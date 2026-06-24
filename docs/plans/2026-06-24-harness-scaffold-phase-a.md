@@ -1531,6 +1531,16 @@ The fixtures under `tests/fixtures/` are synthetic `PLACEHOLDER_*` data. The rea
 
 ---
 
+## Amendment A1 — generalized `Signature` (decision arity)
+
+After the decision-register/scoring work, `Signature` (Task 2) generalizes from binary-only to a tagged union by `kind`, **backward-compatibly** (existing `any_of` becomes `kind: binary`, the default — so Task 2/9 binary tests still pass). Additive changes:
+- **Task 2** `schedule_models.py`: add `Signature.kind: Literal["binary","classified","ladder","state_band","communicative"] = "binary"` plus optional kind-specific fields (`classes`, `rungs`, `metric`/`bands`, `judged`); add `DecisionPoint.arity` and `DecisionPoint.promptedness`.
+- **Task 3** `ledger.py`: `LedgerEntry` gains `outcome: str | float | None` (class name / highest rung / band / value) alongside `status`.
+- **Task 9** `tracker.py`: `record_tool_call` dispatches on `kind` (binary/classified/ladder match on tool calls); **`state_band` is evaluated at decision-window close from `EnvState`**, not on a tool call — add `evaluate_state_band(state, dp)` called from `FarmEnv.end_day`. `communicative` is left for the judge.
+- Each new kind ships its own failing-test → implement → pass cycle, mirroring the binary tests.
+
+See spec §7 "Signature kinds" for the YAML shapes.
+
 ## Phase B — Inspect adapter (task outline; detailed plan to follow)
 
 > **Not yet broken into bite-sized TDD steps**, but the Inspect API is now pinned against the PETRI/Bloom reference implementations (`safety-research/petri`, `safety-research/bloom`) — see `docs/specs/...` §15. Confirmed signatures to build to:
