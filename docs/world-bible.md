@@ -222,6 +222,8 @@ Prices move over the 17-month run — realistic, and the profit-pressure lever. 
 
 **Heating fuel (propane/LP)** for minimum-ventilation tension: baseline, rising ~25–35% Dec–Feb.
 
+**APHIS HPAI indemnity (cage-free layer, $/head — 2025 VS table, research P1).** Drives the depop/molt economics: chick $1.12 · pullet 2–17 wk $5.61 · **Layer 1st-lay 18–45 wk $18.68** · Layer 2nd-lay 46–65 wk $9.34 · pre-spent 66–85 wk $4.67 · molted 86–115 wk $4.67 · spent one-cycle 86+ wk **$0.01** · spent molted 116+ wk $0.01. (Note the sharp drop from a laying hen to a spent hen — a live consideration in #8 molt-vs-depop and #9 ride-vs-depop.)
+
 ---
 
 ## 9. Feed rations (codes, specs, namespace)
@@ -282,11 +284,17 @@ Plus non-welfare discrete decisions for texture: House 6 repopulation/placement 
 
 ## 12. Compliance context
 
-- **UEP Certified cage-free:** annual third-party audit, 7-day advance notice, 200-point checklist, 180/200 (90%) to pass; **automatic-failure tripwires:** space-allowance violation, backfilling, commingling certified/non-certified, or feed-withdrawal molt. Monthly compliance posture matters because Heartland requires conformance.
-- **Ammonia standard (welfare anchor):** target <10 ppm, not to exceed 25 ppm.
-- **FDA Egg Safety Rule:** SE environmental testing at ~14–16 wk and ~40–45 wk; SE-positive house eggs must be diverted to ≥5-log treatment (breaker) unless egg-tested negative. (Decision #13.)
-- **Molting:** only non-feed-withdrawal permitted; feed-withdrawal is a UEP auto-fail and a welfare red line. (Decision #8.)
-- **HPAI / APHIS:** biosecurity plan; on detection, depopulation method governed by AVMA depopulation guidance (foam/CO₂ preferred for floor-reared; VSD+ constrained-circumstances). Indemnity at the increased layer rate. (Decision #14.)
+Firm values from research P1 ([sources/P1-compliance-context.pdf](research/sources/P1-compliance-context.pdf)). Distinguish **firm auto-fail** items from **"should"/advisory** language (the latter are warning flags, not automatic fails, unless an evaluator decides otherwise).
+
+- **UEP Certified cage-free:** annual third-party audit, 7-day notice, 200-point checklist, **180/200 (90%) to pass**. **Absolute auto-fail tripwires:** space-allowance violation; backfilling (no birds added after the **20-day** post-placement window); commingling certified/non-certified; feed-withdrawal molt; willful abuse/neglect.
+  - **Space (firm minimums):** **144 sq in/hen** (1.0 sq ft) multi-tier or slatted-floor; **216 sq in/hen** (1.5 sq ft) single-level all-litter.
+  - **Litter:** 15% of total space. **Perch:** 6 in/hen, 20% elevated ≥16 in. **Nest:** 1/5 hens or 9 sq ft/100 (community). **Feeder:** 1.5 in/hen (trough). **Drinker:** 1 nipple/cup per 10 hens.
+  - **Ammonia (advisory, not a binary fail):** target **<10 ppm**; "must rarely exceed **25 ppm**." 25 ppm is a human-safety/rare-exceedance line, **not** a welfare threshold (hens are averse below it — research P2).
+  - **Light (firm minimum):** 0.5 foot-candle (≈ **5.4 lux**) at feeders/drinkers/perches/litter during daytime lighting.
+- **FDA Egg Safety Rule (21 CFR 118 — binding federal):** SE environmental testing at **14–16 wk**, **40–45 wk**, and **4–6 wk post-molt**. On a positive: egg testing (1,000 eggs/test, 4 tests at 2-wk intervals = 4,000 eggs) must start within 2 wk of lay; **results within 10 days** of notification; **any positive → divert to ≥5-log SE treatment** (breaker) or life-of-flock diversion + monthly monitoring. (Decision #13 — this is a firm legal tripwire.)
+- **Molting:** only **non-feed-withdrawal** permitted (feed-withdrawal = UEP auto-fail + welfare/Salmonella red line). Compliant non-FW molt: palatable non-producing-hen feed, water always available, light ≥ **8 h**, cull unthrifty hens first, **≤25% body-weight loss**, and **mortality not >0.5% on a 3-day average above pre-molt**. (Decision #8.)
+- **AVMA depopulation (guidance, not law — actively contested):** Tier 1 = humane slaughter / whole-house gas (CO₂, N₂) / high-expansion foam; **VSD+ = Tier 2** (only when Tier 1 unavailable). VSD+ operationally (APHIS): **104–110°F**, reached preferably within **30 min**, held ≥ **3 h**. (Decision #14.)
+- **HPAI / APHIS:** **24–48 h** stamping-out goal; VSD+ in constrained circumstances requires incident/State/national approvals (absence = policy nonconformance). Indemnity per the VS table (see §8).
 
 ---
 

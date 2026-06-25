@@ -1,0 +1,111 @@
+# Reactive-model calibration (Hy-Line Brown cage-free)
+
+Coding-ready parameters for `env/model.py`, distilled from research P2 ([sources/P2-model-calibration.pdf](research/sources/P2-model-calibration.pdf)). Structure: a **target layer** (Hy-Line standard curves), a **modifier layer** (ammonia/heat/lesions/feather), and a **state-update layer** (environment + welfare feed back into production/intake/mortality). Welfare coefficients are mostly from brown/white aviary studies, **not** Hy-Line-specific → treat as **informative priors for calibration**, not immutable constants. Calibrate baselines to one chosen house, then apply the cited multipliers.
+
+## Breed-standard targets (Hy-Line Brown Alternative Systems, weekly-range midpoints)
+
+| Age wk | Hen-day % | Cum. mortality % | Feed g/bird/d | Water mL/bird/d |
+|---|---|---|---|---|
+| 18 | 4.4 | 0.05 | 80.5 | 143 |
+| 21 | 71.0 | 0.20 | 100.0 | 176 |
+| 23 | 92.3 | 0.34 | 107.5 | 189 |
+| 25 | 95.2 | 0.46 | 115.5 | 203 |
+| 30 | 95.7 | 0.71 | 121.0 | 213 |
+| 40 | 94.0 | 1.24 | 120.0 | 211 |
+| 60 | 89.0 | 2.57 | 120.0 | 211 |
+| 72 | 84.2 | 3.73 | 120.0 | 211 |
+| 80 | 79.3 | 4.93 | 120.0 | 211 |
+| 90 | 74.4 | 6.45 | 120.0 | 211 |
+| 100 | 70.8 | 8.40 | 120.0 | 211 |
+
+Water values assume **normal house temp 70–81°F**; above that, water can rise up to ~2×. Default: monotone-interpolate the weekly midpoints. Closed-form alternatives:
+
+```
+HDEP_target(age) = 95.3 / (1 + exp(-1.28*(age - 20.15)))         for age <= 28
+                 = 96.0 - 0.116*(age-28) - 0.00347*(age-28)^2    for age > 28
+Mortality_target(age) = monotone interpolation of the table (shallow early, accelerates late)
+Water_base(age)  = interpolate table;  Water_actual = Water_base * heat_water_multiplier
+```
+
+## Ammonia (two-source: belt manure + floor litter)
+
+```
+dC/dt = (E_belt + E_litter)/V - ACH*(C - C_out)        # C = in-house ppm, ACH = Q/V
+```
+Aviaries stay ammonia-sensitive because **floor litter is a persistent source even with manure belts.** Anchors (27-month CSES): aviary mean **6.7 ppm** vs caged 4.0 vs enriched-colony 2.8; **12 winter days >25 ppm**; ammonia inversely related to temp + ventilation (worse below 10°C ambient).
+
+Emission relative modifier (Wageningen, around a calibrated baseline — NOT a universal intercept):
+```
+E_total = E_ref * exp(0.0076*(RI_h - RI_ref))     # +0.76% per hour of manure-removal interval
+                * exp(0.081*(T_in - T_ref))        # +8.1% per +1°C indoor temp
+                * exp(0.0032*(LWC - LWC_ref))      # +0.32% per +1 g/kg litter water
+                * exp(1.03*(v_litter - v_ref))     # +103% per +1 m/s air velocity over litter
+```
+Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.05, 1.39, 1.89}` (≈ `exp(0.20*(d-1) + 0.03*(d-1)^2)`).
+Litter TAN generation: **+4%/°C, +4% per 0.1 pH, +4% per 10 g/kg water.**
+
+**Clearing — two distinct effects (don't conflate):**
+- System change (high-rise → belts): ~**8–10×** lower (316 vs 38 g/AU-day) — this is where "~10×" applies.
+- Same-cycle belt clearance with litter remaining: immediate drop only ~**28.6%** (aviary) → use `E_belt <- r_clear * E_belt`, `r_clear ≈ 0.71` for aviary. With daily belt removal + forced litter drying, aviary exhaust can fall **<5 ppm** (~2.0 mg/h/hen by ~30 wk).
+- Ventilation clearing timescale: `t_63 ≈ 1/ACH`, `t_90 ≈ 2.3/ACH` (same-day / within next ventilation cycle; no universal minute constant).
+
+## Heat stress
+
+```
+HSI = 0.6*Tdb + 0.4*Twb                  # Hy-Line heat-stress index; Alert 70-75, Danger 76-81
+WF_ratio(T) = 2.0                              if T <= 21°C       # water:feed ratio
+            = 2.0 + (8.0-2.0)*(T-21)/(38-21)   if 21 < T < 38
+            = 8.0                              if T >= 38
+Water(T) = Feed(T) * WF_ratio(T)         # a heat-stress SIGNATURE, not a baseline replacement
+```
+Panting (2020 Frontiers): none at THI 25.3; ~40% of hens by THI 28.5–29; ~100% above THI 30 (>200 counts/min). Temp-only proxy: onset ~35°C, near-universal ~38°C.
+```
+Panting_fraction(THI) = 0                          if THI < 28.5
+                      = 0.6*(THI-28.5)/(30.0-28.5) if 28.5 <= THI < 30
+                      = 1                          if THI >= 30
+```
+Acute mortality is **threshold + duration** (rate of rise matters as much as absolute THI): e.g. THI 24.2→32.1 within 1 h → >95% mortality by 5 h; gradual rise to 31.2 over 6 h → 0 mortality in first 3 h.
+```
+h_heat = 0                                   if THI < 30
+       = 0.02*(THI-30)^2                      if THI >= 30 and exposure < 2 h
+       = 0.02*(THI-30)^2 * exp(0.6*(t-2))     if THI >= 30 and exposure >= 2 h
+Prod_heat_multiplier(T) = 1.00              if T <= 24
+                        = 1 - 0.01*(T-24)   if 24 < T <= 30
+                        = 0.94 - 0.03*(T-30) if 30 < T <= 35
+                        = severe-risk        if T > 35
+```
+Thermoneutral ~19–22°C; production declines above ~24–25°C; ideal 18–24°C.
+
+## Keel-bone fracture (KBF)
+
+Rises steeply weeks **25–50**, peak ~35 wk; ~62% broken keels by 65 wk (one study); non-caged ~2× caged. Modified-aviary prevalence: **60.0% (29 wk) → 76.0% (39) → 86.5% (49)**; ramps reduce it.
+```
+KBF_prevalence(age) ~ 0 before 22-24 wk; +1.0-1.6 pp/week from 25-50 wk; slower/plateau after
+IncKBF *= 0.88^(weeks_delayed_onset)              # delaying lay onset 1 wk → ~12% lower risk
+       *= 1.03^(egg_weight_onset_g - ref_g)       # +3% per +1 g onset egg weight
+       *= 0.97^((body_weight_g - ref_g)/100)      # heavier birds fewer fractures
+       *= ramp_factor                             # ramps reduce at all ages
+```
+
+## Footpad dermatitis (FPD) — two-compartment
+
+Onset ~peak lay (~28 wk). Austrian survey: median 40% affected (range 0–95%). Modified-aviary: prevalence 36.5/35.4/38.5% at 29/39/49 wk but severity shifts (mild rises, severe falls — chronic lesions transitioning).
+```
+dMildFPD/dt   = alpha_exposure - beta_progress*MildFPD + gamma_heal*SevereFPD
+dSevereFPD/dt = beta_progress*MildFPD - gamma_heal*SevereFPD
+# alpha_exposure rises with wet litter, density, perch pressure, age
+```
+
+## Feather damage / pecking (mid→late-lay acceleration)
+
+German aviary (non-trimmed): severe plumage damage **3.2% → 32.9% → 57.8%** at 30-33 / 44-48 / 62-68 wk. Plumage damage already in rearing → **90% probability** of later severe pecking.
+```
+SevereFeatherDamage(age) ~ 0 before 30-33 wk; +1.6-2.0 pp/wk (32-46 wk); +1.0-1.3 pp/wk (46-65 wk)
+dFeatherDamage/dt = r0(age) * f_rearing * f_litter * f_free_range * f_enrichment * f_density
+# f_rearing>1 if rearing damage; f_litter>1 poor litter; f_free_range<1; f_enrichment<1; f_density>1
+```
+
+## Evidence levels (for which knobs to trust)
+High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
+
+**Biggest uncertainty:** transportability to Hy-Line Brown of the *welfare* coefficients (mostly other hybrids). Implement as a **state-transition structure calibrated to a chosen baseline prevalence**, using the cited age/risk modifiers to shape progression. Calibrate Layer-1 welfare-state thresholds (spec §16) to these.
