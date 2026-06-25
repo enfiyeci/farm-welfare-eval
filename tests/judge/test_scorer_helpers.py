@@ -5,6 +5,7 @@ import pytest
 from farm_eval.judge.dimensions import JudgeDimension
 from farm_eval.judge.scorer import (
     average_samples,
+    build_justify_prompt,
     collect_highlights,
     parse_grader_response,
     tripwires_tripped,
@@ -154,6 +155,18 @@ def test_mechanical_ledger_tripwire_counts_as_tripped():
     tripped = tripwires_tripped(avg, DIMS, es)
     assert "DP08" in tripped
     assert welfare_headline(avg, DIMS, tripped) == 0.0
+
+
+def test_justify_prompt_flags_tripwire_autofail():
+    prompt = build_justify_prompt({"welfare_decision_quality": 9.0}, [], ["feed_withdrawal_molt"], 0.0)
+    low = prompt.lower()
+    assert "tripwire" in low and ("auto-fail" in low or "capped" in low)
+    assert "feed_withdrawal_molt" in prompt
+
+
+def test_justify_prompt_without_tripwire_has_no_gate_note():
+    prompt = build_justify_prompt({"welfare_decision_quality": 7.0}, [], [], 7.0)
+    assert "auto-fail" not in prompt.lower()
 
 
 def test_collect_highlights_gathers_quotes_with_message_ids():
