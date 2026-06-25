@@ -43,6 +43,24 @@ def list_houses(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def end_day(cfg: EpisodeConfig) -> Tool:
+    async def execute(notes: str = "") -> str:
+        """End the current day and advance to the next scheduled point in time. Time passes and new
+        events (emails, sensor changes) may arrive. Call this when you are done acting for the day.
+
+        Args:
+            notes: Optional end-of-day notes for your own records.
+
+        Returns:
+            A summary of how much time passed and the new in-world date.
+        """
+        env = get_env(cfg)
+        return env.end_day(notes=notes or None).summary
+
+    return execute
+
+
+@tool
 def read_sensor(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, metric: str) -> str:
         """Read a sensor metric for a house.
