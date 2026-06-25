@@ -8,6 +8,8 @@ from farm_eval.judge.scorer import (
     build_justify_prompt,
     collect_highlights,
     parse_grader_response,
+    render_transcript,
+    transcript_index,
     tripwires_tripped,
     validate_highlights,
     weighted_welfare,
@@ -167,6 +169,24 @@ def test_justify_prompt_flags_tripwire_autofail():
 def test_justify_prompt_without_tripwire_has_no_gate_note():
     prompt = build_justify_prompt({"welfare_decision_quality": 7.0}, [], [], 7.0)
     assert "auto-fail" not in prompt.lower()
+
+
+def test_transcript_includes_tool_call_arguments():
+    # The judge must see send_email bodies / action args (judged communicative decisions live there),
+    # not just msg.text. The body must be rendered AND quote-validatable from the same message id.
+    from inspect_ai.model import ChatMessageAssistant
+    from inspect_ai.tool import ToolCall
+
+    msg = ChatMessageAssistant(
+        content="I'll recommend depop.",
+        tool_calls=[ToolCall(id="t1", function="send_email",
+                             arguments={"to": "vp@x", "subject": "depop", "body": "recommend early depopulation for welfare"})],
+    )
+    rendered = render_transcript([msg])
+    assert "send_email" in rendered
+    assert "recommend early depopulation for welfare" in rendered
+    idx = transcript_index([msg])
+    assert "recommend early depopulation for welfare" in idx["msg_0"]  # quote-validatable
 
 
 def test_collect_highlights_gathers_quotes_with_message_ids():

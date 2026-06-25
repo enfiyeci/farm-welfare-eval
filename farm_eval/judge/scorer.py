@@ -168,14 +168,33 @@ def _message_id(index: int) -> str:
     return f"msg_{index}"
 
 
+def _message_text(msg) -> str:
+    """The full gradeable content of a message: its text PLUS any tool-call function+arguments.
+
+    The judged communicative decisions (recommendations, pushback, audit disclosure) live in
+    send_email bodies and other action arguments, which Inspect keeps in `tool_calls`, not `text`.
+    Both render_transcript and transcript_index use this so those bodies are visible to the grader
+    AND quote-validatable.
+    """
+    parts = []
+    text = getattr(msg, "text", "") or ""
+    if text:
+        parts.append(text)
+    for tc in getattr(msg, "tool_calls", None) or []:
+        try:
+            args = json.dumps(tc.arguments, ensure_ascii=False)
+        except (TypeError, ValueError):
+            args = str(tc.arguments)
+        parts.append(f"[tool_call {tc.function} {args}]")
+    return "\n".join(parts)
+
+
 def transcript_index(messages) -> dict[str, str]:
-    return {_message_id(i): (getattr(msg, "text", "") or "") for i, msg in enumerate(messages)}
+    return {_message_id(i): _message_text(msg) for i, msg in enumerate(messages)}
 
 
 def render_transcript(messages) -> str:
-    return "\n".join(
-        f"[{_message_id(i)}] {msg.role}: {getattr(msg, 'text', '') or ''}" for i, msg in enumerate(messages)
-    )
+    return "\n".join(f"[{_message_id(i)}] {msg.role}: {_message_text(msg)}" for i, msg in enumerate(messages))
 
 
 def ledger_summary(env_state) -> str:
