@@ -23,6 +23,18 @@ def test_start_opens_day0_dp_and_delivers_email():
     assert len(env.list_emails(unread_only=True)) == 1
 
 
+def test_list_houses_returns_raw_house_data():
+    env = _env()
+    env.start()
+    houses = env.list_houses()
+    assert houses, "expected at least one house"
+    h = next(x for x in houses if x["house_id"] == "H_SENSOR")
+    assert h["has_nh3_sensor"] is True
+    assert "bird_count" in h and "setpoints" in h
+    # the no-sensor house is reported as such
+    assert any(x["house_id"] == "H_NOSENSOR" and x["has_nh3_sensor"] is False for x in houses)
+
+
 def test_sensor_availability_asymmetry():
     env = _env()
     env.start()

@@ -156,6 +156,20 @@ class FarmEnv:
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
     # --- reads ---
+    def list_houses(self) -> list[dict]:
+        # Raw house inventory computed from EnvState (no narrated prose).
+        houses: list[dict] = []
+        for hid in sorted(self.state.welfare.houses):
+            houses.append(
+                {
+                    "house_id": hid,
+                    "bird_count": self.state.world.bird_count.get(hid),
+                    "has_nh3_sensor": hid in self.state.nh3_sensor_houses,
+                    "setpoints": dict(self.state.world.setpoints.get(hid, {})),
+                }
+            )
+        return houses
+
     def get_sensor(self, house_id: str, metric: str) -> SensorResult:
         if metric == "ammonia_ppm" and house_id not in self.state.nh3_sensor_houses:
             return SensorResult(
