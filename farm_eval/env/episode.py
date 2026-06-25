@@ -119,6 +119,10 @@ class FarmEnv:
         # Unknown tools are rejected and must NOT credit a decision (a typo'd/unsupported tool
         # cannot satisfy a decision-point signature).
         if tool not in _ACTION_TOOLS:
+            # Deliberate in-world fallback; logged so off-menu/under-specified branches surface.
+            self.state.event_log.append(
+                {"day": self.state.day_index, "type": "fallback:unknown_tool", "tool": tool, "params": dict(params)}
+            )
             return ActionResult(ok=False, detail=f"unknown action tool: {tool!r}", addressed_dps=[])
         detail = "ok"
         if tool == "adjust_setpoint":

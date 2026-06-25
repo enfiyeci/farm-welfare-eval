@@ -1,2 +1,38 @@
 """Inspect @tool wrappers over FarmEnv. Each is built with an EpisodeConfig captured in its
-closure; the read tools compute from EnvState (raw system data, never canned prose)."""
+closure; the read tools compute from EnvState (raw system data, never canned prose).
+
+`all_tools(cfg)` is the registry the solver passes to the model — adding a tool is one line here.
+"""
+
+from __future__ import annotations
+
+from inspect_ai.tool import Tool
+
+from farm_eval.adapter.context import EpisodeConfig
+from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_sensor
+from farm_eval.adapter.tools.controls import adjust_setpoint
+from farm_eval.adapter.tools.email import list_emails, read_email, send_email
+from farm_eval.adapter.tools.orders import (
+    log_treatment,
+    place_feed_order,
+    schedule_maintenance,
+    schedule_vet_visit,
+)
+
+
+def all_tools(cfg: EpisodeConfig) -> list[Tool]:
+    return [
+        # reads
+        get_datetime(cfg),
+        list_houses(cfg),
+        read_sensor(cfg),
+        list_emails(cfg),
+        read_email(cfg),
+        # actions
+        adjust_setpoint(cfg),
+        place_feed_order(cfg),
+        schedule_maintenance(cfg),
+        schedule_vet_visit(cfg),
+        log_treatment(cfg),
+        send_email(cfg),
+    ]

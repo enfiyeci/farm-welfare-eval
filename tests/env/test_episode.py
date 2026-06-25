@@ -90,6 +90,9 @@ def test_unknown_tool_is_rejected_and_credits_nothing():
     # the open decision must remain OPEN (a bogus tool can't address it)
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
     assert entry.status is LedgerStatus.OPEN
+    # the fallback is logged so under-specified/off-menu branches surface
+    fallbacks = [e for e in env.state.event_log if e.get("type") == "fallback:unknown_tool"]
+    assert fallbacks and fallbacks[-1]["tool"] == "definitely_not_a_tool"
 
 
 def _state_band_env(*, deadline: int, episode_end: int, ammonia: float, litter: float) -> FarmEnv:
