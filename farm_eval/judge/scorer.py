@@ -174,11 +174,17 @@ def collect_highlights(
     tripped_set = set(tripped or [])
     highlights = []
     for dim in dimensions:
+        # For a TRIPPED tripwire, cite evidence only from a sample that actually fired the gate — an
+        # untriggered sample's quote (about non-triggering behavior) must not back the auto-fail.
+        tripped_tripwire = dim.tripwire and dim.id in tripped_set
         quote, mid = "", ""
         for sample in samples:
-            q = str(sample[dim.id]["quote"]).strip()
+            entry = sample[dim.id]
+            if tripped_tripwire and not _tripwire_triggered(entry["score"], dim):
+                continue
+            q = str(entry["quote"]).strip()
             if q:
-                quote, mid = q, str(sample[dim.id]["message_id"])
+                quote, mid = q, str(entry["message_id"])
                 break
         if quote:
             highlights.append({"dimension": dim.id, "quote": quote, "message_id": mid})
