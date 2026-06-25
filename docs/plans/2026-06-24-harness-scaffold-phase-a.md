@@ -1613,6 +1613,17 @@ Each task: failing-test → implement → pass → commit; Codex adversarial rev
 - **Task B5 — Operator briefing** `prompts/operator_briefing.md` (neutral, from world-bible §2) loaded as the sample input/system message. Test: the task builds with the briefing as input.
 - **Tasks B6–B9** (judge scorer + rubric, task wiring, run infra, validation harness): largely content-bearing — keep as the next increment after the playable B1–B5 core lands and is reviewed. B6's rubric content overlaps the content pass.
 
+### Phase B B5–B7 execution — TDD task breakdown (2026-06-25)
+
+> Goal of this increment: a task that is runnable AND scored end-to-end via `mockllm` (both target and grader keyless). Rubric *content* (real anchors) stays PLACEHOLDER — deferred to the content pass per spec §10 ("still fill-in"); this builds the judge *structure*.
+
+- **B5 — Operator briefing.** `prompts/operator_briefing.md` = the verbatim neutral system prompt from world-bible §2 (no welfare/eval foregrounding). `farm_eval/adapter/briefing.py:load_briefing(path)`. Test: loads, non-empty, contains the FMS framing and no eval/welfare-scoring language.
+- **B6 — Judge scorer + rubric (structure).** `farm_eval/judge/dimensions.py:JudgeDimension` (pydantic) + `load_dimensions(dir)` parsing `judge/dimensions/*.md` (YAML frontmatter `id/group/weight/scale/anchors/tripwire` + markdown body = grader instructions). Placeholder dimension files for the welfare-first groups + a tripwire. `farm_eval/judge/scorer.py:welfare_judge()` = `@scorer(metrics=[mean(), stderr()])`: reads `state.messages` + final `EnvState` (store) + ledger; builds ONE grader prompt (dimensions + anchors + ledger summary + transcript + the autonomy note); grades via `get_model(role="grader")`; **multi-sample-then-justify** (N scoring calls → average per dimension → one justify call); **verbatim-quote highlights with message ids** required per dimension; returns `Score(value={dim: avg}, explanation=justification, metadata={highlights, samples, weighted_welfare})`. Grader returns JSON `{dim_id: {score, quote, message_id}}`; scorer extracts JSON robustly. Tests (mockllm grader scripted with JSON): dimensions load; scorer averages N samples; quote highlights captured; tripwire dim surfaced; missing/garbled grader JSON fails loudly (no silent zero).
+- **B7 — Task wiring.** `farm_eval/farm_task.py:farm_task()` = `@task` (single `Sample` with the briefing as input, `farm_solver`, `welfare_judge`); `config.yml` (target/grader roles, epochs, seed, `episode_end_day`, max-turns/day, corpus/schedule paths, model params) loaded into `EpisodeConfig`. Smoke test: `inspect_eval(farm_task(...), model=mockllm, model_roles={target, grader})` runs the whole pipeline and produces scores in the log.
+- **B8/B9** (run_sweep infra, judge-validation Spearman gate) + the deferred reads stay the next increment.
+
+Each task: failing-test → implement → pass → commit; Codex adversarial review at the end.
+
 This session targets **B1–B4** (the playable Inspect core: an agent can drive the farm via `mockllm` end-to-end), each as failing-test → implement → pass → commit, with a Codex adversarial review at the end.
 
 ---
