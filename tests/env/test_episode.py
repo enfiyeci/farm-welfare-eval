@@ -83,6 +83,28 @@ def test_start_leaves_started_false_when_day0_init_fails():
     assert env.state.started is False
 
 
+def test_start_retry_does_not_duplicate_first_day0_event_after_partial_failure():
+    # Event firing is idempotent: if event 0 fires and event 1 raises, a retry must re-attempt
+    # event 1 without re-firing the already-delivered event 0.
+    corpus = Corpus(documents={"OK.md": "hello"})
+    schedule = Schedule(
+        decision_points=[],
+        events=[
+            ScheduledEvent(on_day=0, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
+            ScheduledEvent(on_day=0, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+        ],
+    )
+    env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    with pytest.raises(KeyError):
+        env.start()  # event 0 delivers; event 1's body_ref is missing -> raises
+    assert env.state.started is False
+    assert len(env.state.mailbox) == 1
+
+    with pytest.raises(KeyError):
+        env.start()  # retry: event 1 still fails, but event 0 must NOT re-fire
+    assert len(env.state.mailbox) == 1  # not duplicated
+
+
 def test_start_is_idempotent():
     env = _env()
     env.start()

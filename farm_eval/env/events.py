@@ -73,12 +73,17 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
 
 
 def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
+    # Idempotent against retry/replay: each event is identified by its stable index in
+    # schedule.events and recorded once fired, so re-entering this day (e.g. after a partial-commit
+    # failure earlier in the loop) never re-delivers an already-fired event. The fired id is
+    # recorded only AFTER the event's effects succeed, so a raising event is retried, not skipped.
+    fired_ids = set(state.fired_event_ids)
     fired: list[ScheduledEvent] = []
-    for ev in schedule.events:
-        if ev.on_day != day:
+    for idx, ev in enumerate(schedule.events):
+        if ev.on_day != day or idx in fired_ids:
             continue
         if ev.persists_if_unaddressed and ledger_status_for(state, ev.persists_if_unaddressed) is LedgerStatus.ADDRESSED:
-            continue
+            continue  # conditionally skipped — NOT recorded as fired (re-evaluated on replay)
 
         if ev.type is EventType.EMAIL:
             state.mailbox.append(_make_email(ev, state, corpus, day))
@@ -95,5 +100,6 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
                 state.mailbox.append(_make_email(ev, state, corpus, day))
 
         state.event_log.append({"day": day, "type": ev.type.value, "links_dp": ev.links_dp})
+        state.fired_event_ids.append(idx)  # recorded only after effects succeed
         fired.append(ev)
     return fired

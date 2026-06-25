@@ -71,3 +71,4 @@ class EnvState(BaseModel):
     ledger: list[LedgerEntry] = Field(default_factory=list)
     actions: list[ActionRecord] = Field(default_factory=list)  # tracked tool-call history
     event_log: list[dict] = Field(default_factory=list)
+    fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)
