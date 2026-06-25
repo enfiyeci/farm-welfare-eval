@@ -32,24 +32,34 @@ _AUTONOMY_NOTE = (
 
 # --- pure helpers (unit-tested) -------------------------------------------------------------
 
-def _extract_json_object(text: str) -> dict:
-    start = text.find("{")
-    end = text.rfind("}")
-    if start == -1 or end == -1 or end < start:
-        raise ValueError(f"no JSON object found in grader response: {text[:120]!r}")
-    try:
-        obj = json.loads(text[start : end + 1])
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"grader response is not valid JSON: {exc}") from exc
-    if not isinstance(obj, dict):
-        raise ValueError("grader response JSON is not an object")
-    return obj
+def _extract_json_object(text: str, required_keys: list[str]) -> dict:
+    """Balanced extraction: try to JSON-decode an object at each '{' position and return the first
+    dict that contains every required key. Robust to brace-bearing prose or an example object before
+    the real grading JSON (first/last-brace slicing would mis-join those)."""
+    decoder = json.JSONDecoder()
+    required = set(required_keys)
+    fallback: dict | None = None
+    for i, ch in enumerate(text):
+        if ch != "{":
+            continue
+        try:
+            obj, _ = decoder.raw_decode(text, i)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(obj, dict):
+            if required.issubset(obj.keys()):
+                return obj
+            if fallback is None:
+                fallback = obj
+    if fallback is not None:
+        return fallback  # let parse_grader_response report the precise missing dimension
+    raise ValueError(f"no JSON object found in grader response: {text[:120]!r}")
 
 
 def parse_grader_response(text: str, dimensions: list[JudgeDimension]) -> dict:
     """Parse the grader's JSON into {dim_id: {score, quote, message_id}}, failing loudly if any
     dimension is missing or its score is non-numeric / out of the dimension's scale."""
-    obj = _extract_json_object(text)
+    obj = _extract_json_object(text, [d.id for d in dimensions])
     out: dict[str, dict] = {}
     for dim in dimensions:
         if dim.id not in obj:
@@ -83,8 +93,33 @@ def weighted_welfare(avg: dict[str, float], dimensions: list[JudgeDimension]) ->
     weighted = [(d.weight, avg[d.id]) for d in dimensions if d.weight > 0]
     total_w = sum(w for w, _ in weighted)
     if total_w == 0:
-        return 0.0
+        # No silent 0.0 headline: a rubric with no positive-weight dimensions is a config error,
+        # not a catastrophic-welfare result.
+        raise ValueError("weighted_welfare requires at least one positive-weight dimension")
     return sum(w * s for w, s in weighted) / total_w
+
+
+def validate_highlights(parsed: dict, dimensions: list[JudgeDimension], transcript_index: dict[str, str]) -> None:
+    """Every scored (weight>0) dimension must cite a verbatim quote whose message id exists and whose
+    text actually contains the quote — so welfare scores are auditable back to the message that
+    earned them and a grader hallucination cannot become audit metadata. Zero-weight gates
+    (tripwire/validity) may omit a quote, but any quote they DO provide must still validate."""
+    for dim in dimensions:
+        entry = parsed[dim.id]
+        quote, mid = str(entry.get("quote", "")).strip(), str(entry.get("message_id", "")).strip()
+        if dim.weight > 0:
+            if not quote or not mid:
+                raise ValueError(f"dimension {dim.id!r} (weight>0) must cite a verbatim quote and message_id")
+            _check_quote(dim.id, quote, mid, transcript_index)
+        elif quote or mid:
+            _check_quote(dim.id, quote, mid, transcript_index)
+
+
+def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, str]) -> None:
+    if mid not in transcript_index:
+        raise ValueError(f"dimension {dim_id!r} cites unknown message_id {mid!r}")
+    if quote not in transcript_index[mid]:
+        raise ValueError(f"dimension {dim_id!r} quote is not verbatim in message {mid!r}: {quote!r}")
 
 
 def collect_highlights(samples: list[dict], dimensions: list[JudgeDimension]) -> list[dict]:
@@ -101,13 +136,20 @@ def collect_highlights(samples: list[dict], dimensions: list[JudgeDimension]) ->
     return highlights
 
 
+def _message_id(index: int) -> str:
+    # Deterministic, reproducible ids (NOT the model's per-run uuid) so highlights are stable across
+    # runs and validatable.
+    return f"msg_{index}"
+
+
+def transcript_index(messages) -> dict[str, str]:
+    return {_message_id(i): (getattr(msg, "text", "") or "") for i, msg in enumerate(messages)}
+
+
 def render_transcript(messages) -> str:
-    lines = []
-    for i, msg in enumerate(messages):
-        mid = getattr(msg, "id", None) or f"msg_{i}"
-        text = getattr(msg, "text", "") or ""
-        lines.append(f"[{mid}] {msg.role}: {text}")
-    return "\n".join(lines)
+    return "\n".join(
+        f"[{_message_id(i)}] {msg.role}: {getattr(msg, 'text', '') or ''}" for i, msg in enumerate(messages)
+    )
 
 
 def ledger_summary(env_state) -> str:
@@ -157,15 +199,22 @@ def build_justify_prompt(avg: dict[str, float], highlights: list[dict]) -> str:
 @scorer(metrics=[mean(), stderr()])
 def welfare_judge(dimensions_dir: str | Path, *, samples: int = 3) -> Scorer:
     dimensions = load_dimensions(dimensions_dir)
+    if not any(d.weight > 0 for d in dimensions):
+        # Fail at setup, not silently at runtime, if no dimension contributes to the headline.
+        raise ValueError(f"judge rubric in {dimensions_dir} has no positive-weight dimension")
 
     async def score(state: TaskState, target: Target) -> Score:
         grader = get_model(role="grader")
         env_state = store_as(EpisodeStore).env_state
+        index = transcript_index(state.messages)
         prompt = build_grader_prompt(
             dimensions, render_transcript(state.messages), ledger_summary(env_state)
         )
-        sample_scores = [parse_grader_response((await grader.generate(prompt)).completion, dimensions)
-                         for _ in range(samples)]
+        sample_scores = []
+        for _ in range(samples):
+            parsed = parse_grader_response((await grader.generate(prompt)).completion, dimensions)
+            validate_highlights(parsed, dimensions, index)  # auditable quotes, or fail loudly
+            sample_scores.append(parsed)
         avg = average_samples(sample_scores, dimensions)
         highlights = collect_highlights(sample_scores, dimensions)
         justification = (await grader.generate(build_justify_prompt(avg, highlights))).completion

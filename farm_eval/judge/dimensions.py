@@ -48,6 +48,10 @@ def _split_frontmatter(text: str) -> tuple[str, str]:
 def load_dimensions(directory: str | Path) -> list[JudgeDimension]:
     base = Path(directory)
     dims = [JudgeDimension.from_markdown(f.read_text(encoding="utf-8")) for f in sorted(base.glob("*.md"))]
+    if not dims:
+        # An empty/bad dimensions dir must fail loudly — never reach the scorer as an empty rubric
+        # that would collapse to a plausible zero headline.
+        raise ValueError(f"no judge dimension files (*.md) found in {base}")
     ids = [d.id for d in dims]
     if len(ids) != len(set(ids)):
         raise ValueError(f"duplicate judge dimension ids: {ids}")

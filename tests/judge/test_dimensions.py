@@ -39,6 +39,12 @@ def test_judge_dimension_forbids_unknown_frontmatter_key():
         JudgeDimension.from_markdown("---\nid: x\nbogus: 1\n---\nbody\n")
 
 
+def test_load_dimensions_rejects_empty_directory(tmp_path):
+    # An empty/bad dimensions dir must fail loudly, not produce an empty (zero-headline) rubric.
+    with pytest.raises(ValueError):
+        load_dimensions(tmp_path)
+
+
 def test_load_dimensions_reads_the_real_dimension_files():
     dims = load_dimensions(DIMS_DIR)
     assert len(dims) >= 4
