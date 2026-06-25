@@ -5,31 +5,32 @@ results come from the scripted env, not a second model): start the episode once,
 generate -> execute-tools loop, advance in-world time when the agent calls `end_day`, enforce a
 max-turns-per-day backstop so a model that never ends the day cannot stall the episode, and
 terminate when `FarmEnv.is_over()`.
+
+Robustness (Codex review): the per-day counter resets on ACTUAL day advancement (not merely on a
+tool *named* end_day — a malformed/erroring end_day call must still count toward the backstop);
+forced advances are written into the transcript so the next turn and the judge see that time
+passed; exhausting the total-turns cap before the episode ends is a loud failure, never a partial
+"success".
 """
 
 from __future__ import annotations
 
-from inspect_ai.model import execute_tools, get_model
+from inspect_ai.model import ChatMessageUser, execute_tools, get_model
 from inspect_ai.solver import Generate, Solver, TaskState, solver
-from inspect_ai.util import store_as
 
-from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
+from farm_eval.adapter.context import EpisodeConfig, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import end_day
 
-# Absolute backstop on total model turns, so a pathological model cannot loop forever even if the
-# clock somehow fails to advance. Far above any real episode's turn count.
-_MAX_TOTAL_TURNS = 5000
+
+class EpisodeStalled(RuntimeError):
+    """Raised when the solver hits its total-turn cap before the episode ends (loud failure)."""
 
 
 @solver
-def farm_solver(cfg: EpisodeConfig, *, max_turns_per_day: int = 30) -> Solver:
+def farm_solver(cfg: EpisodeConfig, *, max_turns_per_day: int = 30, max_total_turns: int = 5000) -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
-        store = store_as(EpisodeStore)
-        env = get_env(cfg)
-        if not store.started:  # survives retry/replay
-            env.start()
-            store.started = True
+        get_env(cfg).start()  # idempotent against the persisted EnvState
 
         tools = all_tools(cfg) + [end_day(cfg)]
         state.tools = tools
@@ -37,24 +38,33 @@ def farm_solver(cfg: EpisodeConfig, *, max_turns_per_day: int = 30) -> Solver:
 
         turns_today = 0
         total_turns = 0
-        while not get_env(cfg).is_over() and total_turns < _MAX_TOTAL_TURNS:
+        while not get_env(cfg).is_over():
+            if total_turns >= max_total_turns:
+                raise EpisodeStalled(
+                    f"solver exceeded {max_total_turns} turns at day {get_env(cfg).current_day()} "
+                    f"before the episode end (day {cfg.episode_end_day})"
+                )
+
+            day_before = get_env(cfg).current_day()
             output = await model.generate(input=state.messages, tools=tools)
             state.messages.append(output.message)
             state.output = output
             total_turns += 1
 
-            tool_calls = output.message.tool_calls or []
-            if tool_calls:
+            if output.message.tool_calls:
                 result = await execute_tools(state.messages, tools)
                 state.messages.extend(result.messages)
 
-            if any(tc.function == "end_day" for tc in tool_calls):
-                turns_today = 0  # the agent ended the day; the end_day tool already advanced time
+            # Reset the per-day counter only when time ACTUALLY advanced (an end_day call that
+            # errored or was malformed leaves the day unchanged and must count toward the backstop).
+            if get_env(cfg).current_day() > day_before:
+                turns_today = 0
             else:
                 turns_today += 1
                 if turns_today >= max_turns_per_day:
-                    # Backstop: force the day to advance so the episode cannot stall.
-                    get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
+                    advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
+                    # Make the forced advance visible to the next turn and the judge.
+                    state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
                     turns_today = 0
 
         return state

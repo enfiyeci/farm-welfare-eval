@@ -33,9 +33,9 @@ class EpisodeConfig:
 
 
 class EpisodeStore(StoreModel):
-    # The mutated, logged episode state. `started` guards the solver's one-time start().
+    # The mutated, logged episode state. Start-idempotence lives in EnvState.started (so it
+    # survives FarmEnv rebinding and retry/replay), not here.
     env_state: EnvState | None = None
-    started: bool = False
 
 
 # Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).

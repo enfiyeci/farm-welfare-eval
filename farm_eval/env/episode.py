@@ -59,7 +59,6 @@ class FarmEnv:
         self.state = state
         self.episode_end_day = episode_end_day
         self.params = params
-        self._started = False
 
     @classmethod
     def from_paths(
@@ -87,11 +86,12 @@ class FarmEnv:
         return self.state.day_index >= self.episode_end_day
 
     def start(self) -> None:
-        # Idempotent: repeated start() (e.g. adapter re-entry/retry) must not re-fire day-0
-        # events or duplicate mail/event-log entries.
-        if self._started:
+        # Idempotent against the PERSISTED state: get_env rebuilds a fresh FarmEnv each call (and
+        # retry/replay re-enters the solver), so the guard lives in EnvState, not on the instance —
+        # repeated start() must not re-fire day-0 events or duplicate mail/event-log entries.
+        if self.state.started:
             return
-        self._started = True
+        self.state.started = True
         open_due_decision_points(self.state, self.schedule, self.state.day_index)
         fire_events_for_day(self.state, self.schedule, self.corpus, self.state.day_index)
 

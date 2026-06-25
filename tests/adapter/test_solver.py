@@ -44,3 +44,28 @@ def test_solver_backstop_forces_day_advance_when_agent_never_ends_day():
     log = _eval(target, max_turns_per_day=3)
     assert log.status == "success"
     assert log.samples[0].store["EpisodeStore:env_state"]["day_index"] == 400
+
+
+def _reads(n): return [ModelOutput.for_tool_call(model="mockllm/model", tool_name="get_datetime", tool_arguments={}) for _ in range(n)]
+
+
+def test_backstop_advance_is_visible_in_transcript():
+    # When the backstop forces time forward, the agent/judge must see evidence in the transcript.
+    target = get_model("mockllm/model", custom_outputs=_reads(50))
+    log = _eval(target, max_turns_per_day=3)
+    msgs = log.samples[0].messages
+    assert any("Time passes" in (m.text or "") for m in msgs if m.role == "user")
+
+
+def test_solver_fails_loudly_when_cap_reached_before_episode_end():
+    # max_turns_per_day huge so the backstop never fires; the day never advances -> hitting the
+    # total-turns cap must FAIL, not return a partial episode as success.
+    target = get_model("mockllm/model", custom_outputs=_reads(50))
+    log = inspect_eval(
+        Task(dataset=[Sample(input="x")], solver=farm_solver(CFG, max_turns_per_day=10_000, max_total_turns=5)),
+        model="mockllm/model",
+        model_roles={"target": target},
+        display="none",
+    )[0]
+    errored = log.status == "error" or (log.samples and log.samples[0].error is not None)
+    assert errored

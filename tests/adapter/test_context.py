@@ -24,6 +24,29 @@ def test_load_resources_caches_by_path():
     assert a[1].decision_points  # schedule parsed
 
 
+def test_double_start_does_not_duplicate_day0_events():
+    # get_env rebuilds a fresh FarmEnv each call; start() must be idempotent against the persisted
+    # EnvState, not a transient instance flag, or day-0 events re-fire on re-entry/replay.
+    @solver
+    def drive():
+        async def solve(state: TaskState, generate: Generate) -> TaskState:
+            get_env(CFG).start()
+            get_env(CFG).start()  # a second fresh wrapper — must NOT re-fire day-0 events
+            env = get_env(CFG)
+            state.metadata["mailbox"] = len(env.state.mailbox)
+            state.metadata["event_log"] = len(env.state.event_log)
+            return state
+
+        return solve
+
+    log = inspect_eval(
+        Task(dataset=[Sample(input="go")], solver=drive()), model="mockllm/model", display="none"
+    )[0]
+    md = log.samples[0].metadata
+    assert md["mailbox"] == 1  # the single day-0 email, delivered once
+    assert md["event_log"] == 1
+
+
 def test_get_env_binds_store_and_persists_mutation():
     @solver
     def drive():

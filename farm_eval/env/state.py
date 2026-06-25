@@ -61,6 +61,7 @@ class EnvState(BaseModel):
     day_index: int = 0
     start_date: str
     seed: int = 0
+    started: bool = False  # day-0 open/fire happened; makes FarmEnv.start() idempotent across rebinds
     nh3_sensor_houses: list[str] = Field(default_factory=list)
     welfare: WelfareState = Field(default_factory=WelfareState)
     financial: FinancialState = Field(default_factory=FinancialState)
