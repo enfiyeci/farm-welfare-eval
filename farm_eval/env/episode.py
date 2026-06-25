@@ -91,9 +91,11 @@ class FarmEnv:
         # repeated start() must not re-fire day-0 events or duplicate mail/event-log entries.
         if self.state.started:
             return
-        self.state.started = True
         open_due_decision_points(self.state, self.schedule, self.state.day_index)
         fire_events_for_day(self.state, self.schedule, self.corpus, self.state.day_index)
+        # Mark started only AFTER day-0 effects complete: a mid-init failure must leave started
+        # False so retry/replay re-attempts rather than continuing on a half-initialized state.
+        self.state.started = True
 
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)

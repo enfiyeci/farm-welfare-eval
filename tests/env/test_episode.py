@@ -1,10 +1,12 @@
 from pathlib import Path
 
+import pytest
+
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.ledger import LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.model import ModelParams
-from farm_eval.env.schedule_models import DecisionCategory, DecisionPoint, Metric, Signature
+from farm_eval.env.schedule_models import DecisionCategory, DecisionPoint, Metric, ScheduledEvent, Signature
 from farm_eval.env.state import EnvState, HouseWelfare, WelfareState, WorldState
 
 FIX = Path(__file__).parent.parent / "fixtures"
@@ -66,6 +68,19 @@ def test_unaddressed_decision_lapses_after_deadline():
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
     assert entry.status is LedgerStatus.LAPSED
     assert env.is_over() is True
+
+
+def test_start_leaves_started_false_when_day0_init_fails():
+    # `started` must be marked only AFTER day-0 init completes; if a day-0 event fails to fire,
+    # a retry/replay must re-attempt start, not skip it on a half-initialized state.
+    schedule = Schedule(
+        decision_points=[],
+        events=[ScheduledEvent(on_day=0, type="email", payload={"from": "x", "subject": "s", "body_ref": "MISSING.md"})],
+    )
+    env = FarmEnv(Corpus(), schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    with pytest.raises(KeyError):
+        env.start()  # corpus has no MISSING.md
+    assert env.state.started is False
 
 
 def test_start_is_idempotent():
