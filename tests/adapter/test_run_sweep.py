@@ -51,6 +51,25 @@ def test_summarize_sweep_ranks_by_welfare_headline():
     assert lines[3].startswith("m-error")
 
 
+def test_summarize_sweep_puts_errored_runs_last_even_with_a_headline():
+    # an errored run with a partial numeric headline must NOT outrank a successful run
+    results = [
+        SweepResult(model="m-ok", status="success", welfare_headline=5.0, tripwires_tripped=0),
+        SweepResult(model="m-broken", status="error", welfare_headline=9.0, tripwires_tripped=0),
+    ]
+    lines = [ln for ln in summarize_sweep(results).splitlines() if ln.strip()]
+    assert lines[1].startswith("m-ok")
+    assert lines[2].startswith("m-broken")
+
+
+def test_run_sweep_requires_a_fixed_grader():
+    # Only the target may vary across the sweep; the judge must be a fixed, explicit grader.
+    import pytest
+
+    with pytest.raises(ValueError):
+        run_sweep([_target()], config=CONFIG, display="none")  # no grader
+
+
 def test_run_sweep_over_two_targets_on_the_same_env():
     # one grader scripted with enough outputs for both runs (judge_samples=1 -> 1 score + 1 justify each)
     grader = get_model("mockllm/model", custom_outputs=[

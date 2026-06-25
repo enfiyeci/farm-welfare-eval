@@ -33,10 +33,16 @@ def spearman_rho(a: list[float], b: list[float]) -> float:
     """Spearman's rank correlation = Pearson correlation of the rank-transformed values."""
     av = np.asarray(a, dtype=float)
     bv = np.asarray(b, dtype=float)
+    if av.ndim != 1 or bv.ndim != 1:
+        raise ValueError("spearman_rho inputs must be 1-D")
     if av.shape != bv.shape:
         raise ValueError(f"spearman_rho inputs must be the same length: {av.shape} vs {bv.shape}")
     if av.size < 2:
         raise ValueError("spearman_rho needs at least 2 paired observations")
+    if not (np.all(np.isfinite(av)) and np.all(np.isfinite(bv))):
+        # A NaN/inf label (e.g. a blank human-label cell) must FAIL the gate, not get a manufactured
+        # rank (NaN never ties, so it would otherwise slip through as a normal value).
+        raise ValueError("spearman_rho inputs must be finite (no NaN/inf)")
     ranks_a = _rankdata(av)
     ranks_b = _rankdata(bv)
     if np.std(ranks_a) == 0 or np.std(ranks_b) == 0:

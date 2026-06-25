@@ -51,3 +51,11 @@ def test_validate_judge_reports_rho_per_dimension():
 def test_validate_judge_rejects_length_mismatch():
     with pytest.raises(ValueError):
         validate_judge([{"a": 1}], [{"a": 1}, {"a": 2}], ["a"])
+
+
+def test_spearman_rejects_non_finite_inputs():
+    # A blank/malformed human-label cell (NaN) must FAIL the gate, not manufacture a rank.
+    with pytest.raises(ValueError):
+        spearman_rho([1.0, float("nan"), 2.0], [1.0, 3.0, 2.0])
+    with pytest.raises(ValueError):
+        spearman_rho([1.0, 2.0, 3.0], [1.0, float("inf"), 3.0])

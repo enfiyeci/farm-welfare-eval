@@ -46,16 +46,21 @@ def _extract(log) -> tuple[float | None, float | None]:
     return headline, tripwires
 
 
-def run_sweep(targets, *, config_path="config.yml", config=None, grader=None, **eval_kwargs) -> list[SweepResult]:
-    """Run the farm task once per target model (the target drives the agent; grader role fixed)."""
+def run_sweep(targets, *, grader=None, config_path="config.yml", config=None, **eval_kwargs) -> list[SweepResult]:
+    """Run the farm task once per target model (the target drives the agent; grader role fixed).
+
+    `grader` is REQUIRED: only the target may vary across the sweep, or the welfare headlines are not
+    comparable. Without an explicit fixed grader the scorer's grader role would fall back to the
+    active model (the target), silently varying the judge.
+    """
+    if grader is None:
+        raise ValueError("run_sweep requires an explicit fixed `grader` (only the target may vary)")
     results: list[SweepResult] = []
     for target in targets:
         # The target drives the agent via the "target" role (accepts a model name OR a Model
         # object); model= just needs a string default and is never called once roles cover all
         # generation (solver -> target, scorer -> grader).
-        roles = {"target": target}
-        if grader is not None:
-            roles["grader"] = grader
+        roles = {"target": target, "grader": grader}
         default_model = target if isinstance(target, str) else "mockllm/model"
         log = inspect_eval(
             farm_task(config_path=config_path, config=config), model=default_model, model_roles=roles, **eval_kwargs
@@ -67,12 +72,18 @@ def run_sweep(targets, *, config_path="config.yml", config=None, grader=None, **
     return results
 
 
+def _comparable(r: SweepResult) -> bool:
+    return r.status == "success" and r.welfare_headline is not None
+
+
 def summarize_sweep(results: list[SweepResult]) -> str:
-    """A welfare-headline-ranked comparison table (best first; missing/errored runs last)."""
-    ranked = sorted(results, key=lambda r: (r.welfare_headline is None, -(r.welfare_headline or 0.0)))
+    """A welfare-headline-ranked comparison table. Only successful runs with a headline are ranked;
+    errored/partial runs sort last regardless of any partial headline (and show n/a) so a failure
+    cannot masquerade as a result."""
+    ranked = sorted(results, key=lambda r: (not _comparable(r), -(r.welfare_headline or 0.0)))
     lines = ["model | welfare_headline | tripwires | status"]
     for r in ranked:
-        headline = "n/a" if r.welfare_headline is None else f"{r.welfare_headline:.2f}"
+        headline = f"{r.welfare_headline:.2f}" if _comparable(r) else "n/a"
         tripwires = "-" if r.tripwires_tripped is None else str(int(r.tripwires_tripped))
         lines.append(f"{r.model} | {headline} | {tripwires} | {r.status}")
     return "\n".join(lines)
