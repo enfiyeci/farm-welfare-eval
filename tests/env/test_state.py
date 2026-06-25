@@ -23,3 +23,14 @@ def test_env_state_minimal_construction():
     assert state.welfare.houses["H_X"].ammonia_ppm == 8.0
     assert state.financial.feed_inventory_tons == 0.0
     assert state.mailbox == []
+    # Tracked tool-call history (used by classified all_of / ladder / transient_before).
+    assert state.actions == []
+
+
+def test_env_state_actions_records_history():
+    from farm_eval.env.ledger import ActionRecord
+
+    state = EnvState(start_date="2025-06-09")
+    state.actions.append(ActionRecord(tool="adjust_setpoint", params={"system": "ventilation"}, day=3))
+    assert state.actions[0].tool == "adjust_setpoint"
+    assert state.actions[0].day == 3

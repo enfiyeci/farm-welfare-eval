@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from farm_eval.env.ledger import LedgerEntry
+from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
 
 class Email(BaseModel):
@@ -68,4 +68,5 @@ class EnvState(BaseModel):
     mailbox: list[Email] = Field(default_factory=list)
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)
+    actions: list[ActionRecord] = Field(default_factory=list)  # tracked tool-call history
     event_log: list[dict] = Field(default_factory=list)

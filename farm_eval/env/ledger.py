@@ -30,3 +30,7 @@ class LedgerEntry(BaseModel):
     status: LedgerStatus = LedgerStatus.OPEN
     agent_action: ActionRecord | None = None
     noticed_unprompted: bool = False
+    # A1.1 — the *outcome* (which class / highest rung / band / value), not just addressed:bool.
+    outcome: str | float | None = None
+    tripwire: bool = False  # a matched tripwire class trips the Layer-3 gate
+    root_cause_used: bool = False  # the upstream lever fired (any signature kind)
