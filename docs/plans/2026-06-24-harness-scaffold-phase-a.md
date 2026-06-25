@@ -1596,6 +1596,25 @@ Each task: failing-test → implement → pass → commit; Codex adversarial rev
 - **Task B8 — Run infra.** `run_sweep.py` to run many models over the same env (vary only the `target` model role); smoke-run docs in `README.md`. Verify `inspect view` renders a transcript.
 - **Task B9 — Judge validation harness (credibility gate).** `farm_eval/judge/validate.py` + `docs/judge-validation.md`: a small harness to compare judge scores against human (ideally vet/welfare-expert) hand-labels on a held-out transcript sample, reporting **Spearman ρ** (target Bloom's range, ~0.75–0.86). Welfare is value-laden; cross-model deltas should not be trusted until ρ is reported. Run before any production sweep.
 
+### Phase B execution — TDD task breakdown (2026-06-25)
+
+> `inspect-ai 0.3.241` installed (added to `pyproject.toml` `dependencies`). Pinned API verified to import: `Task`/`@task`, `@solver`/`Generate`/`TaskState`, `@tool`, `@scorer`/`Score`/`Target`/`mean`/`stderr`, `get_model(role=...)`, `store_as`/`StoreModel`. Build under a new top-level package `farm_eval/adapter/` (keeps `farm_eval/env/` Inspect-free).
+
+**Locked seam decision (resolves the `store_as(EnvState)` vs Inspect-free-core tension).** The env core must NOT import `inspect_ai`, so `EnvState` cannot subclass `StoreModel`. Instead the adapter defines `class EpisodeStore(StoreModel)` (in `adapter/context.py`) carrying `env_state: EnvState | None = None` (+ `started: bool = False`). Verified: a `StoreModel` holding a plain-pydantic field round-trips through the `Store` and **in-place nested mutations persist** (same object reference), so a `FarmEnv` bound to `episode_store.env_state` mutates it in place and the welfare state serializes into the `.eval` log. Corpus + schedule are read-only and identical across samples — loaded once, **cached by path** at module level (NOT in the store). `get_env(state) -> FarmEnv` lazily initializes `env_state` from the cached corpus on first call and returns a per-sample-cached `FarmEnv` (cache keyed by `state.sample_id`/`uuid`) so `FarmEnv._started` persists across tool calls within a sample.
+
+**Locked testing strategy.** Two layers, mirroring the architecture seam:
+1. **Plain logic** stays in `farm_eval/env/` (already there) — the Inspect `@tool`/`@solver`/`@scorer` are *thin* wrappers that call `get_env(state)` then a `FarmEnv` method. Unit tests hit `FarmEnv` directly (fast, no Inspect) — already covered by the Phase A suite.
+2. **Inspect wiring** is tested with the built-in **`mockllm/model`** (no API key): `inspect_eval(task, model="mockllm/model", display="none")` runs a real sample end-to-end; assert against `log.samples[0].store` / `.messages` / `.scores`. Verified working. `mockllm` can be given scripted `custom_outputs` (tool-call sequences) to drive the solver loop deterministically.
+
+- **Task B1 — `adapter/context.py`.** `EpisodeStore(StoreModel)`; path-keyed corpus/schedule cache; `get_env(state) -> FarmEnv` (lazy init from corpus, per-sample FarmEnv cache). Tests: unit test the cache + lazy-init logic; a `mockllm` solver test asserting two `get_env` calls in one sample return the SAME FarmEnv and a mutation (e.g. `apply_action`) persists in `log.samples[0].store`.
+- **Task B2 — Read tools** (`adapter/tools/controller.py`, `flock.py`, `email.py`, `pricing.py`). Each `@tool` calls the matching `FarmEnv` read method; `read_sensor` surfaces the `SensorResult` message verbatim. **Computed-reads:** open-ended reads return data computed from `EnvState` (raw system data, not narrated prose). Tests: call each tool's `execute` against a `FarmEnv`-backed store (mockllm sample) and assert raw-data shape; assert the no-sensor house returns the handheld-logs message.
+- **Task B3 — Action tools** (`adapter/tools/orders.py`, `controls.py`, `email.py:send_email`) + `tools/__init__.py:all_tools()` registry. Each routes through `FarmEnv.apply_action`; off-menu/unknown tool gets the logged in-world fallback. Tests: a mockllm sample whose scripted tool call addresses a decision; assert `addressed_dps` reflected and the ledger entry flipped in the store.
+- **Task B4 — `end_day` tool + solver loop** (`adapter/solver/farm_solver.py`). Custom `@solver`: `FarmEnv.start`, generate→tool loop, advance on the agent's `end_day` call, max-turns-per-day backstop, terminate at `FarmEnv.is_over()`. Tests: a mockllm script that calls `end_day` repeatedly drives the episode to `is_over()`; assert day advanced and the loop terminated within the backstop.
+- **Task B5 — Operator briefing** `prompts/operator_briefing.md` (neutral, from world-bible §2) loaded as the sample input/system message. Test: the task builds with the briefing as input.
+- **Tasks B6–B9** (judge scorer + rubric, task wiring, run infra, validation harness): largely content-bearing — keep as the next increment after the playable B1–B5 core lands and is reviewed. B6's rubric content overlaps the content pass.
+
+This session targets **B1–B4** (the playable Inspect core: an agent can drive the farm via `mockllm` end-to-end), each as failing-test → implement → pass → commit, with a Codex adversarial review at the end.
+
 ---
 
 ## Self-Review

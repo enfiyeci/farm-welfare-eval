@@ -59,7 +59,6 @@ class FarmEnv:
         self.state = state
         self.episode_end_day = episode_end_day
         self.params = params
-        self._started = False
 
     @classmethod
     def from_paths(
@@ -87,24 +86,37 @@ class FarmEnv:
         return self.state.day_index >= self.episode_end_day
 
     def start(self) -> None:
-        # Idempotent: repeated start() (e.g. adapter re-entry/retry) must not re-fire day-0
-        # events or duplicate mail/event-log entries.
-        if self._started:
+        # Idempotent against the PERSISTED state: get_env rebuilds a fresh FarmEnv each call (and
+        # retry/replay re-enters the solver), so the guard lives in EnvState, not on the instance —
+        # repeated start() must not re-fire day-0 events or duplicate mail/event-log entries.
+        if self.state.started:
             return
-        self._started = True
         open_due_decision_points(self.state, self.schedule, self.state.day_index)
         fire_events_for_day(self.state, self.schedule, self.corpus, self.state.day_index)
+        # Mark started only AFTER day-0 effects complete: a mid-init failure must leave started
+        # False so retry/replay re-attempts rather than continuing on a half-initialized state.
+        self.state.started = True
 
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
-        integrate(self.state, elapsed, self.params)
-        self.state.day_index = new_day
+        # Atomic: stage every mutation on a deep copy and commit only after the new day's events fire
+        # successfully. `integrate` is non-idempotent, so a firing failure must NOT leave the live
+        # state half-advanced — otherwise retry would compute the next beat from the advanced day and
+        # silently drop the failed day's events (and re-integrate). On failure the copy is discarded
+        # and the live state is untouched, so retry re-attempts the same beat.
+        staged = self.state.model_copy(deep=True)
+        integrate(staged, elapsed, self.params)
+        staged.day_index = new_day
+        episode_over = new_day >= self.episode_end_day
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
-        evaluate_due_state_bands(self.state, self.schedule, new_day, episode_over=self.is_over())
-        lapse_expired_decision_points(self.state, new_day)
-        open_due_decision_points(self.state, self.schedule, new_day)
-        fired = fire_events_for_day(self.state, self.schedule, self.corpus, new_day)
+        evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        lapse_expired_decision_points(staged, new_day)
+        open_due_decision_points(staged, self.schedule, new_day)
+        fired = fire_events_for_day(staged, self.schedule, self.corpus, new_day)
+        # Commit: copy the staged fields back into the live (store-referenced) state in place.
+        for field_name in type(self.state).model_fields:
+            setattr(self.state, field_name, getattr(staged, field_name))
         return DayAdvanceResult(
             elapsed_days=elapsed,
             new_date=self.current_date(),
@@ -119,6 +131,10 @@ class FarmEnv:
         # Unknown tools are rejected and must NOT credit a decision (a typo'd/unsupported tool
         # cannot satisfy a decision-point signature).
         if tool not in _ACTION_TOOLS:
+            # Deliberate in-world fallback; logged so off-menu/under-specified branches surface.
+            self.state.event_log.append(
+                {"day": self.state.day_index, "type": "fallback:unknown_tool", "tool": tool, "params": dict(params)}
+            )
             return ActionResult(ok=False, detail=f"unknown action tool: {tool!r}", addressed_dps=[])
         detail = "ok"
         if tool == "adjust_setpoint":
@@ -156,6 +172,20 @@ class FarmEnv:
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
     # --- reads ---
+    def list_houses(self) -> list[dict]:
+        # Raw house inventory computed from EnvState (no narrated prose).
+        houses: list[dict] = []
+        for hid in sorted(self.state.welfare.houses):
+            houses.append(
+                {
+                    "house_id": hid,
+                    "bird_count": self.state.world.bird_count.get(hid),
+                    "has_nh3_sensor": hid in self.state.nh3_sensor_houses,
+                    "setpoints": dict(self.state.world.setpoints.get(hid, {})),
+                }
+            )
+        return houses
+
     def get_sensor(self, house_id: str, metric: str) -> SensorResult:
         if metric == "ammonia_ppm" and house_id not in self.state.nh3_sensor_houses:
             return SensorResult(

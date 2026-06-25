@@ -1,10 +1,12 @@
 from pathlib import Path
 
+import pytest
+
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.ledger import LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.model import ModelParams
-from farm_eval.env.schedule_models import DecisionCategory, DecisionPoint, Metric, Signature
+from farm_eval.env.schedule_models import DecisionCategory, DecisionPoint, Metric, ScheduledEvent, Signature
 from farm_eval.env.state import EnvState, HouseWelfare, WelfareState, WorldState
 
 FIX = Path(__file__).parent.parent / "fixtures"
@@ -21,6 +23,18 @@ def test_start_opens_day0_dp_and_delivers_email():
     assert env.current_date() == "2025-06-09"
     assert any(e.dp_id == "DP_PLACEHOLDER_1" and e.status is LedgerStatus.OPEN for e in env.state.ledger)
     assert len(env.list_emails(unread_only=True)) == 1
+
+
+def test_list_houses_returns_raw_house_data():
+    env = _env()
+    env.start()
+    houses = env.list_houses()
+    assert houses, "expected at least one house"
+    h = next(x for x in houses if x["house_id"] == "H_SENSOR")
+    assert h["has_nh3_sensor"] is True
+    assert "bird_count" in h and "setpoints" in h
+    # the no-sensor house is reported as such
+    assert any(x["house_id"] == "H_NOSENSOR" and x["has_nh3_sensor"] is False for x in houses)
 
 
 def test_sensor_availability_asymmetry():
@@ -56,6 +70,64 @@ def test_unaddressed_decision_lapses_after_deadline():
     assert env.is_over() is True
 
 
+def test_start_leaves_started_false_when_day0_init_fails():
+    # `started` must be marked only AFTER day-0 init completes; if a day-0 event fails to fire,
+    # a retry/replay must re-attempt start, not skip it on a half-initialized state.
+    schedule = Schedule(
+        decision_points=[],
+        events=[ScheduledEvent(on_day=0, type="email", payload={"from": "x", "subject": "s", "body_ref": "MISSING.md"})],
+    )
+    env = FarmEnv(Corpus(), schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    with pytest.raises(KeyError):
+        env.start()  # corpus has no MISSING.md
+    assert env.state.started is False
+
+
+def test_start_retry_does_not_duplicate_first_day0_event_after_partial_failure():
+    # Event firing is idempotent: if event 0 fires and event 1 raises, a retry must re-attempt
+    # event 1 without re-firing the already-delivered event 0.
+    corpus = Corpus(documents={"OK.md": "hello"})
+    schedule = Schedule(
+        decision_points=[],
+        events=[
+            ScheduledEvent(on_day=0, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
+            ScheduledEvent(on_day=0, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+        ],
+    )
+    env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    with pytest.raises(KeyError):
+        env.start()  # event 0 delivers; event 1's body_ref is missing -> raises
+    assert env.state.started is False
+    assert len(env.state.mailbox) == 1
+
+    with pytest.raises(KeyError):
+        env.start()  # retry: event 1 still fails, but event 0 must NOT re-fire
+    assert len(env.state.mailbox) == 1  # not duplicated
+
+
+def test_end_day_is_atomic_when_an_event_fails():
+    # end_day must be all-or-nothing: if a scheduled event for the new day raises, the day must NOT
+    # advance (retry re-attempts the same beat) and nothing is committed (no double integrate / lost
+    # events / partial mailbox).
+    corpus = Corpus(documents={"OK.md": "hi"})
+    schedule = Schedule(
+        decision_points=[],
+        events=[
+            ScheduledEvent(on_day=5, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
+            ScheduledEvent(on_day=5, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+        ],
+    )
+    env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    env.start()
+    assert env.current_day() == 0
+    for _ in range(2):  # the failure must be stable across retries — never a partial advance
+        with pytest.raises(KeyError):
+            env.end_day()  # next beat is day 5; s1 resolves, s2's body_ref is missing -> raises
+        assert env.current_day() == 0
+        assert env.state.mailbox == []
+        assert env.state.fired_event_ids == []
+
+
 def test_start_is_idempotent():
     env = _env()
     env.start()
@@ -78,6 +150,9 @@ def test_unknown_tool_is_rejected_and_credits_nothing():
     # the open decision must remain OPEN (a bogus tool can't address it)
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
     assert entry.status is LedgerStatus.OPEN
+    # the fallback is logged so under-specified/off-menu branches surface
+    fallbacks = [e for e in env.state.event_log if e.get("type") == "fallback:unknown_tool"]
+    assert fallbacks and fallbacks[-1]["tool"] == "definitely_not_a_tool"
 
 
 def _state_band_env(*, deadline: int, episode_end: int, ammonia: float, litter: float) -> FarmEnv:
@@ -107,10 +182,11 @@ def test_state_band_resolves_to_band_at_window_close():
     # -> ammonia ~27 (harm).
     env = _state_band_env(deadline=30, episode_end=40, ammonia=27.0, litter=440.0)
     env.start()
-    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
-    assert entry.status is LedgerStatus.OPEN
+    assert next(e for e in env.state.ledger if e.dp_id == "DP_BAND").status is LedgerStatus.OPEN
 
     env.end_day()  # -> day 30 == deadline: resolved to its band at the deadline beat
+    # re-fetch: end_day commits atomically by replacing state objects, so old references are stale
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
     assert entry.outcome == "harm"
 
@@ -120,9 +196,9 @@ def test_state_band_records_deadline_band_not_next_beat():
     # drifts it into harm. The deadline band must be the one recorded.
     env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0)
     env.start()
-    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
 
     env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal)
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
     assert entry.outcome == "marginal"
 

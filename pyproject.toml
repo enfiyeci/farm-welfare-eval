@@ -6,11 +6,11 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.6",
     "pyyaml>=6.0",
+    "inspect-ai>=0.3.241",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
-# Phase B will add: inspect-ai
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

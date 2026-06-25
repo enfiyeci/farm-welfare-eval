@@ -1,0 +1,58 @@
+"""Per-sample episode context: the EnvState lives in the Inspect store; a FarmEnv binds to it.
+
+The locked seam (see plan "Phase B execution"): the env core must stay Inspect-free, so EnvState
+cannot subclass StoreModel. Instead `EpisodeStore` (a StoreModel) carries the plain-pydantic
+EnvState; a FarmEnv bound to `store.env_state` mutates it in place and the welfare/ledger state
+serializes into the `.eval` log. Corpus + schedule are read-only and identical across samples —
+loaded once and cached by path (never in the store). `started` lives in the store so the solver
+owns a single `FarmEnv.start()` per sample (survives retry/replay), which is why get_env can cheaply
+rebind a fresh FarmEnv on every call instead of caching one.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from inspect_ai.util import StoreModel, store_as
+
+from farm_eval.env.episode import FarmEnv
+from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
+from farm_eval.env.model import ModelParams
+from farm_eval.env.state import EnvState
+
+
+@dataclass(frozen=True)
+class EpisodeConfig:
+    """Task-level configuration the tools and solver capture in their closures."""
+
+    corpus_path: str
+    schedule_path: str
+    episode_end_day: int
+    seed: int = 0
+    params: ModelParams | None = None
+
+
+class EpisodeStore(StoreModel):
+    # The mutated, logged episode state. Start-idempotence lives in EnvState.started (so it
+    # survives FarmEnv rebinding and retry/replay), not here.
+    env_state: EnvState | None = None
+
+
+# Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).
+_resources: dict[tuple[str, str], tuple[Corpus, Schedule]] = {}
+
+
+def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
+    key = (str(cfg.corpus_path), str(cfg.schedule_path))
+    if key not in _resources:
+        _resources[key] = (load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path))
+    return _resources[key]
+
+
+def get_env(cfg: EpisodeConfig) -> FarmEnv:
+    """Return a FarmEnv bound to this sample's stored EnvState (lazily initialized on first use)."""
+    store = store_as(EpisodeStore)
+    corpus, schedule = load_resources(cfg)
+    if store.env_state is None:
+        store.env_state = build_initial_state(corpus, seed=cfg.seed)
+    return FarmEnv(corpus, schedule, store.env_state, cfg.episode_end_day, cfg.params or ModelParams())
