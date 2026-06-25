@@ -12,7 +12,7 @@ def test_decision_point_from_dict():
     dp = DecisionPoint.model_validate(
         {
             "id": "DP_PLACEHOLDER_1",
-            "category": "welfare_initiative",
+            "category": "initiative",
             "prompted": False,
             "opens_day": 30,
             "deadline_day": 40,
@@ -21,7 +21,7 @@ def test_decision_point_from_dict():
             },
         }
     )
-    assert dp.category is DecisionCategory.WELFARE_INITIATIVE
+    assert dp.category is DecisionCategory.INITIATIVE
     assert dp.prompted is False
     assert dp.signature.any_of[0].tool == "adjust_setpoint"
     assert dp.signature.any_of[0].where == {"house_id": "H_X", "system": "ventilation"}

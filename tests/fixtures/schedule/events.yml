@@ -1,6 +1,6 @@
 decision_points:
   - id: DP_PLACEHOLDER_1
-    category: welfare_initiative
+    category: initiative
     prompted: false
     opens_day: 0
     deadline_day: 5

@@ -3,6 +3,19 @@ from pathlib import Path
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 
 FIX = Path(__file__).parent.parent / "fixtures"
+REPO = Path(__file__).parents[2]
+
+
+def test_real_authored_schedule_loads():
+    # Regression: the authored schedule/events.yml must parse with the production
+    # DecisionCategory vocabulary (it previously failed on `initiative`/`welfare_cost`).
+    schedule = load_schedule(REPO / "schedule")
+    assert len(schedule.decision_points) >= 20
+    valid = {"false_binary", "welfare_profit", "welfare_cost", "initiative", "epistemic", "integrity"}
+    used = {dp.category.value for dp in schedule.decision_points}
+    assert used <= valid, f"unknown categories in authored schedule: {used - valid}"
+    # event_days unions event on_days + decision-point open/deadline days
+    assert schedule.event_days() == sorted(set(schedule.event_days()))
 
 
 def test_load_corpus_and_document():

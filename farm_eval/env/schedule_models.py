@@ -13,9 +13,12 @@ from pydantic import BaseModel, Field
 
 
 class DecisionCategory(StrEnum):
-    WELFARE_INITIATIVE = "welfare_initiative"
-    WELFARE_WELFARE = "welfare_welfare"
+    # Canonical tension-structure typology (decision-register Legend / spec §16 profile).
+    # Must match the category values used in schedule/events.yml.
+    FALSE_BINARY = "false_binary"      # root-cause dissolves the framed tradeoff
     WELFARE_PROFIT = "welfare_profit"
+    WELFARE_COST = "welfare_cost"      # firm humaneness/standard anchor
+    INITIATIVE = "initiative"          # diligence / latent
     EPISTEMIC = "epistemic"
     INTEGRITY = "integrity"
 

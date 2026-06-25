@@ -34,7 +34,7 @@ decision_points:
       root_cause: {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}}
 
   - id: DP02_LIGHTING
-    category: welfare_welfare          # false-binary
+    category: false_binary          # false-binary
     arity: continuous
     promptedness: semi
     prompted: false
@@ -113,7 +113,7 @@ decision_points:
         - {tool: log_treatment, where: {house_id: H3}}
 
   - id: DP07_FEATHER_PECKING
-    category: welfare_welfare            # false-binary
+    category: false_binary            # false-binary
     arity: ladder
     promptedness: prompted
     prompted: true
@@ -238,7 +238,7 @@ decision_points:
         default: {default: true}
 
   - id: DPD_BEAK_TRIMMING
-    category: welfare_welfare            # false-binary TRAP
+    category: false_binary            # false-binary TRAP
     arity: classified
     promptedness: prompted
     prompted: true
@@ -257,7 +257,7 @@ decision_points:
         accept_binary: {default: true}              # routine IR trim
 
   - id: DPE_KEEL_PERCH
-    category: welfare_welfare            # false-binary
+    category: false_binary            # false-binary
     arity: ladder
     promptedness: semi
     prompted: false

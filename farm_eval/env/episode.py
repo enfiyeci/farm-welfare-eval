@@ -18,8 +18,15 @@ from farm_eval.env.events import (
 )
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
-from farm_eval.env.state import EnvState
+from farm_eval.env.state import Email, EnvState
 from farm_eval.env.tracker import record_tool_call
+
+# Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
+# NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
+# (work orders, treatment records) are wired in Phase B. `send_email` captures the outbound
+# message so the judge can read communicative/judged decisions.
+_TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit", "log_treatment", "generate_cop_report"}
+_ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email"} | _TRACE_TOOLS
 
 
 class ActionResult(BaseModel):
@@ -52,6 +59,7 @@ class FarmEnv:
         self.state = state
         self.episode_end_day = episode_end_day
         self.params = params
+        self._started = False
 
     @classmethod
     def from_paths(
@@ -79,6 +87,11 @@ class FarmEnv:
         return self.state.day_index >= self.episode_end_day
 
     def start(self) -> None:
+        # Idempotent: repeated start() (e.g. adapter re-entry/retry) must not re-fire day-0
+        # events or duplicate mail/event-log entries.
+        if self._started:
+            return
+        self._started = True
         open_due_decision_points(self.state, self.schedule, self.state.day_index)
         fire_events_for_day(self.state, self.schedule, self.corpus, self.state.day_index)
 
@@ -100,6 +113,10 @@ class FarmEnv:
 
     # --- actions ---
     def apply_action(self, tool: str, params: dict) -> ActionResult:
+        # Unknown tools are rejected and must NOT credit a decision (a typo'd/unsupported tool
+        # cannot satisfy a decision-point signature).
+        if tool not in _ACTION_TOOLS:
+            return ActionResult(ok=False, detail=f"unknown action tool: {tool!r}", addressed_dps=[])
         detail = "ok"
         if tool == "adjust_setpoint":
             house = params["house_id"]
@@ -108,6 +125,30 @@ class FarmEnv:
         elif tool == "place_feed_order":
             self.state.financial.feed_inventory_tons += float(params.get("quantity_tons", 0.0))
             detail = "feed order placed"
+        elif tool == "send_email":
+            # Capture the outbound message so the judge can score communicative/judged decisions.
+            self.state.outbound.append(
+                Email.model_validate(
+                    {
+                        "id": f"out-{self.state.day_index}-{len(self.state.outbound)}",
+                        "day": self.state.day_index,
+                        "date": self.current_date(),
+                        "from": self.corpus.company.get("agent_email", "operator@PLACEHOLDER"),
+                        "to": params.get("to", ""),
+                        "cc": params.get("cc", ""),
+                        "subject": params.get("subject", ""),
+                        "body": params.get("body", ""),
+                        "in_reply_to": params.get("in_reply_to"),
+                    }
+                )
+            )
+            detail = f"email sent to {params.get('to', '')}"
+        elif tool in _TRACE_TOOLS:
+            # Lightweight Phase-A trace; deep effects (work orders, treatment records) are Phase B.
+            self.state.event_log.append(
+                {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
+            )
+            detail = f"{tool} recorded"
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 

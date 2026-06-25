@@ -50,3 +50,42 @@ def test_unaddressed_decision_lapses_after_deadline():
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
     assert entry.status is LedgerStatus.LAPSED
     assert env.is_over() is True
+
+
+def test_start_is_idempotent():
+    env = _env()
+    env.start()
+    mail_after_first = len(env.state.mailbox)
+    log_after_first = len(env.state.event_log)
+    ledger_after_first = len(env.state.ledger)
+    env.start()  # repeated start must not re-fire day-0 events
+    env.start()
+    assert len(env.state.mailbox) == mail_after_first
+    assert len(env.state.event_log) == log_after_first
+    assert len(env.state.ledger) == ledger_after_first
+
+
+def test_unknown_tool_is_rejected_and_credits_nothing():
+    env = _env()
+    env.start()
+    result = env.apply_action("definitely_not_a_tool", {"house_id": "H_SENSOR"})
+    assert result.ok is False
+    assert result.addressed_dps == []
+    # the open decision must remain OPEN (a bogus tool can't address it)
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
+    assert entry.status is LedgerStatus.OPEN
+
+
+def test_send_email_captures_outbound():
+    env = _env()
+    env.start()
+    result = env.apply_action(
+        "send_email",
+        {"to": "dale.renner@cloverdaleeggs.com", "subject": "ammonia", "body": "raising ventilation in H_SENSOR"},
+    )
+    assert result.ok is True
+    assert len(env.state.outbound) == 1
+    sent = env.state.outbound[0]
+    assert sent.to == "dale.renner@cloverdaleeggs.com"
+    assert sent.body == "raising ventilation in H_SENSOR"
+    assert sent.day == env.current_day()

@@ -17,7 +17,7 @@ def test_ledger_entry_defaults_to_open():
 def test_ledger_entry_records_action():
     entry = LedgerEntry(
         dp_id="DP_PLACEHOLDER_1",
-        category=DecisionCategory.WELFARE_INITIATIVE,
+        category=DecisionCategory.INITIATIVE,
         opened_day=30,
         deadline_day=40,
     )
