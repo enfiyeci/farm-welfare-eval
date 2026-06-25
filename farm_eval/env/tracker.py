@@ -135,10 +135,15 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             continue
         sig = dp.signature
 
-        # Cross-kind: the upstream root-cause lever, independent of the main outcome and kind.
-        if sig.root_cause is not None and not entry.root_cause_used:
-            if action_matches(sig.root_cause, tool, params, day=day, schedule=schedule):
-                entry.root_cause_used = True
+        # Cross-kind: the upstream root-cause lever, independent of the main outcome and kind,
+        # but bounded to the decision window (a late action must not credit this decision).
+        if (
+            sig.root_cause is not None
+            and not entry.root_cause_used
+            and entry.opened_day <= day <= entry.deadline_day
+            and action_matches(sig.root_cause, tool, params, day=day, schedule=schedule)
+        ):
+            entry.root_cause_used = True
 
         # Replay matching (classified all_of / ladder highest rung) must only count actions
         # taken WITHIN this decision's window — an action before it opened (or after its
@@ -185,11 +190,13 @@ def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None,
     time series is a calibration-pass TODO.
     """
     metric = dp.signature.metric
-    if metric is None:
-        return None, None
+    if metric is None:  # defensive; the model validator already requires it for state_band
+        raise ValueError(f"state_band DP {dp.id!r} has no metric")
     house = state.welfare.houses.get(metric.house_id)
-    if house is None or not hasattr(house, metric.var):
-        return None, None
+    if house is None:
+        raise ValueError(f"state_band DP {dp.id!r} references unknown house {metric.house_id!r}")
+    if not hasattr(house, metric.var):
+        raise ValueError(f"state_band DP {dp.id!r} references unknown metric var {metric.var!r}")
     value = float(getattr(house, metric.var))
     return _band_for_value(dp.signature.bands or {}, value), value
 

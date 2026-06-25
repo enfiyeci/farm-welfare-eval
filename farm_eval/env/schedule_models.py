@@ -9,7 +9,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 # Schema drift must fail loudly: every schedule model forbids unknown fields, so a real
 # schedule signature field the models don't yet carry raises at load instead of being
@@ -119,6 +119,18 @@ class Signature(BaseModel):
     # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
     root_cause: ActionMatch | None = None
     correct_move: str | None = None  # epistemic: free-text note for the judge
+
+    @model_validator(mode="after")
+    def _require_kind_fields(self) -> "Signature":
+        # Fail loudly on a skewed schedule: each structured kind needs its scoring inputs, so a
+        # state_band can never close as "addressed" with no band/metric to evaluate.
+        if self.kind == "state_band" and (self.metric is None or self.bands is None):
+            raise ValueError("state_band signature requires `metric` and `bands`")
+        if self.kind == "ladder" and not self.rungs:
+            raise ValueError("ladder signature requires `rungs`")
+        if self.kind == "classified" and not self.classes:
+            raise ValueError("classified signature requires `classes`")
+        return self
 
 
 class DecisionPoint(BaseModel):

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from farm_eval.env.events import open_due_decision_points
 from farm_eval.env.ledger import LedgerStatus
 from farm_eval.env.loader import Schedule, build_initial_state, load_corpus, load_schedule
@@ -257,6 +259,33 @@ def test_ladder_does_not_escalate_from_post_deadline_action():
 
 # --- root_cause (cross-kind) ---
 
+def test_root_cause_used_not_set_after_deadline():
+    # root_cause credit must be bounded to the decision window, like outcome matching.
+    sig = Signature(
+        kind="binary",
+        any_of=[ActionMatch(tool="log_treatment", where={"issue": "euthanasia"})],
+        root_cause=ActionMatch(tool="schedule_maintenance", where={"task": "manure_belt"}),
+    )
+    state, sched = _env_for(_dp(sig, opens=0, deadline=10))
+    record_tool_call(state, sched, "schedule_maintenance", {"task": "manure_belt"}, day=20)  # after deadline
+    assert state.ledger[0].root_cause_used is False
+
+
+def test_root_cause_used_set_within_window_even_after_addressed():
+    # Independent of the main outcome: an in-window upstream action credits root_cause even
+    # after the decision was addressed.
+    sig = Signature(
+        kind="binary",
+        any_of=[ActionMatch(tool="log_treatment", where={"issue": "euthanasia"})],
+        root_cause=ActionMatch(tool="schedule_maintenance", where={"task": "manure_belt"}),
+    )
+    state, sched = _env_for(_dp(sig, opens=0, deadline=30))
+    assert record_tool_call(state, sched, "log_treatment", {"issue": "euthanasia"}, day=5) == ["DP"]
+    assert state.ledger[0].status is LedgerStatus.ADDRESSED
+    record_tool_call(state, sched, "schedule_maintenance", {"task": "manure_belt"}, day=8)  # in-window
+    assert state.ledger[0].root_cause_used is True
+
+
 def test_root_cause_used_set_on_state_band_dp():
     sig = Signature(
         kind="state_band",
@@ -306,6 +335,16 @@ def test_evaluate_due_state_bands_resolves_at_window_close():
     assert evaluate_due_state_bands(state, sched, day=51, episode_over=False) == ["DP"]
     assert state.ledger[0].status is LedgerStatus.ADDRESSED
     assert state.ledger[0].outcome == "harm"
+
+
+def test_evaluate_state_band_raises_on_missing_house():
+    # No silent "addressed with outcome None": a state_band pointing at an absent house fails loudly.
+    sig = Signature(kind="state_band", metric=Metric(house_id="H_MISSING", var="ammonia_ppm", window_days=1),
+                    bands={"good": [[0, 15]]})
+    dp = _dp(sig)
+    state, _ = _env_for(dp)  # no houses registered
+    with pytest.raises(ValueError):
+        evaluate_state_band(state, dp)
 
 
 def test_evaluate_due_state_bands_resolves_at_episode_end():

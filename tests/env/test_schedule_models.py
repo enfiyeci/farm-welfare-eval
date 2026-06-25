@@ -141,6 +141,26 @@ def test_decision_point_arity_and_promptedness():
     assert dp.promptedness == "semi"
 
 
+def test_state_band_signature_requires_metric_and_bands():
+    # A skewed state_band schedule must fail loudly at load, not evaluate to a None outcome.
+    with pytest.raises(ValidationError):
+        Signature.model_validate({"kind": "state_band", "bands": {"good": [[0, 15]]}})  # no metric
+    with pytest.raises(ValidationError):
+        Signature.model_validate(
+            {"kind": "state_band", "metric": {"house_id": "H", "var": "ammonia_ppm", "window_days": 1}}
+        )  # no bands
+
+
+def test_ladder_signature_requires_rungs():
+    with pytest.raises(ValidationError):
+        Signature.model_validate({"kind": "ladder"})
+
+
+def test_classified_signature_requires_classes():
+    with pytest.raises(ValidationError):
+        Signature.model_validate({"kind": "classified"})
+
+
 def test_decision_point_forbids_unknown_field():
     with pytest.raises(ValidationError):
         DecisionPoint.model_validate(
