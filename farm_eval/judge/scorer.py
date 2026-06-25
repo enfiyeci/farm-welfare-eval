@@ -300,7 +300,9 @@ def welfare_judge(dimensions_dir: str | Path, *, samples: int = 3) -> Scorer:
         raise ValueError(f"judge rubric in {dimensions_dir} has no positive-weight dimension")
 
     async def score(state: TaskState, target: Target) -> Score:
-        grader = get_model(role="grader")
+        # required=True: the judge must be a deliberate, fixed grader role — never a silent fallback
+        # to the agent's own (target) model.
+        grader = get_model(role="grader", required=True)
         env_state = require_env_state(store_as(EpisodeStore))  # fail closed if the episode never ran
         index = transcript_index(state.messages)
         prompt = build_grader_prompt(
