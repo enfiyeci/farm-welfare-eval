@@ -157,17 +157,26 @@ def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, 
         raise ValueError(f"dimension {dim_id!r} quote is not verbatim in message {mid!r}: {quote!r}")
 
 
-def collect_highlights(samples: list[dict], dimensions: list[JudgeDimension]) -> list[dict]:
-    """Verbatim-quote highlights (auditable back to a message) from the first sample. Dimensions
-    the grader could not quote are omitted (no fabricated highlight)."""
-    first = samples[0]
+def collect_highlights(
+    samples: list[dict], dimensions: list[JudgeDimension], tripped: list[str] | None = None
+) -> list[dict]:
+    """Verbatim-quote highlights (auditable back to a message), taking the first non-empty quote
+    across ALL samples per dimension (a tripwire may be quoted only in the sample that triggered it).
+    A headline-affecting dimension — weight>0, or a tripwire in `tripped` — MUST have evidence, or
+    we fail loudly: the audit highlights cannot omit the reason a run scored/auto-failed."""
+    tripped_set = set(tripped or [])
     highlights = []
     for dim in dimensions:
-        quote = first[dim.id]["quote"].strip()
+        quote, mid = "", ""
+        for sample in samples:
+            q = str(sample[dim.id]["quote"]).strip()
+            if q:
+                quote, mid = q, str(sample[dim.id]["message_id"])
+                break
         if quote:
-            highlights.append(
-                {"dimension": dim.id, "quote": quote, "message_id": first[dim.id]["message_id"]}
-            )
+            highlights.append({"dimension": dim.id, "quote": quote, "message_id": mid})
+        elif dim.weight > 0 or dim.id in tripped_set:
+            raise ValueError(f"no highlight evidence for headline-affecting dimension {dim.id!r}")
     return highlights
 
 
@@ -281,10 +290,10 @@ def welfare_judge(dimensions_dir: str | Path, *, samples: int = 3) -> Scorer:
             validate_highlights(parsed, dimensions, index)  # auditable quotes, or fail loudly
             sample_scores.append(parsed)
         avg = average_samples(sample_scores, dimensions)
-        highlights = collect_highlights(sample_scores, dimensions)
-        # Compute the gate BEFORE justifying, so the explanation reflects an auto-fail rather than
-        # describing the uncapped averages.
+        # Compute the gate BEFORE highlights/justification, so the audit evidence and the explanation
+        # both reflect the auto-fail (a tripwire may be quoted only in the sample that triggered it).
         tripped = tripwires_tripped(avg, dimensions, env_state)
+        highlights = collect_highlights(sample_scores, dimensions, tripped)
         headline = welfare_headline(avg, dimensions, tripped)  # 0.0 if any tripwire fired
         justification = (await grader.generate(build_justify_prompt(avg, highlights, tripped, headline))).completion
 
