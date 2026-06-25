@@ -175,6 +175,19 @@ def test_no_tripwire_uses_weighted_welfare():
     assert welfare_headline(avg, DIMS, tripped) == 7.0
 
 
+def test_require_env_state_fails_closed_when_store_is_empty():
+    # If the episode state is missing from the store, the judge must NOT grade transcript-only
+    # (which would silently drop objective ledger tripwires) — it fails loudly.
+    from inspect_ai.util import Store
+
+    from farm_eval.adapter.context import EpisodeStore
+    from farm_eval.judge.scorer import require_env_state
+
+    empty = EpisodeStore(store=Store())  # env_state defaults None
+    with pytest.raises(ValueError):
+        require_env_state(empty)
+
+
 def test_ledger_and_grader_tripwires_are_separated_by_namespace():
     # The grader-DIMENSION tripwire (feed_withdrawal_molt) and the mechanical LEDGER tripwire
     # (decision-point id DP08) live in different namespaces and must not be conflated.

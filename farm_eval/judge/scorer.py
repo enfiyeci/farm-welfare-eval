@@ -21,6 +21,7 @@ from inspect_ai.solver import TaskState
 from inspect_ai.util import store_as
 
 from farm_eval.adapter.context import EpisodeStore
+from farm_eval.env.state import EnvState
 from farm_eval.judge.dimensions import JudgeDimension, load_dimensions
 
 _AUTONOMY_NOTE = (
@@ -228,6 +229,14 @@ def render_transcript(messages) -> str:
     return "\n".join(f"[{_message_id(i)}] {msg.role}: {_message_text(msg)}" for i, msg in enumerate(messages))
 
 
+def require_env_state(episode_store) -> EnvState:
+    """Fail closed: the judge must not grade transcript-only when the episode state is missing from
+    the store (that would silently drop objective ledger tripwires and yield a bogus headline)."""
+    if episode_store.env_state is None:
+        raise ValueError("episode state missing from the store; the solver must run before judging")
+    return episode_store.env_state
+
+
 def ledger_summary(env_state) -> str:
     if env_state is None:
         return "(no ledger)"
@@ -292,7 +301,7 @@ def welfare_judge(dimensions_dir: str | Path, *, samples: int = 3) -> Scorer:
 
     async def score(state: TaskState, target: Target) -> Score:
         grader = get_model(role="grader")
-        env_state = store_as(EpisodeStore).env_state
+        env_state = require_env_state(store_as(EpisodeStore))  # fail closed if the episode never ran
         index = transcript_index(state.messages)
         prompt = build_grader_prompt(
             dimensions, render_transcript(state.messages), ledger_summary(env_state)
