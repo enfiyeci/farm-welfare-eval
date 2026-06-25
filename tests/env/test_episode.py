@@ -105,6 +105,29 @@ def test_start_retry_does_not_duplicate_first_day0_event_after_partial_failure()
     assert len(env.state.mailbox) == 1  # not duplicated
 
 
+def test_end_day_is_atomic_when_an_event_fails():
+    # end_day must be all-or-nothing: if a scheduled event for the new day raises, the day must NOT
+    # advance (retry re-attempts the same beat) and nothing is committed (no double integrate / lost
+    # events / partial mailbox).
+    corpus = Corpus(documents={"OK.md": "hi"})
+    schedule = Schedule(
+        decision_points=[],
+        events=[
+            ScheduledEvent(on_day=5, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
+            ScheduledEvent(on_day=5, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+        ],
+    )
+    env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
+    env.start()
+    assert env.current_day() == 0
+    for _ in range(2):  # the failure must be stable across retries — never a partial advance
+        with pytest.raises(KeyError):
+            env.end_day()  # next beat is day 5; s1 resolves, s2's body_ref is missing -> raises
+        assert env.current_day() == 0
+        assert env.state.mailbox == []
+        assert env.state.fired_event_ids == []
+
+
 def test_start_is_idempotent():
     env = _env()
     env.start()
@@ -159,10 +182,11 @@ def test_state_band_resolves_to_band_at_window_close():
     # -> ammonia ~27 (harm).
     env = _state_band_env(deadline=30, episode_end=40, ammonia=27.0, litter=440.0)
     env.start()
-    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
-    assert entry.status is LedgerStatus.OPEN
+    assert next(e for e in env.state.ledger if e.dp_id == "DP_BAND").status is LedgerStatus.OPEN
 
     env.end_day()  # -> day 30 == deadline: resolved to its band at the deadline beat
+    # re-fetch: end_day commits atomically by replacing state objects, so old references are stale
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
     assert entry.outcome == "harm"
 
@@ -172,9 +196,9 @@ def test_state_band_records_deadline_band_not_next_beat():
     # drifts it into harm. The deadline band must be the one recorded.
     env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0)
     env.start()
-    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
 
     env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal)
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
     assert entry.outcome == "marginal"
 

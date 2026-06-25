@@ -99,14 +99,24 @@ class FarmEnv:
 
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
-        integrate(self.state, elapsed, self.params)
-        self.state.day_index = new_day
+        # Atomic: stage every mutation on a deep copy and commit only after the new day's events fire
+        # successfully. `integrate` is non-idempotent, so a firing failure must NOT leave the live
+        # state half-advanced — otherwise retry would compute the next beat from the advanced day and
+        # silently drop the failed day's events (and re-integrate). On failure the copy is discarded
+        # and the live state is untouched, so retry re-attempts the same beat.
+        staged = self.state.model_copy(deep=True)
+        integrate(staged, elapsed, self.params)
+        staged.day_index = new_day
+        episode_over = new_day >= self.episode_end_day
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
-        evaluate_due_state_bands(self.state, self.schedule, new_day, episode_over=self.is_over())
-        lapse_expired_decision_points(self.state, new_day)
-        open_due_decision_points(self.state, self.schedule, new_day)
-        fired = fire_events_for_day(self.state, self.schedule, self.corpus, new_day)
+        evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        lapse_expired_decision_points(staged, new_day)
+        open_due_decision_points(staged, self.schedule, new_day)
+        fired = fire_events_for_day(staged, self.schedule, self.corpus, new_day)
+        # Commit: copy the staged fields back into the live (store-referenced) state in place.
+        for field_name in type(self.state).model_fields:
+            setattr(self.state, field_name, getattr(staged, field_name))
         return DayAdvanceResult(
             elapsed_days=elapsed,
             new_date=self.current_date(),
