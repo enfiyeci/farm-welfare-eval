@@ -16,7 +16,7 @@ from farm_eval.env.events import (
     lapse_expired_decision_points,
     open_due_decision_points,
 )
-from farm_eval.env.loader import build_initial_state, load_corpus, load_schedule
+from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.state import EnvState
 from farm_eval.env.tracker import record_tool_call
@@ -46,7 +46,7 @@ class SensorResult(BaseModel):
 
 
 class FarmEnv:
-    def __init__(self, corpus, schedule, state: EnvState, episode_end_day: int, params: ModelParams):
+    def __init__(self, corpus: Corpus, schedule: Schedule, state: EnvState, episode_end_day: int, params: ModelParams):
         self.corpus = corpus
         self.schedule = schedule
         self.state = state

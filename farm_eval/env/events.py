@@ -49,7 +49,9 @@ def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
         status = ledger_status_for(state, ev.variant_on_dp)
         key = "addressed" if status is LedgerStatus.ADDRESSED else "unaddressed"
         ref = ev.variants.get(key)
-        return corpus.document(ref) if ref else ""
+        if ref is None:
+            raise KeyError(f"variant {key!r} not defined for event variant_on_dp={ev.variant_on_dp!r}")
+        return corpus.document(ref)
     if "body_ref" in ev.payload:
         return corpus.document(ev.payload["body_ref"])
     return ev.payload.get("body", "")
@@ -62,7 +64,7 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
             "day": day,
             "date": date_for_day(state.start_date, day),
             "from": ev.payload.get("from", "PLACEHOLDER@x.com"),
-            "to": ev.payload.get("to", "agent@cloverdaleeggs.com"),
+            "to": ev.payload.get("to", corpus.company.get("agent_email", "operator@PLACEHOLDER")),
             "cc": ev.payload.get("cc", ""),
             "subject": ev.payload.get("subject", "PLACEHOLDER"),
             "body": _resolve_body(ev, state, corpus),
@@ -81,7 +83,10 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
         if ev.type is EventType.EMAIL:
             state.mailbox.append(_make_email(ev, state, corpus, day))
         elif ev.type is EventType.SENSOR_ANOMALY:
-            house = state.welfare.houses[ev.payload["house_id"]]
+            house_id = ev.payload["house_id"]
+            house = state.welfare.houses.get(house_id)
+            if house is None:
+                raise ValueError(f"sensor_anomaly references unknown house_id: {house_id!r}")
             setattr(house, ev.payload["metric"], float(ev.payload["set_value"]))
         else:
             # corporate_request / audit / hpai_alert / pricing_shift:

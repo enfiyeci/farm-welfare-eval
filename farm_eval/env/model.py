@@ -23,6 +23,9 @@ class ModelParams(BaseModel):
     mortality_excess_per_day: float = 0.0003
 
 
+# TODO(calibration): FinancialState.revenue / feed_cost / margin / eggs_sold / cull_value and
+# WelfareState.mortality_rate_weekly are NOT updated by integrate() — they are deferred to
+# Phase B model-params calibration. This is intentional for Phase A.
 def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
     if elapsed_days <= 0:
         return state

@@ -12,7 +12,7 @@ from farm_eval.env.state import EnvState
 
 
 def match_where(params: dict, where: dict) -> bool:
-    return all(params.get(key) == value for key, value in where.items())
+    return all(key in params and params[key] == value for key, value in where.items())
 
 
 def match_signature(signature: Signature, tool: str, params: dict) -> bool:

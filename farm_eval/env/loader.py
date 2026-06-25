@@ -35,7 +35,11 @@ class Schedule(BaseModel):
     events: list[ScheduledEvent] = Field(default_factory=list)
 
     def event_days(self) -> list[int]:
-        return sorted({ev.on_day for ev in self.events})
+        days: set[int] = {ev.on_day for ev in self.events}
+        for dp in self.decision_points:
+            days.add(dp.opens_day)
+            days.add(dp.deadline_day)
+        return sorted(days)
 
 
 def _read_yaml(path: Path) -> dict:
