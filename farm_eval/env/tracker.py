@@ -65,6 +65,7 @@ def _dp_index(schedule: Schedule) -> dict[str, DecisionPoint]:
 
 
 def _history_has(am: ActionMatch, history: list[ActionRecord], schedule: Schedule) -> bool:
+    # `history` is the caller's in-window slice of the action log (see record_tool_call).
     return any(action_matches(am, a.tool, a.params, day=a.day, schedule=schedule) for a in history)
 
 
@@ -139,8 +140,14 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             if action_matches(sig.root_cause, tool, params, day=day, schedule=schedule):
                 entry.root_cause_used = True
 
+        # Replay matching (classified all_of / ladder highest rung) must only count actions
+        # taken WITHIN this decision's window — an action before it opened (or after its
+        # deadline) cannot credit it. Binary matches the current call only, so it is already
+        # window-bound by the OPEN check below.
+        window = [a for a in state.actions if entry.opened_day <= a.day <= entry.deadline_day]
+
         if sig.kind == "ladder":
-            if _record_ladder(entry, dp, state.actions, schedule, tool, params, day):
+            if _record_ladder(entry, dp, window, schedule, tool, params, day):
                 addressed.append(entry.dp_id)
             continue
 
@@ -152,7 +159,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
                 _address(entry, dp, tool, params, day)
                 addressed.append(entry.dp_id)
         elif sig.kind == "classified":
-            name, tripwire = _evaluate_classified(sig, state.actions, schedule)
+            name, tripwire = _evaluate_classified(sig, window, schedule)
             if name is not None:
                 _address(entry, dp, tool, params, day, outcome=name, tripwire=tripwire)
                 addressed.append(entry.dp_id)

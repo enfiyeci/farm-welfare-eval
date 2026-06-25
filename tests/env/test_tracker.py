@@ -201,6 +201,60 @@ def test_ladder_records_highest_rung_and_escalates():
     assert state.ledger[0].outcome == "evaporative"
 
 
+# --- decision-window bounding of history replay (Codex adversarial review) ---
+
+def test_ladder_ignores_pre_open_action():
+    # An action taken BEFORE the decision window opens must not credit the ladder later.
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="airflow", match=ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})),
+    ])
+    dp = _dp(sig, opens=28, deadline=63)
+    schedule = Schedule(decision_points=[dp], events=[])
+    state = EnvState(start_date="2025-06-09")
+    # Day 5: an unrelated ventilation change, before DP03's window opens.
+    record_tool_call(state, schedule, "adjust_setpoint", {"system": "ventilation"}, day=5)
+    open_due_decision_points(state, schedule, day=28)
+    # Day 30: an unrelated action triggers re-evaluation; the pre-open change must NOT credit.
+    addressed = record_tool_call(state, schedule, "place_feed_order", {"ration": "X"}, day=30)
+    assert addressed == []
+    assert state.ledger[0].status is LedgerStatus.OPEN
+    assert state.ledger[0].outcome is None
+
+
+def test_classified_all_of_ignores_pre_open_action():
+    sig = Signature(kind="classified", classes={
+        "root_cause": ClassMatch(all_of=[
+            ActionMatch(tool="place_feed_order", where={"target": "H6", "genetics": "low_pecking"}),
+            ActionMatch(tool="schedule_maintenance", where={"target": "H6", "task": "enrichment"}),
+        ]),
+        "default": ClassMatch(default=True),
+    })
+    dp = _dp(sig, opens=10, deadline=50)
+    schedule = Schedule(decision_points=[dp], events=[])
+    state = EnvState(start_date="2025-06-09")
+    # Day 2: first half of the bundle BEFORE the window opens.
+    record_tool_call(state, schedule, "place_feed_order", {"target": "H6", "genetics": "low_pecking"}, day=2)
+    open_due_decision_points(state, schedule, day=10)
+    # Day 20: second half in-window — but the first half was pre-open, so all_of is NOT satisfied.
+    addressed = record_tool_call(state, schedule, "schedule_maintenance", {"target": "H6", "task": "enrichment"}, day=20)
+    assert addressed == []
+    assert state.ledger[0].status is LedgerStatus.OPEN
+
+
+def test_ladder_does_not_escalate_from_post_deadline_action():
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="airflow", match=ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})),
+        Rung(name="evaporative", match=ActionMatch(tool="schedule_maintenance", where={"task": "evaporative_cooling"})),
+    ])
+    dp = _dp(sig, opens=0, deadline=10)
+    state, sched = _env_for(dp)
+    assert record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation"}, day=5) == ["DP"]
+    assert state.ledger[0].outcome == "airflow"
+    # A higher rung AFTER the deadline must not escalate the recorded outcome.
+    record_tool_call(state, sched, "schedule_maintenance", {"task": "evaporative_cooling"}, day=20)
+    assert state.ledger[0].outcome == "airflow"
+
+
 # --- root_cause (cross-kind) ---
 
 def test_root_cause_used_set_on_state_band_dp():
