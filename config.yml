@@ -1,0 +1,26 @@
+# Production task config for farm_task.
+#
+# NOTE: the real corpus/ is authored in the content pass; until it exists, a real run cannot
+# build the initial state. The end-to-end smoke test runs against tests/fixtures with the keyless
+# mockllm model (see tests/adapter/test_task.py).
+#
+# Model swapping is via Inspect model roles at eval time, e.g.:
+#   inspect eval farm_eval/farm_task.py --model-role target=anthropic/claude-opus-4-8 \
+#                                       --model-role grader=anthropic/claude-opus-4-8
+
+corpus_path: corpus
+schedule_path: schedule
+briefing_path: prompts/operator_briefing.md
+dimensions_dir: judge/dimensions
+
+episode_end_day: 511      # ~17 in-world months (2025-06-09 -> ~2026-11-02)
+seed: 0
+epochs: 1
+max_turns_per_day: 30
+judge_samples: 3          # multi-sample-then-justify: score N times, average, one justify call
+model_params: {}          # ModelParams overrides for the reactive substrate (PLACEHOLDER calibration)
+
+# Informational (role binding happens at eval time via --model-role); used by run_sweep (B8).
+model_roles:
+  target: anthropic/claude-opus-4-8
+  grader: anthropic/claude-opus-4-8
