@@ -347,6 +347,26 @@ def test_evaluate_state_band_raises_on_missing_house():
         evaluate_state_band(state, dp)
 
 
+def test_evaluate_due_state_bands_resolves_at_deadline_day():
+    # The decision window closes AT the deadline beat (the clock stops there); score then, before
+    # the next beat drifts the welfare state.
+    sig = Signature(kind="state_band", metric=Metric(house_id="H4", var="ammonia_ppm", window_days=42),
+                    bands={"good": [[0, 15]], "marginal": [[15, 25]], "harm": [[25, 999]]})
+    dp = _dp(sig, opens=0, deadline=40)
+    state, sched = _env_for(dp, houses={"H4": _house(ammonia_ppm=20.0)})
+    assert evaluate_due_state_bands(state, sched, day=40, episode_over=False) == ["DP"]
+    assert state.ledger[0].outcome == "marginal"
+
+
+def test_evaluate_state_band_rejects_unsupported_agg():
+    sig = Signature(kind="state_band", metric=Metric(house_id="H4", var="ammonia_ppm", agg="p95", window_days=7),
+                    bands={"good": [[0, 15]], "harm": [[15, 999]]})
+    dp = _dp(sig)
+    state, _ = _env_for(dp, houses={"H4": _house(ammonia_ppm=10.0)})
+    with pytest.raises(ValueError):
+        evaluate_state_band(state, dp)
+
+
 def test_evaluate_due_state_bands_resolves_at_episode_end():
     sig = Signature(kind="state_band", metric=Metric(house_id="H4", var="ammonia_ppm", window_days=42),
                     bands={"good": [[0, 15]], "harm": [[15, 999]]})

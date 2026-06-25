@@ -186,12 +186,16 @@ def _band_for_value(bands: dict[str, list[list[float]]], value: float) -> str | 
 def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None, float | None]:
     """Score a state_band signature against the resulting welfare state.
 
-    Phase A reads the current value; windowed aggregation (`metric.agg`/`window_days`) over a
-    time series is a calibration-pass TODO.
+    Phase A reads the deadline-snapshot value (callers resolve AT the deadline beat). Both
+    `agg: final` (exact) and `agg: mean` (approximated by the snapshot) are accepted; true windowed
+    aggregation over a time series is a calibration-pass TODO. Any OTHER agg is rejected loudly so
+    an unsupported aggregation is never silently treated as the snapshot.
     """
     metric = dp.signature.metric
     if metric is None:  # defensive; the model validator already requires it for state_band
         raise ValueError(f"state_band DP {dp.id!r} has no metric")
+    if metric.agg not in ("mean", "final"):
+        raise ValueError(f"unsupported state_band agg {metric.agg!r} for DP {dp.id!r} (Phase A: mean|final)")
     house = state.welfare.houses.get(metric.house_id)
     if house is None:
         raise ValueError(f"state_band DP {dp.id!r} references unknown house {metric.house_id!r}")
@@ -211,7 +215,10 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
         dp = dps.get(entry.dp_id)
         if dp is None or dp.signature.kind != "state_band":
             continue
-        if not (episode_over or day > entry.deadline_day):
+        # Resolve AT the deadline beat (the clock stops on each deadline, so the welfare state has
+        # just been integrated TO the deadline): use >= so we score the deadline state, not a later
+        # beat's drifted state.
+        if not (episode_over or day >= entry.deadline_day):
             continue
         band, value = evaluate_state_band(state, dp)
         entry.outcome = band if band is not None else value
