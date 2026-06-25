@@ -19,7 +19,7 @@ from farm_eval.env.events import (
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.state import Email, EnvState
-from farm_eval.env.tracker import record_tool_call
+from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
@@ -99,6 +99,9 @@ class FarmEnv:
         new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
         integrate(self.state, elapsed, self.params)
         self.state.day_index = new_day
+        # Resolve state_band decisions from the resulting welfare state at window close,
+        # BEFORE lapse — they are scored on the state, not addressed by an action.
+        evaluate_due_state_bands(self.state, self.schedule, new_day, episode_over=self.is_over())
         lapse_expired_decision_points(self.state, new_day)
         open_due_decision_points(self.state, self.schedule, new_day)
         fired = fire_events_for_day(self.state, self.schedule, self.corpus, new_day)
