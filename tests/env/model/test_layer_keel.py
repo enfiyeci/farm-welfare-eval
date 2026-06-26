@@ -17,3 +17,21 @@ def test_keel_monotone_and_bounded():
         v = keel_prevalence_pct(float(wk), p)
         assert prev <= v <= 100.0
         prev = v
+
+
+import pytest
+from pydantic import ValidationError
+
+
+def test_modelparams_rejects_mismatched_keel_lists():
+    with pytest.raises(ValidationError):
+        ModelParams(keel_age_wk=[22, 29, 39], keel_pct=[0, 60, 76, 86.5, 92])
+
+
+def test_modelparams_rejects_nonmonotone_ages():
+    with pytest.raises(ValidationError):
+        ModelParams(keel_age_wk=[22, 20, 39, 49, 65])
+
+
+def test_default_modelparams_still_valid():
+    assert ModelParams().keel_age_wk[0] == 22

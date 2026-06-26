@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 class ModelParams(BaseModel):
@@ -51,3 +51,24 @@ class ModelParams(BaseModel):
     # keel_age_wk / keel_pct: parallel lists for _interp (equal length, monotone).
     keel_age_wk: list[float] = [22, 29, 39, 49, 65]
     keel_pct: list[float] = [0, 60, 76, 86.5, 92]
+
+    @model_validator(mode="after")
+    def _validate_anchor_tables(self):
+        # Each age-axis field must be non-empty, strictly increasing, and the
+        # same length as every value list parallel to it. (Value lists are NOT
+        # checked for monotonicity here: breed_hdep/feed/water are intentionally
+        # non-monotone — they rise to a peak/plateau then decline.)
+        tables = {
+            "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
+            "keel_age_wk": ["keel_pct"],
+        }
+        for age_field, value_fields in tables.items():
+            ages = getattr(self, age_field)
+            if not ages:
+                raise ValueError(f"{age_field} must be non-empty")
+            if any(ages[i] >= ages[i + 1] for i in range(len(ages) - 1)):
+                raise ValueError(f"{age_field} must be strictly increasing")
+            for vf in value_fields:
+                if len(getattr(self, vf)) != len(ages):
+                    raise ValueError(f"{vf} must be the same length as {age_field}")
+        return self
