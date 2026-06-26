@@ -19,7 +19,7 @@ class ModelParams(BaseModel):
     # winter low-temp (ambient_c=-8) equilibrium >25 ppm; direction tests pass.
     nh3_target_base: float = 4.2        # baseline floor ppm (belt_days=2, no litter age/moisture effect)
     nh3_litter_coeff: float = 0.02      # ppm per litter-age day (litter TAN generation)
-    nh3_moisture_coeff: float = 0.06    # ppm per g/kg above reference moisture (25 g/kg)
+    nh3_moisture_coeff: float = 0.06    # ppm per % above reference moisture (25 %)
     nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
     nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C

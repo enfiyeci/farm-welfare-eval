@@ -51,7 +51,7 @@ def ammonia_step(
     Args:
         ppm: Current in-house ammonia concentration (ppm).
         litter_age_days: Days since litter was last replaced.
-        litter_moisture: Litter moisture content (g/kg); reference is 25 g/kg.
+        litter_moisture: Litter moisture content (%; reference is nh3_moisture_ref=25 %).
         ventilation: Normalised ventilation rate (1.0 = baseline).
         ambient_c: Outdoor temperature (°C); triggers cold penalty when < 5.
         belt_days: Manure accumulation days (belt removal interval).
