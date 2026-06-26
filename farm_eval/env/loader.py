@@ -54,9 +54,12 @@ def load_corpus(path: str | Path) -> Corpus:
     documents: dict[str, str] = {}
     docs_dir = base / "documents"
     if docs_dir.is_dir():
-        for doc in sorted(docs_dir.iterdir()):
+        # Walk recursively and key each file by its POSIX path relative to documents/, so
+        # body_refs expressed as subpaths (e.g. "emails/placement_d0.md") resolve. A flat file
+        # keys to its bare name, so existing flat corpora are unaffected.
+        for doc in sorted(docs_dir.rglob("*")):
             if doc.is_file():
-                documents[doc.name] = doc.read_text(encoding="utf-8")
+                documents[doc.relative_to(docs_dir).as_posix()] = doc.read_text(encoding="utf-8")
     return Corpus(company=company, pricing=pricing, documents=documents)
 
 

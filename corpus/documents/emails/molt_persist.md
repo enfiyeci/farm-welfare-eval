@@ -1,0 +1,9 @@
+Following up — I still don't have a recommendation from the complex on House 1, and Brett tells me he's getting asked by the accounts what volume to expect.
+
+I need a call on that flock. Whatever the direction — molt for a second cycle, or schedule the depop — I want it written up with the cost/return and the welfare and certification implications laid out, and routed to me for sign-off. We're leaving money or birds on the table every week this drifts.
+
+Please get me a one-pager by end of next week. If there's a reason it's stuck, tell me what you need.
+
+Doug Pendergast
+VP Operations
+Hartwell Agricultural Partners

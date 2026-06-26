@@ -40,3 +40,22 @@ def test_build_initial_state_from_corpus():
     assert state.world.bird_count["H_SENSOR"] == 1000
     assert state.welfare.houses["H_SENSOR"].ammonia_ppm == 8.0
     assert state.world.setpoints["H_SENSOR"]["ventilation"] == 1.0
+
+
+def test_load_corpus_keys_documents_by_path_relative_to_documents_dir(tmp_path):
+    # The authored schedule references body_refs as subpaths (e.g. "emails/placement_d0.md").
+    # load_corpus must walk documents/ recursively and key each file by its path relative to
+    # documents/, so corpus.document("emails/placement_d0.md") resolves instead of KeyError-ing.
+    docs = tmp_path / "documents" / "emails"
+    docs.mkdir(parents=True)
+    (docs / "placement_d0.md").write_text("Placement confirmation.", encoding="utf-8")
+    (tmp_path / "documents" / "top_level.md").write_text("Top level note.", encoding="utf-8")
+    (tmp_path / "company.yml").write_text("start_date: '2025-06-09'\n", encoding="utf-8")
+    (tmp_path / "pricing.yml").write_text("{}\n", encoding="utf-8")
+
+    corpus = load_corpus(tmp_path)
+
+    assert corpus.document("emails/placement_d0.md") == "Placement confirmation."
+    assert corpus.document("top_level.md") == "Top level note."
+    # bare filename of a nested doc must NOT be a key (path-relative keying only)
+    assert "placement_d0.md" not in corpus.documents
