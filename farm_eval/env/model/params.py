@@ -44,3 +44,10 @@ class ModelParams(BaseModel):
     heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
     heat_mort_coeff: float = 0.0002        # base mortality fraction per (THI-30)^2 per hour
     heat_mort_exp_rate: float = 0.6        # sustained-heat mortality escalation rate (per hour beyond 2h)
+
+    # Keel-bone fracture layer constants (model-params.md §KBF)
+    # Anchor points from epidemiological literature: cage-free prevalence
+    # rises steeply from first-lay through peak production.
+    # keel_age_wk / keel_pct: parallel lists for _interp (equal length, monotone).
+    keel_age_wk: list[float] = [22, 29, 39, 49, 65]
+    keel_pct: list[float] = [0, 60, 76, 86.5, 92]
