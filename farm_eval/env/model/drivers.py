@@ -25,6 +25,19 @@ def _f_to_c(f: float) -> float:
     return (f - 32.0) * 5.0 / 9.0
 
 
+def flock_age_weeks(age_weeks_at_start: float, day: int) -> float:
+    """Return flock age in weeks at *day* (integer day index from eval start).
+
+    Parameters
+    ----------
+    age_weeks_at_start:
+        Age of the flock in weeks on day 0 (from WorldState.age_weeks_at_start).
+    day:
+        Integer day index (0-based from eval start).
+    """
+    return age_weeks_at_start + day / 7.0
+
+
 def make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[float, float]]:
     """Build a deterministic ambient(day, hour) closure from corpus weather data.
 
