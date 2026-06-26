@@ -9,6 +9,8 @@ def _interp(x: float, xs: list[float], ys: list[float]) -> float:
     Returns ys[0] for x below xs[0] and ys[-1] for x above xs[-1].
     Shared helper reused by later layers (keel, feather).
     """
+    if not xs or len(xs) != len(ys):
+        raise ValueError("_interp requires equal-length, non-empty xs and ys")
     if x <= xs[0]:
         return ys[0]
     if x >= xs[-1]:
@@ -35,8 +37,8 @@ def production_step(age_weeks: float, params: ModelParams) -> dict:
     (model-params.md §Breed-standard targets).
     """
     cum = _interp(age_weeks, params.breed_age_wk, params.breed_cummort)
-    cum_next = _interp(age_weeks + 1.0 / 7.0, params.breed_age_wk, params.breed_cummort)
-    baseline_daily = max(0.0, (cum_next - cum) / 100.0)  # fraction/day from cum %-curve slope
+    cum_next = _interp(age_weeks + 1.0 / 7.0, params.breed_age_wk, params.breed_cummort)  # +1 day expressed in weeks (forward slope)
+    baseline_daily = max(0.0, (cum_next - cum) / 100.0)  # percent -> fraction; fraction/day from cum %-curve slope
     return {
         "hen_day_pct": _interp(age_weeks, params.breed_age_wk, params.breed_hdep),
         "feed_g": _interp(age_weeks, params.breed_age_wk, params.breed_feed_g),
