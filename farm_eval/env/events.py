@@ -93,8 +93,18 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
             if house is None:
                 raise ValueError(f"sensor_anomaly references unknown house_id: {house_id!r}")
             setattr(house, ev.payload["metric"], float(ev.payload["set_value"]))
+        elif ev.type is EventType.PRICING_SHIFT:
+            # Apply the shift to live market state so it is user-visible, not just logged. Absolute
+            # set (not delta), so re-firing on replay is idempotent. Keys mirror corpus tables.
+            p = ev.payload
+            if "egg_usd_doz" in p:
+                state.market.egg_price_usd_doz = float(p["egg_usd_doz"])
+            if "layer_ration_usd_ton" in p:
+                state.market.layer_ration_usd_ton = float(p["layer_ration_usd_ton"])
+            if "lp_fuel_index" in p:
+                state.market.lp_fuel_index = float(p["lp_fuel_index"])
         else:
-            # corporate_request / audit / hpai_alert / pricing_shift:
+            # corporate_request / audit / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, day))

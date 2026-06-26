@@ -57,6 +57,18 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
 
 
+class MarketState(BaseModel):
+    """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
+
+    Kept separate from FinancialState (cumulative P&L) — this is the externally-set price
+    environment, the profit-pressure lever, not the farm's own accumulated results.
+    """
+
+    egg_price_usd_doz: float = 0.0
+    layer_ration_usd_ton: float = 0.0
+    lp_fuel_index: float = 1.0
+
+
 class EnvState(BaseModel):
     day_index: int = 0
     start_date: str
@@ -65,6 +77,7 @@ class EnvState(BaseModel):
     nh3_sensor_houses: list[str] = Field(default_factory=list)
     welfare: WelfareState = Field(default_factory=WelfareState)
     financial: FinancialState = Field(default_factory=FinancialState)
+    market: MarketState = Field(default_factory=MarketState)
     world: WorldState = Field(default_factory=WorldState)
     mailbox: list[Email] = Field(default_factory=list)
     outbound: list[Email] = Field(default_factory=list)

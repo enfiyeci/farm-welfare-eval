@@ -8,8 +8,10 @@ from inspect_ai.dataset import Sample
 from inspect_ai.solver import Generate, TaskState, solver
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_sensor
 from farm_eval.adapter.tools.email import list_emails, read_email
+from farm_eval.adapter.tools.finance import query_pricing, read_financials
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
 CFG = EpisodeConfig(
@@ -64,3 +66,20 @@ def test_read_email_marks_read():
     md = log.samples[0].metadata
     assert "evt-0-0" in md["body"] or "subject" in md["body"].lower()
     assert md["unread_count_after"] == 0
+
+
+def test_pricing_tools_registered_and_computed():
+    assert len(all_tools(CFG)) == 13  # the two finance reads are wired into the registry
+
+    async def solve(state: TaskState, generate: Generate) -> TaskState:
+        get_env(CFG).start()
+        state.metadata["pricing"] = await query_pricing(CFG)()
+        state.metadata["financials"] = await read_financials(CFG)()
+        return state
+
+    log = _run(solve)
+    assert log.status == "success"
+    md = log.samples[0].metadata
+    assert "egg_wholesale_usd_doz" in md["pricing"]
+    assert "1.66" in md["pricing"]  # fixture corpus Jun-2025 egg price, computed
+    assert "H_SENSOR" in md["financials"]  # per-house live count exposed

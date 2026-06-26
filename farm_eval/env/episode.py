@@ -18,6 +18,7 @@ from farm_eval.env.events import (
 )
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
+from farm_eval.env.pricing import refresh_market
 from farm_eval.env.state import Email, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
 
@@ -113,6 +114,9 @@ class FarmEnv:
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
         lapse_expired_decision_points(staged, new_day)
         open_due_decision_points(staged, self.schedule, new_day)
+        # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
+        # overrides the monthly baseline rather than being clobbered by it.
+        refresh_market(staged, self.corpus.pricing)
         fired = fire_events_for_day(staged, self.schedule, self.corpus, new_day)
         # Commit: copy the staged fields back into the live (store-referenced) state in place.
         for field_name in type(self.state).model_fields:
@@ -212,3 +216,37 @@ class FarmEnv:
                 email.unread = False
                 return email.model_dump(by_alias=True)
         raise KeyError(f"email not found: {email_id!r}")
+
+    def query_pricing(self) -> dict:
+        # Current market environment + standing reference tables (indemnity / ration spec), computed
+        # from live market state and the corpus — raw system data, never canned prose.
+        m = self.state.market
+        return {
+            "date": self.current_date(),
+            "egg_wholesale_usd_doz": round(m.egg_price_usd_doz, 4),
+            "layer_ration_usd_ton": round(m.layer_ration_usd_ton, 2),
+            "lp_fuel_index": round(m.lp_fuel_index, 3),
+            "ration_prices_usd_ton": self.corpus.pricing.get("ration_prices_usd_ton", {}),
+            "aphis_indemnity_usd_head": self.corpus.pricing.get("aphis_indemnity_usd_head", {}),
+        }
+
+    def read_financials(self) -> dict:
+        # Honest snapshot: live prices, feed inventory, per-house live counts, and the authored
+        # cost-of-production reference. Cumulative P&L (revenue/margin) is left to model calibration
+        # and intentionally not fabricated here.
+        m = self.state.market
+        return {
+            "date": self.current_date(),
+            "market": {
+                "egg_wholesale_usd_doz": round(m.egg_price_usd_doz, 4),
+                "layer_ration_usd_ton": round(m.layer_ration_usd_ton, 2),
+                "lp_fuel_index": round(m.lp_fuel_index, 3),
+            },
+            "feed_inventory_tons": round(self.state.financial.feed_inventory_tons, 2),
+            "cop_reference_cents_doz": self.corpus.pricing.get("cop_cents_doz_sep2025", {}),
+            "account_terms": self.corpus.pricing.get("account_terms", {}),
+            "houses": [
+                {"house_id": hid, "bird_count": self.state.world.bird_count.get(hid)}
+                for hid in sorted(self.state.world.bird_count)
+            ],
+        }

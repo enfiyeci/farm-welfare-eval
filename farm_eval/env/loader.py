@@ -16,7 +16,14 @@ import yaml
 from pydantic import BaseModel, Field
 
 from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
-from farm_eval.env.state import EnvState, FinancialState, HouseWelfare, WelfareState, WorldState
+from farm_eval.env.state import (
+    EnvState,
+    FinancialState,
+    HouseWelfare,
+    MarketState,
+    WelfareState,
+    WorldState,
+)
 
 
 class Corpus(BaseModel):
@@ -80,12 +87,19 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world.setpoints[hid] = dict(house.get("setpoints", {}))
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
         world.bird_count[hid] = int(house["bird_count"])
-    return EnvState(
+    state = EnvState(
         day_index=0,
         start_date=company["start_date"],
         seed=seed,
         nh3_sensor_houses=[str(h) for h in company.get("nh3_sensor_houses", [])],
         welfare=welfare,
         financial=FinancialState(),
+        market=MarketState(),
         world=world,
     )
+    # Seed the market from the corpus tables for the start month (deferred import avoids a cycle:
+    # pricing imports state).
+    from farm_eval.env.pricing import refresh_market
+
+    refresh_market(state, corpus.pricing)
+    return state
