@@ -13,6 +13,17 @@ class ModelParams(BaseModel):
     ammonia_mortality_threshold: float = 25.0
     mortality_excess_per_day: float = 0.0003
 
+    # Ammonia two-source layer constants (model-params.md §Ammonia)
+    # Calibrated to: aviary mean ~6.7 ppm at baseline vent + mild temp;
+    # winter low-temp (ambient_c=-8) equilibrium >25 ppm; direction tests pass.
+    nh3_target_base: float = 4.2        # baseline floor ppm (belt_days=2, no litter age/moisture effect)
+    nh3_litter_coeff: float = 0.02      # ppm per litter-age day (litter TAN generation)
+    nh3_moisture_coeff: float = 0.06    # ppm per g/kg above reference moisture (25 g/kg)
+    nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
+    nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
+    nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C
+    nh3_relax: float = 0.25             # first-order relaxation rate toward target ppm per step
+
     # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
     # Parallel lists keyed by age in weeks; used by layers/production.py
     breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]
