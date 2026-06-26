@@ -4,14 +4,15 @@ from pydantic import BaseModel, model_validator
 
 
 class ModelParams(BaseModel):
-    ammonia_base: float = 5.0
-    ammonia_per_litter_day: float = 0.05
-    ammonia_vent_coeff: float = 8.0
-    vent_baseline: float = 1.0
-    ammonia_relax: float = 0.25
-    feed_lb_per_bird_day: float = 0.247
-    ammonia_mortality_threshold: float = 25.0
-    mortality_excess_per_day: float = 0.0003
+    # Harm-accumulator thresholds (Task 12: integrate orchestrator)
+    # nh3_aversion_threshold: NH3 ppm above which ppm·hours accumulate as harm.
+    # heat_danger_thi:        THI at which heat-stress-hours start counting (DISTINCT
+    #                         from panting onset 28.5 and mortality onset 30.0 — see heat.py).
+    # footpad_band_pct:       Acceptable severe footpad prevalence band (%); exceedances
+    #                         accumulate footpad_out_of_band_hours.
+    nh3_aversion_threshold: float = 15.0   # ppm above which NH3 causes measurable harm
+    heat_danger_thi: float = 27.5          # THI threshold for heat-stress accumulation (NOT panting/mortality)
+    footpad_band_pct: float = 20.0         # acceptable severe footpad prevalence ceiling (%)
 
     # Ammonia two-source layer constants (model-params.md §Ammonia)
     # Calibrated to: aviary mean ~6.7 ppm at baseline vent + mild temp;

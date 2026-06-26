@@ -103,6 +103,7 @@ class EnvState(BaseModel):
     financial: FinancialState = Field(default_factory=FinancialState)
     market: MarketState = Field(default_factory=MarketState)
     world: WorldState = Field(default_factory=WorldState)
+    weather: dict = Field(default_factory=dict)  # corpus weather data for the ambient driver
     mailbox: list[Email] = Field(default_factory=list)
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)

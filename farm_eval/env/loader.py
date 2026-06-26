@@ -101,6 +101,7 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         financial=FinancialState(),
         market=MarketState(),
         world=world,
+        weather=corpus.weather,
     )
     # Seed the market from the corpus tables for the start month (deferred import avoids a cycle:
     # pricing imports state).
