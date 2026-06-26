@@ -54,24 +54,38 @@ class ModelParams(BaseModel):
 
     # Footpad dermatitis (FPD) two-compartment constants (model-params.md §FPD)
     # Two-compartment model: mild lesions develop on wet litter and progress to
-    # severe; severe lesions barely heal (gamma≈0).
+    # severe; severe lesions heal only on dry litter.
     #
     # Austrian survey: median 40% affected (range 0–95%).
     # Modified-aviary: prevalence 36.5/35.4/38.5% at 29/39/49 wk.
-    # Calibration target: total prevalence (mild+severe) settles to 30–45%
+    # Calibration target: total prevalence (mild+severe) reaches 30–45%
     # on persistently wet litter (moisture=35, age=30 wk) after ~200 steps.
-    # Observed with defaults: ~33% total (within target range).
+    # Observed with defaults: ~35% total at 200 steps (within target range).
+    # On sustained wet litter the model converges toward 40–50% at equilibrium,
+    # bounded at 100% via saturating incidence.
     #
-    # fpd_alpha:       base incidence gain coefficient; alpha rises when
-    #                  litter_moisture > fpd_moisture_ref AND with flock age.
-    # fpd_progress:    rate of progression from mild to severe compartment per step.
-    # fpd_heal:        (very small) severe-lesion heal rate per step; also mild
-    #                  natural-regression rate. gamma≈0 means severe barely heals.
-    # fpd_moisture_ref: litter moisture threshold (%) below which alpha=0.
-    fpd_alpha: float = 0.4
+    # fpd_alpha:          base incidence gain coefficient; alpha rises when
+    #                     litter_moisture > fpd_moisture_ref AND with flock age.
+    #                     Re-tuned to 0.45 (was 0.4) to maintain 30–45% anchor
+    #                     with saturating incidence form.
+    # fpd_progress:       rate of progression from mild to severe per step.
+    # fpd_heal:           severe-lesion heal rate per step (only on dry litter);
+    #                     also mild natural-regression rate. gamma≈0 means severe
+    #                     barely heals even on dry litter.
+    # fpd_moisture_ref:   litter moisture threshold (%) below which incidence=0.
+    # fpd_moisture_scale: normaliser for excess-moisture in the incidence formula
+    #                     (interpretability: alpha is per-step incidence rate per
+    #                     fpd_moisture_scale units of excess moisture at age_ref).
+    # fpd_age_ref:        age (weeks) at which the age factor equals 1.0.
+    # fpd_age_factor_max: cap on the age acceleration factor (prevents unbounded
+    #                     incidence at old flock ages; old flocks stay coherent).
+    fpd_alpha: float = 0.45
     fpd_progress: float = 0.05
     fpd_heal: float = 0.002
     fpd_moisture_ref: float = 30.0
+    fpd_moisture_scale: float = 10.0
+    fpd_age_ref: float = 30.0
+    fpd_age_factor_max: float = 3.0
 
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
