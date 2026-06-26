@@ -16,6 +16,9 @@ from typing import Callable
 
 _PEAK_DOY = 205          # late July warmest
 _HOUR_PEAK = 15          # afternoon high
+_RH_CEILING_PCT = 90.0   # generic ambient-RH band ceiling
+_RH_FLOOR_PCT = 35.0     # generic ambient-RH band floor
+_RH_SLOPE_PER_F = 1.2    # RH drop per °F above the daily low (generic heuristic)
 
 
 def _f_to_c(f: float) -> float:
@@ -64,7 +67,7 @@ def make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[f
         amp_f = (daily_high_f - daily_low_f) / 2.0
         temp_f = mean_f + amp_f * math.cos(2 * math.pi * (hour - _HOUR_PEAK) / 24.0)
         # RH inversely tracks temperature within a plausible barn-ambient band.
-        rh = max(35.0, min(90.0, 90.0 - (temp_f - daily_low_f) * 1.2))
+        rh = max(_RH_FLOOR_PCT, min(_RH_CEILING_PCT, _RH_CEILING_PCT - (temp_f - daily_low_f) * _RH_SLOPE_PER_F))
         return _f_to_c(temp_f), rh
 
     return ambient
