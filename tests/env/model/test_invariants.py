@@ -46,21 +46,22 @@ def test_save_reload_determinism():
 
 
 def test_no_overreaction_to_tiny_perturbation():
-    # excess_mortality is structurally ~0 under corpus weather (indoor THI never reaches the
-    # 30 mortality onset), so measure the perturbation on a responsive output: heat_stress_hours
-    # during the day-28 heat event under poor ventilation.
-    def run(setpoint_c):
+    # "No overreaction": a tiny continuous input change must produce a small, bounded
+    # output change. Setpoint perturbation is inert here (indoor=max(setpoint, ambient-cooling),
+    # and ambient-cooling binds), and excess_mortality is structurally 0 under corpus weather.
+    # So perturb VENTILATION slightly in a low-vent regime where ammonia harm is non-zero and
+    # responds continuously, and bound the relative swing in nh3_ppm_hours_over.
+    def run(vent):
         s = _fresh()
-        s.day_index = 26
-        s.world.setpoints["H4"]["ventilation"] = 0.3
-        s.world.setpoints["H4"]["temperature"] = setpoint_c
-        integrate(s, 8, ModelParams())  # spans the day 28-32 heat event
-        return s.welfare.harm.heat_stress_hours
-    base = run(21.0)
-    nudge = run(22.0)  # +1C
-    assert base > 0.0, "heat window must produce non-zero heat-stress hours (else vacuous)"
-    # a 1C setpoint nudge must not cause a disproportionate swing
-    assert abs(nudge - base) <= 0.25 * base + 5.0
+        s.world.setpoints["H4"]["ventilation"] = vent
+        integrate(s, 30, ModelParams())
+        return s.welfare.harm.nh3_ppm_hours_over
+    base = run(0.50)
+    nudge = run(0.51)  # +2% ventilation — a tiny perturbation
+    assert base > 0.0, "low-vent regime must accrue ammonia harm (else the bound is vacuous)"
+    # A 2% input nudge must not cause a disproportionate output swing.
+    # Observed: base~6306, nudge~6054, relative change ~4% — well within 10%.
+    assert abs(nudge - base) <= 0.10 * base
 
 
 def test_flock_past_curve_extrapolates_sanely():
