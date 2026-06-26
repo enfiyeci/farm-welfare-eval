@@ -34,3 +34,12 @@ class ModelParams(BaseModel):
     breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
     breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
     breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
+
+    # Heat stress layer constants (model-params.md §Heat stress)
+    # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
+    #   below ambient (at full ventilation). Sub-full ventilation scales this linearly.
+    # heat_mort_coeff: base per-hour mortality coefficient for the acute heat mortality
+    #   formula. Calibrated so a brief THI~31 spike is sub-lethal and sustained
+    #   THI~33 over hours is severe (anchor: sustained > 10× blip).
+    heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
+    heat_mort_coeff: float = 0.0002        # base mortality fraction per (THI-30)^2 per hour
