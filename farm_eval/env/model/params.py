@@ -43,3 +43,4 @@ class ModelParams(BaseModel):
     #   THI~33 over hours is severe (anchor: sustained > 10× blip).
     heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
     heat_mort_coeff: float = 0.0002        # base mortality fraction per (THI-30)^2 per hour
+    heat_mort_exp_rate: float = 0.6        # sustained-heat mortality escalation rate (per hour beyond 2h)

@@ -11,13 +11,13 @@ def test_panting_onset_at_thi_28_5():
 
 
 def test_no_acute_mortality_below_thi_30():
-    assert heat_mortality_frac(29.0, hours_over_30=0) == 0.0
+    assert heat_mortality_frac(29.0, hours_over_30=0, params=ModelParams()) == 0.0
 
 
 def test_sustained_extreme_heat_is_severe():
     # THI 33 sustained >2h accumulates real mortality; a 1h THI 31 blip does not
-    blip = heat_mortality_frac(31.0, hours_over_30=1)
-    sustained = heat_mortality_frac(33.0, hours_over_30=5)
+    blip = heat_mortality_frac(31.0, hours_over_30=1, params=ModelParams())
+    sustained = heat_mortality_frac(33.0, hours_over_30=5, params=ModelParams())
     assert sustained > 10 * blip
 
 
