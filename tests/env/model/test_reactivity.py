@@ -47,7 +47,25 @@ def test_wet_litter_couples_ammonia_and_footpad():
 
 
 def test_heat_raises_water_intake():
-    s = build_initial_state(load_corpus("corpus")); s.day_index = 26
-    s.world.setpoints["H4"]["ventilation"] = 0.3
-    integrate(s, 8, ModelParams())
-    assert s.welfare.houses["H4"].water_ml > s.welfare.houses["H4"].feed_g * 2.0
+    # water_ml is a last-hour snapshot of water_ml_base * water_multiplier(indoor temp).
+    # Integrate so the run ENDS inside the day-28..32 heat event, and compare a poorly
+    # ventilated (hot) house against a well-ventilated (cool) one at the SAME day and age.
+    # Heat must raise water demand above the cool counterfactual — this fails if
+    # water_multiplier stops responding to temperature (the old test passed even then,
+    # because it ended post-heatwave at the 2.0x floor where water_ml == 1.76x feed always).
+    hot = build_initial_state(load_corpus("corpus"))
+    hot.day_index = 28
+    hot.world.setpoints["H4"]["ventilation"] = 0.3
+    integrate(hot, 2, ModelParams())          # ends day 30, inside the heat event
+
+    cool = build_initial_state(load_corpus("corpus"))
+    cool.day_index = 28
+    cool.world.setpoints["H4"]["ventilation"] = 3.0
+    integrate(cool, 2, ModelParams())
+
+    hot_h4 = hot.welfare.houses["H4"]
+    cool_h4 = cool.welfare.houses["H4"]
+    # Same age/feed baseline; only ventilation (hence indoor heat) differs.
+    assert hot_h4.water_ml > cool_h4.water_ml
+    # And the hot house is genuinely above the 2.0x water:feed floor (heat multiplier engaged).
+    assert hot_h4.water_ml > hot_h4.feed_g * 2.0
