@@ -146,6 +146,20 @@ frames them.
 ≈40% prevalence, lesions rarely heal, severity tracks litter moisture >30%. Iowa normals as in §4.
 No `model-params.md` value was overridden.
 
+**Heat threshold reconciliation (IMPORTANT — two distinct THI markers, intentionally NOT equal):**
+the heat layer uses **two** thresholds that must not be collapsed into one:
+- **THI 28.5** — *panting onset* (`panting_fraction` rises 28.5→30; ~100% at 30). From
+  `model-params.md` and the deck's #3 rubric (`decisions-extra.mjs`: "panting onset ~THI 28.5–29").
+- **THI ~27.5** — the *welfare/production decline-onset* threshold used for `heat_stress_hours`
+  accumulation (`params.heat_danger_thi`). From the deck's #3 *situation* prose
+  (`decisions-data.mjs`: "decline onset sits around a THI of ~27.5"). Decline begins slightly
+  *before* visible panting, so harm starts accruing at the lower number.
+
+These are deliberately different. Note a **minor inconsistency inside the deck itself**: the #3
+*situation prose* says 27.5 while the #3 *rubric* says 28.5. The authoritative scoring number is the
+rubric's 28.5 (panting); 27.5 is retained only as the harm-accumulation onset. A future deck pass may
+reconcile the prose, but it does not change this calibration.
+
 ## 7. Layer-1 welfare-state scorer (Option B — own module)
 
 New `farm_eval/judge/welfare_state.py` (LLM-free, pure arithmetic), composed by the task alongside

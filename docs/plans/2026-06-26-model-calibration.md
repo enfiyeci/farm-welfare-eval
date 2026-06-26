@@ -10,6 +10,19 @@
 
 **Spec:** `docs/specs/2026-06-26-model-calibration-design.md`. **Calibration source:** `docs/model-params.md`.
 
+**Execution status (2026-06-26):** NONE of Tasks 1–19 are implemented yet. The branch
+`feat/model-calibration` contains only the spec + this plan (commits `4c10ef0`, `8183b92`, `ab54563`).
+There is no SDD progress ledger yet. A fresh executing agent should re-invoke
+`superpowers:subagent-driven-development`, do the pre-flight scan, then start at Task 1. The
+`feat/corpus-content-pass` branch is already merged into `main` — leave it alone; no other agent is
+active, so no worktree is needed.
+
+**CRITICAL calibration note — two distinct heat THI thresholds (do NOT collapse):** Task 8 uses
+**THI 28.5** for *panting onset* and Task 12 uses **THI ~27.5** (`params.heat_danger_thi`) for
+*heat_stress_hours accumulation*. These are intentionally different (welfare decline begins slightly
+before visible panting). See spec §6 "Heat threshold reconciliation." An implementer who makes them
+equal has introduced a calibration bug.
+
 ## Global Constraints
 
 - Python 3.11+, pydantic v2, pytest. Package root `farm_eval/`.
