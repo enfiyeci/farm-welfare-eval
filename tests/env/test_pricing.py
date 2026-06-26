@@ -64,18 +64,18 @@ def test_query_pricing_visible_at_spike_and_endlay_beats():
     assert p["aphis_indemnity_usd_head"]["spent_one_cycle_86wk_plus"] == 0.01
 
 
-def test_read_financials_exposes_prices_inventory_and_counts():
+def test_read_financials_exposes_prices_inventory_no_stale_counts():
     env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", seed=0, episode_end_day=511)
     _advance_to(env, 182)
     fin = env.read_financials()
     assert fin["market"]["egg_wholesale_usd_doz"] == 2.85
     assert fin["market"]["lp_fuel_index"] == 1.30
     assert fin["cop_reference_cents_doz"]["total"] == 96.2
-    # Counts are the seeded start-of-episode figures, not claimed as mortality-reconciled live
-    # counts (live-count reconciliation is deferred to model calibration).
-    counts = {h["house_id"]: h["bird_count_at_start"] for h in fin["houses"]}
-    assert counts["H4"] == 124200
-    assert "bird_count" not in fin["houses"][0]  # no field that implies a current/live count
+    assert "feed_inventory_tons" in fin
+    # Bird counts are NOT served from this financial snapshot: world.bird_count is not yet
+    # reconciled with modeled mortality (calibration-deferred), so it must not appear here where
+    # it would read as current economic data. Raw counts remain available via list_houses.
+    assert "houses" not in fin
 
 
 def test_pricing_shift_carrying_email_fields_still_delivers_email():

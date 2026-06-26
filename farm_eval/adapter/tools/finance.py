@@ -35,8 +35,8 @@ def read_financials(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """Read the current financial snapshot for the complex.
 
-        Returns current market prices, feed inventory, per-house live bird counts, the
-        cost-of-production reference build (cents/doz), and customer account terms.
+        Returns current market prices, feed inventory on hand, the cost-of-production reference
+        build (cents/doz), and customer account terms. For per-house bird counts use list_houses.
 
         Returns:
             A JSON financial snapshot (raw system data).

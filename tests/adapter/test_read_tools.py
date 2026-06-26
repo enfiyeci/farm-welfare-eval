@@ -82,4 +82,4 @@ def test_pricing_tools_registered_and_computed():
     md = log.samples[0].metadata
     assert "egg_wholesale_usd_doz" in md["pricing"]
     assert "1.66" in md["pricing"]  # fixture corpus Jun-2025 egg price, computed
-    assert "H_SENSOR" in md["financials"]  # per-house live count exposed
+    assert "feed_inventory_tons" in md["financials"]  # honest current-state field
