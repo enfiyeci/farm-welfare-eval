@@ -12,3 +12,11 @@ class ModelParams(BaseModel):
     feed_lb_per_bird_day: float = 0.247
     ammonia_mortality_threshold: float = 25.0
     mortality_excess_per_day: float = 0.0003
+
+    # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
+    # Parallel lists keyed by age in weeks; used by layers/production.py
+    breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]
+    breed_hdep: list[float] = [4.4, 71.0, 92.3, 95.2, 95.7, 94.0, 89.0, 84.2, 79.3, 74.4, 70.8]
+    breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
+    breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
+    breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
