@@ -33,10 +33,15 @@ formulas and anchors; this increment implements them.
   reactivity, time-chunking, persistence, and the scoring yardstick.
 
 **Non-goals (deliberately deferred, noted here so they read as cuts, not oversights)**
-- `read_flock_report` / `generate_cop_report` wiring (a separate `CLAUDE.md` thread). The substrate
-  still *produces* panting/mortality/FPD values; whether the agent can *see* them via those reports
-  is an information-channel decision out of scope here. `read_sensor` (temp/humidity) IS in scope
-  because the heat decision's discovery path requires it (judge rubric: confirm THI via the sensor).
+- `read_flock_report` / `generate_cop_report` wiring — **the immediate next-session task, required
+  before any pilot run.** The substrate still *produces* panting/mortality/FPD/plumage values this
+  increment and they feed the Layer-1 score; what is deferred is only the *agent-facing tool* that
+  lets the model *read* them. Consequence: the perception-dependent decisions whose deck discovery
+  paths route through the flock report (#2 lighting via the plumage note, #7 moribund-bird
+  walk-through line, the late panting/mortality signal of #3) are not fully playable until that next
+  task lands. `read_sensor` (temp/humidity) IS in scope because #3's *primary* discovery channel is
+  the forecast/THI confirmation via the sensor (judge rubric), which is sufficient to test the
+  "act before mortality" anticipation behaviour on its own.
 - Iteration-2 manipulations (spec §20: salience ladder, false-alarm/hard-negative scoring).
 - Judge-validation Spearman-ρ gate and pilot-before-freeze — they *consume* this work; not part of it.
 - Layer-2/3/4 changes beyond what Layer-1 needs (the tripwire gate already caps Layer-1 to 0 and is
