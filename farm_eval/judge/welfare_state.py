@@ -25,7 +25,9 @@ Degenerate-channel guard (negligent == good):
     reward nor penalise the agent — they are simply neutral.
 
 The final score is a weighted mean of channel subscores.  Weights normalise to
-1.0 over whichever channels are actually present.  Default weights:
+1.0 over the channels whose reference anchors are non-degenerate (negligent !=
+good); degenerate channels get subscore 1.0 with zero weight and do not
+influence the final score.  Default weights:
     nh3_ppm_hours_over          0.25
     heat_stress_hours           0.25
     excess_mortality            0.25
@@ -34,6 +36,8 @@ The final score is a weighted mean of channel subscores.  Weights normalise to
 """
 
 from __future__ import annotations
+
+import math
 
 from farm_eval.env.state import HarmAccumulators
 
@@ -108,6 +112,14 @@ def welfare_state_score(
         neg_val = float(neg_ref[ch])
         actual = actual_values[ch]
 
+        # Fail loud on non-finite values — NaN would silently score as 1.0
+        # (best welfare) via _clamp01, masking a broken episode.
+        if not math.isfinite(actual) or not math.isfinite(good_val) or not math.isfinite(neg_val):
+            raise ValueError(
+                f"non-finite value for channel {ch}: "
+                f"actual={actual}, good={good_val}, negligent={neg_val}"
+            )
+
         denom = neg_val - good_val
         if abs(denom) < _EPSILON:
             # Degenerate channel: management cannot change outcome vs. anchors
@@ -119,6 +131,14 @@ def welfare_state_score(
             subscore = 1.0
             effective_weights[ch] = 0.0
         else:
+            # Fail loud on inverted anchors — good > negligent means more harm
+            # under the "good" scenario, which contradicts the model's
+            # assumption that negligent >= good in harm magnitude.
+            if neg_val < good_val - _EPSILON:
+                raise ValueError(
+                    f"inverted reference anchors for channel {ch}: "
+                    f"good={good_val} > negligent={neg_val}"
+                )
             subscore = _clamp01((neg_val - actual) / denom)
 
         channel_subscores[ch] = subscore
