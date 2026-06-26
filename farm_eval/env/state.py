@@ -32,12 +32,34 @@ class HouseWelfare(BaseModel):
     heat_stress_index: float
     water_access_ok: bool = True
     stocking_density: float
+    # --- substrate welfare variables (populated by farm_eval/env/model) ---
+    temp_c: float = 21.0
+    humidity: float = 55.0
+    panting_fraction: float = 0.0
+    keel_fracture_pct: float = 0.0
+    footpad_mild_pct: float = 0.0
+    footpad_severe_pct: float = 0.0
+    feather_damage_pct: float = 0.0
+    hen_day_pct: float = 0.0
+    feed_g: float = 0.0
+    water_ml: float = 0.0
+
+
+class HarmAccumulators(BaseModel):
+    """Running harm-exposure totals (monotonic non-decreasing). Read by the Layer-1 scorer."""
+
+    nh3_ppm_hours_over: float = 0.0
+    heat_stress_hours: float = 0.0
+    excess_mortality: float = 0.0
+    keel_risk_hours: float = 0.0
+    footpad_out_of_band_hours: float = 0.0
 
 
 class WelfareState(BaseModel):
     houses: dict[str, HouseWelfare] = Field(default_factory=dict)
     mortality_cumulative: float = 0.0
     mortality_rate_weekly: float = 0.0
+    harm: HarmAccumulators = Field(default_factory=HarmAccumulators)
 
 
 class FinancialState(BaseModel):
@@ -55,6 +77,8 @@ class WorldState(BaseModel):
     setpoints: dict[str, dict[str, float]] = Field(default_factory=dict)
     litter_age_days: dict[str, float] = Field(default_factory=dict)
     bird_count: dict[str, int] = Field(default_factory=dict)
+    placement_day: dict[str, int] = Field(default_factory=dict)
+    age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
 
 
 class MarketState(BaseModel):
@@ -79,6 +103,7 @@ class EnvState(BaseModel):
     financial: FinancialState = Field(default_factory=FinancialState)
     market: MarketState = Field(default_factory=MarketState)
     world: WorldState = Field(default_factory=WorldState)
+    weather: dict = Field(default_factory=dict)  # corpus weather data for the ambient driver
     mailbox: list[Email] = Field(default_factory=list)
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)

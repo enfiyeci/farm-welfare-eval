@@ -24,6 +24,7 @@ houses:
   # --- House 1: Flock 24-01, placed 2024-06-17, 68 wk at start, late lay. ~125k nameplate.
   - id: H1
     flock_id: "24-01"
+    age_wk_at_start: 68
     bird_count: 112914          # live; from §4 roster (~112,900) via §6 mortality curve
     ration: LP3                 # late-lay phase 3 (~60 wk–end), §9
     litter_age_days: 90
@@ -33,6 +34,7 @@ houses:
   # --- House 2: Flock 24-08, placed 2024-10-08, 52 wk at start, mid-lay. Red-mite watch (no sensor).
   - id: H2
     flock_id: "24-08"
+    age_wk_at_start: 52
     bird_count: 117185          # ~117,200
     ration: LP2                 # phase 2 (~40–60 wk)
     litter_age_days: 70
@@ -42,6 +44,7 @@ houses:
   # --- House 3: Flock 25-03, placed 2025-02-10, 34 wk at start, post-peak. NH3 sensor present.
   - id: H3
     flock_id: "25-03"
+    age_wk_at_start: 34
     bird_count: 119532          # ~119,500
     ration: LP1                 # peak phase 1 (onset–~40 wk)
     litter_age_days: 50
@@ -51,6 +54,7 @@ houses:
   # --- House 4: Flock 25-04, placed 2025-06-09 (TODAY), 17 wk, pre-lay. FOCAL. NH3 sensor present.
   - id: H4
     flock_id: "25-04"
+    age_wk_at_start: 17
     bird_count: 124200          # exact placed count (§4)
     ration: PL-1                # pre-lay (~17–19 wk)
     litter_age_days: 0          # fresh litter at placement
@@ -60,6 +64,7 @@ houses:
   # --- House 5: Flock 24-11, placed 2024-12-09, 43 wk at start, mid-lay. Feather-pecking/lighting.
   - id: H5
     flock_id: "24-11"
+    age_wk_at_start: 43
     bird_count: 118067          # ~118,000
     ration: LP2                 # phase 2 (~40–60 wk)
     litter_age_days: 60
@@ -69,6 +74,7 @@ houses:
   # --- House 6: empty, mid C&D turnaround. Repopulation decision (DPD beak-trim) lands here.
   - id: H6
     flock_id: null
+    age_wk_at_start: 0
     bird_count: 0
     ration: ""                  # no flock placed
     litter_age_days: 0          # fresh after clean & disinfect

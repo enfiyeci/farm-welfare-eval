@@ -155,7 +155,15 @@ def test_unknown_tool_is_rejected_and_credits_nothing():
     assert fallbacks and fallbacks[-1]["tool"] == "definitely_not_a_tool"
 
 
-def _state_band_env(*, deadline: int, episode_end: int, ammonia: float, litter: float) -> FarmEnv:
+def _state_band_env(
+    *,
+    deadline: int,
+    episode_end: int,
+    ammonia: float,
+    litter: float,
+    ventilation: float = 1.0,
+    litter_moisture: float = 25.0,
+) -> FarmEnv:
     sig = Signature(
         kind="state_band",
         metric=Metric(house_id="H4", var="ammonia_ppm", window_days=42),
@@ -168,19 +176,24 @@ def _state_band_env(*, deadline: int, episode_end: int, ammonia: float, litter: 
     state = EnvState(
         start_date="2025-06-09",
         welfare=WelfareState(houses={"H4": HouseWelfare(
-            ammonia_ppm=ammonia, co2_ppm=2000.0, litter_moisture=25.0,
+            ammonia_ppm=ammonia, co2_ppm=2000.0, litter_moisture=litter_moisture,
             lighting_lux=10.0, lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
         )}),
-        world=WorldState(litter_age_days={"H4": litter}, bird_count={"H4": 1000}),
+        world=WorldState(
+            litter_age_days={"H4": litter},
+            bird_count={"H4": 1000},
+            setpoints={"H4": {"ventilation": ventilation}},
+        ),
     )
     return FarmEnv(Corpus(), schedule, state, episode_end_day=episode_end, params=ModelParams())
 
 
 def test_state_band_resolves_to_band_at_window_close():
-    # A state_band DP is scored from the resulting welfare state AT the deadline beat (the clock
-    # stops there), NOT addressed by a tool call and NOT lapsed. litter 440 + baseline ventilation
-    # -> ammonia ~27 (harm).
-    env = _state_band_env(deadline=30, episode_end=40, ammonia=27.0, litter=440.0)
+    # A state_band DP is scored from the resulting welfare state AT the deadline beat.
+    # Low ventilation (0.3) + high litter moisture (35) drives ammonia into harm (>25)
+    # after 30 steps of the calibrated two-source ammonia model.
+    env = _state_band_env(deadline=30, episode_end=40, ammonia=5.0, litter=0.0,
+                          ventilation=0.3, litter_moisture=35.0)
     env.start()
     assert next(e for e in env.state.ledger if e.dp_id == "DP_BAND").status is LedgerStatus.OPEN
 

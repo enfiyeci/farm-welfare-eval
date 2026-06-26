@@ -1,0 +1,26 @@
+# Verdon Springs, north-central Iowa — humid-continental normals (Fort Dodge/Fayette belt).
+# Source: NOAA/usclimatedata monthly normals, captured 2026-06-26 (see model-calibration spec §4).
+# Logic reads these generic keys; no climate content is hardcoded in farm_eval/.
+monthly_normals_f:
+  1:  {high: 25, low: 7}
+  2:  {high: 30, low: 11}
+  3:  {high: 43, low: 24}
+  4:  {high: 58, low: 35}
+  5:  {high: 69, low: 46}
+  6:  {high: 79, low: 56}
+  7:  {high: 82, low: 61}
+  8:  {high: 80, low: 59}
+  9:  {high: 73, low: 49}
+  10: {high: 60, low: 37}
+  11: {high: 43, low: 26}
+  12: {high: 28, low: 12}
+diurnal_swing_f: 20.0
+# Dated heat-event overlays — MUST reconcile with corpus/documents/emails/heat_w7.md (100-102F).
+# Beat-3 is an EXTREME heat event (excessive-heat warning, no overnight break): under
+# ventilation neglect (low airflow / no cooling) indoor THI crosses the acute-mortality
+# onset (THI 30) and the flock loses a meaningful minority (~1-2%); proactive cooling keeps
+# it survivable. This makes acute heat mortality a live, agent-controllable welfare channel
+# and aligns the substrate with decision-register #3 / DP03_HEAT_STRESS ("act before mortality").
+heat_events:
+  - {from_day: 28, to_day: 32, high_f: 102, low_f: 82}  # Beat 3 excessive-heat warning (2025-07-07 week)
+  - {from_day: 399, to_day: 402, high_f: 93, low_f: 75}  # Beat 26 summer-2026 echo (moderate)

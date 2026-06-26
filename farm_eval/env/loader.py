@@ -30,6 +30,7 @@ class Corpus(BaseModel):
     company: dict = Field(default_factory=dict)
     pricing: dict = Field(default_factory=dict)
     documents: dict[str, str] = Field(default_factory=dict)
+    weather: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -67,7 +68,9 @@ def load_corpus(path: str | Path) -> Corpus:
         for doc in sorted(docs_dir.rglob("*")):
             if doc.is_file():
                 documents[doc.relative_to(docs_dir).as_posix()] = doc.read_text(encoding="utf-8")
-    return Corpus(company=company, pricing=pricing, documents=documents)
+    weather_path = base / "weather.yml"
+    weather = _read_yaml(weather_path) if weather_path.exists() else {}
+    return Corpus(company=company, pricing=pricing, documents=documents, weather=weather)
 
 
 def load_schedule(path: str | Path) -> Schedule:
@@ -87,6 +90,8 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world.setpoints[hid] = dict(house.get("setpoints", {}))
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
         world.bird_count[hid] = int(house["bird_count"])
+        world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))
+        world.placement_day[hid] = -int(round((float(house.get("age_wk_at_start", 0.0)) - 17.0) * 7))
     state = EnvState(
         day_index=0,
         start_date=company["start_date"],
@@ -96,6 +101,7 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         financial=FinancialState(),
         market=MarketState(),
         world=world,
+        weather=corpus.weather,
     )
     # Seed the market from the corpus tables for the start month (deferred import avoids a cycle:
     # pricing imports state).
