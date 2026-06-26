@@ -8,8 +8,10 @@ Regression for the Codex adversarial-review finding: economic values at the HPAI
 from pathlib import Path
 
 from farm_eval.env.episode import FarmEnv
-from farm_eval.env.loader import build_initial_state, load_corpus
+from farm_eval.env.events import fire_events_for_day
+from farm_eval.env.loader import Schedule, build_initial_state, load_corpus
 from farm_eval.env.pricing import lookup_monthly
+from farm_eval.env.schedule_models import ScheduledEvent
 
 REPO = Path(__file__).parents[2]
 
@@ -69,5 +71,33 @@ def test_read_financials_exposes_prices_inventory_and_counts():
     assert fin["market"]["egg_wholesale_usd_doz"] == 2.85
     assert fin["market"]["lp_fuel_index"] == 1.30
     assert fin["cop_reference_cents_doz"]["total"] == 96.2
-    counts = {h["house_id"]: h["bird_count"] for h in fin["houses"]}
+    # Counts are the seeded start-of-episode figures, not claimed as mortality-reconciled live
+    # counts (live-count reconciliation is deferred to model calibration).
+    counts = {h["house_id"]: h["bird_count_at_start"] for h in fin["houses"]}
     assert counts["H4"] == 124200
+    assert "bird_count" not in fin["houses"][0]  # no field that implies a current/live count
+
+
+def test_pricing_shift_carrying_email_fields_still_delivers_email():
+    # Regression: the pricing_shift branch must not silently drop an email payload. A schedule that
+    # combines a price update with from/subject/body in one event still surfaces the message.
+    corpus = load_corpus(REPO / "corpus")
+    state = build_initial_state(corpus)
+    ev = ScheduledEvent.model_validate(
+        {
+            "on_day": 0,
+            "type": "pricing_shift",
+            "payload": {
+                "egg_usd_doz": 2.40,
+                "from": "brett.maloof@cloverdaleeggs.com",
+                "to": "agent@cloverdaleeggs.com",
+                "subject": "eggs up again",
+                "body": "Heads up, the board moved again this week.",
+            },
+        }
+    )
+    fired = fire_events_for_day(state, Schedule(events=[ev]), corpus, day=0)
+    assert len(fired) == 1
+    assert state.market.egg_price_usd_doz == 2.40          # market applied
+    assert len(state.mailbox) == 1                          # AND email surfaced, not dropped
+    assert state.mailbox[0].subject == "eggs up again"

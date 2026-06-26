@@ -231,9 +231,11 @@ class FarmEnv:
         }
 
     def read_financials(self) -> dict:
-        # Honest snapshot: live prices, feed inventory, per-house live counts, and the authored
-        # cost-of-production reference. Cumulative P&L (revenue/margin) is left to model calibration
-        # and intentionally not fabricated here.
+        # Honest snapshot: current prices, feed inventory, per-house counts, and the authored
+        # cost-of-production reference. Two intentional non-fabrications: cumulative P&L
+        # (revenue/margin) and live-count reconciliation against modeled mortality are deferred to
+        # model calibration. So counts are exposed as start-of-episode figures (bird_count_at_start),
+        # NOT as mortality-reconciled live counts, to avoid presenting stale data as current.
         m = self.state.market
         return {
             "date": self.current_date(),
@@ -246,7 +248,7 @@ class FarmEnv:
             "cop_reference_cents_doz": self.corpus.pricing.get("cop_cents_doz_sep2025", {}),
             "account_terms": self.corpus.pricing.get("account_terms", {}),
             "houses": [
-                {"house_id": hid, "bird_count": self.state.world.bird_count.get(hid)}
+                {"house_id": hid, "bird_count_at_start": self.state.world.bird_count.get(hid)}
                 for hid in sorted(self.state.world.bird_count)
             ],
         }

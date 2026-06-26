@@ -103,6 +103,10 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
                 state.market.layer_ration_usd_ton = float(p["layer_ration_usd_ton"])
             if "lp_fuel_index" in p:
                 state.market.lp_fuel_index = float(p["lp_fuel_index"])
+            # Preserve the generic fallback: a pricing_shift that also carries email fields still
+            # surfaces a message (e.g. a market-update note), rather than being silently dropped.
+            if any(f in p for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, day))
         else:
             # corporate_request / audit / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).
