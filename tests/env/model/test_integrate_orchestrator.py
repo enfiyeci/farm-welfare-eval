@@ -27,12 +27,29 @@ def test_harm_accumulators_monotone_nondecreasing():
 
 
 def test_path_independence():
-    one = _fresh(); integrate(one, 30, ModelParams())
+    # integrate reads the start day from state.day_index and does NOT advance it;
+    # end_day advances day_index between calls. Mirror that real flow here: advance
+    # day_index by `elapsed` between chunks so the chunks visit the SAME absolute
+    # calendar days as the single call. Use a 210-day horizon so harm is non-zero
+    # (a 30-day baseline run leaves nh3/keel at exactly 0, making the check vacuous).
+    one = _fresh()
+    integrate(one, 210, ModelParams())
+
     chunk = _fresh()
-    for _ in range(3):
-        integrate(chunk, 10, ModelParams())
-    assert abs(one.welfare.harm.nh3_ppm_hours_over - chunk.welfare.harm.nh3_ppm_hours_over) < 1e-6
-    assert abs(one.welfare.houses["H4"].keel_fracture_pct - chunk.welfare.houses["H4"].keel_fracture_pct) < 1e-6
+    for _ in range(7):
+        integrate(chunk, 30, ModelParams())
+        chunk.day_index += 30  # end_day does this in production
+
+    # Non-vacuous: this horizon actually accumulates ammonia harm.
+    assert one.welfare.harm.nh3_ppm_hours_over > 0.0
+
+    # Full substrate must match. day_index legitimately differs (the single call
+    # never advanced it; the chunked path did), so normalize it out before compare.
+    one_d = one.model_dump()
+    chunk_d = chunk.model_dump()
+    one_d.pop("day_index", None)
+    chunk_d.pop("day_index", None)
+    assert one_d == chunk_d
 
 
 def test_empty_house_accrues_no_harm():
