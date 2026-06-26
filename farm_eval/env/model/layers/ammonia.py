@@ -65,14 +65,17 @@ def ammonia_step(
         accumulation on belts raises emission.  Formula: exp(0.20*(d-1) + 0.03*(d-1)^2)
         gives {1.00, 1.26, 1.65, 2.39} for belt_days {1, 2, 3, 4}.
     """
+    # Guard: belt_days must be >= 1 so f_MAT never inverts below 1.0
+    belt_days = max(1, belt_days)
+
     # Belt manure-accumulation-time multiplier (f_MAT); belt_days=1 → multiplier=1.0
-    belt_mult = math.exp(0.20 * (belt_days - 1) + 0.03 * (belt_days - 1) ** 2)
+    belt_mult = math.exp(params.nh3_fmat_linear * (belt_days - 1) + params.nh3_fmat_quad * (belt_days - 1) ** 2)
 
     # Total emission target ppm from both litter and belt sources
     emission = (
         params.nh3_target_base
         + params.nh3_litter_coeff * litter_age_days
-        + params.nh3_moisture_coeff * max(0.0, litter_moisture - 25.0)
+        + params.nh3_moisture_coeff * max(0.0, litter_moisture - params.nh3_moisture_ref)
     ) * belt_mult
 
     # Ventilation clearing: each unit above baseline removes nh3_vent_coeff ppm

@@ -23,6 +23,9 @@ class ModelParams(BaseModel):
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
     nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C
     nh3_relax: float = 0.25             # first-order relaxation rate toward target ppm per step
+    nh3_fmat_linear: float = 0.20       # f_MAT linear coeff (Wageningen, model-params.md §Ammonia)
+    nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
+    nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
 
     # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
     # Parallel lists keyed by age in weeks; used by layers/production.py
