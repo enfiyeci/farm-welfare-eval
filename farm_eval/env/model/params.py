@@ -52,6 +52,13 @@ class ModelParams(BaseModel):
     keel_age_wk: list[float] = [22, 29, 39, 49, 65]
     keel_pct: list[float] = [0, 60, 76, 86.5, 92]
 
+    # Feather-damage layer constants (model-params.md §Feather)
+    # Parallel lists keyed by age in weeks; used by layers/feather.py.
+    # Anchored to cage-free epidemiological data: feather cover deteriorates
+    # slowly until ~30 wk then rises sharply through mid-production.
+    feather_age_wk: list[float] = [30, 31, 46, 65]
+    feather_pct: list[float] = [0, 3.2, 32.9, 57.8]
+
     # Footpad dermatitis (FPD) two-compartment constants (model-params.md §FPD)
     # Two-compartment model: mild lesions develop on wet litter and progress to
     # severe; severe lesions heal only on dry litter.
@@ -96,6 +103,7 @@ class ModelParams(BaseModel):
         tables = {
             "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
             "keel_age_wk": ["keel_pct"],
+            "feather_age_wk": ["feather_pct"],
         }
         for age_field, value_fields in tables.items():
             ages = getattr(self, age_field)
