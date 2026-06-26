@@ -331,7 +331,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 **Interfaces:**
 - Consumes: weather dict from Task 3 (`Corpus.weather`).
-- Produces: `make_ambient(weather: dict) -> Callable[[int, int], tuple[float, float]]` returning a closure `ambient(day, hour) -> (temp_c, rh_pct)`. Day 0 = 2025-06-09 (day-of-year 160). Helper `_f_to_c(f)`. Seasonal mean from a sinusoid fit to `monthly_normals_f` (warmest DOY ~205, coldest ~15); diurnal cosine of amplitude `diurnal_swing_f/2` peaking at hour 15; heat-event overlays override the daily high/low for their day span.
+- Produces: `make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[float, float]]` returning a closure `ambient(day, hour) -> (temp_c, rh_pct)`. **Day-0 day-of-year is derived from `start_date`** (NOT hardcoded — `start_date` is corpus content), via `datetime.date.fromisoformat(start_date).timetuple().tm_yday`. Helper `_f_to_c(f)`. Seasonal mean from a sinusoid fit to `monthly_normals_f` (warmest DOY ~205, coldest ~15); diurnal cosine of amplitude `diurnal_swing_f/2` peaking at hour 15; heat-event overlays override the daily high/low for their day span.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -342,7 +342,8 @@ from farm_eval.env.model.drivers import make_ambient
 
 
 def _ambient():
-    return make_ambient(load_corpus("corpus").weather)
+    c = load_corpus("corpus")
+    return make_ambient(c.weather, c.company["start_date"])
 
 
 def test_july_afternoon_near_normal_high():
@@ -385,10 +386,10 @@ Expected: FAIL (`ModuleNotFoundError: drivers`).
 ```python
 from __future__ import annotations
 
+import datetime
 import math
 from typing import Callable
 
-_DOY_DAY0 = 160          # 2025-06-09 day-of-year
 _PEAK_DOY = 205          # late July warmest
 _HOUR_PEAK = 15          # afternoon high
 
@@ -397,7 +398,9 @@ def _f_to_c(f: float) -> float:
     return (f - 32.0) * 5.0 / 9.0
 
 
-def make_ambient(weather: dict) -> Callable[[int, int], tuple[float, float]]:
+def make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[float, float]]:
+    # Day-0 day-of-year derived from corpus start_date (parsing a fixed string is not wall-clock).
+    day0_doy = datetime.date.fromisoformat(start_date).timetuple().tm_yday
     normals = weather["monthly_normals_f"]
     swing_f = float(weather.get("diurnal_swing_f", 20.0))
     # Annual mean and amplitude from the warmest (Jul) and coldest (Jan) monthly means.
@@ -408,7 +411,7 @@ def make_ambient(weather: dict) -> Callable[[int, int], tuple[float, float]]:
     events = weather.get("heat_events", [])
 
     def ambient(day: int, hour: int) -> tuple[float, float]:
-        doy = (_DOY_DAY0 + day) % 365
+        doy = (day0_doy + day) % 365
         seasonal_f = annual_mean_f + annual_amp_f * math.cos(2 * math.pi * (doy - _PEAK_DOY) / 365.0)
         daily_high_f = seasonal_f + swing_f / 2.0
         daily_low_f = seasonal_f - swing_f / 2.0
@@ -633,7 +636,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - Test: `tests/env/model/test_layer_ammonia.py`
 
 **Interfaces:**
-- Produces: `ammonia_step(ppm, litter_age_days, litter_moisture, ventilation, ambient_c, belt_days, params) -> float` (next ppm). Constants: `nh3_target_base=5.0`, `nh3_litter_coeff=0.04`, `nh3_moisture_coeff=0.06`, `nh3_vent_coeff=8.0`, `nh3_vent_baseline=1.0`, `nh3_cold_vent_penalty=0.5` (cold ambient suppresses effective ventilation), `nh3_relax=0.25`, `nh3_belt_clear_ratio=0.71`. Helper `effective_ventilation(ventilation, ambient_c, params)` = `ventilation * (1 - cold_penalty)` when `ambient_c < 5` (climate controller throttles fans to hold heat in winter).
+- Produces: `ammonia_step(ppm, litter_age_days, litter_moisture, ventilation, ambient_c, belt_days, params) -> float` (next ppm). Constants: `nh3_target_base=5.0`, `nh3_litter_coeff=0.04`, `nh3_moisture_coeff=0.06`, `nh3_vent_coeff=8.0`, `nh3_vent_baseline=1.0`, `nh3_cold_vent_penalty=0.5` (cold ambient suppresses effective ventilation), `nh3_relax=0.25`. Helper `effective_ventilation(ventilation, ambient_c, params)` = `ventilation * (1 - cold_penalty)` when `ambient_c < 5` (climate controller throttles fans to hold heat in winter). NOTE: belt frequency enters via the `f_MAT` accumulation multiplier (more-frequent belts → lower `belt_days` → lower emission); the distinct same-cycle `r_clear≈0.71` clearance from `model-params.md` is NOT modeled here (belt *interval* ≠ same-cycle clearance) — do not add an unused `r_clear` constant.
 
 - [ ] **Step 1: Write the failing test (anchors: model-params.md §Ammonia)**
 
@@ -664,12 +667,12 @@ def test_more_ventilation_lowers_ammonia():
     assert _eq(ventilation=3.0, ambient_c=18.0) < _eq(ventilation=1.0, ambient_c=18.0)
 
 
-def test_belt_clearance_drops_about_28pct():
-    # model-params: same-cycle belt clearance ~28.6% immediate drop (r_clear ~ 0.71)
-    before = _eq(ventilation=1.0, ambient_c=18.0, belt_days=4)
-    after = ammonia_step(before, 60.0, 25.0, 1.0, 18.0, 1, ModelParams())  # belt just cleared
-    # one-step clearance applies the ratio toward a lower target
-    assert after < before
+def test_more_frequent_belts_lower_ammonia():
+    # model-params: lower manure-accumulation time (f_MAT) -> lower NH3. Direction only;
+    # the precise same-cycle r_clear (~28.6%) is a refinement not modeled in this layer.
+    frequent = _eq(ventilation=1.0, ambient_c=18.0, belt_days=1)
+    infrequent = _eq(ventilation=1.0, ambient_c=18.0, belt_days=4)
+    assert frequent < infrequent
 ```
 
 - [ ] **Step 2: Run, verify fail.** Run: `./venv/bin/python -m pytest tests/env/model/test_layer_ammonia.py -v` → FAIL.
@@ -702,7 +705,7 @@ def ammonia_step(ppm, litter_age_days, litter_moisture, ventilation, ambient_c, 
     return max(0.0, ppm + (target - ppm) * params.nh3_relax)
 ```
 
-Tune `nh3_target_base`, `nh3_litter_coeff`, `nh3_cold_vent_penalty` until both the 6.7 and the winter-over-25 anchors pass. (Note: `belt_days` and the `nh3_belt_clear_ratio` clearance path are exercised by `test_belt_clearance`; the immediate-clear semantics come from feeding `belt_days=1` post-clearance.)
+Tune `nh3_target_base`, `nh3_litter_coeff`, `nh3_cold_vent_penalty` until both the 6.7 and the winter-over-25 anchors pass. (`belt_days` enters via the `f_MAT` multiplier; `test_more_frequent_belts_lower_ammonia` checks its direction.)
 
 - [ ] **Step 4: Run, verify pass.** Expected PASS (4 tests).
 
@@ -1010,7 +1013,7 @@ from farm_eval.env.model import accumulators as acc
 def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
     if elapsed_days <= 0:
         return state
-    ambient = make_ambient(state.weather) if state.weather else (lambda d, h: (21.0, 55.0))
+    ambient = make_ambient(state.weather, state.start_date) if state.weather else (lambda d, h: (21.0, 55.0))
     start_day = state.day_index
     for offset in range(elapsed_days):
         day = start_day + offset + 1
@@ -1253,7 +1256,16 @@ def test_flock_past_curve_extrapolates_sanely():
 **Interfaces:**
 - Produces: a `run_baseline(days)` helper (in the test or `scripts/regen_golden.py`) that runs a no-intervention episode and emits checkpoint rows `{week, H4: {hen_day_pct, ammonia_ppm, keel_fracture_pct, feather_damage_pct, footpad_severe_pct}}` at named weeks, plus the good-management and negligent reference runs' terminal `HarmAccumulators`. The "good" reference run sets high ventilation + frequent belts + cooling during heat events + dry litter; the "negligent" run sets minimum ventilation + infrequent belts + no heat response + wet litter.
 
-- [ ] **Step 1: Write `scripts/regen_golden.py`** (the generator; running it writes the two JSON fixtures). Document at top: `# Regenerate goldens: ./venv/bin/python scripts/regen_golden.py`. It builds the baseline + the two reference policies (apply setpoints once at start), integrates to episode end, and dumps the checkpoint table + reference terminal harm to the two JSON files (sorted keys, 4-decimal rounding for stability).
+- [ ] **Step 0: Make `scripts/` importable under pytest** (so `test_reference_runs_match_golden` can `from scripts.regen_golden import run_reference`). Create empty `scripts/__init__.py`, and add `pythonpath = ["."]` to `[tool.pytest.ini_options]` in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+```
+
+- [ ] **Step 1: Write `scripts/regen_golden.py`** (the generator; running it writes the two JSON fixtures AND `farm_eval/judge/welfare_reference.json` for Task 17). Document at top: `# Regenerate goldens: ./venv/bin/python scripts/regen_golden.py`. Expose module-level `run_baseline(days)` and `run_reference(policy)` functions (imported by the golden test). It builds the baseline + the two reference policies (apply setpoints once at start), integrates to episode end, and dumps the checkpoint table + reference terminal harm to the JSON files (sorted keys, 4-decimal rounding for stability).
 
 - [ ] **Step 2: Generate the fixtures** — Run: `./venv/bin/python scripts/regen_golden.py`. Inspect the JSON: assert by eye that H4 keel% at wk39 is ~76, ammonia baseline mean is in 5–8.5, etc. (sanity vs anchors).
 
