@@ -13,16 +13,20 @@ Per-channel formula:
 
 Degenerate-channel guard (negligent == good):
     When negligent == good (within EPSILON), the denominator is zero and the
-    formula is undefined.  This occurs for two channels in the reference data:
+    formula is undefined.  This occurs for one channel in the current reference data:
 
     - ``keel_risk_hours``: driven purely by flock age; management cannot
       change it, so both reference runs accumulate the same value.
-    - ``excess_mortality``: the corpus weather never triggers the acute-heat
-      mortality pathway, so both reference runs end at 0.0.
 
-    For these channels the agent cannot worsen below the reference floor, so
-    they receive full credit (subscore = 1.0) unconditionally.  They neither
-    reward nor penalise the agent — they are simply neutral.
+    (``excess_mortality`` WAS degenerate when the corpus weather never crossed the
+    acute-heat mortality onset; the authored beat-3 excessive-heat event now makes it
+    discriminate — negligent ventilation kills birds, proactive cooling does not — so it
+    is a live, weighted channel.  See docs/eval-design-notes.md.)
+
+    For a degenerate channel the agent cannot worsen below the reference floor, so
+    it receives full credit (subscore = 1.0) unconditionally.  Such channels neither
+    reward nor penalise the agent — they are simply neutral.  The guard is data-driven:
+    any channel whose anchors collapse re-enters automatically once they diverge.
 
 The final score is a weighted mean of channel subscores.  Weights normalise to
 1.0 over the channels whose reference anchors are non-degenerate (negligent !=

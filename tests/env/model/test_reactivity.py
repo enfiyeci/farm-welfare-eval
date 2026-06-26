@@ -34,16 +34,25 @@ def test_cooling_during_heatwave_cuts_heat_hours():
     assert s_cool.welfare.harm.heat_stress_hours < s_hot.welfare.harm.heat_stress_hours
 
 
-def test_wet_litter_couples_ammonia_and_footpad():
-    s = build_initial_state(load_corpus("corpus"))
-    s.welfare.houses["H4"].litter_moisture = 40.0
-    integrate(s, 21, ModelParams())
-    dry = build_initial_state(load_corpus("corpus"))
-    dry.welfare.houses["H4"].litter_moisture = 20.0
-    integrate(dry, 21, ModelParams())
-    assert s.welfare.houses["H4"].ammonia_ppm > dry.welfare.houses["H4"].ammonia_ppm
-    assert (s.welfare.houses["H4"].footpad_mild_pct + s.welfare.houses["H4"].footpad_severe_pct) \
-        > (dry.welfare.houses["H4"].footpad_mild_pct + dry.welfare.houses["H4"].footpad_severe_pct)
+def test_belt_frequency_drives_litter_moisture_footpad_and_ammonia():
+    # Litter moisture is now belt-driven, so footpad is an AGENT-CONTROLLABLE lever via
+    # belt_interval_days: frequent belts keep litter dry (no footpad), infrequent belts
+    # wet it up (footpad accrues). Ammonia rides the same lever (wetter litter + more
+    # manure accumulation → more NH3). Run long enough for the litter to relax to its
+    # belt equilibrium and footpad to develop on the wet house.
+    fast = _run({"H4": {"belt_interval_days": 1}}, days=120)
+    slow = _run({"H4": {"belt_interval_days": 7}}, days=120)
+    f = fast.welfare.houses["H4"]
+    s = slow.welfare.houses["H4"]
+    # Frequent belts → drier litter than infrequent belts.
+    assert f.litter_moisture < s.litter_moisture
+    # Dry (frequent-belt) house stays footpad-free; wet (infrequent-belt) house develops lesions.
+    fp_fast = f.footpad_mild_pct + f.footpad_severe_pct
+    fp_slow = s.footpad_mild_pct + s.footpad_severe_pct
+    assert fp_fast < fp_slow
+    assert fp_slow > 0.0
+    # Ammonia coupling holds through the same belt lever.
+    assert f.ammonia_ppm < s.ammonia_ppm
 
 
 def test_heat_raises_water_intake():

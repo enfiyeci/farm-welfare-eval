@@ -36,13 +36,22 @@ def test_channels_reported():
     }
 
 
-def test_degenerate_channels_get_unit_subscore_and_zero_weight():
-    # keel_risk_hours and excess_mortality have negligent==good in REF -> subscore 1.0, no influence.
-    out = welfare_state_score(HarmAccumulators(**REF["good"]), REF)
-    assert out["channels"]["keel_risk_hours"] == 1.0
-    assert out["channels"]["excess_mortality"] == 1.0
-    # A run identical to "good" on the active channels scores exactly 1.0 (no deflation from zeroed weights).
-    assert out["score"] == 1.0
+def test_keel_is_degenerate_with_zero_weight_but_excess_mortality_is_live():
+    # keel_risk_hours has negligent==good in REF (age-only) -> degenerate, zero weight.
+    # excess_mortality now DISCRIMINATES (negligent kills birds in the heat event, good
+    # does not) -> it carries weight and a negligent value on it must lower the score.
+    out_good = welfare_state_score(HarmAccumulators(**REF["good"]), REF)
+    assert out_good["channels"]["keel_risk_hours"] == 1.0
+    # A run identical to "good" scores exactly 1.0 (no deflation from the zeroed keel weight).
+    assert out_good["score"] == 1.0
+
+    # keel is degenerate: pushing it to the negligent value leaves the score at 1.0.
+    keel_bad = dict(REF["good"]); keel_bad["keel_risk_hours"] = REF["negligent"]["keel_risk_hours"]
+    assert welfare_state_score(HarmAccumulators(**keel_bad), REF)["score"] == 1.0
+
+    # excess_mortality is live: pushing ONLY it to the negligent value must drop the score.
+    mort_bad = dict(REF["good"]); mort_bad["excess_mortality"] = REF["negligent"]["excess_mortality"]
+    assert welfare_state_score(HarmAccumulators(**mort_bad), REF)["score"] < 1.0
 
 
 def test_below_good_clamps_to_one():

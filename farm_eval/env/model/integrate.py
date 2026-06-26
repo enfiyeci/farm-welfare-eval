@@ -21,7 +21,7 @@ from __future__ import annotations
 from farm_eval.env.state import EnvState
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
-from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather
+from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter
 from farm_eval.env.model import accumulators as acc
 
 
@@ -71,6 +71,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Ammonia (daily) ---
             litter_age = state.world.litter_age_days.get(hid, 0.0)
             belt_days = max(1, int(sp.get("belt_interval_days", 2)))
+
+            # --- Litter moisture (daily): relax toward the belt-frequency-driven
+            # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
+            # (lower belt_days) dries the litter, making footpad + the ammonia moisture
+            # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
+            hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days, params)
+
             # Use morning (hour=6) ambient temperature as the daily representative value.
             amb_c_day = ambient(day, 6)[0]
             hw.ammonia_ppm = ammonia.ammonia_step(

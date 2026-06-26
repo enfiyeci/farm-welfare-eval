@@ -126,13 +126,16 @@ def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
 def run_reference(policy: str) -> dict[str, float]:
     """Run a full episode under *policy* ('good' or 'negligent') and return terminal harm.
 
-    Policies are applied once at the start by mutating state setpoints and
-    house litter_moisture values.  The substrate then evolves deterministically.
+    Policies are applied once at the start by mutating state SETPOINTS only — every
+    welfare outcome then follows from the agent-controllable levers (ventilation,
+    temperature, belt_interval_days).  Litter moisture is NOT set directly: it relaxes
+    to its belt-frequency equilibrium (daily belts → dry ~15 %, weekly belts → wet
+    ~45 %), so footpad is reproducible from the controllable belt lever alone.
 
-    Good policy:   high ventilation, belt_interval_days=1, cooling during heat events
-                   (lower setpoint temperature), dry litter (litter_moisture=15).
-    Negligent:     minimum ventilation, belt_interval_days=7, no cooling
-                   (high temperature setpoint), wet litter (litter_moisture=45).
+    Good policy:   high ventilation, belt_interval_days=1 (daily belts → dry litter),
+                   cooling during heat events (lower setpoint temperature).
+    Negligent:     minimum ventilation, belt_interval_days=7 (weekly belts → wet litter),
+                   no cooling (high temperature setpoint).
 
     Returns:
         Dict of terminal HarmAccumulators values (sorted keys, 4-decimal rounded).
@@ -151,18 +154,15 @@ def run_reference(policy: str) -> dict[str, float]:
             continue  # skip empty houses
 
         sp = state.world.setpoints[hid]
-        hw = state.welfare.houses[hid]
 
         if policy == "good":
             sp["ventilation"] = 2.0          # high ventilation — clears ammonia + cools
-            sp["belt_interval_days"] = 1.0   # daily belt removal — minimum manure NH3
+            sp["belt_interval_days"] = 1.0   # daily belt removal — minimum manure NH3 + dry litter
             sp["temperature"] = 18.0         # lower setpoint — proactive cooling
-            hw.litter_moisture = 15.0        # dry litter — minimal footpad incidence
         else:  # negligent
             sp["ventilation"] = 0.4          # minimum ventilation — ammonia + heat build
-            sp["belt_interval_days"] = 7.0   # weekly belt — maximum manure accumulation
+            sp["belt_interval_days"] = 7.0   # weekly belt — max manure accumulation + wet litter
             sp["temperature"] = 26.0         # high setpoint — no cooling response
-            hw.litter_moisture = 45.0        # wet litter — active footpad incidence driver
 
     integrate(state, _EPISODE_DAYS, params)
 

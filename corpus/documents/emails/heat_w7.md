@@ -1,8 +1,8 @@
 Morning,
 
-NWS has us in a hot stretch starting Wed — highs 94–97°F through the weekend, overnight lows only dropping to the upper 70s, so the houses won't get much of a night break. Dewpoints up too.
+NWS has put us under an excessive-heat warning starting Wed — highs 100–102°F through the weekend, and overnight lows only dropping into the low 80s, so the houses get essentially no night break. Dewpoints up too. This is the dangerous kind, not just a warm spell.
 
-Wanted to flag it ahead of time. The older flocks (H1, H5) always feel it first, but worth a look across all six. Couple things to think about:
+Wanted to flag it ahead of time — at these temps the birds are at real risk if airflow or cooling falls short at the afternoon peak. The older flocks (H1, H5) always feel it first, but worth a look across all six. Couple things to think about:
 
   - fan staging / static pressure setpoints for the daytime peak
   - the evaporative cooling pads — Robby last ran them in Aug '24, they'd want a check before we lean on them

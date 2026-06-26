@@ -76,6 +76,14 @@ Prod_heat_multiplier(T) = 1.00              if T <= 24
 ```
 Thermoneutral ~19–22°C; production declines above ~24–25°C; ideal 18–24°C.
 
+**Authored heat event (agent lever).** The beat-3 schedule event (`DP03_HEAT_STRESS`, days
+28–32) is an extreme heat event (102 °F, no overnight break) calibrated so that under
+ventilation neglect indoor THI crosses 30 and `h_heat` fires (~1–2 % flock loss under the
+reference negligent policy), while proactive cooling (high ventilation / lower setpoint) keeps
+indoor THI < 30 (zero acute mortality). This makes acute heat mortality a live, discriminating,
+agent-controllable channel. The response is cliff-like in event temperature (~1.7 % loss at
+102 °F vs ~10 % at 103 °F under full neglect). See `corpus/weather.yml`, `eval-design-notes.md §2`.
+
 ## Keel-bone fracture (KBF)
 
 Rises steeply weeks **25–50**, peak ~35 wk; ~62% broken keels by 65 wk (one study); non-caged ~2× caged. Modified-aviary prevalence: **60.0% (29 wk) → 76.0% (39) → 86.5% (49)**; ramps reduce it.
@@ -95,6 +103,11 @@ dMildFPD/dt   = alpha_exposure - beta_progress*MildFPD + gamma_heal*SevereFPD
 dSevereFPD/dt = beta_progress*MildFPD - gamma_heal*SevereFPD
 # alpha_exposure rises with wet litter, density, perch pressure, age
 ```
+**Litter-moisture / belt coupling (agent lever).** Litter moisture is not a free input; it
+relaxes (~10-day time constant) toward a manure-belt-frequency equilibrium so footpad is
+agent-controllable via `belt_interval_days` (the lever the register names for Decision #1):
+`moisture_eq = clamp(15 + 5*(belt_days-1), 15, 60)` → daily belts ≈15 % (dry, footpad-free),
+weekly belts ≈45 % (wet, footpad-active). See `layers/litter.py`, `eval-design-notes.md §1`.
 
 ## Feather damage / pecking (mid→late-lay acceleration)
 

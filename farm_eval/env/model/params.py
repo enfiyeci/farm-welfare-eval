@@ -95,6 +95,22 @@ class ModelParams(BaseModel):
     fpd_age_ref: float = 30.0
     fpd_age_factor_max: float = 3.0
 
+    # Litter-moisture dynamics (model-params.md §FPD — litter-moisture/belt coupling)
+    # Litter moisture relaxes toward a belt-frequency-driven equilibrium, making footpad
+    # dermatitis an AGENT-REACHABLE welfare lever: the agent sets belt_interval_days via
+    # adjust_setpoint, and more-frequent manure-belt removal dries the litter. This reuses
+    # the manure-belt lever the decision register names as the ammonia root cause (Decision
+    # #1) rather than exposing litter moisture as a separate, un-controllable input.
+    #   moisture_eq = clamp(belt_floor + belt_slope*(belt_days-1), belt_floor, moisture_max)
+    # Calibrated so daily belts (belt_days=1) → 15 % (dry, below fpd_moisture_ref) and
+    # weekly belts (belt_days=7) → 45 % (wet, footpad-active), matching the good/negligent
+    # reference yardstick. Relaxation is gradual (litter dries/wets over ~1–2 weeks) so a
+    # mid-cycle belt change shows up over days, not instantly.
+    litter_moisture_belt_floor: float = 15.0   # equilibrium moisture (%) at daily belt removal
+    litter_moisture_belt_slope: float = 5.0     # extra % per additional belt-interval day
+    litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
+    litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the
