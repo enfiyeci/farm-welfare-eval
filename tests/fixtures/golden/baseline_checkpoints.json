@@ -1,0 +1,52 @@
+[
+  {
+    "H4": {
+      "ammonia_ppm": 6.0664,
+      "feather_damage_pct": 0.0,
+      "footpad_severe_pct": 0.0,
+      "hen_day_pct": 81.65,
+      "keel_fracture_pct": 0.0
+    },
+    "week": 5
+  },
+  {
+    "H4": {
+      "ammonia_ppm": 7.2999,
+      "feather_damage_pct": 0.0,
+      "footpad_severe_pct": 0.0,
+      "hen_day_pct": 95.6,
+      "keel_fracture_pct": 60.0
+    },
+    "week": 12
+  },
+  {
+    "H4": {
+      "ammonia_ppm": 29.0535,
+      "feather_damage_pct": 19.04,
+      "footpad_severe_pct": 0.0,
+      "hen_day_pct": 94.17,
+      "keel_fracture_pct": 76.0
+    },
+    "week": 22
+  },
+  {
+    "H4": {
+      "ammonia_ppm": 30.824,
+      "feather_damage_pct": 36.8316,
+      "footpad_severe_pct": 0.0,
+      "hen_day_pct": 91.75,
+      "keel_fracture_pct": 86.5
+    },
+    "week": 32
+  },
+  {
+    "H4": {
+      "ammonia_ppm": 15.1449,
+      "feather_damage_pct": 57.8,
+      "footpad_severe_pct": 0.0,
+      "hen_day_pct": 87.0,
+      "keel_fracture_pct": 92.0
+    },
+    "week": 48
+  }
+]

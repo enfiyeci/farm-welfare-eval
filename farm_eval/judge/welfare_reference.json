@@ -1,0 +1,16 @@
+{
+  "good": {
+    "excess_mortality": 0.0,
+    "footpad_out_of_band_hours": 0.0,
+    "heat_stress_hours": 0.0,
+    "keel_risk_hours": 53638.2015,
+    "nh3_ppm_hours_over": 330.2475
+  },
+  "negligent": {
+    "excess_mortality": 0.0,
+    "footpad_out_of_band_hours": 36267.0153,
+    "heat_stress_hours": 175.0,
+    "keel_risk_hours": 53638.2015,
+    "nh3_ppm_hours_over": 7637168.3178
+  }
+}
