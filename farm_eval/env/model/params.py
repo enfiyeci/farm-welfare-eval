@@ -45,6 +45,11 @@ class ModelParams(BaseModel):
     heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
     heat_mort_coeff: float = 0.0002        # base mortality fraction per (THI-30)^2 per hour
     heat_mort_exp_rate: float = 0.6        # sustained-heat mortality escalation rate (per hour beyond 2h)
+    heat_mort_daily_cap: float = 0.5       # max heat-driven mortality fraction in a single day
+                                           # (safety rail: the exp() escalation term is unbounded as
+                                           # hours-over-30 grows; today the diurnal night-break keeps
+                                           # it small, but this caps a worst-case no-night-break event
+                                           # so it can never wipe a flock in one day)
 
     # Keel-bone fracture layer constants (model-params.md §KBF)
     # Anchor points from epidemiological literature: cage-free prevalence

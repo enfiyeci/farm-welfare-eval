@@ -81,8 +81,10 @@ Thermoneutral ~19–22°C; production declines above ~24–25°C; ideal 18–24�
 ventilation neglect indoor THI crosses 30 and `h_heat` fires (~1–2 % flock loss under the
 reference negligent policy), while proactive cooling (high ventilation / lower setpoint) keeps
 indoor THI < 30 (zero acute mortality). This makes acute heat mortality a live, discriminating,
-agent-controllable channel. The response is cliff-like in event temperature (~1.7 % loss at
-102 °F vs ~10 % at 103 °F under full neglect). See `corpus/weather.yml`, `eval-design-notes.md §2`.
+agent-controllable channel. The response climbs steeply with event severity (~1.7 % loss at
+102 °F, ~3.4 % at 103 °F, ~5.7 % at 104 °F under full neglect — and steeper still if overnight
+lows stay above 82 °F, since fewer night hours fall below THI 30). See `corpus/weather.yml`,
+`eval-design-notes.md §2`.
 
 ## Keel-bone fracture (KBF)
 

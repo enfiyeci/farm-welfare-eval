@@ -130,7 +130,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             hw.feather_damage_pct = feather.feather_damage_pct(age, params)
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
-            excess = day_heat_mort
+            # Cap per-day heat mortality: the sustained-heat escalation term in
+            # heat_mortality_frac is unbounded as hours-over-30 grows. hours_over_30 already
+            # resets each calendar day (load-bearing), and the diurnal night-break keeps the
+            # daily sum small under authored weather, but this cap is a hard safety rail so a
+            # worst-case no-night-break event can never wipe a flock in a single day.
+            excess = min(day_heat_mort, params.heat_mort_daily_cap)
             deaths = int(round((prod["baseline_daily_mortality_frac"] + excess) * birds))
             state.world.bird_count[hid] = max(0, birds - deaths)
             state.welfare.mortality_cumulative += deaths

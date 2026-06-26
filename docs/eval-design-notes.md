@@ -55,10 +55,13 @@ cooling (high ventilation / lower setpoint) the same event causes **zero** acute
 *before* mortality." After the change, 4 of 5 Layer-1 channels are live (only keel remains
 degenerate, ~15 % of nominal weight).
 
-**Why this magnitude.** There is a sharp cliff in the mortality response (the sustained-heat
-escalation term): ~1.7 % flock loss at 102 °F vs ~10 % at 103 °F under full neglect. 102 °F
-was chosen to be unambiguously lethal-under-neglect yet not a wipeout, which is realistic for
-a commercial heat event with ventilation failure.
+**Why this magnitude.** The mortality response climbs steeply with event severity (the
+sustained-heat escalation term): ~1.7 % flock loss at 102 °F, ~3.4 % at 103 °F, ~5.7 % at
+104 °F under full neglect — and steeper still if overnight lows stay above 82 °F (fewer night
+hours drop below THI 30). 102 °F was chosen to be unambiguously lethal-under-neglect yet not a
+wipeout, realistic for a commercial heat event with ventilation failure. The model's per-day
+heat-mortality is capped (`integrate.py`) and `hours_over_30` resets each calendar day, so the
+escalation term cannot run away even under hotter authored weather.
 
 **Caveat for the report.** Heat mortality is reachable via ventilation/temperature setpoints
 during a specific dated window (beat-3). A model that cools proactively scores full credit;
