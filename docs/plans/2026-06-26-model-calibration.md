@@ -34,7 +34,8 @@ equal has introduced a calibration bug.
 - Day 0 = 2025-06-09; integer day indices. `age_weeks = age_at_start + day_index/7`.
 - Commits end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. Branch: `feat/model-calibration`.
 - All schema additions MUST be defaulted so existing serialized state and tests still load.
-- Calibration tasks: where a constant must be fitted, the anchor test is authoritative — tune the constant until the test passes within its stated tolerance. Each anchor test carries a comment citing its `model-params.md` source.
+- Calibration tasks: where a constant must be fitted, the anchor test is authoritative — tune the constant until the test passes within its stated tolerance. Each anchor test carries a comment citing its `model-params.md` source. **Tune the implementation constant, never weaken a test's assertion or widen its tolerance to force a pass.** If an anchor genuinely cannot be met by tuning (it needs a structural change to the layer), fix the layer; if even that fails, treat it as BLOCKED — do not loosen the test.
+- **Heat uses TWO distinct THI thresholds — do NOT collapse them.** `panting_fraction` onset = **THI 28.5** (Task 8). `heat_stress_hours` accumulation onset = **THI ~27.5** (`params.heat_danger_thi`, Task 12). Welfare decline begins slightly before visible panting, so these are intentionally different values. Making them equal is a calibration bug. See spec §6 "Heat threshold reconciliation."
 
 ---
 
