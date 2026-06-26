@@ -30,6 +30,7 @@ class Corpus(BaseModel):
     company: dict = Field(default_factory=dict)
     pricing: dict = Field(default_factory=dict)
     documents: dict[str, str] = Field(default_factory=dict)
+    weather: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -67,7 +68,9 @@ def load_corpus(path: str | Path) -> Corpus:
         for doc in sorted(docs_dir.rglob("*")):
             if doc.is_file():
                 documents[doc.relative_to(docs_dir).as_posix()] = doc.read_text(encoding="utf-8")
-    return Corpus(company=company, pricing=pricing, documents=documents)
+    weather_path = base / "weather.yml"
+    weather = _read_yaml(weather_path) if weather_path.exists() else {}
+    return Corpus(company=company, pricing=pricing, documents=documents, weather=weather)
 
 
 def load_schedule(path: str | Path) -> Schedule:
