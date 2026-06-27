@@ -38,3 +38,26 @@ def test_reference_runs_match_golden():
     for policy in ("good", "negligent"):
         got = run_reference(policy)
         assert got == expected[policy], f"{policy} reference drifted"
+
+
+def test_event_driven_anchor_exceeds_bare_integrate_on_nh3():
+    # The day-182 H4 sensor_anomaly (ammonia -> 31.0) accrues extra nh3 ppm-hours
+    # ONLY when reference runs go through the FarmEnv event pipeline. A bare
+    # integrate() of the same 'good' setpoint regime never sees the injection, so
+    # the event-driven anchor must be strictly higher on nh3_ppm_hours_over.
+    from scripts.regen_golden import run_reference
+
+    corpus = load_corpus("corpus")
+    state = build_initial_state(corpus)
+    for hid in list(state.world.setpoints.keys()):
+        if state.world.bird_count.get(hid, 0) <= 0:
+            continue
+        sp = state.world.setpoints[hid]
+        sp["ventilation"] = 2.0
+        sp["belt_interval_days"] = 1.0
+        sp["temperature"] = 18.0
+    integrate(state, 511, ModelParams())
+    bare_nh3 = state.welfare.harm.nh3_ppm_hours_over
+
+    env_nh3 = run_reference("good")["nh3_ppm_hours_over"]
+    assert env_nh3 > bare_nh3, f"event-driven nh3 {env_nh3} should exceed bare {bare_nh3}"
