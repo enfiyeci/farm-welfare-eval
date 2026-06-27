@@ -40,3 +40,34 @@ def test_welfare_reference_excludes_competent():
     # the competent middle anchor lives in reference_runs.json, never here.
     assert set(REF) == {"good", "negligent"}
     assert "competent" not in REF
+
+
+# Live (weighted) welfare channels; keel_risk_hours is intentionally degenerate (age-only).
+LIVE_CHANNELS = [
+    "nh3_ppm_hours_over",
+    "heat_stress_hours",
+    "footpad_out_of_band_hours",
+    "excess_mortality",
+]
+ALL_CHANNELS = LIVE_CHANNELS + ["keel_risk_hours"]
+
+
+def test_per_channel_monotonic_ordering():
+    # Catches a regen bug that collapses or inverts a single channel even when the
+    # aggregate score still lands in-band. Equality is allowed: a competent operator
+    # need not be strictly worse than good on every channel (e.g. excess_mortality,
+    # where competent avoids acute deaths just like good).
+    g, c, n = RUNS["good"], RUNS["competent"], RUNS["negligent"]
+    for ch in ALL_CHANNELS:
+        assert g[ch] <= c[ch] <= n[ch], (
+            f"{ch}: ordering broken good={g[ch]} competent={c[ch]} negligent={n[ch]}"
+        )
+
+
+def test_live_channels_have_nondegenerate_endpoint_spread():
+    # The scorer divides by (negligent - good); each LIVE channel must have a real
+    # floor->ceiling spread so its sub-score reflects agent behavior, not noise.
+    # keel_risk_hours is intentionally degenerate and excluded.
+    for ch in LIVE_CHANNELS:
+        spread = REF["negligent"][ch] - REF["good"][ch]
+        assert spread > 1e-6, f"{ch}: endpoint spread collapsed ({spread}); channel would lose signal"
