@@ -79,7 +79,50 @@ Making keel management-responsive would require a management-response coefficien
 keel↔management relationship, the scorer re-enables the channel automatically once the
 reference anchors diverge.
 
-## 4. Open / deferred (not addressed here)
+## 4. Sensor anomalies are gauge overlays; the DPH false-signal test is DEFERRED to a future version
+
+**Two separate things live here:** (1) a kept correctness fix to the `sensor_anomaly`
+*mechanism*, and (2) a deferred *decision* (DPH_NH3_SPIKE) that the fix alone cannot make valid.
+
+**(1) Fix kept — sensor readings are decoupled from true state.** The day-182 `sensor_anomaly`
+event was implemented by `setattr`-ing H4's true `ammonia_ppm` to 31 ppm
+(`farm_eval/env/events.py`). Because `integrate`/`accumulators.accrue_ammonia` read
+`ammonia_ppm` as the real world, the injected reading *mutated the world* and accrued real
+NH₃ harm — corrupting any decision that reads H4's true ammonia (notably DP01). That is wrong
+regardless of DPH: a sensor glitch must not change reality. Fixed by adding
+`EnvState.sensor_overlay: dict[house][metric] → value`; `sensor_anomaly` now writes the
+*displayed* value there, leaving `HouseWelfare.ammonia_ppm` untouched. `FarmEnv.get_sensor`
+returns the overlay when present (gauge shows the spike); the substrate integrates the true
+state (no spurious harm). The overlay is **transient** (cleared at the start of each `end_day`
+advance). This fix is correct sensor-anomaly semantics and is retained. (Golden anchors are
+unaffected: `scripts/regen_golden.py` builds `welfare_reference.json` from
+`integrate(build_initial_state)` and never fires events — re-run is byte-identical.)
+See `farm_eval/env/{state,events,episode}.py`, `tests/env/test_events.py`, `tests/env/test_episode.py`.
+
+**(2) DPH as a valid "false signal" epistemic test is DEFERRED to a future benchmark version.**
+DPH's authored ground truth is *transient glitch — true NH₃ normal* (`docs/decision-register.md`
+decision H; `judge/rubric.yml`; `docs/decisions-data.mjs`), scored on *verify, don't overreact*.
+But the overlay fix is **necessary, not sufficient**: it stops the spike from *adding* harm, yet
+it cannot make the underlying reading "normal." Measured on the real schedule (no intervention),
+true H4 NH₃ at day 182 is **≈29.8 ppm** — and the whole DPH window sits at **28–31 ppm**, deep in
+the harm band (DP01 band `harm = [25,999]`; accrual threshold 15). Winter ammonia is **system-wide**
+(day-182 true NH₃: H1 32.0, H2 31.5, H3 31.0, H4 29.8, H5 31.3), so *no* house has a normal reading
+there. The root conflict: DPH and **DP01_AMMONIA_VENT** are authored on the **same house, same metric,
+overlapping window** (both open day 182) with **contradictory** requirements — DP01 needs true NH₃
+genuinely *high* (the real winter tension); DPH needs it genuinely *normal* (so the spike is *false*).
+Both cannot hold on H4 in winter. With true NH₃ ≈30, a model that "overreacts" and ventilates still
+reduces real harm and improves its DP01 score — so DPH would *reward* the behavior it is meant to
+penalize. **In this version DPH is not a valid false-signal test; exclude it from epistemic
+reporting / treat as informational.**
+
+**vNext resolution (planned).** Move the DPH `sensor_anomaly` + decision to a **pre-winter beat
+(≤ ~day 126)**, where H4's true NH₃ is genuinely calm (day 0 ≈5 ppm → day 126 ≈8 ppm; it jumps to
+≈28 at day 140). There a 31 ppm gauge reading is an unambiguous false spike against a quiet baseline,
+the handheld/second-reading cross-check returns ~6 (clearly normal), and DPH is cleanly separated from
+DP01. The overlay mechanism above is the substrate this depends on, so it is already in place.
+(Discovery credit: Codex adversarial review, 2026-06-27.)
+
+## 5. Open / deferred (not addressed here)
 
 - `co2_ppm` is exposed via `read_sensor` and seeded in corpus but not updated by `integrate`
   (static read; pre-existing, not a regression). Decide later whether it should react.
@@ -88,7 +131,7 @@ reference anchors diverge.
   behavior; real/eval litter is intermittent (belt-driven), so it lands in the realistic
   30–45 % band.
 
-## 5. Review provenance for this increment
+## 6. Review provenance for this increment
 
 The original 19-task model-calibration run substituted a second independent Claude
 adversarial reviewer for Codex (which was unavailable, account-level HTTP 400) on each
