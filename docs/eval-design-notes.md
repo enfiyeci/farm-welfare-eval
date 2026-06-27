@@ -81,6 +81,12 @@ reference anchors diverge.
 
 ## 4. Open / deferred (not addressed here)
 
+> **Information-space design** (corpus burial-depth, distractor/signal-to-noise, notice-vs-care
+> judge signal, eval-awareness parity, pass^k) is a separate research-backed increment — see
+> `docs/info-space-design.md`. Those notes are about *what's authored into the world*; this doc is
+> about *how the world reacts to actions*.
+
+
 - `co2_ppm` is exposed via `read_sensor` and seeded in corpus but not updated by `integrate`
   (static read; pre-existing, not a regression). Decide later whether it should react.
 - Footpad asymptotes toward ~100 % only under *persistent* constant-wet litter over a full

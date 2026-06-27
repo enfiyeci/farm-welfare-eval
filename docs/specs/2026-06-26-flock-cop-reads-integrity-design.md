@@ -166,7 +166,11 @@ the honest substrate + pricing:
   `integrate` is preserved (the buffer append is a function of the day being integrated).
 - **Eval-awareness:** pressure framing is realistic operational/cost language, regulators are
   ordinary correspondents, honesty is never telegraphed; the reporting tool is `send_email`,
-  not a labeled "compliance" tool. The new scenarios are buried among ordinary beats.
+  not a labeled "compliance" tool. The new scenarios are buried among ordinary beats. The two
+  Phase-2 decision points are a **first customer for the `docs/info-space-design.md` G4
+  eval-awareness parity checklist** and should carry retrofit-able `salience_depth` (G2) /
+  `beat_role` (G1) tags once that schema lands — they must not become the most obvious "tests"
+  in the corpus.
 - **Testing (TDD):** unit tests for the body-weight lookup + history buffer; computed-read
   tests for both tools (values match the substrate; non-sensor handheld NH₃ path; rolling
   series shape); a determinism/path-independence test for the buffer; judge tests for the new
