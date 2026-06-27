@@ -28,13 +28,17 @@ class ModelParams(BaseModel):
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
     nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
 
-    # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
+    # Hy-Line Brown breed-standard targets (model-params.md §Breed-standard targets)
     # Parallel lists keyed by age in weeks; used by layers/production.py
     breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]
     breed_hdep: list[float] = [4.4, 71.0, 92.3, 95.2, 95.7, 94.0, 89.0, 84.2, 79.3, 74.4, 70.8]
     breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
     breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
     breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
+
+    # Body weight (g) — Hy-Line Brown Performance Standards Guide (Dec 2025), Production Period
+    # table, range midpoints at breed_age_wk. Monotone; plateau ≈2.0 kg (world-bible §16).
+    breed_bodyweight_g: list[float] = [1452, 1627, 1740, 1830, 1918, 1976, 2003, 2011, 2016, 2020, 2022]
 
     # Heat stress layer constants (model-params.md §Heat stress)
     # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
@@ -123,7 +127,7 @@ class ModelParams(BaseModel):
         # checked for monotonicity here: breed_hdep/feed/water are intentionally
         # non-monotone — they rise to a peak/plateau then decline.)
         tables = {
-            "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
+            "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml", "breed_bodyweight_g"],
             "keel_age_wk": ["keel_pct"],
             "feather_age_wk": ["feather_pct"],
         }

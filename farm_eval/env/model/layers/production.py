@@ -46,3 +46,9 @@ def production_step(age_weeks: float, params: ModelParams) -> dict:
         "baseline_daily_mortality_frac": baseline_daily,
         "cum_mortality_pct": cum,
     }
+
+
+def body_weight_g(age_weeks: float, params: ModelParams) -> float:
+    """Breed-standard body weight (grams) at *age_weeks*, clamped-interpolated from the
+    Hy-Line Brown standards table. Body weight rises monotonically and plateaus (~2.0 kg)."""
+    return _interp(age_weeks, params.breed_age_wk, params.breed_bodyweight_g)
