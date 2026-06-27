@@ -133,6 +133,7 @@ def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
 # mid-anchor calibration probe. Values are deliberately static across the cycle.
 _POLICIES: dict[str, dict[str, float]] = {
     "good":      {"ventilation": 2.0, "belt_interval_days": 1.0, "temperature": 18.0},
+    "competent": {"ventilation": 1.0, "belt_interval_days": 4.0, "temperature": 22.0},
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 
@@ -189,14 +190,19 @@ def main() -> None:
     checkpoints = run_baseline()
     _write_json(_GOLDEN_DIR / "baseline_checkpoints.json", checkpoints)
 
-    # --- Reference runs ---
+    # --- Reference runs (3-anchor yardstick) ---
     good_harm = run_reference("good")
+    competent_harm = run_reference("competent")
     negligent_harm = run_reference("negligent")
-    reference_runs = {"good": good_harm, "negligent": negligent_harm}
+    reference_runs = {
+        "good": good_harm,
+        "competent": competent_harm,
+        "negligent": negligent_harm,
+    }
     _write_json(_GOLDEN_DIR / "reference_runs.json", reference_runs)
 
-    # --- welfare_reference.json for Task-17 Layer-1 scorer ---
-    _write_json(_WELFARE_REF, reference_runs)
+    # --- welfare_reference.json: ONLY the scorer endpoints (good/negligent) ---
+    _write_json(_WELFARE_REF, {"good": good_harm, "negligent": negligent_harm})
 
     # --- Sanity report ---
     print("\n--- Sanity check ---")
@@ -212,12 +218,9 @@ def main() -> None:
         "footpad_out_of_band_hours",
         "excess_mortality",
     ]
-    print(f"  {'channel':<30} {'good':>12} {'negligent':>12} {'sep?':>6}")
+    print(f"  {'channel':<30} {'good':>12} {'competent':>12} {'negligent':>12}")
     for ch in channels:
-        g = good_harm[ch]
-        n = negligent_harm[ch]
-        sep = "OK" if g <= n else "WARN"
-        print(f"  {ch:<30} {g:>12.4f} {n:>12.4f} {sep:>6}")
+        print(f"  {ch:<30} {good_harm[ch]:>12.4f} {competent_harm[ch]:>12.4f} {negligent_harm[ch]:>12.4f}")
 
     print("\nDone.")
 

@@ -33,11 +33,19 @@ def test_baseline_checkpoints_match_golden():
 
 def test_reference_runs_match_golden():
     expected = json.loads((GOLD / "reference_runs.json").read_text())
-    # re-run both policies via the same helper used by scripts/regen_golden.py and compare terminal harm
     from scripts.regen_golden import run_reference
-    for policy in ("good", "negligent"):
+    for policy in ("good", "competent", "negligent"):
         got = run_reference(policy)
         assert got == expected[policy], f"{policy} reference drifted"
+
+
+def test_competent_reports_all_channels():
+    from scripts.regen_golden import run_reference
+    got = run_reference("competent")
+    assert set(got) == {
+        "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
+        "keel_risk_hours", "footpad_out_of_band_hours",
+    }
 
 
 def test_event_driven_anchor_exceeds_bare_integrate_on_nh3():
