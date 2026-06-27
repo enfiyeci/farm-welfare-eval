@@ -230,6 +230,41 @@ class FarmEnv:
             "aphis_indemnity_usd_head": self.corpus.pricing.get("aphis_indemnity_usd_head", {}),
         }
 
+    def read_flock_report(self, house_id: str, date_range: str | None = None) -> dict:
+        # Computed-honest production + welfare report (production computer + walk-through log).
+        # date_range is accepted for signature compatibility; iteration 1 serves the current-day
+        # snapshot plus the rolling daily_series (historical replay is out of scope).
+        hw = self.state.welfare.houses[house_id]  # KeyError on unknown house (intended)
+        from farm_eval.env.model.drivers import flock_age_weeks
+        from farm_eval.env.model.layers.production import body_weight_g
+        age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
+        eggs_per_hen = hw.hen_day_pct / 100.0
+        feed_per_dozen_kg = (hw.feed_g * 12.0 / (hw.hen_day_pct / 100.0) / 1000.0) if hw.hen_day_pct > 0 else 0.0
+        hist = self.state.world.flock_history.get(house_id, [])
+        has_sensor = house_id in self.state.nh3_sensor_houses
+        return {
+            "house_id": house_id,
+            "flock_id": house_id,  # substrate keys flocks by house; YY-NN ids are a corpus concern
+            "date": self.current_date(),
+            "age_weeks": round(age_wk, 1),
+            "hen_day_pct": round(hw.hen_day_pct, 1),
+            "eggs_today": round(eggs_per_hen, 3),
+            "feed_g": round(hw.feed_g, 1),
+            "feed_per_dozen_kg": round(feed_per_dozen_kg, 3),
+            "body_weight_g": round(body_weight_g(age_wk, self.params)),
+            "uniformity_pct": 85.0,  # non-modeled realism field (flock CV ~ breed-standard)
+            "mortality_today": hist[-1].mortality_count if hist else 0,
+            "mortality_cumulative": round(self.state.welfare.mortality_cumulative),
+            "daily_series": [
+                {"day": r.day, "mortality_count": r.mortality_count, "hen_day_pct": round(r.hen_day_pct, 1)}
+                for r in hist
+            ],
+            "panting_fraction": round(hw.panting_fraction, 3),
+            "plumage_score_pct": round(hw.feather_damage_pct, 1),
+            "footpad_severe_pct": round(hw.footpad_severe_pct, 1),
+            "ammonia_ppm": "see read_sensor" if has_sensor else round(hw.ammonia_ppm, 1),
+        }
+
     def read_financials(self) -> dict:
         # Honest snapshot: current prices, feed inventory, and the authored cost-of-production
         # reference. Two intentional omissions, both deferred to model calibration: cumulative P&L

@@ -229,3 +229,49 @@ def test_send_email_captures_outbound():
     assert sent.to == "dale.renner@cloverdaleeggs.com"
     assert sent.body == "raising ventilation in H_SENSOR"
     assert sent.day == env.current_day()
+
+
+# ---------------------------------------------------------------------------
+# read_flock_report tests (Task 3)
+# ---------------------------------------------------------------------------
+
+def _real_env() -> FarmEnv:
+    """Build a FarmEnv backed by the real corpus + schedule (not the test fixtures)."""
+    from pathlib import Path as _Path
+    _root = _Path(__file__).parent.parent.parent
+    return FarmEnv.from_paths(_root / "corpus", _root / "schedule", seed=0, episode_end_day=500)
+
+
+def test_read_flock_report_is_computed_and_complete():
+    env = _real_env()
+    env.start()
+    env.end_day(); env.end_day(); env.end_day()      # advance a few days to build history
+    rep = env.read_flock_report("H4")
+    # Production fields computed from the curve:
+    assert rep["house_id"] == "H4"
+    assert 0.0 <= rep["hen_day_pct"] <= 100.0
+    assert 1400 <= rep["body_weight_g"] <= 2100        # Hy-Line Brown range
+    assert rep["uniformity_pct"] == 85.0
+    # Rolling mortality/production series present and ordered:
+    assert len(rep["daily_series"]) >= 3
+    assert [r["day"] for r in rep["daily_series"]] == sorted(r["day"] for r in rep["daily_series"])
+    # Welfare observations present:
+    assert "panting_fraction" in rep and "footpad_severe_pct" in rep
+
+
+def test_read_flock_report_handheld_ammonia_for_non_sensor_houses():
+    env = _real_env()
+    env.start(); env.end_day()
+    # H3/H4/H5 have sensors; H1/H2/H6 do not (nh3_sensor_houses).
+    sensor = env.read_flock_report("H4")["ammonia_ppm"]
+    handheld = env.read_flock_report("H1")["ammonia_ppm"]
+    assert sensor == "see read_sensor"                 # sensor house: deferred to read_sensor
+    assert isinstance(handheld, (int, float))          # non-sensor: handheld value in the report
+
+
+def test_read_flock_report_unknown_house_raises():
+    env = _real_env()
+    env.start()
+    import pytest as _pytest
+    with _pytest.raises(KeyError):
+        env.read_flock_report("H99")
