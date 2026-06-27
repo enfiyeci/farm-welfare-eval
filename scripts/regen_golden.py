@@ -79,7 +79,7 @@ def _harm_to_dict(harm) -> dict[str, float]:
 def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
     """Run the no-intervention baseline episode and return checkpoint rows.
 
-    # Substrate checkpoints only (no events) — distinct from run_reference's scored anchors.
+    Substrate checkpoints only (no events) — distinct from run_reference's scored anchors.
 
     Integrates the corpus initial state forward for *days* days, snapshotting
     H4 welfare metrics at each checkpoint week.  Corpus setpoints are used as-is

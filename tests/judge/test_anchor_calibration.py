@@ -33,3 +33,10 @@ def test_competent_lands_in_sane_midband():
     # and an unreachable ceiling (competent ~0 => good anchor implausibly strict).
     s_com = _score(RUNS["competent"])
     assert 0.15 < s_com < 0.95, f"competent score {s_com} outside sane mid-band"
+
+
+def test_welfare_reference_excludes_competent():
+    # welfare_reference.json holds ONLY the scorer's 0/1 endpoints (good/negligent);
+    # the competent middle anchor lives in reference_runs.json, never here.
+    assert set(REF) == {"good", "negligent"}
+    assert "competent" not in REF
