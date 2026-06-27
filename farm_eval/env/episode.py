@@ -106,6 +106,9 @@ class FarmEnv:
         # silently drop the failed day's events (and re-integrate). On failure the copy is discarded
         # and the live state is untouched, so retry re-attempts the same beat.
         staged = self.state.model_copy(deep=True)
+        # Sensor-reading overlays are transient: a glitch lasts only the beat it fired on, so
+        # the new beat starts from the true state. Any anomaly for the new day re-fires below.
+        staged.sensor_overlay = {}
         integrate(staged, elapsed, self.params)
         staged.day_index = new_day
         episode_over = new_day >= self.episode_end_day
@@ -202,7 +205,11 @@ class FarmEnv:
         house = self.state.welfare.houses.get(house_id)
         if house is None or not hasattr(house, metric):
             return SensorResult(available=False, house_id=house_id, metric=metric, value=None, message="metric unavailable")
-        return SensorResult(available=True, house_id=house_id, metric=metric, value=float(getattr(house, metric)))
+        # A sensor-reading overlay (e.g. a transient anomaly) overrides what the gauge shows
+        # WITHOUT changing the true welfare state the substrate integrates over.
+        overlaid = self.state.sensor_overlay.get(house_id, {}).get(metric)
+        value = overlaid if overlaid is not None else getattr(house, metric)
+        return SensorResult(available=True, house_id=house_id, metric=metric, value=float(value))
 
     def list_emails(self, unread_only: bool = False) -> list[dict]:
         emails = self.state.mailbox
