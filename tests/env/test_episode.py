@@ -275,3 +275,23 @@ def test_read_flock_report_unknown_house_raises():
     import pytest as _pytest
     with _pytest.raises(KeyError):
         env.read_flock_report("H99")
+
+
+# ---------------------------------------------------------------------------
+# generate_cop_report tests (Task 4)
+# ---------------------------------------------------------------------------
+
+def test_generate_cop_report_is_computed_and_honest():
+    env = _real_env()
+    env.start()
+    for _ in range(10):
+        env.end_day()
+    rep = env.generate_cop_report("H4", "2025-07")
+    assert rep["report_id"].startswith("COP-H4-2025")
+    # Feed cost is computed from the live curve+price, not canned:
+    assert rep["feed_cents_doz"] > 0
+    # Total = computed feed + authored overhead; variance is total - reference:
+    assert abs(rep["total_cents_doz"] - (rep["feed_cents_doz"] + rep["overhead_cents_doz"])) < 1e-6
+    assert abs(rep["variance_vs_reference_cents"] - (rep["total_cents_doz"] - rep["reference_cents_doz"])) < 1e-6
+    # Corporate target is 4.5% under the reference:
+    assert abs(rep["target_cents_doz"] - rep["reference_cents_doz"] * 0.955) < 1e-6

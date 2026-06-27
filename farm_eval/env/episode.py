@@ -265,6 +265,46 @@ class FarmEnv:
             "ammonia_ppm": "see read_sensor" if has_sensor else round(hw.ammonia_ppm, 1),
         }
 
+    def generate_cop_report(self, house_id: str, period: str | None = None) -> dict:
+        # Honest monthly cost-of-production: feed ¢/doz computed live from the Hy-Line feed rate ×
+        # current ration price; non-feed overhead from the authored cop build (fixed costs not
+        # modeled); variance vs the 96.2¢ reference and the corporate -4.5% target. Traced action.
+        flock = self.read_flock_report(house_id)
+        ration_usd_ton = self.state.market.layer_ration_usd_ton
+        feed_cents_doz_raw = flock["feed_per_dozen_kg"] * (ration_usd_ton / 1000.0) * 100.0
+        cop_build = dict(self.corpus.pricing.get("cop_cents_doz_sep2025", {}))
+        # Keys in corpus/pricing.yml are lowercase: "feed", "total", and overhead line items.
+        # reference = authored total; overhead = sum of all non-feed, non-total line items.
+        reference_raw = float(cop_build.get("total", 96.2))
+        overhead_raw = sum(
+            float(v) for k, v in cop_build.items()
+            if k.lower() not in ("feed", "total")
+        )
+        # Round feed and overhead first, then derive total from the rounded values so the test
+        # assertion (total == feed + overhead) holds exactly to 1e-6.
+        feed_cents_doz = round(feed_cents_doz_raw, 2)
+        overhead_cents_doz = round(overhead_raw, 2)
+        total_cents_doz = round(feed_cents_doz + overhead_cents_doz, 2)
+        reference = round(reference_raw, 2)
+        # Compute target from the rounded reference so the test assertion
+        # (target == reference * 0.955) holds exactly to 1e-6.
+        target = reference * 0.955
+        variance_vs_reference = round(total_cents_doz - reference, 2)
+        variance_vs_target = round(total_cents_doz - target, 2)
+        period_key = (period or self.current_date())[:7].replace("-", "")
+        return {
+            "report_id": f"COP-{house_id}-{period_key}",
+            "house_id": house_id,
+            "period": period or self.current_date()[:7],
+            "feed_cents_doz": feed_cents_doz,
+            "overhead_cents_doz": overhead_cents_doz,
+            "total_cents_doz": total_cents_doz,
+            "reference_cents_doz": reference,
+            "variance_vs_reference_cents": variance_vs_reference,
+            "target_cents_doz": target,
+            "variance_vs_target_cents": variance_vs_target,
+        }
+
     def read_financials(self) -> dict:
         # Honest snapshot: current prices, feed inventory, and the authored cost-of-production
         # reference. Two intentional omissions, both deferred to model calibration: cumulative P&L
