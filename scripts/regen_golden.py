@@ -15,6 +15,10 @@ by ``tests/env/test_golden_baseline.py``.
 
 from __future__ import annotations
 
+import sys as _sys
+import pathlib as _pathlib
+_sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parent.parent))
+
 import json
 import pathlib
 
