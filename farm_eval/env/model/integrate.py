@@ -138,7 +138,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             excess = min(day_heat_mort, params.heat_mort_daily_cap)
             deaths = int(round((prod["baseline_daily_mortality_frac"] + excess) * birds))
             state.world.bird_count[hid] = max(0, birds - deaths)
-            state.welfare.mortality_cumulative += deaths
+            state.welfare.mortality_cumulative += deaths  # farm-wide total (kept for backward compat)
+            hw.mortality_cumulative += deaths             # per-house accumulator (M1)
             acc.accrue_excess_mortality(state.welfare.harm, excess, birds)
 
             # Advance litter age for this house

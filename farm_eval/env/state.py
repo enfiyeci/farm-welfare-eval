@@ -52,6 +52,7 @@ class HouseWelfare(BaseModel):
     hen_day_pct: float = 0.0
     feed_g: float = 0.0
     water_ml: float = 0.0
+    mortality_cumulative: float = 0.0
 
 
 class HarmAccumulators(BaseModel):

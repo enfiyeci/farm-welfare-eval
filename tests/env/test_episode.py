@@ -295,3 +295,93 @@ def test_generate_cop_report_is_computed_and_honest():
     assert abs(rep["variance_vs_reference_cents"] - (rep["total_cents_doz"] - rep["reference_cents_doz"])) < 1e-6
     # Corporate target is 4.5% under the reference:
     assert abs(rep["target_cents_doz"] - rep["reference_cents_doz"] * 0.955) < 1e-6
+
+
+# ---------------------------------------------------------------------------
+# M1 — per-house mortality_cumulative (review fix)
+# ---------------------------------------------------------------------------
+
+def test_read_flock_report_mortality_cumulative_is_per_house():
+    """read_flock_report must return per-house cumulative mortality, not the farm-wide total.
+
+    Strategy: build a two-house env where the two houses have different bird counts so
+    their daily death tallies differ. After integrating several days, each house's
+    reported mortality_cumulative must equal the sum of that house's own daily deaths
+    (NOT the farm-wide sum of both houses).
+    """
+    from farm_eval.env.state import EnvState, HouseWelfare, WelfareState, WorldState
+
+    # Build a minimal two-house env — no real corpus or schedule needed.
+    hw_a = HouseWelfare(
+        ammonia_ppm=5.0, co2_ppm=1800.0, litter_moisture=25.0,
+        lighting_lux=10.0, lighting_hours=16.0, heat_stress_index=0.0,
+        stocking_density=1.0,
+    )
+    hw_b = HouseWelfare(
+        ammonia_ppm=5.0, co2_ppm=1800.0, litter_moisture=25.0,
+        lighting_lux=10.0, lighting_hours=16.0, heat_stress_index=0.0,
+        stocking_density=1.0,
+    )
+    state = EnvState(
+        start_date="2025-06-09",
+        welfare=WelfareState(houses={"HA": hw_a, "HB": hw_b}),
+        world=WorldState(
+            bird_count={"HA": 10_000, "HB": 50_000},   # different counts → different daily deaths
+            litter_age_days={"HA": 0.0, "HB": 0.0},
+            age_weeks_at_start={"HA": 25.0, "HB": 25.0},
+            setpoints={"HA": {"ventilation": 1.0}, "HB": {"ventilation": 1.0}},
+        ),
+    )
+    from farm_eval.env.model import integrate, ModelParams
+    DAYS = 7
+    integrate(state, DAYS, ModelParams())
+
+    # Derive expected per-house totals from the rolling flock history.
+    hist_a = state.world.flock_history.get("HA", [])
+    hist_b = state.world.flock_history.get("HB", [])
+    expected_a = sum(r.mortality_count for r in hist_a)
+    expected_b = sum(r.mortality_count for r in hist_b)
+
+    # The two houses must accumulate DIFFERENT death counts (HA<<HB because HA has 5× fewer birds).
+    assert expected_a != expected_b, (
+        f"test setup broken: both houses have the same cumulative deaths ({expected_a}); "
+        "adjust bird_count so the per-house totals differ"
+    )
+    # Farm total must be the SUM, confirming the two houses have different per-house counts.
+    farm_total = state.welfare.mortality_cumulative
+    assert farm_total == expected_a + expected_b
+
+    # Build a FarmEnv from this state and read the reports.
+    env = FarmEnv(Corpus(), Schedule(decision_points=[], events=[]), state, episode_end_day=50, params=ModelParams())
+    rep_a = env.read_flock_report("HA")
+    rep_b = env.read_flock_report("HB")
+
+    # Each house's report must reflect its OWN cumulative deaths, not the farm total.
+    assert rep_a["mortality_cumulative"] == round(expected_a), (
+        f"HA: expected {expected_a}, got {rep_a['mortality_cumulative']} "
+        f"(farm total is {farm_total})"
+    )
+    assert rep_b["mortality_cumulative"] == round(expected_b), (
+        f"HB: expected {expected_b}, got {rep_b['mortality_cumulative']} "
+        f"(farm total is {farm_total})"
+    )
+    # Sanity: they must be different (redundant but explicit).
+    assert rep_a["mortality_cumulative"] != rep_b["mortality_cumulative"], (
+        "both houses report the same mortality_cumulative — still reporting the farm total"
+    )
+
+
+# ---------------------------------------------------------------------------
+# M2 — eggs_per_hen rename (review fix)
+# ---------------------------------------------------------------------------
+
+def test_read_flock_report_has_eggs_per_hen_not_eggs_today():
+    """read_flock_report must expose the field as 'eggs_per_hen', not 'eggs_today'."""
+    env = _real_env()
+    env.start()
+    env.end_day()
+    rep = env.read_flock_report("H4")
+    assert "eggs_per_hen" in rep, "'eggs_per_hen' key missing from flock report"
+    assert "eggs_today" not in rep, "'eggs_today' key must be removed (renamed to 'eggs_per_hen')"
+    # Value is a per-hen rate in [0, 1].
+    assert 0.0 <= rep["eggs_per_hen"] <= 1.0

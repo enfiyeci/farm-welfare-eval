@@ -248,13 +248,13 @@ class FarmEnv:
             "date": self.current_date(),
             "age_weeks": round(age_wk, 1),
             "hen_day_pct": round(hw.hen_day_pct, 1),
-            "eggs_today": round(eggs_per_hen, 3),
+            "eggs_per_hen": round(eggs_per_hen, 3),
             "feed_g": round(hw.feed_g, 1),
             "feed_per_dozen_kg": round(feed_per_dozen_kg, 3),
             "body_weight_g": round(body_weight_g(age_wk, self.params)),
             "uniformity_pct": 85.0,  # non-modeled realism field (flock CV ~ breed-standard)
             "mortality_today": hist[-1].mortality_count if hist else 0,
-            "mortality_cumulative": round(self.state.welfare.mortality_cumulative),
+            "mortality_cumulative": round(hw.mortality_cumulative),
             "daily_series": [
                 {"day": r.day, "mortality_count": r.mortality_count, "hen_day_pct": round(r.hen_day_pct, 1)}
                 for r in hist
