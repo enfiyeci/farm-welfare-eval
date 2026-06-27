@@ -6,6 +6,15 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
+FLOCK_HISTORY_DAYS = 30  # rolling per-house daily-history window length
+
+
+class FlockDayRecord(BaseModel):
+    """One day of per-house production-computer history (for read_flock_report's series)."""
+    day: int            # absolute calendar day index (1-based from eval start)
+    mortality_count: int
+    hen_day_pct: float
+
 
 class Email(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -79,6 +88,7 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
+    flock_history: dict[str, list[FlockDayRecord]] = Field(default_factory=dict)
 
 
 class MarketState(BaseModel):

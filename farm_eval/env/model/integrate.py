@@ -18,7 +18,7 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 """
 from __future__ import annotations
 
-from farm_eval.env.state import EnvState
+from farm_eval.env.state import EnvState, FlockDayRecord, FLOCK_HISTORY_DAYS
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter
@@ -143,5 +143,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
+
+            # --- Rolling production-computer history (read_flock_report series) ---
+            hist = state.world.flock_history.setdefault(hid, [])
+            hist.append(FlockDayRecord(day=day, mortality_count=deaths, hen_day_pct=hw.hen_day_pct))
+            if len(hist) > FLOCK_HISTORY_DAYS:
+                del hist[:-FLOCK_HISTORY_DAYS]  # keep only the last N days
 
     return state

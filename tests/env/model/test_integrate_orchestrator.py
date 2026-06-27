@@ -1,5 +1,6 @@
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
+from farm_eval.env.state import FLOCK_HISTORY_DAYS
 
 
 def _fresh():
@@ -64,3 +65,33 @@ def test_elapsed_zero_is_noop():
     before = s.model_dump()
     integrate(s, 0, ModelParams())
     assert s.model_dump() == before
+
+
+def test_integrate_appends_one_flock_history_record_per_day():
+    s = build_initial_state(load_corpus("corpus"))
+    integrate(s, 5, ModelParams())
+    hist = s.world.flock_history["H4"]
+    assert len(hist) == 5
+    assert [r.day for r in hist] == [1, 2, 3, 4, 5]      # absolute calendar days, in order
+    assert all(r.hen_day_pct >= 0 for r in hist)
+
+
+def test_flock_history_is_capped_to_window():
+    s = build_initial_state(load_corpus("corpus"))
+    integrate(s, FLOCK_HISTORY_DAYS + 10, ModelParams())
+    hist = s.world.flock_history["H4"]
+    assert len(hist) == FLOCK_HISTORY_DAYS              # bounded: only the last N days kept
+    assert hist[-1].day == FLOCK_HISTORY_DAYS + 10      # newest retained
+    assert hist[0].day == 11                            # oldest 10 dropped
+
+
+def test_flock_history_is_path_independent():
+    # Chunked integration visits the same days, so the retained window is identical.
+    one = build_initial_state(load_corpus("corpus"))
+    integrate(one, 40, ModelParams())
+    chunked = build_initial_state(load_corpus("corpus"))
+    for _ in range(40):
+        chunked.day_index = chunked.world.flock_history.get("H4", [])[-1].day if chunked.world.flock_history.get("H4") else 0
+        integrate(chunked, 1, ModelParams())
+    assert [(r.day, r.mortality_count, round(r.hen_day_pct, 6)) for r in one.world.flock_history["H4"]] \
+        == [(r.day, r.mortality_count, round(r.hen_day_pct, 6)) for r in chunked.world.flock_history["H4"]]
