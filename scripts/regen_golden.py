@@ -150,9 +150,11 @@ def run_reference(policy: str) -> dict[str, float]:
     is NOT set directly: it relaxes to its belt-frequency equilibrium (daily belts -> dry ~15%,
     weekly belts -> wet ~45%), so footpad is reproducible from the belt lever alone.
 
-    The run is driven through FarmEnv.start()/end_day() (NOT bare integrate) so that scheduled
-    events models actually experience are reflected in the anchors — notably the day-182 H4
-    ammonia sensor_anomaly. This keeps the anchors on the SAME world models are scored against.
+    The run is driven through FarmEnv.start()/end_day() (the same path scored models take), so
+    the anchors reflect whatever the substrate actually does. As of the DPH fix, scheduled events
+    are sensor-only gauge overlays that do NOT change welfare harm, so these anchors equal a bare
+    integrate() of the same setpoints — guarded by the test_pipeline_anchor_equals_bare_integrate
+    canary, which fires if a future event ever perturbs the welfare substrate.
 
         good:      high ventilation, daily belts (dry litter), proactive cooling (low setpoint)
         competent: reduced ventilation, ~5-day belts (wet-tending litter), mild setpoint
