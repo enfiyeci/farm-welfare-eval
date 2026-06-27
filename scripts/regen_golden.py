@@ -133,7 +133,7 @@ def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
 # mid-anchor calibration probe. Values are deliberately static across the cycle.
 _POLICIES: dict[str, dict[str, float]] = {
     "good":      {"ventilation": 2.0, "belt_interval_days": 1.0, "temperature": 18.0},
-    "competent": {"ventilation": 1.0, "belt_interval_days": 4.0, "temperature": 22.0},
+    "competent": {"ventilation": 0.8, "belt_interval_days": 5.0, "temperature": 23.0},
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 
@@ -151,7 +151,7 @@ def run_reference(policy: str) -> dict[str, float]:
     ammonia sensor_anomaly. This keeps the anchors on the SAME world models are scored against.
 
         good:      high ventilation, daily belts (dry litter), proactive cooling (low setpoint)
-        competent: baseline ventilation, ~4-day belts (marginal litter), mild setpoint
+        competent: reduced ventilation, ~5-day belts (wet-tending litter), mild setpoint
         negligent: minimum ventilation, weekly belts (wet litter), no cooling (high setpoint)
 
     Returns:
