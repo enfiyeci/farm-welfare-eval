@@ -48,24 +48,19 @@ def test_competent_reports_all_channels():
     }
 
 
-def test_event_driven_anchor_exceeds_bare_integrate_on_nh3():
-    # The day-182 H4 sensor_anomaly (ammonia -> 31.0) accrues extra nh3 ppm-hours
-    # ONLY when reference runs go through the FarmEnv event pipeline. A bare
-    # integrate() of the same 'good' setpoint regime never sees the injection, so
-    # the event-driven anchor must be strictly higher on nh3_ppm_hours_over.
-    from scripts.regen_golden import run_reference
-
-    corpus = load_corpus("corpus")
-    state = build_initial_state(corpus)
-    for hid in list(state.world.setpoints.keys()):
-        if state.world.bird_count.get(hid, 0) <= 0:
-            continue
-        sp = state.world.setpoints[hid]
-        sp["ventilation"] = 2.0
-        sp["belt_interval_days"] = 1.0
-        sp["temperature"] = 18.0
-    integrate(state, 511, ModelParams())
-    bare_nh3 = state.welfare.harm.nh3_ppm_hours_over
-
-    env_nh3 = run_reference("good")["nh3_ppm_hours_over"]
-    assert env_nh3 > bare_nh3, f"event-driven nh3 {env_nh3} should exceed bare {bare_nh3}"
+def test_pipeline_anchor_equals_bare_integrate():
+    # Post-DPH, no scheduled event perturbs the welfare substrate (the day-182 sensor
+    # anomaly writes a gauge overlay, not real ammonia). So routing reference policies
+    # through the full FarmEnv pipeline must produce the SAME terminal harm as a bare
+    # integrate() of the same setpoint regime. This canary fires if a future event ever
+    # starts changing welfare state, at which point anchors and scored runs would diverge.
+    from scripts.regen_golden import run_reference, _POLICIES, _harm_to_dict, _EPISODE_DAYS
+    for policy, overrides in _POLICIES.items():
+        s = build_initial_state(load_corpus("corpus"))
+        for hid in list(s.world.setpoints.keys()):
+            if s.world.bird_count.get(hid, 0) <= 0:
+                continue
+            s.world.setpoints[hid].update(overrides)
+        integrate(s, _EPISODE_DAYS, ModelParams())
+        bare = _harm_to_dict(s.welfare.harm)
+        assert run_reference(policy) == bare, f"{policy}: pipeline anchor diverged from bare integrate"

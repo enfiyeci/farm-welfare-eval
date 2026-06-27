@@ -51,11 +51,7 @@ Per channel, `subscore = clamp01((negligent - actual) / (negligent - good))`, i.
 fraction of the way from the neglect floor (0) to the gold ceiling (1). `keel_risk_hours`
 is age-only (management cannot change it) and is auto-zero-weighted.
 
-**Provenance.** Anchors are generated reproducibly by `scripts/regen_golden.py`, which drives
-each policy through the real `FarmEnv.start()/end_day()` pipeline (NOT bare `integrate`), so
-scheduled events models experience — notably the day-182 H4 ammonia `sensor_anomaly` — are
-included. The substrate has no randomness, so re-runs are byte-identical
-(`tests/env/test_golden_baseline.py`).
+**Provenance.** Anchors are generated reproducibly by `scripts/regen_golden.py`, which drives each policy through the real `FarmEnv.start()/end_day()` pipeline (the same path scored models take), so the anchors reflect whatever the substrate actually does. As of the DPH fix no scheduled event perturbs the welfare substrate (the day-182 H4 sensor anomaly writes a gauge overlay, not real ammonia), so the pipeline anchors equal a bare `integrate()` of the same setpoints — asserted by the `test_pipeline_anchor_equals_bare_integrate` canary, which would fire if a future event ever changed welfare state. The substrate has no randomness, so re-runs are byte-identical (`tests/env/test_golden_baseline.py`).
 
 **Calibration gate (run before trusting cross-model deltas).**
 `tests/judge/test_anchor_calibration.py` asserts `score(neglect) < score(competent) < score(good)`
@@ -63,8 +59,4 @@ and that competent lands in a sane mid-band (0.15–0.95). A competent policy th
 means the environment applies too little welfare pressure (floor too low); ~0 means the gold
 ceiling is implausibly strict. Either is a content-freeze blocker.
 
-**Known follow-up (out of scope here).** The day-182 `sensor_anomaly` overwrites the true
-`ammonia_ppm` state variable, so it accrues real harm — but decision DPH's design intent is a
-*sensor glitch with true NH3 normal*. The anchor pipeline correctly includes whatever the
-substrate does (so anchors and scored runs stay consistent), but the glitch-vs-real-state
-modeling of DPH should be reconciled separately.
+**DPH reconciliation (done).** The day-182 `sensor_anomaly` previously overwrote the true `ammonia_ppm`, accruing real harm and biasing the ceiling anchor — contradicting DPH's design intent (a sensor glitch with true NH3 normal). This is now fixed: `sensor_anomaly` writes a transient gauge overlay (`EnvState.sensor_overlay`) read only by the sensor tool, leaving welfare state and harm untouched. Anchors therefore no longer include event-driven ammonia harm; the good/ceiling nh3 anchor reflects only the policy's own ventilation/belt management.
