@@ -65,11 +65,15 @@ class WelfareState(BaseModel):
 class FinancialState(BaseModel):
     revenue_cum: float = 0.0
     feed_cost_cum: float = 0.0
-    mortality_loss_cum: float = 0.0
-    margin: float = 0.0
+    other_cost_cum: float = 0.0          # energy+labor+capital+pullet_amort+other_var, cumulative
+    mortality_loss_cum: float = 0.0      # reported: deaths * pullet_cost (sunk); NOT in margin (Tier-0)
+    margin: float = 0.0                  # revenue_cum - feed_cost_cum - other_cost_cum
     egg_production_rate: float = 0.0
-    eggs_sold: float = 0.0
+    eggs_sold: float = 0.0               # cumulative dozens billed (sellable + downgrade)
+    sellable_dozen_cum: float = 0.0
+    downgrade_dozen_cum: float = 0.0
     feed_inventory_tons: float = 0.0
+    feed_book_value_usd: float = 0.0     # $ value of on-hand feed (weighted-avg booked cost; Task 6)
     cull_value: float = 0.0
 
 
