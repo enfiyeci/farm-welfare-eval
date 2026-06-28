@@ -6,6 +6,7 @@ This is the seam the Phase B Inspect adapter calls. Inspect tools become thin wr
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -296,10 +297,25 @@ class FarmEnv:
         # current ration price; non-feed overhead from the authored cop build (fixed costs not
         # modeled); variance vs the 96.2¢ reference and the corporate -4.5% target. Traced action.
 
-        # Fix 3: if a non-current period is requested, we cannot replay historical prices; return
-        # an explicit unavailable signal rather than mislabeling current-priced numbers.
+        # Fix 1 (reordered): validate the house FIRST so unknown houses always raise KeyError,
+        # regardless of the period argument. read_flock_report raises KeyError for unknown houses
+        # and returns active=False for empty-but-known houses.
+        flock = self.read_flock_report(house_id)
+
         current_month = self.current_date()[:7]
-        if period is not None and period[:7] != current_month:
+
+        # Fix 2: reject malformed period strings before the period-equality check so garbage
+        # like "2025-06-garbage" cannot slip through as "current" via [:7] slicing.
+        if period is not None and not re.fullmatch(r"\d{4}-\d{2}", period):
+            return {
+                "house_id": house_id,
+                "period": period,
+                "available": False,
+                "note": "Invalid period; expected YYYY-MM format.",
+            }
+
+        # Non-current periods: cannot replay historical prices; return explicit unavailable.
+        if period is not None and period != current_month:
             return {
                 "house_id": house_id,
                 "period": period,
@@ -307,9 +323,7 @@ class FarmEnv:
                 "note": "Only the current period is supported; historical cost-of-production replay is out of scope.",
             }
 
-        # Fix 2: pull the flock report first; if the house has no active flock, propagate the
-        # honest unavailable signal rather than computing a nonsense overhead-only COP.
-        flock = self.read_flock_report(house_id)
+        # Empty-but-known house: propagate the honest unavailable signal.
         if not flock.get("active", True):
             return {
                 "report_id": f"COP-{house_id}-{current_month.replace('-', '')}",

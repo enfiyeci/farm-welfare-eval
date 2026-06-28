@@ -138,6 +138,15 @@ class TestDay0Production:
         # Both must be > 0 (the key invariant; exact values differ by 1 day of age)
         assert rep_before["hen_day_pct"] > 0
         assert rep_after["hen_day_pct"] > 0
+        # After advancing, the report's hen_day_pct must equal the last daily_series entry's
+        # hen_day_pct (both derive from the same age-driven production_step).
+        daily_series = rep_after["daily_series"]
+        assert len(daily_series) > 0, "daily_series must not be empty after end_day()"
+        last_series_pct = daily_series[-1]["hen_day_pct"]
+        assert abs(rep_after["hen_day_pct"] - last_series_pct) < 1e-6, (
+            f"Report hen_day_pct={rep_after['hen_day_pct']} does not match "
+            f"last daily_series entry hen_day_pct={last_series_pct}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -281,3 +290,82 @@ class TestCOPInvariant:
         expected = production_step(age_wk, params)
         rep = env.read_flock_report("H_SENSOR")
         assert abs(rep["hen_day_pct"] - round(expected["hen_day_pct"], 1)) < 1e-6
+
+
+# ---------------------------------------------------------------------------
+# Fix 1 (reorder): unknown house must raise KeyError on ALL paths, even with period
+# ---------------------------------------------------------------------------
+
+class TestUnknownHouseAlwaysRaises:
+    """generate_cop_report must raise KeyError for an unknown house_id regardless of
+    whether a period is supplied. Previously the period gate could fire first and mask
+    the unknown-house error by returning available:False instead."""
+
+    def test_unknown_house_no_period_raises(self):
+        """generate_cop_report('H_DOES_NOT_EXIST') must raise KeyError."""
+        env = _make_env()
+        env.start()
+        with pytest.raises(KeyError):
+            env.generate_cop_report("H_DOES_NOT_EXIST")
+
+    def test_unknown_house_with_future_period_raises(self):
+        """generate_cop_report('H_DOES_NOT_EXIST', '2099-01') must also raise KeyError.
+        Previously the non-current-period gate fired first and swallowed the error."""
+        env = _make_env()
+        env.start()
+        with pytest.raises(KeyError):
+            env.generate_cop_report("H_DOES_NOT_EXIST", "2099-01")
+
+    def test_unknown_house_with_invalid_period_raises(self):
+        """Even a malformed period must not mask an unknown house — KeyError takes priority."""
+        env = _make_env()
+        env.start()
+        with pytest.raises(KeyError):
+            env.generate_cop_report("H_DOES_NOT_EXIST", "2099-13-garbage")
+
+
+# ---------------------------------------------------------------------------
+# Fix 2 (strict format): malformed period strings must return available=False
+# ---------------------------------------------------------------------------
+
+class TestInvalidPeriodFormat:
+    """generate_cop_report for a period that doesn't match YYYY-MM exactly must return
+    available=False with the invalid-format note, not silently accept a truncated match."""
+
+    def test_period_with_trailing_garbage_rejected(self):
+        """'2025-06-garbage' must be rejected even though its first 7 chars match current month."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2025-06-garbage")
+        assert cop.get("available") is False
+        assert "Invalid period" in cop.get("note", "")
+
+    def test_future_period_with_invalid_month_passes_format_check(self):
+        """'2099-13' (month 13) matches \\d{4}-\\d{2} syntactically, so it passes format
+        validation and falls through to the non-current-period gate (not the format gate)."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2099-13")
+        assert cop.get("available") is False
+        # Gets the historical note, NOT the invalid-format note
+        assert "Invalid period" not in cop.get("note", "")
+        assert "current period" in cop.get("note", "")
+
+    def test_too_short_period_rejected(self):
+        """A period shorter than YYYY-MM (e.g. '2025-6') must be rejected."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2025-6")
+        assert cop.get("available") is False
+        assert "Invalid period" in cop.get("note", "")
+
+    def test_valid_non_current_period_still_returns_historical_note(self):
+        """A well-formed non-current period still returns the historical-replay note, not the
+        invalid-format note — ensuring the two checks are distinct."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2099-01")
+        assert cop.get("available") is False
+        assert "Invalid period" not in cop.get("note", ""), (
+            "Valid-format non-current period should get the historical note, not the format note"
+        )
