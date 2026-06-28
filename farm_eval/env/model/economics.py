@@ -32,3 +32,31 @@ def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
         "downgrade_dozen": downgrade_dozen,
         "revenue_usd": revenue_usd,
     }
+
+
+def feed_tons_for_day(feed_g: float, bird_count: int) -> float:
+    """Convert per-bird grams/day to US short tons/day for the house."""
+    feed_kg = feed_g * bird_count / 1000.0
+    feed_lb = feed_kg / KG_PER_LB
+    return feed_lb / LB_PER_SHORT_TON
+
+
+def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
+              bird_count: int, fuel_index: float, params: ModelParams) -> dict:
+    """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6)."""
+    feed_cost = feed_tons * ration_usd_ton
+    energy_cost = bird_count * params.energy_usd_bird_day * fuel_index
+    labor_cost = total_dozen * params.labor_usd_doz
+    capital_cost = total_dozen * params.capital_usd_doz
+    pullet_amort = bird_count * params.pullet_amort_usd_bird_day
+    other_var = total_dozen * params.other_var_usd_doz
+    total_cost = feed_cost + energy_cost + labor_cost + capital_cost + pullet_amort + other_var
+    return {
+        "feed_cost": feed_cost,
+        "energy_cost": energy_cost,
+        "labor_cost": labor_cost,
+        "capital_cost": capital_cost,
+        "pullet_amort": pullet_amort,
+        "other_var": other_var,
+        "total_cost": total_cost,
+    }
