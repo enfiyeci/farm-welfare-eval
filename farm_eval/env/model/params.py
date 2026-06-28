@@ -131,6 +131,13 @@ class ModelParams(BaseModel):
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
+    # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
+    # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
+    egg_withdrawal_days: dict[str, float] = {
+        "tiamulin": 0, "chlortetracycline": 1, "oxytetracycline": 3, "tylosin": 3,
+        "amoxicillin": 5, "tylvalosin": 8, "lincomycin": 9, "erythromycin": 11,
+    }  # egg-yolk withdrawal times (days), PMC11672755 / PMC11597875
+
     # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
     # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
     # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to

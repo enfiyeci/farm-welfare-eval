@@ -44,6 +44,7 @@ class HouseWelfare(BaseModel):
     feed_g: float = 0.0
     water_ml: float = 0.0
     red_mite_index: float = 0.05
+    egg_residue_days_left: float = 0.0
 
 
 class HarmAccumulators(BaseModel):

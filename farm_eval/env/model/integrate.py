@@ -154,6 +154,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
             acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
 
+            # --- Egg drug-residue countdown (daily decrement) ---
+            if hw.egg_residue_days_left > 0.0:
+                hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
+
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
             # heat_mortality_frac is unbounded as hours-over-30 grows. hours_over_30 already
