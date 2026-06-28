@@ -147,6 +147,10 @@ class ModelParams(BaseModel):
     red_mite_action_threshold: float = 1.0 # IPM action threshold (anemia/welfare onset)
     red_mite_knockdown_floor: float = 0.05  # post-treatment residual burden (acaricide efficacy floor)
 
+    # Salmonella Enteritidis (SE) environmental test sensitivity (model-params.md §SE)
+    # Single-swab culture recovery rate (~29–58%; PubMed 32027739).
+    se_env_test_sensitivity: float = 0.6
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the
