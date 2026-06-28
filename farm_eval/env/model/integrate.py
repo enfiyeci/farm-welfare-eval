@@ -55,6 +55,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
         day = start_day + offset + 1
 
         for hid, hw in state.welfare.houses.items():
+            # Egg drug-residue countdown is calendar-based (not occupancy-based): decrement it
+            # BEFORE the empty-house skip so withdrawal time elapses even in a depopulated house.
+            if hw.egg_residue_days_left > 0.0:
+                hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
+
             birds = state.world.bird_count.get(hid, 0)
             if birds <= 0:
                 continue  # empty house — skip entirely, no harm, no div-by-zero
@@ -153,10 +158,6 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Red-mite burden (daily logistic growth) ---
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
             acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
-
-            # --- Egg drug-residue countdown (daily decrement) ---
-            if hw.egg_residue_days_left > 0.0:
-                hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
