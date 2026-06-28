@@ -62,6 +62,21 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
     }
 
 
+def cop_cents_doz(financial) -> float:
+    """Cost of production, cents per sellable dozen."""
+    doz = financial.sellable_dozen_cum
+    if doz <= 0:
+        return 0.0
+    total_cost = financial.feed_cost_cum + financial.other_cost_cum
+    return (total_cost / doz) * 100.0
+
+
+def margin_cents_doz(financial) -> float:
+    """Margin, cents per sellable dozen."""
+    doz = financial.sellable_dozen_cum
+    return (financial.margin / doz) * 100.0 if doz > 0 else 0.0
+
+
 def consume_feed(financial, feed_tons: float, spot_ration_usd_ton: float) -> float:
     """Draw feed_tons from booked inventory at weighted-average cost; charge any shortfall at
     spot. Mutates financial.{feed_inventory_tons, feed_book_value_usd}. Returns the $ cost.

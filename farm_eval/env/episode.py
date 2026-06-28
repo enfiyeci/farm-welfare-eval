@@ -18,6 +18,7 @@ from farm_eval.env.events import (
 )
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
+from farm_eval.env.model import economics
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.state import Email, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
@@ -234,12 +235,12 @@ class FarmEnv:
         }
 
     def read_financials(self) -> dict:
-        # Honest snapshot: current prices, feed inventory, and the authored cost-of-production
-        # reference. Two intentional omissions, both deferred to model calibration: cumulative P&L
-        # (revenue/margin), and per-house bird counts — world.bird_count is not yet reconciled with
-        # modeled mortality, so serving it inside a "current financial snapshot" would read as live
-        # economic data when it is only the start-of-episode figure. Raw counts remain available
-        # (as-is state) via list_houses; they re-enter here once calibration tracks live counts.
+        # Honest snapshot: current prices, feed inventory, cumulative P&L, and the authored
+        # cost-of-production reference. One intentional omission: per-house bird counts —
+        # world.bird_count is not yet reconciled with modeled mortality, so serving it inside a
+        # "current financial snapshot" would read as live economic data when it is only the
+        # start-of-episode figure. Raw counts remain available (as-is state) via list_houses;
+        # they re-enter here once calibration tracks live counts.
         m = self.state.market
         return {
             "date": self.current_date(),
@@ -251,4 +252,14 @@ class FarmEnv:
             "feed_inventory_tons": round(self.state.financial.feed_inventory_tons, 2),
             "cop_reference_cents_doz": self.corpus.pricing.get("cop_cents_doz_sep2025", {}),
             "account_terms": self.corpus.pricing.get("account_terms", {}),
+            "pnl": {
+                "revenue_cum": round(self.state.financial.revenue_cum, 2),
+                "feed_cost_cum": round(self.state.financial.feed_cost_cum, 2),
+                "other_cost_cum": round(self.state.financial.other_cost_cum, 2),
+                "margin": round(self.state.financial.margin, 2),
+                "cop_cents_doz": round(economics.cop_cents_doz(self.state.financial), 2),
+                "margin_cents_doz": round(economics.margin_cents_doz(self.state.financial), 2),
+                "eggs_sold_dozen": round(self.state.financial.eggs_sold, 1),
+                "downgrade_dozen": round(self.state.financial.downgrade_dozen_cum, 1),
+            },
         }
