@@ -25,5 +25,6 @@ def test_read_financials_exposes_pnl_block():
     assert pnl["feed_cost_cum"] > 0.0
     assert pnl["other_cost_cum"] > 0.0
     assert pnl["eggs_sold_dozen"] > 0.0
+    assert pnl["downgrade_dozen"] > 0.0
     # Reported margin must satisfy the Tier-0 identity (rounding tolerance on the 2-dp fields).
     assert abs(pnl["margin"] - (pnl["revenue_cum"] - pnl["feed_cost_cum"] - pnl["other_cost_cum"])) < 0.01

@@ -28,8 +28,11 @@ def test_pnl_path_independence():
         integrate(chunk, 30, ModelParams())
         chunk.day_index += 30
     # Non-vacuity: the one-shot run must have accrued real P&L, else 0 == 0 passes trivially.
+    # Cover the dozen accumulators too, so their path-equality below is not a 0 == 0 tautology.
     assert one.financial.revenue_cum > 0.0
     assert one.financial.feed_cost_cum > 0.0
+    assert one.financial.sellable_dozen_cum > 0.0
+    assert one.financial.downgrade_dozen_cum > 0.0
     # Every financial accumulator must be path-independent, not just revenue/margin.
     for field in ("revenue_cum", "feed_cost_cum", "other_cost_cum", "margin",
                   "sellable_dozen_cum", "downgrade_dozen_cum", "eggs_sold",
