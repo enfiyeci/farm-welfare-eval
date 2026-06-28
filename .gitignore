@@ -8,6 +8,7 @@ __pycache__/
 venv/
 *.egg-info/
 .pytest_cache/
+.claude/
 
 # Generated, human-readable reference only — NOT consumed by the judge (the scorer reads
 # judge/dimensions/*.md, the source of truth). Regenerate on demand: node docs/build-rubric.mjs
