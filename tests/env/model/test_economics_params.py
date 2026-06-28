@@ -1,4 +1,14 @@
+import pytest
+from pydantic import ValidationError
+
 from farm_eval.env.model.params import ModelParams
+
+
+def test_modelparams_rejects_mismatched_downgrade_lists():
+    # The downgrade age/value anchors are a parallel-list table like breed_/keel_/feather_;
+    # a length mismatch must fail fast at construction, not silently survive until _interp.
+    with pytest.raises(ValidationError):
+        ModelParams(downgrade_age_wk=[30, 80], downgrade_frac_pct=[3.2])
 
 
 def test_economic_params_present_with_research_anchored_defaults():

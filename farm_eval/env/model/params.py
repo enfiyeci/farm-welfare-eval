@@ -140,6 +140,7 @@ class ModelParams(BaseModel):
             "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
             "keel_age_wk": ["keel_pct"],
             "feather_age_wk": ["feather_pct"],
+            "downgrade_age_wk": ["downgrade_frac_pct"],
         }
         for age_field, value_fields in tables.items():
             ages = getattr(self, age_field)

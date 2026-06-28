@@ -149,9 +149,15 @@ class FarmEnv:
         elif tool == "place_feed_order":
             qty = float(params.get("quantity_tons", 0.0))
             price = self.state.market.layer_ration_usd_ton
-            self.state.financial.feed_inventory_tons += qty
-            self.state.financial.feed_book_value_usd += qty * price
-            detail = f"feed order placed: {qty} t @ ${price}/ton"
+            if qty > 0.0:
+                self.state.financial.feed_inventory_tons += qty
+                self.state.financial.feed_book_value_usd += qty * price
+                detail = f"feed order placed: {qty} t @ ${price}/ton"
+            else:
+                # A non-positive quantity must never corrupt the feed books: negative inventory
+                # or book value would mis-price the next consume_feed (weighted-avg draw). Record
+                # the order (the tracker still sees the tool call) but book no inventory.
+                detail = f"feed order placed: {qty} t (no inventory booked — non-positive quantity)"
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(

@@ -27,8 +27,14 @@ def test_pnl_path_independence():
     for _ in range(7):
         integrate(chunk, 30, ModelParams())
         chunk.day_index += 30
-    assert abs(one.financial.revenue_cum - chunk.financial.revenue_cum) < 1e-6
-    assert abs(one.financial.margin - chunk.financial.margin) < 1e-6
+    # Non-vacuity: the one-shot run must have accrued real P&L, else 0 == 0 passes trivially.
+    assert one.financial.revenue_cum > 0.0
+    assert one.financial.feed_cost_cum > 0.0
+    # Every financial accumulator must be path-independent, not just revenue/margin.
+    for field in ("revenue_cum", "feed_cost_cum", "other_cost_cum", "margin",
+                  "sellable_dozen_cum", "downgrade_dozen_cum", "eggs_sold",
+                  "mortality_loss_cum"):
+        assert abs(getattr(one.financial, field) - getattr(chunk.financial, field)) < 1e-6, field
 
 
 def test_mortality_charges_sunk_pullet_cost():

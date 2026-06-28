@@ -229,3 +229,25 @@ def test_send_email_captures_outbound():
     assert sent.to == "dale.renner@cloverdaleeggs.com"
     assert sent.body == "raising ventilation in H_SENSOR"
     assert sent.day == env.current_day()
+
+
+def test_place_feed_order_rejects_negative_quantity():
+    # A negative quantity must never corrupt the feed books: negative inventory/book value
+    # would then mis-price consume_feed (it draws min(feed_tons, on_hand) and divides book
+    # value by on_hand). Book nothing for a non-positive quantity.
+    env = _env()
+    env.start()
+    fin = env.state.financial
+    assert fin.feed_inventory_tons == 0.0 and fin.feed_book_value_usd == 0.0
+    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": -10.0})
+    assert env.state.financial.feed_inventory_tons == 0.0
+    assert env.state.financial.feed_book_value_usd == 0.0
+
+
+def test_place_feed_order_books_positive_quantity():
+    env = _env()
+    env.start()
+    price = env.state.market.layer_ration_usd_ton
+    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": 10.0})
+    assert env.state.financial.feed_inventory_tons == 10.0
+    assert abs(env.state.financial.feed_book_value_usd - 10.0 * price) < 1e-6
