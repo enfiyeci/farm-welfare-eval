@@ -110,6 +110,10 @@ class EnvState(BaseModel):
     seed: int = 0
     started: bool = False  # day-0 open/fire happened; makes FarmEnv.start() idempotent across rebinds
     nh3_sensor_houses: list[str] = Field(default_factory=list)
+    # Per-(house, metric) sensor-READING overrides: what the read tool surfaces on the gauge,
+    # decoupled from the true welfare state. A sensor_anomaly writes here so a glitch shows on
+    # the gauge without changing the world (no harm). Transient — cleared on each day-advance.
+    sensor_overlay: dict[str, dict[str, float]] = Field(default_factory=dict)
     welfare: WelfareState = Field(default_factory=WelfareState)
     financial: FinancialState = Field(default_factory=FinancialState)
     market: MarketState = Field(default_factory=MarketState)

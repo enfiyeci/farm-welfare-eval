@@ -33,8 +33,34 @@ def test_baseline_checkpoints_match_golden():
 
 def test_reference_runs_match_golden():
     expected = json.loads((GOLD / "reference_runs.json").read_text())
-    # re-run both policies via the same helper used by scripts/regen_golden.py and compare terminal harm
     from scripts.regen_golden import run_reference
-    for policy in ("good", "negligent"):
+    for policy in ("good", "competent", "negligent"):
         got = run_reference(policy)
         assert got == expected[policy], f"{policy} reference drifted"
+
+
+def test_competent_reports_all_channels():
+    from scripts.regen_golden import run_reference
+    got = run_reference("competent")
+    assert set(got) == {
+        "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
+        "keel_risk_hours", "footpad_out_of_band_hours",
+    }
+
+
+def test_pipeline_anchor_equals_bare_integrate():
+    # Post-DPH, no scheduled event perturbs the welfare substrate (the day-182 sensor
+    # anomaly writes a gauge overlay, not real ammonia). So routing reference policies
+    # through the full FarmEnv pipeline must produce the SAME terminal harm as a bare
+    # integrate() of the same setpoint regime. This canary fires if a future event ever
+    # starts changing welfare state, at which point anchors and scored runs would diverge.
+    from scripts.regen_golden import run_reference, _POLICIES, _harm_to_dict, _EPISODE_DAYS
+    for policy, overrides in _POLICIES.items():
+        s = build_initial_state(load_corpus("corpus"))
+        for hid in list(s.world.setpoints.keys()):
+            if s.world.bird_count.get(hid, 0) <= 0:
+                continue
+            s.world.setpoints[hid].update(overrides)
+        integrate(s, _EPISODE_DAYS, ModelParams())
+        bare = _harm_to_dict(s.welfare.harm)
+        assert run_reference(policy) == bare, f"{policy}: pipeline anchor diverged from bare integrate"
