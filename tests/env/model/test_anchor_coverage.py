@@ -13,6 +13,11 @@ ANCHORS = {
     "margin identity": "test_integrate_populates_pnl",
     "procurement timing lever": "test_buying_ahead_of_price_rise_is_cheaper",
     "COP cents/doz": "test_cop_and_margin_per_dozen",
+    "worker NH3 over-threshold accrual": "test_worker_exposure_accrues_only_over_threshold",
+    "red-mite logistic growth": "test_red_mite_grows_logistically_toward_carrying",
+    "drug-residue withdrawal map (erythromycin 11d)": "test_withdrawal_map_has_research_anchored_values",
+    "SE env-test sensitivity-limited": "test_positive_flock_detection_is_sensitivity_limited_but_deterministic",
+    "HPAI subclinical-then-exponential": "test_subclinical_then_exponential_rise",
 }
 
 
