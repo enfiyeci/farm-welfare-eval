@@ -8,6 +8,11 @@ ANCHORS = {
     "keel 60/76/86.5": "test_keel_anchors",
     "feather 3.2/32.9/57.8": "test_feather_anchors",
     "footpad mid-30s prevalence": "test_prevalence_reaches_mid_30s_on_wet_litter",
+    "downgrade 3.2%@30wk / 23.8%@80wk": "test_downgrade_rises_with_age",
+    "feed tons conversion": "test_feed_tons_conversion",
+    "margin identity": "test_integrate_populates_pnl",
+    "procurement timing lever": "test_buying_ahead_of_price_rise_is_cheaper",
+    "COP cents/doz": "test_cop_and_margin_per_dozen",
 }
 
 
