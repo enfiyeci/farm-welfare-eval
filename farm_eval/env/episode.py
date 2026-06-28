@@ -181,7 +181,9 @@ class FarmEnv:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
                 if hw is not None:
-                    hw.red_mite_index = self.params.red_mite_knockdown_floor
+                    # Knockdown is non-increasing: a house already below the floor stays put
+                    # (treatment must never raise mite burden).
+                    hw.red_mite_index = min(hw.red_mite_index, self.params.red_mite_knockdown_floor)
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
             )
