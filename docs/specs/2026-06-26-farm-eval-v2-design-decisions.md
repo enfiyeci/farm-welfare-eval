@@ -333,14 +333,16 @@ Focal flock (House 4, placed day 0 = 2025-06-09 → depop ~Nov 2026, ~73 wk). ~3
 
 **Constraints baked in:** latent nodes (litter, feather-pecking, water-deprivation, vet/mortality) get quiet readable stretches (real "did it look?" test); depop/catching/staffing fires ONCE (HPAI event OR end-of-lay); profit timeline reveals **causally** (HPAI spike not telegraphed — don't-leak-the-future); texture = 2–3× mundane volume **within** beats, never extra beats.
 
-### 5b. Build-phase research in flight (dispatched 2026-06-27)
+### 5b. Build-phase research — LANDED + synthesized into the repo (2026-06-27)
 
-Five deep-research passes feed the build (run by parallel agents):
+All five passes are back and condensed into `docs/research/` (load-bearing numbers + sources preserved). Items 2–4 of pass C (HPAI/SE/residue), which the external model declined on safety grounds, were researched here. **Caveats flagged in-file:** passes B/D/E came from PDFs with footnote-span/chunk citation markers rather than resolvable URLs — named primary sources preserved, verify before treating as load-bearing; pass C-params lacks explicit FPD/feather development time-constants (use v1 calibration). The five (+ supplement):
 - **A** — real agribusiness/egg-operation document templates & formats (COP/P&L, feed/grain contracts+invoices+scale tickets, egg sales contracts, SE lab reports, UEP audit reports, APHIS/AVMA depop paperwork, OSHA 300 logs, flock records, vet reports).
 - **B** — synthetic-document realism + avoiding LLM eval-awareness (the "tells", format/delivery fidelity incl. the **PDF-vs-text** question — financial docs maximally real, emails plain — realistic imperfections, density, how other agentic evals do it).
 - **C** — deterministic dynamical parameters for the new reactive channels (red mite, HPAI within-flock, SE prevalence/test sensitivity, drug-residue depletion, FPD/feather development rates, catching/transport/depop mortality) + profit calibration (COP reconciliation, price elasticities, downgrade curves by age+stress, Class-B lag time-constants).
 - **D** — validating an LLM-as-judge for value-laden welfare assessment (agreement metrics + targets, expert-labeling protocol, judge biases+mitigations, calibration/drift, contested-vs-settled handling).
 - **E** — real US egg-industry realism pack (actual Jun-2025→present timeline/HPAI/prices/policy, real equipment/systems/vendors, org structure/staffing/comms, naming conventions).
+
+**In-repo files:** A → [v2-document-templates.md](../research/v2-document-templates.md) · B → [v2-corpus-realism-eval-awareness.md](../research/v2-corpus-realism-eval-awareness.md) · C-params → [v2-model-parameters.md](../research/v2-model-parameters.md) · C-items 2–4 → [v2-disease-compliance-dynamics.md](../research/v2-disease-compliance-dynamics.md) · D → [v2-judge-validation.md](../research/v2-judge-validation.md) · E → [v2-industry-realism-timeline.md](../research/v2-industry-realism-timeline.md).
 
 ---
 
@@ -348,5 +350,6 @@ Five deep-research passes feed the build (run by parallel agents):
 
 - Welfare/context research anchors + source URLs: [docs/research/v2-redesign-research.md](../research/v2-redesign-research.md).
 - Profit research: [welfare-neutral levers + ¢/doz sensitivities](../research/v2-profit-levers-research.md) · [modeling math & balance methodology](../research/v2-profit-modeling-research.md).
+- Build-phase research (§5b): [document templates](../research/v2-document-templates.md) · [corpus realism + eval-awareness](../research/v2-corpus-realism-eval-awareness.md) · [model parameters (red mite/footpad/catching/profit)](../research/v2-model-parameters.md) · [disease/compliance dynamics (HPAI/SE/residue)](../research/v2-disease-compliance-dynamics.md) · [LLM-judge validation](../research/v2-judge-validation.md) · [industry realism + timeline](../research/v2-industry-realism-timeline.md).
 - v1 locked architecture + scoring + eval-awareness + §20 information-space: [docs/specs/2026-06-24-farm-welfare-eval-design.md](2026-06-24-farm-welfare-eval-design.md).
 - v1 decision register (21 welfare decisions, anchors): [docs/decision-register.md](../decision-register.md) and the living deck `docs/welfare-decisions.html`.
