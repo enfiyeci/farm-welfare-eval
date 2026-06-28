@@ -21,7 +21,7 @@ from __future__ import annotations
 from farm_eval.env.state import EnvState
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
-from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter
+from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter, red_mite
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
 
@@ -149,6 +149,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # --- Feather damage (daily snapshot from age curve) ---
             hw.feather_damage_pct = feather.feather_damage_pct(age, params)
+
+            # --- Red-mite burden (daily logistic growth) ---
+            hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
+            acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in

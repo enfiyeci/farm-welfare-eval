@@ -43,6 +43,7 @@ class HouseWelfare(BaseModel):
     hen_day_pct: float = 0.0
     feed_g: float = 0.0
     water_ml: float = 0.0
+    red_mite_index: float = 0.05
 
 
 class HarmAccumulators(BaseModel):
@@ -54,6 +55,7 @@ class HarmAccumulators(BaseModel):
     keel_risk_hours: float = 0.0
     footpad_out_of_band_hours: float = 0.0
     worker_nh3_ppm_hours_over: float = 0.0
+    red_mite_index_hours_over: float = 0.0
 
 
 class WelfareState(BaseModel):

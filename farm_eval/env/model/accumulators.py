@@ -88,3 +88,9 @@ def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: 
         threshold: Worker NH3 occupational threshold (ppm); typically params.worker_nh3_threshold (25.0, NIOSH REL).
     """
     h.worker_nh3_ppm_hours_over += max(0.0, ppm - threshold) * hours
+
+
+def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: float) -> None:
+    """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost)."""
+    if index > threshold:
+        h.red_mite_index_hours_over += (index - threshold) * hours

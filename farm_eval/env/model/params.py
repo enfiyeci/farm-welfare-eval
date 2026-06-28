@@ -131,6 +131,15 @@ class ModelParams(BaseModel):
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
+    # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
+    # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
+    # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to
+    # red_mite_knockdown_floor via log_treatment action.
+    red_mite_growth: float = 0.12          # per-day logistic rate (generation-time anchored)
+    red_mite_carrying: float = 3.0         # relative carrying capacity
+    red_mite_action_threshold: float = 1.0 # IPM action threshold (anemia/welfare onset)
+    red_mite_knockdown_floor: float = 0.05  # post-treatment residual burden (acaricide efficacy floor)
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the
