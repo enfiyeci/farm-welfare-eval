@@ -53,11 +53,18 @@ One welfare scoring **spine**. Every decision carries a `stakeholder` tag (`anim
   - **Class B — genuine tradeoffs** (stocking density, keel-safe tier design, cheaper/lower-spec feed, molt method). Welfare costs measured money → the real **propensity** tests.
 - **Guardrails** (from the agent-business-benchmark survey): (1) **never expose profit to the agent as an explicit target** (reward-hacking is guaranteed — Vending-Bench/AI-Economist/TheAgentCompany all got gamed); (2) make **every welfare degradation mechanically consequential on a delay** (FS22 lesson: no mechanical cost → stewardship isn't a real decision; our reactive substrate supports this); (3) make the profit optimum **state-dependent** (flock age, season, feed/egg prices) so there's no dominant dial; (4) **report reliability across runs** (pass^k / variance band), not single-run deltas; (5) score against deterministic ground-truth state the agent can't write (Layer-1 already does).
 
-### 1.4 Human-playable driver (`play.py`) — first-class deliverable
+### 1.4 Human-playable driver — an interactive FMS dashboard (decided 2026-06-27)
 
-A thin CLI/TUI "human driver" over the **Inspect-free env core** (`FarmEnv` is the seam): loop = print date + inbox + dashboard → read a typed tool command → call the *same* tool functions the model calls → advance on `end_day`. No model, no API key, deterministic.
+A human-playable interface over the **Inspect-free env core** (`FarmEnv` is the seam): you play the farm through the **same tools the model uses**, seeing the **same information**. Per the user (2026-06-27) this is an **interactive dashboard**, not a terse CLI — literally the FMS operator UI the model is told it's running. No model, no API key, deterministic.
 
-- **Payoffs:** difficulty calibration (is the task doable? are hooks noticeable or buried?) — feeds the §15 pilot-before-freeze gate; **judge-validation for free** (your play-through is a hand-labeled reference transcript for the Spearman-ρ gate); catches incoherent tool outputs (the #1 eval-awareness tell) fast.
+**Architecture — one backend, multiple front-ends (build the backend once):**
+- **Play backend** — a thin "session" layer over `FarmEnv`: exposes every tool, runs the beat loop, handles blind/debug modes, emits the transcript + final `EnvState`/ledger. Frontend-agnostic.
+- **Dashboard frontend** — a small local web app (Python server wrapping `FarmEnv` + HTML/JS UI; reuses the repo's existing build-site/HTML pattern): house tiles + status, sensor time-series as charts, inbox, financials, alerts, and clickable/fillable actions (setpoints, email, orders, `end_day`).
+- **Scriptable harness** (same backend, no UI) — drive the env from a Python policy function; how the **profit reference policies** (competent baseline / expert ceiling) are authored programmatically.
+
+**Hard rule — information fidelity:** the dashboard may *render* nicer (chart vs raw JSON) but must show **only the information the tools actually return** — no extra aggregations the model can't get; in **blind mode** no latent-signal highlighting and no live scoring (so it's a valid difficulty measure). A **debug mode** shows the ledger + state deltas + reactive-model internals live (world-debugging; catches incoherent tool outputs, the #1 eval-awareness tell).
+
+- **Payoffs:** difficulty calibration (is the task doable? are hooks noticeable or buried?) — feeds the §15 pilot-before-freeze gate; **judge-validation for free** (a blind play-through is a hand-labeled reference transcript for the Spearman-ρ gate); authoring the **profit reference runs**; and (future, §3.10) **transcript replay** — step through a model's run in the same UI for the §19 holistic analysis.
 
 ### 1.5 Context budget — keep event-driven sparse-jump; trim for the first run
 
@@ -255,6 +262,12 @@ The full program from the [modeling research](../research/v2-profit-modeling-res
 - **Formal acceptance-criteria freeze** — the full accounting/dynamic/no-dominant/no-exploit/state-dependence/no-trivial-lever/welfare-integrity checklist.
 - **Why deferred:** a months-long standalone quant-modeling project; much of it (DP optimum, Sobol, CMA-ES, reward-shaping) solves problems we largely don't have (no training, profit never exposed as reward, LLM agent won't grind exploits). Risks the profit subsystem dwarfing the welfare eval it exists to support.
 
+### 3.10 Dashboard extensions + alternatives to hand-playing (deferred per user, 2026-06-27)
+
+To revisit **after** a working play version is ready with everything wired (user's explicit sequencing).
+- **Transcript replay** — render a model's `.eval` transcript through the same dashboard (step through what the model saw + did). Big win for the §19 holistic behavioral analysis and for explaining scores.
+- **Alternatives to hand-playing as the measurement** — hand-playing is NOT the only option; the scriptable harness (§1.4) means reference/expert/baseline plays can be **scripted policies** (coded competent/expert operators) or model-generated at varied settings. Worth exploring whether scripted/automated references can replace or supplement hand-play for difficulty calibration + the profit J_opt/J_baseline. Parked until the dashboard works.
+
 ---
 
 ## 4. Cost model
@@ -280,7 +293,7 @@ The full program from the [modeling research](../research/v2-profit-modeling-res
 1. ~~Confirm the trimmed node list~~ **DONE (2026-06-27): locked at 23 nodes** (§2.4), with signature kinds + promptedness assigned (§2.4a). Kept 23 (not 22) for the first run — cost is a non-issue (Gemini credits) and **trimming later is far cheaper than adding** (remove = drop beats + stop scoring; add = author corpus/events + calibrate coupling + write rubric + re-validate judge). 23 holds the context budget (~35–37 beats, ~90–95k peak). **Future trim floor: ~15–16 nodes** (reliability floor — ≥2 nodes per category/stakeholder so the per-category profile + per-stakeholder breakout stay stable); ~12 is the bare coverage floor (all 6 categories + Class A/B + all stakeholders + shared + trap + epistemic present at all). Don't go below ~15–16 in leaner runs.
 2. **Profit-model Tier-0 build** (approach decided §1.8; build details open) — the financial state + reactive coupling in `farm_eval/env/model/`: P&L core (revenue/cost/margin/NPV), COP lines, feed/egg price timeline (reuse world-bible §8 + research §6), HDEP revenue curve, downgrades, mortality→pullet-cost feedback, the delayed-consequence (lag-template) wiring for Class B levers. **Decide:** exact operational clean levers + their tool surface (feed-procurement timing is the star); calibrate to one reconciled month (world-bible §7); author the competent + expert reference runs (via `play.py`); audit-logging profit decomposition. Don't-leak-the-future authoring constraint.
 3. ~~Stakeholder aggregation weights~~ **DONE (2026-06-27): Option A** — equal per decision for the headline, report stakeholder-balanced (B) + the breakout alongside, weighting is a visible config (§1.2).
-4. **`play.py` interface** — command grammar, what it renders per beat.
+4. **Play interface = interactive FMS dashboard** (decided §1.4) — build details open: the play-backend session layer, the web dashboard, the scriptable harness; blind/debug modes; what each panel renders (faithful to tool outputs). Replay + scripted-reference alternatives deferred (§3.10).
 5. **Judge dimensions delta** — add `stakeholder`-aware dimensions / breakout; extend the integrity family; the human-welfare anchors (OSHA/NIOSH/FDA/PITS) into `judge/dimensions/*.md`.
 6. **Re-budget the beat schedule** (`schedule/events.yml`) for the new nodes while holding ~35 beats / ~90k peak.
 7. **Process gates unchanged:** judge-validation (Spearman ρ vs expert labels) + pilot-before-freeze (2–3 models, measure welfare-elicitation AND eval-awareness) before any production sweep.
