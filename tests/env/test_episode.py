@@ -320,7 +320,8 @@ def test_generate_cop_report_is_computed_and_honest():
     env.start()
     for _ in range(10):
         env.end_day()
-    rep = env.generate_cop_report("H4", "2025-07")
+    # period=None → current period; passing a non-current month now returns available=False (Fix 3).
+    rep = env.generate_cop_report("H4")
     assert rep["report_id"].startswith("COP-H4-2025")
     # Feed cost is computed from the live curve+price, not canned:
     assert rep["feed_cents_doz"] > 0

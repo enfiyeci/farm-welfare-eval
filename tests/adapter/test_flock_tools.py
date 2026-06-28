@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+import pytest
 from inspect_ai import Task
 from inspect_ai import eval as inspect_eval
 from inspect_ai.dataset import Sample
@@ -11,11 +12,23 @@ from inspect_ai.solver import Generate, TaskState, solver
 from farm_eval.adapter.context import EpisodeConfig, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.flock import generate_cop_report, read_flock_report
+from farm_eval.env.loader import build_initial_state, load_corpus, load_schedule
+from farm_eval.env.episode import FarmEnv
+from farm_eval.env.model.params import ModelParams
+from farm_eval.env.model.layers.production import production_step
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
 CFG = EpisodeConfig(
     corpus_path=str(FIX / "corpus"), schedule_path=str(FIX / "schedule"), episode_end_day=400, seed=1
 )
+
+
+def _make_env() -> FarmEnv:
+    """Build a FarmEnv from fixtures (without starting it)."""
+    corpus = load_corpus(FIX / "corpus")
+    schedule = load_schedule(FIX / "schedule")
+    state = build_initial_state(corpus)
+    return FarmEnv(corpus, schedule, state, 400, ModelParams())
 
 
 def _run(solve_fn):
@@ -60,3 +73,211 @@ def test_generate_cop_report_tool_returns_json():
     rep = json.loads(log.samples[0].metadata["cop"])
     assert rep["house_id"] == "H_SENSOR"
     assert "total_cents_doz" in rep
+
+
+# ---------------------------------------------------------------------------
+# Fix 1: Day-0 reads must show live production (not zero)
+# ---------------------------------------------------------------------------
+
+class TestDay0Production:
+    """read_flock_report at day-0 (after start(), before end_day()) must report
+    age-driven production values, not zeros from the un-integrated HouseWelfare fields."""
+
+    def test_hen_day_pct_positive_at_day0(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_SENSOR")
+        assert rep["hen_day_pct"] > 0, (
+            f"Expected hen_day_pct > 0 at day-0 but got {rep['hen_day_pct']}"
+        )
+
+    def test_feed_g_positive_at_day0(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_SENSOR")
+        assert rep["feed_g"] > 0, (
+            f"Expected feed_g > 0 at day-0 but got {rep['feed_g']}"
+        )
+
+    def test_day0_values_match_production_step(self):
+        """The reported values must equal production_step(age_wk, params) exactly."""
+        env = _make_env()
+        env.start()
+        params = ModelParams()
+        age_wk = env.state.world.age_weeks_at_start.get("H_SENSOR", 0.0)  # +0 days at day-0
+        expected = production_step(age_wk, params)
+        rep = env.read_flock_report("H_SENSOR")
+        assert abs(rep["hen_day_pct"] - round(expected["hen_day_pct"], 1)) < 1e-6, (
+            f"hen_day_pct mismatch: report={rep['hen_day_pct']} expected={expected['hen_day_pct']}"
+        )
+        assert abs(rep["feed_g"] - round(expected["feed_g"], 1)) < 1e-6, (
+            f"feed_g mismatch: report={rep['feed_g']} expected={expected['feed_g']}"
+        )
+        eggs_per_hen_expected = round(expected["hen_day_pct"] / 100.0, 3)
+        assert abs(rep["eggs_per_hen"] - eggs_per_hen_expected) < 1e-6, (
+            f"eggs_per_hen mismatch: report={rep['eggs_per_hen']} expected={eggs_per_hen_expected}"
+        )
+
+    def test_cop_feed_cents_doz_positive_at_day0(self):
+        """generate_cop_report must return feed_cents_doz > 0 at day-0 (inherits from fix 1)."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR")
+        assert cop.get("feed_cents_doz", 0) > 0, (
+            f"Expected feed_cents_doz > 0 at day-0 but got {cop.get('feed_cents_doz')}"
+        )
+
+    def test_day0_and_after_advance_hen_day_pct_consistent(self):
+        """After end_day() production is still age-driven, so values should remain consistent
+        with production_step (not suddenly jump from 0)."""
+        env = _make_env()
+        env.start()
+        rep_before = env.read_flock_report("H_SENSOR")
+        env.end_day()
+        rep_after = env.read_flock_report("H_SENSOR")
+        # Both must be > 0 (the key invariant; exact values differ by 1 day of age)
+        assert rep_before["hen_day_pct"] > 0
+        assert rep_after["hen_day_pct"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Fix 2: Empty houses must return active=False, not fabricated metrics
+# ---------------------------------------------------------------------------
+
+class TestEmptyHouse:
+    """read_flock_report and generate_cop_report on a house with bird_count=0 must
+    return honest 'no active flock' signals, not invented numbers."""
+
+    def test_read_flock_report_active_false(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_EMPTY")
+        assert rep.get("active") is False, (
+            f"Expected active=False for empty house, got {rep.get('active')}"
+        )
+
+    def test_read_flock_report_no_body_weight(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_EMPTY")
+        assert "body_weight_g" not in rep, (
+            "body_weight_g must NOT appear in empty-house report (fabricated metric)"
+        )
+
+    def test_read_flock_report_no_hen_day_pct(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_EMPTY")
+        assert "hen_day_pct" not in rep, (
+            "hen_day_pct must NOT appear in empty-house report (fabricated metric)"
+        )
+
+    def test_read_flock_report_bird_count_zero(self):
+        env = _make_env()
+        env.start()
+        rep = env.read_flock_report("H_EMPTY")
+        assert rep.get("bird_count") == 0
+
+    def test_generate_cop_report_available_false(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_EMPTY")
+        assert cop.get("available") is False, (
+            f"Expected available=False for empty house COP, got {cop.get('available')}"
+        )
+
+    def test_generate_cop_report_no_total_cents_doz(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_EMPTY")
+        assert "total_cents_doz" not in cop, (
+            "total_cents_doz must NOT appear in empty-house COP (fabricated metric)"
+        )
+
+    def test_unknown_house_still_raises(self):
+        """A genuinely unknown house_id must raise KeyError (only empty-but-known is guarded)."""
+        env = _make_env()
+        env.start()
+        with pytest.raises(KeyError):
+            env.read_flock_report("H_DOES_NOT_EXIST")
+
+
+# ---------------------------------------------------------------------------
+# Fix 3: generate_cop_report mislabels period — non-current must return available=False
+# ---------------------------------------------------------------------------
+
+class TestCOPPeriod:
+    """generate_cop_report for a non-current period must not mislabel current prices
+    under a historical period key."""
+
+    def test_future_period_available_false(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2099-01")
+        assert cop.get("available") is False, (
+            f"Expected available=False for non-current period, got {cop.get('available')}"
+        )
+
+    def test_future_period_no_total_cents_doz(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2099-01")
+        assert "total_cents_doz" not in cop, (
+            "total_cents_doz must NOT appear for non-current period (mislabeled number)"
+        )
+
+    def test_future_period_preserves_period_label(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2099-01")
+        assert cop.get("period") == "2099-01"
+
+    def test_current_period_still_works(self):
+        """When period=None (default) or matches the current month, the COP is computed normally."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR")
+        assert "total_cents_doz" in cop
+        assert cop.get("available", True) is not False  # should not be available=False
+
+    def test_explicit_current_month_works(self):
+        """Providing the current month explicitly must behave the same as period=None."""
+        env = _make_env()
+        env.start()
+        current_month = env.current_date()[:7]
+        cop_none = env.generate_cop_report("H_SENSOR")
+        cop_explicit = env.generate_cop_report("H_SENSOR", period=current_month)
+        assert "total_cents_doz" in cop_explicit
+        assert cop_explicit["total_cents_doz"] == cop_none["total_cents_doz"]
+
+    def test_past_period_available_false(self):
+        """A past period (e.g. from before the episode) must also return available=False."""
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR", period="2020-01")
+        assert cop.get("available") is False
+
+
+# ---------------------------------------------------------------------------
+# Known-value invariant: total_cents_doz == feed + overhead (existing invariant)
+# ---------------------------------------------------------------------------
+
+class TestCOPInvariant:
+    def test_total_equals_feed_plus_overhead(self):
+        env = _make_env()
+        env.start()
+        cop = env.generate_cop_report("H_SENSOR")
+        assert abs(cop["total_cents_doz"] - (cop["feed_cents_doz"] + cop["overhead_cents_doz"])) < 1e-6, (
+            f"total={cop['total_cents_doz']} != feed={cop['feed_cents_doz']} + overhead={cop['overhead_cents_doz']}"
+        )
+
+    def test_hen_day_pct_matches_production_step_after_advance(self):
+        """After advancing one day, hen_day_pct must match production_step for the updated age."""
+        env = _make_env()
+        env.start()
+        env.end_day()
+        params = ModelParams()
+        age_wk = env.state.world.age_weeks_at_start.get("H_SENSOR", 0.0) + 1 / 7.0  # day index is now 1
+        expected = production_step(age_wk, params)
+        rep = env.read_flock_report("H_SENSOR")
+        assert abs(rep["hen_day_pct"] - round(expected["hen_day_pct"], 1)) < 1e-6

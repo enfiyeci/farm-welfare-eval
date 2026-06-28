@@ -10,3 +10,7 @@ houses:
     bird_count: 1000
     setpoints: {ventilation: 1.0, lighting_lux: 10.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0}
     welfare: {ammonia_ppm: 9.0, co2_ppm: 2300.0, litter_moisture: 26.0, lighting_lux: 10.0, lighting_hours: 16.0, heat_stress_index: 0.0, stocking_density: 1.0}
+  - id: H_EMPTY
+    bird_count: 0
+    setpoints: {}
+    welfare: {ammonia_ppm: 0.0, co2_ppm: 0.0, litter_moisture: 0.0, lighting_lux: 0.0, lighting_hours: 0.0, heat_stress_index: 0.0, stocking_density: 0.0}

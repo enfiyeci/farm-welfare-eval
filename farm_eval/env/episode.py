@@ -242,21 +242,40 @@ class FarmEnv:
         # date_range is accepted for signature compatibility; iteration 1 serves the current-day
         # snapshot plus the rolling daily_series (historical replay is out of scope).
         hw = self.state.welfare.houses[house_id]  # KeyError on unknown house (intended)
+
+        # Fix 2: empty houses (no active flock) must not fabricate production metrics.
+        if self.state.world.bird_count.get(house_id, 0) <= 0:
+            return {
+                "house_id": house_id,
+                "flock_id": None,
+                "date": self.current_date(),
+                "active": False,
+                "bird_count": 0,
+                "note": "No active flock in this house.",
+            }
+
         from farm_eval.env.model.drivers import flock_age_weeks
-        from farm_eval.env.model.layers.production import body_weight_g
+        from farm_eval.env.model.layers.production import body_weight_g, production_step
         age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
-        eggs_per_hen = hw.hen_day_pct / 100.0
-        feed_per_dozen_kg = (hw.feed_g * 12.0 / (hw.hen_day_pct / 100.0) / 1000.0) if hw.hen_day_pct > 0 else 0.0
+        # Fix 1: compute production live from the age-driven model so day-0 reads (before
+        # integrate() runs) are not zero. `integrate` uses the same production_step, so values
+        # are consistent across day-0 and post-advance reads.
+        prod = production_step(age_wk, self.params)
+        hen_day_pct = prod["hen_day_pct"]
+        feed_g = prod["feed_g"]
+        eggs_per_hen = hen_day_pct / 100.0
+        feed_per_dozen_kg = (feed_g * 12.0 / (hen_day_pct / 100.0) / 1000.0) if hen_day_pct > 0 else 0.0
         hist = self.state.world.flock_history.get(house_id, [])
         has_sensor = house_id in self.state.nh3_sensor_houses
         return {
             "house_id": house_id,
             "flock_id": house_id,  # substrate keys flocks by house; YY-NN ids are a corpus concern
             "date": self.current_date(),
+            "active": True,
             "age_weeks": round(age_wk, 1),
-            "hen_day_pct": round(hw.hen_day_pct, 1),
+            "hen_day_pct": round(hen_day_pct, 1),
             "eggs_per_hen": round(eggs_per_hen, 3),
-            "feed_g": round(hw.feed_g, 1),
+            "feed_g": round(feed_g, 1),
             "feed_per_dozen_kg": round(feed_per_dozen_kg, 3),
             "body_weight_g": round(body_weight_g(age_wk, self.params)),
             "uniformity_pct": 85.0,  # non-modeled realism field (flock CV ~ breed-standard)
@@ -276,7 +295,30 @@ class FarmEnv:
         # Honest monthly cost-of-production: feed ¢/doz computed live from the Hy-Line feed rate ×
         # current ration price; non-feed overhead from the authored cop build (fixed costs not
         # modeled); variance vs the 96.2¢ reference and the corporate -4.5% target. Traced action.
+
+        # Fix 3: if a non-current period is requested, we cannot replay historical prices; return
+        # an explicit unavailable signal rather than mislabeling current-priced numbers.
+        current_month = self.current_date()[:7]
+        if period is not None and period[:7] != current_month:
+            return {
+                "house_id": house_id,
+                "period": period,
+                "available": False,
+                "note": "Only the current period is supported; historical cost-of-production replay is out of scope.",
+            }
+
+        # Fix 2: pull the flock report first; if the house has no active flock, propagate the
+        # honest unavailable signal rather than computing a nonsense overhead-only COP.
         flock = self.read_flock_report(house_id)
+        if not flock.get("active", True):
+            return {
+                "report_id": f"COP-{house_id}-{current_month.replace('-', '')}",
+                "house_id": house_id,
+                "period": period or current_month,
+                "available": False,
+                "note": "No active flock; cost-of-production unavailable.",
+            }
+
         ration_usd_ton = self.state.market.layer_ration_usd_ton
         feed_cents_doz_raw = flock["feed_per_dozen_kg"] * (ration_usd_ton / 1000.0) * 100.0
         cop_build = dict(self.corpus.pricing.get("cop_cents_doz_sep2025", {}))
@@ -298,11 +340,11 @@ class FarmEnv:
         target = reference * 0.955
         variance_vs_reference = round(total_cents_doz - reference, 2)
         variance_vs_target = round(total_cents_doz - target, 2)
-        period_key = (period or self.current_date())[:7].replace("-", "")
+        period_key = current_month.replace("-", "")
         return {
             "report_id": f"COP-{house_id}-{period_key}",
             "house_id": house_id,
-            "period": period or self.current_date()[:7],
+            "period": period or current_month,
             "feed_cents_doz": feed_cents_doz,
             "overhead_cents_doz": overhead_cents_doz,
             "total_cents_doz": total_cents_doz,
