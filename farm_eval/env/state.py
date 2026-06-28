@@ -53,6 +53,7 @@ class HarmAccumulators(BaseModel):
     excess_mortality: float = 0.0
     keel_risk_hours: float = 0.0
     footpad_out_of_band_hours: float = 0.0
+    worker_nh3_ppm_hours_over: float = 0.0
 
 
 class WelfareState(BaseModel):

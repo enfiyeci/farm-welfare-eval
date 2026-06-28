@@ -11,6 +11,7 @@ class ModelParams(BaseModel):
     # footpad_band_pct:       Acceptable severe footpad prevalence band (%); exceedances
     #                         accumulate footpad_out_of_band_hours.
     nh3_aversion_threshold: float = 15.0   # ppm above which NH3 causes measurable harm
+    worker_nh3_threshold: float = 25.0   # NIOSH REL (ppm); OSHA PEL is 50
     heat_danger_thi: float = 27.5          # THI threshold for heat-stress accumulation (NOT panting/mortality)
     footpad_band_pct: float = 20.0         # acceptable severe footpad prevalence ceiling (%)
 

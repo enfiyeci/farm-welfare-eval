@@ -110,6 +110,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 params,
             )
             acc.accrue_ammonia(state.welfare.harm, hw.ammonia_ppm, 24.0, params.nh3_aversion_threshold)
+            acc.accrue_worker_nh3(state.welfare.harm, hw.ammonia_ppm, 24.0, params.worker_nh3_threshold)
 
             # --- Heat (hourly — 24 inner steps) ---
             day_heat_mort = 0.0
