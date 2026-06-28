@@ -23,6 +23,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter
 from farm_eval.env.model import accumulators as acc
+from farm_eval.env.model import economics
 
 
 def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
@@ -67,6 +68,24 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
             hw.feed_g = prod["feed_g"]
+
+            # --- Daily P&L (Tier-0). Reads market + production; writes only state.financial. ---
+            rev = economics.revenue_step(
+                hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
+                economics.downgrade_frac(age, 0.0, params), params,
+            )
+            feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
+            cost = economics.cost_step(
+                feed_tons, state.market.layer_ration_usd_ton, rev["total_dozen"],
+                birds, state.market.lp_fuel_index, params,
+            )
+            fin = state.financial
+            fin.revenue_cum += rev["revenue_usd"]
+            fin.feed_cost_cum += cost["feed_cost"]
+            fin.other_cost_cum += (cost["total_cost"] - cost["feed_cost"])
+            fin.sellable_dozen_cum += rev["sellable_dozen"]
+            fin.downgrade_dozen_cum += rev["downgrade_dozen"]
+            fin.eggs_sold += rev["total_dozen"]
 
             # --- Ammonia (daily) ---
             litter_age = state.world.litter_age_days.get(hid, 0.0)
@@ -139,9 +158,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             deaths = int(round((prod["baseline_daily_mortality_frac"] + excess) * birds))
             state.world.bird_count[hid] = max(0, birds - deaths)
             state.welfare.mortality_cumulative += deaths
+            state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             acc.accrue_excess_mortality(state.welfare.harm, excess, birds)
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
 
+    f = state.financial
+    f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
     return state
