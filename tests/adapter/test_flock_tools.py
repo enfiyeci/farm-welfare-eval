@@ -28,8 +28,9 @@ def _run(solve_fn):
 
 def test_flock_tools_registered():
     tools = all_tools(CFG)
-    # Inspect @tool wrappers store the name in __registry_info__.name, not __name__
-    names = {t.__registry_info__.name for t in tools if hasattr(t, "__registry_info__")}
+    # Inspect @tool wrappers store the name in __registry_info__.name, not __name__.
+    # Inspect namespaces tool names by package (e.g. "farm_eval/read_flock_report"); compare bare.
+    names = {t.__registry_info__.name.split("/")[-1] for t in tools if hasattr(t, "__registry_info__")}
     assert "read_flock_report" in names
     assert "generate_cop_report" in names
     assert len(tools) == 15  # 13 existing + 2 new flock tools
