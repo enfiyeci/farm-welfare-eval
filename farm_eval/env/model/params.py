@@ -151,6 +151,17 @@ class ModelParams(BaseModel):
     # Single-swab culture recovery rate (~29–58%; PubMed 32027739).
     se_env_test_sensitivity: float = 0.6
 
+    # HPAI clinical-course constants (model-params.md §HPAI)
+    # Subclinical incubation then exponentially rising mortality (PMC4897471 / PMC5986775).
+    # hpai_incubation_days: subclinical period before clinical signs appear.
+    # hpai_mort_doubling_days: daily mortality ~doubles each period.
+    # hpai_mort_base: initial clinical daily mortality fraction at day 0 of clinical phase.
+    # hpai_mort_cap: daily mortality ceiling (near-total within days in HP strains).
+    hpai_incubation_days: int = 3          # subclinical before signs (PMC4897471)
+    hpai_mort_doubling_days: float = 1.0   # daily mortality ~doubles
+    hpai_mort_base: float = 0.002          # initial clinical daily mortality fraction
+    hpai_mort_cap: float = 0.6             # daily mortality ceiling (near-total within days)
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the

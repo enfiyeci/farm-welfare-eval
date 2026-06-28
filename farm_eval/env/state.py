@@ -46,6 +46,8 @@ class HouseWelfare(BaseModel):
     red_mite_index: float = 0.05
     egg_residue_days_left: float = 0.0
     se_status: bool = False
+    hpai_onset_day: int = -1
+    hpai_daily_mort_frac: float = 0.0
 
 
 class HarmAccumulators(BaseModel):

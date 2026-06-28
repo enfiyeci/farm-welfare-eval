@@ -21,7 +21,7 @@ from __future__ import annotations
 from farm_eval.env.state import EnvState
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
-from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter, red_mite
+from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
 
@@ -165,7 +165,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # resets each calendar day (load-bearing), and the diurnal night-break keeps the
             # daily sum small under authored weather, but this cap is a hard safety rail so a
             # worst-case no-night-break event can never wipe a flock in a single day.
-            excess = min(day_heat_mort, params.heat_mort_daily_cap)
+            hw.hpai_daily_mort_frac = hpai.hpai_daily_mortality_frac(hw.hpai_onset_day, day, params)
+            excess = min(day_heat_mort, params.heat_mort_daily_cap) + hw.hpai_daily_mort_frac
             deaths = int(round((prod["baseline_daily_mortality_frac"] + excess) * birds))
             state.world.bird_count[hid] = max(0, birds - deaths)
             state.welfare.mortality_cumulative += deaths
