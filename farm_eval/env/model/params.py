@@ -36,6 +36,20 @@ class ModelParams(BaseModel):
     breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
     breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
 
+    # --- Economics (Tier-0 P&L). Research-anchored placeholders; verify at C7 (SOURCES.md). ---
+    # Egg downgrade (checks/dirties -> breaker stock) rises with flock age.
+    downgrade_age_wk: list[float] = [30, 80]
+    downgrade_frac_pct: list[float] = [3.2, 23.8]   # weak-shell share %, PMC12914820
+    downgrade_stress_coeff: float = 0.0             # stress -> extra downgrade (wired in C2/C3)
+    breaker_price_frac: float = 0.35                # breaker price as fraction of shell price
+    # Cost lines (cage-free).
+    energy_usd_bird_day: float = 0.0007             # ~2.3 cents/doz electricity (Iowa aviary)
+    labor_usd_doz: float = 0.074                    # ~4x conventional (CSES)
+    capital_usd_doz: float = 0.162                  # aviary amortization (CSES)
+    other_var_usd_doz: float = 0.27                 # vet/med/supplies/admin misc
+    pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle
+    pullet_cost_usd: float = 5.00                   # point-of-lay pullet
+
     # Heat stress layer constants (model-params.md §Heat stress)
     # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
     #   below ambient (at full ventilation). Sub-full ventilation scales this linearly.
