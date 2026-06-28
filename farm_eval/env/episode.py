@@ -27,8 +27,8 @@ from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
 # (work orders, treatment records) are wired in Phase B. `send_email` captures the outbound
 # message so the judge can read communicative/judged decisions.
-_TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit", "log_treatment", "generate_cop_report"}
-_ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email"} | _TRACE_TOOLS
+_TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit", "generate_cop_report"}
+_ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment"} | _TRACE_TOOLS
 
 
 class ActionResult(BaseModel):
@@ -176,6 +176,16 @@ class FarmEnv:
                 )
             )
             detail = f"email sent to {params.get('to', '')}"
+        elif tool == "log_treatment":
+            if params.get("issue") == "red_mite":
+                hid = params.get("house_id")
+                hw = self.state.welfare.houses.get(hid)
+                if hw is not None:
+                    hw.red_mite_index = self.params.red_mite_knockdown_floor
+            self.state.event_log.append(
+                {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
+            )
+            detail = "treatment logged"
         elif tool in _TRACE_TOOLS:
             # Lightweight Phase-A trace; deep effects (work orders, treatment records) are Phase B.
             self.state.event_log.append(
