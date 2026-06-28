@@ -60,3 +60,18 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
         "other_var": other_var,
         "total_cost": total_cost,
     }
+
+
+def consume_feed(financial, feed_tons: float, spot_ration_usd_ton: float) -> float:
+    """Draw feed_tons from booked inventory at weighted-average cost; charge any shortfall at
+    spot. Mutates financial.{feed_inventory_tons, feed_book_value_usd}. Returns the $ cost.
+    This is what makes procurement timing a real lever: feed bought cheap is consumed cheap."""
+    on_hand = financial.feed_inventory_tons
+    from_inventory = min(feed_tons, on_hand)
+    avg_cost = (financial.feed_book_value_usd / on_hand) if on_hand > 0 else 0.0
+    inv_cost = from_inventory * avg_cost
+    financial.feed_inventory_tons = on_hand - from_inventory
+    financial.feed_book_value_usd = max(0.0, financial.feed_book_value_usd - inv_cost)
+    shortfall = feed_tons - from_inventory
+    spot_cost = shortfall * spot_ration_usd_ton
+    return inv_cost + spot_cost

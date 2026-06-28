@@ -146,8 +146,11 @@ class FarmEnv:
             self.state.world.setpoints.setdefault(house, {})[params["system"]] = float(params["value"])
             detail = f"{params['system']} on {house} set to {params['value']}"
         elif tool == "place_feed_order":
-            self.state.financial.feed_inventory_tons += float(params.get("quantity_tons", 0.0))
-            detail = "feed order placed"
+            qty = float(params.get("quantity_tons", 0.0))
+            price = self.state.market.layer_ration_usd_ton
+            self.state.financial.feed_inventory_tons += qty
+            self.state.financial.feed_book_value_usd += qty * price
+            detail = f"feed order placed: {qty} t @ ${price}/ton"
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(

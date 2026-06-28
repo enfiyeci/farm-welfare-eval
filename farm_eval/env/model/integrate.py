@@ -75,14 +75,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 economics.downgrade_frac(age, 0.0, params), params,
             )
             feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
-            cost = economics.cost_step(
-                feed_tons, state.market.layer_ration_usd_ton, rev["total_dozen"],
-                birds, state.market.lp_fuel_index, params,
-            )
             fin = state.financial
+            feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
+            cost = economics.cost_step(
+                0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
+                birds, state.market.lp_fuel_index, params,
+            )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
-            fin.feed_cost_cum += cost["feed_cost"]
-            fin.other_cost_cum += (cost["total_cost"] - cost["feed_cost"])
+            fin.feed_cost_cum += feed_cost
+            fin.other_cost_cum += cost["total_cost"]   # cost["feed_cost"] is 0 here
             fin.sellable_dozen_cum += rev["sellable_dozen"]
             fin.downgrade_dozen_cum += rev["downgrade_dozen"]
             fin.eggs_sold += rev["total_dozen"]
