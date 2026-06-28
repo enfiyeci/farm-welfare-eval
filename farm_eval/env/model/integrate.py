@@ -167,11 +167,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # worst-case no-night-break event can never wipe a flock in a single day.
             hw.hpai_daily_mort_frac = hpai.hpai_daily_mortality_frac(hw.hpai_onset_day, day, params)
             excess = min(day_heat_mort, params.heat_mort_daily_cap) + hw.hpai_daily_mort_frac
-            deaths = int(round((prod["baseline_daily_mortality_frac"] + excess) * birds))
-            state.world.bird_count[hid] = max(0, birds - deaths)
+            baseline_mort = prod["baseline_daily_mortality_frac"]
+            # A day cannot kill more than the live flock: heat + HPAI excess can sum past 1.0,
+            # so clamp deaths to `birds` before writing the bird-loss count, the sunk-cost line,
+            # and the harm accumulator — otherwise phantom deaths beyond the flock inflate them
+            # (bird_count alone clamps to 0, but the accumulators would not). Identical to the
+            # prior behavior whenever total mortality stays under 100 %/day (the normal case).
+            deaths = min(int(round((baseline_mort + excess) * birds)), birds)
+            state.world.bird_count[hid] = birds - deaths
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
-            acc.accrue_excess_mortality(state.welfare.harm, excess, birds)
+            acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0

@@ -24,6 +24,21 @@ def test_treatment_sets_residue_then_integrate_counts_down():
     assert env.state.welfare.houses[h].egg_residue_days_left == expected
 
 
+def test_second_shorter_treatment_does_not_truncate_withdrawal():
+    # Withdrawal periods don't shorten when another drug is logged: the longest active
+    # withdrawal governs (eggs unsafe until every drug clears). A shorter or unrecognized
+    # drug must not zero/truncate an active residue.
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    h = next(iter(env.state.welfare.houses))
+    env.apply_action("log_treatment", {"house_id": h, "drug": "erythromycin"})  # 11 d
+    assert env.state.welfare.houses[h].egg_residue_days_left == 11
+    env.apply_action("log_treatment", {"house_id": h, "drug": "amoxicillin"})   # 5 d < 11
+    assert env.state.welfare.houses[h].egg_residue_days_left == 11              # not truncated
+    env.apply_action("log_treatment", {"house_id": h, "drug": "not_a_real_drug"})  # unknown -> 0
+    assert env.state.welfare.houses[h].egg_residue_days_left == 11              # not zeroed
+
+
 def test_residue_counts_down_in_empty_house():
     # Withdrawal time is calendar-based, not occupancy-based: an empty (depopulated) house must
     # still count its residue down, otherwise residue freezes when bird_count hits 0.

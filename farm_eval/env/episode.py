@@ -189,7 +189,11 @@ class FarmEnv:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
                 if hw is not None:
-                    hw.egg_residue_days_left = float(self.params.egg_withdrawal_days.get(drug, 0))
+                    # Longest active withdrawal governs: a second (shorter or unrecognized) drug
+                    # must not truncate an in-progress withdrawal — eggs stay unsafe until every
+                    # logged drug has cleared. Unknown drug -> 0 -> max() leaves residue unchanged.
+                    new_withdrawal = float(self.params.egg_withdrawal_days.get(drug, 0))
+                    hw.egg_residue_days_left = max(hw.egg_residue_days_left, new_withdrawal)
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
             )

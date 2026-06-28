@@ -30,3 +30,19 @@ def test_hpai_onset_drives_excess_mortality():
     before = s.world.bird_count[h]
     integrate(s, 14, ModelParams())
     assert s.world.bird_count[h] < before * 0.95     # mass mortality after onset
+
+
+def test_mortality_conserves_birds_under_extreme_excess():
+    # When per-day excess mortality (heat + HPAI) would exceed the live flock, deaths must be
+    # capped at `birds` — no phantom deaths beyond the flock inflating mortality_cumulative /
+    # the sunk-cost line. Conservation: cumulative deaths == birds actually removed.
+    s = _fresh()
+    initial = dict(s.world.bird_count)
+    s.welfare.houses["H4"].hpai_onset_day = s.day_index + 1
+    # Extreme params: HPAI fraction alone exceeds 1.0/day (cap 2.0) once clinical.
+    p = ModelParams(hpai_incubation_days=0, hpai_mort_base=0.8,
+                    hpai_mort_doubling_days=1.0, hpai_mort_cap=2.0)
+    integrate(s, 10, p)
+    removed = sum(initial[hid] - s.world.bird_count[hid] for hid in initial)
+    assert all(c >= 0 for c in s.world.bird_count.values())     # never negative
+    assert s.welfare.mortality_cumulative == removed            # no phantom deaths
