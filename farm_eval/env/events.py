@@ -99,7 +99,9 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
             if house is None:
                 raise ValueError(f"state_seed references unknown house_id: {ev.payload['house_id']!r}")
             field = ev.payload["field"]
-            if not hasattr(house, field):
+            # Whitelist to declared HouseWelfare data fields (NOT hasattr, which would also
+            # accept methods / dunders / model_config and let a malformed event setattr them).
+            if field not in type(house).model_fields:
                 raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
             setattr(house, field, ev.payload["value"])
         elif ev.type is EventType.PRICING_SHIFT:
