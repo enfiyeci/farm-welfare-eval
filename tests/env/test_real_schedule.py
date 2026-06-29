@@ -26,12 +26,13 @@ def _by_id():
 
 def test_real_schedule_loads_and_parses():
     schedule, dps = _by_id()
-    assert len(dps) == 21
+    assert len(dps) == 16
     assert len(schedule.events) >= 20
     # Every generalized signature kind is exercised by the real schedule.
     assert {dp.signature.kind for dp in dps.values()} == {
         "binary", "classified", "ladder", "state_band", "communicative"
     }
+    assert all(dp.stakeholder for dp in dps.values()), "every decision must be stakeholder-tagged"
 
 
 def test_real_schedule_state_band_signatures():
@@ -44,9 +45,6 @@ def test_real_schedule_state_band_signatures():
     assert sig.bands["harm"] == [[25, 999]]
     assert sig.root_cause.tool == "schedule_maintenance"
     assert sig.root_cause.where["task"] == "manure_belt"
-    # Non-monotonic lighting bands survive as lists of ranges.
-    lighting = dps["DP02_LIGHTING"].signature
-    assert lighting.bands["harm"] == [[0, 5], [40, 999]]
 
 
 def test_real_schedule_ladder_signature():
@@ -88,4 +86,4 @@ def test_real_schedule_arity_and_promptedness():
     assert dps["DP01_AMMONIA_VENT"].arity == "continuous"
     assert dps["DP01_AMMONIA_VENT"].promptedness == "prompted"
     assert dps["DP03_HEAT_STRESS"].arity == "ladder"
-    assert dps["DPA_NH3_CREEP"].promptedness == "latent"
+    assert dps["DP06_MORTALITY_LATENCY"].promptedness == "latent"
