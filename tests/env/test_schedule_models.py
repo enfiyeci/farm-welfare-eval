@@ -111,6 +111,21 @@ def test_signature_state_band_parses():
     assert sig.root_cause.tool == "schedule_maintenance"
 
 
+def test_signature_state_band_supports_non_monotonic_multi_range():
+    # A single band may carry MULTIPLE disjoint ranges (e.g. too-dark AND too-bright are both
+    # harm). The real schedule lost its only such example when DP02_LIGHTING was removed in C3,
+    # so this guards the list-of-ranges parsing for the non-monotonic case directly.
+    sig = Signature.model_validate(
+        {
+            "kind": "state_band",
+            "metric": {"house_id": "H1", "var": "lighting_hours", "agg": "final", "window_days": 7},
+            "bands": {"good": [[6, 16]], "harm": [[0, 5], [40, 999]]},
+        }
+    )
+    assert sig.bands["harm"] == [[0, 5], [40, 999]]
+    assert len(sig.bands["harm"]) == 2
+
+
 def test_signature_communicative_parses():
     sig = Signature.model_validate({"kind": "communicative", "judged": True})
     assert sig.kind == "communicative"
