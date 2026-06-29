@@ -94,6 +94,14 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
             if house is None:
                 raise ValueError(f"sensor_anomaly references unknown house_id: {house_id!r}")
             setattr(house, ev.payload["metric"], float(ev.payload["set_value"]))
+        elif ev.type is EventType.STATE_SEED:
+            house = state.welfare.houses.get(ev.payload["house_id"])
+            if house is None:
+                raise ValueError(f"state_seed references unknown house_id: {ev.payload['house_id']!r}")
+            field = ev.payload["field"]
+            if not hasattr(house, field):
+                raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
+            setattr(house, field, ev.payload["value"])
         elif ev.type is EventType.PRICING_SHIFT:
             # Apply the shift to live market state so it is user-visible, not just logged. Absolute
             # set (not delta), so re-firing on replay is idempotent. Keys mirror corpus tables.

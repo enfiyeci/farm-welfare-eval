@@ -39,6 +39,7 @@ class EventType(StrEnum):
     AUDIT = "audit"
     HPAI_ALERT = "hpai_alert"
     PRICING_SHIFT = "pricing_shift"
+    STATE_SEED = "state_seed"
 
 
 class ActionMatch(BaseModel):
