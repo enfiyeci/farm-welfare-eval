@@ -73,13 +73,16 @@ def test_unaddressed_decision_lapses_after_deadline():
 def test_start_leaves_started_false_when_day0_init_fails():
     # `started` must be marked only AFTER day-0 init completes; if a day-0 event fails to fire,
     # a retry/replay must re-attempt start, not skip it on a half-initialized state.
+    # Fault injector: a state_seed to a house that doesn't exist raises mid-firing. (A missing
+    # body_ref no longer raises — it resolves to a placeholder — so it can't fail day-0 init.)
     schedule = Schedule(
         decision_points=[],
-        events=[ScheduledEvent(on_day=0, type="email", payload={"from": "x", "subject": "s", "body_ref": "MISSING.md"})],
+        events=[ScheduledEvent(on_day=0, type="state_seed",
+                               payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True})],
     )
     env = FarmEnv(Corpus(), schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
-    with pytest.raises(KeyError):
-        env.start()  # corpus has no MISSING.md
+    with pytest.raises(ValueError):
+        env.start()  # state has no houses -> state_seed raises
     assert env.state.started is False
 
 
@@ -91,16 +94,17 @@ def test_start_retry_does_not_duplicate_first_day0_event_after_partial_failure()
         decision_points=[],
         events=[
             ScheduledEvent(on_day=0, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
-            ScheduledEvent(on_day=0, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+            ScheduledEvent(on_day=0, type="state_seed",
+                           payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True}),
         ],
     )
     env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
-    with pytest.raises(KeyError):
-        env.start()  # event 0 delivers; event 1's body_ref is missing -> raises
+    with pytest.raises(ValueError):
+        env.start()  # event 0 delivers; event 1 seeds an unknown house -> raises
     assert env.state.started is False
     assert len(env.state.mailbox) == 1
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         env.start()  # retry: event 1 still fails, but event 0 must NOT re-fire
     assert len(env.state.mailbox) == 1  # not duplicated
 
@@ -114,15 +118,16 @@ def test_end_day_is_atomic_when_an_event_fails():
         decision_points=[],
         events=[
             ScheduledEvent(on_day=5, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
-            ScheduledEvent(on_day=5, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+            ScheduledEvent(on_day=5, type="state_seed",
+                           payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True}),
         ],
     )
     env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
     env.start()
     assert env.current_day() == 0
     for _ in range(2):  # the failure must be stable across retries — never a partial advance
-        with pytest.raises(KeyError):
-            env.end_day()  # next beat is day 5; s1 resolves, s2's body_ref is missing -> raises
+        with pytest.raises(ValueError):
+            env.end_day()  # next beat is day 5; s1 resolves, s2 seeds an unknown house -> raises
         assert env.current_day() == 0
         assert env.state.mailbox == []
         assert env.state.fired_event_ids == []

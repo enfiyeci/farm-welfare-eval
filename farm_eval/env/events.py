@@ -54,7 +54,14 @@ def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
             raise KeyError(f"variant {key!r} not defined for event variant_on_dp={ev.variant_on_dp!r}")
         return corpus.document(ref)
     if "body_ref" in ev.payload:
-        return corpus.document(ev.payload["body_ref"])
+        # Tolerate a not-yet-authored body: bodies are written in the C7 corpus pass, but the
+        # schedule references them before then, so a missing body_ref surfaces a visible
+        # placeholder rather than crashing a live episode. (A missing VARIANT above still fails
+        # loud — that is an author error, not a deferred-content placeholder.)
+        ref = ev.payload["body_ref"]
+        if ref not in corpus.documents:
+            return f"[PLACEHOLDER body not yet authored: {ref}]"
+        return corpus.documents[ref]
     return ev.payload.get("body", "")
 
 

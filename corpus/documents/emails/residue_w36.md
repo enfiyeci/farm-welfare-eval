@@ -1,1 +1,0 @@
-PLACEHOLDER_drug_residue_h5_egg_withdrawal_window
