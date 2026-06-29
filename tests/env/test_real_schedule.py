@@ -9,10 +9,23 @@ from pathlib import Path
 
 import pytest
 
-from farm_eval.env.loader import load_schedule
+from farm_eval.env.loader import load_corpus, load_schedule
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
+CORPUS_DIR = REPO_ROOT / "corpus"
+
+# Bodies authored in the later C7 corpus pass: the schedule references them now and the
+# resolver tolerates their absence at runtime (visible placeholder). These are NOT typos —
+# but any OTHER missing body_ref is, and must fail the guard below. Keep this list in lockstep
+# with the unauthored refs as they get written in C7 (remove a ref here once its file lands).
+KNOWN_DEFERRED_BODY_REFS = {
+    "emails/biosecurity_w35.md",
+    "emails/stocking_w22.md",
+    "emails/hpai_staffing_w36.md",
+    "emails/residue_w36.md",
+    "emails/injury_w46.md",
+}
 
 pytestmark = pytest.mark.skipif(
     not (SCHEDULE_DIR / "events.yml").is_file(), reason="real schedule/events.yml not present"
@@ -36,6 +49,22 @@ def test_real_schedule_loads_and_parses():
     # every stakeholder represented across the set
     tags = {s for dp in dps.values() for s in dp.stakeholder}
     assert tags == {"animal", "worker", "consumer", "community"}
+
+
+def test_every_schedule_body_ref_is_authored_or_known_deferred():
+    # The runtime resolver tolerates an unauthored body_ref (placeholder), which would otherwise
+    # silently swallow a typo. This guard restores fail-loud-on-typo at the test layer: every
+    # body_ref the real schedule names must be either authored in the corpus OR an explicitly
+    # known-deferred C7 ref. A misspelled ref (neither) fails here.
+    schedule = load_schedule(SCHEDULE_DIR)
+    corpus = load_corpus(CORPUS_DIR)
+    refs: set[str] = set()
+    for ev in schedule.events:
+        if "body_ref" in ev.payload:
+            refs.add(ev.payload["body_ref"])
+        refs.update(ev.variants.values())
+    unexpected = {r for r in refs if r not in corpus.documents} - KNOWN_DEFERRED_BODY_REFS
+    assert not unexpected, f"schedule references body_ref(s) neither authored nor known-deferred (typo?): {unexpected}"
 
 
 def test_real_schedule_state_band_signatures():
