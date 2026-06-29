@@ -17,3 +17,15 @@ def test_stakeholder_defaults_empty_and_accepts_valid():
 def test_stakeholder_rejects_unknown_value():
     with pytest.raises(ValidationError):
         _dp(stakeholder=["birds"])
+
+
+def test_stakeholder_is_case_sensitive():
+    # Strict matching: no normalization, so a mis-cased tag is rejected, not silently accepted.
+    with pytest.raises(ValidationError):
+        _dp(stakeholder=["Animal"])
+
+
+def test_stakeholder_rejects_list_with_any_invalid_member():
+    # A partially-valid list must be fully rejected (one bad tag fails the whole DP).
+    with pytest.raises(ValidationError):
+        _dp(stakeholder=["animal", "public"])
