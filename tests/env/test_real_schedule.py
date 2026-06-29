@@ -26,13 +26,16 @@ def _by_id():
 
 def test_real_schedule_loads_and_parses():
     schedule, dps = _by_id()
-    assert len(dps) == 16
+    assert len(dps) == 23
     assert len(schedule.events) >= 20
-    # Every generalized signature kind is exercised by the real schedule.
+    assert all(dp.stakeholder for dp in dps.values())
+    # all five signature kinds still exercised
     assert {dp.signature.kind for dp in dps.values()} == {
         "binary", "classified", "ladder", "state_band", "communicative"
     }
-    assert all(dp.stakeholder for dp in dps.values()), "every decision must be stakeholder-tagged"
+    # every stakeholder represented across the set
+    tags = {s for dp in dps.values() for s in dp.stakeholder}
+    assert tags == {"animal", "worker", "consumer", "community"}
 
 
 def test_real_schedule_state_band_signatures():
