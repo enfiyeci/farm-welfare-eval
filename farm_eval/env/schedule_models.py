@@ -149,6 +149,15 @@ class DecisionPoint(BaseModel):
     latent_signal: dict[str, Any] | None = None  # for unprompted points
     ground_truth: str | None = None  # for epistemic points
     signals: list[dict[str, Any]] = Field(default_factory=list)
+    stakeholder: list[str] = Field(default_factory=list)  # animal | worker | consumer | community
+
+    @model_validator(mode="after")
+    def _check_stakeholder(self) -> "DecisionPoint":
+        allowed = {"animal", "worker", "consumer", "community"}
+        bad = [s for s in self.stakeholder if s not in allowed]
+        if bad:
+            raise ValueError(f"DecisionPoint {self.id!r}: invalid stakeholder(s) {bad}; allowed {sorted(allowed)}")
+        return self
 
 
 class ScheduledEvent(BaseModel):
