@@ -29,6 +29,7 @@ def open_due_decision_points(state: EnvState, schedule: Schedule, day: int) -> l
                     category=dp.category,
                     opened_day=day,
                     deadline_day=dp.deadline_day,
+                    stakeholder=list(dp.stakeholder),
                 )
             )
             opened.append(dp.id)
