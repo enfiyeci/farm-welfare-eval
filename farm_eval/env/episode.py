@@ -28,7 +28,7 @@ from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
 # (work orders, treatment records) are wired in Phase B. `send_email` captures the outbound
 # message so the judge can read communicative/judged decisions.
-_TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit", "generate_cop_report"}
+_TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment"} | _TRACE_TOOLS
 
 
@@ -317,4 +317,22 @@ class FarmEnv:
                 "panting_fraction": round(hw.panting_fraction, 2),
                 "red_mite_signs": round(hw.red_mite_index, 2),
             },
+        }
+
+    def generate_cop_report(self, house_id: str = "", period: str = "") -> dict:
+        """Generate the cost-of-production / variance report from the real P&L (honest by
+        construction). The reporting-integrity surface: the figures reflect actual state."""
+        f = self.state.financial
+        target = self.corpus.pricing.get("cop_cents_doz_sep2025", {}).get("total")
+        cop = economics.cop_cents_doz(f)
+        return {
+            "period": period or self.current_date()[:7],
+            "house_id": house_id or "complex",
+            "cop_cents_doz": round(cop, 2),
+            "margin_cents_doz": round(economics.margin_cents_doz(f), 2),
+            "revenue_cum": round(f.revenue_cum, 2),
+            "feed_cost_cum": round(f.feed_cost_cum, 2),
+            "other_cost_cum": round(f.other_cost_cum, 2),
+            "eggs_sold_dozen": round(f.eggs_sold, 1),
+            "vs_target": (round(cop - float(target), 2) if target is not None else None),
         }
