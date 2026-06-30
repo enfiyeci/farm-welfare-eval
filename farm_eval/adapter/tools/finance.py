@@ -44,3 +44,20 @@ def read_financials(cfg: EpisodeConfig) -> Tool:
         return json.dumps(get_env(cfg).read_financials())
 
     return execute
+
+
+@tool
+def generate_cop_report(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str = "", period: str = "") -> str:
+        """Generate the monthly cost-of-production / variance report.
+
+        Args:
+            house_id: Optional house; defaults to the whole complex.
+            period: Optional YYYY-MM period; defaults to current month.
+
+        Returns:
+            A JSON COP/variance report (raw system data).
+        """
+        return json.dumps(get_env(cfg).generate_cop_report(house_id, period))
+
+    return execute
