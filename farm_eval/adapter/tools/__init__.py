@@ -9,7 +9,7 @@ from __future__ import annotations
 from inspect_ai.tool import Tool
 
 from farm_eval.adapter.context import EpisodeConfig
-from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_sensor
+from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_flock_report, read_sensor
 from farm_eval.adapter.tools.controls import adjust_setpoint
 from farm_eval.adapter.tools.email import list_emails, read_email, send_email
 from farm_eval.adapter.tools.finance import query_pricing, read_financials
@@ -31,6 +31,7 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         read_email(cfg),
         query_pricing(cfg),
         read_financials(cfg),
+        read_flock_report(cfg),
         # actions
         adjust_setpoint(cfg),
         place_feed_order(cfg),

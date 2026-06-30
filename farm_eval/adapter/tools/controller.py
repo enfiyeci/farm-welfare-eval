@@ -80,3 +80,20 @@ def read_sensor(cfg: EpisodeConfig) -> Tool:
         return json.dumps({"house_id": house_id, "metric": metric, "value": result.value})
 
     return execute
+
+
+@tool
+def read_flock_report(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, date_range: str = "") -> str:
+        """Read the flock report for a house: production, mortality, and welfare observations
+        (footpad, feather condition, panting, mite signs).
+
+        Args:
+            house_id: House to report on (e.g. "H4").
+            date_range: Optional date range; defaults to current.
+
+        Returns:
+            A JSON flock report (raw system data).
+        """
+        return json.dumps(get_env(cfg).read_flock_report(house_id, date_range or None))
+    return execute
