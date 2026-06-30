@@ -1,5 +1,6 @@
 """Task 4 — generate_cop_report tool wrapper: thin @tool over FarmEnv.generate_cop_report."""
 
+import json
 from pathlib import Path
 
 from inspect_ai import Task
@@ -33,4 +34,6 @@ def test_generate_cop_report_tool_returns_json():
 
     log = _run(solve)
     assert log.status == "success"
-    assert "cop_cents_doz" in log.samples[0].metadata["cop"]
+    cop = json.loads(log.samples[0].metadata["cop"])
+    assert isinstance(cop["cop_cents_doz"], (int, float))
+    assert "vs_target" in cop and "revenue_cum" in cop
