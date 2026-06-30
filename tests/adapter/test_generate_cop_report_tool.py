@@ -29,11 +29,16 @@ def test_generate_cop_report_tool_returns_json():
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(CFG).start()
         get_env(CFG).end_day()
-        state.metadata["cop"] = await generate_cop_report(CFG)()
+        result = await generate_cop_report(CFG)()          # tool output (JSON string)
+        expected = json.dumps(get_env(CFG).generate_cop_report())   # env method, same unmutated state
+        state.metadata["cop"] = result
+        state.metadata["cop_expected"] = expected
         return state
 
     log = _run(solve)
     assert log.status == "success"
     cop = json.loads(log.samples[0].metadata["cop"])
+    expected = json.loads(log.samples[0].metadata["cop_expected"])
+    assert cop == expected                              # tool delegates to the env method exactly
     assert isinstance(cop["cop_cents_doz"], (int, float))
     assert "vs_target" in cop and "revenue_cum" in cop

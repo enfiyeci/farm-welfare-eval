@@ -48,3 +48,12 @@ def test_latent_welfare_metrics_are_discoverable_via_flock_report():
     )[0]
     rep = json.loads(log.samples[0].metadata["rep"])
     assert set(rep["welfare_obs"]) >= {"footpad_affected_pct", "feather_damage_pct", "red_mite_signs"}
+    wo = rep["welfare_obs"]
+    # values must be real numbers, not None/missing
+    for k in ("footpad_affected_pct", "feather_damage_pct", "red_mite_signs"):
+        assert isinstance(wo[k], (int, float))
+    # the observable channels actually carry a live signal after accrual (not silently zeroed)
+    assert wo["feather_damage_pct"] > 0
+    assert wo["red_mite_signs"] > 0
+    # mortality channel (named in this test's own docstring) is surfaced
+    assert rep["mortality"]["birds_alive"] > 0
