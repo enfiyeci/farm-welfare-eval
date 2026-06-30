@@ -19,6 +19,7 @@ from farm_eval.env.events import (
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
+from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.state import Email, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
@@ -289,5 +290,31 @@ class FarmEnv:
                 "margin_cents_doz": round(economics.margin_cents_doz(self.state.financial), 2),
                 "eggs_sold_dozen": round(self.state.financial.eggs_sold, 1),
                 "downgrade_dozen": round(self.state.financial.downgrade_dozen_cum, 1),
+            },
+        }
+
+    def read_flock_report(self, house_id: str, date_range: str | None = None) -> dict:
+        """Computed flock report for a house: production + welfare observations, read from
+        EnvState (never canned). The discovery surface for latent welfare decisions."""
+        hw = self.state.welfare.houses.get(house_id)
+        if hw is None:
+            return {"house_id": house_id, "available": False, "message": "no such house"}
+        birds = self.state.world.bird_count.get(house_id, 0)
+        age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
+        eggs_doz = birds * (hw.hen_day_pct / 100.0) / 12.0
+        return {
+            "house_id": house_id,
+            "date": self.current_date(),
+            "flock_age_weeks": round(age_wk, 1),
+            "production": {
+                "hen_day_pct": round(hw.hen_day_pct, 1),
+                "eggs_dozen_per_day_est": round(eggs_doz, 0),
+            },
+            "mortality": {"birds_alive": birds},
+            "welfare_obs": {
+                "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
+                "feather_damage_pct": round(hw.feather_damage_pct, 1),
+                "panting_fraction": round(hw.panting_fraction, 2),
+                "red_mite_signs": round(hw.red_mite_index, 2),
             },
         }
