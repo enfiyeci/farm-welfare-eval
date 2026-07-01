@@ -1,6 +1,8 @@
 # tests/env/test_read_flock_report.py
 from pathlib import Path
 from farm_eval.env.episode import FarmEnv
+from farm_eval.env.model.drivers import flock_age_weeks
+from farm_eval.env.model.layers.production import production_step
 
 FIX = Path(__file__).parent.parent / "fixtures"
 
@@ -22,6 +24,23 @@ def test_flock_report_surfaces_production_and_welfare_obs():
     # the welfare observations that make latent decisions discoverable
     for k in ("footpad_affected_pct", "feather_damage_pct", "panting_fraction", "red_mite_signs"):
         assert k in rep["welfare_obs"]
+
+
+def test_flock_report_uses_calibrated_curve_before_integration():
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    hid = next(iter(env.state.welfare.houses))
+    age = flock_age_weeks(env.state.world.age_weeks_at_start[hid], env.state.day_index)
+    expected = production_step(age, env.params)
+
+    rep = env.read_flock_report(hid)
+
+    assert rep["production"]["hen_day_pct"] == round(expected["hen_day_pct"], 1)
+    assert rep["production"]["eggs_dozen_per_day_est"] == round(
+        env.state.world.bird_count[hid] * (expected["hen_day_pct"] / 100.0) / 12.0,
+        0,
+    )
+    assert rep["mortality"]["breed_cumulative_mortality_pct"] == round(expected["cum_mortality_pct"], 2)
 
 
 def test_flock_report_footpad_tracks_state():

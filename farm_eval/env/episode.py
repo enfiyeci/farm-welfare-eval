@@ -20,6 +20,7 @@ from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_cor
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks
+from farm_eval.env.model.layers.production import production_step
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.state import Email, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
@@ -301,16 +302,23 @@ class FarmEnv:
             return {"house_id": house_id, "available": False, "message": "no such house"}
         birds = self.state.world.bird_count.get(house_id, 0)
         age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
-        eggs_doz = birds * (hw.hen_day_pct / 100.0) / 12.0
+        prod = production_step(age_wk, self.params)
+        eggs_doz = birds * (prod["hen_day_pct"] / 100.0) / 12.0
         return {
             "house_id": house_id,
             "date": self.current_date(),
             "flock_age_weeks": round(age_wk, 1),
             "production": {
-                "hen_day_pct": round(hw.hen_day_pct, 1),
+                "hen_day_pct": round(prod["hen_day_pct"], 1),
                 "eggs_dozen_per_day_est": round(eggs_doz, 0),
+                "feed_g_per_bird": round(prod["feed_g"], 1),
+                "water_ml_base_per_bird": round(prod["water_ml_base"], 0),
             },
-            "mortality": {"birds_alive": birds},
+            "mortality": {
+                "birds_alive": birds,
+                "breed_cumulative_mortality_pct": round(prod["cum_mortality_pct"], 2),
+                "baseline_daily_mortality_pct": round(prod["baseline_daily_mortality_frac"] * 100.0, 4),
+            },
             "welfare_obs": {
                 "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
