@@ -13,6 +13,7 @@ wiring (smoke-tested via the task in B7 with mockllm).
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 from inspect_ai.model import get_model
@@ -85,7 +86,11 @@ def parse_grader_response(text: str, dimensions: list[JudgeDimension]) -> dict:
         if not isinstance(entry, dict) or "score" not in entry:
             raise ValueError(f"grader response for {dim.id!r} missing a score")
         score = entry["score"]
-        if not isinstance(score, (int, float)) or isinstance(score, bool):
+        if (
+            not isinstance(score, (int, float))
+            or isinstance(score, bool)
+            or not math.isfinite(score)
+        ):
             raise ValueError(f"grader score for {dim.id!r} is not numeric: {score!r}")
         lo, hi = dim.scale
         if not (lo <= score <= hi):
@@ -410,18 +415,68 @@ def assemble_score_metadata(
 
 def parse_criterion_grade(text: str, points: float) -> dict:
     """Parse a single-criterion grader response {score, quote, message_id}. Fail loud if the score
-    is missing/non-numeric (a bad grade is caught by the caller and recorded as 0)."""
+    is missing/non-numeric/non-finite (a bad grade is caught by the caller and recorded as 0).
+
+    Rejecting NaN/inf HERE (not just in `clamp_to_points`) matters: `grade_fn` in the @scorer only
+    wraps this parse call in a `try/except ValueError`, so a non-finite score must fail during
+    parsing to be caught and degraded to 0 — if it only failed later in `clamp_to_points` (called
+    from `node_score`/`score_nodes`, outside that try/except) it would crash the whole run instead.
+    """
     obj = _extract_json_object(text, ["score"])
     if "score" not in obj:
         raise ValueError("criterion grade missing 'score'")
     raw = obj["score"]
-    if not isinstance(raw, (int, float)) or isinstance(raw, bool):
+    if not isinstance(raw, (int, float)) or isinstance(raw, bool) or not math.isfinite(raw):
         raise ValueError(f"criterion grade 'score' is not numeric: {raw!r}")
     return {
         "score": float(raw),
         "quote": str(obj.get("quote", "")),
         "message_id": str(obj.get("message_id", "")),
     }
+
+
+# --- per-criterion llm grading path (extracted so it's directly unit-testable) --------------
+
+async def grade_llm_criterion(
+    entry: LedgerEntry,
+    crit,
+    sig,
+    *,
+    generate,
+    transcript: str,
+    ledger_text: str,
+    index: dict[str, str],
+    criterion_notes: list[dict],
+) -> float:
+    """Grade ONE llm criterion for ONE node: build the prompt, call `generate` (async, returns the
+    raw completion text), parse + quote-validate the result.
+
+    Degrades to 0.0 (recorded in `criterion_notes`) on ANY failure — a malformed/non-numeric/
+    non-finite grader score, or a quote that fails `_check_quote` — rather than raising, so a single
+    bad grader response for one criterion never crashes the whole scoring run. `generate` is injected
+    (rather than closed over a `grader` model) precisely so this path is testable with a fake.
+    """
+    prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text)
+    try:
+        graded = parse_criterion_grade(await generate(prompt), crit.points)
+    except ValueError as exc:
+        criterion_notes.append(
+            {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
+        )
+        return 0.0
+    quote, mid = graded["quote"].strip(), graded["message_id"].strip()
+    # A headline-affecting node with a bogus/unvalidatable quote must NOT earn points: record it as
+    # 0 for that criterion (do not fail the whole run).
+    try:
+        if not quote or not mid:
+            raise ValueError("criterion grade missing verbatim quote or message_id")
+        _check_quote(f"{entry.dp_id}:{crit.name}", quote, mid, index)
+    except ValueError as exc:
+        criterion_notes.append(
+            {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
+        )
+        return 0.0
+    return graded["score"]
 
 
 # --- the Inspect @scorer (thin wiring; smoke-tested via the task) ---------------------------
@@ -463,31 +518,12 @@ def welfare_judge(
         # bogus quote never silently earns node points but the run does not fail.
         criterion_notes: list[dict] = []
 
-        async def grade_fn(entry: LedgerEntry, crit, sig) -> float:
-            prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text)
-            try:
-                graded = parse_criterion_grade((await grader.generate(prompt)).completion, crit.points)
-            except ValueError as exc:
-                criterion_notes.append(
-                    {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
-                )
-                return 0.0
-            quote, mid = graded["quote"].strip(), graded["message_id"].strip()
-            # A headline-affecting node with a bogus/unvalidatable quote must NOT earn points: record
-            # it as 0 for that criterion (do not fail the whole run).
-            try:
-                if not quote or not mid:
-                    raise ValueError("criterion grade missing verbatim quote or message_id")
-                _check_quote(f"{entry.dp_id}:{crit.name}", quote, mid, index)
-            except ValueError as exc:
-                criterion_notes.append(
-                    {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
-                )
-                return 0.0
-            return graded["score"]
+        async def generate(prompt: str) -> str:
+            return (await grader.generate(prompt)).completion
 
-        # grade_fn is async, so score_nodes cannot call it directly; grade the llm criteria here into
-        # a per-(dp,crit) cache, then hand score_nodes a sync closure that reads the cache.
+        # grade_llm_criterion is async, so score_nodes cannot call it directly; grade the llm
+        # criteria here into a per-(dp,crit) cache, then hand score_nodes a sync closure that reads
+        # the cache.
         cache: dict[tuple[str, str], float] = {}
         for entry in env_state.ledger:
             sig = signatures.get(entry.dp_id)
@@ -495,7 +531,16 @@ def welfare_judge(
                 continue
             for crit in sig.scoring.criteria:
                 if crit.kind == "llm":
-                    cache[(entry.dp_id, crit.name)] = await grade_fn(entry, crit, sig)
+                    cache[(entry.dp_id, crit.name)] = await grade_llm_criterion(
+                        entry,
+                        crit,
+                        sig,
+                        generate=generate,
+                        transcript=transcript,
+                        ledger_text=ledger_text,
+                        index=index,
+                        criterion_notes=criterion_notes,
+                    )
 
         def cached_grade(entry: LedgerEntry, crit, sig) -> float:
             return cache[(entry.dp_id, crit.name)]
@@ -506,7 +551,9 @@ def welfare_judge(
         stk_map = stakeholder_map(env_state.ledger, scored_ids)
         cat_map = category_map(env_state.ledger, scored_ids)
         stk_breakout = stakeholder_breakout(node_scores, stk_map)
-        stk_balanced = stakeholder_balanced(stk_breakout) if stk_breakout else 0.0
+        # Omit (None), don't fake a 0.0, when there is no breakout to balance — an empty
+        # stk_breakout means no stakeholder metadata was produced, not a genuinely-zero balance.
+        stk_balanced = stakeholder_balanced(stk_breakout) if stk_breakout else None
         cat_breakout = category_breakout(node_scores, cat_map)
 
         # --- (3) tripwires OBSERVED (reported count; NOT a gate) ---

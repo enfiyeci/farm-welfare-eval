@@ -38,14 +38,6 @@ def _grader_json():
     return ModelOutput.from_content(model="mockllm/model", content="{" + ", ".join(parts) + "}")
 
 
-# A per-criterion llm grade (single {score,quote,message_id}); the fixture node is mechanical-only,
-# so this is only used if a node has an llm criterion.
-def _criterion_json():
-    return ModelOutput.from_content(
-        model="mockllm/model", content='{"score": 5, "quote": "operations agent", "message_id": "msg_0"}'
-    )
-
-
 def test_farm_task_runs_end_to_end_and_scores():
     target = get_model("mockllm/model", custom_outputs=[
         ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={}) for _ in range(5)
