@@ -5,6 +5,8 @@ binary/action/pure-latency + floor_channel/latency modifiers), apply_cap_floor,
 node_score_mechanical.
 """
 
+import math
+
 import pytest
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
@@ -21,6 +23,8 @@ from farm_eval.env.schedule_models import (
     Signature,
 )
 from farm_eval.judge.node_scores import (
+    _clamp,
+    _clamp01,
     apply_cap_floor,
     criterion_score,
     latency_factor,
@@ -484,3 +488,49 @@ def test_node_score_mechanical_cap_hit_overrides_sum():
     entry = make_entry(outcome="egregious")
     # criteria would sum to 10.0, but the cap overrides to 0.0
     assert node_score_mechanical(entry, sig, {}, []) == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# fail-loud on non-finite clamp input (NaN/inf must never silently become a
+# score, let alone the MAX score)
+# ---------------------------------------------------------------------------
+
+
+def test_clamp01_nan_raises():
+    with pytest.raises(ValueError):
+        _clamp01(float("nan"))
+
+
+def test_clamp01_inf_raises():
+    with pytest.raises(ValueError):
+        _clamp01(float("inf"))
+
+
+def test_clamp_nan_raises():
+    with pytest.raises(ValueError):
+        _clamp(float("nan"), 0.0, 10.0)
+
+
+def test_clamp_inf_raises():
+    with pytest.raises(ValueError):
+        _clamp(float("inf"), 0.0, 10.0)
+
+
+def test_criterion_score_channel_nan_subscore_raises():
+    crit = Criterion(name="c", points=5.0, channel="x")
+    entry = make_entry()
+    sig = Signature()
+    with pytest.raises(ValueError):
+        criterion_score(crit, entry, sig, {"x": float("nan")}, [])
+
+
+def test_node_score_mechanical_tripwire_cap_nan_score_raises():
+    sig = Signature(
+        scoring=NodeScoring(
+            criteria=[Criterion(name="a", points=10.0, channel="x")],
+            cap=NodeCap(when="tripwire", score=float("nan")),
+        )
+    )
+    entry = make_entry(tripwire=True)
+    with pytest.raises(ValueError):
+        node_score_mechanical(entry, sig, {"x": 1.0}, [])

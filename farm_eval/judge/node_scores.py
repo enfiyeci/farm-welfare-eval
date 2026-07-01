@@ -24,16 +24,22 @@ single source of truth the resolvers below read from):
 
 from __future__ import annotations
 
+import math
+
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.schedule_models import Criterion, Signature
 from farm_eval.env.tracker import action_matches
 
 
 def _clamp01(x: float) -> float:
+    if not math.isfinite(x):
+        raise ValueError(f"clamp received non-finite value {x!r}")
     return max(0.0, min(1.0, x))
 
 
 def _clamp(x: float, lo: float, hi: float) -> float:
+    if not math.isfinite(x):
+        raise ValueError(f"clamp received non-finite value {x!r}")
     return max(lo, min(hi, x))
 
 
