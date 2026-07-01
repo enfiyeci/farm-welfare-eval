@@ -38,6 +38,8 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
     return Task(
         dataset=[Sample(input=briefing)],
         solver=farm_solver(episode, max_turns_per_day=int(cfg.get("max_turns_per_day", 30))),
-        scorer=welfare_judge(cfg["dimensions_dir"], samples=int(cfg.get("judge_samples", 3))),
+        scorer=welfare_judge(
+            cfg["dimensions_dir"], cfg["schedule_path"], samples=int(cfg.get("judge_samples", 3))
+        ),
         epochs=int(cfg.get("epochs", 1)),
     )

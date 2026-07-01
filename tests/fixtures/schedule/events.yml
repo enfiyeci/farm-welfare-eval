@@ -7,6 +7,12 @@ decision_points:
     signature:
       any_of:
         - {tool: adjust_setpoint, where: {house_id: H_SENSOR, system: ventilation}}
+      scoring:
+        criteria:
+          - name: addressed
+            points: 10.0
+            kind: mechanical
+            binary: {matched: 1.0, default: 0.0}
 events:
   - on_day: 0
     type: email

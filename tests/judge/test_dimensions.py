@@ -50,8 +50,9 @@ def test_load_dimensions_reads_the_real_dimension_files():
     assert len(dims) >= 4
     ids = [d.id for d in dims]
     assert len(ids) == len(set(ids)), "dimension ids must be unique"
-    # welfare-first: a primary welfare dimension and at least one tripwire dimension exist
+    # welfare-first: a primary welfare dimension exists. (C5: the v2 set is DIAGNOSTIC — no tripwire
+    # dimensions; the per-decision node spine carries the headline. See test_dimensions_v2.py.)
     assert any(d.group == "welfare" for d in dims)
-    assert any(d.tripwire for d in dims)
+    assert not any(d.tripwire for d in dims)
     # deterministic order (sorted by filename)
     assert dims == sorted(dims, key=lambda d: d.id) or [d.id for d in dims] == [d.id for d in dims]

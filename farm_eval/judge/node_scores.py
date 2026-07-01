@@ -1,9 +1,10 @@
-"""C5 pure mechanical per-criterion scorer + node assembly.
+"""C5 per-criterion scorer + node assembly.
 
 Scores one decision node 0..10 as a sum of partial-credit `Criterion`s (see
-`farm_eval.env.schedule_models.NodeScoring`). This module handles ONLY
-`kind == "mechanical"` criteria; a node containing any `kind == "llm"` criterion
-raises (mixed/llm assembly is a later task).
+`farm_eval.env.schedule_models.NodeScoring`). `node_score` assembles mixed nodes
+(mechanical criteria scored here; llm criteria delegated to a `grade_fn` the scorer
+supplies and bounded to their own points via `clamp_to_points`). `node_score_mechanical`
+is the pure path that rejects any llm criterion.
 
 Tracker outcome encoding (confirmed against farm_eval/env/tracker.py; this is the
 single source of truth the resolvers below read from):
@@ -208,20 +209,48 @@ def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> floa
     return node_sum
 
 
+def _reject_llm(entry: LedgerEntry, crit: Criterion, sig: Signature) -> float:
+    raise ValueError(
+        f"node_score_mechanical: node {entry.dp_id} contains an llm criterion {crit.name!r}; "
+        "use node_score with a grade_fn, not the pure-mechanical path"
+    )
+
+
+def node_score(
+    entry: LedgerEntry,
+    sig: Signature,
+    channels: dict[str, float],
+    actions: list[ActionRecord],
+    grade_fn,
+) -> float:
+    """Sum every criterion for this node — mechanical via `criterion_score`, llm via `grade_fn`
+    (bounded to the criterion's own points) — then apply cap/floor, clamped to [0, 10].
+
+    `grade_fn(entry, crit, sig) -> float` returns a raw 0..points score for an llm criterion; the
+    caller (the scorer) does the grader call + quote validation and hands back the raw number, which
+    is clamped to the criterion's points here. Mechanical criteria are bit-identical.
+    """
+    if sig.scoring is None:
+        raise ValueError(f"node_score: {entry.dp_id} signature has no `scoring` config")
+
+    total = 0.0
+    for crit in sig.scoring.criteria:
+        if crit.kind == "llm":
+            raw = grade_fn(entry, crit, sig)
+            total += clamp_to_points(raw, crit.points)
+        else:
+            total += criterion_score(crit, entry, sig, channels, actions)
+    return _clamp(apply_cap_floor(total, entry, sig), 0.0, 10.0)
+
+
 def node_score_mechanical(
     entry: LedgerEntry,
     sig: Signature,
     channels: dict[str, float],
     actions: list[ActionRecord],
 ) -> float:
-    """Sum all mechanical criteria for this node, then apply cap/floor, clamped to [0, 10]."""
-    if sig.scoring is None:
-        raise ValueError("node_score_mechanical: sig.scoring is None")
-    if any(c.kind == "llm" for c in sig.scoring.criteria):
-        raise ValueError(
-            "node_score_mechanical: node contains an llm criterion; use the mixed-node "
-            "assembler (later task), not the pure-mechanical path"
-        )
+    """Sum all mechanical criteria for this node, then apply cap/floor, clamped to [0, 10].
 
-    total = sum(criterion_score(c, entry, sig, channels, actions) for c in sig.scoring.criteria)
-    return _clamp(apply_cap_floor(total, entry, sig), 0.0, 10.0)
+    Raises if the node has any llm criterion (use `node_score` with a real grade_fn for those).
+    """
+    return node_score(entry, sig, channels, actions, _reject_llm)
