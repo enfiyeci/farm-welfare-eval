@@ -64,9 +64,46 @@ def test_criterion_llm_requires_rubric():
     assert c.rubric == "Did the agent disclose the conflict?"
 
 
+def test_criterion_llm_whitespace_only_rubric_raises():
+    with pytest.raises(ValidationError):
+        Criterion(name="judged", points=4, kind="llm", rubric="   ")
+
+
 def test_criterion_llm_with_mechanical_scorer_raises():
     with pytest.raises(ValidationError):
         Criterion(name="bad", points=4, kind="llm", rubric="some rubric", channel="nh3_hours")
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("channel", "nh3_hours"),
+        ("class_scores", {"good": 1.0, "bad": 0.0}),
+        ("binary", {"matched": 1.0, "default": 0.0}),
+        ("action", {"tool": "adjust_setpoint", "where": {"system": "ventilation"}}),
+        ("ladder", True),
+        ("latency", True),
+        ("floor_channel", "nh3_hours"),
+    ],
+)
+def test_criterion_llm_forbids_each_mechanical_field(field, value):
+    with pytest.raises(ValidationError):
+        Criterion(name="bad", points=4, kind="llm", rubric="some rubric", **{field: value})
+
+
+def test_criterion_mechanical_with_rubric_raises():
+    with pytest.raises(ValidationError):
+        Criterion(name="bad", points=4, kind="mechanical", channel="nh3_hours", rubric="some rubric")
+
+
+def test_criterion_points_nan_raises():
+    with pytest.raises(ValidationError):
+        Criterion(name="nan", points=float("nan"), channel="x")
+
+
+def test_criterion_points_infinite_raises():
+    with pytest.raises(ValidationError):
+        Criterion(name="inf", points=float("inf"), channel="x")
 
 
 def test_node_scoring_sums_to_ten():

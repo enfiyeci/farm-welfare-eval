@@ -6,6 +6,7 @@ the actual decisions and events live in the schedule file and load into these mo
 
 from __future__ import annotations
 
+import math
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -122,7 +123,7 @@ class Criterion(BaseModel):
 
     @model_validator(mode="after")
     def _check_criterion(self) -> "Criterion":
-        if self.points <= 0:
+        if not (math.isfinite(self.points) and self.points > 0):
             raise ValueError(f"Criterion {self.name!r}: points must be > 0, got {self.points}")
 
         if self.kind == "mechanical":
@@ -148,7 +149,7 @@ class Criterion(BaseModel):
             if self.rubric is not None:
                 raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
         else:  # kind == "llm"
-            if not self.rubric:
+            if not (self.rubric is not None and self.rubric.strip() != ""):
                 raise ValueError(f"Criterion {self.name!r}: llm criterion requires a non-empty `rubric`")
             if (
                 self.channel is not None
