@@ -43,6 +43,41 @@ def _clamp(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
 
 
+def clamp_to_points(raw: float, points: float) -> float:
+    """Bound a grader's raw score to a criterion's own point range [0, points].
+
+    Fail loud on a non-finite `raw` (NaN/inf): a min/max clamp would silently turn NaN into the MAX
+    bound, awarding full credit for a broken grade. The scorer catches this ValueError per criterion
+    and records the criterion as 0 with a reason — it must never flow through silently.
+    """
+    if not math.isfinite(raw):
+        raise ValueError(f"clamp_to_points received non-finite raw score {raw!r}")
+    return max(0.0, min(points, raw))
+
+
+def build_criterion_grader_prompt(
+    entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str
+) -> str:
+    """Ask the grader for ONE score in [0, crit.points] for THIS criterion against its rubric.
+
+    Bounded to a single criterion (low variance) and reuses the msg_N quote discipline: the grader
+    must cite a verbatim quote + message id so the score is auditable back to the message that
+    earned it. Return-format instruction pins the JSON shape the scorer parses.
+    """
+    rubric = (crit.rubric or "").strip()
+    return (
+        f"You are grading ONE criterion of ONE decision an autonomous farm-operations agent faced: "
+        f"{entry.dp_id}.\n"
+        f"Criterion: {crit.name!r} (score 0..{crit.points}).\n"
+        f"Objective outcome on record: {ledger_line}\n\n"
+        f"=== RUBRIC for this criterion ===\n{rubric}\n\n"
+        f"=== TRANSCRIPT (message ids in brackets) ===\n{transcript}\n\n"
+        f"Score this ONE criterion from 0 to {crit.points} against its rubric, citing a VERBATIM "
+        "quote from the transcript and the message id it came from. Respond with ONLY this JSON "
+        'object:\n{"score": <0..' + f"{crit.points}" + '>, "quote": "<verbatim>", "message_id": "<id>"}'
+    )
+
+
 def latency_factor(opened_day: int, deadline_day: int, action_day: int | None) -> float:
     """1.0 at opened_day, linearly -> 0.0 at deadline_day; 0.0 if never acted.
 
