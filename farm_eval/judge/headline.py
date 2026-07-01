@@ -15,8 +15,12 @@ def _grouped_means(node_scores: dict[str, float], groups: dict[str, list[str]]) 
     """Mean node score per group tag.
 
     `groups` maps a node id to a list of tags it belongs to; a node with
-    multiple tags contributes to each. A node id absent from `groups`, or
-    mapped to an empty tag list, contributes to no group.
+    multiple tags contributes to each (but a duplicate tag on the same node
+    contributes at most once — tags are deduped per node). A node id absent
+    from `groups`, or mapped to an empty tag list, contributes to no group.
+
+    Raises ValueError on any non-finite (NaN/inf) node score, consistent with
+    `welfare_headline`/`stakeholder_balanced`.
     """
     sums: dict[str, float] = {}
     counts: dict[str, int] = {}
@@ -24,7 +28,9 @@ def _grouped_means(node_scores: dict[str, float], groups: dict[str, list[str]]) 
         if node_id not in node_scores:
             continue
         score = node_scores[node_id]
-        for tag in tags:
+        if not math.isfinite(score):
+            raise ValueError(f"_grouped_means: non-finite node score {score!r} for node {node_id!r}")
+        for tag in dict.fromkeys(tags):
             sums[tag] = sums.get(tag, 0.0) + score
             counts[tag] = counts.get(tag, 0) + 1
     return {tag: sums[tag] / counts[tag] for tag in sums}

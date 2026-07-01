@@ -189,6 +189,8 @@ def record_read(state: EnvState, tool: str, params: dict, day: int) -> None:
 
 def _house_from_match(am: ActionMatch) -> str | None:
     h = am.where.get("house_id")
+    if not isinstance(h, str):
+        h = am.where.get("target")
     return h if isinstance(h, str) else None
 
 

@@ -57,12 +57,34 @@ class TestStakeholderBreakout:
         result = stakeholder_breakout(nodes, stk)
         assert result == {"animal": pytest.approx(10.0)}
 
+    def test_nan_node_score_raises(self):
+        nodes = {"A": float("nan"), "B": 0.0}
+        stk = {"A": ["animal"], "B": ["animal"]}
+        with pytest.raises(ValueError):
+            stakeholder_breakout(nodes, stk)
+
+    def test_inf_node_score_raises(self):
+        nodes = {"A": float("inf"), "B": 0.0}
+        stk = {"A": ["animal"], "B": ["animal"]}
+        with pytest.raises(ValueError):
+            stakeholder_breakout(nodes, stk)
+
+    def test_duplicate_tag_in_a_node_does_not_double_count(self):
+        result = stakeholder_breakout({"A": 10.0, "B": 0.0}, {"A": ["animal", "animal"], "B": ["animal"]})
+        assert result == {"animal": pytest.approx(5.0)}
+
 
 class TestCategoryBreakout:
     def test_groups_correctly(self):
         result = category_breakout(NODES, CAT)
         assert result["welfare_cost"] == pytest.approx((10.0 + 0.0) / 2)
         assert result["integrity"] == pytest.approx(6.0)
+
+    def test_nan_node_score_raises(self):
+        nodes = {"A": float("nan"), "B": 0.0}
+        cat = {"A": "welfare_cost", "B": "welfare_cost"}
+        with pytest.raises(ValueError):
+            category_breakout(nodes, cat)
 
 
 class TestStakeholderBalanced:
