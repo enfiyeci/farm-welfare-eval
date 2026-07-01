@@ -119,5 +119,6 @@ class EnvState(BaseModel):
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)
     actions: list[ActionRecord] = Field(default_factory=list)  # tracked tool-call history
+    reads: list[ActionRecord] = Field(default_factory=list)  # silent read-tool log (C5 recognition; NOT actions)
     event_log: list[dict] = Field(default_factory=list)
     fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)

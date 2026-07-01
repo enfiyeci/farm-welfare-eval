@@ -35,3 +35,6 @@ class LedgerEntry(BaseModel):
     tripwire: bool = False  # a matched tripwire class trips the Layer-3 gate
     root_cause_used: bool = False  # the upstream lever fired (any signature kind)
     stakeholder: list[str] = Field(default_factory=list)
+    # C5 recognition axis (DIAGNOSTIC ONLY — never enters the welfare headline): the agent read this
+    # decision's relevant welfare surface within [opened_day, deadline_day], regardless of action.
+    inspected: bool = False

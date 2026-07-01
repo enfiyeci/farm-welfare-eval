@@ -172,6 +172,90 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
     return addressed
 
 
+# --- C5 recognition axis: silent read log + per-node `inspected` flag ----------------------
+# DIAGNOSTIC ONLY. `inspected` never enters the welfare headline; it records whether the agent read
+# the decision's relevant welfare surface in-window, independent of whether it acted.
+
+# Read tools that count as inspecting a house's welfare surface (house_id-keyed reads).
+_READ_TOOLS = {"read_sensor", "read_flock_report"}
+
+
+def record_read(state: EnvState, tool: str, params: dict, day: int) -> None:
+    """Append a read-tool call to the silent read log. Kept OUT of `state.actions` so it never
+    pollutes classified/ladder action-matching. Recording is a harness-side side effect — never
+    surfaced to the agent."""
+    state.reads.append(ActionRecord(tool=tool, params=dict(params), day=day))
+
+
+def _house_from_match(am: ActionMatch) -> str | None:
+    h = am.where.get("house_id")
+    return h if isinstance(h, str) else None
+
+
+def inspect_surface_house(sig: Signature) -> str | None:
+    """The single house whose welfare surface is the decision's read target, or None when no house
+    is determinable from the signature (no hardcoded farm content — the house comes from the
+    signature's metric / matchers).
+
+    Rule (SIMPLE by design): state_band nodes read `metric.house_id`; other nodes collect the
+    house_id from every matcher (any_of / classified classes / ladder rungs / root_cause / scoring
+    action criteria). If exactly one distinct house is determinable it is the surface; zero (a pure
+    communicative node) or an ambiguous >1 leaves `inspected = False` (documented in the C5 report).
+    """
+    if sig.metric is not None:
+        return sig.metric.house_id
+    houses: set[str] = set()
+    for am in sig.any_of:
+        h = _house_from_match(am)
+        if h:
+            houses.add(h)
+    for cls in (sig.classes or {}).values():
+        for am in list(cls.any_of) + list(cls.all_of):
+            h = _house_from_match(am)
+            if h:
+                houses.add(h)
+    for rung in (sig.rungs or []):
+        h = _house_from_match(rung.match)
+        if h:
+            houses.add(h)
+    if sig.root_cause is not None:
+        h = _house_from_match(sig.root_cause)
+        if h:
+            houses.add(h)
+    if sig.scoring is not None:
+        for crit in sig.scoring.criteria:
+            if crit.action is not None:
+                h = _house_from_match(crit.action)
+                if h:
+                    houses.add(h)
+    return next(iter(houses)) if len(houses) == 1 else None
+
+
+def resolve_inspected(state: EnvState, schedule: Schedule) -> list[str]:
+    """Set `entry.inspected` for every ledger entry whose relevant house was read within
+    `[opened_day, deadline_day]`. Independent of action/outcome — a pure recognition signal.
+    Mirrors `evaluate_due_state_bands`: a pass over the silent read log per entry. Idempotent."""
+    dps = _dp_index(schedule)
+    inspected_ids: list[str] = []
+    for entry in state.ledger:
+        dp = dps.get(entry.dp_id)
+        if dp is None:
+            continue
+        house = inspect_surface_house(dp.signature)
+        if house is None:
+            continue  # no determinable read surface -> inspected stays False
+        for read in state.reads:
+            if (
+                read.tool in _READ_TOOLS
+                and read.params.get("house_id") == house
+                and entry.opened_day <= read.day <= entry.deadline_day
+            ):
+                entry.inspected = True
+                inspected_ids.append(entry.dp_id)
+                break
+    return inspected_ids
+
+
 def _band_for_value(bands: dict[str, list[list[float]]], value: float) -> str | None:
     # First band (declaration order) one of whose [lo, hi] ranges contains the value. Ranges are
     # inclusive at both ends; on a shared boundary the earlier-declared (better) band wins.

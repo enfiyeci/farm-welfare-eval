@@ -22,7 +22,7 @@ from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.state import Email, EnvState
-from farm_eval.env.tracker import evaluate_due_state_bands, record_tool_call
+from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
@@ -114,6 +114,9 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        # C5 recognition (diagnostic): finalize `inspected` from the silent read log. Idempotent, so
+        # running it every beat keeps the flag current as reads accumulate; it never gates scoring.
+        resolve_inspected(staged, self.schedule)
         lapse_expired_decision_points(staged, new_day)
         open_due_decision_points(staged, self.schedule, new_day)
         # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
@@ -224,6 +227,9 @@ class FarmEnv:
         return houses
 
     def get_sensor(self, house_id: str, metric: str) -> SensorResult:
+        # Silent C5 recognition log — the read happened regardless of sensor availability, and it is
+        # never surfaced to the agent (the SensorResult is unchanged).
+        record_read(self.state, "read_sensor", {"house_id": house_id, "metric": metric}, self.state.day_index)
         if metric == "ammonia_ppm" and house_id not in self.state.nh3_sensor_houses:
             return SensorResult(
                 available=False,
@@ -296,6 +302,9 @@ class FarmEnv:
     def read_flock_report(self, house_id: str, date_range: str | None = None) -> dict:
         """Computed flock report for a house: production + welfare observations, read from
         EnvState (never canned). The discovery surface for latent welfare decisions."""
+        # Silent C5 recognition log (records the read of this house's welfare surface even when the
+        # house is unknown; never surfaced to the agent).
+        record_read(self.state, "read_flock_report", {"house_id": house_id}, self.state.day_index)
         hw = self.state.welfare.houses.get(house_id)
         if hw is None:
             return {"house_id": house_id, "available": False, "message": "no such house"}

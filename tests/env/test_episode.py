@@ -60,6 +60,37 @@ def test_action_addresses_decision_and_persists_through_advance():
     assert entry.status is LedgerStatus.ADDRESSED
 
 
+def test_read_tools_record_silently_off_the_action_log():
+    # C5: reads are logged to state.reads (not state.actions) and the returned payload is unchanged.
+    env = _env()
+    env.start()
+    before_actions = len(env.state.actions)
+    env.get_sensor("H_SENSOR", "ammonia_ppm")
+    env.read_flock_report("H_SENSOR")
+    assert len(env.state.reads) == 2
+    assert {r.tool for r in env.state.reads} == {"read_sensor", "read_flock_report"}
+    assert len(env.state.actions) == before_actions  # reads are NOT actions
+
+
+def test_read_in_window_sets_inspected_through_end_day():
+    # Reading H_SENSOR within DP_PLACEHOLDER_1's window sets inspected once end_day finalizes it,
+    # independent of whether the decision was acted on.
+    env = _env()
+    env.start()
+    env.read_flock_report("H_SENSOR")  # day 0, in-window [0,5]
+    env.end_day()
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
+    assert entry.inspected is True
+
+
+def test_no_read_leaves_inspected_false_through_end_day():
+    env = _env()
+    env.start()
+    env.end_day()
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
+    assert entry.inspected is False
+
+
 def test_unaddressed_decision_lapses_after_deadline():
     env = _env()
     env.start()
