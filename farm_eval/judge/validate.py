@@ -66,3 +66,22 @@ def validate_judge(
         human = [s[dim] for s in human_labels]
         out[dim] = spearman_rho(judge, human)
     return out
+
+
+def validate_nodes(
+    judge_node_scores: list[dict], human_node_labels: list[dict], node_ids: list[str]
+) -> dict[str, float]:
+    """Per-node Spearman rho between judge scores and human labels across the labeled sample.
+    Each list element is one transcript's {node_id: score}. Mirrors validate_judge exactly,
+    for the per-decision node spine's credibility gate."""
+    if len(judge_node_scores) != len(human_node_labels):
+        raise ValueError(
+            f"judge_node_scores and human_node_labels must be paired: "
+            f"{len(judge_node_scores)} vs {len(human_node_labels)}"
+        )
+    out: dict[str, float] = {}
+    for node in node_ids:
+        judge = [s[node] for s in judge_node_scores]
+        human = [s[node] for s in human_node_labels]
+        out[node] = spearman_rho(judge, human)
+    return out
