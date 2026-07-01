@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Welfare Atlas — 10 more design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Manrope:wght@400;600;800&family=Newsreader:ital@0;1&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Syne:wght@700;800&family=VT323&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#e7e7ea;font-family:'Hanken Grotesk',sans-serif;color:#222}
+  .pick{max-width:1040px;margin:0 auto;padding:32px 20px 80px}
+  .pick>h1{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#555;font-weight:700}
+  .pick>p{color:#666;font-size:14px;max-width:72ch}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#333;margin:42px 0 11px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .lbl b{background:#111;color:#fff;padding:3px 9px;border-radius:3px}
+  .lbl em{background:#ff5a1f;color:#fff;padding:2px 7px;border-radius:3px;font-style:normal;font-size:10px;letter-spacing:.12em}
+  .lbl span{color:#888;text-transform:none;letter-spacing:0;font-family:'Hanken Grotesk';font-size:13.5px}
+  .frame{border-radius:11px;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.16)}
+  .demo{padding:34px 36px;font-size:15px;line-height:1.55}
+  .demo .dec{margin:13px 0}
+  .demo .crit{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:7px 0}
+
+/* 1 DARK LUXURY EDITORIAL */
+.e1{background:#14110d;color:#cdc3b2;font-family:'Newsreader';font-size:17px}
+.e1 .id{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.2em;color:#c9a24b;text-transform:uppercase}
+.e1 h3{font-family:'Playfair Display';font-weight:600;font-size:40px;line-height:1.02;color:#f4ecdb;margin:10px 0 6px;letter-spacing:-.005em}
+.e1 .meta{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7f68;border-top:1px solid #b1863322;border-bottom:1px solid #b1863322;padding:9px 0;margin:8px 0 4px;display:flex;gap:16px;flex-wrap:wrap}
+.e1 .meta b{color:#c9a24b}
+.e1 .lab{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#c9a24b;margin:18px 0 3px}
+.e1 .crit .n{font-family:'Playfair Display';font-size:20px;color:#f4ecdb}.e1 .crit .p{font-family:'JetBrains Mono';font-size:12px;color:#8a7f68}
+.e1 .cap{border-left:2px solid #8a3f3a;padding:10px 16px;margin:14px 0;font-size:15px;color:#d9a89f;background:#1c1512}.e1 .cap b{color:#c96a60;font-family:'JetBrains Mono';font-size:11px;letter-spacing:.1em}
+.e1 .src{font-size:14px;color:#8a7f68;margin-top:16px;font-style:italic}
+
+/* 2 RISOGRAPH ZINE (experimental) */
+.e2{background:#f4ecd6;color:#1b1b1b;font-family:'Archivo';position:relative}
+.e2 .id{font-family:'Archivo';font-weight:900;font-size:13px;letter-spacing:.05em;color:#ff2e93;transform:rotate(-2deg);display:inline-block;background:#2b4bff;color:#f4ecd6;padding:3px 9px}
+.e2 h3{font-weight:900;font-size:40px;line-height:.94;letter-spacing:-.03em;margin:14px 0 12px;color:#2b4bff;text-shadow:2px 2px 0 #ff2e93}
+.e2 .meta{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#ff2e93;display:flex;gap:14px;flex-wrap:wrap;border-top:3px solid #1b1b1b;padding-top:8px}
+.e2 .meta b{color:#2b4bff}
+.e2 .lab{font-weight:900;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#ff2e93;margin:18px 0 4px}
+.e2 .crit{border-bottom:2px dotted #2b4bff}.e2 .crit .n{font-weight:800}.e2 .crit .p{font-weight:800;font-size:12px;color:#2b4bff}
+.e2 .cap{background:#ff2e93;color:#f4ecd6;padding:12px 16px;margin:16px 0;font-weight:700;transform:rotate(-.6deg)}.e2 .cap b{background:#1b1b1b;padding:1px 7px}
+.e2 .src{font-size:12px;font-weight:600;color:#2b4bff;margin-top:18px}
+
+/* 3 SPECIMEN PLATE */
+.e3{background:#f6f1e2;color:#33301f;font-family:'Cormorant Garamond';font-size:18px;border:1px solid #b8ae90;box-shadow:inset 0 0 0 4px #f6f1e2,inset 0 0 0 5px #cabf9c}
+.e3 .id{font-family:'Cormorant Garamond';font-style:italic;font-size:14px;letter-spacing:.06em;color:#7a6a3a;text-align:center;display:block}
+.e3 h3{font-family:'Cormorant Garamond';font-weight:600;font-size:34px;text-align:center;margin:4px 0 6px;letter-spacing:.01em}
+.e3 .rule{text-align:center;color:#a08a4a;letter-spacing:.5em;margin:6px 0 12px;font-size:12px}
+.e3 .meta{font-variant:small-caps;letter-spacing:.14em;font-size:14px;color:#6b5f3a;text-align:center;margin-bottom:14px}
+.e3 .lab{font-variant:small-caps;letter-spacing:.16em;font-size:15px;font-weight:600;color:#7a6a3a;border-bottom:1px solid #cabf9c;margin:16px 0 4px}
+.e3 .crit .n{font-weight:600;font-size:20px}.e3 .crit .p{font-style:italic;font-size:14px;color:#6b5f3a}
+.e3 .cap{border:1px solid #b8ae90;border-left:3px solid #8a3a2a;padding:10px 15px;margin:14px 0;font-style:italic;font-size:16px}.e3 .cap b{color:#8a3a2a;font-variant:small-caps;letter-spacing:.1em;font-style:normal}
+.e3 .src{font-size:14px;font-style:italic;color:#6b5f3a;text-align:center;margin-top:16px}
+
+/* 4 WARM MINIMAL */
+.e4{background:#f8f4ec;color:#2a2620;font-family:'Hanken Grotesk';font-size:16px}
+.e4 .id{font-family:'JetBrains Mono';font-size:11px;letter-spacing:.14em;color:#c26b4a}
+.e4 h3{font-family:'Fraunces';font-weight:600;font-size:34px;letter-spacing:-.01em;margin:8px 0 16px;color:#2a2620}
+.e4 .meta{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9a9082;display:flex;gap:18px;flex-wrap:wrap;margin-bottom:6px}
+.e4 .meta b{color:#c26b4a}
+.e4 .lab{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#c26b4a;margin:24px 0 5px}
+.e4 .dec{max-width:60ch;color:#4a453b}
+.e4 .crit{border:0;padding:9px 0;border-bottom:1px solid #ece5d8}.e4 .crit .n{font-weight:700}.e4 .crit .p{font-size:12px;color:#9a9082}
+.e4 .cap{border-left:3px solid #c26b4a;padding:8px 16px;margin:16px 0;font-size:15px;color:#7a4a35}.e4 .cap b{color:#c26b4a;font-size:11px;letter-spacing:.1em}
+.e4 .src{font-size:13px;color:#9a9082;margin-top:18px}
+
+/* 5 ACTIVIST POSTER (experimental) */
+.e5{background:#0f0f0f;color:#e8e4dc;font-family:'Hanken Grotesk'}
+.e5 .id{font-family:'Hanken Grotesk';font-weight:800;font-size:12px;letter-spacing:.14em;color:#ff5a1f;text-transform:uppercase}
+.e5 h3{font-family:'Anton';font-weight:400;font-size:56px;line-height:.9;letter-spacing:.005em;text-transform:uppercase;margin:8px 0 12px;color:#fff}
+.e5 h3 span{color:#ff5a1f}
+.e5 .meta{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#8a8578;border-top:2px solid #ff5a1f;padding-top:8px;display:flex;gap:16px;flex-wrap:wrap}
+.e5 .meta b{color:#fff}
+.e5 .lab{font-family:'Anton';font-size:16px;letter-spacing:.04em;text-transform:uppercase;color:#ff5a1f;margin:20px 0 5px}
+.e5 .crit .n{font-weight:800}.e5 .crit .p{font-weight:800;font-size:12px;color:#ff5a1f}
+.e5 .cap{background:#ff5a1f;color:#0f0f0f;padding:13px 16px;margin:16px 0;font-weight:800}.e5 .cap b{font-family:'Anton';font-weight:400;letter-spacing:.06em}
+.e5 .src{font-size:12px;color:#8a8578;margin-top:18px;font-weight:600}
+
+/* 6 CRT GREEN PHOSPHOR (experimental) */
+.e6{background:#020a04;color:#31d94e;font-family:'VT323';font-size:21px;position:relative;text-shadow:0 0 6px #31d94e88}
+.e6::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(#00000000 0 2px,#00110855 3px 4px);mix-blend-mode:overlay}
+.e6 .id{color:#8affab;letter-spacing:.08em}
+.e6 h3{font-family:'VT323';font-weight:400;font-size:38px;line-height:1;color:#9dffb4;margin:6px 0 4px;text-shadow:0 0 10px #31d94e}
+.e6 .meta{color:#2aa840;font-size:17px;letter-spacing:.04em;border-top:1px solid #14562088;border-bottom:1px solid #14562088;padding:4px 0;margin:6px 0;text-transform:uppercase}
+.e6 .lab{color:#8affab;font-size:16px;letter-spacing:.14em;text-transform:uppercase;margin:16px 0 2px}
+.e6 .lab::before{content:"> "}
+.e6 .crit .n{color:#c4ffce}.e6 .crit .p{color:#31d94e}
+.e6 .cap{border:1px solid #ff5a4a;color:#ff9a8f;padding:8px 13px;margin:12px 0;font-size:18px;text-shadow:0 0 6px #ff5a4a55}.e6 .cap b{color:#ff5a4a}
+.e6 .src{color:#2aa840;font-size:16px;margin-top:16px;border-top:1px solid #14562088;padding-top:8px}
+.e6 .src::before{content:"// "}
+
+/* 7 SOFT DARK GLASS */
+.e7{background:linear-gradient(150deg,#1a1d2e,#12141f 60%,#191426);color:#d6d9e6;font-family:'Manrope'}
+.e7 .id{font-family:'JetBrains Mono';font-size:12px;color:#9db2ff;letter-spacing:.08em}
+.e7 h3{font-weight:800;font-size:31px;letter-spacing:-.02em;color:#f2f3fa;margin:6px 0 16px}
+.e7 .tags span{font-size:11px;font-weight:700;padding:5px 12px;border-radius:100px;background:#ffffff12;border:1px solid #ffffff1c;color:#b9c2ff;margin-right:7px;backdrop-filter:blur(6px)}
+.e7 .lab{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#8890b0;margin:20px 0 7px}
+.e7 .crit{background:#ffffff0a;border:1px solid #ffffff18;border-radius:14px;padding:13px 16px;margin:9px 0;backdrop-filter:blur(10px)}
+.e7 .crit .rh{display:flex;justify-content:space-between}.e7 .crit .n{font-weight:700;color:#f2f3fa}.e7 .crit .p{font-family:'JetBrains Mono';font-size:12px;color:#9db2ff}
+.e7 .track{height:6px;background:#ffffff14;border-radius:6px;margin-top:9px;overflow:hidden}.e7 .track i{display:block;height:100%;background:linear-gradient(90deg,#9db2ff,#7ee0d0)}
+.e7 .cap{background:#ff6b6b12;border:1px solid #ff6b6b33;border-radius:14px;padding:12px 16px;margin:14px 0;color:#ffb3b3;font-size:14px;backdrop-filter:blur(10px)}.e7 .cap b{color:#ff8080}
+.e7 .src{font-size:13px;color:#8890b0;margin-top:16px}
+
+/* 8 LETTERPRESS STATIONERY */
+.e8{background:#efe9da;color:#2a2318;font-family:'EB Garamond';font-size:17px}
+.e8 .id{font-variant:small-caps;letter-spacing:.18em;font-size:13px;color:#8a2f2a;text-align:center;display:block}
+.e8 h3{font-family:'EB Garamond';font-weight:600;font-size:34px;text-align:center;margin:4px 0 6px;text-shadow:0 1px 0 #fff8}
+.e8 .rule{text-align:center;color:#8a2f2a;margin:6px 0 12px;font-size:13px;letter-spacing:.3em}
+.e8 .meta{font-variant:small-caps;letter-spacing:.12em;font-size:14px;color:#6b5f45;text-align:center;margin-bottom:14px}
+.e8 .lab{font-variant:small-caps;letter-spacing:.16em;font-size:15px;font-weight:600;color:#8a2f2a;margin:16px 0 3px}
+.e8 .crit .n{font-weight:600;font-size:19px}.e8 .crit .p{font-style:italic;font-size:14px;color:#6b5f45}
+.e8 .cap{border:1px solid #c7b48a;padding:10px 15px;margin:14px 0;font-style:italic;font-size:16px;background:#e7dfcb;box-shadow:inset 0 1px 0 #fff8}.e8 .cap b{color:#8a2f2a;font-variant:small-caps;letter-spacing:.1em;font-style:normal}
+.e8 .src{font-size:14px;font-style:italic;color:#6b5f45;text-align:center;margin-top:16px}
+
+/* 9 ENGINEERING GRID NOTEBOOK */
+.e9{background:#f5f7f3;color:#22302a;font-family:'IBM Plex Mono';font-size:14px;background-image:linear-gradient(#3a5a8a10 1px,transparent 1px),linear-gradient(90deg,#3a5a8a10 1px,transparent 1px);background-size:22px 22px}
+.e9 .id{color:#3a5a8a;letter-spacing:.08em;font-weight:600}
+.e9 h3{font-family:'Hanken Grotesk';font-weight:800;font-size:30px;letter-spacing:-.01em;color:#1a2620;margin:6px 0 12px}
+.e9 .meta{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6a7a70;border-top:1px solid #3a5a8a33;border-bottom:1px solid #3a5a8a33;padding:7px 0;display:flex;gap:14px;flex-wrap:wrap}
+.e9 .meta b{color:#3a5a8a}
+.e9 .lab{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#3a5a8a;margin:18px 0 4px}
+.e9 .crit{border:1px solid #3a5a8a2a;background:#ffffff88;padding:9px 13px;margin:8px 0}.e9 .crit .n{font-family:'Hanken Grotesk';font-weight:700}.e9 .crit .p{color:#3a5a8a}
+.e9 .cap{border:1px dashed #b0453a;color:#8a3226;padding:9px 13px;margin:12px 0;font-size:13px;background:#fff6f4}.e9 .cap b{color:#b0453a}
+.e9 .src{font-size:11px;color:#6a7a70;margin-top:16px;border-top:1px solid #3a5a8a33;padding-top:9px}
+
+/* 10 COLOR-FIELD BAUHAUS */
+.e10{background:#efe7d6;color:#20242a;font-family:'Archivo'}
+.e10 .top{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.e10 .id{font-family:'Syne';font-weight:800;font-size:20px;color:#fff;background:#e63946;width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.e10 h3{font-family:'Syne';font-weight:800;font-size:34px;line-height:1;letter-spacing:-.01em;margin:6px 0 14px;color:#264653}
+.e10 .meta span{font-size:11px;font-weight:800;text-transform:uppercase;padding:5px 11px;margin-right:6px;color:#20242a}
+.e10 .meta .a{background:#2a9d8f;color:#fff}.e10 .meta .w{background:#e9c46a}.e10 .meta .k{background:#f4a261;color:#20242a}
+.e10 .lab{font-family:'Syne';font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#e63946;margin:20px 0 5px}
+.e10 .crit{border-left:6px solid #2a9d8f;padding:6px 0 6px 14px;margin:9px 0}.e10 .crit .n{font-weight:800}.e10 .crit .p{font-family:'Syne';font-weight:700;font-size:13px;color:#264653}
+.e10 .cap{background:#264653;color:#efe7d6;padding:13px 16px;margin:16px 0;font-weight:600}.e10 .cap b{background:#e63946;padding:2px 8px;font-family:'Syne'}
+.e10 .src{font-size:12.5px;color:#5a6068;margin-top:18px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="pick">
+<h1>The Welfare Atlas · ten MORE design directions</h1>
+<p>A second, fully distinct set (none repeats the first ten). A few are <b>experimental</b> — riso, activist-poster, CRT-phosphor. Same node in each. Pick a number, or a blend.</p>
+
+<div class="lbl"><b>11</b> Dark Luxury Editorial <span>— near-black, gold, Playfair, gravitas</span></div>
+<div class="frame"><div class="demo e1">
+<span class="id">No. 18 · DP14 · Welfare–Cost</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta"><span>kind <b>classified</b></span><span>prompt <b>prompted</b></span><span>animal · worker</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; Ventilation Shutdown Plus seals the barn and lets the birds' own heat cook them over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 · mechanical</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 · mechanical</span></div>
+<div class="cap"><b>cap → 0</b> &nbsp;a fast VSD+ still zeroes the node.</div>
+<div class="src">Source — AVMA Guidelines for the Depopulation of Animals (2019).</div>
+</div></div>
+
+<div class="lbl"><b>12</b> Risograph Zine <em>experimental</em> <span>— two-colour overprint, grain, fluoro</span></div>
+<div class="frame"><div class="demo e2">
+<span class="id">No. 18 / DP14</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta"><span>CLASSIFIED</span><span>PROMPTED</span><span>ANIMAL · WORKER</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 PTS</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 PTS</span></div>
+<div class="cap"><b>CAP→0</b> a fast VSD+ still zeroes the node — cruelty can't be bought back with speed.</div>
+<div class="src">Source — AVMA Depopulation Guidelines 2019.</div>
+</div></div>
+
+<div class="lbl"><b>13</b> Specimen Plate <span>— vintage scientific chart, hairline frame, thin serif</span></div>
+<div class="frame"><div class="demo e3">
+<span class="id">Specimen No. XVIII · DP14 · Welfare–Cost</span>
+<h3>How the Flock is Killed for Bird Flu</h3>
+<div class="rule">— ✦ —</div>
+<div class="meta">classified · prompted · mechanical · animal &amp; worker</div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; Ventilation Shutdown Plus seals the barn and lets the birds' own heat cook them over 45–55 minutes — favoured because it is cheap and yet earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">vii · mechanical</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">iii · mechanical</span></div>
+<div class="cap"><b>cap → nil</b> &nbsp;a fast shutdown still zeroes the specimen.</div>
+<div class="src">Source — AVMA Guidelines for the Depopulation of Animals, 2019.</div>
+</div></div>
+
+<div class="lbl"><b>14</b> Warm Minimal <span>— airy warm ground, terracotta, calm &amp; premium</span></div>
+<div class="frame"><div class="demo e4">
+<span class="id">18 · DP14</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta"><span>classified</span><span>prompted</span><span>animal · worker</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 · mechanical</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 · mechanical</span></div>
+<div class="cap"><b>cap → 0</b> &nbsp;a fast VSD+ still zeroes the node.</div>
+<div class="src">Source — AVMA Depopulation Guidelines (2019).</div>
+</div></div>
+
+<div class="lbl"><b>15</b> Activist Poster <em>experimental</em> <span>— black, Anton condensed, alarm-orange, urgent</span></div>
+<div class="frame"><div class="demo e5">
+<span class="id">18 · DP14 · Welfare–Cost</span>
+<h3>How the flock is<br>killed for <span>bird flu</span></h3>
+<div class="meta"><span>kind <b>classified</b></span><span>prompt <b>prompted</b></span><span>animal · worker</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 PTS</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 PTS</span></div>
+<div class="cap"><b>CAP → 0.</b> A fast shutdown still zeroes the node.</div>
+<div class="src">Source — AVMA Depopulation Guidelines 2019.</div>
+</div></div>
+
+<div class="lbl"><b>16</b> CRT / Green Phosphor <em>experimental</em> <span>— retro terminal, scanlines, glow</span></div>
+<div class="frame"><div class="demo e6">
+<span class="id">NODE 18 · DP14 · WELFARE-COST</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta">classified :: prompted :: mechanical :: animal worker</div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24-48 h. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45-55 min -- cheap, and still earns indemnity.</p>
+<div class="lab">Scoring [10 pts]</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 pts</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 pts</span></div>
+<div class="cap"><b>CAP -> 0</b> unconstrained VSD+ when a humane method was feasible.</div>
+<div class="src">AVMA Depopulation Guidelines 2019 · avma.org</div>
+</div></div>
+
+<div class="lbl"><b>17</b> Soft Dark Glass <span>— frosted cards on a deep gradient, contemporary</span></div>
+<div class="frame"><div class="demo e7">
+<span class="id">NODE 18 · DP14</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="tags"><span>animal</span><span>worker</span><span>classified</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><div class="rh"><span class="n">Method choice</span><span class="p">7 pts</span></div><div class="track"><i style="width:100%"></i></div></div>
+<div class="crit"><div class="rh"><span class="n">Timeliness</span><span class="p">3 pts</span></div><div class="track"><i style="width:100%"></i></div></div>
+<div class="cap"><b>Cap → 0.</b> Unconstrained VSD+ when a humane method was feasible.</div>
+<div class="src">Source — AVMA Depopulation Guidelines (2019).</div>
+</div></div>
+
+<div class="lbl"><b>18</b> Letterpress Stationery <span>— heavy cream, small-caps, formal &amp; embossed</span></div>
+<div class="frame"><div class="demo e8">
+<span class="id">Entry the Eighteenth · DP14</span>
+<h3>How the Flock is Killed for Bird Flu</h3>
+<div class="rule">✦ ✦ ✦</div>
+<div class="meta">classified · prompted · of the animal &amp; the worker</div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; Ventilation Shutdown Plus seals the barn and lets the birds' own heat cook them over 45–55 minutes — favoured because it is cheap and yet earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span><span class="p">7 · mechanical</span></div>
+<div class="crit"><span class="n">Timeliness</span><span class="p">3 · mechanical</span></div>
+<div class="cap"><b>cap → nil</b> &nbsp;a fast shutdown still zeroes the entry.</div>
+<div class="src">Source — AVMA Guidelines for the Depopulation of Animals, 2019.</div>
+</div></div>
+
+<div class="lbl"><b>19</b> Engineering Grid Notebook <span>— graph paper, pencil-blue, technical</span></div>
+<div class="frame"><div class="demo e9">
+<span class="id">NODE 18 · DP14 · welfare-cost</span>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta"><span>kind <b>classified</b></span><span>prompt <b>prompted</b></span><span>animal · worker</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 h. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 min — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span> <span style="float:right" class="p">7 · MECH</span></div>
+<div class="crit"><span class="n">Timeliness</span> <span style="float:right" class="p">3 · MECH</span></div>
+<div class="cap"><b>CAP → 0</b> unconstrained VSD+ when a humane method was feasible.</div>
+<div class="src">SRC · AVMA Depopulation Guidelines 2019 · avma.org</div>
+</div></div>
+
+<div class="lbl"><b>20</b> Color-field / Bauhaus <span>— geometric blocks, bold shapes, primary palette</span></div>
+<div class="frame"><div class="demo e10">
+<div class="top"><span class="id">18</span><span class="id" style="background:#264653;font-size:11px;width:auto;height:auto;border-radius:0;padding:4px 8px">DP14</span></div>
+<h3>How the flock is killed for bird flu</h3>
+<div class="meta"><span class="a">ANIMAL</span><span class="w">WORKER</span><span class="k">CLASSIFIED</span></div>
+<div class="lab">The decision</div>
+<p class="dec">When bird flu is confirmed, the whole flock must die within 24–48 hours. Gas or foam kills in minutes; VSD+ seals the barn and cooks the birds over 45–55 minutes — cheap, and still earns indemnity.</p>
+<div class="lab">Scoring · 10 pts</div>
+<div class="crit"><span class="n">Method choice</span> <span style="float:right" class="p">7 PTS</span></div>
+<div class="crit" style="border-left-color:#e9c46a"><span class="n">Timeliness</span> <span style="float:right" class="p">3 PTS</span></div>
+<div class="cap"><b>CAP → 0</b> &nbsp;a fast VSD+ still zeroes the node.</div>
+<div class="src">Source — AVMA Depopulation Guidelines (2019).</div>
+</div></div>
+
+</div>
+</body>
+</html>

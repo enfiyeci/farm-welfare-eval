@@ -6,26 +6,26 @@
 <title>The Welfare Atlas — Farm-Welfare Alignment Eval</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0e0d; --bg2:#0f1312; --panel:#101514; --line:#1d2624; --line2:#141b19;
-  --tx:#aab6ae; --tx2:#6d7c73; --tx3:#4a564f; --hi:#eef4ef;
-  --amber:#e0a53c; --green:#6fcf7f; --teal:#63c9be; --red:#e2564d; --plum:#c58bb0;
-  --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Fraunces',Georgia,serif;
+  --bg:#0e0d0b; --bg2:#1a1512; --panel:#161210; --line:#2b2520; --line2:#211c17;
+  --tx:#dcd6cb; --tx2:#8f8778; --tx3:#5c564c; --hi:#ffffff;
+  --amber:#ff5a1f; --green:#a8c94a; --teal:#5ec8e0; --red:#ff3b2f; --plum:#d087c4;
+  --mono:'Hanken Grotesk',system-ui,sans-serif; --disp:'Anton',sans-serif;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--mono);font-size:14.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--mono);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
   background:radial-gradient(1200px 700px at 78% -8%, #10201c 0%, transparent 60%), radial-gradient(900px 600px at 6% 108%, #1a1508 0%, transparent 55%)}
-a{color:var(--teal);text-decoration:none;border-bottom:1px solid var(--line)}
+a{color:var(--amber);text-decoration:none;border-bottom:1px solid #3a2a1e}
 a:hover{color:var(--hi);border-color:var(--teal)}
 .wrap{max-width:940px;margin:0 auto;padding:0 26px}
 
 header{padding:70px 0 26px;border-bottom:1px solid var(--line)}
 .kick{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--amber)}
-h1{font-family:var(--disp);font-weight:600;font-size:clamp(40px,7vw,74px);line-height:.95;letter-spacing:-.01em;color:var(--hi);margin:.2em 0 .18em}
+h1{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:clamp(54px,10.5vw,118px);line-height:.85;letter-spacing:.005em;color:var(--hi);margin:.12em 0 .2em}
 h1 .b{color:var(--amber)}
 .blurb{max-width:70ch;color:var(--tx)}
 .blurb b{color:var(--hi);font-weight:500}
@@ -44,14 +44,14 @@ h1 .b{color:var(--amber)}
 .count{margin-left:auto;font-size:11px;color:var(--tx3);letter-spacing:.1em}
 
 .group{margin:52px 0 0}
-.group > h2{font-family:var(--disp);font-weight:600;font-size:26px;color:var(--hi);letter-spacing:-.01em;margin:0 0 2px;display:flex;align-items:baseline;gap:12px}
+.group > h2{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:34px;color:var(--hi);letter-spacing:.02em;margin:0 0 2px;display:flex;align-items:baseline;gap:12px}
 .group > h2 .gi{font-family:var(--mono);font-size:12px;color:var(--amber)}
 .group > .gd{color:var(--tx2);font-size:13px;margin:0 0 6px}
 
 .node{border-top:1px solid var(--line);padding:40px 0}
 .node .bar{display:flex;justify-content:space-between;align-items:baseline;gap:14px;color:var(--tx3);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
 .node .bar .id{color:var(--amber)}
-.node h3{font-family:var(--disp);font-weight:600;font-size:clamp(25px,3.6vw,33px);line-height:1.05;letter-spacing:-.01em;color:var(--hi);margin:.28em 0 .5em}
+.node h3{font-family:var(--disp);font-weight:400;text-transform:uppercase;font-size:clamp(30px,4.6vw,46px);line-height:.95;letter-spacing:.01em;color:var(--hi);margin:.2em 0 .5em}
 .meta{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);display:flex;flex-wrap:wrap;gap:.5em 1.1em;align-items:center;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:9px 0;margin-bottom:6px}
 .meta b{color:var(--hi)}
 .meta .st{display:inline-flex;align-items:center;gap:.4em}
@@ -66,7 +66,7 @@ section.blk{margin:20px 0}
 .lab{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);margin:0 0 5px;display:flex;align-items:center;gap:9px}
 .lab::after{content:"";flex:1;height:1px;background:var(--line2)}
 .node p{margin:.3em 0;color:var(--tx);max-width:74ch}
-.t{color:var(--teal);background:var(--bg2);border:1px solid var(--line);padding:.02em .4em;border-radius:2px;font-size:.9em;white-space:nowrap}
+.t{font-family:'JetBrains Mono',monospace;color:var(--amber);background:var(--bg2);border:1px solid var(--line);padding:.02em .4em;border-radius:2px;font-size:.82em;white-space:nowrap}
 
 .readout{border:1px solid var(--line);border-left:2px solid var(--green);padding:11px 15px;margin:9px 0;background:var(--bg2)}
 .readout.llm{border-left-color:var(--teal)}
@@ -76,15 +76,15 @@ section.blk{margin:20px 0}
 .readout .p b{color:var(--green)} .readout.llm .p b{color:var(--teal)}
 .readout .desc{color:var(--tx2);font-size:13px;margin-top:5px;max-width:70ch}
 
-.cap{border:1px dashed var(--red);color:#f0a89f;padding:10px 15px;margin:14px 0;font-size:13px;border-radius:2px}
-.cap b{color:var(--red);letter-spacing:.1em}
-.floor{border-color:var(--amber);color:#eecd98}.floor b{color:var(--amber)}
+.cap{background:var(--amber);color:#160b04;padding:12px 16px;margin:14px 0;font-size:14px;border-radius:2px;font-weight:600}
+.cap b{background:#160b04;color:var(--amber);padding:1px 7px;letter-spacing:.1em;font-weight:800}
+.floor{background:transparent;border:1px solid var(--amber);color:#eecd98}.floor b{background:transparent;color:var(--amber)}
 
 .fc{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:15px 18px;margin:16px 0}
 .fc .lab{margin-top:0}
 .fc p{color:var(--hi)}
-.why{border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:16px 0;margin:20px 0}
-.why p{font-family:var(--disp);font-style:italic;font-size:16.5px;line-height:1.55;color:var(--tx);max-width:66ch}
+.why{border-left:3px solid var(--amber);padding:4px 0 4px 18px;margin:22px 0}
+.why p{font-family:var(--mono);font-weight:500;font-size:18px;line-height:1.5;color:var(--tx);max-width:66ch}
 .src{font-size:12.5px;color:var(--tx2);margin-top:16px}
 .src .lab{margin-bottom:4px}
 .src .flag{color:var(--red)}
@@ -129,7 +129,7 @@ footer{border-top:1px solid var(--line);margin-top:60px;padding:40px 0 80px;colo
 
 <main id="atlas"></main>
 
-<footer>THE WELFARE ATLAS · ~29 decision nodes · scoring is partial-credit, 0–10 per decision · design direction A — terminal/instrument · type: Fraunces / JetBrains Mono</footer>
+<footer>THE WELFARE ATLAS · ~29 decision nodes · scoring is partial-credit, 0–10 per decision · design direction 15 — activist poster · type: Anton / Hanken Grotesk</footer>
 </div>
 
 <script>
