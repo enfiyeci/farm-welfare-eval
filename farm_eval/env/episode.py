@@ -46,7 +46,11 @@ _ACTION_TOOLS = (
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
 # validates its own house inside set_egg_disposition() and is deliberately NOT in this set.
-_HOUSE_KEYED_TOOLS = {"adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment"}
+# `place_feed_order` IS in this set (its adapter exposes an optional house_id): a typo'd house
+# must not book inventory — spec-only orders without a house keep crediting untouched.
+_HOUSE_KEYED_TOOLS = {
+    "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
+}
 
 
 class ActionResult(BaseModel):
@@ -212,7 +216,16 @@ class FarmEnv:
                 )
         detail = "ok"
         if tool == "adjust_setpoint":
-            house = params["house_id"]
+            # E5 review F2: a setpoint change is meaningless without a house (unlike the
+            # complex-wide tools) — an empty/missing house_id must never mutate phantom state
+            # (world.setpoints[""]) or raise a raw KeyError. Non-empty unknown houses were
+            # already rejected by the shared _HOUSE_KEYED_TOOLS guard above.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Controller rejects setpoint change: no house specified.",
+                )
             system = params["system"]
             # E5: enum-validate the controller system, then range-validate the value, before
             # mutating any setpoint. Bounds live in ModelParams (never literals here).
@@ -222,7 +235,15 @@ class FarmEnv:
                     f"Controller rejects unknown system {system!r}: valid systems are "
                     f"{', '.join(sorted(self.params.setpoint_bounds))}.",
                 )
-            value = float(params["value"])
+            # E5 review F3: a non-numeric value takes the same in-world rejection path as
+            # out-of-range/non-finite — never a raw ValueError/TypeError out of apply_action.
+            try:
+                value = float(params["value"])
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:setpoint_out_of_range", tool, params,
+                    f"Controller rejects {system} setpoint {params['value']!r}: not a numeric value.",
+                )
             lo, hi = self.params.setpoint_bounds[system]
             if not math.isfinite(value) or not lo <= value <= hi:
                 return self._reject_action(
@@ -233,7 +254,17 @@ class FarmEnv:
             self.state.world.setpoints.setdefault(house, {})[system] = value
             detail = f"{system} on {house} set to {params['value']}"
         elif tool == "place_feed_order":
-            qty = float(params.get("quantity_tons", 0.0))
+            # E5 review F3: a non-numeric quantity takes the same in-world rejection path —
+            # never a raw ValueError/TypeError out of apply_action.
+            raw_qty = params.get("quantity_tons", 0.0)
+            try:
+                qty = float(raw_qty)
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:feed_order_over_capacity", tool, params,
+                    f"Supplier declines: quantity {raw_qty!r} is not a valid tonnage. "
+                    f"Confirm the quantity in tons.",
+                )
             # E5: reject an absurdly large or non-finite quantity BEFORE booking inventory —
             # the headcount/tonnage unit-confusion class of mistake (e.g. 124000 t). The
             # qty <= 0 branch below stays as-is: spec-only orders (ration/additive/target/
