@@ -36,7 +36,10 @@ def test_economic_params_present_with_research_anchored_defaults():
     assert p.downgrade_age_wk[0] == 30 and p.downgrade_age_wk[-1] == 80
     assert p.downgrade_frac_pct[0] == 3.2 and p.downgrade_frac_pct[-1] == 23.8
     # Cost lines (cage-free, $/doz unless noted) — placeholders from research, verify at C7
-    assert 0.05 <= p.labor_usd_doz <= 0.10        # ~$0.074/doz cage-free
+    assert 0.05 <= (
+        p.default_fte_per_100k * p.labor_wage_usd_hr
+        * p.labor_hours_per_fte_day * p.labor_loaded_factor
+    ) / 7_500.0 <= 0.10                            # ~$0.074/doz at ~90% henday, 100k birds
     assert 0.10 <= p.capital_usd_doz <= 0.20      # ~$0.162/doz aviary
     assert 0.20 <= p.other_var_usd_doz <= 0.35    # misc variable
     assert 0.0 <= p.breaker_price_frac <= 1.0     # breaker price as fraction of shell price

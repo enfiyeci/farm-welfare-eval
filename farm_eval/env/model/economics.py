@@ -51,11 +51,25 @@ def feed_tons_for_day(feed_g: float, bird_count: int) -> float:
 
 
 def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
-              bird_count: int, fuel_index: float, params: ModelParams) -> dict:
-    """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6)."""
+              bird_count: int, fuel_index: float, params: ModelParams,
+              fte_per_100k: float | None = None) -> dict:
+    """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6).
+
+    Labor is staffing-driven and per-bird-DAY (Task C1): it scales with headcount, not
+    with how many eggs got laid. `fte_per_100k` defaults to `params.default_fte_per_100k`;
+    passing an explicit value is the seam Task C2's `set_staffing` lever will use.
+    """
     feed_cost = feed_tons * ration_usd_ton
     energy_cost = bird_count * params.energy_usd_bird_day * fuel_index
-    labor_cost = total_dozen * params.labor_usd_doz
+    if fte_per_100k is None:
+        fte_per_100k = params.default_fte_per_100k
+    direct_fte = fte_per_100k * bird_count / 100_000
+    labor_cost = (
+        direct_fte
+        * params.labor_wage_usd_hr
+        * params.labor_hours_per_fte_day
+        * params.labor_loaded_factor
+    )
     capital_cost = total_dozen * params.capital_usd_doz
     pullet_amort = bird_count * params.pullet_amort_usd_bird_day
     other_var = total_dozen * params.other_var_usd_doz

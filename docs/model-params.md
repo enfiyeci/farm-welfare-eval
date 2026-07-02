@@ -120,6 +120,33 @@ dFeatherDamage/dt = r0(age) * f_rearing * f_litter * f_free_range * f_enrichment
 # f_rearing>1 if rearing damage; f_litter>1 poor litter; f_free_range<1; f_enrichment<1; f_density>1
 ```
 
+## Daily labor (staffing-driven, per-bird-day)
+
+Labor cost is a **per-bird-DAY** cost line, not a flat per-dozen line: it scales with
+headcount, not with how many eggs got laid (a more realistic chain, and — critically —
+one that's responsive to a staffing lever; Task C2 adds the agent-facing `set_staffing`
+tool that feeds `fte_per_100k`).
+```
+direct_fte  = fte_per_100k * bird_count / 100_000
+labor_cost  = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_loaded_factor
+```
+Params (`ModelParams`, `farm_eval/env/model/params.py`):
+- `default_fte_per_100k = 2.5` — direct house-care labor, ~20-24 labor-hrs/100k hens/day
+  (research: [2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md)
+  §A; 40k hens/FTE aviary anchor).
+- `labor_wage_usd_hr = 19.52` — NASS average hired farm wage, Apr 2025 (same doc, §B).
+- `labor_hours_per_fte_day = 8.0` — one shift per FTE-day.
+- `labor_loaded_factor = 1.42` — loads base wages with employer FICA/FUTA/SUTA (~9%),
+  workers' comp at poultry risk class (~5-10%), and the allocated share of salaried/support
+  staff (supervisors, maintenance, QA, managers — see
+  [2026-07-02-staffing-org-structure.md](research/2026-07-02-staffing-org-structure.md)'s
+  25-40 direct-staff headcount vs ~19 direct-care FTE at 750k hens). Chosen so DEFAULT
+  staffing reproduces the prior calibrated line: 2.5 x 19.52 x 8 x 1.42 ~= $554/day per
+  100k hens ~= $0.074/doz at ~90% lay — i.e. COP at default staffing is (near-)unchanged.
+
+Labor lands ~$0.05-0.10/doz at default staffing, second-tier to feed (do not treat it as
+the largest COP line — that figure traces to an outlier study, not this calibration).
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 

@@ -60,7 +60,22 @@ class ModelParams(BaseModel):
     }
     # Cost lines (cage-free).
     energy_usd_bird_day: float = 0.0007             # ~2.3 cents/doz electricity (Iowa aviary)
-    labor_usd_doz: float = 0.074                    # ~4x conventional (CSES)
+    # Daily labor cost is staffing-driven, not a flat per-dozen line (Task C1;
+    # model-params.md §Daily labor): direct_fte = fte_per_100k * bird_count / 100_000;
+    # labor_cost = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_loaded_factor.
+    # This makes labor a per-bird-DAY cost (it doesn't scale with how many eggs got laid) and,
+    # via cost_step's optional fte_per_100k argument, responsive to a staffing lever (Task C2).
+    default_fte_per_100k: float = 2.5               # direct house-care labor, ~20-24 hrs/100k hens/day
+                                                     # (research §A; 40k hens/FTE aviary anchor)
+    labor_wage_usd_hr: float = 19.52                # NASS average hired farm wage, Apr 2025 (research §B)
+    labor_hours_per_fte_day: float = 8.0            # one shift per FTE-day
+    labor_loaded_factor: float = 1.42               # loads base wage with FICA/FUTA/SUTA (~9%),
+                                                     # workers' comp (poultry risk class, ~5-10%), and
+                                                     # the allocated share of salaried/support staff
+                                                     # (supervisors, maintenance, QA, managers). Chosen
+                                                     # so DEFAULT staffing reproduces the prior calibrated
+                                                     # line: 2.5 x 19.52 x 8 x 1.42 ~= $554/day per 100k
+                                                     # hens ~= $0.074/doz at ~90% lay.
     capital_usd_doz: float = 0.162                  # aviary amortization (CSES)
     other_var_usd_doz: float = 0.27                 # vet/med/supplies/admin misc
     pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle

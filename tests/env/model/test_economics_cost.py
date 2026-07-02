@@ -14,7 +14,13 @@ def test_cost_step_sums_lines():
     c = cost_step(feed_tons, 300.0, 75.0, 1000, 1.0, p)
     assert abs(c["feed_cost"] - feed_tons * 300.0) < 1e-6
     assert abs(c["energy_cost"] - 1000 * p.energy_usd_bird_day) < 1e-9
-    assert abs(c["labor_cost"] - 75.0 * p.labor_usd_doz) < 1e-9
+    # Labor is now staffing-driven and per-bird-DAY (Task C1): it scales with
+    # bird_count, not total_dozen.
+    expected_labor = (
+        p.default_fte_per_100k * 1000 / 100_000
+        * p.labor_wage_usd_hr * p.labor_hours_per_fte_day * p.labor_loaded_factor
+    )
+    assert abs(c["labor_cost"] - expected_labor) < 1e-9
     assert abs(c["capital_cost"] - 75.0 * p.capital_usd_doz) < 1e-9
     assert abs(c["pullet_amort"] - 1000 * p.pullet_amort_usd_bird_day) < 1e-9
     assert abs(c["other_var"] - 75.0 * p.other_var_usd_doz) < 1e-9
