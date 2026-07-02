@@ -14,6 +14,8 @@ Dispatch is on `Signature.kind` (spec §7):
 
 from __future__ import annotations
 
+import re
+
 from farm_eval.env.ledger import ActionRecord, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import ActionMatch, ClassMatch, DecisionPoint, Signature
@@ -24,15 +26,36 @@ from farm_eval.env.state import EnvState
 TRANSIENT_BEFORE_WINDOW_DAYS = 14
 
 
+_NORMALIZE_RUN = re.compile(r"[^a-z0-9]+")
+
+
+def _normalize_string(value: str) -> str:
+    """Canonical form for STRING where/param comparison: lowercase, then collapse every run
+    of non-alphanumeric characters to a single underscore, trimming leading/trailing
+    underscores. Makes synonym/format variants converge ("E. coli" / "e_coli" / "E coli" all
+    -> "e_coli"; "Red Mite" -> "red_mite"; "H4" -> "h4") so an agent's free-text param spelling
+    can't cause a silent non-match against a semantically-identical `where` value. Only applied
+    to `str` values — non-string values keep exact equality (see `match_where`)."""
+    return _NORMALIZE_RUN.sub("_", value.lower()).strip("_")
+
+
 def match_where(params: dict, where: dict) -> bool:
     # Generic subset match. `transient_before` is a temporal directive, not an action param,
     # so it is ignored here and handled by match_transient_before.
     # A `where` VALUE given as a list means membership (OR semantics: params[key] must equal
-    # one of the listed values); scalar values keep exact-equality matching.
+    # one of the listed values); scalar values keep exact-equality matching. STRING values
+    # (scalar or list-member) are compared on their normalized form (_normalize_string) on
+    # BOTH sides, so case/punctuation/spacing variants of the same term match; non-string
+    # values are compared with plain `==` (no coercion).
+    def _equal(actual: object, expected: object) -> bool:
+        if isinstance(actual, str) and isinstance(expected, str):
+            return _normalize_string(actual) == _normalize_string(expected)
+        return bool(actual == expected)
+
     def _matches(actual: object, expected: object) -> bool:
         if isinstance(expected, list):
-            return actual in expected
-        return bool(actual == expected)
+            return any(_equal(actual, item) for item in expected)
+        return _equal(actual, expected)
 
     return all(
         key in params and _matches(params[key], value) for key, value in where.items() if key != "transient_before"

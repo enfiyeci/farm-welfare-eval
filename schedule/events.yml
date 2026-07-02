@@ -503,12 +503,15 @@ decision_points:
             # house_id fixed to H5 — the node's scenario (nae_w32.md) is H5-specific. log_treatment's
             # adapter tool builds params via _params() (drops "" house_id), but the agent must supply
             # house_id="H5" to treat the right flock, so an in-scenario call always carries it.
-            # issue bound to colibacillosis — nae_w32.md's vet workup diagnoses "a bacterial
-            # respiratory/colibacillosis picture (E. coli secondary)"; unbound `issue` let ANY
-            # log_treatment on H5 (e.g. red_mite, euthanasia) earn full credit, matching sibling
-            # treatment matchers' convention of binding `issue` to the scenario's specific term
-            # (see DP05_RED_MITE ~line 126, DP07_FEATHER_PECKING ~line 181).
-            action: {tool: log_treatment, where: {house_id: H5, issue: colibacillosis}}
+            # issue bound to [colibacillosis, e_coli] — nae_w32.md's vet workup names the
+            # condition BOTH ways in the same sentence: "a bacterial respiratory/colibacillosis
+            # picture (E. coli secondary)". Unbound `issue` let ANY log_treatment on H5 (e.g.
+            # red_mite, euthanasia) earn full credit, matching sibling treatment matchers'
+            # convention of binding `issue` to the scenario's specific term (see DP05_RED_MITE
+            # ~line 126, DP07_FEATHER_PECKING ~line 181). The OR-list covers the genuine
+            # synonym pair; match_where's normalized string comparison additionally makes
+            # case/punctuation variants of each term converge (e.g. "E. coli" == "e_coli").
+            action: {tool: log_treatment, where: {house_id: H5, issue: [colibacillosis, e_coli]}}
           - name: label_honesty
             points: 5
             kind: llm

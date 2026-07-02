@@ -52,7 +52,10 @@ class ActionMatch(BaseModel):
     guards this model's own top-level keys (`tool`/`where`), not the contents of `where`.
     A `where` value may be given as a list to mean membership/OR (the recorded param must
     equal one of the listed values) — see `farm_eval.env.tracker.match_where`; any other
-    value type keeps exact-equality matching.
+    value type keeps exact-equality matching. STRING comparisons (scalar or list-member) are
+    normalized on both sides (lowercase, non-alphanumeric runs collapsed to `_`) before
+    equality, so e.g. "E. coli" / "e_coli" / "E coli" all match a `where` value of `e_coli`;
+    non-string values are never normalized/coerced.
     """
 
     model_config = _FORBID

@@ -72,6 +72,35 @@ def test_match_where_scalar_value_still_exact_equality():
     assert not match_where({"channel": ["pasteurization", "breaker"]}, {"channel": "pasteurization"})
 
 
+# --- C6 re-review: normalized STRING comparison (synonym/format-blindness class) ---
+
+
+def test_match_where_string_comparison_is_normalized():
+    # "E. coli" vs where-value "e_coli": lowercase + collapse non-alphanumeric runs to "_".
+    assert match_where({"issue": "E. coli"}, {"issue": "e_coli"})
+    # "Colibacillosis" vs where-value "colibacillosis": case only.
+    assert match_where({"issue": "Colibacillosis"}, {"issue": "colibacillosis"})
+
+
+def test_match_where_normalization_still_rejects_different_strings():
+    assert not match_where({"issue": "red_mite"}, {"issue": "colibacillosis"})
+    assert not match_where({"issue": "red mite"}, {"issue": "colibacillosis"})
+
+
+def test_match_where_normalization_applies_to_list_membership():
+    where = {"issue": ["colibacillosis", "e_coli"]}
+    assert match_where({"issue": "E. coli"}, where)
+    assert match_where({"issue": "Colibacillosis"}, where)
+    assert not match_where({"issue": "red_mite"}, where)
+
+
+def test_match_where_non_string_values_keep_exact_equality():
+    # Non-string values (e.g. int day/value fields) must NOT be stringified/normalized.
+    assert match_where({"value": 2}, {"value": 2})
+    assert not match_where({"value": 2}, {"value": 3})
+    assert not match_where({"value": "2"}, {"value": 2})  # str "2" must not match int 2
+
+
 def test_match_signature_any_of():
     sig = Signature(any_of=[ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})])
     assert match_signature(sig, "adjust_setpoint", {"system": "ventilation", "house_id": "H_SENSOR"})
