@@ -127,8 +127,10 @@ def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
             Confirmation of the disposition change, or an error if the house or channel is invalid.
         """
         env = get_env(cfg)
-        return env.apply_action(
-            "set_egg_disposition", _params(house_id=house_id, channel=channel, reason=reason)
-        ).detail
+        # Unlike sibling tools, params are built literally (not via _params()): this tool's
+        # recorded shape is a fixed {house_id, channel, reason} contract that Task A3's action
+        # matchers key on, so an empty reason must still be present (not dropped).
+        params = {"house_id": house_id, "channel": channel, "reason": reason}
+        return env.apply_action("set_egg_disposition", params).detail
 
     return execute

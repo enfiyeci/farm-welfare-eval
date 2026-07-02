@@ -84,6 +84,25 @@ def test_set_egg_disposition_invalid_channel_does_not_record_action():
     assert not any(a["tool"] == "set_egg_disposition" for a in actions)
 
 
+def test_set_egg_disposition_empty_reason_still_recorded_in_params():
+    async def solve(state: TaskState, generate: Generate) -> TaskState:
+        get_env(CFG).start()
+        detail = await set_egg_disposition(CFG)(house_id="H_SENSOR", channel="shell")
+        state.metadata["detail"] = detail
+        return state
+
+    log = _run(solve)
+    assert log.status == "success"
+    store = log.samples[0].store["EpisodeStore:env_state"]
+    actions = store["actions"]
+    entry = next(a for a in actions if a["tool"] == "set_egg_disposition")
+    assert entry["params"] == {"house_id": "H_SENSOR", "channel": "shell", "reason": ""}
+
+    dispositions = store["egg_dispositions"]
+    disposition_entry = next(d for d in dispositions if d["house_id"] == "H_SENSOR")
+    assert disposition_entry["reason"] == ""
+
+
 def test_set_egg_disposition_unknown_house_does_not_record_action():
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(CFG).start()

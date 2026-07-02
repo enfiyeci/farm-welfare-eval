@@ -7,6 +7,7 @@ This is the seam the Phase B Inspect adapter calls. Inspect tools become thin wr
 from __future__ import annotations
 
 from pathlib import Path
+from typing import get_args
 
 from pydantic import BaseModel
 
@@ -21,7 +22,7 @@ from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.pricing import refresh_market
-from farm_eval.env.state import Email, EggDispositionRecord, EnvState
+from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
@@ -234,15 +235,14 @@ class FarmEnv:
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
     # --- egg disposition (standing per-house channel allocation; C6-A1) ---
-    _EGG_CHANNELS = ("shell", "breaker", "pasteurization", "discard")
+    _EGG_CHANNELS = frozenset(get_args(EggChannel))
 
     def set_egg_disposition(self, house_id: str, channel: str, reason: str) -> dict:
         """Route `house_id`'s egg output to `channel` from the CURRENT day forward, until
         changed. Fails loud on an unknown house or invalid channel (mirroring the fail-loud
         precedent of other env methods, e.g. `read_email`'s KeyError). Every call is appended to
-        the standing audit log (`EnvState.egg_dispositions`) so the harness can reconstruct the
-        full history; the return value is a plain confirmation dict with NO ledger/scoring data
-        — this is a routine operational lever, not a scored action in itself."""
+        the standing audit log (`EnvState.egg_dispositions`) so the full history can be
+        reconstructed. Returns a plain confirmation dict (house_id, channel, effective_day)."""
         if house_id not in self.state.welfare.houses:
             raise ValueError(f"unknown house: {house_id!r}")
         if channel not in self._EGG_CHANNELS:
