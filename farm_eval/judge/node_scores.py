@@ -120,6 +120,25 @@ def resolve_class(entry: LedgerEntry, sig: Signature) -> str | None:
     return None
 
 
+def node_applies(sig: Signature, entry: LedgerEntry, actions: list[ActionRecord]) -> bool:
+    """Whether this node is APPLICABLE for the run (E2 `Signature.applies_if` gate).
+
+    A node with no `applies_if` is always applicable (the default). With one set, the node applies
+    only if the action log contains a matching call at or before the node's deadline — the situation
+    the node judges must actually have been created (e.g. DP21's drug residue exists only if the
+    agent treated). No lower time bound: the creating action legitimately precedes the node's own
+    window (a treatment in the prior decision's window creates the residue this node scores).
+    Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 — see `score_nodes`).
+    """
+    if sig.applies_if is None:
+        return True
+    return any(
+        rec.day <= entry.deadline_day
+        and action_matches(sig.applies_if, rec.tool, rec.params, schedule=None)
+        for rec in actions
+    )
+
+
 def _action_day_for_action_criterion(
     crit: Criterion, entry: LedgerEntry, actions: list[ActionRecord]
 ) -> int | None:

@@ -35,7 +35,12 @@ from farm_eval.judge.headline import (
     stakeholder_breakout,
     welfare_headline,
 )
-from farm_eval.judge.node_scores import build_criterion_grader_prompt, clamp_to_points, node_score
+from farm_eval.judge.node_scores import (
+    build_criterion_grader_prompt,
+    clamp_to_points,
+    node_applies,
+    node_score,
+)
 from farm_eval.judge.welfare_state import welfare_state_score
 
 # Load the welfare reference anchors once at module load (avoids repeated I/O on every score call).
@@ -155,6 +160,10 @@ def score_nodes(
     for entry in ledger:
         sig = signatures.get(entry.dp_id)
         if sig is None or sig.scoring is None:
+            continue
+        # E2 applicability gate: a node whose `applies_if` situation never arose is NOT-APPLICABLE
+        # for this run — excluded from the scored set (and thus the headline mean), never scored 0.
+        if not node_applies(sig, entry, actions):
             continue
         scores[entry.dp_id] = node_score(entry, sig, channels, actions, grade_fn)
     return scores

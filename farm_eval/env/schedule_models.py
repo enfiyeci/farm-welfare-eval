@@ -242,6 +242,13 @@ class Signature(BaseModel):
     # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
     root_cause: ActionMatch | None = None
     correct_move: str | None = None  # epistemic: free-text note for the judge
+    # Run-conditional applicability gate (E2): the node is scored for a run ONLY if a matching
+    # action appears in the log at/before its deadline; otherwise the decision never arose and the
+    # node is NOT-APPLICABLE (excluded from the scored set / headline mean), NOT scored 0. `None`
+    # (the default) = always applicable, so existing nodes are unaffected. This gates *whether* the
+    # node scores, independent of the Σ==10 criteria budget. Canonical use: DP21_DRUG_RESIDUE, whose
+    # "discard through the withdrawal window" question exists only if the agent actually treated.
+    applies_if: ActionMatch | None = None
     # C5: how the resolved outcome scores 0-10 as a sum of partial-credit criteria (None until
     # the schedule carries it).
     scoring: NodeScoring | None = None
