@@ -50,6 +50,9 @@ class ActionMatch(BaseModel):
     `task`, `target`, `additive`, `genetics`, `method`, `value`, `issue`, `reason`) plus the
     `transient_before` temporal directive the tracker special-cases. `extra="forbid"` only
     guards this model's own top-level keys (`tool`/`where`), not the contents of `where`.
+    A `where` value may be given as a list to mean membership/OR (the recorded param must
+    equal one of the listed values) — see `farm_eval.env.tracker.match_where`; any other
+    value type keeps exact-equality matching.
     """
 
     model_config = _FORBID

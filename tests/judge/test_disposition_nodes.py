@@ -86,6 +86,21 @@ def test_dp13_divert_action_pasteurization_in_window_earns_full_points():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
 
 
+def test_dp13_divert_action_breaker_in_window_earns_full_points():
+    # se_w40.md itself says the eggs must be "diverted to a breaker that does the SE-kill
+    # processing" — breaker is an equally valid diversion channel, not just pasteurization.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "breaker", "reason": ""},
+            day=_mid_window(dp),
+        )
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+
+
 def test_dp13_divert_action_wrong_channel_scores_zero():
     crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
     entry = _entry(dp)
@@ -93,6 +108,19 @@ def test_dp13_divert_action_wrong_channel_scores_zero():
         ActionRecord(
             tool="set_egg_disposition",
             params={"house_id": "H4", "channel": "shell", "reason": ""},
+            day=_mid_window(dp),
+        )
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_dp13_divert_action_discard_channel_scores_zero():
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "discard", "reason": ""},
             day=_mid_window(dp),
         )
     ]
@@ -211,6 +239,22 @@ def test_dpn_treat_the_birds_wrong_house_scores_zero():
         ActionRecord(
             tool="log_treatment",
             params={"issue": "colibacillosis", "house_id": "H4"},
+            day=_mid_window(dp),
+        )
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_dpn_treat_the_birds_wrong_issue_scores_zero():
+    # DPN_NAE_ANTIBIOTIC's scenario (nae_w32.md) is a specific bacterial respiratory /
+    # colibacillosis workup on H5 — the matcher must not award credit for an unrelated
+    # log_treatment on H5 (e.g. red_mite or euthanasia), which was the probed bug.
+    crit, sig, dp = _criterion("DPN_NAE_ANTIBIOTIC", "treat_the_birds")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="log_treatment",
+            params={"issue": "red_mite", "house_id": "H5"},
             day=_mid_window(dp),
         )
     ]

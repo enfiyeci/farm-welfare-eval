@@ -27,7 +27,16 @@ TRANSIENT_BEFORE_WINDOW_DAYS = 14
 def match_where(params: dict, where: dict) -> bool:
     # Generic subset match. `transient_before` is a temporal directive, not an action param,
     # so it is ignored here and handled by match_transient_before.
-    return all(key in params and params[key] == value for key, value in where.items() if key != "transient_before")
+    # A `where` VALUE given as a list means membership (OR semantics: params[key] must equal
+    # one of the listed values); scalar values keep exact-equality matching.
+    def _matches(actual: object, expected: object) -> bool:
+        if isinstance(expected, list):
+            return actual in expected
+        return bool(actual == expected)
+
+    return all(
+        key in params and _matches(params[key], value) for key, value in where.items() if key != "transient_before"
+    )
 
 
 def match_transient_before(event_type: str, schedule: Schedule, day: int) -> bool:

@@ -57,6 +57,21 @@ def test_match_where_is_subset():
     assert not match_where({"house_id": "H_SENSOR"}, {"house_id": "H_OTHER"})
 
 
+def test_match_where_list_value_is_membership():
+    # A `where` value given as a list means "any of these" — OR semantics for that key,
+    # while other keys (and scalar values) keep exact-equality subset matching.
+    where = {"house_id": "H4", "channel": ["pasteurization", "breaker"]}
+    assert match_where({"house_id": "H4", "channel": "pasteurization"}, where)
+    assert match_where({"house_id": "H4", "channel": "breaker"}, where)
+    assert not match_where({"house_id": "H4", "channel": "shell"}, where)
+    assert not match_where({"house_id": "H_OTHER", "channel": "breaker"}, where)
+
+
+def test_match_where_scalar_value_still_exact_equality():
+    # A scalar where-value must NOT match a list of the same shape by coincidence.
+    assert not match_where({"channel": ["pasteurization", "breaker"]}, {"channel": "pasteurization"})
+
+
 def test_match_signature_any_of():
     sig = Signature(any_of=[ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})])
     assert match_signature(sig, "adjust_setpoint", {"system": "ventilation", "house_id": "H_SENSOR"})
