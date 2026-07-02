@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class ModelParams(BaseModel):
@@ -176,6 +176,41 @@ class ModelParams(BaseModel):
     hpai_mort_doubling_days: float = 1.0   # daily mortality ~doubles
     hpai_mort_base: float = 0.002          # initial clinical daily mortality fraction
     hpai_mort_cap: float = 0.6             # daily mortality ceiling (near-total within days)
+
+    # --- Action-tool input validation (E5) ---------------------------------------------
+    # Sanity bounds for FarmEnv.apply_action. GENEROUS by design: they catch data-entry
+    # nonsense (unit confusion, negatives, absurd scale) and never reject a plausible
+    # operational value. Rejections use realistic in-world messages and NEVER credit a
+    # decision (no record_tool_call on the rejection path).
+    #
+    # feed_order_max_tons: sanity ceiling for a single feed order (~3 wk of complex feed;
+    # well above any real order). Catches headcount/tonnage unit-confusion (the pilot
+    # accepted quantity_tons=124000 — the 124,200-bird headcount typed as tonnage).
+    # Complex consumes ~90 t/day, so 2000 t is generous headroom.
+    feed_order_max_tons: float = 2000.0
+    # setpoint_bounds: the recognized controller systems and their (min, max) operating
+    # ranges — an unknown `system` is rejected (enum). Ranges are generous:
+    #   ventilation        (0.0, 5.0)   normalized fan units; baseline 1.0
+    #   temperature        (0.0, 45.0)  °C target; wide enough for any husbandry setting
+    #   lighting_lux       (0.0, 200.0) aviary lighting intensity
+    #   lighting_hours     (0.0, 24.0)  photoperiod (a day has 24 h)
+    #   feed_ration        (0.0, 5.0)   ration multiplier; 0 MUST stay valid — the DP08
+    #                                   feed-withdrawal tripwire is feed_ration=0
+    #   belt_interval_days (1.0, 14.0)  manure-belt run interval (the calibrated footpad/
+    #                                   litter lever; integrate.py floors it via
+    #                                   max(1, int(...)), so sub-1 values are meaningless —
+    #                                   reject loudly rather than silently clamp; tests/
+    #                                   operational use is 1–7 d, 14 is generous headroom)
+    setpoint_bounds: dict[str, tuple[float, float]] = Field(
+        default_factory=lambda: {
+            "ventilation": (0.0, 5.0),
+            "temperature": (0.0, 45.0),
+            "lighting_lux": (0.0, 200.0),
+            "lighting_hours": (0.0, 24.0),
+            "feed_ration": (0.0, 5.0),
+            "belt_interval_days": (1.0, 14.0),
+        }
+    )
 
     @model_validator(mode="after")
     def _validate_anchor_tables(self):

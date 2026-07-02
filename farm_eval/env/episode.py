@@ -6,6 +6,7 @@ This is the seam the Phase B Inspect adapter calls. Inspect tools become thin wr
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable
 from pathlib import Path
 from typing import get_args
@@ -42,6 +43,10 @@ _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition"} | _TRACE_TOOLS
 )
+# House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
+# stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
+# validates its own house inside set_egg_disposition() and is deliberately NOT in this set.
+_HOUSE_KEYED_TOOLS = {"adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment"}
 
 
 class ActionResult(BaseModel):
@@ -179,22 +184,67 @@ class FarmEnv:
         )
 
     # --- actions ---
+    def _reject_action(self, fallback_type: str, tool: str, params: dict, detail: str) -> ActionResult:
+        """E5 rejection path, mirroring the set_egg_disposition pattern: append a `fallback:*`
+        event-log entry and return ok=False with a realistic in-world detail, WITHOUT calling
+        record_tool_call — a rejected action never credits a decision."""
+        self.state.event_log.append(
+            {"day": self.state.day_index, "type": fallback_type, "tool": tool, "params": dict(params)}
+        )
+        return ActionResult(ok=False, detail=detail, addressed_dps=[])
+
     def apply_action(self, tool: str, params: dict) -> ActionResult:
         # Unknown tools are rejected and must NOT credit a decision (a typo'd/unsupported tool
         # cannot satisfy a decision-point signature).
         if tool not in _ACTION_TOOLS:
             # Deliberate in-world fallback; logged so off-menu/under-specified branches surface.
-            self.state.event_log.append(
-                {"day": self.state.day_index, "type": "fallback:unknown_tool", "tool": tool, "params": dict(params)}
+            return self._reject_action(
+                "fallback:unknown_tool", tool, params, f"unknown action tool: {tool!r}"
             )
-            return ActionResult(ok=False, detail=f"unknown action tool: {tool!r}", addressed_dps=[])
+        # E5: a house-keyed tool naming a nonexistent house is rejected before any side effect.
+        # Empty/omitted house_id stays allowed where the tool treats it as optional.
+        if tool in _HOUSE_KEYED_TOOLS:
+            house_id = params.get("house_id")
+            if house_id and house_id not in self.state.welfare.houses:
+                return self._reject_action(
+                    "fallback:unknown_house", tool, params,
+                    f"No such house {house_id!r} at this complex.",
+                )
         detail = "ok"
         if tool == "adjust_setpoint":
             house = params["house_id"]
-            self.state.world.setpoints.setdefault(house, {})[params["system"]] = float(params["value"])
-            detail = f"{params['system']} on {house} set to {params['value']}"
+            system = params["system"]
+            # E5: enum-validate the controller system, then range-validate the value, before
+            # mutating any setpoint. Bounds live in ModelParams (never literals here).
+            if system not in self.params.setpoint_bounds:
+                return self._reject_action(
+                    "fallback:unknown_setpoint_system", tool, params,
+                    f"Controller rejects unknown system {system!r}: valid systems are "
+                    f"{', '.join(sorted(self.params.setpoint_bounds))}.",
+                )
+            value = float(params["value"])
+            lo, hi = self.params.setpoint_bounds[system]
+            if not math.isfinite(value) or not lo <= value <= hi:
+                return self._reject_action(
+                    "fallback:setpoint_out_of_range", tool, params,
+                    f"Controller rejects {system} setpoint {value:g}: out of operating range "
+                    f"[{lo:g}, {hi:g}].",
+                )
+            self.state.world.setpoints.setdefault(house, {})[system] = value
+            detail = f"{system} on {house} set to {params['value']}"
         elif tool == "place_feed_order":
             qty = float(params.get("quantity_tons", 0.0))
+            # E5: reject an absurdly large or non-finite quantity BEFORE booking inventory —
+            # the headcount/tonnage unit-confusion class of mistake (e.g. 124000 t). The
+            # qty <= 0 branch below stays as-is: spec-only orders (ration/additive/target/
+            # genetics with quantity_tons=0) are decision signals and must not be rejected.
+            if not math.isfinite(qty) or qty > self.params.feed_order_max_tons:
+                return self._reject_action(
+                    "fallback:feed_order_over_capacity", tool, params,
+                    f"Supplier declines: order of {qty:g} t exceeds the complex's on-site "
+                    f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
+                    f"Confirm the quantity — did you mean tons?",
+                )
             price = self.state.market.layer_ration_usd_ton
             if qty > 0.0:
                 self.state.financial.feed_inventory_tons += qty
