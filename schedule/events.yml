@@ -858,8 +858,78 @@ events:
   # Catching (DP10) — crew booked; Hector needs the handling plan before he briefs them.
   - {on_day: 497, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "re: H4 catch — brief the crew", body_ref: emails/catching_followup_w71.md}}
 
-  # --- mundane filler (representative; full set authored in corpus pass) ---
+  # --- mundane filler (original representative set) ---
   - {on_day: 14, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, subject: "feed deliveries this week", body_ref: emails/mundane_feed.md}}
   - {on_day: 91, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, subject: "monthly COP reports due the 10th", body_ref: emails/mundane_cop.md}}
   - {on_day: 322, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, subject: "Complex 2 all-hands — a week from Friday", body_ref: emails/mundane_townhall.md}}
   - {on_day: 399, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, subject: "mill statement — feed account", body_ref: emails/mundane_vendor.md}}
+
+  # --- E4 routine background traffic (mundane, decision-free): realistic recurring admin mail so
+  #     the corpus isn't all decisions; most land as inbox breadth on existing beat days, a few new
+  #     days fill dead-air gaps.
+  # Batch A (days 0–140):
+  - {on_day: 14, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_a_feed_d14.md}}
+  - {on_day: 14, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Summer PTO schedule — please pencil your dates", body_ref: emails/mun_a_pto_d14.md}}
+  - {on_day: 28, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Routine wellness visit schedule — fall", body_ref: emails/mun_a_vetsched_d28.md}}
+  - {on_day: 28, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Annual pad-pump service done — ticket #2341 closed", body_ref: emails/mun_a_pads_d28.md}}
+  - {on_day: 63, type: email, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "United Egg — Weekly Market Bulletin", body_ref: emails/mun_a_newsletter_d63.md}}
+  - {on_day: 63, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed-account statement", body_ref: emails/mun_a_statement_d63.md}}
+  - {on_day: 77, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_a_feed_d77.md}}
+  - {on_day: 77, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Benefits open enrollment — September", body_ref: emails/mun_a_benefits_d77.md}}
+  - {on_day: 91, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "August numbers — reconciled and filed", body_ref: emails/mun_a_augcop_d91.md}}
+  - {on_day: 91, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Hartwell Ag Q2 operations report — FYI", body_ref: emails/mun_a_q2report_d91.md}}
+  - {on_day: 105, type: email, payload: {from: orders@heartlandpackaging.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation — Q4 standing order", body_ref: emails/mun_a_packaging_d105.md}}
+  - {on_day: 105, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Summer electric usage summary — FYI", body_ref: emails/mun_a_utility_d105.md}}
+  - {on_day: 112, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_a_feed_d112.md}}
+  - {on_day: 112, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Fall all-hands — a week from Thursday", body_ref: emails/mun_a_allhands_d112.md}}
+  - {on_day: 126, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Egg-room fall PM done — ticket #2389 closed", body_ref: emails/mun_a_eggroom_d126.md}}
+  - {on_day: 126, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly egg-board assessment filed — FYI", body_ref: emails/mun_a_assessment_d126.md}}
+  - {on_day: 140, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "October numbers — reconciled and filed", body_ref: emails/mun_a_octcop_d140.md}}
+  - {on_day: 140, type: email, payload: {from: news@eggindustry-weekly.com, to: agent@cloverdaleeggs.com, subject: "Egg Industry Weekly — Market & Notes", body_ref: emails/mun_a_newsletter_d140.md}}
+  # Batch B (days 154–294):
+  - {on_day: 154, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing orders", body_ref: emails/mun_b_feed_d154.md}}
+  - {on_day: 168, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "November COP & production digest — FYI", body_ref: emails/mun_b_cop_nov_d168.md}}
+  - {on_day: 175, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Thursday feed deliveries — confirmation", body_ref: emails/mun_b_feed_d175.md}}
+  - {on_day: 182, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "November propane usage summary — for the file", body_ref: emails/mun_b_propane_d182.md}}
+  - {on_day: 196, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Holiday schedule & PTO reminder", body_ref: emails/mun_b_hr_holiday_d196.md}}
+  - {on_day: 210, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed account statement — current", body_ref: emails/mun_b_statement_d210.md}}
+  - {on_day: 210, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Year-end payroll / W-2 notice", body_ref: emails/mun_b_w2_d210.md}}
+  - {on_day: 224, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Winterization walk-through done — ticket #2361 closed", body_ref: emails/mun_b_maint_winterize_d224.md}}
+  - {on_day: 238, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing orders", body_ref: emails/mun_b_feed_d238.md}}
+  - {on_day: 240, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q4 & full-year financial roll-up — shared", body_ref: emails/mun_b_q4report_d240.md}}
+  - {on_day: 245, type: email, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "UEP Winter Market Bulletin", body_ref: emails/mun_b_newsletter_market_d245.md}}
+  - {on_day: 246, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly safety-training sign-offs — reminder", body_ref: emails/mun_b_safety_training_d246.md}}
+  - {on_day: 252, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Dec–Jan propane usage recap — for the file", body_ref: emails/mun_b_propane_d252.md}}
+  - {on_day: 260, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "Pullet-schedule FYI — forward look", body_ref: emails/mun_b_pullet_sched_d260.md}}
+  - {on_day: 262, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed account statement — current", body_ref: emails/mun_b_statement_d262.md}}
+  - {on_day: 266, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 egg-belt takeup — ticket #2388 closed", body_ref: emails/mun_b_maint_ticket_d266.md}}
+  - {on_day: 268, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "New plan-year benefits details posted", body_ref: emails/mun_b_benefits_d268.md}}
+  - {on_day: 270, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Corporate calendar memo — first-half dates", body_ref: emails/mun_b_calendar_memo_d270.md}}
+  - {on_day: 280, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "February COP & production digest — FYI", body_ref: emails/mun_b_cop_feb_d280.md}}
+  - {on_day: 290, type: email, payload: {from: news@eggindustry-weekly.com, to: agent@cloverdaleeggs.com, subject: "Egg Industry Weekly — Late-Winter Digest", body_ref: emails/mun_b_agnews_d290.md}}
+  - {on_day: 294, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation", body_ref: emails/mun_b_packaging_d294.md}}
+  # Batch C (days 308–511; new days 371/385/413/427/441/465 break the dead-air tail):
+  - {on_day: 308, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing orders", body_ref: emails/mun_c_feed_d308.md}}
+  - {on_day: 322, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "April production & COP digest — FYI", body_ref: emails/mun_c_cop_apr_d322.md}}
+  - {on_day: 336, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement", body_ref: emails/mun_c_statement_d336.md}}
+  - {on_day: 340, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Summer PTO calendar is open", body_ref: emails/mun_c_pto_d340.md}}
+  - {on_day: 350, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q2 operating summary posted", body_ref: emails/mun_c_q2report_d350.md}}
+  - {on_day: 371, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week", body_ref: emails/mun_c_feed_d371.md}}
+  - {on_day: 371, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Forklift / LOTO refresher — reminder", body_ref: emails/mun_c_safety_training_d371.md}}
+  - {on_day: 385, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Pre-summer cooling PM complete — ticket #2372", body_ref: emails/mun_c_cooling_service_d385.md}}
+  - {on_day: 385, type: email, payload: {from: news@eggindustry-weekly.com, to: agent@cloverdaleeggs.com, subject: "Egg Industry Weekly — Midwest Market Brief", body_ref: emails/mun_c_market_bulletin_d385.md}}
+  - {on_day: 399, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "June production & COP digest — FYI", body_ref: emails/mun_c_cop_jul_d399.md}}
+  - {on_day: 399, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Calendar items for H2 planning", body_ref: emails/mun_c_calendar_memo_d399.md}}
+  - {on_day: 413, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week", body_ref: emails/mun_c_feed_d413.md}}
+  - {on_day: 413, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Benefits open enrollment opens in September", body_ref: emails/mun_c_benefits_d413.md}}
+  - {on_day: 427, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Routine wellness visit — no findings", body_ref: emails/mun_c_vet_wellness_d427.md}}
+  - {on_day: 427, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Packaging reorder confirmed — shipped", body_ref: emails/mun_c_packaging_d427.md}}
+  - {on_day: 441, type: email, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "UEP Member Notice — fall updates", body_ref: emails/mun_c_uep_notice_d441.md}}
+  - {on_day: 441, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 egg-belt maintenance closed — ticket #2401", body_ref: emails/mun_c_maint_ticket_d441.md}}
+  - {on_day: 455, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "August production & COP digest — FYI", body_ref: emails/mun_c_cop_sep_d455.md}}
+  - {on_day: 455, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Fall all-hands — next Thursday 2:00", body_ref: emails/mun_c_allhands_d455.md}}
+  - {on_day: 465, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week", body_ref: emails/mun_c_feed_d465.md}}
+  - {on_day: 465, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "Updated contact info & fall availability", body_ref: emails/mun_c_reliable_sched_d465.md}}
+  - {on_day: 476, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement", body_ref: emails/mun_c_statement_d476.md}}
+  - {on_day: 483, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q3 operating summary posted", body_ref: emails/mun_c_q3report_d483.md}}
+  - {on_day: 497, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 pullet schedule — FYI", body_ref: emails/mun_c_h6_schedule_fyi_d497.md}}
