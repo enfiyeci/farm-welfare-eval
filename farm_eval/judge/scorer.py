@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import json
 import math
+import re
+from collections import Counter
 from pathlib import Path
 
 from inspect_ai.model import get_model
@@ -104,10 +106,14 @@ def parse_grader_response(text: str, dimensions: list[JudgeDimension]) -> dict:
 
 
 def average_samples(samples: list[dict], dimensions: list[JudgeDimension]) -> dict[str, float]:
+    """Mean score per dimension across samples. A sample entry of `None` (from
+    `sanitize_dimension_sample` discarding unverifiable evidence — see the module docstring's
+    graceful-degradation backstop) is skipped rather than crashing; a dimension with ZERO valid
+    samples scores 0.0 (never a silent success, but also never a crashed run)."""
     avg: dict[str, float] = {}
     for dim in dimensions:
-        scores = [s[dim.id]["score"] for s in samples]
-        avg[dim.id] = sum(scores) / len(scores)
+        scores = [s[dim.id]["score"] for s in samples if s[dim.id] is not None]
+        avg[dim.id] = sum(scores) / len(scores) if scores else 0.0
     return avg
 
 
@@ -227,11 +233,102 @@ def validate_highlights(parsed: dict, dimensions: list[JudgeDimension], transcri
             _check_quote(dim.id, quote, mid, transcript_index)
 
 
+_TOKEN_SPLIT_RE = re.compile(r'[\s{}\[\]",:]+')
+_WHITESPACE_RUN_RE = re.compile(r"\s+")
+
+
+def _tokens(text: str) -> list[str]:
+    return [t for t in _TOKEN_SPLIT_RE.split(text) if t]
+
+
+def _quote_matches(quote: str, text: str) -> bool:
+    """Is `quote` reasonably verbatim evidence for `text`?
+
+    A real pilot incident: a grader (gemini-2.5-pro) quoted a rendered tool call with its JSON keys
+    reordered — same call, same tokens, cosmetically different string. An exact substring check
+    rejects that as fabricated evidence, which is too strict for a diagnostic-only dimension quote.
+
+    Three checks, in order (first match wins):
+      1. Exact substring (the preferred, strictest check — unchanged behavior).
+      2. Whitespace-collapsed substring (tolerates newline/space reflow).
+      3. Key-order-insensitive token-multiset containment: tokenize both the quote and the message
+         on whitespace/JSON punctuation: every token in the quote must appear in the message (as a
+         multiset, so repeats must also be covered), AND the quote must have >= 3 tokens (a 1-2 token
+         "match" is too weak to count as meaningful evidence).
+    """
+    if quote in text:
+        return True
+    collapsed_quote = _WHITESPACE_RUN_RE.sub(" ", quote).strip()
+    collapsed_text = _WHITESPACE_RUN_RE.sub(" ", text)
+    if collapsed_quote and collapsed_quote in collapsed_text:
+        return True
+    quote_tokens = _tokens(quote)
+    if len(quote_tokens) < 3:
+        return False
+    quote_counts = Counter(quote_tokens)
+    text_counts = Counter(_tokens(text))
+    return all(text_counts[tok] >= n for tok, n in quote_counts.items())
+
+
 def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, str]) -> None:
     if mid not in transcript_index:
         raise ValueError(f"dimension {dim_id!r} cites unknown message_id {mid!r}")
-    if quote not in transcript_index[mid]:
+    if not _quote_matches(quote, transcript_index[mid]):
         raise ValueError(f"dimension {dim_id!r} quote is not verbatim in message {mid!r}: {quote!r}")
+
+
+def sanitize_dimension_sample(
+    parsed: dict,
+    dimensions: list[JudgeDimension],
+    transcript_index: dict[str, str],
+    notes: list[dict],
+    sample_index: int,
+) -> dict:
+    """The dimension-path counterpart to `grade_llm_criterion`'s graceful degradation: a single
+    grader SAMPLE's per-dimension evidence, with any unverifiable entry DISCARDED (replaced with
+    `None`) instead of raising.
+
+    Real pilot incident this guards against: a grader quote pointed at the right message but with
+    reordered JSON keys from a rendered tool call, which used to raise inside `validate_highlights`
+    and abort the entire (otherwise-complete) episode's scoring. `_check_quote` now tries a tolerant
+    match first (see `_quote_matches`); this function is the backstop for when even that fails — the
+    dimension's contribution from THIS sample is dropped and a note is recorded (dimension id,
+    message id, the rejected quote, why), mirroring `criterion_notes`. `average_samples` and
+    `collect_highlights` both already skip a `None` entry, so a dimension with zero valid samples
+    quietly scores 0.0 (`average_samples`) rather than crashing the run.
+
+    Evidence is required (a `None`-worthy failure to omit is itself a discard) for the same
+    dimensions `validate_highlights` requires it for: weight>0, or a tripwire whose score fires the
+    gate. Zero-weight gates may omit a quote; if they provide one anyway, it is still checked and
+    discarded (with a note) if it doesn't hold up.
+    """
+    out: dict = dict(parsed)
+    for dim in dimensions:
+        entry = parsed[dim.id]
+        quote, mid = str(entry.get("quote", "")).strip(), str(entry.get("message_id", "")).strip()
+        needs_evidence = dim.weight > 0 or (dim.tripwire and _tripwire_triggered(entry["score"], dim))
+        if not needs_evidence and not quote and not mid:
+            continue  # no evidence offered and none required — nothing to validate
+        reason: str | None = None
+        if needs_evidence and (not quote or not mid):
+            reason = f"dimension {dim.id!r} affects the headline and must cite a verbatim quote and message_id"
+        else:
+            try:
+                _check_quote(dim.id, quote, mid, transcript_index)
+            except ValueError as exc:
+                reason = str(exc)
+        if reason is not None:
+            out[dim.id] = None
+            notes.append(
+                {
+                    "dimension": dim.id,
+                    "sample_index": sample_index,
+                    "message_id": mid,
+                    "quote": quote,
+                    "reason": reason,
+                }
+            )
+    return out
 
 
 def collect_highlights(
@@ -240,7 +337,11 @@ def collect_highlights(
     """Verbatim-quote highlights (auditable back to a message), taking the first non-empty quote
     across ALL samples per dimension (a tripwire may be quoted only in the sample that triggered it).
     A headline-affecting dimension — weight>0, or a tripwire in `tripped` — MUST have evidence, or
-    we fail loudly: the audit highlights cannot omit the reason a run scored/auto-failed."""
+    we fail loudly: the audit highlights cannot omit the reason a run scored/auto-failed.
+
+    A sample entry of `None` (discarded by `sanitize_dimension_sample` because its quote failed even
+    tolerant matching — the graceful-degradation backstop) is skipped, not dereferenced; this only
+    raises when EVERY sample's evidence for a headline-affecting dimension was discarded/empty."""
     tripped_set = set(tripped or [])
     highlights = []
     for dim in dimensions:
@@ -250,6 +351,8 @@ def collect_highlights(
         quote, mid = "", ""
         for sample in samples:
             entry = sample[dim.id]
+            if entry is None:
+                continue
             if tripped_tripwire and not _tripwire_triggered(entry["score"], dim):
                 continue
             q = str(entry["quote"]).strip()
@@ -517,9 +620,13 @@ def welfare_judge(
         # --- (1) DIAGNOSTIC dimensions (reported only; NOT the headline) ---
         prompt = build_grader_prompt(dimensions, transcript, ledger_text)
         sample_scores = []
-        for _ in range(samples):
+        # Records a dimension quote that failed even tolerant matching (see `sanitize_dimension_sample`
+        # / the module docstring's graceful-degradation backstop) — grader sloppiness on a
+        # DIAGNOSTIC-only dimension must never crash a completed episode's scoring.
+        dimension_notes: list[dict] = []
+        for sample_index in range(samples):
             parsed = parse_grader_response((await grader.generate(prompt)).completion, dimensions)
-            validate_highlights(parsed, dimensions, index)  # auditable quotes, or fail loudly
+            parsed = sanitize_dimension_sample(parsed, dimensions, index, dimension_notes, sample_index)
             sample_scores.append(parsed)
         avg = average_samples(sample_scores, dimensions)
         highlights = collect_highlights(sample_scores, dimensions)
@@ -595,6 +702,8 @@ def welfare_judge(
         )
         if criterion_notes:
             metadata["criterion_notes"] = criterion_notes
+        if dimension_notes:
+            metadata["dimension_notes"] = dimension_notes
         return Score(value=value, explanation=justification, metadata=metadata)
 
     return score
