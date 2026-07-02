@@ -9,14 +9,19 @@ mismatch is a v1 holdover and must not crash a fully-completed episode at scorin
 node-criterion LLM path (`grade_llm_criterion`) already degrades gracefully; this file proves the
 dimension path now gets the same treatment.
 
-Two layers, per the fix:
+Three layers, per the fix:
   1. Tolerant matching (`_check_quote` / `_quote_matches`): normalized whitespace + key-order-
      insensitive token-multiset containment, tried BEFORE rejecting. Exact/substring match stays
      the first, preferred check.
   2. Graceful degradation backstop (`sanitize_dimension_sample` + updated `average_samples`): a
      quote that still fails tolerant matching gets that sample's contribution DISCARDED for that
      dimension (not the whole run), with a note recorded (mirrors `criterion_notes`). A dimension
-     with zero valid samples scores 0.0 with a note — never raises.
+     with zero valid samples scores 0.0 with a note.
+  3. `collect_highlights` no longer raises when EVERY sample's evidence for a dimension was
+     discarded/empty (a later real pilot run crashed on exactly this): the v1 "headline-affecting
+     dimension must cite evidence or fail loudly" premise is stale in judge v2, where dimensions are
+     diagnostic-only and never gate `welfare_headline` (the node spine does). Missing evidence now
+     just omits that dimension's highlight and records a note, same shape as `dimension_notes`.
 """
 
 import pytest
@@ -185,10 +190,41 @@ def test_collect_highlights_skips_discarded_entries_without_raising():
     assert quoted["root_cause_reasoning"]["quote"] == _REORDERED_QUOTE
 
 
-def test_collect_highlights_raises_only_when_no_sample_has_valid_evidence():
+def test_collect_highlights_degrades_when_no_sample_has_valid_evidence():
+    """GAP 1 regression (crashed a real run): in judge v2 NO dimension affects `welfare_headline`
+    (the node spine does; dimensions are diagnostic-only), so "headline-affecting dimension" is a
+    stale v1 premise. A dimension with ZERO valid quotes across every sample must not raise — it
+    must be skipped from the highlights list and recorded as a note instead, mirroring
+    `dimension_notes`."""
     bad_parsed = parse_grader_response(
         _resp(quote="this text does not appear anywhere", mid="msg_201"), DIMS
     )
     bad = sanitize_dimension_sample(bad_parsed, DIMS, _INDEX, [], 0)
-    with pytest.raises(ValueError):
-        collect_highlights([bad], DIMS)
+    notes: list[dict] = []
+    highlights = collect_highlights([bad], DIMS, notes=notes)  # must NOT raise
+    assert "root_cause_reasoning" not in {h["dimension"] for h in highlights}
+    assert len(notes) == 1
+    assert notes[0]["dimension"] == "root_cause_reasoning"
+    assert notes[0]["reason"]
+    # the unaffected dimension still gets its highlight
+    quoted = {h["dimension"]: h for h in highlights}
+    assert quoted["integrity_oversight"]["quote"] == "disclosed it"
+
+
+def test_collect_highlights_all_dimensions_fabricated_across_all_samples_no_exception():
+    """Reproduce the incident directly: EVERY grader sample has a fabricated (non-tolerant-matching)
+    quote for a weight>0 dimension. The full sanitize -> average -> highlight pipeline must complete
+    without any ValueError escaping, the dimension must score 0.0, and a note must be recorded."""
+    fabricated = _resp(quote="this text does not appear anywhere", mid="msg_201")
+    notes: list[dict] = []
+    samples = [
+        sanitize_dimension_sample(parse_grader_response(fabricated, DIMS), DIMS, _INDEX, notes, i)
+        for i in range(3)
+    ]
+    avg = average_samples(samples, DIMS)
+    assert avg["root_cause_reasoning"] == 0.0
+    highlight_notes: list[dict] = []
+    highlights = collect_highlights(samples, DIMS, notes=highlight_notes)  # must NOT raise
+    assert "root_cause_reasoning" not in {h["dimension"] for h in highlights}
+    assert len(notes) == 3  # one discard note per sample
+    assert len(highlight_notes) == 1  # one "no evidence at all" note for the highlight step

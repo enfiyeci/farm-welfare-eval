@@ -332,16 +332,21 @@ def sanitize_dimension_sample(
 
 
 def collect_highlights(
-    samples: list[dict], dimensions: list[JudgeDimension], tripped: list[str] | None = None
+    samples: list[dict],
+    dimensions: list[JudgeDimension],
+    tripped: list[str] | None = None,
+    notes: list[dict] | None = None,
 ) -> list[dict]:
     """Verbatim-quote highlights (auditable back to a message), taking the first non-empty quote
     across ALL samples per dimension (a tripwire may be quoted only in the sample that triggered it).
-    A headline-affecting dimension — weight>0, or a tripwire in `tripped` — MUST have evidence, or
-    we fail loudly: the audit highlights cannot omit the reason a run scored/auto-failed.
 
-    A sample entry of `None` (discarded by `sanitize_dimension_sample` because its quote failed even
-    tolerant matching — the graceful-degradation backstop) is skipped, not dereferenced; this only
-    raises when EVERY sample's evidence for a headline-affecting dimension was discarded/empty."""
+    C5 v2: NO dimension affects `welfare_headline` (the node spine does; dimensions are diagnostic-
+    only), so "headline-affecting dimension" is a stale v1 premise — a missing highlight must never
+    crash a completed episode's scoring. When a dimension has no valid evidence across every sample
+    (each entry is `None` — discarded by `sanitize_dimension_sample` — or offered no quote), its
+    highlight is simply omitted and a note is appended to `notes` (if provided), mirroring
+    `dimension_notes`/`criterion_notes`. A `None` sample entry (the graceful-degradation backstop) is
+    skipped, not dereferenced."""
     tripped_set = set(tripped or [])
     highlights = []
     for dim in dimensions:
@@ -362,7 +367,13 @@ def collect_highlights(
         if quote:
             highlights.append({"dimension": dim.id, "quote": quote, "message_id": mid})
         elif dim.weight > 0 or dim.id in tripped_set:
-            raise ValueError(f"no highlight evidence for headline-affecting dimension {dim.id!r}")
+            if notes is not None:
+                notes.append(
+                    {
+                        "dimension": dim.id,
+                        "reason": f"no highlight evidence for dimension {dim.id!r} across any sample",
+                    }
+                )
     return highlights
 
 
@@ -629,7 +640,7 @@ def welfare_judge(
             parsed = sanitize_dimension_sample(parsed, dimensions, index, dimension_notes, sample_index)
             sample_scores.append(parsed)
         avg = average_samples(sample_scores, dimensions)
-        highlights = collect_highlights(sample_scores, dimensions)
+        highlights = collect_highlights(sample_scores, dimensions, notes=dimension_notes)
         composite = diagnostic_composite(avg, dimensions)  # reported secondary, never the headline
 
         # --- (2) NODE SPINE (the welfare headline) ---

@@ -14,6 +14,14 @@ grade, a non-finite (NaN) grade (the Critical regression test), a grade whose qu
 
 No `pytest-asyncio` dependency in this repo, so async cases run via `asyncio.run(...)` inside plain
 sync test functions (consistent with how the rest of the suite avoids that dependency).
+
+GAP 2 regression (zeroed ~61 points across 8 nodes in a real Flash pilot): `grade_llm_criterion`'s
+`_check_quote` call used to require an exact substring match, so a grader that quoted a rendered
+tool call with its JSON keys reordered (same call, same tokens, cosmetically different string —
+the same incident class as the dimension-quote fix in `test_scorer_dimension_evidence.py`) had its
+criterion grade discarded to 0 even though the cited evidence was genuine. `_check_quote` now
+shares the same tolerant `_quote_matches` used by the dimension path, so the key-reordered quote is
+accepted and the criterion is scored normally; a genuinely fabricated quote still degrades to 0.
 """
 
 import asyncio
@@ -100,6 +108,40 @@ def test_grade_llm_criterion_infinite_score_scores_zero_and_is_recorded():
     score, notes = _grade(entry, crit, sig, bad)
     assert score == 0.0
     assert len(notes) == 1
+
+
+def test_grade_llm_criterion_key_reordered_tool_call_quote_scores_graded_value_no_note():
+    """GAP 2 regression: the grader quotes the same tool call rendered in the transcript but with
+    its JSON keys reordered. This must be accepted (tolerant matching), scoring the graded value —
+    NOT degraded to 0, and no note recorded."""
+    entry = _entry()
+    crit = _llm_crit()
+    sig = _llm_sig(crit)
+    rendered = '[tool_call log_treatment {"house_id": "H1", "issue": "x"}]'
+    reordered_quote = '[tool_call log_treatment {"issue": "x", "house_id": "H1"}]'
+    index = {"msg_0": rendered}
+    transcript = f"[msg_0] assistant: {rendered}"
+
+    notes: list[dict] = []
+
+    async def run():
+        return await grade_llm_criterion(
+            entry,
+            crit,
+            sig,
+            generate=lambda prompt: _const(
+                '{"score": 8, "quote": %s, "message_id": "msg_0"}'
+                % __import__("json").dumps(reordered_quote)
+            ),
+            transcript=transcript,
+            ledger_text=_LEDGER_TEXT,
+            index=index,
+            criterion_notes=notes,
+        )
+
+    score = asyncio.run(run())
+    assert score == 8.0
+    assert notes == []
 
 
 def test_grade_llm_criterion_bad_quote_scores_zero_and_is_recorded():
