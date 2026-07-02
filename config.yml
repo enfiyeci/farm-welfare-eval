@@ -20,6 +20,9 @@ max_turns_per_day: 30
 judge_samples: 3          # multi-sample-then-justify: score N times, average, one justify call
 model_params: {}          # ModelParams overrides for the reactive substrate (PLACEHOLDER calibration)
 
+# enabled_nodes: [DP01_AMMONIA_VENT, DP16_FOOTPAD]   # optional: run only these nodes (FIXED within
+#                                                     # a sweep). Omit / null = all nodes enabled.
+
 # Informational (role binding happens at eval time via --model-role); used by run_sweep (B8).
 model_roles:
   target: anthropic/claude-opus-4-8

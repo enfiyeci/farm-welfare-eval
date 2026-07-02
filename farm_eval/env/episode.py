@@ -6,6 +6,7 @@ This is the seam the Phase B Inspect adapter calls. Inspect tools become thin wr
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 from typing import get_args
 
@@ -67,12 +68,39 @@ class SensorResult(BaseModel):
 
 
 class FarmEnv:
-    def __init__(self, corpus: Corpus, schedule: Schedule, state: EnvState, episode_end_day: int, params: ModelParams):
+    def __init__(
+        self,
+        corpus: Corpus,
+        schedule: Schedule,
+        state: EnvState,
+        episode_end_day: int,
+        params: ModelParams,
+        enabled_nodes: Iterable[str] | None = None,
+    ):
         self.corpus = corpus
         self.schedule = schedule
         self.state = state
         self.episode_end_day = episode_end_day
         self.params = params
+        self.enabled_nodes: frozenset[str] | None = (
+            frozenset(enabled_nodes) if enabled_nodes is not None else None
+        )
+        # Fail loud on a bad `enabled_nodes`: never a silently-degenerate run.
+        if self.enabled_nodes is not None:
+            # An EMPTY selection (e.g. `enabled_nodes: []`) would seed an empty ledger and crash
+            # later in `welfare_headline` (empty node_scores) — reject it at config time instead.
+            if not self.enabled_nodes:
+                raise ValueError(
+                    "enabled_nodes is empty; enable at least one decision point "
+                    "(omit the key / use null to enable all nodes)"
+                )
+            # An id not in the schedule is a config error (typo / stale id).
+            known = {dp.id for dp in schedule.decision_points}
+            unknown = self.enabled_nodes - known
+            if unknown:
+                raise ValueError(
+                    f"enabled_nodes references unknown decision point(s): {sorted(unknown)}"
+                )
 
     @classmethod
     def from_paths(
@@ -83,12 +111,15 @@ class FarmEnv:
         seed: int = 0,
         episode_end_day: int,
         params: ModelParams | None = None,
+        enabled_nodes: Iterable[str] | None = None,
     ) -> "FarmEnv":
         corpus = load_corpus(corpus_path)
         schedule = load_schedule(schedule_path)
         validate_body_refs(schedule, corpus)
         state = build_initial_state(corpus, seed=seed)
-        return cls(corpus, schedule, state, episode_end_day, params or ModelParams())
+        return cls(
+            corpus, schedule, state, episode_end_day, params or ModelParams(), enabled_nodes
+        )
 
     # --- clock ---
     def current_day(self) -> int:
@@ -106,7 +137,7 @@ class FarmEnv:
         # repeated start() must not re-fire day-0 events or duplicate mail/event-log entries.
         if self.state.started:
             return
-        open_due_decision_points(self.state, self.schedule, self.state.day_index)
+        open_due_decision_points(self.state, self.schedule, self.state.day_index, self.enabled_nodes)
         fire_events_for_day(self.state, self.schedule, self.corpus, self.state.day_index)
         # Mark started only AFTER day-0 effects complete: a mid-init failure must leave started
         # False so retry/replay re-attempts rather than continuing on a half-initialized state.
@@ -130,7 +161,7 @@ class FarmEnv:
         # running it every beat keeps the flag current as reads accumulate; it never gates scoring.
         resolve_inspected(staged, self.schedule)
         lapse_expired_decision_points(staged, new_day)
-        open_due_decision_points(staged, self.schedule, new_day)
+        open_due_decision_points(staged, self.schedule, new_day, self.enabled_nodes)
         # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)

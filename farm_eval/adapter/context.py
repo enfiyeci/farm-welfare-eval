@@ -37,6 +37,9 @@ class EpisodeConfig:
     episode_end_day: int
     seed: int = 0
     params: ModelParams | None = None
+    # Optional node-selection filter: when set, ONLY these decision points seed the ledger (and
+    # thus score). None (the default) = all nodes enabled. Fixed within a sweep (ablation studies).
+    enabled_nodes: tuple[str, ...] | None = None
 
 
 class EpisodeStore(StoreModel):
@@ -64,4 +67,11 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
     corpus, schedule = load_resources(cfg)
     if store.env_state is None:
         store.env_state = build_initial_state(corpus, seed=cfg.seed)
-    return FarmEnv(corpus, schedule, store.env_state, cfg.episode_end_day, cfg.params or ModelParams())
+    return FarmEnv(
+        corpus,
+        schedule,
+        store.env_state,
+        cfg.episode_end_day,
+        cfg.params or ModelParams(),
+        enabled_nodes=cfg.enabled_nodes,
+    )

@@ -33,6 +33,11 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         episode_end_day=int(cfg["episode_end_day"]),
         seed=int(cfg.get("seed", 0)),
         params=ModelParams(**(cfg.get("model_params") or {})),
+        # Distinguish "key absent" (-> None, all nodes) from "present but empty" (-> (), which
+        # FarmEnv rejects loudly): an empty selection is a config mistake, not "all nodes".
+        enabled_nodes=(
+            tuple(cfg["enabled_nodes"]) if cfg.get("enabled_nodes") is not None else None
+        ),
     )
     briefing = load_briefing(cfg["briefing_path"])
     return Task(

@@ -18,10 +18,20 @@ def ledger_status_for(state: EnvState, dp_id: str) -> LedgerStatus | None:
     return None
 
 
-def open_due_decision_points(state: EnvState, schedule: Schedule, day: int) -> list[str]:
+def open_due_decision_points(
+    state: EnvState,
+    schedule: Schedule,
+    day: int,
+    enabled_nodes: frozenset[str] | None = None,
+) -> list[str]:
     existing = {entry.dp_id for entry in state.ledger}
     opened: list[str] = []
     for dp in schedule.decision_points:
+        # `enabled_nodes` (when set) restricts seeding to the named subset: a disabled node is
+        # never seeded, so it is absent from scores/breakouts/coverage automatically. `None` (the
+        # default) = all nodes enabled (unchanged behavior).
+        if enabled_nodes is not None and dp.id not in enabled_nodes:
+            continue
         if dp.opens_day <= day and dp.id not in existing:
             state.ledger.append(
                 LedgerEntry(
