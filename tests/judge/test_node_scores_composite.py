@@ -80,3 +80,39 @@ def test_prompt_embeds_ledger_line():
         _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=addressed outcome=None"
     )
     assert "status=addressed" in prompt
+
+
+def test_prompt_contains_quote_discipline_block():
+    # Pilot evidence: graders re-serialized tool-call JSON from memory (reordered keys) instead of
+    # copying the rendered line. The prompt must spell out copy/paste discipline explicitly.
+    crit = _llm_crit()
+    sig = Signature(kind="communicative", judged=True)
+    prompt = build_criterion_grader_prompt(
+        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+    )
+    assert "CHARACTER-FOR-CHARACTER" in prompt
+    assert "DISCARDED" in prompt
+    assert "re-order or re-format" in prompt
+
+
+def test_prompt_contains_absence_case_instruction():
+    # Pilot evidence: when the agent never addressed a criterion, graders fabricated/mismatched
+    # quotes (9 discarded criterion grades in one run). The prompt must tell the grader what to do
+    # when there is nothing legitimate to quote.
+    crit = _llm_crit()
+    sig = Signature(kind="communicative", judged=True)
+    prompt = build_criterion_grader_prompt(
+        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+    )
+    assert "never addressed this criterion" in prompt
+    assert "Do not invent a quote." in prompt
+
+
+def test_prompt_clarifies_none_outcome_is_normal():
+    crit = _llm_crit()
+    sig = Signature(kind="communicative", judged=True)
+    prompt = build_criterion_grader_prompt(
+        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+    )
+    assert "outcome of None" in prompt
+    assert "normal for judged decisions" in prompt

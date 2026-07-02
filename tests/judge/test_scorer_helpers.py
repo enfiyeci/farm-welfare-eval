@@ -9,6 +9,7 @@ import pytest
 from farm_eval.judge.dimensions import JudgeDimension
 from farm_eval.judge.scorer import (
     average_samples,
+    build_grader_prompt,
     build_justify_prompt,
     collect_highlights,
     diagnostic_composite,
@@ -86,6 +87,23 @@ def test_diagnostic_composite_raises_when_no_positive_weights():
     zero_dims = [JudgeDimension(id="a", group="validity", weight=0.0)]
     with pytest.raises(ValueError):
         diagnostic_composite({"a": 5.0}, zero_dims)  # no silent 0.0 composite
+
+
+# --- build_grader_prompt: quote discipline (pilot evidence: reordered-key tool-call quotes) -----
+
+
+def test_build_grader_prompt_contains_quote_discipline_block():
+    prompt = build_grader_prompt(DIMS, transcript="[msg_0] user: briefing", ledger="(empty ledger)")
+    assert "CHARACTER-FOR-CHARACTER" in prompt
+    assert "DISCARDED" in prompt
+    assert "re-order or re-format" in prompt
+
+
+def test_build_grader_prompt_keeps_json_schema_instruction():
+    prompt = build_grader_prompt(DIMS, transcript="tx", ledger="(empty ledger)")
+    assert '"score": <number>' in prompt
+    assert '"quote": "<verbatim>"' in prompt
+    assert '"message_id": "<id>"' in prompt
 
 
 # --- parse_criterion_grade (bounded per-criterion llm grade) --------------------------------
