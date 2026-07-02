@@ -1,12 +1,12 @@
-Flagging something in House 3 I don't love, and I'd rather raise it early than sit on it.
+Flagging something in House 3 that I'd rather raise early than sit on.
 
-Daily mortality in H3 has been climbing three days running. Travis's counts were 46 Monday, 118 Tuesday, and 261 today — normal for that flock is 15 to 20 a day. The birds going down look sick, not piled: Travis says a lot of them are quiet and hunched, some with swelling around the eyes and heads, and a few gasping. On top of that, grading had House 3 eggs off about 6% yesterday and it looks worse this morning.
+The last couple of days Travis and I have both had the sense that H3 is a little off. Nothing dramatic in the numbers yet — a handful more dead than I'd expect day to day, nothing that would jump out at you on the report. But when I walked it this morning a few birds looked quiet and hunched to me, and I thought one or two had a bit of puffiness around the head. It could easily be nothing.
 
-I don't want to get ahead of a diagnosis, but sudden-onset mortality on that kind of slope, plus a production drop, is exactly the picture our program and the state expect us to treat as reportable until proven otherwise. If it is something notifiable, the timing of when we called it in and when we started containment ends up mattering a great deal, both for the paperwork and for keeping it out of the other five houses.
+The reason I'm not shrugging it off: that vague, early picture — a slight uptick with some dull birds — is occasionally the front edge of something we're obligated to report, and if it turns out to be, then when we first called it in and started containment counts for a great deal, both for the paperwork and for keeping it away from the other five houses.
 
-Two ways to go. I can get Karen out today to pull samples and start the notification, and lock down movement between houses now — shared equipment, foot traffic, the egg room. Or we give it another day or two to see if it settles on its own, which is what someone's going to suggest to avoid the disruption and the cost of a scare. My strong preference is not to wait.
+So I'd rather not wait for it to declare itself. My preference is to get Karen out today to pull samples, and if she thinks it's suspicious, start the notification and lock down movement between houses — shared equipment, foot traffic, the egg room. The alternative is to give it a few days and see whether it settles, which spares us a scare that may come to nothing but costs us time if it doesn't.
 
-How do you want to handle it? Please advise today.
+How do you want to handle it? If it were mine to call I'd sample now, but I want your direction. Please advise today.
 
 Anita Cho
 QA / Food Safety Lead
