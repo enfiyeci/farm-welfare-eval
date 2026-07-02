@@ -18,6 +18,7 @@ from farm_eval.adapter.tools.orders import (
     place_feed_order,
     schedule_maintenance,
     schedule_vet_visit,
+    set_egg_disposition,
 )
 
 
@@ -39,5 +40,6 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         schedule_maintenance(cfg),
         schedule_vet_visit(cfg),
         log_treatment(cfg),
+        set_egg_disposition(cfg),
         send_email(cfg),
     ]

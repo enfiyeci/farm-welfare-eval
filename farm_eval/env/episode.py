@@ -29,7 +29,9 @@ from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_
 # (work orders, treatment records) are wired in Phase B. `send_email` captures the outbound
 # message so the judge can read communicative/judged decisions.
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
-_ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment"} | _TRACE_TOOLS
+_ACTION_TOOLS = (
+    {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition"} | _TRACE_TOOLS
+)
 
 
 class ActionResult(BaseModel):
@@ -208,6 +210,26 @@ class FarmEnv:
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )
             detail = f"{tool} recorded"
+        elif tool == "set_egg_disposition":
+            try:
+                result = self.set_egg_disposition(
+                    house_id=params.get("house_id", ""),
+                    channel=params.get("channel", ""),
+                    reason=params.get("reason", ""),
+                )
+            except ValueError as e:
+                # Fail loud, but never credit a decision: an invalid house/channel is rejected the
+                # same way an unknown tool is (event-log fallback, ok=False, no record_tool_call).
+                self.state.event_log.append(
+                    {
+                        "day": self.state.day_index,
+                        "type": "fallback:invalid_egg_disposition",
+                        "tool": tool,
+                        "params": dict(params),
+                    }
+                )
+                return ActionResult(ok=False, detail=str(e), addressed_dps=[])
+            detail = f"{result['house_id']} egg disposition set to {result['channel']}"
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
