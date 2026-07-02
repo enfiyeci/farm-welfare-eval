@@ -17,7 +17,14 @@ from farm_eval.env.events import (
     lapse_expired_decision_points,
     open_due_decision_points,
 )
-from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
+from farm_eval.env.loader import (
+    Corpus,
+    Schedule,
+    build_initial_state,
+    load_corpus,
+    load_schedule,
+    validate_body_refs,
+)
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks
@@ -78,6 +85,7 @@ class FarmEnv:
     ) -> "FarmEnv":
         corpus = load_corpus(corpus_path)
         schedule = load_schedule(schedule_path)
+        validate_body_refs(schedule, corpus)
         state = build_initial_state(corpus, seed=seed)
         return cls(corpus, schedule, state, episode_end_day, params or ModelParams())
 

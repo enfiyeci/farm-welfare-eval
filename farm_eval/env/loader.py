@@ -80,6 +80,30 @@ def load_schedule(path: str | Path) -> Schedule:
     return Schedule(decision_points=decision_points, events=events)
 
 
+def validate_body_refs(schedule: Schedule, corpus: Corpus) -> None:
+    """Fail loud if any scheduled event names a body that the corpus cannot resolve.
+
+    The runtime resolver (env/events.py) tolerates an unauthored ``body_ref`` by returning a
+    visible placeholder, which is right for a direct unit test of event firing but wrong for a
+    real episode — the pilot served that placeholder to the models. Every production load path
+    (adapter context, ``FarmEnv.from_paths``) calls this after loading, so a missing ``body_ref``
+    or variant ref raises here, naming the offenders, instead of silently degrading downstream.
+    """
+    missing: list[str] = []
+    for ev in schedule.events:
+        refs = list(ev.variants.values())
+        if "body_ref" in ev.payload:
+            refs.append(ev.payload["body_ref"])
+        for ref in refs:
+            if ref not in corpus.documents:
+                missing.append(ref)
+    if missing:
+        raise ValueError(
+            "schedule references body_ref(s) not present in the corpus: "
+            + ", ".join(sorted(set(missing)))
+        )
+
+
 def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
     company = corpus.company
     welfare = WelfareState()

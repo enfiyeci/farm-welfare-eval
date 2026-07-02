@@ -15,17 +15,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
 CORPUS_DIR = REPO_ROOT / "corpus"
 
-# Bodies authored in the later C7 corpus pass: the schedule references them now and the
-# resolver tolerates their absence at runtime (visible placeholder). These are NOT typos —
-# but any OTHER missing body_ref is, and must fail the guard below. Keep this list in lockstep
-# with the unauthored refs as they get written in C7 (remove a ref here once its file lands).
-KNOWN_DEFERRED_BODY_REFS = {
-    "emails/biosecurity_w35.md",
-    "emails/stocking_w22.md",
-    "emails/hpai_staffing_w36.md",
-    "emails/residue_w36.md",
-    "emails/injury_w46.md",
-}
+# Previously this held five deferred decision-email bodies that the schedule referenced before
+# they were authored; the resolver degraded them to a visible placeholder. Phase E1 authored all
+# five, so the allowlist is now empty and EVERY real body_ref must resolve in the corpus. The
+# production load path (loader.validate_body_refs) enforces this at load time; this guard is the
+# test-layer mirror. If a future decision email is scheduled before its body is written, add its
+# ref here deliberately (and know that a real run will still fail loud until the file lands).
+KNOWN_DEFERRED_BODY_REFS: set[str] = set()
 
 pytestmark = pytest.mark.skipif(
     not (SCHEDULE_DIR / "events.yml").is_file(), reason="real schedule/events.yml not present"

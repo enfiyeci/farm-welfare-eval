@@ -16,7 +16,14 @@ from dataclasses import dataclass
 from inspect_ai.util import StoreModel, store_as
 
 from farm_eval.env.episode import FarmEnv
-from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
+from farm_eval.env.loader import (
+    Corpus,
+    Schedule,
+    build_initial_state,
+    load_corpus,
+    load_schedule,
+    validate_body_refs,
+)
 from farm_eval.env.model import ModelParams
 from farm_eval.env.state import EnvState
 
@@ -45,7 +52,9 @@ _resources: dict[tuple[str, str], tuple[Corpus, Schedule]] = {}
 def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
     key = (str(cfg.corpus_path), str(cfg.schedule_path))
     if key not in _resources:
-        _resources[key] = (load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path))
+        corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
+        validate_body_refs(schedule, corpus)
+        _resources[key] = (corpus, schedule)
     return _resources[key]
 
 

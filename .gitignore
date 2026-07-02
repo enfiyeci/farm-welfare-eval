@@ -12,3 +12,6 @@ venv/
 # Generated, human-readable reference only — NOT consumed by the judge (the scorer reads
 # judge/dimensions/*.md, the source of truth). Regenerate on demand: node docs/build-rubric.mjs
 farm_eval/judge/rubric.yml
+
+# worktree venv symlink (see HANDOFF: symlinked, never committed)
+venv
