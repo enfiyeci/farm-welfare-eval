@@ -18,7 +18,7 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 """
 from __future__ import annotations
 
-from farm_eval.env.state import EnvState
+from farm_eval.env.state import EnvState, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai
@@ -75,9 +75,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             hw.feed_g = prod["feed_g"]
 
             # --- Daily P&L (Tier-0). Reads market + production; writes only state.financial. ---
+            # The house's standing egg-disposition channel (C6-A1 lever) scales revenue: a
+            # discard/breaker/pasteurization diversion set via `FarmEnv.set_egg_disposition`
+            # takes effect starting the day it was recorded (day-forward semantics), read here
+            # from the append-only log so past days remain unaffected by a later change.
+            channel = current_disposition(state, hid)
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
-                economics.downgrade_frac(age, 0.0, params), params,
+                economics.downgrade_frac(age, 0.0, params), params, channel,
             )
             feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
             fin = state.financial

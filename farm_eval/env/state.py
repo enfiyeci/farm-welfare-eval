@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
+
+EggChannel = Literal["shell", "breaker", "pasteurization", "discard"]
 
 
 class Email(BaseModel):
@@ -92,6 +96,17 @@ class WorldState(BaseModel):
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
 
 
+class EggDispositionRecord(BaseModel):
+    """One `set_egg_disposition` call: an append-only audit-log entry. The STANDING allocation
+    for a house is derived from the log (see `current_disposition`), not stored separately —
+    single source of truth, no duplicated state."""
+
+    house_id: str
+    channel: EggChannel
+    reason: str
+    day: int
+
+
 class MarketState(BaseModel):
     """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
 
@@ -122,3 +137,18 @@ class EnvState(BaseModel):
     reads: list[ActionRecord] = Field(default_factory=list)  # silent read-tool log (C5 recognition; NOT actions)
     event_log: list[dict] = Field(default_factory=list)
     fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)
+    # Egg-disposition audit log (append-only): every `set_egg_disposition` call, in call order.
+    # The STANDING per-house channel is derived from this log via `current_disposition` — a
+    # house with no record defaults to "shell". Day-forward semantics: a record at `day` governs
+    # that house's egg revenue from `day` onward until superseded by a later record.
+    egg_dispositions: list[EggDispositionRecord] = Field(default_factory=list)
+
+
+def current_disposition(state: EnvState, house_id: str) -> str:
+    """The house's currently standing egg-disposition channel, derived from the append-only
+    log (latest record for that house, by log order — records are always appended at the
+    current day so log order and day order agree). Defaults to "shell" with no record."""
+    for record in reversed(state.egg_dispositions):
+        if record.house_id == house_id:
+            return record.channel
+    return "shell"

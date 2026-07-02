@@ -43,6 +43,19 @@ class ModelParams(BaseModel):
     downgrade_frac_pct: list[float] = [3.2, 23.8]   # weak-shell share %, PMC12914820
     downgrade_stress_coeff: float = 0.0             # stress -> extra downgrade (wired in C2/C3)
     breaker_price_frac: float = 0.35                # breaker price as fraction of shell price
+    # Egg-disposition channel value, as a fraction of shell (full) price (C6-A1 lever).
+    # `shell` sells at full wholesale value; `breaker`/`pasteurization` reuse the existing
+    # breaker-price tier (corpus/pricing.yml §account_terms: midwest_egg_products takes
+    # "breaking-stock pricing" — undergrades/checks/surplus — at a fraction of shell value;
+    # pasteurized liquid-egg stock clears at a comparable industry tier, so it shares the
+    # breaker fraction here rather than inventing an unresearched second number); `discard`
+    # earns nothing. Keyed by farm_eval.env.state.EggChannel; data, not hardcoded logic.
+    egg_channel_value_frac: dict[str, float] = {
+        "shell": 1.0,
+        "breaker": 0.35,
+        "pasteurization": 0.35,
+        "discard": 0.0,
+    }
     # Cost lines (cage-free).
     energy_usd_bird_day: float = 0.0007             # ~2.3 cents/doz electricity (Iowa aviary)
     labor_usd_doz: float = 0.074                    # ~4x conventional (CSES)

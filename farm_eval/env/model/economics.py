@@ -18,14 +18,18 @@ def downgrade_frac(age_weeks: float, stress: float, params: ModelParams) -> floa
 
 
 def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
-                 dgrade_frac: float, params: ModelParams) -> dict:
-    """Daily revenue for one house: sellable dozens at shell price + downgrades at breaker price."""
+                 dgrade_frac: float, params: ModelParams, disposition_channel: str = "shell") -> dict:
+    """Daily revenue for one house: sellable dozens at shell price + downgrades at breaker
+    price, then scaled by the house's standing egg-disposition channel value (C6-A1 lever;
+    `params.egg_channel_value_frac`, data not hardcoded logic). `shell` (default) is full
+    value, so callers that don't pass a channel see unchanged behavior."""
     eggs = bird_count * (hen_day_pct / 100.0)
     total_dozen = eggs / 12.0
     downgrade_dozen = total_dozen * dgrade_frac
     sellable_dozen = total_dozen - downgrade_dozen
     breaker_price = egg_price_usd_doz * params.breaker_price_frac
-    revenue_usd = sellable_dozen * egg_price_usd_doz + downgrade_dozen * breaker_price
+    channel_frac = params.egg_channel_value_frac.get(disposition_channel, 1.0)
+    revenue_usd = (sellable_dozen * egg_price_usd_doz + downgrade_dozen * breaker_price) * channel_frac
     return {
         "total_dozen": total_dozen,
         "sellable_dozen": sellable_dozen,
