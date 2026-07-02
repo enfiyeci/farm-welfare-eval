@@ -144,11 +144,16 @@ class EnvState(BaseModel):
     egg_dispositions: list[EggDispositionRecord] = Field(default_factory=list)
 
 
-def current_disposition(state: EnvState, house_id: str) -> str:
-    """The house's currently standing egg-disposition channel, derived from the append-only
-    log (latest record for that house, by log order — records are always appended at the
-    current day so log order and day order agree). Defaults to "shell" with no record."""
-    for record in reversed(state.egg_dispositions):
-        if record.house_id == house_id:
-            return record.channel
-    return "shell"
+def current_disposition(state: EnvState, house_id: str, as_of_day: int) -> str:
+    """The house's standing egg-disposition channel as of `as_of_day`, derived from the
+    append-only log: among records for this house with `record.day <= as_of_day`, the one
+    with the greatest `day` wins; same-day ties break by append order (the LAST-APPENDED
+    record among those tied at the max day wins). Defaults to "shell" when no record
+    qualifies (e.g. all records are for a day after `as_of_day`)."""
+    best_record = None
+    for record in state.egg_dispositions:
+        if record.house_id != house_id or record.day > as_of_day:
+            continue
+        if best_record is None or record.day >= best_record.day:
+            best_record = record
+    return best_record.channel if best_record is not None else "shell"

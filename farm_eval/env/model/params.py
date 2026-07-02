@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 from pydantic import BaseModel, model_validator
 
 
@@ -196,4 +198,18 @@ class ModelParams(BaseModel):
             for vf in value_fields:
                 if len(getattr(self, vf)) != len(ages):
                     raise ValueError(f"{vf} must be the same length as {age_field}")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_egg_channel_value_frac(self):
+        # Each channel value must be a finite fraction in [0.0, 1.0]. NaN/inf must never
+        # reach financial.revenue_cum; a value outside the valid price-fraction range is
+        # a config mistake that should fail loudly here, not silently distort revenue.
+        for channel, frac in self.egg_channel_value_frac.items():
+            if not math.isfinite(frac):
+                raise ValueError(f"egg_channel_value_frac[{channel!r}] must be finite, got {frac}")
+            if not (0.0 <= frac <= 1.0):
+                raise ValueError(
+                    f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"
+                )
         return self

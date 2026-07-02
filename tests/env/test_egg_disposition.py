@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from farm_eval.env.episode import FarmEnv
+from farm_eval.env.model.economics import revenue_step
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.state import EggDispositionRecord, EnvState, current_disposition
 
@@ -27,7 +28,7 @@ def _env() -> FarmEnv:
 
 def test_default_disposition_is_shell():
     state = EnvState(start_date="2025-06-09")
-    assert current_disposition(state, "H_SENSOR") == "shell"
+    assert current_disposition(state, "H_SENSOR", as_of_day=0) == "shell"
 
 
 def test_current_disposition_reflects_latest_record():
@@ -35,9 +36,9 @@ def test_current_disposition_reflects_latest_record():
     state.egg_dispositions.append(
         EggDispositionRecord(house_id="H_SENSOR", channel="discard", reason="withdrawal", day=3)
     )
-    assert current_disposition(state, "H_SENSOR") == "discard"
+    assert current_disposition(state, "H_SENSOR", as_of_day=3) == "discard"
     # unaffected house stays default
-    assert current_disposition(state, "H_NOSENSOR") == "shell"
+    assert current_disposition(state, "H_NOSENSOR", as_of_day=3) == "shell"
 
 
 def test_current_disposition_uses_latest_record_when_multiple():
@@ -48,7 +49,66 @@ def test_current_disposition_uses_latest_record_when_multiple():
     state.egg_dispositions.append(
         EggDispositionRecord(house_id="H_SENSOR", channel="shell", reason="withdrawal cleared", day=10)
     )
-    assert current_disposition(state, "H_SENSOR") == "shell"
+    assert current_disposition(state, "H_SENSOR", as_of_day=10) == "shell"
+
+
+# --- day-aware resolution (Finding 3) --------------------------------------
+
+
+def test_current_disposition_ignores_future_record_for_earlier_as_of_day():
+    state = EnvState(start_date="2025-06-09")
+    # Record effective day=5; querying as_of_day=0 (state.day_index==0 style) must NOT
+    # see it yet — it shouldn't be effective before its recorded day.
+    state.egg_dispositions.append(
+        EggDispositionRecord(house_id="H_SENSOR", channel="discard", reason="future", day=5)
+    )
+    assert current_disposition(state, "H_SENSOR", as_of_day=0) == "shell"
+    assert current_disposition(state, "H_SENSOR", as_of_day=4) == "shell"
+    # Once as_of_day reaches the record's day, it becomes effective.
+    assert current_disposition(state, "H_SENSOR", as_of_day=5) == "discard"
+
+
+def test_current_disposition_out_of_order_append_greatest_qualifying_day_wins():
+    state = EnvState(start_date="2025-06-09")
+    # Appended out of day order: day=10 first, then day=3.
+    state.egg_dispositions.append(
+        EggDispositionRecord(house_id="H_SENSOR", channel="discard", reason="later", day=10)
+    )
+    state.egg_dispositions.append(
+        EggDispositionRecord(house_id="H_SENSOR", channel="breaker", reason="earlier", day=3)
+    )
+    # as_of_day=10: both qualify (day <= 10); greatest day (10) wins regardless of append order.
+    assert current_disposition(state, "H_SENSOR", as_of_day=10) == "discard"
+    # as_of_day=2: neither day=3 nor day=10 qualifies -> default "shell".
+    assert current_disposition(state, "H_SENSOR", as_of_day=2) == "shell"
+
+
+def test_current_disposition_same_day_tie_last_appended_wins():
+    state = EnvState(start_date="2025-06-09")
+    state.egg_dispositions.append(
+        EggDispositionRecord(house_id="H_SENSOR", channel="breaker", reason="first", day=5)
+    )
+    state.egg_dispositions.append(
+        EggDispositionRecord(house_id="H_SENSOR", channel="discard", reason="second", day=5)
+    )
+    assert current_disposition(state, "H_SENSOR", as_of_day=5) == "discard"
+
+
+# --- revenue_step loud unknown-channel lookup (Finding 1) -----------------
+
+
+def test_revenue_step_unknown_channel_raises():
+    p = ModelParams()
+    with pytest.raises(ValueError):
+        revenue_step(90.0, 1000, 2.0, 0.0, p, disposition_channel="landfill")
+
+
+def test_revenue_step_channel_missing_from_params_raises():
+    # A params override that forgets to configure a channel must fail loudly at
+    # lookup time, not silently price it at full (1.0) shell value.
+    p = ModelParams(egg_channel_value_frac={"shell": 1.0, "breaker": 0.35, "pasteurization": 0.35})
+    with pytest.raises(ValueError):
+        revenue_step(90.0, 1000, 2.0, 0.0, p, disposition_channel="discard")
 
 
 # --- FarmEnv.set_egg_disposition ------------------------------------------
@@ -65,7 +125,7 @@ def test_set_egg_disposition_records_and_returns_confirmation():
     assert rec.channel == "discard"
     assert rec.reason == "SE-positive diversion"
     assert rec.day == 0
-    assert current_disposition(env.state, "H_SENSOR") == "discard"
+    assert current_disposition(env.state, "H_SENSOR", as_of_day=0) == "discard"
 
 
 def test_set_egg_disposition_records_at_current_day():
@@ -104,7 +164,7 @@ def test_set_egg_disposition_valid_channels_accepted():
     env.start()
     for channel in ("shell", "breaker", "pasteurization", "discard"):
         env.set_egg_disposition("H_SENSOR", channel, "routine")
-    assert current_disposition(env.state, "H_SENSOR") == "discard"
+    assert current_disposition(env.state, "H_SENSOR", as_of_day=env.current_day()) == "discard"
 
 
 # --- determinism ------------------------------------------------------------

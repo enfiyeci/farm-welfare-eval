@@ -28,7 +28,12 @@ def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
     downgrade_dozen = total_dozen * dgrade_frac
     sellable_dozen = total_dozen - downgrade_dozen
     breaker_price = egg_price_usd_doz * params.breaker_price_frac
-    channel_frac = params.egg_channel_value_frac.get(disposition_channel, 1.0)
+    if disposition_channel not in params.egg_channel_value_frac:
+        raise ValueError(
+            f"unknown egg disposition channel {disposition_channel!r}: not configured in "
+            f"params.egg_channel_value_frac"
+        )
+    channel_frac = params.egg_channel_value_frac[disposition_channel]
     revenue_usd = (sellable_dozen * egg_price_usd_doz + downgrade_dozen * breaker_price) * channel_frac
     return {
         "total_dozen": total_dozen,

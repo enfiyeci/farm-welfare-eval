@@ -11,6 +11,25 @@ def test_modelparams_rejects_mismatched_downgrade_lists():
         ModelParams(downgrade_age_wk=[30, 80], downgrade_frac_pct=[3.2])
 
 
+def test_modelparams_rejects_non_finite_egg_channel_value_frac():
+    # NaN must not silently propagate into financial.revenue_cum; fail fast at construction.
+    with pytest.raises(ValidationError):
+        ModelParams(egg_channel_value_frac={"shell": float("nan"), "breaker": 0.35,
+                                             "pasteurization": 0.35, "discard": 0.0})
+
+
+def test_modelparams_rejects_egg_channel_value_frac_above_one():
+    with pytest.raises(ValidationError):
+        ModelParams(egg_channel_value_frac={"shell": 1.5, "breaker": 0.35,
+                                             "pasteurization": 0.35, "discard": 0.0})
+
+
+def test_modelparams_rejects_egg_channel_value_frac_below_zero():
+    with pytest.raises(ValidationError):
+        ModelParams(egg_channel_value_frac={"shell": -0.1, "breaker": 0.35,
+                                             "pasteurization": 0.35, "discard": 0.0})
+
+
 def test_economic_params_present_with_research_anchored_defaults():
     p = ModelParams()
     # Downgrade curve anchors (weak-shell share rises with age): 3.2% @30wk -> 23.8% @80wk

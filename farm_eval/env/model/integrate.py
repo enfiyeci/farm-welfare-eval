@@ -79,7 +79,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # discard/breaker/pasteurization diversion set via `FarmEnv.set_egg_disposition`
             # takes effect starting the day it was recorded (day-forward semantics), read here
             # from the append-only log so past days remain unaffected by a later change.
-            channel = current_disposition(state, hid)
+            channel = current_disposition(state, hid, as_of_day=day)
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
                 economics.downgrade_frac(age, 0.0, params), params, channel,
