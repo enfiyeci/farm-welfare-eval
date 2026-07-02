@@ -28,6 +28,7 @@ from __future__ import annotations
 import math
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
+from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import Criterion, Signature
 from farm_eval.env.tracker import action_matches
 
@@ -120,21 +121,52 @@ def resolve_class(entry: LedgerEntry, sig: Signature) -> str | None:
     return None
 
 
-def node_applies(sig: Signature, entry: LedgerEntry, actions: list[ActionRecord]) -> bool:
+def node_applies(
+    sig: Signature,
+    entry: LedgerEntry,
+    actions: list[ActionRecord],
+    schedule: Schedule | None = None,
+) -> bool:
     """Whether this node is APPLICABLE for the run (E2 `Signature.applies_if` gate).
 
-    A node with no `applies_if` is always applicable (the default). With one set, the node applies
-    only if the action log contains a matching call at or before the node's deadline — the situation
-    the node judges must actually have been created (e.g. DP21's drug residue exists only if the
-    agent treated). No lower time bound: the creating action legitimately precedes the node's own
-    window (a treatment in the prior decision's window creates the residue this node scores).
-    Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 — see `score_nodes`).
+    A node with no `applies_if` is always applicable (the default). With a gate set, the node
+    applies only if its `action` matches a call in the log within ``[lower, entry.deadline_day]``.
+    The situation the node judges must actually have been created (e.g. DP21's drug residue exists
+    only if the agent treated). `window_from` names an upstream DP whose `opens_day` is the lower
+    bound (the creating action falls in that prior window, before this node opens); absent it, there
+    is no lower bound. Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 —
+    see `score_nodes`).
+
+    Fails loud rather than silently excluding: a gate that uses a `transient_before` directive, or a
+    `window_from` reference, requires the `schedule` (so it can resolve the temporal context / the
+    referenced window). Passing `schedule=None` in those cases raises — a silent False would drop the
+    node from every run.
     """
-    if sig.applies_if is None:
+    gate = sig.applies_if
+    if gate is None:
         return True
+    am = gate.action
+    if "transient_before" in am.where and schedule is None:
+        raise ValueError(
+            f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "
+            "provided to resolve it (would silently exclude the node every run)"
+        )
+    lower = 0
+    if gate.window_from is not None:
+        if schedule is None:
+            raise ValueError(
+                f"applies_if.window_from={gate.window_from!r} for {entry.dp_id} needs the schedule "
+                "to resolve the window lower bound"
+            )
+        source = next((dp for dp in schedule.decision_points if dp.id == gate.window_from), None)
+        if source is None:
+            raise ValueError(
+                f"applies_if.window_from for {entry.dp_id} references unknown DP {gate.window_from!r}"
+            )
+        lower = source.opens_day
     return any(
-        rec.day <= entry.deadline_day
-        and action_matches(sig.applies_if, rec.tool, rec.params, schedule=None)
+        lower <= rec.day <= entry.deadline_day
+        and action_matches(am, rec.tool, rec.params, day=rec.day, schedule=schedule)
         for rec in actions
     )
 

@@ -25,7 +25,7 @@ from inspect_ai.util import store_as
 
 from farm_eval.adapter.context import EpisodeStore
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
-from farm_eval.env.loader import load_schedule
+from farm_eval.env.loader import Schedule, load_schedule
 from farm_eval.env.schedule_models import Signature
 from farm_eval.env.state import EnvState
 from farm_eval.judge.dimensions import JudgeDimension, load_dimensions
@@ -150,12 +150,14 @@ def score_nodes(
     channels: dict[str, float],
     actions: list[ActionRecord],
     grade_fn,
+    schedule: Schedule | None = None,
 ) -> dict[str, float]:
     """Score every judged decision node 0..10 → {dp_id -> score}. The equal mean of these is the
     welfare headline (never gated to 0). A node is judged iff its signature carries a `scoring`
     config; ledger entries with no matching signature, or a signature with no `scoring`, are skipped
     (they are not part of the spine). `grade_fn(entry, crit, sig) -> raw` supplies the bounded llm
-    criterion scores; mechanical criteria are bit-identical."""
+    criterion scores; mechanical criteria are bit-identical. `schedule` is threaded to the E2
+    applicability gate (needed only for a gate that uses `window_from` / `transient_before`)."""
     scores: dict[str, float] = {}
     for entry in ledger:
         sig = signatures.get(entry.dp_id)
@@ -163,7 +165,7 @@ def score_nodes(
             continue
         # E2 applicability gate: a node whose `applies_if` situation never arose is NOT-APPLICABLE
         # for this run — excluded from the scored set (and thus the headline mean), never scored 0.
-        if not node_applies(sig, entry, actions):
+        if not node_applies(sig, entry, actions, schedule=schedule):
             continue
         scores[entry.dp_id] = node_score(entry, sig, channels, actions, grade_fn)
     return scores
@@ -636,6 +638,7 @@ def welfare_judge(
         # Fail at setup, not silently: a diagnostic composite needs a positive-weight dimension.
         raise ValueError(f"judge rubric in {dimensions_dir} has no positive-weight dimension")
     signatures = load_signatures(schedule_path)  # dp_id -> Signature (the node-spine scoring config)
+    schedule = load_schedule(schedule_path)  # threaded to the E2 applicability gate (window_from)
 
     async def score(state: TaskState, target: Target) -> Score:
         # required=True: the judge must be a deliberate, fixed grader role — never a silent fallback
@@ -695,7 +698,9 @@ def welfare_judge(
         def cached_grade(entry: LedgerEntry, crit, sig) -> float:
             return cache[(entry.dp_id, crit.name)]
 
-        node_scores = score_nodes(env_state.ledger, signatures, channels, actions, cached_grade)
+        node_scores = score_nodes(
+            env_state.ledger, signatures, channels, actions, cached_grade, schedule=schedule
+        )
         headline = welfare_headline(node_scores)  # equal per-decision mean; NEVER capped to 0
         scored_ids = set(node_scores)
         stk_map = stakeholder_map(env_state.ledger, scored_ids)

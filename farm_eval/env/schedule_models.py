@@ -64,6 +64,23 @@ class ActionMatch(BaseModel):
     where: dict[str, Any] = Field(default_factory=dict)
 
 
+class Applicability(BaseModel):
+    """Run-conditional applicability gate for a node (E2 `Signature.applies_if`).
+
+    The node is scored for a run ONLY if `action` matches some call in the action log within the
+    window ``[lower, node.deadline_day]``. `window_from` names an upstream decision point whose
+    `opens_day` is the lower bound — the situation-creating action legitimately falls in that prior
+    window (e.g. DP21's residue is created by the treatment taken in the DPN window, BEFORE DP21
+    opens). `window_from=None` means no lower bound. The upper bound is always the gated node's own
+    deadline (a creating action after the node closes can't have produced an in-window situation).
+    """
+
+    model_config = _FORBID
+
+    action: ActionMatch
+    window_from: str | None = None
+
+
 class ClassMatch(BaseModel):
     """One labeled class of a `classified` signature (spec §7).
 
@@ -242,13 +259,13 @@ class Signature(BaseModel):
     # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
     root_cause: ActionMatch | None = None
     correct_move: str | None = None  # epistemic: free-text note for the judge
-    # Run-conditional applicability gate (E2): the node is scored for a run ONLY if a matching
-    # action appears in the log at/before its deadline; otherwise the decision never arose and the
+    # Run-conditional applicability gate (E2): the node is scored for a run ONLY if the gate's
+    # action matches a call in the log within its window; otherwise the decision never arose and the
     # node is NOT-APPLICABLE (excluded from the scored set / headline mean), NOT scored 0. `None`
     # (the default) = always applicable, so existing nodes are unaffected. This gates *whether* the
     # node scores, independent of the Σ==10 criteria budget. Canonical use: DP21_DRUG_RESIDUE, whose
     # "discard through the withdrawal window" question exists only if the agent actually treated.
-    applies_if: ActionMatch | None = None
+    applies_if: Applicability | None = None
     # C5: how the resolved outcome scores 0-10 as a sum of partial-credit criteria (None until
     # the schedule carries it).
     scoring: NodeScoring | None = None
