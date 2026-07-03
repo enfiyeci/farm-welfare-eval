@@ -17,7 +17,7 @@ from inspect_ai import eval as inspect_eval
 from inspect_ai.dataset import Sample
 from inspect_ai.model import ModelOutput, get_model
 
-from farm_eval.adapter.checkpoint import load_checkpoint
+from farm_eval.adapter.checkpoint import _sample_dir_name, load_checkpoint, write_checkpoint
 from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
 from farm_eval.adapter.solver.farm_solver import farm_solver
 from farm_eval.env.state import EnvState
@@ -142,7 +142,8 @@ def test_restart_from_checkpoint_matches_uninterrupted_run(tmp_path):
     reference = _run(cfg, checkpoint_dir=str(ckpt_dir), sample_id=42, custom_outputs=[_end_day() for _ in range(6)])
     reference_state = reference.samples[0].store["EpisodeStore:env_state"]
 
-    # Load an EARLIER checkpoint (day 4, not the final day 20) and confirm we captured it.
+    # Load the EARLIEST retained checkpoint (day 6 -- after last-3 retention the retained set is
+    # {6, 8, 20}, so [0] is day 6, not the final day 20) and confirm we captured it.
     sample_dir = ckpt_dir / "42"
     earlier = sorted(sample_dir.glob("day_*.json"), key=lambda p: int(p.stem.split("_")[1]))[0]
     day, message_count, env_state = load_checkpoint(earlier)
@@ -224,3 +225,70 @@ def test_checkpoint_io_failure_warns_and_never_kills_episode(tmp_path, caplog):
     assert log.status == "success"
     assert log.samples[0].store["EpisodeStore:env_state"]["day_index"] == 20
     assert any("checkpoint" in rec.message.lower() for rec in caplog.records)
+
+
+# --- F1: sample_id sanitization must not allow path traversal or root cross-contamination ---
+
+
+@pytest.mark.parametrize("hostile", ["..", ".", "", "../..", "./.", "..\x00"])
+def test_sample_dir_name_neutralizes_traversal_segments(hostile):
+    # A sample_id that would sanitize to "." / ".." / "" must NOT stay a traversal/self segment:
+    # the result must be a single, safe path component that resolves strictly inside its parent.
+    name = _sample_dir_name(hostile)
+    assert name not in ("", ".", "..")
+    assert "/" not in name and os.sep not in name  # a single path segment, no separators
+    parent = Path("/base/ckpt")
+    resolved = (parent / name).resolve()
+    # The write dir must live strictly UNDER the checkpoint_dir, never escape to its parent.
+    assert resolved.parent == parent.resolve()
+    assert resolved != parent.resolve()
+
+
+def test_sample_dir_name_preserves_normal_ids():
+    assert _sample_dir_name(1) == "1"
+    assert _sample_dir_name("sample-42_a.b") == "sample-42_a.b"
+
+
+def test_write_checkpoint_traversal_id_stays_inside_checkpoint_dir(tmp_path):
+    # A hostile ".." sample_id must write UNDER checkpoint_dir and must NOT create/unlink files in
+    # its PARENT. Seed a sentinel day_*.json in the parent and prove it is untouched.
+    ckpt_dir = tmp_path / "ckpt"
+    ckpt_dir.mkdir()
+    sentinel = tmp_path / "day_999.json"  # lives in ckpt_dir's PARENT
+    sentinel.write_text("sentinel", encoding="utf-8")
+
+    env_state = EnvState(start_date="2025-06-09")
+    write_checkpoint(str(ckpt_dir), "..", day=3, message_count=5, env_state=env_state)
+
+    # The parent sentinel is untouched (no retention prune reached outside checkpoint_dir).
+    assert sentinel.read_text(encoding="utf-8") == "sentinel"
+    # No day_*.json was written into the parent directory itself.
+    assert not (tmp_path / "day_3.json").exists()
+    # The checkpoint landed strictly under checkpoint_dir, in a sanitized sample subdir.
+    written = list(ckpt_dir.rglob("day_3.json"))
+    assert len(written) == 1
+    assert ckpt_dir.resolve() in written[0].resolve().parents
+
+
+# --- F2: positive coverage of the PRODUCTION config path (EpisodeConfig.checkpoint_dir) ---
+
+
+def test_checkpoints_written_via_episode_config_checkpoint_dir(tmp_path):
+    # The advertised production flow: checkpoint_dir set on EpisodeConfig (NOT the solver override).
+    # farm_solver must fall back to cfg.checkpoint_dir and write checkpoints through that path.
+    schedule = _make_schedule(tmp_path / "sched_src")
+    ckpt_dir = tmp_path / "ckpt"
+    cfg = EpisodeConfig(
+        corpus_path=CORPUS,
+        schedule_path=str(schedule),
+        episode_end_day=20,
+        seed=1,
+        checkpoint_dir=str(ckpt_dir),  # <-- the production seam, not the solver kwarg
+    )
+    # _run passes checkpoint_dir=None to farm_solver, so ONLY cfg.checkpoint_dir can drive writes.
+    _run(cfg, checkpoint_dir=None, sample_id=99, custom_outputs=[_end_day() for _ in range(6)])
+
+    sample_dir = ckpt_dir / "99"
+    files = sorted(sample_dir.glob("day_*.json"))
+    days_present = sorted(int(p.stem.split("_")[1]) for p in files)
+    assert days_present == [6, 8, 20]  # per-beat writes with last-3 retention, via the config path

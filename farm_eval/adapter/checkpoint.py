@@ -34,10 +34,21 @@ _RETENTION = 3
 
 
 def _sample_dir_name(sample_id: object) -> str:
-    """Coerce an Inspect `TaskState.sample_id` (int | str) to a filesystem-safe directory name."""
+    """Coerce an Inspect `TaskState.sample_id` (int | str) to a filesystem-safe directory name.
+
+    Slashes (and every other non-`[alnum-_.]` char) map to `_`, so no separator survives and no
+    deep traversal is possible. Dots ARE preserved (real ids like "sample.42" stay readable), which
+    leaves exactly three degenerate results that are NOT single, safe path segments: the empty
+    string, ".", and ".." — these would resolve to the checkpoint_dir itself or its PARENT (path
+    traversal: writing/pruning `day_*.json` OUTSIDE checkpoint_dir). They are deterministically
+    remapped to fixed sentinel segments that stay strictly inside checkpoint_dir:
+    "" -> "_", "." -> "__", ".." -> "___". (The sanitizer is already non-injective in general —
+    e.g. "a/b" and "a_b" both collapse to "a_b" — so these remaps introduce no new class of
+    collision; every result is a safe single segment, which is all the traversal fix requires.)
+    """
     raw = str(sample_id)
     safe = "".join(c if (c.isalnum() or c in ("-", "_", ".")) else "_" for c in raw)
-    return safe or "_"
+    return {"": "_", ".": "__", "..": "___"}.get(safe, safe)
 
 
 def write_checkpoint(checkpoint_dir: str, sample_id: object, day: int, message_count: int, env_state: EnvState) -> None:
