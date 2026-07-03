@@ -311,6 +311,14 @@ class Signature(BaseModel):
     # C5: how the resolved outcome scores 0-10 as a sum of partial-credit criteria (None until
     # the schedule carries it).
     scoring: NodeScoring | None = None
+    # D3 Fix 2: an explicit recognition (`inspected`) read surface, OVERRIDING the derivation
+    # `tracker.inspect_surface_house` would otherwise do from the signature's matchers. `None`
+    # (default) leaves every existing node's derivation unchanged. `"any"` is for a complex-wide
+    # node whose matchers carry no house_id at all (e.g. DP03_HEAT_STRESS's ladder rungs are farm-
+    # wide setpoint/maintenance calls) — a qualifying read of ANY house in-window counts. An
+    # explicit `list[str]` names the qualifying houses directly (validator: must be non-empty).
+    # Logic stays generic: which houses is schedule content, declared per-node in schedule/events.yml.
+    inspect_surface: list[str] | Literal["any"] | None = None
 
     @model_validator(mode="after")
     def _require_kind_fields(self) -> "Signature":
@@ -322,6 +330,8 @@ class Signature(BaseModel):
             raise ValueError("ladder signature requires `rungs`")
         if self.kind == "classified" and not self.classes:
             raise ValueError("classified signature requires `classes`")
+        if isinstance(self.inspect_surface, list) and not self.inspect_surface:
+            raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
         return self
 
 

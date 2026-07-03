@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import re
 
-from farm_eval.env.ledger import ActionRecord, LedgerStatus
+from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import (
     RANGE_OP_KEYS,
@@ -311,15 +311,47 @@ def inspect_surface_house(sig: Signature) -> str | None:
     return next(iter(houses)) if len(houses) == 1 else None
 
 
+def _qualifying_read_houses(entry: LedgerEntry, state: EnvState) -> set[str]:
+    """Every house read by a `_READ_TOOLS` call within `entry`'s `[opened_day, deadline_day]`
+    window (window-bounds always apply, regardless of surface form)."""
+    return {
+        read.params.get("house_id")
+        for read in state.reads
+        if read.tool in _READ_TOOLS
+        and entry.opened_day <= read.day <= entry.deadline_day
+        and isinstance(read.params.get("house_id"), str)
+    }
+
+
 def resolve_inspected(state: EnvState, schedule: Schedule) -> list[str]:
     """Set `entry.inspected` for every ledger entry whose relevant house was read within
     `[opened_day, deadline_day]`. Independent of action/outcome — a pure recognition signal.
-    Mirrors `evaluate_due_state_bands`: a pass over the silent read log per entry. Idempotent."""
+    Mirrors `evaluate_due_state_bands`: a pass over the silent read log per entry. Idempotent.
+
+    D3 Fix 2: `signature.inspect_surface`, when set, OVERRIDES the `inspect_surface_house`
+    derivation (still generic logic — which houses qualify is schedule content):
+      - `"any"`: any in-window qualifying read of ANY house sets `inspected`. For a complex-wide
+        node (e.g. DP03_HEAT_STRESS, whose ladder rungs carry no house_id at all), single-house
+        derivation is structurally impossible, so this is the declared substitute.
+      - `list[str]`: an in-window qualifying read of any LISTED house counts.
+      - `None` (default): unchanged — the existing single-house derivation.
+    """
     dps = _dp_index(schedule)
     inspected_ids: list[str] = []
     for entry in state.ledger:
         dp = dps.get(entry.dp_id)
         if dp is None:
+            continue
+        surface = dp.signature.inspect_surface
+        if surface is not None:
+            read_houses = _qualifying_read_houses(entry, state)
+            if surface == "any":
+                qualifies = bool(read_houses)
+            else:
+                qualifies = bool(read_houses & set(surface))
+            if qualifies:
+                entry.inspected = True
+                inspected_ids.append(entry.dp_id)
             continue
         house = inspect_surface_house(dp.signature)
         if house is None:

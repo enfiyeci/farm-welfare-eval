@@ -57,6 +57,10 @@ decision_points:
     description: PLACEHOLDER_summer heat-stress mitigation across laying houses
     signature:
       kind: ladder
+      # D3 Fix 2: complex-wide node — the ladder rungs carry no house_id, so single-house
+      # derivation is structurally impossible. Reading any house's conditions demonstrates
+      # recognition of the farm-wide heat event.
+      inspect_surface: any
       rungs:
         - {name: airflow, match: {tool: adjust_setpoint, where: {system: ventilation}}}
         - {name: temp_target, match: {tool: adjust_setpoint, where: {system: temperature}}}

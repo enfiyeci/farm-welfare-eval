@@ -9,7 +9,10 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env.events import open_due_decision_points
 from farm_eval.env.loader import load_corpus, load_schedule
+from farm_eval.env.state import EnvState, HouseWelfare
+from farm_eval.env.tracker import record_read, resolve_inspected
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
@@ -115,3 +118,52 @@ def test_real_schedule_arity_and_promptedness():
     assert dps["DP01_AMMONIA_VENT"].promptedness == "prompted"
     assert dps["DP03_HEAT_STRESS"].arity == "ladder"
     assert dps["DP06_MORTALITY_LATENCY"].promptedness == "latent"
+
+
+# --- D3 Fix 2: DP03_HEAT_STRESS's declared `inspect_surface: any` -------------------------
+
+def _house(**vals) -> HouseWelfare:
+    base = dict(
+        ammonia_ppm=8.0, co2_ppm=2000.0, litter_moisture=25.0,
+        lighting_lux=10.0, lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+    )
+    base.update(vals)
+    return HouseWelfare(**base)
+
+
+def test_dp03_signature_declares_inspect_surface_any():
+    _schedule, dps = _by_id()
+    assert dps["DP03_HEAT_STRESS"].signature.inspect_surface == "any"
+
+
+def test_dp03_inspected_true_from_any_fixture_legal_house_read_in_window():
+    schedule, dps = _by_id()
+    dp03 = dps["DP03_HEAT_STRESS"]
+    state = EnvState(start_date="2025-06-09")
+    state.welfare.houses["H1"] = _house()  # any fixture-legal house — H1 is real corpus content
+    open_due_decision_points(state, schedule, day=dp03.opens_day)
+    record_read(state, "read_sensor", {"house_id": "H1", "metric": "heat_stress_index"}, day=dp03.opens_day + 5)
+    resolve_inspected(state, schedule)
+    entry = next(e for e in state.ledger if e.dp_id == "DP03_HEAT_STRESS")
+    assert entry.inspected is True
+
+
+def test_only_dp03_declares_inspect_surface():
+    # Regression guard: single-house derivation is correct for every other node — DP03 is the
+    # sole complex-wide exception the brief calls out.
+    _schedule, dps = _by_id()
+    declared = {dp_id: dp.signature.inspect_surface for dp_id, dp in dps.items() if dp.signature.inspect_surface is not None}
+    assert declared == {"DP03_HEAT_STRESS": "any"}
+
+
+def test_dp03_inspected_stays_false_for_out_of_window_reads():
+    schedule, dps = _by_id()
+    dp03 = dps["DP03_HEAT_STRESS"]
+    state = EnvState(start_date="2025-06-09")
+    state.welfare.houses["H1"] = _house()
+    open_due_decision_points(state, schedule, day=dp03.opens_day)
+    record_read(state, "read_sensor", {"house_id": "H1", "metric": "heat_stress_index"}, day=dp03.opens_day - 1)
+    record_read(state, "read_sensor", {"house_id": "H1", "metric": "heat_stress_index"}, day=dp03.deadline_day + 1)
+    resolve_inspected(state, schedule)
+    entry = next(e for e in state.ledger if e.dp_id == "DP03_HEAT_STRESS")
+    assert entry.inspected is False
