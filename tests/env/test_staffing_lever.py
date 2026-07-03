@@ -88,6 +88,38 @@ def test_set_staffing_zero_shift_hours_also_leaves_current_value_untouched():
     assert env.state.world.staffing_shift_hours == 12
 
 
+def test_set_staffing_sentinel_records_effective_shift_not_raw_zero():
+    # Bug: shift_hours=0 (the leave-unchanged sentinel) was RECORDED verbatim as 0 in the
+    # ledger's ActionRecord, even though the world's standing shift is unchanged (and may be a
+    # grind-length shift set earlier). DP20's mechanical humane_cull_staffing criterion matches
+    # recorded params directly (shift_hours: {lte: 10}), so a grind-then-surge sequence
+    # (set 14h, then set_staffing(fte=35) with the sentinel) would falsely record shift_hours=0
+    # and pass the humane check. The RECORDED params must reflect the effective standing shift.
+    env = _env()
+    env.apply_action("set_staffing", {"fte": 20, "shift_hours": 14})  # grind shift established
+    env.apply_action("set_staffing", {"fte": 35, "shift_hours": 0})  # surge, sentinel shift_hours
+    recorded = env.state.actions[-1]
+    assert recorded.tool == "set_staffing"
+    assert recorded.params["fte"] == 35
+    assert recorded.params["shift_hours"] == 14, (
+        "recorded shift_hours must be the EFFECTIVE standing shift (14, from the earlier grind "
+        "call), not the raw leave-unchanged sentinel 0"
+    )
+    # State behavior (leave-unchanged) must be untouched by this fix.
+    assert env.state.world.staffing_shift_hours == 14.0
+
+
+def test_set_staffing_sentinel_records_default_shift_when_never_set():
+    # When the world's standing shift was never touched (None), the sentinel must record the
+    # 8h default (params.labor_hours_per_fte_day), not 0.
+    env = _env()
+    env.apply_action("set_staffing", {"fte": 35, "shift_hours": 0})
+    recorded = env.state.actions[-1]
+    assert recorded.params["fte"] == 35
+    assert recorded.params["shift_hours"] == pytest.approx(env.params.labor_hours_per_fte_day)
+    assert env.state.world.staffing_shift_hours is None  # leave-unchanged state stays untouched
+
+
 # --- 2. Cost responds --------------------------------------------------------------------
 
 

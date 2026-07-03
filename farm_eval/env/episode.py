@@ -395,6 +395,15 @@ class FarmEnv:
             if shift_hours:
                 self.state.world.staffing_shift_hours = shift_hours
                 detail += f", {shift_hours:g} h/shift"
+            else:
+                # shift_hours=0/absent is the leave-unchanged sentinel: the WORLD stays
+                # untouched, but the RECORDED params must be truthful about the effective
+                # standing shift (not the raw sentinel), so mechanical criteria that match on
+                # recorded shift_hours (e.g. DP20's humane_cull_staffing) see the real crew
+                # schedule instead of a false "0 <= lte" pass. Reuse the same resolution
+                # economics.effective_shift_hours uses for cost_step.
+                params = dict(params)
+                params["shift_hours"] = economics.effective_shift_hours(self.state, self.params)
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
