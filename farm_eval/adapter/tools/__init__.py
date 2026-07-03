@@ -10,7 +10,7 @@ from inspect_ai.tool import Tool
 
 from farm_eval.adapter.context import EpisodeConfig
 from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_flock_report, read_sensor
-from farm_eval.adapter.tools.controls import adjust_setpoint
+from farm_eval.adapter.tools.controls import adjust_setpoint, set_staffing
 from farm_eval.adapter.tools.email import list_emails, read_email, send_email
 from farm_eval.adapter.tools.finance import generate_cop_report, query_pricing, read_financials
 from farm_eval.adapter.tools.orders import (
@@ -36,6 +36,7 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         generate_cop_report(cfg),
         # actions
         adjust_setpoint(cfg),
+        set_staffing(cfg),
         place_feed_order(cfg),
         schedule_maintenance(cfg),
         schedule_vet_visit(cfg),

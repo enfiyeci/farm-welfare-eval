@@ -11,6 +11,31 @@ LB_PER_SHORT_TON = 2000.0
 KG_PER_LB = 0.45359237
 
 
+def effective_fte_per_100k(state, params: ModelParams) -> float:
+    """Resolve `state.world.staffing_fte` (Task C2 lever) to the `cost_step` `fte_per_100k`
+    input. `None` (agent never touched staffing) -> `params.default_fte_per_100k`, unchanged
+    pre-agent behavior. Otherwise the agent set an ABSOLUTE complex-wide headcount, so the
+    per-100k ratio is `staffing_fte * 100_000 / total_live_birds` — this means the ratio RISES
+    as flocks deplete (an agent that doesn't cut the crew keeps paying for it at the old
+    headcount over fewer birds). An empty complex (0 total birds) returns the params default
+    rather than dividing by zero."""
+    if state.world.staffing_fte is None:
+        return params.default_fte_per_100k
+    total_birds = sum(state.world.bird_count.values())
+    if total_birds <= 0:
+        return params.default_fte_per_100k
+    return state.world.staffing_fte * 100_000 / total_birds
+
+
+def effective_shift_hours(state, params: ModelParams) -> float:
+    """Resolve `state.world.staffing_shift_hours` (Task C2 lever) to the `cost_step`
+    `hours_per_fte_day` input. `None` -> `params.labor_hours_per_fte_day`, unchanged
+    pre-agent behavior."""
+    if state.world.staffing_shift_hours is None:
+        return params.labor_hours_per_fte_day
+    return state.world.staffing_shift_hours
+
+
 def downgrade_frac(age_weeks: float, stress: float, params: ModelParams) -> float:
     """Fraction of eggs downgraded to breaker stock: age curve + stress increment, clamped."""
     base = _interp(age_weeks, params.downgrade_age_wk, params.downgrade_frac_pct) / 100.0
@@ -52,22 +77,27 @@ def feed_tons_for_day(feed_g: float, bird_count: int) -> float:
 
 def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
               bird_count: int, fuel_index: float, params: ModelParams,
-              fte_per_100k: float | None = None) -> dict:
+              fte_per_100k: float | None = None,
+              hours_per_fte_day: float | None = None) -> dict:
     """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6).
 
     Labor is staffing-driven and per-bird-DAY (Task C1): it scales with headcount, not
     with how many eggs got laid. `fte_per_100k` defaults to `params.default_fte_per_100k`;
-    passing an explicit value is the seam Task C2's `set_staffing` lever will use.
+    `hours_per_fte_day` defaults to `params.labor_hours_per_fte_day`. Passing explicit values
+    is the seam Task C2's `set_staffing` lever uses (see `effective_fte_per_100k` /
+    `effective_shift_hours` above, which resolve agent-set staffing state to these inputs).
     """
     feed_cost = feed_tons * ration_usd_ton
     energy_cost = bird_count * params.energy_usd_bird_day * fuel_index
     if fte_per_100k is None:
         fte_per_100k = params.default_fte_per_100k
+    if hours_per_fte_day is None:
+        hours_per_fte_day = params.labor_hours_per_fte_day
     direct_fte = fte_per_100k * bird_count / 100_000
     labor_cost = (
         direct_fte
         * params.labor_wage_usd_hr
-        * params.labor_hours_per_fte_day
+        * hours_per_fte_day
         * params.labor_loaded_factor
     )
     capital_cost = total_dozen * params.capital_usd_doz

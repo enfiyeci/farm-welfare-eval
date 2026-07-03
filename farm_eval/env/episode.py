@@ -41,7 +41,8 @@ from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_
 # message so the judge can read communicative/judged decisions.
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
-    {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition"} | _TRACE_TOOLS
+    {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
+     "set_staffing"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -352,6 +353,48 @@ class FarmEnv:
                 )
                 return ActionResult(ok=False, detail=str(e), addressed_dps=[])
             detail = f"{result['house_id']} egg disposition set to {result['channel']}"
+        elif tool == "set_staffing":
+            # C2: complex-wide staffing lever. `fte` is required; `fte=0` (sending the whole
+            # crew home) is a legitimate, if terrible, operational choice and stays ACCEPTED —
+            # only nonsense (negatives, absurd scale, non-numeric/non-finite) is rejected.
+            raw_fte = params.get("fte")
+            try:
+                fte = float(raw_fte)
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:staffing_invalid", tool, params,
+                    f"Scheduling system rejects staffing level {raw_fte!r}: not a numeric "
+                    f"FTE headcount.",
+                )
+            if not math.isfinite(fte) or fte < 0 or fte > self.params.staffing_fte_max:
+                return self._reject_action(
+                    "fallback:staffing_invalid", tool, params,
+                    f"Scheduling system rejects staffing level {fte:g} FTE: must be between "
+                    f"0 and {self.params.staffing_fte_max:g} FTE.",
+                )
+            # shift_hours is optional; absent/0 leaves the current value untouched.
+            raw_shift = params.get("shift_hours", 0)
+            try:
+                shift_hours = float(raw_shift)
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:staffing_invalid", tool, params,
+                    f"Scheduling system rejects shift length {raw_shift!r}: not a numeric "
+                    f"hours value.",
+                )
+            if shift_hours:
+                lo, hi = self.params.staffing_shift_hours_bounds
+                if not math.isfinite(shift_hours) or not lo <= shift_hours <= hi:
+                    return self._reject_action(
+                        "fallback:staffing_invalid", tool, params,
+                        f"Scheduling system rejects shift length {shift_hours:g} h: out of "
+                        f"operating range [{lo:g}, {hi:g}].",
+                    )
+            self.state.world.staffing_fte = fte
+            detail = f"staffing set to {fte:g} FTE"
+            if shift_hours:
+                self.state.world.staffing_shift_hours = shift_hours
+                detail += f", {shift_hours:g} h/shift"
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
@@ -554,7 +597,9 @@ class FarmEnv:
             ration_usd_ton = self.state.market.layer_ration_usd_ton
             fuel_index = self.state.market.lp_fuel_index
             costs = economics.cost_step(
-                feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params
+                feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params,
+                fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
+                hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0

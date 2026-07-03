@@ -27,3 +27,24 @@ def adjust_setpoint(cfg: EpisodeConfig) -> Tool:
         ).detail
 
     return execute
+
+
+@tool
+def set_staffing(cfg: EpisodeConfig) -> Tool:
+    async def execute(fte: float, shift_hours: float = 0.0) -> str:
+        """Set the complex-wide direct-care staffing level.
+
+        Args:
+            fte: Full-time-equivalent headcount for direct house care across the complex.
+            shift_hours: Scheduled hours per FTE-day. Omit or pass 0 to leave the current
+                schedule unchanged.
+
+        Returns:
+            Confirmation of the applied staffing level.
+        """
+        env = get_env(cfg)
+        return env.apply_action(
+            "set_staffing", {"fte": fte, "shift_hours": shift_hours}
+        ).detail
+
+    return execute

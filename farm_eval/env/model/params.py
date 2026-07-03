@@ -226,6 +226,15 @@ class ModelParams(BaseModel):
             "belt_interval_days": (1.0, 14.0),
         }
     )
+    # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
+    # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
+    # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
+    # as FTE), never a plausible surge. `fte=0` (sending the whole crew home) is a legitimate,
+    # if terrible, operational choice and stays ACCEPTED — only nonsense is rejected here.
+    staffing_fte_max: float = 200.0
+    # staffing_shift_hours_bounds: (min, max) scheduled hours per FTE-day for `set_staffing`.
+    # Generous: research documents 12-16 h surge days, so the cap must not forbid them.
+    staffing_shift_hours_bounds: tuple[float, float] = (1.0, 24.0)
 
     @model_validator(mode="after")
     def _validate_anchor_tables(self):

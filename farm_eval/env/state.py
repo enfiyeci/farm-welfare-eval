@@ -94,6 +94,11 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
+    # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
+    # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
+    # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.
+    staffing_fte: float | None = None            # complex-wide direct-care FTE headcount
+    staffing_shift_hours: float | None = None    # scheduled hours per FTE-day
 
 
 class EggDispositionRecord(BaseModel):

@@ -90,6 +90,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,
+                fte_per_100k=economics.effective_fte_per_100k(state, params),
+                hours_per_fte_day=economics.effective_shift_hours(state, params),
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost
