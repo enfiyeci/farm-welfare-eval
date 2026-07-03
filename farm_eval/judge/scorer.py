@@ -630,26 +630,27 @@ async def grade_llm_criterion(
 # --- the Inspect @scorer (thin wiring; smoke-tested via the task) ---------------------------
 
 @scorer(
-    metrics=[
-        {
-            # `welfare_judge` returns Score(value=<dict>) (the real headline lives at
-            # value["welfare_headline"]). Inspect (pinned 0.3.241) supports a dict-of-metrics form
-            # keyed by the score value's dict keys (inspect_ai/scorer/_scorer.py: `metrics:
-            # Sequence[Metric | Mapping[str, Sequence[Metric]]] | Mapping[str, Sequence[Metric]]`)
-            # so the CLI surfaces the real per-key means instead of a degenerate mean-over-a-dict.
-            # `welfare_headline` is named explicitly (the CLI headline metric); `*` globs every
-            # other key in the value dict (inspect_ai/_eval/task/results.py:
-            # resolve_glob_metric_keys — matched against the first dict-valued sample Score, then
-            # deduped by metric name so the explicit + glob entries never double up). Every key
-            # `welfare_judge` puts in `value` is a plain always-present float (the fixed
-            # diagnostic_composite/welfare_state/tripwires_observed keys, plus one entry per
-            # configured JudgeDimension id) — never None-able/non-numeric, so a blanket `*` mean is
-            # safe here (a key missing from ANY sample's dict, or a non-numeric value, would raise
-            # in Inspect's metric computation rather than silently aggregate).
-            "welfare_headline": [mean(), stderr()],
-            "*": [mean(), stderr()],
-        }
-    ]
+    # BARE dict (Mapping[str, Sequence[Metric]]), NOT a list-of-one-dict. `welfare_judge` returns
+    # Score(value=<dict>) (the real headline lives at value["welfare_headline"]). Inspect (pinned
+    # 0.3.241) supports a dict-of-metrics form keyed by the score value's dict keys
+    # (inspect_ai/scorer/_scorer.py: `metrics: Sequence[Metric | Mapping[str, Sequence[Metric]]] |
+    # Mapping[str, Sequence[Metric]]`) so the CLI surfaces the real per-key means instead of a
+    # degenerate mean-over-a-dict. Use the BARE dict form: it routes ONLY through
+    # scorers_from_metric_dict. The list-of-one-dict form ALSO runs scorer_for_metrics over an
+    # empty simple-metrics list and appends a spurious empty EvalScore(name="welfare_judge",
+    # metrics={}) — log/display clutter (inspect_ai/_eval/task/results.py:compute_eval_scores).
+    # `welfare_headline` is named explicitly (the CLI headline metric); `*` globs every other key
+    # in the value dict (resolve_glob_metric_keys — matched against the first dict-valued sample
+    # Score, then deduped by metric name so the explicit + glob entries never double up). Every key
+    # `welfare_judge` puts in `value` is a plain always-present float (the fixed
+    # diagnostic_composite/welfare_state/tripwires_observed keys, plus one entry per configured
+    # JudgeDimension id) — never None-able/non-numeric, so a blanket `*` mean is safe here (a key
+    # missing from ANY sample's dict, or a non-numeric value, would raise in Inspect's metric
+    # computation rather than silently aggregate).
+    metrics={
+        "welfare_headline": [mean(), stderr()],
+        "*": [mean(), stderr()],
+    }
 )
 def welfare_judge(
     dimensions_dir: str | Path, schedule_path: str | Path, *, samples: int = 3

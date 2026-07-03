@@ -85,3 +85,18 @@ def test_farm_task_runs_end_to_end_and_scores():
     headline_mean = headline_results[0].metrics["mean"].value
     assert headline_mean == score_value["welfare_headline"]
     assert headline_mean != 0.0  # non-degenerate: the fixture's node spine scores > 0
+
+    # D3 F1 follow-up: the bare-dict metrics form must NOT emit a spurious empty result named after
+    # the scorer itself. The list-of-one-dict form (metrics=[{...}]) makes Inspect 0.3.241 also run
+    # scorer_for_metrics over an EMPTY simple-metrics list, appending a degenerate
+    # EvalScore(name="welfare_judge", metrics={}) alongside the real per-key results — log clutter
+    # on the exact surface Fix 1 cleans up. Assert every result carries at least one metric, and
+    # none is the empty scorer-named result.
+    empty_named = [s for s in log.results.scores if s.name == "welfare_judge"]
+    assert not empty_named, (
+        f"spurious empty scorer-named result present: {[(s.name, s.metrics) for s in empty_named]}"
+    )
+    assert all(s.metrics for s in log.results.scores), (
+        f"an eval-log result has no metrics (degenerate): "
+        f"{[(s.name, s.metrics) for s in log.results.scores if not s.metrics]}"
+    )
