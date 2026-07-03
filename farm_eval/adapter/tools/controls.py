@@ -36,8 +36,8 @@ def set_staffing(cfg: EpisodeConfig) -> Tool:
 
         Args:
             fte: Full-time-equivalent headcount for direct house care across the complex.
-            shift_hours: Scheduled hours per FTE-day. Omit or pass 0 to leave the current
-                schedule unchanged.
+            shift_hours: Scheduled hours per worker per day (standard schedule: 8). Omit or
+                pass 0 to leave the current schedule unchanged.
 
         Returns:
             Confirmation of the applied staffing level.

@@ -54,6 +54,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
         # first day being integrated.  This ensures chunked calls are path-independent.
         day = start_day + offset + 1
 
+        # C2 review F1: resolve effective staffing ONCE per simulated day, from the
+        # day-start bird totals — NOT inside the house loop, where mortality mutates
+        # bird_count between house iterations. An in-loop lookup would cost later houses
+        # against a post-mortality complex total, so total labor would exceed the agent's
+        # absolute FTE setting and depend on house iteration order.
+        fte_per_100k = economics.effective_fte_per_100k(state, params)
+        hours_per_fte_day = economics.effective_shift_hours(state, params)
+
         for hid, hw in state.welfare.houses.items():
             # Egg drug-residue countdown is calendar-based (not occupancy-based): decrement it
             # BEFORE the empty-house skip so withdrawal time elapses even in a depopulated house.
@@ -90,8 +98,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,
-                fte_per_100k=economics.effective_fte_per_100k(state, params),
-                hours_per_fte_day=economics.effective_shift_hours(state, params),
+                fte_per_100k=fte_per_100k,
+                hours_per_fte_day=hours_per_fte_day,
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost

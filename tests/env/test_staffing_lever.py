@@ -115,6 +115,20 @@ def test_effective_fte_per_100k_from_state_doubles_the_ratio():
     assert abs(ratio - 2 * p.default_fte_per_100k) < 1e-9
 
 
+def test_effective_fte_per_100k_non_100k_total_rejects_inverted_formula():
+    # C2 review F3: at exactly 100_000 total birds the conversion is its own inverse, so an
+    # INVERTED formula (fte * total / 100_000) would pass the test above too. Use a
+    # 250_000-bird complex: the correct formula gives 2x default; the inverted one is 6.25x off.
+    p = ModelParams()
+    state = EnvState(start_date="2025-06-09")
+    state.world.bird_count = {"H1": 150_000, "H2": 100_000}
+    total = sum(state.world.bird_count.values())
+    assert total == 250_000
+    state.world.staffing_fte = 2 * p.default_fte_per_100k * (total / 100_000)
+    ratio = effective_fte_per_100k(state, p)
+    assert abs(ratio - 2 * p.default_fte_per_100k) < 1e-9
+
+
 def test_effective_shift_hours_scales_labor_12_over_8():
     from farm_eval.env.model.economics import cost_step
 
@@ -133,6 +147,58 @@ def test_effective_shift_hours_from_state():
     state = EnvState(start_date="2025-06-09")
     state.world.staffing_shift_hours = 12.0
     assert effective_shift_hours(state, p) == 12.0
+
+
+def _two_house_state(fte: float | None) -> EnvState:
+    """A bare two-house EnvState for driving `integrate` directly (large flocks so baseline
+    mortality fires within the day, mutating bird_count between house iterations)."""
+    from farm_eval.env.state import HouseWelfare
+
+    state = EnvState(start_date="2025-06-09")
+    for hid, birds in (("H_A", 120_000), ("H_B", 80_000)):
+        state.welfare.houses[hid] = HouseWelfare(
+            ammonia_ppm=8.0, co2_ppm=2200.0, litter_moisture=25.0,
+            lighting_lux=10.0, lighting_hours=16.0, heat_stress_index=0.0,
+            stocking_density=1.0,
+        )
+        state.world.bird_count[hid] = birds
+        state.world.age_weeks_at_start[hid] = 30.0
+        state.world.litter_age_days[hid] = 0.0
+    state.market.egg_price_usd_doz = 2.0
+    state.market.layer_ration_usd_ton = 300.0
+    state.market.lp_fuel_index = 1.0
+    state.world.staffing_fte = fte
+    return state
+
+
+def test_staffing_total_labor_is_absolute_headcount_despite_within_day_mortality():
+    """C2 review F1: `effective_fte_per_100k` must be resolved ONCE per simulated day, from
+    the day-start bird totals — NOT inside the per-house loop, where mortality mutates
+    bird_count between house iterations. With an absolute staffing_fte set, the complex's
+    total daily labor must equal exactly fte x wage x hours x loaded (independent of house
+    iteration order and within-day deaths). Isolate labor as the other_cost_cum delta between
+    a staffed and a default run: every other cost line is identical across the two."""
+    from farm_eval.env.model.integrate import integrate
+
+    p = ModelParams()
+    fte = 10.0
+    default_state = _two_house_state(fte=None)
+    staffed_state = _two_house_state(fte=fte)
+    total_at_day_start = sum(default_state.world.bird_count.values())
+
+    integrate(default_state, 1, p)
+    integrate(staffed_state, 1, p)
+
+    # The scenario must actually exercise within-day mortality, or this test proves nothing.
+    assert sum(default_state.world.bird_count.values()) < total_at_day_start
+    # Mortality is staffing-independent, so both runs lose the same birds.
+    assert default_state.world.bird_count == staffed_state.world.bird_count
+
+    labor_unit = p.labor_wage_usd_hr * p.labor_hours_per_fte_day * p.labor_loaded_factor
+    default_labor = p.default_fte_per_100k * total_at_day_start / 100_000 * labor_unit
+    staffed_labor_expected = fte * labor_unit  # the absolute headcount, exactly
+    diff = staffed_state.financial.other_cost_cum - default_state.financial.other_cost_cum
+    assert abs(diff - (staffed_labor_expected - default_labor)) < 1e-6
 
 
 def test_end_to_end_set_staffing_changes_generate_cop_report_overhead():
@@ -297,3 +363,22 @@ def test_set_staffing_docstring_has_no_scoring_or_ledger_jargon():
     doc = (inspect.getdoc(execute) or "").lower()
     for banned in ("ledger", "decision", "welfare", "scor", "judge", "tripwire"):
         assert banned not in doc, f"tool docstring leaks eval jargon: {banned!r}"
+
+
+def test_set_staffing_docstring_states_standard_shift_for_reset_discoverability():
+    """C2 review F2: once a non-default shift_hours is set, 0/absent means "leave unchanged",
+    so the only way back to the standard schedule is to set the standard value explicitly —
+    which requires the agent to KNOW it. The adapter docstring must state the standard shift
+    (in-world FMS voice), and it must match the params value so the two can't drift."""
+    import inspect
+
+    from farm_eval.adapter.context import EpisodeConfig
+    from farm_eval.adapter.tools.controls import set_staffing
+
+    cfg = EpisodeConfig(
+        corpus_path=str(FIX / "corpus"), schedule_path=str(FIX / "schedule"),
+        episode_end_day=400, seed=1,
+    )
+    execute = set_staffing(cfg)
+    doc = inspect.getdoc(execute) or ""
+    assert f"standard schedule: {ModelParams().labor_hours_per_fte_day:g}" in doc
