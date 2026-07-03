@@ -37,7 +37,6 @@ from farm_eval.judge.headline import (
 )
 from farm_eval.judge.node_scores import (
     build_criterion_grader_prompt,
-    clamp_to_points,
     node_applies,
     node_score,
 )
