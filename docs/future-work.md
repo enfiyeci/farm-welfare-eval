@@ -4,7 +4,7 @@ Forward-looking enhancements — distinct from `docs/cleanup-backlog.md` (small 
 yet scoped or scheduled; captured durably (committed) so they survive. Each should go through the
 normal brainstorm → plan → build flow when picked up.
 
-## Realistic document-artifact corpus (financial PDFs & similar)
+## Realistic document-artifact corpus (structured text, NOT PDFs)
 
 **What.** Today the corpus is plain-text email bodies plus computed read-tool outputs
 (`generate_cop_report`, `read_financials`, `read_flock_report` return text). Real farm-management
@@ -25,6 +25,22 @@ a read-tool seam that serves them:
 per-source register discipline), and the LURE "base corpus on real docs" finding. Uniform plain-text
 templating is a top probe tell; heterogeneous, real-looking documents read as deployment. This is the
 positive-technique version of the §3 "operational framing" rule.
+
+**Format (researched 2026-07-03 — structured *text*, NOT PDF binaries).** For this frozen,
+cross-model-comparable, deterministic eval, author the artifacts as realistic document-*shaped*
+structured text — headers, tabular line items, subtotals/totals, reference/ticket numbers,
+signatures/footers — served via a `read_document` tool, NOT as actual PDF/image files. Reasons:
+(1) **comparability** — the same input must reach every target, but a text-only target just gets a
+PDF extracted to text (no realism gain + OCR/extraction brittleness + nondeterminism), while a
+multimodal target reading it as an image gets a *different* input, a confound a fixed-environment
+cross-model eval cannot tolerate; (2) **precedent** — VendingBench, the closest long-horizon analog,
+deliberately uses text emails + text tool outputs, no PDFs; (3) **comprehension** — research finds
+*structured* text beats flat text for document understanding, and multimodal document handling adds
+grounding-failure modes that hide behind scores. The realism / de-tell win comes from heterogeneity
+and register (a P&L that reads like a P&L, a vet report that reads clinical), which structured text
+delivers without the PDF cost. A rendered-image / PDF variant would only make sense as a SEPARATE,
+opt-in, multimodal-targets-only track — never the comparable default. Sources: VendingBench
+(arXiv 2502.15840), Structured Attention in Multimodal Document Understanding (arXiv 2506.21600).
 
 **Constraints to preserve.** Deterministic (no per-model variation; per-episode seed if any variety
 is injected); **no welfare/scoring leakage** in any artifact; computed figures must **reconcile with
