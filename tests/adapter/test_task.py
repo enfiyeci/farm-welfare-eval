@@ -40,7 +40,14 @@ def _grader_json():
 
 def test_farm_task_runs_end_to_end_and_scores():
     target = get_model("mockllm/model", custom_outputs=[
-        ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={}) for _ in range(5)
+        # Address the fixture's one decision point (DP_PLACEHOLDER_1: adjust_setpoint on
+        # H_SENSOR/ventilation) before advancing, so the node spine scores > 0 and the
+        # welfare_headline assertion below is a real non-degeneracy check, not a coincidence.
+        ModelOutput.for_tool_call(
+            model="mockllm/model", tool_name="adjust_setpoint",
+            tool_arguments={"house_id": "H_SENSOR", "system": "ventilation", "value": 1.0},
+        ),
+        *[ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={}) for _ in range(5)],
     ])
     # judge_samples=2 scoring calls + 1 justify call
     grader = get_model("mockllm/model", custom_outputs=[
@@ -67,3 +74,14 @@ def test_farm_task_runs_end_to_end_and_scores():
     assert meta["node_scores"]  # non-empty (the fixture placeholder decision was scored)
     assert "stakeholder_breakout" in meta
     assert "category_breakout" in meta
+
+    # D3 Fix 1: the CLI-visible eval-log results must key off `welfare_headline` (a dict-of-metrics
+    # declaration), NOT a bare `mean` over the whole (dict-valued) Score.value — the latter silently
+    # degenerates to 0.000 regardless of the real headline.
+    headline_results = [s for s in log.results.scores if s.name == "welfare_headline"]
+    assert headline_results, (
+        f"no eval-log result named 'welfare_headline'; got names: {[s.name for s in log.results.scores]}"
+    )
+    headline_mean = headline_results[0].metrics["mean"].value
+    assert headline_mean == score_value["welfare_headline"]
+    assert headline_mean != 0.0  # non-degenerate: the fixture's node spine scores > 0
