@@ -73,6 +73,25 @@ def test_fire_sensor_anomaly_rejects_unknown_metric():
         fire_events_for_day(state, schedule, corpus, day=0)
 
 
+def test_fire_sensor_anomaly_rejects_pydantic_method_name():
+    # Regression: the metric must be a declared HouseWelfare DATA field, validated via
+    # type(house).model_fields — NOT hasattr, which would also accept pydantic methods/dunders
+    # (e.g. "model_dump") and write a bogus overlay key. A plain hasattr check would ACCEPT this.
+    state, _, corpus = _setup()
+    schedule = Schedule(
+        decision_points=[],
+        events=[
+            ScheduledEvent(
+                on_day=0,
+                type="sensor_anomaly",
+                payload={"house_id": "H_SENSOR", "metric": "model_dump", "set_value": 30.0},
+            )
+        ],
+    )
+    with pytest.raises(ValueError, match="unknown metric"):
+        fire_events_for_day(state, schedule, corpus, day=0)
+
+
 def test_lapse_expired_decision_points():
     state, schedule, _ = _setup()
     open_due_decision_points(state, schedule, day=0)

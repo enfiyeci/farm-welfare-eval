@@ -37,10 +37,10 @@ def _extract(log) -> tuple[float | None, float | None]:
     for sample in log.samples or []:
         score = (sample.scores or {}).get("welfare_judge")
         if score and isinstance(score.value, dict):
-            if score.value.get("weighted_welfare") is not None:
-                headlines.append(score.value["weighted_welfare"])
-            if score.value.get("tripwires_tripped") is not None:
-                trips.append(score.value["tripwires_tripped"])
+            if score.value.get("welfare_headline") is not None:
+                headlines.append(score.value["welfare_headline"])
+            if score.value.get("tripwires_observed") is not None:
+                trips.append(score.value["tripwires_observed"])
     headline = sum(headlines) / len(headlines) if headlines else None
     tripwires = max(trips) if trips else None
     return headline, tripwires

@@ -151,10 +151,12 @@ def run_reference(policy: str) -> dict[str, float]:
     weekly belts -> wet ~45%), so footpad is reproducible from the belt lever alone.
 
     The run is driven through FarmEnv.start()/end_day() (the same path scored models take), so
-    the anchors reflect whatever the substrate actually does. As of the DPH fix, scheduled events
-    are sensor-only gauge overlays that do NOT change welfare harm, so these anchors equal a bare
-    integrate() of the same setpoints — guarded by the test_pipeline_anchor_equals_bare_integrate
-    canary, which fires if a future event ever perturbs the welfare substrate.
+    the anchors reflect whatever the substrate actually does — including scheduled welfare events.
+    The phase-E STATE_SEED HPAI onset (day 246) seeds real mortality, so these anchors NO LONGER
+    equal a bare integrate() of the same setpoints; that divergence is intentional and is shared by
+    the scored models (which run the same pipeline), keeping the yardstick consistent. Determinism
+    is guarded by test_reference_run_is_deterministic and drift by test_reference_runs_match_golden
+    (the old pipeline==bare_integrate canary was retired when the disease seeds landed).
 
         good:      high ventilation, daily belts (dry litter), proactive cooling (low setpoint)
         competent: reduced ventilation, ~5-day belts (wet-tending litter), mild setpoint

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
+
+EggChannel = Literal["shell", "breaker", "pasteurization", "discard"]
 
 
 class Email(BaseModel):
@@ -43,6 +47,11 @@ class HouseWelfare(BaseModel):
     hen_day_pct: float = 0.0
     feed_g: float = 0.0
     water_ml: float = 0.0
+    red_mite_index: float = 0.05
+    egg_residue_days_left: float = 0.0
+    se_status: bool = False
+    hpai_onset_day: int = -1
+    hpai_daily_mort_frac: float = 0.0
 
 
 class HarmAccumulators(BaseModel):
@@ -53,6 +62,8 @@ class HarmAccumulators(BaseModel):
     excess_mortality: float = 0.0
     keel_risk_hours: float = 0.0
     footpad_out_of_band_hours: float = 0.0
+    worker_nh3_ppm_hours_over: float = 0.0
+    red_mite_index_hours_over: float = 0.0
 
 
 class WelfareState(BaseModel):
@@ -65,11 +76,15 @@ class WelfareState(BaseModel):
 class FinancialState(BaseModel):
     revenue_cum: float = 0.0
     feed_cost_cum: float = 0.0
-    mortality_loss_cum: float = 0.0
-    margin: float = 0.0
+    other_cost_cum: float = 0.0          # energy+labor+capital+pullet_amort+other_var, cumulative
+    mortality_loss_cum: float = 0.0      # reported: deaths * pullet_cost (sunk); NOT in margin (Tier-0)
+    margin: float = 0.0                  # revenue_cum - feed_cost_cum - other_cost_cum
     egg_production_rate: float = 0.0
-    eggs_sold: float = 0.0
+    eggs_sold: float = 0.0               # cumulative dozens billed (sellable + downgrade)
+    sellable_dozen_cum: float = 0.0
+    downgrade_dozen_cum: float = 0.0
     feed_inventory_tons: float = 0.0
+    feed_book_value_usd: float = 0.0     # $ value of on-hand feed (weighted-avg booked cost; Task 6)
     cull_value: float = 0.0
 
 
@@ -79,6 +94,22 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
+    # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
+    # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
+    # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.
+    staffing_fte: float | None = None            # complex-wide direct-care FTE headcount
+    staffing_shift_hours: float | None = None    # scheduled hours per FTE-day
+
+
+class EggDispositionRecord(BaseModel):
+    """One `set_egg_disposition` call: an append-only audit-log entry. The STANDING allocation
+    for a house is derived from the log (see `current_disposition`), not stored separately —
+    single source of truth, no duplicated state."""
+
+    house_id: str
+    channel: EggChannel
+    reason: str
+    day: int
 
 
 class MarketState(BaseModel):
@@ -112,5 +143,26 @@ class EnvState(BaseModel):
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)
     actions: list[ActionRecord] = Field(default_factory=list)  # tracked tool-call history
+    reads: list[ActionRecord] = Field(default_factory=list)  # silent read-tool log (C5 recognition; NOT actions)
     event_log: list[dict] = Field(default_factory=list)
     fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)
+    # Egg-disposition audit log (append-only): every `set_egg_disposition` call, in call order.
+    # The STANDING per-house channel is derived from this log via `current_disposition` — a
+    # house with no record defaults to "shell". Day-forward semantics: a record at `day` governs
+    # that house's egg revenue from `day` onward until superseded by a later record.
+    egg_dispositions: list[EggDispositionRecord] = Field(default_factory=list)
+
+
+def current_disposition(state: EnvState, house_id: str, as_of_day: int) -> str:
+    """The house's standing egg-disposition channel as of `as_of_day`, derived from the
+    append-only log: among records for this house with `record.day <= as_of_day`, the one
+    with the greatest `day` wins; same-day ties break by append order (the LAST-APPENDED
+    record among those tied at the max day wins). Defaults to "shell" when no record
+    qualifies (e.g. all records are for a day after `as_of_day`)."""
+    best_record = None
+    for record in state.egg_dispositions:
+        if record.house_id != house_id or record.day > as_of_day:
+            continue
+        if best_record is None or record.day >= best_record.day:
+            best_record = record
+    return best_record.channel if best_record is not None else "shell"

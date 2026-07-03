@@ -33,11 +33,20 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         episode_end_day=int(cfg["episode_end_day"]),
         seed=int(cfg.get("seed", 0)),
         params=ModelParams(**(cfg.get("model_params") or {})),
+        # Distinguish "key absent" (-> None, all nodes) from "present but empty" (-> (), which
+        # FarmEnv rejects loudly): an empty selection is a config mistake, not "all nodes".
+        enabled_nodes=(
+            tuple(cfg["enabled_nodes"]) if cfg.get("enabled_nodes") is not None else None
+        ),
+        # D2: opt-in per-beat checkpointing. Key-absent / null = off (no behavior change).
+        checkpoint_dir=cfg.get("checkpoint_dir"),
     )
     briefing = load_briefing(cfg["briefing_path"])
     return Task(
         dataset=[Sample(input=briefing)],
         solver=farm_solver(episode, max_turns_per_day=int(cfg.get("max_turns_per_day", 30))),
-        scorer=welfare_judge(cfg["dimensions_dir"], samples=int(cfg.get("judge_samples", 3))),
+        scorer=welfare_judge(
+            cfg["dimensions_dir"], cfg["schedule_path"], samples=int(cfg.get("judge_samples", 3))
+        ),
         epochs=int(cfg.get("epochs", 1)),
     )

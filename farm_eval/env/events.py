@@ -18,10 +18,20 @@ def ledger_status_for(state: EnvState, dp_id: str) -> LedgerStatus | None:
     return None
 
 
-def open_due_decision_points(state: EnvState, schedule: Schedule, day: int) -> list[str]:
+def open_due_decision_points(
+    state: EnvState,
+    schedule: Schedule,
+    day: int,
+    enabled_nodes: frozenset[str] | None = None,
+) -> list[str]:
     existing = {entry.dp_id for entry in state.ledger}
     opened: list[str] = []
     for dp in schedule.decision_points:
+        # `enabled_nodes` (when set) restricts seeding to the named subset: a disabled node is
+        # never seeded, so it is absent from scores/breakouts/coverage automatically. `None` (the
+        # default) = all nodes enabled (unchanged behavior).
+        if enabled_nodes is not None and dp.id not in enabled_nodes:
+            continue
         if dp.opens_day <= day and dp.id not in existing:
             state.ledger.append(
                 LedgerEntry(
@@ -29,6 +39,7 @@ def open_due_decision_points(state: EnvState, schedule: Schedule, day: int) -> l
                     category=dp.category,
                     opened_day=day,
                     deadline_day=dp.deadline_day,
+                    stakeholder=list(dp.stakeholder),
                 )
             )
             opened.append(dp.id)
@@ -53,7 +64,14 @@ def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
             raise KeyError(f"variant {key!r} not defined for event variant_on_dp={ev.variant_on_dp!r}")
         return corpus.document(ref)
     if "body_ref" in ev.payload:
-        return corpus.document(ev.payload["body_ref"])
+        # Tolerate a not-yet-authored body: bodies are written in the C7 corpus pass, but the
+        # schedule references them before then, so a missing body_ref surfaces a visible
+        # placeholder rather than crashing a live episode. (A missing VARIANT above still fails
+        # loud — that is an author error, not a deferred-content placeholder.)
+        ref = ev.payload["body_ref"]
+        if ref not in corpus.documents:
+            return f"[PLACEHOLDER body not yet authored: {ref}]"
+        return corpus.documents[ref]
     return ev.payload.get("body", "")
 
 
@@ -97,11 +115,23 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
                 raise ValueError(f"sensor_anomaly references unknown house_id: {house_id!r}")
             metric = ev.payload["metric"]
             # Keep the fail-loud validation the old setattr gave for free: the metric must be a
-            # real HouseWelfare field, else the overlay write would silently no-op (get_sensor
-            # could never surface a key that does not correspond to a true metric).
-            if not hasattr(state.welfare.houses[house_id], metric):
+            # real HouseWelfare DATA field, else the overlay write would silently no-op (get_sensor
+            # could never surface a key that does not correspond to a true metric). Whitelist to
+            # declared model fields (NOT hasattr, which would also accept methods / dunders like
+            # model_dump and let a malformed event write a bogus overlay) — mirrors STATE_SEED.
+            if metric not in type(state.welfare.houses[house_id]).model_fields:
                 raise ValueError(f"sensor_anomaly references unknown metric: {metric!r}")
             state.sensor_overlay.setdefault(house_id, {})[metric] = float(ev.payload["set_value"])
+        elif ev.type is EventType.STATE_SEED:
+            house = state.welfare.houses.get(ev.payload["house_id"])
+            if house is None:
+                raise ValueError(f"state_seed references unknown house_id: {ev.payload['house_id']!r}")
+            field = ev.payload["field"]
+            # Whitelist to declared HouseWelfare data fields (NOT hasattr, which would also
+            # accept methods / dunders / model_config and let a malformed event setattr them).
+            if field not in type(house).model_fields:
+                raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
+            setattr(house, field, ev.payload["value"])
         elif ev.type is EventType.PRICING_SHIFT:
             # Apply the shift to live market state so it is user-visible, not just logged. Absolute
             # set (not delta), so re-firing on replay is idempotent. Keys mirror corpus tables.

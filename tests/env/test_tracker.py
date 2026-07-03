@@ -57,6 +57,113 @@ def test_match_where_is_subset():
     assert not match_where({"house_id": "H_SENSOR"}, {"house_id": "H_OTHER"})
 
 
+def test_match_where_list_value_is_membership():
+    # A `where` value given as a list means "any of these" — OR semantics for that key,
+    # while other keys (and scalar values) keep exact-equality subset matching.
+    where = {"house_id": "H4", "channel": ["pasteurization", "breaker"]}
+    assert match_where({"house_id": "H4", "channel": "pasteurization"}, where)
+    assert match_where({"house_id": "H4", "channel": "breaker"}, where)
+    assert not match_where({"house_id": "H4", "channel": "shell"}, where)
+    assert not match_where({"house_id": "H_OTHER", "channel": "breaker"}, where)
+
+
+def test_match_where_scalar_value_still_exact_equality():
+    # A scalar where-value must NOT match a list of the same shape by coincidence.
+    assert not match_where({"channel": ["pasteurization", "breaker"]}, {"channel": "pasteurization"})
+
+
+# --- C6 re-review: normalized STRING comparison (synonym/format-blindness class) ---
+
+
+def test_match_where_string_comparison_is_normalized():
+    # "E. coli" vs where-value "e_coli": lowercase + collapse non-alphanumeric runs to "_".
+    assert match_where({"issue": "E. coli"}, {"issue": "e_coli"})
+    # "Colibacillosis" vs where-value "colibacillosis": case only.
+    assert match_where({"issue": "Colibacillosis"}, {"issue": "colibacillosis"})
+
+
+def test_match_where_normalization_still_rejects_different_strings():
+    assert not match_where({"issue": "red_mite"}, {"issue": "colibacillosis"})
+    assert not match_where({"issue": "red mite"}, {"issue": "colibacillosis"})
+
+
+def test_match_where_normalization_applies_to_list_membership():
+    where = {"issue": ["colibacillosis", "e_coli"]}
+    assert match_where({"issue": "E. coli"}, where)
+    assert match_where({"issue": "Colibacillosis"}, where)
+    assert not match_where({"issue": "red_mite"}, where)
+
+
+def test_match_where_non_string_values_keep_exact_equality():
+    # Non-string values (e.g. int day/value fields) must NOT be stringified/normalized.
+    assert match_where({"value": 2}, {"value": 2})
+    assert not match_where({"value": 2}, {"value": 3})
+    assert not match_where({"value": "2"}, {"value": 2})  # str "2" must not match int 2
+
+
+# --- C6 (Task C4): generic numeric-range predicates (a DICT-valued `where` entry) ---
+
+
+def test_match_where_gte_boundary():
+    where = {"fte": {"gte": 30}}
+    assert match_where({"fte": 30}, where)
+    assert match_where({"fte": 31}, where)
+    assert not match_where({"fte": 29.9}, where)
+
+
+def test_match_where_lte_boundary():
+    where = {"shift_hours": {"lte": 10}}
+    assert match_where({"shift_hours": 10}, where)
+    assert match_where({"shift_hours": 9}, where)
+    assert not match_where({"shift_hours": 10.1}, where)
+
+
+def test_match_where_gte_and_lte_requires_both():
+    where = {"fte": {"gte": 30}, "shift_hours": {"lte": 10}}
+    assert match_where({"fte": 35, "shift_hours": 10}, where)
+    assert not match_where({"fte": 35, "shift_hours": 14}, where)  # fte ok, shift_hours fails
+    assert not match_where({"fte": 20, "shift_hours": 8}, where)  # shift_hours ok, fte fails
+    assert not match_where({"fte": 20, "shift_hours": 14}, where)  # both fail
+
+
+def test_match_where_gt_lt_strict_variants():
+    where = {"fte": {"gt": 30}}
+    assert match_where({"fte": 31}, where)
+    assert not match_where({"fte": 30}, where)  # gt is strict, boundary excluded
+
+    where = {"shift_hours": {"lt": 10}}
+    assert match_where({"shift_hours": 9.9}, where)
+    assert not match_where({"shift_hours": 10}, where)  # lt is strict, boundary excluded
+
+
+def test_match_where_range_unknown_op_raises_naming_the_key():
+    where = {"fte": {"gte": 30, "approx": 1}}
+    with pytest.raises(ValueError, match="approx"):
+        match_where({"fte": 35}, where)
+
+
+def test_match_where_range_non_numeric_actual_is_false_not_error():
+    where = {"fte": {"gte": 30}}
+    assert not match_where({"fte": "lots"}, where)
+    assert not match_where({}, where)  # missing key: existing semantics, no match
+
+
+def test_match_where_range_bool_actual_is_false():
+    # bool is a subclass of int in Python; explicitly excluded from "numeric" so a bool param
+    # can't nonsensically satisfy a numeric range like gte: 0.
+    where = {"fte": {"gte": 0}}
+    assert not match_where({"fte": True}, where)
+    assert not match_where({"fte": False}, where)
+
+
+def test_match_where_range_combined_with_scalar_and_list_keys():
+    # A dict-range entry alongside scalar/list entries in the SAME where clause; all must hold.
+    where = {"house_id": "H3", "channel": ["a", "b"], "fte": {"gte": 30}}
+    assert match_where({"house_id": "H3", "channel": "a", "fte": 30}, where)
+    assert not match_where({"house_id": "H3", "channel": "c", "fte": 30}, where)
+    assert not match_where({"house_id": "H3", "channel": "a", "fte": 29}, where)
+
+
 def test_match_signature_any_of():
     sig = Signature(any_of=[ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})])
     assert match_signature(sig, "adjust_setpoint", {"system": "ventilation", "house_id": "H_SENSOR"})

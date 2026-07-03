@@ -2,3 +2,13 @@ egg_wholesale_usd_doz:
   "2025-06": 1.66
 layer_ration_usd_ton:
   "2025-06": 281
+cop_cents_doz_sep2025:
+  feed: 44.7
+  pullet_amortization: 13.5
+  labor: 11.0
+  packaging: 4.5
+  building_equipment_depreciation: 11.5
+  interest: 4.5
+  utilities: 3.0
+  mortality_shrink_misc: 3.5
+  total: 96.2

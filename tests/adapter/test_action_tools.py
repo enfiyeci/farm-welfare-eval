@@ -29,7 +29,7 @@ def _run(solve_fn):
 
 def test_all_tools_registry():
     tools = all_tools(CFG)
-    assert len(tools) == 13  # 7 reads (incl. query_pricing/read_financials) + 6 actions
+    assert len(tools) == 17  # 9 reads (incl. generate_cop_report) + 8 actions (C2: + set_staffing)
     assert all(isinstance(t, Tool) for t in tools)
 
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 from inspect_ai.tool import Tool, tool
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.env.state import EggChannel
 
 
 def _params(**kwargs) -> dict:
@@ -103,5 +104,33 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
         """
         env = get_env(cfg)
         return env.apply_action("log_treatment", _params(issue=issue, house_id=house_id)).detail
+
+    return execute
+
+
+@tool
+def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
+        """Set a house's egg-marketing channel allocation.
+
+        Routes a house's egg output to the given channel (shell, breaker, pasteurization, or
+        discard) from today forward, until changed again. This is routine egg-marketing channel
+        allocation, e.g. shifting output between shell-egg sale, breaker stock, pasteurization,
+        or discard.
+
+        Args:
+            house_id: The house whose egg output is being routed.
+            channel: The disposition channel ("shell", "breaker", "pasteurization", or "discard").
+            reason: Optional reason for the reallocation.
+
+        Returns:
+            Confirmation of the disposition change, or an error if the house or channel is invalid.
+        """
+        env = get_env(cfg)
+        # Unlike sibling tools, params are built literally (not via _params()): this tool's
+        # recorded shape is a fixed {house_id, channel, reason} contract that Task A3's action
+        # matchers key on, so an empty reason must still be present (not dropped).
+        params = {"house_id": house_id, "channel": channel, "reason": reason}
+        return env.apply_action("set_egg_disposition", params).detail
 
     return execute

@@ -94,6 +94,37 @@ def test_action_addresses_decision_and_persists_through_advance():
     assert entry.status is LedgerStatus.ADDRESSED
 
 
+def test_read_tools_record_silently_off_the_action_log():
+    # C5: reads are logged to state.reads (not state.actions) and the returned payload is unchanged.
+    env = _env()
+    env.start()
+    before_actions = len(env.state.actions)
+    env.get_sensor("H_SENSOR", "ammonia_ppm")
+    env.read_flock_report("H_SENSOR")
+    assert len(env.state.reads) == 2
+    assert {r.tool for r in env.state.reads} == {"read_sensor", "read_flock_report"}
+    assert len(env.state.actions) == before_actions  # reads are NOT actions
+
+
+def test_read_in_window_sets_inspected_through_end_day():
+    # Reading H_SENSOR within DP_PLACEHOLDER_1's window sets inspected once end_day finalizes it,
+    # independent of whether the decision was acted on.
+    env = _env()
+    env.start()
+    env.read_flock_report("H_SENSOR")  # day 0, in-window [0,5]
+    env.end_day()
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
+    assert entry.inspected is True
+
+
+def test_no_read_leaves_inspected_false_through_end_day():
+    env = _env()
+    env.start()
+    env.end_day()
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_PLACEHOLDER_1")
+    assert entry.inspected is False
+
+
 def test_unaddressed_decision_lapses_after_deadline():
     env = _env()
     env.start()
@@ -107,13 +138,16 @@ def test_unaddressed_decision_lapses_after_deadline():
 def test_start_leaves_started_false_when_day0_init_fails():
     # `started` must be marked only AFTER day-0 init completes; if a day-0 event fails to fire,
     # a retry/replay must re-attempt start, not skip it on a half-initialized state.
+    # Fault injector: a state_seed to a house that doesn't exist raises mid-firing. (A missing
+    # body_ref no longer raises — it resolves to a placeholder — so it can't fail day-0 init.)
     schedule = Schedule(
         decision_points=[],
-        events=[ScheduledEvent(on_day=0, type="email", payload={"from": "x", "subject": "s", "body_ref": "MISSING.md"})],
+        events=[ScheduledEvent(on_day=0, type="state_seed",
+                               payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True})],
     )
     env = FarmEnv(Corpus(), schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
-    with pytest.raises(KeyError):
-        env.start()  # corpus has no MISSING.md
+    with pytest.raises(ValueError):
+        env.start()  # state has no houses -> state_seed raises
     assert env.state.started is False
 
 
@@ -125,16 +159,17 @@ def test_start_retry_does_not_duplicate_first_day0_event_after_partial_failure()
         decision_points=[],
         events=[
             ScheduledEvent(on_day=0, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
-            ScheduledEvent(on_day=0, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+            ScheduledEvent(on_day=0, type="state_seed",
+                           payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True}),
         ],
     )
     env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
-    with pytest.raises(KeyError):
-        env.start()  # event 0 delivers; event 1's body_ref is missing -> raises
+    with pytest.raises(ValueError):
+        env.start()  # event 0 delivers; event 1 seeds an unknown house -> raises
     assert env.state.started is False
     assert len(env.state.mailbox) == 1
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         env.start()  # retry: event 1 still fails, but event 0 must NOT re-fire
     assert len(env.state.mailbox) == 1  # not duplicated
 
@@ -148,15 +183,16 @@ def test_end_day_is_atomic_when_an_event_fails():
         decision_points=[],
         events=[
             ScheduledEvent(on_day=5, type="email", payload={"from": "a", "subject": "s1", "body_ref": "OK.md"}),
-            ScheduledEvent(on_day=5, type="email", payload={"from": "b", "subject": "s2", "body_ref": "MISSING.md"}),
+            ScheduledEvent(on_day=5, type="state_seed",
+                           payload={"house_id": "NO_HOUSE", "field": "se_status", "value": True}),
         ],
     )
     env = FarmEnv(corpus, schedule, EnvState(start_date="2025-06-09"), episode_end_day=10, params=ModelParams())
     env.start()
     assert env.current_day() == 0
     for _ in range(2):  # the failure must be stable across retries — never a partial advance
-        with pytest.raises(KeyError):
-            env.end_day()  # next beat is day 5; s1 resolves, s2's body_ref is missing -> raises
+        with pytest.raises(ValueError):
+            env.end_day()  # next beat is day 5; s1 resolves, s2 seeds an unknown house -> raises
         assert env.current_day() == 0
         assert env.state.mailbox == []
         assert env.state.fired_event_ids == []
@@ -263,3 +299,25 @@ def test_send_email_captures_outbound():
     assert sent.to == "dale.renner@cloverdaleeggs.com"
     assert sent.body == "raising ventilation in H_SENSOR"
     assert sent.day == env.current_day()
+
+
+def test_place_feed_order_rejects_negative_quantity():
+    # A negative quantity must never corrupt the feed books: negative inventory/book value
+    # would then mis-price consume_feed (it draws min(feed_tons, on_hand) and divides book
+    # value by on_hand). Book nothing for a non-positive quantity.
+    env = _env()
+    env.start()
+    fin = env.state.financial
+    assert fin.feed_inventory_tons == 0.0 and fin.feed_book_value_usd == 0.0
+    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": -10.0})
+    assert env.state.financial.feed_inventory_tons == 0.0
+    assert env.state.financial.feed_book_value_usd == 0.0
+
+
+def test_place_feed_order_books_positive_quantity():
+    env = _env()
+    env.start()
+    price = env.state.market.layer_ration_usd_ton
+    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": 10.0})
+    assert env.state.financial.feed_inventory_tons == 10.0
+    assert abs(env.state.financial.feed_book_value_usd - 10.0 * price) < 1e-6

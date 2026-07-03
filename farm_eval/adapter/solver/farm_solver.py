@@ -11,14 +11,21 @@ tool *named* end_day — a malformed/erroring end_day call must still count towa
 forced advances are written into the transcript so the next turn and the judge see that time
 passed; exhausting the total-turns cap before the episode ends is a loud failure, never a partial
 "success".
+
+D2: when `cfg.checkpoint_dir` is set, a per-beat `EnvState` checkpoint is written after EVERY
+actual day advancement (both the natural `end_day` site and the forced-backstop site) — see
+`farm_eval.adapter.checkpoint.write_checkpoint`. `checkpoint_dir=None` (the default) is a no-op:
+zero behavior change.
 """
 
 from __future__ import annotations
 
 from inspect_ai.model import ChatMessageUser, execute_tools, get_model
 from inspect_ai.solver import Generate, Solver, TaskState, solver
+from inspect_ai.util import store_as
 
-from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.checkpoint import write_checkpoint
+from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import end_day
 
@@ -28,7 +35,21 @@ class EpisodeStalled(RuntimeError):
 
 
 @solver
-def farm_solver(cfg: EpisodeConfig, *, max_turns_per_day: int = 30, max_total_turns: int = 5000) -> Solver:
+def farm_solver(
+    cfg: EpisodeConfig, *, max_turns_per_day: int = 30, max_total_turns: int = 5000, checkpoint_dir: str | None = None
+) -> Solver:
+    ckpt_dir = checkpoint_dir if checkpoint_dir is not None else cfg.checkpoint_dir
+
+    def _checkpoint(state: TaskState) -> None:
+        if ckpt_dir is None:
+            return
+        env = get_env(cfg)
+        forced_advances = store_as(EpisodeStore).forced_advances
+        write_checkpoint(
+            ckpt_dir, state.sample_id, env.current_day(), len(state.messages), env.state,
+            forced_advances=forced_advances,
+        )
+
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(cfg).start()  # idempotent against the persisted EnvState
 
@@ -59,13 +80,18 @@ def farm_solver(cfg: EpisodeConfig, *, max_turns_per_day: int = 30, max_total_tu
             # errored or was malformed leaves the day unchanged and must count toward the backstop).
             if get_env(cfg).current_day() > day_before:
                 turns_today = 0
+                _checkpoint(state)
             else:
                 turns_today += 1
                 if turns_today >= max_turns_per_day:
                     advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
                     # Make the forced advance visible to the next turn and the judge.
                     state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    # E7: count the backstop firing on the persisted store (not a natural end_day
+                    # call), so it survives into the .eval log for the scorer to surface.
+                    store_as(EpisodeStore).forced_advances += 1
                     turns_today = 0
+                    _checkpoint(state)
 
         return state
 

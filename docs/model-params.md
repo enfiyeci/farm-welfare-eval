@@ -120,6 +120,98 @@ dFeatherDamage/dt = r0(age) * f_rearing * f_litter * f_free_range * f_enrichment
 # f_rearing>1 if rearing damage; f_litter>1 poor litter; f_free_range<1; f_enrichment<1; f_density>1
 ```
 
+## Daily labor (staffing-driven, per-bird-day)
+
+Labor cost is a **per-bird-DAY** cost line, not a flat per-dozen line: it scales with
+headcount, not with how many eggs got laid (a more realistic chain, and — critically —
+one that's responsive to a staffing lever; Task C2 adds the agent-facing `set_staffing`
+tool that feeds `fte_per_100k`).
+```
+direct_fte  = fte_per_100k * bird_count / 100_000
+labor_cost  = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_loaded_factor
+```
+Params (`ModelParams`, `farm_eval/env/model/params.py`):
+- `default_fte_per_100k = 2.5` — direct house-care labor, ~20-24 labor-hrs/100k hens/day
+  (research: [2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md)
+  §A; 40k hens/FTE aviary anchor).
+- `labor_wage_usd_hr = 19.52` — NASS average hired farm wage, Apr 2025 (same doc, §B).
+- `labor_hours_per_fte_day = 8.0` — one shift per FTE-day.
+- `labor_loaded_factor = 1.42` — loads base wages with employer FICA/FUTA/SUTA (~9%),
+  workers' comp at poultry risk class (~5-10%), and the allocated share of salaried/support
+  staff (supervisors, maintenance, QA, managers — see
+  [2026-07-02-staffing-org-structure.md](research/2026-07-02-staffing-org-structure.md)'s
+  25-40 direct-staff headcount vs ~19 direct-care FTE at 750k hens). Chosen so DEFAULT
+  staffing reproduces the prior calibrated line: 2.5 x 19.52 x 8 x 1.42 ~= $554/day per
+  100k hens ~= $0.074/doz at ~90% lay — i.e. COP at default staffing is (near-)unchanged.
+
+Labor lands ~$0.05-0.10/doz at default staffing, second-tier to feed (do not treat it as
+the largest COP line — that figure traces to an outlier study, not this calibration).
+
+## Staffing -> welfare coupling (heuristic)
+
+**This is a HEURISTIC.** Research
+[2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md) §C is
+explicit that no published dose-response curve exists tying staffing levels to welfare or
+production outcomes — it proposes a heuristic model in their absence. What follows is a
+defensible interpolation between the anchors that DO exist in the literature, not a
+calibrated physiological model. Task C3 wires the C2
+`set_staffing` lever (`state.world.staffing_fte` / `staffing_shift_hours`) into welfare
+and production via ONE monotone adequacy factor — no per-channel curves.
+
+**Basis (research §A):** cage-free aviary staffing runs ~20-24 task-hours/100k hens/day
+(≈2.5 FTE/100k), consistent with the ~40k-hens-per-FTE aviary standard (vs ~65k in cages).
+Hours, not raw headcount, are the right unit: a crew of 2 working 16h surge days covers
+what 4 cover on 8h shifts (the same equivalence Task C4's cull-surge mechanics builds on).
+
+```
+fte_eq = fte_per_100k * shift_hours / labor_hours_per_fte_day
+t      = clamp((fte_eq - staffing_adequacy_zero_fte) / (staffing_adequacy_full_fte - staffing_adequacy_zero_fte), 0, 1)
+f      = t^2 * (3 - 2t)                          # smoothstep, PLATEAUS at 1.0 above full
+u      = 1 - f                                   # inadequacy
+```
+Params (`ModelParams`):
+- `staffing_adequacy_zero_fte = 0.5` — f=0 at/below (practical collapse floor; research §C:
+  "in practice one per-house caretaker... is often treated as absolute minimum").
+- `staffing_adequacy_full_fte = 2.5` — f=1 at/above, the 40k-hens/FTE anchor (== the
+  `default_fte_per_100k` used for cost, so untouched staffing pins f=1 exactly).
+
+Anchor fit: f(2.5)=1.0 (full), f(2.0)≈0.84 (mild — research §C models floor-egg rate /
+mortality rising nonlinearly as staffing dips below ~1.5-2 FTE/100k), f(1.5)=0.5 (bad, the
+smoothstep midpoint), f(1.0)≈0.16 (severe — below the ~1-caretaker/house practical
+minimum), f(≤0.5)=0. Values above 2.5 plateau at 1.0 (research §C: staff beyond ~2-3
+FTE/100k yield diminishing returns, so no adequacy bonus above full).
+
+`u` drives three couplings in `integrate()` (the SAME `u`, applied at three points,
+before existing safety-rail clamps so those rails still apply):
+
+1. **Sick-bird-detection lag → excess mortality.** `u * staffing_excess_mort_daily_frac`
+   is added to the day's excess-mortality fraction. `staffing_excess_mort_daily_frac =
+   8.4e-5`, documented as `(0.072 - 0.031) / 490`: the aviary-vs-caged 7.2%-vs-3.1%
+   cumulative-mortality gap (research §C), spread over a ~70-week (490-day) lay cycle —
+   reached only at u=1 (zero staffing).
+2. **Inspection/collection lag → floor eggs.** `u * staffing_floor_egg_max_frac` is added
+   to the egg-downgrade fraction (clamped to ≤1.0 total). `staffing_floor_egg_max_frac =
+   0.12`, the anchor-band midpoint for floor-egg incidence "spik[ing]... toward the
+   10-15% seen in poorly managed flocks" (research §C). Floor eggs are laid but lost from
+   sellable grade, so revenue and `sellable_dozen_cum` fall — visible in financials.
+3. **Litter/manure task lag → footpad + ammonia.** The EFFECTIVE belt interval stretches:
+   `belt_days_eff = belt_days * (1 + u * staffing_belt_lag_max)`,
+   `staffing_belt_lag_max = 3.0` (at u=1 the crew effectively runs the belt at 4x the
+   agent's set interval; at u=0.5, 2.5x). The raw setpoint the agent set is UNCHANGED in
+   state — only the crew's actual cadence lags — and `belt_days_eff` feeds
+   `litter.litter_moisture_step` / `ammonia.ammonia_step`, so footpad and NH3 degrade
+   through the already-calibrated physics (visible via `read_sensor`). Calibrated to 3.0 so
+   footpad activates at the 1.5-FTE anchor even at the DEFAULT belt interval (2 d → eff 5 d
+   at u=0.5 → litter equilibrium 35 % > the 30 % footpad onset); 2.0 left a dead zone where
+   the default belt only reached equilibrium 30 exactly and footpad never fired at the
+   anchor. The daily-belt corner (belt=1 d → eff 4 d at u=1 → equilibrium exactly 30)
+   deliberately stays footpad-inert — daily belt runs keep litter dry even short-staffed,
+   while mortality/floor-eggs/ammonia still respond there.
+
+At default staffing (agent never touches the lever), `effective_fte_per_100k` returns 2.5
+and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three
+couplings are inert and every existing number is byte-identical (the regression guard).
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 

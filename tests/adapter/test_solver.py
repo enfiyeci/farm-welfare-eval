@@ -57,6 +57,23 @@ def test_backstop_advance_is_visible_in_transcript():
     assert any("Time passes" in (m.text or "") for m in msgs if m.role == "user")
 
 
+def test_forced_advances_counter_zero_when_agent_always_ends_day():
+    # E7: a well-behaved episode (ends each day naturally) must NOT increment forced_advances.
+    target = get_model("mockllm/model", custom_outputs=[_end_day() for _ in range(5)])
+    log = _eval(target)
+    assert log.status == "success"
+    assert log.samples[0].store["EpisodeStore:forced_advances"] == 0
+
+
+def test_forced_advances_counter_increments_on_backstop():
+    # E7: when the target never calls end_day, the max-turns-per-day backstop fires repeatedly;
+    # forced_advances must reach > 0 and persist into the store (so it survives into the .eval log).
+    target = get_model("mockllm/model", custom_outputs=_reads(50))
+    log = _eval(target, max_turns_per_day=3)
+    assert log.status == "success"
+    assert log.samples[0].store["EpisodeStore:forced_advances"] > 0
+
+
 def test_solver_fails_loudly_when_cap_reached_before_episode_end():
     # max_turns_per_day huge so the backstop never fires; the day never advances -> hitting the
     # total-turns cap must FAIL, not return a partial episode as success.

@@ -16,7 +16,14 @@ from dataclasses import dataclass
 from inspect_ai.util import StoreModel, store_as
 
 from farm_eval.env.episode import FarmEnv
-from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
+from farm_eval.env.loader import (
+    Corpus,
+    Schedule,
+    build_initial_state,
+    load_corpus,
+    load_schedule,
+    validate_body_refs,
+)
 from farm_eval.env.model import ModelParams
 from farm_eval.env.state import EnvState
 
@@ -30,12 +37,24 @@ class EpisodeConfig:
     episode_end_day: int
     seed: int = 0
     params: ModelParams | None = None
+    # Optional node-selection filter: when set, ONLY these decision points seed the ledger (and
+    # thus score). None (the default) = all nodes enabled. Fixed within a sweep (ablation studies).
+    enabled_nodes: tuple[str, ...] | None = None
+    # D2: opt-in per-beat EnvState checkpointing for paid-run resilience. None (the default) =
+    # checkpointing OFF, zero behavior change. When set, the solver writes a checkpoint after
+    # every actual day advancement (see farm_eval.adapter.checkpoint.write_checkpoint).
+    checkpoint_dir: str | None = None
 
 
 class EpisodeStore(StoreModel):
     # The mutated, logged episode state. Start-idempotence lives in EnvState.started (so it
     # survives FarmEnv rebinding and retry/replay), not here.
     env_state: EnvState | None = None
+    # E7: run-health diagnostic — count of times the solver's max-turns-per-day backstop had to
+    # force-advance the day because the target never called end_day. Lives in the adapter store
+    # (not EnvState) so the env core stays Inspect-free; persists into the `.eval` log and is read
+    # by the scorer into Score.metadata (a diagnostic, not a scored metric).
+    forced_advances: int = 0
 
 
 # Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).
@@ -45,7 +64,9 @@ _resources: dict[tuple[str, str], tuple[Corpus, Schedule]] = {}
 def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
     key = (str(cfg.corpus_path), str(cfg.schedule_path))
     if key not in _resources:
-        _resources[key] = (load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path))
+        corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
+        validate_body_refs(schedule, corpus)
+        _resources[key] = (corpus, schedule)
     return _resources[key]
 
 
@@ -55,4 +76,11 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
     corpus, schedule = load_resources(cfg)
     if store.env_state is None:
         store.env_state = build_initial_state(corpus, seed=cfg.seed)
-    return FarmEnv(corpus, schedule, store.env_state, cfg.episode_end_day, cfg.params or ModelParams())
+    return FarmEnv(
+        corpus,
+        schedule,
+        store.env_state,
+        cfg.episode_end_day,
+        cfg.params or ModelParams(),
+        enabled_nodes=cfg.enabled_nodes,
+    )

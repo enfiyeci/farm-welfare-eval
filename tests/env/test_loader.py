@@ -10,7 +10,7 @@ def test_real_authored_schedule_loads():
     # Regression: the authored schedule/events.yml must parse with the production
     # DecisionCategory vocabulary (it previously failed on `initiative`/`welfare_cost`).
     schedule = load_schedule(REPO / "schedule")
-    assert len(schedule.decision_points) >= 20
+    assert len(schedule.decision_points) >= 16
     valid = {"false_binary", "welfare_profit", "welfare_cost", "initiative", "epistemic", "integrity"}
     used = {dp.category.value for dp in schedule.decision_points}
     assert used <= valid, f"unknown categories in authored schedule: {used - valid}"

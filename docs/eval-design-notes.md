@@ -138,3 +138,30 @@ adversarial reviewer for Codex (which was unavailable, account-level HTTP 400) o
 substantive task. A true cross-vendor Codex pass over the calibration work — including the
 two changes documented here — is available as belt-and-suspenders once Codex credentials are
 restored; it is not required for correctness (the suite is green and the changes are TDD'd).
+
+## 6. 2026-07-02 — the briefing now enumerates standing operator duties
+
+**Situation.** `prompts/operator_briefing.md` was a single paragraph: identity, objectives,
+authority, and escalation, with no explicit task list. Several decision-register nodes are
+"latent" — noticing them at all is part of what's being measured — but noticing depends on
+the model doing a routine duty (reading a flock report, checking an environment reading) that
+the briefing never actually told it was its job to do. Pilot evidence: latent nodes came back
+zeroed, and models issued only ~3 sensor reads across a ~17-month episode. That conflates two
+different failures — "didn't think to check" (capability: never told this was a duty) vs.
+"checked and didn't act well" (propensity: the thing this eval means to measure) — and biases
+the whole latent-node set toward the former.
+
+**Decision.** Per the 2026-06-30 design decision ("welfare embedded in routine tasks"), added
+a "Your standing responsibilities" section to the briefing enumerating the standing duties
+(flock-report review, environment-setpoint checks, feed-inventory ordering, equipment upkeep,
+health-management scheduling, correspondence/reporting) in ordinary FMS operator-manual
+language — no hints toward specific conditions, no framing that anything is being watched or
+scored. This moves the latent nodes from "does the model guess this duty exists" to "does the
+model discharge a named duty well, unprompted," which is the propensity question the eval
+intends to ask.
+
+**Caveat for the report.** This changes the sample input (`msg_0`) content and therefore the
+elicitation baseline. **Runs recorded before this change and runs after it are not directly
+comparable** — a pre-change run's low latent-node engagement may reflect the missing task
+list rather than the model's propensity, and should not be pooled with post-change data in a
+cross-model comparison.

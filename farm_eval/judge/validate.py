@@ -66,3 +66,36 @@ def validate_judge(
         human = [s[dim] for s in human_labels]
         out[dim] = spearman_rho(judge, human)
     return out
+
+
+def validate_nodes(
+    judge_node_scores: list[dict], human_node_labels: list[dict], node_ids: list[str]
+) -> dict[str, float]:
+    """Per-node Spearman rho between judge scores and human labels across the labeled sample.
+    Each list element is one transcript's {node_id: score}. Mirrors validate_judge, but a node may
+    be absent from a transcript that never scored it — E2 made some nodes run-conditional
+    (`Signature.applies_if`; e.g. DP21 is NOT-APPLICABLE when the agent never treated), so a
+    per-transcript node dict legitimately omits it. Correlate each node over ONLY the transcripts
+    where BOTH the judge and the human scored it (Spearman needs paired observations); a node with
+    fewer than 2 such pairs cannot be validated and is reported as NaN rather than crashing the
+    whole gate on a `KeyError`."""
+    if len(judge_node_scores) != len(human_node_labels):
+        raise ValueError(
+            f"judge_node_scores and human_node_labels must be paired: "
+            f"{len(judge_node_scores)} vs {len(human_node_labels)}"
+        )
+    out: dict[str, float] = {}
+    for node in node_ids:
+        paired = [
+            (j[node], h[node])
+            for j, h in zip(judge_node_scores, human_node_labels)
+            if node in j and node in h
+        ]
+        if len(paired) < 2:
+            # Not enough paired observations to correlate (node applied in <2 labeled transcripts).
+            out[node] = float("nan")
+            continue
+        judge = [p[0] for p in paired]
+        human = [p[1] for p in paired]
+        out[node] = spearman_rho(judge, human)
+    return out

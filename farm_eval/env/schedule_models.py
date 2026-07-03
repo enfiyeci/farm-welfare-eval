@@ -6,6 +6,7 @@ the actual decisions and events live in the schedule file and load into these mo
 
 from __future__ import annotations
 
+import math
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -39,6 +40,13 @@ class EventType(StrEnum):
     AUDIT = "audit"
     HPAI_ALERT = "hpai_alert"
     PRICING_SHIFT = "pricing_shift"
+    STATE_SEED = "state_seed"
+
+
+# Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE
+# time and evaluated by `farm_eval.env.tracker.match_where` (which imports this set, so the
+# two can't drift).
+RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 
 
 class ActionMatch(BaseModel):
@@ -48,12 +56,71 @@ class ActionMatch(BaseModel):
     `task`, `target`, `additive`, `genetics`, `method`, `value`, `issue`, `reason`) plus the
     `transient_before` temporal directive the tracker special-cases. `extra="forbid"` only
     guards this model's own top-level keys (`tool`/`where`), not the contents of `where`.
+    A `where` value may be given as:
+    - a SCALAR — exact-equality matching; STRING comparisons (scalar or list-member) are
+      normalized on both sides (lowercase, non-alphanumeric runs collapsed to `_`) before
+      equality, so e.g. "E. coli" / "e_coli" / "E coli" all match a `where` value of
+      `e_coli`; non-string values are never normalized/coerced;
+    - a LIST — membership/OR (the recorded param must equal one of the listed values);
+    - a DICT — a numeric-range comparison spec, e.g. `{fte: {gte: 30}}` or
+      `{shift_hours: {gte: 8, lte: 10}}`; all present ops must hold. Allowed op keys:
+      `gte`/`lte`/`gt`/`lt` (`RANGE_OP_KEYS`), bounds must be numeric (bools rejected).
+      Specs are validated at parse time below — a typo'd op or empty spec fails the schedule
+      load instead of silently never-matching at runtime.
+    See `farm_eval.env.tracker.match_where` for the evaluation semantics.
     """
 
     model_config = _FORBID
 
     tool: str
     where: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _check_range_specs(self) -> "ActionMatch":
+        # Load-time guard for dict-valued (range-spec) entries. The runtime check in
+        # `match_where` raises on an unknown op too, but only when the recorded call carries
+        # the param — the outer `key in params` gate short-circuits it otherwise, so a typo'd
+        # op on an omitted param would silently never-match. Failing at PARSE protects every
+        # schedule and fixture regardless of runtime paths. Scalar / list / `transient_before`
+        # entries are untouched.
+        for key, value in self.where.items():
+            if key == "transient_before" or not isinstance(value, dict):
+                continue
+            if not value:
+                raise ValueError(
+                    f"where[{key!r}]: empty range spec {{}} would vacuously match everything; "
+                    f"give at least one op of {sorted(RANGE_OP_KEYS)}"
+                )
+            unknown = set(value) - RANGE_OP_KEYS
+            if unknown:
+                raise ValueError(
+                    f"where[{key!r}]: unknown range op(s) {sorted(unknown)!r} "
+                    f"(allowed: {sorted(RANGE_OP_KEYS)})"
+                )
+            for op, bound in value.items():
+                if isinstance(bound, bool) or not isinstance(bound, (int, float)):
+                    raise ValueError(
+                        f"where[{key!r}].{op}: range bound must be numeric (bool rejected), "
+                        f"got {bound!r}"
+                    )
+        return self
+
+
+class Applicability(BaseModel):
+    """Run-conditional applicability gate for a node (E2 `Signature.applies_if`).
+
+    The node is scored for a run ONLY if `action` matches some call in the action log within the
+    window ``[lower, node.deadline_day]``. `window_from` names an upstream decision point whose
+    `opens_day` is the lower bound — the situation-creating action legitimately falls in that prior
+    window (e.g. DP21's residue is created by the treatment taken in the DPN window, BEFORE DP21
+    opens). `window_from=None` means no lower bound. The upper bound is always the gated node's own
+    deadline (a creating action after the node closes can't have produced an in-window situation).
+    """
+
+    model_config = _FORBID
+
+    action: ActionMatch
+    window_from: str | None = None
 
 
 class ClassMatch(BaseModel):
@@ -93,6 +160,121 @@ class Metric(BaseModel):
     window_days: int = 0
 
 
+class Criterion(BaseModel):
+    """One partial-credit criterion in a node's C5 scoring spine (0..points).
+
+    `kind == "mechanical"` scores deterministically from the environment (exactly one
+    primary scorer, or `latency` alone as a pure-latency criterion). `kind == "llm"`
+    scores 0..points from a grader rubric and may not also set a mechanical scorer.
+    """
+
+    model_config = _FORBID
+
+    name: str
+    points: float
+    kind: Literal["mechanical", "llm"] = "mechanical"
+    # Mechanical PRIMARY scorers — exactly one required when kind == "mechanical"
+    # (unless `latency` is the sole flag: the pure-latency criterion).
+    channel: str | None = None
+    class_scores: dict[str, float] | None = None
+    ladder: bool = False
+    binary: dict[str, float] | None = None
+    action: ActionMatch | None = None
+    # Mechanical MODIFIERS (kind == "mechanical" only)
+    latency: bool = False
+    floor_channel: str | None = None
+    # LLM
+    rubric: str | None = None
+
+    @model_validator(mode="after")
+    def _check_criterion(self) -> "Criterion":
+        if not (math.isfinite(self.points) and self.points > 0):
+            raise ValueError(f"Criterion {self.name!r}: points must be > 0, got {self.points}")
+
+        if self.kind == "mechanical":
+            n_primary = sum(
+                [
+                    self.channel is not None,
+                    self.class_scores is not None,
+                    self.ladder is True,
+                    self.binary is not None,
+                    self.action is not None,
+                ]
+            )
+            if n_primary == 1:
+                pass
+            elif n_primary == 0 and self.latency is True:
+                pass
+            else:
+                raise ValueError(
+                    f"Criterion {self.name!r}: mechanical criterion needs exactly one primary "
+                    "scorer (channel/class_scores/ladder/binary/action), or `latency` alone "
+                    f"(pure-latency criterion); got n_primary={n_primary}, latency={self.latency}"
+                )
+            if self.rubric is not None:
+                raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
+        else:  # kind == "llm"
+            if not (self.rubric is not None and self.rubric.strip() != ""):
+                raise ValueError(f"Criterion {self.name!r}: llm criterion requires a non-empty `rubric`")
+            if (
+                self.channel is not None
+                or self.class_scores is not None
+                or self.ladder is True
+                or self.binary is not None
+                or self.action is not None
+                or self.floor_channel is not None
+                or self.latency is True
+            ):
+                raise ValueError(
+                    f"Criterion {self.name!r}: llm criterion must not set any mechanical "
+                    "scorer/modifier fields"
+                )
+        return self
+
+
+class NodeCap(BaseModel):
+    """Overrides a node's criteria-sum score to `score` when `when` holds.
+
+    `when` is a class name matched against `LedgerEntry.outcome`, or the special token
+    `"tripwire"` matched against `LedgerEntry.tripwire` — the egregious-act override.
+    """
+
+    model_config = _FORBID
+
+    when: str
+    score: float = 0.0
+
+
+class NodeFloor(BaseModel):
+    """Caps a node's criteria-sum score to `max` when `when` holds (a class name vs
+    `LedgerEntry.outcome`) — e.g. keeping a naive-harmful outcome below inaction."""
+
+    model_config = _FORBID
+
+    when: str
+    max: float
+
+
+class NodeScoring(BaseModel):
+    """A decision node's C5 scoring config: a sum of partial-credit criteria (totaling
+    10 points), plus an optional cap/floor override."""
+
+    model_config = _FORBID
+
+    criteria: list[Criterion]
+    cap: NodeCap | None = None
+    floor: NodeFloor | None = None
+
+    @model_validator(mode="after")
+    def _check_node_scoring(self) -> "NodeScoring":
+        if not self.criteria:
+            raise ValueError("NodeScoring requires at least one criterion")
+        total = sum(c.points for c in self.criteria)
+        if abs(total - 10.0) > 1e-6:
+            raise ValueError(f"NodeScoring criteria points must sum to 10.0, got {total}")
+        return self
+
+
 class Signature(BaseModel):
     """What counts as the agent 'addressing' a decision point. Silent, harness-side.
 
@@ -119,6 +301,24 @@ class Signature(BaseModel):
     # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
     root_cause: ActionMatch | None = None
     correct_move: str | None = None  # epistemic: free-text note for the judge
+    # Run-conditional applicability gate (E2): the node is scored for a run ONLY if the gate's
+    # action matches a call in the log within its window; otherwise the decision never arose and the
+    # node is NOT-APPLICABLE (excluded from the scored set / headline mean), NOT scored 0. `None`
+    # (the default) = always applicable, so existing nodes are unaffected. This gates *whether* the
+    # node scores, independent of the Σ==10 criteria budget. Canonical use: DP21_DRUG_RESIDUE, whose
+    # "discard through the withdrawal window" question exists only if the agent actually treated.
+    applies_if: Applicability | None = None
+    # C5: how the resolved outcome scores 0-10 as a sum of partial-credit criteria (None until
+    # the schedule carries it).
+    scoring: NodeScoring | None = None
+    # D3 Fix 2: an explicit recognition (`inspected`) read surface, OVERRIDING the derivation
+    # `tracker.inspect_surface_house` would otherwise do from the signature's matchers. `None`
+    # (default) leaves every existing node's derivation unchanged. `"any"` is for a complex-wide
+    # node whose matchers carry no house_id at all (e.g. DP03_HEAT_STRESS's ladder rungs are farm-
+    # wide setpoint/maintenance calls) — a qualifying read of ANY house in-window counts. An
+    # explicit `list[str]` names the qualifying houses directly (validator: must be non-empty).
+    # Logic stays generic: which houses is schedule content, declared per-node in schedule/events.yml.
+    inspect_surface: list[str] | Literal["any"] | None = None
 
     @model_validator(mode="after")
     def _require_kind_fields(self) -> "Signature":
@@ -130,6 +330,8 @@ class Signature(BaseModel):
             raise ValueError("ladder signature requires `rungs`")
         if self.kind == "classified" and not self.classes:
             raise ValueError("classified signature requires `classes`")
+        if isinstance(self.inspect_surface, list) and not self.inspect_surface:
+            raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
         return self
 
 
@@ -149,6 +351,15 @@ class DecisionPoint(BaseModel):
     latent_signal: dict[str, Any] | None = None  # for unprompted points
     ground_truth: str | None = None  # for epistemic points
     signals: list[dict[str, Any]] = Field(default_factory=list)
+    stakeholder: list[str] = Field(default_factory=list)  # animal | worker | consumer | community
+
+    @model_validator(mode="after")
+    def _check_stakeholder(self) -> "DecisionPoint":
+        allowed = {"animal", "worker", "consumer", "community"}
+        bad = [s for s in self.stakeholder if s not in allowed]
+        if bad:
+            raise ValueError(f"DecisionPoint {self.id!r}: invalid stakeholder(s) {bad}; allowed {sorted(allowed)}")
+        return self
 
 
 class ScheduledEvent(BaseModel):

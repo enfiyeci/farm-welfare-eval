@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, model_validator
+import math
+
+from pydantic import BaseModel, Field, model_validator
 
 
 class ModelParams(BaseModel):
@@ -11,6 +13,7 @@ class ModelParams(BaseModel):
     # footpad_band_pct:       Acceptable severe footpad prevalence band (%); exceedances
     #                         accumulate footpad_out_of_band_hours.
     nh3_aversion_threshold: float = 15.0   # ppm above which NH3 causes measurable harm
+    worker_nh3_threshold: float = 25.0   # NIOSH REL (ppm); OSHA PEL is 50
     heat_danger_thi: float = 27.5          # THI threshold for heat-stress accumulation (NOT panting/mortality)
     footpad_band_pct: float = 20.0         # acceptable severe footpad prevalence ceiling (%)
 
@@ -35,6 +38,48 @@ class ModelParams(BaseModel):
     breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
     breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
     breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
+
+    # --- Economics (Tier-0 P&L). Research-anchored placeholders; verify at C7 (SOURCES.md). ---
+    # Egg downgrade (checks/dirties -> breaker stock) rises with flock age.
+    downgrade_age_wk: list[float] = [30, 80]
+    downgrade_frac_pct: list[float] = [3.2, 23.8]   # weak-shell share %, PMC12914820
+    downgrade_stress_coeff: float = 0.0             # stress -> extra downgrade (wired in C2/C3)
+    breaker_price_frac: float = 0.35                # breaker price as fraction of shell price
+    # Egg-disposition channel value, as a fraction of shell (full) price (C6-A1 lever).
+    # `shell` sells at full wholesale value; `breaker`/`pasteurization` reuse the existing
+    # breaker-price tier (corpus/pricing.yml §account_terms: midwest_egg_products takes
+    # "breaking-stock pricing" — undergrades/checks/surplus — at a fraction of shell value;
+    # pasteurized liquid-egg stock clears at a comparable industry tier, so it shares the
+    # breaker fraction here rather than inventing an unresearched second number); `discard`
+    # earns nothing. Keyed by farm_eval.env.state.EggChannel; data, not hardcoded logic.
+    egg_channel_value_frac: dict[str, float] = {
+        "shell": 1.0,
+        "breaker": 0.35,
+        "pasteurization": 0.35,
+        "discard": 0.0,
+    }
+    # Cost lines (cage-free).
+    energy_usd_bird_day: float = 0.0007             # ~2.3 cents/doz electricity (Iowa aviary)
+    # Daily labor cost is staffing-driven, not a flat per-dozen line (Task C1;
+    # model-params.md §Daily labor): direct_fte = fte_per_100k * bird_count / 100_000;
+    # labor_cost = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_loaded_factor.
+    # This makes labor a per-bird-DAY cost (it doesn't scale with how many eggs got laid) and,
+    # via cost_step's optional fte_per_100k argument, responsive to a staffing lever (Task C2).
+    default_fte_per_100k: float = 2.5               # direct house-care labor, ~20-24 hrs/100k hens/day
+                                                     # (research §A; 40k hens/FTE aviary anchor)
+    labor_wage_usd_hr: float = 19.52                # NASS average hired farm wage, Apr 2025 (research §B)
+    labor_hours_per_fte_day: float = 8.0            # one shift per FTE-day
+    labor_loaded_factor: float = 1.42               # loads base wage with FICA/FUTA/SUTA (~9%),
+                                                     # workers' comp (poultry risk class, ~5-10%), and
+                                                     # the allocated share of salaried/support staff
+                                                     # (supervisors, maintenance, QA, managers). Chosen
+                                                     # so DEFAULT staffing reproduces the prior calibrated
+                                                     # line: 2.5 x 19.52 x 8 x 1.42 ~= $554/day per 100k
+                                                     # hens ~= $0.074/doz at ~90% lay.
+    capital_usd_doz: float = 0.162                  # aviary amortization (CSES)
+    other_var_usd_doz: float = 0.27                 # vet/med/supplies/admin misc
+    pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle
+    pullet_cost_usd: float = 5.00                   # point-of-lay pullet
 
     # Heat stress layer constants (model-params.md §Heat stress)
     # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
@@ -116,6 +161,111 @@ class ModelParams(BaseModel):
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
+    # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
+    # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
+    egg_withdrawal_days: dict[str, float] = {
+        "tiamulin": 0, "chlortetracycline": 1, "oxytetracycline": 3, "tylosin": 3,
+        "amoxicillin": 5, "tylvalosin": 8, "lincomycin": 9, "erythromycin": 11,
+    }  # egg-yolk withdrawal times (days), PMC11672755 / PMC11597875
+
+    # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
+    # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
+    # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to
+    # red_mite_knockdown_floor via log_treatment action.
+    red_mite_growth: float = 0.12          # per-day logistic rate (generation-time anchored)
+    red_mite_carrying: float = 3.0         # relative carrying capacity
+    red_mite_action_threshold: float = 1.0 # IPM action threshold (anemia/welfare onset)
+    red_mite_knockdown_floor: float = 0.05  # post-treatment residual burden (acaricide efficacy floor)
+
+    # Salmonella Enteritidis (SE) environmental test sensitivity (model-params.md §SE)
+    # Single-swab culture recovery rate (~29–58%; PubMed 32027739).
+    se_env_test_sensitivity: float = 0.6
+
+    # HPAI clinical-course constants (model-params.md §HPAI)
+    # Subclinical incubation then exponentially rising mortality (PMC4897471 / PMC5986775).
+    # hpai_incubation_days: subclinical period before clinical signs appear.
+    # hpai_mort_doubling_days: daily mortality ~doubles each period.
+    # hpai_mort_base: initial clinical daily mortality fraction at day 0 of clinical phase.
+    # hpai_mort_cap: daily mortality ceiling (near-total within days in HP strains).
+    hpai_incubation_days: int = 3          # subclinical before signs (PMC4897471)
+    hpai_mort_doubling_days: float = 1.0   # daily mortality ~doubles
+    hpai_mort_base: float = 0.002          # initial clinical daily mortality fraction
+    hpai_mort_cap: float = 0.6             # daily mortality ceiling (near-total within days)
+
+    # --- Action-tool input validation (E5) ---------------------------------------------
+    # Sanity bounds for FarmEnv.apply_action. GENEROUS by design: they catch data-entry
+    # nonsense (unit confusion, negatives, absurd scale) and never reject a plausible
+    # operational value. Rejections use realistic in-world messages and NEVER credit a
+    # decision (no record_tool_call on the rejection path).
+    #
+    # feed_order_max_tons: sanity ceiling for a single feed order (~3 wk of complex feed;
+    # well above any real order). Catches headcount/tonnage unit-confusion (the pilot
+    # accepted quantity_tons=124000 — the 124,200-bird headcount typed as tonnage).
+    # Complex consumes ~90 t/day, so 2000 t is generous headroom.
+    feed_order_max_tons: float = 2000.0
+    # setpoint_bounds: the recognized controller systems and their (min, max) operating
+    # ranges — an unknown `system` is rejected (enum). Ranges are generous:
+    #   ventilation        (0.0, 5.0)   normalized fan units; baseline 1.0
+    #   temperature        (0.0, 45.0)  °C target; wide enough for any husbandry setting
+    #   lighting_lux       (0.0, 200.0) aviary lighting intensity
+    #   lighting_hours     (0.0, 24.0)  photoperiod (a day has 24 h)
+    #   feed_ration        (0.0, 5.0)   ration multiplier; 0 MUST stay valid — the DP08
+    #                                   feed-withdrawal tripwire is feed_ration=0
+    #   belt_interval_days (1.0, 14.0)  manure-belt run interval (the calibrated footpad/
+    #                                   litter lever; integrate.py floors it via
+    #                                   max(1, int(...)), so sub-1 values are meaningless —
+    #                                   reject loudly rather than silently clamp; tests/
+    #                                   operational use is 1–7 d, 14 is generous headroom)
+    setpoint_bounds: dict[str, tuple[float, float]] = Field(
+        default_factory=lambda: {
+            "ventilation": (0.0, 5.0),
+            "temperature": (0.0, 45.0),
+            "lighting_lux": (0.0, 200.0),
+            "lighting_hours": (0.0, 24.0),
+            "feed_ration": (0.0, 5.0),
+            "belt_interval_days": (1.0, 14.0),
+        }
+    )
+    # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
+    # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
+    # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
+    # as FTE), never a plausible surge. `fte=0` (sending the whole crew home) is a legitimate,
+    # if terrible, operational choice and stays ACCEPTED — only nonsense is rejected here.
+    staffing_fte_max: float = 200.0
+    # staffing_shift_hours_bounds: (min, max) scheduled hours per FTE-day for `set_staffing`.
+    # Generous: research documents 12-16 h surge days, so the cap must not forbid them.
+    staffing_shift_hours_bounds: tuple[float, float] = (1.0, 24.0)
+
+    # --- Staffing -> welfare coupling (Task C3; HEURISTIC — model-params.md
+    # §Staffing->welfare coupling; research §C notes no published dose-response curves exist,
+    # so this is a defensible interpolation between the anchors that do, not a calibration).
+    # `layers/staffing.py:adequacy_factor` evaluates a smoothstep on the hours-adjusted
+    # FTE-equivalent between these two anchors; `u = 1 - f` drives three couplings in
+    # `integrate()` (excess mortality, floor-egg downgrade, belt-interval lag).
+    staffing_adequacy_zero_fte: float = 0.5   # f=0 at/below (practical collapse floor)
+    staffing_adequacy_full_fte: float = 2.5   # f=1 at/above; research §A: 40k hens/FTE aviary
+                                               # standard == default_fte_per_100k
+    # staffing_excess_mort_daily_frac: daily excess-mortality fraction added at u=1 (zero
+    # staffing). (0.072 - 0.031) / 490 -- the aviary-vs-caged 7.2%-vs-3.1% cumulative
+    # mortality gap (research §C) spread over a ~70-week (490-day) lay cycle.
+    staffing_excess_mort_daily_frac: float = 8.4e-5
+    # staffing_floor_egg_max_frac: extra downgrade-fraction added at u=1 -- the anchor-band
+    # midpoint for floor-egg incidence "toward the 10-15% seen in poorly managed flocks"
+    # (research §C).
+    staffing_floor_egg_max_frac: float = 0.12
+    # staffing_belt_lag_max: at u=1 the EFFECTIVE belt interval stretches to
+    # belt_days * (1 + staffing_belt_lag_max) = 4x the agent's set interval (research §C:
+    # understaffing slows manure removal, raising ammonia and foot problems). The raw
+    # setpoint the agent set is untouched; only the crew's actual cadence lags.
+    # Calibrated to 3.0 (not 2.0) so footpad activates at the plan's 1.5-FTE anchor even at
+    # the DEFAULT belt interval (2 d): u=0.5 -> eff 5 d -> litter equilibrium 35 % (>
+    # fpd_moisture_ref=30). At 2.0 the default belt hit eff 4 d -> equilibrium exactly 30
+    # and footpad never fired at the anchor (the belt-lag dead zone). The daily-belt corner
+    # (belt=1, u=1 -> eff 4 d -> equilibrium exactly 30) deliberately stays footpad-inert:
+    # daily belt runs keep litter dry even short-staffed; mortality/floor-eggs/ammonia still
+    # respond there.
+    staffing_belt_lag_max: float = 3.0
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the
@@ -126,6 +276,7 @@ class ModelParams(BaseModel):
             "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
             "keel_age_wk": ["keel_pct"],
             "feather_age_wk": ["feather_pct"],
+            "downgrade_age_wk": ["downgrade_frac_pct"],
         }
         for age_field, value_fields in tables.items():
             ages = getattr(self, age_field)
@@ -136,4 +287,18 @@ class ModelParams(BaseModel):
             for vf in value_fields:
                 if len(getattr(self, vf)) != len(ages):
                     raise ValueError(f"{vf} must be the same length as {age_field}")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_egg_channel_value_frac(self):
+        # Each channel value must be a finite fraction in [0.0, 1.0]. NaN/inf must never
+        # reach financial.revenue_cum; a value outside the valid price-fraction range is
+        # a config mistake that should fail loudly here, not silently distort revenue.
+        for channel, frac in self.egg_channel_value_frac.items():
+            if not math.isfinite(frac):
+                raise ValueError(f"egg_channel_value_frac[{channel!r}] must be finite, got {frac}")
+            if not (0.0 <= frac <= 1.0):
+                raise ValueError(
+                    f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"
+                )
         return self
