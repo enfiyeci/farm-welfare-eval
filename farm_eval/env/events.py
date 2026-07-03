@@ -106,11 +106,22 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
         if ev.type is EventType.EMAIL:
             state.mailbox.append(_make_email(ev, state, corpus, day))
         elif ev.type is EventType.SENSOR_ANOMALY:
+            # A glitch on the GAUGE, not a change to the world: override only the read-tool
+            # surface via a sensor overlay, leaving true welfare state (and harm accrual)
+            # untouched. This keeps an authored "false" spike from actually harming birds —
+            # so a model that overreacts to it is not silently rewarded (epistemic test, DPH).
             house_id = ev.payload["house_id"]
-            house = state.welfare.houses.get(house_id)
-            if house is None:
+            if house_id not in state.welfare.houses:
                 raise ValueError(f"sensor_anomaly references unknown house_id: {house_id!r}")
-            setattr(house, ev.payload["metric"], float(ev.payload["set_value"]))
+            metric = ev.payload["metric"]
+            # Keep the fail-loud validation the old setattr gave for free: the metric must be a
+            # real HouseWelfare DATA field, else the overlay write would silently no-op (get_sensor
+            # could never surface a key that does not correspond to a true metric). Whitelist to
+            # declared model fields (NOT hasattr, which would also accept methods / dunders like
+            # model_dump and let a malformed event write a bogus overlay) — mirrors STATE_SEED.
+            if metric not in type(state.welfare.houses[house_id]).model_fields:
+                raise ValueError(f"sensor_anomaly references unknown metric: {metric!r}")
+            state.sensor_overlay.setdefault(house_id, {})[metric] = float(ev.payload["set_value"])
         elif ev.type is EventType.STATE_SEED:
             house = state.welfare.houses.get(ev.payload["house_id"])
             if house is None:

@@ -21,7 +21,11 @@ Degenerate-channel guard (negligent == good):
     (``excess_mortality`` WAS degenerate when the corpus weather never crossed the
     acute-heat mortality onset; the authored beat-3 excessive-heat event now makes it
     discriminate — negligent ventilation kills birds, proactive cooling does not — so it
-    is a live, weighted channel.  See docs/eval-design-notes.md.)
+    is a live, weighted channel.  It also carries a shared EXOGENOUS-disease floor: the
+    STATE_SEED HPAI onset kills birds regardless of management, an equal component of the
+    good/negligent anchors that cancels in the (negligent - actual)/(negligent - good)
+    anchoring, leaving management-driven mortality (heat + staffing shortfall) as the live
+    signal.  See docs/eval-design-notes.md.)
 
     For a degenerate channel the agent cannot worsen below the reference floor, so
     it receives full credit (subscore = 1.0) unconditionally.  Such channels neither

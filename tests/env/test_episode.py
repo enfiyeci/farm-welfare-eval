@@ -47,6 +47,40 @@ def test_sensor_availability_asymmetry():
     assert "handheld" in missing.message.lower()
 
 
+def test_get_sensor_returns_reading_overlay_without_touching_true_state():
+    # The gauge shows the overlaid (anomalous) reading, but the underlying welfare state
+    # the model substrate integrates over is unchanged — so no spurious harm is injected.
+    env = _env()
+    env.start()
+    true_val = env.get_sensor("H_SENSOR", "ammonia_ppm").value
+    env.state.sensor_overlay.setdefault("H_SENSOR", {})["ammonia_ppm"] = 31.0
+    r = env.get_sensor("H_SENSOR", "ammonia_ppm")
+    assert r.available is True
+    assert r.value == 31.0
+    assert env.state.welfare.houses["H_SENSOR"].ammonia_ppm == true_val
+
+
+def test_sensor_overlay_is_transient_cleared_on_day_advance():
+    # A transient glitch lasts only the beat it fires on: advancing the clock wipes the
+    # prior beat's overlay, so a re-read after advancing shows the true (normal) value.
+    env = _env()
+    env.start()
+    env.state.sensor_overlay.setdefault("H_SENSOR", {})["co2_ppm"] = 9999.0
+    env.end_day()
+    assert env.get_sensor("H_SENSOR", "co2_ppm").value != 9999.0
+
+
+def test_sensor_anomaly_shows_on_gauge_but_not_in_integrated_state():
+    # End-to-end: firing the day-5 anomaly through a real advance puts the spike on the
+    # gauge while integrate runs on the un-spiked true state.
+    env = _env()
+    env.start()
+    env.end_day()  # advances 0 -> 5, firing the day-5 sensor_anomaly
+    assert env.current_day() == 5
+    assert env.get_sensor("H_SENSOR", "ammonia_ppm").value == 30.0  # gauge shows the spike
+    assert env.state.welfare.houses["H_SENSOR"].ammonia_ppm != 30.0  # true state decoupled
+
+
 def test_action_addresses_decision_and_persists_through_advance():
     env = _env()
     env.start()

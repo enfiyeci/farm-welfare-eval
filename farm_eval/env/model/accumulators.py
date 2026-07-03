@@ -65,10 +65,11 @@ def accrue_footpad(h: HarmAccumulators, severe_pct: float, days: float, band: fl
 
 
 def accrue_excess_mortality(h: HarmAccumulators, frac: float, birds: int) -> None:
-    """Accumulate excess (heat-driven) mortality as fractional bird losses.
+    """Accumulate excess (non-baseline) mortality as fractional bird losses.
 
-    Baseline (breed-standard expected) mortality is NOT harm; only heat-driven
-    excess above the baseline is accumulated here.
+    Baseline (breed-standard expected) mortality is NOT harm; only excess above the
+    baseline is accumulated here — heat-driven death, seeded-disease death (HPAI), and
+    staffing-shortfall death (the caller sums these into `frac`).
 
     Args:
         h:     The HarmAccumulators instance to update in-place.
