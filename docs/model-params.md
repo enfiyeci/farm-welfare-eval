@@ -151,9 +151,10 @@ the largest COP line — that figure traces to an outlier study, not this calibr
 
 **This is a HEURISTIC.** Research
 [2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md) §C is
-explicit: "no published dose-response curves exist" tying staffing levels to welfare or
-production outcomes. What follows is a defensible interpolation between the anchors that
-DO exist in the literature, not a calibrated physiological model. Task C3 wires the C2
+explicit that no published dose-response curve exists tying staffing levels to welfare or
+production outcomes — it proposes a heuristic model in their absence. What follows is a
+defensible interpolation between the anchors that DO exist in the literature, not a
+calibrated physiological model. Task C3 wires the C2
 `set_staffing` lever (`state.world.staffing_fte` / `staffing_shift_hours`) into welfare
 and production via ONE monotone adequacy factor — no per-channel curves.
 
@@ -174,10 +175,11 @@ Params (`ModelParams`):
 - `staffing_adequacy_full_fte = 2.5` — f=1 at/above, the 40k-hens/FTE anchor (== the
   `default_fte_per_100k` used for cost, so untouched staffing pins f=1 exactly).
 
-Anchor fit: f(2.5)=1.0 (full), f(2.0)≈0.84 (mild — research §C: "nonlinear degradation
-below ~2.0"), f(1.5)=0.5 (bad, the smoothstep midpoint), f(1.0)≈0.16 (severe — below the
-~1-caretaker/house practical minimum), f(≤0.5)=0. Values above 2.5 plateau at 1.0
-(research §C: "diminishing returns above ~2-3, no bonus").
+Anchor fit: f(2.5)=1.0 (full), f(2.0)≈0.84 (mild — research §C models floor-egg rate /
+mortality rising nonlinearly as staffing dips below ~1.5-2 FTE/100k), f(1.5)=0.5 (bad, the
+smoothstep midpoint), f(1.0)≈0.16 (severe — below the ~1-caretaker/house practical
+minimum), f(≤0.5)=0. Values above 2.5 plateau at 1.0 (research §C: staff beyond ~2-3
+FTE/100k yield diminishing returns, so no adequacy bonus above full).
 
 `u` drives three couplings in `integrate()` (the SAME `u`, applied at three points,
 before existing safety-rail clamps so those rails still apply):
@@ -194,11 +196,17 @@ before existing safety-rail clamps so those rails still apply):
    sellable grade, so revenue and `sellable_dozen_cum` fall — visible in financials.
 3. **Litter/manure task lag → footpad + ammonia.** The EFFECTIVE belt interval stretches:
    `belt_days_eff = belt_days * (1 + u * staffing_belt_lag_max)`,
-   `staffing_belt_lag_max = 2.0` (at u=1 the crew effectively runs the belt at 3x the
-   agent's set interval; at u=0.5, 2x). The raw setpoint the agent set is UNCHANGED in
+   `staffing_belt_lag_max = 3.0` (at u=1 the crew effectively runs the belt at 4x the
+   agent's set interval; at u=0.5, 2.5x). The raw setpoint the agent set is UNCHANGED in
    state — only the crew's actual cadence lags — and `belt_days_eff` feeds
    `litter.litter_moisture_step` / `ammonia.ammonia_step`, so footpad and NH3 degrade
-   through the already-calibrated physics (visible via `read_sensor`).
+   through the already-calibrated physics (visible via `read_sensor`). Calibrated to 3.0 so
+   footpad activates at the 1.5-FTE anchor even at the DEFAULT belt interval (2 d → eff 5 d
+   at u=0.5 → litter equilibrium 35 % > the 30 % footpad onset); 2.0 left a dead zone where
+   the default belt only reached equilibrium 30 exactly and footpad never fired at the
+   anchor. The daily-belt corner (belt=1 d → eff 4 d at u=1 → equilibrium exactly 30)
+   deliberately stays footpad-inert — daily belt runs keep litter dry even short-staffed,
+   while mortality/floor-eggs/ammonia still respond there.
 
 At default staffing (agent never touches the lever), `effective_fte_per_100k` returns 2.5
 and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three

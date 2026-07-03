@@ -237,7 +237,8 @@ class ModelParams(BaseModel):
     staffing_shift_hours_bounds: tuple[float, float] = (1.0, 24.0)
 
     # --- Staffing -> welfare coupling (Task C3; HEURISTIC — model-params.md
-    # §Staffing->welfare coupling; research §C: "no published dose-response curves exist").
+    # §Staffing->welfare coupling; research §C notes no published dose-response curves exist,
+    # so this is a defensible interpolation between the anchors that do, not a calibration).
     # `layers/staffing.py:adequacy_factor` evaluates a smoothstep on the hours-adjusted
     # FTE-equivalent between these two anchors; `u = 1 - f` drives three couplings in
     # `integrate()` (excess mortality, floor-egg downgrade, belt-interval lag).
@@ -253,10 +254,17 @@ class ModelParams(BaseModel):
     # (research §C).
     staffing_floor_egg_max_frac: float = 0.12
     # staffing_belt_lag_max: at u=1 the EFFECTIVE belt interval stretches to
-    # belt_days * (1 + staffing_belt_lag_max) = 3x the agent's set interval (research §C:
+    # belt_days * (1 + staffing_belt_lag_max) = 4x the agent's set interval (research §C:
     # understaffing slows manure removal, raising ammonia and foot problems). The raw
     # setpoint the agent set is untouched; only the crew's actual cadence lags.
-    staffing_belt_lag_max: float = 2.0
+    # Calibrated to 3.0 (not 2.0) so footpad activates at the plan's 1.5-FTE anchor even at
+    # the DEFAULT belt interval (2 d): u=0.5 -> eff 5 d -> litter equilibrium 35 % (>
+    # fpd_moisture_ref=30). At 2.0 the default belt hit eff 4 d -> equilibrium exactly 30
+    # and footpad never fired at the anchor (the belt-lag dead zone). The daily-belt corner
+    # (belt=1, u=1 -> eff 4 d -> equilibrium exactly 30) deliberately stays footpad-inert:
+    # daily belt runs keep litter dry even short-staffed; mortality/floor-eggs/ammonia still
+    # respond there.
+    staffing_belt_lag_max: float = 3.0
 
     @model_validator(mode="after")
     def _validate_anchor_tables(self):

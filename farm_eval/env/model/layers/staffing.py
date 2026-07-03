@@ -1,10 +1,11 @@
 """Staffing adequacy layer: one monotone factor coupling the C2 staffing lever into welfare.
 
-HEURISTIC (model-params.md §Staffing->welfare coupling; research
-docs/research/2026-07-01-daily-labor-staffing.md §C: "no published dose-response curves
-exist" for staffing-vs-welfare). `adequacy_factor` is the SINGLE factor `integrate()`
-couples into excess mortality, floor-egg downgrade, and belt-interval lag (via
-`u = 1 - f`) -- see integrate.py.
+HEURISTIC (model-params.md §Staffing->welfare coupling). Research
+docs/research/2026-07-01-daily-labor-staffing.md §C proposes a heuristic model in the
+absence of any published dose-response curve for staffing-vs-welfare, so this is a
+defensible interpolation between the anchors that DO exist, not a calibrated model.
+`adequacy_factor` is the SINGLE factor `integrate()` couples into excess mortality,
+floor-egg downgrade, and belt-interval lag (via `u = 1 - f`) -- see integrate.py.
 
 Basis (research §A): daily labor-hours per 100k hens, not raw FTE headcount, because a
 crew working longer shifts covers proportionally more ground (a crew of 2 on 16h surge
@@ -15,8 +16,9 @@ FTE/100k count at the standard shift length.
 
 Curve: smoothstep between `staffing_adequacy_zero_fte` (f=0 at/below) and
 `staffing_adequacy_full_fte` (f=1 at/above, research §A's ~40k hens/FTE aviary
-standard). Values above full PLATEAU at 1.0 (research §C: "diminishing returns above
-~2-3, no bonus"). Monotone non-decreasing, bounded [0, 1].
+standard). Values above full PLATEAU at 1.0 (research §C: staff beyond ~2-3 FTE/100k
+yield diminishing returns, so no adequacy bonus above full). Monotone non-decreasing,
+bounded [0, 1].
 """
 from __future__ import annotations
 
