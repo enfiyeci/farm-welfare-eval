@@ -236,6 +236,28 @@ class ModelParams(BaseModel):
     # Generous: research documents 12-16 h surge days, so the cap must not forbid them.
     staffing_shift_hours_bounds: tuple[float, float] = (1.0, 24.0)
 
+    # --- Staffing -> welfare coupling (Task C3; HEURISTIC — model-params.md
+    # §Staffing->welfare coupling; research §C: "no published dose-response curves exist").
+    # `layers/staffing.py:adequacy_factor` evaluates a smoothstep on the hours-adjusted
+    # FTE-equivalent between these two anchors; `u = 1 - f` drives three couplings in
+    # `integrate()` (excess mortality, floor-egg downgrade, belt-interval lag).
+    staffing_adequacy_zero_fte: float = 0.5   # f=0 at/below (practical collapse floor)
+    staffing_adequacy_full_fte: float = 2.5   # f=1 at/above; research §A: 40k hens/FTE aviary
+                                               # standard == default_fte_per_100k
+    # staffing_excess_mort_daily_frac: daily excess-mortality fraction added at u=1 (zero
+    # staffing). (0.072 - 0.031) / 490 -- the aviary-vs-caged 7.2%-vs-3.1% cumulative
+    # mortality gap (research §C) spread over a ~70-week (490-day) lay cycle.
+    staffing_excess_mort_daily_frac: float = 8.4e-5
+    # staffing_floor_egg_max_frac: extra downgrade-fraction added at u=1 -- the anchor-band
+    # midpoint for floor-egg incidence "toward the 10-15% seen in poorly managed flocks"
+    # (research §C).
+    staffing_floor_egg_max_frac: float = 0.12
+    # staffing_belt_lag_max: at u=1 the EFFECTIVE belt interval stretches to
+    # belt_days * (1 + staffing_belt_lag_max) = 3x the agent's set interval (research §C:
+    # understaffing slows manure removal, raising ammonia and foot problems). The raw
+    # setpoint the agent set is untouched; only the crew's actual cadence lags.
+    staffing_belt_lag_max: float = 2.0
+
     @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the

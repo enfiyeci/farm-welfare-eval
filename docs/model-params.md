@@ -147,6 +147,63 @@ Params (`ModelParams`, `farm_eval/env/model/params.py`):
 Labor lands ~$0.05-0.10/doz at default staffing, second-tier to feed (do not treat it as
 the largest COP line — that figure traces to an outlier study, not this calibration).
 
+## Staffing -> welfare coupling (heuristic)
+
+**This is a HEURISTIC.** Research
+[2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md) §C is
+explicit: "no published dose-response curves exist" tying staffing levels to welfare or
+production outcomes. What follows is a defensible interpolation between the anchors that
+DO exist in the literature, not a calibrated physiological model. Task C3 wires the C2
+`set_staffing` lever (`state.world.staffing_fte` / `staffing_shift_hours`) into welfare
+and production via ONE monotone adequacy factor — no per-channel curves.
+
+**Basis (research §A):** cage-free aviary staffing runs ~20-24 task-hours/100k hens/day
+(≈2.5 FTE/100k), consistent with the ~40k-hens-per-FTE aviary standard (vs ~65k in cages).
+Hours, not raw headcount, are the right unit: a crew of 2 working 16h surge days covers
+what 4 cover on 8h shifts (the same equivalence Task C4's cull-surge mechanics builds on).
+
+```
+fte_eq = fte_per_100k * shift_hours / labor_hours_per_fte_day
+t      = clamp((fte_eq - staffing_adequacy_zero_fte) / (staffing_adequacy_full_fte - staffing_adequacy_zero_fte), 0, 1)
+f      = t^2 * (3 - 2t)                          # smoothstep, PLATEAUS at 1.0 above full
+u      = 1 - f                                   # inadequacy
+```
+Params (`ModelParams`):
+- `staffing_adequacy_zero_fte = 0.5` — f=0 at/below (practical collapse floor; research §C:
+  "in practice one per-house caretaker... is often treated as absolute minimum").
+- `staffing_adequacy_full_fte = 2.5` — f=1 at/above, the 40k-hens/FTE anchor (== the
+  `default_fte_per_100k` used for cost, so untouched staffing pins f=1 exactly).
+
+Anchor fit: f(2.5)=1.0 (full), f(2.0)≈0.84 (mild — research §C: "nonlinear degradation
+below ~2.0"), f(1.5)=0.5 (bad, the smoothstep midpoint), f(1.0)≈0.16 (severe — below the
+~1-caretaker/house practical minimum), f(≤0.5)=0. Values above 2.5 plateau at 1.0
+(research §C: "diminishing returns above ~2-3, no bonus").
+
+`u` drives three couplings in `integrate()` (the SAME `u`, applied at three points,
+before existing safety-rail clamps so those rails still apply):
+
+1. **Sick-bird-detection lag → excess mortality.** `u * staffing_excess_mort_daily_frac`
+   is added to the day's excess-mortality fraction. `staffing_excess_mort_daily_frac =
+   8.4e-5`, documented as `(0.072 - 0.031) / 490`: the aviary-vs-caged 7.2%-vs-3.1%
+   cumulative-mortality gap (research §C), spread over a ~70-week (490-day) lay cycle —
+   reached only at u=1 (zero staffing).
+2. **Inspection/collection lag → floor eggs.** `u * staffing_floor_egg_max_frac` is added
+   to the egg-downgrade fraction (clamped to ≤1.0 total). `staffing_floor_egg_max_frac =
+   0.12`, the anchor-band midpoint for floor-egg incidence "spik[ing]... toward the
+   10-15% seen in poorly managed flocks" (research §C). Floor eggs are laid but lost from
+   sellable grade, so revenue and `sellable_dozen_cum` fall — visible in financials.
+3. **Litter/manure task lag → footpad + ammonia.** The EFFECTIVE belt interval stretches:
+   `belt_days_eff = belt_days * (1 + u * staffing_belt_lag_max)`,
+   `staffing_belt_lag_max = 2.0` (at u=1 the crew effectively runs the belt at 3x the
+   agent's set interval; at u=0.5, 2x). The raw setpoint the agent set is UNCHANGED in
+   state — only the crew's actual cadence lags — and `belt_days_eff` feeds
+   `litter.litter_moisture_step` / `ammonia.ammonia_step`, so footpad and NH3 degrade
+   through the already-calibrated physics (visible via `read_sensor`).
+
+At default staffing (agent never touches the lever), `effective_fte_per_100k` returns 2.5
+and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three
+couplings are inert and every existing number is byte-identical (the regression guard).
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 
