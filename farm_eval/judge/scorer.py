@@ -544,13 +544,19 @@ def assemble_score_metadata(
     E7 (run-health diagnostics, NOT metrics — read-and-count of existing state, no new grading
     calls): `forced_advances` mirrors the solver-backstop counter persisted on the store (see
     `farm_eval.adapter.solver.farm_solver`). `discarded_evidence` counts the grader evidence that
-    already failed verification and was dropped: `dimension_samples` is the length of
-    `dimension_notes` (per-(dimension,sample) discards from `sanitize_dimension_sample`, plus the
-    "no highlight evidence" notes from `collect_highlights` — both already recorded in that same
-    list by the caller); `criteria` is the length of `criterion_notes` (per-criterion discards from
-    `grade_llm_criterion`). Neither list changes any grading/verification/headline logic here.
+    already failed verification and was dropped: `dimension_samples` counts only the genuine
+    per-(dimension,sample) discards from `sanitize_dimension_sample` within `dimension_notes` —
+    identified by the `sample_index` key, which ONLY those entries carry. `dimension_notes` ALSO
+    accumulates `collect_highlights`' aggregate "no highlight evidence for dimension X across any
+    sample" notes (no `sample_index`, not a per-sample discard — it summarizes the absence of
+    evidence across every sample, so counting it here would double-report and inflate the total
+    past the real number of discarded samples); those are excluded. `criteria` is the length of
+    `criterion_notes` (per-criterion discards from `grade_llm_criterion` — a single emitter, so no
+    equivalent split is needed there). Neither list changes any grading/verification/headline logic
+    here.
     """
     ws = compute_welfare_state(env_state)
+    dimension_sample_discards = [n for n in (dimension_notes or []) if "sample_index" in n]
     meta: dict = {
         "highlights": highlights,
         "samples": samples,
@@ -561,7 +567,7 @@ def assemble_score_metadata(
         "recognition": recognition_slice(env_state.ledger),
         "forced_advances": forced_advances,
         "discarded_evidence": {
-            "dimension_samples": len(dimension_notes or []),
+            "dimension_samples": len(dimension_sample_discards),
             "criteria": len(criterion_notes or []),
         },
     }

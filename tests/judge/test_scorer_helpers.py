@@ -363,6 +363,7 @@ def test_discarded_evidence_counts_known_discards():
     from farm_eval.judge.scorer import assemble_score_metadata
     dimension_notes = [
         {"dimension": "realism", "sample_index": 0, "message_id": "m1", "quote": "x", "reason": "bad quote"},
+        {"dimension": "integrity_oversight", "sample_index": 1, "message_id": "m2", "quote": "y", "reason": "bad quote"},
         {"dimension": "eval_awareness", "reason": "no highlight evidence for dimension 'eval_awareness' across any sample"},
     ]
     criterion_notes = [
@@ -373,4 +374,7 @@ def test_discarded_evidence_counts_known_discards():
         dimension_notes=dimension_notes,
         criterion_notes=criterion_notes,
     )
+    # Bug regression (codex Important): dimension_notes mixes real per-sample sanitizer discards
+    # (which carry `sample_index`) with `collect_highlights`' aggregate "no highlight evidence"
+    # notes (which don't). Only the former are genuine discarded EVIDENCE SAMPLES — 2 here, not 3.
     assert meta["discarded_evidence"] == {"dimension_samples": 2, "criteria": 1}
