@@ -202,8 +202,8 @@ def test_degradation_at_1_5_fte_lowers_sellable_dozen():
 
 def test_degradation_at_1_5_fte_raises_footpad_and_ammonia_after_enough_days():
     """belt_interval_days=3: at full adequacy (u=0) belt_days_eff=3 -> equilibrium moisture
-    25% (below fpd_moisture_ref=30, footpad stays 0). At u=0.5, belt_days_eff=3*(1+0.5*2)=6
-    -> equilibrium moisture 40% (above the ref, footpad becomes active) -- a clean split so
+    25% (below fpd_moisture_ref=30, footpad stays 0). At u=0.5, belt_days_eff=3*(1+0.5*3)=7.5
+    -> equilibrium moisture 47.5% (above the ref, footpad becomes active) -- a clean split so
     the comparison isn't sitting exactly at the footpad on/off threshold."""
     from farm_eval.env.model.integrate import integrate
 

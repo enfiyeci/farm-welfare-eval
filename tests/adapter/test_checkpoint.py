@@ -7,7 +7,6 @@ so an episode reaches >= 4 distinct beats without needing the full production sc
 
 import json
 import os
-import stat
 from pathlib import Path
 
 import pytest

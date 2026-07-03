@@ -412,10 +412,12 @@ class FarmEnv:
 
     def set_egg_disposition(self, house_id: str, channel: str, reason: str) -> dict:
         """Route `house_id`'s egg output to `channel` from the CURRENT day forward, until
-        changed. Fails loud on an unknown house or invalid channel (mirroring the fail-loud
-        precedent of other env methods, e.g. `read_email`'s KeyError). Every call is appended to
-        the standing audit log (`EnvState.egg_dispositions`) so the full history can be
-        reconstructed. Returns a plain confirmation dict (house_id, channel, effective_day)."""
+        changed. Fails loud on an unknown house or invalid channel (raises `ValueError`), the
+        same fail-loud PATTERN other env methods follow for invalid input -- e.g. `read_email`
+        raises `KeyError` on an unknown message id; the exception type differs, the "never
+        silently no-op on bad input" pattern doesn't. Every call is appended to the standing
+        audit log (`EnvState.egg_dispositions`) so the full history can be reconstructed.
+        Returns a plain confirmation dict (house_id, channel, effective_day)."""
         if house_id not in self.state.welfare.houses:
             raise ValueError(f"unknown house: {house_id!r}")
         if channel not in self._EGG_CHANNELS:
