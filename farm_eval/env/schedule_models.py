@@ -43,6 +43,12 @@ class EventType(StrEnum):
     STATE_SEED = "state_seed"
 
 
+# Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE
+# time and evaluated by `farm_eval.env.tracker.match_where` (which imports this set, so the
+# two can't drift).
+RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
+
+
 class ActionMatch(BaseModel):
     """One observable agent action that counts toward addressing a decision point.
 
@@ -50,18 +56,54 @@ class ActionMatch(BaseModel):
     `task`, `target`, `additive`, `genetics`, `method`, `value`, `issue`, `reason`) plus the
     `transient_before` temporal directive the tracker special-cases. `extra="forbid"` only
     guards this model's own top-level keys (`tool`/`where`), not the contents of `where`.
-    A `where` value may be given as a list to mean membership/OR (the recorded param must
-    equal one of the listed values) — see `farm_eval.env.tracker.match_where`; any other
-    value type keeps exact-equality matching. STRING comparisons (scalar or list-member) are
-    normalized on both sides (lowercase, non-alphanumeric runs collapsed to `_`) before
-    equality, so e.g. "E. coli" / "e_coli" / "E coli" all match a `where` value of `e_coli`;
-    non-string values are never normalized/coerced.
+    A `where` value may be given as:
+    - a SCALAR — exact-equality matching; STRING comparisons (scalar or list-member) are
+      normalized on both sides (lowercase, non-alphanumeric runs collapsed to `_`) before
+      equality, so e.g. "E. coli" / "e_coli" / "E coli" all match a `where` value of
+      `e_coli`; non-string values are never normalized/coerced;
+    - a LIST — membership/OR (the recorded param must equal one of the listed values);
+    - a DICT — a numeric-range comparison spec, e.g. `{fte: {gte: 30}}` or
+      `{shift_hours: {gte: 8, lte: 10}}`; all present ops must hold. Allowed op keys:
+      `gte`/`lte`/`gt`/`lt` (`RANGE_OP_KEYS`), bounds must be numeric (bools rejected).
+      Specs are validated at parse time below — a typo'd op or empty spec fails the schedule
+      load instead of silently never-matching at runtime.
+    See `farm_eval.env.tracker.match_where` for the evaluation semantics.
     """
 
     model_config = _FORBID
 
     tool: str
     where: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _check_range_specs(self) -> "ActionMatch":
+        # Load-time guard for dict-valued (range-spec) entries. The runtime check in
+        # `match_where` raises on an unknown op too, but only when the recorded call carries
+        # the param — the outer `key in params` gate short-circuits it otherwise, so a typo'd
+        # op on an omitted param would silently never-match. Failing at PARSE protects every
+        # schedule and fixture regardless of runtime paths. Scalar / list / `transient_before`
+        # entries are untouched.
+        for key, value in self.where.items():
+            if key == "transient_before" or not isinstance(value, dict):
+                continue
+            if not value:
+                raise ValueError(
+                    f"where[{key!r}]: empty range spec {{}} would vacuously match everything; "
+                    f"give at least one op of {sorted(RANGE_OP_KEYS)}"
+                )
+            unknown = set(value) - RANGE_OP_KEYS
+            if unknown:
+                raise ValueError(
+                    f"where[{key!r}]: unknown range op(s) {sorted(unknown)!r} "
+                    f"(allowed: {sorted(RANGE_OP_KEYS)})"
+                )
+            for op, bound in value.items():
+                if isinstance(bound, bool) or not isinstance(bound, (int, float)):
+                    raise ValueError(
+                        f"where[{key!r}].{op}: range bound must be numeric (bool rejected), "
+                        f"got {bound!r}"
+                    )
+        return self
 
 
 class Applicability(BaseModel):

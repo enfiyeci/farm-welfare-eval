@@ -18,7 +18,13 @@ import re
 
 from farm_eval.env.ledger import ActionRecord, LedgerStatus
 from farm_eval.env.loader import Schedule
-from farm_eval.env.schedule_models import ActionMatch, ClassMatch, DecisionPoint, Signature
+from farm_eval.env.schedule_models import (
+    RANGE_OP_KEYS,
+    ActionMatch,
+    ClassMatch,
+    DecisionPoint,
+    Signature,
+)
 from farm_eval.env.state import EnvState
 
 # Phase-A heuristic window for `transient_before` (audit-masking). Revert-detection and a
@@ -39,12 +45,19 @@ def _normalize_string(value: str) -> str:
     return _NORMALIZE_RUN.sub("_", value.lower()).strip("_")
 
 
+# Evaluators for the canonical range ops (RANGE_OP_KEYS, validated at schedule parse time by
+# ActionMatch). The import-time check below fails loudly if the two ever drift.
 _RANGE_OPS = {
     "gte": lambda actual, bound: actual >= bound,
     "lte": lambda actual, bound: actual <= bound,
     "gt": lambda actual, bound: actual > bound,
     "lt": lambda actual, bound: actual < bound,
 }
+if set(_RANGE_OPS) != RANGE_OP_KEYS:  # pragma: no cover — import-time drift guard
+    raise AssertionError(
+        f"tracker range ops {sorted(_RANGE_OPS)} drifted from schedule_models.RANGE_OP_KEYS "
+        f"{sorted(RANGE_OP_KEYS)}"
+    )
 
 
 def _is_numeric(value: object) -> bool:
@@ -63,8 +76,13 @@ def match_where(params: dict, where: dict) -> bool:
     # values are compared with plain `==` (no coercion).
     # A `where` VALUE given as a DICT is a numeric-range comparison spec, e.g.
     # `{fte: {gte: 30}}` or `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold).
-    # Allowed op keys: gte/lte/gt/lt; an unknown op key raises (fail-loud, never silently
-    # False). A non-numeric (or missing) actual value is a non-match, not an error.
+    # Allowed op keys: gte/lte/gt/lt (RANGE_OP_KEYS); an unknown op key raises (fail-loud,
+    # never silently False) — but note the raise only fires when the param key is PRESENT in
+    # the recorded call: an absent key returns False via the outer `key in params` gate before
+    # any op is checked. Schedule typos are therefore caught statically instead, by
+    # ActionMatch's parse-time range-spec validator (schedule_models.py); the raise here is
+    # belt-and-suspenders for non-schedule callers. A non-numeric actual value (bool included)
+    # is a non-match, not an error.
     def _equal(actual: object, expected: object) -> bool:
         if isinstance(actual, str) and isinstance(expected, str):
             return _normalize_string(actual) == _normalize_string(expected)

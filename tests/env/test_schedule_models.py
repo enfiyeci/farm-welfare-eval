@@ -187,3 +187,77 @@ def test_decision_point_forbids_unknown_field():
                 "bogus_field": True,
             }
         )
+
+
+# --- C4 review fix F1: load-time validation of dict-valued (range-spec) where entries ---
+# A typo'd range op must fail at PARSE time: at runtime the outer `key in params` gate in
+# match_where short-circuits before the op check whenever the recorded call omits the param,
+# so a schedule typo could otherwise silently never-match (a 0 masquerading as "didn't act").
+
+
+def test_action_match_range_spec_unknown_op_raises_at_parse_naming_key_and_op():
+    with pytest.raises(ValidationError, match="lte_") as exc_info:
+        ActionMatch.model_validate({"tool": "set_staffing", "where": {"shift_hours": {"lte_": 10}}})
+    assert "shift_hours" in str(exc_info.value)
+
+
+def test_action_match_range_spec_empty_dict_raises_at_parse():
+    # An empty spec would vacuously match everything (all() of nothing is True) — reject it.
+    with pytest.raises(ValidationError, match="fte"):
+        ActionMatch.model_validate({"tool": "set_staffing", "where": {"fte": {}}})
+
+
+def test_action_match_range_spec_non_numeric_bound_raises_at_parse():
+    with pytest.raises(ValidationError, match="fte"):
+        ActionMatch.model_validate({"tool": "set_staffing", "where": {"fte": {"gte": "thirty"}}})
+
+
+def test_action_match_range_spec_bool_bound_raises_at_parse():
+    # bool is a subclass of int; a boolean bound is schedule nonsense, reject it loudly.
+    with pytest.raises(ValidationError, match="fte"):
+        ActionMatch.model_validate({"tool": "set_staffing", "where": {"fte": {"gte": True}}})
+
+
+def test_action_match_valid_range_spec_parses():
+    am = ActionMatch.model_validate(
+        {"tool": "set_staffing", "where": {"fte": {"gte": 30}, "shift_hours": {"lte": 10}}}
+    )
+    assert am.where == {"fte": {"gte": 30}, "shift_hours": {"lte": 10}}
+    # Multi-op spec on one key is also valid.
+    am2 = ActionMatch.model_validate({"tool": "t", "where": {"x": {"gte": 8, "lte": 10}}})
+    assert am2.where["x"] == {"gte": 8, "lte": 10}
+
+
+def test_action_match_scalar_list_and_transient_before_entries_unaffected():
+    am = ActionMatch.model_validate(
+        {
+            "tool": "t",
+            "where": {"house_id": "H3", "channel": ["a", "b"], "transient_before": "audit"},
+        }
+    )
+    assert am.where["house_id"] == "H3"
+    assert am.where["channel"] == ["a", "b"]
+    assert am.where["transient_before"] == "audit"
+
+
+def test_schedule_yaml_with_typoed_range_op_fails_at_load(tmp_path):
+    # The full loader path: a schedule/events.yml carrying the typo must fail at load_schedule.
+    from farm_eval.env.loader import load_schedule
+
+    (tmp_path / "events.yml").write_text(
+        """
+decision_points:
+  - id: DP_TYPO
+    category: initiative
+    prompted: false
+    opens_day: 1
+    deadline_day: 2
+    signature:
+      any_of:
+        - {tool: set_staffing, where: {fte: {gte_: 30}}}
+events: []
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValidationError, match="gte_"):
+        load_schedule(tmp_path)
