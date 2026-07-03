@@ -185,6 +185,76 @@ def test_replay_raises_loudly_when_a_recorded_success_now_rejects():
         replay_env(corpus, schedule, doctored, to_day=original.state.day_index, params=params, episode_end_day=400, seed=1)
 
 
+def test_replay_with_reads_is_bit_identical_including_inspected_flags():
+    # F1 (review Critical): reads are state-bearing — `state.reads` feeds `resolve_inspected`,
+    # which mutates ledger entries' `inspected` recognition flags at end_day. A replay without the
+    # read log rebuilds `reads=[]` / `inspected=False` and thus CANNOT be bit-identical; passing
+    # the original `state.reads` restores full bit-identity.
+    corpus, schedule = _corpus_and_schedule()
+    params = ModelParams()
+    state = build_initial_state(corpus, seed=1)
+    env = FarmEnv(corpus, schedule, state, 400, params, None)
+    env.start()
+    # Read DP_PLACEHOLDER_1's surface house inside its [0, 5] window -> inspected=True at end_day.
+    env.get_sensor("H_SENSOR", "ammonia_ppm")
+    env.read_flock_report("H_SENSOR")
+    env.apply_action("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 2.5})
+    env.end_day()  # -> day 5; resolve_inspected sees the day-0 reads
+    env.read_flock_report("H_NOSENSOR")  # a later-day read, for reads-list fidelity
+    while not env.is_over():
+        env.end_day()
+
+    original = env.state
+    assert original.reads, "precondition: the original run used read tools"
+    assert next(e for e in original.ledger if e.dp_id == "DP_PLACEHOLDER_1").inspected is True
+
+    # Without the read log, replay must NOT be bit-identical (reads=[], inspected=False) — the
+    # documented reason `reads` is part of the salvage-caller input contract.
+    replayed_no_reads = replay_env(
+        corpus, schedule, original.actions, to_day=original.day_index, params=params,
+        episode_end_day=400, seed=1,
+    )
+    assert replayed_no_reads.reads == []
+    assert next(e for e in replayed_no_reads.ledger if e.dp_id == "DP_PLACEHOLDER_1").inspected is False
+    assert _dump(replayed_no_reads) != _dump(original)
+
+    # With the read log, replay is bit-identical: the reads list itself AND the ledger
+    # inspected flags round-trip.
+    replayed = replay_env(
+        corpus, schedule, original.actions, to_day=original.day_index, params=params,
+        episode_end_day=400, seed=1, reads=original.reads,
+    )
+    assert replayed.reads == original.reads
+    assert next(e for e in replayed.ledger if e.dp_id == "DP_PLACEHOLDER_1").inspected is True
+    assert _dump(replayed) == _dump(original)
+
+
+def test_replay_raises_loudly_on_a_doctored_read_day():
+    # Reads follow the same fail-loud rule as actions: a read whose day (<= to_day) can never be
+    # reached as a beat day is a mismatched schedule/log pairing, not something to skip.
+    corpus, schedule = _corpus_and_schedule()
+    params = ModelParams()
+    original = _drive_realistic_episode(corpus, schedule, params=params, episode_end_day=400)
+
+    bad_reads = [
+        original.state.actions[0].model_copy(update={"tool": "read_flock_report", "day": 3})
+    ]  # 3 is not a beat day
+    with pytest.raises(ValueError, match=r"read day\(s\) \[3\]"):
+        replay_env(
+            corpus, schedule, original.state.actions, to_day=original.state.day_index,
+            params=params, episode_end_day=400, seed=1, reads=bad_reads,
+        )
+
+
+def test_replay_rejects_negative_to_day():
+    # F2 (review Important): to_day < 0 has no valid answer ("last beat <= to_day" is the empty
+    # set) — guard at entry, before any day-0 events fire.
+    corpus, schedule = _corpus_and_schedule()
+    params = ModelParams()
+    with pytest.raises(ValueError, match=r"to_day"):
+        replay_env(corpus, schedule, [], to_day=-1, params=params, episode_end_day=400, seed=1)
+
+
 def test_enabled_nodes_pass_through_seeds_only_selected_nodes():
     corpus, schedule = _corpus_and_schedule()
     params = ModelParams()
