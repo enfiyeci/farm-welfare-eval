@@ -22,9 +22,10 @@ from __future__ import annotations
 
 from inspect_ai.model import ChatMessageUser, execute_tools, get_model
 from inspect_ai.solver import Generate, Solver, TaskState, solver
+from inspect_ai.util import store_as
 
 from farm_eval.adapter.checkpoint import write_checkpoint
-from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import end_day
 
@@ -82,6 +83,9 @@ def farm_solver(
                     advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
                     # Make the forced advance visible to the next turn and the judge.
                     state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    # E7: count the backstop firing on the persisted store (not a natural end_day
+                    # call), so it survives into the .eval log for the scorer to surface.
+                    store_as(EpisodeStore).forced_advances += 1
                     turns_today = 0
                     _checkpoint(state)
 

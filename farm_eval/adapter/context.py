@@ -50,6 +50,11 @@ class EpisodeStore(StoreModel):
     # The mutated, logged episode state. Start-idempotence lives in EnvState.started (so it
     # survives FarmEnv rebinding and retry/replay), not here.
     env_state: EnvState | None = None
+    # E7: run-health diagnostic — count of times the solver's max-turns-per-day backstop had to
+    # force-advance the day because the target never called end_day. Lives in the adapter store
+    # (not EnvState) so the env core stays Inspect-free; persists into the `.eval` log and is read
+    # by the scorer into Score.metadata (a diagnostic, not a scored metric).
+    forced_advances: int = 0
 
 
 # Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).

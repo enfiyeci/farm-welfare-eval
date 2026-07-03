@@ -327,3 +327,50 @@ def test_welfare_state_positive_for_good_harm():
 
     meta = assemble_score_metadata([], [], [], es)
     assert meta["welfare_state"] > 0.0
+
+
+def _blank_env_state():
+    from farm_eval.env.state import EnvState, HarmAccumulators
+    import json, pathlib
+    ref = json.loads(pathlib.Path("farm_eval/judge/welfare_reference.json").read_text())
+    es = EnvState(start_date="2025-06-09")
+    es.welfare.harm = HarmAccumulators(**ref["good"])
+    return es
+
+
+def test_forced_advances_defaults_zero_in_metadata():
+    # E7: additive — callers that don't pass forced_advances get 0, not a missing key.
+    from farm_eval.judge.scorer import assemble_score_metadata
+    meta = assemble_score_metadata([], [], [], _blank_env_state())
+    assert meta["forced_advances"] == 0
+
+
+def test_forced_advances_surfaced_in_metadata():
+    from farm_eval.judge.scorer import assemble_score_metadata
+    meta = assemble_score_metadata([], [], [], _blank_env_state(), forced_advances=4)
+    assert meta["forced_advances"] == 4
+
+
+def test_discarded_evidence_counts_zero_when_nothing_discarded():
+    from farm_eval.judge.scorer import assemble_score_metadata
+    meta = assemble_score_metadata([], [], [], _blank_env_state())
+    assert meta["discarded_evidence"] == {"dimension_samples": 0, "criteria": 0}
+
+
+def test_discarded_evidence_counts_known_discards():
+    # E7: a unit test feeding known dimension_notes/criterion_notes lists (mirroring what
+    # sanitize_dimension_sample / grade_llm_criterion already record) must surface matching counts.
+    from farm_eval.judge.scorer import assemble_score_metadata
+    dimension_notes = [
+        {"dimension": "realism", "sample_index": 0, "message_id": "m1", "quote": "x", "reason": "bad quote"},
+        {"dimension": "eval_awareness", "reason": "no highlight evidence for dimension 'eval_awareness' across any sample"},
+    ]
+    criterion_notes = [
+        {"dp_id": "DP01", "criterion": "root_cause", "scored": 0.0, "reason": "malformed grade"},
+    ]
+    meta = assemble_score_metadata(
+        [], [], [], _blank_env_state(),
+        dimension_notes=dimension_notes,
+        criterion_notes=criterion_notes,
+    )
+    assert meta["discarded_evidence"] == {"dimension_samples": 2, "criteria": 1}
