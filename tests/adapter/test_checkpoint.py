@@ -146,14 +146,15 @@ def test_restart_from_checkpoint_matches_uninterrupted_run(tmp_path):
     # {6, 8, 20}, so [0] is day 6, not the final day 20) and confirm we captured it.
     sample_dir = ckpt_dir / "42"
     earlier = sorted(sample_dir.glob("day_*.json"), key=lambda p: int(p.stem.split("_")[1]))[0]
-    day, message_count, env_state = load_checkpoint(earlier)
+    day, message_count, env_state, forced_advances = load_checkpoint(earlier)
     assert isinstance(env_state, EnvState)
     assert day == env_state.day_index
     assert message_count > 0
+    assert forced_advances == 0  # this run never hit the max-turns-per-day backstop
 
-    # Fresh env/store: inject the loaded checkpoint state, then re-enter the solver and run to
-    # completion. FarmEnv.start() must be idempotent (EnvState.started) so day-0 events do not
-    # re-fire on re-entry.
+    # Fresh env/store: inject the loaded checkpoint state (and forced_advances, mirroring
+    # message_count/env_state), then re-enter the solver and run to completion. FarmEnv.start()
+    # must be idempotent (EnvState.started) so day-0 events do not re-fire on re-entry.
     from inspect_ai.solver import Generate, TaskState, solver
 
     @solver
@@ -163,6 +164,7 @@ def test_restart_from_checkpoint_matches_uninterrupted_run(tmp_path):
 
             store = store_as(EpisodeStore)
             store.env_state = env_state
+            store.forced_advances = forced_advances
             get_env(cfg).start()
             return state
 
@@ -271,6 +273,40 @@ def test_write_checkpoint_traversal_id_stays_inside_checkpoint_dir(tmp_path):
 
 
 # --- F2: positive coverage of the PRODUCTION config path (EpisodeConfig.checkpoint_dir) ---
+
+
+def test_write_load_checkpoint_round_trips_forced_advances(tmp_path):
+    # E7's run-health forced_advances counter must survive a checkpoint round-trip so a
+    # resume after a hard kill doesn't undercount/lose run-health metadata.
+    ckpt_dir = tmp_path / "ckpt"
+    env_state = EnvState(start_date="2025-06-09")
+    write_checkpoint(str(ckpt_dir), "s1", day=3, message_count=5, env_state=env_state, forced_advances=2)
+
+    path = ckpt_dir / "s1" / "day_3.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["forced_advances"] == 2
+
+    day, message_count, loaded_state, forced_advances = load_checkpoint(path)
+    assert day == 3
+    assert message_count == 5
+    assert isinstance(loaded_state, EnvState)
+    assert forced_advances == 2
+
+
+def test_load_checkpoint_old_format_without_forced_advances_defaults_to_zero(tmp_path):
+    # Backward-tolerant: a checkpoint written before this change has no "forced_advances" key.
+    # Loading it must default to 0, not crash.
+    ckpt_dir = tmp_path / "ckpt"
+    ckpt_dir.mkdir()
+    env_state = EnvState(start_date="2025-06-09")
+    old_payload = {"day": 4, "message_count": 7, "env_state": env_state.model_dump(mode="json")}
+    old_path = ckpt_dir / "day_4.json"
+    old_path.write_text(json.dumps(old_payload), encoding="utf-8")
+
+    day, message_count, loaded_state, forced_advances = load_checkpoint(old_path)
+    assert day == 4
+    assert message_count == 7
+    assert forced_advances == 0
 
 
 def test_checkpoints_written_via_episode_config_checkpoint_dir(tmp_path):

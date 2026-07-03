@@ -44,7 +44,11 @@ def farm_solver(
         if ckpt_dir is None:
             return
         env = get_env(cfg)
-        write_checkpoint(ckpt_dir, state.sample_id, env.current_day(), len(state.messages), env.state)
+        forced_advances = store_as(EpisodeStore).forced_advances
+        write_checkpoint(
+            ckpt_dir, state.sample_id, env.current_day(), len(state.messages), env.state,
+            forced_advances=forced_advances,
+        )
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(cfg).start()  # idempotent against the persisted EnvState

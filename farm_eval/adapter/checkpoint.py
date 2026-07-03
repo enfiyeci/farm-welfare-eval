@@ -8,7 +8,9 @@ can be salvaged for partial scoring via `load_checkpoint` + `farm_eval.env.repla
 Design:
   - OFF by default (`checkpoint_dir=None`): zero behavior change, zero files written.
   - One file per beat: `<checkpoint_dir>/<sample_id>/day_<n>.json`, containing
-    `{"day": n, "message_count": <int>, "env_state": <EnvState.model_dump(mode="json")>}`.
+    `{"day": n, "message_count": <int>, "env_state": <EnvState.model_dump(mode="json")>,
+    "forced_advances": <int>}`. `forced_advances` (E7's run-health backstop counter) is
+    backward-tolerant on load: a checkpoint written before this key existed loads as 0.
   - Atomic write-replace: write to a temp file in the SAME directory, then `os.replace` onto the
     final name, so a kill mid-write can never leave a truncated `day_<n>.json` behind.
   - Retention: only the last 3 `day_*.json` per sample are kept, determined by parsing the day
@@ -51,19 +53,34 @@ def _sample_dir_name(sample_id: object) -> str:
     return {"": "_", ".": "__", "..": "___"}.get(safe, safe)
 
 
-def write_checkpoint(checkpoint_dir: str, sample_id: object, day: int, message_count: int, env_state: EnvState) -> None:
+def write_checkpoint(
+    checkpoint_dir: str,
+    sample_id: object,
+    day: int,
+    message_count: int,
+    env_state: EnvState,
+    forced_advances: int = 0,
+) -> None:
     """Atomically persist a per-beat checkpoint, if `checkpoint_dir` is set.
 
     Never raises: a write/serialization failure is logged as a warning (naming the path and the
     error) and swallowed, so a checkpointing malfunction can never crash a healthy paid episode.
     Retention keeps only the last 3 `day_*.json` files per sample, ordered by the day number
     parsed from the filename (not mtime, for determinism).
+
+    `forced_advances` persists E7's run-health backstop counter (`EpisodeStore.forced_advances`)
+    alongside the env state, so a checkpoint resume after a hard kill doesn't lose/undercount it.
     """
     try:
         sample_dir = Path(checkpoint_dir) / _sample_dir_name(sample_id)
         sample_dir.mkdir(parents=True, exist_ok=True)
 
-        payload = {"day": day, "message_count": message_count, "env_state": env_state.model_dump(mode="json")}
+        payload = {
+            "day": day,
+            "message_count": message_count,
+            "env_state": env_state.model_dump(mode="json"),
+            "forced_advances": forced_advances,
+        }
         final_path = sample_dir / f"day_{day}.json"
         tmp_path = sample_dir / f".day_{day}.json.tmp"
         tmp_path.write_text(json.dumps(payload), encoding="utf-8")
@@ -90,10 +107,17 @@ def _prune_old_checkpoints(sample_dir: Path) -> None:
         stale_path.unlink(missing_ok=True)
 
 
-def load_checkpoint(path: str | Path) -> tuple[int, int, EnvState]:
-    """Load a checkpoint file, returning (day, message_count, validated EnvState).
+def load_checkpoint(path: str | Path) -> tuple[int, int, EnvState, int]:
+    """Load a checkpoint file, returning (day, message_count, validated EnvState, forced_advances).
 
-    Kept importable without running a solver, for salvage tooling and tests.
+    Kept importable without running a solver, for salvage tooling and tests. Backward-tolerant:
+    a checkpoint written before `forced_advances` was added to the payload loads as 0, not a
+    KeyError -- old checkpoint files on disk must still load cleanly.
     """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
-    return data["day"], data["message_count"], EnvState.model_validate(data["env_state"])
+    return (
+        data["day"],
+        data["message_count"],
+        EnvState.model_validate(data["env_state"]),
+        data.get("forced_advances", 0),
+    )
