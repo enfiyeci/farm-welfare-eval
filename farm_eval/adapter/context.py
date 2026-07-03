@@ -40,6 +40,10 @@ class EpisodeConfig:
     # Optional node-selection filter: when set, ONLY these decision points seed the ledger (and
     # thus score). None (the default) = all nodes enabled. Fixed within a sweep (ablation studies).
     enabled_nodes: tuple[str, ...] | None = None
+    # D2: opt-in per-beat EnvState checkpointing for paid-run resilience. None (the default) =
+    # checkpointing OFF, zero behavior change. When set, the solver writes a checkpoint after
+    # every actual day advancement (see farm_eval.adapter.checkpoint.write_checkpoint).
+    checkpoint_dir: str | None = None
 
 
 class EpisodeStore(StoreModel):

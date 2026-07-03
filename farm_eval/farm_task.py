@@ -38,6 +38,8 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         enabled_nodes=(
             tuple(cfg["enabled_nodes"]) if cfg.get("enabled_nodes") is not None else None
         ),
+        # D2: opt-in per-beat checkpointing. Key-absent / null = off (no behavior change).
+        checkpoint_dir=cfg.get("checkpoint_dir"),
     )
     briefing = load_briefing(cfg["briefing_path"])
     return Task(
