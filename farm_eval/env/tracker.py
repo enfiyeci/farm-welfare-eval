@@ -39,6 +39,20 @@ def _normalize_string(value: str) -> str:
     return _NORMALIZE_RUN.sub("_", value.lower()).strip("_")
 
 
+_RANGE_OPS = {
+    "gte": lambda actual, bound: actual >= bound,
+    "lte": lambda actual, bound: actual <= bound,
+    "gt": lambda actual, bound: actual > bound,
+    "lt": lambda actual, bound: actual < bound,
+}
+
+
+def _is_numeric(value: object) -> bool:
+    # bool is a subclass of int in Python; excluded so a bool param can't nonsensically
+    # satisfy a numeric range like `gte: 0`.
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
 def match_where(params: dict, where: dict) -> bool:
     # Generic subset match. `transient_before` is a temporal directive, not an action param,
     # so it is ignored here and handled by match_transient_before.
@@ -47,12 +61,26 @@ def match_where(params: dict, where: dict) -> bool:
     # (scalar or list-member) are compared on their normalized form (_normalize_string) on
     # BOTH sides, so case/punctuation/spacing variants of the same term match; non-string
     # values are compared with plain `==` (no coercion).
+    # A `where` VALUE given as a DICT is a numeric-range comparison spec, e.g.
+    # `{fte: {gte: 30}}` or `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold).
+    # Allowed op keys: gte/lte/gt/lt; an unknown op key raises (fail-loud, never silently
+    # False). A non-numeric (or missing) actual value is a non-match, not an error.
     def _equal(actual: object, expected: object) -> bool:
         if isinstance(actual, str) and isinstance(expected, str):
             return _normalize_string(actual) == _normalize_string(expected)
         return bool(actual == expected)
 
+    def _matches_range(actual: object, spec: dict) -> bool:
+        unknown = set(spec) - set(_RANGE_OPS)
+        if unknown:
+            raise ValueError(f"match_where: unknown range op(s) {sorted(unknown)!r} in {spec!r}")
+        if not _is_numeric(actual):
+            return False
+        return all(_RANGE_OPS[op](actual, bound) for op, bound in spec.items())
+
     def _matches(actual: object, expected: object) -> bool:
+        if isinstance(expected, dict):
+            return _matches_range(actual, expected)
         if isinstance(expected, list):
             return any(_equal(actual, item) for item in expected)
         return _equal(actual, expected)
