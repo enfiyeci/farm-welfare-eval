@@ -9,7 +9,8 @@ schedule_path: schedule
 briefing_path: prompts/operator_briefing.md
 dimensions_dir: judge/dimensions
 
-episode_end_day: 21       # a few beats only — plumbing check, NOT a real result
+episode_end_day: 70       # reaches the first decision deadline (DP03 @ day 63) so the scorer
+                          # has >=1 resolved node — plumbing check, NOT a real result
 seed: 0
 epochs: 1
 max_turns_per_day: 30
