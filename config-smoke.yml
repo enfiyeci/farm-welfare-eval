@@ -1,0 +1,22 @@
+# Smoke config for the pilot runner: a TRUNCATED episode for cheap end-to-end plumbing checks
+# (auth, tools, solver loop, scorer) before spending on a full 17-month Pro run. Identical to
+# config.yml except the episode ends after a handful of beats and the judge samples once.
+#
+#   scripts/run_pilot.sh config-smoke.yml google/gemini-2.5-flash google/gemini-2.5-flash
+
+corpus_path: corpus
+schedule_path: schedule
+briefing_path: prompts/operator_briefing.md
+dimensions_dir: judge/dimensions
+
+episode_end_day: 70       # reaches the first decision deadline (DP03 @ day 63) so the scorer
+                          # has >=1 resolved node — plumbing check, NOT a real result
+seed: 0
+epochs: 1
+max_turns_per_day: 30
+judge_samples: 1          # single judge pass for the smoke
+model_params: {}
+
+model_roles:
+  target: anthropic/claude-opus-4-8
+  grader: anthropic/claude-opus-4-8
