@@ -112,3 +112,120 @@ def test_extract_sample_record_fails_loud_on_pre_v2_score():
     score = SimpleNamespace(value={"welfare_headline": 7.5}, metadata={})
     with pytest.raises(ValueError, match="node_scores"):
         extract_sample_record(_fake_sample({"welfare_judge": score}), "pilot-x.eval")
+
+
+# --- Task 4: filled sheets -> pairing -> rho report -------------------------------------------
+
+import math
+
+from farm_eval.judge.validation_harness import (
+    load_filled_sheet,
+    render_report,
+    validation_result,
+)
+
+
+def _rec(sample_id: str, node_scores: dict, value: dict) -> dict:
+    return {
+        "log": "pilot-x.eval", "sample_id": sample_id, "epoch": 1,
+        "node_scores": node_scores, "value": value,
+        "env_state": None, "messages": [],  # not read by validation_result
+    }
+
+
+def _sheet(sample_id: str, node_labels: dict, dim_labels: dict, kind: str = "expert") -> dict:
+    return {
+        "log": "pilot-x.eval", "sample_id": sample_id, "epoch": 1,
+        "labeler": "dr-vet", "labeler_kind": kind,
+        "nodes": [{"node_id": k, "score": v} for k, v in node_labels.items()],
+        "dimensions": [{"id": k, "score": v} for k, v in dim_labels.items()],
+    }
+
+
+def _monotonic_fixture(n: int = 5):
+    """n transcripts where human labels rank exactly like the judge -> rho 1.0."""
+    records, sheets = [], []
+    for i in range(n):
+        records.append(_rec(str(i), {"DP_A": float(i)}, {"welfare_decision_quality": float(i)}))
+        sheets.append(_sheet(str(i), {"DP_A": float(i * 2)}, {"welfare_decision_quality": float(i * 2)}))
+    return records, sheets
+
+
+def test_validation_result_perfect_monotonic_rho():
+    records, sheets = _monotonic_fixture()
+    result = validation_result(records, sheets)
+    assert result["labeler_kind"] == "expert"
+    assert result["n_transcripts"] == 5
+    assert result["node_rho"]["DP_A"] == pytest.approx(1.0)
+    assert result["node_pairs"]["DP_A"] == 5
+    assert result["dimension_rho"]["welfare_decision_quality"] == pytest.approx(1.0)
+
+
+def test_validation_result_null_scores_drop_the_pair():
+    records, sheets = _monotonic_fixture()
+    sheets[0]["nodes"][0]["score"] = None  # unlabeled cell -> that pair drops, no crash
+    result = validation_result(records, sheets)
+    assert result["node_pairs"]["DP_A"] == 4
+
+
+def test_validation_result_mixed_labeler_kind_raises():
+    records, sheets = _monotonic_fixture()
+    sheets[0]["labeler_kind"] = "proxy"
+    with pytest.raises(ValueError, match="mixed labeler_kind"):
+        validation_result(records, sheets)
+
+
+def test_validation_result_label_for_unscored_node_raises():
+    records, sheets = _monotonic_fixture()
+    sheets[0]["nodes"].append({"node_id": "DP_GHOST", "score": 5.0})
+    with pytest.raises(ValueError, match="DP_GHOST"):
+        validation_result(records, sheets)
+
+
+def test_validation_result_unmatched_sheet_raises():
+    records, sheets = _monotonic_fixture()
+    sheets[0]["sample_id"] = "999"
+    with pytest.raises(ValueError, match="no matching scored log"):
+        validation_result(records, sheets)
+
+
+def test_validation_result_single_transcript_dimensions_are_nan_not_crash():
+    records, sheets = _monotonic_fixture(1)
+    result = validation_result(records, sheets)
+    assert math.isnan(result["dimension_rho"]["welfare_decision_quality"])
+    assert math.isnan(result["node_rho"]["DP_A"])  # <2 pairs: validate_nodes reports NaN
+
+
+def test_load_filled_sheet_requires_labeler_fields(tmp_path):
+    sheet = _sheet("0", {"DP_A": 5.0}, {})
+    sheet["labeler_kind"] = None
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="labeler_kind"):
+        load_filled_sheet(p)
+
+
+def test_load_filled_sheet_rejects_nonfinite_label(tmp_path):
+    sheet = _sheet("0", {"DP_A": float("nan")}, {})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="finite"):
+        load_filled_sheet(p)
+
+
+def test_render_report_verdicts_and_proxy_disclaimer():
+    records, sheets = _monotonic_fixture()
+    for s in sheets:
+        s["labeler_kind"] = "proxy"
+    report = render_report(validation_result(records, sheets))
+    assert "PROXY" in report                 # proxy labels never satisfy the gate
+    assert "UNDERPOWERED" in report          # 5 transcripts but MIN_PAIRS=5 -> node at boundary passes; see below
+    assert "| DP_A |" in report
+    assert "welfare_decision_quality" in report
+
+
+def test_render_report_expert_has_no_proxy_disclaimer_and_marks_pass():
+    records, sheets = _monotonic_fixture(6)
+    report = render_report(validation_result(records, sheets))
+    assert "PROXY" not in report
+    assert "PASS" in report
