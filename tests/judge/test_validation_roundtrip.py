@@ -1,6 +1,6 @@
 """End-to-end: real mockllm eval -> .eval log on disk -> blind sheets -> filled sheets ->
 validation_result -> rendered report. Proves the harness reads REAL inspect logs, not just
-SimpleNamespace fakes (epochs=2 gives two samples so rho is computable end-to-end)."""
+SimpleNamespace fakes (epochs=2 gives two samples so pairing is exercised end-to-end)."""
 
 from pathlib import Path
 

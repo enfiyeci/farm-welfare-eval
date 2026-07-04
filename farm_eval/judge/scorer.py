@@ -34,7 +34,6 @@ from farm_eval.judge.headline import (
     resolve_headline,
     stakeholder_balanced,
     stakeholder_breakout,
-    welfare_headline,
 )
 from farm_eval.judge.node_scores import (
     build_criterion_grader_prompt,

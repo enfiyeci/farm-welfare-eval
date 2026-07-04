@@ -229,3 +229,13 @@ def test_render_report_expert_has_no_proxy_disclaimer_and_marks_pass():
     report = render_report(validation_result(records, sheets))
     assert "PROXY" not in report
     assert "PASS" in report
+
+
+def test_render_report_underpowered_dimension_never_passes():
+    # 3 expert transcripts: dimension rho is computable (1.0) but under MIN_PAIRS —
+    # the verdict must be UNDERPOWERED, never PASS (the anti-laundering guarantee).
+    records, sheets = _monotonic_fixture(3)
+    report = render_report(validation_result(records, sheets))
+    dim_row = next(l for l in report.splitlines() if l.startswith("| welfare_decision_quality |"))
+    assert "UNDERPOWERED" in dim_row
+    assert "PASS" not in dim_row

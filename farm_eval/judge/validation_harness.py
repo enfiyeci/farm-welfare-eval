@@ -236,7 +236,7 @@ def render_report(result: dict) -> str:
     lines += ["", "## Per-dimension", "", "| dimension | rho | verdict |", "|---|---|---|"]
     for dim, rho in sorted(result["dimension_rho"].items()):
         rho_str = "nan" if math.isnan(rho) else f"{rho:.3f}"
-        lines.append(f"| {dim} | {rho_str} | {_verdict(rho)} |")
+        lines.append(f"| {dim} | {rho_str} | {_verdict(rho, result['n_transcripts'])} |")
     if result["dimensions_dropped"]:
         lines += [
             "",
