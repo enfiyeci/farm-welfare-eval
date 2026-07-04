@@ -239,3 +239,100 @@ def test_render_report_underpowered_dimension_never_passes():
     dim_row = next(l for l in report.splitlines() if l.startswith("| welfare_decision_quality |"))
     assert "UNDERPOWERED" in dim_row
     assert "PASS" not in dim_row
+
+
+# --- Codex adversarial review hardening --------------------------------------------------------
+
+
+def test_extract_sample_record_rejects_partial_run():
+    score = SimpleNamespace(
+        value={"welfare_headline": 7.5},
+        metadata={
+            "node_scores": {"DP_PLACEHOLDER_1": 7.5},
+            "partial_run": True,
+            "scored_through_day": 3,
+            "episode_end_day": 400,
+        },
+    )
+    with pytest.raises(ValueError, match="partial"):
+        extract_sample_record(_fake_sample({"welfare_judge": score}), "pilot-x.eval")
+
+
+def test_validation_result_unlabeled_judge_node_stays_visible():
+    records, sheets = _monotonic_fixture()
+    for r in records:
+        r["node_scores"]["DP_B"] = 5.0  # judge scores it; no sheet ever labels it
+    result = validation_result(records, sheets)
+    assert result["node_pairs"]["DP_B"] == 0
+    assert math.isnan(result["node_rho"]["DP_B"])
+    report = render_report(result)
+    assert "| DP_B | 0 |" in report
+
+
+def test_load_filled_sheet_rejects_bool_score(tmp_path):
+    sheet = _sheet("0", {"DP_A": True}, {})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="0-10"):
+        load_filled_sheet(p)
+
+
+def test_load_filled_sheet_rejects_score_above_10(tmp_path):
+    sheet = _sheet("0", {"DP_A": 999}, {})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="0-10"):
+        load_filled_sheet(p)
+
+
+def test_load_filled_sheet_rejects_negative_score(tmp_path):
+    sheet = _sheet("0", {"DP_A": -3}, {})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="0-10"):
+        load_filled_sheet(p)
+
+
+def test_load_filled_sheet_rejects_duplicate_node_id(tmp_path):
+    sheet = _sheet("0", {"DP_A": 5.0}, {})
+    sheet["nodes"].append({"node_id": "DP_A", "score": 6.0})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate"):
+        load_filled_sheet(p)
+
+
+def test_load_filled_sheet_rejects_duplicate_dimension_id(tmp_path):
+    sheet = _sheet("0", {}, {"welfare_decision_quality": 5.0})
+    sheet["dimensions"].append({"id": "welfare_decision_quality", "score": 6.0})
+    p = tmp_path / "s.yml"
+    p.write_text(yaml.safe_dump(sheet), encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate"):
+        load_filled_sheet(p)
+
+
+def test_validation_result_rejects_duplicate_sheet_key():
+    records, sheets = _monotonic_fixture()
+    sheets.append(dict(sheets[0]))  # same (log, sample_id, epoch) as an existing sheet
+    with pytest.raises(ValueError, match="duplicate"):
+        validation_result(records, sheets)
+
+
+def test_validation_result_dimension_null_cell_drops_only_that_pair():
+    # 5 monotonic sheets, one dimension cell nulled: pairs == 4, rho still computed
+    # (never dropped), verdict UNDERPOWERED (below MIN_PAIRS=5).
+    records, sheets = _monotonic_fixture(5)
+    sheets[0]["dimensions"][0]["score"] = None
+    result = validation_result(records, sheets)
+    assert result["dimension_pairs"]["welfare_decision_quality"] == 4
+    assert not math.isnan(result["dimension_rho"]["welfare_decision_quality"])
+    report = render_report(result)
+    dim_row = next(l for l in report.splitlines() if l.startswith("| welfare_decision_quality |"))
+    assert "UNDERPOWERED" in dim_row
+
+
+def test_validation_result_label_for_unscored_dimension_raises():
+    records, sheets = _monotonic_fixture()
+    sheets[0]["dimensions"].append({"id": "GHOST", "score": 5.0})
+    with pytest.raises(ValueError, match="GHOST"):
+        validation_result(records, sheets)

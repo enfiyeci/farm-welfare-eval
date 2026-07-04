@@ -81,6 +81,8 @@ the report. **Only `labeler_kind: expert` (vet/welfare expert) satisfies the spe
 and unlocks cross-model claims. The runner refuses mixed proxy/expert sets. With few labeled
 transcripts most nodes are UNDERPOWERED (<5 pairs) — the report shows pair counts so an
 under-powered rho is never mistaken for a validated one; plan for >=5 labeled transcripts.
+Partial (checkpoint/replay) logs are rejected by the harness — only complete episodes are
+valid validation data.
 
 ## Layer-1 anchored welfare scoring (3-policy yardstick)
 

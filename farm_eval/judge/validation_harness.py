@@ -20,7 +20,7 @@ from farm_eval.env.schedule_models import Signature
 from farm_eval.env.state import EnvState
 from farm_eval.judge.dimensions import JudgeDimension, load_dimensions
 from farm_eval.judge.scorer import load_signatures, render_transcript
-from farm_eval.judge.validate import validate_judge, validate_nodes
+from farm_eval.judge.validate import validate_nodes
 
 
 def extract_sample_record(sample, log_name: str) -> dict:
@@ -38,6 +38,13 @@ def extract_sample_record(sample, log_name: str) -> dict:
         raise ValueError(
             f"{log_name} sample {sample.id!r}: score has no node_scores metadata (scored by a "
             f"pre-v2 judge) — re-score the log with the current judge (`inspect score <log>`)"
+        )
+    if (score.metadata or {}).get("partial_run"):
+        raise ValueError(
+            f"{log_name} sample {sample.id!r}: partial run (scored through day "
+            f"{score.metadata.get('scored_through_day')!r} of "
+            f"{score.metadata.get('episode_end_day')!r}) — partial results are never comparable "
+            f"validation data; exclude this log or score a complete episode"
         )
     env_state = EnvState.model_validate(sample.store["EpisodeStore:env_state"])
     return {
@@ -129,13 +136,22 @@ def load_filled_sheet(path: str | Path) -> dict:
     if sheet["labeler_kind"] not in ("proxy", "expert"):
         raise ValueError(f"{path}: labeler_kind must be 'proxy' or 'expert'")
     for section, id_key in (("nodes", "node_id"), ("dimensions", "id")):
+        seen_ids = set()
         for item in sheet.get(section) or []:
+            item_id = item.get(id_key)
+            if item_id in seen_ids:
+                raise ValueError(f"{path}: {section}: duplicate id {item_id!r}")
+            seen_ids.add(item_id)
             score = item.get("score")
             if score is None:
                 continue  # unlabeled cell: the pair is dropped at pairing time, never guessed
-            if not (isinstance(score, (int, float)) and math.isfinite(float(score))):
+            if (
+                isinstance(score, bool)
+                or not (isinstance(score, (int, float)) and math.isfinite(float(score)))
+                or not (0 <= float(score) <= 10)
+            ):
                 raise ValueError(
-                    f"{path}: {section} {item.get(id_key)!r}: score must be a finite number "
+                    f"{path}: {section} {item_id!r}: score must be a finite number in 0-10 "
                     f"or null, got {score!r}"
                 )
     return sheet
@@ -144,10 +160,10 @@ def load_filled_sheet(path: str | Path) -> dict:
 def validation_result(records: list[dict], sheets: list[dict]) -> dict:
     """Pair filled sheets with judge records and run the Spearman gates.
 
-    Fail-loud pairing: a sheet with no matching record, a label for a node the judge never
-    scored, or a mixed proxy/expert sheet set is an error — never a silent drop. Unlabeled
-    (null) cells drop only that pair. Dimension rho needs >=2 sheets; below that it is NaN
-    (mirrors validate_nodes' underpowered semantics), never a crash.
+    Fail-loud pairing: a sheet with no matching record, a label for a node/dimension the
+    judge never scored, a duplicate sheet, or a mixed proxy/expert sheet set is an error —
+    never a silent drop. Unlabeled (null) cells drop only their pair, for nodes AND
+    dimensions alike.
     """
     kinds = {s["labeler_kind"] for s in sheets}
     if len(kinds) != 1:
@@ -156,9 +172,13 @@ def validation_result(records: list[dict], sheets: list[dict]) -> dict:
             f"label sets separately (they answer different questions)"
         )
     by_key = {(r["log"], r["sample_id"], r["epoch"]): r for r in records}
+    seen_keys = set()
     judge_nodes, human_nodes, judge_dims, human_dims = [], [], [], []
     for sheet in sheets:
         key = (sheet["log"], str(sheet["sample_id"]), int(sheet.get("epoch", 1)))
+        if key in seen_keys:
+            raise ValueError(f"duplicate label sheet for {key}")
+        seen_keys.add(key)
         record = by_key.get(key)
         if record is None:
             raise ValueError(f"label sheet {key} has no matching scored log sample")
@@ -169,34 +189,33 @@ def validation_result(records: list[dict], sheets: list[dict]) -> dict:
         judge_nodes.append(record["node_scores"])
         human_nodes.append(labels_n)
         labels_d = {d["id"]: float(d["score"]) for d in sheet["dimensions"] if d["score"] is not None}
+        unknown_d = set(labels_d) - set(record["value"])
+        if unknown_d:
+            raise ValueError(
+                f"{key}: labeled dimension(s) the judge never scored: {sorted(unknown_d)}"
+            )
         judge_dims.append({k: float(record["value"][k]) for k in labels_d})
         human_dims.append(labels_d)
 
-    node_ids = sorted({node for labels in human_nodes for node in labels})
+    node_ids = sorted({node for judge in judge_nodes for node in judge})
     node_rho = validate_nodes(judge_nodes, human_nodes, node_ids)
     node_pairs = {
         node: sum(1 for j, h in zip(judge_nodes, human_nodes) if node in j and node in h)
         for node in node_ids
     }
-    labeled_everywhere = (
-        sorted(set.intersection(*[set(d) for d in human_dims])) if human_dims else []
-    )
-    dims_union = sorted({d for labels in human_dims for d in labels})
-    if len(sheets) < 2:
-        dimension_rho = {d: float("nan") for d in labeled_everywhere}
-    else:
-        dimension_rho = validate_judge(
-            [{k: d[k] for k in labeled_everywhere} for d in judge_dims],
-            [{k: d[k] for k in labeled_everywhere} for d in human_dims],
-            labeled_everywhere,
-        )
+    dim_ids = sorted({d["id"] for sheet in sheets for d in sheet["dimensions"]})
+    dimension_rho = validate_nodes(judge_dims, human_dims, dim_ids)
+    dimension_pairs = {
+        dim: sum(1 for j, h in zip(judge_dims, human_dims) if dim in j and dim in h)
+        for dim in dim_ids
+    }
     return {
         "labeler_kind": next(iter(kinds)),
         "n_transcripts": len(sheets),
         "node_rho": node_rho,
         "node_pairs": node_pairs,
         "dimension_rho": dimension_rho,
-        "dimensions_dropped": sorted(set(dims_union) - set(labeled_everywhere)),
+        "dimension_pairs": dimension_pairs,
     }
 
 
@@ -233,14 +252,15 @@ def render_report(result: dict) -> str:
         pairs = result["node_pairs"][node]
         rho_str = "nan" if math.isnan(rho) else f"{rho:.3f}"
         lines.append(f"| {node} | {pairs} | {rho_str} | {_verdict(rho, pairs)} |")
-    lines += ["", "## Per-dimension", "", "| dimension | rho | verdict |", "|---|---|---|"]
+    lines += [
+        "",
+        "## Per-dimension",
+        "",
+        "| dimension | pairs | rho | verdict |",
+        "|---|---|---|---|",
+    ]
     for dim, rho in sorted(result["dimension_rho"].items()):
+        pairs = result["dimension_pairs"][dim]
         rho_str = "nan" if math.isnan(rho) else f"{rho:.3f}"
-        lines.append(f"| {dim} | {rho_str} | {_verdict(rho, result['n_transcripts'])} |")
-    if result["dimensions_dropped"]:
-        lines += [
-            "",
-            "Dimensions dropped (not labeled in every sheet): "
-            + ", ".join(result["dimensions_dropped"]),
-        ]
+        lines.append(f"| {dim} | {pairs} | {rho_str} | {_verdict(rho, pairs)} |")
     return "\n".join(lines) + "\n"
