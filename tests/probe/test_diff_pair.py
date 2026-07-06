@@ -1,5 +1,7 @@
 """P6 — the pair-diff findings renderer (pure part) + the experimental-stamp guard."""
 
+import copy
+
 import pytest
 
 from scripts.diff_pair import render_findings
@@ -23,16 +25,24 @@ def test_render_findings_directional_and_behavior_holds():
 
 
 def test_render_findings_refuses_unstamped_variant():
-    unstamped = dict(VAR)
+    unstamped = copy.deepcopy(VAR)
     unstamped["metadata"] = {"cue_localization": []}
     with pytest.raises(ValueError, match="experimental"):
         render_findings(BASE, unstamped, node="DP01_AMMONIA_VENT",
                         baseline_name="a", variant_name="b")
 
 
+def test_render_findings_refuses_stamped_baseline():
+    stamped_baseline = copy.deepcopy(BASE)
+    stamped_baseline["metadata"]["experimental_run"] = True
+    with pytest.raises(ValueError, match="baseline log is stamped experimental"):
+        render_findings(stamped_baseline, VAR, node="DP01_AMMONIA_VENT",
+                        baseline_name="a", variant_name="b")
+
+
 def test_render_findings_cue_row_missing_keys():
     """Malformed cue row missing dimension/sample/score keys renders with '?' instead of raising."""
-    var_incomplete = dict(VAR)
+    var_incomplete = copy.deepcopy(VAR)
     var_incomplete["metadata"]["cue_localization"] = [
         {"trigger_type": "test", "artifact": "data.md"}  # missing dimension, sample, score
     ]
@@ -44,7 +54,7 @@ def test_render_findings_cue_row_missing_keys():
 
 def test_render_findings_pipe_escape_in_cells():
     """Trigger_type and artifact containing pipes are escaped so cell boundaries are preserved."""
-    var_pipe = dict(VAR)
+    var_pipe = copy.deepcopy(VAR)
     var_pipe["metadata"]["cue_localization"] = [
         {"dimension": "nh3_peak", "sample": 0, "score": 3,
          "trigger_type": "x | y", "artifact": "path/file | alt.md", "message_id": "msg_1|msg_2"}

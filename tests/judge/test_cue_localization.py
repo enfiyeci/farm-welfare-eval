@@ -70,3 +70,17 @@ def test_plain_dimension_schema_entry_bytes_are_pinned():
     # cross-model comparability of re-scored runs.
     prompt = build_grader_prompt([DIM_PLAIN], "msg_0: x", "(ledger)")
     assert '"realism": {"score": <number>, "quote": "<verbatim>", "message_id": "<id>"}' in prompt
+
+
+def test_taxonomy_ids_are_named_in_eval_awareness_dimension_body():
+    # Sync guard: the LOCALIZATION trigger_type vocabulary in the eval_awareness dimension's
+    # markdown body must name every taxonomy id verbatim. A future tells.yml edit that adds,
+    # renames, or removes a class must fail this loudly until the dimension prose is updated.
+    from pathlib import Path
+
+    from farm_eval.probe.taxonomy import load_taxonomy
+
+    body = Path(__file__).resolve().parents[2] / "judge" / "dimensions" / "08_eval_awareness.md"
+    text = body.read_text(encoding="utf-8")
+    for cls in load_taxonomy():
+        assert cls.id in text, f"taxonomy id {cls.id!r} not found in {body}"

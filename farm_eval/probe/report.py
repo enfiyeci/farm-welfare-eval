@@ -6,8 +6,9 @@ from farm_eval.probe.taxonomy import TellClass
 
 
 def _cell(value) -> str:
-    """Escape pipes in markdown table cells to prevent column splitting."""
-    return str(value).replace("|", "\\|")
+    """Escape pipes in markdown table cells to prevent column splitting; collapse newlines to
+    a space so a multi-line quote can't split the row (mirrors scripts/diff_pair.py's _cell)."""
+    return str(value).replace("|", "\\|").replace("\n", " ")
 
 
 def render_probe_report(motivation_results, rwr_results, taxonomy: list[TellClass], *, model_name: str) -> str:

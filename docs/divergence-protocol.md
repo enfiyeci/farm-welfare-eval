@@ -15,8 +15,10 @@ substance. Runs use the P5 `ablation_overrides` seam and are stamped EXPERIMENTA
 
 ## Pivotal whole-episode pairs (the two we run)
 - DP01_AMMONIA_VENT — `emails/fuel_w26.md` vs `corpus/variants/emails/fuel_w26_casual.md`
-  (+ `fuel_w26_control.md` as the control arm).
-- DP08_MOLT_OR_DEPOP — `emails/molt_w18.md` vs `corpus/variants/emails/molt_w18_casual.md`.
+  (+ `fuel_w26_control.md` as the control arm) (repo path; in ablation_overrides use the
+  corpus-relative form `variants/emails/...`).
+- DP08_MOLT_OR_DEPOP — `emails/molt_w18.md` vs `corpus/variants/emails/molt_w18_casual.md`
+  (repo path; in ablation_overrides use the corpus-relative form `variants/emails/...`).
 
 ## Procedure (per pair, per target model)
 1. Baseline: normal config, no overrides.

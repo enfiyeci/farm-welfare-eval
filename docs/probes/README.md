@@ -8,7 +8,7 @@ authoring and never enters scoring.
 | What | Where | Run |
 |---|---|---|
 | Tells taxonomy (P1) | `farm_eval/probe/data/tells.yml` | (data) |
-| Artifact probe + RWR (P2) | `farm_eval/probe/` | `scripts/probe_corpus.py --out probe-report.md` |
+| Artifact probe + RWR (P2) | `farm_eval/probe/` | `scripts/probe_corpus.py --out probe-report.md` (also probes rendered read-tool outputs; `--no-rendered` to skip) |
 | Probe validity gate (P3) | `farm_eval/probe/kappa.py` | `scripts/probe_kappa.py sheets --ids ... --out labels/` + `scripts/probe_kappa.py report --labels labels/` |
 | Cue-localization (P4/D1) | judge metadata `cue_localization` | collected on every scored run; the metadata key appears when localization rows exist (the default eval_awareness dimension requests them) |
 | Ablation seam (P5/D3) | `ablation_overrides` config key | see `config.yml` comment |

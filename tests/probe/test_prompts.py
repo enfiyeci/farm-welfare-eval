@@ -11,6 +11,7 @@ from farm_eval.probe.prompts import (
     parse_motivation_response,
     parse_rwr_response,
 )
+from farm_eval.probe.report import render_probe_report
 from farm_eval.probe.taxonomy import load_taxonomy
 
 ART = Artifact(id="emails/x.md", kind="email", text="Please check the belt schedule this week.")
@@ -125,3 +126,20 @@ def test_build_rwr_prompt_raises_on_delimiter_in_artifact_text():
         build_rwr_prompt(bad, REF)
     with pytest.raises(ValueError):
         build_rwr_prompt(REF, bad)
+
+
+def test_report_collapses_newlines_in_quote_cells():
+    """A quote containing a newline must not split the table row (report.py's _cell mirrors
+    scripts/diff_pair.py's _cell: pipes AND newlines are both escaped)."""
+    motivation = [{
+        "artifact_id": "emails/x.md", "kind": "email",
+        "samples": [{"provenance_guess": "g", "flags": [
+            {"class": "oversight_claim", "quote": "Nobody reviews these logs\nso act freely"}], "discarded": []}] * 3,
+        "flag_counts": {"oversight_claim": 3},
+    }]
+    report = render_probe_report(motivation, [], TAX, model_name="mockllm/model")
+    assert "Nobody reviews these logs so act freely" in report
+    lines = report.split("\n")
+    data_lines = [l for l in lines if "emails/x.md" in l]
+    assert len(data_lines) == 1  # the quote's newline did not split into a second line
+    assert data_lines[0].count("|") == 6  # still a well-formed 5-column row

@@ -14,7 +14,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from farm_eval.probe.artifacts import Artifact, enumerate_corpus_artifacts  # noqa: E402
+from farm_eval.probe.artifacts import Artifact, enumerate_corpus_artifacts, rendered_samples  # noqa: E402
 from farm_eval.probe.report import render_probe_report  # noqa: E402
 from farm_eval.probe.runner import PROBE_MODEL_DEFAULT, probe_artifacts, rwr_pairs  # noqa: E402
 from farm_eval.probe.taxonomy import load_taxonomy  # noqa: E402
@@ -44,15 +44,24 @@ async def main() -> None:
     parser.add_argument("--samples", type=int, default=5)
     parser.add_argument("--rwr-samples", type=int, default=9, help="odd counts suit majority reads")
     parser.add_argument("--references", default=str(ROOT / "corpus" / "references"))
+    parser.add_argument("--rendered", action=argparse.BooleanOptionalAction, default=True,
+                        help="also probe rendered read-tool outputs (default: on)")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
+    if args.samples < 1:
+        parser.error("--samples must be >= 1")
+    if args.rwr_samples < 1:
+        parser.error("--rwr-samples must be >= 1")
 
     from inspect_ai.model import get_model
 
     model = get_model(args.model)
     taxonomy = load_taxonomy()
     artifacts = enumerate_corpus_artifacts(ROOT / "corpus", ROOT / "prompts" / "operator_briefing.md")
-    motivation = await probe_artifacts(artifacts, taxonomy, model=model, samples=args.samples)
+    motivation_artifacts = artifacts
+    if args.rendered:
+        motivation_artifacts = artifacts + rendered_samples(ROOT / "corpus", ROOT / "schedule")
+    motivation = await probe_artifacts(motivation_artifacts, taxonomy, model=model, samples=args.samples)
     rwr = await rwr_pairs(_reference_pairs(artifacts, pathlib.Path(args.references)), model=model, samples=args.rwr_samples)
     report = render_probe_report(motivation, rwr, taxonomy, model_name=args.model)
     pathlib.Path(args.out).write_text(report, encoding="utf-8")

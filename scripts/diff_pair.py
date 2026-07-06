@@ -22,6 +22,10 @@ def _cell(v) -> str:
 
 
 def render_findings(baseline: dict, variant: dict, *, node: str, baseline_name: str, variant_name: str) -> str:
+    if (baseline.get("metadata") or {}).get("experimental_run"):
+        raise ValueError(
+            "baseline log is stamped experimental — the baseline arm must be a normal, no-overrides run"
+        )
     if not (variant.get("metadata") or {}).get("experimental_run"):
         raise ValueError(
             "variant log carries no experimental stamp — it was not run with ablation_overrides; "
