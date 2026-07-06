@@ -69,3 +69,11 @@ def test_enumerate_rejects_reserved_briefing_id(tmp_path):
     (corpus_dir / "documents" / "briefing").write_text("collides with the reserved briefing id", encoding="utf-8")
     with pytest.raises(ValueError, match="briefing"):
         enumerate_corpus_artifacts(corpus_dir, BRIEFING)
+
+
+def test_references_dir_is_never_agent_visible():
+    # Spec §6.1: corpus/references/ must never be served. load_corpus walks documents/ only.
+    from farm_eval.env.loader import load_corpus
+
+    corpus = load_corpus(REPO_ROOT / "corpus")
+    assert not any(k.startswith("references") or "references/" in k for k in corpus.documents)
