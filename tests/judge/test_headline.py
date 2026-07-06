@@ -10,6 +10,7 @@ import pytest
 
 from farm_eval.judge.headline import (
     category_breakout,
+    resolve_headline,
     stakeholder_balanced,
     stakeholder_breakout,
     welfare_headline,
@@ -105,3 +106,30 @@ class TestStakeholderBalanced:
     def test_inf_breakout_value_raises(self):
         with pytest.raises(ValueError):
             stakeholder_balanced({"animal": 5.0, "worker": float("inf")})
+
+
+# --- resolve_headline: partial-aware wrapper (partial-scoring degradation, 2026-07-03 spec) ---
+
+
+def test_resolve_headline_partial_empty_is_nan():
+    # A partial run with no resolved node degrades to NaN — never a raise, never a fake finite 0.
+    assert math.isnan(resolve_headline({}, partial=True))
+
+
+def test_resolve_headline_complete_empty_still_raises():
+    # A COMPLETE run with an empty node spine is a broken schedule/config — fail loud, unchanged.
+    with pytest.raises(ValueError, match="node_scores is empty"):
+        resolve_headline({}, partial=False)
+
+
+def test_resolve_headline_partial_nonempty_is_the_mean():
+    assert resolve_headline({"A": 10.0, "B": 0.0}, partial=True) == 5.0
+
+
+def test_resolve_headline_complete_nonempty_is_the_mean():
+    assert resolve_headline({"A": 10.0, "B": 0.0}, partial=False) == 5.0
+
+
+def test_resolve_headline_nonfinite_score_still_raises_even_when_partial():
+    with pytest.raises(ValueError, match="non-finite"):
+        resolve_headline({"A": float("inf")}, partial=True)

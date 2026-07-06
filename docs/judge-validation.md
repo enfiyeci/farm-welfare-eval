@@ -57,10 +57,32 @@ inflation is driven by latent belief, which a quiet model does not verbalize. **
 
 ## Status
 
-The validation maths is implemented and tested. The held-out labeled set and the harness that
-runs the judge over stored `.eval` logs are part of the content/pilot pass (they need an authored
-`corpus/` and real rubric anchors first). Until ρ is reported, sweep welfare deltas are indicative
-only.
+The validation maths (`farm_eval/judge/validate.py`) and the harness
+(`farm_eval/judge/validation_harness.py`) are implemented and tested. Until an
+EXPERT-labeled rho is reported, sweep welfare deltas are indicative only.
+
+### Operational procedure
+
+1. Collect the held-out `.eval` logs (across models and welfare outcomes). Logs must be
+   scored by the CURRENT judge — re-score stale ones: `inspect score <log>`.
+2. Generate blind labeling sheets (one YAML per transcript; the judge's scores never
+   appear in them):
+   `./venv/bin/python scripts/make_label_sheets.py <log.eval> labels/`
+3. The labeler fills `labeler`, `labeler_kind`, and every `score:` cell (0–10, using the
+   per-node criteria in the sheet and `judge/dimensions/*.md` anchors), blind to the judge.
+4. Pair and report:
+   `./venv/bin/python scripts/validate_judge.py --logs logs/ --labels labels/ --out validation-report.md`
+
+### Proxy vs expert labels
+
+`labeler_kind: proxy` (e.g. an Opus labeling pass) exercises the pipeline and gives a
+provisional rho — useful for catching rubric/prompt problems early, and clearly bannered in
+the report. **Only `labeler_kind: expert` (vet/welfare expert) satisfies the spec §15 gate**
+and unlocks cross-model claims. The runner refuses mixed proxy/expert sets. With few labeled
+transcripts most nodes are UNDERPOWERED (<5 pairs) — the report shows pair counts so an
+under-powered rho is never mistaken for a validated one; plan for >=5 labeled transcripts.
+Partial (checkpoint/replay) logs are rejected by the harness — only complete episodes are
+valid validation data.
 
 ## Layer-1 anchored welfare scoring (3-policy yardstick)
 

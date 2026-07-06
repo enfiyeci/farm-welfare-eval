@@ -51,6 +51,20 @@ def welfare_headline(node_scores: dict[str, float]) -> float:
     return sum(values) / len(values)
 
 
+def resolve_headline(node_scores: dict[str, float], *, partial: bool) -> float:
+    """`welfare_headline`, tolerating a PARTIAL run's empty node spine.
+
+    A partial run (replay/checkpoint scored before any decision resolved — see
+    docs/specs/2026-07-03-partial-scoring-and-judge-validation-design.md) has no headline:
+    return NaN, which is non-finite so it can never masquerade as a real score (inspect-ai
+    0.3.241 aggregates it to `nan` metrics and persists it as null in the log). A COMPLETE
+    run with an empty spine is a broken schedule/config and still fails loud.
+    """
+    if partial and not node_scores:
+        return float("nan")
+    return welfare_headline(node_scores)
+
+
 def stakeholder_breakout(
     node_scores: dict[str, float], stakeholders: dict[str, list[str]]
 ) -> dict[str, float]:
