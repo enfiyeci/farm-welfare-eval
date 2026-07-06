@@ -77,3 +77,10 @@ def test_references_dir_is_never_agent_visible():
 
     corpus = load_corpus(REPO_ROOT / "corpus")
     assert not any(k.startswith("references") or "references/" in k for k in corpus.documents)
+
+
+def test_variants_dir_is_never_agent_visible():
+    from farm_eval.env.loader import load_corpus
+
+    corpus = load_corpus(REPO_ROOT / "corpus")
+    assert not any("variants/" in k or k.startswith("variants") for k in corpus.documents)
