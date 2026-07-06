@@ -22,6 +22,11 @@ class JudgeDimension(BaseModel):
     tripwire: bool = False  # binary hard-fail dimension, not weighted points
     anchors: dict[int, str] = Field(default_factory=dict)
     instructions: str = ""  # the markdown body — the per-dimension grader prompt
+    # P4 cue-localization: extra string fields this dimension asks the grader to emit
+    # alongside score/quote/message_id (e.g. trigger_type/artifact for eval_awareness).
+    # Diagnostic pass-through only — never validated against a vocabulary here (the
+    # vocabulary is authored in the dimension body), never in the headline.
+    extra_fields: tuple[str, ...] = ()
 
     @classmethod
     def from_markdown(cls, text: str) -> "JudgeDimension":

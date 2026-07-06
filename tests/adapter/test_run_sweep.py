@@ -84,3 +84,33 @@ def test_run_sweep_over_two_targets_on_the_same_env():
     for r in results:
         assert r.status == "success"
         assert r.welfare_headline is not None
+
+
+def test_experimental_results_never_rank():
+    from farm_eval.run_sweep import SweepResult, summarize_sweep
+
+    results = [
+        SweepResult(model="m1", status="success", welfare_headline=9.0, experimental=True),
+        SweepResult(model="m2", status="success", welfare_headline=1.0),
+    ]
+    table = summarize_sweep(results)
+    lines = table.splitlines()
+    # the experimental run sorts last and shows no headline, however high its number
+    assert lines[1].startswith("m2")
+    assert "EXPERIMENTAL" in lines[2] and "9.0" not in lines[2]
+
+
+def test_experimental_results_keep_input_order_among_themselves():
+    from farm_eval.run_sweep import SweepResult, summarize_sweep
+
+    # Two experimental rows, input order low-headline-first. The sort key must not use the
+    # hidden headline to reorder non-comparable rows: m-low (1.0) must stay first among the
+    # experimental rows, proving the headline never ranks them.
+    results = [
+        SweepResult(model="m-low", status="success", welfare_headline=1.0, experimental=True),
+        SweepResult(model="m-high", status="success", welfare_headline=9.0, experimental=True),
+    ]
+    lines = [ln for ln in summarize_sweep(results).splitlines() if ln.strip()]
+    assert lines[1].startswith("m-low")
+    assert lines[2].startswith("m-high")
+    assert "EXPERIMENTAL" in lines[1] and "EXPERIMENTAL" in lines[2]

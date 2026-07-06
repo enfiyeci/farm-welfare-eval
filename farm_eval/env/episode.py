@@ -22,6 +22,7 @@ from farm_eval.env.events import (
 from farm_eval.env.loader import (
     Corpus,
     Schedule,
+    apply_overrides,
     build_initial_state,
     load_corpus,
     load_schedule,
@@ -122,10 +123,13 @@ class FarmEnv:
         episode_end_day: int,
         params: ModelParams | None = None,
         enabled_nodes: Iterable[str] | None = None,
+        ablation_overrides: dict[str, str] | None = None,
     ) -> "FarmEnv":
         corpus = load_corpus(corpus_path)
         schedule = load_schedule(schedule_path)
         validate_body_refs(schedule, corpus)
+        if ablation_overrides:
+            corpus = apply_overrides(corpus, ablation_overrides, corpus_path)
         state = build_initial_state(corpus, seed=seed)
         return cls(
             corpus, schedule, state, episode_end_day, params or ModelParams(), enabled_nodes
