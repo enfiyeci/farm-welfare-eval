@@ -5,17 +5,29 @@ REGULAR cadence and long dead-air; fixes are Phase-2 authoring, never regulariza
 
 from __future__ import annotations
 
+import re
 import statistics
+
+_HOUSE_ID_RE = re.compile(r"^H\d+$")
+
+
+def _house_ids(value) -> set[str]:
+    values = value if isinstance(value, list) else [value]
+    return {str(v) for v in values if _HOUSE_ID_RE.match(str(v))}
 
 
 def _houses_from_action_match(action_match) -> set[str]:
     where = getattr(action_match, "where", None) or {}
-    house = where.get("house_id") if isinstance(where, dict) else None
-    if house is None:
+    if not isinstance(where, dict):
         return set()
-    if isinstance(house, list):
-        return {str(h) for h in house}
-    return {str(house)}
+    houses: set[str] = set()
+    house = where.get("house_id")
+    if house is not None:
+        houses |= {str(h) for h in (house if isinstance(house, list) else [house])}
+    target = where.get("target")
+    if target is not None:
+        houses |= _house_ids(target)
+    return houses
 
 
 def _houses_for_decision_point(dp) -> set[str]:
@@ -49,7 +61,7 @@ def _houses_for_decision_point(dp) -> set[str]:
     return houses
 
 
-def audit_schedule(schedule) -> dict:
+def audit_schedule(schedule, *, end_day: int | None = None) -> dict:
     dps = sorted(schedule.decision_points, key=lambda d: (d.opens_day, d.id))
     opens = [(d.opens_day, d.id) for d in dps]
     gaps = [
@@ -57,6 +69,14 @@ def audit_schedule(schedule) -> dict:
         for a, b in zip(opens, opens[1:])
     ]
     event_days = sorted({e.on_day for e in schedule.events} | {d.opens_day for d in dps})
+    if end_day is not None:
+        # Full-horizon mode: include the episode boundaries so the head (day 0 -> first
+        # observed day) and tail (last observed day -> end_day) windows are measurable too —
+        # otherwise a silent lead-in or a long dead tail past the last event is invisible.
+        if event_days and event_days[0] > 0:
+            event_days = [0] + event_days
+        if not event_days or event_days[-1] < end_day:
+            event_days = event_days + [end_day]
     dead_air = [
         {"from_day": a, "to_day": b, "gap_days": b - a}
         for a, b in zip(event_days, event_days[1:])

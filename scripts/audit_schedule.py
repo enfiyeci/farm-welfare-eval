@@ -7,6 +7,8 @@ import argparse
 import pathlib
 import sys
 
+import yaml
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -18,7 +20,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", default=str(ROOT / "docs" / "probes" / "schedule-spacing-report.md"))
     args = parser.parse_args()
-    report = render_schedule_report(audit_schedule(load_schedule(ROOT / "schedule")))
+    config = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
+    end_day = config["episode_end_day"]
+    report = render_schedule_report(audit_schedule(load_schedule(ROOT / "schedule"), end_day=end_day))
     out = pathlib.Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(report, encoding="utf-8")
