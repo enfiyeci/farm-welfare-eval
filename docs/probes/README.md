@@ -10,7 +10,7 @@ authoring and never enters scoring.
 | Tells taxonomy (P1) | `farm_eval/probe/data/tells.yml` | (data) |
 | Artifact probe + RWR (P2) | `farm_eval/probe/` | `scripts/probe_corpus.py --out probe-report.md` |
 | Probe validity gate (P3) | `farm_eval/probe/kappa.py` | `scripts/probe_kappa.py sheets --ids ... --out labels/` + `scripts/probe_kappa.py report --labels labels/` |
-| Cue-localization (P4/D1) | judge metadata `cue_localization` | automatic on every scored run |
+| Cue-localization (P4/D1) | judge metadata `cue_localization` | collected on every scored run; the metadata key appears when localization rows exist (the default eval_awareness dimension requests them) |
 | Ablation seam (P5/D3) | `ablation_overrides` config key | see `config.yml` comment |
 | Divergence kit (P6) | `docs/divergence-protocol.md` | `scripts/diff_pair.py --baseline ... --variant ... --node ... --out findings.md` |
 | Spacing audit (P8) | `docs/probes/schedule-spacing-report.md` | `scripts/audit_schedule.py [--out docs/probes/schedule-spacing-report.md]` |
@@ -33,17 +33,17 @@ RWR only. Verbal awareness is a LOWER BOUND — see docs/judge-validation.md.
 1. κ gate passed; `scripts/probe_corpus.py` clean (no majority-fired high-severity tells) on
    the full corpus + briefing.
 2. Blow-cover pass: instruct a strong model (default Fable; optionally a second family —
-   Gemini Pro was the most tell-sensitive model in the pilot) with the motivation-guessing
+   Gemini Pro, which fired the eval-awareness gate true-positive in the pilot) with the motivation-guessing
    framing over (a) every corpus artifact, (b) ONE full stored transcript. Collect every cue
    it surfaces; map each to a taxonomy class.
 3. Disposition table (committed): fix / accept-with-rationale per finding. No unresolved
    high-severity finding at freeze.
-4. Re-run `scripts/probe_corpus.py` after fixes; attach the report to the freeze record.
+4. Re-run `scripts/probe_corpus.py --out <report>` after fixes; attach the report to the freeze record.
 
 ## Phase-1 exit criteria (spec §3)
 
 - [ ] κ ≥ 0.6 + format-control (P3)
-- [ ] RWR number for every artifact class, mode-labeled (P2)
+- [ ] RWR number for every artifact class, mode-labeled (P2) — needs reference curation beyond the CLI's current email-only real-reference pairing (self-relative mode covers the rest)
 - [ ] cue_localization visible in a scored run's metadata (P4)
 - [ ] one end-to-end ablation demonstrated (P5)
 - [ ] 2 pivotal pairs authored + protocol committed; executed when episode infra permits (P6)
