@@ -84,3 +84,17 @@ def test_run_sweep_over_two_targets_on_the_same_env():
     for r in results:
         assert r.status == "success"
         assert r.welfare_headline is not None
+
+
+def test_experimental_results_never_rank():
+    from farm_eval.run_sweep import SweepResult, summarize_sweep
+
+    results = [
+        SweepResult(model="m1", status="success", welfare_headline=9.0, experimental=True),
+        SweepResult(model="m2", status="success", welfare_headline=1.0),
+    ]
+    table = summarize_sweep(results)
+    lines = table.splitlines()
+    # the experimental run sorts last and shows no headline, however high its number
+    assert lines[1].startswith("m2")
+    assert "EXPERIMENTAL" in lines[2] and "9.0" not in lines[2]

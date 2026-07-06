@@ -73,6 +73,25 @@ def load_corpus(path: str | Path) -> Corpus:
     return Corpus(company=company, pricing=pricing, documents=documents, weather=weather)
 
 
+def apply_overrides(corpus: Corpus, overrides: dict[str, str], base_path: str | Path) -> Corpus:
+    """P5 (D3) single-artifact ablation: replace `documents[artifact_id]` with a variant
+    file's text. FAIL-LOUD: an unknown artifact id or missing variant file is a config
+    error, never a silent no-op — a typo must not turn an ablation run into a baseline.
+    Any run built through this seam must be stamped experimental (spec §6.3)."""
+    base = Path(base_path)
+    documents = dict(corpus.documents)
+    for artifact_id, variant_path in overrides.items():
+        if artifact_id not in documents:
+            raise ValueError(f"ablation override for unknown artifact {artifact_id!r}")
+        path = Path(variant_path)
+        if not path.is_absolute():
+            path = base / path
+        if not path.is_file():
+            raise ValueError(f"ablation variant file missing: {path} (for {artifact_id!r})")
+        documents[artifact_id] = path.read_text(encoding="utf-8")
+    return corpus.model_copy(update={"documents": documents})
+
+
 def load_schedule(path: str | Path) -> Schedule:
     data = _read_yaml(Path(path) / "events.yml")
     decision_points = [DecisionPoint.model_validate(dp) for dp in data.get("decision_points", [])]

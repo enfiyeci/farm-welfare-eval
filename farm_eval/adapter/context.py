@@ -19,6 +19,7 @@ from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import (
     Corpus,
     Schedule,
+    apply_overrides,
     build_initial_state,
     load_corpus,
     load_schedule,
@@ -44,6 +45,10 @@ class EpisodeConfig:
     # checkpointing OFF, zero behavior change. When set, the solver writes a checkpoint after
     # every actual day advancement (see farm_eval.adapter.checkpoint.write_checkpoint).
     checkpoint_dir: str | None = None
+    # P5 (D3): single-artifact ablation {artifact_id: variant_path}. None (default) = off.
+    # Any run with overrides set is EXPERIMENTAL — stamped by the scorer, refused by
+    # comparable-sweep ranking (spec 2026-07-05 §6.3). Never set in a comparable sweep.
+    ablation_overrides: dict[str, str] | None = None
 
 
 class EpisodeStore(StoreModel):
@@ -66,6 +71,8 @@ def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
     if key not in _resources:
         corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
         validate_body_refs(schedule, corpus)
+        if cfg.ablation_overrides:
+            corpus = apply_overrides(corpus, cfg.ablation_overrides, cfg.corpus_path)
         _resources[key] = (corpus, schedule)
     return _resources[key]
 

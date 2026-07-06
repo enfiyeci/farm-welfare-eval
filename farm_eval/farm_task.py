@@ -40,6 +40,7 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         ),
         # D2: opt-in per-beat checkpointing. Key-absent / null = off (no behavior change).
         checkpoint_dir=cfg.get("checkpoint_dir"),
+        ablation_overrides=(dict(cfg["ablation_overrides"]) if cfg.get("ablation_overrides") else None),
     )
     briefing = load_briefing(cfg["briefing_path"])
     return Task(
@@ -50,6 +51,7 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
             cfg["schedule_path"],
             samples=int(cfg.get("judge_samples", 3)),
             episode_end_day=int(cfg["episode_end_day"]),
+            experimental=bool(cfg.get("ablation_overrides")),
         ),
         epochs=int(cfg.get("epochs", 1)),
     )

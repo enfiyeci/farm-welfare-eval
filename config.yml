@@ -29,6 +29,12 @@ model_params: {}          # ModelParams overrides for the reactive substrate (PL
 #                                                     # Omit / null = off (default, no behavior
 #                                                     # change). See farm_eval/adapter/checkpoint.py.
 
+# ablation_overrides:                                # P5 (D3): single-artifact ablation
+#   emails/fuel_w26.md: corpus/variants/emails/fuel_w26_casual.md
+#                                                    # {artifact_id: variant_path}. Omit/null = off.
+#                                                    # Runs with overrides are stamped EXPERIMENTAL
+#                                                    # and never rank in a comparable sweep.
+
 # Informational (role binding happens at eval time via --model-role); used by run_sweep (B8).
 model_roles:
   target: anthropic/claude-opus-4-8

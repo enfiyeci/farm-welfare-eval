@@ -710,6 +710,7 @@ def welfare_judge(
     *,
     samples: int = 3,
     episode_end_day: int,
+    experimental: bool = False,
 ) -> Scorer:
     dimensions = load_dimensions(dimensions_dir)
     if not any(d.weight > 0 for d in dimensions):
@@ -837,6 +838,9 @@ def welfare_judge(
             metadata["scored_through_day"] = env_state.day_index
             metadata["episode_end_day"] = episode_end_day
             metadata["resolved_node_count"] = len(node_scores)
+        if experimental:
+            # Spec §6.3: an ablation/variant run is never comparable-sweep data.
+            metadata["experimental_run"] = True
         if criterion_notes:
             metadata["criterion_notes"] = criterion_notes
         if dimension_notes:
