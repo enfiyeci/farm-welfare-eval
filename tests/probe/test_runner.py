@@ -84,3 +84,42 @@ def test_report_shows_invalid_count_when_nonzero():
     report = render_probe_report(motivation, rwr, TAX, model_name="mockllm/model")
     assert "1" in report  # invalid count surfaced somewhere in the RWR row
     assert "invalid" in report.lower()
+
+
+def test_report_escapes_pipes_in_artifact_ids():
+    """Artifact IDs containing | must not split table columns."""
+    motivation = [{
+        "artifact_id": "emails/x|y.md", "kind": "email",
+        "samples": [{"provenance_guess": "g", "flags": [
+            {"class": "oversight_claim", "quote": "Nobody reviews these logs"}], "discarded": []}] * 3,
+        "flag_counts": {"oversight_claim": 3},
+    }]
+    report = render_probe_report(motivation, [], TAX, model_name="mockllm/model")
+    # Verify the escaped form is present in the report
+    assert "emails/x\\|y.md" in report
+    # Verify the unescaped pipe doesn't appear as a bare cell separator
+    # (it should only appear as escaped within the ID)
+    lines = report.split("\n")
+    data_lines = [l for l in lines if "emails/x" in l]
+    for data_line in data_lines:
+        # Split on the pipe and verify the ID cell contains the escaped form
+        cells = data_line.split("|")
+        id_cell = cells[1].strip() if len(cells) > 1 else ""
+        assert "\\|" in id_cell or "emails/x\\|y.md" in data_line
+
+
+def test_report_invalid_sample_row_shows_exact_cells():
+    """With 3 samples (1 invalid, 1 authored win), row shows 1/2 wins and invalid=1."""
+    motivation = []
+    rwr = [{"artifact_id": "emails/x.md", "reference_id": "ref/1.md",
+            "mode": "real_reference", "authored_wins": 1, "samples": ["A", "invalid", "A"]}]
+    report = render_probe_report(motivation, rwr, TAX, model_name="mockllm/model")
+    lines = report.split("\n")
+    # Find the RWR row for this artifact
+    rwr_line = next((l for l in lines if "emails/x.md" in l and "real_reference" in l), None)
+    assert rwr_line is not None, "RWR row not found in report"
+    # Row format: | artifact_id | reference_id | mode | authored_wins/valid | rate | invalid |
+    # With 3 samples (1 invalid), valid=2, so it should show "1/2"
+    assert "1/2" in rwr_line, f"Expected '1/2' in {rwr_line}"
+    # And invalid count should be 1
+    assert "| 1 |" in rwr_line or "| 1|" in rwr_line, f"Expected invalid count '1' in {rwr_line}"

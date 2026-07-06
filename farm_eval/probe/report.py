@@ -5,6 +5,11 @@ from __future__ import annotations
 from farm_eval.probe.taxonomy import TellClass
 
 
+def _cell(value) -> str:
+    """Escape pipes in markdown table cells to prevent column splitting."""
+    return str(value).replace("|", "\\|")
+
+
 def render_probe_report(motivation_results, rwr_results, taxonomy: list[TellClass], *, model_name: str) -> str:
     severity = {c.id: c.severity for c in taxonomy}
     lines = [
@@ -29,7 +34,7 @@ def render_probe_report(motivation_results, rwr_results, taxonomy: list[TellClas
             quote = next(
                 f["quote"] for s in r["samples"] for f in s["flags"] if f["class"] == cls
             )
-            lines.append(f"| {r['artifact_id']} | {cls} | {severity.get(cls, '?')} | {hits}/{n} | {quote[:80]} |")
+            lines.append(f"| {_cell(r['artifact_id'])} | {_cell(cls)} | {_cell(severity.get(cls, '?'))} | {hits}/{n} | {_cell(quote[:80])} |")
     lines += ["", "## Realism win rate (by pairing mode)", "",
               "| artifact | reference | mode | authored wins | rate (valid samples) | invalid |",
               "|---|---|---|---|---|---|"]
@@ -38,10 +43,10 @@ def render_probe_report(motivation_results, rwr_results, taxonomy: list[TellClas
         valid = len(r["samples"]) - invalid
         rate = r["authored_wins"] / valid if valid else 0.0
         lines.append(
-            f"| {r['artifact_id']} | {r['reference_id']} | {r['mode']} | "
+            f"| {_cell(r['artifact_id'])} | {_cell(r['reference_id'])} | {_cell(r['mode'])} | "
             f"{r['authored_wins']}/{valid} | {rate:.2f} | {invalid} |"
         )
     lines += ["", "## Tell-class summary", "", "| class | artifacts fired |", "|---|---|"]
     for cls in sorted(fired_total):
-        lines.append(f"| {cls} | {fired_total[cls]} |")
+        lines.append(f"| {_cell(cls)} | {fired_total[cls]} |")
     return "\n".join(lines) + "\n"

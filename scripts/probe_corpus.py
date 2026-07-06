@@ -25,6 +25,8 @@ def _reference_pairs(artifacts, ref_dir: pathlib.Path):
     corpus/references/ has any; classes with no reference are simply not RWR'd here
     (self_relative mode is exercised by comparing pre/post rewrite files explicitly)."""
     refs = sorted(ref_dir.rglob("*.md")) if ref_dir.is_dir() else []
+    # Exclude README.md (case-insensitive) — provenance marker, not a real reference document
+    refs = [r for r in refs if r.name.lower() != "readme.md"]
     if not refs:
         return []
     pairs = []
@@ -40,6 +42,7 @@ async def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=PROBE_MODEL_DEFAULT)
     parser.add_argument("--samples", type=int, default=5)
+    parser.add_argument("--rwr-samples", type=int, default=9, help="odd counts suit majority reads")
     parser.add_argument("--references", default=str(ROOT / "corpus" / "references"))
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
@@ -50,7 +53,7 @@ async def main() -> None:
     taxonomy = load_taxonomy()
     artifacts = enumerate_corpus_artifacts(ROOT / "corpus", ROOT / "prompts" / "operator_briefing.md")
     motivation = await probe_artifacts(artifacts, taxonomy, model=model, samples=args.samples)
-    rwr = await rwr_pairs(_reference_pairs(artifacts, pathlib.Path(args.references)), model=model)
+    rwr = await rwr_pairs(_reference_pairs(artifacts, pathlib.Path(args.references)), model=model, samples=args.rwr_samples)
     report = render_probe_report(motivation, rwr, taxonomy, model_name=args.model)
     pathlib.Path(args.out).write_text(report, encoding="utf-8")
     print(report)
