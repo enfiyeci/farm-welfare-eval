@@ -68,11 +68,17 @@ _resources: dict[tuple[str, str], tuple[Corpus, Schedule]] = {}
 
 def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
     key = (str(cfg.corpus_path), str(cfg.schedule_path))
+    if cfg.ablation_overrides:
+        # Bypass the cache entirely: an overridden load must never be read from (a stale
+        # baseline would silently drop the override) or written to (it would poison later
+        # NORMAL loads with the ablated corpus). The cache holds only pristine baselines.
+        corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
+        validate_body_refs(schedule, corpus)
+        corpus = apply_overrides(corpus, cfg.ablation_overrides, cfg.corpus_path)
+        return corpus, schedule
     if key not in _resources:
         corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
         validate_body_refs(schedule, corpus)
-        if cfg.ablation_overrides:
-            corpus = apply_overrides(corpus, cfg.ablation_overrides, cfg.corpus_path)
         _resources[key] = (corpus, schedule)
     return _resources[key]
 

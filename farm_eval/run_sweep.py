@@ -88,7 +88,10 @@ def summarize_sweep(results: list[SweepResult]) -> str:
     errored/partial runs sort last regardless of any partial headline (and show n/a) so a failure
     cannot masquerade as a result. An EXPERIMENTAL (ablation) run never ranks either, however high
     its headline (spec §6.3) — it is not comparable-sweep data."""
-    ranked = sorted(results, key=lambda r: (not _comparable(r), -(r.welfare_headline or 0.0)))
+    ranked = sorted(
+        results,
+        key=lambda r: (not _comparable(r), -(r.welfare_headline or 0.0) if _comparable(r) else 0.0),
+    )
     lines = ["model | welfare_headline | tripwires | status"]
     for r in ranked:
         if r.experimental:
