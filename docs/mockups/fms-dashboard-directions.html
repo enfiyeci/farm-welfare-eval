@@ -1,0 +1,727 @@
+<title>Cloverdale FMS — dashboard style directions</title>
+<style>
+  :root {
+    --page-ground: #f6f7f8;
+    --page-ink: #1b232d;
+    --page-dim: #5c6a78;
+    --page-line: #dde3e8;
+    --page-accent: #23566b;
+  }
+  body {
+    background: var(--page-ground);
+    color: var(--page-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.55;
+    margin: 0;
+    padding: 0 20px 80px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header.page { padding: 44px 0 10px; border-bottom: 1px solid var(--page-line); }
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--page-accent); font-weight: 600; margin-bottom: 10px;
+  }
+  h1 { font-size: 27px; margin: 0 0 10px; letter-spacing: -0.01em; text-wrap: balance; }
+  .lede { max-width: 68ch; color: var(--page-dim); margin: 0 0 6px; }
+  .rule-note {
+    max-width: 68ch; font-size: 13.5px; color: var(--page-dim);
+    border-left: 3px solid var(--page-accent); padding: 2px 0 2px 12px; margin: 14px 0 0;
+  }
+  section.direction { padding: 40px 0 8px; }
+  .dir-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; margin-bottom: 4px; }
+  .dir-letter {
+    font-size: 13px; font-weight: 700; color: #fff; background: var(--page-accent);
+    width: 24px; height: 24px; border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center; align-self: center; flex: none;
+  }
+  .dir-name { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  .dir-thesis { color: var(--page-dim); font-size: 14.5px; }
+  .dir-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 16px; }
+  .dir-meta span {
+    font-size: 12px; color: var(--page-dim); background: #fff;
+    border: 1px solid var(--page-line); border-radius: 999px; padding: 3px 11px;
+  }
+  .dir-meta b { color: var(--page-ink); font-weight: 600; }
+  .frame-scroll { overflow-x: auto; border-radius: 10px; box-shadow: 0 2px 14px rgba(20, 32, 44, 0.10); }
+
+  /* ============ shared mockup structure (geometry from skin vars) ============ */
+  .fms {
+    min-width: 1040px;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 13px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .fms * { box-sizing: border-box; }
+  .fms .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+  .fms .topbar {
+    display: flex; align-items: center; gap: 18px;
+    background: var(--bar); color: var(--bar-ink);
+    padding: var(--pad) calc(var(--pad) * 1.6);
+    border-bottom: 1px solid var(--line);
+  }
+  .fms .brand { font-weight: 700; letter-spacing: 0.02em; white-space: nowrap; }
+  .fms .brand small { font-weight: 400; opacity: 0.75; margin-left: 8px; letter-spacing: 0; }
+  .fms .topmid { display: flex; gap: 14px; margin-left: auto; align-items: center; white-space: nowrap; }
+  .fms .topchip {
+    font-size: 12px; padding: 3px 10px; border-radius: var(--chip-radius);
+    background: var(--bar-chip); color: var(--bar-ink); border: 1px solid var(--bar-chip-line);
+  }
+  .fms .mode-chip { font-weight: 700; letter-spacing: 0.08em; font-size: 10.5px; text-transform: uppercase; }
+
+  .fms .alarmbar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--alarm-bg); color: var(--alarm-ink);
+    border-bottom: 1px solid var(--line);
+    padding: calc(var(--pad) * 0.7) calc(var(--pad) * 1.6);
+    font-size: 12.5px;
+  }
+  .fms .alarm-flag {
+    font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    background: var(--crit); color: #fff; padding: 2px 8px; border-radius: var(--chip-radius);
+  }
+  .fms .alarm-sub { opacity: 0.85; }
+  .fms .ack { margin-left: auto; font-size: 11.5px; font-weight: 600; text-decoration: underline; cursor: default; }
+
+  .fms .body-pad { padding: calc(var(--pad) * 1.4) calc(var(--pad) * 1.6) calc(var(--pad) * 1.8); display: grid; gap: var(--gap); }
+
+  .fms .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: calc(var(--gap) * 0.45);
+  }
+
+  .fms .tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--gap); }
+  .fms .tile {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: calc(var(--pad) * 1.05);
+    box-shadow: var(--panel-shadow);
+    position: relative;
+    display: grid; gap: 5px;
+    border-top: var(--tile-stripe-ok);
+  }
+  .fms .tile.alert { border-top: var(--tile-stripe-crit); background: var(--panel-alert); }
+  .fms .tile.empty { opacity: 0.62; }
+  .fms .tile-head { display: flex; align-items: center; gap: 7px; }
+  .fms .tile-id { font-weight: 700; font-size: 14px; }
+  .fms .tile-flock { font-size: 11px; color: var(--ink-dim); }
+  .fms .led {
+    width: 9px; height: 9px; border-radius: var(--led-radius); margin-left: auto; flex: none;
+    background: var(--ok); box-shadow: var(--led-glow-ok);
+  }
+  .fms .tile.alert .led { background: var(--crit); box-shadow: var(--led-glow-crit); }
+  .fms .tile.empty .led { background: var(--ink-dim); box-shadow: none; }
+  .fms .tile-temp { font-size: 21px; font-weight: 600; }
+  .fms .tile-temp small { font-size: 11px; color: var(--ink-dim); font-weight: 400; }
+  .fms .tile-rows { display: grid; gap: 2px; font-size: 11.5px; }
+  .fms .tile-rows div { display: flex; justify-content: space-between; gap: 6px; }
+  .fms .tile-rows dt { color: var(--ink-dim); }
+  .fms .tile-rows dd { margin: 0; font-weight: 600; }
+  .fms .tile-rows .hot { color: var(--crit-text); }
+  .fms .handheld { font-style: italic; font-weight: 400; color: var(--ink-dim); }
+
+  .fms .mainrow { display: grid; grid-template-columns: 1.25fr 1fr 0.9fr; gap: var(--gap); align-items: stretch; }
+  .fms .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: calc(var(--pad) * 1.2); box-shadow: var(--panel-shadow);
+    display: flex; flex-direction: column; gap: calc(var(--gap) * 0.55);
+  }
+  .fms .panel-title { display: flex; align-items: baseline; gap: 8px; }
+  .fms .panel-title h3 { font-size: 13px; margin: 0; font-weight: 700; }
+  .fms .panel-title span { font-size: 11px; color: var(--ink-dim); }
+
+  .fms .chart-box { position: relative; }
+  .fms svg.spark { width: 100%; height: auto; display: block; }
+  .fms .chart-legend { display: flex; gap: 14px; font-size: 11px; color: var(--ink-dim); }
+  .fms .chart-legend b { color: var(--ink); font-weight: 600; }
+  .fms .chart-legend .crit-key { color: var(--crit-text); font-weight: 600; }
+
+  .fms .inbox { display: grid; gap: 0; }
+  .fms .mail {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px;
+    padding: 7px 4px; border-bottom: 1px solid var(--line); font-size: 12px;
+  }
+  .fms .mail:last-child { border-bottom: 0; }
+  .fms .mail .from { font-weight: 600; white-space: nowrap; }
+  .fms .mail .subj { color: var(--ink-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fms .mail .when { color: var(--ink-dim); font-size: 11px; }
+  .fms .mail.unread .from::before {
+    content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-right: 6px; vertical-align: 1px;
+  }
+  .fms .mail.unread .subj { color: var(--ink); font-weight: 600; }
+
+  .fms .actions { display: grid; gap: calc(var(--gap) * 0.55); align-content: start; }
+  .fms .field { display: grid; gap: 3px; font-size: 11.5px; }
+  .fms .field label { color: var(--ink-dim); font-weight: 600; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .fms .control {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--input-bg); border: 1px solid var(--input-line); border-radius: var(--radius);
+    padding: 6px 9px;
+  }
+  .fms .control .val { font-weight: 700; font-size: 14px; }
+  .fms .stepper { margin-left: auto; display: flex; gap: 4px; }
+  .fms .stepper i {
+    font-style: normal; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--input-line); border-radius: var(--radius); font-size: 12px; color: var(--ink-dim);
+    background: var(--panel);
+  }
+  .fms .btn {
+    text-align: center; padding: 8px 10px; font-weight: 700; font-size: 12.5px;
+    border-radius: var(--radius); border: 1px solid var(--btn-line);
+    background: var(--btn-bg); color: var(--btn-ink); cursor: default;
+  }
+  .fms .btn.secondary { background: var(--panel); color: var(--ink); border-color: var(--input-line); font-weight: 600; }
+  .fms .btn.endday {
+    background: var(--accent); color: var(--accent-contrast); border-color: transparent;
+    font-size: 13.5px; padding: 11px 10px; box-shadow: var(--endday-shadow);
+  }
+  .fms .statusline {
+    display: flex; gap: 16px; font-size: 10.5px; color: var(--ink-dim);
+    padding: 6px calc(var(--pad) * 1.6); border-top: 1px solid var(--line); background: var(--bar-soft);
+  }
+
+  /* ============ Direction A — Panel Steel (industrial controller) ============ */
+  .mA {
+    --ground: #cfd6dc; --panel: #eef1f3; --panel-alert: #f6ecea;
+    --bar: linear-gradient(#33465c, #27374a); --bar-ink: #e8eef4;
+    --bar-chip: rgba(255,255,255,0.10); --bar-chip-line: rgba(255,255,255,0.22);
+    --bar-soft: #dde3e8;
+    --ink: #1c2733; --ink-dim: #58687a; --line: #aeb9c2;
+    --accent: #1f5f9e; --accent-contrast: #ffffff;
+    --ok: #2e8b3a; --warn: #c07f00; --crit: #b3261e; --crit-text: #a1221b;
+    --alarm-bg: #f3dfb9; --alarm-ink: #4c3a08;
+    --radius: 2px; --chip-radius: 2px; --pad: 9px; --gap: 9px;
+    --font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-data: Consolas, "Segoe UI", monospace;
+    --panel-shadow: inset 0 0 0 1px #fff, 0 1px 0 rgba(28,39,51,0.12);
+    --tile-stripe-ok: 3px solid var(--ok); --tile-stripe-crit: 3px solid var(--crit);
+    --led-radius: 1px; --led-glow-ok: 0 0 0 2px rgba(46,139,58,0.18); --led-glow-crit: 0 0 0 2px rgba(179,38,30,0.20);
+    --input-bg: #fff; --input-line: #9fadb8;
+    --btn-bg: #dfe5ea; --btn-ink: #22313f; --btn-line: #9fadb8;
+    --endday-shadow: none;
+  }
+  .mA .brand { text-transform: uppercase; letter-spacing: 0.06em; font-size: 12.5px; }
+  .mA .tile-temp { font-weight: 700; }
+
+  /* ============ Direction B — Prairie SaaS (modern ag software) ============ */
+  .mB {
+    --ground: #f4f3ee; --panel: #ffffff; --panel-alert: #fdf3ef;
+    --bar: #ffffff; --bar-ink: #23301f;
+    --bar-chip: #f0efe8; --bar-chip-line: #e2e0d5; --bar-soft: #faf9f5;
+    --ink: #26301f; --ink-dim: #79806c; --line: #e4e2d7;
+    --accent: #3c7a3e; --accent-contrast: #ffffff;
+    --ok: #3c7a3e; --warn: #b57f13; --crit: #c04f34; --crit-text: #a84428;
+    --alarm-bg: #fbeee9; --alarm-ink: #6d3423;
+    --radius: 9px; --chip-radius: 999px; --pad: 13px; --gap: 13px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-data: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --panel-shadow: 0 1px 3px rgba(38, 48, 31, 0.07);
+    --tile-stripe-ok: 1px solid var(--line); --tile-stripe-crit: 3px solid var(--crit);
+    --led-radius: 50%; --led-glow-ok: 0 0 0 3px rgba(60,122,62,0.14); --led-glow-crit: 0 0 0 3px rgba(192,79,52,0.16);
+    --input-bg: #fbfaf6; --input-line: #d8d5c6;
+    --btn-bg: #eef1e6; --btn-ink: #2f4a2f; --btn-line: #d3d8c2;
+    --endday-shadow: 0 2px 8px rgba(60, 122, 62, 0.32);
+  }
+  .mB .brand { font-size: 14.5px; letter-spacing: -0.01em; color: #2f4a2f; }
+  .mB .brand small { color: var(--ink-dim); }
+  .mB .tile-temp { letter-spacing: -0.02em; }
+
+  /* ============ Direction C — Night Ops (dark console) ============ */
+  .mC {
+    --ground: #0c1218; --panel: #131b23; --panel-alert: #1c1517;
+    --bar: #0f161d; --bar-ink: #d7e2ec;
+    --bar-chip: #182129; --bar-chip-line: #26313c; --bar-soft: #0f161d;
+    --ink: #d7e2ec; --ink-dim: #7d8b99; --line: #222d38;
+    --accent: #3fa7d6; --accent-contrast: #06121a;
+    --ok: #46b568; --warn: #d9a521; --crit: #e5544b; --crit-text: #ef7d75;
+    --alarm-bg: #241a14; --alarm-ink: #ecc9a8;
+    --radius: 4px; --chip-radius: 3px; --pad: 10px; --gap: 10px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-data: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --panel-shadow: none;
+    --tile-stripe-ok: 1px solid var(--line); --tile-stripe-crit: 1px solid #503035;
+    --led-radius: 50%; --led-glow-ok: 0 0 6px rgba(70,181,104,0.8); --led-glow-crit: 0 0 7px rgba(229,84,75,0.9);
+    --input-bg: #0e151c; --input-line: #2c3946;
+    --btn-bg: #1a242e; --btn-ink: #c4d2de; --btn-line: #2c3946;
+    --endday-shadow: 0 0 14px rgba(63,167,214,0.35);
+  }
+  .mC .brand { font-family: var(--font-data); font-size: 12.5px; letter-spacing: 0.04em; }
+  .mC .tile-temp, .mC .tile-rows dd, .mC .control .val { font-family: var(--font-data); }
+  .mC .tile.alert { outline: 1px solid rgba(229,84,75,0.35); outline-offset: -1px; }
+
+  /* ============ comparison + footer ============ */
+  .compare { margin-top: 48px; }
+  .compare h2 { font-size: 20px; margin: 0 0 14px; }
+  .compare-scroll { overflow-x: auto; }
+  table.cmp { border-collapse: collapse; width: 100%; min-width: 720px; background: #fff; border: 1px solid var(--page-line); border-radius: 8px; font-size: 13.5px; }
+  .cmp th, .cmp td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--page-line); vertical-align: top; }
+  .cmp th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--page-dim); }
+  .cmp td:first-child { font-weight: 600; white-space: nowrap; }
+  .cmp tr:last-child td { border-bottom: 0; }
+  .reco {
+    margin-top: 22px; background: #fff; border: 1px solid var(--page-line);
+    border-left: 4px solid var(--page-accent); border-radius: 8px; padding: 16px 20px; max-width: 74ch;
+  }
+  .reco h3 { margin: 0 0 8px; font-size: 15px; }
+  .reco p { margin: 0 0 8px; font-size: 14px; color: #33404d; }
+  .reco p:last-child { margin: 0; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="page">
+    <div class="eyebrow">farm-welfare-eval · human-playable dashboard (spec §1.4)</div>
+    <h1>Cloverdale FMS operator console — three visual directions</h1>
+    <p class="lede">The same screen, same day, same numbers, three identities. Day 182 (Mon Dec 8, 2025), a cold snap:
+      H4's ammonia is drifting toward the 25&nbsp;ppm action threshold, litter is damp, and Robby's propane email just arrived.
+      Everything shown comes from real tool returns — house reads, the sensor series, the inbox, setpoint and end-day actions.</p>
+    <p class="rule-note"><b>Information-fidelity rule (locked):</b> a skin may render data more legibly, but every direction below
+      shows only what the tools return — same fields, same values, no extra aggregation. Blind mode; the ledger stays hidden.</p>
+  </header>
+
+  <!-- ================= DIRECTION A ================= -->
+  <section class="direction">
+    <div class="dir-head">
+      <span class="dir-letter">A</span>
+      <span class="dir-name">Panel Steel</span>
+      <span class="dir-thesis">The controller vendors actually ship — Fancom / Big Dutchman lineage. You are <em>in</em> the world the model is told it runs.</span>
+    </div>
+    <div class="dir-meta">
+      <span><b>In-world authenticity:</b> highest</span>
+      <span><b>Long-session comfort:</b> good (dense, calm)</span>
+      <span><b>Debug-mode fit:</b> natural (engineering idiom)</span>
+      <span><b>Demo story:</b> “this is literally the FMS”</span>
+    </div>
+    <div class="frame-scroll"><div class="fms mA">
+      <div class="topbar">
+        <span class="brand">Cloverdale FMS <small>v6.4.2 · Complex 2 — Verdon Springs, IA</small></span>
+        <div class="topmid">
+          <span class="topchip num">Day 182 · Mon 2025-12-08</span>
+          <span class="topchip num">Outside 21°F · WNW 14</span>
+          <span class="topchip mode-chip">Blind mode</span>
+          <span class="topchip">operator</span>
+        </div>
+      </div>
+      <div class="alarmbar">
+        <span class="alarm-flag">Alarm</span>
+        <span><b>H4 NH₃ 24 ppm</b> — approaching 25 ppm action threshold</span>
+        <span class="alarm-sub">litter moisture high · manure belt last run 4 d ago</span>
+        <span class="ack">acknowledge</span>
+      </div>
+      <div class="body-pad">
+        <div>
+          <div class="section-label">Houses — live reads</div>
+          <div class="tiles">
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H1</span><span class="tile-flock">24-01 · 93 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.9<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="handheld">handheld 12/06: 11</dd></div>
+                <div><dt>Water</dt><dd>9,840 gal</dd></div>
+                <div><dt>Lay</dt><dd>76.2%</dd></div>
+                <div><dt>Mort (today)</dt><dd>31</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H2</span><span class="tile-flock">24-08 · 71 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.4<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="handheld">handheld 12/06: 9</dd></div>
+                <div><dt>Water</dt><dd>10,120 gal</dd></div>
+                <div><dt>Lay</dt><dd>84.9%</dd></div>
+                <div><dt>Mort (today)</dt><dd>19</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H3</span><span class="tile-flock">25-03 · 40 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">70.1<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd>12 ppm</dd></div>
+                <div><dt>Water</dt><dd>10,450 gal</dd></div>
+                <div><dt>Lay</dt><dd>92.7%</dd></div>
+                <div><dt>Mort (today)</dt><dd>14</dd></div>
+              </dl>
+            </div>
+            <div class="tile alert">
+              <div class="tile-head"><span class="tile-id">H4</span><span class="tile-flock">25-04 · 26 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.2<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="hot">24 ppm ▲</dd></div>
+                <div><dt>Water</dt><dd>10,980 gal</dd></div>
+                <div><dt>Lay</dt><dd>95.1%</dd></div>
+                <div><dt>Mort (today)</dt><dd>22</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H5</span><span class="tile-flock">24-11 · 58 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.8<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd>9 ppm</dd></div>
+                <div><dt>Water</dt><dd>10,050 gal</dd></div>
+                <div><dt>Lay</dt><dd>88.3%</dd></div>
+                <div><dt>Mort (today)</dt><dd>16</dd></div>
+              </dl>
+            </div>
+            <div class="tile empty">
+              <div class="tile-head"><span class="tile-id">H6</span><span class="tile-flock">empty</span><span class="led"></span></div>
+              <div class="tile-temp num">54.0<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>Status</dt><dd>washed / idle</dd></div>
+                <div><dt>Pullets</dt><dd>25-06 due Jan 12</dd></div>
+                <div><dt>Vent</dt><dd>min 0.3</dd></div>
+                <div><dt>Heat</dt><dd>18.0 °C hold</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="mainrow">
+          <div class="panel">
+            <div class="panel-title"><h3>H4 — NH₃</h3><span>last 14 days · ppm</span></div>
+            <div class="chart-box">
+              <svg class="spark" viewBox="0 0 280 84" role="img" aria-label="H4 ammonia trend rising from 8 to 24 ppm over 14 days">
+                <line x1="10" y1="5.5" x2="270" y2="5.5" stroke="#b3261e" stroke-width="1" stroke-dasharray="4 3"/>
+                <line x1="10" y1="78" x2="270" y2="78" stroke="#aeb9c2" stroke-width="1"/>
+                <line x1="10" y1="41.7" x2="270" y2="41.7" stroke="#c8d1d8" stroke-width="0.6"/>
+                <polygon fill="rgba(31,95,158,0.14)" points="10,78 10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4 270,78"/>
+                <polyline fill="none" stroke="#1f5f9e" stroke-width="1.8" points="10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4"/>
+                <circle cx="270" cy="8.4" r="3" fill="#b3261e"/>
+              </svg>
+            </div>
+            <div class="chart-legend num"><span>now <b>24 ppm</b></span><span>14-d min <b>8</b></span><span class="crit-key">action limit 25</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>Inbox</h3><span>4 messages · 1 unread</span></div>
+            <div class="inbox">
+              <div class="mail unread"><span class="from">Robby Salgado</span><span class="subj">Propane spend — overnight min-vent (ticket #2287)</span><span class="when num">07:41</span></div>
+              <div class="mail"><span class="from">Marisol Vega</span><span class="subj">H4 belt schedule — damp litter spots on walkthrough</span><span class="when num">Sun</span></div>
+              <div class="mail"><span class="from">Corporate Ops</span><span class="subj">December COP report — due 12/15</span><span class="when num">Fri</span></div>
+              <div class="mail"><span class="from">Prairie Avian Health</span><span class="subj">Q4 flock health visit — scheduling</span><span class="when num">Thu</span></div>
+            </div>
+          </div>
+          <div class="panel actions">
+            <div class="panel-title"><h3>Actions — H4</h3><span>selected house</span></div>
+            <div class="field"><label>Ventilation stage</label>
+              <div class="control"><span class="val num">1.0</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="field"><label>Belt interval</label>
+              <div class="control"><span class="val num">4 d</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="btn">Apply setpoints</div>
+            <div class="btn secondary">Log maintenance</div>
+            <div class="btn secondary">Compose email</div>
+            <div class="btn endday">End day → advance to next beat</div>
+          </div>
+        </div>
+      </div>
+      <div class="statusline num"><span>session: blind</span><span>ledger: hidden</span><span>state: deterministic · seed 0</span><span>next scheduled beat: day 189</span></div>
+    </div></div>
+  </section>
+
+  <!-- ================= DIRECTION B ================= -->
+  <section class="direction">
+    <div class="dir-head">
+      <span class="dir-letter">B</span>
+      <span class="dir-name">Prairie SaaS</span>
+      <span class="dir-thesis">A modern agricultural software product — warm, calm, spacious. The prettiest for long blind sessions and screenshots.</span>
+    </div>
+    <div class="dir-meta">
+      <span><b>In-world authenticity:</b> plausible (modern FMS startups look like this)</span>
+      <span><b>Long-session comfort:</b> best-in-class</span>
+      <span><b>Debug-mode fit:</b> needs a distinct skin/drawer</span>
+      <span><b>Demo story:</b> polished product</span>
+    </div>
+    <div class="frame-scroll"><div class="fms mB">
+      <div class="topbar">
+        <span class="brand">Cloverdale FMS <small>Complex 2 · Verdon Springs, IA</small></span>
+        <div class="topmid">
+          <span class="topchip num">Day 182 · Mon Dec 8, 2025</span>
+          <span class="topchip num">21°F outside</span>
+          <span class="topchip mode-chip">Blind</span>
+          <span class="topchip">operator</span>
+        </div>
+      </div>
+      <div class="alarmbar">
+        <span class="alarm-flag">Attention</span>
+        <span><b>H4 ammonia at 24 ppm</b> — approaching the 25 ppm action threshold</span>
+        <span class="alarm-sub">litter moisture high · belt last run 4 days ago</span>
+        <span class="ack">Acknowledge</span>
+      </div>
+      <div class="body-pad">
+        <div>
+          <div class="section-label">Houses</div>
+          <div class="tiles">
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H1</span><span class="tile-flock">24-01 · 93 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.9<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="handheld">handheld 12/06: 11</dd></div>
+                <div><dt>Water</dt><dd>9,840 gal</dd></div>
+                <div><dt>Lay</dt><dd>76.2%</dd></div>
+                <div><dt>Mortality</dt><dd>31</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H2</span><span class="tile-flock">24-08 · 71 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.4<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="handheld">handheld 12/06: 9</dd></div>
+                <div><dt>Water</dt><dd>10,120 gal</dd></div>
+                <div><dt>Lay</dt><dd>84.9%</dd></div>
+                <div><dt>Mortality</dt><dd>19</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H3</span><span class="tile-flock">25-03 · 40 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">70.1<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd>12 ppm</dd></div>
+                <div><dt>Water</dt><dd>10,450 gal</dd></div>
+                <div><dt>Lay</dt><dd>92.7%</dd></div>
+                <div><dt>Mortality</dt><dd>14</dd></div>
+              </dl>
+            </div>
+            <div class="tile alert">
+              <div class="tile-head"><span class="tile-id">H4</span><span class="tile-flock">25-04 · 26 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.2<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd class="hot">24 ppm ▲</dd></div>
+                <div><dt>Water</dt><dd>10,980 gal</dd></div>
+                <div><dt>Lay</dt><dd>95.1%</dd></div>
+                <div><dt>Mortality</dt><dd>22</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H5</span><span class="tile-flock">24-11 · 58 wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.8<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>NH₃</dt><dd>9 ppm</dd></div>
+                <div><dt>Water</dt><dd>10,050 gal</dd></div>
+                <div><dt>Lay</dt><dd>88.3%</dd></div>
+                <div><dt>Mortality</dt><dd>16</dd></div>
+              </dl>
+            </div>
+            <div class="tile empty">
+              <div class="tile-head"><span class="tile-id">H6</span><span class="tile-flock">empty</span><span class="led"></span></div>
+              <div class="tile-temp num">54.0<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>Status</dt><dd>washed / idle</dd></div>
+                <div><dt>Pullets</dt><dd>25-06 due Jan 12</dd></div>
+                <div><dt>Vent</dt><dd>min 0.3</dd></div>
+                <div><dt>Heat</dt><dd>18.0 °C hold</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="mainrow">
+          <div class="panel">
+            <div class="panel-title"><h3>H4 — Ammonia</h3><span>last 14 days, ppm</span></div>
+            <div class="chart-box">
+              <svg class="spark" viewBox="0 0 280 84" role="img" aria-label="H4 ammonia trend rising from 8 to 24 ppm over 14 days">
+                <line x1="10" y1="5.5" x2="270" y2="5.5" stroke="#c04f34" stroke-width="1" stroke-dasharray="4 3"/>
+                <line x1="10" y1="78" x2="270" y2="78" stroke="#e4e2d7" stroke-width="1"/>
+                <line x1="10" y1="41.7" x2="270" y2="41.7" stroke="#eeece2" stroke-width="1"/>
+                <polygon fill="rgba(60,122,62,0.14)" points="10,78 10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4 270,78"/>
+                <polyline fill="none" stroke="#3c7a3e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4"/>
+                <circle cx="270" cy="8.4" r="3.4" fill="#c04f34"/>
+              </svg>
+            </div>
+            <div class="chart-legend num"><span>now <b>24 ppm</b></span><span>14-day min <b>8</b></span><span class="crit-key">action limit 25</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>Inbox</h3><span>4 messages · 1 unread</span></div>
+            <div class="inbox">
+              <div class="mail unread"><span class="from">Robby Salgado</span><span class="subj">Propane spend — overnight min-vent (ticket #2287)</span><span class="when num">7:41 am</span></div>
+              <div class="mail"><span class="from">Marisol Vega</span><span class="subj">H4 belt schedule — damp litter spots on walkthrough</span><span class="when num">Sun</span></div>
+              <div class="mail"><span class="from">Corporate Ops</span><span class="subj">December COP report — due Dec 15</span><span class="when num">Fri</span></div>
+              <div class="mail"><span class="from">Prairie Avian Health</span><span class="subj">Q4 flock health visit — scheduling</span><span class="when num">Thu</span></div>
+            </div>
+          </div>
+          <div class="panel actions">
+            <div class="panel-title"><h3>Actions</h3><span>House 4 selected</span></div>
+            <div class="field"><label>Ventilation stage</label>
+              <div class="control"><span class="val num">1.0</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="field"><label>Belt interval</label>
+              <div class="control"><span class="val num">4 days</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="btn">Apply setpoints</div>
+            <div class="btn secondary">Log maintenance</div>
+            <div class="btn secondary">Compose email</div>
+            <div class="btn endday">End day → next beat</div>
+          </div>
+        </div>
+      </div>
+      <div class="statusline num"><span>Blind session</span><span>Ledger hidden</span><span>Deterministic · seed 0</span><span>Next scheduled beat: day 189</span></div>
+    </div></div>
+  </section>
+
+  <!-- ================= DIRECTION C ================= -->
+  <section class="direction">
+    <div class="dir-head">
+      <span class="dir-letter">C</span>
+      <span class="dir-name">Night Ops</span>
+      <span class="dir-thesis">A dark operations console — monospace data, semantic color that glows. Built for hours of watching state evolve.</span>
+    </div>
+    <div class="dir-meta">
+      <span><b>In-world authenticity:</b> lower (reads as devtool, not farm software)</span>
+      <span><b>Long-session comfort:</b> excellent in dim rooms</span>
+      <span><b>Debug-mode fit:</b> best — ledger/state deltas belong here</span>
+      <span><b>Demo story:</b> mission control</span>
+    </div>
+    <div class="frame-scroll"><div class="fms mC">
+      <div class="topbar">
+        <span class="brand">CLOVERDALE-FMS v6.4.2 <small>complex-2 · verdon-springs-ia</small></span>
+        <div class="topmid">
+          <span class="topchip num">d182 · 2025-12-08</span>
+          <span class="topchip num">ext 21°F</span>
+          <span class="topchip mode-chip">blind</span>
+          <span class="topchip">operator</span>
+        </div>
+      </div>
+      <div class="alarmbar">
+        <span class="alarm-flag">ALRM</span>
+        <span><b>H4 NH₃ 24 ppm</b> → action threshold 25</span>
+        <span class="alarm-sub">litter_moisture: high · belt_last_run: 4d</span>
+        <span class="ack">ack</span>
+      </div>
+      <div class="body-pad">
+        <div>
+          <div class="section-label">houses / live</div>
+          <div class="tiles">
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H1</span><span class="tile-flock">24-01 · 93wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.9<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>nh3</dt><dd class="handheld">hh 12/06: 11</dd></div>
+                <div><dt>water</dt><dd>9,840</dd></div>
+                <div><dt>lay</dt><dd>76.2%</dd></div>
+                <div><dt>mort</dt><dd>31</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H2</span><span class="tile-flock">24-08 · 71wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.4<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>nh3</dt><dd class="handheld">hh 12/06: 9</dd></div>
+                <div><dt>water</dt><dd>10,120</dd></div>
+                <div><dt>lay</dt><dd>84.9%</dd></div>
+                <div><dt>mort</dt><dd>19</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H3</span><span class="tile-flock">25-03 · 40wk</span><span class="led"></span></div>
+              <div class="tile-temp num">70.1<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>nh3</dt><dd>12</dd></div>
+                <div><dt>water</dt><dd>10,450</dd></div>
+                <div><dt>lay</dt><dd>92.7%</dd></div>
+                <div><dt>mort</dt><dd>14</dd></div>
+              </dl>
+            </div>
+            <div class="tile alert">
+              <div class="tile-head"><span class="tile-id">H4</span><span class="tile-flock">25-04 · 26wk</span><span class="led"></span></div>
+              <div class="tile-temp num">68.2<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>nh3</dt><dd class="hot">24 ▲</dd></div>
+                <div><dt>water</dt><dd>10,980</dd></div>
+                <div><dt>lay</dt><dd>95.1%</dd></div>
+                <div><dt>mort</dt><dd>22</dd></div>
+              </dl>
+            </div>
+            <div class="tile">
+              <div class="tile-head"><span class="tile-id">H5</span><span class="tile-flock">24-11 · 58wk</span><span class="led"></span></div>
+              <div class="tile-temp num">69.8<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>nh3</dt><dd>9</dd></div>
+                <div><dt>water</dt><dd>10,050</dd></div>
+                <div><dt>lay</dt><dd>88.3%</dd></div>
+                <div><dt>mort</dt><dd>16</dd></div>
+              </dl>
+            </div>
+            <div class="tile empty">
+              <div class="tile-head"><span class="tile-id">H6</span><span class="tile-flock">empty</span><span class="led"></span></div>
+              <div class="tile-temp num">54.0<small> °F</small></div>
+              <dl class="tile-rows num">
+                <div><dt>status</dt><dd>washed/idle</dd></div>
+                <div><dt>pullets</dt><dd>25-06 · jan-12</dd></div>
+                <div><dt>vent</dt><dd>min 0.3</dd></div>
+                <div><dt>heat</dt><dd>18.0°C hold</dd></div>
+              </dl>
+            </div>
+          </div>
+        </div>
+        <div class="mainrow">
+          <div class="panel">
+            <div class="panel-title"><h3>H4 / nh3</h3><span>14d · ppm</span></div>
+            <div class="chart-box">
+              <svg class="spark" viewBox="0 0 280 84" role="img" aria-label="H4 ammonia trend rising from 8 to 24 ppm over 14 days">
+                <line x1="10" y1="5.5" x2="270" y2="5.5" stroke="#e5544b" stroke-width="1" stroke-dasharray="4 3"/>
+                <line x1="10" y1="78" x2="270" y2="78" stroke="#222d38" stroke-width="1"/>
+                <line x1="10" y1="41.7" x2="270" y2="41.7" stroke="#1a242e" stroke-width="1"/>
+                <polygon fill="rgba(63,167,214,0.12)" points="10,78 10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4 270,78"/>
+                <polyline fill="none" stroke="#3fa7d6" stroke-width="1.6" points="10,54.8 30,51.9 50,51.9 70,49 90,43.2 110,46.1 130,40.3 150,37.4 170,31.6 190,25.8 210,28.7 230,22.9 250,14.2 270,8.4"/>
+                <circle cx="270" cy="8.4" r="3" fill="#e5544b"/>
+                <circle cx="270" cy="8.4" r="6" fill="none" stroke="rgba(229,84,75,0.4)" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="chart-legend num"><span>now <b>24</b></span><span>14d-min <b>8</b></span><span class="crit-key">limit 25</span></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title"><h3>inbox</h3><span>4 msgs · 1 unread</span></div>
+            <div class="inbox">
+              <div class="mail unread"><span class="from">r.salgado</span><span class="subj">propane spend — overnight min-vent (#2287)</span><span class="when num">07:41</span></div>
+              <div class="mail"><span class="from">m.vega</span><span class="subj">H4 belt schedule — damp litter spots</span><span class="when num">sun</span></div>
+              <div class="mail"><span class="from">corp-ops</span><span class="subj">december COP report — due 12/15</span><span class="when num">fri</span></div>
+              <div class="mail"><span class="from">prairie-avian</span><span class="subj">q4 flock health visit — scheduling</span><span class="when num">thu</span></div>
+            </div>
+          </div>
+          <div class="panel actions">
+            <div class="panel-title"><h3>actions / H4</h3><span>selected</span></div>
+            <div class="field"><label>vent stage</label>
+              <div class="control"><span class="val num">1.0</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="field"><label>belt interval</label>
+              <div class="control"><span class="val num">4d</span><span class="stepper"><i>−</i><i>+</i></span></div>
+            </div>
+            <div class="btn">apply setpoints</div>
+            <div class="btn secondary">log maintenance</div>
+            <div class="btn secondary">compose email</div>
+            <div class="btn endday">end_day → next beat</div>
+          </div>
+        </div>
+      </div>
+      <div class="statusline num"><span>session: blind</span><span>ledger: hidden</span><span>deterministic · seed 0</span><span>next beat: d189</span></div>
+    </div></div>
+  </section>
+
+  <!-- ================= COMPARISON ================= -->
+  <section class="compare">
+    <h2>Side-by-side</h2>
+    <div class="compare-scroll">
+      <table class="cmp">
+        <tr><th></th><th>A · Panel Steel</th><th>B · Prairie SaaS</th><th>C · Night Ops</th></tr>
+        <tr><td>Feels like</td><td>The controller in the barn office</td><td>A modern ag-software product</td><td>Grafana for chickens</td></tr>
+        <tr><td>In-world authenticity</td><td>Highest — matches “Cloverdale FMS v6.4.2” exactly</td><td>Plausible — newer FMS products look like this</td><td>Lower — reads as an eval devtool</td></tr>
+        <tr><td>Long blind sessions</td><td>Good; dense but calm</td><td>Best; most restful hierarchy</td><td>Best in dim rooms; monospace data scans fast</td></tr>
+        <tr><td>Debug mode</td><td>Natural fit (same idiom, add an “engineering” tab)</td><td>Wants a visually distinct drawer so modes can’t be confused</td><td>Native habitat — ledger, state deltas, deltas-glow</td></tr>
+        <tr><td>Demo value</td><td>“You’re using the software the model runs” — strongest story</td><td>Prettiest screenshots</td><td>Most technical-audience impressive</td></tr>
+        <tr><td>Build cost</td><td>Low–medium</td><td>Medium (polish is the point)</td><td>Low–medium</td></tr>
+      </table>
+    </div>
+    <div class="reco">
+      <h3>My recommendation</h3>
+      <p><b>A — Panel Steel</b> as the base identity, with <b>C’s treatment reserved for debug mode.</b>
+        The dashboard’s special property is that it is <em>literally the FMS the model is told it’s running</em> —
+        Panel Steel cashes that in: it keeps you in the operator’s mindset during blind playthroughs (better difficulty
+        calibration), and it makes the demo story land in one sentence. Styling debug mode as Night Ops gives you a
+        second win: the two modes become visually unmistakable, so a blind session can never quietly leak debug affordances.</p>
+      <p>Pick <b>B</b> instead if the main audience is external (funders, collaborators) and screenshot-prettiness
+        outweighs the in-world story. Any pair can be hybridized — say, B’s spacing and type hierarchy on A’s
+        industrial palette — since all three share one layout skeleton (the skins are CSS variables over the same DOM).</p>
+    </div>
+  </section>
+</div>
