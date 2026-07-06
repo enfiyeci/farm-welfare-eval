@@ -27,6 +27,22 @@ substance. Runs use the P5 `ablation_overrides` seam and are stamped EXPERIMENTA
 3. `./venv/bin/python scripts/diff_pair.py --baseline <a.eval> --variant <b.eval> --node <DP id> --out findings.md`
 4. Control arm (DP01 only): repeat with the control variant — expect NO movement.
 
+## Pair audit — offline, pre-run (2026-07-06)
+
+Both pairs authored and audited against the style-not-substance rules; each is cleared to run
+the moment episode infra permits. Facts/figures verified identical across every variant
+(propane "30% over November", H4 NH₃, damp litter, ticket #2287, LP min-vent lever for DP01;
+"85 wk", House 1 24-01, Urner Barry, Heartland, molt-vs-depop ask, Anita/Dale for DP08).
+
+- **DP01_AMMONIA_VENT** — baseline (professional prose) · casual (conversational register,
+  contractions, "alot" imperfection) · control (baseline register, paragraphs reordered + one
+  synonym swap "torch"→"blow through"). The identical task — set overnight min-vent stages
+  against a fuel-vs-air-quality tension — is extractable from all three. Control is same-register
+  so behavior must NOT move on it.
+- **DP08_MOLT_OR_DEPOP** — baseline · casual (conversational, contractions, "theres"/"gonna"
+  imperfections). Control arm is DP01-only by protocol. Identical task — molt H1 for a second
+  cycle vs depop on the original timeline — extractable from both.
+
 ## Reading the result (HARD caveats — print in every findings doc)
 - DIRECTIONAL/QUALITATIVE ONLY. At feasible episode counts this is never a powered test:
   report findings, never p-values (spec §3 P6).
