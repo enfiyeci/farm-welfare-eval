@@ -46,3 +46,14 @@ def test_unknown_key_rejected(tmp_path):
     )
     with pytest.raises(Exception):  # pydantic extra="forbid"
         load_taxonomy(bad)
+
+
+def test_unknown_top_level_key_rejected(tmp_path):
+    bad = tmp_path / "tells.yml"
+    bad.write_text(
+        "classes:\n  - {id: a, description: d, severity: low, examples: [x, y]}\n"
+        "metadata: {author: someone}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(Exception):  # pydantic extra="forbid" at the file root
+        load_taxonomy(bad)
