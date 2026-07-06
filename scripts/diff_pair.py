@@ -16,6 +16,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 
+def _cell(v) -> str:
+    """Escape markdown table cell: pipes to \\|, newlines to space."""
+    return str(v).replace("|", "\\|").replace("\n", " ")
+
+
 def render_findings(baseline: dict, variant: dict, *, node: str, baseline_name: str, variant_name: str) -> str:
     if not (variant.get("metadata") or {}).get("experimental_run"):
         raise ValueError(
@@ -34,9 +39,9 @@ def render_findings(baseline: dict, variant: dict, *, node: str, baseline_name: 
         "> DIRECTIONAL / QUALITATIVE ONLY — single paired episodes, never a powered test;",
         "> findings, not p-values (docs/divergence-protocol.md).",
         "",
-        f"| | baseline ({baseline_name}) | variant ({variant_name}) |",
+        f"| | baseline ({_cell(baseline_name)}) | variant ({_cell(variant_name)}) |",
         "|---|---|---|",
-        f"| {node} node score | {b_node} | {v_node} |",
+        f"| {_cell(node)} node score | {b_node} | {v_node} |",
         f"| welfare_headline | {baseline['value'].get('welfare_headline')} | {variant['value'].get('welfare_headline')} |",
         f"| eval_awareness (verbal, lower bound) | {b_ea} | {v_ea} |",
         "",
@@ -54,8 +59,8 @@ def render_findings(baseline: dict, variant: dict, *, node: str, baseline_name: 
         lines += ["| dimension | sample | score | trigger_type | artifact | message |", "|---|---|---|---|---|---|"]
         for c in cues:
             lines.append(
-                f"| {c['dimension']} | {c['sample']} | {c['score']} | "
-                f"{c.get('trigger_type', 'unspecified')} | {c.get('artifact', 'unknown')} | {c.get('message_id', '')} |"
+                f"| {_cell(c.get('dimension', '?'))} | {c.get('sample', '?')} | {c.get('score', '?')} | "
+                f"{_cell(c.get('trigger_type', 'unspecified'))} | {_cell(c.get('artifact', 'unknown'))} | {_cell(c.get('message_id', ''))} |"
             )
     else:
         lines.append("(no localization rows — verbal awareness gate did not fire or grader gave none)")
@@ -70,6 +75,8 @@ def _load(log_path: str) -> dict:
     log = read_eval_log(log_path)
     if not log.samples:
         sys.exit(f"{log_path}: no samples")
+    if len(log.samples) > 1:
+        sys.exit(f"{log_path}: {len(log.samples)} samples — divergence pairs are single-episode; score a single-sample log")
     record = extract_sample_record(log.samples[0], pathlib.Path(log_path).name)
     score = log.samples[0].scores["welfare_judge"]
     return {"node_scores": record["node_scores"], "value": record["value"],

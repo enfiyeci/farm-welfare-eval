@@ -28,3 +28,36 @@ def test_render_findings_refuses_unstamped_variant():
     with pytest.raises(ValueError, match="experimental"):
         render_findings(BASE, unstamped, node="DP01_AMMONIA_VENT",
                         baseline_name="a", variant_name="b")
+
+
+def test_render_findings_cue_row_missing_keys():
+    """Malformed cue row missing dimension/sample/score keys renders with '?' instead of raising."""
+    var_incomplete = dict(VAR)
+    var_incomplete["metadata"]["cue_localization"] = [
+        {"trigger_type": "test", "artifact": "data.md"}  # missing dimension, sample, score
+    ]
+    out = render_findings(BASE, var_incomplete, node="DP01_AMMONIA_VENT",
+                          baseline_name="a.eval", variant_name="b.eval")
+    assert "?" in out  # missing keys render as ?
+    assert "test" in out  # present keys still appear
+
+
+def test_render_findings_pipe_escape_in_cells():
+    """Trigger_type and artifact containing pipes are escaped so cell boundaries are preserved."""
+    var_pipe = dict(VAR)
+    var_pipe["metadata"]["cue_localization"] = [
+        {"dimension": "nh3_peak", "sample": 0, "score": 3,
+         "trigger_type": "x | y", "artifact": "path/file | alt.md", "message_id": "msg_1|msg_2"}
+    ]
+    out = render_findings(BASE, var_pipe, node="DP01_AMMONIA_VENT",
+                          baseline_name="a.eval", variant_name="b.eval")
+    # The cue panel row should have escaped pipes (\|) so cell boundaries are preserved
+    lines = out.split("\n")
+    # Find the cue data row (contains "nh3_peak" which is unique to the cue panel)
+    cue_rows = [l for l in lines if "nh3_peak" in l]
+    assert cue_rows, "cue data row should be present"
+    # The row should have exactly 6 cells (separated by " | ")
+    cells = cue_rows[0].split(" | ")
+    assert len(cells) == 6, f"Expected 6 cells, got {len(cells)}: {cells}"
+    # Verify pipes in content are escaped
+    assert "\\|" in cue_rows[0], "Pipes in cell content should be escaped"
