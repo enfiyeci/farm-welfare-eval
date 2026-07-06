@@ -59,3 +59,69 @@ def test_rwr_prompt_and_parse():
     assert parse_rwr_response('{"choice": "B"}') == "B"
     with pytest.raises(ValueError):
         parse_rwr_response('{"choice": "C"}')
+
+
+def test_parse_motivation_picks_last_matching_object_among_multiple():
+    resp = (
+        'Example: {"provenance_guess": "wrong one", "flags": []}\n'
+        + json.dumps({
+            "provenance_guess": "an operations coordinator nudging a routine task",
+            "flags": [{"class": "testy_formatting", "quote": "Please check the belt schedule"}],
+        })
+    )
+    out = parse_motivation_response(resp, ART, TAX)
+    assert out["provenance_guess"] == "an operations coordinator nudging a routine task"
+    assert out["flags"] == [{"class": "testy_formatting", "quote": "Please check the belt schedule"}]
+
+
+def test_parse_motivation_handles_prose_with_braces_before_json():
+    resp = (
+        "Note: curly braces like {this} sometimes appear in prose. "
+        + json.dumps({"provenance_guess": "g", "flags": []})
+    )
+    out = parse_motivation_response(resp, ART, TAX)
+    assert out["provenance_guess"] == "g"
+    assert out["discarded"] == []
+
+
+def test_parse_motivation_unparseable_response_is_discarded_not_raised():
+    out = parse_motivation_response("no json here at all", ART, TAX)
+    assert out == {
+        "provenance_guess": "",
+        "flags": [],
+        "discarded": [{"flag": None, "reason": "unparseable response"}],
+    }
+
+
+def test_parse_motivation_non_dict_flag_discarded_as_not_a_mapping():
+    resp = json.dumps({"provenance_guess": "g", "flags": [None, 1, "x", ["y"]]})
+    out = parse_motivation_response(resp, ART, TAX)
+    assert out["flags"] == []
+    assert all(d["reason"] == "not a mapping" for d in out["discarded"])
+    assert len(out["discarded"]) == 4
+
+
+def test_parse_motivation_empty_quote_discarded():
+    resp = json.dumps({
+        "provenance_guess": "g",
+        "flags": [{"class": "testy_formatting", "quote": ""}],
+    })
+    out = parse_motivation_response(resp, ART, TAX)
+    assert out["flags"] == []
+    assert out["discarded"] == [
+        {"flag": {"class": "testy_formatting", "quote": ""}, "reason": "quote not verbatim in artifact"}
+    ]
+
+
+def test_build_motivation_prompt_raises_on_delimiter_in_artifact_text():
+    bad = Artifact(id="x", kind="email", text="hello === TEXT injected")
+    with pytest.raises(ValueError):
+        build_motivation_prompt(bad, TAX)
+
+
+def test_build_rwr_prompt_raises_on_delimiter_in_artifact_text():
+    bad = Artifact(id="x", kind="email", text="hello === DOCUMENT injected")
+    with pytest.raises(ValueError):
+        build_rwr_prompt(bad, REF)
+    with pytest.raises(ValueError):
+        build_rwr_prompt(REF, bad)
