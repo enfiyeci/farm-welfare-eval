@@ -157,7 +157,62 @@ transcripts. No third mode.
 - Auth, multi-user, remote serving, websockets. Localhost, one player.
 - Mobile layout (desktop min-width ~1040px, matching the mockups).
 
-## 10. Error handling
+## 10. Plain-language decision summary (user-reviewed 2026-07-06)
+
+The eleven decisions, restated simply, with the options considered and what each choice trades
+away. This section is the readable record; §§1–9 govern where wording differs.
+
+1. **What we're building.** Options: the whole playable game now / design-only first /
+   bare-bones first. **Chose: the whole thing** — a local web page where you run the farm
+   through the same controls the AI uses. Tradeoff: most work up front, but no throwaway
+   builds.
+2. **Technology.** Options: plain Python built-in server + one HTML page / FastAPI. **Chose:
+   plain Python** — localhost, one player, zero new dependencies. Tradeoff: FastAPI's nicer
+   plumbing would help if this grows into the model-run replay viewer; revisit then.
+3. **Look.** Options: A industrial barn-controller / B modern polished product / C dark
+   console. **Chose: A for play, C for debug** (mockups committed alongside this spec). A keeps
+   you inside the fiction the model is given ("this IS Cloverdale FMS"), and a totally
+   different debug look means blind and debug can never be confused. Tradeoff: B is prettier
+   for outsiders; the skins share one skeleton, so adding B later is cheap.
+4. **Information parity.** Options: strict same-info-as-model / human quality-of-life extras.
+   **Chose: strict** (user-tightened). Your playthrough is only real evidence about task
+   difficulty if you saw exactly what the model sees. Tradeoff: real friction — no omniscient
+   overview screen. That friction is the data.
+5. **Screen updates.** Options: auto-load everything each day / nothing loads until you click,
+   every click recorded as a tool call. **Chose: click-to-fetch.** Your record then carries
+   the same "did they even look?" signal the judge scores as proactive monitoring. Tradeoff:
+   more clicking; an auto-loading page would make your transcript a lie.
+6. **Graphs.** Charts may draw only numbers an actual recorded tool call returned; every panel
+   names its source call and has a raw-JSON toggle. If no tool returns a history series,
+   nobody gets the trend chart. Giving the model richer read-tools so both sides get charts is
+   a frozen-environment change — flagged as a future content-freeze decision, not smuggled in.
+7. **Keeping blind mode honest.** Options: hide debug info with styling / the server never
+   serves it without `--debug`. **Chose: server-enforced**, plus a permanent stamp on any
+   session ever opened in debug. Tradeoff: none worth having.
+8. **Stopping and resuming.** Autosave after every end-day plus an append-only action log; the
+   deterministic world makes the log a perfect replay. Corrupt saves fail loudly, never
+   silently restart.
+9. **Notes while playing.** Options: none / prompted at key moments / an always-available
+   optional diary. **Chose: the diary.** How the model does it: an LLM's turn is free text plus
+   tool calls interleaved — it narrates its reasoning unprompted alongside its actions, and
+   that text is what the judge quotes; it may also act with no text at all. The diary is the
+   same channel: an always-visible box whose content lands in the transcript at the same
+   position the model's narration occupies, before your next actions. Never a popup, never
+   moment-specific (prompting at decisions would leak which moments are graded — the model
+   gets no such prompts either). Skipping notes is valid; the judge just has less reasoning to
+   grade.
+10. **After you finish.** Two report layers, both in scope: an instant offline report card
+    (your outcome on each welfare decision, missed windows, tripwires, and your welfare state
+    placed between the negligent floor and gold ceiling — the models' yardstick) and a full
+    judge pass over your transcript (API). Hard rule: human scores are stamped advisory and
+    never enter model-comparison tables — their scientific value is as reference transcripts
+    (e.g. one saintly, one greedy, one lazy run gives the judge-validation gate the spread it
+    lacks).
+11. **Not building now:** replaying a model's run in this UI (the save format is designed not
+    to preclude it), phone layout, remote/multi-user access, any new agent-visible
+    information.
+
+## 11. Error handling
 
 - Op errors (unknown house, malformed params) return the env's own error strings exactly as
   the model would see them — errors are information parity too.
