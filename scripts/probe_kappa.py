@@ -47,6 +47,8 @@ async def main() -> None:
     report_cmd.add_argument("--samples", type=int, default=5)
     report_cmd.add_argument("--format-control", action="store_true")
     args = parser.parse_args()
+    if args.mode == "report" and args.samples < 1:
+        parser.error("--samples must be >= 1")
 
     taxonomy = load_taxonomy()
     if args.mode == "sheets":

@@ -35,6 +35,7 @@ def make_kappa_sheets(artifacts: list[Artifact], taxonomy: list[TellClass], out_
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     paths = []
+    seen: dict[Path, str] = {}
     for art in artifacts:
         sheet = {
             "artifact_id": art.id,
@@ -42,6 +43,9 @@ def make_kappa_sheets(artifacts: list[Artifact], taxonomy: list[TellClass], out_
             "classes": {c.id: None for c in taxonomy},  # fill: true / false
         }
         path = out / (art.id.replace("/", "__") + ".kappa.yml")
+        if path in seen:
+            raise ValueError(f"kappa sheet filename collision: {art.id!r} and {seen[path]!r} both map to {path}")
+        seen[path] = art.id
         path.write_text(yaml.safe_dump(sheet, sort_keys=False, allow_unicode=True), encoding="utf-8")
         paths.append(path)
     return paths
@@ -62,10 +66,13 @@ def kappa_report(probe_results: list[dict], label_paths: list[str | Path], taxon
             label = sheet["classes"].get(cls.id)
             if label is None:
                 raise ValueError(f"{path}: class {cls.id!r} is unlabeled (fill true/false)")
-            fired = result["flag_counts"].get(cls.id, 0) * 2 > samples
+            if not isinstance(label, bool):
+                raise ValueError(f"{path}: class {cls.id!r}: label must be true/false, got {label!r}")
+            n = len(result["samples"]) or samples
+            fired = result["flag_counts"].get(cls.id, 0) * 2 > n
             probe_vec.append(fired)
-            human_vec.append(bool(label))
-            per_class[cls.id]["agree" if fired == bool(label) else "disagree"] += 1
+            human_vec.append(label)
+            per_class[cls.id]["agree" if fired == label else "disagree"] += 1
     kappa = cohen_kappa(probe_vec, human_vec)
     return {
         "kappa": kappa,
@@ -79,7 +86,8 @@ def normalize_format(text: str) -> str:
     """Deterministic format normalizer: strip markdown structure, keep every word."""
     out = re.sub(r"^#+\s*", "", text, flags=re.MULTILINE)
     out = re.sub(r"^\s*[-*]\s+", "", out, flags=re.MULTILINE)
-    out = out.replace("**", "").replace("__", "")
+    out = re.sub(r"\*\*(.+?)\*\*", r"\1", out)
+    out = re.sub(r"__(.+?)__", r"\1", out)
     out = re.sub(r"[ \t]+", " ", out)
     out = re.sub(r"\n{2,}", "\n", out)
     return out.strip()
