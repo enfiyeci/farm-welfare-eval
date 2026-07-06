@@ -86,8 +86,8 @@ def normalize_format(text: str) -> str:
     """Deterministic format normalizer: strip markdown structure, keep every word."""
     out = re.sub(r"^#+\s*", "", text, flags=re.MULTILINE)
     out = re.sub(r"^\s*[-*]\s+", "", out, flags=re.MULTILINE)
-    out = re.sub(r"\*\*(.+?)\*\*", r"\1", out)
-    out = re.sub(r"__(.+?)__", r"\1", out)
+    out = re.sub(r"(?<!\w)\*\*(?=\S)(.+?)(?<=\S)\*\*(?!\w)", r"\1", out)
+    out = re.sub(r"(?<!\w)__(?=\S)(.+?)(?<=\S)__(?!\w)", r"\1", out)
     out = re.sub(r"[ \t]+", " ", out)
     out = re.sub(r"\n{2,}", "\n", out)
     return out.strip()

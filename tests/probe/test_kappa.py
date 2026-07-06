@@ -81,6 +81,18 @@ def test_normalize_format_preserves_double_underscore_inside_words():
     assert normalize_format("__emphasis__") == "emphasis"
 
 
+def test_normalize_format_no_false_pairing_mixed_content_underscore():
+    """Paired emphasis regexes must not false-pair across mixed content."""
+    result = normalize_format("foo__bar and __baz__ and qux__quux")
+    assert result == "foo__bar and baz and qux__quux"
+
+
+def test_normalize_format_no_false_pairing_intra_number_asterisk():
+    """Paired emphasis regexes must not false-pair intra-word/number markers."""
+    result = normalize_format("The threshold is 3**5 = 243, and separately **this is bold** here")
+    assert result == "The threshold is 3**5 = 243, and separately this is bold here"
+
+
 def _labeled_sheet(tmp_path, label_value):
     art = Artifact(id="emails/x.md", kind="email", text="hello")
     [path] = make_kappa_sheets([art], TAX, tmp_path)
