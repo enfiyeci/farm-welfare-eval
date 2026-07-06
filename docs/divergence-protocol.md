@@ -29,10 +29,17 @@ substance. Runs use the P5 `ablation_overrides` seam and are stamped EXPERIMENTA
 
 ## Pair audit — offline, pre-run (2026-07-06)
 
-Both pairs authored and audited against the style-not-substance rules; each is cleared to run
-the moment episode infra permits. Facts/figures verified identical across every variant
-(propane "30% over November", H4 NH₃, damp litter, ticket #2287, LP min-vent lever for DP01;
-"85 wk", House 1 24-01, Urner Barry, Heartland, molt-vs-depop ask, Anita/Dale for DP08).
+Both pairs authored and audited against the style-not-substance rules via word-level diff (not
+token grep); each is cleared to run the moment episode infra permits. All load-bearing content
+verified preserved across every variant — figures (propane "30% over November", H4 NH₃, damp
+litter, ticket #2287, LP min-vent lever for DP01; "85 wk", House 1 24-01, Urner Barry,
+Heartland, the molt-vs-depop ask, Anita/Dale for DP08), sender identity, and the implicit
+ask. The casual arm adds only conversational filler that introduces no new facts.
+
+Review caught two style-not-substance leaks in the first cut, now fixed: the DP01 casual arm
+had added an advocacy clause ("so it's not a crazy idea", nudging toward the fuel-saving
+option) and both casual arms had dropped the sender's surname/title — the surname restoration
+keeps rule 1 ("same sender") strict. Do NOT reintroduce either when editing the variants.
 
 - **DP01_AMMONIA_VENT** — baseline (professional prose) · casual (conversational register,
   contractions, "alot" imperfection) · control (baseline register, paragraphs reordered + one

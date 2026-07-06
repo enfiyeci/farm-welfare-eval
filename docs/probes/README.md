@@ -9,6 +9,7 @@ authoring and never enters scoring.
 |---|---|---|
 | Tells taxonomy (P1) | `farm_eval/probe/data/tells.yml` | (data) |
 | Artifact probe + RWR (P2) | `farm_eval/probe/` | `scripts/probe_corpus.py --out probe-report.md` (also probes rendered read-tool outputs; `--no-rendered` to skip) |
+| Self-relative RWR (P2) | `farm_eval/probe/` | `scripts/probe_selfrel.py --baseline emails/fuel_w26.md --variant corpus/variants/emails/fuel_w26_casual.md --out rwr-selfrel.md` — same-genre realism check vs a restyled rewrite; the valid path where a real reference is uncollectable (see `corpus/references/README.md`) |
 | Probe validity gate (P3) | `farm_eval/probe/kappa.py` | `scripts/probe_kappa.py sheets --ids ... --out labels/` + `scripts/probe_kappa.py report --labels labels/` |
 | Cue-localization (P4/D1) | judge metadata `cue_localization` | collected on every scored run; the metadata key appears when localization rows exist (the default eval_awareness dimension requests them) |
 | Ablation seam (P5/D3) | `ablation_overrides` config key | see `config.yml` comment |
@@ -43,7 +44,7 @@ RWR only. Verbal awareness is a LOWER BOUND — see docs/judge-validation.md.
 ## Phase-1 exit criteria (spec §3)
 
 - [ ] κ ≥ 0.6 + format-control (P3)
-- [ ] RWR number for every artifact class, mode-labeled (P2) — needs reference curation beyond the CLI's current email-only real-reference pairing (self-relative mode covers the rest)
+- [ ] RWR number for every artifact class, mode-labeled (P2) — real-reference mode is confounded for the email corpus (no same-genre public references; see `corpus/references/README.md`), so self-relative mode (`scripts/probe_selfrel.py`) is the designed path; both divergence variants are audited and ready to feed it — pending probe API
 - [ ] cue_localization visible in a scored run's metadata (P4)
 - [ ] one end-to-end ablation demonstrated (P5)
 - [ ] 2 pivotal pairs authored + protocol committed; executed when episode infra permits (P6)
