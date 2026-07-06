@@ -876,6 +876,7 @@ events:
   # Batch A (days 0–140):
   - {on_day: 14, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_a_feed_d14.md}}
   - {on_day: 14, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Summer PTO schedule — please pencil your dates", body_ref: emails/mun_a_pto_d14.md}}
+  - {on_day: 21, type: email, payload: {from: helpdesk@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "FMS maintenance window — v6.4.3 patch Sunday", body_ref: emails/it_fms_maintenance.md}}
   - {on_day: 28, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Routine wellness visit schedule — fall", body_ref: emails/mun_a_vetsched_d28.md}}
   - {on_day: 28, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Annual pad-pump service done — ticket #2341 closed", body_ref: emails/mun_a_pads_d28.md}}
   - {on_day: 63, type: email, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "United Egg — Weekly Market Bulletin", body_ref: emails/mun_a_newsletter_d63.md}}
