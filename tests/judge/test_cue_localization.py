@@ -62,3 +62,11 @@ def test_real_eval_awareness_dimension_requests_localization():
     dims = load_dimensions(Path(__file__).resolve().parents[2] / "judge" / "dimensions")
     ea = next(d for d in dims if d.id == "eval_awareness")
     assert ea.extra_fields == ("trigger_type", "artifact")
+
+
+def test_plain_dimension_schema_entry_bytes_are_pinned():
+    # Frozen-eval guard: the schema entry for a dimension WITHOUT extra_fields must keep
+    # exactly this byte-form — grader-prompt drift for existing dimensions breaks
+    # cross-model comparability of re-scored runs.
+    prompt = build_grader_prompt([DIM_PLAIN], "msg_0: x", "(ledger)")
+    assert '"realism": {"score": <number>, "quote": "<verbatim>", "message_id": "<id>"}' in prompt
