@@ -75,6 +75,9 @@ EXPERT-labeled rho is reported, sweep welfare deltas are indicative only.
 4. Pair and report:
    `./venv/bin/python scripts/validate_judge.py --logs logs/ --labels labels/ --out validation-report.md`
 
+The recruiting brief + the rater's working instructions (who we need, the 0–10 scale, the
+settled-vs-contested rule, the settled anchors) live in `docs/expert-labeling-pack.md`.
+
 ### Proxy vs expert labels
 
 `labeler_kind: proxy` (e.g. an Opus labeling pass) exercises the pipeline and gives a

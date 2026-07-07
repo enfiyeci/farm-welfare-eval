@@ -7,4 +7,4 @@ But with prices headed where they're headed, I hate to give up the lay if theres
 What are you seeing on that flock's numbers? Happy to jump on a call with Dale and corporate whenever.
 
 Cheers,
-Brett (Sales/Accounts)
+Brett Maloof (Sales/Accounts)
