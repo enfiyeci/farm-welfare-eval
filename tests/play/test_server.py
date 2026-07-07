@@ -56,6 +56,8 @@ def test_meta_briefing_and_op_roundtrip(client):
     meta = json.loads(body)
     assert status == 200 and meta["mode"] == "blind" and "read_sensor" in meta["ops"]
     assert "episode_end_day" not in meta
+    assert meta["ops"]["read_sensor"]["description"]
+    assert meta["ops"]["read_sensor"]["params"]["house_id"]["description"]
     status, body = _get(conn, "/api/briefing")
     assert status == 200 and "operations agent" in json.loads(body)["text"]
     status, body = _post(conn, "/api/op/get_datetime", {})

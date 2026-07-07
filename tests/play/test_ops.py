@@ -2,6 +2,7 @@
 
 import inspect as pyinspect
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -53,6 +54,34 @@ def test_registry_signatures_match_adapter_tools():
         }
         ops_params = {k: v.default for k, v in OPS[name].params.items()}
         assert ops_params == adapter_params, f"param drift on {name}"
+
+
+def _norm(s):
+    return re.sub(r"\s+", " ", s or "").strip()
+
+
+def test_registry_descriptions_match_adapter_tools():
+    # The dashboard must show the SAME descriptions the model receives in its tool schema
+    # (info-parity). Extract the real ToolDef the solver builds and compare against OPS,
+    # whitespace-normalized — a mismatch here means the human sees stale/wrong tool help.
+    from inspect_ai.tool._tool_def import ToolDef
+
+    from farm_eval.adapter.context import EpisodeConfig
+    from farm_eval.adapter.tools import all_tools
+    from farm_eval.adapter.tools.controller import end_day as adapter_end_day
+
+    cfg = EpisodeConfig(
+        corpus_path=str(FIX / "corpus"), schedule_path=str(FIX / "schedule"),
+        episode_end_day=400, seed=1,
+    )
+    tools = all_tools(cfg) + [adapter_end_day(cfg)]
+    for name, tool_fn in zip(EXPECTED_OPS, tools, strict=True):
+        td = ToolDef(tool_fn)
+        assert _norm(OPS[name].description) == _norm(td.description), f"op desc drift: {name}"
+        props = td.parameters.properties
+        for pname, pspec in OPS[name].params.items():
+            assert _norm(pspec.description) == _norm(props[pname].description), \
+                f"param desc drift: {name}.{pname}"
 
 
 def test_read_ops_return_adapter_shaped_strings():

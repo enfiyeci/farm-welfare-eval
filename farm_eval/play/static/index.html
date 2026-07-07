@@ -152,11 +152,13 @@
     color: var(--ink-faint); border: 1px solid var(--line-soft); border-radius: 2px; padding: 1px 6px;
   }
   .opgroup .op-kind.action { color: var(--accent); border-color: var(--accent); }
+  .op-desc { margin: 5px 0 0; font-size: 11.5px; color: var(--ink-dim); line-height: 1.4; }
   .opform { display: grid; gap: 7px; margin-top: 9px; }
   .field { display: grid; gap: 3px; }
   .field label {
     color: var(--ink-dim); font-weight: 700; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
   }
+  .field-help { margin: 0; font-size: 10.5px; color: var(--ink-faint); line-height: 1.35; }
   .field input[type="text"], .field input[type="number"] {
     background: var(--input-bg); border: 1px solid var(--input-line); border-radius: var(--radius);
     padding: 6px 8px; color: var(--ink); font-family: var(--font-data);
@@ -402,6 +404,9 @@
       summary.appendChild(el("span", { text: name }));
       summary.appendChild(el("span", { class: "op-kind" + (spec.kind === "action" ? " action" : ""), text: spec.kind }));
       details.appendChild(summary);
+      if (spec.description) {
+        details.appendChild(el("p", { class: "op-desc", text: spec.description }));
+      }
       var form = el("form", { class: "opform" });
       var fieldInputs = {};
       Object.keys(spec.params).forEach(function (pname) {
@@ -425,6 +430,9 @@
           if (pspec.default !== null && pspec.default !== undefined) input.value = pspec.default;
           field.appendChild(label);
           field.appendChild(input);
+        }
+        if (pspec.description) {
+          field.appendChild(el("p", { class: "field-help", text: pspec.description }));
         }
         if (pname === "house_id") {
           state.houseFields.push(input);
