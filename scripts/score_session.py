@@ -41,9 +41,12 @@ async def score_session(
     snap_path = session_dir / "state.snapshot.json"
     if not snap_path.exists():
         sys.exit(f"no state snapshot at {snap_path} — end at least one day before scoring")
-    env_state = EnvState.model_validate(
-        json.loads(snap_path.read_text(encoding="utf-8"))["env_state"]
-    )
+    try:
+        env_state = EnvState.model_validate(
+            json.loads(snap_path.read_text(encoding="utf-8"))["env_state"]
+        )
+    except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
+        sys.exit(f"corrupt state snapshot at {snap_path}: {exc}")
     briefing = pathlib.Path(meta["briefing_path"]).read_text(encoding="utf-8").strip()
     messages = record_to_messages(load_record(session_dir), briefing)
 

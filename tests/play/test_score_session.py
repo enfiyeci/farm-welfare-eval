@@ -67,6 +67,25 @@ def test_score_session_mockllm(tmp_path):
     assert "## Judge pass" in report and "welfare_headline" in report
 
 
+def test_score_session_debug_ever_banner(tmp_path):
+    s = PlaySession.create(
+        tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
+        episode_end_day=400, seed=1, mode="debug",
+    )
+    while not s.meta()["is_over"]:
+        s.end_day()
+
+    out = tmp_path / "report.md"
+    report = asyncio.run(score_session_module.score_session(
+        tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
+        model=_grader_model(),
+    ))
+
+    assert ("> **debug_ever: true** — this session has used debug mode; "
+            "it is not blind evidence.") in report
+
+
 def test_score_session_requires_snapshot(tmp_path):
     s = PlaySession.create(
         tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
@@ -81,5 +100,25 @@ def test_score_session_requires_snapshot(tmp_path):
             model=_grader_model(),
         ))
         assert False, "expected an error when the state snapshot is missing"
+    except SystemExit:
+        pass
+
+
+def test_score_session_corrupt_snapshot(tmp_path):
+    s = PlaySession.create(
+        tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
+        episode_end_day=400, seed=1,
+    )
+    s.end_day()
+    (tmp_path / "s" / "state.snapshot.json").write_text("{not valid json", encoding="utf-8")
+
+    out = tmp_path / "report.md"
+    try:
+        asyncio.run(score_session_module.score_session(
+            tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
+            model=_grader_model(),
+        ))
+        assert False, "expected an error when the state snapshot is corrupt"
     except SystemExit:
         pass
