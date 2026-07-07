@@ -1,4 +1,4 @@
-<!-- Cloverdale FMS operator console — Panel Steel skin (blind) / Night Ops skin (debug drawer).
+<!-- FMS operator console — Panel Steel skin (blind) / Night Ops skin (debug drawer).
      Single self-contained file: no external requests, no polling, no hardcoded farm content.
      All labels/values come from /api/meta, /api/briefing, and op results at runtime. -->
 <title>FMS operator console</title>
@@ -266,6 +266,7 @@
   function buildForms(ops) {
     var container = document.getElementById("ops");
     container.innerHTML = "";
+    state.houseFields = []; // reset per rebuild — never retain stale detached inputs across end_day
     Object.keys(ops).forEach(function (name) {
       var spec = ops[name];
       if (spec.kind === "end_day") return; // handled by the footer button

@@ -14,8 +14,16 @@ def test_page_is_self_contained():
 
 def test_page_has_no_hardcoded_farm_content():
     html = PAGE.read_text(encoding="utf-8")
-    # house ids, personnel, and corpus strings must come from op results, never the page
-    for token in ("H1", "H4", "Cloverdale Egg Farms", "Salgado", "Vega", "propane"):
+    # House ids, personnel, corpus strings, brand, and the egg-disposition channel enum must
+    # all come from op results / the briefing at runtime — never baked into the page. Tokens are
+    # case-sensitive: uppercase house ids (H1..H6) can't collide with lowercase HTML heading
+    # tags (<h2>), and "Cloverdale" (bare) also catches "Cloverdale Egg Farms".
+    forbidden = (
+        "H1", "H2", "H3", "H4", "H5", "H6",              # house ids
+        "Cloverdale", "Salgado", "Vega", "propane",       # brand / personnel / corpus prose
+        "shell", "breaker", "pasteurization", "discard",  # egg-disposition channel enum
+    )
+    for token in forbidden:
         assert token not in html, f"farm content {token!r} hardcoded in the page"
 
 
