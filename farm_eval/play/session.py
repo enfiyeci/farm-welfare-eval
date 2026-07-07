@@ -46,6 +46,8 @@ class PlaySession:
         session_dir.mkdir(parents=True, exist_ok=True)
         meta_path = session_dir / "meta.yml"
         if not meta_path.exists():
+            # `mode` is write-once: it records the creation mode / launch default and is
+            # never rewritten later (see resume()). `debug_ever` is the permanent audit trail.
             meta_path.write_text(yaml.safe_dump({
                 "schema": 1, "mode": mode, "seed": seed,
                 "corpus_path": str(corpus_path), "schedule_path": str(schedule_path),
@@ -130,6 +132,9 @@ class PlaySession:
         """
         session_dir = Path(session_dir)
         meta = yaml.safe_load((session_dir / "meta.yml").read_text(encoding="utf-8"))
+        # meta["mode"] is the write-once creation/launch-default mode; it is deliberately NOT
+        # updated here even when `mode` opts into debug for this launch — debug access requires
+        # explicit opt-in per launch (safer for blindness), while debug_ever is the permanent record.
         effective_mode = mode or meta["mode"]
         if effective_mode == "debug":
             cls._stamp_debug(session_dir)
@@ -145,7 +150,7 @@ class PlaySession:
                 snap = json.loads(snap_path.read_text(encoding="utf-8"))
                 restored = type(env.state).model_validate(snap["env_state"])
                 snapshot_seq = snap["seq"]
-            except (json.JSONDecodeError, KeyError, ValueError) as exc:
+            except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
                 raise ValueError(
                     f"corrupt state snapshot at {snap_path}: {exc}. Fallback: delete the "
                     f"snapshot and resume replays session.jsonl from day 0 (deterministic)."

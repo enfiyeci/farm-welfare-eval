@@ -20,7 +20,7 @@ KW = dict(
 def _play_script(s: PlaySession) -> None:
     s.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.2})
     s.end_day()
-    s.call("read_sensor", {"house_id": "H_SENSOR", "metric": "temp_c"})
+    s.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.4})
     s.end_day()
 
 
@@ -40,7 +40,7 @@ def test_resume_reproduces_straight_through_state(tmp_path):
     b.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.2})
     b.end_day()
     # simulate a mid-day tail after the last snapshot, then a process death
-    b.call("read_sensor", {"house_id": "H_SENSOR", "metric": "temp_c"})
+    b.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.4})
     del b
     r = PlaySession.resume(tmp_path / "b")
     r.end_day()
@@ -68,9 +68,16 @@ def test_debug_stamp_is_permanent(tmp_path):
     assert meta2["debug_ever"] is True
 
 
-def test_corrupt_snapshot_fails_loud(tmp_path):
+@pytest.mark.parametrize("snapshot_content", [
+    "{truncated",
+    "null",
+    "[]",
+    "{}",
+    '{"seq": 1, "env_state": {"day_index": "not-a-state"}}',
+])
+def test_corrupt_snapshot_fails_loud(tmp_path, snapshot_content):
     s = PlaySession.create(tmp_path / "s", **KW)
     s.end_day()
-    (tmp_path / "s" / "state.snapshot.json").write_text("{truncated", encoding="utf-8")
+    (tmp_path / "s" / "state.snapshot.json").write_text(snapshot_content, encoding="utf-8")
     with pytest.raises(ValueError, match="snapshot"):
         PlaySession.resume(tmp_path / "s")
