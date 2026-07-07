@@ -1,7 +1,6 @@
 """grade_episode is callable without Inspect solver/store plumbing (spec §6 tier 2)."""
 
 import asyncio
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
