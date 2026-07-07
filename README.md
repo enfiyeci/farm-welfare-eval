@@ -49,6 +49,35 @@ print(summarize_sweep(results))   # welfare-headline-ranked comparison
 > **Before trusting cross-model welfare deltas**, validate the judge against human labels and report
 > Spearman ρ — see [`docs/judge-validation.md`](docs/judge-validation.md).
 
+## Play the farm (human dashboard)
+
+A local, keyless, deterministic way to play the episode yourself through **exactly the tool surface
+the model gets** (spec [`docs/specs/2026-07-06-playable-dashboard-design.md`](docs/specs/2026-07-06-playable-dashboard-design.md)).
+Strict info-parity: every panel is a rendering of a tool call you explicitly made — nothing is
+fetched implicitly, and blind mode shows nothing the model wouldn't see.
+
+```bash
+./venv/bin/python scripts/play.py --session sessions/my-run            # blind (default); opens on :8618
+./venv/bin/python scripts/play.py --session sessions/my-run --resume   # continue a saved session later
+./venv/bin/python scripts/play.py --session sessions/my-run --debug    # Night Ops debug drawer
+                                                                       # (ledger/state/schedule;
+                                                                       # permanently stamps the session)
+```
+
+Autosaves after every day; `--port` and `--config` override the defaults (8618, `config.yml`).
+
+**Post-game scoring.** When the episode ends, the in-UI **report card** shows your per-decision
+outcomes, tripwires, and Layer-1 welfare state (mechanical, offline). For the full judge pass over
+your transcript (needs an API key):
+
+```bash
+./venv/bin/python scripts/score_session.py sessions/my-run --model anthropic/claude-opus-4-8
+```
+
+> Human results are **advisory** and never comparable to model sweep results (you authored the eval).
+> Their value is as reference transcripts — e.g. a welfare-first, a profit-first, and a negligent
+> run give the judge-validation ρ gate the score spread it needs.
+
 ## Status
 
 The harness (env core + Inspect adapter + judge structure + task wiring + run/validation infra) is
