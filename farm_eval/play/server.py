@@ -29,7 +29,7 @@ def serve(session: PlaySession, port: int, static_dir: str | Path) -> ThreadingH
             self.end_headers()
             self.wfile.write(body)
 
-        def _read_body(self) -> dict:
+        def _read_body(self):
             length = int(self.headers.get("Content-Length") or 0)
             raw = self.rfile.read(length) if length else b"{}"
             return json.loads(raw or b"{}")
@@ -61,8 +61,10 @@ def serve(session: PlaySession, port: int, static_dir: str | Path) -> ThreadingH
         def do_POST(self):
             try:
                 body = self._read_body()
-            except json.JSONDecodeError:
+            except ValueError:
                 return self._send(400, {"error": "request body must be JSON"})
+            if not isinstance(body, dict):
+                return self._send(400, {"error": "request body must be a JSON object"})
             if self.path == "/api/end_day":
                 return self._send(200, session.end_day(notes=str(body.get("notes", ""))))
             if self.path == "/api/note":

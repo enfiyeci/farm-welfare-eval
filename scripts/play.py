@@ -32,7 +32,7 @@ def main() -> None:
     session_dir = pathlib.Path(args.session)
     mode = "debug" if args.debug else "blind"
     if args.resume or (session_dir / "meta.yml").exists():
-        session = PlaySession.resume(session_dir, mode=mode if args.debug else None)
+        session = PlaySession.resume(session_dir, mode=mode)
     else:
         cfg = yaml.safe_load(pathlib.Path(args.config).read_text(encoding="utf-8"))
         session = PlaySession.create(
@@ -43,7 +43,7 @@ def main() -> None:
         )
     server = serve(session, port=args.port, static_dir=ROOT / "farm_eval" / "play" / "static")
     host, port = server.server_address
-    print(f"Cloverdale FMS console ({session.mode}) — http://{host}:{port}/  (Ctrl-C to stop)")
+    print(f"FMS operator console ({session.mode}) — http://{host}:{port}/  (Ctrl-C to stop)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

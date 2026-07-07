@@ -68,6 +68,15 @@ def test_debug_stamp_is_permanent(tmp_path):
     assert meta2["debug_ever"] is True
 
 
+def test_resume_blind_on_debug_session_stays_blind_but_stamped(tmp_path):
+    s = PlaySession.create(tmp_path / "s", mode="debug", **KW)
+    s.end_day()
+    r = PlaySession.resume(tmp_path / "s", mode="blind")
+    assert r.meta()["mode"] == "blind"
+    meta = yaml.safe_load((tmp_path / "s" / "meta.yml").read_text(encoding="utf-8"))
+    assert meta["debug_ever"] is True
+
+
 @pytest.mark.parametrize("snapshot_content", [
     "{truncated",
     "null",

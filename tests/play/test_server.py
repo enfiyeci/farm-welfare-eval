@@ -104,4 +104,12 @@ def test_action_after_horizon_409(client):
 def test_index_served(client):
     _, _, conn = client()
     status, body = _get(conn, "/")
-    assert status == 200 and "<html" in body.lower() or "fms" in body.lower()
+    assert (status == 200) and ("<html" in body.lower() or "fms" in body.lower())
+
+
+def test_op_bad_body_returns_400(client):
+    _, _, conn = client()
+    conn.request("POST", "/api/op/get_datetime", "null", {"Content-Type": "application/json"})
+    resp = conn.getresponse()
+    status, body = resp.status, resp.read().decode()
+    assert status == 400 and "error" in json.loads(body)
