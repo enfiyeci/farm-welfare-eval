@@ -106,15 +106,18 @@
     background: linear-gradient(180deg, #fff, var(--panel));
     border: 1px solid var(--line); border-top: 2px solid var(--accent); border-radius: var(--radius);
     padding: 9px 10px 10px; box-shadow: var(--panel-shadow);
-    display: grid; gap: 6px; text-align: left; cursor: pointer; color: inherit; min-width: 0;
+    display: grid; gap: 6px; text-align: left; color: inherit; min-width: 0;
     transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
   }
   .tile:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(20,30,44,0.14); }
-  .tile:active { transform: translateY(0); }
+  .tile-body { display: grid; gap: 6px; cursor: pointer; }
+  .tile-body:active { transform: translateY(0); }
   .tile-id {
     font-family: var(--font-data); font-weight: 700; font-size: 15px; letter-spacing: 0.02em;
     padding-bottom: 5px; border-bottom: 1px solid var(--line-soft);
   }
+  .tile-actions { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+  .btn.tiny { padding: 4px 8px; font-size: 10px; }
 
   /* recursive key/value rendering (shared by tiles + log) — never overflows its container */
   .kv { display: grid; gap: 2px; font-size: 11.5px; min-width: 0; }
@@ -135,6 +138,12 @@
   /* ---- console ops + log side by side ---- */
   .mainrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
   @media (max-width: 940px) { .mainrow { grid-template-columns: 1fr; } }
+
+  .quickbar { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-bottom: 2px; }
+  .quickbar .quickbar-label {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+    font-weight: 700; margin-right: 2px;
+  }
 
   #ops { display: grid; gap: 7px; }
   .opgroup {
@@ -201,6 +210,23 @@
   .logentry details { margin-top: 6px; }
   .logentry details summary { cursor: pointer; font-size: 10.5px; color: var(--ink-faint); letter-spacing: 0.04em; }
   .logentry details pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; margin: 5px 0 0; font-family: var(--font-data); color: var(--ink-dim); }
+
+  /* ---- inbox ---- */
+  #inbox { display: grid; gap: 5px; }
+  .mail {
+    display: flex; align-items: baseline; gap: 8px; cursor: pointer; min-width: 0;
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 9px;
+    background: #fff; transition: border-color 0.12s ease, background 0.12s ease;
+  }
+  .mail:hover { border-color: var(--accent); background: var(--panel-2); }
+  .mail-dot {
+    flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 2px rgba(31,95,158,0.15);
+  }
+  .mail-body { display: flex; gap: 8px; min-width: 0; flex-wrap: wrap; flex: 1; }
+  .mail-field { font-size: 11.5px; min-width: 0; overflow-wrap: anywhere; }
+  .mail-field.mail-from { color: var(--ink-dim); font-family: var(--font-data); }
+  .mail-field.mail-subject { font-weight: 700; }
 
   #diary textarea {
     width: 100%; min-height: 40px; max-height: 160px; resize: vertical;
@@ -273,9 +299,15 @@
     <div class="tiles" id="houses"></div>
   </div>
 
+  <div class="panel" id="inbox-panel" style="display:none">
+    <div class="panel-title"><h2>Inbox</h2><span id="inbox-hint">click a message to open it</span></div>
+    <div id="inbox"></div>
+  </div>
+
   <div class="mainrow">
     <div class="panel" id="ops-panel">
       <div class="panel-title"><h2>Console ops</h2><span>reads &amp; actions</span></div>
+      <div class="quickbar" id="quickbar"><span class="quickbar-label">quick reads</span></div>
       <div id="ops"></div>
     </div>
 
@@ -360,6 +392,7 @@
       state.meta = res.body;
       renderTopbar(res.body);
       buildForms(res.body.ops);
+      buildQuickReads(res.body.ops);
       if (res.body.debug) buildDebugDrawer(); else clearDebugDrawer();
       return res.body;
     });
@@ -462,6 +495,30 @@
     });
   }
 
+  // required params are those with no default (server sends default: null) — shared by the
+  // quickbar (no required params at all) and the per-house tile actions (required subset of
+  // {"house_id"}).
+  function requiredParams(spec) {
+    return Object.keys(spec.params).filter(function (pname) {
+      var d = spec.params[pname].default;
+      return d === null || d === undefined;
+    });
+  }
+
+  // ---- quick-reads toolbar: one-click reads with no required args, derived from meta.ops ----
+  function buildQuickReads(ops) {
+    var bar = document.getElementById("quickbar");
+    bar.querySelectorAll(".btn").forEach(function (b) { b.remove(); });
+    Object.keys(ops).forEach(function (name) {
+      var spec = ops[name];
+      if (spec.kind !== "read") return;
+      if (requiredParams(spec).length > 0) return;
+      var btn = el("button", { type: "button", class: "btn tiny", text: name });
+      btn.addEventListener("click", function () { runOp(name, {}); });
+      bar.appendChild(btn);
+    });
+  }
+
   // ---- 2. click-to-fetch op execution ----
   function runOp(name, params) {
     var day = state.meta ? state.meta.day_index : "?";
@@ -471,6 +528,9 @@
       logResult(name, params, day, res);
       if (name === "list_houses" && res.ok && res.body && res.body.result) {
         renderHouses(res.body.result);
+      }
+      if (name === "list_emails" && res.ok && res.body && res.body.result) {
+        renderInbox(res.body.result);
       }
     });
   }
@@ -506,6 +566,24 @@
     log.scrollTop = log.scrollHeight;
   }
 
+  // house-scoped reads: ops where house_id alone suffices (kind read, has a house_id param,
+  // and every OTHER required param — if any — still has a default). Derived from state.meta
+  // at render time so it tracks meta.ops without hardcoding op names.
+  function houseReadOps() {
+    var ops = (state.meta && state.meta.ops) || {};
+    return Object.keys(ops).filter(function (name) {
+      var spec = ops[name];
+      if (spec.kind !== "read") return false;
+      if (!("house_id" in spec.params)) return false;
+      var required = requiredParams(spec);
+      return required.every(function (p) { return p === "house_id"; });
+    });
+  }
+
+  function fillHouseFields(houseId) {
+    state.houseFields.forEach(function (input) { input.value = houseId; });
+  }
+
   // ---- house tiles from the latest list_houses result ----
   function renderHouses(resultStr) {
     var houses;
@@ -514,17 +592,65 @@
     var container = document.getElementById("houses");
     container.innerHTML = "";
     document.getElementById("houses-hint").textContent = houses.length + " houses · click a tile to fill house_id";
+    var actionOps = houseReadOps();
     houses.forEach(function (house) {
-      var tile = el("button", { type: "button", class: "tile" });
-      tile.appendChild(el("div", { class: "tile-id", text: house.house_id }));
+      var tile = el("div", { class: "tile" });
+      var body = el("div", { class: "tile-body", role: "button", tabindex: "0" });
+      body.appendChild(el("div", { class: "tile-id", text: house.house_id }));
       var rest = {};
       Object.keys(house).forEach(function (k) { if (k !== "house_id") rest[k] = house[k]; });
-      tile.appendChild(kvNode(rest));
-      tile.addEventListener("click", function () {
-        state.houseFields.forEach(function (input) { input.value = house.house_id; });
+      body.appendChild(kvNode(rest));
+      body.addEventListener("click", function () { fillHouseFields(house.house_id); });
+      body.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); fillHouseFields(house.house_id); }
       });
+      tile.appendChild(body);
+
+      var actions = el("div", { class: "tile-actions" });
+      var fillBtn = el("button", { type: "button", class: "btn tiny", text: "fill house_id" });
+      fillBtn.addEventListener("click", function (ev) { ev.stopPropagation(); fillHouseFields(house.house_id); });
+      actions.appendChild(fillBtn);
+      actionOps.forEach(function (name) {
+        var btn = el("button", { type: "button", class: "btn tiny", text: name });
+        btn.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          runOp(name, { house_id: house.house_id });
+        });
+        actions.appendChild(btn);
+      });
+      tile.appendChild(actions);
+
       container.appendChild(tile);
     });
+  }
+
+  // ---- inbox panel from the latest list_emails result ----
+  function renderInbox(resultStr) {
+    var emails;
+    try { emails = JSON.parse(resultStr); } catch (e) { return; }
+    if (!Array.isArray(emails)) return;
+    var panel = document.getElementById("inbox-panel");
+    var container = document.getElementById("inbox");
+    container.innerHTML = "";
+    document.getElementById("inbox-hint").textContent = emails.length + " messages · click to open";
+    emails.forEach(function (mail) {
+      var row = el("div", { class: "mail", role: "button", tabindex: "0" });
+      if (mail.unread) row.appendChild(el("span", { class: "mail-dot", "aria-hidden": "true" }));
+      var body = el("div", { class: "mail-body" });
+      Object.keys(mail).forEach(function (k) {
+        if (k === "id" || k === "unread") return;
+        var cls = "mail-field" + (k === "from" ? " mail-from" : k === "subject" ? " mail-subject" : "");
+        body.appendChild(el("span", { class: cls, text: String(mail[k]) }));
+      });
+      row.appendChild(body);
+      var open = function () { runOp("read_email", { email_id: mail.id }); };
+      row.addEventListener("click", open);
+      row.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); open(); }
+      });
+      container.appendChild(row);
+    });
+    panel.style.display = "flex";
   }
 
   // ---- 4. diary ----

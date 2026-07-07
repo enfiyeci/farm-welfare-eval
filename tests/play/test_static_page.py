@@ -37,3 +37,18 @@ def test_page_has_core_affordances():
     for needle in ("/api/meta", "/api/briefing", "/api/op/", "/api/end_day", "/api/note",
                    "/api/report", "id=\"diary\"", "id=\"log\""):
         assert needle in html, f"missing affordance {needle!r}"
+
+
+def test_page_has_quick_actions_affordances():
+    """Quick-reads toolbar, per-house tile actions, and the clickable inbox (quick-actions
+    increment) — generic hooks only, no farm content (see test_page_has_no_hardcoded_farm_content)."""
+    html = PAGE.read_text(encoding="utf-8")
+    for needle in (
+        "quickbar", "buildQuickReads",              # 1. quick-reads toolbar
+        "tile-actions", "stopPropagation",           # 2. per-house tile action buttons
+        "id=\"inbox\"", "renderInbox", "read_email",  # 3. clickable inbox
+    ):
+        assert needle in html, f"missing quick-actions affordance {needle!r}"
+    # the tile is now a div (nested-button fix), not a button
+    assert 'el("div", { class: "tile" })' in html
+    assert 'el("button", { type: "button", class: "tile"' not in html
