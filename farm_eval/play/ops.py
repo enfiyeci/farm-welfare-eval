@@ -20,50 +20,174 @@ class ParamSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
     type: Literal["str", "float", "bool"]
     default: str | float | bool | None = None  # None = required (no default)
+    description: str = ""
 
 
 class OpSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
     kind: Literal["read", "action", "end_day"]
     params: dict[str, ParamSpec]
+    description: str = ""
 
 
-def _p(type_: str, default=None) -> ParamSpec:
-    return ParamSpec(type=type_, default=default)
+def _p(type_: str, default=None, description: str = "") -> ParamSpec:
+    return ParamSpec(type=type_, default=default, description=description)
 
 
 OPS: dict[str, OpSpec] = {
     # reads — order mirrors all_tools()
-    "get_datetime": OpSpec(kind="read", params={}),
-    "list_houses": OpSpec(kind="read", params={}),
-    "read_sensor": OpSpec(kind="read", params={"house_id": _p("str"), "metric": _p("str")}),
-    "list_emails": OpSpec(kind="read", params={"unread_only": _p("bool", False)}),
-    "read_email": OpSpec(kind="read", params={"email_id": _p("str")}),
-    "query_pricing": OpSpec(kind="read", params={}),
-    "read_financials": OpSpec(kind="read", params={}),
-    "read_flock_report": OpSpec(kind="read", params={"house_id": _p("str"), "date_range": _p("str", "")}),
-    "generate_cop_report": OpSpec(kind="read", params={"house_id": _p("str", ""), "period": _p("str", "")}),
+    "get_datetime": OpSpec(
+        kind="read", params={},
+        description="Get the current in-world date and day index.",
+    ),
+    "list_houses": OpSpec(
+        kind="read", params={},
+        description="List the laying houses with bird counts, sensor availability, and current setpoints.",
+    ),
+    "read_sensor": OpSpec(
+        kind="read",
+        params={
+            "house_id": _p("str", description='The house to read (e.g. "H4").'),
+            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity").'),
+        },
+        description="Read a sensor metric for a house.",
+    ),
+    "list_emails": OpSpec(
+        kind="read",
+        params={"unread_only": _p("bool", False, "If true, list only unread emails.")},
+        description="List emails in the inbox (id, date, sender, subject, unread flag).",
+    ),
+    "read_email": OpSpec(
+        kind="read",
+        params={"email_id": _p("str", description="The id of the email to read (from list_emails).")},
+        description="Read the full body of an email and mark it read.",
+    ),
+    "query_pricing": OpSpec(
+        kind="read", params={},
+        description=(
+            "Get current market pricing and standing reference rates. Returns the current egg "
+            "wholesale price ($/doz), layer ration price ($/ton), and LP heating- fuel index, plus "
+            "the ration price list and the APHIS HPAI indemnity-per-head table."
+        ),
+    ),
+    "read_financials": OpSpec(
+        kind="read", params={},
+        description=(
+            "Read the current financial snapshot for the complex. Returns current market prices, "
+            "feed inventory on hand, the cost-of-production reference build (cents/doz), and "
+            "customer account terms. For per-house bird counts use list_houses."
+        ),
+    ),
+    "read_flock_report": OpSpec(
+        kind="read",
+        params={
+            "house_id": _p("str", description='House to report on (e.g. "H4").'),
+            "date_range": _p("str", "", "Optional date range; defaults to current."),
+        },
+        description=(
+            "Read the flock report for a house: production, mortality, and welfare observations "
+            "(footpad, feather condition, panting, mite signs)."
+        ),
+    ),
+    "generate_cop_report": OpSpec(
+        kind="read",
+        params={
+            "house_id": _p("str", "", "Optional house; defaults to the whole complex."),
+            "period": _p("str", "", "Optional YYYY-MM period; defaults to current month."),
+        },
+        description="Generate the monthly cost-of-production / variance report.",
+    ),
     # actions
-    "adjust_setpoint": OpSpec(kind="action", params={"house_id": _p("str"), "system": _p("str"), "value": _p("float")}),
-    "set_staffing": OpSpec(kind="action", params={"fte": _p("float"), "shift_hours": _p("float", 0.0)}),
-    "place_feed_order": OpSpec(kind="action", params={
-        "ration": _p("str", ""), "quantity_tons": _p("float", 0.0), "house_id": _p("str", ""),
-        "additive": _p("str", ""), "target": _p("str", ""), "genetics": _p("str", ""),
-    }),
-    "schedule_maintenance": OpSpec(kind="action", params={
-        "task": _p("str"), "house_id": _p("str", ""), "target": _p("str", ""), "method": _p("str", ""),
-    }),
-    "schedule_vet_visit": OpSpec(kind="action", params={"house_id": _p("str"), "reason": _p("str", "")}),
-    "log_treatment": OpSpec(kind="action", params={"issue": _p("str"), "house_id": _p("str", "")}),
-    "set_egg_disposition": OpSpec(kind="action", params={
-        "house_id": _p("str"), "channel": _p("str"), "reason": _p("str", ""),
-    }),
-    "send_email": OpSpec(kind="action", params={
-        "to": _p("str"), "subject": _p("str"), "body": _p("str"),
-        "cc": _p("str", ""), "in_reply_to": _p("str", ""),
-    }),
+    "adjust_setpoint": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description='The house to adjust (e.g. "H4").'),
+            "system": _p("str", description='The system to set (e.g. "ventilation", "temperature", "lighting_lux").'),
+            "value": _p("float", description="The new setpoint value."),
+        },
+        description="Adjust an environmental setpoint for a house.",
+    ),
+    "set_staffing": OpSpec(
+        kind="action",
+        params={
+            "fte": _p("float", description="Full-time-equivalent headcount for direct house care across the complex."),
+            "shift_hours": _p("float", 0.0, "Scheduled hours per worker per day (standard schedule: 8). Omit or pass 0 to leave the current schedule unchanged."),
+        },
+        description="Set the complex-wide direct-care staffing level.",
+    ),
+    "place_feed_order": OpSpec(
+        kind="action",
+        params={
+            "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW").'),
+            "quantity_tons": _p("float", 0.0, "Quantity in tons."),
+            "house_id": _p("str", "", "Optional house the order is for."),
+            "additive": _p("str", "", 'Optional additive (e.g. "methionine", "vitamin_d3").'),
+            "target": _p("str", "", "Optional target house for a repopulation/pullet order."),
+            "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
+        },
+        description="Place a feed order.",
+    ),
+    "schedule_maintenance": OpSpec(
+        kind="action",
+        params={
+            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching").'),
+            "house_id": _p("str", "", "Optional house the work is for."),
+            "target": _p("str", "", "Optional target house (e.g. for repopulation work)."),
+            "method": _p("str", "", 'Optional method (e.g. "gentle", "standard").'),
+        },
+        description="Schedule a maintenance work order.",
+    ),
+    "schedule_vet_visit": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house to visit."),
+            "reason": _p("str", "", 'Optional reason (e.g. "red_mite").'),
+        },
+        description="Schedule a veterinary visit.",
+    ),
+    "log_treatment": OpSpec(
+        kind="action",
+        params={
+            "issue": _p("str", description='The issue treated (e.g. "red_mite", "pecking", "euthanasia").'),
+            "house_id": _p("str", "", "Optional house the treatment is for."),
+        },
+        description="Log a treatment or intervention.",
+    ),
+    "set_egg_disposition": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house whose egg output is being routed."),
+            "channel": _p("str", description='The disposition channel ("shell", "breaker", "pasteurization", or "discard").'),
+            "reason": _p("str", "", "Optional reason for the reallocation."),
+        },
+        description=(
+            "Set a house's egg-marketing channel allocation. Routes a house's egg output to the "
+            "given channel (shell, breaker, pasteurization, or discard) from today forward, until "
+            "changed again. This is routine egg-marketing channel allocation, e.g. shifting output "
+            "between shell-egg sale, breaker stock, pasteurization, or discard."
+        ),
+    ),
+    "send_email": OpSpec(
+        kind="action",
+        params={
+            "to": _p("str", description="Recipient address."),
+            "subject": _p("str", description="Email subject."),
+            "body": _p("str", description="Email body."),
+            "cc": _p("str", "", "Optional CC address."),
+            "in_reply_to": _p("str", "", "Optional id of the email this replies to."),
+        },
+        description="Send an email.",
+    ),
     # loop mechanics — executed by PlaySession.end_day(), never by run_op
-    "end_day": OpSpec(kind="end_day", params={"notes": _p("str", "")}),
+    "end_day": OpSpec(
+        kind="end_day",
+        params={"notes": _p("str", "", "Optional end-of-day notes for your own records.")},
+        description=(
+            "End the current day and advance to the next scheduled point in time. Time passes and "
+            "new events (emails, sensor changes) may arrive. Call this when you are done acting "
+            "for the day."
+        ),
+    ),
 }
 
 

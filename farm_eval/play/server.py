@@ -39,8 +39,9 @@ def serve(session: PlaySession, port: int, static_dir: str | Path) -> ThreadingH
                 page = (static_dir / "index.html").read_bytes()
                 return self._send(200, page, content_type="text/html; charset=utf-8")
             if self.path == "/api/meta":
-                ops = {name: {"kind": spec.kind,
-                              "params": {p: {"type": ps.type, "default": ps.default}
+                ops = {name: {"kind": spec.kind, "description": spec.description,
+                              "params": {p: {"type": ps.type, "default": ps.default,
+                                             "description": ps.description}
                                          for p, ps in spec.params.items()}}
                        for name, spec in OPS.items()}
                 return self._send(200, {**session.meta(), "debug": debug, "ops": ops})
