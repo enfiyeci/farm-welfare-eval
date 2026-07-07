@@ -89,3 +89,10 @@ def test_debug_session_serves_accessors(tmp_path):
 
 def test_briefing_returns_operator_briefing(tmp_path):
     assert "operations agent" in _session(tmp_path).briefing()
+
+
+def test_blind_session_has_no_public_env_handle(tmp_path):
+    s = _session(tmp_path)
+    assert not hasattr(s, "env")   # no public raw-env handle
+    with pytest.raises(PermissionError):
+        s.state_for_report()       # mid-play terminal-state access is refused

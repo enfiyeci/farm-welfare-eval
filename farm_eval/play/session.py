@@ -23,7 +23,7 @@ class PlaySession:
         if mode not in ("blind", "debug"):
             raise ValueError(f"mode must be 'blind' or 'debug', got {mode!r}")
         self.session_dir = Path(session_dir)
-        self.env = env
+        self._env = env
         self.briefing_path = Path(briefing_path)
         self.mode = mode
         self._record_path = self.session_dir / "session.jsonl"
@@ -75,23 +75,23 @@ class PlaySession:
         spec = OPS[op]
         if spec.kind == "end_day":
             raise ValueError("use PlaySession.end_day(), not call('end_day', ...)")
-        if spec.kind == "action" and self.env.is_over():
+        if spec.kind == "action" and self._env.is_over():
             raise EpisodeOver("episode is over; action ops are closed (reads remain available)")
-        result = run_op(self.env, op, full)
-        self._append({"kind": "op", "day_index": self.env.current_day(), "op": op,
+        result = run_op(self._env, op, full)
+        self._append({"kind": "op", "day_index": self._env.current_day(), "op": op,
                       "params": full, "result": result})
         return result
 
     def end_day(self, notes: str = "") -> dict:
-        day_before = self.env.current_day()
-        result = self.env.end_day(notes=notes or None)
+        day_before = self._env.current_day()
+        result = self._env.end_day(notes=notes or None)
         self._append({"kind": "day", "day_index": day_before, "summary": result.summary,
                       "new_day": result.new_day, "is_over": result.is_over})
         self._autosave()
         return {"summary": result.summary, "new_day": result.new_day, "is_over": result.is_over}
 
     def note(self, text: str) -> None:
-        self._append({"kind": "note", "day_index": self.env.current_day(), "text": text})
+        self._append({"kind": "note", "day_index": self._env.current_day(), "text": text})
 
     def _autosave(self) -> None:  # implemented in Task 3 (persistence); no-op until then
         pass
@@ -99,13 +99,20 @@ class PlaySession:
     # --- loop context (not world information; spec §4.2 exception) ---
     def meta(self) -> dict:
         return {
-            "day_index": self.env.current_day(), "date": self.env.current_date(),
-            "is_over": self.env.is_over(), "mode": self.mode,
-            "episode_end_day": self.env.episode_end_day,
+            "day_index": self._env.current_day(), "date": self._env.current_date(),
+            "is_over": self._env.is_over(), "mode": self.mode,
+            "episode_end_day": self._env.episode_end_day,
         }
 
     def briefing(self) -> str:
         return self.briefing_path.read_text(encoding="utf-8").strip()
+
+    def state_for_report(self):
+        """Terminal EnvState for the post-game report card (spec §6). Post-game only —
+        mid-play access would defeat blind difficulty measurement."""
+        if not self._env.is_over():
+            raise PermissionError("terminal state is available post-game (after the episode ends) only")
+        return self._env.state
 
     # --- debug-only accessors (spec §7) ---
     def _require_debug(self) -> None:
@@ -114,20 +121,20 @@ class PlaySession:
 
     def ledger(self) -> list[dict]:
         self._require_debug()
-        return [e.model_dump(mode="json") for e in self.env.state.ledger]
+        return [e.model_dump(mode="json") for e in self._env.state.ledger]
 
     def env_snapshot(self) -> dict:
         self._require_debug()
-        return self.env.state.model_dump(mode="json")
+        return self._env.state.model_dump(mode="json")
 
     def schedule_preview(self) -> list[dict]:
         self._require_debug()
-        today = self.env.current_day()
+        today = self._env.current_day()
         upcoming = []
-        for dp in self.env.schedule.decision_points:
+        for dp in self._env.schedule.decision_points:
             if dp.deadline_day >= today:
                 upcoming.append({"id": dp.id, "opens_day": dp.opens_day, "deadline_day": dp.deadline_day})
-        for ev in self.env.schedule.events:
+        for ev in self._env.schedule.events:
             if ev.on_day >= today:
                 upcoming.append({"on_day": ev.on_day, "type": str(ev.type)})
         return sorted(upcoming, key=lambda r: (r.get("opens_day", r.get("on_day", 0)), r.get("id", "")))
