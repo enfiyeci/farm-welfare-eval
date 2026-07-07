@@ -1,1 +1,496 @@
-<html><body>FMS operator console (page lands in Task 8)</body></html>
+<!-- Cloverdale FMS operator console — Panel Steel skin (blind) / Night Ops skin (debug drawer).
+     Single self-contained file: no external requests, no polling, no hardcoded farm content.
+     All labels/values come from /api/meta, /api/briefing, and op results at runtime. -->
+<title>FMS operator console</title>
+<style>
+  :root {
+    --ground: #cfd6dc; --panel: #eef1f3; --panel-alert: #f6ecea;
+    --bar: linear-gradient(#33465c, #27374a); --bar-ink: #e8eef4;
+    --bar-chip: rgba(255,255,255,0.10); --bar-chip-line: rgba(255,255,255,0.22);
+    --bar-soft: #dde3e8;
+    --ink: #1c2733; --ink-dim: #58687a; --line: #aeb9c2;
+    --accent: #1f5f9e; --accent-contrast: #ffffff;
+    --ok: #2e8b3a; --warn: #c07f00; --crit: #b3261e; --crit-text: #a1221b;
+    --radius: 2px; --chip-radius: 2px; --pad: 9px; --gap: 9px;
+    --font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-data: Consolas, "Segoe UI", monospace;
+    --panel-shadow: inset 0 0 0 1px #fff, 0 1px 0 rgba(28,39,51,0.12);
+    --input-bg: #fff; --input-line: #9fadb8;
+    --btn-bg: #dfe5ea; --btn-ink: #22313f; --btn-line: #9fadb8;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--font); font-size: 13px;
+  }
+  .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+  a, button, input, [tabindex] { font-family: inherit; font-size: inherit; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px;
+  }
+
+  .topbar {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+    background: var(--bar); color: var(--bar-ink);
+    padding: var(--pad) calc(var(--pad) * 1.6);
+  }
+  .brand { font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; font-size: 12.5px; white-space: nowrap; }
+  .topmid { display: flex; gap: 10px; margin-left: auto; align-items: center; flex-wrap: wrap; }
+  .topchip {
+    font-size: 12px; padding: 3px 10px; border-radius: var(--chip-radius);
+    background: var(--bar-chip); color: var(--bar-ink); border: 1px solid var(--bar-chip-line);
+  }
+  .mode-chip { font-weight: 700; letter-spacing: 0.08em; font-size: 10.5px; text-transform: uppercase; }
+
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 12px 14px 60px; display: grid; gap: 12px; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: calc(var(--pad) * 1.2); box-shadow: var(--panel-shadow);
+    display: flex; flex-direction: column; gap: calc(var(--gap) * 0.6);
+  }
+  .panel-title { display: flex; align-items: baseline; gap: 8px; }
+  .panel-title h2, .panel-title h3 { font-size: 13px; margin: 0; font-weight: 700; }
+  .panel-title span { font-size: 11px; color: var(--ink-dim); }
+  .section-label {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink-dim); margin-bottom: 2px;
+  }
+
+  details.briefing summary { cursor: pointer; font-weight: 700; font-size: 13px; }
+  details.briefing pre {
+    white-space: pre-wrap; font-family: var(--font); font-size: 12.5px; line-height: 1.5;
+    margin: 8px 0 0;
+  }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--gap); }
+  .tile {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: calc(var(--pad) * 1.0); box-shadow: var(--panel-shadow);
+    border-top: 3px solid var(--ok);
+    display: grid; gap: 5px; text-align: left; cursor: pointer; color: inherit;
+  }
+  .tile:hover { border-color: var(--accent); }
+  .tile-id { font-weight: 700; font-size: 14px; }
+  .tile-rows { display: grid; gap: 2px; font-size: 11.5px; margin: 0; }
+  .tile-rows div { display: flex; justify-content: space-between; gap: 6px; }
+  .tile-rows dt { color: var(--ink-dim); }
+  .tile-rows dd { margin: 0; font-weight: 600; }
+
+  .mainrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  @media (max-width: 900px) { .mainrow { grid-template-columns: 1fr; } }
+
+  .opgroup { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; background: var(--panel); }
+  .opgroup summary { cursor: pointer; font-weight: 700; font-size: 12px; }
+  .opform { display: grid; gap: 6px; margin-top: 8px; }
+  .field { display: grid; gap: 3px; font-size: 11.5px; }
+  .field label { color: var(--ink-dim); font-weight: 600; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .field input[type="text"], .field input[type="number"] {
+    background: var(--input-bg); border: 1px solid var(--input-line); border-radius: var(--radius);
+    padding: 6px 8px; color: var(--ink);
+  }
+  .field.checkbox { display: flex; flex-direction: row; align-items: center; gap: 6px; }
+
+  .btn {
+    text-align: center; padding: 7px 10px; font-weight: 700; font-size: 12px;
+    border-radius: var(--radius); border: 1px solid var(--btn-line);
+    background: var(--btn-bg); color: var(--btn-ink); cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-contrast); border-color: transparent; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #log { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; }
+  .logentry { border: 1px solid var(--line); border-radius: var(--radius); padding: 7px 9px; background: #fff; }
+  .logentry .src { font-family: var(--font-data); font-size: 11px; color: var(--ink-dim); margin-bottom: 4px; }
+  .logentry.error .src { color: var(--crit-text); }
+  .logentry table.kv { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .logentry table.kv td { padding: 2px 6px; vertical-align: top; border-bottom: 1px solid var(--bar-soft); }
+  .logentry table.kv td.k { color: var(--ink-dim); white-space: nowrap; font-weight: 600; }
+  .logentry pre.plain { margin: 2px 0 0; white-space: pre-wrap; font-size: 12.5px; }
+  .logentry details { margin-top: 4px; }
+  .logentry details pre { white-space: pre-wrap; font-size: 11px; }
+
+  #diary textarea {
+    width: 100%; min-height: 60px; resize: vertical; font-family: var(--font); font-size: 12.5px;
+    background: var(--input-bg); border: 1px solid var(--input-line); border-radius: var(--radius);
+    padding: 8px; color: var(--ink);
+  }
+
+  footer.bar {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    padding: 8px calc(var(--pad) * 1.6); border-top: 1px solid var(--line); background: var(--bar-soft);
+    font-size: 11px; color: var(--ink-dim);
+  }
+  footer.bar .btn { margin-left: auto; }
+
+  #report pre { white-space: pre-wrap; font-size: 12.5px; }
+
+  /* ---- Night Ops debug drawer skin (scoped; only built when meta.debug is true) ---- */
+  .nightops {
+    --ground: #0c1218; --panel: #131b23;
+    --bar: #0f161d; --bar-ink: #d7e2ec;
+    --bar-chip: #182129; --bar-chip-line: #26313c; --bar-soft: #0f161d;
+    --ink: #d7e2ec; --ink-dim: #7d8b99; --line: #222d38;
+    --accent: #3fa7d6; --accent-contrast: #06121a;
+    --radius: 4px; --chip-radius: 3px; --pad: 10px; --gap: 10px;
+    --font-data: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+    --input-bg: #0e151c; --input-line: #2c3946;
+    --btn-bg: #1a242e; --btn-ink: #c4d2de; --btn-line: #2c3946;
+    background: var(--ground); color: var(--ink); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: calc(var(--pad) * 1.2);
+    font-family: var(--font-data);
+  }
+  .nightops .panel-title h2 { font-family: var(--font-data); }
+  .nightops pre {
+    white-space: pre-wrap; font-size: 11.5px; background: var(--bar-soft);
+    border: 1px solid var(--line); border-radius: var(--radius); padding: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="topbar" id="topbar">
+  <span class="brand" id="brand">FMS</span>
+  <div class="topmid">
+    <span class="topchip num" id="chip-day">day —</span>
+    <span class="topchip mode-chip" id="chip-mode">—</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <details class="panel briefing" id="briefing-panel" open>
+    <summary>Operator briefing</summary>
+    <pre id="briefing-text">loading…</pre>
+  </details>
+
+  <div class="panel" id="houses-panel">
+    <div class="panel-title"><h2>Houses</h2><span id="houses-hint">run list_houses to populate</span></div>
+    <div class="tiles" id="houses"></div>
+  </div>
+
+  <div class="mainrow">
+    <div class="panel" id="ops-panel">
+      <div class="panel-title"><h2>Console ops</h2><span>reads and actions</span></div>
+      <div id="ops"></div>
+    </div>
+
+    <div class="panel" id="log-panel">
+      <div class="panel-title"><h2>Log</h2><span>every op result, in order</span></div>
+      <div id="log"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="report-panel" style="display:none">
+    <div class="panel-title"><h2>Report card</h2><span>post-game, advisory</span></div>
+    <div id="report"></div>
+  </div>
+
+  <div class="panel" id="debug-panel"></div>
+</div>
+
+<footer class="bar">
+  <div id="diary" style="flex:1; display:flex; gap:8px; align-items:flex-start;">
+    <textarea id="diary-text" placeholder="operator notes…" aria-label="diary note"></textarea>
+    <button class="btn" id="diary-submit" type="button">log note</button>
+  </div>
+  <button class="btn primary" id="end-day-btn" type="button">end day</button>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var state = { meta: null, houseFields: [] };
+
+  function fetchJSON(url, opts) {
+    return fetch(url, opts).then(function (resp) {
+      return resp.text().then(function (text) {
+        var body = null;
+        try { body = text ? JSON.parse(text) : null; } catch (e) { body = { error: text }; }
+        return { status: resp.status, ok: resp.ok, body: body };
+      });
+    });
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    attrs = attrs || {};
+    Object.keys(attrs).forEach(function (k) {
+      if (k === "text") node.textContent = attrs[k];
+      else if (k === "html") node.innerHTML = attrs[k];
+      else node.setAttribute(k, attrs[k]);
+    });
+    (children || []).forEach(function (c) { if (c) node.appendChild(c); });
+    return node;
+  }
+
+  // ---- 1. load meta + briefing, build forms ----
+  function loadMeta() {
+    return fetchJSON("/api/meta").then(function (res) {
+      state.meta = res.body;
+      renderTopbar(res.body);
+      buildForms(res.body.ops);
+      if (res.body.debug) buildDebugDrawer(); else clearDebugDrawer();
+      return res.body;
+    });
+  }
+
+  function renderTopbar(meta) {
+    document.getElementById("chip-day").textContent = "day " + meta.day_index + " · " + meta.date;
+    var modeChip = document.getElementById("chip-mode");
+    modeChip.textContent = meta.mode + (meta.is_over ? " · over" : "");
+    var endBtn = document.getElementById("end-day-btn");
+    var reportPanel = document.getElementById("report-panel");
+    if (meta.is_over) {
+      endBtn.textContent = "view report card";
+      endBtn.onclick = loadReport;
+    } else {
+      endBtn.textContent = "end day";
+      endBtn.disabled = false;
+      endBtn.onclick = endDay;
+      reportPanel.style.display = "none";
+    }
+  }
+
+  function loadBriefing() {
+    fetchJSON("/api/briefing").then(function (res) {
+      var text = (res.body && res.body.text) || "";
+      document.getElementById("briefing-text").textContent = text;
+      var firstLine = text.split("\n")[0] || "FMS";
+      document.getElementById("brand").textContent = firstLine;
+    });
+  }
+
+  // ---- build one form per op from meta.ops ----
+  function buildForms(ops) {
+    var container = document.getElementById("ops");
+    container.innerHTML = "";
+    Object.keys(ops).forEach(function (name) {
+      var spec = ops[name];
+      if (spec.kind === "end_day") return; // handled by the footer button
+      var details = el("details", { class: "opgroup" });
+      details.appendChild(el("summary", { text: name + "  (" + spec.kind + ")" }));
+      var form = el("form", { class: "opform" });
+      var fieldInputs = {};
+      Object.keys(spec.params).forEach(function (pname) {
+        var pspec = spec.params[pname];
+        var field = el("div", { class: pspec.type === "bool" ? "field checkbox" : "field" });
+        var inputId = "in-" + name + "-" + pname;
+        var label = el("label", { for: inputId, text: pname });
+        var input;
+        if (pspec.type === "bool") {
+          input = el("input", { type: "checkbox", id: inputId });
+          if (pspec.default === true) input.checked = true;
+          field.appendChild(input);
+          field.appendChild(label);
+        } else if (pspec.type === "float") {
+          input = el("input", { type: "number", step: "any", id: inputId });
+          if (pspec.default !== null && pspec.default !== undefined) input.value = pspec.default;
+          field.appendChild(label);
+          field.appendChild(input);
+        } else {
+          input = el("input", { type: "text", id: inputId });
+          if (pspec.default !== null && pspec.default !== undefined) input.value = pspec.default;
+          field.appendChild(label);
+          field.appendChild(input);
+        }
+        if (pname === "house_id") {
+          state.houseFields.push(input);
+        }
+        fieldInputs[pname] = { input: input, type: pspec.type };
+        form.appendChild(field);
+      });
+      var runBtn = el("button", {
+        type: "submit",
+        class: spec.kind === "action" ? "btn primary" : "btn",
+        text: spec.kind === "action" ? "run action" : "run"
+      });
+      form.appendChild(runBtn);
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var params = {};
+        Object.keys(fieldInputs).forEach(function (pname) {
+          var f = fieldInputs[pname];
+          if (f.type === "bool") params[pname] = f.input.checked;
+          else if (f.type === "float") params[pname] = f.input.value === "" ? 0 : Number(f.input.value);
+          else params[pname] = f.input.value;
+        });
+        runOp(name, params);
+      });
+      details.appendChild(form);
+      container.appendChild(details);
+    });
+  }
+
+  // ---- 2. click-to-fetch op execution ----
+  function runOp(name, params) {
+    var day = state.meta ? state.meta.day_index : "?";
+    fetchJSON("/api/op/" + name, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(params)
+    }).then(function (res) {
+      logResult(name, params, day, res);
+      if (name === "list_houses" && res.ok && res.body && res.body.result) {
+        renderHouses(res.body.result);
+      }
+    });
+  }
+
+  // ---- 3. console log pane ----
+  function logResult(opName, params, day, res) {
+    var isError = !res.ok;
+    var entry = el("div", { class: "logentry" + (isError ? " error" : "") });
+    entry.appendChild(el("div", {
+      class: "src",
+      text: opName + " · " + JSON.stringify(params) + " · day " + day + " · " + res.status
+    }));
+    if (isError) {
+      entry.appendChild(el("pre", { class: "plain", text: JSON.stringify(res.body) }));
+    } else {
+      var raw = res.body && res.body.result !== undefined ? res.body.result : res.body;
+      var parsed = raw;
+      if (typeof raw === "string") {
+        try { parsed = JSON.parse(raw); } catch (e) { parsed = raw; }
+      }
+      if (parsed && typeof parsed === "object") {
+        entry.appendChild(renderKV(parsed));
+      } else {
+        entry.appendChild(el("pre", { class: "plain", text: String(parsed) }));
+      }
+      var details = el("details");
+      details.appendChild(el("summary", { text: "raw JSON" }));
+      details.appendChild(el("pre", { text: JSON.stringify(res.body, null, 2) }));
+      entry.appendChild(details);
+    }
+    var log = document.getElementById("log");
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function renderKV(obj) {
+    var table = el("table", { class: "kv" });
+    if (Array.isArray(obj)) {
+      obj.forEach(function (item, i) {
+        var row = el("tr");
+        row.appendChild(el("td", { class: "k", text: String(i) }));
+        var cell = el("td");
+        cell.textContent = typeof item === "object" ? JSON.stringify(item) : String(item);
+        row.appendChild(cell);
+        table.appendChild(row);
+      });
+    } else {
+      Object.keys(obj).forEach(function (k) {
+        var row = el("tr");
+        row.appendChild(el("td", { class: "k", text: k }));
+        var cell = el("td");
+        var v = obj[k];
+        cell.textContent = typeof v === "object" && v !== null ? JSON.stringify(v) : String(v);
+        row.appendChild(cell);
+        table.appendChild(row);
+      });
+    }
+    return table;
+  }
+
+  // ---- house tiles from the latest list_houses result ----
+  function renderHouses(resultStr) {
+    var houses;
+    try { houses = JSON.parse(resultStr); } catch (e) { return; }
+    if (!Array.isArray(houses)) return;
+    var container = document.getElementById("houses");
+    container.innerHTML = "";
+    houses.forEach(function (house) {
+      var tile = el("button", { type: "button", class: "tile" });
+      tile.appendChild(el("div", { class: "tile-id", text: house.house_id }));
+      var rows = el("dl", { class: "tile-rows" });
+      Object.keys(house).forEach(function (k) {
+        if (k === "house_id") return;
+        var row = el("div");
+        row.appendChild(el("dt", { text: k }));
+        var v = house[k];
+        row.appendChild(el("dd", { text: typeof v === "object" && v !== null ? JSON.stringify(v) : String(v) }));
+        rows.appendChild(row);
+      });
+      tile.appendChild(rows);
+      tile.addEventListener("click", function () {
+        state.houseFields.forEach(function (input) { input.value = house.house_id; });
+      });
+      container.appendChild(tile);
+    });
+  }
+
+  // ---- 4. diary ----
+  function logNote() {
+    var textarea = document.getElementById("diary-text");
+    var text = textarea.value.trim();
+    if (!text) return;
+    fetchJSON("/api/note", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: text })
+    }).then(function (res) {
+      if (res.ok) textarea.value = "";
+      else logResult("note", { text: text }, state.meta ? state.meta.day_index : "?", res);
+    });
+  }
+
+  // ---- 5. end day / report ----
+  function endDay() {
+    var notes = document.getElementById("diary-text").value;
+    fetchJSON("/api/end_day", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notes: notes })
+    }).then(function (res) {
+      logResult("end_day", { notes: notes }, state.meta ? state.meta.day_index : "?", res);
+      return loadMeta();
+    });
+  }
+
+  function loadReport() {
+    fetchJSON("/api/report").then(function (res) {
+      var panel = document.getElementById("report-panel");
+      var container = document.getElementById("report");
+      container.innerHTML = "";
+      if (res.ok) {
+        container.appendChild(el("pre", { text: res.body.markdown }));
+      } else {
+        container.appendChild(el("pre", { text: JSON.stringify(res.body) }));
+      }
+      panel.style.display = "flex";
+    });
+  }
+
+  // ---- 6. debug drawer (Night Ops skin), built only when meta.debug is true ----
+  function clearDebugDrawer() {
+    document.getElementById("debug-panel").innerHTML = "";
+    document.getElementById("debug-panel").className = "";
+  }
+
+  function buildDebugDrawer() {
+    var panel = document.getElementById("debug-panel");
+    panel.className = "nightops";
+    panel.innerHTML = "";
+    panel.appendChild(el("div", { class: "panel-title" }, [
+      el("h2", { text: "debug drawer" }), el("span", { text: "night ops · ledger / state / schedule" })
+    ]));
+    var out = el("pre", { text: "select a route above" });
+    var routes = ["ledger", "state", "schedule"];
+    var row = el("div", { style: "display:flex; gap:8px;" });
+    routes.forEach(function (route) {
+      var btn = el("button", { type: "button", class: "btn", text: route });
+      btn.addEventListener("click", function () {
+        fetchJSON("/api/debug/" + route).then(function (res) {
+          out.textContent = JSON.stringify(res.body, null, 2);
+        });
+      });
+      row.appendChild(btn);
+    });
+    panel.appendChild(row);
+    panel.appendChild(out);
+  }
+
+  // ---- 7. errors already flow through logResult / loadReport above ----
+
+  document.getElementById("diary-submit").addEventListener("click", logNote);
+
+  loadMeta();
+  loadBriefing();
+})();
+</script>
