@@ -96,3 +96,8 @@ def test_blind_session_has_no_public_env_handle(tmp_path):
     assert not hasattr(s, "env")   # no public raw-env handle
     with pytest.raises(PermissionError):
         s.state_for_report()       # mid-play terminal-state access is refused
+
+
+def test_meta_excludes_episode_end_day(tmp_path):
+    s = _session(tmp_path)
+    assert "episode_end_day" not in s.meta()

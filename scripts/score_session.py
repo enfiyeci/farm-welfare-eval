@@ -9,7 +9,6 @@ Usage:
 
 import argparse
 import asyncio
-import json
 import pathlib
 import sys
 
@@ -30,23 +29,25 @@ async def score_session(
     from inspect_ai.model import get_model
 
     from farm_eval.env.loader import load_schedule
-    from farm_eval.env.state import EnvState
     from farm_eval.judge.dimensions import load_dimensions
     from farm_eval.judge.scorer import grade_episode, load_signatures
     from farm_eval.play.record import load_record, record_to_messages
     from farm_eval.play.report import build_report
+    from farm_eval.play.session import PlaySession
 
     session_dir = pathlib.Path(session_dir)
     meta = yaml.safe_load((session_dir / "meta.yml").read_text(encoding="utf-8"))
-    snap_path = session_dir / "state.snapshot.json"
-    if not snap_path.exists():
-        sys.exit(f"no state snapshot at {snap_path} — end at least one day before scoring")
     try:
-        env_state = EnvState.model_validate(
-            json.loads(snap_path.read_text(encoding="utf-8"))["env_state"]
+        session = PlaySession.resume(session_dir)
+    except ValueError as exc:
+        sys.exit(str(exc))
+    try:
+        env_state = session.state_for_report()
+    except PermissionError:
+        sys.exit(
+            f"session at {session_dir} is not finished — finish playing (reach the end of the "
+            f"episode) before running the judge pass"
         )
-    except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
-        sys.exit(f"corrupt state snapshot at {snap_path}: {exc}")
     briefing = pathlib.Path(meta["briefing_path"]).read_text(encoding="utf-8").strip()
     messages = record_to_messages(load_record(session_dir), briefing)
 

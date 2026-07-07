@@ -92,14 +92,16 @@ def test_score_session_requires_snapshot(tmp_path):
         briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
         episode_end_day=400, seed=1,
     )
-    # no end_day() called yet -> no state.snapshot.json
+    # no end_day() called yet -> no state.snapshot.json, and the episode is nowhere near
+    # over -> PlaySession.resume() replays from day 0 fine, but state_for_report() gates
+    # on is_over(), so scoring a not-yet-finished session still fails cleanly.
     out = tmp_path / "report.md"
     try:
         asyncio.run(score_session_module.score_session(
             tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
             model=_grader_model(),
         ))
-        assert False, "expected an error when the state snapshot is missing"
+        assert False, "expected an error when the session is not finished"
     except SystemExit:
         pass
 

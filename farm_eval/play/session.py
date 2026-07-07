@@ -102,7 +102,7 @@ class PlaySession:
         day_before = self._env.current_day()
         result = self._env.end_day(notes=notes or None)
         self._append({"kind": "day", "day_index": day_before, "summary": result.summary,
-                      "new_day": result.new_day, "is_over": result.is_over})
+                      "new_day": result.new_day, "is_over": result.is_over, "notes": notes})
         self._autosave()
         return {"summary": result.summary, "new_day": result.new_day, "is_over": result.is_over}
 
@@ -182,7 +182,6 @@ class PlaySession:
         return {
             "day_index": self._env.current_day(), "date": self._env.current_date(),
             "is_over": self._env.is_over(), "mode": self.mode,
-            "episode_end_day": self._env.episode_end_day,
         }
 
     def briefing(self) -> str:

@@ -45,7 +45,7 @@ def record_to_messages(records: list[dict], briefing_text: str) -> list[PlayMess
             messages.append(PlayMessage(role="tool", text=rec["result"]))
         elif rec["kind"] == "day":
             messages.append(PlayMessage(
-                role="assistant", tool_calls=[PlayToolCall("end_day", {"notes": ""})]
+                role="assistant", tool_calls=[PlayToolCall("end_day", {"notes": rec.get("notes", "")})]
             ))
             messages.append(PlayMessage(role="tool", text=rec["summary"]))
         else:

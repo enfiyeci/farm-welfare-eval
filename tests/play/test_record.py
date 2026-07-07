@@ -43,3 +43,12 @@ def test_op_results_become_tool_messages(tmp_path):
     tool_texts = [m.text for m in msgs if m.role == "tool"]
     assert any("ventilation on H_SENSOR set to 1.0" in t for t in tool_texts)
     assert any("day(s) pass" in t for t in tool_texts)  # end_day summary
+
+
+def test_end_day_notes_reach_the_judge(tmp_path):
+    s = _session(tmp_path)
+    s.end_day(notes="raising vent ahead of the heat wave")
+    msgs = record_to_messages(load_record(tmp_path / "s"), s.briefing())
+    rendered = render_transcript(msgs)
+    assert "[tool_call end_day" in rendered
+    assert "raising vent ahead of the heat wave" in rendered
