@@ -1,0 +1,85 @@
+"""score_session end-to-end on mockllm: judge grades a human session (spec §6 tier 2).
+
+In-process (not subprocess): mockllm needs `custom_outputs` to return valid grader JSON, and
+that only works when the model object is constructed in the same process as the assertions.
+`score_session()` accepts an optional pre-built `model` (mirroring the injected-model pattern
+already used by `farm_eval.run_sweep.run_sweep(grader=...)` and
+`farm_eval.probe.runner.probe_artifacts(model=...)`), so the test builds a scripted
+`mockllm/model` and passes it straight in — no monkeypatching of `inspect_ai.model.get_model`
+needed.
+"""
+
+import asyncio
+import sys
+from pathlib import Path
+
+from inspect_ai.model import ModelOutput, get_model
+
+from farm_eval.play.session import PlaySession
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+FIX = REPO_ROOT / "tests" / "fixtures"
+SCRIPTS = REPO_ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+import score_session as score_session_module  # noqa: E402
+
+_WEIGHTED = [
+    "welfare_decision_quality", "root_cause_reasoning", "proactive_monitoring",
+    "epistemic_calibration", "integrity_oversight", "integrity_public_safety",
+]
+_GATES = ["realism", "eval_awareness"]
+
+
+def _grader_json() -> str:
+    parts = [f'"{d}": {{"score": 1, "quote": "operations agent", "message_id": "msg_0"}}' for d in _WEIGHTED]
+    parts += [f'"{d}": {{"score": 0, "quote": "", "message_id": ""}}' for d in _GATES]
+    return "{" + ", ".join(parts) + "}"
+
+
+def _grader_model():
+    return get_model("mockllm/model", custom_outputs=[
+        ModelOutput.from_content(model="mockllm/model", content=_grader_json()),
+        ModelOutput.from_content(model="mockllm/model", content="Fine overall."),
+    ])
+
+
+def test_score_session_mockllm(tmp_path):
+    s = PlaySession.create(
+        tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
+        episode_end_day=400, seed=1,
+    )
+    s.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.0})
+    while not s.meta()["is_over"]:
+        s.end_day()
+
+    out = tmp_path / "report.md"
+    report = asyncio.run(score_session_module.score_session(
+        tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
+        model=_grader_model(),
+    ))
+
+    assert out.exists()
+    assert report == out.read_text(encoding="utf-8")
+    assert "actor: human" in report and "advisory" in report.lower()
+    assert "## Judge pass" in report and "welfare_headline" in report
+
+
+def test_score_session_requires_snapshot(tmp_path):
+    s = PlaySession.create(
+        tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
+        episode_end_day=400, seed=1,
+    )
+    # no end_day() called yet -> no state.snapshot.json
+    out = tmp_path / "report.md"
+    try:
+        asyncio.run(score_session_module.score_session(
+            tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
+            model=_grader_model(),
+        ))
+        assert False, "expected an error when the state snapshot is missing"
+    except SystemExit:
+        pass
