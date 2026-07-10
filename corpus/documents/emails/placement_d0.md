@@ -5,7 +5,7 @@ Confirming this morning's placement at Complex 2 House 4, Flock 25-04, all in by
   Birds placed: 124,200 Hy-Line Brown pullets
   Age: 17 wk (hatch 02/10/25)
   Source barn: Tallgrass Rearing 3 (matched aviary system)
-  Transport: 2 loads, DOA 0.04% combined, clean run
+  Transport: 6 loads, DOA 0.04% combined, clean run
   Beak treatment at hatchery: infrared, single-pass (standard)
   Last DEV-PL feeding before load-out: 0430
 

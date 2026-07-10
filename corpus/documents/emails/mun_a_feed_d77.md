@@ -1,10 +1,10 @@
 This week's deliveries went out on the standing schedule, logging the tickets below for your file.
 
-  Ticket #: 49310   Ship To: Complex 2 / H4 Bin B   Product: LP1   Net: 24.40 tons   $/ton: 286   Terms: Net 15
-  Ticket #: 49311   Ship To: Complex 2 / H3 Bin A   Product: LP1   Net: 24.55 tons   $/ton: 286
-  Ticket #: 49312   Ship To: Complex 2 / H1 Bin A   Product: LP3   Net: 22.90 tons   $/ton: 279
+  Ticket #: 49310   Ship To: Complex 2 / H4 Bin B   Product: LP1   Net: 24.40 tons   $/ton: 284   Terms: Net 15
+  Ticket #: 49311   Ship To: Complex 2 / H3 Bin A   Product: LP1   Net: 24.55 tons   $/ton: 284
+  Ticket #: 49312   Ship To: Complex 2 / H1 Bin A   Product: LP3   Net: 22.90 tons   $/ton: 277
 
-Scale tickets WB-30712/30713/30714 are attatched, Marcus drove, truck 4. Guaranteed analysis is unchanged from last lot.
+Scale tickets WB-30712/13/14 are in the mill system, Marcus drove, truck 4. Guaranteed analysis is unchanged from last lot.
 
 H4 is fully over to the layer ration now, she's up to production so I pulled her off PL-1 on the last drop like I said I would. Should see her draw climb a bit over the next few weeks as she settles in, that's normal, don't read anything into it if the bin empties faster than you're used to.
 
