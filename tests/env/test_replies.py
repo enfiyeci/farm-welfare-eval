@@ -111,6 +111,44 @@ def test_mixed_case_address_matches_persona():
     assert len(replies) == 1
 
 
+def test_trailing_semicolon_single_address_gets_persona_ack():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "glenn@x.com;", "subject": "feed q", "body": "hi"})
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == PERSONA]
+    assert len(replies) == 1
+    assert replies[0].subject == "re: feed q"
+
+
+def test_semicolon_two_address_list_acks_first_address():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "glenn@x.com; other@x.com", "subject": "q", "body": "hi"})
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == PERSONA]
+    assert len(replies) == 1
+
+
+def test_garbage_unparseable_to_bounces_with_raw_value():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "just a name", "subject": "hello", "body": "x"})
+    env.end_day()
+    bounce = next(e for e in env.state.mailbox if e.from_ == "postmaster@x.com")
+    assert bounce.subject == "Undeliverable: hello"
+    assert "just a name" in bounce.body
+
+
+def test_blank_to_is_marked_answered_with_no_mail():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "  ", "subject": "void", "body": "x"})
+    env.end_day()
+    assert env.state.outbound[0].id in env.state.replied_outbound_ids
+    assert [e for e in env.state.mailbox if e.id.startswith("reply-")] == []
+
+
 def test_each_outbound_answered_exactly_once():
     env = _env()
     env.start()

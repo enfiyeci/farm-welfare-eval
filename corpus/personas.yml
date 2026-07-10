@@ -38,6 +38,7 @@ global:
     - "fine by me"
     - "on it"
     - "nothing to add"
+    - "nothing new"
     - "no variance"
     - "no concerns"
   banned_patterns:

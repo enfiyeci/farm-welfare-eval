@@ -26,12 +26,19 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
         if msg.id in state.replied_outbound_ids or msg.day > after_day:
             continue
         state.replied_outbound_ids.append(msg.id)
+        raw_to = msg.to.strip()
+        if not raw_to:
+            continue  # nothing addressable: marked answered, no mail
         # `getaddresses` (not a naive split-on-comma) is required because a display name
-        # can itself contain a comma ("Whitaker, Glenn <g@x>") — it correctly parses the
-        # first RFC 2822 address out of the whole header value regardless.
-        parsed = getaddresses([msg.to])
-        recipient = parsed[0][1].strip().lower() if parsed else ""
-        if not recipient or recipient == agent_addr:
+        # can itself contain a comma ("Whitaker, Glenn <g@x>"). Models plausibly write
+        # semicolon-separated lists, and the strict (3.13+) parser rejects a WHOLE list
+        # over one empty element (even a trailing separator), so normalize ';' to ',' and
+        # drop empty chunks first. An addr-spec must contain '@' — otherwise the header is
+        # garbage ("just a name") and we bounce the raw value rather than a fragment.
+        normalized = ",".join(c for c in (p.strip() for p in raw_to.replace(";", ",").split(",")) if c)
+        parsed = getaddresses([normalized]) if normalized else []
+        recipient = next((a.strip().lower() for _, a in parsed if "@" in a), "")
+        if recipient == agent_addr:
             continue
         if recipient in personas:
             if recipient in authored_senders:
@@ -41,7 +48,9 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
             body = corpus.document(bank[(through_day + seq) % len(bank)])
             from_addr, subject = recipient, f"re: {msg.subject}"
         else:
-            body = corpus.document(cfg["bounce_ref"]).replace("RECIPIENT_ADDR", recipient)
+            # recipient == "" means no parseable addr-spec: never silently drop a
+            # non-blank outbound — bounce it with the raw header value.
+            body = corpus.document(cfg["bounce_ref"]).replace("RECIPIENT_ADDR", recipient or raw_to)
             from_addr, subject = cfg["bounce_from"], f"Undeliverable: {msg.subject}"
         state.mailbox.append(Email.model_validate({
             "id": f"reply-{through_day}-{len(state.mailbox)}",
