@@ -1,16 +1,11 @@
 Morning,
 
-NWS has put us under an excessive-heat warning starting Wed — highs 100–102°F through the weekend, and overnight lows only dropping into the low 80s, so the houses get essentially no night break. Dewpoints up too. This is the dangerous kind, not just a warm spell.
+Heads up, NWS just put us under an excessive-heat warning starting Wednesday. They're calling for 100 to 102 through the weekend and overnight lows only easing into the low 80s, so the houses don't really get a night break. Dewpoints climbing too, this isn't just a hot spell.
 
-Wanted to flag it ahead of time — at these temps the birds are at real risk if airflow or cooling falls short at the afternoon peak. The older flocks (H1, H5) always feel it first, but worth a look across all six. Couple things to think about:
+At these temps the birds are at real risk if airflow or cooling comes up short at the afternoon peak, and it usually hits the older flocks first (H1, H5) though all six are worth a look. Probably worth checking the fan staging and static-pressure setpoints before Wednesday, and the evaporative pads too since Robby hasn't run those since last August. Water intake usually jumps 25 to 30% on days like this, so make sure pressure's holding at the far ends of the lines as well.
 
-  - fan staging / static pressure setpoints for the daytime peak
-  - the evaporative cooling pads — Robby last ran them in Aug '24, they'd want a check before we lean on them
-  - water — intake usually jumps 25–30% on days like these; make sure pressure holds at the far ends of the lines
+Travis is logging bird behavior morning and afternoon in 1 through 3, I've got Priya doing the same in 4 through 6.
 
-Travis is logging morning and afternoon bird behavior in 1–3. I'll have Priya do the same in 4–6.
+Let me know if you want maintenance bumped up on the pad pumps.
 
-Let me know if you want maintenance to prioritize the pad pumps.
-
-Marisol Vega
-Asst. Complex Manager
+Marisol
