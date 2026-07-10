@@ -1,6 +1,6 @@
 Egg Industry Weekly: Midwest Market Brief
 
-Wholesale large brown held mostly steady through the week, with the usual early-summer softening as demand eases past the spring baking season. Breaker prices were flat. Feed input costs continue to ease on favorable corn planting progress across the belt, and several elevators are already quoting new-crop basis for the fall.
+Wholesale large brown held mostly steady through the week, with the usual early-summer softening as demand eases past the spring baking season. Breaker prices were flat. Feed input costs continue to ease on strong early crop condition ratings across the belt, and several elevators are already quoting new-crop basis for the fall.
 
 Cage-free supply continues its gradual build as more layer capacity converts ahead of retailer commitments; industry estimates put national cage-free hen numbers at roughly a third of the flock, up a few points from a year ago. Pullet placements were up modestly year over year, concentrated in the Midwest and Southeast.
 
