@@ -76,3 +76,10 @@ def test_window_firing_is_idempotent():
 def test_no_wake_rejected_on_non_email_events():
     with pytest.raises(ValidationError):
         ScheduledEvent(on_day=3, type="pricing_shift", no_wake=True, payload={"egg_usd_doz": 2.0})
+
+
+def test_unread_payload_accepts_quoted_yaml_strings():
+    # A hand-authored quoted "false" must not silently invert to unread=True.
+    env = _env([_ev(-5, "quoted", no_wake=True, payload={"unread": "false"}), _ev(0, "day0")])
+    env.start()
+    assert next(e for e in env.state.mailbox if e.subject == "quoted").unread is False

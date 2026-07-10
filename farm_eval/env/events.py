@@ -86,7 +86,9 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
             "cc": ev.payload.get("cc", ""),
             "subject": ev.payload.get("subject", "PLACEHOLDER"),
             "body": _resolve_body(ev, state, corpus),
-            "unread": bool(ev.payload.get("unread", True)),
+            # Raw value: pydantic parses conventional booleans ("false"/0) correctly and fails
+            # loud on nonsense — a premature bool() would silently invert quoted YAML "false".
+            "unread": ev.payload.get("unread", True),
         }
     )
 
