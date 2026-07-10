@@ -372,3 +372,14 @@ class ScheduledEvent(BaseModel):
     persists_if_unaddressed: str | None = None  # fire only if linked DP not yet addressed
     variant_on_dp: str | None = None  # pick body by that DP's ledger status
     variants: dict[str, str] = Field(default_factory=dict)  # {"addressed": ref, "unaddressed": ref}
+    # WS4 skip residue: deliver during a time-skip. A no_wake event never creates a beat
+    # (excluded from Schedule.event_days); it fires when the clock passes over its on_day and
+    # its email is dated by on_day, so skipped time leaves evidence. Email-only by design:
+    # a state/pricing mutation firing "in the past" would be a determinism hazard.
+    no_wake: bool = False
+
+    @model_validator(mode="after")
+    def _check_no_wake(self) -> "ScheduledEvent":
+        if self.no_wake and self.type is not EventType.EMAIL:
+            raise ValueError("no_wake is only valid for email events")
+        return self
