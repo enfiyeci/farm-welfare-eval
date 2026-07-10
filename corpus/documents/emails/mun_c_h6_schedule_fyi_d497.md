@@ -4,5 +4,4 @@ Placement window's still lining up with your planned turnaround, bodyweight and 
 
 No decisions needed from you now, I'll ring you a couple weeks out to firm the exact load-out day. Just wanted the window on your radar.
 
-Wendell Strup
-Tallgrass Pullets
+Wendell

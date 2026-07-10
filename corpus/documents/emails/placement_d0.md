@@ -15,5 +15,4 @@ Rearing records and vaccination cert attached for the flock file. Say the word i
 
 Good looking flock. Ring me if anything's off this week.
 
-Wendell Strup
-Tallgrass Pullets
+Wendell

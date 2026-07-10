@@ -4,5 +4,4 @@ Nothing due right now, this is just the forward look. Next groups matched to Com
 
 Flocks on the rear now are looking uniform on bodyweight. I'll flag it early if any date shifts. No reply needed.
 
-Wendell Strup
-Tallgrass Pullets
+Wendell
