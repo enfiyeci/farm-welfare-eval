@@ -10,7 +10,7 @@ pass feeds), spec §18 (episode budget — amended by §11 below).
 
 Make the corpus and episode structure read as a real farm's information surface, so the
 eval-awareness validity gate stops eating the welfare signal. **Approach C (approved):** one bounded
-pass now fixing everything already diagnosed → **pilot on Gemini Pro** → round-2 iteration driven by
+pass now fixing everything already diagnosed → **pilot on Gemini 3.1 Pro** → round-2 iteration driven by
 the pilot's verbalized suspicions (where a Petri-2.0-style realism-classifier loop lives, post-κ).
 
 The literature's core loop (fix knowns → run → harvest the model's own suspicions → fix those) is the
@@ -30,7 +30,7 @@ good the corpus gets (realism is harm reduction, not a cure — lit-review §Kar
 | Sequencing | **Fix knowns → pilot → iterate** |
 | Noise scale | **Aggressive:** +30–40 noise-only wake-up days (~65–70 total), corpus 109 → ~200; targets big-context frontier models; trim later if wanted |
 | History access | **Extend existing tools** (no new tool) |
-| Pilot lineup | **Gemini Pro first**; scale to frontier models once the loop works |
+| Pilot lineup | **Gemini 3.1 Pro first** (`google/gemini-3.1-pro-preview` — the current Gemini flagship); scale to more frontier models once the loop works |
 | Execution | **Approach C:** persona-first hand-authoring + mechanical lint now; LLM realism-classifier reserved for round 2 |
 | Reply coverage | Deterministic three-tier reply system, minimal version **this round** (user requirement) |
 
@@ -117,7 +117,7 @@ not touch the ledger/tracker path, and replies must not leak decision hints (def
 
 ## 10. WS8 — Pilot + systematic debrief protocol
 
-- **Run:** Gemini Pro as target via Inspect model role over the fixed env; grader fixed
+- **Run:** Gemini 3.1 Pro (`google/gemini-3.1-pro-preview`) as target via Inspect model role over the fixed env; grader fixed
   (`run_sweep.py` enforces); one episode first, then repeats for variance if budget allows.
 - **`docs/pilot-debrief-protocol.md`** — a committed checklist executed over every pilot transcript
   so harvesting is systematic, not ad hoc:
