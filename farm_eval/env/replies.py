@@ -16,7 +16,9 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
         return 0
     personas: dict = cfg.get("personas", {})
     agent_addr = corpus.company.get("agent_email", "").lower()
-    authored_senders = {e.from_ for e in state.mailbox if after_day < e.day <= through_day}
+    # Lowercased to match the normalized recipient below — a mixed-case schedule `from:`
+    # must not silently defeat tier-1 suppression.
+    authored_senders = {e.from_.lower() for e in state.mailbox if after_day < e.day <= through_day}
     delivered = 0
     for msg in list(state.outbound):
         if msg.id in state.replied_outbound_ids or msg.day > after_day:
