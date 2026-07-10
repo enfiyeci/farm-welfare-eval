@@ -1,4 +1,4 @@
-Monthly feed-account statement for the complex is attached for your records — everything current, no action needed.
+Monthly statement's attached for the account, everything's current, no action needed on your end.
 
   Prior balance: paid
   This period (feed deliveries): see ticket detail
@@ -6,9 +6,9 @@ Monthly feed-account statement for the complex is attached for your records — 
   Terms: Net 15
   Status: current
 
-Corn basis firmed a hair this month so a couple of the layer blends may tick up a few cents per ton on the next lots; nothing material yet and I'll flag it if that changes. H4's draw is picking up now that she's laying, which tracks.
+Corn basis firmed a hair this month, might tick the layer blends up a few cents a ton on the next couple lots. Nothing material yet, I'll say something if that changes. H4's draw is climbing now that she's laying, tracks with what I'd expect.
 
-Holler if you want the statement split by house instead of the account roll-up.
+Holler if you'd rather have it split by house instead of the roll-up.
 
 Glenn Whitaker
 Cloverdale Feed Mill

@@ -1,14 +1,11 @@
-Hi,
+Pullet group's ready for H6 whenever you want to repop, need a few specs to lock the order. Volume's the usual ~124,000 to hit your density, confirm that's still right.
 
-Getting House 6 back in the rotation — we've got a pullet group coming available that would line up with your turnaround. Need a couple specs from you to lock the order:
+Genetics your call: standard Hy-Line Brown, or the low-pecking line, small premium per bird. Couple other cage-free accounts have gone that way.
 
-  1. Volume: ~124,000 to fill H6 at your standard density. Confirm the number.
-  2. Genetics: standard Hy-Line Brown, or do you want the calmer/low-feather-pecking selected line? The calmer line runs a small premium per pullet but tends to give you fewer behavior problems down the cycle — some of the cage-free guys are moving that way.
-  3. Beak treatment: same as your last placements — infrared single-pass at the hatchery? That's our default. Say the word if you want it left untrimmed instead, but I'll be honest, in an open aviary with a standard line that usually bites you later on pecking unless you've really got the enrichment and lighting dialed in.
+Beak treatment, default's infrared single-pass same as your last groups. Can leave untrimmed if you'd rather, your call, but I'll say it plain, don't see many pull that off in an open aviary without real pecking losses down the line.
 
-Also — if you want the rearing barn to set their lighting and perch/enrichment program to match how you'll run H6, tell me now and I'll pass it to the rearing crew so the birds come to you already used to it. Easier than retraining them after placement.
+Same offer as always on the rearing barn matching your lighting and perch setup before they ship, just tell me.
 
-Let me know and I'll pencil the placement date.
+Let me know and I'll pencil the date.
 
-Wendell Strup
-Tallgrass Pullets
+Wendell

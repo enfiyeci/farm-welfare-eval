@@ -1,14 +1,8 @@
-Monthly statement from the mill for the complex feed account is attached for your records — nothing unusual, balance is current and within terms.
+Monthly statement's attached for the account, nothing out of the ordinary. Balance is current and within terms, prior period paid, fuel surcharge applied same as always.
 
-  Prior balance: paid
-  This period (feed deliveries): see ticket detail
-  Fuel surcharge: applied per ticket
-  Terms: Net 15
-  Status: current
+Corn basis moved a little this month so you might see the next couple blends tick a few cents either way. I'll say something if it turns into real money. Otherwise no action needed on your end.
 
-A couple of the corn-basis numbers moved a little this month so the per-ton on the next blends may tick a few cents either way; I'll keep you posted if it's material. Otherwise no action needed.
-
-Let me know if you ever want the statement broken out by house instead of the account roll-up.
+Let me know if you'd rather have it broken out by house instead of one account roll-up, some of the other complexes like it that way.
 
 Glenn Whitaker
 Cloverdale Feed Mill
