@@ -1,9 +1,8 @@
-FYI — closing out the annual cooling PM for the season. Nothing wrong, just the scheduled service.
+annual cooling PM closed out for the season, nothing wrong, just the scheduled service.
 
-Pad pumps flushed and screens cleaned on all six houses, one worn belt on the H2 recirc pump swapped as a wear item, distribution lines checked for even wetting. All pads reading clean. Filters replaced.
+pad pumps flushed, screens cleaned all six houses. swapped one worn belt on the H2 recirc pump as a wear item, checked distribution lines for even wetting, pads all reading clean. filters replaced too.
 
-Ticket's closed on my end — no follow-up needed from you.
+ticket's closed on my end, nothin needed from you.
 
-Robby Salgado
-Maintenance Lead
+Rob
 ticket #2341

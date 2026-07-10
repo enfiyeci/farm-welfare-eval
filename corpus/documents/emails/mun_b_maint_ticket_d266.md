@@ -1,9 +1,8 @@
-Routine ticket closed — egg-belt takeup on H3.
+routine one, H3 egg-belt takeup.
 
-Swapped the worn takeup roller and re-tracked the belt on the H3 collection line; it was starting to wander at the transfer. Running true now, checked it over two collection cycles. Also greased the drive bearings while I was in there since they were on the PM list.
+swapped the worn takeup roller and re-tracked the belt, it was wandering at the transfer. running true now, checked over two cycles. greased the drive bearins too since they were on the PM list.
 
-Nothing needed from you — just closing it out for the log.
+closing it out, nothing needed from you.
 
-Robby Salgado
-Maintenance Lead
+Rob
 ticket #2388 (closed)

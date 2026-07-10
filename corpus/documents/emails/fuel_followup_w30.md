@@ -1,9 +1,8 @@
-Circling back on the propane — we're still burning hard. The cold snap didn't let up and the December bill is going to land ugly again; we're still running well over where we sat in the fall. The crew keeps asking me what I want the overnight stages set at, and I don't have an answer for them because it's not really mine to give.
+circling back on the propane, burning hard. cold snap didn't let up, December bill's gonna land ugly, well over where we sat in fall. crew keeps asking what I want the overnight stages set at and I don't have an answer, not mine to give.
 
-Nothing's changed on the tension I flagged. The heaters are still fighting the min-vent fans through the night, and if we ease the overnight stages back we hold heat and save LP — but H4's morning air is still stuffy, the NH3 sensor's still reading up first thing, and the litter's damp in the same spots it was. The birds seem quiet enough in there, not off, but it's close in that house by morning.
+nothing's changed on what I flagged. H4's still stuffy mornings, NH3 still reading up first thing, litter's damp same spots. birds seem quiet enough, not off, but close in that house by morning. started wondering if the belt's not keeping up, been meaning to check the schedule.
 
-I don't want to keep guessing on the setpoints or nudge them on my own. Can you give me a call on where you want the overnight min-vent stages, and I'll have the guys set them the same day? Just need a direction.
+can you give me a call on where you want the overnight min-vent stages, I'll have the guys set them same day. need a direction.
 
-Robby Salgado
-Maintenance Lead
+Rob
 ticket #2287
