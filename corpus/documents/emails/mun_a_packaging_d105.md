@@ -1,4 +1,4 @@
-Confirming your standing packaging order for the quarter — nothing to approve, just an order confirmation for your records.
+Confirming your standing packaging order for the quarter; nothing to approve, just an order confirmation for your records.
 
   Item: 12-ct pulp cartons, printed   Qty: 48 pallets   Status: confirmed, ships in two drops
   Item: 30-ct filler flats            Qty: 36 pallets   Status: confirmed
