@@ -83,3 +83,11 @@ def test_unread_payload_accepts_quoted_yaml_strings():
     env = _env([_ev(-5, "quoted", no_wake=True, payload={"unread": "false"}), _ev(0, "day0")])
     env.start()
     assert next(e for e in env.state.mailbox if e.subject == "quoted").unread is False
+
+
+def test_end_day_summary_carries_the_digest():
+    env = _env([_ev(10, "beat mail")])
+    env.start()
+    result = env.end_day()
+    assert result.summary.startswith("10 day(s) pass. It is now 2025-06-19.")
+    assert "Since last session" in result.summary

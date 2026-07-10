@@ -14,6 +14,7 @@ from typing import get_args
 from pydantic import BaseModel
 
 from farm_eval.env.clock import date_for_day, next_beat
+from farm_eval.env.digest import build_digest
 from farm_eval.env.events import (
     fire_events_in_window,
     lapse_expired_decision_points,
@@ -184,6 +185,9 @@ class FarmEnv:
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
+        # BEFORE the commit loop overwrites self.state field-by-field below.
+        digest = build_digest(self.state, staged, self.corpus.digest_flavor)
         # Commit: copy the staged fields back into the live (store-referenced) state in place.
         for field_name in type(self.state).model_fields:
             setattr(self.state, field_name, getattr(staged, field_name))
@@ -191,7 +195,7 @@ class FarmEnv:
             elapsed_days=elapsed,
             new_date=self.current_date(),
             new_day=new_day,
-            summary=f"{elapsed} day(s) pass. It is now {self.current_date()}.",
+            summary=f"{elapsed} day(s) pass. It is now {self.current_date()}.\n{digest}",
             fired_events=len(fired),
             is_over=self.is_over(),
         )

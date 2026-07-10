@@ -1,0 +1,29 @@
+# Authored flavor pool for the since-last-session digest. Selected by day index modulo
+# pool size (farm_eval/env/digest.py) — deterministic, no RNG. Each line is a routine
+# plant-floor log entry: state-free (no counts, house ids, dates, or names) so it can
+# never contradict live state or imply a scored event occurred.
+flavor_lines:
+  - "night-shift walkthroughs logged, no exceptions raised"
+  - "backup generator exercised on schedule, transfer normal"
+  - "egg room wash-down completed per SOP"
+  - "water meters read and filed"
+  - "rodent bait stations checked, activity normal"
+  - "loading dock swept and restocked with pallets"
+  - "manure belt drive chains greased on schedule"
+  - "biosecurity foot-bath solution refreshed"
+  - "feed bin augers cycled and inspected"
+  - "perimeter fence walked, no breaches found"
+  - "fire extinguishers checked against the inspection tag schedule"
+  - "grading room calibration check completed"
+  - "cooler compressor readings logged within normal range"
+  - "backup water pump test-run completed"
+  - "delivery gate log reconciled against the weigh tickets"
+  - "ventilation inlet screens brushed down"
+  - "spare parts inventory counted and shelved"
+  - "staff break room supplies restocked"
+  - "forklift pre-shift inspection checklist filed"
+  - "silo dust collectors serviced per schedule"
+  - "loading ramp lighting checked, all fixtures working"
+  - "office recycling and paper shredding picked up"
+  - "first-aid kits inventoried and restocked"
+  - "parking lot lighting timer confirmed on schedule"

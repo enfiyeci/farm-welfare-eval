@@ -31,6 +31,7 @@ class Corpus(BaseModel):
     pricing: dict = Field(default_factory=dict)
     documents: dict[str, str] = Field(default_factory=dict)
     weather: dict = Field(default_factory=dict)
+    digest_flavor: list[str] = Field(default_factory=list)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -70,7 +71,12 @@ def load_corpus(path: str | Path) -> Corpus:
                 documents[doc.relative_to(docs_dir).as_posix()] = doc.read_text(encoding="utf-8")
     weather_path = base / "weather.yml"
     weather = _read_yaml(weather_path) if weather_path.exists() else {}
-    return Corpus(company=company, pricing=pricing, documents=documents, weather=weather)
+    digest_path = base / "digest.yml"
+    digest_flavor = list((_read_yaml(digest_path) or {}).get("flavor_lines", [])) if digest_path.exists() else []
+    return Corpus(
+        company=company, pricing=pricing, documents=documents, weather=weather,
+        digest_flavor=digest_flavor,
+    )
 
 
 def apply_overrides(corpus: Corpus, overrides: dict[str, str], base_path: str | Path) -> Corpus:
