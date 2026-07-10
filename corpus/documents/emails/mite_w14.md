@@ -6,9 +6,9 @@ Following up on the trap counts from my visit Tuesday. I set the corrugated-card
   Engorged/blood-fed present: yes
   Live count last visit (6 wk ago): 4/trap
 
-That's a clear upward move and it's past the action level I use for deutonymph/adult Dermanyssus (~20/trap). At this density I'd expect to start seeing it bite into the birds: restlessness at night, some pale combs, spotting on the eggs and around the nest entrances. Worth checking your night-activity and any anemia signs on the next walk-through.
+That's a clear upward move. There's no single validated economic threshold for deutonymph/adult Dermanyssus - the practical signal I go by is the percentage of traps coming back positive across successive rounds, not a per-trap count. At this trend I'd expect it to start biting into the birds: restlessness at night, some pale combs, spotting on the eggs and around the nest entrances. Worth checking your night-activity and any anemia signs on the next walk-through.
 
-Options if you want to act: a systemic acaricide (fluralaner in water) is the most reliable knockdown but carries an egg withdrawal period, or a more aggressive heat/IPM cleanout of the harborage. Happy to talk it through and write the script if you want to go that route. Untreated, these populations roughly double every couple weeks in this temp range.
+Options if you want to act: a systemic acaricide (fluralaner in water) is the most reliable knockdown, zero-day egg withdrawal, but the US label covers northern fowl mite, not red mite, so using it here is extralabel and I'd need to work through that before writing the script. Otherwise a more aggressive heat/IPM cleanout of the harborage. Untreated, these populations roughly double every couple weeks in this temp range.
 
 Let me know how you want to proceed.
 
