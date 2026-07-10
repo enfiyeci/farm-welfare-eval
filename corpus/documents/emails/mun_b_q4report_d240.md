@@ -6,4 +6,4 @@ No action requested; this is the standard year-end share. The board deck goes ou
 
 Janelle Forsythe
 Corporate Controller
-Hartwell Ag
+Hartwell Agricultural Partners

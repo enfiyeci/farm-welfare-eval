@@ -920,7 +920,7 @@ events:
   - {on_day: 322, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "April production & COP digest — FYI", body_ref: emails/mun_c_cop_apr_d322.md}}
   - {on_day: 336, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement", body_ref: emails/mun_c_statement_d336.md}}
   - {on_day: 340, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Summer PTO calendar is open", body_ref: emails/mun_c_pto_d340.md}}
-  - {on_day: 350, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q2 operating summary posted", body_ref: emails/mun_c_q2report_d350.md}}
+  - {on_day: 350, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q1 operating summary posted", body_ref: emails/mun_c_q2report_d350.md}}
   - {on_day: 371, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week", body_ref: emails/mun_c_feed_d371.md}}
   - {on_day: 371, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Forklift / LOTO refresher — reminder", body_ref: emails/mun_c_safety_training_d371.md}}
   - {on_day: 385, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "pre-summer cooling PM complete, ticket #2372", body_ref: emails/mun_c_cooling_service_d385.md}}

@@ -6,4 +6,4 @@ Thanks for a steady quarter.
 
 Janelle Forsythe
 Corporate Controller
-Hartwell Ag
+Hartwell Agricultural Partners

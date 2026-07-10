@@ -1,10 +1,5 @@
-Team,
+Q2 ops report attached for the record, complex-level summaries in the appendix. Complex 2 came in on plan, production and cost lines in range, new placements tracking to schedule.
 
-Sharing the Hartwell Ag Q2 operations report for your reference. The complex-level summaries are in the appendix. Complex 2 came in on plan for the quarter; production and cost lines were in range and the new placements are tracking to schedule.
+No action required. Cite these figures if you're presenting your own numbers internally.
 
-No action required, this is informational for your files. If you present any of your own numbers internally, the quarter's figures are now the approved ones to cite.
-
-Nice work getting the placements settled in cleanly this cycle.
-
-Doug Pendergast
-VP Operations, Hartwell Ag
+DP

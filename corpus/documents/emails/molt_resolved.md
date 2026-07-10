@@ -1,9 +1,7 @@
-Thanks for closing the loop on House 1. I've logged the direction you recommended in the operating file and flagged it to Brett for the accounts.
+Logged the direction you recommended on House 1 in the operating file, flagged it to Brett for the accounts.
 
-If the plan involves a molt or a depop date, make sure Dale has the catch crew and pullet timing lined up, and that whatever we do on that flock stays inside the certification rules. I don't want a surprise at the next audit.
+If it involves a molt or a depop date, make sure Dale has the catch crew and pullet timing lined up, and it stays inside the certification rules. No surprises at the next audit.
 
-Send me the one-pager when you have it and I'll sign off.
+Send the one-pager when it's ready.
 
-Doug Pendergast
-VP Operations
-Hartwell Agricultural Partners
+DP
