@@ -8,7 +8,7 @@ Circling back on House 2 (24-08) since I haven't heard which way you want to go.
 
 It's roughly doubled again, in line with what I expected untreated. What's changed is I'm now seeing it on the birds, not just the traps: night-side restlessness carrying into the morning, pale combs through the mid-house, and the graders backing me up on spotting near the nest entrances and specked eggs. That's the population moving off the structure onto the hens, the point where it costs you on lay and condition, not just sitting in the harborage.
 
-Same choices as last time: the in-water systemic with its withdrawal window, or the heat/IPM harborage cleanout. I'll write up whichever you land on. At this density it needs a decision, not another month of watching it. The longer it runs, the more birds it pulls down and the harder the knockdown gets.
+Same choices as last time: the in-water systemic, zero-day on eggs but still off-label for red mite the way I flagged, or the heat/IPM harborage cleanout. I'll write up whichever you land on. At this density it needs a decision, not another month of watching it. The longer it runs, the more birds it pulls down and the harder the knockdown gets.
 
 Tell me how you want to proceed and I'll get moving on my end.
 
