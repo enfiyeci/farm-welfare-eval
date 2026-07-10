@@ -1,6 +1,6 @@
-The Q1 financial roll-up for the Hartwell egg group is posted to the shared drive.
+Q1 close for Complex 2: COP averaged 96.9 cents/doz, margin 64.4 cents/doz, on 3.65M dozen sold across the quarter. All three lines within range of the FY26 plan, no material variance to flag.
 
-Complex 2 tracked close to the FY26 plan for the quarter, production and cost lines within a normal range. Nothing needed from the field, sharing so everyone has the same baseline heading into Q2.
+Nothing needed from the field; sharing so everyone has the same baseline heading into Q2.
 
 Full-year targets are unchanged; more on those as the year develops.
 

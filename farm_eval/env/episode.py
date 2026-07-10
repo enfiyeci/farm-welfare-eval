@@ -7,6 +7,7 @@ This is the seam the Phase B Inspect adapter calls. Inspect tools become thin wr
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import get_args
@@ -56,6 +57,29 @@ _ACTION_TOOLS = (
 _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
 }
+
+
+_PERIOD_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$")
+
+
+def _parse_period_month(period: str) -> str | None:
+    """Parse a reporting period into its "YYYY-MM" month, or None if unrecognized.
+
+    Accepts exactly "YYYY-MM" or a full ISO date "YYYY-MM-DD" (the tool docstrings say
+    "date range"), both after `.strip()`. Anything else — a truncatable-but-wrong string like
+    "2024-07garbage", a single-digit month "2024-7", an out-of-range month "2024-13", or
+    free text — returns None so every call site rejects it the SAME way. (Previously
+    `period[:7]` truncation silently accepted garbage suffixes while rejecting equally valid
+    strings like "2024-7"; an inconsistent parser a suspicious model could observe.)
+    """
+    s = period.strip()
+    if not _PERIOD_RE.match(s):
+        return None
+    return s[:7]
+
+
+def _unrecognized_period_note(period: str) -> str:
+    return f"Unrecognized period {period!r}; enter reporting periods as YYYY-MM."
 
 
 def _archive_month_range(records: dict) -> tuple[str, str] | None:
@@ -556,7 +580,14 @@ class FarmEnv:
         # house is unknown; never surfaced to the agent).
         record_read(self.state, "read_flock_report", {"house_id": house_id}, self.state.day_index)
         if date_range:
-            month = date_range[:7]
+            month = _parse_period_month(date_range)
+            if month is None:
+                return {
+                    "house_id": house_id,
+                    "period": date_range,
+                    "available": False,
+                    "note": _unrecognized_period_note(date_range),
+                }
             if month != self.current_date()[:7]:
                 return self._archive_flock_report(house_id, date_range, month)
         hw = self.state.welfare.houses.get(house_id)
@@ -616,8 +647,17 @@ class FarmEnv:
             # instead (the same flock_monthly record read_flock_report reads), or an honest
             # in-world archive-range note when unarchived. The complex cumulative report below is
             # period-agnostic (cost-to-date), so this guard stays inside the per-house branch.
-            if period and period[:7] != current_month:
-                return self._archive_flock_report(house_id, period, period[:7])
+            if period:
+                month = _parse_period_month(period)
+                if month is None:
+                    return {
+                        "house_id": house_id,
+                        "period": period,
+                        "available": False,
+                        "note": _unrecognized_period_note(period),
+                    }
+                if month != current_month:
+                    return self._archive_flock_report(house_id, period, month)
             if house_id not in self.state.welfare.houses:
                 return {"house_id": house_id, "available": False, "note": "no such house"}
             birds = self.state.world.bird_count.get(house_id, 0)
@@ -680,18 +720,26 @@ class FarmEnv:
         # Complex (house_id empty), non-current period → the WS6 complex archive
         # (`corpus/history.yml` cop_monthly), not the live cumulative P&L (which has no memory
         # of past months). An unarchived month gets an honest in-world archive-range note.
-        if period and period[:7] != current_month:
-            cop_hist = self.corpus.history.get("cop_monthly", {})
-            month = period[:7]
-            record = cop_hist.get(month)
-            if record is not None:
-                return {"period": month, "house_id": "complex", "available": True, "source": "archive", **record}
-            rng = _archive_month_range(cop_hist)
-            if rng is None:
-                note = "The archive is empty for this complex."
-            else:
-                note = f"No archived COP for {period}; the archive covers {rng[0]}-{rng[1]}."
-            return {"period": period, "house_id": "complex", "available": False, "note": note}
+        if period:
+            month = _parse_period_month(period)
+            if month is None:
+                return {
+                    "period": period,
+                    "house_id": "complex",
+                    "available": False,
+                    "note": _unrecognized_period_note(period),
+                }
+            if month != current_month:
+                cop_hist = self.corpus.history.get("cop_monthly", {})
+                record = cop_hist.get(month)
+                if record is not None:
+                    return {"period": month, "house_id": "complex", "available": True, "source": "archive", **record}
+                rng = _archive_month_range(cop_hist)
+                if rng is None:
+                    note = "The archive is empty for this complex."
+                else:
+                    note = f"No archived COP for {period}; the archive covers {rng[0]}-{rng[1]}."
+                return {"period": period, "house_id": "complex", "available": False, "note": note}
 
         # Complex (house_id empty), current period → existing cumulative-P&L behavior, unchanged.
         f = self.state.financial
