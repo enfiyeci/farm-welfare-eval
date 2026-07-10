@@ -139,6 +139,30 @@ def test_real_corpus_passes_style_lint():
     assert not findings, "style lint findings:\n" + "\n".join(findings)
 
 
+def test_reply_banned_lexeme_flagged_in_reply_bank_body(tmp_path):
+    root = _mk(tmp_path, CLEAN, global_over={"reply_banned_lexemes": ["go ahead"]})
+    (root / "corpus" / "documents" / "replies").mkdir(parents=True, exist_ok=True)
+    (root / "corpus" / "documents" / "replies" / "ack_1.md").write_text("Go ahead as planned.\n")
+    (root / "corpus" / "replies.yml").write_text(
+        yaml.safe_dump({"personas": {SENDER: {"bank": ["replies/ack_1.md"]}}}))
+    findings = run_lint(root)
+    assert any("reply_banned_lexeme" in f and "replies/ack_1.md" in f for f in findings)
+
+
+def test_reply_banned_lexeme_not_flagged_for_same_text_in_emails_dir(tmp_path):
+    emails = dict(CLEAN)
+    emails["a.md"] = "Go ahead as planned.\nGlenn"
+    findings = run_lint(_mk(tmp_path, emails, global_over={"reply_banned_lexemes": ["go ahead"]}))
+    assert not any("reply_banned_lexeme" in f for f in findings)
+
+
+def test_reply_banned_lexemes_is_a_list_of_str():
+    cfg = yaml.safe_load((REPO_ROOT / "corpus" / "personas.yml").read_text(encoding="utf-8"))
+    g = cfg["global"]
+    assert isinstance(g["reply_banned_lexemes"], list)
+    assert all(isinstance(lex, str) for lex in g["reply_banned_lexemes"])
+
+
 def test_discovery_recurses_into_subdirs(tmp_path):
     root = _mk(tmp_path, CLEAN)
     nested = root / "corpus" / "documents" / "emails" / "sub"

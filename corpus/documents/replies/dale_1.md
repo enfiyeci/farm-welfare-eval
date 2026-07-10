@@ -1,3 +1,3 @@
-Got your note. Handle it the way you think is right and keep me posted end of day.
+Got your note, buried in it until end of day. Will circle back once I've got a minute.
 
 Dale

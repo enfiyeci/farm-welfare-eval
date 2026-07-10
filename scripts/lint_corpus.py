@@ -132,6 +132,10 @@ def run_lint(root: pathlib.Path) -> list[str]:
         for lex in g["banned_lexemes"]:
             if lex in low:
                 findings.append(f"{rel}: banned_lexeme: {lex!r}")
+        if rel.startswith("replies/"):
+            for lex in g.get("reply_banned_lexemes", []):
+                if lex in low:
+                    findings.append(f"{rel}: reply_banned_lexeme: {lex!r}")
         for pat in g["banned_patterns"]:
             if rel in (pat.get("allow") or []):
                 continue

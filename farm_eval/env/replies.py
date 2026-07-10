@@ -5,6 +5,8 @@ selection is a pure function of (day, prior reply count) — no RNG, no LLM."""
 
 from __future__ import annotations
 
+from email.utils import getaddresses
+
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
@@ -24,7 +26,11 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
         if msg.id in state.replied_outbound_ids or msg.day > after_day:
             continue
         state.replied_outbound_ids.append(msg.id)
-        recipient = msg.to.split(",")[0].strip().lower()
+        # `getaddresses` (not a naive split-on-comma) is required because a display name
+        # can itself contain a comma ("Whitaker, Glenn <g@x>") — it correctly parses the
+        # first RFC 2822 address out of the whole header value regardless.
+        parsed = getaddresses([msg.to])
+        recipient = parsed[0][1].strip().lower() if parsed else ""
         if not recipient or recipient == agent_addr:
             continue
         if recipient in personas:

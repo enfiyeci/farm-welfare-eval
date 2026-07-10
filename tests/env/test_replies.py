@@ -83,6 +83,34 @@ def test_authored_inbound_from_same_persona_suppresses_the_ack():
     assert env.state.outbound[0].id in env.state.replied_outbound_ids
 
 
+def test_display_name_address_resolves_to_known_persona():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "Glenn Whitaker <glenn@x.com>", "subject": "feed q", "body": "hi"})
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == PERSONA]
+    assert len(replies) == 1
+    assert replies[0].subject == "re: feed q"
+
+
+def test_display_name_with_comma_resolves_to_known_persona():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": '"Whitaker, Glenn" <glenn@x.com>', "subject": "q", "body": "hi"})
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == PERSONA]
+    assert len(replies) == 1
+
+
+def test_mixed_case_address_matches_persona():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {"to": "GLENN@X.COM", "subject": "q", "body": "hi"})
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == PERSONA]
+    assert len(replies) == 1
+
+
 def test_each_outbound_answered_exactly_once():
     env = _env()
     env.start()

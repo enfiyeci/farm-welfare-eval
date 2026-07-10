@@ -1,3 +1,3 @@
-Noted, thanks! Nothing else needed from me right now.
+Noted, thanks! Tied up with Midwest Egg this morning, back to you shortly.
 
 Brett

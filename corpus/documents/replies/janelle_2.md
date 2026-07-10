@@ -1,4 +1,4 @@
-Noted for the record. No variance impact at this time.
+Noted for the record. Will fold this into the variance review before month-end close.
 
 Janelle Forsythe
 Corporate Controller

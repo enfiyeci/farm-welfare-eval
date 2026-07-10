@@ -1,3 +1,3 @@
-Saw this come through. Nothing new to add right now, go ahead as planned.
+Saw this come through. Tied up on the west range today, will read it closer tonight.
 
 Dale
