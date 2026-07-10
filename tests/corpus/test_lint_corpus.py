@@ -137,3 +137,60 @@ def test_banned_pattern_regexes_compile_and_thresholds_are_numeric():
 def test_real_corpus_passes_style_lint():
     findings = run_lint(REPO_ROOT)
     assert not findings, "style lint findings:\n" + "\n".join(findings)
+
+
+def test_discovery_recurses_into_subdirs(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    nested = root / "corpus" / "documents" / "emails" / "sub"
+    nested.mkdir()
+    (nested / "x.md").write_text("Let me delve into it.\nGlenn")
+    findings = run_lint(root)
+    assert any("banned_lexeme" in f and "emails/sub/x.md" in f for f in findings)
+
+
+def test_discovery_flags_non_md_file(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    (root / "corpus" / "documents" / "emails" / "x.txt").write_text("hello")
+    findings = run_lint(root)
+    assert "emails/x.txt: discovery: non-md file in corpus documents" in findings
+
+
+def test_discovery_flags_ghost_schedule_ref(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    sched_path = root / "schedule" / "events.yml"
+    sched = yaml.safe_load(sched_path.read_text())
+    sched["events"].append({"on_day": 99, "type": "email",
+                            "payload": {"from": SENDER, "to": "agent@x.com",
+                                        "subject": "s", "body_ref": "emails/ghost.md"}})
+    sched_path.write_text(yaml.safe_dump(sched))
+    findings = run_lint(root)
+    assert "emails/ghost.md: discovery: referenced but not found under corpus/documents" in findings
+
+
+def test_en_dash_density_flagged(tmp_path):
+    emails = dict(CLEAN)
+    emails["a.md"] = "Quick note – bins topped – tickets logged – all good.\nGlenn"
+    findings = run_lint(_mk(tmp_path, emails))
+    assert any("em_dash" in f and "a.md" in f for f in findings)
+
+
+def test_conflicting_sender_mapping_flagged(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    sched_path = root / "schedule" / "events.yml"
+    sched = yaml.safe_load(sched_path.read_text())
+    sched["events"].append({"on_day": 50, "type": "email",
+                            "payload": {"from": "someone.else@x.com", "to": "agent@x.com",
+                                        "subject": "s", "body_ref": "emails/a.md"}})
+    sched_path.write_text(yaml.safe_dump(sched))
+    findings = run_lint(root)
+    assert any("sender_conflict" in f and "emails/a.md" in f for f in findings)
+
+
+def test_empty_corpus_is_a_finding(tmp_path):
+    (tmp_path / "corpus" / "documents" / "emails").mkdir(parents=True)
+    (tmp_path / "corpus" / "documents" / "replies").mkdir(parents=True)
+    (tmp_path / "schedule").mkdir()
+    (tmp_path / "schedule" / "events.yml").write_text(yaml.safe_dump({"events": []}))
+    (tmp_path / "corpus" / "personas.yml").write_text(yaml.safe_dump({"global": GLOBAL, "personas": []}))
+    findings = run_lint(tmp_path)
+    assert findings == ["CORPUS: discovery: no email files found under corpus/documents/"]

@@ -20,52 +20,90 @@ import sys
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-EM_DASH = "—"
+DASH_CHARS = ("—", "–", "‒", "−")  # em dash, en dash, figure dash, minus sign
 
 
 def _load_yaml(path: pathlib.Path) -> dict:
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
-def sender_map(root: pathlib.Path) -> dict[str, str]:
-    """body_ref (relative to corpus/documents/) -> sender email.
+def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str, str]]]:
+    """(body_ref -> sender email, conflicts) — ref relative to corpus/documents/.
 
     Sources: schedule event payloads (from + body_ref/variants) and, when present, the
     reply manifest (corpus/replies.yml personas' banks). A file neither names is unmapped
     — an authoring error (orphan or missing schedule entry) surfaced as a finding.
+
+    conflicts is a list of (ref, first_sender, second_sender) tuples for any ref that
+    is assigned two DIFFERENT senders across the sources above; re-assigning the same
+    ref to the same sender again is not a conflict. The first-seen sender wins in the
+    returned map (later differing assignments are recorded as conflicts, not applied).
     """
     senders: dict[str, str] = {}
+    conflicts: list[tuple[str, str, str]] = []
+
+    def assign(ref: str, frm: str) -> None:
+        if ref in senders:
+            if senders[ref] != frm:
+                conflicts.append((ref, senders[ref], frm))
+        else:
+            senders[ref] = frm
+
     sched = _load_yaml(root / "schedule" / "events.yml")
     for ev in sched.get("events", []):
         payload = ev.get("payload", {})
         frm = payload.get("from", "")
         if payload.get("body_ref"):
-            senders[payload["body_ref"]] = frm
+            assign(payload["body_ref"], frm)
         for ref in (ev.get("variants") or {}).values():
-            senders[ref] = frm
+            assign(ref, frm)
     replies_path = root / "corpus" / "replies.yml"
     if replies_path.exists():
         replies = _load_yaml(replies_path)
         for sender, pcfg in (replies.get("personas") or {}).items():
             for ref in pcfg.get("bank", []):
-                senders[ref] = sender
+                assign(ref, sender)
         if replies.get("bounce_ref"):
-            senders[replies["bounce_ref"]] = replies.get("bounce_from", "")
-    return senders
+            assign(replies["bounce_ref"], replies.get("bounce_from", ""))
+    return senders, conflicts
 
 
 def run_lint(root: pathlib.Path) -> list[str]:
     cfg = _load_yaml(root / "corpus" / "personas.yml")
     g = cfg["global"]
     persona_rules = {p["email"]: p for p in cfg["personas"]}
-    senders = sender_map(root)
+    senders, conflicts = sender_map(root)
 
     docs_dir = root / "corpus" / "documents"
-    files = sorted(
-        p for d in (docs_dir / "emails", docs_dir / "replies") if d.is_dir()
-        for p in d.glob("*.md")
-    )
-    findings: list[str] = []
+    files: list[pathlib.Path] = []
+    discovery_findings: list[str] = []
+    for sub in ("emails", "replies"):
+        d = docs_dir / sub
+        if not d.is_dir():
+            continue
+        for p in d.rglob("*"):
+            if not p.is_file():
+                continue
+            if p.suffix == ".md":
+                files.append(p)
+            else:
+                rel = p.relative_to(docs_dir).as_posix()
+                discovery_findings.append(f"{rel}: discovery: non-md file in corpus documents")
+    files.sort()
+    discovery_findings.sort()
+
+    if not files:
+        return ["CORPUS: discovery: no email files found under corpus/documents/"]
+
+    linted_rels = {p.relative_to(docs_dir).as_posix() for p in files}
+
+    findings: list[str] = list(discovery_findings)
+    for ref, a, b in conflicts:
+        findings.append(f"{ref}: sender_conflict: mapped to both {a!r} and {b!r}")
+    for ref in sorted(senders):
+        if (ref.startswith("emails/") or ref.startswith("replies/")) and ref not in linted_rels:
+            findings.append(f"{ref}: discovery: referenced but not found under corpus/documents")
+
     word_counts: list[int] = []
     total_words = 0
     total_emdash = 0
@@ -78,7 +116,7 @@ def run_lint(root: pathlib.Path) -> list[str]:
         word_counts.append(words)
         total_words += words
 
-        n_emdash = body.count(EM_DASH)
+        n_emdash = sum(body.count(c) for c in DASH_CHARS)
         total_emdash += n_emdash
         allowance = max(1, words // g["em_dash_per_file_words_per"])
         if n_emdash > allowance:
