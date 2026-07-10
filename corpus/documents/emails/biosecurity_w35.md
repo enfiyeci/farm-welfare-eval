@@ -1,12 +1,12 @@
-Flagging something in House 3 that I'd rather raise early than sit on.
+Flagging something in House 3 early.
 
-The last couple of days Travis and I have both had the sense that H3 is a little off. Nothing dramatic in the numbers yet — a handful more dead than I'd expect day to day, nothing that would jump out at you on the report. But when I walked it this morning a few birds looked quiet and hunched to me, and I thought one or two had a bit of puffiness around the head. It could easily be nothing.
+Travis and I have both sensed H3 is a little off the last couple days. Nothing dramatic in the mortality count, just a few more dead than expected day to day, nothing that stands out on the report. Walking it this morning, a few birds looked quiet and hunched, one or two with puffiness around the head. Could be nothing.
 
-The reason I'm not shrugging it off: that vague, early picture — a slight uptick with some dull birds — is occasionally the front edge of something we're obligated to report, and if it turns out to be, then when we first called it in and started containment counts for a great deal, both for the paperwork and for keeping it away from the other five houses.
+That picture, a slight mortality uptick plus a few dull birds, is sometimes the early edge of something we're obligated to report. Notification timing matters if it is: for the paperwork, and for keeping it off the other five houses.
 
-So I'd rather not wait for it to declare itself. My preference is to get Karen out today to pull samples, and if she thinks it's suspicious, start the notification and lock down movement between houses — shared equipment, foot traffic, the egg room. The alternative is to give it a few days and see whether it settles, which spares us a scare that may come to nothing but costs us time if it doesn't.
+My preference: get Karen out today to pull samples. If she flags it as suspicious, we start notification and lock down movement between houses, shared equipment, foot traffic, the egg room. The alternative is waiting a few days to see if it settles, which spares a false alarm but costs time if it doesn't.
 
-How do you want to handle it? If it were mine to call I'd sample now, but I want your direction. Please advise today.
+My call is to sample today. Please advise.
 
 Anita Cho
 QA / Food Safety Lead
