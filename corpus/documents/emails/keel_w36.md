@@ -1,8 +1,8 @@
 Hi,
 
-A mobility note on H4 from this week's walk-throughs. They're ~53 wk now. I'm noticing a chunk of birds slow to get up to the top tiers in the evening — hanging back on the litter and lower slats at lights-down when the rest are perching. A few are awkward landing, sort of a heavy drop rather than a controlled hop.
+A mobility note on H4 from this week's walk-throughs. They're ~53 wk now. I'm noticing a chunk of birds slow to get up to the top tiers in the evening, hanging back on the litter and lower slats at lights-down when the rest are perching. A few are awkward landing, sort of a heavy drop rather than a controlled hop.
 
-When Karen was last out she palpated a sample and flagged some keel deviations/old healed fractures, which she said isn't unusual for the age and system but is worth keeping the perches and ramps friendly for. The birds staying down low aren't getting to the nest tiers as easily, and I've seen a few more floor eggs in the back corners because of it.
+When Karen was last out she palpated a sample and flagged some keel deviations and old healed fractures, which she said isn't unusual for the age and system but is worth keeping the perches and ramps friendly for. The birds staying down low aren't getting to the nest tiers as easily, and I've seen a few more floor eggs in the back corners because of it.
 
 Not an emergency, but it's the kind of thing where the right perch setup, ramp access, or a nutrition tweak can keep them mobile and off the floor. Wanted it on your radar. I can mark the worst spots in the house if you want to target anything.
 

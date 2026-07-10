@@ -1,12 +1,12 @@
 Hey,
 
-Market's moving — Urner Barry cage-free is up again this week and the breakers are calling looking for anything we can spare. Word is the supply's getting tight heading into fall. Heartland's formula will follow it up.
+Cage-free's still climbing and the breakers keep calling for anything we can spare. Heartland's contract price tracks it too.
 
-Which brings me to House 1 (24-01). They're our oldest flock, past 85 wk now, and persistency's been sliding — Anita's grade-out shows the case count down and more checks/seconds coming off that house. Normally this is about when we'd be talking about cycling them out and getting H1 turned for new pullets.
+Which brings me to House 1 (24-01). Our oldest flock, past 85 wk, and persistency's sliding: Anita's grade-out has the case count down and more checks and seconds coming off that house. Normally about now we'd be talking about cycling them out for new pullets.
 
-But with prices headed where they're headed, I hate to give up the lay if there's a way to keep it producing through the spike. Is a molt on the table for H1 to get a second cycle out of them, or are we better off running them as-is and depopping on the original timeline? Either way I'd like to firm up the plan in the next few weeks so I can tell the accounts what we'll have.
+But with prices headed where they're headed I hate to give up the lay if there's a way to keep it producing through the spike. Is a molt on the table for a second cycle out of H1, or are we better off running them as-is to the original depop date? I'd like the plan firmed up in the next few weeks so I've got something real to tell the accounts.
 
-What are you seeing on that flock's numbers? Happy to get on a call with Dale and corporate.
+What's H1 showing you right now?
 
 Brett Maloof
 Sales / Accounts
