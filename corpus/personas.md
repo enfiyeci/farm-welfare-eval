@@ -117,3 +117,5 @@ occasional.
   (cap 400 words).
 - Heartland Packaging Orders (orders@heartlandpackaging.com) — order-confirmation boilerplate:
   PO numbers, ship dates.
+- Mail Delivery System (postmaster@cloverdaleeggs.com) — the WS5 bounce sender for mail to an
+  unrecognized address; a single fixed non-delivery notice, never a persona bank entry.

@@ -1,0 +1,46 @@
+# Reply manifest (WS5): three-tier deterministic correspondence closure. See
+# farm_eval/env/replies.py for selection semantics and farm_eval/env/loader.py's
+# validate_reply_refs for the load-time consistency check.
+#
+# Every persona email in corpus/personas.yml appears below EXCEPT the bounce
+# sender (postmaster@cloverdaleeggs.com), which is addressed only via
+# bounce_from/bounce_ref, never through the personas bank mechanism.
+
+bounce_from: postmaster@cloverdaleeggs.com
+bounce_ref: replies/bounce.md
+
+personas:
+  dale.renner@cloverdaleeggs.com:
+    bank: [replies/dale_1.md, replies/dale_2.md, replies/dale_3.md]
+  marisol.vega@cloverdaleeggs.com:
+    bank: [replies/marisol_1.md, replies/marisol_2.md, replies/marisol_3.md]
+  travis.lindqvist@cloverdaleeggs.com:
+    bank: [replies/travis_1.md, replies/travis_2.md, replies/travis_3.md]
+  priya.anand@cloverdaleeggs.com:
+    bank: [replies/priya_1.md, replies/priya_2.md, replies/priya_3.md]
+  rob.salgado@cloverdaleeggs.com:
+    bank: [replies/rob_1.md, replies/rob_2.md, replies/rob_3.md]
+  anita.cho@cloverdaleeggs.com:
+    bank: [replies/anita_1.md, replies/anita_2.md, replies/anita_3.md]
+  glenn.whitaker@cloverdaleeggs.com:
+    bank: [replies/glenn_1.md, replies/glenn_2.md, replies/glenn_3.md]
+  brett.maloof@cloverdaleeggs.com:
+    bank: [replies/brett_1.md, replies/brett_2.md, replies/brett_3.md]
+  kholzmann@prairieavian.com:
+    bank: [replies/karen_1.md, replies/karen_2.md, replies/karen_3.md]
+  janelle.forsythe@hartwellag.com:
+    bank: [replies/janelle_1.md, replies/janelle_2.md, replies/janelle_3.md]
+  doug.pendergast@hartwellag.com:
+    bank: [replies/doug_1.md, replies/doug_2.md, replies/doug_3.md]
+  wstrup@tallgrasspullets.com:
+    bank: [replies/wendell_1.md, replies/wendell_2.md, replies/wendell_3.md]
+  hramos@reliablepoultry.com:
+    bank: [replies/hector_1.md, replies/hector_2.md, replies/hector_3.md]
+  helpdesk@hartwellag.com:
+    bank: [replies/helpdesk_auto.md]
+  bulletin@unitedegg.org:
+    bank: [replies/noreply_bulletin.md]
+  news@eggindustry-weekly.com:
+    bank: [replies/noreply_news.md]
+  orders@heartlandpackaging.com:
+    bank: [replies/orders_auto.md]

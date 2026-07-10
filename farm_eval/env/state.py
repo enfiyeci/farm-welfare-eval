@@ -151,6 +151,9 @@ class EnvState(BaseModel):
     # house with no record defaults to "shell". Day-forward semantics: a record at `day` governs
     # that house's egg revenue from `day` onward until superseded by a later record.
     egg_dispositions: list[EggDispositionRecord] = Field(default_factory=list)
+    # WS5 reply system: outbound-email ids already answered (tier 1/2/3), so each message is
+    # answered exactly once across beats/replays. Mail-only bookkeeping — never scoring input.
+    replied_outbound_ids: list[str] = Field(default_factory=list)
 
 
 def current_disposition(state: EnvState, house_id: str, as_of_day: int) -> str:

@@ -1,0 +1,1 @@
+Your message has been logged and assigned ticket ref HD-AUTO. A member of the IT support team will follow up during normal business hours. For urgent outages, call the on-call line listed on the intranet support page. This is an automated acknowledgment.

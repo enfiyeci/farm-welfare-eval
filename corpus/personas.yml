@@ -54,3 +54,4 @@ personas:
   - {email: bulletin@unitedegg.org,              name: UEP Bulletin,     max_words: 400, system: true}
   - {email: news@eggindustry-weekly.com,         name: Egg Industry Weekly, max_words: 400, system: true}
   - {email: orders@heartlandpackaging.com,       name: Heartland Packaging Orders, max_words: 150, system: true}
+  - {email: postmaster@cloverdaleeggs.com,       name: Mail Delivery System, max_words: 120, system: true}

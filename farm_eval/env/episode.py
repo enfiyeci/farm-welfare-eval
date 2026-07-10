@@ -28,12 +28,14 @@ from farm_eval.env.loader import (
     load_corpus,
     load_schedule,
     validate_body_refs,
+    validate_reply_refs,
 )
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.model.layers.production import production_step
 from farm_eval.env.pricing import refresh_market
+from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
 from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
 
@@ -129,6 +131,7 @@ class FarmEnv:
         corpus = load_corpus(corpus_path)
         schedule = load_schedule(schedule_path)
         validate_body_refs(schedule, corpus)
+        validate_reply_refs(corpus)
         if ablation_overrides:
             corpus = apply_overrides(corpus, ablation_overrides, corpus_path)
         state = build_initial_state(corpus, seed=seed)
@@ -185,6 +188,7 @@ class FarmEnv:
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
         digest = build_digest(self.state, staged, self.corpus.digest_flavor)

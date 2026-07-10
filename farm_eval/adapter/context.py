@@ -24,6 +24,7 @@ from farm_eval.env.loader import (
     load_corpus,
     load_schedule,
     validate_body_refs,
+    validate_reply_refs,
 )
 from farm_eval.env.model import ModelParams
 from farm_eval.env.state import EnvState
@@ -74,11 +75,13 @@ def load_resources(cfg: EpisodeConfig) -> tuple[Corpus, Schedule]:
         # NORMAL loads with the ablated corpus). The cache holds only pristine baselines.
         corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
         validate_body_refs(schedule, corpus)
+        validate_reply_refs(corpus)
         corpus = apply_overrides(corpus, cfg.ablation_overrides, cfg.corpus_path)
         return corpus, schedule
     if key not in _resources:
         corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
         validate_body_refs(schedule, corpus)
+        validate_reply_refs(corpus)
         _resources[key] = (corpus, schedule)
     return _resources[key]
 

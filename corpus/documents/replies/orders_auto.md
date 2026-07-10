@@ -1,0 +1,1 @@
+This is an automated confirmation that your message has been received by the Heartland Packaging order desk. A team member will review and respond within one business day. Please reference your PO number in any follow-up correspondence.
