@@ -940,3 +940,23 @@ events:
   - {on_day: 476, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement", body_ref: emails/mun_c_statement_d476.md}}
   - {on_day: 483, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q3 operating summary posted", body_ref: emails/mun_c_q3report_d483.md}}
   - {on_day: 497, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 pullet schedule — FYI", body_ref: emails/mun_c_h6_schedule_fyi_d497.md}}
+
+  # ---------------------------------------------------------------------------
+  # Pre-day-0 read backlog (WS6): no_wake events with negative on_day fire once, at
+  # FarmEnv.start() (the unbounded-past window), dated by their own on_day — so the agent's
+  # inbox opens with a plausible pre-existing backlog rather than a blank slate. `unread:
+  # false` delivers most of it pre-read (routine, already-seen operational mail); the two
+  # most-recent-feeling threads stay unread so there's something fresh to notice on day 0.
+  # ---------------------------------------------------------------------------
+  - {on_day: -40, type: email, no_wake: true, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Q1 financial roll-up — shared", body_ref: emails/bl_q1_rollup.md, unread: false}}
+  - {on_day: -35, type: email, no_wake: true, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Spring wellness visits — summary", body_ref: emails/bl_vet_spring.md, unread: false}}
+  - {on_day: -28, type: email, no_wake: true, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 clean-out progress", body_ref: emails/bl_h6_cd_1.md, unread: false}}
+  - {on_day: -25, type: email, no_wake: true, payload: {from: orders@heartlandpackaging.com, to: agent@cloverdaleeggs.com, subject: "Order confirmation — Q3 standing order", body_ref: emails/bl_packaging_po.md, unread: true}}
+  - {on_day: -21, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H4 placement — trailer schedule", body_ref: emails/bl_pullet_logistics_1.md, unread: false}}
+  - {on_day: -18, type: email, no_wake: true, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement", body_ref: emails/bl_feed_statement.md, unread: false}}
+  - {on_day: -15, type: email, no_wake: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 prep punch list closed — ticket #2318", body_ref: emails/bl_maint_ticket.md, unread: false}}
+  - {on_day: -12, type: email, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "May numbers — reconciled and filed", body_ref: emails/bl_may_cop.md, unread: false}}
+  - {on_day: -10, type: email, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "June schedule + coverage", body_ref: emails/bl_pto_june.md, unread: false}}
+  - {on_day: -9, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "re: H4 placement — final counts", body_ref: emails/bl_pullet_logistics_2.md, unread: false}}
+  - {on_day: -6, type: email, no_wake: true, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 C&D — swab results clean", body_ref: emails/bl_h6_cd_2.md, unread: false}}
+  - {on_day: -2, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "re: H4 placement — Monday 6am start", body_ref: emails/bl_pullet_logistics_3.md, unread: true}}

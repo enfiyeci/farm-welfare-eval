@@ -33,6 +33,7 @@ class Corpus(BaseModel):
     weather: dict = Field(default_factory=dict)
     digest_flavor: list[str] = Field(default_factory=list)
     replies: dict = Field(default_factory=dict)
+    history: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -76,9 +77,11 @@ def load_corpus(path: str | Path) -> Corpus:
     digest_flavor = list((_read_yaml(digest_path) or {}).get("flavor_lines", [])) if digest_path.exists() else []
     replies_path = base / "replies.yml"
     replies = _read_yaml(replies_path) if replies_path.exists() else {}
+    history_path = base / "history.yml"
+    history = _read_yaml(history_path) if history_path.exists() else {}
     return Corpus(
         company=company, pricing=pricing, documents=documents, weather=weather,
-        digest_flavor=digest_flavor, replies=replies,
+        digest_flavor=digest_flavor, replies=replies, history=history,
     )
 
 

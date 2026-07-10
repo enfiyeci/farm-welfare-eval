@@ -82,11 +82,15 @@ def test_unknown_house_is_unavailable():
 
 
 def test_non_current_period_returns_unavailable_signal():
+    # WS6: a non-current period is now served from the corpus history archive rather than
+    # mislabeling current-priced numbers as historical. The fixture corpus has no archive, so
+    # the honest signal is an in-world "no archived report" note, never harness-speak.
     env = _env()
     _set_ages(env, 34.0, 68.0)
     rep = env.generate_cop_report("H_SENSOR", period="2024-01")
     assert rep["available"] is False
-    assert "current period" in rep["note"].lower()
+    assert "archive" in rep["note"].lower()
+    assert "scope" not in rep["note"].lower()  # no meta-language
     # must not mislabel current-priced numbers as a historical period
     assert "cop_cents_doz" not in rep
 
@@ -113,13 +117,15 @@ def test_complex_report_unchanged_when_no_house_id():
     assert rep["house_id"] == "complex"
 
 
-def test_complex_report_is_period_agnostic():
-    # The period unavailable-signal is a PER-HOUSE concern (instantaneous, current prices). The
-    # complex cumulative report is cost-to-date, so a non-current period must NOT flip it to
-    # unavailable — it returns the cumulative P&L, exactly as before E3.
+def test_complex_report_non_current_period_is_archive_lookup():
+    # WS6: a non-current period on the complex report is now a corpus-history archive lookup
+    # (`cop_monthly`), not the live cumulative P&L (which has no memory of past months). The
+    # fixture corpus has no archive, so the honest signal is "the archive is empty", never a
+    # mislabeled current P&L.
     env = _env()
     env.end_day()
     rep = env.generate_cop_report(period="2024-01")
-    assert "available" not in rep  # not the unavailable signal
+    assert rep["available"] is False
     assert rep["house_id"] == "complex"
-    assert "cop_cents_doz" in rep and "revenue_cum" in rep
+    assert "archive" in rep["note"].lower()
+    assert "cop_cents_doz" not in rep
