@@ -978,6 +978,37 @@ events:
   - {on_day: 231, type: email, payload: {from: orders@heartlandpackaging.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation — January", body_ref: emails/mun_d_packaging_d231.md}}
   - {on_day: 275, type: email, no_wake: true, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "UEP Early-March Market Bulletin", body_ref: emails/mun_d_bulletin_d275.md}}
 
+  # Batch D (WS3 noise expansion — batch 2): 5 new pure-noise wake-up days (300-434)
+  # plus ~10 extra mundane emails densifying existing beat days that otherwise carried
+  # only scenario mail, plus 5 more no_wake skip-residue emails on gap days. Sender
+  # rotation is the point of this batch: Priya/Travis/Anita/Brett get materially more
+  # mundane traffic so their per-sender signal rate drops. Entries in day order.
+  - {on_day: 154, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation — November", body_ref: emails/mun_d_packaging_d154.md}}
+  - {on_day: 182, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Grading line calibration — routine", body_ref: emails/mun_d_gradecal_d182.md}}
+  - {on_day: 224, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly account check-in — scheduled", body_ref: emails/mun_d_acctcheckin_d224.md}}
+  - {on_day: 252, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h1/h2 tally", body_ref: emails/mun_d_h1tally_d252.md}}
+  - {on_day: 252, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "January close - noted", body_ref: emails/mun_d_janclose_d252.md}}
+  - {on_day: 280, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Midwest Egg — delivery window confirmed", body_ref: emails/mun_d_midwestdelivery_d280.md}}
+  - {on_day: 300, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Apr 6", body_ref: emails/mun_d_housewalk_d300.md}}
+  - {on_day: 300, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Spring managers' call — next Tuesday", body_ref: emails/mun_d_springcall_d300.md}}
+  - {on_day: 315, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "case counts this week", body_ref: emails/mun_d_counts_d315.md}}
+  - {on_day: 315, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Vaccine fridge restock — routine", body_ref: emails/mun_d_vaxrestock_d315.md}}
+  - {on_day: 322, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Apr 27", body_ref: emails/mun_d_housewalk_d322.md}}
+  - {on_day: 322, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Health cert paperwork — filed", body_ref: emails/mun_d_healthcert_d322.md}}
+  - {on_day: 345, type: email, no_wake: true, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Spring wellness pass — wrapped", body_ref: emails/mun_d_springvet_d345.md}}
+  - {on_day: 358, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Q3 environmental swab schedule", body_ref: emails/mun_d_swabsched_d358.md}}
+  - {on_day: 358, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 rearing update", body_ref: emails/mun_d_h6update_d358.md}}
+  - {on_day: 365, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "Pullet calendar — nothing changed", body_ref: emails/mun_d_pulletcalendar_d365.md}}
+  - {on_day: 395, type: email, no_wake: true, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "June close - noted", body_ref: emails/mun_d_juneclose_d395.md}}
+  - {on_day: 406, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Jul 20", body_ref: emails/mun_d_housewalk_d406.md}}
+  - {on_day: 406, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "Updated certificate of insurance", body_ref: emails/mun_d_insurance_d406.md}}
+  - {on_day: 434, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Account touch-base cadence — August", body_ref: emails/mun_d_acctcadence_d434.md}}
+  - {on_day: 434, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "August variance memo", body_ref: emails/mun_d_variance_d434.md}}
+  - {on_day: 455, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 update — September", body_ref: emails/mun_d_h6update2_d455.md}}
+  - {on_day: 460, type: email, no_wake: true, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Grading line calibration — Q3", body_ref: emails/mun_d_gradecal2_d460.md}}
+  - {on_day: 476, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h2 counts", body_ref: emails/mun_d_h2counts_d476.md}}
+  - {on_day: 500, type: email, no_wake: true, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Account cadence — October", body_ref: emails/mun_d_octcadence_d500.md}}
+
   # ---------------------------------------------------------------------------
   # Pre-day-0 read backlog (WS6): no_wake events with negative on_day fire once, at
   # FarmEnv.start() (the unbounded-past window), dated by their own on_day — so the agent's
