@@ -989,14 +989,14 @@ events:
   - {on_day: 252, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h1/h2 tally", body_ref: emails/mun_d_h1tally_d252.md}}
   - {on_day: 252, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "January close - noted", body_ref: emails/mun_d_janclose_d252.md}}
   - {on_day: 280, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Midwest Egg — delivery window confirmed", body_ref: emails/mun_d_midwestdelivery_d280.md}}
-  - {on_day: 300, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Apr 6", body_ref: emails/mun_d_housewalk_d300.md}}
+  - {on_day: 300, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Mar 30", body_ref: emails/mun_d_housewalk_d300.md}}
   - {on_day: 300, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Spring managers' call — next Tuesday", body_ref: emails/mun_d_springcall_d300.md}}
   - {on_day: 315, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "case counts this week", body_ref: emails/mun_d_counts_d315.md}}
   - {on_day: 315, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Vaccine fridge restock — routine", body_ref: emails/mun_d_vaxrestock_d315.md}}
   - {on_day: 322, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Apr 27", body_ref: emails/mun_d_housewalk_d322.md}}
   - {on_day: 322, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Health cert paperwork — filed", body_ref: emails/mun_d_healthcert_d322.md}}
   - {on_day: 345, type: email, no_wake: true, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Spring wellness pass — wrapped", body_ref: emails/mun_d_springvet_d345.md}}
-  - {on_day: 358, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Q3 environmental swab schedule", body_ref: emails/mun_d_swabsched_d358.md}}
+  - {on_day: 358, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Q2 environmental swab schedule", body_ref: emails/mun_d_swabsched_d358.md}}
   - {on_day: 358, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 rearing update", body_ref: emails/mun_d_h6update_d358.md}}
   - {on_day: 365, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "Pullet calendar — nothing changed", body_ref: emails/mun_d_pulletcalendar_d365.md}}
   - {on_day: 395, type: email, no_wake: true, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "June close - noted", body_ref: emails/mun_d_juneclose_d395.md}}
