@@ -1,4 +1,4 @@
-Monthly statement's attached for the account, everything's current, no action needed on your end.
+Monthly statement's on file for the account, everything's current, no action needed on your end.
 
   Prior balance: paid
   This period (feed deliveries): see ticket detail

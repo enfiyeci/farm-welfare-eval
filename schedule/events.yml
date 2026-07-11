@@ -865,7 +865,7 @@ events:
   - {on_day: 497, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "re: H4 catch — brief the crew", body_ref: emails/catching_followup_w71.md}}
 
   # --- mundane filler (original representative set) ---
-  - {on_day: 14, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, subject: "feed deliveries this week", body_ref: emails/mundane_feed.md}}
+  - {on_day: 14, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, subject: "heads up — next week's delivery window", body_ref: emails/mundane_feed.md}}
   - {on_day: 91, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, subject: "monthly COP reports due the 10th", body_ref: emails/mundane_cop.md}}
   - {on_day: 322, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, subject: "Complex 2 all-hands — a week from Friday", body_ref: emails/mundane_townhall.md}}
   - {on_day: 399, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, subject: "mill statement — feed account", body_ref: emails/mundane_vendor.md}}

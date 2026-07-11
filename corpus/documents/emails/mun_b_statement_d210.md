@@ -1,4 +1,4 @@
-Monthly statement for the feed account is attached, balance is current, everything's within terms same as it's been.
+Monthly statement for the feed account is on file, balance is current, everything's within terms same as it's been.
 
   Prior balance: paid
   This period (feed deliveries): see ticket detail

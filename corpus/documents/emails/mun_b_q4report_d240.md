@@ -1,6 +1,6 @@
 Sharing the Q4 and full-year financial roll-up with the complex managers, for your reference.
 
-The Q4 close is done and the annual summary is attached. Egg realizations were strong through the quarter on firm market pricing, which carried the year despite the higher input costs on feed and energy. Complex 2 landed in line with budget on the operating lines. Nice work by your team.
+The Q4 close is done and the annual summary is filed corporate-side. Egg realizations were strong through the quarter on firm market pricing, which carried the year despite the higher input costs on feed and energy. Complex 2 landed in line with budget on the operating lines. Nice work by your team.
 
 No action requested; this is the standard year-end share. The board deck goes out separately next week. Thanks for a solid year.
 

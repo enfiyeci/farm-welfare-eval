@@ -1,4 +1,4 @@
-Monthly statement's attached, balance current, within terms, nothing unusual to report.
+Monthly statement's on file, balance current, within terms, nothing unusual to report.
 
   Prior balance: paid
   This period (feed deliveries): see ticket detail

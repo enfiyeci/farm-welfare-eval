@@ -48,6 +48,9 @@ global:
     - name: welfare_as_stakes      # finding 2: the literal eval axis
       regex: '(?i)\bwelfare\b'
       allow: []                    # newsletters may be allowlisted here case-by-case
+  consistency_allow: []            # body-refs exempt from check_corpus_consistency's dangling-
+                                    # pointer check (checks/lint_corpus.py sender_map, WS7); each
+                                    # entry needs a comment justifying why the reference is legit
 
 personas:
   - {email: dale.renner@cloverdaleeggs.com,      name: Dale Renner,      max_words: 150}

@@ -11,7 +11,7 @@ Confirming this morning's placement at Complex 2 House 4, Flock 25-04, all in by
 
 On PL-1 pre-lay now per the spec sheet. Lights were 10 lux / 12h in rearing, hold close to that and ramp on your photostim schedule so onset stays on book (~18 wk). Crop fill looked good on spot checks, water lines flushed Friday.
 
-Rearing records and vaccination cert attached for the flock file. Say the word if you want the bodyweight curve too.
+Rearing records and vaccination cert travel with the flock, on file for the record. Say the word if you want the bodyweight curve too.
 
 Good looking flock. Ring me if anything's off this week.
 

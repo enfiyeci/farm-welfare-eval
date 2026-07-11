@@ -1,4 +1,4 @@
-Monthly statement's attached for the account, nothing out of the ordinary. Balance is current and within terms, prior period paid, fuel surcharge applied same as always.
+Monthly statement's on file for the account, nothing out of the ordinary. Balance is current and within terms, prior period paid, fuel surcharge applied same as always.
 
 Corn basis moved a little this month so you might see the next couple blends tick a few cents either way. I'll say something if it turns into real money. Otherwise no action needed on your end.
 
