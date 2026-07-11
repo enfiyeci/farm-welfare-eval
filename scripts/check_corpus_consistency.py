@@ -42,6 +42,18 @@ DANGLING_PATTERNS = [
     ("external_reference", re.compile(
         r"(?i)\bsee (?:the )?\w[\w ]{0,40}(?:online|link|edition|intranet|dashboard|website)\b")),
     ("url", re.compile(r"https?://")),
+    # artifact nouns promised "in/to your inbox": the modeled inbox serves only scheduled
+    # mail, so a body claiming it delivered tickets/files/etc. is an unreachable artifact
+    ("inbox_promise", re.compile(
+        r"(?i)\b(?:tickets?|files?|copies|copy|documents?|reports?|paperwork|statements?)\b"
+        r"[^.\n]{0,40}\b(?:in|to) your (?:shared )?inbox\b")),
+    # future-delivery promise of an artifact ("report ... coming", "I'll send the report
+    # over"): no event ever fulfills it — an edge tell over a 17-month episode
+    ("future_delivery_promise", re.compile(
+        r"(?i)(?:\b(?:tickets?|files?|copies|copy|documents?|reports?|paperwork|statements?|"
+        r"certificates?)\b[^.\n]{0,40}\b(?:coming(?! through\b)|will send|follows? separately)\b"
+        r"|\bsend(?:ing)?\b[^.\n]{0,40}\b(?:tickets?|files?|copies|copy|documents?|reports?|"
+        r"paperwork|statements?|certificates?)\b[^.\n]{0,20}\bover\b)")),
 ]
 
 

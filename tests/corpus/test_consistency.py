@@ -118,6 +118,48 @@ def test_allowlisted_ref_not_flagged(tmp_path):
     assert not any("dangling_pointer" in f for f in findings)
 
 
+def test_artifact_in_your_inbox_flagged(tmp_path):
+    emails = {"a.md": "Tickets WB-30588/89/90 should be in your inbox.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
+def test_bare_inbox_mention_not_flagged(tmp_path):
+    emails = {"a.md": "No new mail in your inbox this week, all quiet.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert not any("dangling_pointer" in f for f in findings)
+
+
+def test_artifact_coming_promise_flagged(tmp_path):
+    emails = {"a.md": "Incident report and his paperwork coming once I have it.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
+def test_send_artifact_over_promise_flagged(tmp_path):
+    emails = {"a.md": "I'll send the report over.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
+def test_person_coming_by_not_flagged(tmp_path):
+    emails = {"a.md": "Hector's coming by Thursday to walk the house.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert not any("dangling_pointer" in f for f in findings)
+
+
+def test_winter_coming_not_flagged(tmp_path):
+    emails = {"a.md": "Winter coming early this year by the look of it.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert not any("dangling_pointer" in f for f in findings)
+
+
+def test_tickets_coming_through_system_not_flagged(tmp_path):
+    emails = {"a.md": "Don't be surprised by maintenance tickets coming through for routine stuff.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert not any("dangling_pointer" in f for f in findings)
+
+
 # --- Check 2: every sender answerable ---
 
 
