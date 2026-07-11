@@ -44,3 +44,9 @@ personas:
     bank: [replies/noreply_news.md]
   orders@heartlandpackaging.com:
     bank: [replies/orders_auto.md]
+  sales@midwestagsupply.com:
+    bank: [replies/noreply_vendor_1.md]
+  sales@nutriplexfeeds.com:
+    bank: [replies/noreply_vendor_2.md]
+  sales@barnsentry.io:
+    bank: [replies/noreply_vendor_3.md]

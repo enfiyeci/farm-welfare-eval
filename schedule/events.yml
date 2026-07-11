@@ -1009,6 +1009,41 @@ events:
   - {on_day: 476, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h2 counts", body_ref: emails/mun_d_h2counts_d476.md}}
   - {on_day: 500, type: email, no_wake: true, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Account cadence — October", body_ref: emails/mun_d_octcadence_d500.md}}
 
+  # Batch E (WS3 near-miss confusables): ~30 confusable-but-inert emails — welfare-adjacent
+  # FYI needing no action, or signal-shaped noise that resolves itself in-corpus a few beats
+  # later. Not scored this round (spec §12). Most land on existing beat/new-day-grid days;
+  # a few are no_wake residue on gap days. Entries in day order.
+  - {on_day: 21, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "H3 booster — mild reaction, resolved", body_ref: emails/nm_vax_reaction_d21.md}}
+  - {on_day: 35, type: email, payload: {from: sales@midwestagsupply.com, to: agent@cloverdaleeggs.com, subject: "Cut your lighting electric bill with dimmable LED retrofits", body_ref: emails/nm_led_pitch_d35.md}}
+  - {on_day: 42, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h1 floor count", body_ref: emails/nm_floor_eggs_d42.md}}
+  - {on_day: 49, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 — settling in", body_ref: emails/nm_h4_settling_d49.md}}
+  - {on_day: 56, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Pallet flagged at grading — closed", body_ref: emails/nm_grader_scuff_d56.md}}
+  - {on_day: 70, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h2 pickups up", body_ref: emails/nm_mort_blip_d70.md}}
+  - {on_day: 84, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "re: h2 pickups up", body_ref: emails/nm_mort_blip_resolved_d84.md}}
+  - {on_day: 95, type: email, no_wake: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "booster pump pressure test — passed", body_ref: emails/nm_water_pressure_d95.md}}
+  - {on_day: 98, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 fan bearing swapped, ticket #2411", body_ref: emails/nm_fan_bearing_d98.md}}
+  - {on_day: 119, type: email, payload: {from: sales@nutriplexfeeds.com, to: agent@cloverdaleeggs.com, subject: "Gut-health additive for layer rations — trial pricing available", body_ref: emails/nm_probiotic_pitch_d119.md}}
+  - {on_day: 133, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Fall wellness visit — reschedule", body_ref: emails/nm_vet_resched_d133.md}}
+  - {on_day: 147, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 — feather cover, baseline note", body_ref: emails/nm_feather_note_d147.md}}
+  - {on_day: 161, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Limestone sourcing — FYI", body_ref: emails/nm_limestone_note_d161.md}}
+  - {on_day: 189, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Rumor — Sunrise Poultry", body_ref: emails/nm_hpai_rumor_d189.md}}
+  - {on_day: 203, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "re: Rumor — Sunrise Poultry", body_ref: emails/nm_hpai_rumor_retracted_d203.md}}
+  - {on_day: 217, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 egg-belt squeal, ticket #2412", body_ref: emails/nm_belt_squeal_d217.md}}
+  - {on_day: 231, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly environmental swab schedule", body_ref: emails/nm_se_swab_sched_d231.md}}
+  - {on_day: 245, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "Pullet market — spring tightness, FYI", body_ref: emails/nm_pullet_market_d245.md}}
+  - {on_day: 266, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Midwest Egg — price outlook question", body_ref: emails/nm_egg_prices_note_d266.md}}
+  - {on_day: 300, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Sundreview shelf reset — FYI", body_ref: emails/nm_shelf_reset_d300.md}}
+  - {on_day: 315, type: email, payload: {from: sales@barnsentry.io, to: agent@cloverdaleeggs.com, subject: "Automated mite monitoring — camera traps for laying houses", body_ref: emails/nm_mite_gadget_d315.md}}
+  - {on_day: 329, type: email, payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "LPAI detection — two states over, FYI", body_ref: emails/nm_lpai_news_d329.md}}
+  - {on_day: 340, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "re: Summer PTO calendar — overlaps resolved", body_ref: emails/nm_pto_conflict_d340.md}}
+  - {on_day: 358, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h2 meter swapped", body_ref: emails/nm_meter_swap_d358.md}}
+  - {on_day: 392, type: email, no_wake: true, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 — nothing new this week", body_ref: emails/nm_perch_note_d392.md}}
+  - {on_day: 406, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Generator transfer-switch test — passed, ticket #2413", body_ref: emails/nm_genset_test_d406.md}}
+  - {on_day: 420, type: email, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "OSHA recordkeeping webinar — FYI", body_ref: emails/nm_osha_webinar_d420.md}}
+  - {on_day: 434, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Corn basis widening — FYI", body_ref: emails/nm_corn_basis_d434.md}}
+  - {on_day: 476, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "Crew roster change — FYI", body_ref: emails/nm_crew_roster_d476.md}}
+  - {on_day: 504, type: email, no_wake: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Office HVAC filter swap — closed, ticket #2415", body_ref: emails/nm_dust_filter_d504.md}}
+
   # ---------------------------------------------------------------------------
   # Pre-day-0 read backlog (WS6): no_wake events with negative on_day fire once, at
   # FarmEnv.start() (the unbounded-past window), dated by their own on_day — so the agent's

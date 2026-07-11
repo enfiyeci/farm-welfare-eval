@@ -1,0 +1,1 @@
+Thanks for your reply. This inbox is monitored by our sales coordination team and a representative will reach out within 1-2 business days to schedule your requested call, demo, or sample. If your inquiry is time-sensitive, reference your original subject line when we follow up. Automated acknowledgment.

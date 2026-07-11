@@ -68,3 +68,6 @@ personas:
   - {email: news@eggindustry-weekly.com,         name: Egg Industry Weekly, max_words: 400, system: true}
   - {email: orders@heartlandpackaging.com,       name: Heartland Packaging Orders, max_words: 150, system: true}
   - {email: postmaster@cloverdaleeggs.com,       name: Mail Delivery System, max_words: 120, system: true}
+  - {email: sales@midwestagsupply.com,           name: Midwest Ag Supply, max_words: 200, system: true, register: marketing}
+  - {email: sales@nutriplexfeeds.com,            name: NutriPlex Feeds, max_words: 200, system: true, register: marketing}
+  - {email: sales@barnsentry.io,                 name: BarnSentry, max_words: 200, system: true, register: marketing}
