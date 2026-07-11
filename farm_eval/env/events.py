@@ -86,25 +86,36 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
             "cc": ev.payload.get("cc", ""),
             "subject": ev.payload.get("subject", "PLACEHOLDER"),
             "body": _resolve_body(ev, state, corpus),
+            # Raw value: pydantic parses conventional booleans ("false"/0) correctly and fails
+            # loud on nonsense — a premature bool() would silently invert quoted YAML "false".
+            "unread": ev.payload.get("unread", True),
         }
     )
 
 
-def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
-    # Idempotent against retry/replay: each event is identified by its stable index in
-    # schedule.events and recorded once fired, so re-entering this day (e.g. after a partial-commit
-    # failure earlier in the loop) never re-delivers an already-fired event. The fired id is
-    # recorded only AFTER the event's effects succeed, so a raising event is retried, not skipped.
+def fire_events_in_window(
+    state: EnvState, schedule: Schedule, corpus: Corpus, after_day: int | None, through_day: int
+) -> list[ScheduledEvent]:
+    """Fire every unfired event with after_day < on_day <= through_day.
+
+    `after_day=None` = unbounded past (episode start: pre-day-0 backlog fires then). Emails
+    are dated by their own on_day, so `no_wake` mail scheduled inside a skip arrives as
+    backlog with the date it was "sent". Idempotency is unchanged: events are identified by
+    their stable index in schedule.events and recorded in fired_event_ids only after their
+    effects succeed.
+    """
     fired_ids = set(state.fired_event_ids)
     fired: list[ScheduledEvent] = []
     for idx, ev in enumerate(schedule.events):
-        if ev.on_day != day or idx in fired_ids:
+        if ev.on_day > through_day or (after_day is not None and ev.on_day <= after_day):
+            continue
+        if idx in fired_ids:
             continue
         if ev.persists_if_unaddressed and ledger_status_for(state, ev.persists_if_unaddressed) is LedgerStatus.ADDRESSED:
             continue  # conditionally skipped — NOT recorded as fired (re-evaluated on replay)
 
         if ev.type is EventType.EMAIL:
-            state.mailbox.append(_make_email(ev, state, corpus, day))
+            state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.SENSOR_ANOMALY:
             # A glitch on the GAUGE, not a change to the world: override only the read-tool
             # surface via a sensor overlay, leaving true welfare state (and harm accrual)
@@ -145,14 +156,18 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
             # Preserve the generic fallback: a pricing_shift that also carries email fields still
             # surfaces a message (e.g. a market-update note), rather than being silently dropped.
             if any(f in p for f in _EMAIL_FIELDS):
-                state.mailbox.append(_make_email(ev, state, corpus, day))
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:
             # corporate_request / audit / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).
             if any(f in ev.payload for f in _EMAIL_FIELDS):
-                state.mailbox.append(_make_email(ev, state, corpus, day))
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
 
-        state.event_log.append({"day": day, "type": ev.type.value, "links_dp": ev.links_dp})
+        state.event_log.append({"day": ev.on_day, "type": ev.type.value, "links_dp": ev.links_dp})
         state.fired_event_ids.append(idx)  # recorded only after effects succeed
         fired.append(ev)
     return fired
+
+
+def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
+    return fire_events_in_window(state, schedule, corpus, day - 1, day)

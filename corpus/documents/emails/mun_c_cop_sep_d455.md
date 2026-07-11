@@ -1,11 +1,3 @@
-FYI — August production and COP digest for the complex, for your records. Books closed clean.
+August production and COP digest, books closed clean. Lay rate 88.9%, feed conversion on book, COP/doz steady, mortality normal. Older flocks are easing off some with age like you'd expect, nothing off-book. Roll-up's in the usual spot.
 
-  Lay rate (complex avg): 88.9%
-  Feed conversion: on book
-  COP/doz: steady
-  Mortality: within normal range
-
-Older flocks are easing off in lay rate as you'd expect for age; nothing off-book. Per-house roll-up filed in the usual spot. No action needed.
-
-Marisol Vega
-Asst. Complex Manager
+Marisol

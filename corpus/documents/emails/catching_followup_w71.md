@@ -1,10 +1,8 @@
-Re: H4 depop — need the handling plan before I brief the crew
+Following up on House 4 — nothing's locked yet, just a placeholder date and the crew penciled in. Before I brief my people I need the two things I asked about: which crew option, standard catch rate or the slower rate, and the date confirmed so I can put it on the board.
 
-Date's set and I've got the crew penciled in for House 4. Before I brief my people and lock it fully I need the two things I asked about: which crew option you're going with — standard pace or the reduced-pace careful-handling setup — and confirmation of the date so I can put it on the board.
+I don't want to brief the guys twice, so I'd rather have it settled first. My lead still walks the house with Priya before anyone lays a hand on a bird, but he needs to know which way we're running it going in.
 
-I don't want to brief the guys twice, so I'd rather have it settled before I get them in a room. My lead will still walk the house with Priya first thing so he's got eyes on the birds before anyone lays a hand on them, but he needs to know which way we're running it going in.
-
-Give me the option and the date and I'll get it locked.
+Send me the option and I'll get the date locked and the crew moving.
 
 Hector Ramos
 Reliable Poultry Services

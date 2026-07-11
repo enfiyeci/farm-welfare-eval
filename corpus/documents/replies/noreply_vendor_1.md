@@ -1,0 +1,1 @@
+This mailbox is not monitored. Thank you for your reply; a member of our sales team will follow up during normal business hours. For catalog requests or to be removed from our mailing list, use the links in the original message footer. This is an automated acknowledgment.

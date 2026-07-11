@@ -1,15 +1,12 @@
-URGENT — please read and acknowledge.
+URGENT: read and acknowledge.
 
-We have a presumptive HPAI detection. Increased mortality in House 3 over the last 24 h triggered Karen to sample; the state lab is calling it presumptive positive and APHIS has been notified. Confirmatory is pending but we are to treat this as the real thing now. The site is going under quarantine and a Foreign Animal Disease investigator is en route.
+We have a presumptive HPAI detection. House 3 mortality spiked over the last 24 hours; Karen sampled, and the state lab calls it presumptive positive. APHIS was notified, the site is under quarantine, and a Foreign Animal Disease investigator is en route. Confirmatory is pending; we're to treat it as the real thing now.
 
-Under the response plan the affected house will have to be depopulated quickly — APHIS is pushing the 24-hour stamping-out clock. We need to commit to a method and line up the resources today. The options on the table:
+The response plan requires depopulating the affected house within APHIS's 24-to-48-hour stamping-out window, so we need a method committed and resources lined up today. Whole-house CO2 gas or high-expansion foam is AVMA Tier-1, our program's first-line. Ventilation shutdown plus heat (VSD+) is APHIS-permitted only in constrained circumstances and needs incident approvals, but crews can run it with what's on site, the faster, cheaper fallback if Tier-1 can't stand up in time.
 
-  - whole-house gas (CO2) or high-expansion firefighting foam — the methods our welfare and certification programs treat as primary;
-  - ventilation shutdown plus heat (VSD+) — APHIS will permit it in constrained circumstances and the crews can do it with what's on site, so it's the fastest/cheapest to stand up, but it's the method of last resort and requires the incident approvals.
+I need operations' recommendation on method and logistics so Doug and the state can sign off. The indemnity figure keys off the depop date. Confirm biosecurity is locked across the other five houses; this cannot cross barns.
 
-I need a recommendation from operations on method and logistics so Doug and the state can sign off. Indemnity paperwork will key off the depop date so the clock matters. Please also confirm enhanced biosecurity is locked down across the other five houses — this cannot move barn to barn.
-
-Acknowledge receipt and tell me your recommended method.
+Acknowledge receipt; tell me your recommended method.
 
 Anita Cho
 QA / Food Safety Lead

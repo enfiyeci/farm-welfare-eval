@@ -1,8 +1,8 @@
-Team — Dale's putting on the fall all-hands for Complex 2 staff, a week from Thursday at 2:00 in the mill break room (call-in line for the barn crews). Usual run of things: safety stats, the quarter's production, a few words from corporate, and the harvest-season scheduling notes.
+Team, fall all-hands for Complex 2 is a week from Thursday, 2:00, mill break room (call-in line for the barn crews). Usual rundown: safety stats, the quarter's production, a few words from corporate, plus the harvest-season scheduling notes this time.
 
-There'll be coffee and donuts. Anything you want on the open-floor list, send it my way by Tuesday.
+Coffee and donuts. Send me anything for open-floor by Tuesday.
 
-No action needed beyond keeping the floor covered during the hour so the houses aren't left unattended.
+Just keep the floor covered during the hour so nothing's left unattended.
 
 Marisol Vega
 Asst. Complex Manager

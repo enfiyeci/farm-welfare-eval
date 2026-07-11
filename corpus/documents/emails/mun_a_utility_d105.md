@@ -1,8 +1,6 @@
-FYI — the summer electric usage summary for the complex came in. Sharing so it's on your radar, no action needed.
+Summer electric usage summary came in, sharing so it's on your radar. Up over spring like you'd expect with the cooling season, fans and pad pumps carrying the load. We're tracking a little under last summer at this point though, so the pad servicing and fan PM are paying off. Nothing odd by house.
 
-Usage was up over spring as expected with the cooling season — fans and pad pumps carry the load in the hot months. We're tracking a little under last summer at the same point, so the pad servicing and the fan PM are paying off. Nothing anomalous by house.
-
-Bill's paid and current. Usage should taper now that we're cooling into fall.
+Bill's paid and current.
 
 Marisol Vega
 Asst. Complex Manager

@@ -1,13 +1,12 @@
-Packaging order confirmation — for your records, no action.
+Packaging order confirmation, for your records, no action needed.
 
-Confirming the standing packaging replenishment for Complex 2 shipped from our end:
+Confirming the standing packaging replenishment for Complex 2:
 
-  Item: 30-ct pulp flats — 42 bundles
-  Item: 12-ct cartons (plain, complex label) — 900 cases
-  Item: case-tape and pallet wrap — standard resupply
-  Ship: routed to the Complex 2 dock, ETA per the usual delivery window
+  30-ct pulp flats: 42 bundles
+  12-ct cartons (plain, complex label): 900 cases
+  Case-tape and pallet wrap: standard resupply
 
-Invoice on the account, Net 30. Inventory looked fine against your run rate so I kept the quantities the same as last cycle. Holler if you want them adjusted next time.
+Routed to the Complex 2 dock, ETA the usual window. Invoice on the account, Net 30. Inventory looked fine against your run rate so quantities matched last cycle. Holler if you want them adjusted next time.
 
 Brett Maloof
 Sales / Accounts

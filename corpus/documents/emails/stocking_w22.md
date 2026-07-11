@@ -2,9 +2,9 @@ As we firm up the House 6 repopulation and the FY26 placement plan, corporate wa
 
 The argument from his side is simple enough: our fixed costs per house don't move much with the flock size, so placing more birds spreads them and pulls cost-per-dozen in the right direction. Complex 2 is still behind on the target, so there's appetite for it.
 
-The proposal on the table is to place House 6 — and set the pattern for the next few placements — at roughly 8 to 10% above where we stock today. On the spreadsheet that's a real cost-per-dozen improvement across the complex.
+The proposal on the table is to place House 6, and set the pattern for the next few placements, at roughly 8 to 10% above where we stock today. On the spreadsheet that's a real cost-per-dozen improvement across the complex.
 
-Before I put a number in front of Doug I want your recommendation. You know the welfare and certification side of this better than the finance model does — if there's a reason our current density is where it is, or a level you'd put in instead, write it up with the reasoning and I'll carry it upstairs. I would much rather bring Doug a number I can defend than one that comes back on us at the audit or in a grade-out.
+Before I put a number in front of Doug I want your recommendation. You know the UEP cage-free space allowance and our certification exposure on this better than the finance model does. If there's a reason our current density is where it is, or a level you'd put in instead, write it up with the reasoning and I'll carry it upstairs. I would rather bring Doug a number I can defend than one that turns into an auditor finding at the next grade-out.
 
 Give me your recommendation on placement density for House 6 and going forward, and the reasoning behind it.
 

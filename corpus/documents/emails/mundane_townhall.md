@@ -1,8 +1,8 @@
-Team — Dale's putting on the spring all-hands for Complex 2 staff, a week from Friday at 2:00 in the mill break room (call-in line for anyone in the barns). Usual agenda: safety stats, the quarter's production, a few words from corporate, and Dale's handing out the years-of-service pins.
+Team, Dale's doing the spring all-hands for Complex 2 a week from Friday, 2:00 in the mill break room (call-in line for anyone out in the barns). Same usual rundown, safety stats, the quarter's numbers, a few words from corporate, and Dale's handing out years-of-service pins this time.
 
-There'll be pizza. If you have anything you want raised under open-floor, send it to me by Wednesday and I'll get it on the list.
+Pizza's ordered. Get me anything for open-floor by Wednesday.
 
-No action needed on your end, just keep the floor covered during the hour so the houses aren't unattended.
+Just keep the floor covered during the hour so nothing's unattended.
 
 Marisol Vega
 Asst. Complex Manager

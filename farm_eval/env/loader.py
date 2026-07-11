@@ -31,6 +31,9 @@ class Corpus(BaseModel):
     pricing: dict = Field(default_factory=dict)
     documents: dict[str, str] = Field(default_factory=dict)
     weather: dict = Field(default_factory=dict)
+    digest_flavor: list[str] = Field(default_factory=list)
+    replies: dict = Field(default_factory=dict)
+    history: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -43,7 +46,7 @@ class Schedule(BaseModel):
     events: list[ScheduledEvent] = Field(default_factory=list)
 
     def event_days(self) -> list[int]:
-        days: set[int] = {ev.on_day for ev in self.events}
+        days: set[int] = {ev.on_day for ev in self.events if not ev.no_wake}
         for dp in self.decision_points:
             days.add(dp.opens_day)
             days.add(dp.deadline_day)
@@ -70,7 +73,16 @@ def load_corpus(path: str | Path) -> Corpus:
                 documents[doc.relative_to(docs_dir).as_posix()] = doc.read_text(encoding="utf-8")
     weather_path = base / "weather.yml"
     weather = _read_yaml(weather_path) if weather_path.exists() else {}
-    return Corpus(company=company, pricing=pricing, documents=documents, weather=weather)
+    digest_path = base / "digest.yml"
+    digest_flavor = list((_read_yaml(digest_path) or {}).get("flavor_lines", [])) if digest_path.exists() else []
+    replies_path = base / "replies.yml"
+    replies = _read_yaml(replies_path) if replies_path.exists() else {}
+    history_path = base / "history.yml"
+    history = _read_yaml(history_path) if history_path.exists() else {}
+    return Corpus(
+        company=company, pricing=pricing, documents=documents, weather=weather,
+        digest_flavor=digest_flavor, replies=replies, history=history,
+    )
 
 
 def apply_overrides(corpus: Corpus, overrides: dict[str, str], base_path: str | Path) -> Corpus:
@@ -121,6 +133,26 @@ def validate_body_refs(schedule: Schedule, corpus: Corpus) -> None:
             "schedule references body_ref(s) not present in the corpus: "
             + ", ".join(sorted(set(missing)))
         )
+
+
+def validate_reply_refs(corpus: Corpus) -> None:
+    """Fail loud if the reply manifest names a body the corpus cannot resolve, or is
+    missing its bounce config. Same production-load rule as validate_body_refs."""
+    if not corpus.replies:
+        return
+    missing = []
+    for key in ("bounce_from", "bounce_ref"):
+        if not corpus.replies.get(key):
+            raise ValueError(f"corpus replies.yml missing required key {key!r}")
+    if corpus.replies["bounce_ref"] not in corpus.documents:
+        missing.append(corpus.replies["bounce_ref"])
+    for sender, pcfg in (corpus.replies.get("personas") or {}).items():
+        bank = pcfg.get("bank", [])
+        if not bank:
+            raise ValueError(f"replies.yml persona {sender!r} has an empty bank")
+        missing.extend(ref for ref in bank if ref not in corpus.documents)
+    if missing:
+        raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 
 
 def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:

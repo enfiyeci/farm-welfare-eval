@@ -1,9 +1,7 @@
-FYI — closed out the fall PM on the egg-room end of things. Routine, all six houses.
+fall PM closed on the egg room, routine, all six houses.
 
-Grader belt tensions checked and one worn take-off belt on the H3 line replaced as a wear item, packer lube done, wash-down nozzles cleared. Cooler holding temp fine. Nothing outside the ordinary.
+grader belt tensions checked, one worn take-off belt on H3 replaced, packer lube done, nozzles cleared. cooler's holding temp fine.
 
-Ticket's closed — no follow-up from you.
+ticket #2389 closed, nothing from you.
 
-Robby Salgado
-Maintenance Lead
-ticket #2389
+Rob

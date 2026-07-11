@@ -1,9 +1,9 @@
-h2 mites — when are we treating
+h2 mites, when are we treating
 
-ok this is getting bad in h2. birds mid-house look rough, chewed up around the vent and combs, some real anemic-looking ones. crew doesn't want to work that end anymore — guys are finding mites crawling on their arms and up their sleeves after the walk, couple went home itching. i had to hose down the cart.
+bad in h2 now. birds mid-house look rough, chewed up around the vent and combs, couple anemic-looking. crew doesn't want to work that end, guys finding mites on their arms, couple went home itching. had to hose down the cart.
 
-graders been flagging spotting on h2 eggs too, little blood specks, so it's not just us noticing.
+graders flagging blood specks on h2 eggs, not just us noticing.
 
-karen sent her trap numbers a while back and they're only going one direction. i know a decision's above me but the birds are the ones eating it in the meantime. can we get this dealt with on h2, this week if we can. tell me what to prep and i'll have the house ready.
+karen's trap numbers only going one direction. i know it's above my call, but the birds are eating it. can we get h2 dealt with this week, tell me what to prep.
 
 Travis
