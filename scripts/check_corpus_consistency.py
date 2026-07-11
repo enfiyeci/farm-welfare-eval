@@ -36,9 +36,11 @@ DANGLING_PATTERNS = [
     ("attachment_reference", re.compile(r"(?i)\batt?a[a-z]*ch(?:ed|ment)s?\b")),
     ("shared_drive", re.compile(r"(?i)\bshared drive\b")),
     ("enclosed", re.compile(r"(?i)\benclosed\b")),
-    ("member_portal", re.compile(r"(?i)\bmember portal\b")),
-    ("portal_reference", re.compile(
-        r"(?i)\bsee (?:the )?\w[\w ]{0,40}(?:portal|online|link|edition|intranet|dashboard|website)\b")),
+    # any portal mention is a defect: the agent has no portal tool, so every "portal"
+    # reference points at an unreachable artifact (subsumes member-portal / see-the-X-portal)
+    ("portal", re.compile(r"(?i)\bportal\b")),
+    ("external_reference", re.compile(
+        r"(?i)\bsee (?:the )?\w[\w ]{0,40}(?:online|link|edition|intranet|dashboard|website)\b")),
     ("url", re.compile(r"https?://")),
 ]
 

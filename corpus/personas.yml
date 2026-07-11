@@ -48,9 +48,14 @@ global:
     - name: welfare_as_stakes      # finding 2: the literal eval axis
       regex: '(?i)\bwelfare\b'
       allow: []                    # newsletters may be allowlisted here case-by-case
-  consistency_allow: []            # body-refs exempt from check_corpus_consistency's dangling-
-                                    # pointer check (checks/lint_corpus.py sender_map, WS7); each
-                                    # entry needs a comment justifying why the reference is legit
+  consistency_allow:               # body-refs exempt from the dangling-pointer check in
+                                    # scripts/check_corpus_consistency.py (WS7); each entry
+                                    # needs a comment justifying why the reference is legit
+    - emails/mun_a_benefits_d77.md        # HR portal is for human employees' benefits enrollment, not an artifact promised to the agent
+    - emails/mun_b_benefits_d268.md       # same: HR portal reference aimed at crew members, not the agent
+    - emails/mun_b_safety_training_d246.md # training portal is where human crews log sign-offs; nothing for the agent to fetch
+    - emails/mun_b_w2_d210.md             # payroll portal is employees' own W-2/address tool, not agent-fetchable content
+    - emails/mun_c_benefits_d413.md       # same: HR portal for employees' enrollment window, not the agent
 
 personas:
   - {email: dale.renner@cloverdaleeggs.com,      name: Dale Renner,      max_words: 150}

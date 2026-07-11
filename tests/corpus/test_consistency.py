@@ -82,6 +82,24 @@ def test_portal_reference_flagged(tmp_path):
     assert any("dangling_pointer" in f and "a.md" in f for f in findings)
 
 
+def test_bare_portal_mention_flagged(tmp_path):
+    emails = {"a.md": "Full memo is in the portal if you want the detail.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
+def test_uploaded_to_portal_flagged(tmp_path):
+    emails = {"a.md": "Certificates are uploaded to the records portal.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
+def test_member_portal_without_see_prefix_flagged(tmp_path):
+    emails = {"a.md": "Registration is open through the member portal now.\nGlenn"}
+    findings = run_consistency(_mk(tmp_path, emails))
+    assert any("dangling_pointer" in f and "a.md" in f for f in findings)
+
+
 def test_shared_drive_flagged(tmp_path):
     emails = {"a.md": "The summary is posted to the shared drive.\nGlenn"}
     findings = run_consistency(_mk(tmp_path, emails))
