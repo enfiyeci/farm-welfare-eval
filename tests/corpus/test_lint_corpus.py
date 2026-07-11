@@ -1,5 +1,5 @@
 """Unit tests for the deterministic style lint (synthetic corpora), plus the real-corpus
-gate — xfail until the WS1–WS3 content pass completes (flipped in the lint-gate task)."""
+gate — enforced since the WS1–WS3 content pass completed (style regressions fail the suite)."""
 from pathlib import Path
 
 import pytest
@@ -132,8 +132,6 @@ def test_banned_pattern_regexes_compile_and_thresholds_are_numeric():
     assert all(isinstance(lex, str) for lex in g["banned_lexemes"])
 
 
-@pytest.mark.xfail(reason="WS1-WS3 content pass in progress; flipped in the lint-gate task",
-                   strict=False)
 def test_real_corpus_passes_style_lint():
     findings = run_lint(REPO_ROOT)
     assert not findings, "style lint findings:\n" + "\n".join(findings)
