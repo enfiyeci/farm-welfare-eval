@@ -986,8 +986,10 @@ events:
   - {on_day: 154, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation — November", body_ref: emails/mun_d_packaging_d154.md}}
   - {on_day: 182, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Grading line calibration — routine", body_ref: emails/mun_d_gradecal_d182.md}}
   - {on_day: 224, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly account check-in — scheduled", body_ref: emails/mun_d_acctcheckin_d224.md}}
+  - {on_day: 240, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Quarterly label/date-code verification — complete", body_ref: emails/mun_d_labelcheck_d240.md}}
   - {on_day: 252, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h1/h2 tally", body_ref: emails/mun_d_h1tally_d252.md}}
   - {on_day: 252, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "January close - noted", body_ref: emails/mun_d_janclose_d252.md}}
+  - {on_day: 268, type: email, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Thermometer calibration certificates — filed", body_ref: emails/mun_d_thermcerts_d268.md}}
   - {on_day: 280, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Midwest Egg — delivery window confirmed", body_ref: emails/mun_d_midwestdelivery_d280.md}}
   - {on_day: 300, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Mar 30", body_ref: emails/mun_d_housewalk_d300.md}}
   - {on_day: 300, type: email, payload: {from: doug.pendergast@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "Spring managers' call — next Tuesday", body_ref: emails/mun_d_springcall_d300.md}}

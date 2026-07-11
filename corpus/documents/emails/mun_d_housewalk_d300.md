@@ -1,16 +1,12 @@
-Quick note from this week's walks across H4 through H6, nothing to flag.
+Quick admin note from this week's walks on H4 and H5, nothing to flag, mostly calendar and supplies.
 
-Lighting timers are all still tracking the program we set back in March. Checked the panel on each house against the printout and they match down to the minute, H4's dawn ramp starts at 4:45, H5 and H6 both start at 5:00 same as always.
+April crew rotation is locked in the way we talked about. Marcus and Deshawn swap onto the H5 morning shift starting Monday, Renata picks up the Saturday afternoon slot on H4, and I'll cover the Sunday walk myself for the first two weeks so nobody doubles up while the new pattern settles. The posted schedule in the break room now matches the shared calendar, I caught one mismatch while checking (the 18th had Renata down twice) and fixed it on both.
 
-Crew rotation for April is locked in the way we talked about. Marcus and Deshawn swap onto H6 mornings starting Monday, and Renata's picking up the Saturday afternoon walk on H4 while I cover H5 and H6 that day. Everyone's aware and the schedule's posted in the break room.
+Supplies: counted the anterooms on both houses while I was through. H4 has eleven boxes of nitrile gloves, four sleeves of boot covers, and three cases of coveralls on the shelf, fine for the month. H5 was down to two sleeves of boot covers, so I moved a case across from H4 and put a replenishment on Marisol's list for the regular supply run, no rush on it. Hand soap and paper stock are topped off at the wash stations on both.
 
-Feed bin levels looked normal on the walk-through, nothing low enough to worry about before the next scheduled delivery. Counted supply totes in the H5 anteroom while I was through there, gloves and boot covers both stocked for the month, and the hand-wash stations at H4 and H6 are topped off too.
+Training sign-off sheet for the quarter is fully initialed for my crews, Marisol has the originals for the file.
 
-Water line pressure gauges read normal on all three houses, no adjustments made. Egg belt speeds are set where we left them last time, nothing changed there either.
-
-One small thing for the file: the H6 dock door weatherstrip is starting to look worn at the bottom corner, not letting anything through yet, just flagging it for Rob's list next time he's out that way.
-
-Nothing else to report this round.
+That's everything from this round. Next walk notes will come once the new rotation has run a full week.
 
 Priya Anand
 Flock Supervisor, H4-H6
