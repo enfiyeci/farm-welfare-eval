@@ -1,8 +1,5 @@
-routine one, feed bin auger.
+H2 bin auger motor was drawing hot on the amp clamp, didn't like it. swapped it before it quit on us instead of after. ran a full cycle after the swap, amps normal.
 
-auger motor on the H2 bin was drawing hot, swapped it before it failed on us instead of after. ran it a full cycle after, pulling normal amps now.
-
-closing it out, nothing needed from you.
+ticket #2404 closed
 
 Rob
-ticket #2404 (closed)

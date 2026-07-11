@@ -1,4 +1,4 @@
-October feed account, balance current, nothing outstanding on our end.
+September feed account, balance current, nothing outstanding on our end.
 
   Prior balance: paid
   This period (feed deliveries): three standing drops, no changes to volumes

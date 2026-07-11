@@ -1,8 +1,5 @@
-routine one, H5 loadout door.
+H5 loadout door. hinge wore loose enough the door wasnt seating square, kept catching the frame. new hinge and strike plate, runs smooth, cycled it a few times to make sure.
 
-hinge had worn loose enough the door wasn't seating square, was catching on the frame. replaced the hinge and the strike plate, runs smooth now, checked it over a few cycles.
-
-closing it out, nothing needed from you.
+closing #2410
 
 Rob
-ticket #2410 (closed)

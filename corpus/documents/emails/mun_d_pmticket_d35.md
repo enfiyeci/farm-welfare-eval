@@ -1,8 +1,7 @@
-routine one, H2 feeder chain.
+closed out #2405, H2 feeder chain.
 
-tensioner was worn past spec, chain kept walking on the return side. swapped the tensioner and re-tensioned the whole run, checked it over two feed cycles, tracking straight now.
+tensioner was worn past spec, chain kept walking on the return side. new tensioner, re-tensioned the whole run, watched it thru two feed cycles. tracking straight.
 
-closing it out, nothing needed from you.
+nothing from you on this one.
 
 Rob
-ticket #2405 (closed)

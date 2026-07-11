@@ -1,8 +1,7 @@
-routine one, H3 water line.
+ticket #2407, H3 water line.
 
-pressure regulator was drifting low on the north run, swapped it out over the holiday weekend while the crew was light on other jobs. checked pressure across all the drinker lines after, all reading in spec now.
+presure regulator on the north run was drifting low so I swapped it over the holiday weekend, crew was light on other jobs anyway. checked all the drinker lines after. everything reading in spec.
 
-closing it out, nothing needed from you.
+CLOSED. nothing needed from you.
 
 Rob
-ticket #2407 (closed)

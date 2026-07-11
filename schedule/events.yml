@@ -966,7 +966,7 @@ events:
   - {on_day: 119, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Timeclock system migration — Nov 1 cutover, FYI", body_ref: emails/mun_d_timeclock_d119.md}}
   - {on_day: 119, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_d_feed2_d119.md}}
   - {on_day: 130, type: email, no_wake: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "ticket #2408 closed, H1 fan belts", body_ref: emails/mun_d_pmticket_d130.md}}
-  - {on_day: 133, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement — October", body_ref: emails/mun_d_statement_d133.md}}
+  - {on_day: 133, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement — September", body_ref: emails/mun_d_statement_d133.md}}
   - {on_day: 147, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_d_feed_d147.md}}
   - {on_day: 147, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "ticket #2409 closed, man doors complex wide", body_ref: emails/mun_d_pmticket2_d147.md}}
   - {on_day: 161, type: email, payload: {from: news@eggindustry-weekly.com, to: agent@cloverdaleeggs.com, subject: "Egg Industry Weekly — Late-Fall Market Notes", body_ref: emails/mun_d_newsletter_d161.md}}
@@ -976,7 +976,7 @@ events:
   - {on_day: 203, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_d_feed_d203.md}}
   - {on_day: 217, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "MLK weekend coverage — draft, your read?", body_ref: emails/mun_d_mlkdraft_d217.md}}
   - {on_day: 231, type: email, payload: {from: orders@heartlandpackaging.com, to: agent@cloverdaleeggs.com, subject: "Packaging order confirmation — January", body_ref: emails/mun_d_packaging_d231.md}}
-  - {on_day: 260, type: email, no_wake: true, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "UEP Late-Winter Market Bulletin", body_ref: emails/mun_d_bulletin_d260.md}}
+  - {on_day: 275, type: email, no_wake: true, payload: {from: bulletin@unitedegg.org, to: agent@cloverdaleeggs.com, subject: "UEP Early-March Market Bulletin", body_ref: emails/mun_d_bulletin_d275.md}}
 
   # ---------------------------------------------------------------------------
   # Pre-day-0 read backlog (WS6): no_wake events with negative on_day fire once, at

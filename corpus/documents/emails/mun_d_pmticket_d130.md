@@ -1,8 +1,3 @@
-routine one, H1 fans.
+fan belt PM, H1. all drive belts swapped while we had the lift out there, checked amps after, normal across the board. rest of the houses are on the schedule for the next rounds.
 
-drive belts were due complex wide on the fan PM schedule, swapped all of them on H1 this round while we had the lift out there. checked amps after, all reading normal.
-
-closing it out, nothing needed from you.
-
-Rob
-ticket #2408 (closed)
+#2408 closed
