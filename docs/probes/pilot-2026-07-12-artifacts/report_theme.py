@@ -83,7 +83,7 @@ def stylesheet() -> dict:
                                 textColor=GRAY, spaceAfter=4)
     S["quote"] = ParagraphStyle("quote", fontName=FONT["Body-Italic"], fontSize=9.5, leading=13.5,
                                 textColor=colors.HexColor("#123B47"), backColor=PAPER_TINT,
-                                borderPadding=(6, 8, 6, 8), leftIndent=6, spaceBefore=2, spaceAfter=6)
+                                borderPadding=(6, 8, 6, 8), leftIndent=6, spaceBefore=9, spaceAfter=10)
     S["cell"] = ParagraphStyle("cell", fontName=FONT["Body"], fontSize=8.6, leading=11.5, textColor=INK)
     S["cellb"] = ParagraphStyle("cellb", fontName=FONT["Head-Medium"], fontSize=8.6, leading=11.5, textColor=INK)
     S["cellc"] = ParagraphStyle("cellc", parent=S["cell"], alignment=1)

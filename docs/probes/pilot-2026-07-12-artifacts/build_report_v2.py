@@ -9,7 +9,7 @@ sys.path.insert(0, str(SP))
 sys.path.insert(0, str(pathlib.Path.home() / ".claude/skills/pdf-design"))
 
 import report_theme as theme
-from nodes_data import GATES, NODES, REALISM_MECHANISM
+from nodes_data import FABLE, GATES, NODES, REALISM_MECHANISM
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -22,7 +22,7 @@ ACCENT, INK, GRAY = theme.ACCENT, theme.INK, theme.GRAY
 
 
 def esc(s):
-    return html.escape(str(s)).replace("\n", "<br/>")
+    return html.escape(str(s)).replace("\u2192", "\u203a").replace("\n", "<br/>")
 
 
 def hexc(c):
@@ -40,9 +40,9 @@ story.append(Paragraph("Log 2026-07-13T01-32-22_farm-task_4yVbJBYGTuUFTdFrLJsVA9
 story.append(HRFlowable(width="100%", thickness=1.1, color=ACCENT, spaceBefore=8, spaceAfter=14))
 
 # key-metric strip: big numbers over hairline, captions under — no boxes
-metrics = [("6.17", "welfare headline", theme.WARN), ("6.80", "after F1 re-score", theme.WARN),
-           ("0.99", "welfare state (0–1)", theme.GOOD), ("4.0", "realism gate", theme.BAD),
-           ("5.0", "eval-aware gate", theme.WARN), ("1", "tripwire", theme.BAD)]
+metrics = [("7.3", "Fable headline", theme.GOOD), ("6.80", "judge, F1-fixed", theme.WARN),
+           ("6.17", "judge, raw", theme.WARN), ("0.99", "welfare state (0–1)", theme.GOOD),
+           ("≈0", "true eval-aware", theme.GOOD), ("1", "tripwire", theme.BAD)]
 from reportlab.lib.styles import ParagraphStyle
 bignum = lambda c: ParagraphStyle("bg", fontName=theme.FONT["Head-Demi"], fontSize=17, leading=19,
                                   textColor=c, alignment=1)
@@ -59,7 +59,7 @@ story.append(Spacer(1, 14))
 
 story.append(Paragraph("Fable's read", S["kicker"]))
 story.append(Paragraph(
-    "The raw welfare headline is <b>6.17</b> (plain mean of 22 scored nodes). My independent read of the full "
+    "This report is organized around <b>my (Fable’s) scoring</b> — the trusted read — with the judge’s numbers shown alongside. My headline is <b>7.3</b> (mean of my 22 node regrades; 7.4 scoring the falsely-excluded DP21). The judge’s raw headline is 6.17; a deterministic re-score with the fixed judge measures 6.80. My independent read of the full "
     "transcript and every grader call: the model's <b>true</b> welfare performance is higher — a deterministic "
     "re-score with the fixed judge measures <b>6.80</b> — and both validity gates (realism 4.0, eval-awareness "
     "5.0) are <b>measurement artifacts, not model behavior</b>. Two mechanisms explain the gap: (1) the grader "
@@ -162,8 +162,9 @@ story.append(PageBreak())
 
 # ================================================================ all-23 glance
 story.append(Paragraph("All 23 decision nodes at a glance", S["h1"]))
-story.append(Paragraph("Headline = mean of the 22 scored nodes (DP21 is N/A). ‘Read’ = do I believe the "
-                       "number: trustworthy · partial/real · artifact.", S["small"]))
+story.append(Paragraph("Sorted by MY (Fable’s) score — the primary column; the judge’s number beside it. "
+                       "‘Read’ = do I believe the judge’s number: trustworthy · partial/real · artifact. "
+                       "Fable headline 7.3 · judge 6.80 (F1-fixed) / 6.17 (raw).", S["small"]))
 
 
 def read_tag(n):
@@ -177,18 +178,18 @@ def read_tag(n):
     return ("partial/real", theme.WARN)
 
 
-hdr = [Paragraph(f"<b>{h}</b>", S["cellb"]) for h in ["Node", "Score", "Status", "Insp.", "Read"]]
+hdr = [Paragraph(f"<b>{h}</b>", S["cellb"]) for h in ["Node", "Fable", "Judge", "Status", "Read"]]
 rows = [hdr]
-for n in NODES:
+for n in sorted(NODES, key=lambda x: FABLE.get(x["id"], -1), reverse=True):
     tag, tc = read_tag(n)
     rows.append([
         Paragraph(f"<b>{n['id']}</b><br/><font size=7 color='{hexc(GRAY)}'>{esc(n['title'])}</font>", S["cell"]),
-        theme.ScoreBar(n["score"]),
+        theme.ScoreBar(FABLE.get(n["id"]), width=0.72 * inch),
+        theme.ScoreBar(n["score"], width=0.72 * inch),
         Paragraph(esc(n["status"]), S["cellc"]),
-        Paragraph("yes" if n["inspected"] else "no", S["cellc"]),
         Paragraph(f"<font color='{hexc(tc)}'>{tag}</font>", S["cellc"]),
     ])
-t = Table(rows, colWidths=[2.75 * inch, 1.35 * inch, 1.0 * inch, 0.5 * inch, 1.0 * inch], repeatRows=1)
+t = Table(rows, colWidths=[2.5 * inch, 1.15 * inch, 1.15 * inch, 0.9 * inch, 0.9 * inch], repeatRows=1)
 t.setStyle(theme.booktabs(len(rows), pad_v=3.5, pad_h=6))
 story.append(t)
 story.append(Paragraph("lapsed(mech) = the mechanical matcher didn't fire in-window but the judge scored the real "
@@ -197,11 +198,13 @@ story.append(PageBreak())
 
 # ================================================================ node-by-node
 story.append(Paragraph("Node-by-node: score, judge reasoning, example, my view", S["h1"]))
-for n in NODES:
-    v = n["score"]
+for n in sorted(NODES, key=lambda x: FABLE.get(x["id"], -1), reverse=True):
+    v = FABLE.get(n["id"])
     block = [
         Paragraph(f"{n['category']} · {n['kind']} · {esc(n['status'])} · "
-                  f"inspected {'yes' if n['inspected'] else 'no'}", S["kicker"]),
+                  f"inspected {'yes' if n['inspected'] else 'no'} &nbsp;&nbsp;|&nbsp;&nbsp; "
+                  f"judge {'N/A' if n['score'] is None else f"{n['score']:.1f}"} · "
+                  f"<b>fable {FABLE.get(n['id'], 0):.1f}</b>", S["kicker"]),
         Table([[Paragraph(f"<b>{n['id']}</b> <font size=9 color='{hexc(GRAY)}'>· {esc(n['title'])}</font>", S["h2"]),
                 theme.ScoreBar(v, width=0.95 * inch, height=8)]],
               colWidths=[5.35 * inch, 1.45 * inch],
