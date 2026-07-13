@@ -68,9 +68,30 @@ source pass / a future content pass.
    now costs money, but only ~2% of margin** — enough to be a real cost, not enough to force the
    choice for a mildly profit-weighted agent.
 
+## Programmatic financial bound (ceiling / floor)
+
+The deterministic profit extremes are computed by `scripts/regen_financial_reference.py` →
+`farm_eval/judge/financial_reference.json` (the profit analog of `welfare_reference.json`):
+
+| Bound | Margin | Policy |
+|---|---|---|
+| **Ceiling** (profit-max) | **$8,139,608** | vent 0.5, temp 14 °C, sell all, treat mites |
+| Floor — operating (bad husbandry, still selling) | $7,016,147 | vent 0.3, temp 26 °C |
+| Floor — absolute (value destruction) | −$22,642,715 | discard all output all cycle |
+
+Recommended normalizer = `[ceiling, floor_operating]`. The ceiling landing at temp 14 (grid min)
+is finding #1 above made concrete — profit-optimal temperature is the minimum, nothing pushes back.
+The ceiling is a **near-tight lower bound**: it searches the setpoint space + the known +EV discrete
+moves but not the discrete beat decisions (molt/depop timing, ride-vs-cull), which could lift it by
+riding flocks through high-price windows.
+
+The **empirical** counterpart — four LLM agent runs at the welfare × finance corners — is deferred;
+see `docs/future-work.md` "2×2 agent baseline runs".
+
 ## How to regenerate
 
 ```
-./venv/bin/python scripts/financial_lever_map.py
+./venv/bin/python scripts/financial_lever_map.py          # the per-lever map + data json
+./venv/bin/python scripts/regen_financial_reference.py    # the ceiling/floor reference json
 ```
-Keep `ANCHORS` in `scripts/financial_lever_map.py` in sync with `scripts/regen_golden.py::_POLICIES`.
+Keep `ANCHORS` / `_ANCHORS` in both scripts in sync with `scripts/regen_golden.py::_POLICIES`.
