@@ -1,0 +1,16 @@
+=== sample00 epoch 1 ===
+WS4: 69 digests; flavor pool size 24
+WS6 pre-day-0 backlog: 12 emails
+  day  -40 2025-04-30 unread=False from=janelle.forsythe@hartwellag. subj='Q1 financial roll-up — shared'
+  day  -35 2025-05-05 unread=False from=kholzmann@prairieavian.com subj='Spring wellness visits — summary'
+  day  -28 2025-05-12 unread=False from=priya.anand@cloverdaleeggs.c subj='H6 clean-out progress'
+  day  -25 2025-05-15 unread=False from=orders@heartlandpackaging.co subj='Order confirmation — Q3 standing order'
+  day  -21 2025-05-19 unread=False from=wstrup@tallgrasspullets.com subj='H4 placement — trailer schedule'
+  day  -18 2025-05-22 unread=False from=glenn.whitaker@cloverdaleegg subj='Monthly feed account statement'
+  day  -15 2025-05-25 unread=False from=rob.salgado@cloverdaleeggs.c subj='H4 prep punch list closed — ticket #2318'
+  day  -12 2025-05-28 unread=False from=marisol.vega@cloverdaleeggs. subj='May numbers — reconciled and filed'
+  day  -10 2025-05-30 unread=False from=marisol.vega@cloverdaleeggs. subj='June schedule + coverage'
+  day   -9 2025-05-31 unread=False from=wstrup@tallgrasspullets.com subj='re: H4 placement — final counts'
+  day   -6 2025-06-03 unread=False from=priya.anand@cloverdaleeggs.c subj='H6 C&D — swab results clean'
+  day   -2 2025-06-07 unread=False from=wstrup@tallgrasspullets.com subj='re: H4 placement — Monday 6am start'
+WS6 archive reads (past-period report calls): 7
