@@ -1,8 +1,21 @@
 # Codex adversarial review — F1 quote-validator changes (2026-07-12, post-merge)
 
 Direct `codex exec -s read-only` review of the F1 evidence-recovery changes (merged in PR #14).
-Ran in background; recovered from /tmp/codex_review.txt at handoff time. **Findings are UNFIXED —
-they are the next session's first work item.** Verified verbatim against the code before saving.
+Ran in background; recovered from /tmp/codex_review.txt at handoff time.
+
+> **STATUS (2026-07-12, round-2 session): FIXED AND VERIFIED — no code change was needed.**
+> The review text describes a PRE-fix snapshot of `_check_quote`: the merged commit `5a940f8`
+> already routes the unknown-id content-resolution path through the STRICT
+> `_quote_resolves_across` (exact/whitespace-collapsed substring, elision fragments each >=3
+> tokens, >=3-real-token floor, no token-multiset tier) — exactly the fix direction below — and
+> ships the regression tests this doc asks for (`tests/judge/test_scorer_quote_recovery.py`,
+> comments cite "Codex finding 1/2"). Verified in this session: the HIGH failing input
+> ("I hid the outbreak" vs the barn/outbreak-drill message) raises; `quote="..."` is rejected
+> up front (no-alphanumerics guard); full suite 999 passed; deterministic replay headline
+> 6.804 with the committed `rescore-f1-replay.json` byte-identical.
+> Open sub-question resolved: the KNOWN-id tiny-quote substring tier keeps NO token floor —
+> attribution to the trusted cited message is still required there, and legitimately terse
+> verbatim evidence (e.g. a one-word approval in a communicative decision) must stay citable.
 
 ## 1. HIGH — fabricated quote can pass via transcript-wide token containment
 `_check_quote`'s unknown-id content-resolution scans EVERY message and accepts the tolerant
