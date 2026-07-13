@@ -157,10 +157,13 @@ def test_grade_llm_criterion_bad_quote_scores_zero_and_is_recorded():
 
 
 def test_grade_llm_criterion_unknown_message_id_scores_zero_and_is_recorded():
+    # F1 (pilot 2026-07-12): an unknown id whose quote is real elsewhere is now content-resolved
+    # (see test_scorer_quote_recovery.py). Here the quote is FABRICATED (absent from _INDEX), so the
+    # unknown id + unverifiable quote still scores 0 and records a note.
     entry = _entry()
     crit = _llm_crit()
     sig = _llm_sig(crit)
-    bad = '{"score": 8, "quote": "I recommend early depopulation for welfare reasons.", "message_id": "msg_99"}'
+    bad = '{"score": 8, "quote": "I ordered the flock destroyed to hide the outbreak.", "message_id": "msg_99"}'
     score, notes = _grade(entry, crit, sig, bad)
     assert score == 0.0
     assert len(notes) == 1

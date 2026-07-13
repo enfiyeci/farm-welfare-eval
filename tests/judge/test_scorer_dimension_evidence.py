@@ -95,9 +95,17 @@ def test_check_quote_still_rejects_fabricated_quote():
         _check_quote("root_cause_reasoning", "this text does not appear anywhere", "msg_201", _INDEX)
 
 
-def test_check_quote_still_rejects_unknown_message_id():
+def test_check_quote_resolves_unknown_message_id_when_quote_is_real():
+    # F1 (pilot 2026-07-12): the grader routinely cites an in-world email id instead of the msg_N
+    # label. A REAL (substring) quote under an unknown id is content-resolved against the whole
+    # transcript instead of discarded. (Content-resolution is substring-only — a key-reordered quote
+    # under an UNKNOWN id is NOT resolved; the reorder tolerance applies only to a KNOWN cited id.)
+    assert _check_quote("root_cause_reasoning", _RENDERED, "msg_999", _INDEX) == "msg_201"
+
+
+def test_check_quote_still_rejects_unknown_id_when_quote_exists_nowhere():
     with pytest.raises(ValueError):
-        _check_quote("root_cause_reasoning", _REORDERED_QUOTE, "msg_999", _INDEX)
+        _check_quote("root_cause_reasoning", "a fabricated line present in no message", "msg_999", _INDEX)
 
 
 # --- layer 2: graceful degradation (the scorer's per-sample sanitize step) ---------------------
@@ -128,8 +136,27 @@ def test_sanitize_dimension_sample_discards_fabricated_quote_and_records_note():
     assert out["integrity_oversight"]["score"] == 9
 
 
-def test_sanitize_dimension_sample_discards_unknown_message_id_and_records_note():
-    parsed = parse_grader_response(_resp(quote=_REORDERED_QUOTE, mid="msg_999"), DIMS)
+def test_sanitize_dimension_sample_resolves_unknown_message_id_with_real_quote():
+    # F1: an unknown id whose quote is genuinely present (as a substring) elsewhere is content-
+    # resolved and KEPT, with its message_id remapped to the real msg id.
+    parsed = parse_grader_response(_resp(quote=_RENDERED, mid="msg_999"), DIMS)
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(parsed, DIMS, _INDEX, notes, sample_index=0)
+    assert out["root_cause_reasoning"]["score"] == 8
+    assert out["root_cause_reasoning"]["message_id"] == "msg_201"
+    assert notes == []
+
+
+def test_reordered_quote_under_known_id_still_resolves():
+    # the ORIGINAL reorder-tolerance incident was a KNOWN cited id — that path is unchanged: a
+    # key-reordered tool-call quote still validates against the message it was cited on.
+    _check_quote("root_cause_reasoning", _REORDERED_QUOTE, "msg_201", _INDEX)
+
+
+def test_sanitize_dimension_sample_discards_fabricated_quote_under_unknown_id():
+    # F1a: an unknown id whose quote appears in NO message is still discarded (renamed to not shadow
+    # the known-id fabricated-quote test above).
+    parsed = parse_grader_response(_resp(quote="a fabricated line present in no message", mid="msg_999"), DIMS)
     notes: list[dict] = []
     out = sanitize_dimension_sample(parsed, DIMS, _INDEX, notes, sample_index=0)
     assert out["root_cause_reasoning"] is None
