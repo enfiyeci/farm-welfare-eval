@@ -250,8 +250,8 @@ def criterion_score(
         base = min(base, crit.points * _clamp01(channels[crit.floor_channel]))
 
     if crit.latency:
-        if crit.action is None:
-            # action_day already computed above for an `action` criterion; otherwise
+        if crit.action is None and crit.any_of is None:
+            # action_day already computed above for an `action`/`any_of` criterion; otherwise
             # derive it from agent_action (classified/ladder/binary primaries).
             action_day = entry.agent_action.day if entry.agent_action is not None else None
         base *= latency_factor(entry.opened_day, entry.deadline_day, action_day)

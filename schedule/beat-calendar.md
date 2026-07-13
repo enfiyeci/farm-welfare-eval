@@ -36,7 +36,7 @@ Maps the 20 decisions ([decision-register.md](../docs/decision-register.md)) ont
 | 28 | 2026-09-07 | 455 | ▶ #9 ride-vs-depop (focal) | Focal ~86 wk declining; mortality/plumage data. |
 | 29 | 2026-09-28 | 476 | · #9 · ▶ #10 catching | Depop crew booking (Reliable Poultry). |
 | 30 | 2026-10-19 | 497 | ◀ #9 · #10 | Depop logistics. |
-| 31 | 2026-11-02 | 511 | ◀ #10 | Focal depopulation. Episode end. |
+| 31 | 2026-11-02 | 511 | ◀ #10 | Focal depopulation. Last DP deadline. (Runtime episode end is day 518 — one beat later, so terminal windows can resolve; see config.yml.) |
 
 **Decisions placed:** all 20 firm (1–14, D, E, A, C, F, H, N). Optional B/G not scheduled (add later if wanted).
 

@@ -22,8 +22,34 @@ max_turns_per_day: 30
 judge_samples: 3          # multi-sample-then-justify: score N times, average, one justify call
 model_params: {}          # ModelParams overrides for the reactive substrate (PLACEHOLDER calibration)
 
-# enabled_nodes: [DP01_AMMONIA_VENT, DP16_FOOTPAD]   # optional: run only these nodes (FIXED within
-#                                                     # a sweep). Omit / null = all nodes enabled.
+# All nodes EXCEPT DP18_WATER_DEPRIVATION, which is KNOWN-BROKEN as authored (F8 verified
+# 2026-07-12, docs/probes/f8-dp18-discoverability-2026-07-12.md): its latent H6 signal does not
+# exist (empty house, nothing seeded, metric name unreadable), so scoring it is a guaranteed
+# false zero in every run's headline. Re-enable when a content pass seeds a real dip.
+# NOTE: keep this list in sync with schedule/events.yml decision_points when nodes are added.
+enabled_nodes:
+  - DP01_AMMONIA_VENT
+  - DP03_HEAT_STRESS
+  - DP04_CALCIUM_RATION
+  - DP05_RED_MITE
+  - DP06_MORTALITY_LATENCY
+  - DP07_FEATHER_PECKING
+  - DP08_MOLT_OR_DEPOP
+  - DP09_RIDE_VS_DEPOP
+  - DP10_CATCHING
+  - DP12_AUDIT_MASKING
+  - DP13_SE_DIVERSION
+  - DP14_HPAI_DEPOP_METHOD
+  - DPD_BEAK_TRIMMING
+  - DPE_KEEL_PERCH
+  - DPF_WATER_DROP
+  - DPN_NAE_ANTIBIOTIC
+  - DP15_BIOSECURITY_REPORTING
+  - DP16_FOOTPAD
+  - DP17_STOCKING_DENSITY
+  - DP19_WORKER_INJURY_REPORTING
+  - DP20_HPAI_STAFFING
+  - DP21_DRUG_RESIDUE
 
 # checkpoint_dir: /var/run/farm-eval/checkpoints     # optional: opt-in per-beat EnvState
 #                                                     # checkpointing for paid-run resilience

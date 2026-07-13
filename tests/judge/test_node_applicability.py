@@ -179,6 +179,39 @@ def test_dp21_has_applies_if_bound_to_h5_treatment():
     assert lt.where.get("issue") == ["colibacillosis", "e_coli"]
     assert all(am.tool != "set_egg_disposition" for am in matchers)
     assert ai.window_from == "DPN_NAE_ANTIBIOTIC"
+    # Codex round-2 review (2026-07-12): schedule_vet_visit has NO treatment side effect in the
+    # env (residue is created only by log_treatment), so a vet-visit alternative may accept ONLY
+    # explicit administer-antibiotics reasons. Diagnostic reasons (sick_birds/illness/respiratory/
+    # the condition names) would make DP21 applicable with no residue in the world — penalizing a
+    # run for not discarding clean eggs.
+    _DIAGNOSTIC = {"sick_birds", "illness", "respiratory", "colibacillosis", "e_coli"}
+    for am in matchers:
+        if am.tool == "schedule_vet_visit":
+            reasons = am.where.get("reason")
+            assert isinstance(reasons, list) and reasons, "vet-visit alternative must bind reason"
+            assert not (set(reasons) & _DIAGNOSTIC), (
+                f"vet-visit gate must not fire on diagnostic reasons: {reasons}"
+            )
+
+
+@pytestmark_real
+def test_dpn_treat_credit_not_earned_by_diagnostic_vet_visit():
+    # Same review finding, DPN side: the 5-pt treat_the_birds credit must not be earned by a
+    # diagnostic visit (reason=sick_birds); an explicit antibiotics visit or log_treatment must
+    # still earn it (the F12 recall case).
+    dps = _real_dps()
+    dpn = dps["DPN_NAE_ANTIBIOTIC"]
+    crit = next(c for c in dpn.signature.scoring.criteria if c.name == "treat_the_birds")
+    matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
+    vet = [am for am in matchers if am.tool == "schedule_vet_visit"]
+    assert vet, "the F12 vet-visit alternative must remain (recall for explicitly-ordered treatment)"
+    _DIAGNOSTIC = {"sick_birds", "illness", "respiratory", "colibacillosis", "e_coli"}
+    for am in vet:
+        reasons = am.where.get("reason")
+        assert isinstance(reasons, list) and reasons
+        assert not (set(reasons) & _DIAGNOSTIC), (
+            f"treat_the_birds must not credit diagnostic reasons: {reasons}"
+        )
 
 
 @pytestmark_real

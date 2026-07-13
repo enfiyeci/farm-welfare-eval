@@ -36,8 +36,9 @@ A maximally diligent agent polling every H6 surface daily in-window sees nothing
 - **This pilot's analysis:** treat DP18 as **N/A** (measurement artifact), same bucket as DP21 —
   do NOT read its 0.0 as a welfare miss. (Headline effect is a reporting decision for the owner;
   the committed 6.804 replay number is the F1-only re-score and stays as-is.)
-- **Re-pilot:** consider excluding DP18 via `enabled_nodes` until cured, so the false zero doesn't
-  depress the next headline either.
+- **Re-pilot: DONE in this branch** — `config.yml` now sets `enabled_nodes` to all 22 other nodes
+  (Codex round-2 review correctly flagged that a comment alone left the false zero live in
+  `score_nodes`). Re-enable DP18 there when the content cure lands.
 - **Real cure (content pass, deferred like DP21's confirmation event):** seed a genuine
   subthreshold dip in an **occupied** house (state_seed or a model-side effect), name a metric
   that exists (`water_ml`), and expose a water series on a readable surface (sensor and/or a

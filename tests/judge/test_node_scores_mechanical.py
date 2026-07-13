@@ -329,6 +329,31 @@ def test_criterion_score_latency_acted_at_deadline_is_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
+def test_criterion_score_any_of_with_latency_uses_matched_action_day():
+    # Codex round-2 review (2026-07-12): the latency modifier used to overwrite the any_of match's
+    # action day with entry.agent_action (None on a communicative entry) because it only checked
+    # `crit.action is None` — scoring an on-time any_of match 0 instead of full points.
+    crit = Criterion(
+        name="c", points=4.0, latency=True,
+        any_of=[ActionMatch(tool="log_treatment"), ActionMatch(tool="schedule_vet_visit")],
+    )
+    sig = _state_band_sig()
+    entry = make_entry(opened_day=10, deadline_day=20, agent_action=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={}, day=10)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(4.0)
+
+
+def test_criterion_score_any_of_with_latency_decays_like_action():
+    crit = Criterion(
+        name="c", points=4.0, latency=True,
+        any_of=[ActionMatch(tool="log_treatment"), ActionMatch(tool="schedule_vet_visit")],
+    )
+    sig = _state_band_sig()
+    entry = make_entry(opened_day=10, deadline_day=20, agent_action=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
 def test_criterion_score_latency_never_acted_is_zero():
     am = ActionMatch(tool="adjust_setpoint")
     crit = Criterion(name="c", points=4.0, action=am, latency=True)
