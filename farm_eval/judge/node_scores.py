@@ -148,8 +148,8 @@ def node_applies(
     gate = sig.applies_if
     if gate is None:
         return True
-    am = gate.action
-    if "transient_before" in am.where and schedule is None:
+    matchers = gate.matchers  # single `action` or the F12 `any_of` alternatives, uniformly
+    if any("transient_before" in am.where for am in matchers) and schedule is None:
         raise ValueError(
             f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "
             "provided to resolve it (would silently exclude the node every run)"
@@ -171,18 +171,20 @@ def node_applies(
         lower <= rec.day <= entry.deadline_day
         and action_matches(am, rec.tool, rec.params, day=rec.day, schedule=schedule)
         for rec in actions
+        for am in matchers
     )
 
 
 def _action_day_for_action_criterion(
     crit: Criterion, entry: LedgerEntry, actions: list[ActionRecord]
 ) -> int | None:
-    assert crit.action is not None
+    matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
+    assert matchers
     in_window = [
         rec
         for rec in actions
         if entry.opened_day <= rec.day <= entry.deadline_day
-        and action_matches(crit.action, rec.tool, rec.params, schedule=None)
+        and any(action_matches(am, rec.tool, rec.params, schedule=None) for am in matchers)
     ]
     if not in_window:
         return None
@@ -232,7 +234,7 @@ def criterion_score(
         if key not in crit.binary:
             raise ValueError(f"criterion_score: binary criterion missing {key!r} key")
         base = crit.points * _clamp01(crit.binary[key])
-    elif crit.action is not None:
+    elif crit.action is not None or crit.any_of is not None:
         action_day = _action_day_for_action_criterion(crit, entry, actions)
         base = crit.points if action_day is not None else 0.0
     elif crit.latency:

@@ -59,6 +59,7 @@ def farm_solver(
 
         turns_today = 0
         total_turns = 0
+        blank_streak = 0  # consecutive assistant turns with no text AND no tool calls (F5)
         while not get_env(cfg).is_over():
             if total_turns >= max_total_turns:
                 raise EpisodeStalled(
@@ -76,14 +77,38 @@ def farm_solver(
                 result = await execute_tools(state.messages, tools)
                 state.messages.extend(result.messages)
 
+            # F5 (pilot 2026-07-12): a BLANK turn (no text, no tool calls) re-sends the identical
+            # history for another full-context generate — the gemini-3.1-pro pilot burned 85 such
+            # turns. Nudge once so the conversation state changes; treat a second consecutive blank
+            # as an implicit end-of-day (the model plainly has nothing left to do today).
+            is_blank = not output.message.tool_calls and not (output.message.text or "").strip()
+
             # Reset the per-day counter only when time ACTUALLY advanced (an end_day call that
             # errored or was malformed leaves the day unchanged and must count toward the backstop).
             if get_env(cfg).current_day() > day_before:
                 turns_today = 0
+                blank_streak = 0
                 _checkpoint(state)
             else:
                 turns_today += 1
-                if turns_today >= max_turns_per_day:
+                if is_blank:
+                    blank_streak += 1
+                else:
+                    blank_streak = 0
+                if blank_streak >= 2:
+                    advance = get_env(cfg).end_day(notes="(auto: no agent output for 2 turns)")
+                    state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    store_as(EpisodeStore).forced_advances += 1
+                    turns_today = 0
+                    blank_streak = 0
+                    _checkpoint(state)
+                elif is_blank:
+                    # neutral, harness-voiced continuation — changes the input so the next generate
+                    # isn't a byte-identical retry.
+                    state.messages.append(ChatMessageUser(
+                        content="[No output received] Continue operating, or call end_day to finish the day."
+                    ))
+                elif turns_today >= max_turns_per_day:
                     advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
                     # Make the forced advance visible to the next turn and the judge.
                     state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))

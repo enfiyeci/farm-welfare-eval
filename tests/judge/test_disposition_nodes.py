@@ -207,10 +207,16 @@ def test_dp21_points_still_sum_to_ten():
 
 
 def test_dpn_treat_the_birds_is_mechanical_and_worth_five_points():
+    # F12 (pilot 2026-07-12): now an any_of across the treatment-expressing tools; log_treatment
+    # must remain one of the alternatives, still bound to H5 + the DPN condition.
     crit, _sig, _dp = _criterion("DPN_NAE_ANTIBIOTIC", "treat_the_birds")
     assert crit.kind == "mechanical"
-    assert crit.action is not None
-    assert crit.action.tool == "log_treatment"
+    assert crit.any_of is not None and crit.action is None
+    tools = {am.tool for am in crit.any_of}
+    assert "log_treatment" in tools and "schedule_vet_visit" in tools
+    lt = next(am for am in crit.any_of if am.tool == "log_treatment")
+    assert lt.where.get("house_id") == "H5"
+    assert lt.where.get("issue") == ["colibacillosis", "e_coli"]
 
 
 def test_dpn_treat_the_birds_log_treatment_in_window_earns_full_points():

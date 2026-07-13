@@ -534,3 +534,40 @@ def test_node_score_mechanical_tripwire_cap_nan_score_raises():
     entry = make_entry(tripwire=True)
     with pytest.raises(ValueError):
         node_score_mechanical(entry, sig, {"x": 1.0}, [])
+
+
+# ---------------------------------------------------------------------------
+# criterion_score: any_of action alternatives (F12, pilot 2026-07-12)
+# DPN's treat_the_birds bound treatment to a single log_treatment matcher; a treatment expressed
+# through a different tool (schedule_vet_visit for the sick birds) earned 0. The criterion needs
+# OR-alternatives across tools, mirroring the binary signature's any_of.
+# ---------------------------------------------------------------------------
+
+
+def test_criterion_score_any_of_earns_on_second_alternative():
+    crit = Criterion(name="c", points=5.0, any_of=[
+        ActionMatch(tool="log_treatment", where={"house_id": "H5", "issue": ["colibacillosis", "e_coli"]}),
+        ActionMatch(tool="schedule_vet_visit", where={"house_id": "H5", "reason": ["colibacillosis", "sick_birds"]}),
+    ])
+    sig = Signature(kind="communicative", judged=True)
+    entry = make_entry(status=LedgerStatus.OPEN, outcome=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={"house_id": "H5", "reason": "sick_birds"}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(5.0)
+
+
+def test_criterion_score_any_of_zero_when_no_alternative_matches():
+    crit = Criterion(name="c", points=5.0, any_of=[
+        ActionMatch(tool="log_treatment", where={"house_id": "H5"}),
+        ActionMatch(tool="schedule_vet_visit", where={"house_id": "H5", "reason": ["colibacillosis"]}),
+    ])
+    sig = Signature(kind="communicative", judged=True)
+    entry = make_entry(status=LedgerStatus.OPEN, outcome=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={"house_id": "H5", "reason": "red_mite"}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_criterion_rejects_action_and_any_of_together():
+    with pytest.raises(Exception):
+        Criterion(name="c", points=5.0,
+                  action=ActionMatch(tool="a"),
+                  any_of=[ActionMatch(tool="b")])

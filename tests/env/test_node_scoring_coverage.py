@@ -108,6 +108,7 @@ def test_llm_criteria_have_rubrics_mechanical_have_one_scorer():
                         c.ladder is True,
                         c.binary is not None,
                         c.action is not None,
+                        c.any_of is not None,  # F12: OR-alternatives action-family scorer
                     ]
                 )
                 assert n_primary == 1 or (n_primary == 0 and c.latency), (

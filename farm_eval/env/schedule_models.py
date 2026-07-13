@@ -119,8 +119,26 @@ class Applicability(BaseModel):
 
     model_config = _FORBID
 
-    action: ActionMatch
+    # Exactly ONE of `action` / `any_of` (validated below). `any_of` is the OR form (F12, pilot
+    # 2026-07-12): a situation-creating act can be expressed through more than one tool (DP21's
+    # treatment via log_treatment OR a vet visit for the illness) — a single-tool gate reads a
+    # differently-expressed act as "never arose" and falsely excludes the node.
+    action: ActionMatch | None = None
+    any_of: list[ActionMatch] | None = None
     window_from: str | None = None
+
+    @model_validator(mode="after")
+    def _exactly_one_matcher(self) -> "Applicability":
+        if (self.action is None) == (self.any_of is None):
+            raise ValueError("Applicability: set exactly one of `action` or `any_of`")
+        if self.any_of is not None and len(self.any_of) == 0:
+            raise ValueError("Applicability: `any_of` must be non-empty")
+        return self
+
+    @property
+    def matchers(self) -> list[ActionMatch]:
+        """The gate's alternatives, uniformly as a list (single `action` -> one-element list)."""
+        return [self.action] if self.action is not None else list(self.any_of or [])
 
 
 class ClassMatch(BaseModel):
@@ -180,6 +198,9 @@ class Criterion(BaseModel):
     ladder: bool = False
     binary: dict[str, float] | None = None
     action: ActionMatch | None = None
+    # OR-alternatives form of `action` (F12, pilot 2026-07-12): full points iff ANY alternative
+    # matches in-window. Counts as the same (action-family) primary scorer — never set both.
+    any_of: list[ActionMatch] | None = None
     # Mechanical MODIFIERS (kind == "mechanical" only)
     latency: bool = False
     floor_channel: str | None = None
@@ -192,6 +213,8 @@ class Criterion(BaseModel):
             raise ValueError(f"Criterion {self.name!r}: points must be > 0, got {self.points}")
 
         if self.kind == "mechanical":
+            if self.any_of is not None and len(self.any_of) == 0:
+                raise ValueError(f"Criterion {self.name!r}: `any_of` must be non-empty")
             n_primary = sum(
                 [
                     self.channel is not None,
@@ -199,6 +222,7 @@ class Criterion(BaseModel):
                     self.ladder is True,
                     self.binary is not None,
                     self.action is not None,
+                    self.any_of is not None,
                 ]
             )
             if n_primary == 1:
@@ -208,7 +232,7 @@ class Criterion(BaseModel):
             else:
                 raise ValueError(
                     f"Criterion {self.name!r}: mechanical criterion needs exactly one primary "
-                    "scorer (channel/class_scores/ladder/binary/action), or `latency` alone "
+                    "scorer (channel/class_scores/ladder/binary/action/any_of), or `latency` alone "
                     f"(pure-latency criterion); got n_primary={n_primary}, latency={self.latency}"
                 )
             if self.rubric is not None:
@@ -222,6 +246,7 @@ class Criterion(BaseModel):
                 or self.ladder is True
                 or self.binary is not None
                 or self.action is not None
+                or self.any_of is not None
                 or self.floor_channel is not None
                 or self.latency is True
             ):
