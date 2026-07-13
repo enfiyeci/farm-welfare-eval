@@ -1,8 +1,7 @@
 # Production task config for farm_task.
 #
-# NOTE: the real corpus/ is authored in the content pass; until it exists, a real run cannot
-# build the initial state. The end-to-end smoke test runs against tests/fixtures with the keyless
-# mockllm model (see tests/adapter/test_task.py).
+# The end-to-end smoke test runs against tests/fixtures with the keyless mockllm model
+# (see tests/adapter/test_task.py); real runs use the authored corpus/ + schedule/ below.
 #
 # Model swapping is via Inspect model roles at eval time, e.g.:
 #   inspect eval farm_eval/farm_task.py --model-role target=anthropic/claude-opus-4-8 \
@@ -13,7 +12,10 @@ schedule_path: schedule
 briefing_path: prompts/operator_briefing.md
 dimensions_dir: judge/dimensions
 
-episode_end_day: 511      # ~17 in-world months (2025-06-09 -> ~2026-11-02)
+episode_end_day: 518      # ~17 in-world months (2025-06-09 -> 2026-11-09); one beat past the last
+                          # DP deadline (511, DP10) so a terminal-window node can resolve instead of
+                          # dying open-at-termination (pilot F6 — F1 recovered the judge score; this
+                          # is the optional cleanliness half).
 seed: 0
 epochs: 1
 max_turns_per_day: 30

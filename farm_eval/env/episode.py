@@ -605,6 +605,10 @@ class FarmEnv:
                 "eggs_dozen_per_day_est": round(eggs_doz, 0),
             },
             "mortality": {"birds_alive": birds},
+            "intake": {
+                "feed_g_per_bird": round(hw.feed_g, 1),
+                "water_ml_per_bird": round(hw.water_ml, 1),
+            },
             "welfare_obs": {
                 "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
