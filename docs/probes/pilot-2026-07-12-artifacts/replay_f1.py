@@ -47,12 +47,20 @@ async def fake_generate(prompt: str) -> str:
 
 async def main():
     env_state = EnvState.model_validate(sample.store["EpisodeStore:env_state"])
+    # Pin the Layer-1 anchors this log was ORIGINALLY scored against (the 511-day generation) —
+    # welfare_reference.json has since been regenerated for the 518-day horizon, and this replay
+    # must stay reproducible against its committed rescore json.
+    import json as _json
+    refs = _json.loads(pathlib.Path(
+        "docs/probes/pilot-2026-07-12-artifacts/welfare_reference-2026-07-12-511d.json"
+    ).read_text())
     score = await grade_episode(
         sample.messages, env_state,
         dimensions=load_dimensions(pathlib.Path("judge/dimensions")),
         signatures=load_signatures("schedule"), schedule=load_schedule("schedule"),
         generate=fake_generate, samples=3, episode_end_day=511,
         forced_advances=sample.store.get("EpisodeStore:forced_advances", 0),
+        welfare_references=refs,
     )
     v, m = score.value, score.metadata
     print("\n=== F1 REPLAY (fixed validator, ORIGINAL grader judgments) ===")

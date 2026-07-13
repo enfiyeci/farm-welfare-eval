@@ -78,7 +78,10 @@ def feed_tons_for_day(feed_g: float, bird_count: int) -> float:
 def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
               bird_count: int, fuel_index: float, params: ModelParams,
               fte_per_100k: float | None = None,
-              hours_per_fte_day: float | None = None) -> dict:
+              hours_per_fte_day: float | None = None,
+              vent: float | None = None,
+              setpoint_c: float | None = None,
+              ambient_c: float | None = None) -> dict:
     """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6).
 
     Labor is staffing-driven and per-bird-DAY (Task C1): it scales with headcount, not
@@ -86,9 +89,30 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
     `hours_per_fte_day` defaults to `params.labor_hours_per_fte_day`. Passing explicit values
     is the seam Task C2's `set_staffing` lever uses (see `effective_fte_per_100k` /
     `effective_shift_hours` above, which resolve agent-set staffing state to these inputs).
+
+    Energy is HVAC-coupled (owner directive 2026-07-12): base (non-HVAC) electricity always
+    accrues; when the HVAC inputs are given, fan electricity scales linearly with `vent`
+    (staged fans: fans running ∝ airflow) and winter make-up-air heating fuel scales with
+    `vent × max(0, setpoint_c − ambient_c) × fuel_index` — so min-vent in a cold snap really
+    does save propane (at the cost of ammonia), and over-ventilating a heated house really
+    does burn it. `vent`/`setpoint_c`/`ambient_c` are all-or-none: production callers pass
+    all three; passing a subset raises (silently dropping a term would miscost the day).
+    Only the heating-fuel term scales with the LP `fuel_index` (electricity is not propane).
     """
+    hvac = (vent, setpoint_c, ambient_c)
+    if any(v is not None for v in hvac) and not all(v is not None for v in hvac):
+        raise ValueError(
+            "cost_step: vent/setpoint_c/ambient_c are all-or-none (got a partial HVAC input)"
+        )
     feed_cost = feed_tons * ration_usd_ton
-    energy_cost = bird_count * params.energy_usd_bird_day * fuel_index
+    energy_cost = bird_count * params.energy_base_usd_bird_day
+    if vent is not None:
+        v = max(0.0, vent)
+        energy_cost += bird_count * params.vent_fan_usd_bird_day * v
+        heating_deg = max(0.0, setpoint_c - ambient_c)
+        energy_cost += (
+            bird_count * params.heat_fuel_usd_bird_day_degc * v * heating_deg * fuel_index
+        )
     if fte_per_100k is None:
         fte_per_100k = params.default_fte_per_100k
     if hours_per_fte_day is None:

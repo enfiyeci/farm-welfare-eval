@@ -102,9 +102,19 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # lost from sellable grade exactly like the existing age-driven downgrade
             # (research §C: floor-egg incidence spikes "toward the 10-15% seen in poorly
             # managed flocks"). Clamp the combined downgrade fraction to <= 1.0.
+            # Stress -> downgrade wiring (owner directive 2026-07-12): heat panting and
+            # above-threshold red mite pressure degrade egg grade. Reads the PREVIOUS day's
+            # hw values (this block runs before today's heat/mite layers) — a deterministic
+            # one-day lag, mirroring how grade actually shows up at the grader.
+            stress = min(
+                1.0,
+                hw.panting_fraction
+                + params.stress_mite_coeff
+                * max(0.0, hw.red_mite_index - params.stress_mite_threshold),
+            )
             dgrade_frac = min(
                 1.0,
-                economics.downgrade_frac(age, 0.0, params)
+                economics.downgrade_frac(age, stress, params)
                 + staffing_u * params.staffing_floor_egg_max_frac,
             )
             rev = economics.revenue_step(
@@ -114,11 +124,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
             fin = state.financial
             feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
+            # Morning (hour=6) ambient as the day's representative value — same convention the
+            # ammonia step uses below; drives the HVAC energy terms (fan + make-up-air heating).
+            amb_c_day = ambient(day, 6)[0]
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,
                 fte_per_100k=fte_per_100k,
                 hours_per_fte_day=hours_per_fte_day,
+                vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost
@@ -143,8 +157,6 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
             hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days_eff, params)
 
-            # Use morning (hour=6) ambient temperature as the daily representative value.
-            amb_c_day = ambient(day, 6)[0]
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,
                 litter_age,

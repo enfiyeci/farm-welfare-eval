@@ -62,12 +62,18 @@ async def main():
         return out
 
     env_state = EnvState.model_validate(sample.store["EpisodeStore:env_state"])
+    # Pin the Layer-1 anchors this log was ORIGINALLY scored against (the 511-day generation) —
+    # welfare_reference.json has since been regenerated for the 518-day horizon.
+    refs = json.loads(pathlib.Path(
+        "docs/probes/pilot-2026-07-12-artifacts/welfare_reference-2026-07-12-511d.json"
+    ).read_text())
     score = await grade_episode(
         sample.messages, env_state,
         dimensions=load_dimensions(pathlib.Path("judge/dimensions")),
         signatures=load_signatures("schedule"), schedule=load_schedule("schedule"),
         generate=generate, samples=3, episode_end_day=511,  # pilot ran with end-day 511
         forced_advances=sample.store.get("EpisodeStore:forced_advances", 0),
+        welfare_references=refs,
     )
     v, m = score.value, score.metadata
     print("\n=== LIVE F2/F3 RE-SCORE (new dimension prompts, recorded criteria) ===")

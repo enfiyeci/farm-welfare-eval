@@ -381,3 +381,20 @@ def test_discarded_evidence_counts_known_discards():
     # (which carry `sample_index`) with `collect_highlights`' aggregate "no highlight evidence"
     # notes (which don't). Only the former are genuine discarded EVIDENCE SAMPLES — 2 here, not 3.
     assert meta["discarded_evidence"] == {"dimension_samples": 2, "criteria": 1}
+
+
+def test_compute_welfare_state_honors_injected_references():
+    # Replay-reproducibility seam: a saved-log re-score must be able to pin the EXACT anchors
+    # the original run was scored against, so regenerating welfare_reference.json (e.g. for a
+    # new episode horizon) never silently changes a committed replay artifact.
+    from farm_eval.judge.scorer import compute_welfare_state
+    es, ref = _make_env_state_with_negligent_harm()
+    default_ws = compute_welfare_state(es)  # negligent harm vs on-disk anchors -> ~0
+    # doubling the negligent anchors puts this harm mid-scale -> the score must move
+    harsher = {"good": dict(ref["good"]),
+               "negligent": {k: v * 2 for k, v in ref["negligent"].items()}}
+    injected_ws = compute_welfare_state(es, references=harsher)
+    assert injected_ws["score"] > default_ws["score"]
+    # and passing the on-disk references explicitly is identical to the default
+    same = compute_welfare_state(es, references=ref)
+    assert same == default_ws

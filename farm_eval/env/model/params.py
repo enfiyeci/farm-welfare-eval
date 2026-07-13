@@ -43,7 +43,14 @@ class ModelParams(BaseModel):
     # Egg downgrade (checks/dirties -> breaker stock) rises with flock age.
     downgrade_age_wk: list[float] = [30, 80]
     downgrade_frac_pct: list[float] = [3.2, 23.8]   # weak-shell share %, PMC12914820
-    downgrade_stress_coeff: float = 0.0             # stress -> extra downgrade (wired in C2/C3)
+    # Stress -> extra downgrade, WIRED (owner directive 2026-07-12): per-house stress =
+    # panting_fraction + stress_mite_coeff * max(0, red_mite_index - stress_mite_threshold),
+    # clamped to 1.0, using the previous day's welfare values (deterministic one-day lag).
+    # At full stress this adds +5% downgraded eggs (heat: thin/checked shells; mites: specks —
+    # the QA "grader flags" pressure now has a mechanical revenue counterpart).
+    downgrade_stress_coeff: float = 0.05
+    stress_mite_threshold: float = 0.3              # visible-infestation onset (trap-count scale 0-1)
+    stress_mite_coeff: float = 1.0                  # index excess -> stress, 1:1 above threshold
     breaker_price_frac: float = 0.35                # breaker price as fraction of shell price
     # Egg-disposition channel value, as a fraction of shell (full) price (C6-A1 lever).
     # `shell` sells at full wholesale value; `breaker`/`pasteurization` reuse the existing
@@ -59,7 +66,19 @@ class ModelParams(BaseModel):
         "discard": 0.0,
     }
     # Cost lines (cage-free).
-    energy_usd_bird_day: float = 0.0007             # ~2.3 cents/doz electricity (Iowa aviary)
+    # Energy is HVAC-coupled (owner directive 2026-07-12): the agent's ventilation and
+    # temperature setpoints move the P&L, replacing the old flat energy_usd_bird_day=0.0007.
+    # Calibrated so a typical operating point (winter vent 0.5 / dT 20degC; summer vent ~1.0)
+    # brackets the old flat rate — the authored COP archives stay plausible.
+    energy_base_usd_bird_day: float = 0.0004        # non-HVAC electricity: lights, belts, egg collection
+    vent_fan_usd_bird_day: float = 0.0003           # fan electricity at vent=1.0; linear in vent (staged fans)
+    heat_fuel_usd_bird_day_degc: float = 0.00003    # LP make-up-air heat per degC (setpoint-ambient) per unit vent, x lp_fuel_index
+    # One-off service charges (owner directive 2026-07-12): discrete welfare actions cost real
+    # money, so welfare-vs-profit is a live financial tension, not narrative-only. Placeholder
+    # research anchors (Midwest ag service rates), flagged for the calibration source pass.
+    maintenance_callout_usd: float = 450.0          # corrective work order: callout + parts/labor
+    vet_visit_usd: float = 400.0                    # poultry vet farm call + exam
+    treatment_usd_per_bird: float = 0.03            # house-level flock treatment (water-line med / acaricide)
     # Daily labor cost is staffing-driven, not a flat per-dozen line (Task C1;
     # model-params.md §Daily labor): direct_fte = fte_per_100k * bird_count / 100_000;
     # labor_cost = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_loaded_factor.

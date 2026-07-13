@@ -147,6 +147,49 @@ Params (`ModelParams`, `farm_eval/env/model/params.py`):
 Labor lands ~$0.05-0.10/doz at default staffing, second-tier to feed (do not treat it as
 the largest COP line — that figure traces to an outlier study, not this calibration).
 
+## HVAC-coupled energy (owner directive 2026-07-12)
+
+The flat `energy_usd_bird_day = 0.0007` line is replaced by three components so the
+agent's ventilation/temperature setpoints actually move the P&L (pre-coupling, cutting
+winter ventilation saved nothing — the DP01 fuel tension was narrative-only):
+```
+energy = base + fan + heating                       (per bird-day)
+base    = energy_base_usd_bird_day                        # lights/belts/collection, 0.0004
+fan     = vent_fan_usd_bird_day * vent                    # staged fans ~linear in airflow, 0.0003 @ vent=1
+heating = heat_fuel_usd_bird_day_degc * vent              # make-up-air heat load ∝ vent × ΔT
+          * max(0, setpoint_c - ambient_c) * lp_fuel_index    # 0.00003 /degC; LP-indexed
+```
+Only the heating term scales with `lp_fuel_index` (electricity is not propane). Calibrated
+so a typical operating point brackets the old flat rate (winter vent 0.5 / ΔT 20 ≈ 0.00085;
+summer vent 1.0 ≈ 0.0007) — the authored COP archives stay plausible. Coefficients are
+**placeholder research anchors** flagged for the calibration source pass. Both `cost_step`
+callers (the integrator and the per-house COP report) pass live setpoints + the morning
+(hour-6) ambient; the per-house COP surfaces `energy_cents_doz` so a setpoint change is
+visible in the very next report.
+
+## One-off service charges (owner directive 2026-07-12)
+
+Discrete welfare actions cost real money at action time (booked into `other_cost_cum`,
+margin identity maintained; the FMS ack shows the charge):
+- `maintenance_callout_usd = 450` — corrective work order (callout + parts/labor).
+- `vet_visit_usd = 400` — poultry vet farm call + exam.
+- `treatment_usd_per_bird = 0.03` — house-level flock treatment (water-line med/acaricide),
+  charged × the treated house's bird count (no house named → no dose → no charge).
+Placeholder Midwest ag service anchors, flagged for the calibration source pass.
+
+## Stress -> egg-downgrade wiring (owner directive 2026-07-12)
+
+`downgrade_frac(age, stress)` always had a stress term; the integrator passed 0.0. Now:
+```
+stress = min(1, panting_fraction + stress_mite_coeff * max(0, red_mite_index - stress_mite_threshold))
+dgrade = clamp(base_age_curve + downgrade_stress_coeff * stress + staffing_floor_egg, <= 1)
+```
+`downgrade_stress_coeff = 0.05` (full stress → +5 pp downgrades: heat → thin/checked
+shells, mites → specks — the QA "grader flags" email pressure now has a mechanical revenue
+counterpart), `stress_mite_threshold = 0.3`, `stress_mite_coeff = 1.0`. Uses the PREVIOUS
+day's welfare values (the P&L block runs before the day's heat/mite layers) — a
+deterministic one-day lag.
+
 ## Staffing -> welfare coupling (heuristic)
 
 **This is a HEURISTIC.** Research
