@@ -172,6 +172,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Heat (hourly — 24 inner steps) ---
             day_heat_mort = 0.0
             hours_over_30 = 0
+            panting_sum = 0.0
             for hour in range(24):
                 amb_c, rh = ambient(day, hour)
                 t_in = heat.indoor_temp_c(amb_c, vent, setpoint_c, params)
@@ -179,13 +180,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 hw.temp_c = t_in
                 hw.humidity = rh
                 hw.heat_stress_index = thi_val
-                hw.panting_fraction = heat.panting_fraction(thi_val)
+                panting_sum += heat.panting_fraction(thi_val)
                 if thi_val >= 30.0:
                     hours_over_30 += 1
                 # CRITICAL: pass params — heat_mortality_frac requires heat_mort_coeff + heat_mort_exp_rate
                 day_heat_mort += heat.heat_mortality_frac(thi_val, hours_over_30, params)
                 # Accumulate heat-stress hours above the danger threshold (27.5, NOT panting 28.5)
                 acc.accrue_heat(state.welfare.harm, thi_val, 1.0, params.heat_danger_thi)
+            # DAILY MEAN, not the hour-23 snapshot (Codex re-review 2026-07-12): a flock that
+            # pants through a hot afternoon but cools by midnight must still carry that stress
+            # into tomorrow's downgrade term and today's flock-report observation.
+            hw.panting_fraction = panting_sum / 24.0
 
             # Water demand driven by end-of-day indoor temperature
             hw.water_ml = prod["water_ml_base"] * heat.water_multiplier(hw.temp_c)

@@ -596,3 +596,20 @@ def test_criterion_rejects_action_and_any_of_together():
         Criterion(name="c", points=5.0,
                   action=ActionMatch(tool="a"),
                   any_of=[ActionMatch(tool="b")])
+
+
+def test_criterion_action_matcher_rejects_transient_before_at_parse():
+    # Codex re-review (2026-07-12, LOW): the criterion action-day path calls
+    # action_matches(..., day=None, schedule=None), so a `transient_before` directive there can
+    # NEVER match — a schema-valid criterion that silently false-zeroes. Reject it at parse
+    # time (Applicability gates keep it: node_applies resolves it with the schedule).
+    with pytest.raises(ValueError, match="transient_before"):
+        Criterion(
+            name="c", points=5.0,
+            action=ActionMatch(tool="adjust_setpoint", where={"transient_before": "DP99"}),
+        )
+    with pytest.raises(ValueError, match="transient_before"):
+        Criterion(
+            name="c", points=5.0,
+            any_of=[ActionMatch(tool="a"), ActionMatch(tool="b", where={"transient_before": "DP99"})],
+        )

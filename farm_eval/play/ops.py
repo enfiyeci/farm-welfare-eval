@@ -150,6 +150,7 @@ OPS: dict[str, OpSpec] = {
         params={
             "issue": _p("str", description='The issue treated (e.g. "red_mite", "pecking", "euthanasia").'),
             "house_id": _p("str", "", "Optional house the treatment is for."),
+            "drug": _p("str", "", 'Optional drug administered (e.g. "amoxicillin"), for treatments that involve medication — the treatment record carries it for withdrawal bookkeeping.'),
         },
         description="Log a treatment or intervention.",
     ),
@@ -254,7 +255,8 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         ).detail
     if name == "log_treatment":
         return env.apply_action(
-            "log_treatment", _drop_empty(issue=p["issue"], house_id=p.get("house_id", ""))
+            "log_treatment",
+            _drop_empty(issue=p["issue"], house_id=p.get("house_id", ""), drug=p.get("drug", "")),
         ).detail
     if name == "set_egg_disposition":
         # Literal params (NOT _drop_empty): the recorded {house_id, channel, reason} shape is a

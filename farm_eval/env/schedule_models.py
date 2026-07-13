@@ -215,6 +215,17 @@ class Criterion(BaseModel):
         if self.kind == "mechanical":
             if self.any_of is not None and len(self.any_of) == 0:
                 raise ValueError(f"Criterion {self.name!r}: `any_of` must be non-empty")
+            # The criterion action-day path resolves matches WITHOUT a schedule/day (see
+            # node_scores._action_day_for_action_criterion), so a `transient_before` temporal
+            # directive there can never match — a schema-valid criterion that silently
+            # false-zeroes. Reject at parse; only Applicability gates support it (node_applies
+            # resolves it against the schedule).
+            for am in [self.action, *(self.any_of or [])]:
+                if am is not None and "transient_before" in am.where:
+                    raise ValueError(
+                        f"Criterion {self.name!r}: `transient_before` is not supported in a "
+                        "criterion action matcher (only in `applies_if`) — it would never match"
+                    )
             n_primary = sum(
                 [
                     self.channel is not None,
