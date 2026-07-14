@@ -96,14 +96,22 @@ def _floor_operating() -> dict:
 
 def _floor_absolute() -> dict:
     # Value destruction: discard every house's sellable output for the whole cycle (costs still
-    # accrue, revenue -> ~0). The true minimum, deliberately NOT the normalizer (real agents would
-    # all map to ~1.0 against it).
+    # accrue, revenue -> ~0), searched over the reachable COST-MAXIMIZING setpoint corner (max
+    # ventilation fan/energy x cold-feed penalty). Codex review 2026-07-13: a single hard-coded
+    # hot policy was no longer the true minimum once cold->feed landed (max vent + min temp is
+    # worse). Deliberately NOT the normalizer — real agents map to ~1.0 against it.
     discard = [
         (1, "set_egg_disposition", {"house_id": h, "channel": "discard", "reason": "baseline floor"})
         for h in ["H1", "H2", "H3", "H4", "H5"]
     ]
-    m = _run({"ventilation": 2.0, "temperature": 26.0, "belt_interval_days": 7.0}, discard)
-    return {"margin_usd": m, "policy": {"note": "discard all sellable output all cycle; max-cost setpoints"}}
+    worst_margin, worst_sp = None, None
+    for vent in (2.0, 3.5, 5.0):                       # up to the ventilation setpoint max (5.0)
+        for temp in (0.0, 7.0, 14.0, 26.0):           # incl. the temperature min (max cold-feed)
+            sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": 7.0}
+            m = _run(sp, discard)
+            if worst_margin is None or m < worst_margin:
+                worst_margin, worst_sp = m, sp
+    return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst reachable cost corner"}}
 
 
 def build() -> dict:

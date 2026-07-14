@@ -89,7 +89,7 @@ pass, not this branch.
 
 | Finding | Verdict | Action |
 |---|---|---|
-| 1 Temperature one-sided | Real bug — literature flips it | **DONE (2026-07-13):** wired cold→feed-intake (`production.cold_feed_multiplier`, `cold_feed_coeff = 0.028`/°C below 18 °C). Regen moved the profit-optimal setpoint 14 → 18 °C (the welfare band); operating floor $7.0M → $6.1M. |
+| 1 Temperature one-sided | Real bug — literature flips it | **DONE (2026-07-13):** wired cold→feed-intake (`production.cold_feed_multiplier`, `cold_feed_coeff = 0.028`/°C below 18 °C). Regen moved the profit-optimal setpoint 14 → 18 °C (the welfare band); operating floor $7.0M → $6.3M. |
 | 2 Belt free | Real gap | **Optional:** small belt→drying-energy cost (+ optional manure revenue). MEDIUM. |
 | 3 Small husbandry spread | Realistic — not a bug | **Keep.** Add profit *challenge* via feed-procurement / merchandising / utilization levers — separate future pass, welfare-neutral. |
 

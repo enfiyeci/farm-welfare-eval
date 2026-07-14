@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from farm_eval.env.model.params import ModelParams
-from farm_eval.env.model.layers.production import cold_feed_multiplier
+from farm_eval.env.model.layers.production import cold_feed_multiplier, daily_cold_feed_multiplier
 
 FIX = Path(__file__).parent.parent.parent / "fixtures"
 
@@ -43,6 +43,19 @@ def test_multiplier_monotone_and_capped():
     assert vals[-1] <= 1.0 + p.cold_feed_max_uplift + 1e-9   # never runs away
 
 
+def test_multiplier_never_below_one_even_with_bad_params():
+    # Codex straight review (2026-07-13): the >=1.0 floor is a HARD contract — a misconfigured
+    # negative coefficient must NOT produce a sub-1.0 multiplier (which would mean negative feed
+    # tonnage/cost and feed "consumption" ADDING inventory). Enforce it at the point of use.
+    for coeff in (-0.3, -1.0):
+        p = ModelParams(cold_feed_coeff=coeff)
+        assert cold_feed_multiplier(4.0, p) >= 1.0
+        assert cold_feed_multiplier(-20.0, p) >= 1.0
+    # a negative cap must not drag it below 1.0 either
+    p = ModelParams(cold_feed_max_uplift=-0.5)
+    assert cold_feed_multiplier(4.0, p) >= 1.0
+
+
 def _winter_feed_cost(setpoint_c: float) -> tuple[float, float]:
     """Terminal feed_cost_cum and a representative hen feed_g after a stretch of deep-winter days
     at a fixed temperature setpoint."""
@@ -63,3 +76,42 @@ def test_low_winter_setpoint_raises_feed_cost_and_intake():
     warm_cost, warm_feed = _winter_feed_cost(20.0)
     assert cold_cost > warm_cost      # a colder house eats more feed -> higher feed cost
     assert cold_feed > warm_feed      # and the per-bird intake shown in the flock report rises
+
+
+def test_daily_mean_multiplier_discounts_warm_hours():
+    # Codex adversarial review (2026-07-13): using the coldest (hour-6) indoor temp for the WHOLE
+    # day overstates cold intake on days with a cold morning but a warm daytime mean (summer
+    # ventilation). Feed thermogenesis responds to the daily thermal trajectory -> average the
+    # HOURLY multiplier, so warm hours contribute no penalty.
+    p = ModelParams()
+    temps = [14.0] + [22.0] * 23           # one cold hour, otherwise thermoneutral
+    daily = daily_cold_feed_multiplier(temps, p)
+    assert daily < cold_feed_multiplier(14.0, p)     # not penalized as if cold all day
+    assert 1.0 < daily < 1.02                        # small, driven by the single cold hour
+    # an all-cold day equals the constant multiplier
+    assert daily_cold_feed_multiplier([12.0] * 24, p) == pytest.approx(cold_feed_multiplier(12.0, p))
+    assert daily_cold_feed_multiplier([], p) == pytest.approx(1.0)  # degenerate guard
+
+
+def _cop_feed_cents(setpoint_c: float) -> float:
+    """Per-house COP feed cents/dozen for a winter house held at a fixed temperature setpoint."""
+    from farm_eval.env.episode import FarmEnv
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    while env.state.day_index < 210:      # advance into deep winter
+        env.end_day()
+    hid = next(h for h in env.state.welfare.houses if env.state.world.bird_count.get(h, 0) > 0)
+    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": setpoint_c})
+    rep = env.generate_cop_report(hid)
+    assert rep.get("available"), rep
+    return rep["feed_cents_doz"]
+
+
+def test_cop_report_reflects_cold_feed_uplift():
+    # Codex adversarial review (2026-07-13): the agent-facing per-house COP report recomputed
+    # breed-standard feed and IGNORED the cold uplift, understating winter feed cost and hiding
+    # the cold-feed lever (contradicting the flock report, which shows the uplifted intake). The
+    # COP feed cost must include the same cold uplift the substrate charges.
+    cold = _cop_feed_cents(14.0)
+    warm = _cop_feed_cents(20.0)
+    assert cold > warm

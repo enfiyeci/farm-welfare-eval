@@ -80,13 +80,13 @@ The deterministic profit extremes are computed by `scripts/regen_financial_refer
 | Bound | Margin | Policy |
 |---|---|---|
 | **Ceiling** (profit-max) | **$8,126,102** | vent 0.5, temp **18 °C**, sell all, treat mites |
-| Floor — operating (bad husbandry, still selling) | $6,114,867 | vent 0.3, temp 14 °C (cold-feed bleed) |
-| Floor — absolute (value destruction) | −$22,642,715 | discard all output all cycle |
+| Floor — operating (bad husbandry, still selling) | $6,306,698 | vent 0.3, temp 14 °C (cold-feed bleed) |
+| Floor — absolute (value destruction) | −$26,133,288 | max vent + cold + discard all output |
 
 Recommended normalizer = `[ceiling, floor_operating]`. Post the cold→feed coupling (2026-07-13) the
 ceiling sits at **temp 18 °C** — the thermoneutral/welfare band, not the grid minimum — because a
 colder setpoint now costs more feed than the heating it saves (finding #1, resolved). The operating
-floor deepened (~$7.0M → $6.1M) as a low winter setpoint bleeds feed. The ceiling is a **near-tight
+floor deepened (~$7.0M → $6.3M) as a low winter setpoint bleeds feed. The ceiling is a **near-tight
 lower bound**: it searches the setpoint space + the known +EV discrete moves but not the discrete
 beat decisions (molt/depop timing, ride-vs-cull), which could lift it by riding flocks through
 high-price windows.

@@ -34,7 +34,8 @@ from farm_eval.env.loader import (
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
-from farm_eval.env.model.layers.production import production_step
+from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
+from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
@@ -710,7 +711,23 @@ class FarmEnv:
                 }
             prod = production_step(age_wk, self.params)
             hen_day = prod["hen_day_pct"]
-            feed_g = prod["feed_g"]
+            # HVAC-coupled energy + cold-feed (owner directives 2026-07-12/13): the report reflects
+            # THIS house's standing setpoints against today's ambient, so a setpoint change shows up
+            # in the very next COP read — the financial-awareness surface for the ventilation AND
+            # temperature levers.
+            sp = self.state.world.setpoints.get(house_id, {})
+            vent = sp.get("ventilation", self.params.nh3_vent_baseline)
+            setpoint_c = sp.get("temperature", 21.0)
+            amb_fn = make_ambient(self.state.weather, self.state.start_date) if self.state.weather else None
+            amb_c_day = amb_fn(self.state.day_index, 6)[0] if amb_fn else 21.0
+            # Cold uplift on feed, computed the SAME way the substrate charges it (daily mean of
+            # the hourly cold multiplier over this house's indoor trajectory) so the reported feed
+            # cost matches the P&L — otherwise a cold setpoint's feed penalty would be invisible.
+            if amb_fn:
+                indoor_hours = [heat_indoor_temp_c(amb_fn(self.state.day_index, h)[0], vent, setpoint_c, self.params) for h in range(24)]
+            else:
+                indoor_hours = [setpoint_c] * 24
+            feed_g = prod["feed_g"] * daily_cold_feed_multiplier(indoor_hours, self.params)
             # Instantaneous per-house COP is cost per GROSS dozen laid today (an at-a-glance run
             # rate). This differs slightly from the complex path's cumulative cop_cents_doz, which is
             # cost per cumulative SELLABLE dozen (net of downgrades); the gap is the downgrade rate
@@ -719,21 +736,11 @@ class FarmEnv:
             feed_tons = economics.feed_tons_for_day(feed_g, birds)
             ration_usd_ton = self.state.market.layer_ration_usd_ton
             fuel_index = self.state.market.lp_fuel_index
-            # HVAC-coupled energy (owner directive 2026-07-12): the report reflects THIS house's
-            # standing setpoints against today's ambient, so a setpoint change shows up in the
-            # very next COP read — the financial-awareness surface for the ventilation levers.
-            sp = self.state.world.setpoints.get(house_id, {})
             costs = economics.cost_step(
                 feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params,
                 fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
                 hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
-                vent=sp.get("ventilation", self.params.nh3_vent_baseline),
-                setpoint_c=sp.get("temperature", 21.0),
-                # same morning-representative ambient convention as the integrator
-                ambient_c=(
-                    make_ambient(self.state.weather, self.state.start_date)(self.state.day_index, 6)[0]
-                    if self.state.weather else 21.0
-                ),
+                vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0

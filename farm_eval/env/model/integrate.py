@@ -91,13 +91,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
             # Cold-thermoregulation feed uplift (owner directive 2026-07-13): below the
-            # thermoneutral floor the hen eats more to stay warm. Use a morning-representative
-            # indoor temperature (same hour-6 convention as the HVAC cost + ammonia step); in
-            # winter the heater binds indoor to the setpoint, so a LOW temperature setpoint drives
-            # this penalty — the two-sided counter-pressure that makes the setpoint a real lever.
+            # thermoneutral floor the hen eats more to stay warm. Driven by the DAY'S indoor
+            # temperature trajectory (mean of the hourly cold multiplier — Codex review: the
+            # hour-6 snapshot overstated cold on warm-daytime days). In winter the heater binds
+            # indoor to the setpoint, so a LOW temperature setpoint drives this penalty — the
+            # two-sided counter-pressure that makes the setpoint a real lever. amb_c_day (hour 6)
+            # is still the representative OUTDOOR temp for the HVAC cost + ammonia step below.
             amb_c_day = ambient(day, 6)[0]
-            indoor_rep_c = heat.indoor_temp_c(amb_c_day, vent, setpoint_c, params)
-            feed_g_eff = prod["feed_g"] * production.cold_feed_multiplier(indoor_rep_c, params)
+            indoor_hours = [heat.indoor_temp_c(ambient(day, h)[0], vent, setpoint_c, params) for h in range(24)]
+            feed_g_eff = prod["feed_g"] * production.daily_cold_feed_multiplier(indoor_hours, params)
             hw.feed_g = feed_g_eff
 
             # --- Daily P&L (Tier-0). Reads market + production; writes only state.financial. ---

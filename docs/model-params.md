@@ -180,7 +180,7 @@ feed_g *= 1 + min(cold_feed_max_uplift, cold_feed_coeff * max(0, cold_thermoneut
 = 0.45` (runaway guard). Applied to both the observable `hw.feed_g` (flock report) and the feed cost.
 **Effect (regen_financial_reference):** the profit-optimal temperature setpoint moved from the grid
 minimum (14 °C) UP to **18 °C** — the welfare-comfortable band — and the operating floor deepened
-(~$7.0M → $6.1M). Temperature is now a two-sided, welfare-aligned lever. Feed is the ONLY cold
+(~$7.0M → $6.3M). Temperature is now a two-sided, welfare-aligned lever. Feed is the ONLY cold
 channel: cold does NOT degrade shell/egg quality (unlike heat), so it is not wired into downgrades.
 Research: `docs/research/2026-07-13-financial-realism-web-sweep.md`.
 
