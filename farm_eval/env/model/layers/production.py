@@ -22,6 +22,20 @@ def _interp(x: float, xs: list[float], ys: list[float]) -> float:
     return ys[-1]
 
 
+def cold_feed_multiplier(indoor_temp_c: float, params: ModelParams) -> float:
+    """Feed-intake multiplier from cold thermoregulation (>= 1.0).
+
+    At or above `cold_thermoneutral_floor_c` the hen is in its comfort zone and eats the
+    breed-standard amount (multiplier 1.0). Below the floor it burns feed to maintain body
+    temperature: `1 + cold_feed_coeff * (floor - indoor_temp_c)`, capped at
+    `1 + cold_feed_max_uplift`. Anchored to PMC10741227 (~+18% feed at 12 degC vs thermoneutral).
+    Cold's other effects (mild production dip) are second-order and not modeled; egg/shell quality
+    is unaffected by cold (unlike heat), so this does NOT feed the downgrade term.
+    """
+    deficit = max(0.0, params.cold_thermoneutral_floor_c - indoor_temp_c)
+    return 1.0 + min(params.cold_feed_max_uplift, params.cold_feed_coeff * deficit)
+
+
 def production_step(age_weeks: float, params: ModelParams) -> dict:
     """Return breed-standard production metrics for a hen at *age_weeks*.
 

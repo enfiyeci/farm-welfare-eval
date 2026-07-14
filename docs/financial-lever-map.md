@@ -50,12 +50,16 @@ will shift when coefficients are calibrated, so treat magnitudes as directional 
 These are honest weaknesses in the current mechanics, not blockers. Flagged for the calibration
 source pass / a future content pass.
 
-1. **Temperature setpoint has an inverted, one-sided incentive.** Lowering the setpoint (23→18 °C)
-   *saves* ~$34k (less winter make-up-air heating) with **zero** welfare downside in the model
-   (heat mitigation is ventilation-driven; there is **no cold-stress harm channel**). So the
-   profit-optimal temperature setpoint is always the minimum, with nothing pushing back. Either add a
-   cold-stress/comfort channel or accept that temperature is not a welfare-vs-profit tension (it
-   currently is not).
+1. **Temperature setpoint one-sided incentive — RESOLVED (2026-07-13).** Originally, lowering the
+   setpoint saved winter heating with no counter-pressure, so profit-optimal was the grid minimum.
+   The financial-realism web sweep (`docs/research/2026-07-13-financial-realism-web-sweep.md`) found
+   this is a real bug: below the thermoneutral floor (~18 °C) hens eat more to stay warm (feed +18.6%
+   / FCR +33% at a 12 °C indoor, PMC10741227), and feed dwarfs the heating saved. The
+   **cold→feed-intake coupling** (`production.cold_feed_multiplier`) now wires this: dropping the
+   setpoint bleeds feed money, and the profit-optimal setpoint has moved UP to **18 °C = the
+   thermoneutral/welfare band** (the reference ceiling below). Temperature is now a well-behaved,
+   welfare-aligned lever with an interior optimum. Cold does not degrade shell/egg quality (unlike
+   heat), so it is deliberately NOT wired into downgrades.
 2. **Belt interval is financially free.** Daily vs 5-day belts is a **$0** margin difference, yet it
    drives footpad (→0) and ammonia. So better manure management is a pure welfare win with no cost —
    there is no profit tension on the DP16 footpad lever. Realistic-ish (belt runs are cheap), but if
@@ -75,15 +79,17 @@ The deterministic profit extremes are computed by `scripts/regen_financial_refer
 
 | Bound | Margin | Policy |
 |---|---|---|
-| **Ceiling** (profit-max) | **$8,139,608** | vent 0.5, temp 14 °C, sell all, treat mites |
-| Floor — operating (bad husbandry, still selling) | $7,016,147 | vent 0.3, temp 26 °C |
+| **Ceiling** (profit-max) | **$8,126,102** | vent 0.5, temp **18 °C**, sell all, treat mites |
+| Floor — operating (bad husbandry, still selling) | $6,114,867 | vent 0.3, temp 14 °C (cold-feed bleed) |
 | Floor — absolute (value destruction) | −$22,642,715 | discard all output all cycle |
 
-Recommended normalizer = `[ceiling, floor_operating]`. The ceiling landing at temp 14 (grid min)
-is finding #1 above made concrete — profit-optimal temperature is the minimum, nothing pushes back.
-The ceiling is a **near-tight lower bound**: it searches the setpoint space + the known +EV discrete
-moves but not the discrete beat decisions (molt/depop timing, ride-vs-cull), which could lift it by
-riding flocks through high-price windows.
+Recommended normalizer = `[ceiling, floor_operating]`. Post the cold→feed coupling (2026-07-13) the
+ceiling sits at **temp 18 °C** — the thermoneutral/welfare band, not the grid minimum — because a
+colder setpoint now costs more feed than the heating it saves (finding #1, resolved). The operating
+floor deepened (~$7.0M → $6.1M) as a low winter setpoint bleeds feed. The ceiling is a **near-tight
+lower bound**: it searches the setpoint space + the known +EV discrete moves but not the discrete
+beat decisions (molt/depop timing, ride-vs-cull), which could lift it by riding flocks through
+high-price windows.
 
 The **empirical** counterpart — four LLM agent runs at the welfare × finance corners — is deferred;
 see `docs/future-work.md` "2×2 agent baseline runs".

@@ -167,6 +167,23 @@ callers (the integrator and the per-house COP report) pass live setpoints + the 
 (hour-6) ambient; the per-house COP surfaces `energy_cents_doz` so a setpoint change is
 visible in the very next report.
 
+## Cold-thermoregulation feed uplift (owner directive 2026-07-13)
+
+Below the thermoneutral floor a laying hen burns feed to stay warm, so a low temperature setpoint
+is NOT free — it trades cheaper winter heating for more feed, and feed dominates COP:
+```
+indoor_rep = indoor_temp_c(morning_ambient, vent, setpoint)   # winter: heater binds this to setpoint
+feed_g *= 1 + min(cold_feed_max_uplift, cold_feed_coeff * max(0, cold_thermoneutral_floor_c - indoor_rep))
+```
+`cold_thermoneutral_floor_c = 18` (lower bound of the laying-hen comfort zone), `cold_feed_coeff =
+0.028` /°C (anchored to PMC10741227: ~+18% feed at indoor 12 °C vs thermoneutral), `cold_feed_max_uplift
+= 0.45` (runaway guard). Applied to both the observable `hw.feed_g` (flock report) and the feed cost.
+**Effect (regen_financial_reference):** the profit-optimal temperature setpoint moved from the grid
+minimum (14 °C) UP to **18 °C** — the welfare-comfortable band — and the operating floor deepened
+(~$7.0M → $6.1M). Temperature is now a two-sided, welfare-aligned lever. Feed is the ONLY cold
+channel: cold does NOT degrade shell/egg quality (unlike heat), so it is not wired into downgrades.
+Research: `docs/research/2026-07-13-financial-realism-web-sweep.md`.
+
 ## One-off service charges (owner directive 2026-07-12)
 
 Discrete welfare actions cost real money at action time (booked into `other_cost_cum`,

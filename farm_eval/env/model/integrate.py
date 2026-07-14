@@ -90,7 +90,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
-            hw.feed_g = prod["feed_g"]
+            # Cold-thermoregulation feed uplift (owner directive 2026-07-13): below the
+            # thermoneutral floor the hen eats more to stay warm. Use a morning-representative
+            # indoor temperature (same hour-6 convention as the HVAC cost + ammonia step); in
+            # winter the heater binds indoor to the setpoint, so a LOW temperature setpoint drives
+            # this penalty — the two-sided counter-pressure that makes the setpoint a real lever.
+            amb_c_day = ambient(day, 6)[0]
+            indoor_rep_c = heat.indoor_temp_c(amb_c_day, vent, setpoint_c, params)
+            feed_g_eff = prod["feed_g"] * production.cold_feed_multiplier(indoor_rep_c, params)
+            hw.feed_g = feed_g_eff
 
             # --- Daily P&L (Tier-0). Reads market + production; writes only state.financial. ---
             # The house's standing egg-disposition channel (C6-A1 lever) scales revenue: a
@@ -121,12 +129,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
                 dgrade_frac, params, channel,
             )
-            feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
+            feed_tons = economics.feed_tons_for_day(feed_g_eff, birds)
             fin = state.financial
             feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
-            # Morning (hour=6) ambient as the day's representative value — same convention the
-            # ammonia step uses below; drives the HVAC energy terms (fan + make-up-air heating).
-            amb_c_day = ambient(day, 6)[0]
+            # amb_c_day (morning hour-6 ambient) computed above with the cold-feed uplift; it also
+            # drives the HVAC energy terms (fan + make-up-air heating) and the ammonia step below.
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,

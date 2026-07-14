@@ -1,13 +1,13 @@
 {
   "ceiling": {
-    "margin_usd": 8139608,
+    "margin_usd": 8126102,
     "policy": {
       "actions": [
         "treat H2 mites (day 120)",
         "sell all output"
       ],
       "belt_interval_days": 5.0,
-      "temperature": 14.0,
+      "temperature": 18.0,
       "ventilation": 0.5
     }
   },
@@ -19,20 +19,20 @@
     }
   },
   "floor_operating": {
-    "margin_usd": 7016147,
+    "margin_usd": 6114867,
     "policy": {
       "actions": [
         "sell all output"
       ],
       "belt_interval_days": 7.0,
-      "temperature": 26.0,
+      "temperature": 14.0,
       "ventilation": 0.3
     }
   },
   "generated_by": "scripts/regen_financial_reference.py",
   "normalizer_recommended": {
-    "best_margin_usd": 8139608,
-    "worst_margin_usd": 7016147
+    "best_margin_usd": 8126102,
+    "worst_margin_usd": 6114867
   },
   "note": "PROGRAMMATIC financial bound over the locked substrate. The EMPIRICAL corner baselines (4 LLM agent runs across the welfare x finance 2x2) are separate, later, and refine reachability \u2014 see docs/future-work.md '2x2 agent baseline runs'. Ceiling is a coordinate search over the setpoint space + known +EV discrete moves; it is a near-tight LOWER bound on the true joint optimum (discrete beat decisions \u2014 molt/depop timing, ride-vs-cull \u2014 are not yet searched). Recommended normalizer = [ceiling, floor_operating]; floor_absolute is the true minimum, a poor normalizer (real agents cluster near 1.0 against it).",
   "units": "USD terminal margin over the full cycle (deterministic FarmEnv pipeline)",

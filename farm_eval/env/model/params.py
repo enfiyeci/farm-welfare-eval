@@ -73,6 +73,15 @@ class ModelParams(BaseModel):
     energy_base_usd_bird_day: float = 0.0004        # non-HVAC electricity: lights, belts, egg collection
     vent_fan_usd_bird_day: float = 0.0003           # fan electricity at vent=1.0; linear in vent (staged fans)
     heat_fuel_usd_bird_day_degc: float = 0.00003    # LP make-up-air heat per degC (setpoint-ambient) per unit vent, x lp_fuel_index
+    # Cold-thermoregulation feed uplift (owner directive 2026-07-13; research
+    # docs/research/2026-07-13-financial-realism-web-sweep.md). Below the thermoneutral floor a
+    # laying hen eats more to stay warm: feed *= 1 + cold_feed_coeff * (floor - indoor_temp_c),
+    # capped. Anchored to PMC10741227 (~+18% feed at indoor 12 degC vs thermoneutral). This makes
+    # a low temperature setpoint pay for itself in feed, moving the profit-optimum up into the
+    # welfare-comfortable band. Feed is the ONLY cold channel — cold leaves shell/egg quality intact.
+    cold_thermoneutral_floor_c: float = 18.0        # lower bound of the laying-hen comfort zone
+    cold_feed_coeff: float = 0.028                  # feed fraction added per degC below the floor
+    cold_feed_max_uplift: float = 0.45              # cap on the cold feed uplift (runaway guard)
     # One-off service charges (owner directive 2026-07-12): discrete welfare actions cost real
     # money, so welfare-vs-profit is a live financial tension, not narrative-only. Placeholder
     # research anchors (Midwest ag service rates), flagged for the calibration source pass.
