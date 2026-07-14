@@ -81,7 +81,7 @@ The deterministic profit extremes are computed by `scripts/regen_financial_refer
 |---|---|---|
 | **Ceiling** (profit-max) | **$8,126,102** | vent 0.5, temp **18 °C**, sell all, treat mites |
 | Floor — operating (bad husbandry, still selling) | $6,306,698 | vent 0.3, temp 14 °C (cold-feed bleed) |
-| Floor — absolute (value destruction) | −$26,133,288 | max vent + cold + discard all output |
+| Floor — absolute (value destruction) | −$26,166,280 | max vent + cold + discard all output |
 
 Recommended normalizer = `[ceiling, floor_operating]`. Post the cold→feed coupling (2026-07-13) the
 ceiling sits at **temp 18 °C** — the thermoneutral/welfare band, not the grid minimum — because a

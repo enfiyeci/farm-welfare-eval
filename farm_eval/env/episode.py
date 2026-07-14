@@ -723,10 +723,13 @@ class FarmEnv:
             # Cold uplift on feed, computed the SAME way the substrate charges it (daily mean of
             # the hourly cold multiplier over this house's indoor trajectory) so the reported feed
             # cost matches the P&L — otherwise a cold setpoint's feed penalty would be invisible.
-            if amb_fn:
-                indoor_hours = [heat_indoor_temp_c(amb_fn(self.state.day_index, h)[0], vent, setpoint_c, self.params) for h in range(24)]
-            else:
-                indoor_hours = [setpoint_c] * 24
+            # Mirror the integrator's fallback EXACTLY: with no weather it integrates against a
+            # constant 21 degC ambient (indoor = indoor_temp_c(21, vent, setpoint)), NOT the raw
+            # setpoint — else the report diverges from the P&L on keyless/no-weather configs.
+            amb_hours = (
+                [amb_fn(self.state.day_index, h)[0] for h in range(24)] if amb_fn else [21.0] * 24
+            )
+            indoor_hours = [heat_indoor_temp_c(a, vent, setpoint_c, self.params) for a in amb_hours]
             feed_g = prod["feed_g"] * daily_cold_feed_multiplier(indoor_hours, self.params)
             # Instantaneous per-house COP is cost per GROSS dozen laid today (an at-a-glance run
             # rate). This differs slightly from the complex path's cumulative cop_cents_doz, which is

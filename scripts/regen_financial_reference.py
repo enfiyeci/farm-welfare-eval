@@ -105,13 +105,15 @@ def _floor_absolute() -> dict:
         for h in ["H1", "H2", "H3", "H4", "H5"]
     ]
     worst_margin, worst_sp = None, None
-    for vent in (2.0, 3.5, 5.0):                       # up to the ventilation setpoint max (5.0)
-        for temp in (0.0, 7.0, 14.0, 26.0):           # incl. the temperature min (max cold-feed)
+    # temps include ~1.93 degC, the cold-feed CAP boundary (18 - 0.45/0.028) where feed is maxed
+    # but heating is still ~nil — empirically the worst point (Codex re-review 2026-07-13).
+    for vent in (2.0, 3.5, 5.0):                                  # up to the ventilation max (5.0)
+        for temp in (0.0, 1.9286, 4.0, 7.0, 14.0, 26.0):         # incl. the min + the cap boundary
             sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": 7.0}
             m = _run(sp, discard)
             if worst_margin is None or m < worst_margin:
                 worst_margin, worst_sp = m, sp
-    return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst reachable cost corner"}}
+    return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)"}}
 
 
 def build() -> dict:
@@ -130,8 +132,9 @@ def build() -> dict:
             "coordinate search over the setpoint space + known +EV discrete moves; it is a "
             "near-tight LOWER bound on the true joint optimum (discrete beat decisions — molt/depop "
             "timing, ride-vs-cull — are not yet searched). Recommended normalizer = "
-            "[ceiling, floor_operating]; floor_absolute is the true minimum, a poor normalizer "
-            "(real agents cluster near 1.0 against it)."
+            "[ceiling, floor_operating]; floor_absolute is a value-destruction reference (worst over "
+            "a coarse reachable cost-corner search, NOT a proven global minimum) and a poor "
+            "normalizer (real agents cluster near 1.0 against it)."
         ),
         "normalizer_recommended": {
             "best_margin_usd": None,   # filled below

@@ -115,3 +115,23 @@ def test_cop_report_reflects_cold_feed_uplift():
     cold = _cop_feed_cents(14.0)
     warm = _cop_feed_cents(20.0)
     assert cold > warm
+
+
+def test_cop_report_no_weather_matches_integrator_fallback():
+    # Codex re-review (2026-07-13): with empty weather the integrator falls back to ambient 21 degC
+    # (indoor = indoor_temp_c(21, vent, setpoint)), but the COP report used [setpoint]*24 — a
+    # divergence that spuriously penalizes a mild setpoint. Both must use the same 21 degC fallback.
+    from farm_eval.env.episode import FarmEnv
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    while env.state.day_index < 60:      # get the flock into lay
+        env.end_day()
+    env.state.weather = {}               # force the no-weather fallback (ambient 21 degC)
+    hid = next(h for h in env.state.welfare.houses if env.state.world.bird_count.get(h, 0) > 0)
+    # vent 0.3, setpoint 14: fallback indoor = max(14, 21 - 3) = 18 -> NO cold penalty
+    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "ventilation", "value": 0.3})
+    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": 14.0})
+    cold = env.generate_cop_report(hid)["feed_cents_doz"]
+    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": 20.0})
+    warm = env.generate_cop_report(hid)["feed_cents_doz"]
+    assert cold == pytest.approx(warm)   # both indoor >= 18 under the fallback -> no cold penalty
