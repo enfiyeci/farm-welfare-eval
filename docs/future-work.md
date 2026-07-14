@@ -32,8 +32,18 @@ legible* to an agent through the tools, and whether profit-max and welfare-max g
 reference-policy seam; prepend the behavioral instruction to the operator briefing per corner; run
 the SAME locked env; record margin + Layer-1 welfare-state + the judge headline for each. Plot the
 four corners against `financial_reference.json`'s ceiling/floors and `welfare_reference.json`'s
-good/negligent. **Deferred — do NOT run now** (owner, 2026-07-12); the deterministic reference and
-the lever map (`docs/financial-lever-map.md`) are the programmatic half and are done.
+good/negligent. The deterministic reference and the lever map (`docs/financial-lever-map.md`) are
+the programmatic half and are done.
+
+**Status (owner, 2026-07-13): pulled forward — run AFTER the round-2 re-pilot debrief is clean**
+(never concurrently with another live run: full episodes contend for the same Vertex model quota
+and can starve each other's retries; and corners run against a soon-to-change env are wasted spend
+if the debrief surfaces another fix wave). Scaffolding is BUILT: `scripts/gen_corner_briefings.py`
+renders the four goal-prefixed briefings (`prompts/baselines/`) + configs
+(`config-baseline-*.yml`) from the CURRENT base briefing/config (drift-gated by
+`tests/adapter/test_corner_baselines.py`); `scripts/run_baseline_corners.sh <grader> <target>`
+runs the four corners sequentially. Corner runs are EXPERIMENTAL (goal-prefixed briefing) — never
+comparable-sweep data.
 
 ## Realistic document-artifact corpus (structured text, NOT PDFs)
 
