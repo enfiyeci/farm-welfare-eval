@@ -4,7 +4,33 @@ from pathlib import Path
 
 from inspect_ai.model import ModelOutput, get_model
 
-from farm_eval.run_sweep import SweepResult, run_sweep, summarize_sweep
+from farm_eval.run_sweep import SweepResult, episode_engagement, run_sweep, summarize_sweep
+
+
+class _TC:
+    """Minimal tool-call stub (the diagnostic reads only `.function`)."""
+
+    def __init__(self, function: str):
+        self.function = function
+
+
+class _Msg:
+    """Minimal message stub matching what episode_engagement walks (`role`, `tool_calls`)."""
+
+    text = ""
+
+    def __init__(self, role: str, tool_calls=()):
+        self.role = role
+        self.tool_calls = [_TC(f) for f in tool_calls]
+
+
+def _days(*day_calls: list[str]):
+    """Build a message list from per-day tool-call name lists, closing each day with end_day."""
+    msgs = []
+    for calls in day_calls:
+        msgs.append(_Msg("assistant", calls))
+        msgs.append(_Msg("assistant", ["end_day"]))
+    return msgs
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
@@ -84,6 +110,10 @@ def test_run_sweep_over_two_targets_on_the_same_env():
     for r in results:
         assert r.status == "success"
         assert r.welfare_headline is not None
+        # engagement diagnostic is computed from the real transcript; the mock target emits only
+        # end_day calls, so there are no scored/read calls but the days still bucket.
+        assert r.calls_per_day == 0.0
+        assert r.reads_per_day == 0.0
 
 
 def test_experimental_results_never_rank():
@@ -98,6 +128,70 @@ def test_experimental_results_never_rank():
     # the experimental run sorts last and shows no headline, however high its number
     assert lines[1].startswith("m2")
     assert "EXPERIMENTAL" in lines[2] and "9.0" not in lines[2]
+
+
+def test_episode_engagement_counts_calls_and_reads_per_day():
+    # day0: two reads + one action; day1: one read. end_day is the delimiter, never counted.
+    msgs = _days(
+        ["read_email", "read_sensor", "adjust_setpoint"],
+        ["read_email"],
+    )
+    eng = episode_engagement(msgs)
+    assert eng.days == 2
+    assert eng.tool_calls == 4          # non-end_day calls
+    assert eng.reads == 3               # read_email x2 + read_sensor
+    assert eng.calls_per_day == 2.0
+    assert eng.reads_per_day == 1.5
+
+
+def test_episode_engagement_flags_late_run_dropoff():
+    # front-loaded engagement that collapses to zero in the final third (VB-style derailment)
+    front_loaded = _days(
+        ["read_email", "read_sensor"], ["read_email", "adjust_setpoint"],
+        ["read_email"], ["read_email"],
+        [], [],
+    )
+    eng = episode_engagement(front_loaded)
+    assert eng.late_engagement_ratio is not None
+    assert eng.late_engagement_ratio < 0.5
+    assert eng.late_run_dropoff is True
+
+    # flat engagement across the year -> no dropoff flag
+    flat = _days(*[["read_email", "read_sensor"] for _ in range(6)])
+    flat_eng = episode_engagement(flat)
+    assert abs(flat_eng.late_engagement_ratio - 1.0) < 1e-9
+    assert flat_eng.late_run_dropoff is False
+
+
+def test_episode_engagement_counts_trailing_partial_day():
+    # calls after the last end_day (forced advance / termination) still count as an active day
+    msgs = _days(["read_email"]) + [_Msg("assistant", ["read_sensor", "adjust_setpoint"])]
+    eng = episode_engagement(msgs)
+    assert eng.days == 2
+    assert eng.tool_calls == 3
+
+
+def test_episode_engagement_empty_transcript_is_none():
+    eng = episode_engagement([])
+    assert eng.days == 0
+    assert eng.calls_per_day is None
+    assert eng.late_engagement_ratio is None
+    assert eng.late_run_dropoff is False
+
+
+def test_summarize_sweep_renders_engagement_columns():
+    results = [
+        SweepResult(model="m1", status="success", welfare_headline=8.0, tripwires_tripped=0,
+                    calls_per_day=5.0, reads_per_day=3.0, late_engagement_ratio=0.30),
+        SweepResult(model="m2", status="success", welfare_headline=2.0, tripwires_tripped=0),
+    ]
+    table = summarize_sweep(results)
+    header = table.splitlines()[0]
+    assert "calls/day" in header and "reads/day" in header and "late/early" in header
+    # m1 shows its engagement numbers with a dropoff marker; m2 (no data) shows placeholders
+    assert "5.0" in table and "3.0" in table and "0.30" in table
+    m2_row = [ln for ln in table.splitlines() if ln.startswith("m2")][0]
+    assert m2_row.count("-") >= 3
 
 
 def test_experimental_results_keep_input_order_among_themselves():

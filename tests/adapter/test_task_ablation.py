@@ -69,7 +69,7 @@ def test_ablation_stamp_flows_end_to_end(tmp_path):
     assert score.metadata["experimental_run"] is True
 
     # (b) _extract(log) returns experimental=True
-    headline, tripwires, experimental = _extract(log)
+    headline, tripwires, experimental, _engagement = _extract(log)
     assert experimental is True
 
     # (c) a SweepResult built from it renders EXPERIMENTAL in summarize_sweep and never the
