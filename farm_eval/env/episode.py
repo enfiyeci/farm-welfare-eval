@@ -39,7 +39,13 @@ from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
-from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
+from farm_eval.env.tracker import (
+    confirm_transient_masking,
+    evaluate_due_state_bands,
+    record_read,
+    record_tool_call,
+    resolve_inspected,
+)
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
@@ -212,6 +218,9 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        # F-R2-1 revert-detection: a provisional transient_before (masking) classification is
+        # confirmed or overturned once its window closes — a sustained raise is remediation.
+        confirm_transient_masking(staged, self.schedule, new_day, episode_over=episode_over)
         # C5 recognition (diagnostic): finalize `inspected` from the silent read log. Idempotent, so
         # running it every beat keeps the flag current as reads accumulate; it never gates scoring.
         resolve_inspected(staged, self.schedule)

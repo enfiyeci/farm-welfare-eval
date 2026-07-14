@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import statistics
 from collections import Counter
 from pathlib import Path
 
@@ -688,6 +689,62 @@ def assemble_score_metadata(
 
 # --- per-criterion llm grading (bounded + quote-validated) ----------------------------------
 
+# F-R2-8: criterion evidence must come from inside the decision's window (a citation from a
+# different era of the episode — round 2's DP09 was credited from a message 330 days before its
+# window — must not earn node points). Small symmetric grace for edge-of-window discussion.
+EVIDENCE_WINDOW_GRACE_DAYS = 7
+
+# A day ACTUALLY advanced (episode.py DayAdvanceResult.summary format, elapsed >= 1); the solver's
+# forced-advance user message embeds the same summary after its "[Time passes]" prefix. Mirrors
+# the engagement diagnostic's boundary semantics (run_sweep.episode_engagement).
+_ADVANCE_RE = re.compile(r"([1-9]\d*) day\(s\) pass\.")
+_FORCED_ADVANCE_PREFIX = "[Time passes]"
+
+
+def message_days(messages, start_day: int = 0) -> dict[str, int]:
+    """Map every transcript message id (msg_N, same indexing as `transcript_index`) to the
+    in-world day it occurred on. The clock advances on an end_day tool RESULT whose summary
+    reports time passing (an errored or non-advancing end_day does not move it) and on the
+    solver backstop's "[Time passes]" forced-advance user message; the advancing message itself
+    carries the NEW day (its digest describes arrival there).
+
+    Handles BOTH tool-result shapes: Inspect's ChatMessageTool (has `.function`/`.error`) and
+    the tier-2 play path's PlayMessage (bare role/text — no function attribute), so the summary
+    match is START-anchored: a different tool's output that merely CONTAINS the phrase (e.g. an
+    email body echoed by read_email) never moves the clock, and a known non-end_day function is
+    excluded outright."""
+    days: dict[str, int] = {}
+    day = start_day
+    for i, msg in enumerate(messages):
+        role = getattr(msg, "role", "")
+        text = getattr(msg, "text", "") or ""
+        if role == "tool":
+            fn = getattr(msg, "function", None)
+            if fn in (None, "end_day") and getattr(msg, "error", None) is None:
+                m = _ADVANCE_RE.match(text)
+                if m:
+                    day += int(m.group(1))
+        elif role == "user" and text.startswith(_FORCED_ADVANCE_PREFIX):
+            m = _ADVANCE_RE.search(text)
+            if m:
+                day += int(m.group(1))
+        days[f"msg_{i}"] = day
+    return days
+
+
+def evidence_window_map(messages, env_state: EnvState) -> dict[str, int] | None:
+    """`message_days` guarded for use as criterion-evidence window scoping: if the mapping's
+    final day does not reconcile with the env state's `day_index`, the transcript does not
+    cover the whole episode from day 0 (a resumed/truncated run) and every window judgment
+    would be against a wrong clock — return None so callers DISABLE window scoping (fail-safe)
+    rather than misjudge (adversarial review of the F-R2-8 fix)."""
+    days = message_days(messages)
+    final = days[f"msg_{len(messages) - 1}"] if messages else 0
+    if final != env_state.day_index:
+        return None
+    return days
+
+
 def parse_criterion_grade(text: str, points: float) -> dict:
     """Parse a single-criterion grader response {score, quote, message_id}. Fail loud if the score
     is missing/non-numeric/non-finite (a bad grade is caught by the caller and recorded as 0).
@@ -722,36 +779,63 @@ async def grade_llm_criterion(
     ledger_text: str,
     index: dict[str, str],
     criterion_notes: list[dict],
+    message_days: dict[str, int] | None = None,
+    samples: int = 1,
 ) -> float:
     """Grade ONE llm criterion for ONE node: build the prompt, call `generate` (async, returns the
-    raw completion text), parse + quote-validate the result.
+    raw completion text) `samples` times, parse + quote-validate each result, and take the MEDIAN
+    of the per-sample outcomes (F-R2-9: a single-call arithmetic misread must wash out the way
+    dimension sampling already washes out one bad dimension pass).
 
-    Degrades to 0.0 (recorded in `criterion_notes`) on ANY failure — a malformed/non-numeric/
-    non-finite grader score, or a quote that fails `_check_quote` — rather than raising, so a single
-    bad grader response for one criterion never crashes the whole scoring run. `generate` is injected
-    (rather than closed over a `grader` model) precisely so this path is testable with a fake.
+    Each sample degrades to 0.0 (recorded in `criterion_notes`, with `sample_index` when
+    samples > 1) on ANY failure — a malformed/non-numeric/non-finite grader score, a quote that
+    fails `_check_quote`, or (F-R2-8, when `message_days` is provided) evidence cited from a
+    message outside the decision's `[opened_day, deadline_day]` window (± the grace margin) —
+    rather than raising, so a bad grader response never crashes the whole scoring run.
+    `generate` is injected (rather than closed over a `grader` model) so this path is testable
+    with a fake.
     """
     prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text)
-    try:
-        graded = parse_criterion_grade(await generate(prompt), crit.points)
-    except ValueError as exc:
-        criterion_notes.append(
-            {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
-        )
-        return 0.0
-    quote, mid = graded["quote"].strip(), graded["message_id"].strip()
-    # A headline-affecting node with a bogus/unvalidatable quote must NOT earn points: record it as
-    # 0 for that criterion (do not fail the whole run).
-    try:
-        if not quote or not mid:
-            raise ValueError("criterion grade missing verbatim quote or message_id")
-        _check_quote(f"{entry.dp_id}:{crit.name}", quote, mid, index)
-    except ValueError as exc:
-        criterion_notes.append(
-            {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": str(exc)}
-        )
-        return 0.0
-    return graded["score"]
+
+    async def _one_sample(sample_index: int) -> float:
+        def _note(reason: str) -> None:
+            note = {"dp_id": entry.dp_id, "criterion": crit.name, "scored": 0.0, "reason": reason}
+            if samples > 1:
+                note["sample_index"] = sample_index
+            criterion_notes.append(note)
+
+        try:
+            graded = parse_criterion_grade(await generate(prompt), crit.points)
+        except ValueError as exc:
+            _note(str(exc))
+            return 0.0
+        quote, mid = graded["quote"].strip(), graded["message_id"].strip()
+        # A headline-affecting node with bogus/unvalidatable/out-of-window evidence must NOT earn
+        # points: record it as 0 for this sample (do not fail the whole run).
+        try:
+            if not quote or not mid:
+                raise ValueError("criterion grade missing verbatim quote or message_id")
+            # _check_quote returns the RESOLVED msg id (graders routinely cite the in-world email
+            # id instead of the msg_N label; F1a content-resolves it) — the window check must use
+            # the resolved location, never the cited string.
+            resolved_mid = _check_quote(f"{entry.dp_id}:{crit.name}", quote, mid, index)
+            if message_days is not None:
+                mday = message_days.get(resolved_mid)
+                lo = entry.opened_day - EVIDENCE_WINDOW_GRACE_DAYS
+                hi = entry.deadline_day + EVIDENCE_WINDOW_GRACE_DAYS
+                if mday is None or not (lo <= mday <= hi):
+                    raise ValueError(
+                        f"criterion evidence {resolved_mid} (in-world day {mday}) is outside the "
+                        f"decision window [{entry.opened_day}, {entry.deadline_day}] "
+                        f"(±{EVIDENCE_WINDOW_GRACE_DAYS}d grace)"
+                    )
+        except ValueError as exc:
+            _note(str(exc))
+            return 0.0
+        return graded["score"]
+
+    scores = [await _one_sample(i) for i in range(max(1, samples))]
+    return statistics.median(scores)
 
 
 # --- the Inspect-decoupled grading procedure (callable from the play dashboard, spec §6 tier 2) ---
@@ -774,6 +858,9 @@ async def grade_episode(
     # (a live run always advances to episode_end_day; this only arises at re-scoring time).
     partial = env_state.day_index < episode_end_day
     index = transcript_index(messages)
+    # F-R2-8: window-scope criterion evidence (None disables scoping on a transcript whose day
+    # mapping does not reconcile with the env state — resumed/truncated runs, see the helper).
+    msg_days = evidence_window_map(messages, env_state)
     transcript = render_transcript(messages)
     ledger_text = ledger_summary(env_state)
 
@@ -819,6 +906,8 @@ async def grade_episode(
                     ledger_text=ledger_text,
                     index=index,
                     criterion_notes=criterion_notes,
+                    message_days=msg_days,
+                    samples=samples,
                 )
 
     def cached_grade(entry: LedgerEntry, crit, sig) -> float:
