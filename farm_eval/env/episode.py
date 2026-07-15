@@ -38,7 +38,7 @@ from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, pr
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
-from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
+from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
 from farm_eval.env.tracker import (
     confirm_transient_masking,
     evaluate_due_state_bands,
@@ -414,6 +414,25 @@ class FarmEnv:
                 else self.params.vet_visit_usd
             )
             self._charge_service_cost(fee)
+            if tool == "schedule_vet_visit":
+                # Round-3 vet tier: register the arc NOW (action time). The deliverer
+                # (farm_eval/env/vet.py) only walks these records — it never scans the
+                # event log, whose entries carry day == old_day at advance time.
+                house = params.get("house_id") or ""
+                lag = int((self.corpus.replies.get("vet") or {}).get("visit_lag_days", 3))
+                pending = next(
+                    (i for i, v in enumerate(self.state.vet_visits)
+                     if v.house_id == house and v.duplicate_of is None and v.stage != "reported"),
+                    None,
+                )
+                self.state.vet_visits.append(VetVisit(
+                    house_id=house,
+                    reason=params.get("reason") or "",
+                    request_day=self.state.day_index,
+                    visit_day=(self.state.vet_visits[pending].visit_day
+                               if pending is not None else self.state.day_index + lag),
+                    duplicate_of=pending,
+                ))
             detail = f"{tool} recorded (est. charge ${fee:,.0f})"
         elif tool == "set_egg_disposition":
             try:
