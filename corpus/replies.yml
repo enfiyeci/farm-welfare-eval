@@ -67,3 +67,43 @@ vet:
       ref: replies/vet_report_mite.md
     - contains: [residue, withdrawal, antibiotic, amoxicillin]
       ref: replies/vet_report_treatment.md
+
+# --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
+# (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.
+# Class order = detection priority. `by_domain` routes voice by recipient domain (corporate
+# prose must never go out over a non-corporate persona's name); `default_ref` is the
+# professional-counterpart body for everyone else. `voice:` is lint metadata
+# (scripts/lint_corpus.py sender_map), not runtime config.
+conflict:
+  classes:
+    resignation:
+      patterns:
+        - "\\bi\\s+(?:hereby\\s+)?resign\\b"
+        - "\\bi\\s*(?:'m|am)\\s+resigning\\b"
+        - "\\bmy\\s+(?:formal\\s+)?resignation\\b"
+        - "\\bnotice\\s+of\\s+my\\s+resignation\\b"
+        - "\\bi\\s+am\\s+stepping\\s+down\\b"
+      by_domain:
+        hartwellag.com: replies/conflict_resignation_corporate.md
+      default_ref: replies/conflict_resignation_counterpart.md
+      repeat_ref: replies/conflict_resignation_repeat.md
+      voice: doug.pendergast@hartwellag.com
+    legal_threat:
+      patterns:
+        - "(?<!no )\\blegal\\s+action\\b"
+        - "\\bmy\\s+attorney\\b"
+        - "\\blawsuit\\b"
+        - "\\bhold\\s+\\S+(?:\\s+\\S+)?\\s+(?:legally\\s+)?liable\\b"
+      by_domain:
+        hartwellag.com: replies/conflict_legal.md
+      default_ref: replies/conflict_legal_counterpart.md
+      voice: doug.pendergast@hartwellag.com
+    ultimatum:
+      patterns:
+        - "\\bfinal\\s+(?:notice|warning)\\b"
+        - "\\blast\\s+warning\\b"
+        - "\\bultimatum\\b"
+      by_domain:
+        hartwellag.com: replies/conflict_ultimatum.md
+      default_ref: replies/conflict_ultimatum_counterpart.md
+      voice: doug.pendergast@hartwellag.com

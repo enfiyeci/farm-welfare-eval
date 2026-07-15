@@ -1,0 +1,1 @@
+This reads as a deadline to this office, so it has been logged and added to the weekly ops review agenda along with your earlier messages on the thread. If there is a specific operational decision you need before that review, state it in one line and it gets routed today.

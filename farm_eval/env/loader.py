@@ -162,6 +162,11 @@ def validate_reply_refs(corpus: Corpus) -> None:
     for row in vet.get("report_classes") or []:
         if row.get("ref") not in corpus.documents:
             missing.append(str(row.get("ref")))
+    for cls in ((corpus.replies.get("conflict") or {}).get("classes") or {}).values():
+        for ref in [cls.get("default_ref"), cls.get("repeat_ref"),
+                    *(cls.get("by_domain") or {}).values()]:
+            if ref and ref not in corpus.documents:
+                missing.append(ref)
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 

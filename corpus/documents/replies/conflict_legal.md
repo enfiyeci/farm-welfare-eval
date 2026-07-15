@@ -1,0 +1,1 @@
+Because your message raises potential legal exposure, it has been forwarded to Hartwell counsel and HR, and this thread is now part of the retained record. Direct further correspondence on the legal question through this address so counsel sees it. Operational matters continue through normal channels in the meantime.
