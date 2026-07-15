@@ -11,19 +11,103 @@ bounce_ref: replies/bounce.md
 
 personas:
   dale.renner@cloverdaleeggs.com:
-    bank: [replies/dale_1.md, replies/dale_2.md, replies/dale_3.md]
+    bank:
+      - replies/dale_1.md
+      - replies/dale_2.md
+      - replies/dale_3.md
+      - replies/dale_4.md
+      - replies/dale_5.md
+      - replies/dale_6.md
+      - replies/dale_7.md
+      - replies/dale_8.md
+      - replies/dale_9.md
+      - replies/dale_10.md
+      - replies/dale_11.md
+      - replies/dale_12.md
   marisol.vega@cloverdaleeggs.com:
-    bank: [replies/marisol_1.md, replies/marisol_2.md, replies/marisol_3.md]
+    bank:
+      - replies/marisol_1.md
+      - replies/marisol_2.md
+      - replies/marisol_3.md
+      - replies/marisol_4.md
+      - replies/marisol_5.md
+      - replies/marisol_6.md
+      - replies/marisol_7.md
+      - replies/marisol_8.md
+      - replies/marisol_9.md
+      - replies/marisol_10.md
+      - replies/marisol_11.md
+      - replies/marisol_12.md
   travis.lindqvist@cloverdaleeggs.com:
-    bank: [replies/travis_1.md, replies/travis_2.md, replies/travis_3.md]
+    bank:
+      - replies/travis_1.md
+      - replies/travis_2.md
+      - replies/travis_3.md
+      - replies/travis_4.md
+      - replies/travis_5.md
+      - replies/travis_6.md
+      - replies/travis_7.md
+      - replies/travis_8.md
+      - replies/travis_9.md
+      - replies/travis_10.md
+      - replies/travis_11.md
+      - replies/travis_12.md
   priya.anand@cloverdaleeggs.com:
-    bank: [replies/priya_1.md, replies/priya_2.md, replies/priya_3.md]
+    bank:
+      - replies/priya_1.md
+      - replies/priya_2.md
+      - replies/priya_3.md
+      - replies/priya_4.md
+      - replies/priya_5.md
+      - replies/priya_6.md
+      - replies/priya_7.md
+      - replies/priya_8.md
+      - replies/priya_9.md
+      - replies/priya_10.md
+      - replies/priya_11.md
+      - replies/priya_12.md
   rob.salgado@cloverdaleeggs.com:
-    bank: [replies/rob_1.md, replies/rob_2.md, replies/rob_3.md]
+    bank:
+      - replies/rob_1.md
+      - replies/rob_2.md
+      - replies/rob_3.md
+      - replies/rob_4.md
+      - replies/rob_5.md
+      - replies/rob_6.md
+      - replies/rob_7.md
+      - replies/rob_8.md
+      - replies/rob_9.md
+      - replies/rob_10.md
+      - replies/rob_11.md
+      - replies/rob_12.md
   anita.cho@cloverdaleeggs.com:
-    bank: [replies/anita_1.md, replies/anita_2.md, replies/anita_3.md]
+    bank:
+      - replies/anita_1.md
+      - replies/anita_2.md
+      - replies/anita_3.md
+      - replies/anita_4.md
+      - replies/anita_5.md
+      - replies/anita_6.md
+      - replies/anita_7.md
+      - replies/anita_8.md
+      - replies/anita_9.md
+      - replies/anita_10.md
+      - replies/anita_11.md
+      - replies/anita_12.md
   glenn.whitaker@cloverdaleeggs.com:
-    bank: [replies/glenn_1.md, replies/glenn_2.md, replies/glenn_3.md]
+    bank:
+      - replies/glenn_1.md
+      - replies/glenn_2.md
+      - replies/glenn_3.md
+      - replies/glenn_4.md
+      - replies/glenn_5.md
+      - replies/glenn_6.md
+      - replies/glenn_7.md
+      - replies/glenn_8.md
+      - replies/glenn_9.md
+      - replies/glenn_10.md
+      - replies/glenn_11.md
+      - replies/glenn_12.md
   brett.maloof@cloverdaleeggs.com:
     bank: [replies/brett_1.md, replies/brett_2.md, replies/brett_3.md]
   kholzmann@prairieavian.com:

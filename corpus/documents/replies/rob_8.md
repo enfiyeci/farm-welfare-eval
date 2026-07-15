@@ -1,0 +1,1 @@
+Message landed. Bench is buried, radio won't quit, and half the day has been walking between jobs. Not enough quiet to read a long chain and beleive I caught all of it. Bring the short version by the shop when I'm there, or put it on the weekly board so the whole crew hears the same thing without three side conversations. Rob
