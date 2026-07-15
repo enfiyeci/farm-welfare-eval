@@ -152,6 +152,10 @@ def validate_reply_refs(corpus: Corpus) -> None:
             raise ValueError(f"replies.yml persona {sender!r} has an empty bank")
         missing.extend(ref for ref in bank if ref not in corpus.documents)
     vet = corpus.replies.get("vet") or {}
+    if "vet" in corpus.replies:
+        for key in ("from", "ack_subject", "ack_pending_subject", "report_subject"):
+            if not vet.get(key):
+                raise ValueError(f"corpus replies.yml vet section missing required key {key!r}")
     for key in ("ack_ref", "ack_pending_ref", "report_default_ref"):
         if vet and vet.get(key) not in corpus.documents:
             missing.append(str(vet.get(key)))

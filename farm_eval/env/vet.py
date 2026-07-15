@@ -54,6 +54,9 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
         if visit.stage == "reported":
             continue
         if visit.duplicate_of is not None:
+            if state.vet_visits[visit.duplicate_of].stage == "reported":
+                visit.stage = "reported"
+                continue
             # Folded request: one short pending-ack, then done — never a second arc.
             _append(cfg["ack_pending_ref"], cfg["ack_pending_subject"], visit)
             visit.stage = "reported"

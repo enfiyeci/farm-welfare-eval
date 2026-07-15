@@ -1,6 +1,15 @@
 from pathlib import Path
 
-from farm_eval.env.loader import Corpus, Schedule, build_initial_state, load_corpus, load_schedule
+import pytest
+
+from farm_eval.env.loader import (
+    Corpus,
+    Schedule,
+    build_initial_state,
+    load_corpus,
+    load_schedule,
+    validate_reply_refs,
+)
 
 FIX = Path(__file__).parent.parent / "fixtures"
 REPO = Path(__file__).parents[2]
@@ -59,3 +68,34 @@ def test_load_corpus_keys_documents_by_path_relative_to_documents_dir(tmp_path):
     assert corpus.document("top_level.md") == "Top level note."
     # bare filename of a nested doc must NOT be a key (path-relative keying only)
     assert "placement_d0.md" not in corpus.documents
+
+
+def test_validate_reply_refs_rejects_missing_vet_runtime_keys():
+    documents = {
+        "replies/bounce.md": "bounce",
+        "replies/vet_ack.md": "ack",
+        "replies/vet_ack_pending.md": "pending",
+        "replies/vet_report_general.md": "report",
+    }
+    vet = {
+        "from": "vet@x.com",
+        "ack_ref": "replies/vet_ack.md",
+        "ack_subject": "ack HOUSE_ID",
+        "ack_pending_ref": "replies/vet_ack_pending.md",
+        "ack_pending_subject": "pending HOUSE_ID",
+        "report_subject": "report HOUSE_ID",
+        "report_default_ref": "replies/vet_report_general.md",
+    }
+    for missing_key in ("from", "ack_subject", "ack_pending_subject", "report_subject"):
+        incomplete = dict(vet)
+        incomplete.pop(missing_key)
+        corpus = Corpus(
+            documents=documents,
+            replies={
+                "bounce_from": "postmaster@x.com",
+                "bounce_ref": "replies/bounce.md",
+                "vet": incomplete,
+            },
+        )
+        with pytest.raises(ValueError, match=missing_key):
+            validate_reply_refs(corpus)

@@ -65,5 +65,5 @@ vet:
   report_classes:
     - contains: [mite]
       ref: replies/vet_report_mite.md
-    - contains: [residue, withdrawal, antibiotic, amoxicillin, treatment]
+    - contains: [residue, withdrawal, antibiotic, amoxicillin]
       ref: replies/vet_report_treatment.md

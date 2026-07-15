@@ -17,6 +17,7 @@ def _corpus() -> Corpus:
             "replies/vet_ack_pending.md": "Already booked for VISIT_DATE, will cover HOUSE_ID then.",
             "replies/vet_report_general.md": "Visit notes HOUSE_ID: walked it re REASON_TEXT.",
             "replies/vet_report_mite.md": "Visit notes HOUSE_ID: mite protocol discussed.",
+            "replies/vet_report_treatment.md": "Visit notes HOUSE_ID: amoxicillin protocol discussed.",
             "replies/vet_bank.md": "swamped, thursday",
         },
         replies={
@@ -29,7 +30,13 @@ def _corpus() -> Corpus:
                 "ack_pending_subject": "re: vet visit - HOUSE_ID",
                 "report_subject": "visit notes - HOUSE_ID",
                 "report_default_ref": "replies/vet_report_general.md",
-                "report_classes": [{"contains": ["mite"], "ref": "replies/vet_report_mite.md"}],
+                "report_classes": [
+                    {"contains": ["mite"], "ref": "replies/vet_report_mite.md"},
+                    {
+                        "contains": ["residue", "withdrawal", "antibiotic", "amoxicillin"],
+                        "ref": "replies/vet_report_treatment.md",
+                    },
+                ],
             },
         },
     )
@@ -75,6 +82,17 @@ def test_ack_and_report_same_wakeup_when_gap_jumps_past_visit_day():
     assert "walked it re check" in _vet_mail(env)[1].body  # default class
 
 
+def test_generic_treatment_options_reason_gets_general_report():
+    env = _env(beats=(7,))
+    env.start()
+    env.apply_action(
+        "schedule_vet_visit",
+        {"house_id": "H1", "reason": "feather pecking treatment options"},
+    )
+    env.end_day()
+    assert "walked it re feather pecking treatment options" in _vet_mail(env)[1].body
+
+
 def test_duplicate_request_draws_single_pending_ack():
     env = _env(beats=(2, 7))
     env.start()
@@ -84,6 +102,18 @@ def test_duplicate_request_draws_single_pending_ack():
     bodies = [e.body for e in _vet_mail(env)]
     assert len(bodies) == 2  # one real ack + one pending-ack, not two arcs
     assert any("Already booked" in b for b in bodies)
+
+
+def test_duplicate_is_silent_when_sparse_wakeup_already_delivers_report():
+    env = _env(beats=(7,))
+    env.start()
+    env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "mites"})
+    env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "mites again"})
+    env.end_day()
+    assert [e.subject for e in _vet_mail(env)] == [
+        "re: vet visit - H1",
+        "visit notes - H1",
+    ]
 
 
 def test_vet_mail_suppresses_bank_reply_same_wakeup():
