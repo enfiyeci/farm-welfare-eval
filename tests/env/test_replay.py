@@ -22,6 +22,11 @@ FIX = Path(__file__).parent.parent / "fixtures"
 
 def _corpus_and_schedule():
     corpus = load_corpus(FIX / "corpus")
+    corpus.company["audit_thresholds"] = {
+        "nh3_ppm_max": 25.0,
+        "space_sq_in_per_hen_min": 144.0,
+        "house_area_sq_in": 18000000.0,
+    }
     # A richer schedule than the shared fixture's single-DP one, so the action mix below (setpoint,
     # feed order, staffing, disposition, email, treatment) has beats to land on across several days.
     schedule = load_schedule(FIX / "schedule")
