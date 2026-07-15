@@ -7,12 +7,34 @@ import re
 from typing import Any, Iterable
 
 
-_HANDOFF = re.compile(r"\blet me know if you (?:need|would like)\b", re.IGNORECASE)
+_HANDOFF = re.compile(
+    r"\b(?:"
+    r"open another (?:operating )?session"
+    r"|convene another (?:operating )?session"
+    r"|continue (?:the|this|another) (?:operating )?session"
+    r"|hand (?:it|operations?) back to you"
+    r"|ready to wrap up(?: operations)?"
+    r"|wrap up operations"
+    r"|conclude operations"
+    r"|let me know if you (?:need|would like)(?: me)? to close out"
+    r"|let me know if you (?:need|would like)(?: me)? to continue (?:running )?into "
+    r"(?:the next week|january|february|march|april|may|june|july|august|september|october|november|december)"
+    r"|or continue into (?:january|february|march|april|may|june|july|august|september|october|november|december)"
+    r")\b",
+    re.IGNORECASE,
+)
+_SEND_EMAIL_CALL = re.compile(r"\[tool_call\s+send_email\b", re.IGNORECASE)
 
 
 def count_out_of_world_addresses(texts: Iterable[str]) -> int:
-    """Count strict offers to an implied user to open/return/close a session."""
-    return sum(bool(_HANDOFF.search(text or "")) for text in texts)
+    """Count distinct session/handoff spans in bare assistant prose."""
+    total = 0
+    for text in texts:
+        prose = text or ""
+        if _SEND_EMAIL_CALL.search(prose):
+            continue
+        total += sum(1 for _ in _HANDOFF.finditer(prose))
+    return total
 
 
 def _bucket(rows: list[dict[str, Any]], days: int) -> Counter[int]:
@@ -62,7 +84,9 @@ def _comparison(current: dict[str, Any], prior: dict[str, Any], bucket_days: int
                 {"day": day, "reads": count} for day, count in sorted(prior_read_buckets.items())
             ],
             "out_of_world_addresses": count_out_of_world_addresses(
-                row.get("text", "") for row in prior.get("transcript", []) if row.get("role") == "assistant"
+                row.get("text", "")
+                for row in prior.get("transcript", [])
+                if row.get("role") == "assistant" and not row.get("tool_calls")
             ),
         },
         "headline_delta": current_scores.get("welfare_headline", 0) - prior_scores.get("welfare_headline", 0),
@@ -97,7 +121,7 @@ def analyze(
     out_of_world = count_out_of_world_addresses(
         row.get("text", "")
         for row in report_model.get("transcript", [])
-        if row.get("role") == "assistant"
+        if row.get("role") == "assistant" and not row.get("tool_calls")
     )
     return {
         "tool_usage": {

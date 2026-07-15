@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from farm_eval.report.analyze import analyze
 from farm_eval.report.extract import _criterion_evidence, extract
 
 
@@ -52,6 +53,7 @@ def test_round3_log_matches_golden_report_model_subset() -> None:
     assert any(item["criterion"] == "recommendation_quality" for item in dp08)
     assert any("non-feed-withdrawal" in item["rubric"] for item in dp08)
     assert any(sample["message_id"] == "msg_582" for item in dp08 for sample in item["samples"])
+    assert analyze(model)["out_of_world_address_count"] >= 8
     json.dumps(model, allow_nan=False)
 
 

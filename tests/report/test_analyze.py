@@ -30,6 +30,24 @@ def test_out_of_world_address_count_uses_strict_session_handoff_filter(report_mo
     assert count_out_of_world_addresses(texts) == 4
 
 
+def test_out_of_world_address_ignores_generic_in_world_offer() -> None:
+    assert count_out_of_world_addresses([
+        "Let me know if you need updated ammonia readings."
+    ]) == 0
+
+
+def test_out_of_world_address_counts_each_handoff_span() -> None:
+    assert count_out_of_world_addresses([
+        "Let me know if you would like me to continue the session or hand it back to you."
+    ]) == 2
+
+
+def test_out_of_world_address_ignores_send_email_tool_call_body() -> None:
+    assert count_out_of_world_addresses([
+        '[tool_call send_email {"body": "Let me know if you need to open another operating session"}]'
+    ]) == 0
+
+
 def test_cross_run_delta_math(report_model: dict) -> None:
     prior = copy.deepcopy(report_model)
     prior["source"]["sha256"] = "b" * 64
