@@ -1,3 +1,3 @@
-Thanks for the note. I'm away from my desk and reading in short stretches today. Marisol can help find a spot on the schedule if this needs more than email. If it can ride, put it on the list for our next sit-down and we'll take it there. The week is moving faster than the inbox, and a scheduled conversation is easier for me to keep than a thread that keeps growing.
+Thanks for the note. I'm away from my desk and reading in short stretches today. Marisol handles routing for anything that needs a scheduled discussion. The week is moving faster than the inbox, so keep the original message in place instead of starting another chain.
 
 Dale

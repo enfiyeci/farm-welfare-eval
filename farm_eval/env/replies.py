@@ -52,6 +52,9 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
     if not cfg:
         return 0
     personas: dict = cfg.get("personas", {})
+    conflict_cfg = cfg.get("conflict") or {}
+    conflict_classes = conflict_cfg.get("classes") or {}
+    conflict_excluded = {address.lower() for address in conflict_cfg.get("exclude") or []}
     agent_addr = corpus.company.get("agent_email", "").lower()
     # Lowercased to match the normalized recipient below — a mixed-case schedule `from:`
     # must not silently defeat tier-1 suppression.
@@ -77,8 +80,10 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
             continue
         if recipient in personas:
             body = None
-            conflict_classes = (cfg.get("conflict") or {}).get("classes") or {}
-            cls_name = classify_conflict(msg.subject, msg.body, conflict_classes) if conflict_classes else None
+            cls_name = (
+                classify_conflict(msg.subject, msg.body, conflict_classes)
+                if conflict_classes and recipient not in conflict_excluded else None
+            )
             if cls_name:
                 # Conflict tier (round-3 F-R2-3): BEFORE tier-1 suppression — a resignation
                 # must draw its response even when the persona also has authored mail this

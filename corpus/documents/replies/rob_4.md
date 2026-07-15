@@ -1,1 +1,1 @@
-seen. hands full rn
+WO stack open. email seen

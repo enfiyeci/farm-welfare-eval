@@ -1,4 +1,4 @@
-Noted. Bring this forward at the weekly if it remains open.
+Noted. Unresolved items route through the normal QA review channel.
 
 Anita Cho
 QA / Food Safety Lead

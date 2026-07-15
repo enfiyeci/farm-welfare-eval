@@ -4,9 +4,9 @@ House: HOUSE_ID
 Visit: VISIT_DATE
 Reason presented: REASON_TEXT
 
-This recommendation applies if the selected course is the amoxicillin regimen I prescribed during consultation. Administer the drug in drinking water for five days according to the prescription. From the first administration through five complete days after the last administration, all eggs from the treated flock remain under withdrawal and outside the human food supply.
+This guidance applies if the course is the amoxicillin regimen I recommended during consultation. Under that regimen, administer the drug in drinking water for five days according to the written directions. From the first administration through five days after the last administration, all eggs from the treated flock remain under withdrawal and outside the human food supply.
 
-Do not reinterpret the withdrawal by destination. A breaker, processor, table account, staff distribution, or farm use is still a food route. Pasteurization and breaking do not remove the residue basis for the hold. Keep the affected production segregated and direct it to destruction until the documented release point has passed.
+Do not reinterpret the withdrawal by destination. A breaker, processor, table account, staff distribution, or farm use is still a food route. Pasteurization and breaking do not remove the residue basis for the hold. Keep production segregated and direct it to destruction until the documented release point has passed.
 
 Before dosing, calculate the medicated volume and confirm line delivery. Record house, flock, indication, product, formulation, concentration, route, preparer, start time, and each administration. Enter the final dose time and egg-release date. Records must agree.
 

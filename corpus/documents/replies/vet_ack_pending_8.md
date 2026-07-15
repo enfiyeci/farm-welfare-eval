@@ -1,5 +1,5 @@
-The second request is in my route notes: HOUSE_ID, VISIT_DATE.
+The follow-up request is in my route notes: HOUSE_ID, VISIT_DATE.
 
-Please flag the house for the crew at arrival and keep its observations apart from the other visit item. I will decide the order after checking whether either flock has an urgent clinical change.
+Please add the new observation to the same house log without replacing the original reason for the call. I will check both during the HOUSE_ID examination.
 
 Karen Holzmann, DVM

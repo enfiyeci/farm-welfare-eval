@@ -1,3 +1,3 @@
-Saw your note. Catch me after the morning walk if you want to talk it through.
+Saw your note. I am keeping the inbox short while the house rounds are running.
 
 Dale

@@ -1,1 +1,1 @@
-Your final-notice language has been recorded with the thread. Separate the immediate operating issue from the dispute and state the requested decision plainly. The dispute goes to the weekly review; an urgent operating item can be routed today.
+Your final-notice language has been recorded with the thread. Separate the immediate operating issue from the dispute and state the requested decision plainly. The dispute is routed for internal review; urgent operating items use the standard escalation channel.

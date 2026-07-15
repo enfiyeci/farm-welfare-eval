@@ -1,4 +1,4 @@
-Saw it. Deep in mill traffic right now.
+Saw it. Scale ticket in one hand, radio in the other.
 
 Glenn Whitaker
 Cloverdale Feed Mill

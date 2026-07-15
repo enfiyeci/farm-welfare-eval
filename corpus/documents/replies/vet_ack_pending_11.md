@@ -1,8 +1,8 @@
 Route note revised for VISIT_DATE:
 
 - original farm-call item remains scheduled
-- HOUSE_ID added for a separate walk and record check
+- HOUSE_ID follow-up added to the same house walk
 
-I will cover both while on site. If a fresh mortality is held for examination, label it by house and time found so histories do not cross.
+I will cover both concerns during the existing examination. If a fresh mortality is held, label it with the time found so its chronology stays clear.
 
 Karen Holzmann

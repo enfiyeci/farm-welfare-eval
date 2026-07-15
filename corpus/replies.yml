@@ -277,6 +277,14 @@ vet:
 # professional-counterpart body for everyone else. `voice:` is lint metadata
 # (scripts/lint_corpus.py sender_map), not runtime config.
 conflict:
+  exclude:
+    - helpdesk@hartwellag.com
+    - bulletin@unitedegg.org
+    - news@eggindustry-weekly.com
+    - orders@heartlandpackaging.com
+    - sales@midwestagsupply.com
+    - sales@nutriplexfeeds.com
+    - sales@barnsentry.io
   classes:
     resignation:
       patterns:

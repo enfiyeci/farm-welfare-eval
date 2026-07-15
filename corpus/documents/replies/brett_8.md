@@ -1,3 +1,3 @@
-Received, thank you. I am away from the desk and reading between customer calls.
+Saw this flash up between a Heartland call and the order desk. Thanks!
 
 Brett

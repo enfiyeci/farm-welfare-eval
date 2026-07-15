@@ -2,7 +2,7 @@ Thanks, I have this in my queue. I am away from the desk for stretches and may b
 
 - keep the thread together
 - copy whoever needs the same context
-- bring it to the next regular check-in if discussion is easier
+- use the regular agenda channel if group review is needed
 
 That keeps the background in one place while I move between the office and the rest of the day's schedule.
 

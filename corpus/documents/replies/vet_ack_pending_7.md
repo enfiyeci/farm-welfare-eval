@@ -1,4 +1,4 @@
-I can cover HOUSE_ID during the VISIT_DATE call that is already arranged. There is enough room in that visit for a proper house walk, provided each concern has its own chronology and records.
+I can cover the HOUSE_ID follow-up during the VISIT_DATE call already arranged for that house. There is enough room in the visit, provided each concern has its own chronology.
 
 No separate booking is necessary now.
 

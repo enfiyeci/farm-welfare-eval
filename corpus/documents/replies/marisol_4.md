@@ -1,3 +1,3 @@
-Noted, thank you. Catch me between rounds if you want a quick conversation.
+Noted, thank you. I am clearing schedule items and reading messages between office calls.
 
 Marisol

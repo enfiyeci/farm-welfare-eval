@@ -1,3 +1,3 @@
-Your note is in the account queue. I am keeping customer traffic moving and may be slow on internal threads.
+Your note is in my inbox queue. I am keeping customer traffic moving and may be slow on internal mail.
 
 Brett

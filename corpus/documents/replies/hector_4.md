@@ -1,3 +1,3 @@
-Received, thank you. I am with a crew and checking messages between work areas.
+Message received. I am keeping the crew handoff clear and the phone mostly in my pocket.
 
 Hector

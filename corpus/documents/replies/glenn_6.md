@@ -1,4 +1,4 @@
-Read your note while I was waiting on a driver. I need a quieter stretch before I can give it proper thought. The board in here is moving around faster than a barn cat in a feed room, so email is getting a quick pass between calls. If you need me sooner, catch me by phone when I am off the floor. Otherwise bring it up at our regular check-in and we can sort through the background together.
+Read your note while a driver was waiting on a scale ticket. The load board is moving faster than a barn cat in a feed room, with ration codes changing at the window and the grinder calling for attention. Email is getting a quick pass only. Keep the original subject line if more context is added so it does not disappear among delivery threads.
 
 Glenn Whitaker
 Cloverdale Feed Mill

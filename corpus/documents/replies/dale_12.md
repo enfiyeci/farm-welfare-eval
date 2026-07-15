@@ -1,3 +1,3 @@
-Got the message. If there's context the wider crew should hear, save it for the next huddle. I'm easier to catch there than by email this week.
+Got the message. I'm spending more time in the houses than at the desk, and email is getting a quick read between rounds.
 
 Dale

@@ -1,1 +1,1 @@
-For clarity, the record now contains both resignation messages. HR owns the employment process; operations coverage remains a separate management issue. Continue the current handoff protocol while that issue is reviewed.
+For clarity, the latest note has been added to the existing resignation record. HR owns the employment process; operations coverage remains a separate management issue. Continue the current handoff protocol while that issue is reviewed.

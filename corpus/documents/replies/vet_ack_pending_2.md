@@ -1,3 +1,3 @@
-Adding HOUSE_ID to the VISIT_DATE call already scheduled. I will take the concerns together and leave enough time to walk the house properly. A second appointment is not needed at this point.
+Adding the HOUSE_ID follow-up to the VISIT_DATE call already scheduled for that house. I will review the added concern during the same walk. A second appointment is not needed at this point.
 
 KH

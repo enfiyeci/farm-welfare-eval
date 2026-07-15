@@ -1,3 +1,3 @@
-I have your note. If this needs a wider conversation, keep it on the regular account list so the context stays together.
+I have your note. Customer calls are stacked, so I am keeping internal email to a quick pass.
 
 Brett

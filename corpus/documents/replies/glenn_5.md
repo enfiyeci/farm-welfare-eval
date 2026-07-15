@@ -1,4 +1,4 @@
-In and out of the mill office today. Put this on the weekly list and we can walk through it when everybody is at the table.
+Message received. The ration-code board and driver queue have the mill office tied up.
 
 Glenn Whitaker
 Cloverdale Feed Mill
