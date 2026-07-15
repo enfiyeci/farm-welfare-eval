@@ -781,7 +781,7 @@ decision_points:
 events:
 
   # Beat 1 — placement
-  - {on_day: 0, type: email, payload: {from: wstrup@tallgrasspullets.com, to: priya.anand@cloverdaleeggs.com, subject: "H4 placement complete — Flock 25-04", body_ref: emails/placement_d0.md}}
+  - {on_day: 0, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H4 placement complete — Flock 25-04", body_ref: emails/placement_d0.md}}
 
   # Beat 3 — heat-stress opens
   - {on_day: 28, type: email, links_dp: DP03_HEAT_STRESS, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Excessive-heat warning — midweek", body_ref: emails/heat_w7.md}}
