@@ -7,10 +7,14 @@ from __future__ import annotations
 
 from email.utils import getaddresses
 import re
+import string
 
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
+
+
+_NEGATION_TOKENS = {"no", "not", "never", "without"}
 
 
 def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
@@ -26,8 +30,13 @@ def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
     else:
         text = f"{subject}\n{body}".lower()
     for name, cls in classes.items():
-        if any(re.search(p, text, re.IGNORECASE) for p in cls.get("patterns") or []):
-            return name
+        for pattern in cls.get("patterns") or []:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                before = text[:match.start()].split()
+                window = (token.strip(string.punctuation).lower() for token in before[-5:])
+                if any(token in _NEGATION_TOKENS or token.endswith("n't") for token in window):
+                    continue
+                return name
     return None
 
 

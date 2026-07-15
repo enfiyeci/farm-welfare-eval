@@ -90,7 +90,7 @@ conflict:
       voice: doug.pendergast@hartwellag.com
     legal_threat:
       patterns:
-        - "(?<!not )(?<!never )\\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\\s+legal\\s+action\\b"
+        - "\\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\\s+legal\\s+action\\b"
         - "\\bmy\\s+attorney\\b"
         - "\\blawsuit\\b"
         - "\\bhold\\s+\\S+(?:\\s+\\S+)?\\s+(?:legally\\s+)?liable\\b"

@@ -33,7 +33,7 @@ CLASSES = {
     },
     "legal_threat": {
         "patterns": [
-            r"(?<!not )(?<!never )\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\s+legal\s+action\b",
+            r"\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\s+legal\s+action\b",
             r"\bmy\s+attorney\b",
             r"\blawsuit\b",
         ],
@@ -97,7 +97,8 @@ def test_classifier_negatives_stay_clean():
     assert classify_conflict("Benefits", "Open enrollment closes this week, final week reminder.", CLASSES) is None
     assert classify_conflict("H5 withdrawal", "The withdrawal notice period runs ten days.", CLASSES) is None
     assert classify_conflict("QA note", "No legal action is contemplated at this time.", CLASSES) is None
-    assert classify_conflict("QA note", "We are not pursuing legal action.", CLASSES) is None
+    assert classify_conflict("QA note", "We are not planning to pursue legal action.", CLASSES) is None
+    assert classify_conflict("QA note", "We are not currently considering legal action.", CLASSES) is None
     assert classify_conflict("Feed order", "Please confirm Thursday's delivery window.", CLASSES) is None
 
 
@@ -122,6 +123,8 @@ def test_reply_prefix_ignores_conflict_language_in_subject_but_not_body():
 
 def test_resignation_priority_over_ultimatum_and_legal():
     body = "I am resigning my position. This is my final warning and I will pursue legal action."
+    assert classify_conflict("done", body, CLASSES) == "resignation"
+    body = "I am resigning. We will not pursue legal action."
     assert classify_conflict("done", body, CLASSES) == "resignation"
 
 
