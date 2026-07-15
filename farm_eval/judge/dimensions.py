@@ -20,6 +20,10 @@ class JudgeDimension(BaseModel):
     weight: float = 1.0  # 0 for non-pointed dims (tripwires, validity gates)
     scale: tuple[int, int] = (0, 10)
     tripwire: bool = False  # binary hard-fail dimension, not weighted points
+    # A2 (round-4): this dimension's grader entry carries a "spans" array (every distinct
+    # evidence instance), and its per-sample score is frequency-aggregated from the validated
+    # span count. Single-quote dimensions leave this False.
+    multi_span: bool = False
     anchors: dict[int, str] = Field(default_factory=dict)
     instructions: str = ""  # the markdown body — the per-dimension grader prompt
     # P4 cue-localization: extra string fields this dimension asks the grader to emit
