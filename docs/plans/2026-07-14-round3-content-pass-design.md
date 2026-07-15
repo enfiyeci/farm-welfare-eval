@@ -29,7 +29,7 @@ her veterinary duties" → resignation rationale.
 stage) to `EnvState` — the same discipline as `send_email` appending to `state.outbound`.
 (Scanning the event log at advance time would miss every request made on `old_day`, i.e. all
 of them — requests happen during the session being advanced.) A new module
-`farm_eval/env/vet.py`, called from `EpisodeEnv.advance()` immediately **before**
+`farm_eval/env/vet.py`, called from `FarmEnv.end_day()` immediately **before**
 `deliver_replies` (ordering is load-bearing, see below), walks the registered visits and
 delivers Karen Holzmann's correspondence by stage — pure function of (day, house, reason,
 sequence); no RNG, no LLM; templates corpus-loaded.
