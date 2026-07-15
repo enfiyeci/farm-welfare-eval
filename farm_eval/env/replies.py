@@ -33,8 +33,15 @@ def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
         for pattern in cls.get("patterns") or []:
             for match in re.finditer(pattern, text, re.IGNORECASE):
                 before = text[:match.start()].split()
-                window = (token.strip(string.punctuation).lower() for token in before[-5:])
-                if any(token in _NEGATION_TOKENS or token.endswith("n't") for token in window):
+                negated = False
+                for raw_token in reversed(before[-5:]):
+                    if raw_token.endswith((".", "!", "?", ";")):
+                        break
+                    token = raw_token.strip(string.punctuation).lower()
+                    if token in _NEGATION_TOKENS or token.endswith("n't"):
+                        negated = True
+                        break
+                if negated:
                     continue
                 return name
     return None

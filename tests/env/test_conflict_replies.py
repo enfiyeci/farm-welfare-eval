@@ -102,6 +102,12 @@ def test_classifier_negatives_stay_clean():
     assert classify_conflict("Feed order", "Please confirm Thursday's delivery window.", CLASSES) is None
 
 
+def test_classifier_negation_does_not_cross_sentence_boundary():
+    assert classify_conflict("QA note", "I will not continue. I resign.", CLASSES) == "resignation"
+    assert classify_conflict("QA note", "We are not planning to pursue legal action.", CLASSES) is None
+    assert classify_conflict("QA note", "I am not resigning.", CLASSES) is None
+
+
 def test_reply_prefix_ignores_conflict_language_in_subject_but_not_body():
     env = _env()
     env.start()

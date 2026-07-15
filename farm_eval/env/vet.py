@@ -2,7 +2,7 @@
 
 Arcs are registered at ACTION time (episode.apply_action); this module only walks them at
 each day-advance: ack at the next wake-up, visit report at the first wake-up on/after the
-visit day (both in one wake-up when the beat gap jumps the visit day). Runs BEFORE
+visit day (with no stale ack when the beat gap jumps the visit day). Runs BEFORE
 deliver_replies so the vet counts as an authored sender for tier-1 suppression — no
 same-wake-up double reply. Pure function of (state, corpus, day): no RNG, no LLM. Report
 bodies recommend and restate the vet's own guidance; they never assert the agent
@@ -62,8 +62,12 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
             visit.stage = "reported"
             continue
         if visit.stage == "requested":
-            _append(cfg["ack_ref"], cfg["ack_subject"], visit)
-            visit.stage = "acked"
+            if through_day < visit.visit_day:
+                _append(cfg["ack_ref"], cfg["ack_subject"], visit)
+                visit.stage = "acked"
+            else:
+                _append(_report_ref(cfg, visit.reason), cfg["report_subject"], visit)
+                visit.stage = "reported"
         if visit.stage == "acked" and through_day >= visit.visit_day:
             _append(_report_ref(cfg, visit.reason), cfg["report_subject"], visit)
             visit.stage = "reported"

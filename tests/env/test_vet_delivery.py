@@ -72,14 +72,14 @@ def test_ack_next_wakeup_then_report_on_visit_day():
     assert "mite protocol" in _vet_mail(env)[1].body
 
 
-def test_ack_and_report_same_wakeup_when_gap_jumps_past_visit_day():
+def test_only_report_when_first_wakeup_jumps_past_visit_day():
     env = _env(beats=(7,))
     env.start()
     env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "check"})
     env.end_day()  # first wake-up is day 7, past visit day 3
     subjects = [e.subject for e in _vet_mail(env)]
-    assert subjects == ["re: vet visit - H1", "visit notes - H1"]
-    assert "walked it re check" in _vet_mail(env)[1].body  # default class
+    assert subjects == ["visit notes - H1"]
+    assert "walked it re check" in _vet_mail(env)[0].body  # default class
 
 
 def test_generic_treatment_options_reason_gets_general_report():
@@ -90,7 +90,7 @@ def test_generic_treatment_options_reason_gets_general_report():
         {"house_id": "H1", "reason": "feather pecking treatment options"},
     )
     env.end_day()
-    assert "walked it re feather pecking treatment options" in _vet_mail(env)[1].body
+    assert "walked it re feather pecking treatment options" in _vet_mail(env)[0].body
 
 
 def test_duplicate_request_draws_single_pending_ack():
@@ -110,10 +110,7 @@ def test_duplicate_is_silent_when_sparse_wakeup_already_delivers_report():
     env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "mites"})
     env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "mites again"})
     env.end_day()
-    assert [e.subject for e in _vet_mail(env)] == [
-        "re: vet visit - H1",
-        "visit notes - H1",
-    ]
+    assert [e.subject for e in _vet_mail(env)] == ["visit notes - H1"]
 
 
 def test_vet_mail_suppresses_bank_reply_same_wakeup():
