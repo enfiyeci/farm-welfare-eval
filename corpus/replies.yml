@@ -109,17 +109,89 @@ personas:
       - replies/glenn_11.md
       - replies/glenn_12.md
   brett.maloof@cloverdaleeggs.com:
-    bank: [replies/brett_1.md, replies/brett_2.md, replies/brett_3.md]
+    bank:
+      - replies/brett_1.md
+      - replies/brett_2.md
+      - replies/brett_3.md
+      - replies/brett_4.md
+      - replies/brett_5.md
+      - replies/brett_6.md
+      - replies/brett_7.md
+      - replies/brett_8.md
+      - replies/brett_9.md
+      - replies/brett_10.md
+      - replies/brett_11.md
+      - replies/brett_12.md
   kholzmann@prairieavian.com:
-    bank: [replies/karen_1.md, replies/karen_2.md, replies/karen_3.md]
+    bank:
+      - replies/karen_1.md
+      - replies/karen_2.md
+      - replies/karen_3.md
+      - replies/karen_4.md
+      - replies/karen_5.md
+      - replies/karen_6.md
+      - replies/karen_7.md
+      - replies/karen_8.md
+      - replies/karen_9.md
+      - replies/karen_10.md
+      - replies/karen_11.md
+      - replies/karen_12.md
   janelle.forsythe@hartwellag.com:
-    bank: [replies/janelle_1.md, replies/janelle_2.md, replies/janelle_3.md]
+    bank:
+      - replies/janelle_1.md
+      - replies/janelle_2.md
+      - replies/janelle_3.md
+      - replies/janelle_4.md
+      - replies/janelle_5.md
+      - replies/janelle_6.md
+      - replies/janelle_7.md
+      - replies/janelle_8.md
+      - replies/janelle_9.md
+      - replies/janelle_10.md
+      - replies/janelle_11.md
+      - replies/janelle_12.md
   doug.pendergast@hartwellag.com:
-    bank: [replies/doug_1.md, replies/doug_2.md, replies/doug_3.md]
+    bank:
+      - replies/doug_1.md
+      - replies/doug_2.md
+      - replies/doug_3.md
+      - replies/doug_4.md
+      - replies/doug_5.md
+      - replies/doug_6.md
+      - replies/doug_7.md
+      - replies/doug_8.md
+      - replies/doug_9.md
+      - replies/doug_10.md
+      - replies/doug_11.md
+      - replies/doug_12.md
   wstrup@tallgrasspullets.com:
-    bank: [replies/wendell_1.md, replies/wendell_2.md, replies/wendell_3.md]
+    bank:
+      - replies/wendell_1.md
+      - replies/wendell_2.md
+      - replies/wendell_3.md
+      - replies/wendell_4.md
+      - replies/wendell_5.md
+      - replies/wendell_6.md
+      - replies/wendell_7.md
+      - replies/wendell_8.md
+      - replies/wendell_9.md
+      - replies/wendell_10.md
+      - replies/wendell_11.md
+      - replies/wendell_12.md
   hramos@reliablepoultry.com:
-    bank: [replies/hector_1.md, replies/hector_2.md, replies/hector_3.md]
+    bank:
+      - replies/hector_1.md
+      - replies/hector_2.md
+      - replies/hector_3.md
+      - replies/hector_4.md
+      - replies/hector_5.md
+      - replies/hector_6.md
+      - replies/hector_7.md
+      - replies/hector_8.md
+      - replies/hector_9.md
+      - replies/hector_10.md
+      - replies/hector_11.md
+      - replies/hector_12.md
   helpdesk@hartwellag.com:
     bank: [replies/helpdesk_auto.md]
   bulletin@unitedegg.org:
