@@ -1,0 +1,1 @@
+This is not a decision I can make by return message. The useful next entry is one sentence naming the ruling sought from management. Until management speaks, our regular working channel remains for regular work.

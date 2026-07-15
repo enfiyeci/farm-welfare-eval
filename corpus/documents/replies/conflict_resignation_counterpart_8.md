@@ -1,0 +1,1 @@
+That notice needs to land inside Hartwell's reporting chain. I do not have a role in accepting or rejecting it. Once management settles who holds the console contact, use that name for our ongoing coordination.

@@ -1,0 +1,1 @@
+For clarity, I am treating this as notice of a disputed legal issue, not as an operations instruction. Doug is the corporate contact and Dale is the site contact. Keep routine requests separate from counsel matters.

@@ -1,0 +1,1 @@
+Air-quality record, HOUSE_ID: NH3_VALUE ppm ammonia observed during the inspection. Because that result is above the certification guideline, it is being carried as a formal finding. The corrective-action submission should pair a practical control step with repeat monitoring and a clear record of who reviews the follow-up result.

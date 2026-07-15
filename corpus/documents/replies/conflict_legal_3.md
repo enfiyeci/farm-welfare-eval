@@ -1,0 +1,1 @@
+Your reference to legal action moves this exchange out of ordinary operations correspondence. The message is being retained for counsel and HR review. Keep any legal assertions on this thread, but direct farm decisions through the managers who normally own them.

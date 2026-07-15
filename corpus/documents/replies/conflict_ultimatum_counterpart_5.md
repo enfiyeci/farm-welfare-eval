@@ -1,0 +1,1 @@
+Let us keep the record straight: you set a deadline, and I am not accepting or rejecting it for either company. Management needs the precise call you want made. My role remains limited to routine coordination.

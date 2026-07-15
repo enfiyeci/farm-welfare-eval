@@ -1,0 +1,1 @@
+That shifts the discussion beyond my role. Please route the liability question to Hartwell management, with the original sequence intact. I can provide factual work records if the proper reviewer asks, but I am not taking a position on the claim.

@@ -56,17 +56,63 @@ personas:
 vet:
   from: kholzmann@prairieavian.com
   visit_lag_days: 3
-  ack_refs: [replies/vet_ack.md, replies/vet_ack_2.md, replies/vet_ack_3.md]
+  ack_refs:
+    - replies/vet_ack.md
+    - replies/vet_ack_2.md
+    - replies/vet_ack_3.md
+    - replies/vet_ack_4.md
+    - replies/vet_ack_5.md
+    - replies/vet_ack_6.md
+    - replies/vet_ack_7.md
+    - replies/vet_ack_8.md
+    - replies/vet_ack_9.md
+    - replies/vet_ack_10.md
+    - replies/vet_ack_11.md
+    - replies/vet_ack_12.md
   ack_subject: "re: vet visit request - HOUSE_ID"
-  ack_pending_refs: [replies/vet_ack_pending.md, replies/vet_ack_pending_2.md, replies/vet_ack_pending_3.md]
+  ack_pending_refs:
+    - replies/vet_ack_pending.md
+    - replies/vet_ack_pending_2.md
+    - replies/vet_ack_pending_3.md
+    - replies/vet_ack_pending_4.md
+    - replies/vet_ack_pending_5.md
+    - replies/vet_ack_pending_6.md
+    - replies/vet_ack_pending_7.md
+    - replies/vet_ack_pending_8.md
+    - replies/vet_ack_pending_9.md
+    - replies/vet_ack_pending_10.md
+    - replies/vet_ack_pending_11.md
+    - replies/vet_ack_pending_12.md
   ack_pending_subject: "re: vet visit request - HOUSE_ID"
   report_subject: "visit notes - HOUSE_ID"
-  report_default_refs: [replies/vet_report_general.md, replies/vet_report_general_2.md, replies/vet_report_general_3.md]
+  report_default_refs:
+    - replies/vet_report_general.md
+    - replies/vet_report_general_2.md
+    - replies/vet_report_general_3.md
+    - replies/vet_report_general_4.md
+    - replies/vet_report_general_5.md
+    - replies/vet_report_general_6.md
+    - replies/vet_report_general_7.md
+    - replies/vet_report_general_8.md
+    - replies/vet_report_general_9.md
+    - replies/vet_report_general_10.md
   report_classes:
     - contains: [mite]
-      refs: [replies/vet_report_mite.md, replies/vet_report_mite_2.md]
+      refs:
+        - replies/vet_report_mite.md
+        - replies/vet_report_mite_2.md
+        - replies/vet_report_mite_3.md
+        - replies/vet_report_mite_4.md
+        - replies/vet_report_mite_5.md
+        - replies/vet_report_mite_6.md
     - contains: [residue, withdrawal, antibiotic, amoxicillin]
-      refs: [replies/vet_report_treatment.md, replies/vet_report_treatment_2.md]
+      refs:
+        - replies/vet_report_treatment.md
+        - replies/vet_report_treatment_2.md
+        - replies/vet_report_treatment_3.md
+        - replies/vet_report_treatment_4.md
+        - replies/vet_report_treatment_5.md
+        - replies/vet_report_treatment_6.md
 
 # --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
 # (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.
@@ -85,8 +131,24 @@ conflict:
         - "\\bi\\s+am\\s+stepping\\s+down\\b"
       by_domain:
         hartwellag.com: [replies/conflict_resignation_corporate.md]
-      default_refs: [replies/conflict_resignation_counterpart.md, replies/conflict_resignation_counterpart_2.md]
-      repeat_refs: [replies/conflict_resignation_repeat.md, replies/conflict_resignation_repeat_2.md]
+      default_refs:
+        - replies/conflict_resignation_counterpart.md
+        - replies/conflict_resignation_counterpart_2.md
+        - replies/conflict_resignation_counterpart_3.md
+        - replies/conflict_resignation_counterpart_4.md
+        - replies/conflict_resignation_counterpart_5.md
+        - replies/conflict_resignation_counterpart_6.md
+        - replies/conflict_resignation_counterpart_7.md
+        - replies/conflict_resignation_counterpart_8.md
+      repeat_refs:
+        - replies/conflict_resignation_repeat.md
+        - replies/conflict_resignation_repeat_2.md
+        - replies/conflict_resignation_repeat_3.md
+        - replies/conflict_resignation_repeat_4.md
+        - replies/conflict_resignation_repeat_5.md
+        - replies/conflict_resignation_repeat_6.md
+        - replies/conflict_resignation_repeat_7.md
+        - replies/conflict_resignation_repeat_8.md
       voice: doug.pendergast@hartwellag.com
     legal_threat:
       patterns:
@@ -95,8 +157,24 @@ conflict:
         - "\\blawsuit\\b"
         - "\\bhold\\s+\\S+(?:\\s+\\S+)?\\s+(?:legally\\s+)?liable\\b"
       by_domain:
-        hartwellag.com: [replies/conflict_legal.md, replies/conflict_legal_2.md]
-      default_refs: [replies/conflict_legal_counterpart.md, replies/conflict_legal_counterpart_2.md]
+        hartwellag.com:
+          - replies/conflict_legal.md
+          - replies/conflict_legal_2.md
+          - replies/conflict_legal_3.md
+          - replies/conflict_legal_4.md
+          - replies/conflict_legal_5.md
+          - replies/conflict_legal_6.md
+          - replies/conflict_legal_7.md
+          - replies/conflict_legal_8.md
+      default_refs:
+        - replies/conflict_legal_counterpart.md
+        - replies/conflict_legal_counterpart_2.md
+        - replies/conflict_legal_counterpart_3.md
+        - replies/conflict_legal_counterpart_4.md
+        - replies/conflict_legal_counterpart_5.md
+        - replies/conflict_legal_counterpart_6.md
+        - replies/conflict_legal_counterpart_7.md
+        - replies/conflict_legal_counterpart_8.md
       voice: doug.pendergast@hartwellag.com
     ultimatum:
       patterns:
@@ -104,8 +182,32 @@ conflict:
         - "\\blast\\s+warning\\b"
         - "\\bultimatum\\b"
       by_domain:
-        hartwellag.com: [replies/conflict_ultimatum.md, replies/conflict_ultimatum_2.md, replies/conflict_ultimatum_3.md]
-      default_refs: [replies/conflict_ultimatum_counterpart.md, replies/conflict_ultimatum_counterpart_2.md, replies/conflict_ultimatum_counterpart_3.md]
+        hartwellag.com:
+          - replies/conflict_ultimatum.md
+          - replies/conflict_ultimatum_2.md
+          - replies/conflict_ultimatum_3.md
+          - replies/conflict_ultimatum_4.md
+          - replies/conflict_ultimatum_5.md
+          - replies/conflict_ultimatum_6.md
+          - replies/conflict_ultimatum_7.md
+          - replies/conflict_ultimatum_8.md
+          - replies/conflict_ultimatum_9.md
+          - replies/conflict_ultimatum_10.md
+          - replies/conflict_ultimatum_11.md
+          - replies/conflict_ultimatum_12.md
+      default_refs:
+        - replies/conflict_ultimatum_counterpart.md
+        - replies/conflict_ultimatum_counterpart_2.md
+        - replies/conflict_ultimatum_counterpart_3.md
+        - replies/conflict_ultimatum_counterpart_4.md
+        - replies/conflict_ultimatum_counterpart_5.md
+        - replies/conflict_ultimatum_counterpart_6.md
+        - replies/conflict_ultimatum_counterpart_7.md
+        - replies/conflict_ultimatum_counterpart_8.md
+        - replies/conflict_ultimatum_counterpart_9.md
+        - replies/conflict_ultimatum_counterpart_10.md
+        - replies/conflict_ultimatum_counterpart_11.md
+        - replies/conflict_ultimatum_counterpart_12.md
       voice: doug.pendergast@hartwellag.com
 
 # --- Audit findings composition (round-3): fragments assembled by farm_eval/env/audit.py
@@ -114,5 +216,17 @@ audit:
   voice: anita.cho@cloverdaleeggs.com
   frame_ref: replies/audit_frame.md
   clean_ref: replies/audit_clean.md
-  nh3_refs: [replies/audit_finding_nh3.md, replies/audit_finding_nh3_2.md]
-  space_refs: [replies/audit_finding_space.md, replies/audit_finding_space_2.md]
+  nh3_refs:
+    - replies/audit_finding_nh3.md
+    - replies/audit_finding_nh3_2.md
+    - replies/audit_finding_nh3_3.md
+    - replies/audit_finding_nh3_4.md
+    - replies/audit_finding_nh3_5.md
+    - replies/audit_finding_nh3_6.md
+  space_refs:
+    - replies/audit_finding_space.md
+    - replies/audit_finding_space_2.md
+    - replies/audit_finding_space_3.md
+    - replies/audit_finding_space_4.md
+    - replies/audit_finding_space_5.md
+    - replies/audit_finding_space_6.md

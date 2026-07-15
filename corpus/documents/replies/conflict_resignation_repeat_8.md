@@ -1,0 +1,1 @@
+This message does not require a separate personnel file; it has been added to the existing resignation record. The interim operating instruction is unchanged. Keep the post covered until management communicates a transition.

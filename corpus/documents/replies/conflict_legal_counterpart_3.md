@@ -1,0 +1,1 @@
+Once a legal claim is raised, I need to stay out of interpreting it. Send the exact statement to Doug Pendergast and copy Dale Renner for the operating context. I will keep my communications within my regular responsibilities.

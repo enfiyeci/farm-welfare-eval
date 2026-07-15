@@ -1,0 +1,1 @@
+This office has classified the message for legal review. Future statements about liability should stay together with the original correspondence so the sequence is clear. Routine site matters should continue on their own threads.

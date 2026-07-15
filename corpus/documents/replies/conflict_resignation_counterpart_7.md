@@ -1,0 +1,1 @@
+I am keeping this message as correspondence, not treating it as notice accepted by your employer. Copy Hartwell HR or Doug Pendergast. I can continue exchanging necessary operating information without taking a position on the resignation.

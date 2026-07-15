@@ -1,0 +1,1 @@
+I have read the deadline as written. It does not give me authority I do not have. Put the requested decision to Dale and Doug, and send me any ordinary coordination item separately so it is not lost in the dispute.

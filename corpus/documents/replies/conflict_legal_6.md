@@ -1,0 +1,1 @@
+The legal assertion is noted without admission or determination. Hartwell counsel will control any response to it. If you also need an operational ruling, identify that request independently and send it through the responsible management contact.

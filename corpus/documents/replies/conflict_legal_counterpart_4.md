@@ -1,0 +1,1 @@
+I have kept your wording in the thread, but I cannot answer for counsel or either company. Management should receive the claim directly. Any separate day-to-day request can still come through the usual working contact.

@@ -1,0 +1,1 @@
+We will maintain the full exchange as a corporate record and route the legal question to counsel. No conclusion on the merits is being communicated here. Separate any time-sensitive farm issue from the claim and address it to operations management.

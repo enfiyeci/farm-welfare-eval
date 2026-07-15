@@ -1,0 +1,1 @@
+This account is a working contact, not your personnel channel. Please place the resignation directly with Hartwell management. I will keep operational requests separate and work through the contact they identify.

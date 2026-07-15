@@ -1,0 +1,1 @@
+The escalation route is unchanged by a final-warning heading. Dale handles site authority; Doug handles Hartwell corporate issues. Address the decision to them and keep this account copied only where my work is involved.

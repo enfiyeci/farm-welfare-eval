@@ -1,0 +1,1 @@
+Resignation is outside my authority. The clean route is Doug for the employment notice and Dale for site coverage. Until they respond, send only ordinary coordination here and I will treat it as such.

@@ -1,0 +1,1 @@
+The legal language needs a management and counsel review above me. I am preserving the exchange as received and will not add conclusions to it. Address further claim-related correspondence to Doug, copying Dale only for site context.

@@ -1,0 +1,1 @@
+This office is documenting the ultimatum without adopting its terms. Operations staff should continue using established escalation contacts. Any decision request must identify the accountable manager and the consequence requiring review.

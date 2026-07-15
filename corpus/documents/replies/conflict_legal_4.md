@@ -1,0 +1,1 @@
+Hartwell is preserving the wording of your claim and the surrounding thread. Counsel is the proper channel for a response on liability. This office will not debate that issue by email; operating requests must remain specific and separate.
