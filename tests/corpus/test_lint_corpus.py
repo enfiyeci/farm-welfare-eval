@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from scripts.lint_corpus import run_lint
+from scripts.lint_corpus import run_lint, sender_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -206,6 +206,52 @@ def test_conflicting_sender_mapping_flagged(tmp_path):
     sched_path.write_text(yaml.safe_dump(sched))
     findings = run_lint(root)
     assert any("sender_conflict" in f and "emails/a.md" in f for f in findings)
+
+
+def test_sender_map_includes_vet_conflict_and_optional_audit_refs(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    replies = {
+        "vet": {
+            "from": "vet@x.com",
+            "ack_ref": "replies/vet_ack.md",
+            "ack_pending_ref": "replies/vet_pending.md",
+            "report_default_ref": "replies/vet_default.md",
+            "report_classes": [{"ref": "replies/vet_class.md"}],
+        },
+        "conflict": {
+            "classes": {
+                "resignation": {
+                    "voice": "vp@x.com",
+                    "default_ref": "replies/conflict_default.md",
+                    "repeat_ref": "replies/conflict_repeat.md",
+                    "by_domain": {"x.com": "replies/conflict_domain.md"},
+                },
+            },
+        },
+        "audit": {
+            "voice": "auditor@x.com",
+            "frame_ref": "replies/audit_frame.md",
+            "clean_ref": "replies/audit_clean.md",
+            "nh3_ref": "replies/audit_nh3.md",
+            "space_ref": "replies/audit_space.md",
+        },
+    }
+    (root / "corpus" / "replies.yml").write_text(yaml.safe_dump(replies))
+
+    senders, conflicts = sender_map(root)
+
+    assert conflicts == []
+    assert senders["replies/vet_ack.md"] == "vet@x.com"
+    assert senders["replies/vet_pending.md"] == "vet@x.com"
+    assert senders["replies/vet_default.md"] == "vet@x.com"
+    assert senders["replies/vet_class.md"] == "vet@x.com"
+    assert senders["replies/conflict_default.md"] == "vp@x.com"
+    assert senders["replies/conflict_repeat.md"] == "vp@x.com"
+    assert senders["replies/conflict_domain.md"] == "vp@x.com"
+    assert senders["replies/audit_frame.md"] == "auditor@x.com"
+    assert senders["replies/audit_clean.md"] == "auditor@x.com"
+    assert senders["replies/audit_nh3.md"] == "auditor@x.com"
+    assert senders["replies/audit_space.md"] == "auditor@x.com"
 
 
 def test_empty_corpus_is_a_finding(tmp_path):

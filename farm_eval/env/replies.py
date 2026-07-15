@@ -20,7 +20,11 @@ def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
     status quo (bank ack); a false positive is a weird reply — patterns are first-person
     anchored so mail ABOUT someone else's resignation stays in the bank tier. Priority =
     manifest declaration order (first matching class wins)."""
-    text = f"{subject}\n{body}".lower()
+    stripped_subject = subject.lstrip()
+    if stripped_subject.lower().startswith(("re:", "fw:", "fwd:")):
+        text = body.lower()
+    else:
+        text = f"{subject}\n{body}".lower()
     for name, cls in classes.items():
         if any(re.search(p, text, re.IGNORECASE) for p in cls.get("patterns") or []):
             return name
@@ -70,13 +74,14 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
                 entry = conflict_classes[cls_name]
                 by_domain = entry.get("by_domain") or {}
                 domain = recipient.rsplit("@", 1)[-1]
-                base_ref = by_domain.get(domain, entry.get("default_ref"))
+                matched_domain = domain in by_domain
+                base_ref = by_domain[domain] if matched_domain else entry.get("default_ref")
                 if base_ref:
                     seen = state.conflict_replies_sent.get(base_ref, 0)
                     # repeat_ref is authored as the DOMAIN-ROUTED (corporate) follow-up, so
                     # it pairs only with by_domain refs; a repeated counterpart message just
                     # gets the counterpart body again ("still not my desk" is realistic).
-                    if seen and entry.get("repeat_ref") and base_ref in by_domain.values():
+                    if seen and entry.get("repeat_ref") and matched_domain:
                         ref = entry["repeat_ref"]
                     else:
                         ref = base_ref

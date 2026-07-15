@@ -31,8 +31,8 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
     """(body_ref -> sender email, conflicts) — ref relative to corpus/documents/.
 
     Sources: schedule event payloads (from + body_ref/variants) and, when present, the
-    reply manifest (corpus/replies.yml personas' banks). A file neither names is unmapped
-    — an authoring error (orphan or missing schedule entry) surfaced as a finding.
+    reply manifest (persona banks plus generated vet/conflict/audit replies). A file none
+    names is unmapped — an authoring error surfaced as a finding.
 
     conflicts is a list of (ref, first_sender, second_sender) tuples for any ref that
     is assigned two DIFFERENT senders across the sources above; re-assigning the same
@@ -63,6 +63,23 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for sender, pcfg in (replies.get("personas") or {}).items():
             for ref in pcfg.get("bank", []):
                 assign(ref, sender)
+        vet = replies.get("vet") or {}
+        for key in ("ack_ref", "ack_pending_ref", "report_default_ref"):
+            if vet.get(key):
+                assign(vet[key], vet.get("from", ""))
+        for row in vet.get("report_classes") or []:
+            if row.get("ref"):
+                assign(row["ref"], vet.get("from", ""))
+        for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
+            voice = cls.get("voice", "")
+            for ref in [cls.get("default_ref"), cls.get("repeat_ref"),
+                        *(cls.get("by_domain") or {}).values()]:
+                if ref:
+                    assign(ref, voice)
+        audit = replies.get("audit") or {}
+        for key in ("frame_ref", "clean_ref", "nh3_ref", "space_ref"):
+            if audit.get(key):
+                assign(audit[key], audit.get("voice", ""))
         if replies.get("bounce_ref"):
             assign(replies["bounce_ref"], replies.get("bounce_from", ""))
     return senders, conflicts

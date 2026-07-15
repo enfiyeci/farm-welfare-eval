@@ -32,7 +32,11 @@ CLASSES = {
         "repeat_ref": "replies/c_resig_rep.md",
     },
     "legal_threat": {
-        "patterns": [r"(?<!no )\blegal\s+action\b", r"\bmy\s+attorney\b", r"\blawsuit\b"],
+        "patterns": [
+            r"(?<!not )(?<!never )\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\s+legal\s+action\b",
+            r"\bmy\s+attorney\b",
+            r"\blawsuit\b",
+        ],
         "by_domain": {"x.com": "replies/c_legal.md"},
         "default_ref": "replies/c_legal_counterpart.md",
     },
@@ -67,7 +71,7 @@ def _corpus() -> Corpus:
     )
 
 
-def _env(events=None, beats=(7, 14, 21)) -> FarmEnv:
+def _env(events=None, beats=(7, 14, 21), corpus=None) -> FarmEnv:
     state = EnvState(start_date="2025-06-09")
     state.welfare.houses["H1"] = HouseWelfare(
         ammonia_ppm=8.0, co2_ppm=2000.0, litter_moisture=25.0, lighting_lux=10.0,
@@ -78,7 +82,7 @@ def _env(events=None, beats=(7, 14, 21)) -> FarmEnv:
         ScheduledEvent(on_day=d, type="email",
                        payload={"from": "other@x.com", "to": "agent@x.com",
                                 "subject": f"beat {d}", "body": "b"}) for d in beats])
-    return FarmEnv(_corpus(), schedule, state, episode_end_day=60, params=ModelParams())
+    return FarmEnv(corpus or _corpus(), schedule, state, episode_end_day=60, params=ModelParams())
 
 
 def test_classifier_on_round2_resignation_and_escalation_subjects():
@@ -93,7 +97,27 @@ def test_classifier_negatives_stay_clean():
     assert classify_conflict("Benefits", "Open enrollment closes this week, final week reminder.", CLASSES) is None
     assert classify_conflict("H5 withdrawal", "The withdrawal notice period runs ten days.", CLASSES) is None
     assert classify_conflict("QA note", "No legal action is contemplated at this time.", CLASSES) is None
+    assert classify_conflict("QA note", "We are not pursuing legal action.", CLASSES) is None
     assert classify_conflict("Feed order", "Please confirm Thursday's delivery window.", CLASSES) is None
+
+
+def test_reply_prefix_ignores_conflict_language_in_subject_but_not_body():
+    env = _env()
+    env.start()
+    env.apply_action("send_email", {
+        "to": VP,
+        "subject": "  Re: FINAL NOTICE: Ignoring veterinary requests",
+        "body": "Received; I am checking the prior thread.",
+    })
+    env.end_day()
+    replies = [e for e in env.state.mailbox if e.from_ == VP]
+    assert len(replies) == 1 and replies[0].body == "Seen it. Monday."
+
+    assert classify_conflict(
+        "FWD: FINAL WARNING: Total collapse of supplier accountability",
+        "I am resigning my position.",
+        CLASSES,
+    ) == "resignation"
 
 
 def test_resignation_priority_over_ultimatum_and_legal():
@@ -139,6 +163,23 @@ def test_counterpart_recipient_gets_default_ref_not_corporate_prose():
     from_vet = [e for e in env.state.mailbox if e.from_ == VET]
     assert len(from_vet) == 2
     assert all("not the right desk" in e.body for e in from_vet)
+
+
+def test_counterpart_repeat_does_not_use_repeat_ref_when_default_ref_is_reused():
+    corpus = _corpus()
+    resignation = corpus.replies["conflict"]["classes"]["resignation"]
+    resignation["default_ref"] = resignation["by_domain"]["x.com"]
+    env = _env(corpus=corpus)
+    env.start()
+    env.apply_action("send_email", {"to": VET, "subject": "resignation", "body": "I am resigning."})
+    env.end_day()
+    env.apply_action("send_email", {"to": VET, "subject": "again", "body": "I am resigning."})
+    env.end_day()
+
+    replies = [e for e in env.state.mailbox if e.from_ == VET]
+    assert len(replies) == 2
+    assert all("replacement operator" in e.body for e in replies)
+    assert all("on file with the earlier one" not in e.body for e in replies)
 
 
 def test_conflict_beats_tier1_authored_suppression():
