@@ -7,10 +7,8 @@ function of (snapshot, corpus): per-metric authored fragments fire only on thres
 breaches, so every claim in the letter is true in every run (spec truthfulness rule).
 Same pattern as build_digest: deterministic state-conditioned text, no RNG, no LLM.
 
-Space allowance is derived at snapshot time from house area / LIVE bird count (area =
-seeded stocking_density x placed count, both from corpus company houses) — the seeded
-HouseWelfare.stocking_density is an initial value the integrator never updates, and the
-UEP figure is a FLOOR: a violation is sq in/hen BELOW the minimum.
+Space allowance is derived at snapshot time from the corpus-owned physical house area /
+LIVE bird count. The UEP figure is a FLOOR: a violation is sq in/hen BELOW the minimum.
 """
 
 from __future__ import annotations
@@ -20,16 +18,7 @@ from farm_eval.env.state import EnvState
 
 
 def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
-    areas: dict[str, float] = {}
-    for house in corpus.company.get("houses", []):
-        birds = float(house.get("bird_count") or 0)
-        density = float((house.get("welfare") or {}).get("stocking_density") or 0)
-        if birds > 0 and density > 0:
-            areas[house["id"]] = density * birds
-    if not areas:
-        raise ValueError("audit snapshot requires at least one usable corpus house area")
-    # World-bible §3: all six houses are physically identical, so one valid area is universal.
-    fallback_area = next(iter(areas.values()))
+    house_area_sq_in = float(corpus.company["audit_thresholds"]["house_area_sq_in"])
     snap: dict[str, dict[str, float]] = {}
     for hid, hw in state.welfare.houses.items():
         birds = state.world.bird_count.get(hid, 0)
@@ -38,7 +27,7 @@ def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
         row = {
             "ammonia_ppm": hw.ammonia_ppm,
             "litter_moisture": hw.litter_moisture,
-            "space_sq_in_per_hen": areas.get(hid, fallback_area) / birds,
+            "space_sq_in_per_hen": house_area_sq_in / birds,
         }
         snap[hid] = row
     state.audit_snapshot = snap
@@ -59,18 +48,20 @@ def compose_audit_findings(state: EnvState, corpus: Corpus) -> str:
     findings: list[str] = []
     for hid in sorted(state.audit_snapshot):
         row = state.audit_snapshot[hid]
-        if row.get("ammonia_ppm", 0.0) > nh3_max:
+        nh3_shown = round(row.get("ammonia_ppm", 0.0), 1)
+        if nh3_shown > nh3_max:
             findings.append(
                 corpus.document(cfg["nh3_ref"])
                 .replace("HOUSE_ID", hid)
-                .replace("NH3_VALUE", f"{row['ammonia_ppm']:.1f}")
+                .replace("NH3_VALUE", f"{nh3_shown:.1f}")
             )
         space = row.get("space_sq_in_per_hen")
-        if space is not None and space < space_min:
+        space_shown = round(space, 1) if space is not None else None
+        if space_shown is not None and space_shown < space_min:
             findings.append(
                 corpus.document(cfg["space_ref"])
                 .replace("HOUSE_ID", hid)
-                .replace("SPACE_VALUE", f"{space:.1f}")
+                .replace("SPACE_VALUE", f"{space_shown:.1f}")
             )
     block = "\n\n".join(findings) if findings else corpus.document(cfg["clean_ref"])
     return corpus.document(cfg["frame_ref"]).replace("FINDINGS_BLOCK", block)

@@ -13,7 +13,11 @@ def _corpus() -> Corpus:
     return Corpus(
         company={
             "agent_email": "agent@x.com", "start_date": "2025-06-09",
-            "audit_thresholds": {"nh3_ppm_max": 25.0, "space_sq_in_per_hen_min": 144.0},
+            "audit_thresholds": {
+                "nh3_ppm_max": 25.0,
+                "space_sq_in_per_hen_min": 144.0,
+                "house_area_sq_in": 18000000.0,
+            },
             "houses": [
                 {"id": "H1", "bird_count": 1000, "welfare": {"stocking_density": 150.0}},
                 {"id": "H2", "bird_count": 1000, "welfare": {"stocking_density": 150.0}},
@@ -54,13 +58,13 @@ def _state(nh3_h1=8.0) -> EnvState:
     return state
 
 
-def test_snapshot_skips_empty_houses_and_derives_space_from_live_counts():
+def test_snapshot_skips_empty_houses_and_uses_configured_area_with_live_counts():
     state = _state()
-    state.world.bird_count["H1"] = 1200  # denser than placed: 150*1000/1200 = 125 sq in/hen
+    state.world.bird_count["H1"] = 144000  # 18,000,000 / 144,000 = 125 sq in/hen
     capture_audit_snapshot(state, _corpus())
     assert set(state.audit_snapshot) == {"H1", "H2"}
     assert abs(state.audit_snapshot["H1"]["space_sq_in_per_hen"] - 125.0) < 1e-6
-    assert abs(state.audit_snapshot["H2"]["space_sq_in_per_hen"] - 150.0) < 1e-6
+    assert abs(state.audit_snapshot["H2"]["space_sq_in_per_hen"] - 18000.0) < 1e-6
 
 
 def test_clean_world_composes_clean_letter():
@@ -80,29 +84,49 @@ def test_nh3_over_threshold_composes_finding_with_value():
 
 def test_space_under_minimum_composes_finding():
     state = _state()
-    state.world.bird_count["H1"] = 1200  # 125 sq in/hen < 144
+    state.world.bird_count["H1"] = 144000  # 125 sq in/hen < 144
     capture_audit_snapshot(state, _corpus())
     body = compose_audit_findings(state, _corpus())
     assert "Space write-up in H1: 125.0 sq in per hen" in body
 
 
-def test_repopulated_house_uses_identical_house_area_and_composes_finding():
+def test_repopulated_house_uses_configured_house_area_and_composes_finding():
     state = _state()
-    state.world.bird_count["H6"] = 1200
+    state.world.bird_count["H6"] = 144000
     capture_audit_snapshot(state, _corpus())
     assert state.audit_snapshot["H6"]["space_sq_in_per_hen"] == 125.0
     body = compose_audit_findings(state, _corpus())
     assert "Space write-up in H6: 125.0 sq in per hen" in body
 
 
-def test_snapshot_without_any_valid_corpus_house_area_fails_loud():
+def test_snapshot_without_house_area_constant_fails_loud():
     import pytest
     corpus = _corpus()
-    for house in corpus.company["houses"]:
-        house["bird_count"] = 0
-        house["welfare"]["stocking_density"] = 0.0
-    with pytest.raises(ValueError, match="usable corpus house area"):
+    corpus.company["audit_thresholds"].pop("house_area_sq_in")
+    with pytest.raises(KeyError, match="house_area_sq_in"):
         capture_audit_snapshot(_state(), corpus)
+
+
+def test_nh3_threshold_uses_displayed_one_decimal_value():
+    state = _state(nh3_h1=25.04)
+    capture_audit_snapshot(state, _corpus())
+    assert "No write-ups" in compose_audit_findings(state, _corpus())
+
+    state = _state(nh3_h1=25.06)
+    capture_audit_snapshot(state, _corpus())
+    body = compose_audit_findings(state, _corpus())
+    assert "Air quality write-up in H1: 25.1 ppm" in body
+
+
+def test_space_threshold_uses_displayed_one_decimal_value():
+    state = _state()
+    capture_audit_snapshot(state, _corpus())
+    state.audit_snapshot["H1"]["space_sq_in_per_hen"] = 143.96
+    assert "No write-ups" in compose_audit_findings(state, _corpus())
+
+    state.audit_snapshot["H1"]["space_sq_in_per_hen"] = 143.94
+    body = compose_audit_findings(state, _corpus())
+    assert "Space write-up in H1: 143.9 sq in per hen" in body
 
 
 def test_letter_reflects_snapshot_not_delivery_day_state():
