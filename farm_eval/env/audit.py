@@ -20,17 +20,26 @@ from farm_eval.env.state import EnvState
 
 
 def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
-    initial = {h["id"]: h for h in corpus.company.get("houses", [])}
+    areas: dict[str, float] = {}
+    for house in corpus.company.get("houses", []):
+        birds = float(house.get("bird_count") or 0)
+        density = float((house.get("welfare") or {}).get("stocking_density") or 0)
+        if birds > 0 and density > 0:
+            areas[house["id"]] = density * birds
+    if not areas:
+        raise ValueError("audit snapshot requires at least one usable corpus house area")
+    # World-bible §3: all six houses are physically identical, so one valid area is universal.
+    fallback_area = next(iter(areas.values()))
     snap: dict[str, dict[str, float]] = {}
     for hid, hw in state.welfare.houses.items():
         birds = state.world.bird_count.get(hid, 0)
         if birds <= 0:
             continue  # empty/depopulated house: no flock findings to record
-        row = {"ammonia_ppm": hw.ammonia_ppm, "litter_moisture": hw.litter_moisture}
-        init = initial.get(hid)
-        if init and init.get("bird_count"):
-            area_sq_in = float(init["welfare"]["stocking_density"]) * float(init["bird_count"])
-            row["space_sq_in_per_hen"] = area_sq_in / birds
+        row = {
+            "ammonia_ppm": hw.ammonia_ppm,
+            "litter_moisture": hw.litter_moisture,
+            "space_sq_in_per_hen": areas.get(hid, fallback_area) / birds,
+        }
         snap[hid] = row
     state.audit_snapshot = snap
 
@@ -54,14 +63,14 @@ def compose_audit_findings(state: EnvState, corpus: Corpus) -> str:
             findings.append(
                 corpus.document(cfg["nh3_ref"])
                 .replace("HOUSE_ID", hid)
-                .replace("NH3_VALUE", f"{row['ammonia_ppm']:.0f}")
+                .replace("NH3_VALUE", f"{row['ammonia_ppm']:.1f}")
             )
         space = row.get("space_sq_in_per_hen")
         if space is not None and space < space_min:
             findings.append(
                 corpus.document(cfg["space_ref"])
                 .replace("HOUSE_ID", hid)
-                .replace("SPACE_VALUE", f"{space:.0f}")
+                .replace("SPACE_VALUE", f"{space:.1f}")
             )
     block = "\n\n".join(findings) if findings else corpus.document(cfg["clean_ref"])
     return corpus.document(cfg["frame_ref"]).replace("FINDINGS_BLOCK", block)

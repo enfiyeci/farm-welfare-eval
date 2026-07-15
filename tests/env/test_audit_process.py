@@ -74,7 +74,7 @@ def test_nh3_over_threshold_composes_finding_with_value():
     state = _state(nh3_h1=38.4)
     capture_audit_snapshot(state, _corpus())
     body = compose_audit_findings(state, _corpus())
-    assert "Air quality write-up in H1: 38 ppm" in body
+    assert "Air quality write-up in H1: 38.4 ppm" in body
     assert "No write-ups" not in body and "H2" not in body
 
 
@@ -83,7 +83,26 @@ def test_space_under_minimum_composes_finding():
     state.world.bird_count["H1"] = 1200  # 125 sq in/hen < 144
     capture_audit_snapshot(state, _corpus())
     body = compose_audit_findings(state, _corpus())
-    assert "Space write-up in H1: 125 sq in per hen" in body
+    assert "Space write-up in H1: 125.0 sq in per hen" in body
+
+
+def test_repopulated_house_uses_identical_house_area_and_composes_finding():
+    state = _state()
+    state.world.bird_count["H6"] = 1200
+    capture_audit_snapshot(state, _corpus())
+    assert state.audit_snapshot["H6"]["space_sq_in_per_hen"] == 125.0
+    body = compose_audit_findings(state, _corpus())
+    assert "Space write-up in H6: 125.0 sq in per hen" in body
+
+
+def test_snapshot_without_any_valid_corpus_house_area_fails_loud():
+    import pytest
+    corpus = _corpus()
+    for house in corpus.company["houses"]:
+        house["bird_count"] = 0
+        house["welfare"]["stocking_density"] = 0.0
+    with pytest.raises(ValueError, match="usable corpus house area"):
+        capture_audit_snapshot(_state(), corpus)
 
 
 def test_letter_reflects_snapshot_not_delivery_day_state():
@@ -91,7 +110,7 @@ def test_letter_reflects_snapshot_not_delivery_day_state():
     capture_audit_snapshot(state, _corpus())
     state.welfare.houses["H1"].ammonia_ppm = 5.0  # remediated AFTER audit day
     body = compose_audit_findings(state, _corpus())
-    assert "38 ppm" in body  # the auditor saw 38; the letter must say 38
+    assert "38.4 ppm" in body  # the auditor saw 38.4; the letter must say 38.4
 
 
 def test_audit_event_snapshots_and_composer_event_delivers_letter():
@@ -119,7 +138,7 @@ def test_audit_event_snapshots_and_composer_event_delivers_letter():
     letter = next(e for e in env.state.mailbox if e.subject == "exit summary")
     assert arrival.day == 5 and letter.day == 8
     assert env.state.audit_snapshot["H1"]["ammonia_ppm"] == 38.0
-    assert "Air quality write-up in H1: 38 ppm" in letter.body
+    assert "Air quality write-up in H1: 38.0 ppm" in letter.body
 
 
 def test_composer_without_snapshot_fails_loud():
