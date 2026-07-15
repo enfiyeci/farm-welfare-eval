@@ -35,7 +35,7 @@ def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
                 before = text[:match.start()].split()
                 negated = False
                 for raw_token in reversed(before[-5:]):
-                    if raw_token.endswith((".", "!", "?", ";")):
+                    if raw_token.rstrip("'\")]}’”").endswith((".", "!", "?", ";")):
                         break
                     token = raw_token.strip(string.punctuation).lower()
                     if token in _NEGATION_TOKENS or token.endswith("n't"):

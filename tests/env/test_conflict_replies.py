@@ -104,6 +104,7 @@ def test_classifier_negatives_stay_clean():
 
 def test_classifier_negation_does_not_cross_sentence_boundary():
     assert classify_conflict("QA note", "I will not continue. I resign.", CLASSES) == "resignation"
+    assert classify_conflict("QA note", 'I will not continue." I resign.', CLASSES) == "resignation"
     assert classify_conflict("QA note", "We are not planning to pursue legal action.", CLASSES) is None
     assert classify_conflict("QA note", "I am not resigning.", CLASSES) is None
 
