@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
@@ -56,6 +57,8 @@ def lapse_expired_decision_points(state: EnvState, day: int) -> list[str]:
 
 
 def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
+    if ev.payload.get("composer") == "audit_findings":
+        return compose_audit_findings(state, corpus)
     if ev.variant_on_dp:
         status = ledger_status_for(state, ev.variant_on_dp)
         key = "addressed" if status is LedgerStatus.ADDRESSED else "unaddressed"
@@ -157,8 +160,14 @@ def fire_events_in_window(
             # surfaces a message (e.g. a market-update note), rather than being silently dropped.
             if any(f in p for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.AUDIT:
+            # Audit morning (round-3): capture what the auditor SEES today — the findings
+            # letter composes from this snapshot, never from delivery-day state.
+            capture_audit_snapshot(state, corpus)
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:
-            # corporate_request / audit / hpai_alert:
+            # corporate_request / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))

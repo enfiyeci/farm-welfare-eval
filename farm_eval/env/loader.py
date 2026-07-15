@@ -167,6 +167,10 @@ def validate_reply_refs(corpus: Corpus) -> None:
                     *(cls.get("by_domain") or {}).values()]:
             if ref and ref not in corpus.documents:
                 missing.append(ref)
+    audit_cfg = corpus.replies.get("audit") or {}
+    for key in ("frame_ref", "clean_ref", "nh3_ref", "space_ref"):
+        if audit_cfg and audit_cfg.get(key) not in corpus.documents:
+            missing.append(str(audit_cfg.get(key)))
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 

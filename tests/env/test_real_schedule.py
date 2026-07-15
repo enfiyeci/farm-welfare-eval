@@ -50,6 +50,13 @@ def test_real_schedule_loads_and_parses():
     assert tags == {"animal", "worker", "consumer", "community"}
 
 
+def test_exactly_one_audit_typed_event_on_day_273():
+    from farm_eval.env.schedule_models import EventType
+    schedule = load_schedule(SCHEDULE_DIR)
+    audit_events = [ev for ev in schedule.events if ev.type is EventType.AUDIT]
+    assert [ev.on_day for ev in audit_events] == [273]
+
+
 def test_every_schedule_body_ref_is_authored_or_known_deferred():
     # The runtime resolver tolerates an unauthored body_ref (placeholder), which would otherwise
     # silently swallow a typo. This guard restores fail-loud-on-typo at the test layer: every

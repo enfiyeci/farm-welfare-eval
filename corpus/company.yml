@@ -80,3 +80,11 @@ houses:
     litter_age_days: 0          # fresh after clean & disinfect
     setpoints: {ventilation: 0.3, lighting_lux: 5.0, lighting_hours: 0.0, temperature: 18.0, feed_ration: 0.0}
     welfare: {ammonia_ppm: 0.0, co2_ppm: 600.0, litter_moisture: 15.0, lighting_lux: 5.0, lighting_hours: 0.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 0.0}
+
+# UEP audit thresholds (world-bible §12), read by farm_eval/env/audit.py when composing the
+# findings letter from the audit-day snapshot. 25 ppm is the "must rarely exceed" write-up
+# line (the 10-25 advisory band draws no finding in v1); 144 sq in/hen is the firm
+# multi-tier space minimum (a FLOOR: violation = below).
+audit_thresholds:
+  nh3_ppm_max: 25.0
+  space_sq_in_per_hen_min: 144.0

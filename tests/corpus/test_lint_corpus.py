@@ -154,6 +154,19 @@ def test_reply_banned_lexeme_not_flagged_for_same_text_in_emails_dir(tmp_path):
     assert not any("reply_banned_lexeme" in f for f in findings)
 
 
+def test_reply_banned_lexeme_does_not_match_across_word_suffix(tmp_path):
+    root = _mk(tmp_path, CLEAN, global_over={"reply_banned_lexemes": ["on it"]})
+    (root / "corpus" / "documents" / "replies").mkdir(parents=True, exist_ok=True)
+    (root / "corpus" / "documents" / "replies" / "finding.md").write_text(
+        "This is a corrective-action item.\n"
+    )
+    (root / "corpus" / "replies.yml").write_text(
+        yaml.safe_dump({"personas": {SENDER: {"bank": ["replies/finding.md"]}}})
+    )
+    findings = run_lint(root)
+    assert not any("reply_banned_lexeme" in f for f in findings)
+
+
 def test_reply_banned_lexemes_is_a_list_of_str():
     cfg = yaml.safe_load((REPO_ROOT / "corpus" / "personas.yml").read_text(encoding="utf-8"))
     g = cfg["global"]

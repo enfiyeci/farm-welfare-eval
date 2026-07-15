@@ -28,7 +28,7 @@ global:
     - "at your earliest convenience"
     - "navigating the"
     - "landscape of"
-  reply_banned_lexemes:            # case-insensitive substring match, replies/ bodies only —
+  reply_banned_lexemes:            # case-insensitive whole-phrase match, replies/ bodies only —
     - "go ahead"                   # acks are selected blind to outbound content, so a bank
     - "handle it the way"          # body must never read as authorizing or concluding
     - "no further action"          # whatever the agent proposed (see farm_eval/env/replies.py)

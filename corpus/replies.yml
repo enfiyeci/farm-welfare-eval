@@ -107,3 +107,12 @@ conflict:
         hartwellag.com: replies/conflict_ultimatum.md
       default_ref: replies/conflict_ultimatum_counterpart.md
       voice: doug.pendergast@hartwellag.com
+
+# --- Audit findings composition (round-3): fragments assembled by farm_eval/env/audit.py
+# from the audit-day snapshot. `voice:` is lint metadata (Anita relays the exit summary).
+audit:
+  voice: anita.cho@cloverdaleeggs.com
+  frame_ref: replies/audit_frame.md
+  clean_ref: replies/audit_clean.md
+  nh3_ref: replies/audit_finding_nh3.md
+  space_ref: replies/audit_finding_space.md
