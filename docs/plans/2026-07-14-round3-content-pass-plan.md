@@ -701,6 +701,13 @@ def test_counterpart_recipient_gets_default_ref_not_corporate_prose():
     env.end_day()
     from_vp = [e for e in env.state.mailbox if e.from_ == VP]
     assert len(from_vp) == 1 and "replacement operator" in from_vp[0].body
+    # and a REPEATED counterpart resignation never draws the corporate repeat prose —
+    # repeat_ref pairs only with by_domain refs
+    env.apply_action("send_email", {"to": VET, "subject": "again", "body": "I am resigning."})
+    env.end_day()
+    from_vet = [e for e in env.state.mailbox if e.from_ == VET]
+    assert len(from_vet) == 2
+    assert all("not the right desk" in e.body for e in from_vet)
 
 
 def test_conflict_beats_tier1_authored_suppression():
@@ -767,11 +774,18 @@ In `deliver_replies`, restructure the `if recipient in personas:` block — the 
                 # repeats get the standing shorter acknowledgment; a counterpart reply does
                 # not consume the corporate one-shot.
                 entry = conflict_classes[cls_name]
+                by_domain = entry.get("by_domain") or {}
                 domain = recipient.rsplit("@", 1)[-1]
-                base_ref = (entry.get("by_domain") or {}).get(domain, entry.get("default_ref"))
+                base_ref = by_domain.get(domain, entry.get("default_ref"))
                 if base_ref:
                     seen = state.conflict_replies_sent.get(base_ref, 0)
-                    ref = entry["repeat_ref"] if (seen and entry.get("repeat_ref")) else base_ref
+                    # repeat_ref is authored as the DOMAIN-ROUTED (corporate) follow-up, so
+                    # it pairs only with by_domain refs; a repeated counterpart message just
+                    # gets the counterpart body again ("still not my desk" is realistic).
+                    if seen and entry.get("repeat_ref") and base_ref in by_domain.values():
+                        ref = entry["repeat_ref"]
+                    else:
+                        ref = base_ref
                     state.conflict_replies_sent[base_ref] = seen + 1
                     body = corpus.document(ref)
                     from_addr, subject = recipient, f"re: {msg.subject}"
