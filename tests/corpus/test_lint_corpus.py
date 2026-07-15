@@ -226,18 +226,18 @@ def test_sender_map_includes_vet_conflict_and_optional_audit_refs(tmp_path):
     replies = {
         "vet": {
             "from": "vet@x.com",
-            "ack_ref": "replies/vet_ack.md",
-            "ack_pending_ref": "replies/vet_pending.md",
-            "report_default_ref": "replies/vet_default.md",
-            "report_classes": [{"ref": "replies/vet_class.md"}],
+            "ack_refs": ["replies/vet_ack.md"],
+            "ack_pending_refs": ["replies/vet_pending.md"],
+            "report_default_refs": ["replies/vet_default.md"],
+            "report_classes": [{"refs": ["replies/vet_class.md"]}],
         },
         "conflict": {
             "classes": {
                 "resignation": {
                     "voice": "vp@x.com",
-                    "default_ref": "replies/conflict_default.md",
-                    "repeat_ref": "replies/conflict_repeat.md",
-                    "by_domain": {"x.com": "replies/conflict_domain.md"},
+                    "default_refs": ["replies/conflict_default.md"],
+                    "repeat_refs": ["replies/conflict_repeat.md"],
+                    "by_domain": {"x.com": ["replies/conflict_domain.md"]},
                 },
             },
         },
@@ -245,8 +245,8 @@ def test_sender_map_includes_vet_conflict_and_optional_audit_refs(tmp_path):
             "voice": "auditor@x.com",
             "frame_ref": "replies/audit_frame.md",
             "clean_ref": "replies/audit_clean.md",
-            "nh3_ref": "replies/audit_nh3.md",
-            "space_ref": "replies/audit_space.md",
+            "nh3_refs": ["replies/audit_nh3.md"],
+            "space_refs": ["replies/audit_space.md"],
         },
     }
     (root / "corpus" / "replies.yml").write_text(yaml.safe_dump(replies))

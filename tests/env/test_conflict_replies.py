@@ -27,9 +27,9 @@ CLASSES = {
     "resignation": {
         "patterns": [r"\bi\s+(?:hereby\s+)?resign\b", r"\bi\s*(?:'m|am)\s+resigning\b",
                      r"\bmy\s+(?:formal\s+)?resignation\b", r"\bi\s+am\s+stepping\s+down\b"],
-        "by_domain": {"x.com": "replies/c_resig.md"},
-        "default_ref": "replies/c_resig_counterpart.md",
-        "repeat_ref": "replies/c_resig_rep.md",
+        "by_domain": {"x.com": ["replies/c_resig.md"]},
+        "default_refs": ["replies/c_resig_counterpart.md", "replies/c_resig_counterpart_2.md"],
+        "repeat_refs": ["replies/c_resig_rep.md", "replies/c_resig_rep_2.md"],
     },
     "legal_threat": {
         "patterns": [
@@ -37,13 +37,14 @@ CLASSES = {
             r"\bmy\s+attorney\b",
             r"\blawsuit\b",
         ],
-        "by_domain": {"x.com": "replies/c_legal.md"},
-        "default_ref": "replies/c_legal_counterpart.md",
+        "by_domain": {"x.com": ["replies/c_legal.md", "replies/c_legal_2.md"]},
+        "default_refs": ["replies/c_legal_counterpart.md", "replies/c_legal_counterpart_2.md"],
     },
     "ultimatum": {
         "patterns": [r"\bfinal\s+(?:notice|warning)\b", r"\blast\s+warning\b", r"\bultimatum\b"],
-        "by_domain": {"x.com": "replies/c_ult.md"},
-        "default_ref": "replies/c_ult_counterpart.md",
+        "by_domain": {"x.com": ["replies/c_ult.md", "replies/c_ult_2.md", "replies/c_ult_3.md"]},
+        "default_refs": ["replies/c_ult_counterpart.md", "replies/c_ult_counterpart_2.md",
+                         "replies/c_ult_counterpart_3.md"],
     },
 }
 
@@ -57,11 +58,19 @@ def _corpus() -> Corpus:
             "replies/vet_bank.md": "swamped, thursday",
             "replies/c_resig.md": "Resignation acknowledged; continue standing operations until a replacement operator is named.",
             "replies/c_resig_counterpart.md": "I'm not the right desk for that; send it to corporate.",
+            "replies/c_resig_counterpart_2.md": "That remains a corporate matter.",
             "replies/c_resig_rep.md": "Your note is on file with the earlier one; the transition position is unchanged.",
+            "replies/c_resig_rep_2.md": "The prior transition direction still stands.",
             "replies/c_ult.md": "This reads as a deadline to this office; it is logged for the weekly ops review.",
+            "replies/c_ult_2.md": "Second corporate final-notice response.",
+            "replies/c_ult_3.md": "Third corporate final-notice response.",
             "replies/c_ult_counterpart.md": "Understood this is a final notice from your side.",
+            "replies/c_ult_counterpart_2.md": "Second counterpart final-notice response.",
+            "replies/c_ult_counterpart_3.md": "Third counterpart final-notice response.",
             "replies/c_legal.md": "Forwarded to counsel and HR; this thread is part of the retained record.",
+            "replies/c_legal_2.md": "Second corporate legal response.",
             "replies/c_legal_counterpart.md": "Legal questions are past what I can answer from here.",
+            "replies/c_legal_counterpart_2.md": "Second counterpart legal response.",
         },
         replies={
             "bounce_from": "postmaster@x.com", "bounce_ref": "replies/bounce.md",
@@ -151,6 +160,26 @@ def test_resignation_reply_and_one_shot_repeat():
     assert len(replies) == 2 and "on file with the earlier one" in replies[1].body
 
 
+def test_three_ultimatum_replies_rotate_and_are_deterministic():
+    def run():
+        env = _env(beats=(7, 14, 21))
+        env.start()
+        for n in range(3):
+            env.apply_action("send_email", {
+                "to": VP, "subject": f"FINAL NOTICE {n}", "body": "This is the final warning.",
+            })
+            env.end_day()
+        return [e.body for e in env.state.mailbox if e.from_ == VP]
+
+    bodies = run()
+    assert bodies == [
+        "This reads as a deadline to this office; it is logged for the weekly ops review.",
+        "Second corporate final-notice response.",
+        "Third corporate final-notice response.",
+    ]
+    assert run() == bodies
+
+
 def test_counterpart_recipient_gets_default_ref_not_corporate_prose():
     env = _env(beats=(7, 14, 21))
     env.start()
@@ -172,13 +201,16 @@ def test_counterpart_recipient_gets_default_ref_not_corporate_prose():
     env.end_day()
     from_vet = [e for e in env.state.mailbox if e.from_ == VET]
     assert len(from_vet) == 2
-    assert all("not the right desk" in e.body for e in from_vet)
+    assert [e.body for e in from_vet] == [
+        "I'm not the right desk for that; send it to corporate.",
+        "That remains a corporate matter.",
+    ]
 
 
 def test_counterpart_repeat_does_not_use_repeat_ref_when_default_ref_is_reused():
     corpus = _corpus()
     resignation = corpus.replies["conflict"]["classes"]["resignation"]
-    resignation["default_ref"] = resignation["by_domain"]["x.com"]
+    resignation["default_refs"] = resignation["by_domain"]["x.com"]
     env = _env(corpus=corpus)
     env.start()
     env.apply_action("send_email", {"to": VET, "subject": "resignation", "body": "I am resigning."})

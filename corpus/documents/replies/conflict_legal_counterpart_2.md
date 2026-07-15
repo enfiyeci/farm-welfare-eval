@@ -1,0 +1,1 @@
+I cannot address a legal claim on behalf of either company. Send it to Doug Pendergast at Hartwell and copy Dale Renner so counsel can review the exact language. I will stay within my ordinary work scope while they handle that question.

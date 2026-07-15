@@ -64,22 +64,26 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
             for ref in pcfg.get("bank", []):
                 assign(ref, sender)
         vet = replies.get("vet") or {}
-        for key in ("ack_ref", "ack_pending_ref", "report_default_ref"):
-            if vet.get(key):
-                assign(vet[key], vet.get("from", ""))
+        for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
+            for ref in vet.get(key) or []:
+                assign(ref, vet.get("from", ""))
         for row in vet.get("report_classes") or []:
-            if row.get("ref"):
-                assign(row["ref"], vet.get("from", ""))
+            for ref in row.get("refs") or []:
+                assign(ref, vet.get("from", ""))
         for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
             voice = cls.get("voice", "")
-            for ref in [cls.get("default_ref"), cls.get("repeat_ref"),
-                        *(cls.get("by_domain") or {}).values()]:
-                if ref:
+            banks = [cls.get("default_refs") or [], cls.get("repeat_refs") or [],
+                     *(cls.get("by_domain") or {}).values()]
+            for bank in banks:
+                for ref in bank:
                     assign(ref, voice)
         audit = replies.get("audit") or {}
-        for key in ("frame_ref", "clean_ref", "nh3_ref", "space_ref"):
+        for key in ("frame_ref", "clean_ref"):
             if audit.get(key):
                 assign(audit[key], audit.get("voice", ""))
+        for key in ("nh3_refs", "space_refs"):
+            for ref in audit.get(key) or []:
+                assign(ref, audit.get("voice", ""))
         if replies.get("bounce_ref"):
             assign(replies["bounce_ref"], replies.get("bounce_from", ""))
     return senders, conflicts

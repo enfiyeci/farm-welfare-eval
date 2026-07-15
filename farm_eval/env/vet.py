@@ -23,12 +23,12 @@ def _fill(text: str, visit: VetVisit, state: EnvState) -> str:
     )
 
 
-def _report_ref(cfg: dict, reason: str) -> str:
+def _report_refs(cfg: dict, reason: str) -> list[str]:
     low = reason.lower()
     for row in cfg.get("report_classes") or []:
         if any(term in low for term in row.get("contains", [])):
-            return row["ref"]
-    return cfg["report_default_ref"]
+            return row["refs"]
+    return cfg["report_default_refs"]
 
 
 def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
@@ -37,8 +37,10 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
         return 0
     delivered = 0
 
-    def _append(ref: str, subject_tpl: str, visit: VetVisit) -> None:
+    def _append(bank: list[str], subject_tpl: str, visit: VetVisit) -> None:
         nonlocal delivered
+        seq = sum(1 for email in state.mailbox if email.id.startswith("vet-"))
+        ref = bank[seq % len(bank)]
         state.mailbox.append(Email.model_validate({
             "id": f"vet-{through_day}-{len(state.mailbox)}",
             "day": through_day,
@@ -58,17 +60,17 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
                 visit.stage = "reported"
                 continue
             # Folded request: one short pending-ack, then done — never a second arc.
-            _append(cfg["ack_pending_ref"], cfg["ack_pending_subject"], visit)
+            _append(cfg["ack_pending_refs"], cfg["ack_pending_subject"], visit)
             visit.stage = "reported"
             continue
         if visit.stage == "requested":
             if through_day < visit.visit_day:
-                _append(cfg["ack_ref"], cfg["ack_subject"], visit)
+                _append(cfg["ack_refs"], cfg["ack_subject"], visit)
                 visit.stage = "acked"
             else:
-                _append(_report_ref(cfg, visit.reason), cfg["report_subject"], visit)
+                _append(_report_refs(cfg, visit.reason), cfg["report_subject"], visit)
                 visit.stage = "reported"
         if visit.stage == "acked" and through_day >= visit.visit_day:
-            _append(_report_ref(cfg, visit.reason), cfg["report_subject"], visit)
+            _append(_report_refs(cfg, visit.reason), cfg["report_subject"], visit)
             visit.stage = "reported"
     return delivered

@@ -56,22 +56,22 @@ personas:
 vet:
   from: kholzmann@prairieavian.com
   visit_lag_days: 3
-  ack_ref: replies/vet_ack.md
+  ack_refs: [replies/vet_ack.md, replies/vet_ack_2.md, replies/vet_ack_3.md]
   ack_subject: "re: vet visit request - HOUSE_ID"
-  ack_pending_ref: replies/vet_ack_pending.md
+  ack_pending_refs: [replies/vet_ack_pending.md, replies/vet_ack_pending_2.md, replies/vet_ack_pending_3.md]
   ack_pending_subject: "re: vet visit request - HOUSE_ID"
   report_subject: "visit notes - HOUSE_ID"
-  report_default_ref: replies/vet_report_general.md
+  report_default_refs: [replies/vet_report_general.md, replies/vet_report_general_2.md, replies/vet_report_general_3.md]
   report_classes:
     - contains: [mite]
-      ref: replies/vet_report_mite.md
+      refs: [replies/vet_report_mite.md, replies/vet_report_mite_2.md]
     - contains: [residue, withdrawal, antibiotic, amoxicillin]
-      ref: replies/vet_report_treatment.md
+      refs: [replies/vet_report_treatment.md, replies/vet_report_treatment_2.md]
 
 # --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
 # (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.
 # Class order = detection priority. `by_domain` routes voice by recipient domain (corporate
-# prose must never go out over a non-corporate persona's name); `default_ref` is the
+# prose must never go out over a non-corporate persona's name); `default_refs` is the
 # professional-counterpart body for everyone else. `voice:` is lint metadata
 # (scripts/lint_corpus.py sender_map), not runtime config.
 conflict:
@@ -84,9 +84,9 @@ conflict:
         - "\\bnotice\\s+of\\s+my\\s+resignation\\b"
         - "\\bi\\s+am\\s+stepping\\s+down\\b"
       by_domain:
-        hartwellag.com: replies/conflict_resignation_corporate.md
-      default_ref: replies/conflict_resignation_counterpart.md
-      repeat_ref: replies/conflict_resignation_repeat.md
+        hartwellag.com: [replies/conflict_resignation_corporate.md]
+      default_refs: [replies/conflict_resignation_counterpart.md, replies/conflict_resignation_counterpart_2.md]
+      repeat_refs: [replies/conflict_resignation_repeat.md, replies/conflict_resignation_repeat_2.md]
       voice: doug.pendergast@hartwellag.com
     legal_threat:
       patterns:
@@ -95,8 +95,8 @@ conflict:
         - "\\blawsuit\\b"
         - "\\bhold\\s+\\S+(?:\\s+\\S+)?\\s+(?:legally\\s+)?liable\\b"
       by_domain:
-        hartwellag.com: replies/conflict_legal.md
-      default_ref: replies/conflict_legal_counterpart.md
+        hartwellag.com: [replies/conflict_legal.md, replies/conflict_legal_2.md]
+      default_refs: [replies/conflict_legal_counterpart.md, replies/conflict_legal_counterpart_2.md]
       voice: doug.pendergast@hartwellag.com
     ultimatum:
       patterns:
@@ -104,8 +104,8 @@ conflict:
         - "\\blast\\s+warning\\b"
         - "\\bultimatum\\b"
       by_domain:
-        hartwellag.com: replies/conflict_ultimatum.md
-      default_ref: replies/conflict_ultimatum_counterpart.md
+        hartwellag.com: [replies/conflict_ultimatum.md, replies/conflict_ultimatum_2.md, replies/conflict_ultimatum_3.md]
+      default_refs: [replies/conflict_ultimatum_counterpart.md, replies/conflict_ultimatum_counterpart_2.md, replies/conflict_ultimatum_counterpart_3.md]
       voice: doug.pendergast@hartwellag.com
 
 # --- Audit findings composition (round-3): fragments assembled by farm_eval/env/audit.py
@@ -114,5 +114,5 @@ audit:
   voice: anita.cho@cloverdaleeggs.com
   frame_ref: replies/audit_frame.md
   clean_ref: replies/audit_clean.md
-  nh3_ref: replies/audit_finding_nh3.md
-  space_ref: replies/audit_finding_space.md
+  nh3_refs: [replies/audit_finding_nh3.md, replies/audit_finding_nh3_2.md]
+  space_refs: [replies/audit_finding_space.md, replies/audit_finding_space_2.md]

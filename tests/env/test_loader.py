@@ -79,12 +79,12 @@ def test_validate_reply_refs_rejects_missing_vet_runtime_keys():
     }
     vet = {
         "from": "vet@x.com",
-        "ack_ref": "replies/vet_ack.md",
+        "ack_refs": ["replies/vet_ack.md"],
         "ack_subject": "ack HOUSE_ID",
-        "ack_pending_ref": "replies/vet_ack_pending.md",
+        "ack_pending_refs": ["replies/vet_ack_pending.md"],
         "ack_pending_subject": "pending HOUSE_ID",
         "report_subject": "report HOUSE_ID",
-        "report_default_ref": "replies/vet_report_general.md",
+        "report_default_refs": ["replies/vet_report_general.md"],
     }
     for missing_key in ("from", "ack_subject", "ack_pending_subject", "report_subject"):
         incomplete = dict(vet)
@@ -99,3 +99,48 @@ def test_validate_reply_refs_rejects_missing_vet_runtime_keys():
         )
         with pytest.raises(ValueError, match=missing_key):
             validate_reply_refs(corpus)
+
+
+@pytest.mark.parametrize("section,path", [
+    ("vet", "ack_refs"),
+    ("conflict", "classes.resignation.default_refs"),
+    ("conflict_repeat", "classes.resignation.repeat_refs"),
+    ("audit", "nh3_refs"),
+])
+def test_validate_reply_refs_rejects_empty_ref_banks(section, path):
+    replies = {"bounce_from": "postmaster@x.com", "bounce_ref": "replies/bounce.md"}
+    documents = {"replies/bounce.md": "bounce"}
+    if section == "vet":
+        replies["vet"] = {
+            "from": "vet@x.com", "ack_subject": "ack", "ack_pending_subject": "pending",
+            "report_subject": "report", "ack_refs": [], "ack_pending_refs": ["replies/bounce.md"],
+            "report_default_refs": ["replies/bounce.md"], "report_classes": [],
+        }
+    elif section in {"conflict", "conflict_repeat"}:
+        replies["conflict"] = {"classes": {"resignation": {
+            "default_refs": ([] if section == "conflict" else ["replies/bounce.md"]),
+            "repeat_refs": ([] if section == "conflict_repeat" else ["replies/bounce.md"]),
+            "by_domain": {"x.com": ["replies/bounce.md"]},
+        }}}
+    else:
+        replies["audit"] = {
+            "frame_ref": "replies/bounce.md", "clean_ref": "replies/bounce.md",
+            "nh3_refs": [], "space_refs": ["replies/bounce.md"],
+        }
+    with pytest.raises(ValueError, match=path.split(".")[-1]):
+        validate_reply_refs(Corpus(documents=documents, replies=replies))
+
+
+def test_validate_reply_refs_checks_every_list_member():
+    corpus = Corpus(
+        documents={"replies/bounce.md": "bounce", "replies/ok.md": "ok"},
+        replies={
+            "bounce_from": "postmaster@x.com", "bounce_ref": "replies/bounce.md",
+            "conflict": {"classes": {"ultimatum": {
+                "default_refs": ["replies/ok.md", "replies/missing.md"],
+                "by_domain": {"x.com": ["replies/ok.md"]},
+            }}},
+        },
+    )
+    with pytest.raises(ValueError, match="replies/missing.md"):
+        validate_reply_refs(corpus)

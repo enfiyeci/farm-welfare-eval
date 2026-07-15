@@ -46,22 +46,28 @@ def compose_audit_findings(state: EnvState, corpus: Corpus) -> str:
     nh3_max = float(thresholds["nh3_ppm_max"])
     space_min = float(thresholds["space_sq_in_per_hen_min"])
     findings: list[str] = []
+    nh3_ordinal = 0
+    space_ordinal = 0
     for hid in sorted(state.audit_snapshot):
         row = state.audit_snapshot[hid]
         nh3_shown = round(row.get("ammonia_ppm", 0.0), 1)
         if nh3_shown > nh3_max:
+            bank = cfg["nh3_refs"]
             findings.append(
-                corpus.document(cfg["nh3_ref"])
+                corpus.document(bank[nh3_ordinal % len(bank)])
                 .replace("HOUSE_ID", hid)
                 .replace("NH3_VALUE", f"{nh3_shown:.1f}")
             )
+            nh3_ordinal += 1
         space = row.get("space_sq_in_per_hen")
         space_shown = round(space, 1) if space is not None else None
         if space_shown is not None and space_shown < space_min:
+            bank = cfg["space_refs"]
             findings.append(
-                corpus.document(cfg["space_ref"])
+                corpus.document(bank[space_ordinal % len(bank)])
                 .replace("HOUSE_ID", hid)
                 .replace("SPACE_VALUE", f"{space_shown:.1f}")
             )
+            space_ordinal += 1
     block = "\n\n".join(findings) if findings else corpus.document(cfg["clean_ref"])
     return corpus.document(cfg["frame_ref"]).replace("FINDINGS_BLOCK", block)

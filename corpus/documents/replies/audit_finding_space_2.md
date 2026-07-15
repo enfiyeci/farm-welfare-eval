@@ -1,0 +1,1 @@
+Certification finding, space allowance, HOUSE_ID. The measured stocking allowance was SPACE_VALUE square inches per hen against the 144-square-inch minimum. The corrective-action response will need to reconcile the placed and current flock counts with the certified house capacity, then document how the site will prevent another count above that limit.

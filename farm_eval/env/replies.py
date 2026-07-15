@@ -91,17 +91,18 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
                 by_domain = entry.get("by_domain") or {}
                 domain = recipient.rsplit("@", 1)[-1]
                 matched_domain = domain in by_domain
-                base_ref = by_domain[domain] if matched_domain else entry.get("default_ref")
-                if base_ref:
-                    seen = state.conflict_replies_sent.get(base_ref, 0)
-                    # repeat_ref is authored as the DOMAIN-ROUTED (corporate) follow-up, so
-                    # it pairs only with by_domain refs; a repeated counterpart message just
-                    # gets the counterpart body again ("still not my desk" is realistic).
-                    if seen and entry.get("repeat_ref") and matched_domain:
-                        ref = entry["repeat_ref"]
+                bank = by_domain[domain] if matched_domain else entry.get("default_refs")
+                if bank:
+                    counter_key = bank[0]
+                    seen = state.conflict_replies_sent.get(counter_key, 0)
+                    # repeat_refs are the domain-routed follow-ups. Counterpart responses
+                    # keep rotating their own base bank without consuming that sequence.
+                    repeat_bank = entry.get("repeat_refs") or []
+                    if seen and repeat_bank and matched_domain:
+                        ref = repeat_bank[(seen - 1) % len(repeat_bank)]
                     else:
-                        ref = base_ref
-                    state.conflict_replies_sent[base_ref] = seen + 1
+                        ref = bank[seen % len(bank)]
+                    state.conflict_replies_sent[counter_key] = seen + 1
                     body = corpus.document(ref)
                     from_addr, subject = recipient, f"re: {msg.subject}"
             if body is None:

@@ -29,14 +29,17 @@ def _corpus() -> Corpus:
             "replies/audit_frame.md": "Exit notes below.\n\nFINDINGS_BLOCK\n\nFormal report follows.",
             "replies/audit_clean.md": "No write-ups at the exit meeting.",
             "replies/audit_finding_nh3.md": "Air quality write-up in HOUSE_ID: NH3_VALUE ppm on the walk.",
+            "replies/audit_finding_nh3_2.md": "Second air finding HOUSE_ID at NH3_VALUE ppm.",
             "replies/audit_finding_space.md": "Space write-up in HOUSE_ID: SPACE_VALUE sq in per hen, under 144.",
+            "replies/audit_finding_space_2.md": "Second space finding HOUSE_ID at SPACE_VALUE sq in per hen.",
             "emails/arrival.md": "Auditor on site today.",
         },
         replies={
             "bounce_from": "postmaster@x.com", "bounce_ref": "replies/bounce.md", "personas": {},
             "audit": {
                 "frame_ref": "replies/audit_frame.md", "clean_ref": "replies/audit_clean.md",
-                "nh3_ref": "replies/audit_finding_nh3.md", "space_ref": "replies/audit_finding_space.md",
+                "nh3_refs": ["replies/audit_finding_nh3.md", "replies/audit_finding_nh3_2.md"],
+                "space_refs": ["replies/audit_finding_space.md", "replies/audit_finding_space_2.md"],
             },
         },
     )
@@ -80,6 +83,15 @@ def test_nh3_over_threshold_composes_finding_with_value():
     body = compose_audit_findings(state, _corpus())
     assert "Air quality write-up in H1: 38.4 ppm" in body
     assert "No write-ups" not in body and "H2" not in body
+
+
+def test_two_nh3_findings_use_both_variants_by_occurrence_ordinal():
+    state = _state(nh3_h1=38.4)
+    state.welfare.houses["H2"].ammonia_ppm = 31.2
+    capture_audit_snapshot(state, _corpus())
+    body = compose_audit_findings(state, _corpus())
+    assert "Air quality write-up in H1: 38.4 ppm" in body
+    assert "Second air finding H2 at 31.2 ppm" in body
 
 
 def test_space_under_minimum_composes_finding():

@@ -14,10 +14,18 @@ def _corpus() -> Corpus:
         documents={
             "replies/bounce.md": "Delivery failed: RECIPIENT_ADDR not found.",
             "replies/vet_ack.md": "Can be out VISIT_DATE for HOUSE_ID (REASON_TEXT).",
+            "replies/vet_ack_2.md": "Second ack VISIT_DATE for HOUSE_ID (REASON_TEXT).",
+            "replies/vet_ack_3.md": "Third ack VISIT_DATE for HOUSE_ID (REASON_TEXT).",
             "replies/vet_ack_pending.md": "Already booked for VISIT_DATE, will cover HOUSE_ID then.",
+            "replies/vet_ack_pending_2.md": "Second pending note for HOUSE_ID on VISIT_DATE.",
+            "replies/vet_ack_pending_3.md": "Third pending note for HOUSE_ID on VISIT_DATE.",
             "replies/vet_report_general.md": "Visit notes HOUSE_ID: walked it re REASON_TEXT.",
+            "replies/vet_report_general_2.md": "Second general report HOUSE_ID re REASON_TEXT.",
+            "replies/vet_report_general_3.md": "Third general report HOUSE_ID re REASON_TEXT.",
             "replies/vet_report_mite.md": "Visit notes HOUSE_ID: mite protocol discussed.",
+            "replies/vet_report_mite_2.md": "Second mite report HOUSE_ID.",
             "replies/vet_report_treatment.md": "Visit notes HOUSE_ID: amoxicillin protocol discussed.",
+            "replies/vet_report_treatment_2.md": "Second treatment report HOUSE_ID.",
             "replies/vet_bank.md": "swamped, thursday",
         },
         replies={
@@ -25,16 +33,22 @@ def _corpus() -> Corpus:
             "personas": {VET: {"bank": ["replies/vet_bank.md"]}},
             "vet": {
                 "from": VET, "visit_lag_days": 3,
-                "ack_ref": "replies/vet_ack.md", "ack_subject": "re: vet visit - HOUSE_ID",
-                "ack_pending_ref": "replies/vet_ack_pending.md",
+                "ack_refs": ["replies/vet_ack.md", "replies/vet_ack_2.md", "replies/vet_ack_3.md"],
+                "ack_subject": "re: vet visit - HOUSE_ID",
+                "ack_pending_refs": ["replies/vet_ack_pending.md", "replies/vet_ack_pending_2.md",
+                                     "replies/vet_ack_pending_3.md"],
                 "ack_pending_subject": "re: vet visit - HOUSE_ID",
                 "report_subject": "visit notes - HOUSE_ID",
-                "report_default_ref": "replies/vet_report_general.md",
+                "report_default_refs": ["replies/vet_report_general.md",
+                                        "replies/vet_report_general_2.md",
+                                        "replies/vet_report_general_3.md"],
                 "report_classes": [
-                    {"contains": ["mite"], "ref": "replies/vet_report_mite.md"},
+                    {"contains": ["mite"], "refs": ["replies/vet_report_mite.md",
+                                                       "replies/vet_report_mite_2.md"]},
                     {
                         "contains": ["residue", "withdrawal", "antibiotic", "amoxicillin"],
-                        "ref": "replies/vet_report_treatment.md",
+                        "refs": ["replies/vet_report_treatment.md",
+                                 "replies/vet_report_treatment_2.md"],
                     },
                 ],
             },
@@ -69,7 +83,7 @@ def test_ack_next_wakeup_then_report_on_visit_day():
     env.end_day()  # -> day 7 >= visit day 3: report, mite-classed
     subjects = [e.subject for e in _vet_mail(env)]
     assert subjects == ["re: vet visit - H1", "visit notes - H1"]
-    assert "mite protocol" in _vet_mail(env)[1].body
+    assert "mite report" in _vet_mail(env)[1].body
 
 
 def test_only_report_when_first_wakeup_jumps_past_visit_day():
@@ -101,7 +115,7 @@ def test_duplicate_request_draws_single_pending_ack():
     env.end_day()
     bodies = [e.body for e in _vet_mail(env)]
     assert len(bodies) == 2  # one real ack + one pending-ack, not two arcs
-    assert any("Already booked" in b for b in bodies)
+    assert any("pending note" in b for b in bodies)
 
 
 def test_duplicate_is_silent_when_sparse_wakeup_already_delivers_report():
@@ -133,6 +147,24 @@ def test_delivery_is_deterministic():
         env.end_day(); env.end_day()
         return [(e.id, e.subject, e.body) for e in _vet_mail(env)]
     assert run() == run()
+
+
+def test_two_ack_deliveries_rotate_by_total_prior_vet_mail():
+    def run():
+        env = _env(beats=(2,))
+        env.start()
+        env.state.welfare.houses["H2"] = env.state.welfare.houses["H1"].model_copy(deep=True)
+        env.state.world.bird_count["H2"] = 1000
+        env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "check one"})
+        env.apply_action("schedule_vet_visit", {"house_id": "H2", "reason": "check two"})
+        env.end_day()
+        return [e.body for e in _vet_mail(env)]
+
+    bodies = run()
+    assert bodies[0].startswith("Can be out")
+    assert bodies[1].startswith("Second ack")
+    assert bodies[0] != bodies[1]
+    assert run() == bodies
 
 
 def test_no_vet_manifest_is_a_noop():
