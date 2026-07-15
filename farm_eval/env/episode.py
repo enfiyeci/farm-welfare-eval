@@ -46,6 +46,7 @@ from farm_eval.env.tracker import (
     record_tool_call,
     resolve_inspected,
 )
+from farm_eval.env.vet import deliver_vet_mail
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
@@ -230,6 +231,9 @@ class FarmEnv:
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
+        # counts as an authored sender for tier-1 suppression this wake-up.
+        deliver_vet_mail(staged, self.corpus, new_day)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.

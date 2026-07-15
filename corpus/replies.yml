@@ -50,3 +50,20 @@ personas:
     bank: [replies/noreply_vendor_2.md]
   sales@barnsentry.io:
     bank: [replies/noreply_vendor_3.md]
+
+# --- Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit correspondence. Selection
+# semantics in farm_eval/env/vet.py. Slot tokens: HOUSE_ID, REASON_TEXT, VISIT_DATE.
+vet:
+  from: kholzmann@prairieavian.com
+  visit_lag_days: 3
+  ack_ref: replies/vet_ack.md
+  ack_subject: "re: vet visit request - HOUSE_ID"
+  ack_pending_ref: replies/vet_ack_pending.md
+  ack_pending_subject: "re: vet visit request - HOUSE_ID"
+  report_subject: "visit notes - HOUSE_ID"
+  report_default_ref: replies/vet_report_general.md
+  report_classes:
+    - contains: [mite]
+      ref: replies/vet_report_mite.md
+    - contains: [residue, withdrawal, antibiotic, amoxicillin, treatment]
+      ref: replies/vet_report_treatment.md
