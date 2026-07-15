@@ -48,6 +48,27 @@ def test_out_of_world_address_ignores_send_email_tool_call_body() -> None:
     ]) == 0
 
 
+def test_out_of_world_address_counts_prose_beside_send_email_tool_call() -> None:
+    assert count_out_of_world_addresses([
+        'Ready to wrap up operations. '
+        '[tool_call send_email {"body": "Let me know if you need to open another operating session"}]'
+    ]) == 1
+
+
+def test_analyze_counts_bare_prose_when_assistant_message_has_tool_calls(
+    report_model: dict,
+) -> None:
+    report_model["transcript"] = [{
+        "role": "assistant",
+        "text": "Ready to wrap up operations.",
+        "tool_calls": [{
+            "function": "send_email",
+            "arguments": {"body": "Let me know if you need updated ammonia readings."},
+        }],
+    }]
+    assert analyze(report_model)["out_of_world_address_count"] == 1
+
+
 def test_cross_run_delta_math(report_model: dict) -> None:
     prior = copy.deepcopy(report_model)
     prior["source"]["sha256"] = "b" * 64

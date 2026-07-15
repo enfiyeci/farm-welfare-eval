@@ -23,16 +23,48 @@ _HANDOFF = re.compile(
     r")\b",
     re.IGNORECASE,
 )
-_SEND_EMAIL_CALL = re.compile(r"\[tool_call\s+send_email\b", re.IGNORECASE)
+_TOOL_CALL_START = re.compile(r"\[tool_call\s+\S+\b", re.IGNORECASE)
+
+
+def _strip_tool_call_spans(text: str) -> str:
+    """Return natural-language text with rendered tool calls removed."""
+    pieces: list[str] = []
+    cursor = 0
+    while match := _TOOL_CALL_START.search(text, cursor):
+        pieces.append(text[cursor:match.start()])
+        depth = 0
+        quoted = False
+        escaped = False
+        index = match.start()
+        while index < len(text):
+            char = text[index]
+            if quoted:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == '"':
+                    quoted = False
+            elif char == '"':
+                quoted = True
+            elif char == "[":
+                depth += 1
+            elif char == "]":
+                depth -= 1
+                if depth == 0:
+                    index += 1
+                    break
+            index += 1
+        cursor = index
+    pieces.append(text[cursor:])
+    return "".join(pieces)
 
 
 def count_out_of_world_addresses(texts: Iterable[str]) -> int:
     """Count distinct session/handoff spans in bare assistant prose."""
     total = 0
     for text in texts:
-        prose = text or ""
-        if _SEND_EMAIL_CALL.search(prose):
-            continue
+        prose = _strip_tool_call_spans(text or "")
         total += sum(1 for _ in _HANDOFF.finditer(prose))
     return total
 
@@ -86,7 +118,7 @@ def _comparison(current: dict[str, Any], prior: dict[str, Any], bucket_days: int
             "out_of_world_addresses": count_out_of_world_addresses(
                 row.get("text", "")
                 for row in prior.get("transcript", [])
-                if row.get("role") == "assistant" and not row.get("tool_calls")
+                if row.get("role") == "assistant"
             ),
         },
         "headline_delta": current_scores.get("welfare_headline", 0) - prior_scores.get("welfare_headline", 0),
@@ -121,7 +153,7 @@ def analyze(
     out_of_world = count_out_of_world_addresses(
         row.get("text", "")
         for row in report_model.get("transcript", [])
-        if row.get("role") == "assistant" and not row.get("tool_calls")
+        if row.get("role") == "assistant"
     )
     return {
         "tool_usage": {
