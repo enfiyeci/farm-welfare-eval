@@ -172,6 +172,9 @@ class EnvState(BaseModel):
     replied_outbound_ids: list[str] = Field(default_factory=list)
     # Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit arcs, registered at action time.
     vet_visits: list[VetVisit] = Field(default_factory=list)
+    # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
+    # conflict reply counters; state carriage makes selection deterministic across replay.
+    vet_bank_seq: dict[str, int] = Field(default_factory=dict)
     # Conflict-class replies (round-3 F-R2-3): per-class delivery counts (resignation one-shot).
     conflict_replies_sent: dict[str, int] = Field(default_factory=dict)
     # Audit-day welfare snapshot (round-3): captured when the type:audit event fires; the

@@ -39,7 +39,8 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
 
     def _append(bank: list[str], subject_tpl: str, visit: VetVisit) -> None:
         nonlocal delivered
-        seq = sum(1 for email in state.mailbox if email.id.startswith("vet-"))
+        key = bank[0]
+        seq = state.vet_bank_seq.get(key, 0)
         ref = bank[seq % len(bank)]
         state.mailbox.append(Email.model_validate({
             "id": f"vet-{through_day}-{len(state.mailbox)}",
@@ -50,6 +51,7 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
             "subject": _fill(subject_tpl, visit, state),
             "body": _fill(corpus.document(ref), visit, state),
         }))
+        state.vet_bank_seq[key] = seq + 1
         delivered += 1
 
     for visit in state.vet_visits:

@@ -83,7 +83,9 @@ def test_ack_next_wakeup_then_report_on_visit_day():
     env.end_day()  # -> day 7 >= visit day 3: report, mite-classed
     subjects = [e.subject for e in _vet_mail(env)]
     assert subjects == ["re: vet visit - H1", "visit notes - H1"]
-    assert "mite report" in _vet_mail(env)[1].body
+    # Ack and report banks have independent state-carried counters. The ack delivery must
+    # not consume index 0 from the mite-report bank.
+    assert "mite protocol" in _vet_mail(env)[1].body
 
 
 def test_only_report_when_first_wakeup_jumps_past_visit_day():
@@ -115,7 +117,7 @@ def test_duplicate_request_draws_single_pending_ack():
     env.end_day()
     bodies = [e.body for e in _vet_mail(env)]
     assert len(bodies) == 2  # one real ack + one pending-ack, not two arcs
-    assert any("pending note" in b for b in bodies)
+    assert any("Already booked" in b for b in bodies)
 
 
 def test_duplicate_is_silent_when_sparse_wakeup_already_delivers_report():
@@ -149,7 +151,7 @@ def test_delivery_is_deterministic():
     assert run() == run()
 
 
-def test_two_ack_deliveries_rotate_by_total_prior_vet_mail():
+def test_two_ack_deliveries_rotate_within_ack_bank():
     def run():
         env = _env(beats=(2,))
         env.start()
@@ -165,6 +167,31 @@ def test_two_ack_deliveries_rotate_by_total_prior_vet_mail():
     assert bodies[1].startswith("Second ack")
     assert bodies[0] != bodies[1]
     assert run() == bodies
+
+
+def test_three_sequential_mite_arcs_rotate_report_bank_zero_one_zero():
+    def run():
+        env = _env(beats=(2, 7, 14, 21))
+        env.start()
+        reports = []
+        for _ in range(3):
+            env.apply_action("schedule_vet_visit", {"house_id": "H1", "reason": "red_mite"})
+            while True:
+                env.end_day()
+                latest = _vet_mail(env)[-1]
+                if latest.subject == "visit notes - H1":
+                    reports.append(latest.body)
+                    break
+        return reports, dict(env.state.vet_bank_seq)
+
+    reports, counters = run()
+    assert reports == [
+        "Visit notes H1: mite protocol discussed.",
+        "Second mite report H1.",
+        "Visit notes H1: mite protocol discussed.",
+    ]
+    assert counters["replies/vet_report_mite.md"] == 3
+    assert run() == (reports, counters)
 
 
 def test_no_vet_manifest_is_a_noop():

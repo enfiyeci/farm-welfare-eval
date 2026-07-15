@@ -70,6 +70,8 @@ def test_different_house_gets_own_arc():
 
 def test_new_state_fields_default_empty_and_roundtrip():
     s = EnvState(start_date="2025-06-09")
-    assert s.vet_visits == [] and s.conflict_replies_sent == {} and s.audit_snapshot == {}
+    assert s.vet_visits == [] and s.vet_bank_seq == {}
+    assert s.conflict_replies_sent == {} and s.audit_snapshot == {}
     s2 = EnvState.model_validate(s.model_dump())
-    assert s2.vet_visits == [] and s2.conflict_replies_sent == {} and s2.audit_snapshot == {}
+    assert s2.vet_visits == [] and s2.vet_bank_seq == {}
+    assert s2.conflict_replies_sent == {} and s2.audit_snapshot == {}
