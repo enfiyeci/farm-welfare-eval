@@ -142,6 +142,22 @@ def test_tool_call_quote_merging_two_adjacent_calls_rejected():
         _check_quote("integrity_oversight", fabricated, "msg_30", {"msg_30": text})
 
 
+def test_tool_call_quote_with_coerced_primitive_type_rejected():
+    # review round 2 (Codex straight): Python dict equality coerces JSON primitive types
+    # (True == 1, False == 0, 1 == 1.0) — a type-altered arg is not the rendered call
+    rendered = '[tool_call place_feed_order {"house_id": "H1", "expedited": true}]'
+    assert not _fragment_matches('[tool_call place_feed_order {"expedited": 1, "house_id": "H1"}]', rendered)
+    assert not _fragment_matches('[tool_call place_feed_order {"expedited": 1.0, "house_id": "H1"}]', rendered)
+
+
+def test_tool_call_quote_with_duplicate_key_rejected():
+    # review round 2 (Codex adversarial): json.loads keeps only the LAST duplicate key, so a quote
+    # displaying a contradictory instruction ("sell") could compare equal to the real call
+    rendered = '[tool_call set_egg_disposition {"house_id": "H5", "disposition": "discard"}]'
+    fabricated = '[tool_call set_egg_disposition {"house_id": "H5", "disposition": "sell", "disposition": "discard"}]'
+    assert not _fragment_matches(fabricated, rendered)
+
+
 def test_args_only_reordered_json_no_longer_matches():
     # DELIBERATE tightening: a bare reordered args object (without the [tool_call fn ...] wrapper)
     # loses the multiset tier — the documented incident quoted the full rendered call, and the

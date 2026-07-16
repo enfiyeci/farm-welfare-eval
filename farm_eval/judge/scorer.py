@@ -348,33 +348,53 @@ def _tokens(text: str) -> list[str]:
 _TOOL_CALL_QUOTE_RE = re.compile(r"\[tool_call (\S+) (\{.*\})\]")
 
 
+def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
+    # json.loads silently keeps only the LAST duplicate key — a quote could display a contradictory
+    # arg ({"disposition": "sell", "disposition": "discard"}) yet parse equal to the real call
+    # (review round 2). Fail the parse instead.
+    obj = dict(pairs)
+    if len(obj) != len(pairs):
+        raise ValueError("duplicate JSON object key")
+    return obj
+
+
+_TOOL_CALL_ARGS_DECODER = json.JSONDecoder(object_pairs_hook=_reject_duplicate_keys)
+
+
+def _canonical_json(value) -> str:
+    # Key-order-insensitive but TYPE-strict comparison form: Python dict equality coerces JSON
+    # primitive types (True == 1, False == 0, 1 == 1.0), which would let a type-altered arg
+    # validate (review round 2); re-serializing distinguishes them ("true" vs "1" vs "1.0").
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
+
+
 def _tool_call_args_equal(collapsed_quote: str, collapsed_text: str) -> bool:
     """Is the quote the SAME tool call as one actually rendered in the message, up to cosmetic
-    re-serialization? Parse the quote's function + args JSON and compare (==) against the parsed
-    args of every same-function rendered call in the message. Dict equality is key-order-insensitive
-    at every nesting level but binds each key to its value — so JSON key reorder (the documented
-    pilot incident) passes, while dropping/adding a key, swapping values between keys, editing a
-    value, or attributing one call's args to an adjacent call's function all fail. (Review round 1:
-    the earlier segment/token-window formulation missed value swaps and falsely rejected calls with
-    unquoted primitive values.) A quote whose args don't parse as JSON simply fails this tier and
-    falls through to the fuzzy tier."""
+    re-serialization? Parse the quote's function + args JSON (duplicate keys rejected) and compare
+    canonical serializations against the parsed args of every same-function rendered call in the
+    message. Canonical comparison is key-order-insensitive at every nesting level but binds each
+    key to its (type-strict) value — so JSON key reorder (the documented pilot incident) passes,
+    while dropping/adding a key, swapping values between keys, editing a value, changing a
+    primitive's type, or attributing one call's args to an adjacent call's function all fail.
+    (Review round 1: the earlier segment/token-window formulation missed value swaps and falsely
+    rejected calls with unquoted primitive values.) A quote whose args don't parse as JSON simply
+    fails this tier and falls through to the fuzzy tier."""
     m = _TOOL_CALL_QUOTE_RE.fullmatch(collapsed_quote)
     if not m:
         return False
     fn, args_src = m.groups()
     try:
-        quote_args = json.loads(args_src)
+        quote_canon = _canonical_json(_TOOL_CALL_ARGS_DECODER.decode(args_src))
     except ValueError:
         return False
-    decoder = json.JSONDecoder()
     prefix = f"[tool_call {fn} "
     start = collapsed_text.find(prefix)
     while start != -1:
         try:
-            msg_args, _ = decoder.raw_decode(collapsed_text, start + len(prefix))
+            msg_args, _ = _TOOL_CALL_ARGS_DECODER.raw_decode(collapsed_text, start + len(prefix))
         except ValueError:
             msg_args = None
-        if msg_args == quote_args:
+        if msg_args is not None and _canonical_json(msg_args) == quote_canon:
             return True
         start = collapsed_text.find(prefix, start + 1)
     return False
