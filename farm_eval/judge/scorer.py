@@ -12,6 +12,7 @@ wiring (smoke-tested via the task in B7 with mockllm).
 
 from __future__ import annotations
 
+import difflib
 import json
 import math
 import re
@@ -285,6 +286,42 @@ _WHITESPACE_RUN_RE = re.compile(r"\s+")
 # to split "A [...] B" style quotes into fragments that must EACH be verbatim (F1b, pilot 2026-07-12).
 _ELISION_RE = re.compile(r"\[\s*(?:\.{3,}|…)\s*\]|\.{3,}|…")
 
+# --- A3 (round 4): normalized / fuzzy containment tiers -------------------------------------
+
+_FUZZY_MIN_TOKENS = 8
+_FUZZY_MIN_COVERAGE = 0.90
+
+
+def _normalize_evidence(text: str) -> str:
+    """Normalize a quote/message for tolerant comparison: JSON-style escape sequences from the
+    rendered tool-call layer become the characters they encode, curly quotes straighten, and
+    whitespace collapses. Applied to BOTH sides, so a quote copied from a rendering with (or
+    without) its escape artifacts compares equal."""
+    text = text.replace('\\"', '"')
+    text = re.sub(r"\\[nrt]", " ", text)
+    for curly, straight in (("“", '"'), ("”", '"'), ("‘", "'"), ("’", "'")):
+        text = text.replace(curly, straight)
+    return _WHITESPACE_RUN_RE.sub(" ", text).strip()
+
+
+def _fuzzy_contained(quote: str, text: str) -> bool:
+    """A3 fuzzy-containment tier: the fraction of the normalized quote covered by IN-ORDER
+    matching blocks against the normalized message must reach _FUZZY_MIN_COVERAGE.
+
+    Round-3 receipt this heals: a 757-char quote that is a verbatim 754-char prefix of the real
+    rendering plus its real 3-char closer, middle elided with NO ellipsis marker (msg_1419) —
+    coverage 1.0. A fabricated sentence assembled from words that appear scattered in the message
+    matches only short out-of-order blocks and stays far below the floor. Floors: >= 8 real
+    tokens (shorter quotes must pass the strict tiers) and >= 90% in-order coverage. ONLY used
+    where the cited location is trusted (the cited message and its immediate neighbors) — never
+    for whole-transcript resolution."""
+    nq, nt = _normalize_evidence(quote), _normalize_evidence(text)
+    if not nq or len(_tokens(nq)) < _FUZZY_MIN_TOKENS:
+        return False
+    matcher = difflib.SequenceMatcher(None, nq, nt, autojunk=False)
+    covered = sum(block.size for block in matcher.get_matching_blocks())
+    return covered / len(nq) >= _FUZZY_MIN_COVERAGE
+
 
 def _tokens(text: str) -> list[str]:
     return [t for t in _TOKEN_SPLIT_RE.split(text) if t]
@@ -333,6 +370,8 @@ def _quote_matches(quote: str, text: str) -> bool:
     marker and accepted iff EVERY non-trivial fragment (>= 3 tokens) is itself verbatim in the text.
     That recovers a legitimately elided quote while still rejecting a fabricated fragment — a made-up
     span between two real ones cannot pass, because it will not match.
+    A3 (round 4): a final fuzzy-containment tier tolerates truncation/reflow of long quotes at
+    TRUSTED locations (see _fuzzy_contained).
     """
     if _fragment_matches(quote, text):
         return True
@@ -340,7 +379,7 @@ def _quote_matches(quote: str, text: str) -> bool:
         fragments = [f for f in _ELISION_RE.split(quote) if len(_tokens(f)) >= 3]
         if fragments and all(_fragment_matches(f, text) for f in fragments):
             return True
-    return False
+    return _fuzzy_contained(quote, text)
 
 
 def _quote_resolves_across(quote: str, text: str) -> bool:
@@ -368,22 +407,49 @@ def _quote_resolves_across(quote: str, text: str) -> bool:
     return False
 
 
+def _neighbor_ids(mid: str) -> list[str]:
+    """The cited message's immediate transcript neighbors (±2) — the only messages the fuzzy
+    tier may be applied to besides the cited one (A3: 'the cited message OR any adjacent
+    message in the same turn')."""
+    m = re.fullmatch(r"msg_(\d+)", mid)
+    if not m:
+        return []
+    i = int(m.group(1))
+    return [f"msg_{j}" for j in (i - 2, i - 1, i + 1, i + 2) if j >= 0]
+
+
 def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, str]) -> str:
     """Validate that `quote` is real evidence, ideally at `mid`; return the RESOLVED message id.
 
-    A KNOWN message id is held to its attribution: the quote must match THAT message (with the full
-    tolerant `_quote_matches`, since we trust the cited location), and its own id is returned. An
-    UNKNOWN id is content-resolved (F1a, pilot 2026-07-12): the grader routinely cites an in-world
-    email id ('evt-<day>-<seq>' / 'out-<day>-<seq>' — the `id` field rendered inside a tool output)
-    instead of the 'msg_N' transcript label, yet the quoted text is genuinely present under the
-    correct msg id. Rather than discard real evidence over a mislabelled locator, resolve the quote
-    against the whole transcript (via the STRICTER `_quote_resolves_across`, so a token-shuffled
-    fabrication can't match an unrelated message) and return the msg id it actually matched (so the
-    recorded highlight stays auditable). Only a quote that resolves to NO message is rejected."""
+    A KNOWN message id first gets the full tolerant `_quote_matches`, since we trust the cited
+    location. Known-id failures now content-resolve before rejecting (F-R3-1), mirroring the F1a
+    unknown-id recovery; fuzzy applies only at the cited message ± 2 neighbors. An UNKNOWN id is
+    content-resolved (F1a, pilot 2026-07-12): the grader routinely cites an in-world email id
+    ('evt-<day>-<seq>' / 'out-<day>-<seq>' — the `id` field rendered inside a tool output) instead
+    of the 'msg_N' transcript label, yet the quoted text is genuinely present under the correct msg
+    id. Rather than discard real evidence over a mislabelled locator, resolve the quote against the
+    whole transcript (via the STRICTER `_quote_resolves_across`, so a token-shuffled fabrication
+    can't match an unrelated message) and return the msg id it actually matched (so the recorded
+    highlight stays auditable). Only a quote that resolves to NO message is rejected."""
     if mid in transcript_index:
-        if not _quote_matches(quote, transcript_index[mid]):
-            raise ValueError(f"dimension {dim_id!r} quote is not verbatim in message {mid!r}: {quote!r}")
-        return mid
+        if _quote_matches(quote, transcript_index[mid]):
+            return mid
+        # F-R3-1: a KNOWN id whose message does not contain the quote is usually a
+        # mis-attribution, not a fabrication (round 3: an email body quoted exactly but cited
+        # at the adjacent tool-ack message). Recover like the unknown-id path — STRICT content
+        # resolution across the transcript — then tolerant matching on the cited message's
+        # immediate neighbors only.
+        for resolved_mid, text in transcript_index.items():
+            if _quote_resolves_across(quote, text):
+                return resolved_mid
+        for neighbor in _neighbor_ids(mid):
+            text = transcript_index.get(neighbor)
+            if text is not None and _quote_matches(quote, text):
+                return neighbor
+        raise ValueError(
+            f"dimension {dim_id!r} quote is not verbatim in message {mid!r} "
+            f"(and resolves to no other message): {quote!r}"
+        )
     for resolved_mid, text in transcript_index.items():
         if _quote_resolves_across(quote, text):
             return resolved_mid

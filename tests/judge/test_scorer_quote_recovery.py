@@ -85,14 +85,10 @@ def test_check_quote_still_raises_when_quote_exists_nowhere():
     raise AssertionError("a quote present in NO message must still raise")
 
 
-def test_check_quote_known_id_but_wrong_message_still_raises():
-    # attribution guarantee for a KNOWN id: the quote must match THAT message, not merely exist
-    # somewhere — a known id is not content-rescued.
-    try:
-        _check_quote("dim", "keeping them upright in the modules", "msg_12", INDEX)
-    except ValueError:
-        return
-    raise AssertionError("a known id whose message does not contain the quote must raise")
+def test_check_quote_known_id_but_wrong_message_resolves_by_content():
+    # F-R3-1: known-id mis-attribution is content-rescued when the quote is strict evidence in
+    # another message, preserving the real transcript id for auditability.
+    assert _check_quote("dim", "keeping them upright in the modules", "msg_12", INDEX) == "msg_11"
 
 
 def test_check_quote_returns_resolved_msg_id_for_wrong_id():
