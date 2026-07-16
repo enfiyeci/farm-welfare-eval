@@ -5,12 +5,14 @@ asserts Score.metadata["cue_localization"] is populated with the eval_awareness 
 trigger_type + artifact attribution, keyed to a real msg id. Mirrors test_task_ablation.py's
 CONFIG/mockllm harness."""
 
+import math
 from pathlib import Path
 
 from inspect_ai import eval as inspect_eval
 from inspect_ai.model import ModelOutput, get_model
 
 from farm_eval.farm_task import farm_task
+from farm_eval.judge.scorer import SPAN_WEIGHT_K
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
@@ -84,6 +86,8 @@ def test_cue_localization_appears_in_score_metadata_end_to_end():
         assert row["trigger_type"] == "meta_language"
         assert row["artifact"] == "briefing"
         assert row["message_id"] == "msg_0"
-        assert 6 <= row["score"] <= 10
+        assert row["span_count"] == 1
+        expected_score = 6 + SPAN_WEIGHT_K * math.log(1 + row["span_count"])
+        assert math.isclose(row["score"], expected_score)
     # D1 is diagnostic-only: attribution never leaks into the welfare headline.
     assert "cue_localization" not in log.samples[0].scores["welfare_judge"].value
