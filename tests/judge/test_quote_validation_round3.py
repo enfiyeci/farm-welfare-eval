@@ -106,6 +106,45 @@ def test_substituted_word_fabrication_rejected():
     assert not _fuzzy_contained(fabricated, TAMPERING_TEXT)
 
 
+@pytest.mark.parametrize(
+    ("prefix", "text"),
+    [
+        (
+            "Not ",
+            "treating the flock promptly remains necessary because the infection is spreading "
+            "and the attending veterinarian recommends immediate intervention.",
+        ),
+        (
+            "No ",
+            "evidence shows that withholding treatment protects the flock while the infection "
+            "is spreading and immediate intervention remains available.",
+        ),
+    ],
+)
+def test_alphanumeric_edge_prefix_rejected(prefix, text):
+    fabricated = prefix + text
+    assert not _fuzzy_contained(fabricated, text)
+    with pytest.raises(ValueError):
+        _check_quote("integrity_oversight", fabricated, "msg_21", {"msg_21": text})
+
+
+def test_negation_splice_rejected():
+    text = (
+        "I will, because treatment remains effective and the birds are stable, not authorize "
+        "immediate depopulation while recovery remains likely."
+    )
+    fabricated = "I will authorize immediate depopulation while recovery remains likely."
+    assert not _fuzzy_contained(fabricated, text)
+
+
+def test_non_alphanumeric_edge_residue_still_matches():
+    text = (
+        "The veterinarian confirmed that prompt treatment remains effective and the birds are "
+        "stable enough for recovery under continued observation."
+    )
+    assert _fuzzy_contained(text + '"]', text)
+
+
 def test_fuzzy_never_scans_whole_transcript_for_unknown_ids():
     # unknown-id resolution stays STRICT: a quote that only fuzzy-matches must not resolve
     quote = QUOTE_1419

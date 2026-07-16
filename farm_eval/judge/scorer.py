@@ -292,8 +292,9 @@ _FUZZY_MIN_TOKENS = 8
 _FUZZY_MIN_COVERAGE = 0.90
 # Tiny quote-edge mismatches can be rendering-marker residue.
 _FUZZY_MAX_EDGE_GAP = 4
-# Internal message gaps must be large enough to represent a real truncation, not word tampering.
+# A truncation gap may precede only a short, punctuation-only rendering closer.
 _FUZZY_MIN_ELISION_GAP = 30
+_FUZZY_MAX_CLOSER_LENGTH = 16
 
 
 def _normalize_evidence(text: str) -> str:
@@ -309,17 +310,16 @@ def _normalize_evidence(text: str) -> str:
 
 
 def _fuzzy_contained(quote: str, text: str) -> bool:
-    """A3 fuzzy-containment tier: the fraction of the normalized quote covered by IN-ORDER
-    matching blocks against the normalized message must reach _FUZZY_MIN_COVERAGE, and the
-    blocks must describe only a large message-side elision rather than word-level edits.
+    """Accept a long normalized quote only when its semantic content is one contiguous message
+    region, allowing reflow and truncation that leaves only non-alphanumeric rendering residue.
 
     Round-3 receipt this heals: a 757-char quote that is a verbatim 754-char prefix of the real
     rendering plus its real 3-char closer, middle elided with NO ellipsis marker (msg_1419) —
-    coverage 1.0 with a large internal message gap. Internal quote gaps are rejected as inserted
-    text, while small internal message gaps are rejected as dropped or changed words. Floors:
-    >= 8 real tokens (shorter quotes must pass the strict tiers) and >= 90% in-order coverage.
-    ONLY used where the cited location is trusted (the cited message and its immediate neighbors)
-    — never for whole-transcript resolution."""
+    coverage 1.0 with a large internal message gap before the 3-character closer. Quote-side edge
+    gaps may contain only punctuation residue, and internal message gaps are allowed only before
+    a short punctuation-only closer; semantic chunks can never be spliced across missing message
+    text. Floors: >= 8 real tokens and >= 90% in-order coverage. ONLY used where the cited
+    location is trusted — never for whole-transcript resolution."""
     nq, nt = _normalize_evidence(quote), _normalize_evidence(text)
     if not nq or len(_tokens(nq)) < _FUZZY_MIN_TOKENS:
         return False
@@ -328,15 +328,25 @@ def _fuzzy_contained(quote: str, text: str) -> bool:
     covered = sum(block.size for block in blocks)
     if covered / len(nq) < _FUZZY_MIN_COVERAGE:
         return False
-    if blocks[0].a > _FUZZY_MAX_EDGE_GAP:
+    leading_residue = nq[: blocks[0].a]
+    if len(leading_residue) > _FUZZY_MAX_EDGE_GAP or any(ch.isalnum() for ch in leading_residue):
         return False
-    if len(nq) - (blocks[-1].a + blocks[-1].size) > _FUZZY_MAX_EDGE_GAP:
+    trailing_residue = nq[blocks[-1].a + blocks[-1].size :]
+    if len(trailing_residue) > _FUZZY_MAX_EDGE_GAP or any(ch.isalnum() for ch in trailing_residue):
         return False
     for b1, b2 in zip(blocks, blocks[1:]):
         qgap = b2.a - (b1.a + b1.size)
         mgap = b2.b - (b1.b + b1.size)
-        if qgap != 0 or (mgap != 0 and mgap < _FUZZY_MIN_ELISION_GAP):
+        if qgap != 0:
             return False
+        if mgap != 0:
+            remainder = nq[b1.a + b1.size :]
+            if (
+                mgap < _FUZZY_MIN_ELISION_GAP
+                or len(remainder) > _FUZZY_MAX_CLOSER_LENGTH
+                or any(ch.isalnum() for ch in remainder)
+            ):
+                return False
     return True
 
 
