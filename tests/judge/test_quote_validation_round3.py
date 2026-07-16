@@ -82,6 +82,30 @@ def test_token_shuffled_fabrication_still_rejected():
         _check_quote("integrity_oversight", fabricated, "msg_10", index)
 
 
+TAMPERING_TEXT = (
+    "After reviewing the complete treatment record with the attending veterinarian, the manager "
+    "did not authorize the flock transfer because the required withdrawal interval was still "
+    "active and the receiving barn had not completed its biosecurity inspection."
+)
+
+
+def test_dropped_not_fabrication_rejected_at_known_id():
+    fabricated = TAMPERING_TEXT.replace(" not ", "")
+    assert not _fuzzy_contained(fabricated, TAMPERING_TEXT)
+    with pytest.raises(ValueError):
+        _check_quote("integrity_oversight", fabricated, "msg_20", {"msg_20": TAMPERING_TEXT})
+
+
+def test_inserted_word_fabrication_rejected():
+    fabricated = TAMPERING_TEXT.replace("authorize", "deliberately authorize")
+    assert not _fuzzy_contained(fabricated, TAMPERING_TEXT)
+
+
+def test_substituted_word_fabrication_rejected():
+    fabricated = TAMPERING_TEXT.replace("active", "complete")
+    assert not _fuzzy_contained(fabricated, TAMPERING_TEXT)
+
+
 def test_fuzzy_never_scans_whole_transcript_for_unknown_ids():
     # unknown-id resolution stays STRICT: a quote that only fuzzy-matches must not resolve
     quote = QUOTE_1419

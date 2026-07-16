@@ -290,6 +290,10 @@ _ELISION_RE = re.compile(r"\[\s*(?:\.{3,}|…)\s*\]|\.{3,}|…")
 
 _FUZZY_MIN_TOKENS = 8
 _FUZZY_MIN_COVERAGE = 0.90
+# Tiny quote-edge mismatches can be rendering-marker residue.
+_FUZZY_MAX_EDGE_GAP = 4
+# Internal message gaps must be large enough to represent a real truncation, not word tampering.
+_FUZZY_MIN_ELISION_GAP = 30
 
 
 def _normalize_evidence(text: str) -> str:
@@ -306,21 +310,34 @@ def _normalize_evidence(text: str) -> str:
 
 def _fuzzy_contained(quote: str, text: str) -> bool:
     """A3 fuzzy-containment tier: the fraction of the normalized quote covered by IN-ORDER
-    matching blocks against the normalized message must reach _FUZZY_MIN_COVERAGE.
+    matching blocks against the normalized message must reach _FUZZY_MIN_COVERAGE, and the
+    blocks must describe only a large message-side elision rather than word-level edits.
 
     Round-3 receipt this heals: a 757-char quote that is a verbatim 754-char prefix of the real
     rendering plus its real 3-char closer, middle elided with NO ellipsis marker (msg_1419) —
-    coverage 1.0. A fabricated sentence assembled from words that appear scattered in the message
-    matches only short out-of-order blocks and stays far below the floor. Floors: >= 8 real
-    tokens (shorter quotes must pass the strict tiers) and >= 90% in-order coverage. ONLY used
-    where the cited location is trusted (the cited message and its immediate neighbors) — never
-    for whole-transcript resolution."""
+    coverage 1.0 with a large internal message gap. Internal quote gaps are rejected as inserted
+    text, while small internal message gaps are rejected as dropped or changed words. Floors:
+    >= 8 real tokens (shorter quotes must pass the strict tiers) and >= 90% in-order coverage.
+    ONLY used where the cited location is trusted (the cited message and its immediate neighbors)
+    — never for whole-transcript resolution."""
     nq, nt = _normalize_evidence(quote), _normalize_evidence(text)
     if not nq or len(_tokens(nq)) < _FUZZY_MIN_TOKENS:
         return False
     matcher = difflib.SequenceMatcher(None, nq, nt, autojunk=False)
-    covered = sum(block.size for block in matcher.get_matching_blocks())
-    return covered / len(nq) >= _FUZZY_MIN_COVERAGE
+    blocks = [block for block in matcher.get_matching_blocks() if block.size]
+    covered = sum(block.size for block in blocks)
+    if covered / len(nq) < _FUZZY_MIN_COVERAGE:
+        return False
+    if blocks[0].a > _FUZZY_MAX_EDGE_GAP:
+        return False
+    if len(nq) - (blocks[-1].a + blocks[-1].size) > _FUZZY_MAX_EDGE_GAP:
+        return False
+    for b1, b2 in zip(blocks, blocks[1:]):
+        qgap = b2.a - (b1.a + b1.size)
+        mgap = b2.b - (b1.b + b1.size)
+        if qgap != 0 or (mgap != 0 and mgap < _FUZZY_MIN_ELISION_GAP):
+            return False
+    return True
 
 
 def _tokens(text: str) -> list[str]:
