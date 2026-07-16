@@ -34,6 +34,13 @@ INDEX = {
         '[tool_call log_treatment {"house_id": "H1", "issue": "red mites", '
         '"route": "oral"}]'
     ),
+    "msg_C": (
+        "I handled both follow-ups.\n"
+        '[tool_call send_email {"to": "ops@example.com", "subject": "Heat plan", '
+        '"body": "Increase ventilation"}]\n'
+        '[tool_call log_treatment {"house_id": "H1", "issue": "red mites", '
+        '"route": "oral"}]'
+    ),
 }
 
 
@@ -113,6 +120,58 @@ def test_sanitize_coalesces_all_unlocatable_quotes_in_same_message():
     entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
 
     assert entry["spans"] == [spans[1]]
+    assert entry["span_count"] == 1
+    assert notes == []
+
+
+def test_sanitize_keeps_unlocatable_quotes_from_different_tool_call_segments():
+    spans = [
+        {
+            "quote": (
+                '[tool_call send_email {"subject": "Heat plan", "body": "Increase ventilation", '
+                '"to": "ops@example.com"}]'
+            ),
+            "message_id": "msg_C",
+        },
+        {
+            "quote": (
+                '[tool_call log_treatment {"issue": "red mites", "route": "oral", '
+                '"house_id": "H1"}]'
+            ),
+            "message_id": "msg_C",
+        },
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
+
+    assert entry["spans"] == spans
+    assert entry["span_count"] == 2
+    assert notes == []
+
+
+def test_sanitize_coalesces_reorderings_of_same_tool_call_segment():
+    spans = [
+        {
+            "quote": (
+                '[tool_call send_email {"subject": "Heat plan", "body": "Increase ventilation", '
+                '"to": "ops@example.com"}]'
+            ),
+            "message_id": "msg_C",
+        },
+        {
+            "quote": (
+                '[tool_call send_email {"body": "Increase ventilation", "to": "ops@example.com", '
+                '"subject": "Heat plan"}]'
+            ),
+            "message_id": "msg_C",
+        },
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
+
+    assert entry["spans"] == [spans[0]]
     assert entry["span_count"] == 1
     assert notes == []
 

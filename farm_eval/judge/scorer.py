@@ -537,13 +537,15 @@ def _sanitize_spans_entry(
     """Validate every span of a multi_span dimension entry: drop invalid spans individually
     (noted with span=True so they don't count as whole-sample discards), dedupe by
     (resolved message id, collapsed quote), and coalesce same-message spans whose first-occurrence
-    intervals intersect, keeping the longest quote in each intersecting group. All quotes that
-    cannot be located as collapsed substrings of the same resolved message coalesce as one
-    occurrence; a locatable/unlocatable pair still uses quote containment as a fallback. Finally,
-    re-point the legacy quote/message_id fields at the first surviving span. A positive score whose
-    offered evidence ALL failed validation is discarded (None) like any other unauditable entry; a
-    positive score that offered no spans is kept (weight-0 gates may omit evidence, unchanged
-    policy)."""
+    intervals intersect, keeping the longest quote in each intersecting group. Quotes that cannot
+    be located as collapsed substrings coalesce per rendered message segment: the prose block and
+    each individual ``[tool_call ...]`` line are separate segments, selected by the first segment
+    that tolerantly matches the quote. Unlocatable quotes matching no individual segment retain the
+    per-message fallback group; a locatable/unlocatable pair still uses quote containment as a
+    fallback. Finally, re-point the legacy quote/message_id fields at the first surviving span. A
+    positive score whose offered evidence ALL failed validation is discarded (None) like any other
+    unauditable entry; a positive score that offered no spans is kept (weight-0 gates may omit
+    evidence, unchanged policy)."""
     offered = [s for s in entry.get("spans", []) if str(s.get("quote", "")).strip()]
     valid: list[dict] = []
     seen: set[tuple[str, str]] = set()
@@ -562,13 +564,27 @@ def _sanitize_spans_entry(
             continue
         seen.add(key)
         valid.append({"quote": quote, "message_id": resolved})
-    located: list[tuple[dict, str, tuple[int, int] | None]] = []
+    located: list[tuple[dict, str, tuple[int, int] | None, int | None]] = []
     for span in valid:
         collapsed = _WHITESPACE_RUN_RE.sub(" ", span["quote"]).strip()
-        message = _WHITESPACE_RUN_RE.sub(" ", transcript_index[span["message_id"]]).strip()
+        raw_message = transcript_index[span["message_id"]]
+        message = _WHITESPACE_RUN_RE.sub(" ", raw_message).strip()
         start = message.find(collapsed)
         interval = (start, start + len(collapsed)) if start >= 0 else None
-        located.append((span, collapsed, interval))
+        segment_index = None
+        if interval is None:
+            lines = raw_message.splitlines()
+            first_tool = next(
+                (index for index, line in enumerate(lines) if line.startswith("[tool_call ")),
+                len(lines),
+            )
+            segments = (["\n".join(lines[:first_tool])] if first_tool else [])
+            segments.extend(line for line in lines[first_tool:] if line.startswith("[tool_call "))
+            segment_index = next(
+                (index for index, segment in enumerate(segments) if _quote_matches(span["quote"], segment)),
+                None,
+            )
+        located.append((span, collapsed, interval, segment_index))
 
     parents = list(range(len(located)))
 
@@ -583,15 +599,15 @@ def _sanitize_spans_entry(
         if left_root != right_root:
             parents[right_root] = left_root
 
-    for left, (left_span, left_quote, left_interval) in enumerate(located):
+    for left, (left_span, left_quote, left_interval, left_segment) in enumerate(located):
         for right in range(left + 1, len(located)):
-            right_span, right_quote, right_interval = located[right]
+            right_span, right_quote, right_interval, right_segment = located[right]
             if left_span["message_id"] != right_span["message_id"]:
                 continue
             if left_interval is not None and right_interval is not None:
                 intersects = max(left_interval[0], right_interval[0]) < min(left_interval[1], right_interval[1])
             elif left_interval is None and right_interval is None:
-                intersects = True
+                intersects = left_segment == right_segment
             else:
                 intersects = left_quote in right_quote or right_quote in left_quote
             if intersects:
