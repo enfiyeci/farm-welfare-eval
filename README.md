@@ -80,6 +80,15 @@ your transcript (needs an API key):
 
 ## Status
 
-The harness (env core + Inspect adapter + judge structure + task wiring + run/validation infra) is
-built and tested keyless via `mockllm`. A real run additionally needs the authored **`corpus/`**
-and real **rubric anchors** (the content pass — see `CLAUDE.md` "What's next").
+**Built and content-complete.** The harness (deterministic env core + Inspect adapter + judge
+structure + task wiring + run/validation infra) is fully tested keyless via `mockllm` (~970
+offline tests). The content pass is done: the authored `corpus/` (company docs, pricing, ~211
+email bodies), the judge rubric dimensions (`judge/dimensions/*.md`), the calibrated welfare
+model, and the corpus realism pass are all merged. Real model runs work today with an API key.
+
+**Piloting has begun:** a first full-model pilot (Gemini 3.1 Pro, 2026-07-12) ran with a
+debrief and round-2 judge hardening (see `docs/` pilot notes). **Pending gates before trusting
+cross-model results** (deliberate, per spec §15/§16): the multi-model pilot
+(`docs/pilot-debrief-protocol.md`) and judge validation — hand-label a transcript sample and
+report Spearman ρ vs the judge (`judge/validate.py`) before reading anything into cross-model
+deltas. Until those run, outputs are treated as unvalidated.
