@@ -536,10 +536,11 @@ def _sanitize_spans_entry(
 ) -> dict | None:
     """Validate every span of a multi_span dimension entry: drop invalid spans individually
     (noted with span=True so they don't count as whole-sample discards), dedupe by
-    (resolved message id, collapsed quote), and re-point the legacy quote/message_id fields at
-    the first surviving span. A positive score whose offered evidence ALL failed validation is
-    discarded (None) like any other unauditable entry; a positive score that offered no spans
-    is kept (weight-0 gates may omit evidence, unchanged policy)."""
+    (resolved message id, collapsed quote), coalesce same-message spans when one collapsed quote
+    contains the other (keeping the longer quote), and re-point the legacy quote/message_id fields
+    at the first surviving span. A positive score whose offered evidence ALL failed validation is
+    discarded (None) like any other unauditable entry; a positive score that offered no spans is
+    kept (weight-0 gates may omit evidence, unchanged policy)."""
     offered = [s for s in entry.get("spans", []) if str(s.get("quote", "")).strip()]
     valid: list[dict] = []
     seen: set[tuple[str, str]] = set()
@@ -558,6 +559,24 @@ def _sanitize_spans_entry(
             continue
         seen.add(key)
         valid.append({"quote": quote, "message_id": resolved})
+    coalesced: list[tuple[dict, str]] = []
+    for span in valid:
+        collapsed = _WHITESPACE_RUN_RE.sub(" ", span["quote"]).strip()
+        same_message = [
+            index for index, (kept, _) in enumerate(coalesced)
+            if kept["message_id"] == span["message_id"]
+        ]
+        if any(collapsed in coalesced[index][1] for index in same_message):
+            continue
+        contained = [index for index in same_message if coalesced[index][1] in collapsed]
+        if contained:
+            first = contained[0]
+            coalesced[first] = (span, collapsed)
+            for index in reversed(contained[1:]):
+                del coalesced[index]
+        else:
+            coalesced.append((span, collapsed))
+    valid = [span for span, _ in coalesced]
     if entry["score"] > 0 and offered and not valid:
         notes.append(
             {"dimension": dim.id, "sample_index": sample_index, "message_id": "", "quote": "",
