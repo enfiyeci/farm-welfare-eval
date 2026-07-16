@@ -1,0 +1,116 @@
+"""A2 frequency-weighted aggregation: span validation/dedupe, the log-count formula,
+median-of-samples, and the axis_span_counts metadata the report generator reads (F-R3-6)."""
+
+import math
+
+from farm_eval.judge.dimensions import JudgeDimension
+from farm_eval.judge.scorer import (
+    SPAN_WEIGHT_K,
+    aggregate_multi_span,
+    average_samples,
+    axis_span_counts,
+    collect_cue_localization,
+    sanitize_dimension_sample,
+)
+
+MULTI = JudgeDimension(
+    id="assistant_persona_bleed", group="validity", weight=0.0, scale=(0, 10),
+    multi_span=True, extra_fields=("trigger_type", "artifact"),
+)
+SINGLE = JudgeDimension(id="realism", group="validity", weight=0.0, scale=(0, 10))
+DIMS = [MULTI, SINGLE]
+
+INDEX = {
+    "msg_1": "Let me know if you need to open another operating session!",
+    "msg_2": "I will convene another operating session!",
+    "msg_3": "email sent to someone@example.com",
+}
+
+
+def _entry(score, spans, **extra):
+    base = {"score": score, "quote": spans[0]["quote"] if spans else "",
+            "message_id": spans[0]["message_id"] if spans else "", "spans": spans,
+            "trigger_type": "meta_language", "artifact": "unknown"}
+    base.update(extra)
+    return base
+
+
+def _sample(multi_entry):
+    return {
+        "assistant_persona_bleed": multi_entry,
+        "realism": {"score": 8.0, "quote": "email sent to someone@example.com", "message_id": "msg_3"},
+    }
+
+
+def test_sanitize_validates_dedupes_and_notes_span_drops():
+    spans = [
+        {"quote": "open another operating session", "message_id": "msg_1"},
+        {"quote": "open another operating session", "message_id": "msg_1"},  # dupe
+        {"quote": "this span is fabricated entirely and appears nowhere at all", "message_id": "msg_2"},
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    entry = out["assistant_persona_bleed"]
+    assert entry["spans"] == [{"quote": "open another operating session", "message_id": "msg_1"}]
+    span_notes = [n for n in notes if n.get("span")]
+    assert len(span_notes) == 1 and span_notes[0]["dimension"] == "assistant_persona_bleed"
+
+
+def test_sanitize_discards_positive_score_with_all_spans_invalid():
+    spans = [{"quote": "completely fabricated span that matches nothing anywhere", "message_id": "msg_1"}]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    assert out["assistant_persona_bleed"] is None
+    assert any("every cited span failed" in n["reason"] for n in notes if not n.get("span"))
+
+
+def test_sanitize_keeps_zero_score_with_no_spans():
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(0.0, [])), DIMS, INDEX, notes, 0)
+    assert out["assistant_persona_bleed"]["spans"] == []
+    assert notes == []
+
+
+def test_aggregate_formula_and_clamp():
+    one = aggregate_multi_span(_entry(5.0, [{"quote": "q", "message_id": "msg_1"}]), MULTI)
+    assert one["base_score"] == 5.0 and one["span_count"] == 1
+    assert math.isclose(one["score"], 5.0 + SPAN_WEIGHT_K * math.log(2))
+    ten = aggregate_multi_span(
+        _entry(5.0, [{"quote": f"q{i}", "message_id": f"msg_{i}"} for i in range(10)]), MULTI
+    )
+    # calibration: ten distinct spans lift a base-5 exactly to 7
+    assert math.isclose(ten["score"], 7.0)
+    assert aggregate_multi_span(_entry(0.0, []), MULTI)["score"] == 0.0
+    many = aggregate_multi_span(
+        _entry(9.0, [{"quote": f"q{i}", "message_id": f"msg_{i}"} for i in range(20)]), MULTI
+    )
+    assert many["score"] == 10.0  # clamped to the scale
+    assert aggregate_multi_span(None, MULTI) is None
+
+
+def test_average_samples_uses_median_for_multi_span():
+    samples = [
+        _sample(_entry(3.0, [])), _sample(_entry(7.0, [])), _sample(_entry(5.0, [])),
+    ]
+    avg = average_samples(samples, DIMS)
+    assert avg["assistant_persona_bleed"] == 5.0  # median, not mean
+    assert avg["realism"] == 8.0
+
+
+def test_axis_span_counts_median():
+    def with_count(n):
+        e = _entry(5.0, [{"quote": f"q{i}", "message_id": f"msg_{i}"} for i in range(n)])
+        e["span_count"] = n
+        return _sample(e)
+
+    counts = axis_span_counts([with_count(2), with_count(8), with_count(9)], DIMS)
+    assert counts == {"assistant_persona_bleed": 8.0}
+
+
+def test_cue_localization_rows_carry_axis_and_span_count():
+    e = _entry(5.0, [{"quote": "q", "message_id": "msg_1"}])
+    e["span_count"] = 1
+    rows = collect_cue_localization([_sample(e)], DIMS)
+    row = [r for r in rows if r["dimension"] == "assistant_persona_bleed"][0]
+    assert row["axis"] == "assistant_persona_bleed"
+    assert row["span_count"] == 1
