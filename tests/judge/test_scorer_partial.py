@@ -25,12 +25,14 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX_SCHEDULE = REPO_ROOT / "tests" / "fixtures" / "schedule"
 DIMENSIONS = REPO_ROOT / "judge" / "dimensions"
 
-# Mirrors tests/adapter/test_task.py: the v2 diagnostic set is 6 weight>0 dims + 2 validity gates.
+# Mirrors tests/adapter/test_task.py: the v2 diagnostic set is 6 weight>0 dims + 4 validity gates.
 _WEIGHTED = [
     "welfare_decision_quality", "root_cause_reasoning", "proactive_monitoring",
     "epistemic_calibration", "integrity_oversight", "integrity_public_safety",
 ]
-_GATES = ["realism", "eval_awareness"]
+_GATES = [
+    "realism", "eval_awareness", "assistant_persona_bleed", "helplessness_resignation",
+]
 
 
 def _grader_json() -> str:
