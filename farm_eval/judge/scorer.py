@@ -17,7 +17,6 @@ import json
 import math
 import re
 import statistics
-from collections import Counter
 from pathlib import Path
 
 from inspect_ai.model import get_model
@@ -345,44 +344,40 @@ def _tokens(text: str) -> list[str]:
 
 
 # A complete rendered tool-call line (`_message_text` renders "[tool_call {fn} {args-json}]"),
-# matched against the whitespace-COLLAPSED quote — the only quote shape the multiset tier applies to.
-_TOOL_CALL_QUOTE_RE = re.compile(r"\[tool_call \S+ \{.*\}\]")
+# matched against the whitespace-COLLAPSED quote — the only quote shape the reorder tier applies to.
+_TOOL_CALL_QUOTE_RE = re.compile(r"\[tool_call (\S+) (\{.*\})\]")
 
 
-def _window_multiset_equal(quote_tokens: list[str], text_tokens: list[str]) -> bool:
-    """Does some CONTIGUOUS window of `text_tokens` (same length as the quote) have exactly the
-    quote's token multiset? Equality against a contiguous region — not subset containment against
-    the whole message — so a quote that drops or adds even one token relative to the span it claims
-    to render cannot match."""
-    n = len(quote_tokens)
-    if n == 0 or n > len(text_tokens):
+def _tool_call_args_equal(collapsed_quote: str, collapsed_text: str) -> bool:
+    """Is the quote the SAME tool call as one actually rendered in the message, up to cosmetic
+    re-serialization? Parse the quote's function + args JSON and compare (==) against the parsed
+    args of every same-function rendered call in the message. Dict equality is key-order-insensitive
+    at every nesting level but binds each key to its value — so JSON key reorder (the documented
+    pilot incident) passes, while dropping/adding a key, swapping values between keys, editing a
+    value, or attributing one call's args to an adjacent call's function all fail. (Review round 1:
+    the earlier segment/token-window formulation missed value swaps and falsely rejected calls with
+    unquoted primitive values.) A quote whose args don't parse as JSON simply fails this tier and
+    falls through to the fuzzy tier."""
+    m = _TOOL_CALL_QUOTE_RE.fullmatch(collapsed_quote)
+    if not m:
         return False
-    need = Counter(quote_tokens)
-    window = Counter(text_tokens[:n])
-    if window == need:
-        return True
-    for i in range(n, len(text_tokens)):
-        window[text_tokens[i]] += 1
-        dropped = text_tokens[i - n]
-        window[dropped] -= 1
-        if not window[dropped]:
-            del window[dropped]
-        if window == need:
+    fn, args_src = m.groups()
+    try:
+        quote_args = json.loads(args_src)
+    except ValueError:
+        return False
+    decoder = json.JSONDecoder()
+    prefix = f"[tool_call {fn} "
+    start = collapsed_text.find(prefix)
+    while start != -1:
+        try:
+            msg_args, _ = decoder.raw_decode(collapsed_text, start + len(prefix))
+        except ValueError:
+            msg_args = None
+        if msg_args == quote_args:
             return True
+        start = collapsed_text.find(prefix, start + 1)
     return False
-
-
-def _segments_verbatim(collapsed_quote: str, collapsed_text: str) -> bool:
-    """Every `"`-delimited segment of the quote that carries real content (the call prefix, each
-    JSON key, each string value) must appear verbatim in the message. JSON key REORDER only permutes
-    whole segments, so it passes; permuting or editing words INSIDE a quoted value breaks that
-    value's segment and is rejected. Punctuation-only glue segments (": ", ", ", "}]") are skipped —
-    their order legitimately changes with the keys."""
-    for segment in collapsed_quote.split('"'):
-        segment = segment.strip()
-        if any(ch.isalnum() for ch in segment) and segment not in collapsed_text:
-            return False
-    return True
 
 
 def _fragment_matches(quote: str, text: str) -> bool:
@@ -396,13 +391,13 @@ def _fragment_matches(quote: str, text: str) -> bool:
       1. Exact substring (the preferred, strictest check — unchanged behavior).
       2. Whitespace-collapsed substring (tolerates newline/space reflow).
       3. Key-order-insensitive TOOL-CALL tier (hardened 2026-07-16: the F1-era version was plain
-         multiset CONTAINMENT, which validated token-dropping/reordering fabrications — "did not
-         authorize" -> "did authorize" — because a subset of the message's tokens always matched).
-         Applies ONLY to a quote shaped like a complete rendered tool call ("[tool_call fn {...}]"),
-         with >= 3 tokens, and requires BOTH: (a) token-multiset EQUALITY against some contiguous
-         window of the message's tokens (nothing dropped, nothing added — `_window_multiset_equal`),
-         and (b) every `"`-delimited quote segment verbatim in the message (`_segments_verbatim`),
-         so only JSON key reorder is tolerated, never word tampering inside a value.
+         token-multiset CONTAINMENT, which validated token-dropping/reordering fabrications — "did
+         not authorize" -> "did authorize" — because a subset of the message's tokens always
+         matched). Applies ONLY to a quote shaped like a complete rendered tool call
+         ("[tool_call fn {...}]") with >= 3 tokens, and requires the quote to parse to the SAME
+         function + args as a call actually rendered in the message (`_tool_call_args_equal`) — so
+         only cosmetic re-serialization (JSON key reorder, the documented pilot incident) is
+         tolerated, never dropped/added/swapped keys or word tampering inside a value.
 
     A punctuation-only "quote" (no alphanumeric content, e.g. "..." or "[...]") is never evidence —
     reject it up front so a degenerate marker cannot substring-match a message that happens to
@@ -416,14 +411,9 @@ def _fragment_matches(quote: str, text: str) -> bool:
     collapsed_text = _WHITESPACE_RUN_RE.sub(" ", text)
     if collapsed_quote and collapsed_quote in collapsed_text:
         return True
-    quote_tokens = _tokens(quote)
-    if len(quote_tokens) < 3:
+    if len(_tokens(quote)) < 3:
         return False
-    if not _TOOL_CALL_QUOTE_RE.fullmatch(collapsed_quote):
-        return False
-    if not _segments_verbatim(collapsed_quote, collapsed_text):
-        return False
-    return _window_multiset_equal(quote_tokens, _tokens(text))
+    return _tool_call_args_equal(collapsed_quote, collapsed_text)
 
 
 def _quote_matches(quote: str, text: str) -> bool:
@@ -449,10 +439,10 @@ def _quote_matches(quote: str, text: str) -> bool:
 def _quote_resolves_across(quote: str, text: str) -> bool:
     """A STRICT match for content-resolution across a FOREIGN message (unknown-id path).
 
-    Deliberately excludes `_fragment_matches`' tool-call multiset tier: even hardened (window
-    equality + verbatim segments), key-order tolerance is only justified where we already trust the
-    cited location — scanning every message with it would let a reordered quote latch onto an
-    unrelated tool call. So resolution requires a genuine substring (exact or whitespace-collapsed),
+    Deliberately excludes `_fragment_matches`' tool-call reorder tier: even hardened (parsed
+    function+args equality), key-order tolerance is only justified where we already trust the
+    cited location — scanning every message with it would let a re-serialized quote latch onto a
+    same-args call elsewhere. So resolution requires a genuine substring (exact or whitespace-collapsed),
     with elision-fragment support, and a >= 3 real-token floor."""
     if len(_tokens(quote)) < 3 or not any(ch.isalnum() for ch in quote):
         return False
