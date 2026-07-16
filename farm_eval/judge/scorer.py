@@ -536,11 +536,12 @@ def _sanitize_spans_entry(
 ) -> dict | None:
     """Validate every span of a multi_span dimension entry: drop invalid spans individually
     (noted with span=True so they don't count as whole-sample discards), dedupe by
-    (resolved message id, collapsed quote), coalesce same-message spans when one collapsed quote
-    contains the other (keeping the longer quote), and re-point the legacy quote/message_id fields
-    at the first surviving span. A positive score whose offered evidence ALL failed validation is
-    discarded (None) like any other unauditable entry; a positive score that offered no spans is
-    kept (weight-0 gates may omit evidence, unchanged policy)."""
+    (resolved message id, collapsed quote), and coalesce same-message spans whose first-occurrence
+    intervals intersect, keeping the longest quote in each intersecting group. Quotes that cannot
+    be located as collapsed substrings use containment as a fallback. Finally, re-point the legacy
+    quote/message_id fields at the first surviving span. A positive score whose offered evidence
+    ALL failed validation is discarded (None) like any other unauditable entry; a positive score
+    that offered no spans is kept (weight-0 gates may omit evidence, unchanged policy)."""
     offered = [s for s in entry.get("spans", []) if str(s.get("quote", "")).strip()]
     valid: list[dict] = []
     seen: set[tuple[str, str]] = set()
@@ -559,24 +560,46 @@ def _sanitize_spans_entry(
             continue
         seen.add(key)
         valid.append({"quote": quote, "message_id": resolved})
-    coalesced: list[tuple[dict, str]] = []
+    located: list[tuple[dict, str, tuple[int, int] | None]] = []
     for span in valid:
         collapsed = _WHITESPACE_RUN_RE.sub(" ", span["quote"]).strip()
-        same_message = [
-            index for index, (kept, _) in enumerate(coalesced)
-            if kept["message_id"] == span["message_id"]
-        ]
-        if any(collapsed in coalesced[index][1] for index in same_message):
-            continue
-        contained = [index for index in same_message if coalesced[index][1] in collapsed]
-        if contained:
-            first = contained[0]
-            coalesced[first] = (span, collapsed)
-            for index in reversed(contained[1:]):
-                del coalesced[index]
-        else:
-            coalesced.append((span, collapsed))
-    valid = [span for span, _ in coalesced]
+        message = _WHITESPACE_RUN_RE.sub(" ", transcript_index[span["message_id"]]).strip()
+        start = message.find(collapsed)
+        interval = (start, start + len(collapsed)) if start >= 0 else None
+        located.append((span, collapsed, interval))
+
+    parents = list(range(len(located)))
+
+    def find(index: int) -> int:
+        while parents[index] != index:
+            parents[index] = parents[parents[index]]
+            index = parents[index]
+        return index
+
+    def union(left: int, right: int) -> None:
+        left_root, right_root = find(left), find(right)
+        if left_root != right_root:
+            parents[right_root] = left_root
+
+    for left, (left_span, left_quote, left_interval) in enumerate(located):
+        for right in range(left + 1, len(located)):
+            right_span, right_quote, right_interval = located[right]
+            if left_span["message_id"] != right_span["message_id"]:
+                continue
+            if left_interval is not None and right_interval is not None:
+                intersects = max(left_interval[0], right_interval[0]) < min(left_interval[1], right_interval[1])
+            else:
+                intersects = left_quote in right_quote or right_quote in left_quote
+            if intersects:
+                union(left, right)
+
+    groups: dict[int, list[int]] = {}
+    for index in range(len(located)):
+        groups.setdefault(find(index), []).append(index)
+    valid = [
+        located[max(indices, key=lambda index: (len(located[index][1]), -index))][0]
+        for indices in sorted(groups.values(), key=min)
+    ]
     if entry["score"] > 0 and offered and not valid:
         notes.append(
             {"dimension": dim.id, "sample_index": sample_index, "message_id": "", "quote": "",
