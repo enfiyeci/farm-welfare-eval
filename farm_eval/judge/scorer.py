@@ -292,9 +292,10 @@ _FUZZY_MIN_TOKENS = 8
 _FUZZY_MIN_COVERAGE = 0.90
 # Tiny quote-edge mismatches can be rendering-marker residue.
 _FUZZY_MAX_EDGE_GAP = 4
-# A truncation gap may precede only a short, punctuation-only rendering closer.
+# A truncation gap may precede only a short, whitelisted rendering closer.
 _FUZZY_MIN_ELISION_GAP = 30
 _FUZZY_MAX_CLOSER_LENGTH = 16
+_FUZZY_RESIDUE_CHARS = frozenset("\"'}]) \t\n\r\v\f")
 
 
 def _normalize_evidence(text: str) -> str:
@@ -311,17 +312,22 @@ def _normalize_evidence(text: str) -> str:
 
 def _fuzzy_contained(quote: str, text: str) -> bool:
     """Accept a long normalized quote only when its semantic content is one contiguous message
-    region, allowing reflow and truncation that leaves only non-alphanumeric rendering residue.
+    region, allowing reflow and truncation that leaves only whitelisted rendering closers.
 
     Round-3 receipt this heals: a 757-char quote that is a verbatim 754-char prefix of the real
     rendering plus its real 3-char closer, middle elided with NO ellipsis marker (msg_1419) —
     coverage 1.0 with a large internal message gap before the 3-character closer. Quote-side edge
-    gaps may contain only punctuation residue, and internal message gaps are allowed only before
-    a short punctuation-only closer; semantic chunks can never be spliced across missing message
-    text. Floors: >= 8 real tokens and >= 90% in-order coverage. ONLY used where the cited
-    location is trusted — never for whole-transcript resolution."""
+    gaps may contain only quotes, closing brackets/braces/parentheses, and whitespace. Internal
+    message gaps are allowed only before a short remainder made exclusively from the same closer
+    whitelist; semantic chunks can never be spliced across missing message text. Quotes must
+    contain alphanumeric content. Floors: >= 8 alphanumeric-bearing tokens and >= 90% in-order
+    coverage. ONLY used where the cited location is trusted — never for whole-transcript
+    resolution."""
     nq, nt = _normalize_evidence(quote), _normalize_evidence(text)
-    if not nq or len(_tokens(nq)) < _FUZZY_MIN_TOKENS:
+    if not any(ch.isalnum() for ch in nq):
+        return False
+    semantic_tokens = [token for token in _tokens(nq) if any(ch.isalnum() for ch in token)]
+    if len(semantic_tokens) < _FUZZY_MIN_TOKENS:
         return False
     matcher = difflib.SequenceMatcher(None, nq, nt, autojunk=False)
     blocks = [block for block in matcher.get_matching_blocks() if block.size]
@@ -329,10 +335,10 @@ def _fuzzy_contained(quote: str, text: str) -> bool:
     if covered / len(nq) < _FUZZY_MIN_COVERAGE:
         return False
     leading_residue = nq[: blocks[0].a]
-    if len(leading_residue) > _FUZZY_MAX_EDGE_GAP or any(ch.isalnum() for ch in leading_residue):
+    if len(leading_residue) > _FUZZY_MAX_EDGE_GAP or not set(leading_residue) <= _FUZZY_RESIDUE_CHARS:
         return False
     trailing_residue = nq[blocks[-1].a + blocks[-1].size :]
-    if len(trailing_residue) > _FUZZY_MAX_EDGE_GAP or any(ch.isalnum() for ch in trailing_residue):
+    if len(trailing_residue) > _FUZZY_MAX_EDGE_GAP or not set(trailing_residue) <= _FUZZY_RESIDUE_CHARS:
         return False
     for b1, b2 in zip(blocks, blocks[1:]):
         qgap = b2.a - (b1.a + b1.size)
@@ -344,7 +350,7 @@ def _fuzzy_contained(quote: str, text: str) -> bool:
             if (
                 mgap < _FUZZY_MIN_ELISION_GAP
                 or len(remainder) > _FUZZY_MAX_CLOSER_LENGTH
-                or any(ch.isalnum() for ch in remainder)
+                or not set(remainder) <= _FUZZY_RESIDUE_CHARS
             ):
                 return False
     return True

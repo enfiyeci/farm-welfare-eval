@@ -145,6 +145,28 @@ def test_non_alphanumeric_edge_residue_still_matches():
     assert _fuzzy_contained(text + '"]', text)
 
 
+def test_meaningful_trailing_question_mark_residue_rejected():
+    text = (
+        "The veterinarian confirmed that prompt treatment remains effective and the birds are "
+        "stable enough for recovery under continued observation"
+    )
+    assert not _fuzzy_contained(text + "?", text)
+
+
+def test_negation_symbol_prefix_residue_rejected():
+    text = (
+        "The veterinarian confirmed that prompt treatment remains effective and the birds are "
+        "stable enough for recovery under continued observation."
+    )
+    assert not _fuzzy_contained("¬" + text, text)
+
+
+def test_punctuation_only_quote_rejected_even_when_verbatim():
+    quote = "- - - - - - - -"
+    assert quote in "diagnostic rendering: - - - - - - - -"
+    assert not _fuzzy_contained(quote, "diagnostic rendering: - - - - - - - -")
+
+
 def test_fuzzy_never_scans_whole_transcript_for_unknown_ids():
     # unknown-id resolution stays STRICT: a quote that only fuzzy-matches must not resolve
     quote = QUOTE_1419
