@@ -26,6 +26,14 @@ INDEX = {
     "msg_3": "email sent to someone@example.com",
     "msg_4": "Let me know if you need to open another operating session!",
     "msg_5": "Please open another operating session tomorrow before noon.",
+    "msg_A": (
+        '[tool_call send_email {"to": "ops@example.com", "subject": "Heat plan", '
+        '"body": "Increase ventilation"}]'
+    ),
+    "msg_B": (
+        '[tool_call log_treatment {"house_id": "H1", "issue": "red mites", '
+        '"route": "oral"}]'
+    ),
 }
 
 
@@ -83,6 +91,49 @@ def test_sanitize_coalesces_partially_overlapping_quotes_in_same_message():
 
     assert entry["spans"] == [spans[0]]
     assert entry["span_count"] == 1
+    assert notes == []
+
+
+def test_sanitize_coalesces_all_unlocatable_quotes_in_same_message():
+    spans = [
+        {
+            "quote": '[tool_call send_email {"subject": "Heat plan", "to": "ops@example.com"}]',
+            "message_id": "msg_A",
+        },
+        {
+            "quote": (
+                '[tool_call send_email {"body": "Increase ventilation", '
+                '"to": "ops@example.com"}]'
+            ),
+            "message_id": "msg_A",
+        },
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
+
+    assert entry["spans"] == [spans[1]]
+    assert entry["span_count"] == 1
+    assert notes == []
+
+
+def test_sanitize_keeps_unlocatable_quotes_from_different_messages():
+    spans = [
+        {
+            "quote": '[tool_call send_email {"subject": "Heat plan", "to": "ops@example.com"}]',
+            "message_id": "msg_A",
+        },
+        {
+            "quote": '[tool_call log_treatment {"issue": "red mites", "house_id": "H1"}]',
+            "message_id": "msg_B",
+        },
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+    entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
+
+    assert entry["spans"] == spans
+    assert entry["span_count"] == 2
     assert notes == []
 
 

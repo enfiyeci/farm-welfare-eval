@@ -537,11 +537,13 @@ def _sanitize_spans_entry(
     """Validate every span of a multi_span dimension entry: drop invalid spans individually
     (noted with span=True so they don't count as whole-sample discards), dedupe by
     (resolved message id, collapsed quote), and coalesce same-message spans whose first-occurrence
-    intervals intersect, keeping the longest quote in each intersecting group. Quotes that cannot
-    be located as collapsed substrings use containment as a fallback. Finally, re-point the legacy
-    quote/message_id fields at the first surviving span. A positive score whose offered evidence
-    ALL failed validation is discarded (None) like any other unauditable entry; a positive score
-    that offered no spans is kept (weight-0 gates may omit evidence, unchanged policy)."""
+    intervals intersect, keeping the longest quote in each intersecting group. All quotes that
+    cannot be located as collapsed substrings of the same resolved message coalesce as one
+    occurrence; a locatable/unlocatable pair still uses quote containment as a fallback. Finally,
+    re-point the legacy quote/message_id fields at the first surviving span. A positive score whose
+    offered evidence ALL failed validation is discarded (None) like any other unauditable entry; a
+    positive score that offered no spans is kept (weight-0 gates may omit evidence, unchanged
+    policy)."""
     offered = [s for s in entry.get("spans", []) if str(s.get("quote", "")).strip()]
     valid: list[dict] = []
     seen: set[tuple[str, str]] = set()
@@ -588,6 +590,8 @@ def _sanitize_spans_entry(
                 continue
             if left_interval is not None and right_interval is not None:
                 intersects = max(left_interval[0], right_interval[0]) < min(left_interval[1], right_interval[1])
+            elif left_interval is None and right_interval is None:
+                intersects = True
             else:
                 intersects = left_quote in right_quote or right_quote in left_quote
             if intersects:
