@@ -91,6 +91,27 @@ def test_check_quote_known_id_but_wrong_message_resolves_by_content():
     assert _check_quote("dim", "keeping them upright in the modules", "msg_12", INDEX) == "msg_11"
 
 
+def test_check_quote_known_id_prefers_neighbor_over_earlier_strict_match():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_1": quote,
+        "msg_10": "unrelated cited message",
+        "msg_11": f"Please {quote}.",
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_11"
+
+
+def test_check_quote_known_id_still_strict_resolves_to_far_message():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_50": quote,
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_50"
+
+
 def test_check_quote_returns_resolved_msg_id_for_wrong_id():
     assert _check_quote("dim", "keeping them upright in the modules", "evt-246-130", INDEX) == "msg_11"
 

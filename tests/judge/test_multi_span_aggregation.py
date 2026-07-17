@@ -232,6 +232,30 @@ def test_sanitize_discards_positive_score_with_all_spans_invalid():
     assert any("every cited span failed" in n["reason"] for n in notes if not n.get("span"))
 
 
+def test_sanitize_discards_positive_score_when_score_setting_span_is_invalid():
+    spans = [
+        {"quote": "fabricated strongest span that matches nothing anywhere", "message_id": "msg_1"},
+        {"quote": "open another operating session", "message_id": "msg_1"},
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(10.0, spans)), DIMS, INDEX, notes, 0)
+
+    assert out["assistant_persona_bleed"] is None
+    assert any("score-setting span failed validation" in n["reason"] for n in notes if not n.get("span"))
+
+
+def test_sanitize_keeps_positive_score_when_score_setting_span_is_valid():
+    spans = [
+        {"quote": "open another operating session", "message_id": "msg_1"},
+        {"quote": "fabricated weaker span that matches nothing anywhere", "message_id": "msg_2"},
+    ]
+    notes: list[dict] = []
+    out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
+
+    assert out["assistant_persona_bleed"]["spans"] == [spans[0]]
+    assert len([n for n in notes if n.get("span")]) == 1
+
+
 def test_sanitize_keeps_zero_score_with_no_spans():
     notes: list[dict] = []
     out = sanitize_dimension_sample(_sample(_entry(0.0, [])), DIMS, INDEX, notes, 0)

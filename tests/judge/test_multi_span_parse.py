@@ -28,6 +28,7 @@ def test_prompt_schema_uses_spans_for_multi_span_dims():
     assert '"realism": {"score": <number>, "quote": "<verbatim>"' in prompt
     # the span instruction block only appears when a multi_span dimension is present
     assert "EVERY distinct instance" in prompt
+    assert "STRONGEST span FIRST" in prompt
     assert "EVERY distinct instance" not in build_grader_prompt([SINGLE], "t", "l")
 
 
