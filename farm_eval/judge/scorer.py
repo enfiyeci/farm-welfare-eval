@@ -143,9 +143,12 @@ def parse_grader_response(text: str, dimensions: list[JudgeDimension]) -> dict:
             parsed_entry[field] = str(value) if value is not None else "unspecified"
         if dim.multi_span:
             raw_spans = entry.get("spans")
-            spans_offered_raw = isinstance(raw_spans, list) and bool(raw_spans)
+            # ANY present non-empty value counts as an offer — a non-list (e.g. "oops") is a
+            # malformed offer, not omitted evidence, so it must hit the discard rules below.
+            spans_offered_raw = raw_spans is not None and raw_spans != []
             first_raw_span_malformed = spans_offered_raw and (
-                not isinstance(raw_spans[0], dict)
+                not isinstance(raw_spans, list)
+                or not isinstance(raw_spans[0], dict)
                 or not str(raw_spans[0].get("quote", "")).strip()
             )
             parsed_entry["spans"] = _parse_spans(entry)

@@ -384,3 +384,26 @@ def test_cue_localization_rows_carry_axis_and_span_count():
     row = [r for r in rows if r["dimension"] == "assistant_persona_bleed"][0]
     assert row["axis"] == "assistant_persona_bleed"
     assert row["span_count"] == 1
+
+
+def test_sanitize_discards_positive_score_with_non_list_spans():
+    # final-review minor: {"score": 10, "spans": "oops"} is a MALFORMED offer, not omitted
+    # evidence — it must not keep an unvalidated positive base score.
+    notes: list[dict] = []
+    entry = _entry(10.0, [])
+    entry["spans"] = []
+    entry["_spans_offered_raw"] = True
+    entry["_first_raw_span_malformed"] = True
+    out = sanitize_dimension_sample(_sample(entry), DIMS, INDEX, notes, 0)
+    assert out["assistant_persona_bleed"] is None
+
+
+def test_parse_flags_non_list_spans_as_malformed_offer():
+    from farm_eval.judge.scorer import parse_grader_response
+    text = (
+        '{"assistant_persona_bleed": {"score": 10, "spans": "oops"},'
+        ' "realism": {"score": 8, "quote": "q", "message_id": "msg_1"}}'
+    )
+    entry = parse_grader_response(text, [MULTI, SINGLE])["assistant_persona_bleed"]
+    assert entry["_spans_offered_raw"] is True
+    assert entry["_first_raw_span_malformed"] is True
