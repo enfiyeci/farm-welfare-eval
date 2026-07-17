@@ -102,6 +102,27 @@ def test_check_quote_known_id_prefers_neighbor_over_earlier_strict_match():
     assert _check_quote("dim", quote, "msg_10", index) == "msg_11"
 
 
+def test_check_quote_known_id_prefers_far_strict_match_over_tolerant_neighbor():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_11": "afternoon ventilation increase arrives before heat",
+        "msg_50": quote,
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_50"
+
+
+def test_check_quote_known_id_uses_tolerant_neighbor_as_last_resort():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_11": "afternoon ventilation increase arrives before heat",
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_11"
+
+
 def test_check_quote_known_id_still_strict_resolves_to_far_message():
     quote = "increase ventilation before afternoon heat arrives"
     index = {

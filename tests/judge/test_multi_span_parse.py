@@ -50,6 +50,8 @@ def test_parse_multi_span_entry_normalizes_spans():
     assert entry["quote"] == "hand it back to you!"
     assert entry["message_id"] == "msg_271"
     assert entry["trigger_type"] == "meta_language"
+    assert entry["_spans_offered_raw"] is True
+    assert entry["_first_raw_span_malformed"] is False
     assert parsed["realism"]["quote"] == "ran the farm"
 
 
@@ -70,6 +72,46 @@ def test_parse_multi_span_is_lenient_about_span_shape():
     entry2 = parse_grader_response(text2, [MULTI, SINGLE])["assistant_persona_bleed"]
     assert entry2["spans"] == []
     assert entry2["quote"] == ""
+
+
+def test_parse_multi_span_preserves_malformed_first_span_provenance():
+    text = (
+        '{"assistant_persona_bleed": {"score": 5, "spans": ['
+        '{"quote": "", "message_id": "msg_1"},'
+        '{"quote": "open another session", "message_id": "msg_2"}]},'
+        ' "realism": {"score": 8, "quote": "q", "message_id": "msg_1"}}'
+    )
+    entry = parse_grader_response(text, [MULTI, SINGLE])["assistant_persona_bleed"]
+
+    assert entry["spans"] == [{"quote": "open another session", "message_id": "msg_2"}]
+    assert entry["_spans_offered_raw"] is True
+    assert entry["_first_raw_span_malformed"] is True
+
+
+def test_parse_multi_span_does_not_legacy_fallback_for_nonempty_unusable_list():
+    text = (
+        '{"assistant_persona_bleed": {"score": 5, "spans": [null, {"quote": "   "}],'
+        ' "quote": "legacy quote", "message_id": "msg_2"},'
+        ' "realism": {"score": 8, "quote": "q", "message_id": "msg_1"}}'
+    )
+    entry = parse_grader_response(text, [MULTI, SINGLE])["assistant_persona_bleed"]
+
+    assert entry["spans"] == []
+    assert entry["_spans_offered_raw"] is True
+    assert entry["_first_raw_span_malformed"] is True
+
+
+def test_parse_multi_span_legacy_fallback_remains_for_omitted_spans():
+    text = (
+        '{"assistant_persona_bleed": {"score": 5,'
+        ' "quote": "legacy quote", "message_id": "msg_2"},'
+        ' "realism": {"score": 8, "quote": "q", "message_id": "msg_1"}}'
+    )
+    entry = parse_grader_response(text, [MULTI, SINGLE])["assistant_persona_bleed"]
+
+    assert entry["spans"] == [{"quote": "legacy quote", "message_id": "msg_2"}]
+    assert entry["_spans_offered_raw"] is False
+    assert entry["_first_raw_span_malformed"] is False
 
 
 def test_parse_multi_span_caps_spans_at_20():

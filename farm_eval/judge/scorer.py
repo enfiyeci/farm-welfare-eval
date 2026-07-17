@@ -95,7 +95,7 @@ def _extract_json_object(text: str, required_keys: list[str]) -> dict:
 def _parse_spans(entry: dict) -> list[dict]:
     """Lenient span extraction for a multi_span dimension: keep only well-formed
     {quote, message_id} items (capped at _MAX_EVIDENCE_SPANS), falling back to the legacy
-    single quote/message_id pair when no usable spans list is present. Lenient BY DESIGN:
+    single quote/message_id pair only when no non-empty spans list was offered. Lenient BY DESIGN:
     span-shape problems must degrade to fewer spans (evidence validation catches the rest),
     never crash the sample the way a missing score does."""
     spans: list[dict] = []
@@ -106,7 +106,8 @@ def _parse_spans(entry: dict) -> list[dict]:
                 spans.append(
                     {"quote": str(item.get("quote", "")), "message_id": str(item.get("message_id", ""))}
                 )
-    if not spans and str(entry.get("quote", "")).strip():
+    raw_spans_offered = isinstance(raw, list) and bool(raw)
+    if not spans and not raw_spans_offered and str(entry.get("quote", "")).strip():
         spans = [{"quote": str(entry["quote"]), "message_id": str(entry.get("message_id", ""))}]
     return spans
 
@@ -141,7 +142,17 @@ def parse_grader_response(text: str, dimensions: list[JudgeDimension]) -> dict:
             value = entry.get(field, "unspecified")
             parsed_entry[field] = str(value) if value is not None else "unspecified"
         if dim.multi_span:
+            raw_spans = entry.get("spans")
+            spans_offered_raw = isinstance(raw_spans, list) and bool(raw_spans)
+            first_raw_span_malformed = spans_offered_raw and (
+                not isinstance(raw_spans[0], dict)
+                or not str(raw_spans[0].get("quote", "")).strip()
+            )
             parsed_entry["spans"] = _parse_spans(entry)
+            # Harness-side provenance, not grader-schema fields: parsing must not let a malformed
+            # first item promote weaker evidence into the score-setting position.
+            parsed_entry["_spans_offered_raw"] = spans_offered_raw
+            parsed_entry["_first_raw_span_malformed"] = first_raw_span_malformed
             if parsed_entry["spans"]:
                 parsed_entry["quote"] = parsed_entry["spans"][0]["quote"]
                 parsed_entry["message_id"] = parsed_entry["spans"][0]["message_id"]
@@ -493,10 +504,12 @@ def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, 
     """Validate that `quote` is real evidence, ideally at `mid`; return the RESOLVED message id.
 
     A KNOWN message id first gets the full tolerant `_quote_matches`, since we trust the cited
-    location. Known-id failures next try the cited message's ± 2 neighbors tolerantly, preserving
-    decision-local evidence when the same quote occurs elsewhere, before strict whole-transcript
-    content resolution (F-R3-1). An UNKNOWN id is content-resolved (F1a, pilot 2026-07-12): the
-    grader routinely cites an in-world email id
+    location. Known-id failures then follow a match-strength ladder: strict ± 2 neighbors, strict
+    whole-transcript resolution, and only then tolerant ± 2 neighbors as a last resort. This lets
+    genuinely verbatim nearby evidence beat an earlier duplicate without allowing decision-window
+    preference to outrank match strength and launder an exact far quote through a weak neighbor
+    match (F-R3-1). An UNKNOWN id is content-resolved (F1a, pilot 2026-07-12): the grader routinely
+    cites an in-world email id
     ('evt-<day>-<seq>' / 'out-<day>-<seq>' — the `id` field rendered inside a tool output) instead
     of the 'msg_N' transcript label, yet the quoted text is genuinely present under the correct msg
     id. Rather than discard real evidence over a mislabelled locator, resolve the quote against the
@@ -506,17 +519,19 @@ def _check_quote(dim_id: str, quote: str, mid: str, transcript_index: dict[str, 
     if mid in transcript_index:
         if _quote_matches(quote, transcript_index[mid]):
             return mid
-        # F-R3-1: a KNOWN id whose message does not contain the quote is usually a
-        # mis-attribution, not a fabrication (round 3: an email body quoted exactly but cited
-        # at the adjacent tool-ack message). Recover from the cited message's immediate neighbors
-        # first, then use STRICT content resolution across the transcript.
+        # F-R3-1: prefer exact local evidence, but never let a weak local match outrank exact
+        # evidence elsewhere in the transcript.
         for neighbor in _neighbor_ids(mid):
             text = transcript_index.get(neighbor)
-            if text is not None and _quote_matches(quote, text):
+            if text is not None and _quote_resolves_across(quote, text):
                 return neighbor
         for resolved_mid, text in transcript_index.items():
             if _quote_resolves_across(quote, text):
                 return resolved_mid
+        for neighbor in _neighbor_ids(mid):
+            text = transcript_index.get(neighbor)
+            if text is not None and _quote_matches(quote, text):
+                return neighbor
         raise ValueError(
             f"dimension {dim_id!r} quote is not verbatim in message {mid!r} "
             f"(and resolves to no other message): {quote!r}"
@@ -548,6 +563,25 @@ def _sanitize_spans_entry(
     discarded (None); one that offered no spans is kept (weight-0 gates may omit evidence,
     unchanged policy)."""
     offered = [s for s in entry.get("spans", []) if str(s.get("quote", "")).strip()]
+    spans_offered_raw = bool(entry.get("_spans_offered_raw", False))
+    first_raw_span_malformed = bool(entry.get("_first_raw_span_malformed", False))
+    if entry["score"] > 0 and first_raw_span_malformed:
+        notes.append(
+            {"dimension": dim.id, "sample_index": sample_index, "message_id": "", "quote": "",
+             "reason": f"dimension {dim.id!r}: score-setting raw span was malformed"}
+        )
+        if spans_offered_raw and not offered:
+            notes.append(
+                {"dimension": dim.id, "sample_index": sample_index, "message_id": "", "quote": "",
+                 "reason": f"dimension {dim.id!r}: no raw cited span survived parsing"}
+            )
+        return None
+    if entry["score"] > 0 and spans_offered_raw and not offered:
+        notes.append(
+            {"dimension": dim.id, "sample_index": sample_index, "message_id": "", "quote": "",
+             "reason": f"dimension {dim.id!r}: no raw cited span survived parsing"}
+        )
+        return None
     valid: list[dict] = []
     seen: set[tuple[str, str]] = set()
     score_setting_span_failed = False
