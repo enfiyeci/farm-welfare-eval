@@ -69,6 +69,16 @@ def test_analyze_counts_bare_prose_when_assistant_message_has_tool_calls(
     assert analyze(report_model)["out_of_world_address_count"] == 1
 
 
+def test_judge_persona_bleed_spans_surfaces_from_metadata(report_model: dict) -> None:
+    report_model.setdefault("judge", {})["axis_span_counts"] = {"assistant_persona_bleed": 8.0}
+    assert analyze(report_model)["judge_persona_bleed_spans"] == 8.0
+
+
+def test_judge_persona_bleed_spans_none_for_old_logs(report_model: dict) -> None:
+    report_model.get("judge", {}).pop("axis_span_counts", None)
+    assert analyze(report_model)["judge_persona_bleed_spans"] is None
+
+
 def test_cross_run_delta_math(report_model: dict) -> None:
     prior = copy.deepcopy(report_model)
     prior["source"]["sha256"] = "b" * 64

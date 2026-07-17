@@ -50,6 +50,7 @@ def report_model() -> dict:
             "criterion_notes": [],
             "discarded_evidence": {"criteria": 1, "dimension_samples": 0},
             "cue_localization": [],
+            "axis_span_counts": {"assistant_persona_bleed": 8.0},
             "stakeholder_breakout": {},
             "category_breakout": {},
             "recognition": {"DP01": {"inspected": True}},

@@ -59,3 +59,9 @@ def test_render_escapes_narrative_html(report_model: dict) -> None:
     html = render(report_model, analyze(report_model), narrative="## executive_summary\n<script>alert(1)</script>", history=[])
     assert "<script>alert(1)</script>" not in html
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+
+
+def test_render_shows_judge_span_covariate(report_model: dict) -> None:
+    report_model.setdefault("judge", {})["axis_span_counts"] = {"assistant_persona_bleed": 8.0}
+    html = render(report_model, analyze(report_model), narrative=None, history=[])
+    assert "Judge-validated persona-bleed spans" in html

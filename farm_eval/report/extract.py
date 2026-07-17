@@ -265,6 +265,7 @@ def extract(path: str | Path) -> dict[str, Any]:
             "criterion_notes": metadata.get("criterion_notes", []),
             "discarded_evidence": metadata.get("discarded_evidence", {}),
             "cue_localization": metadata.get("cue_localization", []),
+            "axis_span_counts": metadata.get("axis_span_counts", {}),
             "stakeholder_breakout": metadata.get("stakeholder_breakout", {}),
             "category_breakout": metadata.get("category_breakout", {}),
             "stakeholder_balanced": metadata.get("stakeholder_balanced"),
