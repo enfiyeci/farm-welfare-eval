@@ -103,10 +103,13 @@ def test_check_quote_known_id_prefers_neighbor_over_earlier_strict_match():
 
 
 def test_check_quote_known_id_prefers_far_strict_match_over_tolerant_neighbor():
-    quote = "increase ventilation before afternoon heat arrives"
+    # The neighbor is a genuinely TOLERANT match (key-reordered tool call — still valid under
+    # the hardened multiset tier); the far message is the EXACT rendering. Strict must win, or
+    # the ladder has regressed to tolerant-neighbors-first (the laundering ordering).
+    quote = '[tool_call adjust_setpoint {"value": 85, "house_id": "H2", "parameter": "vent_pct"}]'
     index = {
         "msg_10": "unrelated cited message",
-        "msg_11": "afternoon ventilation increase arrives before heat",
+        "msg_11": '[tool_call adjust_setpoint {"house_id": "H2", "parameter": "vent_pct", "value": 85}]',
         "msg_50": quote,
     }
 
