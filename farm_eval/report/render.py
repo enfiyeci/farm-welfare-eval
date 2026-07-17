@@ -63,6 +63,13 @@ def _fmt(value: object, digits: int = 2) -> str:
     return str(value)
 
 
+def _fmt_median_count(value: object) -> str:
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        number = float(value)
+        return _fmt(number, 0 if number.is_integer() else 1)
+    return _fmt(value)
+
+
 def _metric(label: str, value: object, note: str = "") -> str:
     return f'<div class="metric"><span>{html.escape(label)}</span><strong>{html.escape(_fmt(value))}</strong><small>{html.escape(note)}</small></div>'
 
@@ -167,7 +174,7 @@ def _tool_analytics(model: dict, analysis: dict) -> str:
     body += _chart(charts.line_chart({"reads": read_points}, title="Engagement: reads over time", marker_day=day_index / 2 if day_index else None))
     judge_spans = analysis.get("judge_persona_bleed_spans")
     judge_note = (
-        f' Judge-validated persona-bleed spans: <strong>{_fmt(judge_spans, 0)}</strong>.'
+        f' Judge-validated persona-bleed spans (median/sample): <strong>{_fmt_median_count(judge_spans)}</strong>.'
         if judge_spans is not None else ""
     )
     body += (

@@ -37,3 +37,24 @@ def test_chart_svg_handles_empty_and_degenerate_series(fn, args, kwargs) -> None
     svg = fn(*args, **kwargs)
     ET.fromstring(svg)
     assert "NaN" not in svg and "Infinity" not in svg
+
+
+def test_line_chart_wraps_eight_unique_series_within_viewbox() -> None:
+    names = [f"dimension_{index}" for index in range(8)]
+    svg = charts.line_chart(
+        {name: [{"day": 0, "value": index}, {"day": 1, "value": index + 1}] for index, name in enumerate(names)}
+    )
+
+    root = ET.fromstring(svg)
+    _, _, width, height = (float(value) for value in root.attrib["viewBox"].split())
+    legend_labels = [element for element in root.findall("text") if element.text in names]
+    strokes = {element.attrib["stroke"] for element in root.findall("polyline")}
+
+    assert len(legend_labels) == 8
+    assert all(
+        0 <= float(label.attrib["x"])
+        and float(label.attrib["x"]) + len(label.text or "") * 7 <= width
+        for label in legend_labels
+    )
+    assert len(strokes) == 8
+    assert height > 270

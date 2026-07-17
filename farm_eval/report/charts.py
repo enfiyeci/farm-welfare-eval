@@ -5,7 +5,7 @@ import math
 from collections.abc import Mapping, Sequence
 
 
-_COLORS = ("var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)")
+_COLORS = tuple(f"var(--chart-{index})" for index in range(1, 10))
 
 
 def _finite(value: object, default: float = 0.0) -> float:
@@ -112,7 +112,20 @@ def line_chart(
             clean[str(name)] = values
     if not clean:
         return _empty(title)
-    width, height, left, right, top, bottom = 820, 270, 62, 24, 24, 46
+    width, base_height, left, right, top, bottom = 820, 270, 62, 24, 24, 46
+    legend_row_height = 22
+    legend_positions: list[tuple[float, float]] = []
+    legend_x = float(left)
+    legend_row = 0
+    for name in clean:
+        entry_width = max(100, len(name) * 7 + 28)
+        if legend_x > left and legend_x + entry_width > width - right:
+            legend_row += 1
+            legend_x = float(left)
+        legend_positions.append((legend_x, base_height - 3 + legend_row * legend_row_height))
+        legend_x += entry_width
+    height = base_height + legend_row * legend_row_height
+    plot_bottom = base_height - bottom
     all_points = [point for points in clean.values() for point in points]
     min_x, max_x = min(x for x, _ in all_points), max(x for x, _ in all_points)
     min_y, max_y = min(y for _, y in all_points), max(y for _, y in all_points)
@@ -126,19 +139,19 @@ def line_chart(
         return left + (x - min_x) / (max_x - min_x) * (width - left - right)
 
     def py(y: float) -> float:
-        return top + (max_y - y) / (max_y - min_y) * (height - top - bottom)
+        return top + (max_y - y) / (max_y - min_y) * (plot_bottom - top)
 
     parts = [
-        f'<line x1="{left}" y1="{height - bottom}" x2="{width - right}" y2="{height - bottom}" class="axis"/>',
-        f'<line x1="{left}" y1="{top}" x2="{left}" y2="{height - bottom}" class="axis"/>',
-        f'<text x="{left}" y="{height - 17}">{min_x:.0f}</text>',
-        f'<text x="{width - right}" y="{height - 17}" text-anchor="end">{max_x:.0f}</text>',
+        f'<line x1="{left}" y1="{plot_bottom}" x2="{width - right}" y2="{plot_bottom}" class="axis"/>',
+        f'<line x1="{left}" y1="{top}" x2="{left}" y2="{plot_bottom}" class="axis"/>',
+        f'<text x="{left}" y="{base_height - 17}">{min_x:.0f}</text>',
+        f'<text x="{width - right}" y="{base_height - 17}" text-anchor="end">{max_x:.0f}</text>',
         f'<text x="{left - 8}" y="{top + 5}" text-anchor="end">{max_y:.3g}</text>',
-        f'<text x="{left - 8}" y="{height - bottom}" text-anchor="end">{min_y:.3g}</text>',
+        f'<text x="{left - 8}" y="{plot_bottom}" text-anchor="end">{min_y:.3g}</text>',
     ]
     if marker_day is not None and min_x <= _finite(marker_day) <= max_x:
         marker_x = px(_finite(marker_day))
-        parts.append(f'<line x1="{marker_x:.3f}" y1="{top}" x2="{marker_x:.3f}" y2="{height - bottom}" class="marker"><title>Attention midpoint: day {marker_day:g}</title></line>')
+        parts.append(f'<line x1="{marker_x:.3f}" y1="{top}" x2="{marker_x:.3f}" y2="{plot_bottom}" class="marker"><title>Attention midpoint: day {marker_day:g}</title></line>')
     for index, (name, points) in enumerate(clean.items()):
         color = _COLORS[index % len(_COLORS)]
         segments: list[list[tuple[float, float]]] = [[]]
@@ -154,7 +167,8 @@ def line_chart(
                 f'<circle cx="{px(x):.3f}" cy="{py(y):.3f}" r="3.5" fill="{color}">'
                 f"<title>{html.escape(name)} · day {x:g}: {y:.3g}</title></circle>"
             )
-        parts.append(f'<text x="{left + index * 145}" y="{height - 3}" fill="{color}">{html.escape(name)}</text>')
+        legend_label_x, legend_label_y = legend_positions[index]
+        parts.append(f'<text x="{legend_label_x:.3f}" y="{legend_label_y:.3f}" fill="{color}">{html.escape(name)}</text>')
     return _svg("".join(parts), title=title, width=width, height=height)
 
 
