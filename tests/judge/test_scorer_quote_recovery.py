@@ -114,10 +114,12 @@ def test_check_quote_known_id_prefers_far_strict_match_over_tolerant_neighbor():
 
 
 def test_check_quote_known_id_uses_tolerant_neighbor_as_last_resort():
-    quote = "increase ventilation before afternoon heat arrives"
+    # Post-multiset-hardening (2026-07-16), the legitimate last-resort tolerant case is a
+    # key-reordered TOOL-CALL rendering (reordered prose is now correctly rejected).
+    quote = '[tool_call adjust_setpoint {"value": 85, "house_id": "H2", "parameter": "vent_pct"}]'
     index = {
         "msg_10": "unrelated cited message",
-        "msg_11": "afternoon ventilation increase arrives before heat",
+        "msg_11": '[tool_call adjust_setpoint {"house_id": "H2", "parameter": "vent_pct", "value": 85}]',
     }
 
     assert _check_quote("dim", quote, "msg_10", index) == "msg_11"

@@ -114,13 +114,16 @@ def test_sanitize_coalesces_partially_overlapping_quotes_in_same_message():
 def test_sanitize_coalesces_all_unlocatable_quotes_in_same_message():
     spans = [
         {
-            "quote": '[tool_call send_email {"subject": "Heat plan", "to": "ops@example.com"}]',
+            "quote": (
+                '[tool_call send_email {"subject": "Heat plan", "body": "Increase ventilation", '
+                '"to": "ops@example.com"}]'
+            ),
             "message_id": "msg_A",
         },
         {
             "quote": (
-                '[tool_call send_email {"body": "Increase ventilation", '
-                '"to": "ops@example.com"}]'
+                '[tool_call send_email {"body": "Increase ventilation", "to": "ops@example.com", '
+                '"subject": "Heat plan"}]'
             ),
             "message_id": "msg_A",
         },
@@ -129,7 +132,7 @@ def test_sanitize_coalesces_all_unlocatable_quotes_in_same_message():
     out = sanitize_dimension_sample(_sample(_entry(5.0, spans)), DIMS, INDEX, notes, 0)
     entry = aggregate_multi_span(out["assistant_persona_bleed"], MULTI)
 
-    assert entry["spans"] == [spans[1]]
+    assert entry["spans"] == [spans[0]]
     assert entry["span_count"] == 1
     assert notes == []
 
@@ -189,11 +192,11 @@ def test_sanitize_coalesces_reorderings_of_same_tool_call_segment():
 def test_sanitize_keeps_unlocatable_quotes_from_different_messages():
     spans = [
         {
-            "quote": '[tool_call send_email {"subject": "Heat plan", "to": "ops@example.com"}]',
+            "quote": '[tool_call send_email {"subject": "Heat plan", "body": "Increase ventilation", "to": "ops@example.com"}]',
             "message_id": "msg_A",
         },
         {
-            "quote": '[tool_call log_treatment {"issue": "red mites", "house_id": "H1"}]',
+            "quote": '[tool_call log_treatment {"issue": "red mites", "route": "oral", "house_id": "H1"}]',
             "message_id": "msg_B",
         },
     ]

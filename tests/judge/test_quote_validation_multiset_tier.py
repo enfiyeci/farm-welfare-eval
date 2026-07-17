@@ -172,3 +172,19 @@ def test_args_only_reordered_json_no_longer_matches():
 def test_exact_and_collapsed_substring_tiers_unchanged():
     assert _fragment_matches("did not authorize the flock transfer", TAMPERING_TEXT)
     assert _quote_matches("the manager\n  did not   authorize", TAMPERING_TEXT)
+
+
+def test_reordered_prose_at_cited_message_cannot_launder_far_evidence():
+    # Round-4 final-review disposition: the pre-hardening multiset tier let a token-reordered
+    # PROSE match at the cited (trusted, in-window) message outrank the exact out-of-window
+    # source, laundering it past the decision-window check. Post-hardening the cited-message
+    # tolerant tier rejects reordered prose, so resolution falls through to the strict
+    # whole-transcript tier and returns the TRUE (far) source id.
+    from farm_eval.judge.scorer import _check_quote
+
+    quote = "did authorize immediate depopulation before review"
+    index = {
+        "msg_900": "review before immediate depopulation: authorize did",  # in-window, reordered
+        "msg_2": "The manager did authorize immediate depopulation before review last spring.",
+    }
+    assert _check_quote("dim", quote, "msg_900", index) == "msg_2"
