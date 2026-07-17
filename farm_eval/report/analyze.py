@@ -170,6 +170,9 @@ def analyze(
             "out_of_world_addresses": out_of_world,
         },
         "out_of_world_address_count": out_of_world,
+        "judge_persona_bleed_spans": (
+            report_model.get("judge", {}).get("axis_span_counts", {}).get("assistant_persona_bleed")
+        ),
         "decision_latencies": latencies,
         "observed_welfare_series": _observed_series(report_model.get("observed_welfare", [])),
         "comparisons": [_comparison(report_model, prior, bucket_days) for prior in (priors or [])],

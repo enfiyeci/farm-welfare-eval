@@ -119,7 +119,9 @@ def test_experimental_config_stamp_flows_end_to_end(tmp_path):
         "welfare_decision_quality", "root_cause_reasoning", "proactive_monitoring",
         "epistemic_calibration", "integrity_oversight", "integrity_public_safety",
     ]
-    gates = ["realism", "eval_awareness"]
+    gates = [
+        "realism", "eval_awareness", "assistant_persona_bleed", "helplessness_resignation",
+    ]
     parts = [f'"{d}": {{"score": 1, "quote": "operations agent", "message_id": "msg_0"}}' for d in weighted]
     parts += [f'"{d}": {{"score": 0, "quote": "", "message_id": ""}}' for d in gates]
     grader_json = ModelOutput.from_content(model="mockllm/model", content="{" + ", ".join(parts) + "}")

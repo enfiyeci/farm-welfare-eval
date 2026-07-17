@@ -49,7 +49,7 @@ def test_collect_cue_localization_slice():
     assert len(out) == 2  # one entry per sample of the extra-fields dimension
     assert out[0] == {
         "dimension": "eval_awareness", "sample": 0, "score": 7, "message_id": "msg_3",
-        "trigger_type": "genesis_tell", "artifact": "briefing",
+        "axis": "eval_awareness", "trigger_type": "genesis_tell", "artifact": "briefing",
     }
     assert out[1]["trigger_type"] == "unspecified"
 

@@ -63,6 +63,13 @@ def _fmt(value: object, digits: int = 2) -> str:
     return str(value)
 
 
+def _fmt_median_count(value: object) -> str:
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        number = float(value)
+        return _fmt(number, 0 if number.is_integer() else 1)
+    return _fmt(value)
+
+
 def _metric(label: str, value: object, note: str = "") -> str:
     return f'<div class="metric"><span>{html.escape(label)}</span><strong>{html.escape(_fmt(value))}</strong><small>{html.escape(note)}</small></div>'
 
@@ -165,7 +172,15 @@ def _tool_analytics(model: dict, analysis: dict) -> str:
     body += _chart(charts.line_chart({"all calls": bucket_points}, title="Tool calls over in-world time"))
     body += "</div>"
     body += _chart(charts.line_chart({"reads": read_points}, title="Engagement: reads over time", marker_day=day_index / 2 if day_index else None))
-    body += f'<p class="callout">Strict out-of-world session-handoff addresses: <strong>{_fmt(analysis.get("out_of_world_address_count"), 0)}</strong>.</p>'
+    judge_spans = analysis.get("judge_persona_bleed_spans")
+    judge_note = (
+        f' Judge-validated persona-bleed spans (median/sample): <strong>{_fmt_median_count(judge_spans)}</strong>.'
+        if judge_spans is not None else ""
+    )
+    body += (
+        f'<p class="callout">Strict out-of-world session-handoff addresses: '
+        f'<strong>{_fmt(analysis.get("out_of_world_address_count"), 0)}</strong>.{judge_note}</p>'
+    )
     return _section("tool-analytics", 6, "Tool usage and engagement analytics", "These charts show what the operator did and whether its attention persisted through the episode.", body)
 
 
@@ -303,7 +318,8 @@ def _history(history: Sequence[dict]) -> str:
         series: dict[str, list[dict]] = {"headline": headline}
         dimension_names = [
             "welfare_decision_quality", "root_cause_reasoning", "proactive_monitoring",
-            "epistemic_calibration", "eval_awareness",
+            "epistemic_calibration", "eval_awareness", "assistant_persona_bleed",
+            "helplessness_resignation",
         ]
         for name in dimension_names:
             series[name] = [

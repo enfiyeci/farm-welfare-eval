@@ -4,6 +4,7 @@
   --line: #c9d0c8; --accent: #176b4d; --accent-soft: #dcece4;
   --positive: #16734b; --negative: #b43b3b; --warning: #9a6500;
   --chart-1: #176b4d; --chart-2: #bd5b2a; --chart-3: #5368a5; --chart-4: #8a4e91; --chart-5: #92730e;
+  --chart-6: #087f8c; --chart-7: #c13f64; --chart-8: #5f6f22; --chart-9: #6f5a3a;
   --shadow: 0 8px 28px rgba(29, 43, 35, .08);
 }
 @media (prefers-color-scheme: dark) {
@@ -12,6 +13,7 @@
     --line: #394a40; --accent: #75d2a8; --accent-soft: #203d30;
     --positive: #75d2a8; --negative: #ff8e8e; --warning: #efc45c;
     --chart-1: #75d2a8; --chart-2: #ff9a68; --chart-3: #9eafff; --chart-4: #e0a0e5; --chart-5: #e9cb6e;
+    --chart-6: #69d9e7; --chart-7: #ff91b0; --chart-8: #bad56c; --chart-9: #d6b98b;
     --shadow: 0 8px 28px rgba(0, 0, 0, .25);
   }
 }
