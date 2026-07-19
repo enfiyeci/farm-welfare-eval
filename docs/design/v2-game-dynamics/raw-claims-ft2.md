@@ -2,7 +2,14 @@
 
 All claims extracted by deep-research run `wf_f5a08ffb-526` (2026-07-18) on emerging/future (2030-2045) welfare-loaded livestock tech, before dedup into [`future-tech-x-mechanics-B-research-backed.md`](future-tech-x-mechanics-B-research-backed.md). The run hit a session limit mid-verification: **✅ VERIFIED** passed 3-vote; **⚠️ UNVERIFIED** the 3 voters errored on the session limit (NOT a refutation — re-verify); **· extracted-only** not sampled for verification (true to source, not cross-checked). 0 claims were refuted. Kept verbatim for provenance.
 
-**Counts:** 119 claims · 17 verified · 8 unverified(session-limit) · 0 refuted · rest extracted-only.
+**Counts:** 119 claims · 17 verified in-run · 8 unverified(session-limit) · 0 refuted · rest extracted-only.
+
+**Update 2026-07-19 — re-verification:** all 8 `⚠️ UNVERIFIED` claims (the depopulation cluster —
+NEFS/EFSA, VSD+/AVMA, nitrogen-foam/AWC — and two gene-editing-ethics claims) were manually
+re-checked against their primary sources: **all 8 SUPPORTED, 0 refuted.** Effective total: **25
+verified / 0 refuted.** The re-verification table (with verbatim quotes) is in the catalog's
+§Re-verification. The `⚠️ UNVERIFIED` marks below are left as the run's raw output for provenance;
+treat those 8 as verified per the catalog.
 
 ---
 

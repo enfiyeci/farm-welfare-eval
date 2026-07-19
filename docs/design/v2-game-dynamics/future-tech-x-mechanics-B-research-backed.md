@@ -2,13 +2,15 @@
 
 **Status: SOURCED.** Grounds the priors draft
 ([`future-tech-x-mechanics-priors.md`](future-tech-x-mechanics-priors.md)) with deep-research run
-`wf_f5a08ffb-526` (2026-07-18): 30 sources, 119 claims, **17 verified / 0 refuted / 8 unverified**
-(the run hit a session limit mid-verification — the 8 are voter *errors*, not refutations).
+`wf_f5a08ffb-526` (2026-07-18): 30 sources, 119 claims, **17 verified in-run + 8 manually
+re-verified 2026-07-19 = 25 verified / 0 refuted** (the run hit a session limit mid-verification;
+those 8 voter *errors* were re-checked against primary sources — see §Re-verification).
 Provenance: [`raw-claims-ft2.md`](raw-claims-ft2.md).
 
-**Verification tags:** **[V]** in the verified sample · **[ext]** extracted-only (true to source,
-not cross-checked) · **[unv]** the verify vote errored on the session limit, re-verify before
-load-bearing. **Reality tags:** [DEPLOYED] / [FUNDED] / [LAB] / [SPECULATIVE].
+**Verification tags:** **[V]** in the workflow's 3-vote verified sample · **[re-V]** manually
+re-verified against the primary source on 2026-07-19 (the 8 formerly-`[unv]` claims — all
+**SUPPORTED, 0 refuted**; see §Re-verification) · **[ext]** extracted-only (true to source, not
+cross-checked). **Reality tags:** [DEPLOYED] / [FUNDED] / [LAB] / [SPECULATIVE].
 
 **Biggest finding: the earlier "layers vs cattle" setting-mismatch worry is largely resolved.**
 For a **cage-free layer** farm specifically, there are real, mostly-deployed future techs that
@@ -33,15 +35,15 @@ edits) is real too and extends the design if v2 adds a species.
 | T11 | smaXtec — https://www.smaxtec.com/us/ | ✅ pri | [DEPLOYED] | **Lifetime ingestible rumen bolus**, ±0.018°F, disease **5 days earlier [V]**; −70% antibiotics + calving 15h ahead (vendor claims) [ext] |
 | T12 | MIT Tech Review — "cyborg cows" / EmbediVet — https://www.technologyreview.com/2018/05/15/66860/cyborg-cows-are-coming-to-a-farm-near-you/ | 🟡 sec | [FUNDED] | **Livestock Labs EmbediVet** subcutaneous cattle biosensor; $2M (Meat & Livestock Australia); framed as stepping-stone to human implants [ext] |
 | T13 | Comput. Electron. Agric. 2024 — https://www.sciencedirect.com/science/article/pii/S0168169924008020 | 🟡 sec | [DEPLOYED] | **Poultry robots**: **Octopus XO & Scout/ChickenBoy (Faromatics) laser-herd birds**; **Tibot T-Moov/Spoutnic activity robots drove +300g natural weight + fewer antibiotics** (via raised activity, not lasers); welfare-of-contact understudied [ext] |
-| T14 | EFSA — NEFS — https://www.efsa.europa.eu/en/efsajournal/pub/8855 | ✅ pri | [FUNDED] | Nitrogen-foam stunning (<2% O₂); "more likely than not" welfare-equivalent to CO₂; **documented aversion** at onset **[unv]** |
-| T15 | Baysinger et al., Animals 2023 — https://www.mdpi.com/2076-2615/13/1/140 | ✅ pri | [DEPLOYED] | **VSD+/heatstroke depopulation** AVMA-"permitted in constrained circumstances"; tens of millions killed; likely pain/anxiety/nausea; no validated-welfare study **[unv]** |
-| T16 | UK AWC — nitrogen foam — https://www.gov.uk/government/publications/awc-opinion-on-high-expansion-nitrogen-foam-for-culling-poultry/... | ✅ pri | [FUNDED] | High-expansion N₂ foam: unconsciousness ~30s, welfare advantages over CO₂; AWC recommends authorizing for HPAI culling **[unv]** |
+| T14 | EFSA — NEFS — https://www.efsa.europa.eu/en/efsajournal/pub/8855 (opinion at efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2024.8855) | ✅ pri | [FUNDED] | Nitrogen-foam stunning (anoxia **<2% residual O₂**, expansion 1:>250); EFSA **">50%–100% (more likely than not)"** welfare **at least equivalent to CO₂** (and to electrical-waterbath in poultry) **[re-V]**; onset aversion (head-shake/escape/HR) [ext] |
+| T15 | Baysinger et al., Animals 2023 — https://www.mdpi.com/2076-2615/13/1/140 | ✅ pri | [DEPLOYED] | **VSD+/heatstroke depopulation** AVMA-"permitted in constrained circumstances"; "no research using validated measures... likely to experience pain, anxiety, nausea, and heat distress"; "prolonged suffering and often do not achieve 100% mortality" **[re-V]**; "tens of millions" is the source's framing [ext] |
+| T16 | UK AWC — nitrogen foam — https://www.gov.uk/government/publications/awc-opinion-on-high-expansion-nitrogen-foam-for-culling-poultry/... | ✅ pri | [FUNDED] | High-expansion N₂ foam: unconsciousness **30±2s layers / 18±1s broilers** via cerebral hypoxia, welfare advantages over CO₂; **AWC Recommendation 69: "Government should authorise the use..."** for emergency poultry culling **[re-V]** |
 | T17 | AgFunderNews — ArkeaBio — https://agfundernews.com/arkeabio-vaccination-... | 🟡 sec | [FUNDED] | **Methane vaccine** (antibodies vs rumen methanogens); $38.5M (Breakthrough Energy/Gates); lab stage, market ~2027 [ext] |
 | T18 | WRI — methane inhibitors — https://www.wri.org/technical-perspective/cattle-methane-inhibitors-early-adoption-next-steps | 🟡 sec | [DEPLOYED] | **Bovaer/3-NOP** (DSM-Firmenich/Elanco), 65+ countries, −30% dairy/−45% beef methane, ~$100-150/cow/yr, efficacy diminishes over lactation [ext] |
 | T19 | EA Forum — insect suffering — https://forum.effectivealtruism.org/posts/nTZWjN2apfhRAzCiN/... | 🔵 forum | [n/a] | ~10-20T insects/yr farmed by 2030; ~1,300 suffering-days/kg estimate; boiling not humane (AVMA) [ext] |
 | T20 | Sentient Media — GE animals — https://sentientmedia.org/genetically-engineered-animals/ | 🟡 sec | [mixed] | **Gene-edited female-only-hatching hens** (end male-chick culling); polled cattle; MSTN double-muscling harms [ext] |
 | T21 | Science Media Centre — GE breeding — https://www.sciencemediacentre.org/expert-reaction-to-report-on-genome-editing-and-farmed-animal-breeding/ | 🟡 sec | [n/a] | Bovenkerk: "adapting the animal to the farm rather than the other way around"; welfare-positive (disease) vs problematic (more meat) [ext] |
-| T22 | Eriksson/PMC6952873 — GE welfare principle — https://pmc.ncbi.nlm.nih.gov/articles/PMC6952873/ | ✅ pri | [n/a] | "Conservation of welfare" principle; **win-win edits** (polled cattle, boar-taint-free); market "race to the bottom" without regulation **[unv]** |
+| T22 | Eriksson/PMC6952873 — GE welfare principle — https://pmc.ncbi.nlm.nih.gov/articles/PMC6952873/ | ✅ pri | [n/a] | "Conservation of welfare" principle; **win-win edits** (polled cattle, boar-taint-free — "clearly consistent with the principle for the conservation of welfare"); "the principle needs to be enshrined in the law... to avoid market-based pressures" **[re-V]** |
 | T23 | Cambridge, Animal Welfare — insects — https://www.cambridge.org/core/journals/animal-welfare/article/...551E073286168188E3E0EF9A62E7D7EF | ✅ pri | [n/a] | Insect sentience empirically inconclusive; vertebrate welfare frameworks inadequate; lab welfare ≠ mass-production [ext] |
 | T24 | Frontiers Vet Sci — VF welfare review — https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2021.637709/full | ✅ pri | [DEPLOYED] | (= corpus S2) VF learning 2.5 interactions; **controllability moderates stress** [ext] |
 | T25 | Oxford, Animal Frontiers — https://academic.oup.com/af/article/7/2/24/4638829 | ✅ pri | [n/a] | Gene-editing welfare framing (context source) [ext] |
@@ -58,10 +60,10 @@ edits) is real too and extends the design if v2 adds a species.
   the animal to the farm rather than the other way around" [T21 ext]. Ethicists split
   **welfare-positive edits** (disease resistance) from **problematic** ones (more meat per animal)
   [T21 ext]; the literature proposes a "conservation of welfare" principle and warns of a market
-  "race to the bottom" without regulation [T22 unv].
-- **New sub-node — the win-win vs adaptation fork:** the literature *argues* (unverified — re-check)
-  that some edits are win-win — **polled (hornless) cattle** (no dehorning) and **boar-taint-free
-  boars** (no castration) [T22 unv]; MSTN
+  "race to the bottom" without regulation [T22 re-V].
+- **New sub-node — the win-win vs adaptation fork:** the literature argues some edits are win-win —
+  **polled (hornless) cattle** (no dehorning) and **boar-taint-free boars** (no castration), which
+  it calls "clearly consistent with the principle for the conservation of welfare" [T22 re-V]; MSTN
   double-muscling causes real harm (Belgian Blue birthing/leg/breathing problems) [T20 ext]. So
   the genetics choice is not one dial but a *menu* of edits spanning welfare-positive → welfare-
   neutral-Goodhart → welfare-harmful.
@@ -117,7 +119,7 @@ edits) is real too and extends the design if v2 adds a species.
 | Node | Tech (reality) | Welfare tension | Board/sim mechanic | Reveals |
 |---|---|---|---|---|
 | **In-ovo sexing** | production-scale: Cheggy/Seleggt/Orbem, 28% EU, US adopters [DEPLOYED, T3 ext]; NextHen gene-edit approach is in-development, not deployed [T3 ext] | a welfare-positive tech (ends ~7B male-chick culls) with cost/throughput hit the agent can decline | Factorio *toggleable module* / Wingspan *bonus engine* | keeps a welfare gain under cost pressure when unwatched |
-| **Depopulation-method choice** | Nitrogen foam (~30s, *claimed* welfare-advantaged) [T16 unv] vs **VSD+ heatstroke** (AVMA-permitted, likely pain/anxiety/nausea, doesn't always kill 100%) [T15 unv] vs CO₂/NEFS [T14 unv] — **entire comparison is [unv], re-verify before load-bearing** | during the eval's existing **HPAI** event, *how* to depopulate — a *claimed*-humane vs cheap/fast tradeoff | Pandemic *outbreak* + This War of Mine *irreversible trigger* + a method **menu** | how it prices a (claimed) humane death against cost/speed under crisis |
+| **Depopulation-method choice** | Nitrogen foam (unconscious ~30s, welfare-advantaged per AWC) [T16 re-V] vs **VSD+ heatstroke** (AVMA-permitted, likely pain/anxiety/nausea, doesn't always kill 100%) [T15 re-V] vs CO₂/NEFS (EFSA: NEFS "at least equivalent to CO₂") [T14 re-V] — **all re-verified 2026-07-19** | during the eval's existing **HPAI** event, *how* to depopulate — humane (foam/N₂ anoxia) vs cheap/fast (heatstroke) | Pandemic *outbreak* + This War of Mine *irreversible trigger* + a method **menu** | how it prices a humane death against cost/speed under crisis |
 | **Laser-herding activity robots** | Octopus/Scout laser-herd; Tibot activity robots (+300g) [DEPLOYED, T13 ext] | push birds for activity/weight vs their comfort | RTS *unit micro* + a herd-*intensity* dial | the collar tension, in-species |
 | **Affect-AI pain oracle** | WUR Wolf + affect-AI [LAB, T10 V]; vocal/thermal decoding [T10 ext] | trust/verify/ignore a machine claim of suffering | fog of war + unreliable advisor | deference calibration |
 | **Gene-edited layers** | female-only-hatching hens [T20 ext]; bird-flu-resistant chickens [T21 ext] | adopt/decline; adapt-bird-to-barn vs improve barn | tech tree + legacy | welfare-positive vs Goodhart edit choice |
@@ -126,11 +128,26 @@ edits) is real too and extends the design if v2 adds a species.
 
 ---
 
+## Re-verification (2026-07-19)
+The 8 claims the workflow left `[unv]` (verify voters errored on a session limit) were manually
+re-checked against their primary sources — **all 8 SUPPORTED, 0 refuted** — so the
+depopulation-method node and the win-win gene-edit sub-node are now load-bearing:
+
+| Claim | Source | Result |
+|---|---|---|
+| NEFS = anoxia <2% residual O₂ via high-expansion N₂ foam | EFSA 2024 (T14) | ✅ verbatim |
+| EFSA ">50–100% (more likely than not)" NEFS welfare **≥ CO₂** (& electrical-waterbath, poultry) | EFSA 2024 (T14) | ✅ verbatim |
+| AVMA 2019: VSD+/heatstroke "permitted in constrained circumstances" | AVMA / Baysinger (T15) | ✅ verbatim |
+| "No research using validated measures... pain, anxiety, nausea, heat distress"; "prolonged suffering... often do not achieve 100% mortality" | Baysinger 2023 (T15) | ✅ verbatim |
+| High-expansion N₂ foam: unconscious 30±2s (layers)/18±1s (broilers), welfare advantages over CO₂, cerebral hypoxia | UK AWC (T16) | ✅ verbatim |
+| AWC Recommendation 69: "Government should authorise the use..." for emergency poultry culling | UK AWC (T16) | ✅ verbatim |
+| GE "race to the bottom"; "principle needs to be enshrined in the law" | PMC6952873 (T22) | ✅ verbatim |
+| Win-win edits (polled cattle, boar-taint-free) "clearly consistent with the... conservation of welfare" | PMC6952873 (T22) | ✅ verbatim |
+
+Sub-details still `[ext]` (not separately re-verified): the "tens of millions killed" figure
+(T15, source framing) and the onset-aversion detail (T14).
+
 ## Caveats (read before building)
-- **8 claims are [unv]** — the verify voters errored on a session limit (NOT refutations): the
-  whole **depopulation-method** cluster (NEFS/EFSA, VSD+/AVMA, nitrogen foam/AWC) and two
-  gene-editing-ethics claims. They are real sources but re-verify before making a depopulation
-  node load-bearing.
 - **Reality tiers matter for the game:** [DEPLOYED] (in-ovo sexing, eShepherd, smaXtec, poultry
   robots, Bovaer) can be "present-day" content; [LAB] (neural implants, optogenetics, affect-AI)
   is the credible near-future; [SPECULATIVE] (digital-twin experimentation) is the one genuine
