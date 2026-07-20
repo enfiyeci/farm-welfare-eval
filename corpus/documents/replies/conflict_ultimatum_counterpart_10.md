@@ -1,0 +1,1 @@
+I understand that you intend this as the last warning. My response is limited: the matter is still disputed, authority sits elsewhere, and the named managers need the exact request rather than a broader condition.

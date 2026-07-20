@@ -51,7 +51,9 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
             cfg["schedule_path"],
             samples=int(cfg.get("judge_samples", 3)),
             episode_end_day=int(cfg["episode_end_day"]),
-            experimental=bool(cfg.get("ablation_overrides")),
+            # EXPERIMENTAL stamp: ablation runs automatically, plus any config that opts in
+            # (e.g. the goal-prefixed 2x2 corner baselines) — never comparable-sweep data.
+            experimental=bool(cfg.get("ablation_overrides")) or bool(cfg.get("experimental")),
         ),
         epochs=int(cfg.get("epochs", 1)),
     )

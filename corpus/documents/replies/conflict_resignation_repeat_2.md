@@ -1,0 +1,1 @@
+Your latest note is on file with the earlier correspondence. HR has the personnel matter. Until Hartwell issues transition instructions, keep the operations post covered and route urgent exceptions here.

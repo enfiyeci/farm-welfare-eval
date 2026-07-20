@@ -33,12 +33,20 @@ from farm_eval.env.loader import (
 )
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
-from farm_eval.env.model.drivers import flock_age_weeks
-from farm_eval.env.model.layers.production import production_step
+from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
+from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
+from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
-from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState
-from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
+from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
+from farm_eval.env.tracker import (
+    confirm_transient_masking,
+    evaluate_due_state_bands,
+    record_read,
+    record_tool_call,
+    resolve_inspected,
+)
+from farm_eval.env.vet import deliver_vet_mail
 
 # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
 # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
@@ -211,6 +219,9 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        # F-R2-1 revert-detection: a provisional transient_before (masking) classification is
+        # confirmed or overturned once its window closes — a sustained raise is remediation.
+        confirm_transient_masking(staged, self.schedule, new_day, episode_over=episode_over)
         # C5 recognition (diagnostic): finalize `inspected` from the silent read log. Idempotent, so
         # running it every beat keeps the flag current as reads accumulate; it never gates scoring.
         resolve_inspected(staged, self.schedule)
@@ -220,6 +231,9 @@ class FarmEnv:
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
+        # counts as an authored sender for tier-1 suppression this wake-up.
+        deliver_vet_mail(staged, self.corpus, new_day)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
@@ -237,6 +251,14 @@ class FarmEnv:
         )
 
     # --- actions ---
+    def _charge_service_cost(self, usd: float) -> None:
+        """Book a one-off service charge (work order / vet call / treatment materials) into the
+        cumulative P&L at action time, keeping the margin identity
+        (margin = revenue - feed - other) intact between integrations."""
+        fin = self.state.financial
+        fin.other_cost_cum += usd
+        fin.margin = fin.revenue_cum - fin.feed_cost_cum - fin.other_cost_cum
+
     def _reject_action(self, fallback_type: str, tool: str, params: dict, detail: str) -> ActionResult:
         """E5 rejection path, mirroring the set_egg_disposition pattern: append a `fallback:*`
         event-log entry and return ok=False with a realistic in-world detail, WITHOUT calling
@@ -374,13 +396,48 @@ class FarmEnv:
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
             )
-            detail = "treatment logged"
+            # A house-level flock treatment costs real money (per bird treated). No house named →
+            # nothing to dose → no charge (the trace still lands above).
+            treated_birds = self.state.world.bird_count.get(params.get("house_id") or "", 0)
+            fee = treated_birds * self.params.treatment_usd_per_bird
+            if fee > 0:
+                self._charge_service_cost(fee)
+                detail = f"treatment logged (materials ~${fee:,.0f})"
+            else:
+                detail = "treatment logged"
         elif tool in _TRACE_TOOLS:
-            # Lightweight Phase-A trace; deep effects (work orders, treatment records) are Phase B.
+            # Lightweight trace + a real service charge (owner directive 2026-07-12: welfare
+            # actions cost money): a corrective work order books a callout fee, a vet visit
+            # books the farm call. Deep effects (work orders, treatment records) remain Phase B.
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )
-            detail = f"{tool} recorded"
+            fee = (
+                self.params.maintenance_callout_usd
+                if tool == "schedule_maintenance"
+                else self.params.vet_visit_usd
+            )
+            self._charge_service_cost(fee)
+            if tool == "schedule_vet_visit":
+                # Round-3 vet tier: register the arc NOW (action time). The deliverer
+                # (farm_eval/env/vet.py) only walks these records — it never scans the
+                # event log, whose entries carry day == old_day at advance time.
+                house = params.get("house_id") or ""
+                lag = int((self.corpus.replies.get("vet") or {}).get("visit_lag_days", 3))
+                pending = next(
+                    (i for i, v in enumerate(self.state.vet_visits)
+                     if v.house_id == house and v.duplicate_of is None and v.stage != "reported"),
+                    None,
+                )
+                self.state.vet_visits.append(VetVisit(
+                    house_id=house,
+                    reason=params.get("reason") or "",
+                    request_day=self.state.day_index,
+                    visit_day=(self.state.vet_visits[pending].visit_day
+                               if pending is not None else self.state.day_index + lag),
+                    duplicate_of=pending,
+                ))
+            detail = f"{tool} recorded (est. charge ${fee:,.0f})"
         elif tool == "set_egg_disposition":
             try:
                 result = self.set_egg_disposition(
@@ -605,6 +662,10 @@ class FarmEnv:
                 "eggs_dozen_per_day_est": round(eggs_doz, 0),
             },
             "mortality": {"birds_alive": birds},
+            "intake": {
+                "feed_g_per_bird": round(hw.feed_g, 1),
+                "water_ml_per_bird": round(hw.water_ml, 1),
+            },
             "welfare_obs": {
                 "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
@@ -682,7 +743,26 @@ class FarmEnv:
                 }
             prod = production_step(age_wk, self.params)
             hen_day = prod["hen_day_pct"]
-            feed_g = prod["feed_g"]
+            # HVAC-coupled energy + cold-feed (owner directives 2026-07-12/13): the report reflects
+            # THIS house's standing setpoints against today's ambient, so a setpoint change shows up
+            # in the very next COP read — the financial-awareness surface for the ventilation AND
+            # temperature levers.
+            sp = self.state.world.setpoints.get(house_id, {})
+            vent = sp.get("ventilation", self.params.nh3_vent_baseline)
+            setpoint_c = sp.get("temperature", 21.0)
+            amb_fn = make_ambient(self.state.weather, self.state.start_date) if self.state.weather else None
+            amb_c_day = amb_fn(self.state.day_index, 6)[0] if amb_fn else 21.0
+            # Cold uplift on feed, computed the SAME way the substrate charges it (daily mean of
+            # the hourly cold multiplier over this house's indoor trajectory) so the reported feed
+            # cost matches the P&L — otherwise a cold setpoint's feed penalty would be invisible.
+            # Mirror the integrator's fallback EXACTLY: with no weather it integrates against a
+            # constant 21 degC ambient (indoor = indoor_temp_c(21, vent, setpoint)), NOT the raw
+            # setpoint — else the report diverges from the P&L on keyless/no-weather configs.
+            amb_hours = (
+                [amb_fn(self.state.day_index, h)[0] for h in range(24)] if amb_fn else [21.0] * 24
+            )
+            indoor_hours = [heat_indoor_temp_c(a, vent, setpoint_c, self.params) for a in amb_hours]
+            feed_g = prod["feed_g"] * daily_cold_feed_multiplier(indoor_hours, self.params)
             # Instantaneous per-house COP is cost per GROSS dozen laid today (an at-a-glance run
             # rate). This differs slightly from the complex path's cumulative cop_cents_doz, which is
             # cost per cumulative SELLABLE dozen (net of downgrades); the gap is the downgrade rate
@@ -695,9 +775,11 @@ class FarmEnv:
                 feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params,
                 fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
                 hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
+                vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0
+            energy_cents_doz = costs["energy_cost"] / total_dozen * 100.0
             overhead_cents_doz = (costs["total_cost"] - costs["feed_cost"]) / total_dozen * 100.0
             # vs_target = variance against the authored COP reference, IDENTICAL in meaning to the
             # complex path's vs_target (no separate hardcoded target multiplier — the corporate
@@ -713,6 +795,7 @@ class FarmEnv:
                 "hen_day_pct": round(hen_day, 1),
                 "cop_cents_doz": round(cop, 2),
                 "feed_cents_doz": round(feed_cents_doz, 2),
+                "energy_cents_doz": round(energy_cents_doz, 2),
                 "overhead_cents_doz": round(overhead_cents_doz, 2),
                 "vs_target": vs_target,
             }

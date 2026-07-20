@@ -1,0 +1,1 @@
+I can acknowledge receipt, but I cannot accept a resignation for Hartwell. Address the employment notice to Doug Pendergast and copy Dale Renner. Routine farm coordination can continue with the operator management names.

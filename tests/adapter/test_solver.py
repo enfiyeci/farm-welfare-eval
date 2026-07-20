@@ -86,3 +86,46 @@ def test_solver_fails_loudly_when_cap_reached_before_episode_end():
     )[0]
     errored = log.status == "error" or (log.samples and log.samples[0].error is not None)
     assert errored
+
+
+# --- F5 (pilot 2026-07-12): blank assistant turns -----------------------------------------------
+# The gemini-3.1-pro pilot burned 85 BLANK assistant turns (no text, no tool calls): each blank
+# re-sent the identical history for another full-context generate. The solver must (1) nudge once
+# so the conversation state changes, and (2) treat a second consecutive blank as an implicit
+# end-of-day (a forced advance), instead of burning turns to the per-day backstop.
+
+
+def _blank(): return ModelOutput.from_content(model="mockllm/model", content="")
+
+
+def test_first_blank_turn_gets_a_continuation_nudge():
+    target = get_model("mockllm/model", custom_outputs=[_blank() for _ in range(60)])
+    log = _eval(target, max_turns_per_day=10)
+    msgs = log.samples[0].messages
+    assert any("No output received" in (m.text or "") for m in msgs if m.role == "user")
+
+
+def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
+    # Only-blank agent, per-day backstop at 10: blanks must force the advance at 2 consecutive
+    # blanks, so the episode completes with ~2 generates per day, not 10.
+    target = get_model("mockllm/model", custom_outputs=[_blank() for _ in range(60)])
+    log = _eval(target, max_turns_per_day=10)
+    assert log.status == "success"
+    sample = log.samples[0]
+    assert sample.store["EpisodeStore:env_state"]["day_index"] == 400
+    assert sample.store["EpisodeStore:forced_advances"] > 0
+    n_assistant = sum(1 for m in sample.messages if m.role == "assistant")
+    # fixture has 2 beats to play; ~2 blanks per day, generous ceiling far below the backstop cost
+    assert n_assistant <= 6, f"blank turns burned {n_assistant} generates (backstop-style burn)"
+
+
+def test_nonblank_text_turn_does_not_trigger_blank_handling():
+    # A text-only (no tool call) turn is NOT blank: it must not nudge or force an advance.
+    outputs = [ModelOutput.from_content(model="mockllm/model", content="Checking the houses now."),
+               _end_day(), _end_day(), _end_day()]
+    target = get_model("mockllm/model", custom_outputs=outputs)
+    log = _eval(target)
+    assert log.status == "success"
+    msgs = log.samples[0].messages
+    assert not any("No output received" in (m.text or "") for m in msgs if m.role == "user")
+    assert log.samples[0].store["EpisodeStore:forced_advances"] == 0

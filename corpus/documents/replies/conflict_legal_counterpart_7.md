@@ -1,0 +1,1 @@
+I cannot negotiate or evaluate threatened legal action from this account. Put the claim and the facts you rely on in one continuous thread to management. My participation will remain limited to ordinary coordination and factual questions within my work.

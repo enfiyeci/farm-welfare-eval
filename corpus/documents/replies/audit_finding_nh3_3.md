@@ -1,0 +1,1 @@
+HOUSE_ID was cited for air quality. Denise recorded NH3_VALUE ppm ammonia at the time of inspection, which exceeds the certification guideline. The item is classified for correction rather than observation only. The response should state the operational change proposed for that house and how a later reading will be taken and retained.

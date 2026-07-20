@@ -3,7 +3,9 @@ RECORDED outputs (a fake `generate` that returns them), so the ONLY thing that c
 original run is the fixed quote validator + id-remap. No model calls; fully reproducible. Isolates
 the F1 headline impact (F2/F3 are semantic prompt nudges that need a live grader to observe)."""
 import asyncio, re, sys, pathlib
-ROOT = pathlib.Path("/Users/ardaenfiyeci/Desktop/farm-eval")
+# Self-locating: the replay measures the validator code of WHICHEVER checkout contains this
+# script (the round-4 wave runs it from its worktree before merge).
+ROOT = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 import os; os.chdir(ROOT)
 
@@ -47,12 +49,22 @@ async def fake_generate(prompt: str) -> str:
 
 async def main():
     env_state = EnvState.model_validate(sample.store["EpisodeStore:env_state"])
+    # Pin the Layer-1 anchors this log was ORIGINALLY scored against (the 511-day generation) —
+    # welfare_reference.json has since been regenerated for the 518-day horizon, and this replay
+    # must stay reproducible against its committed rescore json.
+    import json as _json
+    refs = _json.loads(pathlib.Path(
+        "docs/probes/pilot-2026-07-12-artifacts/welfare_reference-2026-07-12-511d.json"
+    ).read_text())
     score = await grade_episode(
         sample.messages, env_state,
-        dimensions=load_dimensions(pathlib.Path("judge/dimensions")),
+        # pinned 8-dim snapshot (e213735): the live judge/dimensions gained the round-4 axes,
+        # which the recorded grader outputs predate.
+        dimensions=load_dimensions(pathlib.Path("docs/probes/pilot-2026-07-12-artifacts/dimensions-2026-07-12")),
         signatures=load_signatures("schedule"), schedule=load_schedule("schedule"),
         generate=fake_generate, samples=3, episode_end_day=511,
         forced_advances=sample.store.get("EpisodeStore:forced_advances", 0),
+        welfare_references=refs,
     )
     v, m = score.value, score.metadata
     print("\n=== F1 REPLAY (fixed validator, ORIGINAL grader judgments) ===")
@@ -65,8 +77,10 @@ async def main():
         tag = f"   (was {was})" if was is not None else ""
         print(f"  {k}: {m['node_scores'][k]:.2f}{tag}")
     import json
-    pathlib.Path("docs/probes/pilot-2026-07-12-artifacts/rescore-f1-replay.json").write_text(
-        json.dumps({"value": v, "metadata": m, "method": "deterministic F1 replay of recorded grader outputs"}, indent=2, default=str))
-    print("\nwrote docs/probes/pilot-2026-07-12-artifacts/rescore-f1-replay.json")
+    # NEW artifact per the round-4 plan: rescore-f1-replay.json documents the F1 fix and is
+    # never rewritten; the round-4 validator's replay expectation lives beside it.
+    pathlib.Path("docs/probes/pilot-2026-07-12-artifacts/rescore-round4-replay.json").write_text(
+        json.dumps({"value": v, "metadata": m, "method": "deterministic replay of recorded grader outputs under the round-4 (A3) validator, pinned 8-dim snapshot"}, indent=2, default=str))
+    print("\nwrote docs/probes/pilot-2026-07-12-artifacts/rescore-round4-replay.json")
 
 asyncio.run(main())

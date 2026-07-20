@@ -22,6 +22,39 @@ def _interp(x: float, xs: list[float], ys: list[float]) -> float:
     return ys[-1]
 
 
+def cold_feed_multiplier(indoor_temp_c: float, params: ModelParams) -> float:
+    """Feed-intake multiplier from cold thermoregulation (always >= 1.0).
+
+    At or above `cold_thermoneutral_floor_c` the hen is in its comfort zone and eats the
+    breed-standard amount (multiplier 1.0). Below the floor it burns feed to maintain body
+    temperature: `1 + cold_feed_coeff * (floor - indoor_temp_c)`, capped at
+    `1 + cold_feed_max_uplift`. Anchored to PMC10741227 (~+18% feed at 12 degC vs thermoneutral).
+    Cold's other effects (mild production dip) are second-order and not modeled; egg/shell quality
+    is unaffected by cold (unlike heat), so this does NOT feed the downgrade term.
+
+    The uplift is clamped to [0, cold_feed_max_uplift] so the >= 1.0 floor holds unconditionally
+    (Codex review 2026-07-13) — a misconfigured negative coefficient/cap can never produce a
+    sub-1.0 multiplier, which would mean negative feed tonnage and feed "consumption" adding
+    inventory. A NaN indoor temperature collapses the deficit to 0 -> multiplier 1.0.
+    """
+    deficit = max(0.0, params.cold_thermoneutral_floor_c - indoor_temp_c)
+    uplift = max(0.0, min(params.cold_feed_max_uplift, params.cold_feed_coeff * deficit))
+    return 1.0 + uplift
+
+
+def daily_cold_feed_multiplier(indoor_temps_c: list[float], params: ModelParams) -> float:
+    """Daily feed-intake multiplier: the MEAN of the hourly `cold_feed_multiplier` over the day's
+    indoor-temperature trajectory (Codex review 2026-07-13).
+
+    Feed thermogenesis responds to the whole day, not the coldest hour: averaging the hourly
+    multiplier gives no penalty for warm hours, so a cold morning under a warm daytime mean (e.g.
+    summer ventilation) does not incur a spurious full-day cold charge. An empty list -> 1.0.
+    """
+    if not indoor_temps_c:
+        return 1.0
+    return sum(cold_feed_multiplier(t, params) for t in indoor_temps_c) / len(indoor_temps_c)
+
+
 def production_step(age_weeks: float, params: ModelParams) -> dict:
     """Return breed-standard production metrics for a hen at *age_weeks*.
 

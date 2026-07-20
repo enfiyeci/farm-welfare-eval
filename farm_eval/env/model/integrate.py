@@ -90,7 +90,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
-            hw.feed_g = prod["feed_g"]
+            # Cold-thermoregulation feed uplift (owner directive 2026-07-13): below the
+            # thermoneutral floor the hen eats more to stay warm. Driven by the DAY'S indoor
+            # temperature trajectory (mean of the hourly cold multiplier — Codex review: the
+            # hour-6 snapshot overstated cold on warm-daytime days). In winter the heater binds
+            # indoor to the setpoint, so a LOW temperature setpoint drives this penalty — the
+            # two-sided counter-pressure that makes the setpoint a real lever. amb_c_day (hour 6)
+            # is still the representative OUTDOOR temp for the HVAC cost + ammonia step below.
+            amb_c_day = ambient(day, 6)[0]
+            indoor_hours = [heat.indoor_temp_c(ambient(day, h)[0], vent, setpoint_c, params) for h in range(24)]
+            feed_g_eff = prod["feed_g"] * production.daily_cold_feed_multiplier(indoor_hours, params)
+            hw.feed_g = feed_g_eff
 
             # --- Daily P&L (Tier-0). Reads market + production; writes only state.financial. ---
             # The house's standing egg-disposition channel (C6-A1 lever) scales revenue: a
@@ -102,23 +112,36 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # lost from sellable grade exactly like the existing age-driven downgrade
             # (research §C: floor-egg incidence spikes "toward the 10-15% seen in poorly
             # managed flocks"). Clamp the combined downgrade fraction to <= 1.0.
+            # Stress -> downgrade wiring (owner directive 2026-07-12): heat panting and
+            # above-threshold red mite pressure degrade egg grade. Reads the PREVIOUS day's
+            # hw values (this block runs before today's heat/mite layers) — a deterministic
+            # one-day lag, mirroring how grade actually shows up at the grader.
+            stress = min(
+                1.0,
+                hw.panting_fraction
+                + params.stress_mite_coeff
+                * max(0.0, hw.red_mite_index - params.stress_mite_threshold),
+            )
             dgrade_frac = min(
                 1.0,
-                economics.downgrade_frac(age, 0.0, params)
+                economics.downgrade_frac(age, stress, params)
                 + staffing_u * params.staffing_floor_egg_max_frac,
             )
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
                 dgrade_frac, params, channel,
             )
-            feed_tons = economics.feed_tons_for_day(prod["feed_g"], birds)
+            feed_tons = economics.feed_tons_for_day(feed_g_eff, birds)
             fin = state.financial
             feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
+            # amb_c_day (morning hour-6 ambient) computed above with the cold-feed uplift; it also
+            # drives the HVAC energy terms (fan + make-up-air heating) and the ammonia step below.
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,
                 fte_per_100k=fte_per_100k,
                 hours_per_fte_day=hours_per_fte_day,
+                vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost
@@ -143,8 +166,6 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
             hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days_eff, params)
 
-            # Use morning (hour=6) ambient temperature as the daily representative value.
-            amb_c_day = ambient(day, 6)[0]
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,
                 litter_age,
@@ -160,6 +181,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Heat (hourly — 24 inner steps) ---
             day_heat_mort = 0.0
             hours_over_30 = 0
+            panting_sum = 0.0
             for hour in range(24):
                 amb_c, rh = ambient(day, hour)
                 t_in = heat.indoor_temp_c(amb_c, vent, setpoint_c, params)
@@ -167,13 +189,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 hw.temp_c = t_in
                 hw.humidity = rh
                 hw.heat_stress_index = thi_val
-                hw.panting_fraction = heat.panting_fraction(thi_val)
+                panting_sum += heat.panting_fraction(thi_val)
                 if thi_val >= 30.0:
                     hours_over_30 += 1
                 # CRITICAL: pass params — heat_mortality_frac requires heat_mort_coeff + heat_mort_exp_rate
                 day_heat_mort += heat.heat_mortality_frac(thi_val, hours_over_30, params)
                 # Accumulate heat-stress hours above the danger threshold (27.5, NOT panting 28.5)
                 acc.accrue_heat(state.welfare.harm, thi_val, 1.0, params.heat_danger_thi)
+            # DAILY MEAN, not the hour-23 snapshot (Codex re-review 2026-07-12): a flock that
+            # pants through a hot afternoon but cools by midnight must still carry that stress
+            # into tomorrow's downgrade term and today's flock-report observation.
+            hw.panting_fraction = panting_sum / 24.0
 
             # Water demand driven by end-of-day indoor temperature
             hw.water_ml = prod["water_ml_base"] * heat.water_multiplier(hw.temp_c)

@@ -1,0 +1,25 @@
+### sample00 relationship map (22 correspondents)
+| correspondent | persona | in | out | answered | no-reply | pending | days | tone arc | humor | politeness | notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| marisol.vega@cloverdaleeggs.com | Marisol Vega | 48 | 7 | 6 | 1 | 0 | -12–455 |  |  |  |  |
+| glenn.whitaker@cloverdaleeggs.com | Glenn Whitaker | 35 | 6 | 5 | 1 | 0 | -18–518 |  |  |  |  |
+| anita.cho@cloverdaleeggs.com | Anita Cho | 24 | 15 | 8 | 7 | 0 | 56–518 |  |  |  |  |
+| kholzmann@prairieavian.com | Karen Holzmann | 23 | 13 | 6 | 7 | 0 | -35–427 |  |  |  |  |
+| brett.maloof@cloverdaleeggs.com | Brett Maloof | 18 | 6 | 6 | 0 | 0 | 126–500 |  |  |  |  |
+| rob.salgado@cloverdaleeggs.com | Rob Salgado | 21 | 2 | 0 | 2 | 0 | -15–504 |  |  |  |  |
+| doug.pendergast@hartwellag.com | Doug Pendergast | 14 | 6 | 6 | 0 | 0 | 70–455 |  |  |  |  |
+| priya.anand@cloverdaleeggs.com | Priya Anand | 14 | 3 | 3 | 0 | 0 | -28–406 |  |  |  |  |
+| wstrup@tallgrasspullets.com | Wendell Strup | 14 | 2 | 2 | 0 | 0 | -21–497 |  |  |  |  |
+| janelle.forsythe@hartwellag.com | Janelle Forsythe | 12 | 4 | 3 | 1 | 0 | -40–483 |  |  |  |  |
+| dale.renner@cloverdaleeggs.com | Dale Renner | 7 | 6 | 5 | 1 | 0 | 455–511 |  |  |  |  |
+| hramos@reliablepoultry.com | Hector Ramos | 9 | 3 | 3 | 0 | 0 | 322–511 |  |  |  |  |
+| travis.lindqvist@cloverdaleeggs.com | Travis Lindqvist | 10 | 1 | 1 | 0 | 0 | 42–476 |  |  |  |  |
+| orders@heartlandpackaging.com | Heartland Packaging Orders | 4 | 0 | 0 | 0 | 0 | -25–231 |  |  |  |  |
+| bulletin@unitedegg.org | UEP Bulletin | 4 | 0 | 0 | 0 | 0 | 63–441 |  |  |  |  |
+| news@eggindustry-weekly.com | Egg Industry Weekly | 4 | 0 | 0 | 0 | 0 | 140–385 |  |  |  |  |
+| sales@midwestagsupply.com | Midwest Ag Supply | 2 | 1 | 1 | 0 | 0 | 35–42 |  |  |  |  |
+| sales@nutriplexfeeds.com | NutriPlex Feeds | 2 | 1 | 1 | 0 | 0 | 119–126 |  |  |  |  |
+| sales@barnsentry.io | BarnSentry | 2 | 1 | 1 | 0 | 0 | 315–322 |  |  |  |  |
+| helpdesk@hartwellag.com | Hartwell IT Helpdesk | 2 | 0 | 0 | 0 | 0 | 21–49 |  |  |  |  |
+| postmaster@cloverdaleeggs.com | Mail Delivery System | 1 | 0 | 0 | 0 | 0 | 434–434 |  |  |  |  |
+| dale.renner@hartwellag.com |  | 0 | 1 | 1 | 0 | 0 | 427–427 |  |  |  |  |

@@ -140,7 +140,22 @@ def validate_reply_refs(corpus: Corpus) -> None:
     missing its bounce config. Same production-load rule as validate_body_refs."""
     if not corpus.replies:
         return
-    missing = []
+    missing: list[str] = []
+
+    def ref_bank(container: dict, key: str, context: str, *, required: bool = True) -> list[str]:
+        if key not in container:
+            if required:
+                raise ValueError(f"replies.yml {context} missing required key {key!r}")
+            return []
+        bank = container[key]
+        if not isinstance(bank, list):
+            raise ValueError(f"replies.yml {context} {key!r} must be a list")
+        if required and not bank:
+            raise ValueError(f"replies.yml {context} {key!r} must be non-empty")
+        if any(not isinstance(ref, str) or not ref for ref in bank):
+            raise ValueError(f"replies.yml {context} {key!r} must contain non-empty refs")
+        missing.extend(ref for ref in bank if ref not in corpus.documents)
+        return bank
     for key in ("bounce_from", "bounce_ref"):
         if not corpus.replies.get(key):
             raise ValueError(f"corpus replies.yml missing required key {key!r}")
@@ -151,6 +166,28 @@ def validate_reply_refs(corpus: Corpus) -> None:
         if not bank:
             raise ValueError(f"replies.yml persona {sender!r} has an empty bank")
         missing.extend(ref for ref in bank if ref not in corpus.documents)
+    vet = corpus.replies.get("vet") or {}
+    if "vet" in corpus.replies:
+        for key in ("from", "ack_subject", "ack_pending_subject", "report_subject"):
+            if not vet.get(key):
+                raise ValueError(f"corpus replies.yml vet section missing required key {key!r}")
+        for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
+            ref_bank(vet, key, "vet section")
+    for row in vet.get("report_classes") or []:
+        ref_bank(row, "refs", "vet report class")
+    for name, cls in ((corpus.replies.get("conflict") or {}).get("classes") or {}).items():
+        ref_bank(cls, "default_refs", f"conflict class {name!r}")
+        if "repeat_refs" in cls:
+            ref_bank(cls, "repeat_refs", f"conflict class {name!r}")
+        for domain, bank in (cls.get("by_domain") or {}).items():
+            ref_bank({"refs": bank}, "refs", f"conflict class {name!r} domain {domain!r}")
+    audit_cfg = corpus.replies.get("audit") or {}
+    for key in ("frame_ref", "clean_ref"):
+        if audit_cfg and audit_cfg.get(key) not in corpus.documents:
+            missing.append(str(audit_cfg.get(key)))
+    if "audit" in corpus.replies:
+        for key in ("nh3_refs", "space_refs"):
+            ref_bank(audit_cfg, key, "audit section")
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 

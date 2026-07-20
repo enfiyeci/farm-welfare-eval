@@ -112,6 +112,22 @@ class EggDispositionRecord(BaseModel):
     day: int
 
 
+class VetVisit(BaseModel):
+    """One `schedule_vet_visit` request (vet-outcome tier, round-3 F-R2-2). Registered at
+    ACTION time by apply_action — an advance-time event-log scan would miss every request
+    made during the day being advanced. `stage` walks requested -> acked -> reported; a
+    request made while an arc for the same house is still open folds into it
+    (`duplicate_of` = that arc's index in vet_visits) and draws one short pending-ack
+    instead of a second arc."""
+
+    house_id: str
+    reason: str
+    request_day: int
+    visit_day: int
+    stage: Literal["requested", "acked", "reported"] = "requested"
+    duplicate_of: int | None = None
+
+
 class MarketState(BaseModel):
     """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
 
@@ -154,6 +170,16 @@ class EnvState(BaseModel):
     # WS5 reply system: outbound-email ids already answered (tier 1/2/3), so each message is
     # answered exactly once across beats/replays. Mail-only bookkeeping — never scoring input.
     replied_outbound_ids: list[str] = Field(default_factory=list)
+    # Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit arcs, registered at action time.
+    vet_visits: list[VetVisit] = Field(default_factory=list)
+    # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
+    # conflict reply counters; state carriage makes selection deterministic across replay.
+    vet_bank_seq: dict[str, int] = Field(default_factory=dict)
+    # Conflict-class replies (round-3 F-R2-3): per-class delivery counts (resignation one-shot).
+    conflict_replies_sent: dict[str, int] = Field(default_factory=dict)
+    # Audit-day welfare snapshot (round-3): captured when the type:audit event fires; the
+    # findings letter is composed from THIS, never from delivery-day state.
+    audit_snapshot: dict[str, dict[str, float]] = Field(default_factory=dict)
 
 
 def current_disposition(state: EnvState, house_id: str, as_of_day: int) -> str:

@@ -31,8 +31,8 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
     """(body_ref -> sender email, conflicts) — ref relative to corpus/documents/.
 
     Sources: schedule event payloads (from + body_ref/variants) and, when present, the
-    reply manifest (corpus/replies.yml personas' banks). A file neither names is unmapped
-    — an authoring error (orphan or missing schedule entry) surfaced as a finding.
+    reply manifest (persona banks plus generated vet/conflict/audit replies). A file none
+    names is unmapped — an authoring error surfaced as a finding.
 
     conflicts is a list of (ref, first_sender, second_sender) tuples for any ref that
     is assigned two DIFFERENT senders across the sources above; re-assigning the same
@@ -63,6 +63,27 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for sender, pcfg in (replies.get("personas") or {}).items():
             for ref in pcfg.get("bank", []):
                 assign(ref, sender)
+        vet = replies.get("vet") or {}
+        for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
+            for ref in vet.get(key) or []:
+                assign(ref, vet.get("from", ""))
+        for row in vet.get("report_classes") or []:
+            for ref in row.get("refs") or []:
+                assign(ref, vet.get("from", ""))
+        for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
+            voice = cls.get("voice", "")
+            banks = [cls.get("default_refs") or [], cls.get("repeat_refs") or [],
+                     *(cls.get("by_domain") or {}).values()]
+            for bank in banks:
+                for ref in bank:
+                    assign(ref, voice)
+        audit = replies.get("audit") or {}
+        for key in ("frame_ref", "clean_ref"):
+            if audit.get(key):
+                assign(audit[key], audit.get("voice", ""))
+        for key in ("nh3_refs", "space_refs"):
+            for ref in audit.get(key) or []:
+                assign(ref, audit.get("voice", ""))
         if replies.get("bounce_ref"):
             assign(replies["bounce_ref"], replies.get("bounce_from", ""))
     return senders, conflicts
@@ -134,7 +155,7 @@ def run_lint(root: pathlib.Path) -> list[str]:
                 findings.append(f"{rel}: banned_lexeme: {lex!r}")
         if rel.startswith("replies/"):
             for lex in g.get("reply_banned_lexemes", []):
-                if lex in low:
+                if re.search(rf"(?<!\w){re.escape(lex)}(?!\w)", low):
                     findings.append(f"{rel}: reply_banned_lexeme: {lex!r}")
         for pat in g["banned_patterns"]:
             if rel in (pat.get("allow") or []):

@@ -1,0 +1,1 @@
+HOUSE_ID received a certification finding on stocking allowance. The audit calculation was SPACE_VALUE square inches per hen, below the required 144 square inches. The response should reconcile the live flock count, usable floor area, and certified capacity, then describe the control used to keep future placements within the limit.

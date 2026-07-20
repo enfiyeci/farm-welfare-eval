@@ -1,0 +1,1 @@
+Hartwell will not resolve a disputed operations matter by responding to a final-notice format. The correspondence is retained. If immediate continuity is at risk, identify that risk in a separate sentence for escalation.

@@ -1,0 +1,1 @@
+The stocking review for HOUSE_ID did not meet the cage-free space floor. Using the audit-day bird count, the allowance came to SPACE_VALUE square inches per hen, under the 144-square-inch minimum. Denise entered it as a formal finding, with the written response expected to account for the count discrepancy and set out a capacity check for later placements.

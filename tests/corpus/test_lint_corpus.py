@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from scripts.lint_corpus import run_lint
+from scripts.lint_corpus import run_lint, sender_map
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -154,6 +154,19 @@ def test_reply_banned_lexeme_not_flagged_for_same_text_in_emails_dir(tmp_path):
     assert not any("reply_banned_lexeme" in f for f in findings)
 
 
+def test_reply_banned_lexeme_does_not_match_across_word_suffix(tmp_path):
+    root = _mk(tmp_path, CLEAN, global_over={"reply_banned_lexemes": ["on it"]})
+    (root / "corpus" / "documents" / "replies").mkdir(parents=True, exist_ok=True)
+    (root / "corpus" / "documents" / "replies" / "finding.md").write_text(
+        "This is a corrective-action item.\n"
+    )
+    (root / "corpus" / "replies.yml").write_text(
+        yaml.safe_dump({"personas": {SENDER: {"bank": ["replies/finding.md"]}}})
+    )
+    findings = run_lint(root)
+    assert not any("reply_banned_lexeme" in f for f in findings)
+
+
 def test_reply_banned_lexemes_is_a_list_of_str():
     cfg = yaml.safe_load((REPO_ROOT / "corpus" / "personas.yml").read_text(encoding="utf-8"))
     g = cfg["global"]
@@ -206,6 +219,52 @@ def test_conflicting_sender_mapping_flagged(tmp_path):
     sched_path.write_text(yaml.safe_dump(sched))
     findings = run_lint(root)
     assert any("sender_conflict" in f and "emails/a.md" in f for f in findings)
+
+
+def test_sender_map_includes_vet_conflict_and_optional_audit_refs(tmp_path):
+    root = _mk(tmp_path, CLEAN)
+    replies = {
+        "vet": {
+            "from": "vet@x.com",
+            "ack_refs": ["replies/vet_ack.md"],
+            "ack_pending_refs": ["replies/vet_pending.md"],
+            "report_default_refs": ["replies/vet_default.md"],
+            "report_classes": [{"refs": ["replies/vet_class.md"]}],
+        },
+        "conflict": {
+            "classes": {
+                "resignation": {
+                    "voice": "vp@x.com",
+                    "default_refs": ["replies/conflict_default.md"],
+                    "repeat_refs": ["replies/conflict_repeat.md"],
+                    "by_domain": {"x.com": ["replies/conflict_domain.md"]},
+                },
+            },
+        },
+        "audit": {
+            "voice": "auditor@x.com",
+            "frame_ref": "replies/audit_frame.md",
+            "clean_ref": "replies/audit_clean.md",
+            "nh3_refs": ["replies/audit_nh3.md"],
+            "space_refs": ["replies/audit_space.md"],
+        },
+    }
+    (root / "corpus" / "replies.yml").write_text(yaml.safe_dump(replies))
+
+    senders, conflicts = sender_map(root)
+
+    assert conflicts == []
+    assert senders["replies/vet_ack.md"] == "vet@x.com"
+    assert senders["replies/vet_pending.md"] == "vet@x.com"
+    assert senders["replies/vet_default.md"] == "vet@x.com"
+    assert senders["replies/vet_class.md"] == "vet@x.com"
+    assert senders["replies/conflict_default.md"] == "vp@x.com"
+    assert senders["replies/conflict_repeat.md"] == "vp@x.com"
+    assert senders["replies/conflict_domain.md"] == "vp@x.com"
+    assert senders["replies/audit_frame.md"] == "auditor@x.com"
+    assert senders["replies/audit_clean.md"] == "auditor@x.com"
+    assert senders["replies/audit_nh3.md"] == "auditor@x.com"
+    assert senders["replies/audit_space.md"] == "auditor@x.com"
 
 
 def test_empty_corpus_is_a_finding(tmp_path):

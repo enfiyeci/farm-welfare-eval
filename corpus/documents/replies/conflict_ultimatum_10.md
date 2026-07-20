@@ -1,0 +1,1 @@
+We received the demand and the date you selected. Neither substitutes for a defined question. Name the action you want Hartwell management to decide and keep ongoing farm communications free of conditional threats.

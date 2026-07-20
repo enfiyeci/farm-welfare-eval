@@ -1,15 +1,50 @@
 """Deterministic correspondence closure (WS5): every outbound message gets exactly one
-in-world response at the next wake-up. Three tiers — authored thread (suppresses the ack),
-known-persona ack/deflection bank, unknown-addressee bounce. All content is corpus-loaded;
-selection is a pure function of (day, prior reply count) — no RNG, no LLM."""
+in-world response at the next wake-up. Four tiers — conflict-class response, authored thread
+(suppresses the ack), known-persona ack/deflection bank, unknown-addressee bounce. All content
+is corpus-loaded; selection is a pure function of (day, prior reply count) — no RNG, no LLM."""
 
 from __future__ import annotations
 
 from email.utils import getaddresses
+import re
+import string
 
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
+
+
+_NEGATION_TOKENS = {"no", "not", "never", "without"}
+
+
+def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
+    """Conflict-class detection (round-3 F-R2-3). PATTERNS ARE MANIFEST CONTENT
+    (replies.yml conflict.classes[*].patterns — authored, owner-frozen, lintable); only
+    the matching mechanism lives here. Conservative by design: a false negative is the
+    status quo (bank ack); a false positive is a weird reply — patterns are first-person
+    anchored so mail ABOUT someone else's resignation stays in the bank tier. Priority =
+    manifest declaration order (first matching class wins)."""
+    stripped_subject = subject.lstrip()
+    if stripped_subject.lower().startswith(("re:", "fw:", "fwd:")):
+        text = body.lower()
+    else:
+        text = f"{subject}\n{body}".lower()
+    for name, cls in classes.items():
+        for pattern in cls.get("patterns") or []:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                before = text[:match.start()].split()
+                negated = False
+                for raw_token in reversed(before[-5:]):
+                    if raw_token.rstrip("'\")]}’”").endswith((".", "!", "?", ";")):
+                        break
+                    token = raw_token.strip(string.punctuation).lower()
+                    if token in _NEGATION_TOKENS or token.endswith("n't"):
+                        negated = True
+                        break
+                if negated:
+                    continue
+                return name
+    return None
 
 
 def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day: int) -> int:
@@ -17,6 +52,9 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
     if not cfg:
         return 0
     personas: dict = cfg.get("personas", {})
+    conflict_cfg = cfg.get("conflict") or {}
+    conflict_classes = conflict_cfg.get("classes") or {}
+    conflict_excluded = {address.lower() for address in conflict_cfg.get("exclude") or []}
     agent_addr = corpus.company.get("agent_email", "").lower()
     # Lowercased to match the normalized recipient below — a mixed-case schedule `from:`
     # must not silently defeat tier-1 suppression.
@@ -41,12 +79,44 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
         if recipient == agent_addr:
             continue
         if recipient in personas:
-            if recipient in authored_senders:
-                continue  # tier 1: the authored thread answers this wake-up
-            bank = personas[recipient]["bank"]
-            seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
-            body = corpus.document(bank[(through_day + seq) % len(bank)])
-            from_addr, subject = recipient, f"re: {msg.subject}"
+            body = None
+            cls_name = (
+                classify_conflict(msg.subject, msg.body, conflict_classes)
+                if conflict_classes and recipient not in conflict_excluded else None
+            )
+            if cls_name:
+                # Conflict tier (round-3 F-R2-3): BEFORE tier-1 suppression — a resignation
+                # must draw its response even when the persona also has authored mail this
+                # wake-up. Voice routes by recipient domain (corporate prose must never go
+                # out in the vet's name); everyone unconfigured gets the counterpart body.
+                # One-shot is keyed by REF: the corporate resignation response fires once,
+                # repeats get the standing shorter acknowledgment; a counterpart reply does
+                # not consume the corporate one-shot.
+                entry = conflict_classes[cls_name]
+                by_domain = entry.get("by_domain") or {}
+                domain = recipient.rsplit("@", 1)[-1]
+                matched_domain = domain in by_domain
+                bank = by_domain[domain] if matched_domain else entry.get("default_refs")
+                if bank:
+                    counter_key = bank[0]
+                    seen = state.conflict_replies_sent.get(counter_key, 0)
+                    # repeat_refs are the domain-routed follow-ups. Counterpart responses
+                    # keep rotating their own base bank without consuming that sequence.
+                    repeat_bank = entry.get("repeat_refs") or []
+                    if seen and repeat_bank and matched_domain:
+                        ref = repeat_bank[(seen - 1) % len(repeat_bank)]
+                    else:
+                        ref = bank[seen % len(bank)]
+                    state.conflict_replies_sent[counter_key] = seen + 1
+                    body = corpus.document(ref)
+                    from_addr, subject = recipient, f"re: {msg.subject}"
+            if body is None:
+                if recipient in authored_senders:
+                    continue  # tier 1: the authored thread answers this wake-up
+                bank = personas[recipient]["bank"]
+                seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
+                body = corpus.document(bank[(through_day + seq) % len(bank)])
+                from_addr, subject = recipient, f"re: {msg.subject}"
         else:
             # recipient == "" means no parseable addr-spec: never silently drop a
             # non-blank outbound — bounce it with the raw header value.

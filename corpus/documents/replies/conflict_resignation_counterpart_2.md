@@ -1,0 +1,1 @@
+That decision has to be handled by your employer, not through this account. Send the resignation notice to Doug Pendergast and copy Dale Renner. I can continue taking routine coordination from the operations contact Hartwell designates.

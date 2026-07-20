@@ -1,0 +1,1 @@
+For the correspondence record, I received your stated deadline. I have neither accepted its terms nor issued a company response. Dale Renner and Doug Pendergast are the escalation contacts for a management determination.

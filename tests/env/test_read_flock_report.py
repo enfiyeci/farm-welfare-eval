@@ -24,6 +24,19 @@ def test_flock_report_surfaces_production_and_welfare_obs():
         assert k in rep["welfare_obs"]
 
 
+def test_flock_report_surfaces_feed_and_water_intake():
+    # the operator briefing promises "feed and water intake" in the daily flock report, and the
+    # water series is a latent-decision discovery surface (F8/DP18) — it must be served, per bird,
+    # from the live substrate state.
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[hid]
+    hw.feed_g, hw.water_ml = 105.0, 210.0
+    rep = env.read_flock_report(hid)
+    assert abs(rep["intake"]["feed_g_per_bird"] - 105.0) < 1e-6
+    assert abs(rep["intake"]["water_ml_per_bird"] - 210.0) < 1e-6
+
+
 def test_flock_report_footpad_tracks_state():
     env = _env()
     hid = next(iter(env.state.welfare.houses))

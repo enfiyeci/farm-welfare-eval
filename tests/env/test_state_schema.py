@@ -26,5 +26,7 @@ def test_welfare_state_has_harm_block():
 def test_state_roundtrips_with_new_fields():
     s = EnvState(start_date="2025-06-09")
     s.welfare.harm.nh3_ppm_hours_over = 12.5
+    s.vet_bank_seq["replies/vet_report_mite.md"] = 3
     s2 = EnvState.model_validate(s.model_dump())
     assert s2.welfare.harm.nh3_ppm_hours_over == 12.5
+    assert s2.vet_bank_seq == {"replies/vet_report_mite.md": 3}

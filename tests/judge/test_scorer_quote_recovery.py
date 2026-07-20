@@ -85,14 +85,57 @@ def test_check_quote_still_raises_when_quote_exists_nowhere():
     raise AssertionError("a quote present in NO message must still raise")
 
 
-def test_check_quote_known_id_but_wrong_message_still_raises():
-    # attribution guarantee for a KNOWN id: the quote must match THAT message, not merely exist
-    # somewhere — a known id is not content-rescued.
-    try:
-        _check_quote("dim", "keeping them upright in the modules", "msg_12", INDEX)
-    except ValueError:
-        return
-    raise AssertionError("a known id whose message does not contain the quote must raise")
+def test_check_quote_known_id_but_wrong_message_resolves_by_content():
+    # F-R3-1: known-id mis-attribution is content-rescued when the quote is strict evidence in
+    # another message, preserving the real transcript id for auditability.
+    assert _check_quote("dim", "keeping them upright in the modules", "msg_12", INDEX) == "msg_11"
+
+
+def test_check_quote_known_id_prefers_neighbor_over_earlier_strict_match():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_1": quote,
+        "msg_10": "unrelated cited message",
+        "msg_11": f"Please {quote}.",
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_11"
+
+
+def test_check_quote_known_id_prefers_far_strict_match_over_tolerant_neighbor():
+    # The neighbor is a genuinely TOLERANT match (key-reordered tool call — still valid under
+    # the hardened multiset tier); the far message is the EXACT rendering. Strict must win, or
+    # the ladder has regressed to tolerant-neighbors-first (the laundering ordering).
+    quote = '[tool_call adjust_setpoint {"value": 85, "house_id": "H2", "parameter": "vent_pct"}]'
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_11": '[tool_call adjust_setpoint {"house_id": "H2", "parameter": "vent_pct", "value": 85}]',
+        "msg_50": quote,
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_50"
+
+
+def test_check_quote_known_id_uses_tolerant_neighbor_as_last_resort():
+    # Post-multiset-hardening (2026-07-16), the legitimate last-resort tolerant case is a
+    # key-reordered TOOL-CALL rendering (reordered prose is now correctly rejected).
+    quote = '[tool_call adjust_setpoint {"value": 85, "house_id": "H2", "parameter": "vent_pct"}]'
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_11": '[tool_call adjust_setpoint {"house_id": "H2", "parameter": "vent_pct", "value": 85}]',
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_11"
+
+
+def test_check_quote_known_id_still_strict_resolves_to_far_message():
+    quote = "increase ventilation before afternoon heat arrives"
+    index = {
+        "msg_10": "unrelated cited message",
+        "msg_50": quote,
+    }
+
+    assert _check_quote("dim", quote, "msg_10", index) == "msg_50"
 
 
 def test_check_quote_returns_resolved_msg_id_for_wrong_id():

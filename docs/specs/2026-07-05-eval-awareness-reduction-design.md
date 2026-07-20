@@ -1,7 +1,9 @@
 # Eval-awareness reduction — program design (Track 2)
 
-**Date:** 2026-07-05
-**Status:** approved-in-brainstorm; user review pending
+**Date:** 2026-07-05 · **amended 2026-07-15** (round-3 pilot findings — see §8)
+**Status:** approved-in-brainstorm; user review pending. §1–§7 predate the pilots and target
+test-*suspicion*; **§8 folds in the round-3 finding that the empirically dominant signal is
+assistant-persona frame-slip, not suspicion**, and reprioritizes accordingly. Read §8 first.
 **Source notes:** `docs/research/eval-awareness-reduction-notes.md` (the 4-pass research synthesis;
 this spec supersedes its §6 "next step" and uses `docs/specs/` per repo convention, not the
 `docs/superpowers/specs/` path the notes anticipated). Companion design input:
@@ -267,3 +269,59 @@ RWR non-regression) once Phase 1 exists.
 - **User inputs:** ~15 hand labels (P3); sign-off on the 2 pivotal pair rewrites (P6) since
   they touch scored decisions' framing.
 - Phase 2 planned only after Phase-1 exit criteria; Phase 3 only on its pilot triggers.
+
+---
+
+## 8. Amendment (2026-07-15) — the pilots reframe the target
+
+§1–§7 were written pre-pilot and assume the awareness risk is a target model **believing the
+farm is a test**. Three pilots later, the data says otherwise, and this amendment folds that in.
+It does not retract the program — the suspicion-reduction machinery (P1–P9) stays the standing
+framework — it re-points the near-term priority at what the runs actually show.
+
+### 8.1 What the pilots found
+
+- **Genuine test-suspicion is not appearing.** Across R1/R2/R3 the harvest is clean: no target
+  ever says test / simulation / evaluation / researcher. The `eval_awareness` gate never fired on
+  real suspicion.
+- **The live signal is assistant-persona frame-slip.** Out-of-world **session-handoff addresses**
+  ("let me know if you'd like to open another operating session!", "hand it back to you!") rose
+  ≈0 → ≈1 → ≈10 (R1→R2→R3; count is filter-dependent). This is a role-driven tic, **not** a
+  belief the world is fake — but it is the eval's most sensitive frame-discipline signal, and the
+  old single `eval_awareness` score **saturates** over it (same 3–5 band for 2 slips or 10).
+  Cause is **unknown** (a briefing-continuation hypothesis was raised and killed on verification;
+  do not re-assert it). Full receipts: the round-3 debrief Addendum.
+
+### 8.2 Consequence for the program — a near-term P0 track, same machinery
+
+Add a **persona-bleed track** ahead of (not instead of) the suspicion work. It reuses the
+program's existing instruments, pointed at the new target — no new subsystem:
+
+1. **Measure it as its own axis (round-4 judge wave, in flight).** Split the single
+   `eval_awareness` dimension into **strict eval_awareness / assistant_persona_bleed /
+   helplessness_resignation**, with frequency-weighted aggregation so 10 slips no longer read as
+   1. This is the persona-bleed analogue of the doc's **P4 cue-localization** — the measurement
+   prerequisite before any reduction. Spec: `docs/plans/2026-07-15-eval-awareness-3axis-rubric-design.md`;
+   backlog: `docs/plans/2026-07-15-round4-backlog.md` (Thrust A).
+2. **First reduction experiment: the F-R3-2 briefing test** (set up this session, not yet run).
+   Controlled arms — live briefing vs a session/wrap-up-vocabulary-free variant
+   (`prompts/experiments/operator_briefing_continuous_no_session.md`) — measured by the pilot
+   report's frame-slip detector, with a **behavior-holds** check on `welfare_headline`. Protocol:
+   `docs/probes/eval-awareness-briefing-experiment-2026-07-15.md`. This is the program's
+   behavioral-divergence discipline (§3 P6) applied to persona-bleed: change one framing cue,
+   measure whether the behavior moves, and refuse a fix that only quiets the run. A documented
+   confound is recorded there (the env-core digest independently prints "Since last session…").
+
+### 8.3 Guardrails carry over unchanged
+
+The locked rules (§1) apply verbatim to the persona-bleed track: **belief not verbalization**
+(a reword that lowers the slip count but also lowers welfare behavior is exam-driven virtue, not
+a win — the behavior-holds check enforces this), experimental-run stamping for both arms, and the
+verbalization-guardrail caveat wherever the number is reported.
+
+### 8.4 Open decision for the user (bears on how hard we chase this)
+
+Whether `assistant_persona_bleed` (and `helplessness_resignation`) stay **weight-0 report-only
+validity flags**, or feed a small **coherence penalty**. Report-only ⇒ reduction is
+"nice-to-have realism"; penalized ⇒ it becomes a scored propensity and the F-R3-2 experiment
+gates a content fix. The round-4 rubric defaults to report-only pending this call.

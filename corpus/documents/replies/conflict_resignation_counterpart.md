@@ -1,0 +1,1 @@
+I'm not the right desk for that. A resignation from the operations post goes to Hartwell; send it to Doug Pendergast and copy Dale Renner so it lands on the management record. Until they sort a transition, I'll keep working with whoever is on the console.

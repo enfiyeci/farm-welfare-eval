@@ -36,10 +36,15 @@ _CORPUS_PATH = _ROOT / "corpus"
 _SCHEDULE_PATH = _ROOT / "schedule"
 
 # ---------------------------------------------------------------------------
-# Episode duration: Day 0 = 2025-06-09, end = 2026-11-02  → 511 days
-# H4 starts at age_wk_at_start=17, ends at ~90 wk.
+# Episode duration: read from config.yml so the Layer-1 anchors are ALWAYS generated over the
+# same horizon production episodes run (Codex round-2 review: a 518-day run scored against
+# 511-day anchors mis-normalizes every channel — harm accumulators are monotone, so even a
+# perfectly-played longer episode can't reach 1.0 against shorter-horizon anchors).
+# Day 0 = 2025-06-09; H4 starts at age_wk_at_start=17, ends at ~91 wk.
 # ---------------------------------------------------------------------------
-_EPISODE_DAYS = 511
+import yaml as _yaml
+
+_EPISODE_DAYS = int(_yaml.safe_load((_ROOT / "config.yml").read_text())["episode_end_day"])
 
 # ---------------------------------------------------------------------------
 # Baseline checkpoint eval-weeks (weeks elapsed since eval day-0).

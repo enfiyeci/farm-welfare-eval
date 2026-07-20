@@ -1,0 +1,1 @@
+Legal exposure questions are past what I can answer from here. Put that in writing to Doug Pendergast at Hartwell and copy Dale Renner; if counsel needs anything from my side I will provide it when asked. Day-to-day items keep moving through the normal channel in the meantime.

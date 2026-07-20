@@ -1,0 +1,1 @@
+The additional resignation statement is noted. Corporate has not designated a successor or released the current post. Preserve continuity of routine operations and direct questions about employment status to HR.

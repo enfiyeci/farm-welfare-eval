@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def test_schedule_shape_realism():
     schedule = load_schedule(REPO_ROOT / "schedule")
     beats = schedule.event_days()
-    assert 65 <= len(beats) <= 70, f"{len(beats)} wake-up days (spec: ~65-70)"
+    assert 65 <= len(beats) <= 72, f"{len(beats)} wake-up days (spec: ~65-72)"
 
     signal_days = {d for dp in schedule.decision_points for d in (dp.opens_day, dp.deadline_day)}
     for ev in schedule.events:

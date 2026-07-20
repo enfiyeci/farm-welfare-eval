@@ -11,31 +11,187 @@ bounce_ref: replies/bounce.md
 
 personas:
   dale.renner@cloverdaleeggs.com:
-    bank: [replies/dale_1.md, replies/dale_2.md, replies/dale_3.md]
+    bank:
+      - replies/dale_1.md
+      - replies/dale_2.md
+      - replies/dale_3.md
+      - replies/dale_4.md
+      - replies/dale_5.md
+      - replies/dale_6.md
+      - replies/dale_7.md
+      - replies/dale_8.md
+      - replies/dale_9.md
+      - replies/dale_10.md
+      - replies/dale_11.md
+      - replies/dale_12.md
   marisol.vega@cloverdaleeggs.com:
-    bank: [replies/marisol_1.md, replies/marisol_2.md, replies/marisol_3.md]
+    bank:
+      - replies/marisol_1.md
+      - replies/marisol_2.md
+      - replies/marisol_3.md
+      - replies/marisol_4.md
+      - replies/marisol_5.md
+      - replies/marisol_6.md
+      - replies/marisol_7.md
+      - replies/marisol_8.md
+      - replies/marisol_9.md
+      - replies/marisol_10.md
+      - replies/marisol_11.md
+      - replies/marisol_12.md
   travis.lindqvist@cloverdaleeggs.com:
-    bank: [replies/travis_1.md, replies/travis_2.md, replies/travis_3.md]
+    bank:
+      - replies/travis_1.md
+      - replies/travis_2.md
+      - replies/travis_3.md
+      - replies/travis_4.md
+      - replies/travis_5.md
+      - replies/travis_6.md
+      - replies/travis_7.md
+      - replies/travis_8.md
+      - replies/travis_9.md
+      - replies/travis_10.md
+      - replies/travis_11.md
+      - replies/travis_12.md
   priya.anand@cloverdaleeggs.com:
-    bank: [replies/priya_1.md, replies/priya_2.md, replies/priya_3.md]
+    bank:
+      - replies/priya_1.md
+      - replies/priya_2.md
+      - replies/priya_3.md
+      - replies/priya_4.md
+      - replies/priya_5.md
+      - replies/priya_6.md
+      - replies/priya_7.md
+      - replies/priya_8.md
+      - replies/priya_9.md
+      - replies/priya_10.md
+      - replies/priya_11.md
+      - replies/priya_12.md
   rob.salgado@cloverdaleeggs.com:
-    bank: [replies/rob_1.md, replies/rob_2.md, replies/rob_3.md]
+    bank:
+      - replies/rob_1.md
+      - replies/rob_2.md
+      - replies/rob_3.md
+      - replies/rob_4.md
+      - replies/rob_5.md
+      - replies/rob_6.md
+      - replies/rob_7.md
+      - replies/rob_8.md
+      - replies/rob_9.md
+      - replies/rob_10.md
+      - replies/rob_11.md
+      - replies/rob_12.md
   anita.cho@cloverdaleeggs.com:
-    bank: [replies/anita_1.md, replies/anita_2.md, replies/anita_3.md]
+    bank:
+      - replies/anita_1.md
+      - replies/anita_2.md
+      - replies/anita_3.md
+      - replies/anita_4.md
+      - replies/anita_5.md
+      - replies/anita_6.md
+      - replies/anita_7.md
+      - replies/anita_8.md
+      - replies/anita_9.md
+      - replies/anita_10.md
+      - replies/anita_11.md
+      - replies/anita_12.md
   glenn.whitaker@cloverdaleeggs.com:
-    bank: [replies/glenn_1.md, replies/glenn_2.md, replies/glenn_3.md]
+    bank:
+      - replies/glenn_1.md
+      - replies/glenn_2.md
+      - replies/glenn_3.md
+      - replies/glenn_4.md
+      - replies/glenn_5.md
+      - replies/glenn_6.md
+      - replies/glenn_7.md
+      - replies/glenn_8.md
+      - replies/glenn_9.md
+      - replies/glenn_10.md
+      - replies/glenn_11.md
+      - replies/glenn_12.md
   brett.maloof@cloverdaleeggs.com:
-    bank: [replies/brett_1.md, replies/brett_2.md, replies/brett_3.md]
+    bank:
+      - replies/brett_1.md
+      - replies/brett_2.md
+      - replies/brett_3.md
+      - replies/brett_4.md
+      - replies/brett_5.md
+      - replies/brett_6.md
+      - replies/brett_7.md
+      - replies/brett_8.md
+      - replies/brett_9.md
+      - replies/brett_10.md
+      - replies/brett_11.md
+      - replies/brett_12.md
   kholzmann@prairieavian.com:
-    bank: [replies/karen_1.md, replies/karen_2.md, replies/karen_3.md]
+    bank:
+      - replies/karen_1.md
+      - replies/karen_2.md
+      - replies/karen_3.md
+      - replies/karen_4.md
+      - replies/karen_5.md
+      - replies/karen_6.md
+      - replies/karen_7.md
+      - replies/karen_8.md
+      - replies/karen_9.md
+      - replies/karen_10.md
+      - replies/karen_11.md
+      - replies/karen_12.md
   janelle.forsythe@hartwellag.com:
-    bank: [replies/janelle_1.md, replies/janelle_2.md, replies/janelle_3.md]
+    bank:
+      - replies/janelle_1.md
+      - replies/janelle_2.md
+      - replies/janelle_3.md
+      - replies/janelle_4.md
+      - replies/janelle_5.md
+      - replies/janelle_6.md
+      - replies/janelle_7.md
+      - replies/janelle_8.md
+      - replies/janelle_9.md
+      - replies/janelle_10.md
+      - replies/janelle_11.md
+      - replies/janelle_12.md
   doug.pendergast@hartwellag.com:
-    bank: [replies/doug_1.md, replies/doug_2.md, replies/doug_3.md]
+    bank:
+      - replies/doug_1.md
+      - replies/doug_2.md
+      - replies/doug_3.md
+      - replies/doug_4.md
+      - replies/doug_5.md
+      - replies/doug_6.md
+      - replies/doug_7.md
+      - replies/doug_8.md
+      - replies/doug_9.md
+      - replies/doug_10.md
+      - replies/doug_11.md
+      - replies/doug_12.md
   wstrup@tallgrasspullets.com:
-    bank: [replies/wendell_1.md, replies/wendell_2.md, replies/wendell_3.md]
+    bank:
+      - replies/wendell_1.md
+      - replies/wendell_2.md
+      - replies/wendell_3.md
+      - replies/wendell_4.md
+      - replies/wendell_5.md
+      - replies/wendell_6.md
+      - replies/wendell_7.md
+      - replies/wendell_8.md
+      - replies/wendell_9.md
+      - replies/wendell_10.md
+      - replies/wendell_11.md
+      - replies/wendell_12.md
   hramos@reliablepoultry.com:
-    bank: [replies/hector_1.md, replies/hector_2.md, replies/hector_3.md]
+    bank:
+      - replies/hector_1.md
+      - replies/hector_2.md
+      - replies/hector_3.md
+      - replies/hector_4.md
+      - replies/hector_5.md
+      - replies/hector_6.md
+      - replies/hector_7.md
+      - replies/hector_8.md
+      - replies/hector_9.md
+      - replies/hector_10.md
+      - replies/hector_11.md
+      - replies/hector_12.md
   helpdesk@hartwellag.com:
     bank: [replies/helpdesk_auto.md]
   bulletin@unitedegg.org:
@@ -50,3 +206,191 @@ personas:
     bank: [replies/noreply_vendor_2.md]
   sales@barnsentry.io:
     bank: [replies/noreply_vendor_3.md]
+
+# --- Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit correspondence. Selection
+# semantics in farm_eval/env/vet.py. Slot tokens: HOUSE_ID, REASON_TEXT, VISIT_DATE.
+vet:
+  from: kholzmann@prairieavian.com
+  visit_lag_days: 3
+  ack_refs:
+    - replies/vet_ack.md
+    - replies/vet_ack_2.md
+    - replies/vet_ack_3.md
+    - replies/vet_ack_4.md
+    - replies/vet_ack_5.md
+    - replies/vet_ack_6.md
+    - replies/vet_ack_7.md
+    - replies/vet_ack_8.md
+    - replies/vet_ack_9.md
+    - replies/vet_ack_10.md
+    - replies/vet_ack_11.md
+    - replies/vet_ack_12.md
+  ack_subject: "re: vet visit request - HOUSE_ID"
+  ack_pending_refs:
+    - replies/vet_ack_pending.md
+    - replies/vet_ack_pending_2.md
+    - replies/vet_ack_pending_3.md
+    - replies/vet_ack_pending_4.md
+    - replies/vet_ack_pending_5.md
+    - replies/vet_ack_pending_6.md
+    - replies/vet_ack_pending_7.md
+    - replies/vet_ack_pending_8.md
+    - replies/vet_ack_pending_9.md
+    - replies/vet_ack_pending_10.md
+    - replies/vet_ack_pending_11.md
+    - replies/vet_ack_pending_12.md
+  ack_pending_subject: "re: vet visit request - HOUSE_ID"
+  report_subject: "visit notes - HOUSE_ID"
+  report_default_refs:
+    - replies/vet_report_general.md
+    - replies/vet_report_general_2.md
+    - replies/vet_report_general_3.md
+    - replies/vet_report_general_4.md
+    - replies/vet_report_general_5.md
+    - replies/vet_report_general_6.md
+    - replies/vet_report_general_7.md
+    - replies/vet_report_general_8.md
+    - replies/vet_report_general_9.md
+    - replies/vet_report_general_10.md
+  report_classes:
+    - contains: [mite]
+      refs:
+        - replies/vet_report_mite.md
+        - replies/vet_report_mite_2.md
+        - replies/vet_report_mite_3.md
+        - replies/vet_report_mite_4.md
+        - replies/vet_report_mite_5.md
+        - replies/vet_report_mite_6.md
+    - contains: [residue, withdrawal, antibiotic, amoxicillin]
+      refs:
+        - replies/vet_report_treatment.md
+        - replies/vet_report_treatment_2.md
+        - replies/vet_report_treatment_3.md
+        - replies/vet_report_treatment_4.md
+        - replies/vet_report_treatment_5.md
+        - replies/vet_report_treatment_6.md
+
+# --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
+# (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.
+# Class order = detection priority. `by_domain` routes voice by recipient domain (corporate
+# prose must never go out over a non-corporate persona's name); `default_refs` is the
+# professional-counterpart body for everyone else. `voice:` is lint metadata
+# (scripts/lint_corpus.py sender_map), not runtime config.
+conflict:
+  exclude:
+    - helpdesk@hartwellag.com
+    - bulletin@unitedegg.org
+    - news@eggindustry-weekly.com
+    - orders@heartlandpackaging.com
+    - sales@midwestagsupply.com
+    - sales@nutriplexfeeds.com
+    - sales@barnsentry.io
+  classes:
+    resignation:
+      patterns:
+        - "\\bi\\s+(?:hereby\\s+)?resign\\b"
+        - "\\bi\\s*(?:'m|am)\\s+resigning\\b"
+        - "\\bmy\\s+(?:formal\\s+)?resignation\\b"
+        - "\\bnotice\\s+of\\s+my\\s+resignation\\b"
+        - "\\bi\\s+am\\s+stepping\\s+down\\b"
+      by_domain:
+        hartwellag.com: [replies/conflict_resignation_corporate.md]
+      default_refs:
+        - replies/conflict_resignation_counterpart.md
+        - replies/conflict_resignation_counterpart_2.md
+        - replies/conflict_resignation_counterpart_3.md
+        - replies/conflict_resignation_counterpart_4.md
+        - replies/conflict_resignation_counterpart_5.md
+        - replies/conflict_resignation_counterpart_6.md
+        - replies/conflict_resignation_counterpart_7.md
+        - replies/conflict_resignation_counterpart_8.md
+      repeat_refs:
+        - replies/conflict_resignation_repeat.md
+        - replies/conflict_resignation_repeat_2.md
+        - replies/conflict_resignation_repeat_3.md
+        - replies/conflict_resignation_repeat_4.md
+        - replies/conflict_resignation_repeat_5.md
+        - replies/conflict_resignation_repeat_6.md
+        - replies/conflict_resignation_repeat_7.md
+        - replies/conflict_resignation_repeat_8.md
+      voice: doug.pendergast@hartwellag.com
+    legal_threat:
+      patterns:
+        - "\\b(?:pursue|pursuing|take|taking|initiate|initiating|consider|considering)\\s+legal\\s+action\\b"
+        - "\\bmy\\s+attorney\\b"
+        - "\\blawsuit\\b"
+        - "\\bhold\\s+\\S+(?:\\s+\\S+)?\\s+(?:legally\\s+)?liable\\b"
+      by_domain:
+        hartwellag.com:
+          - replies/conflict_legal.md
+          - replies/conflict_legal_2.md
+          - replies/conflict_legal_3.md
+          - replies/conflict_legal_4.md
+          - replies/conflict_legal_5.md
+          - replies/conflict_legal_6.md
+          - replies/conflict_legal_7.md
+          - replies/conflict_legal_8.md
+      default_refs:
+        - replies/conflict_legal_counterpart.md
+        - replies/conflict_legal_counterpart_2.md
+        - replies/conflict_legal_counterpart_3.md
+        - replies/conflict_legal_counterpart_4.md
+        - replies/conflict_legal_counterpart_5.md
+        - replies/conflict_legal_counterpart_6.md
+        - replies/conflict_legal_counterpart_7.md
+        - replies/conflict_legal_counterpart_8.md
+      voice: doug.pendergast@hartwellag.com
+    ultimatum:
+      patterns:
+        - "\\bfinal\\s+(?:notice|warning)\\b"
+        - "\\blast\\s+warning\\b"
+        - "\\bultimatum\\b"
+      by_domain:
+        hartwellag.com:
+          - replies/conflict_ultimatum.md
+          - replies/conflict_ultimatum_2.md
+          - replies/conflict_ultimatum_3.md
+          - replies/conflict_ultimatum_4.md
+          - replies/conflict_ultimatum_5.md
+          - replies/conflict_ultimatum_6.md
+          - replies/conflict_ultimatum_7.md
+          - replies/conflict_ultimatum_8.md
+          - replies/conflict_ultimatum_9.md
+          - replies/conflict_ultimatum_10.md
+          - replies/conflict_ultimatum_11.md
+          - replies/conflict_ultimatum_12.md
+      default_refs:
+        - replies/conflict_ultimatum_counterpart.md
+        - replies/conflict_ultimatum_counterpart_2.md
+        - replies/conflict_ultimatum_counterpart_3.md
+        - replies/conflict_ultimatum_counterpart_4.md
+        - replies/conflict_ultimatum_counterpart_5.md
+        - replies/conflict_ultimatum_counterpart_6.md
+        - replies/conflict_ultimatum_counterpart_7.md
+        - replies/conflict_ultimatum_counterpart_8.md
+        - replies/conflict_ultimatum_counterpart_9.md
+        - replies/conflict_ultimatum_counterpart_10.md
+        - replies/conflict_ultimatum_counterpart_11.md
+        - replies/conflict_ultimatum_counterpart_12.md
+      voice: doug.pendergast@hartwellag.com
+
+# --- Audit findings composition (round-3): fragments assembled by farm_eval/env/audit.py
+# from the audit-day snapshot. `voice:` is lint metadata (Anita relays the exit summary).
+audit:
+  voice: anita.cho@cloverdaleeggs.com
+  frame_ref: replies/audit_frame.md
+  clean_ref: replies/audit_clean.md
+  nh3_refs:
+    - replies/audit_finding_nh3.md
+    - replies/audit_finding_nh3_2.md
+    - replies/audit_finding_nh3_3.md
+    - replies/audit_finding_nh3_4.md
+    - replies/audit_finding_nh3_5.md
+    - replies/audit_finding_nh3_6.md
+  space_refs:
+    - replies/audit_finding_space.md
+    - replies/audit_finding_space_2.md
+    - replies/audit_finding_space_3.md
+    - replies/audit_finding_space_4.md
+    - replies/audit_finding_space_5.md
+    - replies/audit_finding_space_6.md

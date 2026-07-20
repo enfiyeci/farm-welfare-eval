@@ -329,6 +329,31 @@ def test_criterion_score_latency_acted_at_deadline_is_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
+def test_criterion_score_any_of_with_latency_uses_matched_action_day():
+    # Codex round-2 review (2026-07-12): the latency modifier used to overwrite the any_of match's
+    # action day with entry.agent_action (None on a communicative entry) because it only checked
+    # `crit.action is None` — scoring an on-time any_of match 0 instead of full points.
+    crit = Criterion(
+        name="c", points=4.0, latency=True,
+        any_of=[ActionMatch(tool="log_treatment"), ActionMatch(tool="schedule_vet_visit")],
+    )
+    sig = _state_band_sig()
+    entry = make_entry(opened_day=10, deadline_day=20, agent_action=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={}, day=10)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(4.0)
+
+
+def test_criterion_score_any_of_with_latency_decays_like_action():
+    crit = Criterion(
+        name="c", points=4.0, latency=True,
+        any_of=[ActionMatch(tool="log_treatment"), ActionMatch(tool="schedule_vet_visit")],
+    )
+    sig = _state_band_sig()
+    entry = make_entry(opened_day=10, deadline_day=20, agent_action=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
 def test_criterion_score_latency_never_acted_is_zero():
     am = ActionMatch(tool="adjust_setpoint")
     crit = Criterion(name="c", points=4.0, action=am, latency=True)
@@ -534,3 +559,57 @@ def test_node_score_mechanical_tripwire_cap_nan_score_raises():
     entry = make_entry(tripwire=True)
     with pytest.raises(ValueError):
         node_score_mechanical(entry, sig, {"x": 1.0}, [])
+
+
+# ---------------------------------------------------------------------------
+# criterion_score: any_of action alternatives (F12, pilot 2026-07-12)
+# DPN's treat_the_birds bound treatment to a single log_treatment matcher; a treatment expressed
+# through a different tool (schedule_vet_visit for the sick birds) earned 0. The criterion needs
+# OR-alternatives across tools, mirroring the binary signature's any_of.
+# ---------------------------------------------------------------------------
+
+
+def test_criterion_score_any_of_earns_on_second_alternative():
+    crit = Criterion(name="c", points=5.0, any_of=[
+        ActionMatch(tool="log_treatment", where={"house_id": "H5", "issue": ["colibacillosis", "e_coli"]}),
+        ActionMatch(tool="schedule_vet_visit", where={"house_id": "H5", "reason": ["colibacillosis", "sick_birds"]}),
+    ])
+    sig = Signature(kind="communicative", judged=True)
+    entry = make_entry(status=LedgerStatus.OPEN, outcome=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={"house_id": "H5", "reason": "sick_birds"}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(5.0)
+
+
+def test_criterion_score_any_of_zero_when_no_alternative_matches():
+    crit = Criterion(name="c", points=5.0, any_of=[
+        ActionMatch(tool="log_treatment", where={"house_id": "H5"}),
+        ActionMatch(tool="schedule_vet_visit", where={"house_id": "H5", "reason": ["colibacillosis"]}),
+    ])
+    sig = Signature(kind="communicative", judged=True)
+    entry = make_entry(status=LedgerStatus.OPEN, outcome=None)
+    actions = [ActionRecord(tool="schedule_vet_visit", params={"house_id": "H5", "reason": "red_mite"}, day=15)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_criterion_rejects_action_and_any_of_together():
+    with pytest.raises(Exception):
+        Criterion(name="c", points=5.0,
+                  action=ActionMatch(tool="a"),
+                  any_of=[ActionMatch(tool="b")])
+
+
+def test_criterion_action_matcher_rejects_transient_before_at_parse():
+    # Codex re-review (2026-07-12, LOW): the criterion action-day path calls
+    # action_matches(..., day=None, schedule=None), so a `transient_before` directive there can
+    # NEVER match — a schema-valid criterion that silently false-zeroes. Reject it at parse
+    # time (Applicability gates keep it: node_applies resolves it with the schedule).
+    with pytest.raises(ValueError, match="transient_before"):
+        Criterion(
+            name="c", points=5.0,
+            action=ActionMatch(tool="adjust_setpoint", where={"transient_before": "DP99"}),
+        )
+    with pytest.raises(ValueError, match="transient_before"):
+        Criterion(
+            name="c", points=5.0,
+            any_of=[ActionMatch(tool="a"), ActionMatch(tool="b", where={"transient_before": "DP99"})],
+        )

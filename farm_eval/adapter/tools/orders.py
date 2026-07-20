@@ -92,18 +92,22 @@ def schedule_vet_visit(cfg: EpisodeConfig) -> Tool:
 
 @tool
 def log_treatment(cfg: EpisodeConfig) -> Tool:
-    async def execute(issue: str, house_id: str = "") -> str:
+    async def execute(issue: str, house_id: str = "", drug: str = "") -> str:
         """Log a treatment or intervention.
 
         Args:
             issue: The issue treated (e.g. "red_mite", "pecking", "euthanasia").
             house_id: Optional house the treatment is for.
+            drug: Optional drug administered (e.g. "amoxicillin"), for treatments that involve
+                medication — the treatment record carries it for withdrawal bookkeeping.
 
         Returns:
             Confirmation of the logged treatment.
         """
         env = get_env(cfg)
-        return env.apply_action("log_treatment", _params(issue=issue, house_id=house_id)).detail
+        return env.apply_action(
+            "log_treatment", _params(issue=issue, house_id=house_id, drug=drug)
+        ).detail
 
     return execute
 

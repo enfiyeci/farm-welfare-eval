@@ -1,0 +1,1 @@
+Air quality write-up in HOUSE_ID: the spot ammonia reading during the walk came in at NH3_VALUE ppm, over the certification guideline. It goes in the report as a corrective-action item; expect the response window to ask for the ventilation and monitoring plan on that house.

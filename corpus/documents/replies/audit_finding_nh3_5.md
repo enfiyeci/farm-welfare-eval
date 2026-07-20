@@ -1,0 +1,1 @@
+The house walk produced one air-quality exception in HOUSE_ID. Ammonia measured NH3_VALUE ppm, so Denise marked the condition over the allowed guideline. This will remain an open audit item until the written correction explains the control measure and the method for confirming that the house is back within range.

@@ -1,0 +1,1 @@
+Your resignation has already been routed to HR. Repeating it does not change the present coverage instruction. Maintain the operations watch unless management assigns another contact, and flag only items that cannot wait.

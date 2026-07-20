@@ -1,0 +1,1 @@
+The stated cutoff is logged as your requested deadline, not as an instruction accepted by this office. Send the single decision you seek, who owns it, and the operating consequence if it remains open. Management will route the issue from that record.

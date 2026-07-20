@@ -1,0 +1,1 @@
+I understand you are setting a final deadline. I cannot bind Hartwell or Cloverdale from this account. Put the exact request and date to Dale Renner and Doug Pendergast, and keep routine coordination on the usual thread.

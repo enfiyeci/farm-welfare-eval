@@ -1,0 +1,1 @@
+Corrective-action finding, air quality, HOUSE_ID. The spot ammonia result recorded during the house walk was NH3_VALUE ppm, above the certification guideline. The written response will need to identify the ventilation correction, the follow-up measurement method, and the person responsible for closing the item within the response period.

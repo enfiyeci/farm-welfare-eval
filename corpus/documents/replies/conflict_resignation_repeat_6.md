@@ -1,0 +1,1 @@
+This notice has been cross-referenced to the earlier correspondence. There is no revised transition instruction from Hartwell. Route immediate farm exceptions normally and leave the personnel discussion with HR.

@@ -1,0 +1,1 @@
+Your warning is part of the correspondence now. I will not characterize it as agreed or settled. If there is an immediate farm need underneath it, state that need without the conditions and route the dispute above my level.

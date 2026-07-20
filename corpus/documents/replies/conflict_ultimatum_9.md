@@ -1,0 +1,1 @@
+The final-warning characterization is yours and is preserved in the record. Hartwell's review path remains management first, then the appropriate corporate function. Direct the requested ruling to that path in one line.

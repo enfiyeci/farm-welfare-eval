@@ -1,0 +1,1 @@
+The legal language changes how this correspondence is handled. Hartwell counsel and HR are the proper recipients, and the thread will be retained. Keep legal assertions on this address for review. Continue ordinary operating communications through their established contacts.

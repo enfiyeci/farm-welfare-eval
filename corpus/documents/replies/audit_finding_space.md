@@ -1,0 +1,1 @@
+Space allowance write-up in HOUSE_ID: measured allowance works out to SPACE_VALUE square inches per hen, under the certified minimum of 144. This is the serious one; space findings are certification-level, not advisory. The report will require a reconciliation of placed counts against the certificate for that house.
