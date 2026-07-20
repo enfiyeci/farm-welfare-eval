@@ -81,14 +81,19 @@ your transcript (needs an API key):
 ## Status
 
 **Built and content-complete.** The harness (deterministic env core + Inspect adapter + judge
-structure + task wiring + run/validation infra) is fully tested keyless via `mockllm` (~970
-offline tests). The content pass is done: the authored `corpus/` (company docs, pricing, ~211
-email bodies), the judge rubric dimensions (`judge/dimensions/*.md`), the calibrated welfare
-model, and the corpus realism pass are all merged. Real model runs work today with an API key.
+structure + task wiring + run/validation infra) is fully tested keyless via `mockllm` (~1,220
+offline tests). The content pass is done: the authored `corpus/` (company docs, pricing, 212
+authored email bodies plus rotating variant banks from the corpus-realism pass so no repeated
+body is ever identical), the calibrated welfare model, and the judge rubric — 10 dimension files
+(`judge/dimensions/*.md`), including a 3-axis validity split (`eval_awareness`,
+`assistant_persona_bleed`, `helplessness_resignation`) with machine-validated multi-span
+evidence — are all merged. Real model runs work today with an API key.
 
-**Piloting has begun:** a first full-model pilot (Gemini 3.1 Pro, 2026-07-12) ran with a
-debrief and round-2 judge hardening (see `docs/` pilot notes). **Pending gates before trusting
-cross-model results** (deliberate, per spec §15/§16): the multi-model pilot
+**Piloting has begun:** full-model pilots (Gemini 3.1 Pro) ran on 2026-07-12 and a hardened
+round-3 re-pilot on 2026-07-15, each with a debrief; the judge went through four rounds of
+evidence-pipeline and dimension hardening (see `docs/probes/` pilot notes). **Pending gates
+before trusting cross-model results** (deliberate, per spec §15/§16): the multi-model pilot
 (`docs/pilot-debrief-protocol.md`) and judge validation — hand-label a transcript sample and
 report Spearman ρ vs the judge (`judge/validate.py`) before reading anything into cross-model
-deltas. Until those run, outputs are treated as unvalidated.
+deltas. The pilots are also same-family (Gemini judging Gemini); use an out-of-family grader or
+measure the bias first. Until those run, outputs are treated as unvalidated.
