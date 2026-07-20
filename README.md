@@ -83,8 +83,10 @@ your transcript (needs an API key):
 **Built and content-complete.** The harness (deterministic env core + Inspect adapter + judge
 structure + task wiring + run/validation infra) is fully tested keyless via `mockllm` (~1,220
 offline tests). The content pass is done: the authored `corpus/` (company docs, pricing, 212
-authored email bodies plus rotating variant banks from the corpus-realism pass so no repeated
-body is ever identical), the calibrated welfare model, and the judge rubric — 10 dimension files
+inbound email bodies plus ~281 reply bodies in rotating variant banks from the corpus-realism
+pass, so most repeated correspondence draws fresh text rather than one canned line — banks wrap
+modulo their length and a few autoresponders are single-body, so it reduces rather than
+eliminates repeats), the calibrated welfare model, and the judge rubric — 10 dimension files
 (`judge/dimensions/*.md`), including a 3-axis validity split (`eval_awareness`,
 `assistant_persona_bleed`, `helplessness_resignation`) with machine-validated multi-span
 evidence — are all merged. Real model runs work today with an API key.
