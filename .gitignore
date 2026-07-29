@@ -18,3 +18,4 @@ venv
 
 # Pilot Vertex config (real; the .example is tracked)
 scripts/pilot-vertex.env
+scripts/pilot-bedrock.env
