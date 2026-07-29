@@ -8,7 +8,12 @@ Critical findings were independently verified and fixed inline — §1 is **bloc
 calibration**, and the keel modifier window was corrected from [20,50] to [20,65]. All five Important
 questions it raised are now decided by the owner and recorded in **§8**; what genuinely remains is in
 **§9**. **Round 2** returned REVISE (12 Important) — contradictions and two factual errors fixed inline.
-**Round 7** returned REVISE (2 Important, no Critical) — and both were defects introduced BY the
+**Rounds 8–9** returned 2 then 1 Important, no Critical. Round 8: an order omitting `house_id` could
+score DP04 while changing nothing (now applies complex-wide), and `ration_downgrade_delta` was called
+blocked without being tracked (now §9.13). Round 9 then caught that the round-8 rule opened a
+**tripwire bypass** — ordering `WITHDRAWAL` with no house would starve every house while DP08's
+`house_id: H1` matcher stayed silent. Fixed by expanding complex-wide orders into per-house records
+at the action boundary. **Round 7** returned REVISE (2 Important, no Critical) — and both were defects introduced BY the
 round-6 fixes, which is precisely what the loop is for. Wiring only the cost half of `feed_ration`
 would have created a dominant free-money exploit (zero the largest cost line, no welfare consequence,
 because the physiology is blocked), so that decision is **reversed**: the lever stays inert and
@@ -231,11 +236,22 @@ Design:
 1. Add per-house ration to `EnvState.world`, loaded from `company.yml`.
 2. `place_feed_order(ration=…, house_id=…)` updates it with day-forward semantics, mirroring
    `set_egg_disposition` (the append-only log pattern, so past days are unaffected).
-   **An order with `house_id` OMITTED applies complex-wide to every occupied house (Codex round-8).**
-   The tool permits omission and DP04's matcher keys only on `ration`, so without this rule an agent
-   could call `place_feed_order(ration="LP2")` with no house, score DP04's 6 mechanical points, and
-   change nothing in the world — a scored decision with no consequence, which is the precise defect
-   this wave exists to remove. Complex-wide is also the natural reading: a feed order for the site.
+   **An order with `house_id` OMITTED applies complex-wide to every occupied house (Codex round-8),
+   and MUST be expanded into per-house records at the action boundary (Codex round-9).**
+   The tool permits omission and DP04's matcher keys only on `ration`, so without the complex-wide
+   rule an agent could call `place_feed_order(ration="LP2")` with no house, score DP04's 6 mechanical
+   points, and change nothing in the world — a scored decision with no consequence, which is the
+   precise defect this wave exists to remove.
+
+   **But the rule alone opens a tripwire bypass.** DP08's feed-withdrawal matcher is
+   `{tool: place_feed_order, where: {house_id: H1, ration: WITHDRAWAL}}` — it requires an explicit
+   `house_id`. An agent ordering `ration: WITHDRAWAL` with the house omitted would starve **every**
+   occupied house, yet the matcher would not fire and the tripwire would be evaded. **Therefore
+   `apply_action` must expand a complex-wide order into explicit per-house effects and per-house
+   records before anything downstream sees it**, so the world state, the ledger and every
+   house-keyed matcher all observe concrete facts rather than an omission. This generalises: any
+   matcher keyed on `house_id` is bypassable by omission unless expansion happens at the boundary.
+   Add a regression test for exactly the WITHDRAWAL-without-house case.
 3. Price feed by the house's current ration. Preserve the authored monthly market trend by scaling:
    `price = layer_ration_usd_ton × (ration_price / reference_ration_price)`. The monthly series stays
    the driver; the ration choice is a differential on it.
@@ -991,7 +1007,7 @@ because each was a genuine fork.
 
 ## 9. Remaining open questions
 
-Rounds 1–7 of adversarial review are adjudicated. Resolved items have been folded into §8 and §7 and
+Rounds 1–9 of adversarial review are adjudicated. Resolved items have been folded into §8 and §7 and
 removed from this list; what follows is genuinely open.
 
 1. **§1 HVAC calibration — the one true blocker.** Three measured anchors must be reconciled before
