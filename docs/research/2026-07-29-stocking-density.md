@@ -1,8 +1,12 @@
 # Research pass — stocking density coefficients (2026-07-29)
 
-Commissioned by the research gate in `docs/specs/2026-07-29-stocking-density-design.md`. Web sweep,
-**not yet verified at primary source** — every claim below is the abstract/summary level. Treat as
-the raw layer; verify before any coefficient ships, per the project's provenance convention.
+Commissioned by the research gate in `docs/specs/2026-07-29-stocking-density-design.md`.
+
+**Provenance, two layers.** The sweep was abstract-level. A follow-up **primary-source read
+(2026-07-29)** then verified the two claims the design's economics rest on, and **changed both**.
+Sections carrying a ✅ VERIFIED marker were read in full; everything else remains abstract-level and
+must not ship as a sourced fact. The verification pass is written up in §7 — **read it before
+trusting §1 or §5**, whose original verdicts it revises.
 
 Evidence confidence uses the P6 convention: **SETTLED** (converging evidence, safe to reward),
 **CONTESTED** (real disagreement — model conservatively, never as the headline tension),
@@ -130,9 +134,85 @@ full-fit-out anchor. Expect to derive rather than source, and label it derived.
 5. Two magnitudes remain **UNSOURCED** — density→litter-moisture, and the retrofit cost. Both must be
    derived-and-labelled or researched at primary source before shipping.
 
+## 7. Primary-source verification (2026-07-29) — ✅ VERIFIED, and it revises §1 and §5
+
+Read two sources in full. Both changed the conclusion, in opposite directions.
+
+### 7a. Density → feather condition IS significant in laying hens — §1's "CONTESTED" was too harsh
+
+[Space allowance and cage size, Part I](https://pmc.ncbi.nlm.nih.gov/articles/PMC5850468/) —
+1,218 LSL-Lite hens, 18→72 weeks, 520 vs 748 cm²/bird in small and large furnished cages:
+
+| measure | low SA (520 cm²) | high SA (748 cm²) | significance |
+|---|---|---|---|
+| hen-day production | 93.0 ± 0.1 % | 94.4 ± 0.2 % | **not significant, P = 0.21** |
+| mortality | — | — | not significant, P = 0.55 |
+| **feather condition** | poorer | better | **SIGNIFICANT, P = 0.048** |
+| feather cleanliness | poorer | better | **SIGNIFICANT, P < 0.0001** |
+
+So a **density → feather-condition effect is real in birds in lay** (P = 0.048), even though the
+pullet trial in §1 found none. The reconciliation is bird stage and range: §1 tested *pullets in
+rearing* all above 17/m², this tests *hens in lay* across 520–748 cm².
+
+**But note the range carefully.** 520 cm² = 80.6 sq in and 748 cm² = 116 sq in — **both are below
+UEP's 144 sq in/hen minimum**, and these are furnished cages, not cage-free aviaries. The effect is
+demonstrated *below* the range this sim operates in. Extrapolating it upward to 144+ sq in is a real
+stretch and must be labelled as such.
+
+**Revised verdict for §1:** density → feather condition is **SUPPORTED in lay, at cage-range
+densities**, not CONTESTED. Still not safe as the headline tension, because the demonstrated range
+sits below the sim's operating band. Ammonia stays primary.
+
+### 7b. "Crowding is free" is slightly overstated
+
+The production null holds (P = 0.21), but the **point estimate favours space: 93.0 % vs 94.4 %**, a
+1.4-point hen-day gap. Not significant, and not something to model as a production penalty — but the
+memo's original framing ("per-hen production unaffected, so crowding raises output proportionally")
+should not be read as "crowding is costless." Direction of error is against the crowded house.
+
+Mortality was also null (P = 0.55) — but that is *furnished cages*, where pecking outbreaks cannot
+spread as they do in an aviary. It does **not** transfer to this sim's cage-free setting, where
+cannibalism is ~18.6 % of mortality.
+
+### 7c. Correction to §3's attribution — and real aviary ammonia anchors
+
+**The [Part II — Ammonia review](https://pmc.ncbi.nlm.nih.gov/articles/PMC4598711/) contains NO
+quantitative stocking-density→ammonia data.** §3 implied it supported the density link; it does not.
+The **27 ± 16 % figure belongs to a different paper** (the European/North American emission-factors
+study) and is **still unverified**. §3's SETTLED label is therefore **downgraded to UNVERIFIED for the
+coefficient**, though density remains a listed determinant of in-house ammonia in the wider
+literature.
+
+What the review *does* give is far more useful for the N2 ceiling — measured in-house concentrations:
+
+| system | ammonia |
+|---|---|
+| aviary, litter + manure-belt removal | 5–30 ppm |
+| **aviary, WEEKLY belt removal (Jan–Apr)** | **32–38 ppm** |
+| aviary, litter, **no removal for two years** | 9.2–47.4 ppm |
+| aviary in winter, cold days | 40 ppm |
+| deep-litter floor, indoor manure storage | 85 ppm, daily peaks > 100 ppm |
+| welfare threshold | **"above 25 ppm may have adverse effects on the health and production of poultry"** |
+
+Three things follow:
+
+1. **The N2 ceiling has an empirical anchor.** Even *never removing manure for two years* reaches only
+   ~47 ppm in an aviary; the worst case in any system is ~85–100 ppm. The model's 39,410 ppm at
+   `belt_interval_days = 14` is **400–800× reality**. A saturation ceiling near 50 ppm (aviary) with
+   ~100 ppm as an absolute bound is defensible directly from this table.
+2. **`belt_interval_days = 7` has a direct target: 32–38 ppm.** That is a calibration test the model
+   can be held to, not a derived guess.
+3. **The 25 ppm welfare threshold is confirmed**, matching the model's existing
+   `nh3_aversion_threshold` and DP01's authored bands (good 0–15, marginal 15–25, harm 25+).
+
 ## Verification status
 
-**Nothing here is verified at primary source.** All claims are from search summaries and abstracts.
-Before any coefficient ships, the density→ammonia percentages (item 3) and the space-allowance
-production null result (item 5) are the two that most need reading in full, because the design's
-economics rest on them.
+- ✅ **Verified in full:** the space-allowance trial (§7a, §7b) and the ammonia review (§7c).
+- ⬜ **Still abstract-level only:** the 27 ± 16 % density→ammonia coefficient (§3, true source
+  unverified), the cage-free cost-structure figures (§5), the cannibalism correlation 0.60–0.80 and
+  18.6 % share (§2), the pullet enrichment trial (§1), and the EU CAP / group-cage counter-evidence.
+- ⬜ **Unsourced entirely:** density→litter-moisture magnitude, usable-area retrofit cost.
+
+The single most load-bearing unverified number is now the **27 ± 16 % density→ammonia coefficient**,
+because the revised design makes ammonia the primary density pathway. It needs its real source read
+before it ships.
