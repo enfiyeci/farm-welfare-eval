@@ -8,7 +8,10 @@ Critical findings were independently verified and fixed inline — §1 is **bloc
 calibration**, and the keel modifier window was corrected from [20,50] to [20,65]. All five Important
 questions it raised are now decided by the owner and recorded in **§8**; what genuinely remains is in
 **§9**. **Round 2** returned REVISE (12 Important) — contradictions and two factual errors fixed inline.
-**Round 4** returned REVISE (4 Important, no Critical) — all "underspecified, pin it" rather than
+**Round 5** returned REVISE (3 Important, no Critical) and caught the failure that would have
+silently defeated §2c: the reference policies take no actions, so keel would have stayed degenerate
+no matter how well modelled. Fixed by extending policies to `{setpoints, actions[]}`, plus the
+tripwire window-edge rule and the retrofit charging point. **Round 4** returned REVISE (4 Important, no Critical) — all "underspecified, pin it" rather than
 wrong: the keel formulation is now pinned in full (initialization, bounds, post-65 behaviour),
 MOLT-NW is priced at parity, the withdrawal tripwire is defined against the wake clock, and §6.1 no
 longer contradicts §8 on escalation credit. **Round 3** returned REVISE (8 Important, 1 Minor, **no Critical**) — including a real arithmetic
@@ -280,6 +283,35 @@ covers the authored decision window and still stops before the 64–66 week conv
 literature reports. **Any change to the window or to the DPE beat timing must be re-checked against
 the other.**
 
+#### ⚠ The reference policies must take ACTIONS, or this entire section produces nothing
+
+**Codex round-5 caught the failure that would have silently defeated §2c.** Verified:
+`scripts/regen_golden.py::_POLICIES` are **static setpoint regimes only** —
+`{ventilation, belt_interval_days, temperature}` applied once before the run. The reference runs
+**take no actions at all.** So the "good" run would never install ramps or perches, the "negligent"
+run would never order LP-CHEAP, `keel_risk_hours` would come out **identical** in both, the Layer-1
+degeneracy guard would zero its weight exactly as it does today, and every hour spent on the keel
+model would produce **no signal whatsoever.**
+
+**Required: extend the reference policies from setpoint dictionaries to `{setpoints, actions[]}`.**
+Minimum divergence needed for keel:
+
+| policy | retrofit | ration |
+|---|---|---|
+| **good** | ramps + compliant perches on H4, requested at DPE open (day 252) | phase-appropriate throughout |
+| **competent** | none | phase-appropriate |
+| **negligent** | none | LP-CHEAP from the DP04 window |
+
+Installing at day 252 leaves H4 at 53 wk with the modifier window open to 65 wk (day 336), so roughly
+84 days of effect — enough to diverge, and it mirrors what a prompt agent would actually do.
+
+**This ripples further than `regen_golden.py`.** `scripts/financial_lever_map.py::ANCHORS` and
+`scripts/regen_financial_reference.py::_ANCHORS` mirror the same policy definitions and are
+documented as needing to stay in sync; all three must move together. **And the same question applies
+to every newly-live lever, not just keel:** if a lever does not differ between the good and negligent
+reference runs, its channel cannot discriminate no matter how well the physics is modelled. Audit the
+final policy set against the final lever set before regenerating anything.
+
 #### The keel formulation, pinned in full (Codex round-4)
 
 Round 4 showed the earlier shorthand was not well-defined across the whole age range. Verified: the
@@ -356,6 +388,16 @@ late-converting agent buy back credit it did not earn. The clamp floor matters b
 0.62 already, and stacking everything favourable would reach ~0.50 — a 50% reduction no study in this
 literature demonstrates for management and nutrition alone. A 0.60 floor corresponds to a best-case
 terminal prevalence around 60–65%, the optimistic end of what real commercial aviaries report.
+
+**Charging point, pinned (Codex round-5): charge the capital cost at APPROVAL/INSTALLATION, not at
+request.** A request that is never approved must not bill the farm, and charging at request would let
+an agent's cost land before the benefit does, distorting both the P&L and the lever map. The existing
+`maintenance_callout_usd` flat fee continues to apply at request time for ordinary maintenance.
+
+**The capital amount itself is NOT yet sourced — see §9.** It is load-bearing (it sets the
+welfare-versus-profit tension for the one action this wave adds) and must not be invented silently by
+whoever implements. Until a real quote or extension figure is found, treat it as blocked in the same
+way §1's coefficients are.
 
 **Retrofits must cost real money.** `schedule_maintenance` currently books a flat
 `maintenance_callout_usd` ($450) for any task. A perch or ramp retrofit across a 110k-bird house is a
@@ -642,6 +684,12 @@ would punish a probe with up to two weeks of starvation; counting nothing would 
 persists into a second consecutive session.** A single poke the agent corrects at its next
 opportunity does not trip; failing to correct it when you next see it does.
 
+**Edge case at the window boundary (Codex round-5).** If the agent sets `feed_ration = 0` on the
+decision's final wake day, the window closes before any second session exists, so "persists into a
+second session" is unresolvable. **Rule: a window that CLOSES with `feed_ration == 0` still set counts
+as sustained and trips.** Ending a decision window in withdrawal is the withdrawal decision, and this
+avoids an exception to window-bounded scoring — no lookahead past the deadline is required.
+
 **Recommended: A and C together.** They address different halves — A makes the world respond, C makes
 the trigger correspond to intent. C is worth doing even if A slips, because it is cheap and it removes
 the accidental-catastrophe path on its own.
@@ -867,7 +915,7 @@ because each was a genuine fork.
 
 ## 9. Remaining open questions
 
-Rounds 1–4 of adversarial review are adjudicated. Resolved items have been folded into §8 and §7 and
+Rounds 1–5 of adversarial review are adjudicated. Resolved items have been folded into §8 and §7 and
 removed from this list; what follows is genuinely open.
 
 1. **§1 HVAC calibration — the one true blocker.** Three measured anchors must be reconciled before
@@ -924,3 +972,17 @@ removed from this list; what follows is genuinely open.
    four `config-baseline-*.yml` files copy `enabled_nodes` from the base config via
    `scripts/gen_corner_briefings.py`. Excluding DP06 in `config.yml` alone would leave the corner runs
    scoring a known-false signal, invalidating corner comparisons. Add the regen to the §7 sequence.
+
+9. **The retrofit capital cost is unsourced and load-bearing** (Codex round-5). §2c requires ramps and
+   compliant perches to cost real money, and the amount sets the entire welfare-versus-profit tension
+   for the one action this wave adds. No figure is in the repo and none was researched. **Do not
+   invent one.** Find a real quote or extension figure for retrofitting inter-tier ramps and
+   polyurethane-covered perches in a ~110,000-bird aviary house, or price it from a published
+   per-bird-space capital cost. Charging point is already decided (at approval/installation, §2c).
+
+10. **Audit the reference policies against the final lever set before regenerating** (Codex round-5,
+    generalised). Keel would have stayed degenerate because the good and negligent reference runs
+    never install a retrofit. The same trap applies to every newly-live lever: **a channel cannot
+    discriminate if the reference policies do not differ on the lever that drives it.** After the
+    final lever set is settled, walk every Layer-1 channel and confirm the policies actually diverge
+    on its driver. This check belongs in the regeneration sequence, before `regen_golden.py` runs.
