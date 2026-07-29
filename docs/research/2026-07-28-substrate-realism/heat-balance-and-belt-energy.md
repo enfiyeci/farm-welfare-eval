@@ -196,8 +196,15 @@ heating_usd_bird_day = deficit * 0.000895 * lp_price_usd_per_gal * lp_fuel_index
 ```
 `0.000895` = gal propane per watt-of-deficit per hen-day (86400 s ÷ 96.5 MJ/gal).
 
-**Validation target:** 0.01–0.16 L propane/hen/yr for a well-managed house. Above ~0.2 means the
+**Validation target:** ~~0.01–0.16 L propane/hen/yr for a well-managed house.~~ Above ~0.2 means the
 model is wrong.
+
+> ⚠ **SUPERSEDED 2026-07-29 — the lower bound no longer governs.** Spec §7 criterion 5 now states the
+> target as **within ~±30 % of the metered 0.0085 L/hen/yr (≈0.006–0.011)**, keeping the ">~0.2 means
+> the model is wrong" alarm. The reason: §1's completed calibration puts a well-managed house at
+> **0.007**, which is close to the metered anchor but *below* the old 0.01 floor, so the 0.01–0.16
+> band would have failed the very calibration it was written to validate. **Do not reject the 0.007
+> baseline for falling below 0.01.**
 
 ## ⛔ ERRATUM (2026-07-28, found by Codex adversarial review, verified)
 
@@ -226,7 +233,10 @@ setpoint at all costs.
 The 0.000895 gal-per-watt-day conversion is dimensionally correct (1 W-day = 0.0864 MJ;
 0.0864 / 96.5 = 0.000895 gal). The *shape* of the recommendation — a threshold balance-point model
 rather than a term proportional to ΔT and `vent` — also stands. Only the mapping and the resulting
-numbers are unsafe. See spec §1, which is blocked pending a calibration reconciliation.
+numbers are unsafe. ~~See spec §1, which is blocked pending a calibration reconciliation.~~
+**Update 2026-07-29: that reconciliation was completed on 2026-07-28 and §1 is no longer blocked.**
+The `vent` → airflow scale was re-pinned (0.6 m³/h/hen at the baseline operating point), which is
+what made the mapping safe; see spec §1 for the pinned coefficients.
 
 ## Flagged gaps
 

@@ -25,8 +25,14 @@ Complete and verified:
 - **Design spec**, ~1,250 lines, nine sections.
 - **Two probe documents** — the lever audit and the DP06 false-zero proof.
 - **Research provenance** — five documents, four from commissioned passes.
-- **Ten rounds of Codex adversarial review**, all adjudicated. Counts: 12, 8, 4, 3, 6, 2, 2, 1, 1.
+- **Eleven rounds of Codex adversarial review**, all adjudicated. Counts: 12, 8, 4, 3, 6, 2, 2, 1, 1,
+  then round 11 = 3 P1 + 6 (straight + adversarial pair, run 2026-07-29 before merge).
   No Critical since round 2. Rationale for each round is in its commit message.
+- **Round 11 found no defect in the design — it found that §9 was never swept.** Items 1, 11 and 13
+  still described blockers the body of the spec had already resolved on 2026-07-28, so the
+  "Remaining open questions" section was telling an implementer that unblocked work was blocked.
+  Fixed by marking them RESOLVED in place. Two genuinely new open items were added, **§9.14 and
+  §9.15 — read them before planning §2a or §2c.**
 - **All four blocked coefficients resolved** (see Decisions).
 - **Three owner decisions taken** 2026-07-28: repair DP06, Reliable supervises the catch crew, defer
   the retrofit trade until keel is measured.
@@ -80,8 +86,16 @@ Spec §9 has the full list. Genuinely open after this session:
 
 - **Storage capacity, spoilage, and the ceiling search space** (§9.5, §9.6) — mine to decide; settle
   them in the plan rather than asking.
-- **Keel window framing, corner-config regeneration, reference-policy audit** (§9.7, §9.8, §9.10) —
-  mechanical, decided, need doing.
+- **Corner-config regeneration, reference-policy audit** (§9.8, §9.10) — mechanical, decided, need
+  doing.
+- **The keel modifier window is NOT decided** (§9.15, corrected 2026-07-29). This handoff previously
+  called it decided; it is not. The research artifact supports 20–50 weeks and the spec uses 20–65,
+  which lets a deadline-day retrofit collect ~28 days of keel credit the evidence does not support.
+  **Owner call.**
+- **`feed_ration` cannot ship as specified** (§9.14). The sourced curve holds lay flat at `r >= 0.90`
+  and specifies body-weight and mortality responses for withdrawal only, so `feed_ration = 0.90` is a
+  ~10 % cut to the largest cost line with zero consequence — the round-7 exploit class, reappearing at
+  partial restriction. Needs a body-condition term before §2a's cost half lands.
 - **Whether "good welfare" should carry a winter fuel bill.** Fell out of the HVAC fix: the `good`
   reference policy holds ventilation at 2.0 year-round, so it over-ventilates through winter and burns
   1.6 L/hen/yr. That is a flaw in the *policy*, not the model. **Owner call, not yet asked.**
@@ -92,9 +106,17 @@ Spec §9 has the full list. Genuinely open after this session:
 **Write the implementation plan** (`superpowers:writing-plans`) from spec §8's decisions. Sequence
 **§2c's keel measurement first** — it is on the critical path because the owner's retrofit-trade
 decision depends on it, and if the complex-wide movement is genuinely ~2–3 % the honest fix is
-per-house channel weighting rather than adjusting the price or the points. Then §2 (nutrition/bone)
-and §5 (financial feedback), which are independent and unblocked. Do NOT start coding before the plan
-exists — this project's convention is brainstorm → plan → build with review per task.
+per-house channel weighting rather than adjusting the price or the points. Then §5 (financial
+feedback), which is independent and unblocked. Do NOT start coding before the plan exists — this
+project's convention is brainstorm → plan → build with review per task.
+
+**Two owner calls gate part of §2 — get them before planning those tasks, not during:**
+- **§2a cannot ship as specified** (§9.14). The coefficient blocker is lifted, but the curve holds
+  lay flat at `r >= 0.90` with body-weight and mortality responses specified for withdrawal only, so
+  `feed_ration = 0.90` is a free ~10 % cut to the largest cost line. Needs a body-condition term.
+- **§2c's keel window is not final** (§9.15). [20,50] is what the research supports; [20,65] is what
+  the current DPE beat timing requires. One of the two has to move, and **moving the beat earlier is
+  the third option** — §2c's argument does not establish that the window is the side that must give.
 
 ## References
 
