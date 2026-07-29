@@ -155,7 +155,7 @@ Anchors (all with sources in the research record): hen house-level sensible heat
 Setting `vent = 1.0 ≡ 2.0 m³/h/hen` reproduces the measured Iowa aviary envelope (winter minimum
 0.8 ↔ vent 0.4; annual mean 4.0 ↔ vent 2.0; summer max 9.1 ↔ vent 4.55, inside the 0–5 cap).
 
-### ⛔ BLOCKED — the proposed coefficients fail their own validation target
+### ⛔→✅ WAS BLOCKED, NOW RESOLVED — the coefficients failed their validation target
 
 **Do not implement §1 as written.** Codex adversarial review caught an arithmetic error in the
 research's balance-point table, and correcting it exposes a deeper inconsistency.
@@ -191,6 +191,44 @@ setpoint: the measured minimum ventilation (0.8 m³/h/hen), the measured propane
 ≈0.59 m³/h/hen, *not* 0.8). The unmodelled reconciler is that real houses do not hold a fixed indoor
 setpoint through winter at all costs: they let indoor temperature float down toward the flock's own
 equilibrium and run heaters rarely. Our substrate charges fuel to hold the setpoint unconditionally.
+
+#### ✅ RESOLVED 2026-07-28 — `vent` conflated two different physical quantities
+
+The blocker is fixed, and the root cause was not a coefficient. **`vent` in the existing model is a
+COOLING lever, not an airflow rate.** `layers/heat.py::indoor_temp_c` computes
+`indoor = max(setpoint_c, ambient_c − cooling)` where `cooling = headroom × min(1, vent)` — so in
+winter (ambient below setpoint) indoor is simply *pinned to setpoint* and `vent` does nothing at all.
+Bolting a heat-loss term onto that same variable silently reinterpreted it as total airflow. Those
+differ by roughly 30× across the seasons (winter minimum 0.3–0.8 m³/h/hen versus summer maximum 9.1),
+which is exactly where the 65× error came from.
+
+**Fix: the heating term is driven by WINTER MINIMUM ventilation, with `vent` scaling a baseline of
+0.6 m³/h/hen at `vent = 1.0`.** The cooling semantics of `vent` in `indoor_temp_c` are unchanged, so
+nothing about summer behaviour moves. Verified against the authored Iowa weather:
+
+| policy | vent | setpoint | m³/h/hen | balance point | L/hen/yr | |
+|---|---|---|---|---|---|---|
+| negligent (min vent) | 0.4 | 26 °C | 0.24 | −38.7 °C | 0.000 | ~zero |
+| competent | 0.8 | 23 °C | 0.48 | −13.0 °C | 0.000 | ~zero |
+| **baseline** | **1.0** | **21 °C** | **0.60** | **−8.4 °C** | **0.007** | **matches metered 0.0085 ✓** |
+| good (high vent) | 2.0 | 18 °C | 1.20 | +2.6 °C | 1.619 | expensive |
+| over-ventilating | 3.0 | 21 °C | 1.80 | +10.6 °C | 5.466 | very expensive |
+
+A well-managed house now lands at **0.007 L/hen/yr against a metered reality of 0.0085** — the
+validation target is met. The DP01 tension is real and correctly shaped: at a fixed 21 °C setpoint,
+fuel goes 0.000 → 0.007 → 0.946 → 2.322 L/hen/yr as vent goes 0.5 → 1.0 → 1.5 → 2.0. Over-ventilating
+in winter is now genuinely expensive, while the existing ammonia layer still punishes under-ventilating.
+
+The `>0.2 L/hen/yr means the model is wrong` threshold applies to **well-managed operation only** — a
+deliberately over-ventilating house should and does burn far more.
+
+**⚠ Observation for the reference policies (§9.10):** the "good" regime is a static `vent 2.0` held
+all year, so it over-ventilates through winter and burns 1.6 L/hen/yr. That is a flaw in the
+*reference policy*, not the model — a genuinely good operator ventilates to need. Consider whether
+the good policy should be season-aware, or accept that "good welfare" carries a real fuel bill and
+say so.
+
+**Superseded below** — the original calibration plan, retained for the reasoning trail:
 
 **Required before implementation** — a calibration pass that either (a) re-pins the `vent` → airflow
 mapping so the realistic operating band lands in the validation window, (b) models indoor temperature
