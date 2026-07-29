@@ -14,7 +14,14 @@ been written.**
 
 ## State
 
-**Branch `docs/substrate-realism-wave`, 11 commits ahead of `main`, nothing pushed. Working tree
+**Branch `docs/substrate-realism-wave`, 15 commits ahead of `origin/main`, nothing pushed.**
+
+**⚠ Local `main` is a STALE ref** (`49229b7`) pointing well behind `origin/main` (`b40f870`).
+Always diff and branch against **`origin/main`** — `git diff main..HEAD` reports 113 commits of
+unrelated history and will mislead you (and misled the review tooling in this session, which was
+given explicit file paths and so still reviewed the right thing).
+
+Working tree clean except for pre-existing untracked files that are NOT mine. Working tree
 clean except for pre-existing untracked files that are NOT mine** (`.claude/`, `debrief-labels-*/`,
 `docs/design-styles*.html`, `docs/meeting-questions.html`, `docs/welfare-nodes.html`) — leave them alone.
 
@@ -31,8 +38,14 @@ NOT done:
 - No implementation. No code touched. No tests written.
 - **§1 (HVAC) is BLOCKED** — the researched coefficients burn 65× measured propane at the realistic
   operating point.
-- **Four coefficients are unsourced and must not be invented**: HVAC (§9.1), retrofit capital cost
-  (§9.9), starvation physiology (§9.11), `ration_downgrade_delta` (§9.13).
+- **All four blocked coefficients are now resolved** (they were open when this handoff was drafted):
+  HVAC — root cause was `vent` conflating cooling with airflow, fixed by driving heating from winter
+  minimum ventilation (0.6 m³/h/hen at vent 1.0); a well-managed house now lands at 0.007 L/hen/yr
+  against metered 0.0085. Retrofit capital — **$600k/house, DERIVED not sourced**, label it as such.
+  Starvation physiology — sourced, so `feed_ration` is unblocked and comes off the inert allowlist.
+  `ration_downgrade_delta` — **+0.013 additive**, but this **overturned the mechanism**: limestone
+  particle size alone is below the noise floor, the modellable effect is calcium LEVEL, and LP-CHEAP
+  must be authored into world-bible §9 at 3.5 % Ca (it currently has no row there at all).
 - The Bedrock pilot runner is built and **Opus 5 is verified working** (`us.anthropic.claude-opus-5`,
   HTTP 200), but **no run has happened** — the owner directed that design must finish first.
 
@@ -83,7 +96,7 @@ per task.
 
 ## References
 
-- Branch `docs/substrate-realism-wave` (11 commits, unpushed). Base `main` @ `4e697a7`.
+- Branch `docs/substrate-realism-wave` (15 commits, unpushed). Base = `origin/main` @ `b40f870`. Do NOT use local `main`, it is stale at `49229b7`.
 - **The spec:** `docs/specs/2026-07-28-substrate-realism-wave-design.md` — §8 decisions, §9 open items.
 - **Probes:** `docs/probes/substrate-realism-audit-2026-07-28.md` (findings F1–F10, the lever audit),
   `docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md`.
