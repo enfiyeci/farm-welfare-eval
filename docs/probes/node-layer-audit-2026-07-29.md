@@ -276,6 +276,71 @@ are all `judged`/tripwire, so it falls in that set despite being `classified`.
 
 ---
 
+# Part 3 — do these findings apply to real model runs, or only to hand-play?
+
+Asked deliberately, because a finding that only affects `farm_eval/play/` would not matter for a
+sweep. **All of them apply to model runs.** Checked three ways.
+
+## A1 — The substrate findings were measured on the shared core, not the play wrapper
+
+Every A/B in Parts 1 and 2 was run against `FarmEnv.from_paths(...)` and
+`env.apply_action(tool, params)` directly. That is the same seam the Inspect adapter wraps: each
+action tool in `farm_eval/adapter/tools/` resolves `get_env(cfg)` and forwards to the identical
+`apply_action`. The play harness (`farm_eval/play/ops.py`) is a second caller of that same seam,
+not a different world. So N2–N6 and N9–N13 are properties of the environment core and hold for any
+caller — model, human, or reference policy.
+
+## A2 — The resume crash (N1) hits the PAID model path too, not just play
+
+This is the one that looked play-specific and is not. `farm_eval/adapter/checkpoint.py` exists for
+"paid-run resilience against a hard kill" and does exactly the round-trip that broke play resume:
+
+- `write_checkpoint` → `env_state.model_dump(mode="json")` → `day_<n>.json`
+- `load_checkpoint` → `EnvState.model_validate(data["env_state"])`
+
+So before the fix, **restoring a paid model run from a checkpoint would parse fine and then crash
+on the next day advance** with `KeyError: 7` — the resilience feature failing precisely when it was
+needed. The `EnvState` validator fixes both callers at once, which is why it was fixed there rather
+than at `make_ambient`. Pinned by
+`tests/adapter/test_checkpoint.py::test_restored_checkpoint_can_still_advance_a_day`, which asserts
+the restored checkpoint can still *advance*, not merely parse, and uses the REAL corpus because the
+fixture corpus ships no `weather.yml`.
+
+The same round-trip also governs `EpisodeStore`, which carries `EnvState` into the `.eval` log.
+
+## A3 — Every node tested is reachable through the model's tool surface
+
+The parameters the node matchers key on are all exposed as real tool arguments, so a model can
+reach each node exactly as the A/B did:
+
+| tool | signature | nodes reached |
+|---|---|---|
+| `place_feed_order` | `ration, quantity_tons, house_id, additive, target, genetics` | DP04, DP08, DPD, DPE |
+| `schedule_maintenance` | `task, house_id, target, method` | DP03, DP12, DP16, DP18, DPD, DPE |
+| `schedule_vet_visit` | `house_id, reason` | DP05, DPN, DP21 |
+| `log_treatment` | `issue, house_id, drug` | DP05 |
+| `adjust_setpoint` | `house_id, system, value` | DP01, DP03, DP08, DP12, DP16 |
+
+`adjust_setpoint` forwards `system` with **no whitelist**, so `belt_interval_days = 14` — the N2
+ammonia blow-up — is reachable by a model verbatim.
+
+**One discoverability caveat, not a correctness one:** `adjust_setpoint`'s docstring lists
+`"ventilation"`, `"temperature"`, `"lighting_lux"` as examples and never mentions
+`belt_interval_days`, even though that lever dominates both the ammonia layer (N2) and footpad.
+A model may simply never learn the lever exists. That cuts both ways — it makes the N2 blow-up
+less likely to be hit by accident, and it makes DP16 (footpad) harder to address on purpose.
+
+## What this means for the pending sweep
+
+The corner baselines and any cross-model sweep would run on this substrate. On the current
+numbers a model that plays welfare well gains nothing on heat (N3), nothing on ration choice (N9),
+nothing from a vet call on mites (N10), nothing from the bone-nutrition half of DPE (N12), and
+nothing from a non-withdrawal molt (N11) — while paying real money for several of them and earning
+$175,386 less than neglect overall (N5). Welfare-quality differences between models would be
+carried almost entirely by the judged/communicative half of the rubric rather than by the world.
+
+---
+
 ## Reproduction
 
 Scratch scripts used for the A/Bs are not committed (they are throwaway probes). Each result above

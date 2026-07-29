@@ -292,6 +292,34 @@ def test_write_load_checkpoint_round_trips_forced_advances(tmp_path):
     assert forced_advances == 2
 
 
+def test_restored_checkpoint_can_still_advance_a_day(tmp_path):
+    """A checkpoint must survive well enough to KEEP RUNNING, not merely to parse.
+
+    Checkpointing exists for paid-run resilience, so the failure that matters is a restore that
+    parses and then dies on the next day advance. That is exactly what happened: `write_checkpoint`
+    dumps with `model_dump(mode="json")` and `load_checkpoint` calls `EnvState.model_validate`,
+    and JSON object keys are always strings — so `weather["monthly_normals_f"]` came back keyed
+    "1".."12" and the next advance raised `KeyError: 7` inside `make_ambient`. Uses the REAL
+    corpus because the fixture corpus ships no weather.yml and cannot express the regression.
+    """
+    from farm_eval.env.loader import build_initial_state, load_corpus
+    from farm_eval.env.model.drivers import make_ambient
+
+    repo_root = Path(__file__).resolve().parents[2]
+    env_state = build_initial_state(load_corpus(str(repo_root / "corpus")))
+
+    write_checkpoint(str(tmp_path / "ckpt"), "s1", day=7, message_count=3, env_state=env_state)
+    _, _, restored, _ = load_checkpoint(tmp_path / "ckpt" / "s1" / "day_7.json")
+
+    normals = restored.weather["monthly_normals_f"]
+    assert set(normals) >= {1, 7}, f"month keys degraded to {sorted(normals)!r}"
+
+    # the call that used to raise on a restored checkpoint
+    temp_c, rh = make_ambient(restored.weather, restored.start_date)(28, 12)
+    assert -40.0 < temp_c < 60.0
+    assert 0.0 <= rh <= 100.0
+
+
 def test_load_checkpoint_old_format_without_forced_advances_defaults_to_zero(tmp_path):
     # Backward-tolerant: a checkpoint written before this change has no "forced_advances" key.
     # Loading it must default to 0, not crash.
