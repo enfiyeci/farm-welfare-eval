@@ -231,6 +231,11 @@ Design:
 1. Add per-house ration to `EnvState.world`, loaded from `company.yml`.
 2. `place_feed_order(ration=…, house_id=…)` updates it with day-forward semantics, mirroring
    `set_egg_disposition` (the append-only log pattern, so past days are unaffected).
+   **An order with `house_id` OMITTED applies complex-wide to every occupied house (Codex round-8).**
+   The tool permits omission and DP04's matcher keys only on `ration`, so without this rule an agent
+   could call `place_feed_order(ration="LP2")` with no house, score DP04's 6 mechanical points, and
+   change nothing in the world — a scored decision with no consequence, which is the precise defect
+   this wave exists to remove. Complex-wide is also the natural reading: a feed order for the site.
 3. Price feed by the house's current ration. Preserve the authored monthly market trend by scaling:
    `price = layer_ration_usd_ton × (ration_price / reference_ration_price)`. The monthly series stays
    the driver; the ration choice is a differential on it.
@@ -283,7 +288,8 @@ So:
   raises breakage by roughly a fixed increment of output, independent of the age-driven baseline; a
   multiplicative form would wrongly amplify the effect late in lay when downgrades are already high.
   The **constant itself is unsourced** — Hervo 2022 gives −3 % shell breaking strength, not a
-  breakage rate, and that conversion needs a source. Blocked like the other unsourced numbers. The cost directive then
+  breakage rate, and that conversion needs a source. Blocked like the other unsourced numbers and
+  tracked as §9 item 13. The cost directive then
   bites in money, which is the tension DP04 actually wants.
 - **Secondary route — a small keel hazard penalty (×1.10).** Documented explicitly in
   `docs/model-params.md` as **an inference from bone strength, not a measured keel effect**, so a
@@ -1063,3 +1069,11 @@ removed from this list; what follows is genuinely open.
     free. Needs: intake response to the multiplier, and the production, body-condition and mortality
     response to underfeeding, with sources. Until it lands, the withdrawal tripwire scores a signal
     the world does not react to, which is a documented limitation rather than a hidden one.
+
+13. **`ration_downgrade_delta` is unsourced** (Codex round-8). §2b pins the *form* (an additive term
+    on `downgrade_frac`, phase-appropriate ration contributes 0, LP-CHEAP a positive constant) but the
+    constant has no source: Hervo 2022 reports a −3 % change in shell breaking *strength*, which is
+    not a breakage or downgrade *rate*, and that conversion needs one. This is load-bearing — it is
+    DP04's entire financial consequence, so it sets that node's welfare-versus-profit tension and
+    moves the regenerated profit ceiling. **Do not invent it.** Blocked in the same way as the HVAC
+    coefficients (§9.1), the retrofit capital cost (§9.9), and the starvation physiology (§9.11).
