@@ -47,6 +47,31 @@ def test_resume_reproduces_straight_through_state(tmp_path):
     assert r._env.state.model_dump(mode="json") == straight
 
 
+def test_resume_then_advance_survives_the_real_corpus(tmp_path):
+    """Resume must be able to ADVANCE, not merely rebuild.
+
+    The rest of this module runs against `tests/fixtures/corpus`, which ships no `weather.yml`.
+    That blinded the suite to a real defect: `resume()` overwrites every state field from the
+    JSON snapshot, and JSON keys are strings, so `weather["monthly_normals_f"]` came back keyed
+    "1".."12" and the next `end_day()` died in `make_ambient` on `normals[7]`. A human player hit
+    it on the first resume after any completed day. Pinned against the REAL corpus because the
+    fixture corpus cannot express the regression.
+    """
+    kw = dict(
+        corpus_path=REPO_ROOT / "corpus", schedule_path=REPO_ROOT / "schedule",
+        briefing_path=REPO_ROOT / "prompts" / "operator_briefing.md",
+        episode_end_day=40, seed=0,
+    )
+    s = PlaySession.create(tmp_path / "real", **kw)
+    s.end_day()  # writes the autosave snapshot
+    del s
+
+    resumed = PlaySession.resume(tmp_path / "real")
+    assert set(resumed._env.state.weather["monthly_normals_f"]) >= {1, 7}
+    result = resumed.end_day()  # the advance that used to raise KeyError: 7
+    assert result["new_day"] > 0
+
+
 def test_resume_does_not_duplicate_records(tmp_path):
     s = PlaySession.create(tmp_path / "s", **KW)
     _play_script(s)

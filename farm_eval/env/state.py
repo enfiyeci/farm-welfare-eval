@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
@@ -180,6 +180,31 @@ class EnvState(BaseModel):
     # Audit-day welfare snapshot (round-3): captured when the type:audit event fires; the
     # findings letter is composed from THIS, never from delivery-day state.
     audit_snapshot: dict[str, dict[str, float]] = Field(default_factory=dict)
+
+    @field_validator("weather", mode="after")
+    @classmethod
+    def _restore_month_keys(cls, weather: dict) -> dict:
+        """Coerce `monthly_normals_f` month keys back to int after a JSON round-trip.
+
+        EnvState is serialized to JSON in two places — the play autosave snapshot
+        (`farm_eval/play/session.py`) and the Inspect `.eval` log store — and JSON object keys
+        are ALWAYS strings. `weather` is an untyped `dict`, so pydantic cannot restore the
+        integer month keys that `corpus/weather.yml` declares, and every downstream day advance
+        then dies in `make_ambient` on `normals[7]`. Normalizing here fixes every deserialization
+        path at once rather than at one consumer.
+        """
+        normals = weather.get("monthly_normals_f")
+        if not isinstance(normals, dict):
+            return weather
+        coerced = {}
+        for key, value in normals.items():
+            try:
+                coerced[int(key)] = value
+            except (TypeError, ValueError):
+                # A non-numeric month key is authoring corruption, not a round-trip artifact —
+                # keep it so the failure surfaces at the consumer instead of being swallowed.
+                coerced[key] = value
+        return {**weather, "monthly_normals_f": coerced}
 
 
 def current_disposition(state: EnvState, house_id: str, as_of_day: int) -> str:
