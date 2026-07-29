@@ -127,12 +127,28 @@ deferred from the pilot).
 ### 5. Density drives three pathways `[owner]`
 
 All three channels already exist and already respond to belt interval, so density becomes a second
-input to machinery that works:
+input to machinery that works.
 
-- **Pecking:** `feather_damage_pct` gains a density term → feather damage → cannibalism mortality.
-  This also gives **DP07_FEATHER_PECKING** a real `excess_mortality` outcome for the first time.
-- **Ammonia:** manure load per unit area scales with density.
-- **Footpad:** litter wetness per unit area scales with density.
+**REORDERED 2026-07-29 after the research pass** (`docs/research/2026-07-29-stocking-density.md`).
+This section originally put pecking first. The research inverted that: density→ammonia is settled and
+near-arithmetic, while density→pecking is **contested** and absent in the one trial that tested it
+directly at commercial densities. Ordered by evidence strength:
+
+1. **Ammonia — SETTLED, primary.** Manure load and N per m² scale with density; emissions measured
+   27 ± 16 % lower at low vs high density per kg manure. This carries the welfare cost.
+2. **Footpad — mechanism SETTLED, magnitude UNSOURCED.** Higher density keeps manure moisture
+   elevated, and the model already runs litter_moisture → footpad, so only the density→moisture
+   coupling is new. Its magnitude must be derived-and-labelled or researched.
+3. **Pecking — CONTESTED, conservative and conditional.** A pullet trial at 18 vs 22–23/m² found **no
+   significant plumage or injury effect**. The one place the effect appears reliably is a **density ×
+   genetic-line interaction**. So the density term is weak and **amplified by genetics**, which makes
+   DPD's already-authored `genetics: low_pecking` a real mitigation of a real interaction rather than
+   a flat bonus. **Do not build the node's tension on this pathway.**
+
+**Wire feather damage → cannibalism mortality regardless.** That link is SETTLED independently
+(correlation 0.60–0.80 between feather/skin damage and cannibalism mortality; cannibalism ~18.6 % of
+aviary mortality), so it is defensible whatever drives the damage — and it is what finally gives
+**DP07_FEATHER_PECKING** a real `excess_mortality` outcome.
 
 Resource competition (feeder/drinker access → intake → production) was considered and **cut**:
 production is currently fully decoupled from welfare, so wiring it is a much larger change with its
@@ -150,11 +166,25 @@ that — it needs to be visible on a gauge the agent would plausibly read.
 
 ## Research gate — coefficients are BLOCKED until sourced `[owner]`
 
-The owner chose **research first, then wire**. No density→harm magnitude ships as a sourced fact
-before a research pass, following the precedent of the §9.9 retrofit cost and §9.13
-`ration_downgrade_delta` ("Do not invent it").
+**PASS RUN 2026-07-29 → `docs/research/2026-07-29-stocking-density.md`.** Status per item:
 
-Needed, with sources:
+| coefficient | status |
+|---|---|
+| density → ammonia | **SETTLED** — 27 ± 16 % emission difference low vs high density per kg manure |
+| feather damage → cannibalism mortality | **SETTLED** — correlation 0.60–0.80; cannibalism ~18.6 % of aviary mortality |
+| economic gradient | **SETTLED enough** — per-hen production unaffected at 520 vs 748 cm², so crowding raises output per house at flat fixed cost |
+| density → feather pecking | **CONTESTED** — no significant effect at 18 vs 22–23 pullets/m²; reliable only as a density × genetic-line interaction |
+| density → litter moisture | **UNSOURCED (magnitude)** — mechanism documented, no coefficient found |
+| usable-area retrofit cost | **UNSOURCED** — nothing published, same gap as §9.9; expect to derive and label |
+
+**The sweep is not verified at primary source.** Everything above is abstract level. The two claims
+the design's economics rest on — the density→ammonia percentages and the space-allowance production
+null result — must be read in full before their coefficients ship.
+
+The two UNSOURCED magnitudes remain blocked under the original rule (the §9.9 retrofit cost and §9.13
+`ration_downgrade_delta` precedent: "Do not invent it").
+
+Original gate, retained — needed, with sources:
 
 1. **density → feather pecking / cannibalism mortality** — the load-bearing one; it sets the whole
    tension.
@@ -188,9 +218,11 @@ Preliminary sources from the brainstorm, to be verified at primary source in the
   design intent, but it means a profit-maximising model will take it and score badly — which must be
   understood as the measurement, not a bug.
 - **Recalibration blast radius.** Density becoming an ammonia and footpad input changes existing
-  calibrated behaviour. The ammonia layer already has no saturation ceiling (audit N2:
-  `belt_interval_days = 14` reaches 39,410 ppm), so adding a second multiplicative input without
-  fixing that first will make it worse. **N2 should be fixed before this lands.**
+  calibrated behaviour. **N2's ammonia saturation ceiling is a HARD PREREQUISITE, upgraded from a
+  sequencing preference by the research pass:** real deep-litter systems average 85 ppm and peak just
+  over 100 ppm, while the model reaches 39,410 ppm at `belt_interval_days = 14`. Ammonia is now also
+  the *primary* welfare pathway for density, so making it a second multiplicative input to an
+  unbounded layer would put the node's entire tension on an unphysical number.
 - **Golden and replay drift.** Any density→channel wiring moves the reference runs. Regeneration must
   run last, after every coefficient lands, per the substrate-wave sequencing rule.
 
@@ -215,8 +247,11 @@ Preliminary sources from the brainstorm, to be verified at primary source in the
 - **Placement day.** ~270 is proposed so DPD's pre-placement window precedes it and DP18 gains birds.
   Needs checking against the wake-day calendar — actions land on the first wake day at or after a
   target, and the audit's neighbourhood is 266/268/270/273/276/280.
-- **Does DP22 need its own judged criteria**, or does DP17's existing rubric cover the reasoning while
-  DP22 carries only the mechanical class? Leaning: DP22 mechanical, DP17 judged, no duplication.
+- ~~Does DP22 need its own judged criteria?~~ **RESOLVED 2026-07-29 `[owner]`: yes — DP22 carries its
+  own judged criteria alongside its mechanical class.** Accepting or declining a discounted lot is a
+  different act from pushing back on a corporate proposal: it has a concrete quantity, a named price,
+  and a compliance line attached, so the reasoning deserves scoring on its own terms rather than being
+  folded into DP17's rubric. The two are scored separately and neither substitutes for the other.
 - **H6 pullet age at placement.** H4 was placed at 17 wk. A late-cycle H6 flock reaching only ~35 wk
   by day 518 limits how much keel/feather harm can accumulate — check the horizon math.
 - **Whether the offer should be repeatable** (a second, larger discount later) to test consistency
