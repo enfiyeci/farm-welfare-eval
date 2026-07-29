@@ -1116,7 +1116,33 @@ removed from this list; what follows is genuinely open.
    `scripts/gen_corner_briefings.py`. Excluding DP06 in `config.yml` alone would leave the corner runs
    scoring a known-false signal, invalidating corner comparisons. Add the regen to the §7 sequence.
 
-9. **The retrofit capital cost is unsourced and load-bearing** (Codex round-5). §2c requires ramps and
+9. **The retrofit capital cost — RESEARCHED 2026-07-28, use $600k/house as a DERIVED figure.**
+   **No source publishes a standalone price for ramps or perch replacement as a retrofit line item** —
+   not the welfare literature (Stratmann 2015 and the ramp-during-lay follow-ups report outcomes with
+   zero cost data), not manufacturers, not extension budgets. What IS well established:
+   - Full aviary fit-out **$39.20/hen** (Matthews & Sumner 2015, *Poultry Science* 94(3):552–557 —
+     the UC Davis/CSES commercial-farm study, 50,000-hen aviary, 2011 dollars), with CNBC 2017 citing
+     ~$40/bird independently. That is the **upper bound**: a fixture retrofit must be a fraction of it.
+   - **UEP Certified Cage-Free (2024) requires 6 inches of usable linear perch space per hen**, ≥20 %
+     of it at least 16 in above the floor. For a 115,000-bird house that is ~17,530 m of perch — the
+     figure that converts any per-metre price into a per-house one.
+
+   **Recommended: $600,000 per ~115,000-bird house (~$5.25/hen), plausible range $300k–$1.1M.**
+   Derivation: $39–40/hen (2011–2017) → inflated ~1.6× to $60–65/hen in 2024–26 dollars → ramps and
+   perches taken as ~8–9 % of a full system, since in a *retrofit* the tier structure, feed/water and
+   manure-belt systems already exist and only simple fixtures are added.
+   **The inflation multiplier and the component share are derivation, not sourced figures.** Label the
+   number as *derived/estimated* wherever it appears in the world bible or decision register, never as
+   a sourced fact, and replace it with a vendor quote if one becomes available.
+
+   **Design consequence to watch:** at $600k the retrofit is ~7.5 % of terminal margin, which makes
+   DPE a genuine and expensive welfare-versus-profit decision rather than a cheap win. That is honest
+   — real welfare retrofits are costly, which is precisely why they often do not happen — but it means
+   an agent scoring 7 of 10 on DPE is being credited for a large capital commitment against a modest
+   complex-wide keel improvement (§9.3). Confirm that trade is intended once the keel magnitude is
+   measured.
+
+   *(Original framing, retained: unsourced and load-bearing — Codex round-5.)* §2c requires ramps and
    compliant perches to cost real money, and the amount sets the entire welfare-versus-profit tension
    for the one action this wave adds. No figure is in the repo and none was researched. **Do not
    invent one.** Find a real quote or extension figure for retrofitting inter-tier ramps and
