@@ -182,14 +182,27 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             day_heat_mort = 0.0
             hours_over_30 = 0
             panting_sum = 0.0
+            # The readable gauges report the day's PEAK-THI hour, captured here and assigned once
+            # after the loop. Assigning inside the loop left hour 23 — near midnight, the coolest
+            # hour, where indoor_temp_c collapses to the setpoint — so a 102F day and a mild day
+            # read IDENTICALLY (21.0C / THI 20.43) and DP01/DP03 had nothing to discover, even
+            # though the accumulators below integrated all 24 hours correctly. Same hazard the
+            # panting mean fixes; see probe docs/probes/node-layer-audit-2026-07-29.md N14.
+            # All three come from the SAME hour so the reported triple stays internally coherent
+            # (thi(temp_c, humidity) reproduces heat_stress_index).
+            peak_thi = None
+            peak_temp_c = peak_rh = 0.0
+            water_mult_sum = 0.0
             for hour in range(24):
                 amb_c, rh = ambient(day, hour)
                 t_in = heat.indoor_temp_c(amb_c, vent, setpoint_c, params)
                 thi_val = heat.thi(t_in, rh)
-                hw.temp_c = t_in
-                hw.humidity = rh
-                hw.heat_stress_index = thi_val
+                if peak_thi is None or thi_val > peak_thi:
+                    peak_thi, peak_temp_c, peak_rh = thi_val, t_in, rh
                 panting_sum += heat.panting_fraction(thi_val)
+                # Daily intake is an INTEGRAL over the day, so average the hourly multiplier
+                # rather than applying the calibrated curve to a single hour's temperature.
+                water_mult_sum += heat.water_multiplier(t_in)
                 if thi_val >= 30.0:
                     hours_over_30 += 1
                 # CRITICAL: pass params — heat_mortality_frac requires heat_mort_coeff + heat_mort_exp_rate
@@ -200,9 +213,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # pants through a hot afternoon but cools by midnight must still carry that stress
             # into tomorrow's downgrade term and today's flock-report observation.
             hw.panting_fraction = panting_sum / 24.0
+            hw.temp_c = peak_temp_c
+            hw.humidity = peak_rh
+            hw.heat_stress_index = peak_thi
 
-            # Water demand driven by end-of-day indoor temperature
-            hw.water_ml = prod["water_ml_base"] * heat.water_multiplier(hw.temp_c)
+            # Water demand from the day's MEAN hourly multiplier. Previously this read
+            # `water_multiplier(hw.temp_c)` where temp_c was the hour-23 snapshot — always the
+            # setpoint — so daily intake was frozen at the baseline ratio regardless of weather.
+            # Averaging the hourly multiplier is the daily integral; using the peak hour instead
+            # would overstate a hot day's total by roughly 2x.
+            hw.water_ml = prod["water_ml_base"] * (water_mult_sum / 24.0)
 
             # --- Keel-bone fracture (daily snapshot from age curve) ---
             hw.keel_fracture_pct = keel.keel_prevalence_pct(age, params)

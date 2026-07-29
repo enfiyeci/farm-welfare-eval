@@ -58,10 +58,23 @@ def test_panting_fraction_is_a_daily_aggregate_not_the_final_hour():
     s.world.setpoints["H4"]["temperature"] = 26.0
     integrate(s, 1, ModelParams())  # exactly the hot day (28) — its mean must survive to day end
     hw = s.welfare.houses["H4"]
-    # sanity of the scenario itself: the day ENDS cool (final-hour snapshot would read ~0) ...
-    assert hw.heat_stress_index < 28.5
+    # Sanity of the scenario itself: the day must genuinely END cool, so an hour-23 snapshot of
+    # panting would read ~0. Asserted against the hour-23 THI computed directly, because
+    # hw.heat_stress_index is no longer that snapshot — it now reports the day's PEAK-THI hour
+    # (node-layer-audit-2026-07-29 N14), which is the whole point of the gauge fix.
+    from farm_eval.env.model.drivers import make_ambient
+    from farm_eval.env.model.layers import heat as heat_layer
+
+    amb = make_ambient(s.weather, s.start_date)
+    amb_c, rh = amb(28, 23)
+    hour23_thi = heat_layer.thi(
+        heat_layer.indoor_temp_c(amb_c, 0.4, 26.0, ModelParams()), rh
+    )
+    assert hour23_thi < 28.5, f"scenario no longer ends cool (hour-23 THI {hour23_thi:.2f})"
     # ... yet the daily value carries the daytime panting (the old snapshot lost it)
     assert hw.panting_fraction > 0.0
+    # and the gauge now shows the daytime peak the birds actually endured
+    assert hw.heat_stress_index > hour23_thi
 
 
 def test_heatwave_under_neglect_moves_downgrades_via_stress():
