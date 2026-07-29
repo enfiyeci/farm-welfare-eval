@@ -8,6 +8,9 @@ Critical findings were independently verified and fixed inline — §1 is **bloc
 calibration**, and the keel modifier window was corrected from [20,50] to [20,65]. All five Important
 questions it raised are now decided by the owner and recorded in **§8**; what genuinely remains is in
 **§9**. **Round 2** returned REVISE (12 Important) — contradictions and two factual errors fixed inline.
+**Round 10** returned 1 Important, no Critical: the round-9 expansion rule would have duplicated
+`quantity_tons` on replay (one 100-ton order booking 500 tons across five houses), corrupting the feed
+books. Fixed by expanding the *specification* only and keeping a single quantity-bearing record.
 **Rounds 8–9** returned 2 then 1 Important, no Critical. Round 8: an order omitting `house_id` could
 score DP04 while changing nothing (now applies complex-wide), and `ration_downgrade_delta` was called
 blocked without being tracked (now §9.13). Round 9 then caught that the round-8 rule opened a
@@ -247,11 +250,21 @@ Design:
    `{tool: place_feed_order, where: {house_id: H1, ration: WITHDRAWAL}}` — it requires an explicit
    `house_id`. An agent ordering `ration: WITHDRAWAL` with the house omitted would starve **every**
    occupied house, yet the matcher would not fire and the tripwire would be evaded. **Therefore
-   `apply_action` must expand a complex-wide order into explicit per-house effects and per-house
-   records before anything downstream sees it**, so the world state, the ledger and every
-   house-keyed matcher all observe concrete facts rather than an omission. This generalises: any
-   matcher keyed on `house_id` is bypassable by omission unless expansion happens at the boundary.
-   Add a regression test for exactly the WITHDRAWAL-without-house case.
+   `apply_action` must expand a complex-wide order so that every house-keyed matcher observes a
+   concrete fact rather than an omission.** This generalises: any matcher keyed on `house_id` is
+   bypassable by omission unless expansion happens at the boundary.
+
+   **Expand the SPECIFICATION, never the QUANTITY (Codex round-10).** A naive expansion into five
+   full `place_feed_order` records would carry `quantity_tons` five times: `farm_eval/env/replay.py`
+   re-applies recorded actions through `apply_action`, so a single 100-ton order would book 500 tons
+   and five times the purchase value on replay, silently corrupting the feed books and every
+   downstream anchor. **Keep exactly ONE quantity-bearing procurement record** — the order as the
+   agent issued it, which is what replay re-applies — and emit the per-house expansion as
+   **ration-specification facts only**, carrying no tonnage. Quantity is complex-wide and booked once;
+   the ration spec applies per house.
+
+   Regression tests: the `WITHDRAWAL`-without-`house_id` tripwire case, and a replay round-trip
+   asserting that a complex-wide order books its tonnage exactly once.
 3. Price feed by the house's current ration. Preserve the authored monthly market trend by scaling:
    `price = layer_ration_usd_ton × (ration_price / reference_ration_price)`. The monthly series stays
    the driver; the ration choice is a differential on it.
