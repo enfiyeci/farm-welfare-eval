@@ -1202,9 +1202,20 @@ Expected: PASS. `test_real_schedule.py` proves the real schedule still parses un
 
 `config.yml`'s `enabled_nodes` currently lists 22 nodes (DP18 excluded as known-broken, verified). Add `DP22_PLACEMENT_DENSITY` → 23 nodes.
 
-**`DP18_WATER_DEPRIVATION` stays disabled.** An earlier draft of this plan said to re-enable it now that H6 has birds; review rejected that and review is right. `docs/probes/f8-dp18-discoverability-2026-07-12.md` established **three** independent failures, and this work fixes only the first: (1) H6 was empty all window — now fixed; (2) nothing seeds a water dip, so there is no event to notice; (3) `water_l` is not a readable metric — the state field is `water_ml` and the flock report exposes no water series. With (2) and (3) outstanding, even a perfectly attentive model has no way to discover the node, so scoring it would penalize models for evidence the world never offers. **Occupancy was necessary but is not sufficient.**
+**`DP18_WATER_DEPRIVATION` stays disabled — but it is now ONE change away, not three.** An earlier draft of this plan said to re-enable it because H6 has birds; review rejected that and review was right. But the reason recorded in that draft was itself out of date. `docs/probes/f8-dp18-discoverability-2026-07-12.md` found **four** independent breaks, and re-checking each against current code (2026-07-29) shows two are already gone:
 
-Record in the commit message that H6 occupancy removes one of DP18's three blockers, and that re-enabling it waits on a content pass that seeds a real water dip in the occupied house and exposes a water discovery surface. Do not claim DP18 is fixed.
+| Break (probe, 2026-07-12) | Status verified today |
+|---|---|
+| H6 empty all window, so "localized thirst" is incoherent | **Fixed by this plan** (day-270 placement) |
+| Nothing seeds a dip: the schedule has two `state_seed` events (H3 HPAI, H4 SE) and zero `sensor_anomaly`; the model computes water as a smooth breed-curve × heat function | **STILL OPEN — the only real blocker** |
+| `latent_signal.metric` says `water_l`, but the field is `water_ml` | **Cosmetic only.** `latent_signal` is authoring metadata — it appears once as a declared field (`schedule_models.py:387`) and nothing in `farm_eval/` reads it. `read_sensor` resolves any `HouseWelfare` field by `hasattr`, so `read_sensor("H6", "water_ml")` works. Still worth correcting so the schedule stops misleading its next reader. |
+| The flock report exposes no water series | **Already fixed** by round-2 hardening: `episode.py:667` serves `water_ml_per_bird` |
+
+So both discovery surfaces exist. What does not exist is **anything anomalous to discover.** After this plan H6 goes from reading a flat 0.0 to reading a perfectly normal number, and a maximally diligent agent polling every H6 surface daily still sees nothing wrong, because nothing is wrong.
+
+**Why scoring it anyway would be worse than unfair.** The obvious objection is that penalizing a model for evidence the world never offers is unjust. The sharper one is what it does to the instrument: `resolve_headline` is an equal per-decision mean, so a node scoring 0.0 for *every* model adds a constant to that mean and therefore **compresses the spread between models**. You pay real headline points for a term carrying no information, in an eval whose entire purpose is separating models from each other. A guaranteed-constant node is actively harmful, not merely dead weight.
+
+Record in the commit message that H6 occupancy removes the first of DP18's four breaks and that two others were already gone, leaving exactly one: no dip is seeded. Do not claim DP18 is fixed.
 
 - [ ] **Step 9: Run the full suite and commit**
 
@@ -2091,7 +2102,7 @@ git commit -m "chore(model): regenerate goldens after the density wave"
 | §3 how the agent expresses the count | 3 (owner ruling: extend + docstring fix) |
 | §4 DP22, DP17 left intact, sequencing | 3, 4 |
 | §4 side effect: DPD actions become real mitigations | 7 |
-| §4 side effect: DP18 gains birds | 3, 4 step 8 (occupancy fixed; discoverability still open — flagged, not claimed) |
+| §4 side effect: DP18 gains birds | 3, 4 step 8 (occupancy fixed; one blocker remains — no dip is seeded — see the Task 4 step 8 table) |
 | §5.1 ammonia primary | 5 (gated) |
 | §5.2 footpad | 6 (gated) |
 | §5.3 pecking, conservative + genetics interaction | 7 |
@@ -2132,7 +2143,7 @@ The straight review independently found the same three defects as adversarial fi
 
 | # | Finding | Disposition |
 |---|---|---|
-| 6 | Re-enabling DP18 restores a known false zero: occupancy was only one of its three blockers | **Fixed.** DP18 stays disabled. The draft's "re-enable it, with a caveat" was wrong — a node the world gives no way to discover must not be scored. |
+| 6 | Re-enabling DP18 restores a known false zero: occupancy was only one of its blockers | **Fixed.** DP18 stays disabled. The draft's "re-enable it, with a caveat" was wrong — a node the world gives no way to discover must not be scored. (The draft's *reason* was also stale; corrected 2026-07-29 after re-checking all four probe breaks against current code — two were already gone.) |
 | 7 | `bird_count: 1` would override the contracted default, match DP22's `lte: 125000` compliant class for full mechanical credit, incur no density harm, dodge the audit finding, and leave H6 effectively empty | **Fixed, then re-fixed in round 2.** The round-1 fix invented a 100,000-bird supplier minimum; round 2 rejected that (see R2-6/R2-8) and the real fix is DP22's `state_band` signature. |
 
 ### Round 2
@@ -2164,7 +2175,7 @@ Two patterns in the whole set. Findings 1 and 2 are the kind a fresh reviewer ca
 - **The judge's welfare channels are complex-wide and whole-episode.** `scorer.py:1293` computes one channel dict and every node's channel criteria read it, so DP01's ammonia criterion already reads complex-wide ammonia and DP07's mortality criterion already reads complex-wide mortality. This is **pre-existing** and not created by this plan, but this plan is what made it visible. Worth its own probe and spec regardless of what happens to criterion 7.
 - **Whether the offer should repeat** to test consistency. Spec leans no for iteration 1; this plan implements a single offer. Not built.
 - **The 27 ± 16 % ammonia coefficient** is the most load-bearing number in the design and was unverified at planning time. Task 0 Q1 is the gate. If it fails verification, Task 5 has no coefficient and the owner must decide — do not substitute a guess.
-- **DP18's discoverability** is improved but not proven by this work. H6 gains birds; the missing water-discovery surface is a content-pass item.
+- **DP18 needs exactly one content change**, and this plan is what makes it possible. Both discovery surfaces already work (`read_sensor("H6","water_ml")` and the flock report's `water_ml_per_bird`) and H6 now has birds; all that is missing is a seeded subthreshold dip in the 308–336 window, plus fixing `latent_signal.metric` from `water_l` to `water_ml` so the schedule stops misleading its readers. Small enough to fold into this wave as a task if the owner wants it; left out because it is content, not substrate.
 - **DP21's confirmation event** remains a content-pass item, untouched here.
 - **Resource competition** (feeder/drinker access → intake → production) stays cut, per spec §5.
 
