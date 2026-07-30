@@ -64,32 +64,52 @@ def test_two_week_interval_stays_within_measured_no_removal_ceiling():
     assert _eq_belt(14) <= 47.4
 
 
-def test_the_weekly_belt_anchor_holds_only_at_the_calibrated_litter_age():
-    """KNOWN RESIDUAL — pinned deliberately, NOT fixed by the N2 bound.
+def test_the_litter_age_term_contradicts_its_own_source_measurement():
+    """OPEN CALIBRATION DEFECT, characterised here and awaiting an owner decision.
 
-    The 32-38 ppm aviary band is calibrated at litter_age=60 d. But `litter_age_days`
-    only ever increments: it is seeded from corpus and advanced +1/day in integrate.py,
-    and NO action in the codebase resets it (only a flock placement would). So by day 518
-    a house carries ~578-day litter and the same weekly-belt equilibrium reaches ~90 ppm,
-    far outside the cited measurement.
+    This is NOT the benign residual an earlier version of this test claimed. Round-2
+    review disproved that, and the numbers below are the evidence.
 
-    The driver is `nh3_litter_coeff * litter_age_days` — a SEPARATE unbounded
-    extrapolation, of exactly the same species as the f_MAT defect this task fixed: a
-    coefficient calibrated over a short horizon and then evaluated far outside it. N2's
-    ceiling catches the extreme, but between ~47 and 100 ppm the layer is likely
-    overstating late-cycle ammonia.
+    The source says: litter with NO removal for two years reaches only **9.2-47.4 ppm**.
+    The model's closest analogue -- 730-day litter with unmanaged belts, mild conditions --
+    returns **100 ppm**, more than double the measured ceiling. So the layer contradicts
+    the very measurement the d=14 anchor was calibrated against.
 
-    Bounding it is a distinct change with its own golden movement and needs a sourced
-    long-horizon coefficient, so it is recorded rather than fixed here. This test pins the
-    behaviour so it cannot drift silently, and fails loudly if someone bounds the litter
-    term without updating docs/model-params.md.
+    `test_two_week_interval_stays_within_measured_no_removal_ceiling` passes only because
+    it evaluates at litter_age=60 -- the right band checked against the wrong condition.
+
+    Cause: `nh3_litter_coeff * litter_age_days` is unbounded. `litter_age_days` only ever
+    increments (seeded from corpus, +1/day at integrate.py:275, no reset path anywhere in
+    the codebase -- only a flock placement would reset it). It is the same species of
+    defect as the f_MAT extrapolation this task fixed: a coefficient calibrated over a
+    short horizon then evaluated far outside it.
+
+    It also has a user-visible consequence: it drives emission to the ceiling in ORDINARY
+    play (belt_interval_days=10, adequate staffing, late episode, winter), where the
+    ventilation lever then goes flat from 1.0 to 2.0 -- see the assertion below.
+
+    Fixing it is a real recalibration with its own golden movement and needs a sourced
+    long-horizon coefficient, so it is characterised rather than silently patched.
     """
     params = ModelParams()
-    late = _eq_belt(7, litter_age=578.0)
-    assert 85.0 <= late <= 95.0, "late-cycle weekly-belt equilibrium moved; update the record"
-    assert late <= params.nh3_ceiling_ppm
-    # The default 2-day interval stays physical even at end-of-episode litter age, which
-    # is why this is a residual rather than a blocker for the density wave.
+
+    # The contradiction, stated plainly.
+    two_year_analogue = _eq_belt(14, litter_age=730.0)
+    assert two_year_analogue > 47.4, (
+        "If this now passes under 47.4 the defect has been fixed -- delete this test and "
+        "update docs/model-params.md and the d=14 anchor's condition."
+    )
+
+    # Reachable in ordinary play, not only in the triple-extreme state. Compared with a
+    # tolerance because the first-order relaxation approaches the rail asymptotically and
+    # settles at 99.99999999999997, never exactly at it.
+    flat_lo = _eq_belt(10, litter_age=518.0, ventilation=1.0, ambient_c=-8.0)
+    flat_hi = _eq_belt(10, litter_age=518.0, ventilation=2.0, ambient_c=-8.0)
+    assert abs(flat_lo - flat_hi) < 1e-9
+    assert abs(flat_lo - params.nh3_ceiling_ppm) < 1e-9
+
+    # What still works, and why the density wave is not blocked on this: the DEFAULT
+    # 2-day interval stays physical even at end-of-episode litter age.
     assert _eq_belt(2, litter_age=578.0) < 25.0
 
 
@@ -109,7 +129,9 @@ def test_belt_lever_stays_strictly_monotone_across_every_reachable_interval():
     # discriminating. Fractional values are included because integrate.py passes
     # belt_days_eff = belt_days * (1 + staffing_u * staffing_belt_lag_max), so the setpoint
     # bound of 14 becomes an effective 56 under fully collapsed staffing.
-    days = [1, 2, 3, 4, 5, 6, 7, 10, 14, 17.5, 28.0, 42.0, 56.0]
+    # Dense sampling INCLUDING fractional low intervals: staffing inadequacy is continuous,
+    # so belt_days_eff takes fractional values everywhere, not just at the sampled integers.
+    days = [1 + 0.1 * i for i in range(0, 131)] + [14.5, 17.5, 21.0, 28.0, 42.0, 56.0]
     values = [_eq_belt(d) for d in days]
     for lo, hi in zip(values, values[1:]):
         assert hi > lo, f"belt lever flat or inverted between {lo:.4f} and {hi:.4f}"
@@ -138,6 +160,12 @@ def test_a_legacy_over_ceiling_concentration_is_pulled_under_the_rail_immediatel
     params = ModelParams()
     out = ammonia_step(1000.0, 60.0, 20.0, 1.0, 18.0, 2, params)
     assert out <= params.nh3_ceiling_ppm
+    # ...and the agent's ventilation must still matter on that first day. Clamping AFTER
+    # relaxation collapsed every legacy step to exactly the ceiling, so vent=0 and vent=5
+    # were indistinguishable.
+    calm = ammonia_step(1000.0, 60.0, 20.0, 0.0, 18.0, 2, params)
+    airy = ammonia_step(1000.0, 60.0, 20.0, 5.0, 18.0, 2, params)
+    assert airy < calm
 
 
 def test_calibrated_domain_is_byte_identical():

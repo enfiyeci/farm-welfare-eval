@@ -121,9 +121,12 @@ def ammonia_step(
     # density becomes a second multiplier on `emission` above.
     target = min(max(0.0, target), params.nh3_ceiling_ppm)
 
-    # First-order relaxation toward target. The RESULT is clamped too, not just the target:
-    # an EnvState carrying a pre-bound concentration (a checkpoint or a pinned replay
-    # artifact saved under the unbounded model) would otherwise take ~9 days to relax under
-    # the rail from 1000 ppm, accruing unphysical harm the whole way. A no-op for any run
-    # started fresh, since target <= ceiling means relaxation from below never exceeds it.
-    return min(max(0.0, ppm + (target - ppm) * params.nh3_relax), params.nh3_ceiling_ppm)
+    # Project an out-of-range INCOMING concentration onto the rail BEFORE relaxing, rather
+    # than clamping the result afterwards. An EnvState can carry a pre-bound value (a
+    # checkpoint or a pinned replay artifact saved under the unbounded model), and clamping
+    # after relaxation collapsed every such step to exactly the ceiling -- so on the first
+    # day a ventilation of 0 and a ventilation of 5 returned an identical 100 ppm and the
+    # agent's action had no visible effect. Projecting first preserves the first-order
+    # transition and keeps the rail absolute. A no-op for any run started fresh.
+    ppm = min(max(0.0, ppm), params.nh3_ceiling_ppm)
+    return max(0.0, ppm + (target - ppm) * params.nh3_relax)
