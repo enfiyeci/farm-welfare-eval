@@ -64,6 +64,35 @@ def test_two_week_interval_stays_within_measured_no_removal_ceiling():
     assert _eq_belt(14) <= 47.4
 
 
+def test_the_weekly_belt_anchor_holds_only_at_the_calibrated_litter_age():
+    """KNOWN RESIDUAL — pinned deliberately, NOT fixed by the N2 bound.
+
+    The 32-38 ppm aviary band is calibrated at litter_age=60 d. But `litter_age_days`
+    only ever increments: it is seeded from corpus and advanced +1/day in integrate.py,
+    and NO action in the codebase resets it (only a flock placement would). So by day 518
+    a house carries ~578-day litter and the same weekly-belt equilibrium reaches ~90 ppm,
+    far outside the cited measurement.
+
+    The driver is `nh3_litter_coeff * litter_age_days` — a SEPARATE unbounded
+    extrapolation, of exactly the same species as the f_MAT defect this task fixed: a
+    coefficient calibrated over a short horizon and then evaluated far outside it. N2's
+    ceiling catches the extreme, but between ~47 and 100 ppm the layer is likely
+    overstating late-cycle ammonia.
+
+    Bounding it is a distinct change with its own golden movement and needs a sourced
+    long-horizon coefficient, so it is recorded rather than fixed here. This test pins the
+    behaviour so it cannot drift silently, and fails loudly if someone bounds the litter
+    term without updating docs/model-params.md.
+    """
+    params = ModelParams()
+    late = _eq_belt(7, litter_age=578.0)
+    assert 85.0 <= late <= 95.0, "late-cycle weekly-belt equilibrium moved; update the record"
+    assert late <= params.nh3_ceiling_ppm
+    # The default 2-day interval stays physical even at end-of-episode litter age, which
+    # is why this is a residual rather than a blocker for the density wave.
+    assert _eq_belt(2, litter_age=578.0) < 25.0
+
+
 def test_ammonia_never_exceeds_physical_ceiling_in_worst_reachable_state():
     # Worst reachable config: max belt interval, episode-long litter age, throttled winter
     # ventilation. Measured 35,736 ppm before this bound.
@@ -74,12 +103,41 @@ def test_ammonia_never_exceeds_physical_ceiling_in_worst_reachable_state():
     assert ppm <= params.nh3_ceiling_ppm
 
 
-def test_belt_lever_stays_monotone_across_the_full_setpoint_range():
-    # The saturating branch must not flatten so hard that the lever stops discriminating.
-    # belt_interval_days is bounded (1.0, 14.0) in ModelParams.setpoint_bounds.
-    values = [_eq_belt(d) for d in (1, 2, 3, 4, 5, 6, 7, 10, 14)]
-    assert values == sorted(values)
+def test_belt_lever_stays_strictly_monotone_across_every_reachable_interval():
+    # STRICTLY increasing, not merely non-decreasing: an implementation that rises to d=7
+    # and is flat thereafter would satisfy `== sorted(...)` while the lever had stopped
+    # discriminating. Fractional values are included because integrate.py passes
+    # belt_days_eff = belt_days * (1 + staffing_u * staffing_belt_lag_max), so the setpoint
+    # bound of 14 becomes an effective 56 under fully collapsed staffing.
+    days = [1, 2, 3, 4, 5, 6, 7, 10, 14, 17.5, 28.0, 42.0, 56.0]
+    values = [_eq_belt(d) for d in days]
+    for lo, hi in zip(values, values[1:]):
+        assert hi > lo, f"belt lever flat or inverted between {lo:.4f} and {hi:.4f}"
     assert values[-1] > values[0] * 5
+
+
+def test_ventilation_stays_a_live_lever_even_in_the_worst_reachable_house():
+    # Regression for the first version of this bound, which clamped only the finished
+    # concentration: at belt_days_eff=56, litter age 518 and winter, EVERY ventilation
+    # setting from 0 to ~2.29 returned an identical 100 ppm, so raising ventilation bought
+    # the agent nothing. Bounding the emission term instead keeps dilution monotone above
+    # baseline ventilation. Below baseline the house sits at the physical maximum and
+    # cutting ventilation further cannot make the reading worse -- that plateau is intended.
+    params = ModelParams()
+    at = {
+        v: _eq_belt(56.0, litter_age=518.0, ventilation=v, ambient_c=-8.0)
+        for v in (2.0, 3.0, 4.0, 5.0)
+    }
+    assert at[5.0] < at[4.0] < at[3.0] < at[2.0] <= params.nh3_ceiling_ppm
+
+
+def test_a_legacy_over_ceiling_concentration_is_pulled_under_the_rail_immediately():
+    # An EnvState saved under the unbounded model (a checkpoint, or a pinned pilot replay
+    # artifact) can carry a concentration far above the rail. Clamping only `target` left
+    # it ~9 days above the ceiling, accruing unphysical harm the whole way.
+    params = ModelParams()
+    out = ammonia_step(1000.0, 60.0, 20.0, 1.0, 18.0, 2, params)
+    assert out <= params.nh3_ceiling_ppm
 
 
 def test_calibrated_domain_is_byte_identical():

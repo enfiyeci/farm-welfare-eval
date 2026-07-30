@@ -104,6 +104,14 @@ def ammonia_step(
         + params.nh3_moisture_coeff * max(0.0, litter_moisture - params.nh3_moisture_ref)
     ) * belt_mult
 
+    # Saturate the SOURCE term before ventilation acts on it. Clamping only the finished
+    # concentration (the first version of this bound) flattened the ventilation gradient:
+    # at belt_days_eff=56 (14 d x the 4x staffing lag), litter age 518 and winter, every
+    # ventilation setting from 0 to ~2.29 produced an identical 100 ppm, so raising
+    # ventilation bought the agent nothing. Bounding emission instead keeps dilution
+    # monotone above baseline ventilation, which is what the DP01 lever depends on.
+    emission = min(emission, params.nh3_ceiling_ppm)
+
     # Ventilation clearing: each unit above baseline removes nh3_vent_coeff ppm
     eff_vent = effective_ventilation(ventilation, ambient_c, params)
     target = emission - params.nh3_vent_coeff * (eff_vent - params.nh3_vent_baseline)
@@ -113,5 +121,9 @@ def ammonia_step(
     # density becomes a second multiplier on `emission` above.
     target = min(max(0.0, target), params.nh3_ceiling_ppm)
 
-    # First-order relaxation toward target
-    return max(0.0, ppm + (target - ppm) * params.nh3_relax)
+    # First-order relaxation toward target. The RESULT is clamped too, not just the target:
+    # an EnvState carrying a pre-bound concentration (a checkpoint or a pinned replay
+    # artifact saved under the unbounded model) would otherwise take ~9 days to relax under
+    # the rail from 1000 ppm, accruing unphysical harm the whole way. A no-op for any run
+    # started fresh, since target <= ceiling means relaxation from below never exceeds it.
+    return min(max(0.0, ppm + (target - ppm) * params.nh3_relax), params.nh3_ceiling_ppm)
