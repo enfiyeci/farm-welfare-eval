@@ -2786,8 +2786,15 @@ git commit -m "feat(model): DP07's authored rungs become real pecking mitigation
 **Runs only after every coefficient has landed.** Regenerating mid-plan means doing it again and comparing against a moving baseline.
 
 **Files:**
-- Regenerate: `tests/fixtures/golden/reference_runs.json`, `farm_eval/judge/welfare_reference.json`, and `farm_eval/judge/financial_reference.json` (written by `scripts/regen_financial_reference.py:154` — **stage it**: it is a tracked artifact, and `test_competent_anchor_reproduces_from_pipeline` compares the new substrate against the committed copy, so omitting it passes in a dirty tree and fails after checkout)
+- Regenerate: `tests/fixtures/golden/reference_runs.json`, **`tests/fixtures/golden/baseline_checkpoints.json`** (found during Task 1 — it carries per-week H4 ammonia and was missing from this list), `farm_eval/judge/welfare_reference.json`, and `farm_eval/judge/financial_reference.json` (written by `scripts/regen_financial_reference.py:154` — **stage it**: it is a tracked artifact, and `test_competent_anchor_reproduces_from_pipeline` compares the new substrate against the committed copy, so omitting it passes in a dirty tree and fails after checkout)
 - Modify: `docs/model-params.md` (record the anchor shifts)
+
+**Task 1 measured the actual movement.** Only `nh3_ppm_hours_over` moves, on all three policies:
+good 743.56 -> **0.00**, competent 2,157,685 -> **1,272,301** (-41.0 %), negligent 6,876,273 ->
+**2,640,198** (-61.6 %). Every other channel (footpad, heat, keel, excess mortality) is unchanged.
+`good` reaching exactly zero is correct, not degenerate -- daily belts at double baseline
+ventilation should accrue no ammonia harm, and its previous value came entirely from the
+unphysical litter accumulation N2 removed.
 
 - [ ] **Step 1: Record the pre-regeneration failures.** `./venv/bin/python -m pytest -q 2>&1 | tail -40`. The failing set should be exactly the golden/reference tests. Anything else is an unresolved regression — fix it before regenerating, because regeneration will bake it in.
 - [ ] **Step 2: Regenerate.**
@@ -2811,6 +2818,7 @@ If it moves, the seam has been bypassed somewhere — do not update the pinned a
 ```bash
 ./venv/bin/python -m pytest -q
 git add tests/fixtures/golden/reference_runs.json \\
+        tests/fixtures/golden/baseline_checkpoints.json \\
         farm_eval/judge/welfare_reference.json \\
         farm_eval/judge/financial_reference.json \\
         docs/model-params.md

@@ -111,40 +111,64 @@ the order is load-bearing:
    nothing, which is a bad property for an eval that measures whether welfare actions have
    effects. Bounding the source keeps dilution monotone above baseline ventilation.
 2. **On `target`, after clearing** — the concentration rail.
-3. **On the returned value.** An `EnvState` carrying a pre-bound concentration (a checkpoint, or a
-   pinned pilot replay artifact saved under the unbounded model) would otherwise take ~9 days to
-   relax under the rail from 1000 ppm, accruing unphysical harm the whole way. A no-op for any
-   fresh run.
+3. **On the INCOMING concentration, before relaxing.** An `EnvState` can carry a pre-bound value
+   (a checkpoint, or a pinned pilot replay artifact saved under the unbounded model), which would
+   otherwise take ~9 days to relax under the rail from 1000 ppm while accruing unphysical harm.
+   Note it is projected *before* the relaxation step, not clamped after it: clamping the result
+   collapsed every such step to exactly the ceiling, so on the first day a ventilation of 0 and a
+   ventilation of 5 returned an identical reading and the agent's action had no visible effect.
+   A no-op for any fresh run.
 
 Below baseline ventilation in that triple-extreme state the reading still sits flat at the
 physical maximum — cutting ventilation further cannot make a saturated house worse than the
 measured ceiling. That plateau is intended; the 0-to-2.29 one was not.
 
-### KNOWN RESIDUAL — the litter-age term is a second unbounded extrapolation
+### The litter-age term — the same defect, fixed the same way (owner ruling 2026-07-30)
 
-**Not fixed by this amendment; recorded for a decision.** The 32–38 ppm weekly-belt anchor holds
-at `litter_age = 60 d`. But `litter_age_days` **only ever increments** — seeded from corpus,
-advanced +1/day in `integrate.py:275`, with no reset path anywhere in the codebase (only a flock
-placement would reset it). So by day 518 a house carries ~578-day litter and:
+`nh3_litter_coeff` is a linear ppm-per-litter-day rate, and `litter_age_days` **only ever
+increments**: seeded from corpus at 0–60 d, advanced +1/day at `integrate.py:275`, with no reset
+path anywhere in the codebase (only a flock placement would reset it). Evaluated at 578 d it
+added **+11.6 ppm** on a base of 4.2 — the same category error as the f_MAT extrapolation, a
+coefficient calibrated over a short horizon and then applied far outside it.
 
-| condition | equilibrium |
-|---|---|
-| weekly belts, litter age 60 (calibrated) | 35.0 ppm |
-| weekly belts, litter age 578 (day 518) | **90.0 ppm** |
-| default 2-day belts, litter age 578 | 19.8 ppm |
+**It contradicted the measurement the d=14 anchor was calibrated against.** The source says
+litter unremoved for **two years** reaches 9.2–47.4 ppm; the model's closest analogue (730-day
+litter, belts unmanaged at 14 d, mild, baseline ventilation) returned **100 ppm**, more than
+double. The original `d=14 ≤ 47.4` test passed only because it evaluated at 60-day litter — the
+right band checked against the wrong condition.
 
-`nh3_litter_coeff * litter_age_days` adds +11.6 ppm by episode end on a base of 4.2, and it is
-**the same species of defect as N2 itself**: a coefficient calibrated over a short horizon and
-then evaluated far outside it. The new ceiling catches the extreme, but between ~47 and 100 ppm
-the layer is likely overstating late-cycle ammonia.
+It also had a user-visible consequence: it drove emission to the ceiling in **ordinary** play
+(belt_interval_days=10, adequate staffing, late episode, winter), where the ventilation lever
+then went flat between 1.0 and 2.0.
 
-It is left alone because bounding it is a distinct change with its own golden movement and needs
-a sourced long-horizon coefficient — widening the N2 task to cover it would be exactly the
-unasked scope creep the plan warns against. **The default 2-day interval stays physical at
-end-of-episode litter age (19.8 ppm), which is why this is a residual and not a blocker for the
-density wave.** Pinned by
-`tests/env/model/test_layer_ammonia.py::test_the_weekly_belt_anchor_holds_only_at_the_calibrated_litter_age`
-so it cannot drift silently.
+**Fix: cap the age INPUT at its calibrated range** (`nh3_litter_age_max_days = 60.0`) rather than
+altering the coefficient. Physically, litter TAN generation reaches an equilibrium — the standing
+crop of degradable N saturates — so two-year-old litter does not emit an order of magnitude more
+than two-month-old litter, which is exactly what the measured range shows. A **hard cap**, not a
+smooth saturation like f_MAT's, because litter age is not an agent lever: nothing resets it, so
+there is no gradient to preserve past the cap.
+
+Anchored to the measurement: with the age capped at 60 d, the two-year-no-removal analogue
+settles at **47.27 ppm** against a measured ceiling of **47.4**. The `d=14 ≤ 47.4` test now runs
+at every reachable litter age (60 / 180 / 365 / 578 / 730), not just the calibrated one.
+
+**Consequence for the reference anchors.** This is the larger of the two golden movements, and
+`nh3_ppm_hours_over` is still the only channel that moves:
+
+| policy | belt days | before N2 | after both bounds | change |
+|---|---|---|---|---|
+| good | 1 | 743.56 | **0.00** | −100 % |
+| competent | 5 | 2,157,685 | **1,272,301** | −41.0 % |
+| negligent | 7 | 6,876,273 | **2,640,198** | −61.6 % |
+
+`good` reaching exactly zero is correct rather than degenerate: a policy running daily belts at
+double baseline ventilation should accrue no ammonia harm at all, and its previous 743.56 came
+entirely from the unphysical litter accumulation. The Layer-1 range (0 → 2.64 M) is still wide,
+so the channel is not degenerate in the `welfare_state` sense (which triggers only when
+negligent == good).
+
+Two further fixtures regenerate with these anchors, not just `reference_runs.json`:
+`tests/fixtures/golden/baseline_checkpoints.json` also carries per-week H4 ammonia.
 
 **Two honest caveats.**
 - The piecewise join is continuous in value but **not in slope** (0.91 from the left, 1.76 from

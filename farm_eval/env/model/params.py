@@ -42,6 +42,21 @@ class ModelParams(BaseModel):
     # emission term). f_max/sat_rate were fitted to the d=7 anchor alone; d=14 landing at
     # 47.3 ppm against an independent 47.4 measured ceiling is a consistency check, not a
     # second fitted target.
+    # The SAME defect in the litter term (owner ruling 2026-07-30: fix it the same way).
+    # nh3_litter_coeff is a linear ppm-per-litter-day rate, and litter_age_days only ever
+    # increments -- seeded from corpus (0-60 d) and advanced +1/day in integrate.py, with no
+    # reset path anywhere in the codebase. Evaluated at 578 d it added +11.6 ppm on a base of
+    # 4.2 and drove the layer to the ceiling in ORDINARY play, which also flattened the
+    # ventilation lever. That is the same category error as the f_MAT extrapolation: a
+    # coefficient calibrated over a short horizon applied far outside it.
+    # The age INPUT is therefore capped rather than the coefficient changed. 60 d is the
+    # top of the corpus-seeded range and is anchored to the measurement: with the age capped
+    # there, the two-year-no-removal analogue (litter 730 d, belts unmanaged at 14 d, mild,
+    # baseline ventilation) settles at 47.3 ppm against a measured ceiling of 47.4.
+    # A hard cap rather than a smooth saturation because litter age is NOT an agent lever --
+    # nothing resets it, so there is no gradient to preserve past the cap (unlike f_MAT,
+    # where the belt interval must keep discriminating).
+    nh3_litter_age_max_days: float = 60.0   # cap on the litter-age input to the emission term
     nh3_fmat_domain_max: float = 4.0    # upper edge of the Wageningen-validated belt-days domain
     nh3_fmat_max: float = 6.35          # f_MAT asymptote beyond the validated domain
     nh3_fmat_sat_rate: float = 0.444    # saturation rate k (per belt-day past the domain edge)

@@ -97,10 +97,15 @@ def ammonia_step(
     # Belt manure-accumulation-time multiplier (f_MAT); belt_days=1 → multiplier=1.0
     belt_mult = fmat(belt_days, params)
 
-    # Total emission target ppm from both litter and belt sources
+    # Total emission target ppm from both litter and belt sources. The litter-age input is
+    # capped at its calibrated range (see nh3_litter_age_max_days): litter TAN generation
+    # reaches an equilibrium -- the standing crop of degradable N saturates -- so two-year-old
+    # litter does not emit an order of magnitude more than two-month-old litter, which is
+    # exactly what the measured 9.2-47.4 ppm range for unremoved litter shows.
+    effective_litter_age = min(litter_age_days, params.nh3_litter_age_max_days)
     emission = (
         params.nh3_target_base
-        + params.nh3_litter_coeff * litter_age_days
+        + params.nh3_litter_coeff * effective_litter_age
         + params.nh3_moisture_coeff * max(0.0, litter_moisture - params.nh3_moisture_ref)
     ) * belt_mult
 

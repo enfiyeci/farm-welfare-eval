@@ -275,9 +275,16 @@ def test_state_band_resolves_to_band_at_window_close():
 
 
 def test_state_band_records_deadline_band_not_next_beat():
-    # litter 380 -> ammonia ~24 (marginal) at the day-40 deadline; by the next beat the model
-    # drifts it into harm. The deadline band must be the one recorded.
-    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0)
+    # Reduced ventilation (0.65) holds H4's ammonia at ~21 ppm -- inside the marginal band
+    # (15-25) -- so the DP resolves to `marginal` when its day-40 deadline comes due.
+    #
+    # The fixture used to reach the marginal band via litter=380, relying on the litter-age
+    # term to inflate emission. That term is now capped at its calibrated range
+    # (nh3_litter_age_max_days; see the N2 amendment in docs/model-params.md), so litter age
+    # no longer moves the band and the dial moved to ventilation. `litter` is left at 380 to
+    # document that: if the cap were ever removed this test would start failing again.
+    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0,
+                          ventilation=0.65)
     env.start()
 
     env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal)
