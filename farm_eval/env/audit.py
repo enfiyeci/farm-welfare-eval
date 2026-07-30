@@ -13,12 +13,13 @@ LIVE bird count. The UEP figure is a FLOOR: a violation is sq in/hen BELOW the m
 
 from __future__ import annotations
 
+from farm_eval.env.density import space_sq_in_per_hen
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import EnvState
 
 
 def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
-    house_area_sq_in = float(corpus.company["audit_thresholds"]["house_area_sq_in"])
+    corpus_area = float(corpus.company["audit_thresholds"]["house_area_sq_in"])
     snap: dict[str, dict[str, float]] = {}
     for hid, hw in state.welfare.houses.items():
         birds = state.world.bird_count.get(hid, 0)
@@ -27,7 +28,13 @@ def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
         row = {
             "ammonia_ppm": hw.ammonia_ppm,
             "litter_moisture": hw.litter_moisture,
-            "space_sq_in_per_hen": house_area_sq_in / birds,
+            "space_sq_in_per_hen": space_sq_in_per_hen(
+                # Prefer the LIVE per-house area so a usable-area retrofit shows up at
+                # audit. Falls back to the corpus constant for states serialized before
+                # world.usable_area_sq_in existed (the pinned pilot replay artifacts).
+                state.world.usable_area_sq_in.get(hid) or corpus_area,
+                birds,
+            ),
         }
         snap[hid] = row
     state.audit_snapshot = snap

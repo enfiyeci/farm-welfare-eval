@@ -204,6 +204,16 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world.bird_count[hid] = int(house["bird_count"])
         world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))
         world.placement_day[hid] = -int(round((float(house.get("age_wk_at_start", 0.0)) - 17.0) * 7))
+        # Usable floor area is corpus-owned and identical across the six houses (world-bible
+        # §3). It is the SAME key the audit grades against, so the density the agent reads and
+        # the space-per-hen the auditor writes up cannot drift apart.
+        # OPTIONAL by design: the test-fixture corpora carry no `audit_thresholds` block, and
+        # requiring it here would make every fixture-based test die on a KeyError. A corpus
+        # without it simply gets no derived density -- integrate.py's `area > 0` guard then
+        # leaves the authored value alone.
+        house_area = (company.get("audit_thresholds") or {}).get("house_area_sq_in")
+        if house_area is not None:
+            world.usable_area_sq_in[hid] = float(house_area)
     state = EnvState(
         day_index=0,
         start_date=company["start_date"],

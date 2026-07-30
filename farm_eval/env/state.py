@@ -94,6 +94,12 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
+    # Usable floor area per house (sq in), seeded from the corpus house-area constant.
+    # Lives in state rather than being read from corpus at each use site because it is
+    # MUTABLE: a usable-area retrofit (an added tier or platform) raises it mid-episode.
+    # Absent for any EnvState serialized before this field existed -- consumers must treat
+    # a missing entry as "unknown", never as zero area (see model/integrate.py).
+    usable_area_sq_in: dict[str, float] = Field(default_factory=dict)
     # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
     # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
     # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.

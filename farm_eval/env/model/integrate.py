@@ -18,6 +18,7 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 """
 from __future__ import annotations
 
+from farm_eval.env.density import space_sq_in_per_hen
 from farm_eval.env.state import EnvState, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
@@ -81,6 +82,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             birds = state.world.bird_count.get(hid, 0)
             if birds <= 0:
                 continue  # empty house — skip entirely, no harm, no div-by-zero
+
+            # Density is DERIVED, never seeded (audit N20: the seeded field was unchanged at
+            # day 518 after ~148k deaths). Written before the harm layers below so every
+            # pathway that reads it sees today's value rather than yesterday's.
+            # The `> 0` guard is load-bearing: `usable_area_sq_in` is absent from any
+            # EnvState serialized before it existed (play autosaves, adapter checkpoints, the
+            # pinned pilot replay artifacts), and deriving 0.0 from a missing area would
+            # silently overwrite the authored density with nonsense.
+            area = state.world.usable_area_sq_in.get(hid, 0.0)
+            if area > 0.0:
+                hw.stocking_density = space_sq_in_per_hen(area, birds)
 
             age = flock_age_weeks(state.world.age_weeks_at_start.get(hid, 0.0), day)
             sp = state.world.setpoints.get(hid, {})
