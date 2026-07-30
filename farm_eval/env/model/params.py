@@ -31,6 +31,22 @@ class ModelParams(BaseModel):
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
     nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
 
+    # N2 bound (probe docs/probes/node-layer-audit-2026-07-29.md; research
+    # docs/research/2026-07-29-stocking-density.md). The f_MAT quadratic above is a
+    # Wageningen fit over belt_days 1-4; extrapolated to 14 it returns a multiplier of
+    # ~2143 and this layer reaches ~35,700 ppm. Measured reality: aviary weekly belts
+    # 32-38 ppm, litter unremoved for two years 9.2-47.4 ppm, worst case in ANY system
+    # ~85-100 ppm (deep litter with indoor manure storage). Beyond the validated domain
+    # f_MAT saturates toward nh3_fmat_max; nh3_ceiling_ppm is the absolute rail (and what
+    # keeps the layer physical once stocking density becomes a second multiplier on the
+    # emission term). f_max/sat_rate were fitted to the d=7 anchor alone; d=14 landing at
+    # 47.3 ppm against an independent 47.4 measured ceiling is a consistency check, not a
+    # second fitted target.
+    nh3_fmat_domain_max: float = 4.0    # upper edge of the Wageningen-validated belt-days domain
+    nh3_fmat_max: float = 6.35          # f_MAT asymptote beyond the validated domain
+    nh3_fmat_sat_rate: float = 0.444    # saturation rate k (per belt-day past the domain edge)
+    nh3_ceiling_ppm: float = 100.0      # max in-house NH3 concentration measured in any system
+
     # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
     # Parallel lists keyed by age in weeks; used by layers/production.py
     breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]

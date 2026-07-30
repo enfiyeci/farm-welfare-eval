@@ -41,13 +41,78 @@ E_total = E_ref * exp(0.0076*(RI_h - RI_ref))     # +0.76% per hour of manure-re
                 * exp(0.0032*(LWC - LWC_ref))      # +0.32% per +1 g/kg litter water
                 * exp(1.03*(v_litter - v_ref))     # +103% per +1 m/s air velocity over litter
 ```
-Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.05, 1.39, 1.89}` (≈ `exp(0.20*(d-1) + 0.03*(d-1)^2)`).
+Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.05, 1.39, 1.89}` (≈ `exp(0.20*(d-1) + 0.03*(d-1)^2)`). **Domain is 1–4 d; see the 2026-07-30 amendment below for what happens past it.**
+
+> **Pre-existing discrepancy, flagged not fixed (2026-07-30).** The tabulated values above do
+> not match the formula beside them: `exp(0.20*(d-1) + 0.03*(d-1)^2)` gives
+> `{1.00, 1.26, 1.65, 2.39}`, which is what `layers/ammonia.py::fmat` computes and what the
+> module docstring states. Left as-is because the tabulated figures may come from a source not
+> to hand, and correcting them is outside the N2 change. **Trust the formula and the code, not
+> the table**, and reconcile in a future pass.
 Litter TAN generation: **+4%/°C, +4% per 0.1 pH, +4% per 10 g/kg water.**
 
 **Clearing — two distinct effects (don't conflate):**
 - System change (high-rise → belts): ~**8–10×** lower (316 vs 38 g/AU-day) — this is where "~10×" applies.
 - Same-cycle belt clearance with litter remaining: immediate drop only ~**28.6%** (aviary) → use `E_belt <- r_clear * E_belt`, `r_clear ≈ 0.71` for aviary. With daily belt removal + forced litter drying, aviary exhaust can fall **<5 ppm** (~2.0 mg/h/hen by ~30 wk).
 - Ventilation clearing timescale: `t_63 ≈ 1/ACH`, `t_90 ≈ 2.3/ACH` (same-day / within next ventilation cycle; no universal minute constant).
+
+### Amendment 2026-07-30 — the f_MAT bound (defect N2)
+
+**The defect.** `f_MAT` above is a Wageningen fit over belt_days **1–4**. `belt_interval_days`
+is a live agent setpoint bounded `(1.0, 14.0)`, and the quadratic was being evaluated across
+that whole range. At d=14 it returns a multiplier of ~**2143**, and the layer reached
+**~35,700 ppm** in the worst reachable state (aged litter, throttled winter ventilation).
+Probe: `docs/probes/node-layer-audit-2026-07-29.md` (N2).
+
+**Measured reality** (`docs/research/2026-07-29-stocking-density.md`):
+
+| system | measured NH₃ |
+|---|---|
+| aviary, weekly belt removal | **32–38 ppm** |
+| litter with NO removal for two years | 9.2–**47.4** ppm |
+| worst case in any system (deep litter, indoor manure storage) | ~85–**100** ppm |
+
+**The bound.** Keep the calibrated quadratic unchanged inside its validated domain; beyond it,
+saturate toward an asymptote anchored at the domain edge, and clamp the resulting concentration:
+
+```
+f_MAT(d) = exp(a*(d-1) + b*(d-1)^2)                      for d <= nh3_fmat_domain_max
+f_MAT(d) = f_max - (f_max - f_MAT(edge)) * exp(-k*(d-edge))   for d >  nh3_fmat_domain_max
+target   = clamp(emission - vent_clearing, 0, nh3_ceiling_ppm)
+```
+
+`nh3_fmat_domain_max = 4.0`, `nh3_fmat_max = 6.35`, `nh3_fmat_sat_rate = 0.444`,
+`nh3_ceiling_ppm = 100.0`. Two mechanisms with distinct jobs: the saturation stops the
+unphysical extrapolation while keeping the belt lever graded over d=5..14; the ceiling is the
+absolute rail, and it is also what keeps this layer physical once stocking density becomes a
+second multiplier on the emission term.
+
+**This is not a fudge factor — it is a refusal to extrapolate a fit outside its domain.**
+
+Resulting equilibria at the aviary reference condition (litter age 60 d, belt-driven moisture,
+ventilation 1.0, mild ambient):
+
+| belt_days | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 10 | 14 |
+|---|---|---|---|---|---|---|---|---|---|
+| old ppm | 5.4 | 6.8 | 9.1 | 13.6 | 21.6 | 36.3 | 64.5 | 515.4 | 16073.1 |
+| **new ppm** | 5.4 | 6.8 | 9.1 | 13.6 | 22.8 | 29.7 | **35.0** | 45.6 | **47.3** |
+
+`f_max` and `k` were fitted to the **d=7 anchor alone**. That d=14 then lands at 47.3 ppm
+against an independent measured ceiling of 47.4 is a consistency check that came out right,
+not a second fitted target. Do not oversell it as a second calibration.
+
+**Two honest caveats.**
+- The piecewise join is continuous in value but **not in slope** (0.91 from the left, 1.76 from
+  the right at d=4). Matching two independent empirical anchors was preferred over smoothness;
+  a C¹ variant was checked and pushes d=14 to 57.5 ppm, outside the measured band.
+- **The competent/negligent discrimination gap compresses.** Measured golden movement:
+  `good` (belt=1) byte-identical on every channel; `competent` (belt=5) `nh3_ppm_hours_over`
+  **+5.9 %** (the saturating branch sits slightly above the quadratic at d=5); `negligent`
+  (belt=7) **−42.6 %**. Ordering still holds (743 < 2.28M < 3.95M) but the competent-to-negligent
+  ratio falls from **3.19× to 1.73×**. The belt lever therefore discriminates less than it did.
+  That is a real consequence of declining to extrapolate, and it is the honest trade: the old
+  spread was larger because the old numbers were unphysical. Only the ammonia channel moved —
+  footpad, heat, keel and excess-mortality anchors are unchanged across all three policies.
 
 ## Heat stress
 
