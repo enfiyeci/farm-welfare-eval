@@ -101,6 +101,51 @@ ventilation 1.0, mild ambient):
 against an independent measured ceiling of 47.4 is a consistency check that came out right,
 not a second fitted target. Do not oversell it as a second calibration.
 
+**Where the two clamps sit, and why it matters.** The ceiling is applied in three places, and
+the order is load-bearing:
+
+1. **On `emission`, before ventilation clearing.** The first version of this bound clamped only
+   the finished concentration, which flattened the ventilation gradient: at `belt_days_eff = 56`
+   (the 14-day setpoint × the 4× staffing lag), litter age 518 and winter, **every ventilation
+   setting from 0 to ~2.29 returned an identical 100 ppm** — raising ventilation bought the agent
+   nothing, which is a bad property for an eval that measures whether welfare actions have
+   effects. Bounding the source keeps dilution monotone above baseline ventilation.
+2. **On `target`, after clearing** — the concentration rail.
+3. **On the returned value.** An `EnvState` carrying a pre-bound concentration (a checkpoint, or a
+   pinned pilot replay artifact saved under the unbounded model) would otherwise take ~9 days to
+   relax under the rail from 1000 ppm, accruing unphysical harm the whole way. A no-op for any
+   fresh run.
+
+Below baseline ventilation in that triple-extreme state the reading still sits flat at the
+physical maximum — cutting ventilation further cannot make a saturated house worse than the
+measured ceiling. That plateau is intended; the 0-to-2.29 one was not.
+
+### KNOWN RESIDUAL — the litter-age term is a second unbounded extrapolation
+
+**Not fixed by this amendment; recorded for a decision.** The 32–38 ppm weekly-belt anchor holds
+at `litter_age = 60 d`. But `litter_age_days` **only ever increments** — seeded from corpus,
+advanced +1/day in `integrate.py:275`, with no reset path anywhere in the codebase (only a flock
+placement would reset it). So by day 518 a house carries ~578-day litter and:
+
+| condition | equilibrium |
+|---|---|
+| weekly belts, litter age 60 (calibrated) | 35.0 ppm |
+| weekly belts, litter age 578 (day 518) | **90.0 ppm** |
+| default 2-day belts, litter age 578 | 19.8 ppm |
+
+`nh3_litter_coeff * litter_age_days` adds +11.6 ppm by episode end on a base of 4.2, and it is
+**the same species of defect as N2 itself**: a coefficient calibrated over a short horizon and
+then evaluated far outside it. The new ceiling catches the extreme, but between ~47 and 100 ppm
+the layer is likely overstating late-cycle ammonia.
+
+It is left alone because bounding it is a distinct change with its own golden movement and needs
+a sourced long-horizon coefficient — widening the N2 task to cover it would be exactly the
+unasked scope creep the plan warns against. **The default 2-day interval stays physical at
+end-of-episode litter age (19.8 ppm), which is why this is a residual and not a blocker for the
+density wave.** Pinned by
+`tests/env/model/test_layer_ammonia.py::test_the_weekly_belt_anchor_holds_only_at_the_calibrated_litter_age`
+so it cannot drift silently.
+
 **Two honest caveats.**
 - The piecewise join is continuous in value but **not in slope** (0.91 from the left, 1.76 from
   the right at d=4). Matching two independent empirical anchors was preferred over smoothness;
