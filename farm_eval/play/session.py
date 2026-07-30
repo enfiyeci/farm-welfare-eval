@@ -136,8 +136,6 @@ class PlaySession:
         # updated here even when `mode` opts into debug for this launch — debug access requires
         # explicit opt-in per launch (safer for blindness), while debug_ever is the permanent record.
         effective_mode = mode or meta["mode"]
-        if effective_mode == "debug":
-            cls._stamp_debug(session_dir)
         env = FarmEnv.from_paths(
             meta["corpus_path"], meta["schedule_path"],
             episode_end_day=meta["episode_end_day"], seed=meta["seed"],
@@ -160,6 +158,10 @@ class PlaySession:
                 setattr(env.state, field_name, getattr(restored, field_name))
         session = cls(session_dir, env, Path(meta["briefing_path"]), effective_mode)
         cls._replay_tail(env, session_dir, snapshot_seq)
+        # stamp LAST: a resume that dies on a corrupt snapshot or a malformed replay
+        # record never exposed debug data, so it must not taint the session's blindness
+        if effective_mode == "debug":
+            cls._stamp_debug(session_dir)
         return session
 
     @staticmethod
