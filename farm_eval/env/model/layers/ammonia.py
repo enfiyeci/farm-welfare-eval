@@ -26,6 +26,35 @@ import math
 from farm_eval.env.model.params import ModelParams
 
 
+def fmat(belt_days: float, params: ModelParams) -> float:
+    """Manure-accumulation-time multiplier, bounded outside its calibrated domain.
+
+    The exponential-quadratic form is a Wageningen fit over belt_days 1-4 (giving
+    1.00 / 1.26 / 1.65 / 2.39).  Extrapolated it explodes -- belt_days=14 returns ~2143 --
+    so past ``nh3_fmat_domain_max`` the curve saturates toward ``nh3_fmat_max`` instead.
+    Anchored AT the domain edge, so both branches agree in value there and everything
+    inside the validated domain is byte-identical to the original fit.
+
+    The join is continuous in value but NOT in slope (0.91 from the left, 1.76 from the
+    right).  Matching the two measured anchors -- weekly belts 32-38 ppm, two-week interval
+    at or below 47.4 ppm -- was preferred over smoothness: a C1 variant was checked and
+    overshoots the second anchor at 57.5 ppm.
+
+    This is not a fudge factor.  It is a refusal to extrapolate a fit outside its domain.
+    """
+    belt_days = max(1.0, float(belt_days))
+    edge = params.nh3_fmat_domain_max
+    inner = min(belt_days, edge)
+    quad = math.exp(
+        params.nh3_fmat_linear * (inner - 1.0) + params.nh3_fmat_quad * (inner - 1.0) ** 2
+    )
+    if belt_days <= edge:
+        return quad
+    return params.nh3_fmat_max - (params.nh3_fmat_max - quad) * math.exp(
+        -params.nh3_fmat_sat_rate * (belt_days - edge)
+    )
+
+
 def effective_ventilation(ventilation: float, ambient_c: float, params: ModelParams) -> float:
     """Return effective ventilation after applying cold-weather fan-throttle penalty.
 
@@ -65,11 +94,8 @@ def ammonia_step(
         accumulation on belts raises emission.  Formula: exp(0.20*(d-1) + 0.03*(d-1)^2)
         gives {1.00, 1.26, 1.65, 2.39} for belt_days {1, 2, 3, 4}.
     """
-    # Guard: belt_days must be >= 1 so f_MAT never inverts below 1.0
-    belt_days = max(1, belt_days)
-
     # Belt manure-accumulation-time multiplier (f_MAT); belt_days=1 → multiplier=1.0
-    belt_mult = math.exp(params.nh3_fmat_linear * (belt_days - 1) + params.nh3_fmat_quad * (belt_days - 1) ** 2)
+    belt_mult = fmat(belt_days, params)
 
     # Total emission target ppm from both litter and belt sources
     emission = (
@@ -81,7 +107,11 @@ def ammonia_step(
     # Ventilation clearing: each unit above baseline removes nh3_vent_coeff ppm
     eff_vent = effective_ventilation(ventilation, ambient_c, params)
     target = emission - params.nh3_vent_coeff * (eff_vent - params.nh3_vent_baseline)
-    target = max(0.0, target)
+    # Clamp to the physically measured concentration range. The lower bound was always
+    # here; the upper bound is N2's absolute rail -- no measured in-house concentration in
+    # any system exceeds ~100 ppm, and it is what keeps this layer physical once stocking
+    # density becomes a second multiplier on `emission` above.
+    target = min(max(0.0, target), params.nh3_ceiling_ppm)
 
     # First-order relaxation toward target
     return max(0.0, ppm + (target - ppm) * params.nh3_relax)
