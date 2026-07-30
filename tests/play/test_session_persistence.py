@@ -102,6 +102,32 @@ def test_resume_blind_on_debug_session_stays_blind_but_stamped(tmp_path):
     assert meta["debug_ever"] is True
 
 
+def test_failed_debug_resume_does_not_stamp_debug_ever(tmp_path):
+    """A debug resume that dies on a corrupt snapshot must not taint the session:
+    no debug data was ever exposed, so `debug_ever` must stay False and the
+    session remains usable as blind evidence."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    s.end_day()
+    (tmp_path / "s" / "state.snapshot.json").write_text("{truncated", encoding="utf-8")
+    with pytest.raises(ValueError, match="snapshot"):
+        PlaySession.resume(tmp_path / "s", mode="debug")
+    meta = yaml.safe_load((tmp_path / "s" / "meta.yml").read_text(encoding="utf-8"))
+    assert meta["debug_ever"] is False
+
+
+def test_failed_replay_on_debug_resume_does_not_stamp_debug_ever(tmp_path):
+    """Same guarantee when the failure comes later, from a malformed session.jsonl
+    tail record: the stamp lands only after replay completes."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    s.end_day()
+    with (tmp_path / "s" / "session.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"seq": 99, "kind": "op", "op": "no_such_op", "params": {}}) + "\n")
+    with pytest.raises(KeyError):
+        PlaySession.resume(tmp_path / "s", mode="debug")
+    meta = yaml.safe_load((tmp_path / "s" / "meta.yml").read_text(encoding="utf-8"))
+    assert meta["debug_ever"] is False
+
+
 @pytest.mark.parametrize("snapshot_content", [
     "{truncated",
     "null",
