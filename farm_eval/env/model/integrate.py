@@ -80,19 +80,23 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
 
             birds = state.world.bird_count.get(hid, 0)
-            if birds <= 0:
-                continue  # empty house — skip entirely, no harm, no div-by-zero
 
             # Density is DERIVED, never seeded (audit N20: the seeded field was unchanged at
-            # day 518 after ~148k deaths). Written before the harm layers below so every
-            # pathway that reads it sees today's value rather than yesterday's.
-            # The `> 0` guard is load-bearing: `usable_area_sq_in` is absent from any
+            # day 518 after ~148k deaths). Written HERE, above the empty-house skip, for two
+            # reasons: the harm layers below read the start-of-day density, which is the one
+            # the flock actually experienced today; and a house emptied from outside this
+            # loop (a depopulation, or a placement that has not happened yet) must report
+            # 0.0 rather than keeping the density it had when it was full.
+            # The `> 0` area guard is load-bearing: `usable_area_sq_in` is absent from any
             # EnvState serialized before it existed (play autosaves, adapter checkpoints, the
             # pinned pilot replay artifacts), and deriving 0.0 from a missing area would
             # silently overwrite the authored density with nonsense.
             area = state.world.usable_area_sq_in.get(hid, 0.0)
             if area > 0.0:
                 hw.stocking_density = space_sq_in_per_hen(area, birds)
+
+            if birds <= 0:
+                continue  # empty house — no harm accrual, no div-by-zero
 
             age = flock_age_weeks(state.world.age_weeks_at_start.get(hid, 0.0), day)
             sp = state.world.setpoints.get(hid, {})
@@ -279,6 +283,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # prior behavior whenever total mortality stays under 100 %/day (the normal case).
             deaths = min(int(round((baseline_mort + excess) * birds)), birds)
             state.world.bird_count[hid] = birds - deaths
+            # Re-derive density against the POST-mortality count. The write above used the
+            # day-start count (correct for the layers that already ran), but the value left
+            # in state is what read_sensor and the audit surface, and that must equal
+            # area / LIVE birds -- otherwise it is a full day's mortality stale on every day
+            # with deaths, and stays nonzero forever if the flock is wiped out.
+            if area > 0.0:
+                hw.stocking_density = space_sq_in_per_hen(area, state.world.bird_count[hid])
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)

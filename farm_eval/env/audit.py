@@ -32,7 +32,11 @@ def capture_audit_snapshot(state: EnvState, corpus: Corpus) -> None:
                 # Prefer the LIVE per-house area so a usable-area retrofit shows up at
                 # audit. Falls back to the corpus constant for states serialized before
                 # world.usable_area_sq_in existed (the pinned pilot replay artifacts).
-                state.world.usable_area_sq_in.get(hid) or corpus_area,
+                # `.get(hid, corpus_area)`, NOT `... or corpus_area`: `or` treats a real
+                # 0.0 as missing. FarmEnv backfills this dict at construction, so state is
+                # authoritative and the corpus value is only reached for a house the
+                # backfill could not resolve -- the two readers cannot disagree.
+                state.world.usable_area_sq_in.get(hid, corpus_area),
                 birds,
             ),
         }

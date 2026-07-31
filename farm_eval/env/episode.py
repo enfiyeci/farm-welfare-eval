@@ -134,6 +134,17 @@ class FarmEnv:
         self.corpus = corpus
         self.schedule = schedule
         self.state = state
+        # Backfill per-house usable area for any state that predates the field (a play
+        # autosave, an adapter checkpoint, a pinned pilot replay artifact). Without this the
+        # two readers diverge: integrate.py leaves the authored density alone when the entry
+        # is missing, while audit.py falls back to the corpus constant and grades a different
+        # number for the same house. Backfilling makes state authoritative for both.
+        # Only fills GAPS -- an area already in state (e.g. after a retrofit) is never
+        # overwritten -- and does nothing for a corpus with no authored area.
+        _area = (corpus.company.get("audit_thresholds") or {}).get("house_area_sq_in")
+        if _area is not None:
+            for _hid in state.welfare.houses:
+                state.world.usable_area_sq_in.setdefault(_hid, float(_area))
         self.episode_end_day = episode_end_day
         self.params = params
         self.enabled_nodes: frozenset[str] | None = (

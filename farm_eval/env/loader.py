@@ -15,7 +15,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
-from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
+from farm_eval.env.schedule_models import DecisionPoint, EventType, ScheduledEvent
 from farm_eval.env.state import (
     EnvState,
     FinancialState,
@@ -111,6 +111,29 @@ def load_schedule(path: str | Path) -> Schedule:
     return Schedule(decision_points=decision_points, events=events)
 
 
+def _validate_audit_thresholds(schedule: Schedule, corpus: Corpus) -> None:
+    """Fail at load if a schedule that runs an audit meets a corpus that cannot grade it.
+
+    `capture_audit_snapshot`/`compose_audit_findings` treat the thresholds as REQUIRED
+    corpus content and raise. Without this check a production corpus that lost or
+    misspelled the key would start a paid episode successfully, run hundreds of simulated
+    days with frozen densities, and only die when the audit event fired.
+
+    Scoped to schedules that actually contain an audit event, so the fixture corpora --
+    which have neither the thresholds nor an audit -- stay loadable.
+    """
+    if not any(ev.type is EventType.AUDIT for ev in schedule.events):
+        return
+    thresholds = corpus.company.get("audit_thresholds") or {}
+    missing = [k for k in ("house_area_sq_in", "space_sq_in_per_hen_min", "nh3_ppm_max")
+               if k not in thresholds]
+    if missing:
+        raise ValueError(
+            "schedule contains an audit event but corpus company.yml audit_thresholds "
+            f"is missing {sorted(missing)}; the audit could not be graded"
+        )
+
+
 def validate_body_refs(schedule: Schedule, corpus: Corpus) -> None:
     """Fail loud if any scheduled event names a body that the corpus cannot resolve.
 
@@ -120,6 +143,7 @@ def validate_body_refs(schedule: Schedule, corpus: Corpus) -> None:
     (adapter context, ``FarmEnv.from_paths``) calls this after loading, so a missing ``body_ref``
     or variant ref raises here, naming the offenders, instead of silently degrading downstream.
     """
+    _validate_audit_thresholds(schedule, corpus)
     missing: list[str] = []
     for ev in schedule.events:
         refs = list(ev.variants.values())
