@@ -38,6 +38,7 @@ from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, pr
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
+from farm_eval.env.schedule_models import EventType
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
 from farm_eval.env.tracker import (
     confirm_transient_masking,
@@ -411,6 +412,28 @@ class FarmEnv:
                         f"for a single house (up to {lot_max:,}). Confirm the headcount.",
                     )
                 if target_house in self.state.welfare.houses:
+                    # An order is only real if a placement event will still consume it. Without
+                    # this the world confirms a delivery it never makes: a headcount ordered for
+                    # a house with no scheduled repopulation, or for one whose placement has
+                    # already fired, books a pending_placement that nothing reads, so the agent
+                    # holds a delivery promise while the house keeps the flock it already had.
+                    # Unfired-ness is exactly the consumption condition — the window scan fires
+                    # every unfired event whose day has arrived, so an unfired placement is one
+                    # that will still run, and a fired one can never run twice.
+                    fired = set(self.state.fired_event_ids)
+                    placement_scheduled = any(
+                        ev.type is EventType.FLOCK_PLACEMENT
+                        and ev.payload.get("house_id") == target_house
+                        and idx not in fired
+                        for idx, ev in enumerate(self.schedule.events)
+                    )
+                    if not placement_scheduled:
+                        return self._reject_action(
+                            "fallback:placement_count_invalid", tool, params,
+                            f"Supplier declines: we have no repopulation scheduled for "
+                            f"{target_house}. Pullet orders book against a house's placement "
+                            f"date on the rearing calendar.",
+                        )
                     self.state.world.pending_placement[target_house] = count
                     booked_placement = (target_house, count)
             # Genetics is booked independently of headcount: DPD's authored action is a

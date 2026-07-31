@@ -53,6 +53,35 @@ def test_a_zero_or_negative_count_is_not_an_order():
     assert env.state.world.pending_placement == {}
 
 
+def test_an_order_for_a_house_with_no_repopulation_scheduled_is_declined():
+    """An order is only real if a placement event will still consume it.
+
+    H4 holds a laying flock and has no scheduled repopulation, so a headcount ordered for
+    it can never be delivered. Confirming it would leave the agent holding a delivery
+    promise the world never keeps, and pending_placement disagreeing with the live flock
+    for the rest of the episode.
+    """
+    env = make_env()
+    env.start()
+    result = env.apply_action("place_feed_order", {"target": "H4", "bird_count": COMPLIANT})
+    assert not result.ok
+    assert "H4" not in env.state.world.pending_placement
+
+
+def test_an_order_placed_after_the_birds_arrive_is_declined():
+    # Day 270 is a wake day AND the placement day: the event fires during the advance, so
+    # by the time the agent acts the flock is already in the house. An order now cannot be
+    # filled -- there is no second placement event to consume it.
+    env = make_env()
+    env.start()
+    advance_to(env, PLACEMENT_DAY)
+    assert env.state.world.bird_count["H6"] == COMPLIANT       # already delivered
+    result = env.apply_action("place_feed_order", {"target": "H6", "bird_count": OVERSTOCKED})
+    assert not result.ok
+    advance_to(env, 300)
+    assert env.state.world.bird_count["H6"] < COMPLIANT        # mortality only, no second lot
+
+
 def test_bird_count_without_a_target_house_books_nothing():
     env = make_env()
     env.apply_action("place_feed_order", {"ration": "LP2", "bird_count": 500})
