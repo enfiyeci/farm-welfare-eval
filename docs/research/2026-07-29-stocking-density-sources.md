@@ -256,6 +256,36 @@ HAL all returned 403).
 - **Role:** reconciles S16's null with the wider literature — **methionine is a threshold effect, not a dose-response**. Determines whether DP07's methionine rung should do anything at all, which depends on a ration spec our corpus does not currently author
 - **Also relevant:** feather regrowth after pecking damage occurs **at the next molt**, not during sustained lay — confirming Task 12's rate-not-level assumption
 
+### S22 — Stocking density in an AVIARY system, Hy-Line Brown ⭐ highest-value unread source
+- **Title:** Effect of stocking density on laying performance, egg quality and blood parameters of Hy-Line Brown laying hens in an aviary system
+- **Authors / year:** Kang et al. · 2018 (complete author list `TO COMPLETE`)
+- **Journal:** European Poultry Science **82** · **DOI:** 10.1399/eps.2018.245
+- **URL:** https://www.sciencedirect.com/science/article/pii/S0003909825009944
+- **Read:** **SUMMARY** — full text and numeric tables paywalled; ScienceDirect, ResearchGate and the journal site all returned 403/404
+- **Design:** **640 Hy-Line Brown hens in an AVIARY system**, 34–43 wk, **13 / 15 / 17 / 19 hens per m²**, four replicates per treatment
+- **Findings (qualitative — the numeric table is what is missing):** **litter moisture and gas emissions (NH₃ and CO₂) significantly greater at 19 hens/m²** than at the other three densities; hen-day production, feed intake, eggshell strength and egg mass **lower** at 19; floor-egg rate, **heterophil/lymphocyte ratio and serum corticosterone higher** at 19
+- **Why this matters more than anything else in the pass:** it is the **only** density source in our actual housing system (aviary with litter) and breed family, and its significant contrast — **19 vs 17 hens/m², an 11.8 % density difference** — is almost exactly the size of the sim's own arms (130.4 vs 144.0 sq in/hen, 10.4 %). It is direct evidence that a density change the size of the one this eval turns on is measurable in a real aviary
+- **Supports:** Q1 (directional corroboration in the right system) and **reopens Q2** — the litter-moisture pathway is real here, only its magnitude is missing
+- **ACQUISITION PRIORITY:** obtaining this paper's tables would convert Task 6 from held to buildable with a sourced coefficient rather than a derivation
+
+### S23 — Hy-Line W-80 Commercial Layers Management Guide (our sim's breed)
+- **Publisher / edition:** Hy-Line International, W-80 Commercial Layers Management Guide, North America edition
+- **URL:** https://hylinena.com/wp-content/uploads/2019/10/W-80_English-1.pdf
+- **Read:** **FULL** (PDF downloaded and text-extracted locally)
+- **Figures used — recommended nutrient intake, phase 1 → phase 5:** methionine + cystine **0.87 → 0.65 % of diet** (total AA) / 0.78 → 0.57 % (SID); **796 → 673 mg/hen/day** (total) / 705 → 596 (SID); methionine alone 425 → 360 mg/day (total) / 395 → 335 (SID)
+- **Role:** the yardstick that **reversed pass 2's reading of Q4b**. S16's arms were 4.0 and 8.0 g/kg met+cys (0.40 % and 0.80 %), so its "low" arm was **well below** a modern layer's requirement — meaning S16 compared deficient against adequate and *still* found only minor pecking effects, which puts it in direct conflict with S21's mechanistic literature and makes methionine a **contested** point rather than a threshold
+- **Caveat:** comparing a 2002 trial's diets against a 2019 W-80 spec crosses two decades of genetic selection. Adequate for judging rough adequacy, not for a coefficient. The guide carries no stocking-density recommendation
+
+### S24 — Plumage and integument scoring on commercial farms (resolves the 0.60–0.80 figure)
+- **Title:** Individual plumage and integument scoring of laying hens on commercial farms: correlation with severe feather pecking and prognosis by visual scoring on flock level
+- **Authors / year:** A. Schwarzer, E. Rauch, M. Erhard, S. Reese, P. Schmidt, S. Bergmann, C. Plattner, A. Kaesberg, H. Louton · 2022
+- **Journal:** Poultry Science · **DOI:** 10.1016/j.psj.2022.102093
+- **URL:** https://pmc.ncbi.nlm.nih.gov/articles/PMC9449859/
+- **Read:** **ABSTRACT** (figures via article-page fetch)
+- **Figures used (n = 16 units, three observation periods):** feather-pecking rate ↔ **cannibalism (skin-lesion) score** rs = **0.769** (p = 0.001), **0.832** (p < 0.001), **0.519** (p = 0.039); feather-pecking rate ↔ total plumage score rs = −0.756, −0.892, −0.672
+- **Role:** **supersedes S11's unlocatable 0.60–0.80 claim.** Schwarzer et al. does NOT cite any earlier 0.60–0.80 damage↔mortality source (it cites Bilcík & Keeling 1999 for different variables), so S11's figure as written remains unverified — but this is a properly sourced replacement in the same range
+- **⚠ The variables are NOT the same:** this correlates pecking **RATE** with a **skin-lesion SCORE**, not feather damage with **MORTALITY**. Any design text leaning on "damage predicts cannibalism deaths" must be restated as "pecking rate predicts skin injury"
+
 ---
 
 ## Reference values used for calibration (not from this pass)
@@ -284,7 +314,11 @@ Already in the repo; listed so a paper's methods section has one place to look.
    2026-07-30:** S9 does **not** carry that coefficient. It traces to **S12/S13** (Mendes, Xin &
    Li). Read S12 and S13 in full instead — they are the load-bearing pair now, and both are still
    only ABSTRACT-verified. Also confirm S16's authorship and DOI, which are search-attributed.
-3. Locate the source for the **0.60–0.80** damage↔cannibalism correlation, or drop the figure.
+3. ~~Locate the source for the **0.60–0.80** damage↔cannibalism correlation, or drop the figure.~~
+   **Resolved 2026-07-30 (pass 3):** not located, and **S24 confirms no such source is cited** in
+   the current literature. Drop S11's figure and use **S24** instead — but restate the variables,
+   because S24 measures pecking **rate** against a skin-lesion **score**, not damage against
+   **mortality**.
 4. Confirm S1's caveat travels with every use: its densities sit **below** UEP's minimum and it is a
    furnished-cage study, so applying it to cage-free aviary densities is extrapolation.
 5. Note that S5 is a practice abstract and S10 is from a different regulatory and market setting.

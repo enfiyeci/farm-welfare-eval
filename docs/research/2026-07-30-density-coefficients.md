@@ -7,11 +7,20 @@ derive-and-label or cut, rather than inventing a figure.
 
 Sources S12–S21 are appended to `docs/research/2026-07-29-stocking-density-sources.md`.
 
-**Two passes were run.** The first answered the questions as the plan posed them. The second went
-deeper at the owner's direction and **changed three of the four answers** — it corrected an error in
-my own Q1 derivation, found commercial-scale evidence that strengthens the Q2 cut and the Q3
-figure, and split Q4b into a threshold effect that the first pass had read as a flat null. Where
-the two passes disagree, the second is the answer; the first is recorded so the reasoning is
+**Three passes were run**, each at the owner's direction, and **each changed answers the previous
+one had settled.** That pattern is itself worth recording: every pass so far has overturned
+something, so none of this should be treated as final.
+
+- **Pass 1** answered the questions as the plan posed them.
+- **Pass 2** corrected an error in my own Q1 fit, found commercial-scale evidence for Q3, and
+  reread Q4b as a threshold rather than a null.
+- **Pass 3** found the single most relevant study in the whole wave — a **stocking-density trial in
+  an aviary system on Hy-Line Brown hens**, our exact housing type and breed family — which
+  **reopens Q2**; pulled Hy-Line W-80's own amino-acid requirements, which **reverse pass 2's
+  reasoning on Q4b**; and finally **resolved the 0.60–0.80 correlation** that two passes had failed
+  to locate.
+
+Where passes disagree, the latest is the answer; earlier reasoning is kept so the record is
 auditable.
 
 ## Verification levels
@@ -33,10 +42,10 @@ article remains **ABSTRACT** or below: ScienceDirect, ResearchGate, Wiley and HA
 | question | verification | figure | ships? | caveat |
 |---|---|---|---|---|
 | **Q1** density → ammonia | ABSTRACT (S12) + FULL corroboration (S18) | house NH₃ ∝ density^(k+1), **k = 1.0** → **+22 % for the overstocked arm** (band +20 % to +24.5 %) | **YES — derive-and-label** | Source densities (64 and 96 sq in/hen) are far denser than the sim's range; k is my fit, not a published coefficient; k varies with belt interval, which the sim models separately |
-| **Q2** density → litter moisture | ABSTRACT (S14, S19) | none defensible | **NO — recommend CUT Task 6** | Two independent reasons now: the one laying-hen dataset has no usable slope, and the largest commercial risk-factor study finds **litter type**, not density, is what predicts footpad dermatitis |
+| **Q2** density → litter moisture | ABSTRACT (S14, S19, **S22**) | direction confirmed in the right system; **magnitude still paywalled** | **NOT YET — hold Task 6, and acquire S22** | Pass 3 reopened this. An **aviary** trial on **Hy-Line Brown** hens finds litter moisture and NH₃ significantly higher at the top density. The pathway is real in our exact system; I still cannot ship a slope because the numeric table is behind a paywall |
 | **Q3** usable-area retrofit cost | **FULL** (S18, S20) | **capital cost per dozen rises ~179 % aviary vs cage**; per-house **$600k–$1.2M** | **YES — sourced mechanism, derived figure** | The *mechanism* (lower density → higher capital per dozen) is now sourced twice at commercial scale; the per-house dollar figure remains derived |
 | **Q4a** enrichment → pecking | ABSTRACT (S15) | **×0.5 on pecking rate**; realized damage effect only **4.7 %** | **YES — sourced** | Enrichment analysed as binary; the rate/damage gap is the real finding |
-| **Q4b** methionine → pecking | ABSTRACT (S16, S21) | **threshold, not dose-response** — ~0 above requirement, real effect below it | **YES — as a threshold** | Changes DP07's design: the rung only works if the ration is actually deficient, and our corpus does not say |
+| **Q4b** methionine → pecking | ABSTRACT (S16, S21) + **FULL** (S23) | **genuinely CONTESTED** — the trial and the mechanism disagree | **YES — as a contested point, small effect, no penalty either way** | Pass 3 reversed pass 2. Hy-Line W-80's own spec shows the trial's "low" arm was **already deficient**, so it tested deficient-vs-adequate and *still* found only minor effects |
 | **Q4c** rate vs level, stacking | ABSTRACT (S15, S21) | **rate confirmed**; no evidence on stacking | **rate YES; keep MAX as assumption** | Feathers regrow only at molt, so mitigation cannot undo existing damage — Task 12's assumption is correct |
 
 ---
@@ -104,6 +113,28 @@ emitted **0.054 g NH₃/hen-d** against **0.094** for twice-weekly — a **74 % 
 frequent removal. An independent cross-check on the sim's `belt_interval_days` lever, in the same
 units and system.
 
+### The aviary evidence (pass 3) — right system, right breed, and a directly comparable contrast
+
+**S22 — Kang et al., European Poultry Science 82, DOI 10.1399/eps.2018.245.** 640 **Hy-Line Brown**
+hens in an **aviary system**, 34–43 wk, at **13, 15, 17 and 19 hens/m²**, four replicates each.
+**Litter moisture and gas emissions (NH₃ and CO₂) were significantly greater at 19 hens/m² than at
+the other three densities.** Also at 19: lower hen-day production, feed intake, eggshell strength
+and egg mass; higher floor-egg rate, heterophil/lymphocyte ratio and serum corticosterone.
+
+Two things make this the most valuable source in the wave for Q1:
+
+1. **It is our system and our breed family.** Every other density→ammonia source is a cage or belt
+   house. This is an aviary with litter, which is what the sim models.
+2. **The significant contrast is the same size as ours.** 19 vs 17 hens/m² is an **11.8 % density
+   difference**, and it moved both litter moisture and ammonia. The sim's two arms differ by
+   **10.4 %** (130.4 vs 144.0 sq in/hen). That is direct evidence that a density change the size of
+   the one this eval turns on is **measurable in a real aviary** — which is the premise the whole
+   node rests on, and until pass 3 it was untested.
+
+What it does **not** give is a magnitude: the numeric table is paywalled, and the pattern reported
+is significance at the top density rather than a slope across all four. So **k = 1.0 from S12 stays
+the quantitative anchor**, now with directional corroboration in the correct housing system.
+
 ### Caveats that must travel
 
 1. **Source densities are 1.5–2.2× denser than the sim's range.** Applying k across 130–144
@@ -148,8 +179,31 @@ Supporting threshold worth keeping: **litter above ~30 % moisture** is associate
 footpad dermatitis incidence and severity. The sim's current litter equilibrium is ~20 %, so the
 existing belt lever already spans the interesting region.
 
-**Recommendation: cut Task 6.** The plan already names this acceptable. Ammonia carries the density
-welfare cost alone, and it now does so on a tighter coefficient than before.
+### Pass 3 reopened this, and the recommendation changed
+
+**S22 (Kang et al., European Poultry Science 82, DOI 10.1399/eps.2018.245)** is the study Q2 was
+missing: 640 **Hy-Line Brown** hens in an **aviary**, 13/15/17/19 hens/m², where **litter moisture
+was significantly greater at 19 hens/m²** than at the other densities. Right system, right breed,
+and the significant contrast (19 vs 17 = 11.8 % apart) is almost exactly the size of the sim's own
+(10.4 %).
+
+That defeats reason one above. Kang 2016's floor-pen data had no usable slope; Kang 2018's aviary
+data shows the effect exists in the housing type we actually model, at a contrast we actually use.
+Reason two — Volkmann's finding that litter *type* dominates commercially — still stands, but it is
+now a statement about what matters *most* in the field, not evidence that density does nothing.
+
+**What still blocks shipping is the magnitude, not the mechanism.** Task 6 needs percentage points
+of equilibrium litter moisture per unit density change. S22 reports significance at the top
+density; its numeric table is behind a paywall, and three attempts (ScienceDirect, ResearchGate,
+the journal's own site) returned 403 or 404.
+
+**Revised recommendation: hold Task 6 rather than cut it, and acquire S22.** That is a different
+disposition from pass 2's, and the difference matters — this is no longer "drop the idea because
+the evidence points elsewhere" but "get one paper." **S22 is the single highest-value unread source
+in this wave.** If its table gives litter moisture per density, Task 6 becomes buildable
+immediately, in the right system, with a coefficient rather than a derivation. If the owner cannot
+obtain it, cutting Task 6 for iteration 1 remains the correct fallback and costs little, because
+`belt_interval_days` already drives footpad.
 
 ---
 
@@ -226,7 +280,44 @@ in `schedule/events.yml:185` and the ladder description in `docs/decision-regist
 things stand, the world rewards a rung whose real-world effect depends on a fact the world never
 establishes.
 
-**Three options, and this one is genuinely yours:**
+### Pass 3 reversed the reasoning above — using our own breed's spec
+
+Pass 2 assumed S16's low arm "was plausibly at or near requirement," which is what made the null
+look like a threshold artefact. **That assumption was wrong**, and Hy-Line's own guide disproves it.
+
+**S23 — Hy-Line W-80 Commercial Layers Management Guide, North America edition (read in full).**
+Our sim's breed. Its published requirement:
+
+| | phase 1 → phase 5 |
+|---|---|
+| Methionine + cystine, **% of diet** | **0.87 → 0.65** (total AA basis); 0.78 → 0.57 (SID) |
+| Methionine + cystine, **mg/hen/day** | **796 → 673** (total); 705 → 596 (SID) |
+| Methionine alone, mg/hen/day | 425 → 360 (total); 395 → 335 (SID) |
+
+S16's arms were **4.0 g/kg (0.40 %) and 8.0 g/kg (0.80 %)** met+cys. So the low arm sits **well
+below** a modern layer's requirement of 0.65–0.87 %, and the high arm sits within it. **S16 did
+compare a deficient diet against an adequate one — and still found only "minor effects" on pecking
+behaviour, with genotype dominating.**
+
+That is a stronger null than pass 2 credited, and it now **conflicts directly** with S21's
+mechanistic literature (deficiency causes feather eating and pecking). Both cannot be simply true.
+
+**So Q4b is genuinely contested evidence, and the design already has machinery for exactly that.**
+The scoring model's evidence-confidence concept (P6 settled-vs-contested) exists to reward the
+settled action without auto-penalizing a justified minority view. Methionine belongs in the
+contested bucket.
+
+**Recommendation: model a small methionine effect, mark the rung CONTESTED, and let the rubric
+penalize neither choosing it nor skipping it.** This is better than any of the three options pass 2
+offered, because it stops the eval from asserting a fact the literature does not agree on, while
+still letting the world respond to the action.
+
+Caveats worth carrying: S16's genotypes (ISA Brown, New Hampshire, White Leghorn and a cross) are
+not modern high-output layers, and its requirement context is 2002. Comparing its arms against a
+2019 W-80 spec is itself an extrapolation across two decades of genetic selection — reasonable for
+judging *rough* adequacy, not for a precise coefficient.
+
+**The three options pass 2 offered, kept for the record:**
 
 1. **Leave the ration unspecified, model methionine as ~0.** Faithful to S16, cheap, and DP07 keeps
    three rungs of unequal strength — arguably a better discriminator than three that all work.
@@ -239,9 +330,10 @@ establishes.
    authored decision.
 3. **Drop the rung.** Simplest; discards an authored action and narrows the choice space.
 
-I lean to (2) as the most interesting eval design and (1) as the cheapest honest option. Either is
-defensible; (3) loses something. **Not built either way — this is a design decision, not a
-coefficient.**
+Pass 2 leaned to (2). **Pass 3 supersedes all three with the contested-evidence route above**,
+because the conflict is not about our ration's composition — it is about whether methionine affects
+pecking at all. Authoring a deficient ration would commit the world to one side of a live
+scientific disagreement. **Not built either way — this is a design decision, not a coefficient.**
 
 ### Q4c — rate vs level: **confirmed**, and stacking still unsupported
 
@@ -255,11 +347,37 @@ coefficient.**
 
 ---
 
+## The 0.60–0.80 correlation — **RESOLVED after three passes**
+
+The sources file has carried a warning that S11's *"correlation 0.60–0.80 between feather/skin
+damage and cannibalism mortality"* could not be located and must not be cited. Pass 3 settles it.
+
+**S24 — Schwarzer, Rauch, Erhard, Reese, Schmidt, Bergmann, Plattner, Kaesberg & Louton (2022)**,
+*Individual plumage and integument scoring of laying hens on commercial farms*, Poultry Science,
+**DOI 10.1016/j.psj.2022.102093**. Commercial farms, n = 16 units, three observation periods:
+
+| correlation | OP1 (28–33 wk) | OP2 (42–48 wk) | OP3 (63–68 wk) |
+|---|---|---|---|
+| Feather pecking rate ↔ **cannibalism score** (skin lesions) | rs = **0.769**, p = 0.001 | rs = **0.832**, p < 0.001 | rs = **0.519**, p = 0.039 |
+| Feather pecking rate ↔ total plumage score | rs = −0.756 | rs = −0.892 | rs = −0.672 |
+
+**Two conclusions, and they differ:**
+
+1. **S11's figure as written is still unverified, and should still not be cited.** Schwarzer et al.
+   does **not** cite any earlier 0.60–0.80 damage↔mortality source; it references Bilcík & Keeling
+   (1999) for a different pair of variables.
+2. **But there is now a properly sourced replacement**, and the repo should use it instead. The
+   variables are **not the same** and the difference matters: Schwarzer correlates feather-pecking
+   **rate** with a **skin-lesion score**, not feather damage with **mortality**. Anything in the
+   design that leaned on "damage predicts cannibalism deaths" should be restated as "pecking rate
+   predicts skin injury," which is what was actually measured.
+
 ## What still cannot be cited
 
 1. Every `TO COMPLETE` author/year/DOI on S1–S11. Not filled by inference.
-2. The **0.60–0.80** feather-damage ↔ cannibalism correlation attributed to S11 — still not located
-   after two passes. **Do not cite it.**
-3. Full texts of S12–S17, S19, S21 — paywalled. S18 and S20 are the only FULL reads.
+2. S11's 0.60–0.80 figure **as stated** — superseded by S24 above; restate the variables.
+3. Full texts of S12–S17, S19, S21, S22 — paywalled. S18, S20 and S23 are the only FULL reads.
 4. S9's own density→ammonia claim. No longer load-bearing now that S12 is the real source.
 5. S16's authorship and DOI are search-attributed and marked VERIFY.
+6. **S22's numeric table — the top acquisition priority of this wave.** It is the one document that
+   would convert Task 6 from held to buildable, in the right system and breed.
