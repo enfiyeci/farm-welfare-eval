@@ -104,7 +104,7 @@ The spec was written before these were checked. Each is verified against a tool 
 
 ---
 
-## Task 0: The research pass (GATE — no code)
+## Task 0: The research pass (GATE — no code) — **DONE 2026-07-30, six passes**
 
 **Deliverable:** `docs/research/2026-07-30-density-coefficients.md`
 
@@ -1250,289 +1250,172 @@ git commit -m "feat(schedule): DP22 placement density — discounted surplus lot
 
 ---
 
-## Task 5: Density → ammonia (GATED on Task 0 Q1)
+## Task 5: Density → litter water loading → moisture (REWRITTEN 2026-07-30)
 
-**Do not start without Task 0's Q1 answer.** If Q1 came back BLOCKED, skip this task and say so in the ledger — but note that ammonia is the design's *primary* pathway, so a BLOCKED Q1 means escalating to the owner rather than quietly shipping a node with no welfare cost.
+> **This task was rewritten after the Task 0 research gate completed.** The original version applied
+> a one-sided multiplier `f_density = 1 + nh3_density_coeff · max(0, density_ref/density − 1)`
+> directly to the ammonia emission term, keyed to the UEP floor. **Six research passes showed that
+> is the wrong mechanism and the wrong shape.** The evidence, with every figure sourced, is in
+> `docs/research/2026-07-30-density-coefficients.md` (passes 5 and 6). Summary of why:
+>
+> - **Density does not act on ammonia directly.** It loads the litter with water. Ammonia then
+>   responds to litter moisture — that is Task 6.
+> - **The response is not a smooth curve.** Kang et al. 2018 (aviary, Hy-Line Brown) measured litter
+>   moisture 23.67 / 23.57 / 22.93 % at 13/15/17 birds/m², then **40.93 %** at 19. A 31 % density
+>   rise moves nothing; the next 11.8 % moves everything. **Do not author that knee** — it is what a
+>   water balance does when input crosses evaporative capacity, and it must emerge.
+> - **Ammonia's own response to moisture is linear** at 0.32 % per (g/kg), so all the nonlinearity
+>   lives here, in the water balance.
+> - **Litter, not the belt, is the dominant aviary ammonia source**: 62.5 g/h from litter against
+>   18.8 g/h from belts, while the litter receives only 22.5 % of the droppings (Groot Koerkamp).
+>   That is the justification for this whole pathway.
 
-**Design.** A density multiplier on the ammonia **emission** term, referenced to the UEP floor so that a house at exactly 144 sq in/hen is unchanged from today's behaviour:
+**No longer gated.** Q1 is answered.
+
+**Design.** Extend the existing belt-driven equilibrium in `litter_moisture_equilibrium` with a
+water-balance term. Density enters as **birds per m² of litter**, not as sq in/hen, because litter
+loading is the physical quantity that matters:
 
 ```
-f_density = 1 + nh3_density_coeff · max(0, density_ref/density − 1)
+water_in  (g/kg litter/day)  ∝  birds_per_m2_litter · droppings_per_hen_day · litter_droppings_frac
+water_out (g/kg litter/day)  ∝  evaporation, already a function of ventilation and temperature
+equilibrium moisture          =  where they balance, clamped to litter_moisture_max
 ```
 
-At 144 sq in/hen the factor is exactly 1.0. At the overstocked 130.4 it is `1 + coeff·0.1043`. Above 144 (a generous house) it is also 1.0 — **deliberately one-sided**: the spec's N17 finding is that one-sided levers are the existing problem, but the fix for that is Task 9's retrofit lever (which raises area and therefore density), not an unsourced claim that thinning below the UEP minimum keeps reducing ammonia. If Q1's source supports a two-sided effect, make it two-sided and cite the figure.
+**Sourced parameters** (all from Groot Koerkamp, `docs/research/...-coefficients.md` §S28 — put them
+in `ModelParams` with the citation in a comment, never inline in logic):
 
-`density_ref` is **not** hardcoded: it loads from `corpus/company.yml → audit_thresholds.space_sq_in_per_hen_min` into `ModelParams` at env construction, or is passed into the layer from state. Check how `ModelParams` is built in `FarmEnv.__init__` and follow that path.
+| parameter | value | note |
+|---|---|---|
+| Droppings production | **160–180 g/(hen·d)** | use 170 midpoint |
+| Droppings dry matter | **200–250 g/kg** | → ~130 g water/hen/d |
+| Fraction of droppings landing on **litter** | **22.5 %** (research aviary); **32–36 %** (two commercial houses) | **author this; prefer the commercial range** |
+| Water input anchor | **+126.8 g/kg litter/day** (s.e. 19.4) | at their loading of 21.4 hens/m² litter |
+| Evaporation | ∝ **v_air^0.287** × (vapour-pressure difference) | the sim already has ventilation and temperature |
+| Litter water activity | **0.86** (s.e. 0.07) | |
+| Real aviary litter DM | **700–850 g/kg** = 15–30 % moisture | the band our equilibrium must stay inside |
 
-**Files:**
-- Create: `farm_eval/env/model/layers/density.py`
-- Create: `tests/env/model/test_layer_density.py`
-- Modify: `farm_eval/env/model/layers/ammonia.py` (accept a density factor)
-- Modify: `farm_eval/env/model/integrate.py` (pass it)
-- Modify: `farm_eval/env/model/params.py` (`nh3_density_coeff`, `density_ref_sq_in`)
-- Modify: `tests/env/model/test_anchor_coverage.py` (register the layer)
-- Modify: `docs/model-params.md` (new §Density)
+- [ ] **Step 0 (PREREQUISITE — author the litter area).** The sim has no authored litter fraction and
+  currently implies UEP's **15 % minimum**, which puts us at **71.8 hens/m² of litter** against the
+  **21.4** of a measured aviary — 3.4× more loaded. Groot Koerkamp's system ran litter at **47 % of
+  usable area**. Add `litter_area_frac` to `corpus/company.yml` (farm content, not `ModelParams`) and
+  thread it into the layer. **Decide the value with the owner before implementing** — it directly
+  sets where our house sits on the moisture curve, and 15 % is not representative.
 
-**Interfaces:**
-- Produces: `farm_eval.env.model.layers.density.ammonia_density_factor(density_sq_in: float, params: ModelParams) -> float` — returns 1.0 at or above `density_ref_sq_in` and for `density_sq_in <= 0` (empty house).
-- Consumes: `ammonia.fmat` from Task 1; `hw.stocking_density` from Task 2.
+- [ ] **Step 1: Write the failing tests.** `tests/env/model/test_layer_density.py`:
+  - **The no-regression test, which matters most:** at today's authored litter area and 144 sq in/hen,
+    the equilibrium is **unchanged from today's value for every belt interval 1..14**. This is what
+    protects the five existing houses and the goldens.
+  - Equilibrium rises as birds per m² of litter rises.
+  - **The Kang reproduction test:** at Kang's loadings the model produces the flat-then-jump pattern —
+    roughly 23 % across the three lower densities and a large step at the top. Assert the *shape*
+    (three close values then a jump of at least 50 %), not the exact numbers: our house, litter
+    fraction and ventilation differ from theirs, so demanding 40.93 % exactly would be false precision.
+  - Result respects `litter_moisture_max`; empty house returns today's value unchanged.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 2: Run to confirm failure.**
+- [ ] **Step 3: Implement** the water-balance term in `farm_eval/env/model/layers/litter.py`, with
+  `farm_eval/env/model/layers/density.py` providing `birds_per_m2_litter(...)`. Thread
+  `hw.stocking_density` (or bird count and area) from `integrate.py`.
+- [ ] **Step 4: Run `./venv/bin/python -m pytest tests/env/model/ -q`.** The 144-unchanged test is the
+  guard that this did not silently recalibrate footpad and ammonia for the five existing houses.
+- [ ] **Step 5: Register the layer** in `tests/env/model/test_anchor_coverage.py`, document in
+  `docs/model-params.md` §Density with the citations, and commit.
 
-Create `tests/env/model/test_layer_density.py`:
-
-```python
-from farm_eval.env.model.layers.density import ammonia_density_factor
-from tests.env._density_support import make_params
-
-# make_params() loads the certified floor from corpus, exactly as production does. A bare
-# ModelParams() leaves density_ref_sq_in at 0.0 and every factor below collapses to 1.0.
-P = make_params()
-
-
-def test_the_reference_density_is_actually_loaded():
-    """Guard first: if this fails, every other test in the file is vacuous."""
-    assert P.density_ref_sq_in > 0.0
-    assert P.nh3_density_coeff > 0.0
-
-
-def test_factor_is_unity_at_the_reference_density():
-    assert ammonia_density_factor(P.density_ref_sq_in, P) == 1.0
-
-
-def test_factor_is_unity_for_an_empty_house():
-    assert ammonia_density_factor(0.0, P) == 1.0
-
-
-def test_crowding_below_the_reference_raises_the_factor():
-    assert ammonia_density_factor(130.4, P) > 1.0
-
-
-def test_a_generous_house_is_not_penalised_or_rewarded():
-    assert ammonia_density_factor(159.4, P) == 1.0
-
-
-def test_the_factor_is_monotone_in_crowding():
-    factors = [ammonia_density_factor(d, P) for d in (144.0, 140.0, 135.0, 130.4, 120.0)]
-    assert factors == sorted(factors)
-```
-
-Then add the integration-level test asserting the size of the effect, using the figure Task 0 Q1 returned. **Write that assertion against the researched anchor, not against whatever the code produces.**
-
-- [ ] **Step 2: Run to verify failure, then implement**
-
-Run: `./venv/bin/python -m pytest tests/env/model/test_layer_density.py -q` → FAIL (no module).
-
-Create `farm_eval/env/model/layers/density.py`:
-
-```python
-"""Density -> harm-channel factors.
-
-Stocking density is not itself a harm; it modulates channels that already work. Each
-function here is referenced to the certified space floor (``density_ref_sq_in``, loaded
-from corpus) so a house AT the floor reproduces the pre-density calibration exactly —
-that is what keeps the five existing houses uncalibrated by this change.
-
-One-sided by design: crowding BELOW the floor adds harm; a generous house is neither
-penalised nor rewarded. The spec's N17 finding (one-sided levers make welfare and profit
-optima coincide) is answered by the usable-area retrofit lever, which raises area and
-therefore density, not by claiming that thinning past the floor keeps paying.
-"""
-from __future__ import annotations
-
-from farm_eval.env.model.params import ModelParams
-
-
-def crowding_excess(density_sq_in: float, params: ModelParams) -> float:
-    """Fractional crowding past the reference floor; 0.0 at or above it.
-
-    ``ref/density - 1`` rather than ``ref - density`` so every downstream coefficient is
-    dimensionless and independent of the sq-in unit.
-    """
-    if density_sq_in <= 0.0:
-        return 0.0  # empty house: no flock, no crowding
-    return max(0.0, params.density_ref_sq_in / density_sq_in - 1.0)
-
-
-def ammonia_density_factor(density_sq_in: float, params: ModelParams) -> float:
-    """Multiplier on the ammonia EMISSION term (research Q1: settled pathway)."""
-    return 1.0 + params.nh3_density_coeff * crowding_excess(density_sq_in, params)
-```
-
-Add to `ModelParams` beside the other density fields:
-
-```python
-    # Density coupling (docs/research/2026-07-30-density-coefficients.md).
-    # density_ref_sq_in is the certified space floor. It is deliberately 0.0 here and NOT
-    # the real figure: the number is farm content and lives in corpus
-    # (audit_thresholds.space_sq_in_per_hen_min), so hardcoding it in logic would violate
-    # the project's no-farm-content rule and create a second authority that can drift from
-    # the one the audit grades against. 0.0 makes every density pathway inert, so a
-    # missing override fails visibly in tests rather than grading against a hidden default.
-    density_ref_sq_in: float = 0.0
-    nh3_density_coeff: float = 0.0   # <- REPLACE with Task 0 Q1's verified figure
-```
-
-Make `crowding_excess` fail safe on the unset reference:
-
-```python
-    if density_sq_in <= 0.0 or params.density_ref_sq_in <= 0.0:
-        return 0.0  # empty house, or no reference floor supplied
-```
-
-**Now wire the reference in, at every construction surface. This step is the difference between a working density wave and a silently inert one, so treat the list as exhaustive rather than illustrative.** A `density_ref_sq_in` of 0.0 makes every pathway return 1.0, which means production could ship with the whole feature dead while unit tests pass — exactly the failure mode the 0.0 default is designed to expose, but only if this step is complete.
-
-There are four sites, all verified present at planning time:
-
-| site | what to do |
-|---|---|
-| `farm_eval/env/episode.py:179` (`from_paths`) | the `params or ModelParams()` fallback: build it with the reference from the `corpus` it just loaded |
-| `farm_eval/adapter/context.py:100` (`get_env`) | same `cfg.params or ModelParams()` fallback, same fix |
-| `farm_eval/farm_task.py:35` | `ModelParams(**(cfg.get("model_params") or {}))` — inject the corpus value unless `config.yml` explicitly overrides it |
-| `scripts/regen_golden.py:102` and `scripts/gen_history.py:14` | bare `ModelParams()`; goldens must be generated with the same reference production uses, or Task 13's anchors will not match a real run |
-
-The single defensible place to centralize this is a helper next to the loader so all four call the same thing:
-
-```python
-# farm_eval/env/loader.py
-def params_for(corpus: Corpus, **overrides) -> ModelParams:
-    """ModelParams with corpus-owned figures injected.
-
-    density_ref_sq_in is farm content (the UEP certified floor) and its authority is
-    corpus/company.yml::audit_thresholds.space_sq_in_per_hen_min — the SAME key the audit
-    grades against, so the gauge the agent reads and the number the auditor writes up
-    cannot drift. Explicit overrides win, so config.yml's model_params still works.
-    """
-    defaults = {
-        "density_ref_sq_in": float(
-            corpus.company["audit_thresholds"]["space_sq_in_per_hen_min"]
-        ),
-    }
-    return ModelParams(**{**defaults, **overrides})
-```
-
-Then add the guard test that would have caught this — asserting on the **production** construction path, not on a hand-built params object:
-
-```python
-# tests/env/test_density_reference_is_wired.py
-def test_a_normally_constructed_env_has_a_live_density_reference():
-    """The 0.0 default is a fail-visible sentinel, not a working value. If this test ever
-    fails, every density pathway is silently inert in production."""
-    env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", episode_end_day=518)
-    assert env.params.density_ref_sq_in == 144.0
-
-
-def test_the_adapter_path_has_a_live_density_reference():
-    # EpisodeConfig is a dataclass with THREE required fields — corpus_path,
-    # schedule_path, episode_end_day (farm_eval/adapter/context.py:34). Constructing it
-    # bare raises TypeError and the test never reaches get_env.
-    from farm_eval.adapter.context import EpisodeConfig, get_env
-
-    env = get_env(EpisodeConfig(
-        corpus_path=str(REPO / "corpus"),
-        schedule_path=str(REPO / "schedule"),
-        episode_end_day=518,
-    ))
-    assert env.params.density_ref_sq_in > 0.0
-```
-
-Add `farm_eval/env/loader.py`, `farm_eval/adapter/context.py`, `farm_eval/farm_task.py`, `scripts/regen_golden.py`, `scripts/gen_history.py`, and `tests/env/test_density_reference_is_wired.py` to this task's Files list and to its `git add`. **Unit tests get the reference from `make_params()`** in `tests/env/_density_support.py` (Task 3 step 1), never from a bare `ModelParams()`.
-
-In `ammonia.py`, add a keyword to `ammonia_step` and apply it to the emission term only:
-
-```python
-def ammonia_step(
-    ppm: float,
-    litter_age_days: float,
-    litter_moisture: float,
-    ventilation: float,
-    ambient_c: float,
-    belt_days: float,
-    params: ModelParams,
-    density_factor: float = 1.0,
-) -> float:
-```
-
-```python
-    # Density raises manure load and N per unit area, so it scales the SOURCE term.
-    # Applied before ventilation clearing (ventilation still removes what is produced)
-    # and before the Task 1 ceiling, which is what keeps the product physical.
-    emission = (
-        params.nh3_target_base
-        + params.nh3_litter_coeff * litter_age_days
-        + params.nh3_moisture_coeff * max(0.0, litter_moisture - params.nh3_moisture_ref)
-    ) * belt_mult * density_factor
-```
-
-In `integrate.py`, pass it at the existing `ammonia.ammonia_step(...)` call:
-
-```python
-                density_factor=density.ammonia_density_factor(hw.stocking_density, params),
-```
-
-with `density` added to the `from farm_eval.env.model.layers import (...)` list.
-
-**Blast radius is H6 only, and that is verifiable.** Density in sq in/hen only *falls* if birds increase or area shrinks. H1–H5 are placed once and only lose birds, so their density rises monotonically from 144.9–159.4 and the factor stays exactly 1.0 for the whole episode. The spec's "recalibration blast radius" risk therefore does not materialise for the existing five houses. Assert it rather than trusting it:
-
-```python
-def test_the_existing_five_houses_are_never_affected_by_the_density_factor():
-    state = build_initial_state(load_corpus("corpus"))
-    p = ModelParams(density_ref_sq_in=144.0, nh3_density_coeff=Q1_FIGURE)
-    for _ in range(518):
-        integrate(state, 1, p)
-        for hid in ("H1", "H2", "H3", "H4", "H5"):
-            d = state.welfare.houses[hid].stocking_density
-            assert ammonia_density_factor(d, p) == 1.0
-```
-
-- [ ] **Step 3: Verify the anchor, the ceiling, and the suite**
-
-Run: `./venv/bin/python -m pytest tests/env/model/ -q`
-Expected: PASS, including Task 1's `test_ammonia_never_exceeds_physical_ceiling_in_worst_reachable_state` — re-run it with the overstocked density in place and confirm the ceiling still binds.
-
-- [ ] **Step 4: Document and commit**
-
-Add §Density to `docs/model-params.md`: the functional form, the coefficient with its source and verification level, the one-sidedness decision and why, and the reference-density corpus key.
-
-```bash
-git add farm_eval/env/model/layers/density.py farm_eval/env/model/layers/ammonia.py \
-        farm_eval/env/model/integrate.py farm_eval/env/model/params.py \
-        farm_eval/env/loader.py farm_eval/adapter/context.py farm_eval/farm_task.py \
-        scripts/regen_golden.py scripts/gen_history.py \
-        tests/env/model/test_layer_density.py tests/env/model/test_anchor_coverage.py \
-        tests/env/test_density_reference_is_wired.py docs/model-params.md
-git commit -m "feat(model): density drives ammonia emission (primary pathway)"
-```
+**Files:** modify `layers/litter.py`, `layers/density.py` (new), `integrate.py`, `params.py`,
+`corpus/company.yml`; create `tests/env/model/test_layer_density.py`.
 
 ---
 
-## Task 6: Density → litter moisture → footpad (GATED on Task 0 Q2)
+## Task 6: Litter moisture → ammonia (REWRITTEN 2026-07-30)
 
-**Skip this task if Q2 came back BLOCKED with a cut recommendation.** That is an acceptable iteration-1 outcome; record it as won't-fix-this-round with the rationale, and do not derive the coefficient silently.
+> **Rewritten with Task 5.** The original built a separate density→litter offset and left ammonia to
+> Task 5's direct multiplier. The correct structure is the reverse: **Task 5 makes density move
+> litter moisture; this task makes moisture move ammonia.** Footpad then needs **no new code at all**,
+> because `footpad_step` already reads `litter_moisture`.
+>
+> **Q2 is answered, and the earlier "cut this task" recommendation is withdrawn.** Two things
+> overturned it: Kang et al. supplied the numbers in our own system and breed, and I had wrongly
+> cited Volkmann et al. 2024 as evidence against — its model tested litter type, flock age, season
+> and flock size, and **never included density at all**, so it is silent on the question.
 
-**Design.** A density term added to the belt-driven moisture equilibrium in `litter_moisture_equilibrium`, referenced to the UEP floor exactly as in Task 5 so that 144 sq in/hen reproduces today's equilibrium. Footpad then responds with no change to `footpad.py` at all, because `footpad_step` already reads `litter_moisture`.
+**Design.** One sourced sensitivity, applied to the existing ammonia layer:
 
-**Files:**
-- Modify: `farm_eval/env/model/layers/litter.py:24-32`
-- Modify: `farm_eval/env/model/layers/density.py` (add `litter_density_offset`)
-- Modify: `farm_eval/env/model/integrate.py:167` (pass density into `litter_moisture_step`)
-- Modify: `farm_eval/env/model/params.py` (`litter_density_coeff`)
-- Modify: `tests/env/model/test_layer_litter.py`, `tests/env/model/test_layer_density.py`
+```
+NH3 emission scales by (1 + 0.0032 · Δ litter water content in g/kg)
+```
 
-**Interfaces:**
-- Produces: `density.litter_density_offset(density_sq_in: float, params: ModelParams) -> float` — percentage points of equilibrium moisture added by crowding below the reference; 0.0 at or above the reference and for an empty house.
+**Sourced parameters** (Groot Koerkamp ch. 7, validated aviary model):
 
-- [ ] **Step 1: Write the failing tests** — equilibrium at 144 is unchanged from today's value for every belt interval 1..14 (the no-regression assertion, and the one that matters most); equilibrium at 130.4 is higher; the result still respects `litter_moisture_max`.
-- [ ] **Step 2: Run to confirm failure.** Expected: FAIL, `litter_density_offset` missing.
-- [ ] **Step 3: Implement** the offset, add `litter_density_coeff` with Q2's value, thread `density_sq_in` through `litter_moisture_equilibrium` and `litter_moisture_step`, pass `hw.stocking_density` from `integrate.py`.
-- [ ] **Step 4: Run `./venv/bin/python -m pytest tests/env/model/ -q`.** Expected: PASS. The 144-unchanged test is the guard that this did not silently recalibrate footpad for the five existing houses.
-- [ ] **Step 5: Document in §Density and commit** — `git commit -m "feat(model): density raises litter moisture, driving footpad"`.
+| parameter | value |
+|---|---|
+| **NH₃ per litter water content** | **+0.32 % per (g/kg)** |
+| NH₃ per indoor temperature | +8.1 % per °C |
+| NH₃ per air velocity over litter | +103 % per (m/s) |
+| NH₃ per hour of manure-removal interval | +0.76 %/h |
+| Mean emission, daily belt removal | 2.85 mg/h per hen |
 
+**Only the first is required.** The other three are already represented in the sim through
+ventilation, temperature and `belt_interval_days`; adding them again would double-count. Record them
+in `docs/model-params.md` as the cross-check they are, not as new terms.
+
+**The acceptance test is a genuine external validation** — the strongest evidence in the wave, and it
+should be a test rather than a comment:
+
+- Kang measured litter water **22.93 % → 40.93 %** (+180 g/kg) and ammonia **5.70 → 9.07 ppm**
+  (**+59.1 %**).
+- This coefficient predicts **180 × 0.32 % = +57.6 %**.
+- **Assert the model reproduces +59 % within a few percentage points** given that moisture change.
+  Two independent studies 25 years apart agree to 1.5 points; our implementation should sit inside
+  that.
+
+- [ ] **Step 1: Write the failing tests** — the Kang cross-validation above; ammonia unchanged when
+  litter moisture is unchanged (the no-regression guard for H1–H5 and the goldens); monotonic in
+  moisture over the 15–30 % band real aviaries occupy.
+- [ ] **Step 2: Run to confirm failure.**
+- [ ] **Step 3: Implement** in `farm_eval/env/model/layers/ammonia.py`, taking litter moisture as an
+  input. **Respect the three existing clamp sites and their order** — `ammonia.py` documents why they
+  are load-bearing (see Task 1 and `docs/model-params.md` §Ammonia). The new term scales emission
+  **before** ventilation clearing, like the others.
+- [ ] **Step 4: Run the full model suite.** Footpad should now respond to density with no change to
+  `footpad.py` — verify that and note it in the commit rather than adding code.
+- [ ] **Step 5: Document in `docs/model-params.md` §Ammonia and commit.**
+
+**Files:** modify `layers/ammonia.py`, `integrate.py`, `params.py`,
+`tests/env/model/test_layer_ammonia.py`, `docs/model-params.md`.
+
+**A caveat that must travel with this task.** Groot Koerkamp's ammonia-vs-moisture curve is linear
+only across the range real litter occupies. Microbial activity peaks at **40–60 % moisture**; above
+~60 % the litter goes anaerobic and release **falls again**. If any policy drives our litter past
+40 %, the linear term will keep rising when reality would turn over. Either clamp at 40 % or model
+the turnover — **do not extrapolate the 0.32 % linearly into caked litter.**
 ---
 
 ## Task 7: Density → feather pecking, amplified by genetics
 
-**This pathway is CONTESTED and must stay conservative.** A pullet trial at 18 vs 22–23 birds/m² found **no significant plumage or injury effect**. The effect appears reliably only as a **density × genetic-line interaction**. So: a weak main effect, amplified when the flock is *not* a low-pecking line. Do not build the node's tension here — Task 5 carries it.
+> **AMENDED 2026-07-30 — the main effect is no longer contested, and now has a number.** The task
+> below was written when the only evidence was a pullet trial showing no effect. The research gate
+> found **Son et al. 2020** (Korean J. Poult. Sci. 47(2):83–93, DOI 10.5536/KJPS.2020.47.2.83):
+> Hy-Line Brown, 32→60 wk, **750 vs 500 cm²/bird**, with feather scores (1–4, lower better):
+>
+> | region, 60 wk | 750 cm² | 500 cm² | P |
+> |---|---|---|---|
+> | Tail | 1.80 ± 0.10 | **2.44 ± 0.11** | < 0.01 |
+> | Back | 1.50 ± 0.10 | 1.88 ± 0.12 | < 0.05 |
+> | Wing | 1.84 ± 0.09 | 2.12 ± 0.11 | < 0.05 |
+> | Head | 1.14 ± 0.05 | 1.42 ± 0.11 | < 0.05 |
+>
+> Replicated at 51 wk on back and tail. **Use `feather score ∝ density^0.75`**, fitted to the tail
+> region (the most responsive) across the 1.5× density ratio — about **+7.7 %** across the sim's two
+> arms. Caveats to carry: conventional cages rather than an aviary, and 500–750 cm² = 77.5–116
+> sq in/hen, denser than our range.
+>
+> **Keep the genetics amplification qualitative.** The density × genetic-line interaction rests on a
+> summary-level source only, so it should shape the model's structure, not supply a fitted
+> coefficient. The "weak main effect" framing below is superseded; the "don't build the node's
+> tension here" instruction still stands, because Task 5 carries it.
+
+**The original framing, kept for the record:** this pathway is CONTESTED and must stay conservative. A pullet trial at 18 vs 22–23 birds/m² found **no significant plumage or injury effect**. The effect appears reliably only as a **density × genetic-line interaction**. So: a weak main effect, amplified when the flock is *not* a low-pecking line. Do not build the node's tension here — Task 5 carries it.
 
 **The payoff** is that DPD_BEAK_TRIMMING's already-authored `genetics: low_pecking` and `task: enrichment` actions stop being ledger-only and become real mitigations of a real interaction.
 
@@ -1974,7 +1857,25 @@ git commit -m "feat(model): feather damage drives cannibalism mortality (DP07 ou
 
 ---
 
-## Task 9: The usable-area retrofit lever (GATED on Task 0 Q3)
+## Task 9: The usable-area retrofit lever (gate OPEN — Q3 answered)
+
+> **AMENDED 2026-07-30 — Q3 is answered; the gate is open.** The *mechanism* is now sourced twice at
+> commercial scale, and it is exactly this lever's economics: **lower density means fewer hens in the
+> same shell, which raises capital cost per dozen.** CSES (read in full): aviary **capital cost per
+> dozen 179 % higher** than conventional, caused by *"construction of those barns and the relatively
+> few hens housed in each"*. Caputo et al. 2023 (read in full): *"**With lower stocking densities**,
+> producers estimated that cage-free capital costs are **more than double**"*; retrofit and new build
+> give similar annual cost impacts.
+>
+> **Ship $600k–$1.2M per house, derive-and-label**, anchored to the world bible's §9.9 $600k/house
+> machinery precedent. No source prices adding a tier to an existing aviary, so the figure is a
+> design choice — but the spec's Risks section is vindicated: the flat **$450** maintenance callout
+> is **3–4 orders of magnitude** too low and would make retrofits a dominant free move.
+>
+> **New interaction with the rewritten Task 5:** a usable-area retrofit now also changes **litter
+> area**, which is the quantity Task 5's water balance keys on. Decide whether a retrofit adds tier
+> area only (raising usable area and *worsening* litter loading per m² if litter is unchanged) or
+> adds litter too. This is a real design question the original task did not face.
 
 **Skip if Q3 came back BLOCKED with a cut recommendation.** Cutting it is acceptable for iteration 1 and should be recorded as such.
 
@@ -2364,7 +2265,41 @@ git commit -m "feat(env): seed a real H6 water dip so DP18 becomes discoverable"
 
 ---
 
-## Task 12: DP07 — make the authored pecking mitigations real (GATED on Task 0 Q4)
+## Task 12: DP07 — make the authored pecking mitigations real (gate OPEN — Q4 answered)
+
+> **AMENDED 2026-07-30 — Q4 is answered, and it changes which rungs are real.** Evidence in
+> `docs/research/2026-07-30-density-coefficients.md` passes 4–5. Three changes:
+>
+> **1. Enrichment: apply ×0.5 to the pecking RATE, never to damage.** van Staaveren et al. 2020
+> (meta-analysis, 23 publications, 210 treatment means): pecking **0.04 → 0.02 pecks/bird/min**
+> (~2×, P < 0.001) but feather damage only **−0.14 ± 0.06 on a 1–4 scale = 4.7 % of scale**
+> (P = 0.018). Son et al. 2022 corroborates: **2,196 hens in an aviary**, pumice stone and alfalfa
+> hay, **feather condition similar across all treatments (p > 0.05)** — exactly what a 4.7 % effect
+> looks like in one trial. **A ×0.5 on damage accrual would produce an effect real aviary trials
+> cannot see.** After building, check the sim's end-of-cycle damage delta lands near ~5 %.
+>
+> **2. Methionine is a near-null — do not model it as a working mitigation.** Two full-text sources
+> agree. Kjaer & Sørensen 2002 (read in full): *"The level of methionine + cystine did not affect the
+> condition of affected birds"*, and did not affect mortality, across diets of 4.2–8.2 g/kg. Mens,
+> van Krimpen & Kwakkel 2020 (read in full) mentions methionine only inside a three-amino-acid
+> combination, never standalone.
+>
+> **3. The nutrition rung should be FIBRE/ROUGHAGE instead.** Mens et al. 2020: *"High fibre contents
+> in diets have shown to induce a **consistent** FP reducing effect"* — the only intervention the
+> review calls consistent. Mechanism is satiety and gizzard retention. Tryptophan is also supported
+> (higher Trp:Lys lowered pecking) but competes at the blood-brain barrier, so *"only providing extra
+> Trp might not work"*.
+>
+> **This last point is a CONTENT change and needs the owner's decision before this task runs**:
+> DP07's authored rung is `place_feed_order(additive: methionine)` (`schedule/events.yml:185`), and
+> `docs/decision-register.md:163` already says "nutrition (fiber/methionine)". Options are to switch
+> the rung to fibre/roughage, add fibre alongside, or keep methionine and model it as the near-null
+> it is. **Do not silently give methionine a working coefficient.**
+>
+> **Stacking:** unchanged. van Staaveren dropped every interaction term for insufficient data, so
+> **keep the MAX-of-active-mitigations rule** and record it as a modelling assumption, not a result.
+> The rate-not-level assumption is now *supported*: feather regrowth occurs at the next molt, not
+> during sustained lay.
 
 **Owner ruling.** This is option 1 from the acceptance-criterion-7 finding: give DP07 an actual lever by making its already-authored rungs reduce feather damage. It is the largest single task in this plan and it touches calibrated anchors, so read the whole task before starting.
 
