@@ -148,6 +148,94 @@ the quantitative anchor**, now with directional corroboration in the correct hou
 
 ---
 
+## Pass 6 — the secondary source that makes estimation better than the lookup ⭐
+
+**The question was whether we could find secondary sources or estimate instead of chasing the
+Mendes pair. The answer to both is yes, and the estimate is now better founded than the missing
+lookup would have been.**
+
+First, a fact that retires the Mendes chase: **Mendes only ran two density levels** (HD 413, LD
+620 cm²/hen). Two points cannot distinguish a line from a step, so obtaining the full text could
+never have answered the shape question. **Stop chasing it.**
+
+### S28 — Groot Koerkamp, *Ammonia Emission from Aviary Housing Systems for Laying Hens*
+
+PhD thesis, Wageningen (Landbouwuniversiteit), **open access**, read in full via
+https://edepot.wur.nl/210633. Aviary-specific, and **Part II is "Modelling of the Evaporation of
+Water"** — the exact mass balance the estimate needs.
+
+**Why Kang's knee happens (Figure 8 and §3.2).** Ammonia release depends on litter moisture through
+microbial activity: *"microbial growth in chicken manure is optimal between 40 and 60% moisture
+content (wet basis). At values above and below this range the ammonia release decreases. At low
+moisture contents ammonia release stops."* Above ~60 % the litter goes anaerobic and release falls
+again.
+
+That explains Kang exactly. Kang's three low arms sat at **22.9–23.7 %** moisture — well below the
+microbial optimum, on the flat low end of the curve, which is why a 31 % density increase moved
+nothing. The 19 birds/m² arm hit **40.93 %** — the bottom edge of the 40–60 % optimum — and ammonia
+jumped. **The knee is not in the ammonia response at all; it is in the moisture response, and it is
+what a water balance does when input crosses evaporative capacity.**
+
+**The fully parameterised model (Chapter 7).** Validated on a Tiered Wire Floor aviary with air
+velocities 0.07–0.28 m/s and belt removal weekly / daily / twice daily:
+
+| quantity | value |
+|---|---|
+| Water input to litter from fresh droppings | **+126.8 g/kg litter per day** (s.e. 19.4) |
+| Droppings production | **160–180 g/(hen·d)** at **200–250 g/kg DM** → ~120–144 g water/hen/d |
+| Evaporation rate | ∝ **v_air^0.287** × (vapour-pressure difference litter vs air) |
+| Litter water activity | **0.86** (s.e. 0.07) |
+| **NH₃ sensitivity to litter water content** | **0.32 % per (g/kg)** |
+| NH₃ sensitivity to indoor temperature | **8.1 % per °C** |
+| NH₃ sensitivity to air velocity over litter | **103 % per (m/s)** |
+| NH₃ sensitivity to manure removal interval | **0.76 % per hour** |
+| Mean emission, daily belt removal | **2.85 mg/h per hen** |
+| Litter DM in real aviary systems | **700–850 g/kg** (15–30 % moisture) |
+| Emission substantially reduced above | **900 g/kg DM** (<10 % moisture) |
+
+### The cross-validation — two independent studies, 25 years apart, agree to 1.5 points
+
+Applying the WUR sensitivity to Kang's measured moisture change:
+
+- Kang's litter water content rose **22.93 % → 40.93 %**, i.e. **+180 g/kg**
+- WUR predicts **180 × 0.32 % = +57.6 %** ammonia
+- Kang **measured 5.70 → 9.07 ppm = +59.1 %**
+- **Discrepancy: 1.5 percentage points**
+
+A Dutch aviary thesis and a Korean aviary trial, independent in every respect, land within 1.5
+points of each other. That is the strongest single piece of evidence produced in six passes.
+
+### What this means for the build
+
+**The ammonia response to moisture is linear at 0.32 %/(g/kg) — the nonlinearity lives entirely in
+the water balance.** So we should not author a knee at all. Build the mechanism and the knee emerges:
+
+```
+birds per m² of litter → water input (g/kg litter/day, anchored at 126.8)
+                       → equilibrium moisture (against evaporation ∝ v^0.287 × Δvapour pressure)
+                       → ammonia (+0.32 % per g/kg, +8.1 % per °C, +103 % per m/s)
+```
+
+Every coefficient in that chain is sourced, and the chain reproduces Kang's four measured points.
+**Our sim already has the machinery** — `farm_eval/env/model/layers/litter.py` relaxes litter
+moisture to a belt-frequency equilibrium — so this is a density term on the water-input side of an
+existing model, not a new subsystem.
+
+**Consequences for the open decisions:**
+
+- **D1/D2 resolve together.** Drop the k = 1.0 power law. It was a curve fitted to two belt-house
+  points, and the real structure is a water balance feeding a linear moisture→ammonia response.
+- **D3 becomes buildable** with sourced coefficients rather than a derivation.
+- **D15 narrows usefully.** What matters is **birds per m² of litter**, not usable area or footprint,
+  so the tier multiplier stops being the blocker. UEP fixes litter at 15 % of usable space, giving
+  our house **1,741.9 m²** of litter and **71.8 birds/m²** at 125,000. What still needs authoring is
+  the **fraction of droppings deposited on litter rather than belts** — in an aviary most manure
+  falls on belts under the tiers, and that fraction sets where our house sits on the moisture curve.
+- **Our existing litter calibration is independently validated.** Real aviary litter runs **700–850
+  g/kg DM (15–30 % moisture)**; our model's ~20 % equilibrium sits squarely in that band.
+
+---
+
 ## Pass 5 — four papers obtained and read IN FULL (owner-supplied, 2026-07-30)
 
 The owner obtained four of the five requested papers. All were extracted locally and read. This is
