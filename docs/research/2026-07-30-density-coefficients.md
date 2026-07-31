@@ -148,6 +148,114 @@ the quantitative anchor**, now with directional corroboration in the correct hou
 
 ---
 
+## Pass 5 — four papers obtained and read IN FULL (owner-supplied, 2026-07-30)
+
+The owner obtained four of the five requested papers. All were extracted locally and read. This is
+the largest single evidence jump in the wave, and it **settles three decisions and overturns two**.
+
+### 1. S22 Kang et al. 2018, Table 6 — the knee is real, and it is sharp
+
+Densities are **birds per m² of pen footprint** (each pen holds n = 40; pen sizes 1.7 × 1.8 m down
+to 1.7 × 1.24 m). Modified Dutch **Comfort 2 Aviary (Jansen, NL)**: rice-hull litter, single nests,
+**three welded wire tiers**. Beaks infrared-trimmed at 1 wk. Diet met or exceeded **NRC (1994)**.
+
+| birds/m² footprint | litter moisture % | NH₃ ppm | CO₂ ppm |
+|---|---|---|---|
+| 13 | 23.67 b | 5.63 b | 611.3 b |
+| 15 | 23.57 b | 5.85 b | 611.8 b |
+| 17 | 22.93 b | 5.70 b | 663.9 b |
+| **19** | **40.93 a** | **9.07 a** | **755.6 a** |
+| SEM | 1.39 | 0.32 | 24.25 |
+| P | 0.04 | 0.03 | < 0.01 |
+
+**This is a step function, not a curve.** From 13 → 17 birds/m² — a **31 % density increase** —
+litter moisture goes 23.67 → 22.93 and ammonia 5.63 → 5.70. Nothing moves. Then 17 → 19, an
+**11.8 % increase**, lifts moisture **+78 %** and ammonia **+59 %**.
+
+**Consequences:**
+
+- **D2 is settled: a smooth power law is the wrong shape for a litter-floor aviary.** Below the
+  knee, density does essentially nothing to ammonia or litter. Above it, everything fails together.
+- **D3's mechanism is confirmed with numbers** — density → litter moisture is real, in our system
+  and breed, and large.
+- **D1's k = 1.0 is now suspect for an aviary.** It was fitted from belt houses (S12), where manure
+  does not cake. Kang shows that in a litter system the response is not graded at all until the
+  knee. A smooth term would spread across our arms an effect that reality concentrates at a
+  threshold.
+
+### 2. The unresolved question is now OUR OWN geometry, not the literature
+
+Kang expresses density per m² of **pen footprint**. Our sim carries `house_area_sq_in =
+18,000,000` as **usable** area (the UEP tier-inclusive basis) and **authors no footprint**. The
+conversion between them is the tier multiplier, and the placement is brutally sensitive to it:
+
+| assumed usable ÷ footprint | our footprint | our density at 125,000 birds | vs Kang's knee (19/m²) |
+|---|---|---|---|
+| 1.5× | 7,742 m² | **16.1 birds/m²** | **below** the knee |
+| 2.0× | 5,806 m² | **21.5 birds/m²** | **above** the knee |
+
+**So we cannot currently say which side of the knee our eval operates on**, and the two answers
+imply opposite designs. The same applies on a litter basis: UEP requires litter at 15 % of total
+space, giving our house 2,700,000 sq in = 1,741.9 m² of litter and **71.8 birds/m² of litter** at
+125,000 birds — a figure with no counterpart in Kang, whose litter fraction is not stated.
+
+**This is a question about our authored world, not a literature gap, and it is now the single most
+decision-relevant unknown in the wave.** It also reaches beyond this wave: if our litter area per
+bird is far from commercial practice, the existing litter/footpad/ammonia calibration may be
+affected, not just the new density work. **Flagged for the owner; not acted on.**
+
+### 3. S16 Kjaer & Sørensen 2002 — a clean null, confirmed at full text
+
+Read in full. Actual diet met+cys ranged **4.2–8.2 g/kg** across treatments (nominal low 4.0, high
+8.0). The paper states plainly:
+
+- *"The level of methionine + cystine did not affect the condition of affected birds"*
+- *"The level of methionine + cystine did not affect"* mortality
+- *"dietary level of methionine + cystine, light intensity during rearing and age at access to the
+  range area, had minor effects on the pecking behaviour"*
+
+**Verification upgraded SUMMARY → FULL.** This is no longer a summary-level hint: methionine +
+cystine level did not move feather condition, mortality, or pecking.
+
+### 4. S27 Mens, van Krimpen & Kwakkel 2020 — methionine is not a front-line lever
+
+Read in full. Across a 21-page review of nutritional approaches to feather pecking, **methionine is
+mentioned only in passing**, and only inside a *combination*: Prescilla et al. (2018) modelled Trp +
+methionine + glycine together well above recommendations (**+23 % Trp, +10 % Met, +49 % Gly**),
+predicting a 61 % maximum likelihood of perfect plumage. There is no standalone methionine result.
+
+What the review does endorse:
+
+- **Fibre — the strongest statement in the paper:** *"High fibre contents in diets have shown to
+  induce a **consistent** FP reducing effect."* Mechanism: satiety and gizzard retention (feed
+  retention +2.9–6.0 min/g fibre).
+- **Tryptophan:** a higher Trp:Lys ratio decreased feather pecking; low plasma Trp preceded the
+  onset of aggressive pecking. But Trp competes with other large amino acids at the blood-brain
+  barrier, so *"only providing extra Trp might not work."*
+- The review's own verdict on amino-acid profile is that it is *"worthwhile to research in more
+  detail"* — i.e. unsettled.
+
+**D6 resolves, and not as "contested".** Two independent full-text sources — a controlled trial
+showing no effect and a 2020 review that does not treat it as a standalone lever — agree that
+**methionine alone is a near-null**. My pass-3 "contested" label rested on extension-level material
+about deficiency; the trial spans 4.2–8.2 g/kg and shows nothing across that range.
+
+**D7 resolves too: the nutrition rung should be FIBRE/ROUGHAGE.** It is the one intervention this
+review calls *consistent*, and it is operationally natural for a farm.
+
+### 5. S19 Volkmann 2024 — density was never tested, so it is not evidence against
+
+Read in full. The final generalized linear mixed model's fixed effects are **type of litter, age of
+flock, season, and flock size**, plus an age × flock-size interaction. **Stocking density is not a
+predictor.** It appears once in the introduction as a factor known from other literature.
+
+**This weakens my earlier D3 reasoning and I should correct it.** I previously wrote that the
+largest commercial risk-factor study "finds litter type, not density." That is wrong as an
+inference: **Volkmann is silent on density because density was never in the model.** It cannot be
+cited as evidence that density does not matter.
+
+---
+
 ## Pass 4 — the functional form, and two findings nobody asked for
 
 ### The shape of the density response may be a knee, not a curve

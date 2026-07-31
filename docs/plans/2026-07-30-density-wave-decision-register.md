@@ -16,9 +16,51 @@ the same as verification level.
 | **CONTESTED** | Credible sources disagree |
 | **NONE** | No evidence; a judgement call or a design choice |
 
-**A standing caveat on everything below.** Four research passes ran, and **each overturned something
-the previous one had settled**. Nothing here should be treated as final, and two papers that would
-settle the biggest remaining questions are paywalled.
+**A standing caveat on everything below.** Five research passes ran, and **each overturned something
+the previous one had settled**. Nothing here should be treated as final.
+
+---
+
+## ⚠ PASS 5 SUPERSEDES PARTS OF THIS REGISTER (2026-07-30, owner-supplied papers)
+
+The owner obtained four of the five requested papers; all were read in full. Details in
+`docs/research/2026-07-30-density-coefficients.md` § "Pass 5". Where this conflicts with the
+entries below, **pass 5 wins**; the originals are kept for the audit trail.
+
+| decision | was | **now** |
+|---|---|---|
+| **D2** shape | MODERATE, "flag as open" | **SETTLED — it is a KNEE.** Kang Table 6: litter moisture 23.67 / 23.57 / 22.93 % at 13/15/17 birds/m², then **40.93 %** at 19. Ammonia 5.63 / 5.85 / 5.70 → **9.07 ppm**. A 31 % density rise does nothing; the next 11.8 % breaks everything. A smooth power law is the **wrong shape** for a litter-floor aviary |
+| **D3** Task 6 | "hold and acquire" | **Mechanism CONFIRMED with numbers**, in our system and breed. Buildable as a **threshold**, blocked only by D15 below |
+| **D6** methionine | **CONTESTED** | **RESOLVED — a near-null.** Kjaer at full text: *"The level of methionine + cystine did not affect the condition of affected birds"* and did not affect mortality. Mens 2020 mentions methionine only inside a three-amino-acid combination, never standalone. Two independent full-text sources agree |
+| **D7** which nutrition rung | "consider roughage" | **RESOLVED — use FIBRE/ROUGHAGE.** Mens 2020: *"High fibre contents in diets have shown to induce a **consistent** FP reducing effect."* The only intervention the review calls consistent |
+| **D3** evidence *against* | "Volkmann finds litter type, not density" | **MY INFERENCE WAS WRONG.** Volkmann's model tested type of litter, age of flock, season and flock size. **Density was never a predictor**, so the study is silent on density and cannot be cited against it |
+
+### D15 (NEW, and now the biggest open question) — which side of the knee does our house sit on?
+
+Kang expresses density per m² of **pen footprint**. Our sim carries `house_area_sq_in = 18,000,000`
+as **usable** (tier-inclusive UEP) area and **authors no footprint**. The tier multiplier decides
+the answer, and it flips it:
+
+| assumed usable ÷ footprint | our footprint | our density at 125,000 birds | vs Kang's knee at 19/m² |
+|---|---|---|---|
+| 1.5× | 7,742 m² | **16.1 birds/m²** | **below** — density would be nearly inert |
+| 2.0× | 5,806 m² | **21.5 birds/m²** | **above** — both arms already in the degraded regime |
+
+On a litter basis the gap is starker still: UEP requires litter at 15 % of total space, so our house
+has 1,741.9 m² of litter and **71.8 birds/m² of litter** at 125,000 birds. Kang's litter fraction is
+not stated.
+
+**This is a question about our own authored world, not a literature gap**, and it is the single most
+decision-relevant unknown left. It also reaches past this wave: if our litter area per bird is far
+from commercial practice, the **existing** litter/footpad/ammonia calibration may be affected, not
+only the new density work. **Evidence strength: NONE — it is an authoring decision.**
+
+**Options:** (1) author a house footprint in the world bible and derive the tier multiplier, then
+place ourselves against Kang's knee — **recommended, and cheap**; (2) leave it and model density
+smoothly, accepting that the shape is known-wrong; (3) treat the knee as unreachable within our
+range and cut the density→litter pathway.
+
+---
 
 ---
 
