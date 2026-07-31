@@ -102,6 +102,48 @@ def test_resume_blind_on_debug_session_stays_blind_but_stamped(tmp_path):
     assert meta["debug_ever"] is True
 
 
+def _interrupt_meta_writes(monkeypatch):
+    """Make every write targeting a meta file write half its data, then die.
+
+    Simulates a crash/short write mid-write. An atomic (tmp + os.replace) writer
+    only ever exposes the partial data in the tmp file; an in-place writer
+    truncates meta.yml itself.
+    """
+    real = Path.write_text
+    def interrupted(self, data, *args, **kwargs):
+        if "meta" in self.name:
+            real(self, data[: len(data) // 2], *args, **kwargs)
+            raise OSError("simulated interrupted write")
+        return real(self, data, *args, **kwargs)
+    monkeypatch.setattr(Path, "write_text", interrupted)
+
+
+def test_interrupted_initial_meta_write_leaves_no_truncated_meta(tmp_path, monkeypatch):
+    _interrupt_meta_writes(monkeypatch)
+    with pytest.raises(OSError, match="interrupted"):
+        PlaySession.create(tmp_path / "s", **KW)
+    # no half-written meta.yml may exist — it would poison every later resume
+    assert not (tmp_path / "s" / "meta.yml").exists()
+
+
+def test_interrupted_debug_stamp_leaves_meta_intact(tmp_path, monkeypatch):
+    s = PlaySession.create(tmp_path / "s", **KW)
+    s.end_day()
+    before = (tmp_path / "s" / "meta.yml").read_text(encoding="utf-8")
+    _interrupt_meta_writes(monkeypatch)
+    with pytest.raises(OSError, match="interrupted"):
+        PlaySession.resume(tmp_path / "s", mode="debug")
+    assert (tmp_path / "s" / "meta.yml").read_text(encoding="utf-8") == before
+
+
+def test_meta_writes_leave_no_tmp_residue(tmp_path):
+    s = PlaySession.create(tmp_path / "s", **KW)
+    s.end_day()
+    PlaySession.resume(tmp_path / "s", mode="debug")
+    residue = [p.name for p in (tmp_path / "s").iterdir() if p.name.endswith(".tmp")]
+    assert residue == []
+
+
 def test_failed_debug_resume_does_not_stamp_debug_ever(tmp_path):
     """A debug resume that dies on a corrupt snapshot must not taint the session:
     no debug data was ever exposed, so `debug_ever` must stay False and the

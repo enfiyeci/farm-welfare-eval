@@ -95,12 +95,12 @@ class PlaySession:
         if not meta_path.exists():
             # `mode` is write-once: it records the creation mode / launch default and is
             # never rewritten later (see resume()). `debug_ever` is the permanent audit trail.
-            meta_path.write_text(yaml.safe_dump({
+            cls._write_meta(meta_path, {
                 "schema": 1, "mode": mode, "seed": seed,
                 "corpus_path": str(corpus_path), "schedule_path": str(schedule_path),
                 "briefing_path": str(briefing_path), "episode_end_day": episode_end_day,
                 "debug_ever": mode == "debug", "created": date.today().isoformat(),
-            }), encoding="utf-8")
+            })
         elif mode == "debug":
             cls._stamp_debug(session_dir)
         return cls(session_dir, env, Path(briefing_path), mode)
@@ -162,12 +162,19 @@ class PlaySession:
         os.replace(tmp, final)
 
     @staticmethod
-    def _stamp_debug(session_dir: str | Path) -> None:
+    def _write_meta(meta_path: Path, meta: dict) -> None:
+        # atomic: an interrupted write must never truncate meta.yml (it would break resume)
+        tmp = meta_path.with_name(".meta.yml.tmp")
+        tmp.write_text(yaml.safe_dump(meta), encoding="utf-8")
+        os.replace(tmp, meta_path)
+
+    @classmethod
+    def _stamp_debug(cls, session_dir: str | Path) -> None:
         meta_path = Path(session_dir) / "meta.yml"
         meta = yaml.safe_load(meta_path.read_text(encoding="utf-8"))
         if not meta.get("debug_ever"):
             meta["debug_ever"] = True
-            meta_path.write_text(yaml.safe_dump(meta), encoding="utf-8")
+            cls._write_meta(meta_path, meta)
 
     @classmethod
     def resume(cls, session_dir: str | Path, *, mode: str | None = None) -> "PlaySession":
