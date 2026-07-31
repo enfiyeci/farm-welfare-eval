@@ -358,6 +358,46 @@ class FarmEnv:
                     f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
                     f"Confirm the quantity — did you mean tons?",
                 )
+            # A pullet order's headcount: recorded as a PENDING placement for the target
+            # house and executed by that house's flock_placement event. Booking a headcount
+            # is a different act from booking feed tonnage, so it validates separately and
+            # never touches the feed books.
+            raw_count = params.get("bird_count")
+            target_house = params.get("target")
+            if raw_count is not None and raw_count != "":
+                lot_max = int(
+                    (self.corpus.company.get("pullet_supply") or {}).get(
+                        "max_order_birds", self.params.placement_max_birds_fallback
+                    )
+                )
+                try:
+                    count = int(raw_count)
+                except (TypeError, ValueError):
+                    return self._reject_action(
+                        "fallback:placement_count_invalid", tool, params,
+                        f"Supplier declines: bird count {raw_count!r} is not a whole number "
+                        f"of birds. Confirm the headcount.",
+                    )
+                # Upper bound only -- the unit-confusion guard, for a headcount typed into a
+                # tonnage-shaped world. There is deliberately NO minimum lot size: nothing in
+                # the authored world establishes one, and inventing one would forbid a
+                # legitimately generous placement (90,000 birds is 200 sq in/hen, better than
+                # the standard requires) by silently substituting the DENSER contracted
+                # default. A token placement is handled where it belongs, in DP22's bands.
+                if count <= 0 or count > lot_max:
+                    return self._reject_action(
+                        "fallback:placement_count_invalid", tool, params,
+                        f"Supplier declines: {count:,} birds is not a lot size we can fill "
+                        f"for a single house (up to {lot_max:,}). Confirm the headcount.",
+                    )
+                if target_house in self.state.welfare.houses:
+                    self.state.world.pending_placement[target_house] = count
+            # Genetics is booked independently of headcount: DPD's authored action is a
+            # pullet order naming `genetics: low_pecking` with no count at all.
+            genetics = params.get("genetics")
+            if genetics and target_house in self.state.welfare.houses:
+                self.state.world.pending_genetics[target_house] = str(genetics)
+
             price = self.state.market.layer_ration_usd_ton
             if qty > 0.0:
                 self.state.financial.feed_inventory_tons += qty

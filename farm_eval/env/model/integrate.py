@@ -158,6 +158,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 fte_per_100k=fte_per_100k,
                 hours_per_fte_day=hours_per_fte_day,
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
+                pullet_price_mult=(
+                    state.world.pullet_price_usd_bird.get(hid, params.pullet_cost_usd)
+                    / params.pullet_cost_usd
+                ),
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost

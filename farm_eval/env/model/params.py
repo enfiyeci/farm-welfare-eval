@@ -139,6 +139,10 @@ class ModelParams(BaseModel):
     other_var_usd_doz: float = 0.27                 # vet/med/supplies/admin misc
     pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle
     pullet_cost_usd: float = 5.00                   # point-of-lay pullet
+    # Unit-confusion rail for a pullet order's headcount, used ONLY when the corpus omits
+    # pullet_supply.max_order_birds (the fixture corpora do). Lot sizing is a commercial
+    # term of the world, so corpus wins where it is authored.
+    placement_max_birds_fallback: int = 200_000
 
     # Heat stress layer constants (model-params.md §Heat stress)
     # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
