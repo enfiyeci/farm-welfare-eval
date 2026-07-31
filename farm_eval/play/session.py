@@ -43,7 +43,13 @@ def _load_records(record_path: Path) -> list[dict]:
     records = []
     for i, line in enumerate(lines):
         if not line:
-            continue
+            if i == len(lines) - 1:
+                continue  # the empty chunk after the final newline (or an empty file)
+            raise ValueError(
+                f"corrupt session record at {record_path}:{i + 1}: blank line. The "
+                f"writer never emits blank lines; skipping one would desync seq "
+                f"accounting and the snapshot-tail replay filter."
+            )
         try:
             records.append(json.loads(line.decode("utf-8")))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:

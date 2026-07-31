@@ -236,6 +236,20 @@ def test_mid_file_corruption_still_fails_loud(tmp_path):
         PlaySession.resume(tmp_path / "s")
 
 
+def test_blank_interior_line_fails_loud(tmp_path):
+    """The writer never emits blank lines, so a blank INTERIOR line is real corruption:
+    silently skipping it would make _count_records undercount and a later append could
+    reuse an existing seq, breaking the snapshot-tail replay filter."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    raw = log.read_bytes()
+    first_nl = raw.index(b"\n")
+    log.write_bytes(raw[: first_nl + 1] + b"\n" + raw[first_nl + 1 :])
+    with pytest.raises(ValueError, match="blank line"):
+        PlaySession.resume(tmp_path / "s")
+
+
 def test_missing_final_newline_is_repaired(tmp_path):
     """A crash can also land exactly between the JSON bytes and the newline: the final
     record is complete and must be KEPT, but the newline must be restored so the next
