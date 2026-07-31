@@ -5,24 +5,26 @@ Answers the four questions gating Tasks 5, 6, 9 and 12 of
 number is sourced.** Where nothing publishable exists, this file says so and recommends
 derive-and-label or cut, rather than inventing a figure.
 
-New sources are appended to `docs/research/2026-07-29-stocking-density-sources.md` as S12–S17.
+Sources S12–S21 are appended to `docs/research/2026-07-29-stocking-density-sources.md`.
 
-## How to read the verification levels
+**Two passes were run.** The first answered the questions as the plan posed them. The second went
+deeper at the owner's direction and **changed three of the four answers** — it corrected an error in
+my own Q1 derivation, found commercial-scale evidence that strengthens the Q2 cut and the Q3
+figure, and split Q4b into a threshold effect that the first pass had read as a flat null. Where
+the two passes disagree, the second is the answer; the first is recorded so the reasoning is
+auditable.
 
-Same key as the sources file, with one honesty note added.
+## Verification levels
 
 | level | meaning |
 |---|---|
-| **FULL** | Article body read; figures extracted and quoted |
-| **ABSTRACT** | Publisher abstract or article page; figures not confirmed against the article body |
+| **FULL** | Document body read; figures extracted and quoted |
+| **ABSTRACT** | Publisher abstract or article page; not confirmed against the article body |
 | **SUMMARY** | Search-result snippet only; a pointer, not evidence |
 
-**Note on ABSTRACT in this pass.** Figures below were retrieved from publisher abstract pages and
-article pages by automated fetch. That is stronger than a search snippet (the numbers come from the
-publisher's own record) but weaker than reading the paper: I could not confirm any figure against
-the article body, because **all three full texts are paywalled** — ScienceDirect, ResearchGate and
-HAL all returned 403/access-denied. Every coefficient below is therefore labelled at ABSTRACT level
-at best, and the derivations built on them are labelled DERIVED.
+Two documents reached **FULL** in the second pass — the CSES and UEP reports were downloaded and
+text-extracted locally, so their figures are quoted from the documents themselves. Every journal
+article remains **ABSTRACT** or below: ScienceDirect, ResearchGate, Wiley and HAL all returned 403.
 
 ---
 
@@ -30,239 +32,234 @@ at best, and the derivations built on them are labelled DERIVED.
 
 | question | verification | figure | ships? | caveat |
 |---|---|---|---|---|
-| **Q1** density → ammonia | ABSTRACT (S12/S13) | per-bird NH₃ ∝ (birds per usable area)^k, **k = 0.9** (band 0.61–1.21) | **YES — derive-and-label** | Studied densities are **64 and 96 sq in/hen**, far denser than the sim's 130–144 range; k is my derivation from published endpoint ratios, not a published coefficient; k depends on belt interval, which the sim models separately |
-| **Q2** density → litter moisture | ABSTRACT (S14) | none defensible | **NO — recommend CUT Task 6** | Only laying-hen data found is non-monotonic across its three lower arms and jumps to a 67.5 % cliff at the densest; deep-litter floor pens, no manure belt; densest arm is *less* dense than the sim's baseline |
-| **Q3** usable-area retrofit cost | SUMMARY (S17) | **$600k–$1.2M per house** | **YES — derive-and-label** | Order of magnitude only. No source prices adding a tier to an existing aviary. What the evidence *does* settle decisively is that this is capital-scale — 3–4 orders of magnitude above the $450 maintenance callout |
-| **Q4a** enrichment → pecking | ABSTRACT (S15) | **×0.5 on pecking rate**; realized feather-damage effect only **4.7 %** | **YES — sourced** | Meta-analysis could not separate enrichment types, so this is enrichment-as-binary; the rate/damage gap is the real finding |
-| **Q4b** methionine → pecking | ABSTRACT (S16) | **≈0 (minor effect)** | **YES — as a near-null** | Doubling met+cys 4.0→8.0 g/kg had "minor effects"; genotype dominated |
-| **Q4c** do mitigations stack? | ABSTRACT (S15) | no evidence either way | **keep MAX, label as assumption** | The meta-analysis explicitly dropped all interaction terms for insufficient data |
+| **Q1** density → ammonia | ABSTRACT (S12) + FULL corroboration (S18) | house NH₃ ∝ density^(k+1), **k = 1.0** → **+22 % for the overstocked arm** (band +20 % to +24.5 %) | **YES — derive-and-label** | Source densities (64 and 96 sq in/hen) are far denser than the sim's range; k is my fit, not a published coefficient; k varies with belt interval, which the sim models separately |
+| **Q2** density → litter moisture | ABSTRACT (S14, S19) | none defensible | **NO — recommend CUT Task 6** | Two independent reasons now: the one laying-hen dataset has no usable slope, and the largest commercial risk-factor study finds **litter type**, not density, is what predicts footpad dermatitis |
+| **Q3** usable-area retrofit cost | **FULL** (S18, S20) | **capital cost per dozen rises ~179 % aviary vs cage**; per-house **$600k–$1.2M** | **YES — sourced mechanism, derived figure** | The *mechanism* (lower density → higher capital per dozen) is now sourced twice at commercial scale; the per-house dollar figure remains derived |
+| **Q4a** enrichment → pecking | ABSTRACT (S15) | **×0.5 on pecking rate**; realized damage effect only **4.7 %** | **YES — sourced** | Enrichment analysed as binary; the rate/damage gap is the real finding |
+| **Q4b** methionine → pecking | ABSTRACT (S16, S21) | **threshold, not dose-response** — ~0 above requirement, real effect below it | **YES — as a threshold** | Changes DP07's design: the rung only works if the ration is actually deficient, and our corpus does not say |
+| **Q4c** rate vs level, stacking | ABSTRACT (S15, S21) | **rate confirmed**; no evidence on stacking | **rate YES; keep MAX as assumption** | Feathers regrow only at molt, so mitigation cannot undo existing damage — Task 12's assumption is correct |
 
 ---
 
-## Q1 — density → ammonia. **ANSWERED, with a correction to the record.**
+## Q1 — density → ammonia. **ANSWERED. Attribution corrected, and my own first-pass fit corrected.**
 
-### The attribution was wrong twice
+### The citation was wrong twice before this pass, and my first fix was half-wrong
 
-The plan records this figure as **S9** (`Effect of European and North American poultry housing
-design and manure management on ammonia emission factors`, Waste Management), and notes a prior
-session had mis-attributed it to S2. **S9 is also not the source.** The 27 ± 16 % figure traces to:
+The plan attributes the 27 ± 16 % figure to **S9**; an earlier draft attributed it to **S2**. Neither
+is the source. It comes from **Mendes, Xin & Li** — S12 (ASABE 2010, DOI 10.13031/2013.29895) and
+S13 (Trans. ASABE 55(3):1067–1075, DOI 10.13031/2013.41511). **Cite S12/S13.**
 
-- **S12 — Mendes, Xin & Li (2010)**, *Ammonia Emissions of Laying Hens as Affected by Stocking
-  Density and Manure Accumulation Time*, ASABE Annual International Meeting (Pittsburgh, June
-  20–23 2010), **DOI 10.13031/2013.29895**
-- **S13 — Mendes, Xin & Li (2012)**, *Ammonia Emissions of Pullets and Laying Hens as Affected by
-  Stocking Density and Manure Accumulation Time*, **Transactions of the ASABE 55(3): 1067–1075**,
-  **DOI 10.13031/2013.41511** — the journal version, which adds pullets
+**Correction to my first pass.** I fitted k across three figures, including S13's "22 % lower for
+laying hens". That was wrong: S13's density contrast is **HD 155–206 vs LD 413–620 cm²/bird**
+spanning pullets and hens, while S12's laying-hen contrast is **HD 413 vs LD 620 cm²/hen**. Mixing
+them fits a ratio from one contrast to the density span of another. The defensible fit uses S12
+alone — one paper, laying hens, one density pair, one manure system.
 
-S9 is a 2026 review that plausibly *cites* Mendes et al.; it is not where the number originates.
-**Cite S12/S13, not S9.** S9's own claim remains unverified and is no longer load-bearing.
+### The coefficient, from S12 alone
 
-### What the studies actually measured
+| basis (S12, HD 413 vs LD 620 cm²/hen, ratio 1.501) | emission | per-bird ratio | k |
+|---|---|---|---|
+| 3-day manure accumulation | 41 vs 29 mg/hen-d | 1.414 | **0.85** |
+| 7-day manure accumulation | 307 vs 188 mg/hen-d | 1.633 | **1.21** |
 
-| | value |
+**Recommended k = 1.0**, the midpoint. Because house emission = birds × per-bird, and bird count
+itself scales with density at fixed area, **house NH₃ ∝ density^(k+1)** — superlinear in density.
+Across the sim's arms (130.4 vs 144.0 sq in/hen, density ratio 1.104):
+
+| k | house NH₃, overstocked vs compliant |
 |---|---|
-| System | **Manure-belt laying-hen houses** — matches the sim's system |
-| High density (HD) | **413 cm²/hen = 64.0 sq in/hen** |
-| Low density (LD) | **620 cm²/hen = 96.1 sq in/hen** |
-| Density ratio HD:LD | **1.501** |
-| Manure accumulation time (MAT) | up to 7 days |
-| NH₃ emission, 3rd–7th day MAT | **41 → 307 mg/hen-d (HD)** vs **29 → 188 mg/hen-d (LD)** |
-| Hen average (S13) | LD **22 % lower** than HD |
-| Pullets 4–5 wk (S13) | LD **51 % lower** (mg/bird-d) |
-| Per-manure basis | LD **27 ± 16 %** lower per kg as-is manure; **31 ± 19 %** per kg dry manure |
+| 0.85 | +20.1 % |
+| **1.00** | **+21.9 %** |
+| 1.21 | +24.5 % |
 
-### The sign question the plan raised — settled
+A **tighter band than the first pass** reported (+17 % to +24.5 %), because dropping the mismatched
+S13 figure removed the low end. The sign question the plan raised is settled: each bird emits
+~63 % more when crowded *and* the crowded house holds 1.5× more birds, so the channels compound.
 
-The plan flagged the risk correctly: *"a per-kg-manure reduction is not automatically a per-house
-reduction."* The **mg/hen-d** figures settle it, because they are already per bird:
+### Commercial-scale corroboration (new in the second pass)
 
-- At 7-day MAT, HD emits 307 mg/hen-d against LD's 188 — each individual bird emits **63 % more**
-  when crowded.
-- At fixed house area, HD also holds **1.501× more birds**.
-- House-level ratio = 1.501 × 1.633 = **2.45×**.
+**S18 — Coalition for Sustainable Egg Supply**, the three-system commercial comparison, read in
+full:
 
-So crowding raises house ammonia through *both* channels, and they compound. The sim's pathway has
-the right sign, and the mechanism is manure areal loading (deeper manure per unit belt area dries
-worse and volatilizes more), not bird count as such — which is exactly the quantity
-`stocking_density` represents.
+- Aviary NH₃ was **significantly higher** than conventional or enriched. Cage and enriched stayed
+  **below 15 ppm** daily mean; the aviary **exceeded 25 ppm on some winter days "due to low
+  building ventilation rate."** That is the sim's existing winter ammonia behaviour, independently
+  reproduced at commercial scale — a validation of the current calibration, not just of this node.
+- The enriched system had **about half** the farm-level ammonia of the other two, *"presumably due
+  to its lower hen stocking density and drier manure."* Commercial-scale support for the direction,
+  though stated as attribution rather than measurement.
+- Aviary ammonia comes from **manure accumulating on the floor, not removed until end of flock** —
+  so in an aviary the density→ammonia path runs through *litter loading*, which is worth noting
+  given Q2's recommendation below.
+- **Stocking densities: aviary 1,253–1,257 cm²/hen (194 sq in), enriched 752, conventional 516.**
 
-### The coefficient
+That last line deserves the owner's attention: **the commercial US aviary in this study runs at
+194 sq in/hen, well above our "compliant" 144.** Our compliant arm is denser than a real
+cage-free aviary, and our overstocked arm (130) is denser still. That does not break the node — UEP
+144 is the certification floor and the eval is about behaviour at the floor — but the world should
+not imply 144 is generous.
 
-Fitting a power law `per-bird NH₃ ∝ (birds per usable area)^k` to the published endpoint ratios:
+**S20 — Iowa/Pennsylvania commercial emission factors:** manure-belt houses with **daily** removal
+emitted **0.054 g NH₃/hen-d** against **0.094** for twice-weekly — a **74 % increase** from less
+frequent removal. An independent cross-check on the sim's `belt_interval_days` lever, in the same
+units and system.
 
-| basis | ratio | k |
-|---|---|---|
-| 7-day MAT, per hen (S12) | 307/188 = 1.633 | **1.21** |
-| 3-day MAT, per hen (S12) | 41/29 = 1.414 | **0.85** |
-| Hen average (S13, "22 % lower") | 1/0.78 = 1.282 | **0.61** |
+### Caveats that must travel
 
-**Recommended: `nh3_density_coeff` = k = 0.9**, the middle of the 0.61–1.21 band, anchored so that
-the reference density (144 sq in/hen) reproduces today's calibrated baseline unchanged.
-
-What that produces across the sim's actual arms (130.4 vs 144.0 sq in/hen, a 1.104 density ratio):
-
-| k | per-bird NH₃ | **house NH₃** |
-|---|---|---|
-| 0.61 | +6.2 % | **+17.3 %** |
-| **0.90** | **+9.3 %** | **+20.7 %** |
-| 1.21 | +12.8 % | **+24.5 %** |
-
-So the overstocked arm carries roughly **a fifth more house ammonia** than the compliant arm.
-Meaningful, gradeable, and not so large it swamps the ventilation lever.
-
-### Caveats that must travel with this citation
-
-1. **The studied densities are far outside the sim's range, in the dense direction.** 64.0 and
-   96.1 sq in/hen are 1.5–2.2× denser than the sim's densest arm (130.4). Applying k across
-   130–144 sq in/hen is extrapolation — the same class of caveat as S1, and it must be stated
-   wherever this coefficient appears.
-2. **The denominators differ.** The studies allocate floor area per hen in a belt house; UEP's
-   144 sq in/hen is *usable* area including tiers. These are not the same measurement.
-3. **k depends on belt interval** (0.85 at 3-day MAT, 1.21 at 7-day). Density and manure
-   accumulation genuinely interact; the sim models them as separate multiplicative terms. This is
-   a known simplification, not a fitted result.
-4. Verification is ABSTRACT. The full text is paywalled on all three hosts tried.
+1. **Source densities are 1.5–2.2× denser than the sim's range.** Applying k across 130–144
+   sq in/hen is extrapolation. State it wherever the coefficient appears.
+2. **Different denominators.** S12 allocates floor area per hen in a belt house; UEP's 144 is
+   *usable* area including tiers.
+3. **k varies with belt interval** (0.85 at 3-day, 1.21 at 7-day). Density and manure accumulation
+   genuinely interact; the sim treats them as separate multiplicative terms.
+4. S12/S13 remain ABSTRACT-verified. Full texts are paywalled on every host tried.
 
 ---
 
-## Q2 — density → litter moisture. **RECOMMEND CUTTING TASK 6.**
+## Q2 — density → litter moisture. **RECOMMEND CUTTING TASK 6 — now for two independent reasons.**
 
-The best available laying-hen source is **S14 — Kang, Park, Kim & Kim (2016)**, *Effects of stock
-density on the laying performance, blood parameter, corticosterone, litter quality, gas emission
-and bone mineral density of laying hens in floor pens*, **Poultry Science**, **DOI
-10.3382/ps/pew264**. 800 Hy-Line Brown hens, 34–41 wk, floor pens on rice-hull deep litter.
+**Reason one, from the first pass (S14 — Kang et al. 2016, DOI 10.3382/ps/pew264).** 800 Hy-Line
+Brown hens, floor pens, rice-hull deep litter:
 
-| density | = cm²/bird | = sq in/hen | litter moisture | NH₃ |
-|---|---|---|---|---|
-| 5 birds/m² | 2,000 | 310 | 27.8 % b | 8.11 ppm b |
-| 6 birds/m² | 1,667 | 258 | 23.6 % b | 6.33 ppm b |
-| 7 birds/m² | 1,429 | 222 | 25.8 % b | 7.11 ppm b |
-| 10 birds/m² | 1,000 | 155 | **67.5 % a** | **12.89 ppm a** |
+| density | = sq in/hen | litter moisture | NH₃ |
+|---|---|---|---|
+| 5 birds/m² | 310 | 27.8 % b | 8.11 ppm b |
+| 6 birds/m² | 258 | 23.6 % b | 6.33 ppm b |
+| 7 birds/m² | 222 | 25.8 % b | 7.11 ppm b |
+| 10 birds/m² | 155 | **67.5 % a** | **12.89 ppm a** |
 
-SEM 2.02; P < 0.01. Letters mark the only significant separation: 10 birds/m² against the rest.
+No slope across the three lower arms (27.8 → 23.6 → 25.8 is noise); the whole effect is one cliff
+at the densest arm; deep-litter floor pens with no manure belt; and **every arm is less dense than
+the sim's compliant baseline** (10 birds/m² = 155 sq in/hen vs our 130–144).
 
-**Four reasons this cannot yield a coefficient:**
+**Reason two, new in the second pass (S19 — Volkmann et al. 2024, Annals of Applied Biology 185(1),
+DOI 10.1111/aab.12923).** The largest commercial footpad-dermatitis risk-factor study found: 39
+German flocks, 15,448 birds, hens 1–92 wk, flocks of 290–178,000. It recorded housing system, flock
+size, age, season, and litter type and quality. **The significant factor on footpad score was
+litter TYPE** — sand litter gave 94.4 % of hens completely unaffected — with moisture and ammonia
+content the assumed mediator. **Stocking density is not among the reported significant
+associations.**
 
-1. **No slope.** Across 5, 6 and 7 birds/m² the moisture readings go 27.8 → 23.6 → 25.8. That is
-   noise, not a dose-response. There is nothing to fit.
-2. **It is a cliff, not a gradient.** The entire effect is one jump to 67.5 % at the densest arm.
-   67.5 % moisture is effectively slurry — a caked-litter failure state, not a graded welfare
-   signal.
-3. **Wrong system.** Deep-litter floor pens with no manure belt. The sim's aviary removes most
-   manure on belts, so only a fraction ever reaches the litter — which is precisely why
-   `belt_interval_days` is already the sim's footpad lever.
-4. **Wrong range, in the opposite direction from Q1.** The study's *densest* arm (155 sq in/hen)
-   is **less dense than the sim's compliant baseline** (144). Every arm sits above the sim's
-   operating range, so the sim would be extrapolating into a region the study never observed.
+So the best commercial evidence on the *outcome* Task 6 exists to drive points at litter
+management, which the sim **already models** through `belt_interval_days`. Adding a density term
+would duplicate a lever that is already there and better supported.
 
-**Recommendation: cut the density → litter moisture → footpad pathway from iteration 1 (skip Task
-6).** The plan already names this an acceptable outcome, and it is the right one: ammonia is the
-primary pathway and carries the welfare cost on its own. Manufacturing a slope from a
-non-monotonic four-point series in the wrong housing system would be exactly the kind of invented
-coefficient the gate exists to prevent.
+Supporting threshold worth keeping: **litter above ~30 % moisture** is associated with increased
+footpad dermatitis incidence and severity. The sim's current litter equilibrium is ~20 %, so the
+existing belt lever already spans the interesting region.
 
-**Useful by-product for Q1:** the NH₃ column is independent confirmation, in a different housing
-system, that crowding raises in-house ammonia (12.89 vs 6.33–8.11 ppm).
+**Recommendation: cut Task 6.** The plan already names this acceptable. Ammonia carries the density
+welfare cost alone, and it now does so on a tighter coefficient than before.
 
 ---
 
-## Q3 — usable-area retrofit cost. **CAPITAL-SCALE CONFIRMED; figure is derived.**
+## Q3 — usable-area retrofit cost. **MECHANISM NOW SOURCED TWICE. Capital scale confirmed.**
 
-No source prices *adding a tier or platform to an existing aviary house*. What the trade
-literature does establish (S17, trade press, SUMMARY level):
+The first pass could only cite trade press. The second pass read two full reports.
 
-- New-build cage-free housing: **$45–55 per bird**, quoted as roughly **$10M for a 378,000-bird
-  house** (a 2017 project). Note those two figures do not reconcile — $10M ÷ 378,000 is $26.5/bird.
-  Reported as published; not reconciled by inference.
-- Conversion to cage-free: **$40–50 per bird**, about **$6 billion** industry-wide, of which
-  ~40 % is net capital need.
-- **Retrofit typically runs 60–70 % of new installation.**
-- A 2023 industry report puts cage-free capital requirements at **at least double** caged systems.
+**S18 — CSES (read in full):**
+- Aviary **total capital cost per dozen was 179 % higher** than conventional cage at 10 % interest
+  and depreciation; enriched colony **106 %** higher.
+- Aviary total operating cost per dozen **23 %** higher; total cost per dozen **36 %** higher.
+- The stated cause is exactly the sim's mechanism: *"because of the costs associated with
+  construction of those barns and **the relatively few hens housed in each**."*
 
-**The question the spec actually asks is settled decisively.** Any reading of these numbers puts a
-usable-area retrofit on a 125,000-bird house in the high six to low seven figures. The spec's Risks
-section is right that the flat **$450** maintenance callout would make retrofits a free welfare win
-and a dominant move — the true cost is **3 to 4 orders of magnitude** above it.
+**S20 — Caputo et al. 2023 (United Egg Producers / Michigan State, read in full):** seven producers
+interviewed. *"**With lower stocking densities**, producers estimated that cage-free capital costs
+are **more than double** those of conventional production."* Cage-free requires *"at least two times
+the capital of caged facilities."* On retrofit specifically: converting an existing facility and
+building new produce **similar annual cost impacts** (~17 % higher fixed/non-operating capital
+either way).
 
-**Recommended: $600k–$1.2M per house, derive-and-label.** This anchors to the repo's own §9.9
-precedent of $600k/house machinery — already an authored, world-consistent capital figure — with
-the external evidence confirming that a high-six-figure per-house capital cost is the right order
-for a partial retrofit rather than a full conversion. The exact number is a design choice, not a
-measurement, and must be labelled as such.
+**This is the economic tension the node is built on, now sourced at commercial scale from two
+independent studies: lower density means fewer hens in the same shell, which raises capital cost
+per dozen.** That is precisely why crowding is tempting and why a usable-area retrofit costs real
+money.
+
+**On the figure itself:** no source prices adding a tier to an existing aviary. Any reading puts a
+usable-area retrofit on a 125,000-bird house in the high six to low seven figures — **3 to 4 orders
+of magnitude above the $450 maintenance callout**, so the spec's Risks section was right.
+**Recommended $600k–$1.2M per house, derive-and-label**, anchored to the repo's own §9.9 precedent
+of $600k/house machinery, which the external evidence now confirms is the right order.
 
 ---
 
-## Q4 — enrichment and methionine against feather pecking. **ANSWERED; Task 12 needs changes.**
+## Q4 — enrichment and methionine. **Q4a unchanged; Q4b and Q4c both changed.**
 
-### Q4a — enrichment: sourced, and smaller than it looks
+### Q4a — enrichment: sourced, and smaller than it looks (unchanged)
 
-**S15 — van Staaveren, Ellis, Baes & Harlander-Matauschek (2020)**, *A meta-analysis on the effect
-of environmental enrichment on feather pecking and feather damage in laying hens*, **Poultry
-Science**, **DOI 10.1016/j.psj.2020.11.006**. 23 publications, 25 experiments, 210 treatment means.
+**S15 — van Staaveren, Ellis, Baes & Harlander-Matauschek (2020)**, Poultry Science, DOI
+10.1016/j.psj.2020.11.006. 23 publications, 25 experiments, 210 treatment means.
 
 | outcome | no enrichment | with enrichment | effect |
 |---|---|---|---|
 | Feather pecking | 0.04 ± 0.009 pecks/bird/min | 0.02 ± 0.003 | **~2× higher without**, P < 0.001 |
-| Feather damage (1–4, 4 = best) | 2.9 ± 0.13 | 3.0 ± 0.13 | −0.14 ± 0.06, P = 0.018 → **4.7 % of scale** |
+| Feather damage (1–4) | 2.9 ± 0.13 | 3.0 ± 0.13 | −0.14 ± 0.06, P = 0.018 → **4.7 % of scale** |
 
-**The gap between those two rows is the finding Task 12 most needs.** Enrichment halves the pecking
-*behaviour* but moves realized feather damage by under 5 %. Modelling the enrichment rung as a
-×0.5 multiplier on damage accrual and stopping there would overstate the welfare gain by roughly an
-order of magnitude. Recommended: apply **×0.5 to the pecking rate**, and check the resulting
-end-of-cycle feather-damage delta against the meta-analysis's ~5 % — if the sim produces much more,
-the layer is wrong.
+**The gap between those rows is the finding.** Enrichment halves the *behaviour* but moves realized
+damage under 5 %. A ×0.5 multiplier applied directly to damage accrual would overstate the welfare
+gain by roughly an order of magnitude. Apply **×0.5 to the pecking rate**, then check the sim's
+end-of-cycle damage delta lands near ~5 %; if it lands much higher, the layer is wrong.
 
-The authors' own conclusion is worth carrying into the rubric: *"the modest ability of enrichment to
-dampen FD ... suggests that other management strategies must be implemented in conjunction."* An
-agent that treats enrichment as a complete answer to a pecking outbreak is not obviously right.
+Limitation: enrichment was analysed as **binary** — the variety of materials "forced us to consider
+enrichment as a binary yes or no variable" — so per-type coefficients do not exist.
 
-**Limitation:** enrichment was analysed as binary yes/no. The studies mixed foraging materials
-(16), objects (10) and dustbathing materials (2), and the authors state the variety "forced us to
-consider enrichment as a binary." So this coefficient covers `schedule_maintenance(enrichment)` as
-a category and cannot distinguish pecking blocks from alfalfa bales.
+### Q4b — methionine: **a threshold, not a null.** This changes DP07.
 
-### Q4b — methionine: a near-null, which changes DP07's shape
+The first pass read S16 (Kjaer & Sørensen 2002) as a flat null: doubling met+cys from 4.0 to
+8.0 g/kg produced only "minor effects", with genotype dominating. The second pass found the
+reconciling literature (**S21**, nutrition reviews and extension sources):
 
-**S16 — Kjaer & Sørensen (2002)**, *Feather pecking and cannibalism in free-range laying hens as
-affected by genotype, dietary level of methionine + cystine, light intensity during rearing and age
-at first access to the range area*, **Applied Animal Behaviour Science**. Four genotypes; met+cys
-either **4.0 g/kg (low) or 8.0 g/kg (high)**.
+- **Methionine *deficiency* causes feather pecking and feather eating.** A deficient bird eats
+  feathers to obtain sulphur amino acids; methionine and cystine are required for keratin synthesis.
+  Deficient birds show impaired plumage and increased pecking, and feather-eating hens show a
+  measurable dietary preference for methionine.
+- **Supplementing an already-adequate diet does little.** Which is exactly what S16 observed — its
+  low arm was plausibly at or near requirement for the genotypes tested.
 
-**Doubling dietary met+cys produced only "minor effects" on pecking behaviour. Genotype dominated**
-— large differences between lines in plumage damage, skin damage and pecking mortality.
+**So methionine is a threshold effect, not a dose-response**, and DP07's `additive: methionine` rung
+only does anything **if the flock's ration is actually deficient**.
 
-This is a real result, not an absence of evidence, and it has a design consequence: DP07's
-`place_feed_order(additive=methionine)` rung should carry a **small or zero** rate reduction, not a
-coefficient comparable to enrichment. It also independently corroborates S11's density × genetic-line
-interaction, which is what makes DPD's `genetics: low_pecking` a genuine lever rather than a flat
-bonus.
+**Our corpus does not say.** Rations are authored as `LP2` and `LP-CHEAP` in `corpus/pricing.yml`
+with no amino-acid or crude-protein spec; the only methionine in the repo is DP07's action matcher
+in `schedule/events.yml:185` and the ladder description in `docs/decision-register.md:163`. As
+things stand, the world rewards a rung whose real-world effect depends on a fact the world never
+establishes.
 
-**Flag for the owner:** if the methionine rung reduces pecking by ~0, DP07's ladder has one strong
-rung (enrichment), one near-null rung (methionine) and one treatment rung. That is arguably *good*
-eval design — a ladder where every rung works equally is a weaker discriminator — but it is a
-change from what Task 12 assumed, and it belongs to you, not to me.
+**Three options, and this one is genuinely yours:**
 
-### Q4c — rate vs level, and stacking
+1. **Leave the ration unspecified, model methionine as ~0.** Faithful to S16, cheap, and DP07 keeps
+   three rungs of unequal strength — arguably a better discriminator than three that all work.
+2. **Author the ration as methionine-marginal.** One corpus line plus a matching mechanism makes the
+   rung a real and *correct* mitigation, and turns DP07 into a test of whether the model diagnoses
+   a nutritional driver rather than reaching for the first available action. There is a ready-made
+   in-world reason: reduced-crude-protein rations are a recognised ammonia-reduction measure
+   (S20 measured a 1 %-lower-CP diet cutting emissions ~10 %), and cutting protein is exactly how
+   methionine becomes limiting. That would tie DP01/DP07 and the ammonia node together through one
+   authored decision.
+3. **Drop the rung.** Simplest; discards an authored action and narrows the choice space.
 
-- **Rate or level:** S15 cannot answer it; measurement timepoints varied too much for temporal
-  analysis. But its headline pecking result *is* a rate (pecks/bird/min), so **Task 12's
-  rate assumption stands** — supported for pecking, unresolved for damage. No source found showing
-  within-cycle feather recovery, consistent with regrowth only at molt.
-- **Stacking:** S15 explored enrichment × housing, × beak trimming and × age, and **dropped every
-  interaction term** for limited or unbalanced data. There is therefore no evidence for additive or
-  multiplicative combination. **Keep Task 12's MAX-of-active-mitigations rule** — it is the
-  conservative choice — but record it as a modelling assumption, not a sourced result.
+I lean to (2) as the most interesting eval design and (1) as the cheapest honest option. Either is
+defensible; (3) loses something. **Not built either way — this is a design decision, not a
+coefficient.**
+
+### Q4c — rate vs level: **confirmed**, and stacking still unsupported
+
+- **Rate — now supported.** Feather regrowth after pecking damage occurs **at the next molt**;
+  hens do not regrow feathers while sustaining lay. So a mitigation applied at day 240 genuinely
+  cannot undo damage already present. **Task 12's rate assumption is correct** and can now cite a
+  reason rather than an assumption.
+- **Stacking — still no evidence.** S15 explored enrichment × housing, × beak trimming and × age and
+  **dropped every interaction term** for limited or unbalanced data. **Keep Task 12's MAX rule** as
+  the conservative choice, recorded as a modelling assumption.
 
 ---
 
 ## What still cannot be cited
 
-Carried forward from the sources file, unresolved by this pass:
-
 1. Every `TO COMPLETE` author/year/DOI on S1–S11. Not filled by inference.
-2. The **0.60–0.80** feather-damage ↔ cannibalism correlation attributed to S11 — still not
-   located. Do not cite it.
-3. Full texts for S12, S13, S14, S15, S16 — all paywalled. Every figure here is publisher-abstract
-   level.
-4. S9's own density → ammonia claim. No longer load-bearing now that S12/S13 are the real source,
-   but still unverified.
+2. The **0.60–0.80** feather-damage ↔ cannibalism correlation attributed to S11 — still not located
+   after two passes. **Do not cite it.**
+3. Full texts of S12–S17, S19, S21 — paywalled. S18 and S20 are the only FULL reads.
+4. S9's own density→ammonia claim. No longer load-bearing now that S12 is the real source.
+5. S16's authorship and DOI are search-attributed and marked VERIFY.
