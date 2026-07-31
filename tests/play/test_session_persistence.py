@@ -170,6 +170,101 @@ def test_failed_replay_on_debug_resume_does_not_stamp_debug_ever(tmp_path):
     assert meta["debug_ever"] is False
 
 
+def test_resume_tolerates_torn_final_line(tmp_path):
+    """A crash mid-append leaves a truncated final JSONL line. That record never became
+    durable, so resume drops it (with a loud warning) and replays from the last complete
+    record — the session must not require manual log surgery."""
+    a = PlaySession.create(tmp_path / "a", **KW)
+    _play_script(a)
+    straight = a._env.state.model_dump(mode="json")
+
+    b = PlaySession.create(tmp_path / "b", **KW)
+    b.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.2})
+    b.end_day()
+    b.call("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.4})
+    del b
+    with (tmp_path / "b" / "session.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write('{"seq": 99, "kind": "op", "op": "adjust_setp')  # torn: no closing, no newline
+    with pytest.warns(RuntimeWarning, match="torn"):
+        r = PlaySession.resume(tmp_path / "b")
+    r.end_day()
+    assert r._env.state.model_dump(mode="json") == straight
+
+
+def test_torn_final_line_is_truncated_from_the_log(tmp_path):
+    """Repair must remove the torn line from disk: a later plain append would otherwise
+    concatenate onto the partial line and corrupt the NEXT record too."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    n_good = len(log.read_text(encoding="utf-8").splitlines())
+    with log.open("a", encoding="utf-8") as fh:
+        fh.write('{"seq": 99, "kind"')
+    with pytest.warns(RuntimeWarning, match="torn"):
+        r = PlaySession.resume(tmp_path / "s")
+    r.note("post-repair")
+    records = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+    assert [rec["seq"] for rec in records] == list(range(n_good + 1))
+
+
+def test_resume_tolerates_torn_final_line_inside_a_utf8_codepoint(tmp_path):
+    """Records are written with ensure_ascii=False, so the log carries raw UTF-8 and a
+    crash can tear the final line midway through a multibyte character. That must repair
+    like any torn line, not die in UnicodeDecodeError before the repair logic runs."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    n_good = len(log.read_text(encoding="utf-8").splitlines())
+    with log.open("ab") as fh:
+        fh.write('{"seq": 99, "kind": "note", "text": "café'.encode("utf-8")[:-1])  # cut mid-é
+    with pytest.warns(RuntimeWarning, match="torn"):
+        PlaySession.resume(tmp_path / "s")
+    records = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == n_good
+
+
+def test_mid_file_corruption_still_fails_loud(tmp_path):
+    """Only the FINAL line can be a torn append; corruption anywhere else is real
+    damage and must not be silently dropped."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    lines = log.read_text(encoding="utf-8").splitlines()
+    lines[1] = '{"seq": 1, "kind"'
+    log.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="corrupt session record"):
+        PlaySession.resume(tmp_path / "s")
+
+
+def test_blank_interior_line_fails_loud(tmp_path):
+    """The writer never emits blank lines, so a blank INTERIOR line is real corruption:
+    silently skipping it would make _count_records undercount and a later append could
+    reuse an existing seq, breaking the snapshot-tail replay filter."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    raw = log.read_bytes()
+    first_nl = raw.index(b"\n")
+    log.write_bytes(raw[: first_nl + 1] + b"\n" + raw[first_nl + 1 :])
+    with pytest.raises(ValueError, match="blank line"):
+        PlaySession.resume(tmp_path / "s")
+
+
+def test_missing_final_newline_is_repaired(tmp_path):
+    """A crash can also land exactly between the JSON bytes and the newline: the final
+    record is complete and must be KEPT, but the newline must be restored so the next
+    append starts on a fresh line instead of merging into it."""
+    s = PlaySession.create(tmp_path / "s", **KW)
+    _play_script(s)
+    log = tmp_path / "s" / "session.jsonl"
+    log.write_text(log.read_text(encoding="utf-8").rstrip("\n"), encoding="utf-8")
+    r = PlaySession.resume(tmp_path / "s")
+    r.note("after")
+    records = [json.loads(line) for line in log.read_text(encoding="utf-8").splitlines()]
+    assert records[-1] == {"seq": len(records) - 1, "kind": "note",
+                           "day_index": r.meta()["day_index"], "text": "after"}
+
+
 @pytest.mark.parametrize("snapshot_content", [
     "{truncated",
     "null",
