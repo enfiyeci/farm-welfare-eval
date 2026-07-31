@@ -47,6 +47,7 @@ article remains **ABSTRACT** or below: ScienceDirect, ResearchGate, Wiley and HA
 | **Q4a** enrichment → pecking | ABSTRACT (S15) | **×0.5 on pecking rate**; realized damage effect only **4.7 %** | **YES — sourced** | Enrichment analysed as binary; the rate/damage gap is the real finding |
 | **Q4b** methionine → pecking | ABSTRACT (S16, S21) + **FULL** (S23) | **genuinely CONTESTED** — the trial and the mechanism disagree | **YES — as a contested point, small effect, no penalty either way** | Pass 3 reversed pass 2. Hy-Line W-80's own spec shows the trial's "low" arm was **already deficient**, so it tested deficient-vs-adequate and *still* found only minor effects |
 | **Q4c** rate vs level, stacking | ABSTRACT (S15, S21) | **rate confirmed**; no evidence on stacking | **rate YES; keep MAX as assumption** | Feathers regrow only at molt, so mitigation cannot undo existing damage — Task 12's assumption is correct |
+| **Bonus — Task 7** density → feather damage | ABSTRACT (**S25**) | **feather score ∝ density^0.75** (tail region, the most responsive) | **YES — sourced, and better than any gate answer** | Not one of the four gate questions, but pass 4 found numeric Hy-Line Brown data where none was expected. Conventional cages, 500–750 cm²/bird — the usual range caveat |
 
 ---
 
@@ -144,6 +145,75 @@ the quantitative anchor**, now with directional corroboration in the correct hou
 3. **k varies with belt interval** (0.85 at 3-day, 1.21 at 7-day). Density and manure accumulation
    genuinely interact; the sim treats them as separate multiplicative terms.
 4. S12/S13 remain ABSTRACT-verified. Full texts are paywalled on every host tried.
+
+---
+
+## Pass 4 — the functional form, and two findings nobody asked for
+
+### The shape of the density response may be a knee, not a curve
+
+S22's own conclusion, recovered in pass 4, is a **threshold statement**: *"increasing the density
+beyond 17 birds/m² produces some negative effects on the laying performance of Hy-Line Brown hens
+kept in this type (**Comfort 2 Aviary system, Jansen, The Netherlands**) of aviary system."* At 19
+birds/m², litter moisture, NH₃, CO₂, floor-egg rate, H/L ratio and corticosterone all move together,
+and production, feed intake, eggshell strength and egg mass all fall together. At 17 and below,
+nothing moves.
+
+**That is a different functional form from the smooth power law Q1 recommends**, and the split is
+mechanistically sensible:
+
+- **Belt houses (S12) show a graded response** — manure on a belt does not cake, so emission scales
+  smoothly with areal loading.
+- **Litter-floor aviaries (S22) show a knee** — litter has a moisture tipping point. Past it the
+  litter cakes, goes anaerobic, and several indicators fail at once.
+
+**Recommendation: keep k = 1.0 as the smooth ammonia term, but flag to the owner that a threshold
+term may be the more faithful shape for a litter-floor aviary**, and that the sim's arms (130.4 vs
+144.0 sq in/hen) may sit on the same side of such a knee — in which case the modelled effect would
+be real but the *shape* wrong. Resolving this needs S22's table, which is the same acquisition
+already named for Q2. One paper unblocks both.
+
+### Task 7 arrived sourced, without being asked for
+
+**S25 — Son, Kim, Kang, Kim, Jeon, Hong & Kang (2020)**, Korean Journal of Poultry Science
+**47(2):83–93**, DOI **10.5536/KJPS.2020.47.2.83**. Hy-Line Brown, 32→60 wk, **750 vs 500 cm²/bird**:
+
+| feather score (1–4, lower better) | 750 cm² | 500 cm² | P |
+|---|---|---|---|
+| Tail, 60 wk | 1.80 ± 0.10 | **2.44 ± 0.11** | < 0.01 |
+| Back, 60 wk | 1.50 ± 0.10 | 1.88 ± 0.12 | < 0.05 |
+| Wing, 60 wk | 1.84 ± 0.09 | 2.12 ± 0.11 | < 0.05 |
+| Head, 60 wk | 1.14 ± 0.05 | 1.42 ± 0.11 | < 0.05 |
+| Back, 51 wk | 1.24 ± 0.06 | 1.66 ± 0.09 | < 0.01 |
+| Tail, 51 wk | 1.68 ± 0.08 | 2.10 ± 0.08 | < 0.01 |
+
+Egg quality was largely unaffected; corticosterone trended higher at 500 cm² without reaching
+significance. Fitting the most responsive region (tail) to a 1.5× density ratio gives
+**feather score ∝ density^0.75**, i.e. **+7.7 %** across the sim's arms.
+
+**Task 7 was never gated**, so this is a windfall — and it is better evidence than Q2 ever produced:
+numeric, our breed, multiple body regions, two ages, consistent direction. Same range caveat as
+everywhere else (500–750 cm² = 77.5–116 sq in/hen, denser than the sim), and it is conventional
+cages rather than an aviary.
+
+### An aviary enrichment trial found *no* feather effect — which supports Q4a rather than undermining it
+
+**S26 — Son, Lee, Kim, Kang & Kang (2022)**, *Animals* **12(9):1165**, DOI **10.3390/ani12091165**.
+**2,196 hens in an aviary**, 26 weeks, pumice stone and alfalfa hay.
+
+- **"The feather condition scores for the laying hens were similar across all treatments
+  (p > 0.05)."** No enrichment effect on plumage.
+- But egg production rose (p < 0.001), mislaid eggs fell with hay (p < 0.01), and **blood
+  corticosterone was significantly lowered** (p < 0.05).
+
+**This is exactly what S15's 4.7 % damage effect predicts**: a single 2,196-hen trial should fail to
+detect it. So it corroborates the meta-analysis rather than contradicting it, and it sharpens the
+Q4a warning — **a ×0.5 multiplier applied to feather damage would produce an effect that real
+aviary trials cannot see.** Apply it to the rate.
+
+It also carries a rubric implication: **enrichment's welfare case does not rest on feather score.**
+It measurably lowered a stress hormone and improved production. A rubric that credits enrichment
+only through plumage would miss most of what it actually does.
 
 ---
 
@@ -379,5 +449,13 @@ damage and cannibalism mortality"* could not be located and must not be cited. P
 3. Full texts of S12–S17, S19, S21, S22 — paywalled. S18, S20 and S23 are the only FULL reads.
 4. S9's own density→ammonia claim. No longer load-bearing now that S12 is the real source.
 5. S16's authorship and DOI are search-attributed and marked VERIFY.
-6. **S22's numeric table — the top acquisition priority of this wave.** It is the one document that
-   would convert Task 6 from held to buildable, in the right system and breed.
+6. **S22's numeric table — the top acquisition priority of this wave**, and pass 4 raised its value
+   further: it would settle **both** Q2's magnitude **and** Q1's functional form (smooth curve vs
+   knee). One paper unblocks two questions. Four access routes tried — ScienceDirect, Elsevier
+   linkinghub, ResearchGate, the journal's own site — all 403 or 404.
+7. **S27 — Mens, van Krimpen & Kwakkel (2020)**, *Nutritional approaches to reduce or prevent
+   feather pecking in laying hens: any potential to intervene during rearing?*, World's Poultry
+   Science Journal **76**: 591–610, DOI **10.1080/00439339.2020.1772024**. Identified in pass 4 as
+   **the** review that would adjudicate Q4b's methionine conflict directly. Three access routes
+   tried (Taylor & Francis, the WUR repository, an open index) — none served the abstract. **Second
+   acquisition priority.**

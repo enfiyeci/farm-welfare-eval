@@ -258,7 +258,9 @@ HAL all returned 403).
 
 ### S22 — Stocking density in an AVIARY system, Hy-Line Brown ⭐ highest-value unread source
 - **Title:** Effect of stocking density on laying performance, egg quality and blood parameters of Hy-Line Brown laying hens in an aviary system
-- **Authors / year:** Kang et al. · 2018 (complete author list `TO COMPLETE`)
+- **Authors / year:** H. K. Kang, S. B. Park, J. J. Jeon, H. S. Kim, S. H. Kim, E. Hong, C. H. Kim · 2018 *(author list completed in pass 4)*
+- **Aviary type:** Comfort 2 Aviary system (Jansen, The Netherlands)
+- **The paper's own conclusion is a THRESHOLD:** *"increasing the density beyond 17 birds/m² produces some negative effects on the laying performance"* — at 19 birds/m² litter moisture, NH₃, CO₂, floor-egg rate, H/L ratio and corticosterone all move together while production, feed intake, eggshell strength and egg mass all fall; at 17 and below nothing moves. This bears on Q1's **functional form**: belt houses (S12) show a graded response, litter-floor aviaries appear to show a **knee**
 - **Journal:** European Poultry Science **82** · **DOI:** 10.1399/eps.2018.245
 - **URL:** https://www.sciencedirect.com/science/article/pii/S0003909825009944
 - **Read:** **SUMMARY** — full text and numeric tables paywalled; ScienceDirect, ResearchGate and the journal site all returned 403/404
@@ -285,6 +287,35 @@ HAL all returned 403).
 - **Figures used (n = 16 units, three observation periods):** feather-pecking rate ↔ **cannibalism (skin-lesion) score** rs = **0.769** (p = 0.001), **0.832** (p < 0.001), **0.519** (p = 0.039); feather-pecking rate ↔ total plumage score rs = −0.756, −0.892, −0.672
 - **Role:** **supersedes S11's unlocatable 0.60–0.80 claim.** Schwarzer et al. does NOT cite any earlier 0.60–0.80 damage↔mortality source (it cites Bilcík & Keeling 1999 for different variables), so S11's figure as written remains unverified — but this is a properly sourced replacement in the same range
 - **⚠ The variables are NOT the same:** this correlates pecking **RATE** with a **skin-lesion SCORE**, not feather damage with **MORTALITY**. Any design text leaning on "damage predicts cannibalism deaths" must be restated as "pecking rate predicts skin injury"
+
+### S25 — Stocking density and FEATHER CONDITION, Hy-Line Brown (numeric)
+- **Title:** Effect of Stocking Density on the Feather Condition, Egg Quality, Blood Parameters and Corticosterone Concentration of Laying Hens in Conventional Cage
+- **Authors / year:** J. S. Son, C. H. Kim, H. K. Kang, H. S. Kim, J. J. Jeon, E. C. Hong, B. S. Kang · 2020
+- **Journal:** Korean Journal of Poultry Science **47(2): 83–93** · **DOI:** 10.5536/KJPS.2020.47.2.83
+- **URL:** https://www.ekjps.org/archive/view_article?pid=kjps-47-2-83
+- **Read:** **ABSTRACT** (tables via article-page fetch; open-access journal)
+- **Design:** Hy-Line Brown, 32→60 wk (28-wk trial), battery cages, **750 vs 500 cm²/bird**
+- **Figures used — feather score (1–4, lower better):** tail 60 wk **1.80 ± 0.10 vs 2.44 ± 0.11** (P < 0.01); back 60 wk 1.50 ± 0.10 vs 1.88 ± 0.12 (P < 0.05); wing 1.84 vs 2.12 (P < 0.05); head 1.14 vs 1.42 (P < 0.05); back 51 wk 1.24 vs 1.66 and tail 51 wk 1.68 vs 2.10 (both P < 0.01). Egg quality largely unaffected; corticosterone higher at 500 cm² but not significant
+- **Supports:** **Task 7 (density → feather damage)** — fitting the tail region to the 1.5× density ratio gives **feather score ∝ density^0.75**, i.e. +7.7 % across the sim's arms. Task 7 was never gated, so this is a windfall, and it is stronger evidence than the Q2 gate question ever produced
+- **Caveat:** conventional cages, not an aviary; 500–750 cm² = **77.5–116 sq in/hen**, denser than the sim's range — the same extrapolation caveat as S1 and S12
+
+### S26 — Environmental enrichment in an AVIARY: no feather effect, real stress effect
+- **Title:** Effect of Providing Environmental Enrichment into Aviary House on the Welfare of Laying Hens
+- **Authors / year:** J. Son, W.-D. Lee, H.-J. Kim, B.-S. Kang, H.-K. Kang · 2022
+- **Journal:** Animals **12(9): 1165** · **DOI:** 10.3390/ani12091165
+- **URL:** https://pubmed.ncbi.nlm.nih.gov/35565591/
+- **Read:** **ABSTRACT**
+- **Design:** **2,196 hens in an aviary system**, 26 weeks; pumice stone and alfalfa hay, four units per replicate
+- **Figures used:** *"The feather condition scores for the laying hens were similar across all treatments (p > 0.05)"*; egg production increased (p < 0.001); mislaid eggs reduced in the hay group (p < 0.01); **blood corticosterone significantly lowered** (p < 0.05); creatinine and LDH decreased
+- **Role:** **corroborates rather than contradicts S15.** A 4.7 %-of-scale damage effect is exactly what a single 2,196-hen trial should fail to detect, so this sharpens the Q4a rule — a ×0.5 multiplier on feather DAMAGE would produce an effect real aviary trials cannot see. Apply it to the rate
+- **Rubric implication:** enrichment's welfare case does not rest on plumage. It lowered a stress hormone and raised production; a rubric crediting enrichment only through feather score would miss most of its effect
+
+### S27 — The review that would adjudicate Q4b (NOT OBTAINED — acquisition priority 2)
+- **Title:** Nutritional approaches to reduce or prevent feather pecking in laying hens: any potential to intervene during rearing?
+- **Authors / year:** A. J. W. Mens, M. M. van Krimpen, R. P. Kwakkel · 2020
+- **Journal:** World's Poultry Science Journal **76**: 591–610 · **DOI:** 10.1080/00439339.2020.1772024
+- **Read:** **NOT OBTAINED** — Taylor & Francis, the WUR repository and an open index all declined to serve the abstract
+- **Why it matters:** it is the targeted review of exactly the Q4b conflict — whether methionine supplementation above requirement reduces feather pecking, where S16's trial and S21's mechanistic literature disagree. A related van Krimpen review indicates **roughage** (maize/barley silage, carrots) decreases injurious pecking and **tryptophan** reduces feather pecking via serotonin turnover, which raises a further design question: DP07's nutrition rung is authored as *methionine*, but the better-supported nutritional levers may be **fibre/roughage and tryptophan**
 
 ---
 
