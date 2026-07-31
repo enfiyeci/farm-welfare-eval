@@ -166,6 +166,50 @@ def fire_events_in_window(
             capture_audit_snapshot(state, corpus)
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.FLOCK_PLACEMENT:
+            # Repopulation: the birds actually arrive. The count comes from the agent's pending
+            # pullet order if it booked one, otherwise the authored contracted default — so an
+            # agent that never engages still gets a COMPLIANT house rather than an empty one
+            # (an empty H6 is what made DP18's zero a false zero).
+            p = ev.payload
+            for required in ("house_id", "default_bird_count", "age_weeks"):
+                if required not in p:
+                    raise ValueError(f"flock_placement payload is missing {required!r}")
+            hid = p["house_id"]
+            if hid not in state.welfare.houses:
+                raise ValueError(f"flock_placement references unknown house_id: {hid!r}")
+            contracted = int(p["default_bird_count"])
+            count = int(state.world.pending_placement.get(hid, contracted))
+            state.world.bird_count[hid] = count
+            # Record the BLENDED price actually paid per bird, so the discount becomes real
+            # money. Without this the offer email's surplus price is narrative only: both
+            # placements would be costed at the same uniform rate, and the margin comparison
+            # would measure generic marginal-flock economics rather than the priced offer the
+            # model was actually shown. Prices are authored in the payload, never in logic.
+            #
+            # A PRICE, not a lump-sum charge. `pullet_amort_usd_bird_day` already books the
+            # acquisition cost every day per live bird, so adding the purchase price to
+            # other_cost_cum here would charge it twice. cost_step scales that existing daily
+            # rate instead — which also puts the saving where the agent can see it, in the
+            # per-house cost per dozen the COP report surfaces.
+            base_usd = float(p["contract_price_usd_bird"])
+            surplus_usd = float(p.get("surplus_price_usd_bird", base_usd))
+            at_contract = min(count, contracted)
+            above_contract = max(0, count - contracted)
+            state.world.pullet_price_usd_bird[hid] = (
+                (at_contract * base_usd + above_contract * surplus_usd) / count
+                if count > 0
+                else base_usd
+            )
+            # Back-date the flock's day-0 age so flock_age_weeks(age_at_start, day), which is
+            # age_at_start + day/7, returns the authored placement age ON the placement day.
+            state.world.age_weeks_at_start[hid] = float(p["age_weeks"]) - (ev.on_day / 7.0)
+            state.world.placement_day[hid] = ev.on_day
+            state.world.litter_age_days[hid] = float(p.get("litter_age_days", 0.0))
+            for system, value in (p.get("setpoints") or {}).items():
+                state.world.setpoints.setdefault(hid, {})[system] = float(value)
+            if any(f in p for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:
             # corporate_request / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).

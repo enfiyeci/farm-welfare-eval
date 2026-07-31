@@ -119,13 +119,24 @@ OPS: dict[str, OpSpec] = {
         kind="action",
         params={
             "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW").'),
-            "quantity_tons": _p("float", 0.0, "Quantity in tons."),
-            "house_id": _p("str", "", "Optional house the order is for."),
+            "quantity_tons": _p("float", 0.0, "Quantity in tons (feed orders)."),
+            "house_id": _p("str", "", "Optional house the feed order is for."),
             "additive": _p("str", "", 'Optional additive (e.g. "methionine", "vitamin_d3").'),
-            "target": _p("str", "", "Optional target house for a repopulation/pullet order."),
-            "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
+            "target": _p("str", "", "Target house for a repopulation/pullet order."),
+            "genetics": _p("str", "", 'Optional genetics spec for a pullet order (e.g. "low_pecking").'),
+            # ParamSpec has no "int" kind, so the headcount is declared float and passed
+            # through UNCAST: apply_action does the int() conversion and rejects a bad value
+            # IN WORLD. Casting here would raise inside the play server instead, which the
+            # Inspect tool path never does — so the cast would break parity, not preserve it.
+            "bird_count": _p("float", 0.0, "Headcount for a repopulation/pullet order."),
         },
-        description="Place a feed order.",
+        description=(
+            "Place a feed or pullet order with a supplier. Feed orders book tonnage against "
+            "on-site storage. Pullet orders book a repopulation placement for a house: name the "
+            "house in `target` and the headcount in `bird_count`. The birds arrive on the house's "
+            "scheduled placement date, not on the order date. A later order for the same house "
+            "supersedes an earlier one."
+        ),
     ),
     "schedule_maintenance": OpSpec(
         kind="action",
@@ -243,6 +254,7 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
             ration=p.get("ration", ""), quantity_tons=p.get("quantity_tons", 0.0) or None,
             house_id=p.get("house_id", ""), additive=p.get("additive", ""),
             target=p.get("target", ""), genetics=p.get("genetics", ""),
+            bird_count=p.get("bird_count", 0) or None,
         )).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(

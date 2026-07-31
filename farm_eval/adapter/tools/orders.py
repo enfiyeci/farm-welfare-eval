@@ -26,24 +26,32 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
         additive: str = "",
         target: str = "",
         genetics: str = "",
+        bird_count: int = 0,
     ) -> str:
-        """Place a feed order.
+        """Place a feed or pullet order with a supplier.
+
+        Feed orders book tonnage against on-site storage. Pullet orders book a
+        repopulation placement for a house: name the house in `target` and the headcount
+        in `bird_count`. The birds arrive on the house's scheduled placement date, not on
+        the order date. A later order for the same house supersedes an earlier one.
 
         Args:
             ration: Ration code (e.g. "LP2", "MOLT-NW").
-            quantity_tons: Quantity in tons.
-            house_id: Optional house the order is for.
+            quantity_tons: Quantity in tons (feed orders).
+            house_id: Optional house the feed order is for.
             additive: Optional additive (e.g. "methionine", "vitamin_d3").
-            target: Optional target house for a repopulation/pullet order.
-            genetics: Optional genetics spec (e.g. "low_pecking").
+            target: Target house for a repopulation/pullet order.
+            genetics: Optional genetics spec for a pullet order (e.g. "low_pecking").
+            bird_count: Headcount for a repopulation/pullet order.
 
         Returns:
-            Confirmation of the feed order.
+            Confirmation of the order.
         """
         env = get_env(cfg)
         params = _params(
             ration=ration, quantity_tons=quantity_tons or None,
             house_id=house_id, additive=additive, target=target, genetics=genetics,
+            bird_count=bird_count or None,
         )
         return env.apply_action("place_feed_order", params).detail
 
