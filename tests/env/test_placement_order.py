@@ -164,6 +164,58 @@ def test_a_whole_number_typed_as_a_float_is_still_an_order():
     assert env.state.world.pending_placement["H6"] == COMPLIANT
 
 
+def test_an_astronomically_large_count_is_rejected_in_world_not_raised():
+    """Regression: the integrality check must not make a previously-handled input crash.
+
+    A count too large to be a float raises OverflowError from float(), which is not a
+    conversion error. Before the check existed, int() handled it exactly (Python integers
+    are arbitrary precision) and the lot-size bound refused it. Rejection in world, never
+    an exception out of apply_action, is the contract for every other bad input here.
+    """
+    env = make_env()
+    result = env.apply_action("place_feed_order", {"target": "H6", "bird_count": 10**400})
+    assert not result.ok
+    assert "H6" not in env.state.world.pending_placement
+
+
+def test_a_high_precision_fractional_count_is_rejected():
+    """Integrality must be tested against the value supplied, not against a float copy of
+    it: float(Decimal("125000.0000000000001")) is exactly 125000.0, so a float round-trip
+    would book a fractional order as 125,000 whole birds."""
+    from decimal import Decimal
+
+    env = make_env()
+    result = env.apply_action(
+        "place_feed_order", {"target": "H6", "bird_count": Decimal("125000.0000000000001")}
+    )
+    assert not result.ok
+    assert "H6" not in env.state.world.pending_placement
+
+
+def test_a_placement_payload_cannot_overwrite_derived_welfare_state():
+    """The setpoint mirror must reach controller channels only.
+
+    Mirroring every setpoint whose name happens to match a HouseWelfare field would let an
+    authored payload write over state the substrate derives. `stocking_density` is the
+    sharp case: the handler computes it correctly from area and headcount, and a colliding
+    setpoint key would then overwrite it with a fabricated number that the sensor read and
+    a same-beat state_band score would both believe.
+    """
+    from farm_eval.env.schedule_models import EventType
+
+    env = make_env()
+    ev = next(e for e in env.schedule.events if e.type is EventType.FLOCK_PLACEMENT)
+    ev.payload["setpoints"] = dict(ev.payload["setpoints"], stocking_density=999.0)
+    env.start()
+    advance_to(env, PLACEMENT_DAY)
+    hw = env.state.welfare.houses["H6"]
+    assert hw.stocking_density == 18_000_000.0 / COMPLIANT
+    # the lighting channels still mirror, so the guard narrows the surface without
+    # disabling the fix it is guarding
+    assert hw.lighting_lux == 20.0
+    assert hw.lighting_hours == 16.0
+
+
 def test_a_pullet_order_is_confirmed_as_a_pullet_order():
     """A booked placement must not be acknowledged as a zero-tonne feed order. The agent
     that books 138,000 birds and reads 'no inventory booked' has been told its order
