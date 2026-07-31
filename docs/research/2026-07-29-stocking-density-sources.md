@@ -150,6 +150,75 @@ Citation-grade source list for the research behind
 
 ---
 
+## Added by the 2026-07-30 coefficient-verification pass (Task 0)
+
+Dispositions and derivations in `docs/research/2026-07-30-density-coefficients.md`. All five were
+retrieved from publisher abstract/article pages by automated fetch — **stronger than a search
+snippet, weaker than reading the paper**. Full texts are paywalled (ScienceDirect, ResearchGate and
+HAL all returned 403).
+
+### S12 — Ammonia emissions of laying hens by stocking density and manure accumulation time
+- **Title:** Ammonia Emissions of Laying Hens as Affected by Stocking Density and Manure Accumulation Time
+- **Authors / year:** L. B. Mendes, H. Xin, H. Li · 2010
+- **Venue:** ASABE Annual International Meeting, Pittsburgh, 20–23 June 2010 · **DOI:** 10.13031/2013.29895
+- **URL:** https://elibrary.asabe.org/abstract.asp?aid=29895
+- **Read:** **ABSTRACT**
+- **Design:** manure-belt laying-hen houses; HD **413 cm²/hen**, LD **620 cm²/hen**; MAT to 7 d
+- **Figures used:** NH₃ emission 3rd–7th d MAT **41→307 mg/hen-d (HD)** vs **29→188 mg/hen-d (LD)**; daily NH₃ ER increases exponentially with MAT (P < 0.0001); night-time hourly ER as high as daytime
+- **Supports:** **the density → ammonia coefficient (Q1).** The per-hen basis is what settles the sign question: each bird emits ~63 % more when crowded, and the crowded house also holds 1.5× more birds, so the two channels compound
+- **Caveat:** 413 and 620 cm²/hen are **64.0 and 96.1 sq in/hen — far denser than the sim's 130–144 range**; and the study's per-hen floor allocation is not the same denominator as UEP's usable-area 144
+
+### S13 — Same, journal version, adding pullets
+- **Title:** Ammonia Emissions of Pullets and Laying Hens as Affected by Stocking Density and Manure Accumulation Time
+- **Authors / year:** L. B. Mendes, H. Xin, H. Li · 2012
+- **Journal:** Transactions of the ASABE **55(3): 1067–1075** · **DOI:** 10.13031/2013.41511
+- **URL:** https://elibrary.asabe.org/abstract.asp??JID=3&AID=41511&CID=t2012&v=55&i=3&T=1
+- **Read:** **ABSTRACT**
+- **Figures used:** pullet HD 155–206 cm²/bird, LD 413–620 cm²/bird, birds 4–37 wk; LD **51 % lower** NH₃ ER (mg bird⁻¹ d⁻¹) for 4–5 wk pullets; LD averaged **22 % lower** for laying hens
+- **⚠ Attribution correction:** the **27 ± 16 % / 31 ± 19 % per-kg-manure** figures the design rests on originate **here and in S12 — NOT in S9**, which the plan named and which a still earlier draft attributed to S2. Cite S12/S13. S9's own claim remains unverified and is no longer load-bearing.
+
+### S14 — Stock density, litter quality and gas emission in floor-pen laying hens
+- **Title:** Effects of stock density on the laying performance, blood parameter, corticosterone, litter quality, gas emission and bone mineral density of laying hens in floor pens
+- **Authors / year:** H. K. Kang, S. B. Park, S. H. Kim, C. H. Kim · 2016
+- **Journal:** Poultry Science · **DOI:** 10.3382/ps/pew264
+- **URL:** https://pmc.ncbi.nlm.nih.gov/articles/PMC5144664/
+- **Read:** **ABSTRACT** (table values via article-page fetch)
+- **Design:** 800 Hy-Line Brown hens, 34–41 wk, floor pens on rice-hull deep litter
+- **Figures used:** litter moisture **27.8 / 23.6 / 25.8 / 67.5 %** and NH₃ **8.11 / 6.33 / 7.11 / 12.89 ppm** at **5 / 6 / 7 / 10 birds m⁻²** (SEM 2.02, P < 0.01; only 10 birds/m² separates)
+- **Role:** the basis for **cutting the density → litter moisture pathway (Q2)**. Non-monotonic across the three lower arms, one cliff at the densest, deep litter with no manure belt, and every arm **less dense than the sim's baseline** (10 birds/m² = 155 sq in/hen vs the sim's 130–144)
+- **Also supports:** independent confirmation in a second housing system that crowding raises in-house NH₃
+
+### S15 — Meta-analysis: environmental enrichment vs feather pecking and damage
+- **Title:** A meta-analysis on the effect of environmental enrichment on feather pecking and feather damage in laying hens
+- **Authors / year:** N. van Staaveren, J. Ellis, C. F. Baes, A. Harlander-Matauschek · 2020
+- **Journal:** Poultry Science · **DOI:** 10.1016/j.psj.2020.11.006
+- **URL:** https://pmc.ncbi.nlm.nih.gov/articles/PMC7858155/
+- **Read:** **ABSTRACT** (figures via article-page fetch)
+- **Design:** 23 publications, 25 experiments, 210 treatment means
+- **Figures used:** feather pecking **0.04 ± 0.009** (no enrichment) vs **0.02 ± 0.003** pecks/bird/min, ~2× higher without, P < 0.001; feather damage **−0.14 ± 0.06** on a 1–4 scale, P = 0.018, i.e. **4.7 % of scale**
+- **Supports:** Task 12's enrichment rung — **×0.5 on pecking rate**, but a realized damage effect under 5 %
+- **Caveats:** enrichment analysed as **binary** (the variety of materials "forced us to consider enrichment as a binary yes or no variable"), so per-type coefficients are unavailable; **all interaction terms were dropped** for limited/unbalanced data, so there is no evidence for or against mitigations stacking; rate-vs-recovery not resolvable
+
+### S16 — Methionine + cystine, genotype and feather pecking
+- **Title:** Feather pecking and cannibalism in free-range laying hens as affected by genotype, dietary level of methionine + cystine, light intensity during rearing and age at first access to the range area
+- **Authors / year:** Kjaer & Sørensen · 2002 — *attribution from search synthesis; **VERIFY at source**, and complete initials*
+- **Journal:** Applied Animal Behaviour Science · **DOI:** `TO COMPLETE`
+- **URL:** https://www.sciencedirect.com/science/article/abs/pii/S016815910100209X
+- **Read:** **SUMMARY**
+- **Design:** four genotypes (ISA Brown, New Hampshire, White Leghorn, NH×WL); met+cys **low 4.0 g/kg vs high 8.0 g/kg**
+- **Claim used:** dietary met+cys level, rearing light intensity and age at range access had **"minor effects"** on pecking behaviour; **large genotype differences** in plumage/skin damage and pecking mortality
+- **Supports:** a **small-or-zero** coefficient for DP07's methionine rung, and (with S11) the genetics-amplified shape of the pecking model
+
+### S17 — Cage-free capital cost (trade press)
+- **Sources:** WATTAgNet / WATTPoultry cage-free cost articles; *The Transition to Cage-Free Eggs* (Caputo et al., 2023, United Egg Producers)
+- **URLs:** https://www.wattagnet.com/egg/egg-production/article/15521471/new-cage-free-layer-housing-may-lower-production-costs-wattagnet · https://unitedegg.com/wp-content/uploads/2023/02/Full-Report-Caputo-et-al.-2023-February-20.pdf
+- **Read:** **SUMMARY** (the Caputo PDF did not text-extract; figures below are from search synthesis of the trade articles)
+- **Claims used:** new-build cage-free **$45–55/bird**, quoted as ~**$10M per 378,000-bird house** (2017 project — note these two do not reconcile, $10M ÷ 378,000 = $26.5/bird; reported as published, **not reconciled by inference**); conversion **$40–50/bird**, ~$6B industry-wide, ~40 % net capital need; **retrofit ≈ 60–70 % of new installation**; cage-free capital at least double caged
+- **Role:** establishes that a usable-area retrofit is **capital-scale — 3–4 orders of magnitude above the $450 maintenance callout**. No source prices adding a tier to an existing aviary, so the shipped figure is derive-and-label
+- **Caveat:** trade press, not peer-reviewed; the per-bird figures are conversion/new-build, not partial retrofit
+
+---
+
 ## Reference values used for calibration (not from this pass)
 
 Already in the repo; listed so a paper's methods section has one place to look.
@@ -172,7 +241,10 @@ Already in the repo; listed so a paper's methods section has one place to look.
 ## Before this is used in a paper
 
 1. Fill every `TO COMPLETE` from the article records. Do not infer them.
-2. Read **S9** in full — it carries the primary density→ammonia coefficient.
+2. ~~Read **S9** in full — it carries the primary density→ammonia coefficient.~~ **Superseded
+   2026-07-30:** S9 does **not** carry that coefficient. It traces to **S12/S13** (Mendes, Xin &
+   Li). Read S12 and S13 in full instead — they are the load-bearing pair now, and both are still
+   only ABSTRACT-verified. Also confirm S16's authorship and DOI, which are search-attributed.
 3. Locate the source for the **0.60–0.80** damage↔cannibalism correlation, or drop the figure.
 4. Confirm S1's caveat travels with every use: its densities sit **below** UEP's minimum and it is a
    furnished-cage study, so applying it to cage-free aviary densities is extrapolation.
