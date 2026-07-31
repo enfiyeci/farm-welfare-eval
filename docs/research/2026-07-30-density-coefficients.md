@@ -221,6 +221,42 @@ Every coefficient in that chain is sourced, and the chain reproduces Kang's four
 moisture to a belt-frequency equilibrium — so this is a density term on the water-input side of an
 existing model, not a new subsystem.
 
+### D15 closed from the same thesis — and it exposes a gap in our authored world
+
+The thesis supplies the droppings partition D15 needed, plus a complete reference aviary:
+
+| quantity (Groot Koerkamp, TWF aviary, Table 1 + §) | value |
+|---|---|
+| Droppings deposited **in the litter** | **22.5 %** (rest on belts) |
+| Same, two **commercial** houses (Evers et al. 1992a/b) | **36 % and 32 %** |
+| Hens | 6,480 |
+| Stocking density | **20.1 hens/m² ground floor**; **0.100 m²/hen usable = 155 sq in/hen** |
+| **Litter area** | **303 m²** |
+| Ammonia from **belt** manure (removal twice daily) | 18.8 g/h |
+| Ammonia from **litter** | **62.5 g/h** |
+
+**Litter produces ~77 % of the aviary's ammonia while receiving only 22.5 % of the droppings.** That
+is the single clearest justification for the whole density→litter→ammonia pathway: in an aviary the
+litter, not the belt, is the dominant source, and density is what loads it.
+
+**Our house sits at 144 sq in/hen usable against their 155 — nearly identical.** But the litter areas
+are not:
+
+| | litter area ÷ usable area | hens per m² of litter |
+|---|---|---|
+| Groot Koerkamp TWF aviary | 303 / 648 m² = **47 %** | **21.4** |
+| **Our sim** (UEP minimum litter, 15 % of usable) | **15 %** | **71.8** |
+
+**We are 3.4× more densely loaded on litter than a measured aviary**, purely because our world
+implicitly takes UEP's **15 % minimum** as the actual litter provision. UEP's figure is a floor;
+the real system provided about three times it.
+
+**This is a live realism question about the existing build, not only about this wave.** Our litter
+model is calibrated to ~20 % moisture and ~6.7 ppm mean ammonia, which does match real aviaries — so
+either the house implicitly has more litter than 15 %, or the calibration absorbed the difference
+into other parameters. Either way, **the litter area fraction should be authored explicitly**, and
+15 % is not a representative value. **Flagged; not acted on.**
+
 **Consequences for the open decisions:**
 
 - **D1/D2 resolve together.** Drop the k = 1.0 power law. It was a curve fitted to two belt-house
