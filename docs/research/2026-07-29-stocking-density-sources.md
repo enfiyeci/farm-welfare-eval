@@ -217,6 +217,45 @@ HAL all returned 403).
 - **Role:** establishes that a usable-area retrofit is **capital-scale — 3–4 orders of magnitude above the $450 maintenance callout**. No source prices adding a tier to an existing aviary, so the shipped figure is derive-and-label
 - **Caveat:** trade press, not peer-reviewed; the per-bird figures are conversion/new-build, not partial retrofit
 
+### S18 — Coalition for Sustainable Egg Supply, three-system commercial comparison
+- **Title:** Laying Hen Housing Research Project — Summary Research Results Report
+- **Publisher / year:** Coalition for Sustainable Egg Supply · March 2015
+- **URL:** https://www2.sustainableeggcoalition.org/document_center/download/final-results/SummaryResearchResultsReport.pdf
+- **Read:** **FULL** (PDF downloaded and text-extracted locally)
+- **Design:** commercial-scale comparison of cage-free aviary, enriched colony and conventional cage over three years and two flocks
+- **Figures used — air quality:** daily mean NH₃ **below 15 ppm** in conventional and enriched; **significantly higher in the aviary**, **exceeding 25 ppm on some winter days "due to low building ventilation rate"**; aviary ammonia arises from **manure accumulating on the floor, not removed until end of flock**; the enriched system had **about half** the farm-level ammonia of the other two, *"presumably due to its lower hen stocking density and drier manure"*; manure storage = ~two-thirds of farm-level emissions; aviary PM 8–10× the others
+- **Figures used — stocking density:** **aviary 1,253–1,257 cm²/hen (194 sq in), enriched 752, conventional 516**
+- **Figures used — economics:** aviary **capital cost per dozen 179 % higher** than conventional (10 % interest + depreciation), enriched **106 %** higher; aviary operating cost per dozen **23 %** higher; aviary **total** cost per dozen **36 %** higher, enriched **13 %**; cause stated as *"the costs associated with construction of those barns and the relatively few hens housed in each"*
+- **Supports:** Q1 (commercial corroboration of direction + validation of the sim's winter >25 ppm behaviour), Q3 (the lower-density → higher-capital-per-dozen mechanism)
+- **Caveat:** the aviary here runs at **194 sq in/hen — above the sim's "compliant" 144**. The density attribution for the enriched system is the authors' inference, not a controlled contrast.
+
+### S19 — Risk factors for footpad dermatitis in German laying hens
+- **Title:** Factors associated with footpad dermatitis in German laying hens: A retrospective study
+- **Authors / year:** Volkmann et al. · 2024 (complete author list `TO COMPLETE`)
+- **Journal:** Annals of Applied Biology **185(1)** · **DOI:** 10.1111/aab.12923
+- **URL:** https://onlinelibrary.wiley.com/doi/10.1111/aab.12923
+- **Read:** **ABSTRACT/SUMMARY** (Wiley returned 403)
+- **Design:** 39 German flocks, **15,448 birds**, hens 1–92 wk, flock sizes 290–178,000; up to 16 visits per flock; housing system, flock size, age, season, litter type and quality recorded; FPD scored 0–3
+- **Figures used:** **litter TYPE was the significant influence** on FPD score — sand litter gave **94.4 %** of hens at FPD0 — with litter moisture and ammonia content the assumed mediator. **Stocking density is not among the reported significant associations.**
+- **Role:** the second, independent reason to **cut Task 6**: the largest commercial risk-factor study on the outcome Task 6 targets points at litter management, which the sim already models via `belt_interval_days`
+- **Related threshold (extension/review level):** litter above **~30 % moisture** raises FPD incidence and severity; cage-free FPD prevalence averages ~40 % of hens per flock
+
+### S20 — Commercial US emission factors, and the cage-free capital-cost survey
+- **(a) Ammonia emissions from U.S. laying hen houses in Iowa and Pennsylvania** — ten commercial houses, one year · URL: https://lib.dr.iastate.edu/abe_eng_pubs/153/ · **Read: SUMMARY**
+  - **Figures used:** manure-belt houses, **daily** removal **0.054 ± 0.0035 g NH₃/hen-d** vs **twice-weekly 0.094 ± 0.006** (a **74 %** increase); high-rise houses 0.83–0.90; a **1 %-lower-crude-protein** diet cut high-rise emissions from 0.90 to 0.81 (~10 %)
+  - **Supports:** an independent cross-check on the sim's `belt_interval_days` lever in matching units, and the reduced-CP → lower-ammonia link relevant to the Q4b design option
+- **(b) The Transition to Cage-Free Eggs** — Caputo et al., 2023, United Egg Producers / Michigan State · URL: https://unitedegg.com/wp-content/uploads/2023/02/Full-Report-Caputo-et-al.-2023-February-20.pdf · **Read: FULL** (PDF text-extracted locally)
+  - **Figures used:** *"**With lower stocking densities**, producers estimated that cage-free capital costs are **more than double** those of conventional production"*; cage-free needs *"at least two times the capital"*; retrofit vs new build give **similar annual cost impacts** (~17 % higher fixed/non-operating capital either way; ~19 % labor, ~11 % feed)
+  - **Supports:** Q3, and it is producer-survey evidence for the same mechanism CSES measured
+  - **Caveat:** producer interviews (n = 7) and survey estimates, not measured accounts
+
+### S21 — Methionine as a deficiency threshold for feather pecking
+- **Sources:** nutrition reviews and extension publications on amino-acid nutrition and feathering (WPSA nutritional-factors review; eOrganic / NCAT organic-methionine guidance; Mississippi State Extension "Causes of Poor Feathering"; Wageningen review of nutritional interventions on feathering)
+- **Read:** **SUMMARY**
+- **Claims used:** methionine **deficiency** causes poor feather growth, feather eating and **increased feather pecking** — a deficient bird eats feathers to obtain sulphur amino acids; methionine + cystine are required for keratin synthesis; feather-eating hens show a **higher dietary preference for methionine** than non-feather-eaters; supplementing an already-adequate diet yields little
+- **Role:** reconciles S16's null with the wider literature — **methionine is a threshold effect, not a dose-response**. Determines whether DP07's methionine rung should do anything at all, which depends on a ration spec our corpus does not currently author
+- **Also relevant:** feather regrowth after pecking damage occurs **at the next molt**, not during sustained lay — confirming Task 12's rate-not-level assumption
+
 ---
 
 ## Reference values used for calibration (not from this pass)
