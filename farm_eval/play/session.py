@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import warnings
 from datetime import date
 from pathlib import Path
 
@@ -20,6 +21,52 @@ from farm_eval.play.ops import OPS, run_op
 
 class EpisodeOver(Exception):
     """An action op was attempted after the episode horizon (server maps this to 409)."""
+
+
+def _load_records(record_path: Path) -> list[dict]:
+    """Parse session.jsonl, repairing crash damage from an interrupted append.
+
+    Appends are plain writes (an append-only log cannot use the per-record tmp+os.replace
+    pattern meta.yml uses), so a crash mid-append can leave a truncated final line. That
+    record never became durable — drop it with a loud warning and truncate it from the
+    file, or a later append would concatenate onto the partial line and corrupt the next
+    record too. A complete final record missing only its newline is kept and the newline
+    restored (same merge risk). Corruption anywhere but the final line is real damage,
+    not a torn append, and fails loud.
+    """
+    if not record_path.exists():
+        return []
+    # Bytes, not read_text: a tear midway through a multibyte UTF-8 character (records
+    # are ensure_ascii=False) must be repairable too, so decode per line, not per file.
+    raw = record_path.read_bytes()
+    lines = raw.split(b"\n")  # the writer only emits "\n"; a trailing b"" chunk == final newline present
+    records = []
+    for i, line in enumerate(lines):
+        if not line:
+            continue
+        try:
+            records.append(json.loads(line.decode("utf-8")))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            if i != len(lines) - 1:
+                raise ValueError(
+                    f"corrupt session record at {record_path}:{i + 1}: {exc}. Only a "
+                    f"truncated FINAL line is repairable (torn append); earlier lines "
+                    f"indicate real log damage."
+                ) from exc
+            warnings.warn(
+                f"{record_path} ends with a torn final line (interrupted append); "
+                f"dropping it and resuming from the last complete record "
+                f"(seq {records[-1]['seq'] if records else 'none'}): {line[:80]!r}",
+                RuntimeWarning,
+            )
+            tmp = record_path.with_name("." + record_path.name + ".tmp")
+            tmp.write_bytes(b"".join(l + b"\n" for l in lines[:i]))
+            os.replace(tmp, record_path)
+            return records
+    if raw and not raw.endswith(b"\n"):
+        with record_path.open("ab") as fh:
+            fh.write(b"\n")
+    return records
 
 
 class PlaySession:
@@ -60,9 +107,7 @@ class PlaySession:
 
     # --- record ---
     def _count_records(self) -> int:
-        if not self._record_path.exists():
-            return 0
-        return sum(1 for line in self._record_path.read_text(encoding="utf-8").splitlines() if line)
+        return len(_load_records(self._record_path))
 
     def _append(self, record: dict) -> None:
         record = {"seq": self._seq, **record}
@@ -168,10 +213,7 @@ class PlaySession:
     def _replay_tail(env: FarmEnv, session_dir: Path, snapshot_seq: int) -> None:
         """Re-execute session.jsonl records after `snapshot_seq` WITHOUT re-recording them."""
         record_path = session_dir / "session.jsonl"
-        if not record_path.exists():
-            return
-        for line in record_path.read_text(encoding="utf-8").splitlines():
-            rec = json.loads(line)
+        for rec in _load_records(record_path):
             if rec["seq"] <= snapshot_seq or rec["kind"] == "note":
                 continue
             if rec["kind"] == "op":
