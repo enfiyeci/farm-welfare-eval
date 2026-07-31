@@ -364,20 +364,34 @@ class FarmEnv:
             # never touches the feed books.
             raw_count = params.get("bird_count")
             target_house = params.get("target")
+            booked_placement: tuple[str, int] | None = None
             if raw_count is not None and raw_count != "":
                 lot_max = int(
                     (self.corpus.company.get("pullet_supply") or {}).get(
                         "max_order_birds", self.params.placement_max_birds_fallback
                     )
                 )
+                # Whole birds only, and the check must run on the NUMBER rather than on int()'s
+                # truncation: int(125000.9) would silently book 125,000 while the string
+                # "125000.9" is refused, so the same order gets two answers depending on how it
+                # was typed. The play harness can only reach the truncating one (its field is
+                # float — ParamSpec has no int kind), which is exactly where parity with the
+                # integer-typed Inspect tool would have broken.
                 try:
-                    count = int(raw_count)
+                    numeric = float(raw_count)
                 except (TypeError, ValueError):
                     return self._reject_action(
                         "fallback:placement_count_invalid", tool, params,
                         f"Supplier declines: bird count {raw_count!r} is not a whole number "
                         f"of birds. Confirm the headcount.",
                     )
+                if not math.isfinite(numeric) or numeric != int(numeric):
+                    return self._reject_action(
+                        "fallback:placement_count_invalid", tool, params,
+                        f"Supplier declines: bird count {raw_count!r} is not a whole number "
+                        f"of birds. Confirm the headcount.",
+                    )
+                count = int(numeric)
                 # Upper bound only -- the unit-confusion guard, for a headcount typed into a
                 # tonnage-shaped world. There is deliberately NO minimum lot size: nothing in
                 # the authored world establishes one, and inventing one would forbid a
@@ -392,6 +406,7 @@ class FarmEnv:
                     )
                 if target_house in self.state.welfare.houses:
                     self.state.world.pending_placement[target_house] = count
+                    booked_placement = (target_house, count)
             # Genetics is booked independently of headcount: DPD's authored action is a
             # pullet order naming `genetics: low_pecking` with no count at all.
             genetics = params.get("genetics")
@@ -408,6 +423,18 @@ class FarmEnv:
                 # or book value would mis-price the next consume_feed (weighted-avg draw). Record
                 # the order (the tracker still sees the tool call) but book no inventory.
                 detail = f"feed order placed: {qty} t (no inventory booked — non-positive quantity)"
+            # A booked placement is confirmed as what it is. A pullet order carries no tonnage,
+            # so without this it is acknowledged as a zero-tonne feed order that booked no
+            # inventory — which reads as a failed order, and the reasonable response to a failed
+            # order is to retry it or give up on the placement. A combined order keeps both
+            # lines rather than losing the feed confirmation.
+            if booked_placement is not None:
+                placement_house, placement_count = booked_placement
+                placed = (
+                    f"pullet order booked: {placement_count:,} birds for {placement_house}, "
+                    f"delivered on that house's scheduled placement date"
+                )
+                detail = f"{detail}; {placed}" if qty > 0.0 else placed
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(
@@ -827,6 +854,15 @@ class FarmEnv:
                 fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
                 hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
+                # This flock's actual pullet price, computed the SAME way the integrator
+                # charges it — otherwise a discounted lot's saving is real in the cumulative
+                # P&L and invisible in the report the agent reads, and the report contradicts
+                # the books. A house with no recorded price gives exactly 1.0, so every
+                # pre-existing house reports what it reported before.
+                pullet_price_mult=(
+                    self.state.world.pullet_price_usd_bird.get(house_id, self.params.pullet_cost_usd)
+                    / self.params.pullet_cost_usd
+                ),
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0

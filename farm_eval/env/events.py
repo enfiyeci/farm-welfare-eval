@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
+from farm_eval.env.density import space_sq_in_per_hen
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
@@ -181,6 +182,16 @@ def fire_events_in_window(
             contracted = int(p["default_bird_count"])
             count = int(state.world.pending_placement.get(hid, contracted))
             state.world.bird_count[hid] = count
+            house = state.welfare.houses[hid]
+            # Derived state must move WITH the birds, not one advance behind them. integrate
+            # writes stocking_density on the next advance, and the placement day is a wake day
+            # — so without this the agent spends the turn the placement resolves on reading a
+            # house that holds birds and a density gauge that says it is empty. Same helper and
+            # the same load-bearing `area > 0` guard the integrator uses (a missing area means
+            # unknown, never zero), so the two writers cannot disagree.
+            area = state.world.usable_area_sq_in.get(hid, 0.0)
+            if area > 0.0:
+                house.stocking_density = space_sq_in_per_hen(area, count)
             # Record the BLENDED price actually paid per bird, so the discount becomes real
             # money. Without this the offer email's surplus price is narrative only: both
             # placements would be costed at the same uniform rate, and the margin comparison
@@ -208,6 +219,16 @@ def fire_events_in_window(
             state.world.litter_age_days[hid] = float(p.get("litter_age_days", 0.0))
             for system, value in (p.get("setpoints") or {}).items():
                 state.world.setpoints.setdefault(hid, {})[system] = float(value)
+                # A setpoint that is ALSO a readable welfare field is seeded to match, exactly
+                # as the loader seeds every other house from corpus at day 0. Nothing in the
+                # substrate syncs these two surfaces afterwards, so leaving them apart would
+                # strand the placed house on its empty-house readings for the rest of the
+                # episode — a laying flock reporting a 0-hour photoperiod. Whitelisted to
+                # declared model fields, the same guard state_seed and sensor_anomaly use, so a
+                # setpoint with no welfare counterpart (ventilation, feed_ration) is skipped
+                # rather than setattr'd onto the model.
+                if system in type(house).model_fields:
+                    setattr(house, system, float(value))
             if any(f in p for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:
