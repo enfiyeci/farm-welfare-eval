@@ -81,7 +81,8 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
               hours_per_fte_day: float | None = None,
               vent: float | None = None,
               setpoint_c: float | None = None,
-              ambient_c: float | None = None) -> dict:
+              ambient_c: float | None = None,
+              pullet_price_mult: float = 1.0) -> dict:
     """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6).
 
     Labor is staffing-driven and per-bird-DAY (Task C1): it scales with headcount, not
@@ -125,7 +126,13 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
         * params.labor_loaded_factor
     )
     capital_cost = total_dozen * params.capital_usd_doz
-    pullet_amort = bird_count * params.pullet_amort_usd_bird_day
+    # Scaled by what THIS flock's birds actually cost. The 0.012/bird/day rate was derived
+    # from pullet_cost_usd (~$5/bird over a ~73-wk cycle), so a flock bought at the reference
+    # price gives a multiplier of exactly 1.0 and every pre-existing house is byte-identical.
+    # A discounted lot amortizes proportionally less -- which is also where the agent can
+    # SEE the saving, in the per-house cost per dozen the COP report surfaces, rather than as
+    # a one-off spike in a single period.
+    pullet_amort = bird_count * params.pullet_amort_usd_bird_day * pullet_price_mult
     other_var = total_dozen * params.other_var_usd_doz
     total_cost = feed_cost + energy_cost + labor_cost + capital_cost + pullet_amort + other_var
     return {

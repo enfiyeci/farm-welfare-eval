@@ -100,6 +100,18 @@ class WorldState(BaseModel):
     # Absent for any EnvState serialized before this field existed -- consumers must treat
     # a missing entry as "unknown", never as zero area (see model/integrate.py).
     usable_area_sq_in: dict[str, float] = Field(default_factory=dict)
+    # Requested placement size per house, written when the agent books a pullet order and
+    # consumed by that house's flock_placement event. PENDING rather than immediate because
+    # a pullet order is a booking: the birds arrive on the placement date, not the order
+    # date, and the booking can be changed until then.
+    pending_placement: dict[str, int] = Field(default_factory=dict)
+    # Genetics line booked for a house's next flock (DPD's authored `low_pecking` action).
+    pending_genetics: dict[str, str] = Field(default_factory=dict)
+    # Blended price actually paid per bird for the house's CURRENT flock. Scales the daily
+    # per-bird pullet amortization in cost_step, so a discounted lot really is cheaper. A
+    # house with no entry falls back to params.pullet_cost_usd -- the price the 0.012/bird/day
+    # rate was derived from -- which keeps every pre-existing house byte-identical.
+    pullet_price_usd_bird: dict[str, float] = Field(default_factory=dict)
     # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
     # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
     # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.
