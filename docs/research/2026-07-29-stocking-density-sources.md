@@ -317,6 +317,23 @@ HAL all returned 403).
 - **Read:** **NOT OBTAINED** — Taylor & Francis, the WUR repository and an open index all declined to serve the abstract
 - **Why it matters:** it is the targeted review of exactly the Q4b conflict — whether methionine supplementation above requirement reduces feather pecking, where S16's trial and S21's mechanistic literature disagree. A related van Krimpen review indicates **roughage** (maize/barley silage, carrots) decreases injurious pecking and **tryptophan** reduces feather pecking via serotonin turnover, which raises a further design question: DP07's nutrition rung is authored as *methionine*, but the better-supported nutritional levers may be **fibre/roughage and tryptophan**
 
+### S28 — Groot Koerkamp, aviary ammonia: the mechanistic model ⭐ the wave's strongest source
+- **Title:** Ammonia Emission from Aviary Housing Systems for Laying Hens — Inventory, Characteristics and Solutions
+- **Author / year:** Peter W. G. Groot Koerkamp · PhD thesis, Landbouwuniversiteit Wageningen (promotor L. Speelman; co-promotor J. H. M. Metz)
+- **URL:** https://edepot.wur.nl/210633 · **open access**
+- **Read:** **FULL** (PDF downloaded and text-extracted locally)
+- **Why it matters:** aviary-specific, and **Part II is "Modelling of the Evaporation of Water"** — a complete, validated water-balance and ammonia model. It removes the need for the Mendes pair entirely
+- **Mechanism (Fig. 8, §3.2):** ammonia release tracks microbial activity, which is *"optimal between 40 and 60% moisture content (wet basis). At values above and below this range the ammonia release decreases. At low moisture contents ammonia release stops."* Above ~60 % the litter goes anaerobic and release falls again
+- **Parameters (ch. 7, Tiered Wire Floor aviary, air velocity 0.07–0.28 m/s, belt removal weekly/daily/twice-daily):** water input to litter from fresh droppings **+126.8 g/kg litter per day** (s.e. 19.4); droppings **160–180 g/(hen·d)** at **200–250 g/kg DM**; evaporation ∝ **v^0.287** × vapour-pressure difference; litter water activity **0.86** (s.e. 0.07); **NH₃ +0.32 % per (g/kg) litter water**, **+8.1 % per °C**, **+103 % per (m/s)** air velocity, **0.76 % per hour** of manure-removal interval; mean emission at daily belt removal **2.85 mg/h per hen**; aviary litter DM **700–850 g/kg**; emission substantially reduced above **900 g/kg DM**
+- **CROSS-VALIDATION against S22 — the strongest evidence in the wave.** Kang's litter water content rose 22.93 → 40.93 % (**+180 g/kg**). WUR predicts 180 × 0.32 % = **+57.6 %** ammonia; Kang **measured +59.1 %**. Two independent studies ~25 years apart agree **within 1.5 percentage points**
+- **Supersedes:** the k = 1.0 power law fitted from S12. The ammonia response to moisture is **linear**; the nonlinearity that produced Kang's apparent knee lives entirely in the **water balance**, so the knee should be allowed to emerge rather than authored
+- **Also validates existing repo calibration:** real aviary litter runs 700–850 g/kg DM (15–30 % moisture); `farm_eval/env/model/layers/litter.py`'s ~20 % equilibrium sits in that band
+
+### ⛔ S12 / S13 (Mendes) — chase RETIRED
+Confirmed in pass 6: **Mendes ran only two density levels** (HD 413, LD 620 cm²/hen). Two points
+cannot distinguish a line from a step, so the full text could never have settled the functional-form
+question. S28 answers it mechanistically instead. **Do not spend further effort obtaining these.**
+
 ---
 
 ## Reference values used for calibration (not from this pass)
