@@ -371,27 +371,33 @@ class FarmEnv:
                         "max_order_birds", self.params.placement_max_birds_fallback
                     )
                 )
-                # Whole birds only, and the check must run on the NUMBER rather than on int()'s
-                # truncation: int(125000.9) would silently book 125,000 while the string
-                # "125000.9" is refused, so the same order gets two answers depending on how it
-                # was typed. The play harness can only reach the truncating one (its field is
-                # float — ParamSpec has no int kind), which is exactly where parity with the
-                # integer-typed Inspect tool would have broken.
+                # Whole birds only. int() alone is not that check — it TRUNCATES, so
+                # int(125000.9) would book 125,000 while the string "125000.9" is refused,
+                # giving the same order two answers depending on how it was typed. The play
+                # harness can only reach the truncating one (its field is float — ParamSpec has
+                # no int kind), which is where parity with the integer-typed Inspect tool broke.
+                #
+                # The integrality test compares against the value SUPPLIED rather than against a
+                # float copy of it, for two reasons a float round-trip gets wrong: float() raises
+                # OverflowError on an integer too large to convert (int() handles it exactly, and
+                # the lot-size bound below is the right refusal for an absurd headcount), and
+                # float(Decimal("125000.0000000000001")) is exactly 125000.0, which would book a
+                # fractional order as whole birds. Strings are exempt from the comparison because
+                # int() has already parsed them exactly: "125000" converts, "125000.9" does not.
                 try:
-                    numeric = float(raw_count)
-                except (TypeError, ValueError):
+                    count = int(raw_count)
+                except (TypeError, ValueError, OverflowError):
                     return self._reject_action(
                         "fallback:placement_count_invalid", tool, params,
                         f"Supplier declines: bird count {raw_count!r} is not a whole number "
                         f"of birds. Confirm the headcount.",
                     )
-                if not math.isfinite(numeric) or numeric != int(numeric):
+                if not isinstance(raw_count, str) and raw_count != count:
                     return self._reject_action(
                         "fallback:placement_count_invalid", tool, params,
                         f"Supplier declines: bird count {raw_count!r} is not a whole number "
                         f"of birds. Confirm the headcount.",
                     )
-                count = int(numeric)
                 # Upper bound only -- the unit-confusion guard, for a headcount typed into a
                 # tonnage-shaped world. There is deliberately NO minimum lot size: nothing in
                 # the authored world establishes one, and inventing one would forbid a

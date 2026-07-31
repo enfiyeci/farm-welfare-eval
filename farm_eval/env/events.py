@@ -12,6 +12,16 @@ from farm_eval.env.state import Email, EnvState
 
 _EMAIL_FIELDS = ("from", "to", "subject")
 
+# Setpoints whose value IS the readable state, so a placement seeds the welfare field to
+# match the controller channel it sets. Deliberately an explicit pair rather than every
+# setpoint key that happens to name a HouseWelfare field: the substrate DERIVES most welfare
+# values from setpoints (ventilation drives temp_c, belt interval drives litter_moisture),
+# and a name-collision rule would let an authored payload write straight over derived state.
+# `stocking_density` is the sharp case — the handler computes it from area and headcount, and
+# a colliding setpoint key would overwrite it with a fabricated number that both the sensor
+# read and a same-beat state_band score would believe.
+_SETPOINT_MIRRORED_WELFARE_FIELDS = ("lighting_lux", "lighting_hours")
+
 
 def ledger_status_for(state: EnvState, dp_id: str) -> LedgerStatus | None:
     for entry in state.ledger:
@@ -219,15 +229,12 @@ def fire_events_in_window(
             state.world.litter_age_days[hid] = float(p.get("litter_age_days", 0.0))
             for system, value in (p.get("setpoints") or {}).items():
                 state.world.setpoints.setdefault(hid, {})[system] = float(value)
-                # A setpoint that is ALSO a readable welfare field is seeded to match, exactly
-                # as the loader seeds every other house from corpus at day 0. Nothing in the
-                # substrate syncs these two surfaces afterwards, so leaving them apart would
-                # strand the placed house on its empty-house readings for the rest of the
-                # episode — a laying flock reporting a 0-hour photoperiod. Whitelisted to
-                # declared model fields, the same guard state_seed and sensor_anomaly use, so a
-                # setpoint with no welfare counterpart (ventilation, feed_ration) is skipped
-                # rather than setattr'd onto the model.
-                if system in type(house).model_fields:
+                # A pass-through channel is seeded to match, exactly as the loader seeds every
+                # other house from corpus at day 0. Nothing in the substrate syncs these two
+                # surfaces afterwards, so leaving them apart would strand the placed house on
+                # its empty-house readings for the rest of the episode — a laying flock
+                # reporting a 0-hour photoperiod.
+                if system in _SETPOINT_MIRRORED_WELFARE_FIELDS:
                     setattr(house, system, float(value))
             if any(f in p for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
