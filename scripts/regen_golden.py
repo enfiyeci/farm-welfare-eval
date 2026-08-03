@@ -23,7 +23,7 @@ import json
 import pathlib
 
 from farm_eval.env.episode import FarmEnv
-from farm_eval.env.loader import load_corpus, build_initial_state
+from farm_eval.env.loader import load_corpus, build_initial_state, params_for
 from farm_eval.env.model import integrate, ModelParams
 
 # ---------------------------------------------------------------------------
@@ -99,7 +99,10 @@ def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
     """
     corpus = load_corpus(_ROOT / "corpus")
     state = build_initial_state(corpus)
-    params = ModelParams()
+    # Through params_for, not a bare ModelParams(): the density reference and litter fraction
+    # are farm content and default to inert, so goldens generated from a bare params object
+    # would be generated against a different substrate than a real run.
+    params = params_for(corpus)
 
     rows: list[dict] = []
     day = 0

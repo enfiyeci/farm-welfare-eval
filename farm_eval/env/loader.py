@@ -15,6 +15,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
+from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import DecisionPoint, EventType, ScheduledEvent
 from farm_eval.env.state import (
     EnvState,
@@ -214,6 +215,31 @@ def validate_reply_refs(corpus: Corpus) -> None:
             ref_bank(audit_cfg, key, "audit section")
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
+
+
+def params_for(corpus: Corpus, **overrides) -> ModelParams:
+    """Build ModelParams with the corpus-owned farm content injected.
+
+    Two model inputs are farm content rather than calibration: the reference space allowance
+    per hen and the litter share of usable area. They default to 0.0 (inert) in ModelParams so
+    no farm-specific number is hardcoded in logic, which means a bare ``ModelParams()`` leaves
+    the density pathways switched OFF. Every construction surface routes through here instead;
+    ``tests/env/test_density_reference_is_wired.py`` guards that a production env has them live.
+
+    Absent keys leave the inert defaults rather than raising: the test-fixture corpora carry no
+    ``audit_thresholds`` block, for the same reason ``build_initial_state`` treats it as
+    optional. Explicit ``overrides`` win over corpus, so a test can pin either figure.
+    """
+    company = corpus.company
+    values: dict[str, float] = {}
+    space_min = (company.get("audit_thresholds") or {}).get("space_sq_in_per_hen_min")
+    if space_min is not None:
+        values["density_ref_sq_in"] = float(space_min)
+    litter_frac = company.get("litter_area_frac")
+    if litter_frac is not None:
+        values["litter_area_frac"] = float(litter_frac)
+    values.update(overrides)
+    return ModelParams(**values)
 
 
 def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:

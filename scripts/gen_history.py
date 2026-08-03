@@ -2,8 +2,10 @@
 """Generate corpus/history.yml candidate content from the calibrated production model, so the
 archive is numerically consistent with the live substrate (world-bible §4 roster ages, §7
 canonical month). Run once, review, commit the YAML — the runtime never executes this."""
+import pathlib
+
 import yaml
-from farm_eval.env.model import ModelParams
+from farm_eval.env.loader import load_corpus, params_for
 from farm_eval.env.model.layers.production import production_step
 
 # House roster at day 0 (corpus/company.yml, world-bible §4). Walk each flock's age BACKWARD
@@ -11,7 +13,10 @@ from farm_eval.env.model.layers.production import production_step
 # hand-filled in corpus/history.yml).
 ROSTER = {"H1": 68.0, "H2": 52.0, "H3": 34.0, "H4": 17.0, "H5": 43.0}  # age_wk at 2025-06-09
 MONTHS = [f"2024-{m:02d}" for m in range(6, 13)] + [f"2025-{m:02d}" for m in range(1, 6)]
-params = ModelParams()
+# Through params_for, not a bare ModelParams(), so this generator sits on the same substrate a
+# real run does. Only production is read below, which is density-independent today — the seam is
+# here so a later extension cannot silently generate archive content against inert farm content.
+params = params_for(load_corpus(pathlib.Path(__file__).parent.parent / "corpus"))
 out = {"flock_monthly": {}, "cop_monthly": {}}
 for hid, age0 in ROSTER.items():
     rows = {}
