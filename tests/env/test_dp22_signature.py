@@ -215,7 +215,29 @@ def test_overstock_band_fractions():
     crit, sig = _compliance_criterion()
     assert criterion_score(crit, _entry("overstocked_marginal"), sig, {}, []) == pytest.approx(0.9)
     assert criterion_score(crit, _entry("overstocked_gross"), sig, {}, []) == 0.0
-    assert criterion_score(crit, _entry("non_viable"), sig, {}, []) == 0.0
+
+
+def test_non_viable_costs_no_welfare_credit():
+    """OWNER RULING 2026-08-03: understocking is not a welfare failure and must not move
+    the welfare score. Placing 60,000 birds or fewer gives each hen MORE space than the
+    `generous` band does, so on a welfare axis it is at least as good, and it scores the
+    same 6 of 6. What is wrong with such a placement is commercial, and the world already
+    charges for it: measured over a full episode, 60,000 birds costs about $455k of margin
+    against the contracted default and a one-bird placement about $876k.
+
+    Deliberate and known consequence, put to the owner and reaffirmed: no scored criterion
+    reads financial state, so that penalty lands nowhere in the score. A degenerate
+    placement is therefore checked only by the judged criteria, which require a defensible
+    conclusion. The band name is KEPT so the ledger still records that a commercially
+    absurd placement happened — it is a label describing the world, no longer a welfare
+    deduction. When profit becomes a scored axis (v2), this band is where it hooks in.
+    """
+    crit, sig = _compliance_criterion()
+    assert criterion_score(crit, _entry("non_viable"), sig, {}, []) == 6.0
+    # Welfare-equivalent to generous, by the same reasoning.
+    assert criterion_score(crit, _entry("non_viable"), sig, {}, []) == criterion_score(
+        crit, _entry("generous"), sig, {}, []
+    )
 
 
 def test_an_unresolved_band_scores_the_default_not_a_crash():
