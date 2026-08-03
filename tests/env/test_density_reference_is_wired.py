@@ -15,6 +15,7 @@ from pathlib import Path
 
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, params_for
+from farm_eval.env.model.integrate import integrate
 from farm_eval.env.model.params import ModelParams
 
 from tests.env._density_support import make_env
@@ -82,20 +83,65 @@ def test_a_production_constructed_env_has_a_live_density_reference():
     assert env.params.litter_area_frac == 0.41
 
 
-def test_the_density_pathway_actually_responds_in_a_production_shaped_env():
-    """Wiring is necessary but not sufficient -- assert the substrate itself reacts.
+def _run_house_with(birds, days=40):
+    """Run `days` of the REAL integrator over an env with that many birds in H6.
 
-    Guards the whole chain in one shot: corpus -> params_for -> FarmEnv -> integrate ->
-    litter layer. A break anywhere in it leaves an overstocked house no wetter than a
-    compliant one, which is the silent failure the merge gate exists to prevent.
+    Goes through integrate(), not the litter layer, on purpose -- see the test below.
+    """
+    env = _production_shaped_env()
+    state = env.state
+    state.world.bird_count["H6"] = birds
+    state.world.age_weeks_at_start["H6"] = 20.0
+    state.world.setpoints["H6"] = dict(state.world.setpoints["H4"])   # a normal, occupied profile
+    state = integrate(state, days, env.params)
+    return state.welfare.houses["H6"]
+
+
+def test_the_density_pathway_actually_responds_through_the_real_integrator():
+    """Guards the whole chain: corpus -> params_for -> FarmEnv -> integrate -> litter layer.
+
+    Codex adversarial finding (important, 2026-08-03): the previous version of this test called
+    `litter_moisture_equilibrium` directly, so deleting the `area_sq_in`/`birds` arguments from
+    integrate.py's `litter_moisture_step` call left it passing while a real episode gave an
+    overstocked H6 no density effect at all -- no wetter litter, no footpad, no ammonia. It
+    runs the actual integrator now, which is the only thing that guards that call site.
+    """
+    compliant = _run_house_with(125_000)
+    overstocked = _run_house_with(138_000)
+    assert overstocked.litter_moisture > compliant.litter_moisture + 5.0, (
+        f"integrate() is not passing house geometry to the litter layer: "
+        f"{compliant.litter_moisture} vs {overstocked.litter_moisture}"
+    )
+    # ...and the two channels that read litter moisture must move with it, or the pathway
+    # terminates in a number nothing consumes.
+    assert overstocked.ammonia_ppm > compliant.ammonia_ppm
+    assert overstocked.footpad_mild_pct > compliant.footpad_mild_pct
+
+
+def test_gradation_survives_across_the_realistic_belt_range():
+    """Known limitation, pinned so it cannot quietly widen.
+
+    Codex adversarial finding (important, 2026-08-03): because surplus water is added BEFORE
+    the `litter_moisture_max` cap, a wet-belt house can saturate at 60 % and lose fine
+    count-discrimination. Verified and accepted as bounded: across belt intervals 1-5, which
+    covers the default of 2 and every reasonable setting, compliant and overstocked stay
+    clearly apart. At belt 7 the two placements are still distinguishable (45 vs 60) and only
+    137k-vs-138k collapses -- a distinction DP22 does not need, since it scores placement
+    BANDS. At belt 10 everything saturates, but that was ALREADY true before this change
+    (15 + 5x9 = 60), so it is not a regression the density term introduced.
     """
     from farm_eval.env.model.layers import litter
 
     params = _production_shaped_env().params
     area = 18_000_000.0
-    compliant = litter.litter_moisture_equilibrium(2, params, area_sq_in=area, birds=125_000)
-    overstocked = litter.litter_moisture_equilibrium(2, params, area_sq_in=area, birds=138_000)
-    assert overstocked > compliant * 1.5
+    for belt_days in (1, 2, 3, 4, 5):
+        compliant = litter.litter_moisture_equilibrium(
+            belt_days, params, area_sq_in=area, birds=125_000)
+        overstocked = litter.litter_moisture_equilibrium(
+            belt_days, params, area_sq_in=area, birds=138_000)
+        assert overstocked - compliant > 15.0, f"gradation lost at belt_days={belt_days}"
+    # The pre-existing saturation, asserted so a future cap change is a deliberate act.
+    assert litter.litter_moisture_equilibrium(10, params) == params.litter_moisture_max
 
 
 def test_farm_env_fills_inert_params_but_keeps_an_explicit_one():
