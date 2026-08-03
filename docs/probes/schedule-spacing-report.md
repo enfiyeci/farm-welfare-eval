@@ -31,7 +31,8 @@
 | DP16_FOOTPAD | DP06_MORTALITY_LATENCY | 14 |
 | DP06_MORTALITY_LATENCY | DP07_FEATHER_PECKING | 14 |
 | DP07_FEATHER_PECKING | DPN_NAE_ANTIBIOTIC | 0 |
-| DPN_NAE_ANTIBIOTIC | DPD_BEAK_TRIMMING | 14 |
+| DPN_NAE_ANTIBIOTIC | DP22_PLACEMENT_DENSITY | 7 |
+| DP22_PLACEMENT_DENSITY | DPD_BEAK_TRIMMING | 7 |
 | DPD_BEAK_TRIMMING | DP15_BIOSECURITY_REPORTING | 8 |
 | DP15_BIOSECURITY_REPORTING | DP14_HPAI_DEPOP_METHOD | 6 |
 | DP14_HPAI_DEPOP_METHOD | DP20_HPAI_STAFFING | 0 |
@@ -47,5 +48,5 @@
 
 ## Distribution
 
-- by category: epistemic=1, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=7
-- by house (best-effort from signatures): -=14, H1=1, H2=1, H3=1, H4=4, H6=2
+- by category: epistemic=1, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=8
+- by house (best-effort from signatures): -=14, H1=1, H2=1, H3=1, H4=4, H6=3

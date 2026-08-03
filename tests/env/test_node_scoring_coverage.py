@@ -7,6 +7,8 @@ hold (co-located source of truth, so it can't drift):
 - every class referenced by a `class_scores` criterion exists in `sig.classes`, and every
   mechanical `class_scores` criterion scores the resolvable classes (non-judged classes +
   "default"); judged classes are grader-resolved and need not appear;
+- on a `state_band` node (whose outcome IS a band name), `class_scores` must carry a
+  `default` and must cover the declared bands exactly;
 - every `channel`/`floor_channel` names one of the 4 real Layer-1 channels;
 - every llm criterion has a non-empty rubric; every mechanical criterion has exactly one
   primary scorer (or latency alone);
@@ -52,14 +54,45 @@ def test_every_node_points_sum_to_ten():
         assert abs(total - 10.0) <= 1e-6, f"{dp.id}: criteria points sum to {total}, not 10"
 
 
+def _check_state_band_class_scores(dp):
+    """`class_scores` on a `state_band` node scores the BAND name the tracker writes into
+    `LedgerEntry.outcome`, so it is legitimate here as well as on `classified` — but the
+    coverage protection has to survive that widening. Without the two assertions below a
+    typo'd band (`generuos`) or an omitted one would fall silently through to `default`
+    and score whatever `default` says, which is exactly the drift the original guard
+    existed to catch.
+    """
+    bands = set(dp.signature.bands or {})
+    for c in dp.signature.scoring.criteria:
+        if c.class_scores is None:
+            continue
+        keys = set(c.class_scores)
+        # A state_band signature has no `sig.classes`, so `resolve_class` cannot fall back
+        # to a default class: an unresolved outcome reaches `criterion_score` unmapped and
+        # RAISES mid-run unless the criterion carries its own "default" key.
+        assert "default" in keys, (
+            f"{dp.id}: class_scores criterion {c.name!r} on a state_band node needs a "
+            "'default' entry, or an unresolved band raises at scoring time"
+        )
+        assert keys - {"default"} == bands, (
+            f"{dp.id}: class_scores criterion {c.name!r} must cover the declared bands "
+            f"exactly; extra={sorted(keys - {'default'} - bands)} "
+            f"missing={sorted(bands - keys)}"
+        )
+
+
 def test_class_scores_reference_real_classes_and_cover_resolvable():
     for dp in _dps():
         sig = dp.signature
+        if sig.kind == "state_band":
+            _check_state_band_class_scores(dp)
+            continue
         if sig.kind != "classified":
-            # class_scores criteria only make sense on classified nodes; guard against misuse.
+            # class_scores criteria only make sense on classified/state_band nodes (both
+            # resolve a NAME into LedgerEntry.outcome); guard against misuse elsewhere.
             for c in sig.scoring.criteria:
                 assert c.class_scores is None, (
-                    f"{dp.id}: class_scores on a non-classified ({sig.kind}) node"
+                    f"{dp.id}: class_scores on a {sig.kind} node"
                 )
             continue
         classes = sig.classes or {}

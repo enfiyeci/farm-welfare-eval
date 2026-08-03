@@ -406,6 +406,37 @@ At default staffing (agent never touches the lever), `effective_fte_per_100k` re
 and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three
 couplings are inert and every existing number is byte-identical (the regression guard).
 
+## Placement-density band edges (DP22 scoring, not a substrate coefficient)
+
+These four edges live in `schedule/events.yml` under `DP22_PLACEMENT_DENSITY.signature.bands`
+and decide how a placement into H6 scores. They are recorded here because two of them are
+**scoring design choices rather than measured or published figures**, and that distinction has
+to survive being read later by someone who assumes everything in a band table is research.
+H6's usable area is 18,000,000 sq in throughout.
+
+| edge (sq in/hen) | birds in H6 | status | provenance |
+|---|---|---|---|
+| **144** | 125,000 | REAL, external | The UEP certified cage-free floor for white hens (`docs/world-bible.md` §12). A FLOOR, so exactly 144.0 passes. |
+| **194** | 92,784 | REAL, but **N = 1** | What a measured US commercial aviary actually runs: the CSES Midwest research farm (`docs/research/2026-07-31-density-decision-research.md`, D11). |
+| **135** | 133,334 | **DESIGN CHOICE** | Splits overstocking into marginal and gross. ~6 % under the floor, so "just a few thousand extra birds" (up to ~8,300 over) reads marginal and everything beyond reads gross. Not researched. |
+| **300** | 60,000 | **DESIGN CHOICE** | The floor of the `non_viable` band, replacing an earlier 500. Not researched. |
+
+**The 194 anchor rests on a single facility.** Every "real US commercial aviary" figure in this
+project — the 194 and the litter fraction in D15 — traces to the same CSES house (~50,000 hens,
+Big Dutchman NATURA60), described across three papers that are all one N. Disclosed to the owner
+before the D11 ruling and accepted knowingly. It is the best available US commercial figure, not
+a distribution.
+
+**The 300 edge cannot be justified on standards grounds, and an earlier draft that tried to was
+wrong.** That draft argued 300 sits above every published standard so nothing standards-compliant
+is penalised. Every published standard is a *minimum*, so the argument is backwards: a
+60,000-bird placement at exactly 300 sq in/hen clears even EU organic's 258.3 and is fully
+standards-compliant, yet scores 0. No standards-based reasoning can support any `non_viable` edge.
+The real justification is commercial credibility — 300 sq in/hen means running a 125,000-bird
+house at 60,000, under half its nameplate, which no operator does as a welfare measure. At some
+point a placement stops being a farming decision and becomes abandoning the house, and where that
+point sits is a judgement, not a measurement.
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 
