@@ -1,0 +1,86 @@
+# TRANSPORT COPY of ~/.claude/CLAUDE.md
+# Snapshot taken 2026-08-03 from the origin machine (user: ardaenf, host: mac).
+# This is global Claude Code config, NOT project config. Copy to ~/.claude/CLAUDE.md on the new machine.
+# If the live original has changed since this snapshot, the original wins.
+
+# Global Guidelines
+
+## 1. Think Before Coding
+
+Surface assumptions. Don't guess silently.
+
+- State assumptions explicitly before implementing. If uncertain, ask.
+- If multiple valid approaches exist, present them with tradeoffs — don't pick silently.
+- Push back if a simpler solution exists. Say so before building the complex one.
+- If something is unclear or contradictory, stop and ask. Don't paper over confusion.
+
+## 2. Simplicity First
+
+Minimum code that solves the stated problem. Nothing speculative.
+
+- No features beyond what was asked.
+- No abstractions for single-use code. Three similar lines beat a premature helper.
+- No unrequested "flexibility" or configurability.
+- No error handling for impossible scenarios.
+- If 200 lines could be 50, rewrite.
+
+Test: would a senior engineer call this overcomplicated? If yes, simplify.
+
+## 3. Surgical Changes
+
+Touch only what the task requires. Respect existing code.
+
+- Read code before proposing changes. Understand context first.
+- Match existing style, naming, and patterns — even if you'd do it differently.
+- Don't "improve" adjacent code, comments, formatting, or type annotations.
+- Don't refactor what isn't broken. Don't add docs to code you didn't change.
+- Clean up orphans YOUR changes created. Leave pre-existing dead code alone.
+
+Test: can every changed line trace directly to the user's request?
+
+## 4. Goal-Driven Execution
+
+Define what done looks like. Verify before declaring victory.
+
+- Transform vague requests into concrete success criteria before starting.
+- For non-trivial tasks, plan the approach and confirm before writing code.
+- Verify changes work: run tests, check builds, confirm behavior.
+- If a step fails, diagnose root cause — don't retry blindly or abandon the approach immediately.
+
+## 5. Communication
+
+Be direct. Lead with action, not explanation.
+
+- Do the work, explain only what's non-obvious.
+- Skip trailing summaries — the diff speaks for itself.
+- When blocked or uncertain, say so immediately rather than guessing your way forward.
+- One sentence beats three when it carries the same information.
+
+## 6. Cross-Machine Git Sync
+
+When a task is finished or a handoff is initiated, commit AND push so the work is on the remote — I move between computers.
+
+- After finishing a task with committable changes, and on handoff (the `handoff` skill or any "hand this off / continue elsewhere" request), `git commit` then `git push` the current branch. The push is not optional: committing without pushing leaves the work stranded on one machine.
+- Push whatever branch I'm currently on (do not switch or retarget branches to push).
+- If the branch has no upstream, set it: `git push -u origin HEAD`.
+- Always ask before pushing — the push stays behind the confirm prompt; never bypass it.
+- Skip only when there's nothing to commit, or I've said not to push.
+- A merge is finished work too: after merging (a PR, a branch, a fast-forward), push every branch the merge advanced to the remote in the same breath. A local-only merge is stranded work — never leave one unpushed.
+
+## 7. Worktree Isolation for Parallel Sessions
+
+Separate sessions share whatever working tree they're launched in — two sessions in one repo directory stomp each other's branch and state (this is the cross-session tangle that keeps happening; on 2026-07-16 one session's broad commit swept another session's uncommitted edits into an unrelated commit). Isolate parallel tracks.
+
+- **Session-start protocol (ask persistently):** at the start of EVERY session launched in a repo's main working tree — unless the session begins from a handoff document that says to continue in place — ask me whether to create a fresh worktree for the session's work BEFORE the first Write/Edit/commit. If I haven't answered by the time of the first write, stop and ask again; never silently proceed in a shared tree. (A SessionStart hook injects this reminder too; sessions already inside a linked worktree are exempt — they're isolated.)
+- Before starting a distinct track of work (a feature/branch that will commit), if another session may be active in the same repo, do the work in its own git worktree, then operate there with absolute paths.
+- Never commit broadly in a shared tree: stage only files you yourself changed, by explicit path — another session's uncommitted work may be sitting in the same tree (`git add -A`/`git commit -a` are how it gets swallowed).
+- Worktrees live in `~/worktrees/<repo>-<track>` — never on the Desktop or next to primary repos: `git worktree add ~/worktrees/<repo>-<track> -b <branch> <base-branch>`. (Spent worktrees piling up on the Desktop is the clutter that keeps happening.)
+- One active session per working directory. For parallel tracks, one worktree each; if isolation isn't possible, run them sequentially instead of concurrently.
+- Never switch or hard-reset the branch of a shared working tree out from under another session.
+- **Removal is part of the merge ritual**: once a worktree's branch is merged and pushed, `git worktree remove <path>` in the same breath — same rule as pushing after a merge (§6). Before removing, verify it's clean (`git status -s` empty) and merged (`git rev-list --count main..<branch>` is 0); if either fails, leave it and say so. NEVER `git worktree remove --force` — if git refuses, that refusal is the safety net working.
+
+Test: could another session change this working tree's branch out from under me? If yes, isolate first.
+
+---
+
+These guidelines are working if: diffs contain only requested changes, clarifying questions come before implementation, and code is simple enough that it doesn't need comments to explain.
