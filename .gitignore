@@ -19,3 +19,7 @@ venv
 # Pilot Vertex config (real; the .example is tracked)
 scripts/pilot-vertex.env
 scripts/pilot-bedrock.env
+
+# Agent worktrees are local checkouts, not repository content.
+.claude/worktrees/
+.claude/settings.local.json

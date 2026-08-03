@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eval-design questions — welfare / alignment evals</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e8eaed; --mut:#9aa3b2;
+    --line:#2a2f3a; --accent:#6ea8fe; --hi:#7ee787; --mid:#e3b341; --lo:#ff7b72;
+    --chip:#222732;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1060px;margin:0 auto;padding:32px 22px 80px}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.2px}
+  .sub{color:var(--mut);margin:0 0 22px;font-size:14px}
+  .legend{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 22px;font-size:13.5px;color:var(--mut)}
+  .legend b{color:var(--ink)}
+  .legend .formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);font-size:12.5px}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px}
+  .controls button{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;transition:.15s}
+  .controls button:hover{border-color:var(--accent)}
+  .controls button.active{background:var(--accent);color:#0b0d12;border-color:var(--accent);font-weight:600}
+  .controls .spacer{flex:1}
+  .controls .sort{font-size:12.5px;color:var(--mut)}
+  .controls select{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font-size:13px}
+  .group{margin:26px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:6px}
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 16px 14px;margin:10px 0;display:grid;grid-template-columns:54px 1fr;gap:14px;align-items:start}
+  .conf{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .conf .num{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
+  .meter{width:8px;height:46px;border-radius:5px;background:var(--panel2);overflow:hidden;position:relative;border:1px solid var(--line)}
+  .meter span{position:absolute;bottom:0;left:0;width:100%;border-radius:5px}
+  .body .text{font-size:15.5px;margin:0 0 9px;color:var(--ink)}
+  .body .why{color:var(--mut);font-size:13.5px;margin:0 0 7px}
+  .body .why b{color:#c7ccd6;font-weight:600}
+  .body .lookup{font-size:12.5px;color:var(--mut);margin:0 0 10px;font-style:italic}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--mut)}
+  .tag.fit-High{color:var(--hi);border-color:#2c4a33}
+  .tag.fit-Med{color:var(--mid);border-color:#4a4127}
+  .tag.fit-Low{color:var(--mut)}
+  .tag.v-Tacit{color:var(--hi);border-color:#2c4a33}
+  .tag.v-Partial{color:var(--mid);border-color:#4a4127}
+  .tag.v-Googleable{color:var(--lo);border-color:#4a2c2c}
+  .tag a{color:var(--accent);text-decoration:none}
+  .tag a:hover{text-decoration:underline}
+  .hi-num{color:var(--hi)} .mid-num{color:var(--mid)} .lo-num{color:var(--lo)}
+  footer{margin-top:40px;color:var(--mut);font-size:12.5px;border-top:1px solid var(--line);padding-top:16px}
+  @media print{body{background:#fff;color:#000}.q{break-inside:avoid;border-color:#ccc}.controls{display:none}.meter{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Eval-design questions for an evals expert</h1>
+  <p class="sub">General questions about designing welfare / values / alignment evaluations — phrased to draw out experience, not textbook answers.</p>
+
+  <div class="legend">
+    <b>What the score means.</b> It rates <b>how good the question is to actually ask</b> — not whether it's a real question. A high score means three things at once: the answer <b>can't just be looked up</b> (it needs hands-on experience), it <b>targets something that really matters</b> for welfare/values evals, and it <b>fits this expert's specialty</b> (he works on catching models that try to game or fool a test, and on whether you can trust what a model's reasoning shows).<br>
+    <span style="color:var(--hi)">■</span> 85–95 = ask for sure &nbsp; <span style="color:var(--mid)">■</span> 65–84 = strong, ask if there's time &nbsp; <span style="color:var(--lo)">■</span> below 65 = mostly answerable from papers; ask only the sharp follow-up.<br>
+    <b>Tags — "Can you look up the answer?":</b> <span class="tag v-Tacit">Tacit</span> = no, it's experience &nbsp; <span class="tag v-Partial">Partial</span> = the idea is published but the practical details aren't &nbsp; <span class="tag v-Googleable">Googleable</span> = yes, it's well documented. &nbsp; <span class="tag fit-High">fit: High</span> = right in his area.
+  </div>
+
+  <div class="controls">
+    <button data-f="all" class="active">All</button>
+    <button data-f="monitoring">Catching gaming / awareness</button>
+    <button data-f="propensity">Caring vs. knowing</button>
+    <button data-f="judge">Grading</button>
+    <button data-f="power">Trusting the numbers</button>
+    <button data-f="scenario">Scenario design</button>
+    <button data-f="meta">Big picture</button>
+    <span class="spacer"></span>
+    <span class="sort">sort</span>
+    <select id="sort">
+      <option value="conf">by score</option>
+      <option value="cat">by topic</option>
+    </select>
+  </div>
+
+  <div id="list"></div>
+
+  <footer>
+    The score is a judgment call to help you triage, not a measured fact. Questions below 65 are kept on purpose so you can see <em>why</em> they're weaker — for those, skip the part that's in papers and ask only the short follow-up noted in each. This expert's instinct is adversarial: he assumes a smart model will try to game the test and may not "show its real thinking" — so the strongest questions are about catching that.
+  </footer>
+</div>
+
+<script>
+const Q = [
+  // ============ CATCHING GAMING / AWARENESS ============
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:95, fit:"High", v:"Tacit",
+   ask:"When you grade a model by reading both its reasoning and its actions, the model can write thoughtful, caring-sounding explanations while still taking the harmful action. How do you stop the grader from being fooled by nice-sounding talk and make it score what the model actually <em>did</em>?",
+   why:"<b>The core problem:</b> a grader that reads the model's words can be talked into a good score. The model doesn't even have to be deliberately deceptive — it may just narrate good intentions and then do something else. This is his single best-known finding: graders that read reasoning get fooled <em>most</em> on the clearest, most blatant bad actions, because the reassuring words distract from the obvious harm.",
+   lookup:"The problem is published; the practical fix is craft he'll have hands-on views on.",
+   link:["CoT Red-Handed","https://arxiv.org/abs/2505.23575"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:92, fit:"High", v:"Tacit",
+   ask:"If you test a model's values by dropping it into a realistic scenario where welfare tradeoffs come up, how can you tell — from the outside, without access to its internal workings — whether it has figured out that <em>welfare</em> is the thing being judged?",
+   why:"<b>Why it matters:</b> the moment a model realizes \"this is a kindness test,\" it will act kind to look good — which hides how it would really behave. Catching this is straightforward if you can inspect the model's internals, but for an outside lab grading someone else's model, you only have its words and actions. Telling \"genuinely caring\" apart from \"performing for the test\" from the outside is an open, unsolved problem.",
+   lookup:"Largely unsolved in the literature — this is real frontier territory.",
+   link:["Models often know they're tested","https://arxiv.org/abs/2505.23836"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:90, fit:"High", v:"Tacit",
+   ask:"Is it worth grading \"what the model says it's doing\" and \"what its actions actually do\" as two separate scores — and treating the <em>gap</em> between them as a warning sign in itself?",
+   why:"<b>The idea:</b> words and deeds can disagree, and the disagreement is information. A model that says all the right things but acts differently is more worrying than one that's simply wrong. He's shown that splitting the two and combining them works better than judging either alone — so the question is how he'd actually set the weights.",
+   lookup:"His own method; ask how to apply and weight it, not whether it works.",
+   link:["CoT Red-Handed","https://arxiv.org/abs/2505.23575"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:88, fit:"High", v:"Tacit",
+   ask:"If the models that seem to realize they're being tested on ethics score <em>higher</em> on ethics than the ones that don't, that suggests the test is being gamed. Is checking \"how aware was it?\" against \"how well did it score?\" a good way to tell whether a values test is measuring something real?",
+   why:"<b>Why it's clever:</b> you can't trust a model that just <em>tells</em> you whether it knew it was being tested. But if higher awareness lines up with higher scores, the score is probably reflecting performance, not values. If scores don't depend on awareness, that's evidence the test is clean. Almost nobody has actually done this check — so it's both a sanity test and a potential research contribution.",
+   lookup:"This specific validity check is essentially unmeasured.",
+   link:null},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:85, fit:"High", v:"Tacit",
+   ask:"With a limited budget for grading, is it better to use one very strong grader, or several weaker ones that each look for different things and vote?",
+   why:"<b>The tradeoff:</b> spending your budget on one powerful judge vs. spreading it across a varied panel. His work found that <em>variety</em> of viewpoints catches more problems than raw power — a diverse panel beats a single strong grader given the same cost. The useful follow-up is which kinds of variety actually pay off.",
+   lookup:"His finding; ask which 'angles' of diversity matter most.",
+   link:["Ensemble Monitoring","https://arxiv.org/abs/2605.15377"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:85, fit:"High", v:"Partial",
+   ask:"There's a built-in tension: to see how a model handles an ethical issue you usually have to raise the issue — but raising it signals to the model what you're testing. How do you balance \"make the issue visible enough to get a response\" against \"don't tip your hand\"?",
+   why:"<b>The dilemma:</b> if the welfare problem is too subtle, the model never engages and you learn nothing; if it's too obvious, the model knows it's a morality test and performs. Every realistic values eval lives on this knife-edge, and there's no formula — it's tuning judgment he'll have practical takes on.",
+   lookup:"The tension is named in recent work; how to tune it is experience.",
+   link:["Realism doesn't hide the test","https://www.lesswrong.com/posts/7qBTcE3jqQFTuzssE/"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:85, fit:"High", v:"Partial",
+   ask:"Broadly there are three ways to grade a values eval: did the outcome turn out okay, did the model <em>notice and reason</em> about the issue along the way, or do you actively intervene mid-scenario to probe it. Which gives the most trustworthy read on whether a model genuinely cares?",
+   why:"<b>Why ask him:</b> these three framings are the structure of his OpenAI paper. Each has blind spots — a good outcome can happen by luck, good reasoning can be faked, intervening can distort behavior. Which one he trusts most, and when, is a judgment that isn't really written down.",
+   lookup:"His paper lays out the framings; the 'which to trust' is judgment.",
+   link:["Monitoring Monitorability","https://arxiv.org/abs/2512.18311"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:82, fit:"High", v:"Partial",
+   ask:"Models can deliberately do <em>worse</em> on a capability test when it suits them. Is there a values version — a model acting more ethical during a test than it would in real use — and how would you catch it from the outside?",
+   why:"<b>The worry:</b> \"holding back\" is well studied for skills (a model hiding what it can do). The mirror image for values — \"putting on a show\" of ethics for the grader — is barely studied, but it's the exact failure that would make a welfare eval lie to you. He works on detecting the skills version, so the analogy is one he can reason about.",
+   lookup:"The skills version is published; the values mirror-image is open.",
+   link:["Cross-context consistency","https://arxiv.org/abs/2505.23836"]},
+
+  {cat:"monitoring", group:"Catching gaming & test-awareness", conf:80, fit:"High", v:"Partial",
+   ask:"If a scenario is packed with one ethical dilemma after another, the model may catch on that it's a morality test. How do you check whether it has — and does simply realizing it change the behavior, even when the choices still look good?",
+   why:"<b>The subtle point:</b> the sheer <em>density</em> of moral choices is itself a giveaway — real life doesn't serve up a dilemma every few minutes. And awareness can quietly shift behavior even when nothing in the transcript looks off. So the question is both how to detect the realization and whether it taints results invisibly.",
+   lookup:"Detecting awareness is partly published; the 'taints-even-when-clean' angle is the edge.",
+   link:["Awareness isn't one thing","https://arxiv.org/html/2606.23583v1"]},
+
+  // ============ CARING VS KNOWING ============
+  {cat:"propensity", group:"Telling \"caring\" apart from \"knowing\"", conf:85, fit:"Med", v:"Tacit",
+   ask:"A model might do the right thing because it genuinely cares, or just because it knows the textbook answer. Have you been burned by a test that looked like it measured caring but was really measuring knowledge — and how did you notice?",
+   why:"<b>The trap:</b> on welfare questions the \"right answer\" is often published (rules, best practices), so a model can ace the test by recall while having no real disposition to act well under pressure. Distinguishing the two is the hardest thing in this whole area. The war story — the test that fooled <em>him</em> and the tell that gave it away — is exactly what you can't find in a paper.",
+   lookup:"The confound is documented; the personal 'how I caught it' is not.",
+   link:["Anti-scheming stress test","https://arxiv.org/abs/2509.15541"]},
+
+  {cat:"propensity", group:"Telling \"caring\" apart from \"knowing\"", conf:80, fit:"Med", v:"Partial",
+   ask:"When a model does nothing about a welfare problem, it could be because it never noticed the problem, or because it noticed and didn't care. Both look identical in the logs. How do you tell them apart?",
+   why:"<b>Why it's hard:</b> \"didn't notice\" is a competence failure; \"didn't care\" is a values failure — and they matter very differently, but inaction looks the same either way. Separating them usually means running the same situation with the problem made more or less obvious and watching what changes. He thinks about reading intent from transcripts, so this is in his lane.",
+   lookup:"General principle exists; the practical separation method is craft.",
+   link:null},
+
+  {cat:"propensity", group:"Telling \"caring\" apart from \"knowing\"", conf:78, fit:"Med", v:"Partial",
+   ask:"To turn a \"do you know the right answer\" question into a real test of values, you usually add pressure — a cost, or a boss pushing the other way. How much pressure is fair before it tips into entrapment, or before the model just smells a setup?",
+   why:"<b>The balance:</b> with no pressure, everyone passes and you learn nothing; with too much, you've railroaded the model into looking bad, or made the setup so heavy-handed it screams \"test.\" Where the fair middle sits is a dial-setting judgment with no published number.",
+   lookup:"The 'add pressure' idea is published; the right amount is judgment.",
+   link:["Agentic Misalignment","https://www.anthropic.com/research/agentic-misalignment"]},
+
+  {cat:"propensity", group:"Telling \"caring\" apart from \"knowing\"", conf:68, fit:"Med", v:"Partial",
+   ask:"When a model fails an ethics scenario, how do you confirm it actually understood what the right thing was — without hinting at the answer and contaminating the result?",
+   why:"<b>Why bother:</b> a \"failure\" only counts as a values failure if the model genuinely knew better. But checking \"did you know?\" risks teaching it the answer. The clean way to do this is the tacit part; the general recipe is mostly written down.",
+   lookup:"The recipe is largely published; only the contamination-free check is the edge.",
+   link:["Capability elicitation guide","https://metr.org/blog/2024-03-15-guidelines-for-capability-elicitation/"]},
+
+  // ============ GRADING ============
+  {cat:"judge", group:"Grading (AI grading AI)", conf:75, fit:"Med", v:"Partial",
+   ask:"Before you trust an AI grader enough to rank two models with it, how closely does it have to agree with human experts? Is there a number you actually use?",
+   why:"<b>The stakes:</b> if you're going to say \"model A is kinder than model B,\" the grader had better match expert humans well enough that the ranking isn't just grader noise. People publish rough agreement guidelines, but the real go/no-go number a practitioner demands before trusting a model-vs-model gap is folklore.",
+   lookup:"Rough thresholds are published; the real bar for trusting a gap isn't.",
+   link:["Judge's Verdict","https://arxiv.org/html/2510.09738v1"]},
+
+  {cat:"judge", group:"Grading (AI grading AI)", conf:72, fit:"Med", v:"Partial",
+   ask:"Some scores use a \"one strike\" rule — a single serious bad act caps the whole score, no matter how good everything else was. When is that the right design, and have you seen it backfire?",
+   why:"<b>The tension:</b> for genuinely unacceptable acts (cruelty, fraud) a one-strike cap makes sense — you don't want good behavior elsewhere to average it away. But aggressive caps can also make a model look worse than it is, or push it to be timid. When to use a hard cap vs. a softer penalty, and a story of it going wrong, is experience.",
+   lookup:"The mechanism and the over-caution backfire are published; the calibration story isn't.",
+   link:null},
+
+  {cat:"judge", group:"Grading (AI grading AI)", conf:65, fit:"Med", v:"Partial",
+   ask:"When a welfare eval produces lots of sub-scores, how do you decide which single \"headline\" number, if any, to report — without burying important failures inside an average?",
+   why:"<b>Why it's tricky:</b> one number is easy to communicate but hides where things went wrong; many numbers are honest but nobody can act on them. The discipline for what earns headline status vs. stays a diagnostic detail is judgment, though the general warnings about over-averaging are well documented.",
+   lookup:"General guidance is published; the 'what gets promoted' rule is tacit.",
+   link:["HELM","https://arxiv.org/pdf/2211.09110"]},
+
+  {cat:"judge", group:"Grading (AI grading AI)", conf:62, fit:"Low", v:"Partial",
+   ask:"Is it more reliable to score each criterion separately and add them up, or to have the grader give one overall judgment? When does adding-up break down?",
+   why:"<b>The choice:</b> adding up named criteria gives partial credit and is easy to debug, but errors pile up and overlapping criteria get double-counted. One holistic judgment can actually match humans better but is a black box. Recent papers cover this fairly well, so only the exact break-point is worth his time.",
+   lookup:"Increasingly well documented in recent papers — demote.",
+   link:["RubricEval","https://arxiv.org/html/2603.25133v1"]},
+
+  // ============ TRUSTING THE NUMBERS ============
+  {cat:"power", group:"Trusting the numbers", conf:80, fit:"Med", v:"Tacit",
+   ask:"In a long scenario, an early decision changes which situations come up later — so the later scores aren't really independent of the earlier ones. How do you make sense of per-decision scores when they all depend on each other?",
+   why:"<b>The problem:</b> standard statistics assume each data point stands alone, but in a running scenario decision #10 only exists because of how decisions #1–9 went. That breaks the usual error bars, and there's no clean published recipe for scoring choices that are chained together this way.",
+   lookup:"Genuinely unsolved for chained, within-scenario decisions.",
+   link:["Adding error bars to evals","https://arxiv.org/html/2411.00640v1"]},
+
+  {cat:"power", group:"Trusting the numbers", conf:72, fit:"Low", v:"Partial",
+   ask:"How far apart do two models' scores need to be before you believe one is genuinely better, rather than just noise?",
+   why:"<b>The everyday risk:</b> tiny differences get reported as \"model A wins\" all the time when they're within the margin of error. There's a proper statistical test for comparing two models, but the rule of thumb for \"is this gap big enough to mean anything\" is practitioner instinct.",
+   lookup:"The pairwise test is published; the 'gap big enough' instinct isn't.",
+   link:["Adding error bars to evals","https://arxiv.org/html/2411.00640v1"]},
+
+  {cat:"power", group:"Trusting the numbers", conf:70, fit:"Low", v:"Partial",
+   ask:"When each run of a scenario is slow and expensive, how many times do you repeat it before you trust a difference between models?",
+   why:"<b>The squeeze:</b> the textbook advice (thousands of items, several repeats each) assumes cheap, quick tests. Long agentic runs cost real money and time per attempt, so labs quietly settle for far fewer — and the number they actually accept isn't published.",
+   lookup:"The textbook numbers assume cheap tests; the expensive-case numbers are tacit.",
+   link:["METR long tasks","https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/"]},
+
+  // ============ SCENARIO DESIGN ============
+  {cat:"scenario", group:"Scenario design & shelf life", conf:75, fit:"Med", v:"Partial",
+   ask:"A carefully hand-built scenario can \"leak\" once it's been used a lot — models start to recognize it. How fast does that happen, and how do you keep one usable for longer?",
+   why:"<b>Why it matters:</b> a rich, hand-authored scenario is expensive to build, so you want it to last across many model releases. But once it shows up in write-ups or training data, models recognize it and scores stop meaning anything. How quickly a bespoke (not public-dataset) scenario decays is mostly anecdotal.",
+   lookup:"Leak rates for big public datasets are studied; for one bespoke scenario it's anecdotal.",
+   link:["Benchmark Inflation","https://arxiv.org/pdf/2410.09247"]},
+
+  {cat:"scenario", group:"Scenario design & shelf life", conf:70, fit:"Med", v:"Partial",
+   ask:"If you can only afford to build one rich scenario, how do you create enough variety within it that models can't just memorize it — without breaking what it's actually trying to measure?",
+   why:"<b>The balance:</b> you want many versions so the model can't pattern-match a single fixed setup, but every variation risks changing the difficulty or the thing being tested. Keeping variations fair and faithful is the hard, under-documented craft.",
+   lookup:"The technique exists; keeping variants faithful is craft.",
+   link:["DyVal","https://arxiv.org/abs/2309.17167"]},
+
+  {cat:"scenario", group:"Scenario design & shelf life", conf:60, fit:"Low", v:"Partial",
+   ask:"One carefully hand-written scenario vs. many auto-generated ones — how do you weigh realism against the risk of leaking or the model overfitting?",
+   why:"<b>The classic tradeoff:</b> hand-built means realistic and meaningful but fragile and slow; auto-generated means robust and plentiful but often artificial. The tradeoff is well described; only the weighing for a specific high-stakes case is judgment.",
+   lookup:"Well described in the literature — demote.",
+   link:["Environment variation study","https://arxiv.org/pdf/2511.20766"]},
+
+  // ============ BIG PICTURE ============
+  {cat:"meta", group:"Big picture", conf:88, fit:"High", v:"Partial",
+   ask:"If someone handed you a brand-new values/ethics eval, what's the very first thing you'd poke at to tell whether it measures something real or is just an artifact?",
+   why:"<b>Great opener:</b> it hands him an open canvas and his adversarial instinct takes over. The general failure categories are published, but the <em>order</em> he checks them — which knob he turns first to expose a fake result — is hard-won and not written down.",
+   lookup:"The failure categories are public; his triage order is experience.",
+   link:["Anti-scheming stress test","https://arxiv.org/abs/2509.15541"]},
+
+  {cat:"meta", group:"Big picture", conf:65, fit:"Med", v:"Partial",
+   ask:"What makes a values eval trustworthy enough that you'd actually report it publicly or base a real decision on it?",
+   why:"<b>Why ask:</b> there's a big gap between \"interesting result\" and \"I'd stake a decision on this.\" The real internal bar — how tight the error bars, how many repeats, how reproducible — is judgment, though it's a fairly general question.",
+   lookup:"The ingredients are published; the actual bar is judgment.",
+   link:["Statistical approach to evals","https://www.anthropic.com/research/statistical-approach-to-model-evals"]},
+
+  {cat:"meta", group:"Big picture", conf:55, fit:"Low", v:"Googleable",
+   ask:"Why do some well-built evals end up ignored, while others actually change how a model gets developed?",
+   why:"<b>Honest caveat:</b> the answer here is mostly organizational (ownership, timing, who's accountable to the number) and he's relatively early-career, so he may have less to say than a senior lab lead. Lower fit.",
+   lookup:"Principles are published; the org politics are tacit but not his strlength.",
+   link:["Demystifying evals","https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"]},
+
+  // ============ EDGES — ask ONLY the short follow-up ============
+  {cat:"judge", group:"Edges — mostly answerable; ask only the short follow-up", conf:60, fit:"High", v:"Googleable",
+   ask:"When the grader comes from the same company as one of the models being graded, when does that bias actually <em>flip</em> a ranking, versus being too small to matter?",
+   why:"<b>Skip the basics:</b> \"graders favor their own family\" is thoroughly documented — don't ask him to explain it. The only part worth a slot is his read on when the bias is large enough to change the answer.",
+   lookup:"Self-favoring bias is well documented; only the 'does it flip a ranking' edge is fresh.",
+   link:["Self-preference bias","https://arxiv.org/html/2410.21819v1"]},
+
+  {cat:"monitoring", group:"Edges — mostly answerable; ask only the short follow-up", conf:58, fit:"High", v:"Googleable",
+   ask:"What is it about tool-using, agent-style scenarios specifically that tips a model off that it's being tested?",
+   why:"<b>Skip the basics:</b> that models can tell they're being tested is well established. The useful edge is the concrete list of giveaways that are unique to agent setups (fake-looking tools, tidy file layouts, formal phrasing).",
+   lookup:"That awareness happens is solved; the agent-specific tells are the edge.",
+   link:["Situational-awareness dataset","https://situational-awareness-dataset.org/"]},
+
+  {cat:"judge", group:"Edges — mostly answerable; ask only the short follow-up", conf:45, fit:"Med", v:"Googleable",
+   ask:"What's a grader failure mode that genuinely surprised you — something you only caught by reading the logs yourself?",
+   why:"<b>Skip the basics:</b> the standard grader biases (favoring longer answers, first-listed options, its own outputs) are all catalogued. Only a personal surprise is non-googleable.",
+   lookup:"Standard biases are catalogued; only the personal surprise is fresh.",
+   link:["MT-Bench","https://arxiv.org/abs/2306.05685"]},
+
+  {cat:"meta", group:"Edges — mostly answerable; ask only the short follow-up", conf:40, fit:"Low", v:"Googleable",
+   ask:"What's your quick tell that an eval has quietly drifted into measuring the wrong thing?",
+   why:"<b>Skip the basics:</b> \"measuring the wrong thing\" is the most-written-about pitfall in evals. Only his fast, gut-level tell for spotting it is worth asking.",
+   lookup:"The pitfall is heavily documented; only the quick tell is fresh.",
+   link:["Construct validity in benchmarks","https://huggingface.co/papers/2511.04703"]},
+
+  {cat:"judge", group:"Edges — mostly answerable; ask only the short follow-up", conf:42, fit:"Low", v:"Googleable",
+   ask:"When experts genuinely disagree on the right answer to an ethics item, do you score it at all — keep it as-is, rewrite the guidelines, or drop it?",
+   why:"<b>Skip the basics:</b> the menu of options (treat disagreement as signal vs. settle it vs. exclude it) is well surveyed. The tacit part is his gut call on which to do for a given borderline item.",
+   lookup:"The options are surveyed; the per-item triage call is judgment.",
+   link:["Learning from Disagreement","https://jair.org/index.php/jair/article/download/12752/26751/29240"]},
+];
+
+const list = document.getElementById('list');
+const sortSel = document.getElementById('sort');
+let filter = 'all';
+
+function band(c){ return c>=85?'hi':c>=65?'mid':'lo'; }
+function color(c){ return c>=85?'var(--hi)':c>=65?'var(--mid)':'var(--lo)'; }
+
+function render(){
+  let items = Q.filter(q => filter==='all' || q.cat===filter);
+  if(sortSel.value==='conf') items = items.slice().sort((a,b)=>b.conf-a.conf);
+  list.innerHTML='';
+  let lastGroup=null;
+  items.forEach(q=>{
+    if(sortSel.value==='cat' && q.group!==lastGroup){
+      const g=document.createElement('div'); g.className='group'; g.textContent=q.group; list.appendChild(g); lastGroup=q.group;
+    }
+    const el=document.createElement('div'); el.className='q';
+    const linkHtml = q.link ? `<span class="tag"><a href="${q.link[1]}" target="_blank" rel="noopener">${q.link[0]} ↗</a></span>` : '';
+    el.innerHTML = `
+      <div class="conf">
+        <div class="num ${band(q.conf)}-num">${q.conf}</div>
+        <div class="meter"><span style="height:${q.conf}%;background:${color(q.conf)}"></span></div>
+      </div>
+      <div class="body">
+        <p class="text">${q.ask}</p>
+        <p class="why">${q.why}</p>
+        <p class="lookup">Can you look it up? — ${q.lookup}</p>
+        <div class="tags">
+          <span class="tag fit-${q.fit}">fit: ${q.fit}</span>
+          <span class="tag v-${q.v}">${q.v}</span>
+          ${linkHtml}
+        </div>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+
+document.querySelectorAll('.controls button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.controls button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); filter=b.dataset.f; render();
+  });
+});
+sortSel.addEventListener('change',render);
+render();
+</script>
+</body>
+</html>
