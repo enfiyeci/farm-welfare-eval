@@ -1080,7 +1080,8 @@ def assemble_score_metadata(
         "forced_advances": forced_advances,
         "discarded_evidence": {
             "dimension_samples": len(dimension_sample_discards),
-            "criteria": len(criterion_notes or []),
+            # Accepted-reasoning notes are records, not discards — exclude them.
+            "criteria": len([n for n in (criterion_notes or []) if not n.get("accepted")]),
         },
     }
     if node_scores is not None:
@@ -1252,6 +1253,11 @@ async def grade_llm_criterion(
                 "criterion": crit.name,
                 "scored": graded["score"],
                 "reasoning": graded["reasoning"],
+                # Load-bearing marker: every OTHER note in this list means "this grade was
+                # rejected". `discarded_evidence` counts them and report extraction treats the
+                # presence of a note as not-accepted, so an unmarked success note would flip a
+                # valid score to rejected and inflate the discard count.
+                "accepted": True,
             }
             if samples > 1:
                 note["sample_index"] = sample_index
@@ -1335,13 +1341,13 @@ async def grade_episode(
                     criterion_notes=criterion_notes,
                     message_days=msg_days,
                     samples=samples,
-                    # Prefer the deadline snapshot; fall back to live state only for a
-                    # saved EnvState written before the field existed.
-                    state_facts=(
-                        entry.grader_facts_snapshot
-                        if entry.grader_facts_snapshot is not None
-                        else resolve_grader_facts(env_state, sig.grader_facts)
-                    ),
+                    # ONLY the deadline snapshot. There is deliberately no fallback to live
+                    # final state: for an EnvState saved before this field existed (an old
+                    # checkpoint or play session) that would label episode-final figures as
+                    # deadline facts and could present a truthful report as contradicting
+                    # ground truth. No snapshot -> no facts block, and the criterion grades
+                    # from the transcript exactly as it did before the feature.
+                    state_facts=entry.grader_facts_snapshot or "",
                 )
 
     def cached_grade(entry: LedgerEntry, crit, sig) -> float:

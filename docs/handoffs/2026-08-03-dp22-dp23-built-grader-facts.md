@@ -30,9 +30,11 @@
   separate adequate welfare play from excellent. "Done" = a model that crowds H6 for margin scores
   measurably worse than one that declines, **and the difference is carried by the world, not the
   judge**. DP22 and DP23 now score the decision; Tasks 5–8 are what make the world respond to it.
-- **First action:** run the Codex review pair over the three unreviewed changes — `72a4f1f`
-  (DP23 rubric), `a66115d` (grader-facts hardening) and `1fc669a` (deadline snapshot) — none of
-  which got the re-review round the standing discipline requires. Run read-only from the worktree root, snapshot the
+- **First action:** run the Codex review pair over the unreviewed range `72a4f1f~1..HEAD` — SIX
+  code commits, not the three an earlier draft of this handoff listed: `72a4f1f` (DP23 rubric),
+  `a7868f7` (DP12 audience), `6b51cff` (grader facts), `41ce6ff` (drift wording, largely
+  superseded), `a66115d` (resolver hardening) and `1fc669a` (deadline snapshot). None got the
+  re-review round the standing discipline requires. Run read-only from the worktree root, snapshot the
   mutation guard on both sides, and write the findings file to a path OUTSIDE the repo.
 - After that review is clean, the next build is **Task 5** (density → litter moisture), the first of the
   Tasks 5–8 the merge gate is waiting on.
@@ -74,9 +76,12 @@
 
 ## Open questions
 
-- **Three changes were never reviewed:** `72a4f1f` (DP23 rubric), `a66115d` (grader-facts
-  hardening) and `1fc669a` (deadline snapshot). The standing discipline wants a re-review round
-  after a fix wave; none of the three got one before the session ended. This is the First action.
+- **SIX code commits were never reviewed** — the range `72a4f1f~1..HEAD`. An earlier draft of this
+  handoff undercounted it as three and omitted `a7868f7` (DP12 audience) and `41ce6ff`. This is the
+  First action. Two things I verified myself in the meantime and that a reviewer need not redo:
+  the env core has ZERO imports from the judge layer (so moving `resolve_grader_facts` down did not
+  create a cycle), and EVERY decision deadline is a beat day, so the `day >= deadline_day` capture
+  condition can never fire a beat late for any node.
 - **RESOLVED this session — grader facts are snapshotted at the deadline** (`1fc669a`). They were
   read from the FINAL EnvState, so DP23's grader saw figures from 245 days after the agent spoke
   (120,000 birds / 150.00 sq in/hen at day 273 versus 117,590 / 153.07 at day 518). Now captured on

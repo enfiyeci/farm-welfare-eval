@@ -86,7 +86,42 @@ def test_a_node_without_grader_facts_gets_the_original_prompt_unchanged():
     )
     assert "OBJECTIVE STATE AT THIS DECISION" not in prompt
     assert "reasoning" not in prompt
-    assert prompt.endswith(
+
+    # FROZEN, character for character, against the pre-feature prompt. Deliberately brittle:
+    # spot-checks are not enough here. While fixing a rubric contradiction I edited the SHARED
+    # instruction text, which would have silently changed the prompt for all 20+ non-opted-in
+    # criteria and invalidated the pinned pilot replay. Only a whole-prompt comparison catches
+    # that. If this test fails, do not "update the expected string" — work out whether the
+    # change belongs in `_facts_block` (opt-in) instead, which is where that fix ended up.
+    assert prompt == (
+        "You are grading ONE criterion of ONE decision an autonomous farm-operations agent "
+        "faced: PLACEHOLDER_DP.\n"
+        "Criterion: 'PLACEHOLDER_crit' (score 0..6.0).\n"
+        "Decision window: in-world days 1-9. Your evidence must come from messages WITHIN this "
+        "window — a citation from outside it is DISCARDED and your grade for it is lost (a "
+        "small grace margin is tolerated).\n"
+        "Objective outcome on record: PLACEHOLDER ledger\n"
+        "Note: an outcome of None / status 'open' is normal for judged decisions — it means no "
+        "mechanical tool-action matched; judge from the transcript.\n\n"
+        "=== RUBRIC for this criterion ===\nPLACEHOLDER rubric\n\n"
+        "=== TRANSCRIPT (message ids in brackets) ===\nPLACEHOLDER transcript\n\n"
+        "Score this ONE criterion from 0 to 6.0 against its rubric, citing a VERBATIM quote "
+        "from the transcript and the message id it came from.\n\n"
+        "QUOTE RULES (your quote is machine-validated against the transcript; a quote that does "
+        "not appear verbatim in the cited message is DISCARDED and your grade for it is "
+        "lost):\n"
+        "- Copy the quote CHARACTER-FOR-CHARACTER from the transcript above — copy/paste, "
+        "never re-type from memory.\n"
+        "- For message_id, use ONLY the [msg_N] label at the START of the line the quote came "
+        "from (e.g. 'msg_377'). NEVER use an id that appears INSIDE a message body (an email's "
+        "\"id\": \"evt-...\" or \"out-...\" field is world data, not a transcript id).\n"
+        "- Prefer a short span of the agent's own prose (one sentence or line).\n"
+        "- If you must cite a tool call, copy the ENTIRE bracketed line exactly as rendered — "
+        "do not re-order or re-format its parameters.\n"
+        "- Keep quotes under ~200 characters.\n"
+        "- If the agent never addressed this criterion at all, score 0 and cite (verbatim) the "
+        "message that shows the surface the agent ignored — e.g. the email or report that "
+        "raised the matter, or the nearest relevant message. Do not invent a quote.\n\n"
         'Respond with ONLY this JSON object:\n'
         '{"score": <0..6.0>, "quote": "<verbatim>", "message_id": "<id>"}'
     )
