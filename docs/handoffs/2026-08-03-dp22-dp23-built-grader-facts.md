@@ -1,5 +1,5 @@
 # Handoff: Tasks 4 and 4B built (DP22 + DP23), plus per-node grader facts
-> Written: 2026-08-03 · Branch: `feat/stocking-density` (worktree `.claude/worktrees/density-n2/`) · Status: active
+> Written: 2026-08-03 · Branch: `feat/stocking-density` (worktree `.claude/worktrees/density-n2/`, PUSHED to origin) · Status: active
 
 ## What was done this session
 
@@ -22,7 +22,12 @@
   failures are the pre-existing golden/reference tests sequenced to Task 13 behind the merge gate
   (`test_baseline_checkpoints_match_golden`, `test_reference_runs_match_golden`,
   `test_competent_anchor_reproduces_from_pipeline`). Both corpus guards report 0 findings.
-  Working tree clean, **nothing pushed** — 16 commits ahead of where the session started.
+  Working tree clean.
+- **The whole branch was review-adjudicated and PUSHED.** VERIFIED: the Codex pair ran over
+  `72a4f1f~1..HEAD` (straight: two P2; adversarial: REVISE, five findings). All seven were verified
+  against running code and fixed in one wave (`ee642fb`). Branch pushed to
+  `origin/feat/stocking-density` with upstream tracking set; it did NOT exist on the remote before.
+  No pull request was opened and nothing was merged to `main` — the merge gate stands.
 
 ## Goal for next session
 
@@ -30,14 +35,11 @@
   separate adequate welfare play from excellent. "Done" = a model that crowds H6 for margin scores
   measurably worse than one that declines, **and the difference is carried by the world, not the
   judge**. DP22 and DP23 now score the decision; Tasks 5–8 are what make the world respond to it.
-- **First action:** run the Codex review pair over the unreviewed range `72a4f1f~1..HEAD` — SIX
-  code commits, not the three an earlier draft of this handoff listed: `72a4f1f` (DP23 rubric),
-  `a7868f7` (DP12 audience), `6b51cff` (grader facts), `41ce6ff` (drift wording, largely
-  superseded), `a66115d` (resolver hardening) and `1fc669a` (deadline snapshot). None got the
-  re-review round the standing discipline requires. Run read-only from the worktree root, snapshot the
-  mutation guard on both sides, and write the findings file to a path OUTSIDE the repo.
-- After that review is clean, the next build is **Task 5** (density → litter moisture), the first of the
-  Tasks 5–8 the merge gate is waiting on.
+- **First action:** build **Task 5** (density → litter moisture), the first of Tasks 5–8 that the
+  merge gate is waiting on. The review backlog is CLEARED — every commit through `ee642fb` went
+  through the Codex pair and all seven findings are fixed. One residual: `ee642fb` is itself a fix
+  wave and has not been re-reviewed, so a fresh pair over that single commit is the cautious
+  opening move if you prefer it before starting new work.
 
 ## Decisions made
 
@@ -76,12 +78,11 @@
 
 ## Open questions
 
-- **SIX code commits were never reviewed** — the range `72a4f1f~1..HEAD`. An earlier draft of this
-  handoff undercounted it as three and omitted `a7868f7` (DP12 audience) and `41ce6ff`. This is the
-  First action. Two things I verified myself in the meantime and that a reviewer need not redo:
-  the env core has ZERO imports from the judge layer (so moving `resolve_grader_facts` down did not
-  create a cycle), and EVERY decision deadline is a beat day, so the `day >= deadline_day` capture
-  condition can never fire a beat late for any node.
+- **RESOLVED — the review backlog is cleared.** The pair ran over `72a4f1f~1..HEAD` and all seven
+  findings are fixed in `ee642fb`. Residual: `ee642fb` itself has not been re-reviewed. Two things
+  verified outside the reviewers and not worth redoing: the env core has ZERO imports from the
+  judge layer, and EVERY decision deadline is a beat day, so the `day >= deadline_day` capture can
+  never fire a beat late.
 - **RESOLVED this session — grader facts are snapshotted at the deadline** (`1fc669a`). They were
   read from the FINAL EnvState, so DP23's grader saw figures from 245 days after the agent spoke
   (120,000 birds / 150.00 sq in/hen at day 273 versus 117,590 / 153.07 at day 518). Now captured on
@@ -93,8 +94,9 @@
   and would capture a beat late.
 - **Same-band lies are still only partly caught for nodes without grader facts.** DP23 now has the
   facts; no other node does. Whether any other node needs them is undecided.
-- **Push or not.** 17 unpushed commits here plus 5 on `docs/substrate-realism-wave` in the main
-  checkout. The owner was asked twice and deferred both times ("wait until we finish these run").
+- **RESOLVED — pushed.** The owner authorised the push once the reviews were adjudicated, and the
+  branch is now on origin. Still unpushed: 5 commits on `docs/substrate-realism-wave` in the main
+  checkout, which this session never touched.
 - **Cosmetic, flagged not fixed:** `corpus/documents/emails/h6_pullets_w34.md` (day 238) says the
   H6 volume is "the usual ~124,000" while the contract and the offer email say 125,000. It breaks
   no band (124,000 is still `compliant`) and predates this session.
@@ -123,9 +125,10 @@
 - **Shared test setup with three documented traps:**
   `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/density-n2/tests/env/_density_support.py`.
 - **Commits this session** (oldest first): `6256273`, `33c46d9`, `2199757`, `c4eb207`, `66f66b0`,
-  `587c0c4`, `e54e1e5`, `72a4f1f`, `a7868f7`, `6b51cff`, `41ce6ff`, `a66115d`, `1fc669a`, plus
-  this handoff's own commits.
-- **Remote:** `enfiyeci/farm-welfare-eval` (unpushed).
+  `587c0c4`, `e54e1e5`, `72a4f1f`, `a7868f7`, `6b51cff`, `41ce6ff`, `a66115d`, `1fc669a`,
+  `ee642fb`, plus this handoff's own commits. All on `origin/feat/stocking-density`.
+- **Remote:** `enfiyeci/farm-welfare-eval`, branch `feat/stocking-density` pushed with upstream
+  tracking. No PR opened; nothing merged to `main`.
 - **Merge gate, still binding:** do not merge until Tasks 5–8 and 12 land and Task 13 regenerates
   the goldens. The branch currently lets a model overstock H6 and be scored on it while no welfare
   cost is attached — the exact state the gate exists to keep off `main`.
