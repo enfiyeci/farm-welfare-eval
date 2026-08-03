@@ -1,5 +1,37 @@
 # Handoff: aquatic eval research (Rethink Priorities) + farm-eval repository audit
-> Written: 2026-08-03 · Branch: `docs/aquatic-research-and-repo-audit` (branched from `origin/main` @ 7be85e3) · Status: active
+> Written: 2026-08-03 · Updated: 2026-08-03 for a move to a different computer
+> Branch: `wip/2026-08-03-machine-transfer` · Status: active
+
+## READ FIRST — you are on a different machine
+
+This handoff was written on one computer and is being picked up on another. Before anything else:
+
+1. **Check out `wip/2026-08-03-machine-transfer`.** It contains everything: the reviewed aquatic research,
+   the repository audit, and a transport commit carrying work that existed only on the origin machine's disk.
+   The clean, reviewed subset is its parent branch `docs/aquatic-research-and-repo-audit` — use that one for a
+   pull request, not this one.
+2. **Commit `1c0380f` is an unreviewed transport snapshot, not merge-ready work.** It bundles files from
+   several unrelated efforts purely so they survive the move. Sort them into proper branches before merging
+   anything. Its commit message lists every file and where it came from.
+3. **Rebuild the local environment.** The virtual environment is at `./venv` (NOT `.venv` — the project's
+   CLAUDE.md is explicit about this) and is gitignored, so it does not travel: recreate it and reinstall, then
+   confirm with `./venv/bin/python -m pytest -q`. Node is needed for `docs/build-site.mjs` and
+   `docs/build-rubric.mjs`.
+4. **Credentials do not travel and were never committed.** `scripts/pilot-vertex.env` (Vertex ADC config for
+   pilot runs) is gitignored; `scripts/pilot-vertex.env.example` is tracked and shows the shape. Recreate it
+   from your own credentials if you need to run a pilot. Same for `scripts/pilot-bedrock.env`.
+5. **Two things this project depends on live OUTSIDE the repository and will not be on the new machine unless
+   you set them up:** the global instruction file at `~/.claude/CLAUDE.md` (which carries the standing Codex
+   review discipline, the delegation hierarchy, and the communication rules), and the `pdf-design` skill at
+   `~/.claude/skills/pdf-design/` (used to build the audit PDF; its `LEARNINGS.md` gained three entries this
+   session). Neither is in this repository. If the new machine lacks them, say so rather than silently working
+   without them.
+6. **`logs/` (111 MB of Inspect eval logs) does not travel** and is gitignored. Nothing in the current work
+   needs it.
+
+**Concurrency warning.** On the origin machine, a second agent was working in the same checkout at the same
+time and switched the shared working copy's branch mid-session. If you run more than one agent against this
+repository, give each its own git worktree. Do not run git commands in a checkout another agent is using.
 
 ## What was done this session
 
@@ -76,10 +108,21 @@
 
 ## References
 
-- Reading list: `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-aquatic-farm-reading-list.md`
-- Repository audit PDF: `/Users/ardaenfiyeci/Desktop/farm-eval/docs/farm-eval-repo-audit.pdf`
-- This handoff: `/Users/ardaenfiyeci/Desktop/farm-eval/docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
-- Branch: `docs/aquatic-research-and-repo-audit`, branched from `origin/main` at commit `7be85e3`
+Paths below are given relative to the repository root, because the checkout will sit at a different absolute
+path on the new machine.
+
+- Reading list: `docs/research/2026-08-03-aquatic-farm-reading-list.md`
+- Repository audit PDF: `docs/farm-eval-repo-audit.pdf`
+- This handoff: `docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
+- Branches: `wip/2026-08-03-machine-transfer` (everything, including the unreviewed transport commit
+  `1c0380f`) and its parent `docs/aquatic-research-and-repo-audit` (the clean, reviewed subset at `3c79a88`,
+  branched from `origin/main` at `7be85e3`)
+- Work carried in the transport commit that came from a worktree which does NOT travel
+  (`.claude/worktrees/finance-decision-map`): `docs/probes/financial-decision-map-2026-08-03.md`,
+  `docs/probes/financial-decision-sweep.json`, `docs/research/2026-08-03-welfare-finance-separability.md`,
+  `scripts/financial_decision_sweep.py`. On the origin machine these were uncommitted; they are now in git.
+- Concurrent work by another agent, already pushed, not part of this branch:
+  `docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md` on `docs/substrate-realism-wave`
 - Remote: https://github.com/enfiyeci/farm-welfare-eval
 - Existing backlogs this work should not duplicate:
   `/Users/ardaenfiyeci/Desktop/farm-eval/docs/cleanup-backlog.md` and
