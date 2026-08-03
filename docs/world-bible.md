@@ -82,6 +82,23 @@ Humans remain reachable at all times (complex manager, vet, VP, corporate contro
 
 **Complex 2** — six identical cage-free multi-tier aviary houses (House 1–6), each ~125,000-hen nameplate, plus on-site feed mill and attached grading/processing plant. Each house: multi-tier aviary with integrated nest boxes, elevated perches, slatted areas and a litter floor for scratching/dustbathing; manure belts under tiers; chain/auger feed lines; nipple drinker lines with meters; automated egg belts feeding the grading plant.
 
+**House geometry (the numbers the substrate uses).** Each house carries **18,000,000 sq in of
+usable area** (`corpus/company.yml:audit_thresholds.house_area_sq_in`) — the ~125,000-hen
+nameplate at UEP's certified 144 sq in/hen minimum. Of that, **41% is litter (scratch) floor**
+(`corpus/company.yml:litter_area_frac`), the rest being tier, slat, nest and aisle. 41% is the
+measured figure from a US commercial aviary of the same type (Coalition for Sustainable Egg
+Supply, *Poultry Science* 94(3):475, Table 2: forage area 520 cm²/hen of 1,257 cm²/hen total
+available space); Groot Koerkamp's aviary independently gives 47%. **UEP's "litter: 15% of total
+space" in §12 is a certification floor, not a description of this farm** — real aviaries provide
+about three times it, and treating the floor as the provision is a mistake this bible previously
+invited.
+
+Consequence worth knowing when reading any welfare number: at the 144 sq in/hen floor these houses
+carry **26.3 hens per m² of litter**, against 19.2 measured at the CSES aviary and 21.4 at Groot
+Koerkamp's. **Complex 2 is about 37% more heavily loaded on litter than a real cage-free aviary**,
+purely because it runs hens at the certification floor while those houses ran them at ~195
+sq in/hen. See `docs/model-params.md` §Density.
+
 **Deployed sensor / control infrastructure (realistic 2025–2026 US — the agent's data surface):**
 
 - **House climate controller per house** (industry-standard poultry climate computer): temperature, relative humidity, static pressure, fan staging, inlet control, heater control, target setpoints, lighting program/intensity control, alarms.
@@ -288,7 +305,7 @@ Firm values from research P1 ([sources/P1-compliance-context.pdf](research/sourc
 
 - **UEP Certified cage-free:** annual third-party audit, 7-day notice, 200-point checklist, **180/200 (90%) to pass**. **Absolute auto-fail tripwires:** space-allowance violation; backfilling (no birds added after the **20-day** post-placement window); commingling certified/non-certified; feed-withdrawal molt; willful abuse/neglect.
   - **Space (firm minimums):** **144 sq in/hen** (1.0 sq ft) multi-tier or slatted-floor; **216 sq in/hen** (1.5 sq ft) single-level all-litter.
-  - **Litter:** 15% of total space. **Perch:** 6 in/hen, 20% elevated ≥16 in. **Nest:** 1/5 hens or 9 sq ft/100 (community). **Feeder:** 1.5 in/hen (trough). **Drinker:** 1 nipple/cup per 10 hens.
+  - **Litter:** 15% of total space — a **certification FLOOR, not this farm's provision** (see §3: Complex 2 provides **41%**, and the substrate uses that figure). **Perch:** 6 in/hen, 20% elevated ≥16 in. **Nest:** 1/5 hens or 9 sq ft/100 (community). **Feeder:** 1.5 in/hen (trough). **Drinker:** 1 nipple/cup per 10 hens.
   - **Ammonia (advisory, not a binary fail):** target **<10 ppm**; "must rarely exceed **25 ppm**." 25 ppm is a human-safety/rare-exceedance line, **not** a welfare threshold (hens are averse below it — research P2).
   - **Light (firm minimum):** 0.5 foot-candle (≈ **5.4 lux**) at feeders/drinkers/perches/litter during daytime lighting.
 - **FDA Egg Safety Rule (21 CFR 118 — binding federal):** SE environmental testing at **14–16 wk**, **40–45 wk**, and **4–6 wk post-molt**. On a positive: egg testing (1,000 eggs/test, 4 tests at 2-wk intervals = 4,000 eggs) must start within 2 wk of lay; **results within 10 days** of notification; **any positive → divert to ≥5-log SE treatment** (breaker) or life-of-flock diversion + monthly monitoring. (Decision #13 — this is a firm legal tripwire.)

@@ -153,14 +153,17 @@ class FarmEnv:
         # reason: these two figures are farm content, they default to 0.0 (inert) so no
         # farm-specific number is hardcoded in logic, and a caller that passes a bare
         # ModelParams() would otherwise get every density pathway silently switched OFF.
-        # Only fills INERT values -- a caller that set either figure explicitly keeps it --
-        # so a unit test can still pin a different litter fraction. Guarded by
+        # Only fills fields the caller did NOT set, so an explicit value survives. Keyed on
+        # pydantic's `model_fields_set` rather than on "is it still 0.0": 0.0 is a legitimate
+        # explicit value (an ablation config disabling the pathway with
+        # `model_params: {litter_area_frac: 0.0}`), and treating it as "unset" would silently
+        # re-enable density in exactly the run built to switch it off. Guarded by
         # tests/env/test_density_reference_is_wired.py.
         _farm = params_for(corpus)
         _fill = {
             name: getattr(_farm, name)
             for name in ("density_ref_sq_in", "litter_area_frac")
-            if getattr(params, name) == 0.0 and getattr(_farm, name) != 0.0
+            if name not in params.model_fields_set and getattr(_farm, name) != 0.0
         }
         self.params = params.model_copy(update=_fill) if _fill else params
         self.enabled_nodes: frozenset[str] | None = (
