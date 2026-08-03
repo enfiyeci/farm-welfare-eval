@@ -21,13 +21,14 @@ The owner asked to be told whenever a study could not be reached in full.
 | Nimmermark et al. 2009 (source of "32–38 ppm") | READ IN FULL | Open PDF, aaem.pl. Agent-read; not independently re-verified. |
 | Dunlop, Blackall & Stuetz 2015 (evaporation, Task 5b) | READ IN FULL | Open access. Agent-read. |
 | David et al. 2015 *Animals* 5(3):886 (the review that tabulates our anchors) | Table 1 extracted | Agent-read. |
-| Miles, Rowe & Cathcart 2011 (moisture turnover) | ⚠️ **PARTIAL — ABSTRACT ONLY** | The turnover *range* 37.4–51.1 % is in the abstract and is solid. **The "42 % at 75 °F / 46 % at 95 °F" figures circulating in search summaries come from no source anyone read. DO NOT SHIP THEM.** |
+| Groot Koerkamp **Ch. 5** (the 58-sample litter survey + eq. 18) | **VERIFIED AT SOURCE** | Table 1 and eq. 18 read directly off the thesis by the primary session. Water content 52 / 227 / **438** g/kg (c.v. 33), water activity **0.84 / 0.93 / 0.99**, pH 7.4–9.2, n = 58, eight further samples excluded as "not granular, but clotted". Eq. 18 verbatim: TAN "increased with approximately 4 % per 1/10 unit of pH, approximately 4 % per unit of temperature (°C), and approximately 4 % per 10 units of water content (g/kg wet basis)", VIFs 1.09 / 1.18 / 1.18. **Not confirmed:** the "12 houses / 5 system types / 6 strains" breakdown — the thesis says notes were taken on system type and strain but I did not find that tally. |
+| **Miles, Rowe & Cathcart 2011**, *Poult. Sci.* **90(7):1397**, DOI 10.3382/ps.2010-01114 | ⚠️ **ABSTRACT READ AT SOURCE; FULL TEXT PAYWALLED** | Abstract verified verbatim via PubMed 21673154. Adds: moisture **20–55 %**, temperature **18.3–40.6 °C**, 100 g litter in 1-L containers, and "the maximum NH₃ was up to **7 times greater at 40.6 vs. 18.3 °C**". Turnover **37.4–51.1 %** confirmed. **Still missing: the fitted equation and the temperature→critical-moisture mapping** (OUP and ScienceDirect both refuse). **The "42 % at 75 °F / 46 % at 95 °F" figures circulating in search summaries come from no source anyone read. DO NOT SHIP THEM.** |
+| Miles, Rowe & Cathcart 2011 companion, *Poult. Sci.* **90(6):1162**, DOI 10.3382/ps.2010-01113 | ❌ COULD NOT ACCESS | Different paper — "…organic versus inorganic bedding materials". Reported open-access on ScienceDirect but the host 403s us. Lower priority: it is about bedding type, not the turnover. |
 | Oliveira, Xin, Chai & Millman 2018 | PARTIAL | Values via PMC fetch; methods not read. |
 | Zhao, Shepherd, Li & Xin 2015 Part I (the 6.7 ppm anchor) | PARTIAL | Abstract/results level only. |
-| **Hinz, Winter & Linke 2010** | ❌ **COULD NOT ACCESS** | German institutional report, no PDF found. **This is the actual source of our `nh3` 9.2–47.4 ppm rail.** Known only second-hand through David et al.'s table. Worth acquiring: David's table gives Hinz a *second* weekly-belt aviary row at **2.2–18.5 ppm**, ~10× below Nimmermark's 32–38 for the same nominal regime. |
-| **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067 | ❌ **COULD NOT ACCESS** | Paywalled; HAL mirrors bot-gated. **This is the one published test of the density × manure-accumulation-time *interaction* — i.e. precisely the decomposition question this pass exists to settle.** Recommend acquiring. |
-| Miles & Rowe 2011 companion, *Poult. Sci.* 90(6):1162 | ❌ COULD NOT ACCESS | Paywalled. |
-| **Kang et al. 2016** (S14, floor pens) | ❌ **NOT ACCESSED** | Our notes cite 5/6/7/10 birds/m² and 8.11/6.33/7.11/12.89 ppm from it. **Those figures are unverifiable from anything local.** |
+| **Kang et al. 2016** (S14, floor pens), *Poult. Sci.* **95(12):2764** | **NOW READ** — free full text at PMC5144664 | Gap closed this session. **Our notes' figures are exact** (27.8 / 23.6 / 25.8 / **67.5 %** moisture and 8.11 / 6.33 / 7.11 / **12.89** ppm). Corrections to our notes: **50 hens per pen, not 40**; densities 5/6/7/10 birds/m² of *floor pen*, deep litter of rice hulls; gas sampled at 4 wk of an 8-wk trial with the same Gastec detector-tube method (so litter gas again, not house air); **manure management is not described here either**. See §6a — this paper substantially changes the coefficient picture. |
+| **Hinz, Winter & Linke 2010** — *Landbauforschung* **60:139–150**, "Luftfremde Stoffe in und aus verschiedenen Haltungssystemen für Legehennen — Teil 1: Ammoniak" | ❌ **COULD NOT ACCESS — but now precisely identified** | **This is the actual source of our 9.2–47.4 ppm rail**, known only second-hand through David et al.'s table. The volume PDF exists at `thuenen.de/media/publikationen/landbauforschung/Landbauforschung_Vol60_3.pdf` but the whole host sits behind a bot challenge (HTTP 302 → `/challenge`), so this is **a gate, not a paywall — a human with a browser can very likely just download it.** Worth acquiring: David's table gives Hinz a *second* weekly-belt aviary row at **2.2–18.5 ppm**, ~10× below Nimmermark's 32–38 for the same nominal regime. |
+| **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067 | ❌ **COULD NOT ACCESS** | ASABE paywalled; the HAL mirror (`hal.science/hal-05028682v1`) is behind Anubis proof-of-work and refuses us. **This is the one published test of the density × manure-accumulation-time *interaction* — i.e. precisely the decomposition question this pass exists to settle.** Search summaries indicate low density gave 51 % lower emission for young pullets and ~22 % lower for laying hens over a 6-day accumulation, but the interaction term itself is what we need and that requires the full text. Highest-value acquisition. |
 
 ## 1. The double-count premise was wrong. Q1 is answered, and it reverses the proposal.
 
@@ -224,6 +225,41 @@ that is 12.2–15.0 ppm against a measured 32–38 — so **moisture explains on
 measured belt effect**. Stacked on an `f_MAT` that already delivers 32–38 it gives **58–85 ppm**, through
 the 47.4 ppm ceiling. Something must give; §2 argues it is the belt→moisture curve.
 
+## 6a. Kang 2016 (now read) halves the coefficient and corroborates the turnover
+
+Obtaining the second Kang paper was worth it. It measures the same thing over a **much wider moisture
+range**, and it disagrees with Kang 2018 by a factor of ~2.
+
+| | moisture | NH₃ |
+|---|---|---|
+| Kang **2016**, 5 → 10 birds/m² (floor pens) | 27.8 % → **67.5 %** (+39.7 pts) | 8.11 → 12.89 ppm (+58.9 %) |
+| Kang **2018**, 17 → 19 birds/m² (aviary pens) | 22.93 % → 40.93 % (+18.0 pts) | 5.70 → 9.07 ppm (+59.1 %) |
+
+**The same ~59 % ammonia rise is attributed to a 39.7-point moisture change in one paper and an
+18.0-point change in the other.** Implied slopes: **1.48 %/pt (2016)** against **3.28 %/pt (2018)** —
+a **2.2× disagreement between two papers by the same first author in the same journal.**
+
+Two things follow, and they point the same way:
+
+1. **This is what a turnover looks like.** Kang 2016's high arm sits at **67.5 % moisture**, far past
+   Miles's 37.4–51.1 % critical band, so ammonia there is being *suppressed*. Averaging a secant across
+   a turnover flattens it — which is exactly why the wide-range paper reports the lower slope. The two
+   Kang papers are not in conflict; together they are **independent evidence that the response is
+   non-monotonic**, which the repo currently supports only with Ch. 2's hand-drawn schematic.
+2. **`3.28 %/pt` should not be shipped as *the* coefficient.** It is the steepest of the available
+   secants, drawn over the narrowest range, from the paper whose own authors suspected suppression at
+   the measurement point. Ch. 5 eq. 18's **0.4 %/(g/kg) = 4 %/10 g/kg over a measured 52–438 g/kg** is
+   the better-founded and better-ranged number, and it is a genuine multivariate partial effect rather
+   than a two-point secant.
+
+**And it bears on `litter_moisture_max`.** Kang 2016 observed **67.5 %** litter moisture in a real
+(if badly overstocked) floor pen — above our 60 % clamp and well above Ch. 5's 43.8 % aviary maximum.
+So the honest reading is: **~44 % is the ceiling for a functioning *aviary*, but litter genuinely can
+reach the 60s once a pen is overstocked and caked.** That argues for keeping a clamp near 60 as a
+physical rail while bounding the *belt-driven* equilibrium to the measured 14–24 % aviary band — which
+is §2's recommendation, now with a measured upper rail behind it. Caveat: floor pen with deep rice-hull
+litter and no described manure removal, not an aviary with belts.
+
 ## 7. Q5: is there a density → ammonia study that would let us skip all of this? No.
 
 Kang 2018 is the only aviary study measuring ammonia across density arms at constant manure management,
@@ -245,8 +281,22 @@ ammonia concentrations." One unchased lead: Al-Homidian & Robertson 2003, litter
    error, and it is what makes the sourced α3 usable at its sourced value.
 4. **Re-cite the moisture term to Ch. 5 eq. (18)** (0.4 %/(g/kg) over 52–438 g/kg) rather than Kang, and
    downgrade the Kang cross-validation from "strongest evidence in the wave" to a consistency check (§4, §6).
-5. **Lower `litter_moisture_max` from 60 to ~44** and treat 37.4–51.1 % as the turnover band (§4).
-6. **Acquire Mendes et al. 2012** — the one published test of the density × manure-accumulation-time
-   interaction — and **Hinz et al. 2010**, the unread source of our 9.2–47.4 ppm rail.
+5. **Keep `litter_moisture_max` near 60 as a physical rail, but bound the belt-driven equilibrium to the
+   measured 14–24 % aviary band**, and treat 37.4–51.1 % as the turnover (§4, §6a). *Revised from an
+   earlier draft of this document, which recommended lowering the cap to 44 — Kang 2016 observed 67.5 %
+   in a real overstocked pen, so 60 is not above physical reality. The defect is the belt curve, not the
+   cap.*
+6. **Two acquisitions, in priority order.** Both are blocked for me but likely trivial for a human:
+   - **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067–1075 — the one published test of the
+     density × manure-accumulation-time **interaction**, i.e. this document's central question.
+     ASABE paywall; HAL mirror behind Anubis proof-of-work.
+   - **Hinz, Winter & Linke 2010**, *Landbauforschung* 60:139–150 — the unread source of our
+     9.2–47.4 ppm rail, and of a second weekly-belt aviary figure (2.2–18.5 ppm) that is 10× below
+     the one we calibrate to. PDF is at
+     `thuenen.de/media/publikationen/landbauforschung/Landbauforschung_Vol60_3.pdf`; the host bounces
+     automated requests to a `/challenge` gate, so a browser should get it.
+   - Lower priority: **Miles, Rowe & Cathcart 2011** *full text* (90(7):1397, DOI 10.3382/ps.2010-01114)
+     for the fitted equation and the temperature→critical-moisture mapping. The turnover range itself is
+     already confirmed from the abstract.
 7. **Correct the stale/overstated claims** flagged in §4, §5 and §6, and the stale "S22 still paywalled —
    hold Task 6" note at `2026-07-30-density-coefficients.md:45`.
