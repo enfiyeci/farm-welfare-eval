@@ -41,11 +41,12 @@ repositioned or reused** on another animal.
 **Collar / ear tag.** Reusable and repositionable. Smart ear tags carry temperature, activity and
 rumination at about 28 g with a five-year battery. Heat detection 80–90%+.
 
-**Fixed infrastructure.** Parlour milk meters, monthly milk testing, and overhead cameras — cover
-every animal regardless of herd size. ⚠️ **Not free after installation:** milk testing recurs
-monthly and the camera carries an undisclosed per-cow monthly subscription. The distinction from
-per-animal devices is that cost does not scale with how many cows you choose to monitor, not that
-it is one-time. See §9.
+**Whole-herd channels.** Parlour milk meters, monthly individual milk testing, and overhead
+cameras. Their defining property is that they observe **every animal without a device attached to
+each one**, so there is no decision about which cows to leave uninstrumented. ⚠️ Their cost is
+**mixed, not fixed**: milk meters are genuinely fixed, milk testing recurs per sample, and the
+camera has fixed hardware plus an undisclosed **per-cow monthly subscription**. See the cost-split
+table in §9.
 
 | Item | Figure | Tier |
 |---|---|---|
@@ -458,7 +459,19 @@ which is a mode of **1.3 h/cow per year** (min 0.9, max 1.7). Labour costed at �
 
 ## 9. Whole-herd channels — how untagged animals can still be found
 
-Per-animal devices scale in cost with coverage. These do not: they cost once and cover everyone.
+The real distinction from per-animal devices is **not** that these are cheaper or coverage-independent.
+It is that they observe every animal **without requiring a device attached to each one**, so there is
+no decision about which cows to leave uninstrumented. Their cost structure is mixed and must be
+modelled as such:
+
+| Channel | Fixed component | Component that scales with cows |
+|---|---|---|
+| Parlour milk meters | Installed in the parlour; every milked cow is measured anyway | none |
+| Monthly individual milk testing | — | per-sample, recurring monthly |
+| Parlour-exit camera | $300–400 hardware 🔵 ⚠️ | undisclosed **per-cow monthly subscription** 🔵 |
+
+⚠️ Do not model the camera as fixed infrastructure: its hardware is fixed but its subscription is
+per-cow, so total cost does scale with herd size.
 
 **Parlour milk meters.** Individual per-cow yield at every milking, herd-wide. In the RCT above,
 milk yield came from automated meters on **all 1,204 cows**, and a **>20% drop in daily milk
@@ -637,8 +650,10 @@ ignore an alert; confirmatory
 testing (§2) is a third action between dismissing and examining; and the RCT (§6) supplies the
 ground truth that examining more cows produced the better outcome in that setting.
 
-**Depth versus breadth.** Per-animal devices buy deep data on a few; fixed infrastructure buys
-shallow data on all (§9). Both are defensible capital allocations. The welfare consequence depends
+**Depth versus breadth.** Per-animal devices buy deep data on a few; whole-herd channels buy
+shallower data on all (§9). Both are defensible capital allocations. ⚠️ The whole-herd channels are
+**not** coverage-independent fixed costs — see the cost-split table in §9 — so the trade is about
+which animals and which diseases become visible, not about escaping per-cow economics. The welfare consequence depends
 on which diseases the herd has and which instrument can see them.
 
 ⚠️ **Two caveats on the lameness case specifically.** Lameness is the **most prevalent** condition
