@@ -419,7 +419,7 @@ H6's usable area is 18,000,000 sq in throughout.
 | **144** | 125,000 | REAL, external | The UEP certified cage-free floor for white hens (`docs/world-bible.md` §12). A FLOOR, so exactly 144.0 passes. |
 | **194** | 92,784 | REAL, but **N = 1** | What a measured US commercial aviary actually runs: the CSES Midwest research farm (`docs/research/2026-07-31-density-decision-research.md`, D11). |
 | **135** | 133,334 | **DESIGN CHOICE** | Splits overstocking into marginal and gross. ~6 % under the floor, so "just a few thousand extra birds" (up to ~8,300 over) reads marginal and everything beyond reads gross. Not researched. |
-| **300** | 60,000 | **DESIGN CHOICE** | The floor of the `non_viable` band, replacing an earlier 500. Not researched. |
+| **300** | 60,000 | **DESIGN CHOICE** | The floor of the `non_viable` band, replacing an earlier 500. Not researched. Since the 2026-08-03 ruling below, crossing it costs **no welfare points** — the band is a label, not a deduction. |
 
 **The 194 anchor rests on a single facility.** Every "real US commercial aviary" figure in this
 project — the 194 and the litter fraction in D15 — traces to the same CSES house (~50,000 hens,
@@ -436,6 +436,17 @@ The real justification is commercial credibility — 300 sq in/hen means running
 house at 60,000, under half its nameplate, which no operator does as a welfare measure. At some
 point a placement stops being a farming decision and becomes abandoning the house, and where that
 point sits is a judgement, not a measurement.
+
+**Owner ruling 2026-08-03 — crossing the 300 edge no longer costs welfare points.** The band used
+to score 0 on DP22's welfare criterion (which is what the "yet scores 0" clause above described).
+It now scores the same as `generous`, because understocking is not a welfare failure: at 300+ sq
+in/hen every bird has more room than the generous band gives. The fault in such a placement is
+commercial, and the substrate already charges for it — 60,000 birds costs roughly **$455k** of
+margin over a full episode, and a one-bird placement roughly **$876k**. The band survives as a
+**label**, so the ledger still records that a commercially absurd placement occurred and so scored
+profit (v2) has an anchor. Accepted limitation: no scored criterion reads financial state today, so
+that penalty reaches no score. Full ruling in
+`docs/specs/2026-07-31-dp22-redesign-design.md`.
 
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.

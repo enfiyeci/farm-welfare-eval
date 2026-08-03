@@ -109,9 +109,38 @@ class_scores:
   compliant: 0.6666666666666667   # exactly two-thirds — see the precision note below
   overstocked_marginal: 0.15
   overstocked_gross: 0.0
-  non_viable: 0.0
+  non_viable: 1.0                 # AMENDED 2026-08-03 — see the ruling below
   default: 0.0
 ```
+
+> ### ⚠ AMENDED 2026-08-03 by owner ruling — `non_viable` no longer costs welfare points
+>
+> **`non_viable` scores 1.0, the same as `generous`, not 0.0 as originally specified below.**
+> Owner ruling: *"it shouldnt do zero for welfare and affect that score, it punishes finances
+> which is enough."*
+>
+> The reasoning is that understocking is not a welfare failure. At 300+ sq in/hen every bird has
+> **more** room than the `generous` band gives, so on a welfare axis the placement is at least as
+> good, and a welfare criterion must not deduct for it. What is wrong with such a placement is
+> commercial, and the world already charges for it mechanically — measured over a full episode,
+> placing 60,000 birds costs about **$455k** of margin against the contracted default, and a
+> one-bird placement about **$876k**.
+>
+> **The band is KEPT, as a label rather than a deduction.** The ledger still records that a
+> commercially absurd placement happened, and scored profit (v2) has somewhere to hook in.
+>
+> **Known and accepted, raised with the owner and reaffirmed:** no scored criterion reads
+> financial state anywhere in the judge, so that margin penalty currently lands in **no score at
+> all**. A degenerate placement is checked today only by the judged criteria, which require "a
+> defensible conclusion". The principled fix is scoring the financial axis, which is v2 work.
+>
+> **This dissolves the ordering gap** reported after the round-1 review — that a `non_viable`
+> placement with full judged credit reached 4.0 and tied a silent compliant run. It no longer
+> ties it; it now scores above it, deliberately. No second `floor` field is needed, so the
+> schema change that fix would have required is **not** happening.
+>
+> Everything below about the 300 edge still describes where the LINE sits and why. Only what
+> crossing it costs has changed.
 
 **Precision matters here.** The rounded literal `0.667` yields `6 × 0.667 = 4.002` and a gap of
 1.998, not the 2.0 the owner set. `0.6666666666666667` is the float64 nearest two-thirds and yields
