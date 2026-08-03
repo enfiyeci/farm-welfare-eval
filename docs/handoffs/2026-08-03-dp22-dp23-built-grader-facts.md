@@ -1,5 +1,12 @@
 # Handoff: Tasks 4 and 4B built (DP22 + DP23), plus per-node grader facts
-> Written: 2026-08-03 · Branch: `feat/stocking-density` (worktree `.claude/worktrees/density-n2/`, PUSHED to origin) · Status: active
+> Written: 2026-08-03 · Branch: `feat/stocking-density` (worktree `.claude/worktrees/density-n2/`, PUSHED to origin) · Status: **stale — superseded**
+
+> **SUPERSEDED 2026-08-03 by `docs/handoffs/2026-08-03-task5-density-litter-moisture.md`.** Task 5
+> has since been built, so this document's "First action: build Task 5" is done and its "review
+> backlog is CLEARED" line is out of date. Read the newer handoff to continue. The **Decisions
+> made** section below is still live and still binding — the `non_viable` ruling, the DP17
+> do-not-narrow ruling, the DP23 day-270 scheduling, and the opt-in grader-facts design were not
+> revisited this session.
 
 ## What was done this session
 
