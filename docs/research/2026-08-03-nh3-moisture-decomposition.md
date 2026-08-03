@@ -1,0 +1,252 @@
+# Task 6 research: does belt → moisture → ammonia double-count? And where do our coefficients come from?
+
+> Written 2026-08-03 · branch `feat/stocking-density-task6` · **no code changed by this pass**
+>
+> Commissioned to unblock Task 6, which the plan records as BLOCKED because the sourced NH₃
+> moisture coefficient collides with two measured belt anchors
+> (`docs/plans/2026-07-29-stocking-density-plan.md` §"STATUS 2026-08-03").
+>
+> **The pass answered the question and then invalidated the answer the session had proposed.** It
+> also turned up a provenance error in Task 5's landed, review-APPROVED code that switches the
+> density signal off when corrected. Both are owner decisions.
+
+## Source access — read this before trusting any number below
+
+The owner asked to be told whenever a study could not be reached in full.
+
+| Source | Access | Notes |
+|---|---|---|
+| **Groot Koerkamp PhD thesis (S28)**, `edepot.wur.nl/210633`, 155 pp | **READ AT SOURCE, verified in this session** | Downloaded and text-extracted locally. Every number attributed to Ch. 7 below was read directly off the thesis by the primary session, not taken on report. |
+| Kang et al. 2018 (S22), local PDF | **READ IN FULL** | 13/13 pp, verified twice (rendered pages + independent `pdftotext`). Table 6 and the hard negatives re-checked by the primary session. |
+| Nimmermark et al. 2009 (source of "32–38 ppm") | READ IN FULL | Open PDF, aaem.pl. Agent-read; not independently re-verified. |
+| Dunlop, Blackall & Stuetz 2015 (evaporation, Task 5b) | READ IN FULL | Open access. Agent-read. |
+| David et al. 2015 *Animals* 5(3):886 (the review that tabulates our anchors) | Table 1 extracted | Agent-read. |
+| Miles, Rowe & Cathcart 2011 (moisture turnover) | ⚠️ **PARTIAL — ABSTRACT ONLY** | The turnover *range* 37.4–51.1 % is in the abstract and is solid. **The "42 % at 75 °F / 46 % at 95 °F" figures circulating in search summaries come from no source anyone read. DO NOT SHIP THEM.** |
+| Oliveira, Xin, Chai & Millman 2018 | PARTIAL | Values via PMC fetch; methods not read. |
+| Zhao, Shepherd, Li & Xin 2015 Part I (the 6.7 ppm anchor) | PARTIAL | Abstract/results level only. |
+| **Hinz, Winter & Linke 2010** | ❌ **COULD NOT ACCESS** | German institutional report, no PDF found. **This is the actual source of our `nh3` 9.2–47.4 ppm rail.** Known only second-hand through David et al.'s table. Worth acquiring: David's table gives Hinz a *second* weekly-belt aviary row at **2.2–18.5 ppm**, ~10× below Nimmermark's 32–38 for the same nominal regime. |
+| **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067 | ❌ **COULD NOT ACCESS** | Paywalled; HAL mirrors bot-gated. **This is the one published test of the density × manure-accumulation-time *interaction* — i.e. precisely the decomposition question this pass exists to settle.** Recommend acquiring. |
+| Miles & Rowe 2011 companion, *Poult. Sci.* 90(6):1162 | ❌ COULD NOT ACCESS | Paywalled. |
+| **Kang et al. 2016** (S14, floor pens) | ❌ **NOT ACCESSED** | Our notes cite 5/6/7/10 birds/m² and 8.11/6.33/7.11/12.89 ppm from it. **Those figures are unverifiable from anything local.** |
+
+## 1. The double-count premise was wrong. Q1 is answered, and it reverses the proposal.
+
+Groot Koerkamp **Ch. 7 eq. (9)** is a **single multivariate model**, read directly:
+
+```
+η_t = α0 + α1·(Time_belt,t − 12.5) + α2·(T_air,house,t − 22.5)
+         + α3·(C_H2O,t − 80) + α4·(v_air,t − 0.26)
+```
+
+with `z_t = η_t + ε_t` (natural log of NH₃ emission, mg/h per hen) and `ε_t = φ·ε_{t−1} + a_t` (AR(1)).
+Four mean-centred predictors, nothing else; residual mean square 0.0219; **80 % of variance accounted for.**
+
+| term | predictor | centred at | estimate (s.e.) | linear scale |
+|---|---|---|---|---|
+| α0 | intercept | — | 1.0470 (0.1172)\*\*\* | 2.850 mg/h per hen |
+| α1 | stay of manure on belts (h) | 12.5 h | 0.0076 (0.0004)\*\*\* | **0.76 %/h** |
+| α2 | indoor house air temperature (°C) | 22.5 °C | 0.0781 (0.0157)\*\*\* | 8.1 %/°C |
+| α3 | **water content of litter (g/kg)** | **80 g/kg** | 0.0032 (0.0012)\*\* | **0.32 %/(g/kg)** |
+| α4 | air velocity above litter (m/s) | 0.26 m/s | 0.7085 (0.3477)\* | 103 %/(m/s) |
+| φ | AR(1) | — | 0.2386 (0.1080)\* | — |
+
+**Consequence, and it runs opposite to the session's proposal.** Because α1 is a partial effect *at
+constant litter water content*, the correct total response to a belt change that also wets the litter
+is `α1·Δh + α3·ΔC`. **Applying the moisture coefficient to the full litter-moisture change is not
+double-counting — it is how a multivariate model is meant to be used.**
+
+> **RETRACTED: the "surplus-only" route.** Earlier this session I proposed applying the moisture
+> coefficient only to the density-driven surplus above the belt-only equilibrium, on the grounds that
+> the belt pathway already embeds belt-driven moisture. Numerically it was attractive — all three
+> anchors stayed byte-identical and overstocking still raised NH₃ 60–77 %. **The premise is false and
+> the route should not be built.** Double-counting would arise only if our belt term were a
+> *total-effect* (univariate) coefficient that had absorbed the moisture pathway.
+
+**Which leaves the real question: is `f_MAT` α1, or is it a total-effect belt coefficient?** Unresolved.
+Neither the tabulated `{1.00, 1.05, 1.39, 1.89}` nor the formula's `{1.00, 1.26, 1.65, 2.39}` appears
+anywhere in the thesis. Ch. 3's day-after-removal series normalised to day 1 is `{1.00, 1.22, 1.83,
+2.43}` — close to the formula, not equal. **The `model-params.md` table/formula discrepancy stands
+unresolved and no thesis figure adjudicates it.** Note also that Ch. 3's `E_DAR` term sits *only* in
+the belt-manure equation, while our `f_MAT` multiplies **total** emission — and the thesis puts belts
+at only **18.8 g/h of 81.3 g/h (~23 %)** of house emission.
+
+Three different belt coefficients exist in the same thesis, which any recalibration must carry as a band:
+**Ch. 7 → 0.76 %/h** (forced litter drying); **Ch. 4 → 0.44 %/h** (three aviaries, no drying);
+**Ch. 3 → +14/39/109/177 %** on days 1–4 after removal. A ~1.7× spread on the same nominal quantity.
+
+## 2. The actual defect is our belt → litter moisture curve, and the thesis is a direct counterexample
+
+`layers/litter.py` maps belt interval to moisture as `15 + 5·(belt_days − 1)`, reaching **45 % at a
+7-day belt**. Groot Koerkamp Ch. 7 ran exactly that regime and measured nothing like it.
+
+**Ch. 7 Table 4 — litter composition, read at source (n = 13–20 samples per period):**
+
+| period | 2A | 2B | 2C | 2D | 2E |
+|---|---|---|---|---|---|
+| belt removal | weekly | **weekly** | daily | daily | 2×daily |
+| litter drying | on | **off** | off | on | off |
+| **litter DM (g/kg)** | 856 (14) | **807 (19)** | 799 (12) | 855 (15) | 835 (11) |
+| → litter moisture | 14.4 % | **19.3 %** | 20.1 % | 14.5 % | 16.5 % |
+
+Exhaust NH₃ across the same periods was **2.1–6.4 ppm**, the 6.4 falling in **period 2B** — weekly
+belts, drying **off**, air velocity 0.07 m/s. Litter loading in that house was **23.0 hens/m² of
+litter**, *higher* than CSES's 19.2 and comparable to our 26.3.
+
+**So: weekly belt removal with litter drying switched off produced 19.3 % litter moisture and 6.4 ppm.
+Our model hands 45 % and ~35 ppm to the same belt interval.** Across all five treatment periods —
+spanning weekly-belts-drying-off to twice-daily-belts-drying-on — measured litter moisture moved only
+between **14.4 % and 20.1 %**. Belt interval is simply not the dominant driver of litter moisture in an
+aviary: the belts sit under the tiers, the litter is on the floor, and hens wet the litter, not belt
+residence time. The thesis measures the coupling we rely on as **weak and not significant** (eq. 6,
+β₃ = 2.55E-4 kPa/h, s.e. 1.50E-4, over h = 5–150; "these effects were small").
+
+**And α3 is being evaluated far outside its fitted range.** It is centred at 80 g/kg; Ch. 7's litter
+data span water content **100–240 g/kg (10–24 % moisture)**. Applying it at 45 % (450 g/kg) gives
+`exp(0.0032·370) = 3.27×` — roughly 2× beyond the top of the fitted domain. **This is the same class of
+error as defects N2 (f_MAT past belt 4) and the litter-age extrapolation, both of which the project
+resolved by bounding the input to its validated domain rather than weakening the coefficient.**
+
+## 3. ⚠️ Provenance error in Task 5's landed code — correcting it switches the density signal OFF
+
+`litter_loading_ref_hens_m2 = 21.4` is documented in `model-params.md:513` as
+**"Sourced — the loading he measured it at."** That is false, and the repo's own notes show it.
+
+- **126.8 g/kg litter/day (s.e. 19.4)** is a **Chapter 7** figure. Verified at source: it is in Ch. 7's
+  abstract and in its §3.4 regression output. `2026-07-30-density-coefficients.md:180` already labels
+  that table "The fully parameterised model (Chapter 7)".
+- **Chapter 7's house**, verified at source: 1,000 Lohmann LSL hens housed at 17 wk, cumulative
+  mortality 2.8 % (Table 2) → ~972 hens; and "**the whole floor area (42.2 m²) was now covered with
+  litter**" — explicitly changed from Ch. 6's 33 %-litter configuration.
+  → **23.0 hens/m² of litter.**
+- **21.4 comes from a different house**: 6,480 hens / 303 m² litter (`2026-07-30-…:232–234, 247`).
+
+Two corrections were considered and only one is right. A first research pass proposed **31.1**, from
+"976 cm²/hen living area × 33 % litter" — but that is Ch. 6's configuration, which **Ch. 7 explicitly
+replaced by covering the whole floor**. The thesis does state "31.0 hens/m² litter", in the
+*Flow of Water to the Litter* chapter (17–30 wk flock), not in the 126.8 chapter. **The correct
+reference for 126.8 is 23.0.**
+
+**The consequence, computed with the real code (`layers/density.py`, corpus params, 18,000,000 sq in):**
+
+| `litter_loading_ref_hens_m2` | compliant 125k water_in | overstocked 138k water_in | excess vs capacity 160.0 | belt-2 moisture, compliant → overstocked | signal |
+|---|---|---|---|---|---|
+| **21.4** (shipped) | 155.6 | 171.7 | 11.7 | 20.0 % → 36.9 % | ALIVE |
+| **23.0** (correct) | 144.7 | **159.8** | **0.0** | 20.0 % → **20.0 %** | **DEAD** |
+| 31.1 (mis-proposed) | 107.0 | 118.2 | 0.0 | 20.0 % → 20.0 % | DEAD |
+
+**At the correct reference the overstocked house lands at 159.8 g/kg/d against a 160.0 capacity, so the
+surplus is zero and both stocking arms sit at identical litter moisture.** The whole Task 5 mechanism
+switches off.
+
+**Why this is recoverable but reopens Task 5.** `litter_evap_capacity_g_kg = 160.0` is **explicitly
+calibrated, not sourced**, and the plan admits it was chosen to sit between the compliant house's 155.6
+and the surplus lot's 171.7. Those two numbers were themselves computed from the wrong reference. With
+the correct reference the band becomes **144.7–159.8**, so a capacity near **150** would restore the same
+structure and the same emergent knee. That is a legitimate recalibration of an admittedly-calibrated
+parameter — but it re-derives a coefficient inside review-APPROVED, landed work, so it is an owner call.
+
+## 4. Better anchors than the ones we ship (agent-read, not independently re-verified)
+
+- **A measured litter-moisture ceiling.** Ch. 5 Table 1: **58 litter samples from 12 aviary houses**,
+  5 system types, 6 strains, ages 20–66 wk → water content **52–438 g/kg, mean 227**. So real,
+  functioning aviary litter reached **43.8 %**, mean **22.7 %**. This is a far better anchor than our
+  `litter_moisture_max = 60.0`, which sits above every aviary measurement *and* above the ammonia
+  turnover. It also places Kang's 40.93 % inside the measured range — no special pleading needed.
+  Methods note the physical regime change directly: eight samples were excluded because "the structure
+  of these samples was not granular, but clotted."
+- **An independent, better-ranged moisture coefficient.** Ch. 5 eq. (18) is a second multivariate fit,
+  over water content **52–438 g/kg**: TAN rises **+4 % per 10 g/kg water** (also +4 %/°C, +4 % per
+  0.1 pH), variance inflation factors 1.09–1.18. **That is 0.4 %/(g/kg) against Ch. 7's 0.32 %/(g/kg)
+  — two independent multivariate fits in the same thesis agreeing to ~25 %, across a range that
+  actually covers our operating band.** This is stronger support for a linear moisture term than the
+  Kang cross-validation, and it should replace it as the primary citation.
+- **Ammonia release is non-monotonic in moisture, and the turnover is measured.** Miles, Rowe &
+  Cathcart 2011: critical moisture "between 37.4 and 51.1 % litter moisture, depending on the
+  temperature." **Abstract only — the fitted equation was not seen.** Note this *narrows* the turnover
+  downward from the 40–60 % the repo cites, and that the repo's 40–60 % is from Ch. 2 Figure 8, which
+  the thesis captions a "**schematic** representation" and introduces with "despite the lack of
+  numerical information on the release rate." `model-params.md:578–581` presents a hand-drawn
+  schematic as an established quantity.
+- **Water activity does not saturate at 0.86 the way we assume.** Ch. 5 found Aw **0.84–0.99** across
+  all 58 samples, and concluded "the small variation of the water activity at this level could not
+  give a reasonable explanation for variations in the degradation rate." Aw stops being the limiting
+  factor above ~25 % moisture. This weakens `density.py`'s docstring rationale ("water activity
+  saturates near 0.86 … so above the sorption plateau the litter cannot shed water any faster"), which
+  is our stated reason the knee is emergent rather than authored. **The knee mechanism may still be
+  right — evaporation is genuinely bounded — but this specific justification needs a better source.**
+
+## 5. The belt anchors themselves are shakier than the plan assumes
+
+- **"32–38 ppm" is not a range over belt intervals.** Nimmermark et al. 2009 Table 2: **38 ppm (SD 13)**
+  from n = 6 spot readings across 3 farms, and **32 ppm (SD 6.5)** from 12 days at **1** farm. Daily
+  averages spanned **21–42 ppm**. Measured in hard winter, outdoor −10 to +2 °C, indoor 16–18 °C —
+  a minimum-ventilation figure. **No litter moisture is reported anywhere in the paper**, so this anchor
+  can neither validate nor refute any litter-moisture value.
+- **The same review's other weekly-belt aviary row is 2.2–18.5 ppm** (Hinz 2010) — a ~10× spread for the
+  same nominal regime. Calibrating to the top of it biases the model high.
+- **The 6.7 ppm and 32–38 ppm anchors are not consistent as a belt response.** Zhao et al. 2015 measured
+  the CSES aviary at 6.7 ppm with **belts removed every 3 to 4 days**, not 2. Going 3.5 d → 7 d is +84 h;
+  α1 predicts `exp(0.0076·84) = 1.89×` ≈ **12.7 ppm**, not ~35. The 5.2× gap between our two anchors is
+  climate, house and method — not belt interval.
+- **The repo's "aviary in winter, cold days | 40 ppm" row is misattributed.** In Nimmermark's Table 2 the
+  40 ppm is a footnote on the **floor-housing** row for a supplemental-heat farm excluded from the
+  averages: concentrations were 6–7 ppm in the house "and 40 ppm just above the litter area." That is a
+  litter-surface local reading in a floor house, not an aviary house mean.
+
+## 6. Kang is much weaker evidence than the notes claim
+
+Verified against the local PDF by the primary session.
+
+- **`3.28 %` per moisture point is a single two-point secant, not a measured slope.** Three of Kang's
+  four arms cluster at 22.9–23.7 % moisture; only the top arm moves. Within the low arms the implied
+  slope is **−39.1, −1.68 and +4.01 %/pt** — Kang supplies *zero* local sensitivity information in the
+  23–41 % band. The coefficient also swings **3.17 → 3.54 %/pt** purely on baseline-arm choice, and our
+  notes chose the arm that minimises the discrepancy.
+- **`0.32 %/(g/kg)` and `3.28 %/pt` are the same quantity in different units** (0.32 × 10 = 3.2 %/pt),
+  and the two are non-commensurable in measurand: Groot Koerkamp's is a house **emission** coefficient;
+  Kang's is a **litter-surface headspace concentration** read with a colorimetric hand pump at a single
+  terminal timepoint. The "two independent studies agreeing to 1.5 points… the strongest evidence in the
+  wave" framing (`2026-07-29-stocking-density-sources.md:328`) is permissive, not confirming.
+- **Kang's 16 pens were divided only by wire netting walls inside one room.** Pens sharing one airspace
+  cannot exhibit a treatment difference in *house-air* ammonia, so 9.07 vs 5.70 ppm can only be a
+  litter-surface reading.
+- **Kang cannot address the decomposition at all**: "manure", "removal" and "depth" occur **zero times**
+  in the paper (machine-verified against the extracted text). There is no belt lever to decompose against.
+- **Kang's own authors suspected suppression at the measurement point**: caked litter "corresponds to high
+  litter moisture or areas where litter becomes anaerobic, which suppresses ammonia volatilisation." If so,
+  9.07 ppm is a floor and the agreement with Groot Koerkamp is coincidence.
+- Confound: water nipples fall 8→5 while group size stays at 40, so the top arm is crowding **plus** a
+  60 % rise in hens per drinker.
+
+**Quantitative confirmation that naive composition breaks the model** (my arithmetic): applying 3.28 %/pt
+across the belt-driven 20 → 45 % range gives ×1.82 linear / ×2.24 compounding. On the 6.7 ppm baseline
+that is 12.2–15.0 ppm against a measured 32–38 — so **moisture explains only a third to a half of the
+measured belt effect**. Stacked on an `f_MAT` that already delivers 32–38 it gives **58–85 ppm**, through
+the 47.4 ppm ceiling. Something must give; §2 argues it is the belt→moisture curve.
+
+## 7. Q5: is there a density → ammonia study that would let us skip all of this? No.
+
+Kang 2018 is the only aviary study measuring ammonia across density arms at constant manure management,
+and §6 explains why its ammonia measurement will not bear the weight. Groot Koerkamp Ch. 4's three
+systems confound density with system type. Mendes et al. 2012 is lab-scale chambers (and inaccessible).
+David et al. 2015 state their review "provides no direct connection between stocking density levels and
+ammonia concentrations." One unchased lead: Al-Homidian & Robertson 2003, litter type × stocking density
+— almost certainly broilers.
+
+## What this pass recommends, for owner decision
+
+1. **Do not build the surplus-only route.** Its premise is refuted (§1).
+2. **Fix the `litter_loading_ref_hens_m2` provenance to 23.0 and re-derive
+   `litter_evap_capacity_g_kg`** (~150) to keep the mechanism alive. This reopens Task 5's calibration
+   and its Codex approval (§3). Highest urgency: the shipped value's "Sourced" label is false either way.
+3. **Bound the belt → litter moisture curve to its measured domain** before doing anything to the ammonia
+   layer (§2). Real aviary litter is 14–24 % across belt regimes from weekly to twice-daily, with a
+   measured ceiling of 43.8 % in 12 houses. This is the established project precedent for exactly this
+   error, and it is what makes the sourced α3 usable at its sourced value.
+4. **Re-cite the moisture term to Ch. 5 eq. (18)** (0.4 %/(g/kg) over 52–438 g/kg) rather than Kang, and
+   downgrade the Kang cross-validation from "strongest evidence in the wave" to a consistency check (§4, §6).
+5. **Lower `litter_moisture_max` from 60 to ~44** and treat 37.4–51.1 % as the turnover band (§4).
+6. **Acquire Mendes et al. 2012** — the one published test of the density × manure-accumulation-time
+   interaction — and **Hinz et al. 2010**, the unread source of our 9.2–47.4 ppm rail.
+7. **Correct the stale/overstated claims** flagged in §4, §5 and §6, and the stale "S22 still paywalled —
+   hold Task 6" note at `2026-07-30-density-coefficients.md:45`.
