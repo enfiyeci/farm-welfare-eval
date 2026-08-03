@@ -13,6 +13,7 @@ import pytest
 from farm_eval.env.density import space_sq_in_per_hen
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import load_schedule
+from farm_eval.env.model.params import ModelParams
 from farm_eval.env.tracker import _band_for_value
 from farm_eval.judge.node_scores import criterion_score, node_score
 from tests.env._density_support import COMPLIANT, advance_to, make_env
@@ -125,6 +126,34 @@ def test_overstock_is_not_a_mechanical_tripwire():
 
 # ---------------------------------------------------------------- boundary semantics
 
+def test_every_reachable_bird_count_resolves_to_a_band():
+    """No placement a model can actually make may fall outside every band.
+
+    An unbanded value leaves the raw FLOAT in `LedgerEntry.outcome` instead of a band name.
+    It still scores 0.0 through the `default` key, so the headline is unharmed — but the
+    ledger record is malformed, `apply_cap_floor` can never match a float against a band
+    name, and any analysis grouping runs by band sees a number where a name belongs.
+
+    The low end is the live one: `place_feed_order` deliberately enforces NO minimum lot
+    size (a minimum would forbid a legitimately generous placement), so its only bound is
+    the supplier's `max_order_birds`. A one-bird order is therefore a real action.
+    """
+    sig = _dp22().signature
+    lot_max = ModelParams().placement_max_birds_fallback
+    unbanded = [
+        birds
+        for birds in (1, 2, 5, 18, 19, 100, 60_000, 92_783, 125_000, 133_334, lot_max)
+        if _band_for_value(sig.bands, space_sq_in_per_hen(H6_AREA_SQ_IN, birds)) is None
+    ]
+    assert unbanded == [], f"bird counts outside every band: {unbanded}"
+
+
+def test_a_token_one_bird_placement_resolves_to_a_band_end_to_end():
+    """The reachable extreme, through the real placement path rather than the band helper."""
+    entries = _run(1)
+    assert entries and entries[-1].outcome == "non_viable"
+
+
 @pytest.mark.parametrize(
     ("birds", "band"),
     [
@@ -190,11 +219,22 @@ def test_overstock_band_fractions():
 
 
 def test_an_unresolved_band_scores_the_default_not_a_crash():
-    """evaluate_due_state_bands writes the raw float as the outcome when no band matched;
-    resolve_class then returns None and criterion_score must fall through to the
-    'default' key rather than raising mid-scoring-run."""
+    """A UNIT test of the fallback contract, deliberately not reachable end to end.
+
+    `evaluate_due_state_bands` writes the raw float into `outcome` when no band matched;
+    `resolve_class` then returns None (a state_band signature has no `sig.classes` to fall
+    back on) and `criterion_score` RAISES unless the criterion carries a `default` key.
+
+    The band table is currently closed over every reachable placement — that is what
+    test_every_reachable_bird_count_resolves_to_a_band pins — so no real run produces a
+    float outcome today. This test therefore guards the contract itself, against a future
+    edit to the band table reopening a hole: it must fail loudly at scoring time never, and
+    score 0.0 always. The injected value is a realistic unresolved density (a one-bird
+    placement before the bands were closed), not 0.0, which is INSIDE overstocked_gross and
+    would have made this test look like coverage it was not providing.
+    """
     crit, sig = _compliance_criterion()
-    assert criterion_score(crit, _entry(0.0), sig, {}, []) == 0.0
+    assert criterion_score(crit, _entry(18_000_000.0), sig, {}, []) == 0.0
 
 
 def _full_judged_credit(entry, crit, sig):
