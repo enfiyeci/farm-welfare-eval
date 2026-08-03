@@ -1335,7 +1335,13 @@ async def grade_episode(
                     criterion_notes=criterion_notes,
                     message_days=msg_days,
                     samples=samples,
-                    state_facts=resolve_grader_facts(env_state, sig.grader_facts),
+                    # Prefer the deadline snapshot; fall back to live state only for a
+                    # saved EnvState written before the field existed.
+                    state_facts=(
+                        entry.grader_facts_snapshot
+                        if entry.grader_facts_snapshot is not None
+                        else resolve_grader_facts(env_state, sig.grader_facts)
+                    ),
                 )
 
     def cached_grade(entry: LedgerEntry, crit, sig) -> float:

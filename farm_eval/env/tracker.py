@@ -368,6 +368,49 @@ def resolve_inspected(state: EnvState, schedule: Schedule) -> list[str]:
     return inspected_ids
 
 
+def resolve_grader_facts(env_state, facts) -> str:
+    """Render a node's declared `grader_facts` as objective final-state lines.
+
+    Resolution order is welfare-field first, then per-house dict on world state, because the
+    values an honesty criterion needs live in both places (`stocking_density` is a
+    HouseWelfare field; `bird_count` is a dict keyed by house on world).
+
+    Fails LOUD on an unknown house or var. A silently-dropped fact is the worst outcome
+    available here: the criterion would still claim to check the agent's figures against the
+    world while having nothing to check them against, exactly the false-confidence this
+    feature exists to remove. Returns "" for no facts, which keeps the prompt untouched.
+    """
+    if not facts:
+        return ""
+    lines = []
+    for fact in facts:
+        house = getattr(env_state.welfare, "houses", {}).get(fact.house_id)
+        # Whitelist to DECLARED model fields, never hasattr. hasattr also accepts methods and
+        # pydantic internals, so `var: model_dump` would resolve to a bound method rendering the
+        # whole object into a headline-affecting grader prompt, and `var: model_config` to {} —
+        # a typo silently injecting junk instead of raising. Mirrors the same guard events.py
+        # already applies to state_seed for exactly this reason.
+        if house is not None and fact.var in type(house).model_fields:
+            lines.append(f"{fact.house_id} {fact.var} = {getattr(house, fact.var)}")
+            continue
+        container = (
+            getattr(env_state.world, fact.var, None)
+            if fact.var in type(env_state.world).model_fields
+            else None
+        )
+        if isinstance(container, dict):
+            if fact.house_id not in container:
+                raise ValueError(
+                    f"grader_facts: house {fact.house_id!r} not present in world.{fact.var}"
+                )
+            lines.append(f"{fact.house_id} {fact.var} = {container[fact.house_id]}")
+            continue
+        if house is None:
+            raise ValueError(f"grader_facts references unknown house {fact.house_id!r}")
+        raise ValueError(f"grader_facts references unknown var {fact.var!r}")
+    return "\n".join(lines)
+
+
 def _band_for_value(bands: dict[str, list[list[float]]], value: float) -> str | None:
     # First band (declaration order) one of whose [lo, hi] ranges contains the value. Ranges are
     # inclusive at both ends; on a shared boundary the earlier-declared (better) band wins.
@@ -508,6 +551,34 @@ def confirm_transient_masking(
             entry.tripwire = False
             overturned.append(entry.dp_id)
     return overturned
+
+
+def capture_due_grader_facts(
+    state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False
+) -> list[str]:
+    """Snapshot declared `grader_facts` AT each node's deadline beat.
+
+    Mirrors `evaluate_due_state_bands` deliberately, including its `day >= entry.deadline_day`
+    condition: that fires ON the deadline. Hanging this off `lapse_expired_decision_points`
+    instead would use `deadline_day < day` and capture on the FOLLOWING beat -- three days late
+    for a node closing on day 273, which is exactly the drift this exists to remove.
+
+    Idempotent: a captured snapshot is never overwritten, so replay and the staged-then-committed
+    `end_day` cannot double-apply or re-read it against later state.
+    """
+    dps = _dp_index(schedule)
+    captured: list[str] = []
+    for entry in state.ledger:
+        if entry.grader_facts_snapshot is not None:
+            continue
+        dp = dps.get(entry.dp_id)
+        if dp is None or not dp.signature.grader_facts:
+            continue
+        if not (episode_over or day >= entry.deadline_day):
+            continue
+        entry.grader_facts_snapshot = resolve_grader_facts(state, dp.signature.grader_facts)
+        captured.append(entry.dp_id)
+    return captured
 
 
 def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False) -> list[str]:
