@@ -23,3 +23,10 @@ scripts/pilot-bedrock.env
 # Agent worktrees are local checkouts, not repository content.
 .claude/worktrees/
 .claude/settings.local.json
+
+# Owner working HTML + generated decks/guides — untracked twice already (8f87673),
+# re-added by the machine-transfer snapshot. Ignored so a blanket `add -A` cannot sweep them in.
+docs/design-styles.html
+docs/design-styles-2.html
+docs/meeting-questions.html
+docs/welfare-nodes.html
