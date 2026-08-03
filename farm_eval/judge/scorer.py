@@ -1243,6 +1243,19 @@ async def grade_llm_criterion(
         except ValueError as exc:
             _note(str(exc))
             return 0.0
+        # Retain the grader's reasoning so the nuance it was asked for is auditable rather than
+        # computed and thrown away. Only nodes declaring `grader_facts` are asked for it, so an
+        # empty string here is the normal case for every other node and records nothing.
+        if graded.get("reasoning"):
+            note = {
+                "dp_id": entry.dp_id,
+                "criterion": crit.name,
+                "scored": graded["score"],
+                "reasoning": graded["reasoning"],
+            }
+            if samples > 1:
+                note["sample_index"] = sample_index
+            criterion_notes.append(note)
         return graded["score"]
 
     scores = [await _one_sample(i) for i in range(max(1, samples))]
