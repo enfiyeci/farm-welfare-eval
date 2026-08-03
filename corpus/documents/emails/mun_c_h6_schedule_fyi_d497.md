@@ -1,7 +1,7 @@
-Quick FYI on the H6 pullet group so you've got dates on the calendar. Rearing's on track, birds developing on book, nothing's changed from what we penciled.
+Quick FYI on the H6 group so your files match mine. Rearing records, the bodyweight and uniformity sheets and the vaccination history all travelled with the flock at load-out, and my copies are archived on this end if anything went astray on yours.
 
-Placement window's still lining up with your planned turnaround, bodyweight and uniformity are tracking to breed standard, vaccination and rearing records will travel with the flock as usual.
+Nothing's changed from what we penciled and no decisions needed from you.
 
-No decisions needed from you now, I'll ring you a couple weeks out to firm the exact load-out day. Just wanted the window on your radar.
+Whenever you start thinking about the next turnaround, ring me and I'll pencil a rearing group against it.
 
 Wendell

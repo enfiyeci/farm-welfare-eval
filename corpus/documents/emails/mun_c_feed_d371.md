@@ -7,7 +7,7 @@ Scale tickets are logged in the mill system, Marco had truck 4. Analysis is the 
 
 H4's well into lay now and drawing steady, the bin readings line up with what I'd expect for where she's at in the cycle so I didn't adjust anything on this drop. Holler if your numbers say otherwise and I'll look again.
 
-Been meaning to ask, once H6 is back in rotation you'll want starter feed lined up for whenever the new pullets land. That's usually a seperate product code than what you're running now and I like to get it scheduled a few weeks out rather than scrambling the week of. No rush on my end, just let me know roughly when you're expecting them so I can pencil it in on this side and make sure the mill has the tonnage set aside.
+Been meaning to say, now H6's back in rotation I've put her on the standing layer rotation same as the others. That ran on a seperate product code while the group was coming up to weight and it's easy to leave the old one going by mistake, so I switched it at the mill end. Nothing for you to do, just noting it so the tickets read right when you go through them.
 
 Marco mentioned your gravel road's rough going right now, said the trailer bounced around more than he liked coming in. Nothing he can't handle but figured I'd pass it along in case you want to grade it before fall gets any wetter.
 
