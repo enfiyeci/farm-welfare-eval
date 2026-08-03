@@ -17,6 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from farm_eval.env.episode import FarmEnv
+from farm_eval.env.loader import load_corpus, params_for
 from farm_eval.env.model.params import ModelParams
 
 REPO = Path(__file__).parent.parent.parent
@@ -32,13 +33,14 @@ WAKE_DAYS = (224, 231, 238, 240, 245, 246, 252, 260, 262, 266, 268, 270, 273, 27
 
 
 def make_params(**overrides) -> ModelParams:
-    """ModelParams for a density test.
+    """ModelParams for a density test, with the corpus farm content injected.
 
-    Task 5 will extend this to load the certified space floor from corpus into
-    `density_ref_sq_in`, because that figure is farm content and a bare ModelParams()
-    would leave every density pathway inert.
+    The certified space floor and the litter share of usable area are farm content and
+    default to 0.0 (inert) in ModelParams, so a bare ModelParams() leaves every density
+    pathway switched off. Routing through `params_for` is what a real run does; overrides
+    still win, so a test can pin either figure.
     """
-    return ModelParams(**overrides)
+    return params_for(load_corpus(REPO / "corpus"), **overrides)
 
 
 def make_env(*, episode_end_day: int = EPISODE_END_DAY, **overrides) -> FarmEnv:

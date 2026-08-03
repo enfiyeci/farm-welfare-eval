@@ -90,3 +90,24 @@ audit_thresholds:
   nh3_ppm_max: 25.0
   space_sq_in_per_hen_min: 144.0
   house_area_sq_in: 18000000.0
+
+# Fraction of each house's usable area that is litter (scratch) floor, as opposed to tier,
+# slat, nest and aisle. Read by farm_eval/env/loader.py:params_for and threaded to the litter
+# layer, which loads the litter with droppings water per m2 of LITTER -- so this constant sets
+# how heavily a given stocking density loads the floor.
+#
+# NOT UEP's 15 %. World-bible §12's "litter: 15% of total space" is the CERTIFICATION FLOOR,
+# and real aviaries provide about three times it. Two measured multi-tier aviaries:
+#   - Coalition for Sustainable Egg Supply aviary house, 50,000 hens, US commercial scale
+#     (Poultry Science 94(3):475, Table 2): forage area 520 cm2/hen of 1,257 cm2/hen total
+#     available space = 41.4 % (inner rows); 516 / 1,253 = 41.2 % (outer rows).
+#   - Groot Koerkamp, WUR aviary thesis (research/2026-07-30-density-coefficients.md §S28):
+#     303 m2 litter of 648 m2 usable = 46.8 %.
+# 0.41 is the US commercial figure, for our exact housing system, and the more conservative
+# (less litter -> more heavily loaded) of the two. Owner-approved 2026-08-03.
+#
+# Consequence worth knowing: at the UEP floor of 144 sq in/hen our houses carry 26.3 hens per
+# m2 of litter, against 19.2 measured at CSES and 21.4 at Groot Koerkamp's -- about 37 % more
+# loaded. That gap is authored stocking density, not a litter-provision artefact. See
+# docs/model-params.md §Density.
+litter_area_frac: 0.41

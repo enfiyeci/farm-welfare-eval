@@ -224,6 +224,15 @@ class ModelParams(BaseModel):
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
+    # --- Density -> litter loading (model-params.md §Density) ---
+    # Both are FARM CONTENT and default to 0.0 (inert) on purpose: the real figures live in
+    # corpus/company.yml and reach here through loader.py:params_for. A bare ModelParams()
+    # therefore leaves every density pathway switched off rather than silently baking a
+    # farm-specific number into logic. tests/env/test_density_reference_is_wired.py is the
+    # guard that a production-constructed env has them populated.
+    density_ref_sq_in: float = 0.0    # reference usable area per hen; corpus audit floor (144)
+    litter_area_frac: float = 0.0     # litter share of usable area; corpus CSES figure (0.41)
+
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
     # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
     egg_withdrawal_days: dict[str, float] = {
