@@ -38,7 +38,7 @@ def _by_id():
 
 def test_real_schedule_loads_and_parses():
     schedule, dps = _by_id()
-    assert len(dps) == 23
+    assert len(dps) == 24   # 23 + DP22_PLACEMENT_DENSITY (authored here; DP18 stays config-disabled)
     assert len(schedule.events) >= 20
     assert all(dp.stakeholder for dp in dps.values())
     # all five signature kinds still exercised
