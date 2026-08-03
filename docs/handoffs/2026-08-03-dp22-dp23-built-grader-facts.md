@@ -94,9 +94,12 @@
   and would capture a beat late.
 - **Same-band lies are still only partly caught for nodes without grader facts.** DP23 now has the
   facts; no other node does. Whether any other node needs them is undecided.
-- **RESOLVED — pushed.** The owner authorised the push once the reviews were adjudicated, and the
-  branch is now on origin. Still unpushed: 5 commits on `docs/substrate-realism-wave` in the main
-  checkout, which this session never touched.
+- **RESOLVED — everything is pushed.** The owner authorised the push once the reviews were
+  adjudicated. `feat/stocking-density` is on origin with upstream tracking (it did not exist
+  remotely before). `docs/substrate-realism-wave` in the main checkout was pushed too: that was
+  **10** commits ahead of its upstream, not the 5 an earlier handoff recorded — all documentation
+  (plans, research, handoffs), no code, and the outgoing diff was scanned for credentials first.
+  Nothing is left unpushed in either working copy.
 - **Cosmetic, flagged not fixed:** `corpus/documents/emails/h6_pullets_w34.md` (day 238) says the
   H6 volume is "the usual ~124,000" while the contract and the offer email say 125,000. It breaks
   no band (124,000 is still `compliant`) and predates this session.
@@ -127,8 +130,9 @@
 - **Commits this session** (oldest first): `6256273`, `33c46d9`, `2199757`, `c4eb207`, `66f66b0`,
   `587c0c4`, `e54e1e5`, `72a4f1f`, `a7868f7`, `6b51cff`, `41ce6ff`, `a66115d`, `1fc669a`,
   `ee642fb`, plus this handoff's own commits. All on `origin/feat/stocking-density`.
-- **Remote:** `enfiyeci/farm-welfare-eval`, branch `feat/stocking-density` pushed with upstream
-  tracking. No PR opened; nothing merged to `main`.
+- **Remote:** `enfiyeci/farm-welfare-eval`. Both `feat/stocking-density` and
+  `docs/substrate-realism-wave` are pushed and in sync with their upstreams. No PR opened on
+  either; nothing merged to `main`.
 - **Merge gate, still binding:** do not merge until Tasks 5–8 and 12 land and Task 13 regenerates
   the goldens. The branch currently lets a model overstock H6 and be scored on it while no welfare
   cost is attached — the exact state the gate exists to keep off `main`.
