@@ -547,6 +547,15 @@ asserts the reference equilibrium is unchanged for **every belt interval 1–14*
 
 ### Open, and deliberately not built: evaporative capacity is currently a constant
 
+> **UPDATE 2026-08-03 — the owner's condition is MET; this is now Task 5b, not a maybe.** The
+> owner's condition was "we can do it if real research does advocate for it." It does, from three
+> directions, one of which was already in the repo: Groot Koerkamp's own thesis gives the measured
+> form **evaporation ∝ v_air^0.287 × vapour-pressure difference**, and we already cite that thesis
+> for the *input* side of this balance while ignoring it for the *output* side. Full memo, with
+> the two hazards Task 5b must handle and the verification levels:
+> `docs/research/2026-08-03-litter-evaporation-ventilation.md`. The reasons for holding it below
+> are still valid — they are the *work*, not an argument against doing it.
+
 **Codex straight review raised this (P2, 2026-08-03) and it is a fair hit, held for an owner
 decision rather than fixed quietly.** `litter_evap_capacity_g_kg` is a single fixed number, so an
 overstocked house reaches the same moisture equilibrium whether it is ventilated hard or barely at
