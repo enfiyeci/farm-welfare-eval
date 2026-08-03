@@ -31,8 +31,15 @@
 - **First action:** run the Codex review pair over the two unreviewed fix waves — `72a4f1f`
   (DP23 rubric) and `a66115d` (grader-facts hardening) — since both landed without the re-review
   round the standing discipline requires. Run read-only from the worktree root, snapshot the
-  mutation guard on both sides, and write the findings file to a path OUTSIDE the repo. Once
-  that is clean, the next build is **Task 5** (density → litter moisture), the first of the
+  mutation guard on both sides, and write the findings file to a path OUTSIDE the repo.
+- **Then, before Task 5: snapshot the grader facts at the node's deadline.** Owner asked for this
+  explicitly once it was clear only the symptom had been fixed. DP23's honesty criterion is
+  currently checked against day-518 figures for a window that closed on day 273, so its
+  correctness rests on the grader reasoning about mortality drift rather than on being handed the
+  right number. Full sketch, the existing precedent to copy, and the trap to avoid are in Open
+  questions below — read that entry before starting, because an earlier draft of this handoff
+  wrongly called the fix expensive.
+- After both of those, the next build is **Task 5** (density → litter moisture), the first of the
   Tasks 5–8 the merge gate is waiting on.
 
 ## Decisions made
@@ -75,12 +82,37 @@
 - **Two fix waves were never re-reviewed:** `72a4f1f` (DP23 rubric) and `a66115d` (grader-facts
   hardening). The standing discipline wants a re-review round after a fix wave; neither got one
   before the session ended. This is the First action above.
-- **Grader facts are read from the FINAL EnvState, not from the node's deadline.** Fixed in
-  `41ce6ff` by telling the grader these are end-of-episode values and to look for a material
-  misstatement rather than exact equality. The deeper fix — snapshotting facts at the node's own
-  deadline — needs per-beat state history that does not exist today. Measured drift on a
-  120,000-bird placement: day 273 reads 120,000 birds / 150.00 sq in/hen, day 518 reads 117,590 /
-  153.07.
+- **OUTSTANDING WORK, not merely a known limitation — grader facts are read from the FINAL
+  EnvState instead of from the node's own deadline.** Only the SYMPTOM is fixed. `41ce6ff` changed
+  the prompt wording so the grader is told these are end-of-episode values, which direction honest
+  drift runs in, and to look for a material misstatement rather than exact equality. The DATA is
+  still wrong: the grader is handed day-518 figures for a node whose window closed on day 273, so
+  correctness currently rests on the grader reasoning about drift rather than on being given the
+  right number. Measured on a 120,000-bird placement: day 273 reads 120,000 birds / 150.00 sq
+  in/hen, day 518 reads 117,590 / 153.07. An independent adversarial reviewer measured the same
+  thing and reached the same conclusion.
+
+  **This is CHEAPER than an earlier draft of this handoff claimed. It does NOT need per-beat state
+  history.** That assessment was wrong. It needs a one-shot capture at the deadline, and the
+  codebase already solves this exact class of bug once: `capture_audit_snapshot`
+  (`/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/density-n2/farm_eval/env/audit.py:21`)
+  exists precisely so the audit findings compose from what the auditor SAW on the day rather than
+  from later state. Sketch, following that precedent:
+  1. Add a `grader_facts_snapshot: str | None = None` field to `LedgerEntry`
+     (`farm_eval/env/ledger.py`). It is plain pydantic, so it serializes into the `.eval` log for
+     free.
+  2. Capture once, idempotently, at the deadline beat. Mirror the condition
+     `evaluate_due_state_bands` already uses — `day >= entry.deadline_day`
+     (`farm_eval/env/tracker.py:526`) — because that fires AT the deadline. Do NOT hang it off
+     `lapse_expired_decision_points` (`farm_eval/env/events.py:61`), which uses
+     `deadline_day < day` and so would fire on the NEXT beat: for DP23 that is day 276, still
+     three days late.
+  3. In the scorer, prefer `entry.grader_facts_snapshot` when present and fall back to live state
+     only when it is absent, so replaying an older saved `EnvState` that predates the field still
+     works.
+  4. Once the snapshot is exact, the drift-tolerance paragraph added to the prompt in `41ce6ff`
+     should be revisited — it exists only to paper over this gap and would otherwise teach the
+     grader to excuse real discrepancies.
 - **Same-band lies are still only partly caught for nodes without grader facts.** DP23 now has the
   facts; no other node does. Whether any other node needs them is undecided.
 - **Push or not.** 14 unpushed commits here plus 5 on `docs/substrate-realism-wave` in the main
