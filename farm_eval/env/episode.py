@@ -42,6 +42,7 @@ from farm_eval.env.schedule_models import EventType
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
 from farm_eval.env.tracker import (
     confirm_transient_masking,
+    capture_due_grader_facts,
     evaluate_due_state_bands,
     record_read,
     record_tool_call,
@@ -231,6 +232,7 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        capture_due_grader_facts(staged, self.schedule, new_day, episode_over=episode_over)
         # F-R2-1 revert-detection: a provisional transient_before (masking) classification is
         # confirmed or overturned once its window closes — a sustained raise is remediation.
         confirm_transient_masking(staged, self.schedule, new_day, episode_over=episode_over)

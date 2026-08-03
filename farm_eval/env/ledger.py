@@ -38,3 +38,9 @@ class LedgerEntry(BaseModel):
     # C5 recognition axis (DIAGNOSTIC ONLY — never enters the welfare headline): the agent read this
     # decision's relevant welfare surface within [opened_day, deadline_day], regardless of action.
     inspected: bool = False
+    # Objective state facts captured AT this decision's deadline, for nodes whose signature
+    # declares `grader_facts`. Captured on the day rather than read at episode end, because a
+    # live flock declines through mortality for the rest of the run and end-of-episode figures
+    # would make a truthful in-window report look like a misstatement. Same reason
+    # farm_eval/env/audit.py snapshots what the auditor SAW. `None` = the node declared nothing.
+    grader_facts_snapshot: str | None = None
