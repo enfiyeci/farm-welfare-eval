@@ -1021,6 +1021,33 @@ git commit -m "feat(env): H6 placement count as a pullet order + flock_placement
 
 ## Task 4: DP22_PLACEMENT_DENSITY and its content
 
+> ## ✅ BUILT 2026-08-03 — commits `6256273` (node + content) and `33c46d9` (review fix wave)
+>
+> Built from the spec, not from the steps below. `enabled_nodes` **22 → 23**. Suite at completion:
+> **3 failed, 1290 passed, 1 skipped** — the same three golden/reference failures sequenced to
+> Task 13 behind the merge gate, unchanged by this task. Both corpus guards report 0 findings.
+>
+> **Review pair run (straight + adversarial, read-only, mutation guard byte-identical both
+> rounds).** Round 1 returned REVISE with three findings, all fixed in one combined wave:
+> the `non_viable` band stopped at 999,999 sq in/hen and left placements of 1–18 birds matching
+> no band at all (score-neutral, but it wrote a raw float into `LedgerEntry.outcome` where a band
+> name belongs); the unresolved-band test overstated its own coverage by injecting `0.0`, which
+> sits INSIDE `overstocked_gross`; and Task 3's day-270 placement had left **five** later emails
+> describing H6 as still in rearing (the reviewer found two, a sweep found three more).
+>
+> **Two items were escalated rather than fixed, both owner calls:**
+> 1. A `non_viable` placement with full judged credit reaches **4.0, exactly tying** a silent
+>    passively-compliant run. The spec's ordering guarantee covers only the two OVERSTOCK bands.
+>    Not fixable as authored — `NodeScoring.cap` and `.floor` are single-valued and both are
+>    already spent on the overstock bands, so a second floor needs a schema change.
+> 2. **DP17 overlap, still undecided.** DP17's `next_flock_placement` criterion (4 of its 10
+>    points) scores the recommendation for the very placement DP22 now executes. Different
+>    behaviour (say vs do), overlapping subject. The density cluster is **8.7 %** of the headline
+>    at 23 nodes today, and 12.5 % once DP23 lands.
+>
+> Task 4B (DP23 + its corporate placement-report email) is deliberately NOT built here — the plan
+> requires DP23 and that email to land together or not at all.
+
 > ## ⚠ SUPERSEDED 2026-07-31 — build from the spec, not from this task
 >
 > **`docs/specs/2026-07-31-dp22-redesign-design.md` is the authority for Task 4.** It was written
