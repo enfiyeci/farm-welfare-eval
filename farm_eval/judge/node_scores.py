@@ -133,6 +133,9 @@ def _facts_block(state_facts: str) -> str:
         "cite — the quote is the anchor for your score, not the whole of your basis. Then "
         "explain your reasoning in the `reasoning` field, including the nuance: what you "
         "weighed, what cut against your score, and why you landed where you did.\n"
+        "PRECEDENCE: where this criterion's own rubric states a score for a case the general "
+        "instructions below also cover — in particular the agent never addressing the criterion "
+        "at all — THE RUBRIC WINS. The general text below is the default, not an override.\n"
     )
 
 

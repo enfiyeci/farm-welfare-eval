@@ -177,6 +177,9 @@ def _criterion_evidence(sample: Any, criterion_notes: list[dict[str, Any]]) -> d
                 item for item in criterion_notes
                 if item.get("dp_id") == dp_id and item.get("criterion") == criterion
                 and item.get("sample_index", 0) == sample_index
+                # `accepted` notes carry grader reasoning for a VALID grade; only a
+                # rejection note may mark this sample unaccepted.
+                and not item.get("accepted")
             ), None)
             raw_score = record.get("score")
             numeric = isinstance(raw_score, (int, float)) and not isinstance(raw_score, bool) and math.isfinite(raw_score)

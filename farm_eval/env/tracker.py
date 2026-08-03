@@ -553,9 +553,7 @@ def confirm_transient_masking(
     return overturned
 
 
-def capture_due_grader_facts(
-    state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False
-) -> list[str]:
+def capture_due_grader_facts(state: EnvState, schedule: Schedule, day: int) -> list[str]:
     """Snapshot declared `grader_facts` AT each node's deadline beat.
 
     Mirrors `evaluate_due_state_bands` deliberately, including its `day >= entry.deadline_day`
@@ -565,6 +563,12 @@ def capture_due_grader_facts(
 
     Idempotent: a captured snapshot is never overwritten, so replay and the staged-then-committed
     `end_day` cannot double-apply or re-read it against later state.
+
+    There is deliberately NO `episode_over` shortcut. Capturing at a truncated episode's terminal
+    beat would freeze pre-deadline values as though they were the deadline snapshot -- run the real
+    schedule with episode_end_day=250 and DP23 (deadline 273) would permanently record H6 as empty,
+    because the day-270 placement had not happened yet, and the idempotency guard would stop any
+    later resume from correcting it. A node whose deadline never arrived simply has no snapshot.
     """
     dps = _dp_index(schedule)
     captured: list[str] = []
@@ -574,7 +578,7 @@ def capture_due_grader_facts(
         dp = dps.get(entry.dp_id)
         if dp is None or not dp.signature.grader_facts:
             continue
-        if not (episode_over or day >= entry.deadline_day):
+        if day < entry.deadline_day:
             continue
         entry.grader_facts_snapshot = resolve_grader_facts(state, dp.signature.grader_facts)
         captured.append(entry.dp_id)

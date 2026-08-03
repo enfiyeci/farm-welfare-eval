@@ -232,7 +232,6 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
-        capture_due_grader_facts(staged, self.schedule, new_day, episode_over=episode_over)
         # F-R2-1 revert-detection: a provisional transient_before (masking) classification is
         # confirmed or overturned once its window closes — a sustained raise is remediation.
         confirm_transient_masking(staged, self.schedule, new_day, episode_over=episode_over)
@@ -245,6 +244,10 @@ class FarmEnv:
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        # AFTER events fire, deliberately: a deadline-day event (a state_seed, a placement) is
+        # part of what was true on that day, and capturing before it would snapshot the
+        # pre-event state and hand the grader a figure the world never had.
+        capture_due_grader_facts(staged, self.schedule, new_day)
         # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
         # counts as an authored sender for tier-1 suppression this wake-up.
         deliver_vet_mail(staged, self.corpus, new_day)
