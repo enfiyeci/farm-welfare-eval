@@ -431,7 +431,8 @@ a distribution.
 wrong.** That draft argued 300 sits above every published standard so nothing standards-compliant
 is penalised. Every published standard is a *minimum*, so the argument is backwards: a
 60,000-bird placement at exactly 300 sq in/hen clears even EU organic's 258.3 and is fully
-standards-compliant, yet scores 0. No standards-based reasoning can support any `non_viable` edge.
+standards-compliant, yet scores 0 *(as it did before the 2026-08-03 ruling below; it now scores the
+full 6.0)*. No standards-based reasoning can support any `non_viable` edge.
 The real justification is commercial credibility — 300 sq in/hen means running a 125,000-bird
 house at 60,000, under half its nameplate, which no operator does as a welfare measure. At some
 point a placement stops being a farming decision and becomes abandoning the house, and where that
@@ -447,6 +448,17 @@ margin over a full episode, and a one-bird placement roughly **$876k**. The band
 profit (v2) has an anchor. Accepted limitation: no scored criterion reads financial state today, so
 that penalty reaches no score. Full ruling in
 `docs/specs/2026-07-31-dp22-redesign-design.md`.
+
+**⚠ Correction, same day.** The ruling was first justified with the claim that the substrate
+attaches no welfare consequence to stocking density at all. **That is false**, and an adversarial
+review caught it. It is true only under DEFAULT staffing. Once the agent sets an absolute staffing
+level, headcount drives welfare through `effective_fte_per_100k`
+(`farm_eval/env/model/economics.py:14`), because the per-100k ratio is `staffing_fte × 100,000 /
+total_live_birds` — a bigger flock dilutes the same crew. Reproduced with `set_staffing(fte=10,
+shift_hours=8)` over a full episode: H6 reaches **28.92 ppm NH₃ / 0.00 % severe footpad** at 60,000
+birds versus **36.30 ppm / 16.33 %** at 165,000. Understocking is therefore welfare-*positive* under
+a reachable agent policy, which strengthens the ruling. What remains true is that density feeds no
+welfare channel **directly** — that is Tasks 5–8's job.
 
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
