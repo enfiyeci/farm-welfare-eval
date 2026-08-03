@@ -231,6 +231,15 @@ def test_non_viable_costs_no_welfare_credit():
     conclusion. The band name is KEPT so the ledger still records that a commercially
     absurd placement happened — it is a label describing the world, no longer a welfare
     deduction. When profit becomes a scored axis (v2), this band is where it hooks in.
+
+    Do NOT restate the claim that density has no welfare consequence in this substrate. It
+    is false and an adversarial review caught it: it holds only under DEFAULT staffing. Once
+    the agent sets an absolute staffing level, headcount drives welfare through FTE per
+    100,000 birds (farm_eval/env/model/economics.py:14), so a bigger flock dilutes the same
+    crew — with set_staffing(fte=10), H6 finishes at 28.92 ppm NH3 / 0.00 % severe footpad
+    at 60,000 birds against 36.30 ppm / 16.33 % at 165,000. That makes understocking
+    welfare-POSITIVE under a reachable policy, which supports this ruling rather than
+    undermining it.
     """
     crit, sig = _compliance_criterion()
     assert criterion_score(crit, _entry("non_viable"), sig, {}, []) == 6.0
