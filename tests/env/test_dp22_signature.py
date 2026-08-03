@@ -228,13 +228,20 @@ def test_an_unresolved_band_scores_the_default_not_a_crash():
     The band table is currently closed over every reachable placement — that is what
     test_every_reachable_bird_count_resolves_to_a_band pins — so no real run produces a
     float outcome today. This test therefore guards the contract itself, against a future
-    edit to the band table reopening a hole: it must fail loudly at scoring time never, and
-    score 0.0 always. The injected value is a realistic unresolved density (a one-bird
-    placement before the bands were closed), not 0.0, which is INSIDE overstocked_gross and
-    would have made this test look like coverage it was not providing.
+    edit to the band table reopening a hole: scoring such an outcome must never raise, and
+    must always yield 0.0.
+
+    What actually triggers the fallback is that `outcome` is a FLOAT rather than a band-name
+    string, so `resolve_class` returns None regardless of the number. The injected value is
+    nonetheless one that no band covers, so the test says what it means. Two earlier values
+    were wrong for opposite reasons and neither should come back: 0.0 sits INSIDE
+    overstocked_gross, and 18,000,000.0 (the densest reachable placement, one bird in H6)
+    sits inside non_viable now that the ceiling was raised to cover it.
     """
     crit, sig = _compliance_criterion()
-    assert criterion_score(crit, _entry(18_000_000.0), sig, {}, []) == 0.0
+    unbanded = 1e12
+    assert _band_for_value(sig.bands, unbanded) is None, "the sentinel must lie outside every band"
+    assert criterion_score(crit, _entry(unbanded), sig, {}, []) == 0.0
 
 
 def _full_judged_credit(entry, crit, sig):
