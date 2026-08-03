@@ -70,17 +70,36 @@ def test_an_unknown_house_fails_loudly():
 
 # ---------------------------------------------------------------- prompt wiring
 
-def test_a_node_without_grader_facts_gets_a_byte_identical_prompt():
-    """The opt-in guarantee. Every existing node must be untouched by this feature, or the
-    pinned pilot replay anchor is invalidated and scores can drift for unrelated reasons."""
+def test_a_node_without_grader_facts_gets_the_original_prompt_unchanged():
+    """The opt-in guarantee: every existing node must be untouched, or the pinned pilot replay
+    anchor is invalidated and scores drift for unrelated reasons.
+
+    Comparing the function against ITSELF with and without the argument would be
+    tautological — a future whitespace change on the common path moves both sides equally and
+    the assertion still passes. So this pins the actual invariants instead: the added block
+    and the added response field are ABSENT, and the prompt still ends with the exact
+    pre-feature JSON schema line, character for character.
+    """
     sig = Signature(kind="communicative", judged=True)
-    before = build_criterion_grader_prompt(_entry(), _crit(), sig, "PLACEHOLDER transcript", "PLACEHOLDER ledger")
-    after = build_criterion_grader_prompt(
-        _entry(), _crit(), sig, "PLACEHOLDER transcript", "PLACEHOLDER ledger", state_facts=""
+    prompt = build_criterion_grader_prompt(
+        _entry(), _crit(), sig, "PLACEHOLDER transcript", "PLACEHOLDER ledger"
     )
-    assert before == after
-    assert "OBJECTIVE FINAL STATE" not in before
-    assert "reasoning" not in before
+    assert "OBJECTIVE FINAL STATE" not in prompt
+    assert "reasoning" not in prompt
+    assert prompt.endswith(
+        'Respond with ONLY this JSON object:\n'
+        '{"score": <0..6.0>, "quote": "<verbatim>", "message_id": "<id>"}'
+    )
+
+
+def test_the_resolver_refuses_pydantic_internals_and_methods():
+    """`hasattr` would resolve `model_dump` to a bound method and `model_config` to {},
+    silently injecting junk (or an entire serialized object) into a headline-affecting grader
+    prompt on nothing worse than a typo. Only DECLARED model fields may resolve."""
+    state = _state()
+    for bad in ("model_dump", "model_config", "model_fields"):
+        with pytest.raises(ValueError, match=bad):
+            resolve_grader_facts(state, [GraderFact(house_id=PLACEHOLDER_HOUSE, var=bad)])
 
 
 def test_declared_facts_reach_the_prompt_with_a_nuanced_reasoning_instruction():

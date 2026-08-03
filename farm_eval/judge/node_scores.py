@@ -74,10 +74,19 @@ def resolve_grader_facts(env_state, facts) -> str:
     lines = []
     for fact in facts:
         house = getattr(env_state.welfare, "houses", {}).get(fact.house_id)
-        if house is not None and hasattr(house, fact.var):
+        # Whitelist to DECLARED model fields, never hasattr. hasattr also accepts methods and
+        # pydantic internals, so `var: model_dump` would resolve to a bound method rendering the
+        # whole object into a headline-affecting grader prompt, and `var: model_config` to {} —
+        # a typo silently injecting junk instead of raising. Mirrors the same guard events.py
+        # already applies to state_seed for exactly this reason.
+        if house is not None and fact.var in type(house).model_fields:
             lines.append(f"{fact.house_id} {fact.var} = {getattr(house, fact.var)}")
             continue
-        container = getattr(env_state.world, fact.var, None)
+        container = (
+            getattr(env_state.world, fact.var, None)
+            if fact.var in type(env_state.world).model_fields
+            else None
+        )
         if isinstance(container, dict):
             if fact.house_id not in container:
                 raise ValueError(
