@@ -15,12 +15,14 @@
   four are dispositioned (three fixed in `a66115d`, one already fixed in `41ce6ff` before the
   review returned). **No re-review round was run after `a66115d`** — that fix wave is UNVERIFIED
   by a reviewer.
+- **Grader facts snapshotted at the decision's deadline.** VERIFIED end to end: `1fc669a`. Fixes
+  the root cause that `41ce6ff` only mitigated in prompt wording. See Open questions for the trap.
 - **A false claim I made was caught and corrected.** VERIFIED: `587c0c4`. Details under Decisions.
-- **Suite at handoff: 3 failed, 1303 passed, 1 skipped.** VERIFIED by running it. The three
+- **Suite at handoff: 3 failed, 1305 passed, 1 skipped.** VERIFIED by running it. The three
   failures are the pre-existing golden/reference tests sequenced to Task 13 behind the merge gate
   (`test_baseline_checkpoints_match_golden`, `test_reference_runs_match_golden`,
   `test_competent_anchor_reproduces_from_pipeline`). Both corpus guards report 0 findings.
-  Working tree clean, **nothing pushed** — 13 commits ahead of where the session started.
+  Working tree clean, **nothing pushed** — 16 commits ahead of where the session started.
 
 ## Goal for next session
 
@@ -28,18 +30,11 @@
   separate adequate welfare play from excellent. "Done" = a model that crowds H6 for margin scores
   measurably worse than one that declines, **and the difference is carried by the world, not the
   judge**. DP22 and DP23 now score the decision; Tasks 5–8 are what make the world respond to it.
-- **First action:** run the Codex review pair over the two unreviewed fix waves — `72a4f1f`
-  (DP23 rubric) and `a66115d` (grader-facts hardening) — since both landed without the re-review
-  round the standing discipline requires. Run read-only from the worktree root, snapshot the
+- **First action:** run the Codex review pair over the three unreviewed changes — `72a4f1f`
+  (DP23 rubric), `a66115d` (grader-facts hardening) and `1fc669a` (deadline snapshot) — none of
+  which got the re-review round the standing discipline requires. Run read-only from the worktree root, snapshot the
   mutation guard on both sides, and write the findings file to a path OUTSIDE the repo.
-- **Then, before Task 5: snapshot the grader facts at the node's deadline.** Owner asked for this
-  explicitly once it was clear only the symptom had been fixed. DP23's honesty criterion is
-  currently checked against day-518 figures for a window that closed on day 273, so its
-  correctness rests on the grader reasoning about mortality drift rather than on being handed the
-  right number. Full sketch, the existing precedent to copy, and the trap to avoid are in Open
-  questions below — read that entry before starting, because an earlier draft of this handoff
-  wrongly called the fix expensive.
-- After both of those, the next build is **Task 5** (density → litter moisture), the first of the
+- After that review is clean, the next build is **Task 5** (density → litter moisture), the first of the
   Tasks 5–8 the merge gate is waiting on.
 
 ## Decisions made
@@ -79,43 +74,21 @@
 
 ## Open questions
 
-- **Two fix waves were never re-reviewed:** `72a4f1f` (DP23 rubric) and `a66115d` (grader-facts
-  hardening). The standing discipline wants a re-review round after a fix wave; neither got one
-  before the session ended. This is the First action above.
-- **OUTSTANDING WORK, not merely a known limitation — grader facts are read from the FINAL
-  EnvState instead of from the node's own deadline.** Only the SYMPTOM is fixed. `41ce6ff` changed
-  the prompt wording so the grader is told these are end-of-episode values, which direction honest
-  drift runs in, and to look for a material misstatement rather than exact equality. The DATA is
-  still wrong: the grader is handed day-518 figures for a node whose window closed on day 273, so
-  correctness currently rests on the grader reasoning about drift rather than on being given the
-  right number. Measured on a 120,000-bird placement: day 273 reads 120,000 birds / 150.00 sq
-  in/hen, day 518 reads 117,590 / 153.07. An independent adversarial reviewer measured the same
-  thing and reached the same conclusion.
-
-  **This is CHEAPER than an earlier draft of this handoff claimed. It does NOT need per-beat state
-  history.** That assessment was wrong. It needs a one-shot capture at the deadline, and the
-  codebase already solves this exact class of bug once: `capture_audit_snapshot`
-  (`/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/density-n2/farm_eval/env/audit.py:21`)
-  exists precisely so the audit findings compose from what the auditor SAW on the day rather than
-  from later state. Sketch, following that precedent:
-  1. Add a `grader_facts_snapshot: str | None = None` field to `LedgerEntry`
-     (`farm_eval/env/ledger.py`). It is plain pydantic, so it serializes into the `.eval` log for
-     free.
-  2. Capture once, idempotently, at the deadline beat. Mirror the condition
-     `evaluate_due_state_bands` already uses — `day >= entry.deadline_day`
-     (`farm_eval/env/tracker.py:526`) — because that fires AT the deadline. Do NOT hang it off
-     `lapse_expired_decision_points` (`farm_eval/env/events.py:61`), which uses
-     `deadline_day < day` and so would fire on the NEXT beat: for DP23 that is day 276, still
-     three days late.
-  3. In the scorer, prefer `entry.grader_facts_snapshot` when present and fall back to live state
-     only when it is absent, so replaying an older saved `EnvState` that predates the field still
-     works.
-  4. Once the snapshot is exact, the drift-tolerance paragraph added to the prompt in `41ce6ff`
-     should be revisited — it exists only to paper over this gap and would otherwise teach the
-     grader to excuse real discrepancies.
+- **Three changes were never reviewed:** `72a4f1f` (DP23 rubric), `a66115d` (grader-facts
+  hardening) and `1fc669a` (deadline snapshot). The standing discipline wants a re-review round
+  after a fix wave; none of the three got one before the session ended. This is the First action.
+- **RESOLVED this session — grader facts are snapshotted at the deadline** (`1fc669a`). They were
+  read from the FINAL EnvState, so DP23's grader saw figures from 245 days after the agent spoke
+  (120,000 birds / 150.00 sq in/hen at day 273 versus 117,590 / 153.07 at day 518). Now captured on
+  the deadline beat into `LedgerEntry.grader_facts_snapshot`, following the `capture_audit_snapshot`
+  precedent. The drift-tolerance wording added in `41ce6ff` was removed, since it existed only to
+  paper over this and would otherwise teach the grader to excuse real discrepancies. Verified end to
+  end. NOTE for whoever touches this: the capture MUST stay on `evaluate_due_state_bands`'
+  `day >= entry.deadline_day` condition — `lapse_expired_decision_points` uses `deadline_day < day`
+  and would capture a beat late.
 - **Same-band lies are still only partly caught for nodes without grader facts.** DP23 now has the
   facts; no other node does. Whether any other node needs them is undecided.
-- **Push or not.** 14 unpushed commits here plus 5 on `docs/substrate-realism-wave` in the main
+- **Push or not.** 17 unpushed commits here plus 5 on `docs/substrate-realism-wave` in the main
   checkout. The owner was asked twice and deferred both times ("wait until we finish these run").
 - **Cosmetic, flagged not fixed:** `corpus/documents/emails/h6_pullets_w34.md` (day 238) says the
   H6 volume is "the usual ~124,000" while the contract and the offer email say 125,000. It breaks
@@ -145,8 +118,8 @@
 - **Shared test setup with three documented traps:**
   `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/density-n2/tests/env/_density_support.py`.
 - **Commits this session** (oldest first): `6256273`, `33c46d9`, `2199757`, `c4eb207`, `66f66b0`,
-  `587c0c4`, `e54e1e5`, `72a4f1f`, `a7868f7`, `6b51cff`, `41ce6ff`, `a66115d`, plus this
-  handoff's own commit.
+  `587c0c4`, `e54e1e5`, `72a4f1f`, `a7868f7`, `6b51cff`, `41ce6ff`, `a66115d`, `1fc669a`, plus
+  this handoff's own commits.
 - **Remote:** `enfiyeci/farm-welfare-eval` (unpushed).
 - **Merge gate, still binding:** do not merge until Tasks 5–8 and 12 land and Task 13 regenerates
   the goldens. The branch currently lets a model overstock H6 and be scored on it while no welfare
