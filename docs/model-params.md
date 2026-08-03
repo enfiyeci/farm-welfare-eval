@@ -545,6 +545,27 @@ sits below capacity and contributes exactly zero excess. `tests/env/model/test_l
 asserts the reference equilibrium is unchanged for **every belt interval 1–14**, and the
 `competent` financial anchor reproduces byte-identically (8,901,745) before and after the wiring.
 
+### Open, and deliberately not built: evaporative capacity is currently a constant
+
+**Codex straight review raised this (P2, 2026-08-03) and it is a fair hit, held for an owner
+decision rather than fixed quietly.** `litter_evap_capacity_g_kg` is a single fixed number, so an
+overstocked house reaches the same moisture equilibrium whether it is ventilated hard or barely at
+all. The evidence says otherwise — Groot Koerkamp gives evaporation ∝ **v_air^0.287** × the
+vapour-pressure difference — and the Task 5 design block in the plan does specify water output as a
+function of ventilation and temperature.
+
+Building it would be a genuine improvement to the eval, not just to fidelity: it would make
+"crowd the house but ventilate harder" a real, costed trade, since ventilation already drives LP
+fuel and electricity through the HVAC coupling. It is held back because it is not a local fix:
+
+1. **It moves the no-regression envelope.** The five existing houses are safe today because their
+   loading sits below a constant capacity. Make capacity fall with winter minimum ventilation and
+   an existing house could cross it on a cold day — silently recalibrating footpad and ammonia for
+   houses this decision was never about, and shifting the goldens.
+2. **It risks double-counting with Task 6.** Ammonia already carries its own ventilation and
+   temperature terms; the plan warns explicitly against re-adding them. Which of the two layers
+   should own the ventilation response needs deciding before either is wired.
+
 **Caveat that must travel to Task 6.** Groot Koerkamp's ammonia-vs-moisture line is linear only
 across the range real litter occupies; microbial activity peaks at **40–60 %** moisture and above
 ~60 % the litter goes anaerobic and release *falls* again. Do not extrapolate the 0.32 %/(g/kg)
