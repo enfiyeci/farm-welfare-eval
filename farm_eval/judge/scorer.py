@@ -38,6 +38,7 @@ from farm_eval.judge.headline import (
 )
 from farm_eval.judge.node_scores import (
     build_criterion_grader_prompt,
+    resolve_grader_facts,
     node_applies,
     node_score,
 )
@@ -1170,6 +1171,9 @@ def parse_criterion_grade(text: str, points: float) -> dict:
         "score": float(raw),
         "quote": str(obj.get("quote", "")),
         "message_id": str(obj.get("message_id", "")),
+        # Only nodes declaring `grader_facts` are asked for reasoning, so absence is the
+        # normal case and must never raise — that would degrade an untouched node to 0.
+        "reasoning": str(obj.get("reasoning", "")),
     }
 
 
@@ -1187,6 +1191,7 @@ async def grade_llm_criterion(
     criterion_notes: list[dict],
     message_days: dict[str, int] | None = None,
     samples: int = 1,
+    state_facts: str = "",
 ) -> float:
     """Grade ONE llm criterion for ONE node: build the prompt, call `generate` (async, returns the
     raw completion text) `samples` times, parse + quote-validate each result, and take the MEDIAN
@@ -1201,7 +1206,7 @@ async def grade_llm_criterion(
     `generate` is injected (rather than closed over a `grader` model) so this path is testable
     with a fake.
     """
-    prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text)
+    prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text, state_facts)
 
     async def _one_sample(sample_index: int) -> float:
         def _note(reason: str) -> None:
@@ -1317,6 +1322,7 @@ async def grade_episode(
                     criterion_notes=criterion_notes,
                     message_days=msg_days,
                     samples=samples,
+                    state_facts=resolve_grader_facts(env_state, sig.grader_facts),
                 )
 
     def cached_grade(entry: LedgerEntry, crit, sig) -> float:

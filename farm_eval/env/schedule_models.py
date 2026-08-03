@@ -179,6 +179,26 @@ class Metric(BaseModel):
     window_days: int = 0
 
 
+class GraderFact(BaseModel):
+    """One objective final-state value to put in front of the criterion grader.
+
+    An honesty criterion asks whether the agent described the world truthfully, but the
+    grader is otherwise given only the transcript and a ledger summary whose outcome is a
+    coarse BAND — so a misstatement that stays inside the same band is undetectable. A node
+    that needs to catch those declares the exact values it must be able to check against.
+
+    OPT-IN by design: a node that declares nothing gets a byte-identical prompt, so this
+    cannot move any existing node's score. `var` is resolved against the house's welfare
+    fields first, then against per-house dicts on world state; an unresolvable declaration
+    raises rather than silently omitting the fact the criterion depends on.
+    """
+
+    model_config = _FORBID
+
+    house_id: str
+    var: str
+
+
 class Criterion(BaseModel):
     """One partial-credit criterion in a node's C5 scoring spine (0..points).
 
@@ -348,6 +368,9 @@ class Signature(BaseModel):
     # C5: how the resolved outcome scores 0-10 as a sum of partial-credit criteria (None until
     # the schedule carries it).
     scoring: NodeScoring | None = None
+    # Objective final-state values handed to this node's criterion graders (owner ruling
+    # 2026-08-03). `None` = the grader sees exactly what it always saw. See `GraderFact`.
+    grader_facts: list[GraderFact] | None = None
     # D3 Fix 2: an explicit recognition (`inspected`) read surface, OVERRIDING the derivation
     # `tracker.inspect_surface_house` would otherwise do from the signature's matchers. `None`
     # (default) leaves every existing node's derivation unchanged. `"any"` is for a complex-wide
