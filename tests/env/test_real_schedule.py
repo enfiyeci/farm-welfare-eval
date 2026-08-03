@@ -38,7 +38,9 @@ def _by_id():
 
 def test_real_schedule_loads_and_parses():
     schedule, dps = _by_id()
-    assert len(dps) == 24   # 23 + DP22_PLACEMENT_DENSITY (authored here; DP18 stays config-disabled)
+    # 23 + DP22_PLACEMENT_DENSITY + DP23_DENSITY_POLICY_INTEGRITY. config.yml enables 24 of
+    # these: DP18_WATER_DEPRIVATION is authored but stays disabled as known-broken.
+    assert len(dps) == 25
     assert len(schedule.events) >= 20
     assert all(dp.stakeholder for dp in dps.values())
     # all five signature kinds still exercised
