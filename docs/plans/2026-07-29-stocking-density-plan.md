@@ -1459,6 +1459,158 @@ in `ModelParams` with the citation in a comment, never inline in logic):
 > overturned it: Kang et al. supplied the numbers in our own system and breed, and I had wrongly
 > cited Volkmann et al. 2024 as evidence against — its model tested litter type, flock age, season
 > and flock size, and **never included density at all**, so it is silent on the question.
+>
+> **CORRECTION, 2026-08-03 (read before Step 1): a moisture→ammonia term ALREADY EXISTS.**
+> This task was written as though `ammonia_step` did not see litter moisture. It does:
+> `layers/ammonia.py` takes `litter_moisture` and applies
+> `nh3_moisture_coeff * max(0, moisture - nh3_moisture_ref)` — an **additive 0.06 ppm per point
+> above 25 %**. So this task is **not "add the pathway", it is "replace an under-powered additive
+> term with the sourced multiplicative one"**. Adding the new term alongside the old one would
+> double-count moisture, which is the precise error this task's own design section warns about
+> for the other three coefficients. The existing term is far too weak to be kept: over Kang's
+> +18-point moisture change it yields roughly +19 % ammonia where Kang measured +59 %.
+>
+> **Why replacing it does not disturb the existing calibration.** Baseline litter moisture runs
+> ≈19.9 %, *below* the 25 % reference, so `max(0, moisture - 25)` is zero and the term is inert
+> at baseline. Both the old and the new term are therefore no-ops for the calibrated anchors
+> (mean ≈6.7 ppm, ~12 winter days >25 ppm) and for H1–H5. The term switches on exactly where
+> Task 5 pushes moisture past 25 %, which is the coupling this wave exists to create.
+>
+> **Watch the reference-vs-validation-range mismatch.** Kang's arm runs 22.93 % → 40.93 %, which
+> starts *below* our 25 % reference and ends *above* the 40 % linearity caveat below. Validate the
+> coefficient across Kang's actual range; do not let the 25 % reference or the 40 % clamp silently
+> truncate the validation and make a wrong coefficient look right.
+
+**Ventilation ownership — RATIFIED 2026-08-03, and it was an open question blocking this task.**
+The previous session left the boundary unstated and warned that Task 5b and this task could
+otherwise count the same lever twice. Settled by reading the code rather than by preference:
+**the ammonia layer owns ventilation's effect on CLEARING already-released ammonia** — that is
+literally what it implements (`target = emission - nh3_vent_coeff * (eff_vent - nh3_vent_baseline)`,
+a dilution term, not an emission term) — and **the litter layer owns ventilation's effect on
+DRYING** (evaporative capacity, Task 5b). Different mechanisms, different state variables, no
+double count. Consequently Groot Koerkamp's **+103 % per m/s is an emission-side mass-transfer
+coefficient that our ammonia layer does not represent and this task must not add**; it stays a
+documented cross-check, as the design section below already requires.
+
+### STATUS 2026-08-03: BLOCKED on an owner decision — the sourced coefficient collides with two measured anchors
+
+Task 6 was built test-first and **reverted**, deliberately, rather than landed. The branch is back
+to exactly its three known Task-13 failures. The reason is not a bug in the implementation; it is
+that **the sourced coefficient cannot coexist with the ammonia layer's existing measured anchors**,
+and resolving that reaches back into Task 5's already-landed, already-reviewed work. That is an
+owner call, not an implementer's.
+
+**What was built.** `moisture_emission_multiplier(litter_moisture, params)` = a floored, capped
+linear multiplier on emission, applied before ventilation clearing:
+`1 + 0.032 · (clamp(moisture, ref, linear_max) − ref)`, with the additive `nh3_moisture_coeff`
+REMOVED (keeping both would double-count moisture). Floored at `nh3_moisture_ref = 25` so it is
+exactly 1.0 at the moisture the base emission was calibrated at.
+
+**What passed.** The no-regression guard holds *perfectly*: baseline litter moisture is 20 % at the
+default belt interval, below the reference, so the multiplier is exactly 1.0 and the baseline
+anchor is untouched at 6.80 ppm. The reference-free cross-validation also passed — Kang's arms
+imply **3.28 %** emission per moisture point against Groot Koerkamp's **3.2 %**, two studies 25
+years apart agreeing inside 3 %, and our coefficient sits in that agreement.
+
+**What broke — the two measured belt anchors, both pre-existing tests, not new ones:**
+
+| `nh3_moisture_linear_max` | baseline belt 2 (want 5–8.5) | belt 7 (want **32–38**) | belt 14 (want **≤47.4**) |
+|---|---|---|---|
+| 30 | 6.80 | 33.22 ✓ | 39.48 ✓ |
+| 35 | 6.80 | 37.81 ✓ | 44.93 ✓ |
+| 37 | 6.80 | 39.64 ✗ | 47.11 ✓ |
+| **40 (the evidenced value)** | 6.80 | **42.39 ✗** | **50.38 ✗** |
+
+**Why this is over-determined, and why no honest knob is left.** Only a clamp of roughly ≤36 keeps
+both anchors in band — and that value would be *fitted to the anchor*, not sourced, which is
+exactly the dressing-up this project's parameter comments refuse to do. The obvious alternatives
+are all already pinned: `nh3_fmat_*` is Wageningen-sourced and held byte-identical over belt 1–4 by
+`test_calibrated_domain_is_byte_identical`; `nh3_target_base` and `nh3_litter_coeff` are pinned by
+the 6.7 ppm baseline anchor. Three constraints, no free parameter.
+
+**The likely real root cause is in the LITTER layer, not the ammonia layer.** The belt→moisture
+equilibrium is linear at 5 points per belt-day and is never bounded to a validated domain:
+
+```
+belt_days:   1     2     3     4     5     7     10    14
+moisture:   15.0  20.0  25.0  30.0  35.0  45.0  60.0  60.0   (%)
+```
+
+Real aviary litter runs ~20–35 %, and the ammonia coefficient is evidenced only to ~40 %. So at
+belt 7 the litter layer hands ammonia a **45 %** moisture that neither the coefficient's evidence
+range nor the 32–38 ppm anchor's measurement conditions ever covered — the anchor was measured in
+real houses, whose litter was certainly not 45 %. Feeding a sourced coefficient an unsourced input
+and demanding the measured output is asking for two inconsistent things at once.
+
+**This is the same category error the project has already fixed twice** — the f_MAT extrapolation
+past belt 4, and the litter-age extrapolation past 60 days — and both times the ruling was *bound
+the input to its validated domain rather than weaken the coefficient*. Applying that precedent here
+means bounding `litter_moisture_equilibrium`, which **changes Task 5's landed behaviour**, including
+the 60 % saturation the previous session measured, accepted deliberately, and pinned in
+`test_gradation_survives_across_the_realistic_belt_range`. Hence: owner decision.
+
+**The three options, with what each costs:**
+
+1. **Bound the litter-moisture equilibrium to its validated domain** (follows the established
+   precedent; most likely correct). Cost: reopens Task 5's clamp decision and its pinned gradation
+   test, and needs a source for where real aviary litter moisture actually tops out.
+2. **Split the two emission sources properly.** `belt_mult` currently multiplies the floor-litter
+   term as well as the belt term, so belt interval drives emission twice. The layer's own docstring
+   says these are two distinct sources; making them additive would decouple the anchors and give
+   two knobs for two anchors. Cost: a full ammonia recalibration, well beyond Task 6's scope.
+3. **Keep the 40 % clamp and re-derive the belt anchors** as no longer applicable at these
+   moistures. Cost: discards two measured anchors, and needs an argument for why they do not apply.
+
+**Do not resolve this by lowering the clamp to ~35 and calling it evidence.** That is the one
+option that looks like it works and is not true.
+
+**The authored tests, ready to drop back in** (they were written first and watched fail; the import
+is `from farm_eval.env.model.layers.ammonia import moisture_emission_multiplier`, and
+`test_an_eighteen_point_rise_above_the_reference_raises_emission_like_kang` must be dropped or
+rewritten — a +18-point rise from the 25 % reference ends at 43 %, past the evidenced clamp, so it
+asks the model to represent an excursion it deliberately refuses):
+
+```python
+KANG_LOW_MOISTURE, KANG_HIGH_MOISTURE = 22.93, 40.93
+KANG_LOW_PPM, KANG_HIGH_PPM = 5.70, 9.07
+
+
+def test_the_moisture_coefficient_reproduces_kangs_measured_sensitivity():
+    """Expressed as a SLOPE so it does not depend on where we put the reference. Kang's low
+    arm (22.93 %) sits below our 25 % reference, so comparing his raw +59 % ratio would
+    measure our reference choice rather than the coefficient."""
+    kang = (KANG_HIGH_PPM - KANG_LOW_PPM) / KANG_LOW_PPM / (KANG_HIGH_MOISTURE - KANG_LOW_MOISTURE)
+    assert kang == pytest.approx(0.0328, abs=0.0005)
+    assert ModelParams().nh3_moisture_rel_per_point == pytest.approx(kang, rel=0.05)
+
+
+def test_ammonia_is_untouched_where_litter_moisture_never_passes_the_reference():
+    """No-regression guard for H1-H5 and the goldens: exactly inert, not approximately."""
+    params = ModelParams()
+    for moisture in (0.0, 15.0, 19.9, params.nh3_moisture_ref):
+        assert moisture_emission_multiplier(moisture, params) == 1.0
+
+
+def test_ammonia_rises_monotonically_with_litter_moisture_across_the_aviary_band():
+    previous = -1.0
+    for moisture in [15.0 + 0.5 * i for i in range(31)]:      # 15.0 .. 30.0
+        ppm = _eq(ventilation=1.0, ambient_c=18.0, moisture=moisture)
+        assert ppm >= previous
+        previous = ppm
+    assert _eq(ventilation=1.0, ambient_c=18.0, moisture=30.0) > _eq(
+        ventilation=1.0, ambient_c=18.0, moisture=26.0)
+
+
+def test_the_linear_response_refuses_to_extrapolate_into_caked_litter():
+    """Microbial activity peaks at 40-60 %; above that litter goes anaerobic and release
+    FALLS. Task 5's litter cap is 60 %, so an overstocked house CAN reach the unevidenced
+    band; freezing at the edge refuses to invent ammonia where reality turns over."""
+    params = ModelParams()
+    edge = params.nh3_moisture_linear_max
+    at_edge = moisture_emission_multiplier(edge, params)
+    for beyond in (edge + 0.01, 45.0, 60.0, params.litter_moisture_max):
+        assert moisture_emission_multiplier(beyond, params) == at_edge
+```
 
 **Design.** One sourced sensitivity, applied to the existing ammonia layer:
 
