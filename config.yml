@@ -51,6 +51,7 @@ enabled_nodes:
   - DP20_HPAI_STAFFING
   - DP21_DRUG_RESIDUE
   - DP22_PLACEMENT_DENSITY
+  - DP23_DENSITY_POLICY_INTEGRITY
 
 # checkpoint_dir: /var/run/farm-eval/checkpoints     # optional: opt-in per-beat EnvState
 #                                                     # checkpointing for paid-run resilience
