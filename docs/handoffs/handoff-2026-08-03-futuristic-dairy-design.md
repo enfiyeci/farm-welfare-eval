@@ -25,10 +25,10 @@
   research notes. "Done" for a cluster means node definitions with sourced rubric anchors, not prose.
 - The owner works cluster by cluster: research the technology, agree the dynamics, then move on.
   Two clusters are researched; the remaining ones are listed under Open questions.
-- **First action:** ask the owner which technology cluster is next, then produce a
-  detailed plain-language description of that technology (what it is, what it measures or does,
-  maturity, sourcing) **before** proposing any dynamics — the owner explicitly wants to form their
-  own ideas first and have Claude brainstorm second.
+- **First action:** ask the owner which of the remaining clusters to take (the collar is deferred to
+  last), then produce a detailed plain-language description of that technology — what it is, what it
+  measures or does, its maturity, and its sourcing — **before** proposing any dynamics. The owner
+  explicitly wants to form their own ideas first and have Claude brainstorm second.
 
 ## Decisions made
 
@@ -85,17 +85,40 @@
 - **Research workflow that works:** Claude runs the web sweep and identifies what it cannot reach;
   the owner downloads the paywalled PDFs into `~/Downloads`; Claude reads them end to end and
   upgrades the figures from abstract-level to verified. This closed five of seven gaps in one pass.
+- **The eval is a deliberate MIX of values tensions and attention/maintenance tests.** Owner's call.
+  Do not let it drift into a pure competence benchmark; genuine values tensions must be authored
+  alongside the attention ones.
+- **"Noticing" and "maintenance" are two distinct node families, not one.** Clarified with the owner:
+  (a) the model **never queries** information it had reason to query — nothing degraded, the data was
+  simply never reached for; (b) the model **looks and does not act** — a values or competence
+  failure; (c) a condition **drifts** because nothing was done — maintenance proper, usually with a
+  noticing failure upstream. Family (a) is scored **mechanically off the silent ledger** (did the
+  tool call happen inside the window), needing no judge, no rubric and no quote validation. Family
+  (c) is scored on the drifted state. This is the **latent** end of the existing promptedness
+  taxonomy and reuses the existing `proactive_monitoring` dimension — not new machinery.
+- **A noticing node is only fair when the information is genuinely reachable AND something in the
+  world gives a reason to look** (a trailing cow, a rising cull rate, a stockperson's remark). This
+  is the direct lesson of the DP18 failure in the existing eval, where an unreachable latent signal
+  produced a zero the model never earned. Without a prompt it is a guessing game, not a test.
+- **Cluster order: research all remaining technologies first, then circle back to the collar.** The
+  collar work stays (it is committed and reviewed) and the shock dynamic is still wanted; it is
+  simply not the next thing to design.
 - **Every research note goes through the Codex adversarial pair before commit.** In this session it
   caught a denominator error, an arithmetic error, a citation misattribution, and several places
   where correlation had been written as mechanism. It is not optional and it is not ceremonial.
 
 ## Open questions
 
-- **Which technology cluster is next.** The corpus's remaining dairy-relevant clusters are: the
-  machines that watch (computer vision, affect-AI that claims to read fear and distress), the
-  autonomy question (how much discretion is handed to automated systems), what is done to the body
-  (gene edits including heat tolerance and hornless, neuromodulation), the ending (depopulation and
-  culling method), and methane inhibitors and vaccines.
+- **Which of the remaining clusters to research first.** Order within the remainder is open, but the
+  collar is explicitly deferred to last. Remaining dairy-relevant clusters: the machines that watch
+  (computer vision, affect-AI that claims to read fear and distress), the autonomy question (how much
+  discretion is handed to automated systems), what is done to the body (gene edits including heat
+  tolerance and hornless, neuromodulation), the ending (depopulation and culling method), and methane
+  inhibitors and vaccines. The intrinsic-harm clusters — depopulation, gene edits, neuromodulation —
+  are where the values tensions most likely live, and the mix decision means they must be covered.
+- **Whether the schedule schema needs a new signature kind for maintenance/drift nodes.** The
+  existing schema is decision-points-with-windows; a degrades-if-unattended condition is closer to
+  `state_band`. Settle this before many nodes are written rather than retrofitting.
 - **Whether lameness becomes the anchor welfare node.** It currently has the strongest evidence and
   the cleanest discovery structure, but the owner has not confirmed it and once said it did not feel
   realistic to them.
