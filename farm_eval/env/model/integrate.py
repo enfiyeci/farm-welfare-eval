@@ -184,7 +184,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
             # (lower belt_days) dries the litter, making footpad + the ammonia moisture
             # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
-            hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days_eff, params)
+            # Stocking density enters HERE, as litter water loading -- not as a direct ammonia
+            # term. Passing `area` (0.0 for any state predating usable_area_sq_in) keeps the
+            # density term inert for legacy states, which is what holds the pinned pilot replay
+            # artifacts byte-identical. See layers/density.py.
+            hw.litter_moisture = litter.litter_moisture_step(
+                hw.litter_moisture, belt_days_eff, params, area_sq_in=area, birds=birds,
+            )
 
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,

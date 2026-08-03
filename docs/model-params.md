@@ -460,6 +460,96 @@ birds versus **36.30 ppm / 16.33 %** at 165,000. Understocking is therefore welf
 a reachable agent policy, which strengthens the ruling. What remains true is that density feeds no
 welfare channel **directly** — that is Tasks 5–8's job.
 
+## Density → litter water loading → moisture (Task 5)
+
+Density does **not** act on ammonia directly. It loads the litter with water; ammonia then
+responds to litter moisture (Task 6), and footpad already reads litter moisture with no new code.
+The justification for routing everything through the litter is Groot Koerkamp's aviary
+measurement: **the litter produces ~77 % of an aviary's ammonia (62.5 g/h against 18.8 g/h from
+the belts) while receiving only 22.5 % of the droppings.** In an aviary the litter is the
+dominant source, and density is what loads it.
+
+The driving quantity is **hens per m² of litter**, not sq in/hen. Implementation:
+`farm_eval/env/model/layers/density.py` (pure functions) feeding
+`layers/litter.py:litter_moisture_equilibrium`, wired at `model/integrate.py`.
+
+### The house's litter area is now authored, and it was wrong before
+
+`corpus/company.yml:litter_area_frac = 0.41`. Until 2026-08-03 the sim authored no litter area
+at all and so implicitly used UEP's **15 % of total space** (world-bible §12) as the real
+provision. That is a *certification floor*, and real aviaries exceed it about threefold:
+
+| aviary | litter ÷ usable | hens per m² of litter |
+|---|---|---|
+| Coalition for Sustainable Egg Supply, US commercial, 50,000 hens (Poultry Sci. 94(3):475, Table 2: forage area 520 cm²/hen of 1,257 cm²/hen total available space; outer rows 516/1,253) | **41 %** | **19.2** |
+| Groot Koerkamp, WUR aviary thesis (303 m² litter of 648 m² usable) | 47 % | 21.4 |
+| **Ours, before** (UEP floor taken as the provision) | 15 % | **71.8** |
+| **Ours, now** (0.41, at the UEP space floor of 144 sq in/hen) | **41 %** | **26.3** |
+
+0.41 is the US commercial figure for our exact housing system and the more conservative of the
+two measured values. Owner-approved 2026-08-03.
+
+### Standing finding: our houses are ~37 % more loaded than a real aviary, and that is stocking density
+
+**This reaches past the density wave and into the existing footpad and ammonia calibration, so it
+is recorded here rather than in a task note.** At the UEP floor our houses carry **26.3 hens per m²
+of litter** against **19.2** measured at CSES and **21.4** at Groot Koerkamp's. With the litter
+share now set to the measured commercial figure, that entire gap is attributable to **authored
+stocking density** — our world runs hens at 144 sq in/hen while the CSES aviary ran them at 195 —
+and no longer to a litter-provision artefact. Two consequences worth carrying:
+
+1. **The world should not imply 144 sq in/hen is generous.** It is the certification floor, and it
+   is denser than any real cage-free aviary in the evidence base.
+2. **The pre-existing ~20 % moisture / ~6.7 ppm calibration was fitted with the litter area
+   unstated.** It still lands inside the real-aviary band (litter DM 700–850 g/kg = 15–30 %
+   moisture), so nothing is known to be wrong — but it was calibrated against a house whose litter
+   loading nobody had written down, and this is the first time that figure exists.
+
+### Coefficients
+
+| parameter | value | basis |
+|---|---|---|
+| `litter_water_in_ref_g_kg` | **126.8** g/kg litter/d (s.e. 19.4) | **Sourced** — Groot Koerkamp, measured water input to litter |
+| `litter_loading_ref_hens_m2` | **21.4** hens/m² litter | **Sourced** — the loading he measured it at |
+| `litter_evap_capacity_g_kg` | **160.0** g/kg litter/d | **Calibrated** — see below |
+| `litter_moisture_per_excess_water` | **1.44** % moisture per (g/kg) | **Calibrated** — pinned to Kang |
+
+Water input scales linearly with loading from the sourced anchor. Evaporation is **bounded**:
+litter water activity saturates near **0.86** (Groot Koerkamp), so above the sorption plateau the
+litter cannot shed water faster however wet it gets. Only the surplus above capacity moves the
+equilibrium:
+
+```
+loading      = birds / (usable_area × litter_area_frac)      [hens per m² of litter]
+water_in     = 126.8 × loading / 21.4                        [g/kg litter/day]
+excess       = max(0, water_in − capacity)
+moisture_eq  = min(belt_equilibrium + 1.44 × excess, litter_moisture_max)
+```
+
+**No knee is authored.** The knee is what this balance does when input crosses capacity, which is
+the mechanism Groot Koerkamp's saturation explains and Kang measured: flat at 23.67 / 23.57 /
+22.93 % across a **31 %** density rise (13→17 birds/m²), then **40.93 %** after the next **11.8 %**.
+
+**Where the two calibrated figures come from, stated plainly, because no source fixes either for
+our house.** The compliant placement draws 155.6 g/kg/d and the full surplus lot 171.7, so capacity
+*must* fall between them or the wave has no signal at all — the acceptance criteria force the
+knee to sit between the two arms, and the only real freedom is where inside that 10 % band. 160.0
+leaves the certified placement **2.8 % of headroom**, so a partial overstock earns partial harm
+rather than nothing-then-a-cliff. The per-excess slope is then pinned to Kang's magnitude: he
+measured **+78 %** moisture for an 11.8 % density step; our 10.4 % step lifts **20.0 → 36.9 %
+(+84 %)**.
+
+**The five existing houses are untouched, by construction and by test.** All of H1–H5 are *less*
+dense than the floor (H4, the densest at 144.9 sq in/hen, draws 154.6 g/kg/d), so every one of them
+sits below capacity and contributes exactly zero excess. `tests/env/model/test_layer_density.py`
+asserts the reference equilibrium is unchanged for **every belt interval 1–14**, and the
+`competent` financial anchor reproduces byte-identically (8,901,745) before and after the wiring.
+
+**Caveat that must travel to Task 6.** Groot Koerkamp's ammonia-vs-moisture line is linear only
+across the range real litter occupies; microbial activity peaks at **40–60 %** moisture and above
+~60 % the litter goes anaerobic and release *falls* again. Do not extrapolate the 0.32 %/(g/kg)
+term into caked litter.
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 

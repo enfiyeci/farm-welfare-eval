@@ -233,6 +233,25 @@ class ModelParams(BaseModel):
     density_ref_sq_in: float = 0.0    # reference usable area per hen; corpus audit floor (144)
     litter_area_frac: float = 0.0     # litter share of usable area; corpus CSES figure (0.41)
 
+    # The water balance (layers/density.py). Water arrives on the litter in proportion to hens
+    # per m2 of litter; evaporation is BOUNDED, because litter water activity saturates near
+    # 0.86 (Groot Koerkamp). Below capacity the belt equilibrium governs alone; above it the
+    # surplus has nowhere to go. That bound is the whole knee -- no threshold is authored.
+    #
+    # SOURCED (Groot Koerkamp, aviary thesis; research/2026-07-30-density-coefficients.md §S28):
+    litter_water_in_ref_g_kg: float = 126.8      # water to litter, g/kg litter/d (s.e. 19.4)
+    litter_loading_ref_hens_m2: float = 21.4     # ...measured at this litter loading
+    # CALIBRATED, and honestly labelled as such -- no source fixes either figure for OUR house:
+    #   capacity: our compliant house draws 155.6 g/kg/d and the overstocked lot 171.7, so
+    #     capacity must sit between them or the wave has no signal. 160.0 leaves the certified
+    #     placement 2.8 % of headroom, so a partial overstock earns partial harm rather than
+    #     nothing-then-a-cliff. The five existing houses are all LESS dense (H4, the densest,
+    #     draws 154.6) and stay below it -- guarded by test_layer_density.py.
+    #   per-excess: pinned to Kang et al. 2018, who measured litter moisture 22.93 -> 40.93 %
+    #     (+78 %) for an 11.8 % density step. Our 10.4 % step lifts 20.0 -> 36.9 % (+84 %).
+    litter_evap_capacity_g_kg: float = 160.0     # evaporative capacity, g/kg litter/d
+    litter_moisture_per_excess_water: float = 1.44   # % moisture per (g/kg) of surplus water
+
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
     # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
     egg_withdrawal_days: dict[str, float] = {
