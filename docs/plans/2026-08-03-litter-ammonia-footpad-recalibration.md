@@ -39,7 +39,10 @@ merge them into one unreviewable task, this plan tolerates exactly one named red
 
 | Test | Goes red at | Must be green again by | Why |
 |---|---|---|---|
-| `tests/env/model/test_layer_ammonia.py:110` `test_belt_lever_stays_strictly_monotone_across_every_reachable_interval` | Task 1 | **Task 6, Step 4** | It asserts `_eq_belt` is *strictly* increasing over belt_days 1→56 and that `values[-1] > values[0] * 5`. Its own comment says it exists to forbid "an implementation that rises to d=7 and is flat thereafter". With f_MAT held flat and no moisture term, belt 4–56 are identical. Task 6 restores strict monotonicity through litter moisture, which keeps rising with belt interval, and lifts the range ratio to ~14× |
+| `test_belt_lever_stays_strictly_monotone_across_every_reachable_interval` | Task 1 | **Task 6, Step 4** | It asserts `_eq_belt` is *strictly* increasing over belt_days 1→56 and that `values[-1] > values[0] * 5`. Its own comment says it exists to forbid "an implementation that rises to d=7 and is flat thereafter". With f_MAT held flat and no moisture term, belt 4–56 are identical. Task 6 restores strict monotonicity through litter moisture, which keeps rising with belt interval, and lifts the range ratio to ~14× |
+| `test_ventilation_stays_a_live_lever_even_in_the_worst_reachable_house` | Task 1 | **Task 6, Step 4** | **Added 2026-08-04 after Task 1 was built — the original register missed it.** Same cause, same cure. It asserts `at[5] < at[4] < at[3] < at[2] <= ceiling` at belt 56 / litter age 518 / ambient −8. Holding f_MAT flat drops emission in that corner from 47.63 to 17.90 ppm, so at ventilation 3, 4 and 5 the target clamps to the 0 floor and the strict chain collapses. **Measured post-Task-1: `{2.0: 17.902, 3.0: 0.0, 4.0: 0.0, 5.0: 0.0}`.** Task 6 lifts that corner's emission to 71.64 ppm, giving `71.64 > 51.64 > 31.64 > 11.64` — strictly decreasing and under the 100 ppm ceiling. **Verified by direct computation, not projection.** |
+
+Both entries must be green by the end of Task 6 Step 4. Neither may be weakened, skipped or xfailed at any point.
 
 Anything else red is a defect. Do NOT weaken or skip that test — Task 6 must make it pass on its merits.
 - NO farm content hardcoded in logic — farm figures live in `corpus/` and reach `ModelParams` via
@@ -92,13 +95,27 @@ multilevel house, and a 9.2–47.4 ppm "aviary, no removal" ceiling that is Hinz
 
 The fix is the principle the repo already applied to litter age: **hold the last validated value instead of
 extrapolating.** `fmat` already clamps its input (`inner = min(belt_days, edge)`), so the honest implementation
-is to return that clamped value unconditionally and delete the saturating branch. At the mild-baseline reference
-that puts a 7-day belt at **12.9 ppm** — between Groot Koerkamp's measured 6.4 ppm and Hinz's aviary median of
-11.40 / max 18.52.
+is to return that clamped value unconditionally and delete the saturating branch. That brings a 7-day belt down
+into the band bracketed by Groot Koerkamp's measured 6.4 ppm and Hinz's aviary median of 11.40 / max 18.52.
 
-Arithmetic, for the reviewer: at `vent=1.0, ambient=18, litter_age=60, moisture ≤ 25`, `emission = (4.2 +
-0.02·60 + 0) · f_MAT = 5.4 · f_MAT` and `target = emission` because the ventilation term is zero at baseline.
-So equilibrium ppm is exactly `5.4 · f_MAT`: belt 2 → 5.4·1.259 = 6.80, belt 7 → 5.4·2.386910853524277 = 12.89.
+**Arithmetic, and mind which operating point it belongs to.** At `vent=1.0, ambient=18, litter_age=60` and
+litter moisture *at or below the additive term's 25 % reference*, `emission = (4.2 + 0.02·60) · f_MAT =
+5.4 · f_MAT` and `target = emission` because the ventilation term is zero at baseline — so equilibrium ppm is
+exactly `5.4 · f_MAT`: belt 2 → 6.80, belt 7 → `5.4 · 2.386910853524277` = **12.89**.
+
+**But that 12.89 is a POST-Task-2 figure.** Until Task 2 bounds the belt curve, `_eq_belt` still feeds moisture
+of 45 % at belt 7 and 60 % at belt 14, both above the 25 % reference, so the additive moisture term contributes
+and the measured values immediately after this task are:
+
+| belt days | litter moisture | before Task 1 | after Task 1 |
+|---|---|---|---|
+| 2 | 20.0 % | 6.7964 | 6.7964 (unchanged) |
+| 4 | 30.0 % | 13.6054 | 13.6054 (unchanged — the domain edge) |
+| 7 | 45.0 % | 35.0061 | **15.7536** |
+| 14 | 60.0 % (capped) | 47.2744 | **17.9018** |
+
+Both post-Task-1 values sit inside the 6–19 ppm aviary band, so the band test passes at this task and again
+after Task 2 moves them to 12.89 and 12.89. Do not "correct" the code toward 12.89 here.
 
 > **Fix-wave note (Codex P1-a, verified).** An earlier draft of this task set `nh3_fmat_max = 2.387` and kept
 > the saturating branch. That does NOT make f_MAT flat: the true edge value is
@@ -166,10 +183,20 @@ def test_belt_multiplier_holds_its_last_validated_value_past_the_domain_edge():
     14-day belt interval, so rather than extrapolate to an invented rail, the multiplier holds
     the last value its fit validates. Any further rise at long belt intervals must come from a
     channel that IS measured -- litter moisture (Task 6) or litter age -- not from f_MAT.
+
+    Asserted on `fmat` itself, NOT on `_eq_belt`. `_eq_belt` feeds
+    litter_moisture_equilibrium(belt_days) into the layer, so end-to-end ppm keeps rising past
+    belt 4 through the MOISTURE channel (13.61 / 14.32 / 15.75 / 17.90 at belts 4 / 5 / 7 / 14).
+    An equality assertion on `_eq_belt` is therefore both false today and the direct negation of
+    the strict monotonicity Task 6 must restore -- it would add a third red that no later task
+    clears. The claim this test actually makes is about the multiplier, so it tests the multiplier.
     """
-    edge = _eq_belt(4)
+    params = ModelParams()
+    edge = fmat(params.nh3_fmat_domain_max, params)
     for belt_days in (5, 7, 10, 14, 28, 56):
-        assert _eq_belt(belt_days) == edge, f"f_MAT grew past its domain at {belt_days} d"
+        assert fmat(float(belt_days), params) == edge, (
+            f"f_MAT grew past its domain at {belt_days} d"
+        )
 ```
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -182,30 +209,30 @@ Expected: `test_weekly_belt_removal_matches_measured_AVIARY_band` FAILS (the mod
 the 19.0 top of the band). `test_belt_multiplier_holds_its_last_validated_value_past_the_domain_edge` FAILS
 (belt 7 returns 35.01 ≠ belt 4's 13.61).
 
-- [ ] **Step 3: Make the saturating branch flat**
+- [ ] **Step 3: Delete the saturating branch so the multiplier simply holds**
 
-In `farm_eval/env/model/params.py`, change line 61 and its comment:
+> **This step was rewritten 2026-08-04.** Its earlier body said to set `nh3_fmat_max = 2.387` and keep the
+> saturating branch, which contradicted this task's own header, Files list, Interfaces block and fix-wave note —
+> all of which say to delete it. The implementer correctly followed the header and flagged the contradiction.
+> `2.387` is not the edge value (`exp(0.87) = 2.386910853524277`), so keeping the branch leaves a belt-dependent
+> residue and fails the equality test. The instruction below is what was actually built.
+
+In `farm_eval/env/model/layers/ammonia.py`, `fmat` already clamps its input, so the whole saturating branch is
+redundant. Return the clamped fit unconditionally:
 
 ```python
-    nh3_fmat_domain_max: float = 4.0    # upper edge of the Wageningen-validated belt-days domain
-    # nh3_fmat_max: the value f_MAT HOLDS past the validated domain edge. Set to the
-    # domain-edge value itself, exp(0.20*3 + 0.03*9) = 2.387, so the saturating branch is
-    # flat: belt_days 4, 7, 14 and 56 all return the belt-4 multiplier.
-    #
-    # It was 6.35, calibrated to two rails that were both misattributed: a "weekly-belt
-    # aviary" anchor of 32-38 ppm that is Nimmermark 2009's cold-season, reduced-ventilation,
-    # litter-caked MULTILEVEL house, and a 9.2-47.4 ppm "aviary" ceiling that is Hinz 2010's
-    # FLOOR-HOUSING row (the real aviary row is 2.24-18.52 ppm, median 11.40, at weekly belts).
-    # Two independent aviary measurements at weekly belts sit at 6.4 ppm (Groot Koerkamp Ch. 7
-    # period 2B) and 11.40 ppm (Hinz Volierenhaltung); holding at 2.387 puts this model at
-    # 12.9 ppm there, inside that evidence. See docs/research/2026-08-03-nh3-moisture-decomposition.md
-    # SS9 and this wave's plan.
-    nh3_fmat_max: float = 2.387         # f_MAT holds this value beyond the validated domain
+    belt_days = max(1.0, float(belt_days))
+    inner = min(belt_days, params.nh3_fmat_domain_max)
+    return math.exp(
+        params.nh3_fmat_linear * (inner - 1.0) + params.nh3_fmat_quad * (inner - 1.0) ** 2
+    )
 ```
 
-Leave `nh3_fmat_sat_rate` untouched — with `nh3_fmat_max` equal to the edge value the rate has no effect
-(`max - (max - quad)*exp(...)` reduces to `max` when `quad == max`), and removing it would be an unrequested
-signature change.
+Then **delete** `nh3_fmat_max` and `nh3_fmat_sat_rate` from `ModelParams` (after running the grep above — no
+functional reader was found: `loader.py:params_for` sets only `density_ref_sq_in` and `litter_area_frac` plus
+explicit overrides, and the sole remaining mention is prose at `docs/model-params.md:84`, which Task 7 owns), and
+rewrite the surrounding comment block to name both misattributed rails **with their operating points** and the
+two real aviary anchors (6.4 ppm Groot Koerkamp Ch. 7 period 2B; 11.40 ppm median Hinz *Volierenhaltung*).
 
 - [ ] **Step 4: Run the ammonia tests to verify they pass**
 
