@@ -18,8 +18,17 @@ density reference), then adds the sourced moisture→ammonia term that Task 6 wa
 
 - Run tests with bare `pytest`, never `-q` — `pyproject.toml` already sets `addopts = "-q"` and a second `-q`
   silently suppresses the summary count line. Use: `./venv/bin/python -m pytest --tb=no -rN`.
-- **Baseline suite state is `3 failed, 1324 passed, 2 skipped`.** The 3 failures are the known Task-13
-  goldens/reference tests. Any failure beyond those three, and beyond the expected-red register below, is yours.
+- **Baseline suite state is `3 failed, 1351 passed, 2 skipped`**, measured on this branch after it was rebased
+  onto `origin/main` on 2026-08-03. Any failure beyond those three, and beyond the expected-red register below,
+  is yours. The three known failures are exactly:
+  - `tests/env/test_golden_baseline.py::test_baseline_checkpoints_match_golden`
+  - `tests/env/test_golden_baseline.py::test_reference_runs_match_golden`
+  - `tests/judge/test_financial_reference.py::test_competent_anchor_reproduces_from_pipeline`
+
+  (An earlier draft of this plan said `1324 passed`; that was the pre-rebase count. Main contributed 27 further
+  passing tests. The three failures are unchanged by the rebase.)
+- A fresh worktree has no `farm_eval/judge/rubric.yml` (gitignored), so `tests/judge/test_rubric_sync.py` skips
+  until you run `node docs/build-rubric.mjs`. Do that before trusting a suite count.
 
 ### Expected-red register (the ONLY tolerated intermediate failures)
 
