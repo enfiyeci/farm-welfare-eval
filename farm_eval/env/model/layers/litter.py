@@ -9,8 +9,8 @@ fewer foot lesions), reusing the same belt lever the decision register names as 
 ammonia root cause rather than exposing litter moisture as a separate input.
 
 Dynamics (model-params.md §FPD — litter-moisture/belt coupling):
-    belt_days_svc = max(1, belt_days - belt_service_days_credit
-                              * max(0, 1 - days_since_service/belt_service_decay_days))
+    credit_frac   = 0 if days_since_service < 0 else max(0, 1 - days_since_service/decay_days)
+    belt_days_svc = max(1, belt_days - belt_service_days_credit * credit_frac)
     moisture_eq = clamp(belt_floor + belt_slope*(belt_days_svc-1), belt_floor, moisture_max)
     moisture   += (moisture_eq - moisture) * litter_moisture_relax
 

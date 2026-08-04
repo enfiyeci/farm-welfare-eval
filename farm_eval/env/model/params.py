@@ -326,9 +326,12 @@ class ModelParams(BaseModel):
     # NO SOURCE fixes either figure, and none is implied. `belt_service_days_credit` is farm
     # content (a callout's scope) and lives in corpus/company.yml, reaching here through
     # loader.py:params_for; 0.0 here keeps a bare ModelParams() switched off, like the density
-    # figures below. `belt_service_decay_days` is a modelling choice: one week is the cadence at
-    # which the corpus's own belt work orders recur, and manure re-accumulates continuously, so
-    # the credit is bled off linearly rather than dropped in a step.
+    # figures below. `belt_service_decay_days` is a BARE MODELLING CHOICE with no provenance at
+    # all -- one week, because manure re-accumulates continuously so the credit should bleed off
+    # rather than drop in a step, and a week is the round number at that scale. An earlier
+    # version of this comment said seven days was "the cadence at which the corpus's own belt
+    # work orders recur"; that was false -- the corpus authors no such cadence -- and it is
+    # exactly the kind of borrowed provenance this whole wave exists to remove.
     #
     # Size, so nobody mistakes this for a large lever. The credit is floored at one belt-day, so
     # at H4's authored belt-2 setpoint under full staffing the equilibrium can move at most

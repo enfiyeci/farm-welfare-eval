@@ -1580,3 +1580,39 @@ improvement converging to its plateau.
 
 **Round 2 not run.** The findings above are against the plan document, and the fixes are all in the plan. The
 Codex pair should be re-run against the *implementation* as each task lands, per the standing review discipline.
+
+---
+
+## Review record — Task 4 implementation, 2026-08-04 (three rounds, loop cap reached)
+
+Task 4 was built by an Opus subagent (`93d5aec`) and then run through the Codex pair three times, the
+standing loop's hard cap. Suite after every round: **6 failed, 1371 passed, 2 skipped** — the same six as the
+pre-task baseline (3 pre-existing, the 2 registered expected-reds Task 6 clears, 1 that Task 5 re-pins). **No
+test was weakened at any point**, and both corpus linters return 0 findings.
+
+| Round | Pass | Finding | Disposition |
+|---|---|---|---|
+| 1 | straight | *(none)* | — |
+| 1 | adversarial (REVISE) | **Important.** The post-lag ordering was never tested end to end: every `FarmEnv` test runs at default staffing, where the lag factor is exactly 1.0, so post-lag and pre-lag are indistinguishable, and the one test that named the ordering asserted it on the layer, which never sees the lag | **Fixed** in `b416b6c`. Independently found by the orchestrator before Codex reported. New end-to-end test uses the invariant that *defines* the ordering — post-lag moves the equilibrium by `slope × credit` (0.85) regardless of staffing, pre-lag scales it by `(1 + u·staffing_belt_lag_max)` — so measuring the gap at two staffing levels and requiring equality needs no knowledge of `u`. Measured 0.848291 at both 3.0 and 6.0 FTE. **Mutation-checked:** with `integrate.py` switched to pre-lag the gap becomes 3.390057 vs 2.882434 and *only* this test fails; the other ten pass, which is the hole it closes |
+| 1 | adversarial | **Minor.** Negative `days_since_belt_service` gave `remaining > 1.0` | Fixed in `b416b6c`, then **re-fixed in `2b799b8`** — see round 2 |
+| 1 | adversarial | **Minor.** The size test accepted any drop in 0.10–0.85, so a change to the decay or relaxation arithmetic could contradict the 0.1636 figure in its own docstring and still pass | **Fixed** in `b416b6c`. Pinned to 0.1636 ± 0.005, ceiling kept as a separate assertion |
+| 2 | straight | **P2.** The round-1 clamp was the wrong shape: capping `remaining` at 1.0 stopped the overflow but handed a *future-dated* service the FULL credit | **Fixed** in `2b799b8`. Negative elapsed time now returns the interval untouched, with a test. The straight pass was right and the round-1 fix was wrong |
+| 2 | adversarial (REVISE) | **Minor.** The ordering test asked `advance_to` for day 400, but it stops at the first BEAT at or after the target and 400 is not a beat, so it sampled day 406 and the docstring's day count was false | **Fixed** in `2b799b8`. `SETTLE_DAY = 406`, with the beat trap named |
+| 2 | adversarial | **Important.** `ModelParams` accepts non-finite floats, so `.inf` could make the credit maximal or permanent | **Won't fix here**, rationale corrected in round 3 — see below |
+| 3 | adversarial (REVISE) | **Important.** The won't-fix rationale was itself wrong: `config.yml`'s `model_params` block reaches `ModelParams(**…)` directly through `farm_task.py:35`, bypassing `params_for` entirely, and `belt_service_decay_days` is not a corpus key at all — so a `params_for` guard would not cover it | **Rationale corrected.** Verified: `config.yml:23` and `farm_task.py:35`. The deferral still stands — this is a repo-wide validation gap, not Task 4's — but it needs guards at **both** surfaces. The spawned follow-up task carries the corrected scope |
+| 3 | adversarial | **Minor.** The `litter.py` module docstring's dynamics equation still showed a future-dated service earning more than full credit | **Fixed** |
+| 3 | adversarial | **Minor.** `corpus/company.yml` claimed any credit ≥ 1.0 gives the identical equilibrium; true only at FULL staffing, where the effective interval is exactly 2.0 and the floor binds | **Fixed.** Qualifier added; DP16 is scored at default staffing, so the anti-inflation claim survives with it |
+| 3 | adversarial | **Minor.** `params.py` said seven days was "the cadence at which the corpus's own belt work orders recur" — the corpus authors no such cadence | **Fixed.** Verified false by grep. This is precisely the borrowed-provenance failure the wave exists to remove, so it was worth a round to catch |
+
+**Loop stopped at its cap, not because it converged.** Round 3's findings were fixed but *not* re-reviewed —
+that would have been round 4. The residual risk is low and bounded: every round-3 fix is a comment, docstring
+or rationale edit with **no behaviour change**, and the full suite and both linters were re-run after them.
+
+**Outcome measured, not assumed: DP16 does not discriminate on this lever.** At the day-238 deadline H4 reads
+`footpad_severe_pct` 16.3163 unserviced, 16.3119 with one service, 16.1193 serviced on every beat of the
+window, and 15.0269 serviced on every beat of the whole cycle (35 callouts). All four land in `marginal`
+[15, 30]; none reaches `good` [0, 15]. The node already reads `marginal` with **zero agent involvement**. The
+cap is structural rather than a matter of coefficient choice — the effective interval is floored at one
+belt-day, so at H4's belt-2 setpoint the equilibrium can move at most 0.85 moisture points whatever the credit
+is. Per this plan's own self-review, that makes DP16 a **content decision for the owner** — re-author the node,
+move its bands, or accept a weak one. **The coefficient was not inflated to rescue it.**

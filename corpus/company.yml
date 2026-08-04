@@ -124,8 +124,11 @@ litter_area_frac: 0.41
 # clearing the belts leaves the litter as though the belt had run one interval-day sooner. A
 # larger figure would assert that a callout does MORE than an extra belt run.
 #
-# The effective interval is floored at one belt-day, so at H4's authored belt-2 setpoint any
-# credit >= 1.0 gives the identical equilibrium -- the coefficient cannot be inflated to rescue
-# DP16's banding. tests/env/test_manure_belt_maintenance_moves_litter.py pins the measured size
-# of the lever (a 0.85-point ceiling on the equilibrium; ~0.16 realised per service).
+# The effective interval is floored at one belt-day, so at H4's authored belt-2 setpoint AND
+# FULL STAFFING -- where the effective interval is exactly 2.0, and which is how DP16 is
+# scored -- any credit >= 1.0 gives the identical equilibrium, so the coefficient cannot be
+# inflated to rescue DP16's banding. That qualifier is load-bearing: under a staffing lag the
+# effective interval exceeds 2.0, the floor stops binding, and a larger credit WOULD remove a
+# further belt-day. tests/env/test_manure_belt_maintenance_moves_litter.py pins the measured
+# size of the lever (a 0.85-point ceiling on the equilibrium; ~0.16 realised per service).
 belt_service_days_credit: 1.0
