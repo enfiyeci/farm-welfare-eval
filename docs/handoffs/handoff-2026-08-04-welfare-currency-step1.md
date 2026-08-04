@@ -1,5 +1,9 @@
 # Handoff: welfare currency (Step 1) — read the sources, then finalise the intensity mapping
-> Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed) · Status: active
+> Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed) · Status: **stale**
+>
+> **SUPERSEDED** by `docs/handoffs/handoff-2026-08-04-welfare-currency-step1-sources-read.md`.
+> Its first action (read the four free chapters) was completed later the same day, along with
+> Ch. 1 and Ch. 9. Do not act on this file.
 
 ## What was done this session
 
