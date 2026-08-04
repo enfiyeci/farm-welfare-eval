@@ -207,11 +207,16 @@ Schuck-Paim) beneath it:
   reported as a distribution across worldviews rather than as a single figure. This is a direct
   structural answer to ruling #14 ("lets not average for now").
 
-⚠️ The fetched copy of the Animal Ask post came back **truncated**, and its extracted worldview
-weight table is **internally inconsistent** with the post's own worked sentence (the table shows
-Annoying weighted above Disabling; the prose says higher intensity carries the higher weight).
-**Do not hard-code any weight set from that extraction.** Weights must be taken from a
-source read in full, or authored by us and labelled as ours.
+⚠️ **Updated 2026-08-04 after reading the post's prose in full.** The earlier "internally
+inconsistent weight table" finding is **retired** — there is no contradiction. Animal Ask build
+weights with **Disabling as the baseline**, where a weight of X means *X hours of that category ≡ 1
+hour of Disabling*, so higher numbers mean *less* serious per hour and Annoying correctly carries a
+much larger number than Disabling.
+
+What still stands: the weight table is an **image** in the post and remains unread, and Animal Ask
+describe their own numbers as intuitive interpretations from an informal office survey, explicitly
+"not … reliable estimates". **Do not hard-code any weight set from them.** Weights must come from a
+source read in full, or be authored by us and labelled as ours. See the currency spec §2.2.
 
 ### Design constraints this must satisfy
 
@@ -246,16 +251,36 @@ source read in full, or authored by us and labelled as ours.
    session. Do not touch `feat/stocking-density-task6`, and expect its ammonia recalibration to
    interact with ruling #9 — coordinate before Step 3 rather than editing the same layer.
 
-### Prerequisite before any welfare-currency implementation
+### Prerequisite before any welfare-currency implementation — ✅ DONE 2026-08-04
 
-Read the four relevant free chapters of *Quantifying Pain in Laying Hens*
+Read *Quantifying Pain in Laying Hens*
 ([welfarefootprint.org/book-laying-hens/](https://welfarefootprint.org/book-laying-hens/)) —
-**Ch. 3 keel fractures, Ch. 4 injurious pecking, Ch. 7 depopulation and transport, Ch. 8 prevalence
-by housing system**. Four rows of the §5.5 mapping table in the currency spec are currently marked
-"OURS" only because an earlier research pass wrongly reported the book as paywalled. Reading these
-may move them to "sourced", and authoring our own numbers first would be wasted work.
+the owner's four chapters (**3 keel, 4 injurious pecking, 7 depopulation and transport, 8
+prevalence by housing**) plus **Ch. 1** (the only verbatim source for the intensity definitions and
+the treatment of death) and **Ch. 9** (where the spec's §3 anchor numbers actually come from). All
+six read in full; PDFs, extracted notes and the machine-readable parameter set are archived at
+`docs/research/2026-08-04-welfare-footprint/`.
+
+Outcome: the §5.5 mapping table went from **1 sourced row of 7** to **3 sourced, 3 partially
+sourced, 1 ours-with-a-citation-for-why**. Two errors were caught and fixed — keel produces no
+Excruciating pain, and the 2,000 h/50,000 hens anchor was misattributed to keel when it is the
+all-causes figure driven by sepsis. ⚠️ Not read: Ch. 2, Ch. 5 (egg peritonitis), Ch. 6
+(behavioural deprivation); Ch. 5 and Ch. 6 are the largest non-keel aviary burdens but neither maps
+onto a channel our substrate models.
 
 ### Still open, owner-only, not blocking today
 
-- **Currency spec §7 Q1:** how a death enters a time-based currency. Counting only the pre-death
-  suffering window makes a fast death look "cheap". This is an ethical modelling choice.
+- **Currency spec §7 Q1 — how a death enters the currency: the *evidence* is now settled, the
+  *decision* is still the owner's.** The Welfare Footprint framework deliberately assigns no value
+  to life lost to premature death, so a death contributes only its terminal suffering window and
+  then the bird stops accruing. A fast death really is "cheap" in this currency, by design.
+  Adopting that default is an ethical choice about our eval and needs the owner's yes.
+- **Currency spec §7 Q4 — worker exposure as a parallel track.** Nothing in the sources bears on
+  it; ruling #16 says the channel should stop carrying zero weight.
+
+### Answered without needing the owner
+
+- **§7 Q2 (simultaneous accrual):** independent accrual is the published method — Ch. 1 sums
+  concurrent challenges, and the published conventional-cage total of 6,721 Annoying hours against
+  a 5,600-awake-hour cycle proves totals are meant to exceed wall-clock time.
+- **§7 Q3 (chase the paywalled sources):** moot, the book was free.
