@@ -12,9 +12,11 @@ Dynamics (model-params.md §FPD — litter-moisture/belt coupling):
     moisture_eq = clamp(belt_floor + belt_slope*(belt_days-1), belt_floor, moisture_max)
     moisture   += (moisture_eq - moisture) * litter_moisture_relax
 
-Calibration: belt_days=1 → 15 % (dry, below fpd_moisture_ref); belt_days=7 → 45 %
-(wet, footpad-active).  Relaxation is gradual (rate 0.1/day, ~10-day time constant),
-so a mid-cycle belt change dries or wets the litter over days, not instantly.
+Calibration (Groot Koerkamp Ch. 7 Table 4, five measured belt regimes in one aviary):
+belt_days=1 → 15.0 % and belt_days=7 → 20.1 %, spanning the measured 14.4-20.1 % band.
+Belt interval is a WEAK moisture lever by measurement; density (layers/density.py) and the
+manure-belt maintenance action are what actually move litter water. Relaxation is gradual
+(rate 0.1/day, ~10-day time constant), so a mid-cycle change dries or wets over days.
 """
 from __future__ import annotations
 

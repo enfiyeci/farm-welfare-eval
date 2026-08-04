@@ -242,12 +242,21 @@ class ModelParams(BaseModel):
     # the manure-belt lever the decision register names as the ammonia root cause (Decision
     # #1) rather than exposing litter moisture as a separate, un-controllable input.
     #   moisture_eq = clamp(belt_floor + belt_slope*(belt_days-1), belt_floor, moisture_max)
-    # Calibrated so daily belts (belt_days=1) → 15 % (dry, below fpd_moisture_ref) and
-    # weekly belts (belt_days=7) → 45 % (wet, footpad-active), matching the good/negligent
-    # reference yardstick. Relaxation is gradual (litter dries/wets over ~1–2 weeks) so a
-    # mid-cycle belt change shows up over days, not instantly.
+    #
+    # MEASURED, and deliberately WEAK. Groot Koerkamp Ch. 7 Table 4 measured litter moisture
+    # 14.4-20.1 % across five belt regimes in one aviary, from weekly-belts-drying-off to
+    # twice-daily. slope=0.85 reproduces that span: belt 1 -> 15.0 % (Ch. 7's driest period is
+    # 14.4), belt 7 -> 20.1 % (its wettest, period 2C). The thesis measures this coupling as
+    # weak and not significant (eq. 6: "these effects were small") -- the belts sit under the
+    # tiers and the litter is on the floor, so hens wet the litter, not belt residence time.
+    #
+    # It was 5.0, which put a 7-day belt at 45 % and a 10-day belt at 60 %. That was not
+    # sourced: it was chosen so that belt interval alone would span from below the footpad
+    # onset threshold to well above it, and the footpad threshold was in turn set from this
+    # curve's span (see fpd_moisture_ref). The two calibrations referenced each other and
+    # neither referenced a measurement.
     litter_moisture_belt_floor: float = 15.0   # equilibrium moisture (%) at daily belt removal
-    litter_moisture_belt_slope: float = 5.0     # extra % per additional belt-interval day
+    litter_moisture_belt_slope: float = 0.85    # extra % per additional belt-interval day
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
