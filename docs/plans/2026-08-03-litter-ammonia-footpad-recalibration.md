@@ -532,6 +532,28 @@ plateau is what the sources pin.
 - Modify: `tests/env/model/test_layer_footpad.py:11-17` (the day-200 anchor test)
 - Create: `tests/env/model/test_layer_footpad_plateau.py`
 
+**Three further tests, added to this list 2026-08-04 after Task 2 landed.** Task 2's implementer measured which
+of its five new failures Task 3 actually cures, and found two are NOT cured plus one currently-green test that
+BREAKS. All three hard-code the coupling Tasks 2 and 3 jointly dissolve — that daily belts sit *below* the
+footpad onset and weekly belts *above* it. Re-point them; do not weaken them:
+
+- Modify: `tests/env/model/test_layer_litter.py` — `test_frequent_belts_have_drier_equilibrium_than_infrequent`
+  asserts `daily <= params.fpd_moisture_ref`, which becomes `15.0 <= 13.0` and is false. The claim worth keeping
+  is that daily belts are drier than infrequent ones; assert that, and drop the comparison against the footpad
+  threshold, which is no longer the meaningful boundary.
+- Modify: `tests/env/model/test_staffing_coupling.py` — `test_footpad_activates_at_default_belt_and_1_5_fte_anchor`
+  asserts full staffing yields `footpad_severe_pct == 0.0`. Footpad is nonzero everywhere in the operating band
+  by design now (Wang's dry-litter arms are 13–17 % prevalence, not zero), so re-point it at the *difference*
+  between staffed and understaffed rather than at an absolute zero.
+- Modify: `tests/env/model/test_staffing_coupling.py` — `test_belt_lag_daily_belt_corner_stays_inert_even_at_zero_staffing`
+  asserts `footpad_severe_pct == 0.0` exactly in the daily-belt corner. Same fix: that corner is no longer inert,
+  it is the *least bad* corner. Assert the ordering instead.
+
+Two of Task 2's five failures — in `test_reactivity.py` and
+`test_staffing_coupling.py::test_degradation_at_1_5_fte_raises_footpad_and_ammonia_after_enough_days` — were
+verified to be **cured by Task 3a alone** (lowering `fpd_moisture_ref` to 13.0). Confirm they go green. If they
+do not, that is a defect in your implementation, not a test to re-point.
+
 **Interfaces:**
 - Consumes: `ModelParams.litter_moisture_belt_slope = 0.85` from Task 2 (the operating band this calibrates against).
 - Produces: `ModelParams.fpd_moisture_ref = 13.0`, `fpd_prevalence_max_dry = 15.0`, `fpd_prevalence_max_wet = 48.0`,
