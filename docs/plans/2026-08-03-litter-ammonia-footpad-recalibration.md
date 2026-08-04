@@ -19,7 +19,20 @@ density reference), then adds the sourced moisture→ammonia term that Task 6 wa
 - Run tests with bare `pytest`, never `-q` — `pyproject.toml` already sets `addopts = "-q"` and a second `-q`
   silently suppresses the summary count line. Use: `./venv/bin/python -m pytest --tb=no -rN`.
 - **Baseline suite state is `3 failed, 1324 passed, 2 skipped`.** The 3 failures are the known Task-13
-  goldens/reference tests. A fourth failure is yours.
+  goldens/reference tests. Any failure beyond those three, and beyond the expected-red register below, is yours.
+
+### Expected-red register (the ONLY tolerated intermediate failures)
+
+Tasks 1, 2 and 6 are mutually dependent: bounding f_MAT (Task 1) removes the belt lever's discrimination past
+day 4, and only the sourced moisture term (Task 6) restores it, which in turn needs Task 2's bounded belt curve
+to be inside its fitted domain. **No ordering of these three leaves the suite green throughout.** Rather than
+merge them into one unreviewable task, this plan tolerates exactly one named red test in between:
+
+| Test | Goes red at | Must be green again by | Why |
+|---|---|---|---|
+| `tests/env/model/test_layer_ammonia.py:110` `test_belt_lever_stays_strictly_monotone_across_every_reachable_interval` | Task 1 | **Task 6, Step 4** | It asserts `_eq_belt` is *strictly* increasing over belt_days 1→56 and that `values[-1] > values[0] * 5`. Its own comment says it exists to forbid "an implementation that rises to d=7 and is flat thereafter". With f_MAT held flat and no moisture term, belt 4–56 are identical. Task 6 restores strict monotonicity through litter moisture, which keeps rising with belt interval, and lifts the range ratio to ~14× |
+
+Anything else red is a defect. Do NOT weaken or skip that test — Task 6 must make it pass on its merits.
 - NO farm content hardcoded in logic — farm figures live in `corpus/` and reach `ModelParams` via
   `loader.py:params_for`. Logic and `ModelParams` defaults use generic keys / inert defaults only.
 - Determinism: no wall-clock, no randomness in logic.
@@ -69,23 +82,41 @@ wrong: a 32–38 ppm "weekly-belt aviary" anchor that is actually a cold-season,
 multilevel house, and a 9.2–47.4 ppm "aviary, no removal" ceiling that is Hinz's **floor-housing** row.
 
 The fix is the principle the repo already applied to litter age: **hold the last validated value instead of
-extrapolating.** Setting `nh3_fmat_max` to the domain-edge value (2.387) makes the saturating branch flat, so
-belt_days ≥ 4 all return the belt-4 multiplier. At the mild-baseline reference that puts a 7-day belt at
-**12.9 ppm** — between Groot Koerkamp's measured 6.4 ppm and Hinz's aviary median of 11.40 / max 18.52.
+extrapolating.** `fmat` already clamps its input (`inner = min(belt_days, edge)`), so the honest implementation
+is to return that clamped value unconditionally and delete the saturating branch. At the mild-baseline reference
+that puts a 7-day belt at **12.9 ppm** — between Groot Koerkamp's measured 6.4 ppm and Hinz's aviary median of
+11.40 / max 18.52.
 
 Arithmetic, for the reviewer: at `vent=1.0, ambient=18, litter_age=60, moisture ≤ 25`, `emission = (4.2 +
 0.02·60 + 0) · f_MAT = 5.4 · f_MAT` and `target = emission` because the ventilation term is zero at baseline.
-So equilibrium ppm is exactly `5.4 · f_MAT`: belt 2 → 5.4·1.259 = 6.80, belt 7 → 5.4·2.387 = 12.89.
+So equilibrium ppm is exactly `5.4 · f_MAT`: belt 2 → 5.4·1.259 = 6.80, belt 7 → 5.4·2.386910853524277 = 12.89.
+
+> **Fix-wave note (Codex P1-a, verified).** An earlier draft of this task set `nh3_fmat_max = 2.387` and kept
+> the saturating branch. That does NOT make f_MAT flat: the true edge value is
+> `exp(0.20·3 + 0.03·9) = 2.386910853524277`, so `max − (max − quad)·exp(−k·(d − edge))` retains a small
+> belt-dependent residue — measured, `fmat` returned 2.386910853524277 / 2.386942815618435 /
+> 2.3869764698915548 / 2.386998948433653 / 2.3869999999999916 at belt 4 / 5 / 7 / 14 / 56, and the
+> exact-equality test below would have failed. Deleting the branch is both simpler and exact.
 
 **Files:**
-- Modify: `farm_eval/env/model/params.py:61` (`nh3_fmat_max`), and the comment block at `farm_eval/env/model/params.py:40-63`
+- Modify: `farm_eval/env/model/layers/ammonia.py` (`fmat`: delete the saturating branch; and the docstring's anchor list at lines 17-20)
+- Modify: `farm_eval/env/model/params.py` — **delete** `nh3_fmat_max` (line 61) and `nh3_fmat_sat_rate` (line 62), and rewrite the comment block at lines 40-63
 - Modify: `tests/env/model/test_layer_ammonia.py:57-68` (both anchor tests)
-- Modify: `farm_eval/env/model/layers/ammonia.py:17-20` (the docstring's anchor list)
 
 **Interfaces:**
 - Consumes: nothing from earlier tasks.
-- Produces: `ModelParams.nh3_fmat_max = 2.387`. Task 6 adds the moisture term to this same layer and relies on
-  the belt term no longer carrying an invented extrapolation.
+- Produces: `fmat(belt_days, params)` returning a constant for `belt_days >= nh3_fmat_domain_max`, and a
+  `ModelParams` with two fewer fields. Task 6 adds the moisture term to this same layer and relies on the belt
+  term no longer carrying an invented extrapolation.
+
+**Before deleting the two params, confirm nothing else reads them:**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && grep -rn "nh3_fmat_max\|nh3_fmat_sat_rate" --include=*.py --include=*.yml --include=*.md . | grep -v docs/plans
+```
+
+If `corpus/` or `loader.py` sets either, leave the fields in place (unused, with a comment saying so) rather
+than breaking the corpus contract, and say which in the commit message.
 
 - [ ] **Step 1: Replace the two misattributed anchor tests with source-correct ones**
 
@@ -586,19 +617,34 @@ In `farm_eval/env/model/params.py`, replace lines 203-209:
     fpd_age_ref: float = 30.0
     fpd_age_factor_max: float = 3.0
     # Prevalence PLATEAU as a function of litter moisture -- the saturation target the flock
-    # approaches, replacing a flat 100 %. Wang et al. 1998 (layers) measured foot pad lesion
-    # prevalence of 17 % and 13 % in its two dry-litter groups and 49 % and 48 % in its two
-    # wet-litter groups. The repo's survey anchors (Austrian median 40 %; modified-aviary
-    # 36.5/35.4/38.5 % at 29/39/49 wk) sit between, at Ch. 5's 22.7 % mean aviary moisture.
+    # approaches, replacing a flat 100 %.
+    #
+    # PIECEWISE-LINEAR through THREE measured anchor points, so every segment endpoint is a
+    # measurement and no curve shape is invented:
+    #   (13.0 %, 15 %)   Wang et al. 1998 dry-litter groups (17 % and 13 % prevalence), at litter
+    #                    drier than anything measured in a working aviary
+    #   (22.7 %, 38 %)   Ch. 5's mean aviary moisture (227 g/kg over 58 samples) against the
+    #                    survey prevalences there: Austrian median 40 %, modified-aviary
+    #                    36.5/35.4/38.5 % at 29/39/49 wk
+    #   (40.0 %, 48 %)   Wang's wet-litter groups (49 % and 48 % prevalence)
+    #
+    # The curve is therefore CONCAVE -- steep from 13->22.7 %, flat from 22.7->40 %. A single
+    # straight line between the dry and wet anchors was tried first and is WRONG: it puts
+    # 22.7 % moisture at 15 + ((22.7-13)/(40-13))*(48-15) = 26.9 % prevalence, which no value of
+    # fpd_alpha can lift to the measured 36-40 %, because the plateau IS the saturation target.
+    # Concavity is also the physically expected shape: the marginal effect of extra moisture
+    # declines as prevalence saturates.
     #
     # Without a moisture-dependent plateau the layer ratcheted: severe never heals on wet
     # litter, so prevalence rose monotonically to the 100 % clamp (19.6 % at day 100 -> 67.4 %
     # at day 518 on 35 % litter) and the one anchor test sampled day 200, where the rising
     # curve crossed 35 %. The measured anchor is FLAT across the cycle, so the plateau is the
     # quantity that must be calibrated.
-    fpd_prevalence_max_dry: float = 15.0    # plateau at fpd_moisture_ref (Wang dry arms 13-17 %)
-    fpd_prevalence_max_wet: float = 48.0    # plateau at fpd_plateau_wet_moisture (Wang wet arms 48-49 %)
-    fpd_plateau_wet_moisture: float = 40.0  # moisture (%) at which the wet plateau is reached
+    fpd_plateau_anchors: tuple[tuple[float, float], ...] = (
+        (13.0, 15.0),      # (litter moisture %, plateau prevalence %)
+        (22.7, 38.0),
+        (40.0, 48.0),
+    )
 ```
 
 - [ ] **Step 4: Make the saturation target moisture-dependent**
@@ -607,41 +653,68 @@ In `farm_eval/env/model/layers/footpad.py`, replace the incidence-driver block (
 `age_factor` / `susceptible` / `alpha` computation) with:
 
 ```python
+def _plateau(litter_moisture: float, params: ModelParams) -> float:
+    """Prevalence plateau for this litter moisture: piecewise-linear through measured anchors.
+
+    Held flat below the first anchor and above the last, so the plateau is always defined and
+    never extrapolated past a measurement.
+    """
+    anchors = params.fpd_plateau_anchors
+    if litter_moisture <= anchors[0][0]:
+        return anchors[0][1]
+    for (m0, p0), (m1, p1) in zip(anchors, anchors[1:]):
+        if litter_moisture <= m1:
+            return p0 + (p1 - p0) * (litter_moisture - m0) / (m1 - m0)
+    return anchors[-1][1]
+```
+
+and in `footpad_step`, replace the incidence-driver block with:
+
+```python
     # --- incidence driver ---
     excess_moisture = max(0.0, litter_moisture - params.fpd_moisture_ref)
     age_factor = min(age_weeks / params.fpd_age_ref, params.fpd_age_factor_max)
 
-    # Prevalence plateau for THIS litter moisture: linear from the dry plateau at
-    # fpd_moisture_ref to the wet plateau at fpd_plateau_wet_moisture, then held. This is the
-    # saturation target the flock approaches; it replaces a flat 100 %, which made the layer
-    # ratchet to full prevalence on any wet litter and left the reported value dependent on how
+    # The saturation target the flock approaches, replacing a flat 100 %. A flat target made the
+    # layer ratchet to full prevalence on any wet litter, so the reported value depended on how
     # long the episode ran rather than on how wet the litter was.
-    wet_span = params.fpd_plateau_wet_moisture - params.fpd_moisture_ref
-    wetness = min(1.0, excess_moisture / wet_span) if wet_span > 0.0 else 0.0
-    plateau = params.fpd_prevalence_max_dry + wetness * (
-        params.fpd_prevalence_max_wet - params.fpd_prevalence_max_dry
-    )
+    plateau = _plateau(litter_moisture, params)
 
-    # Susceptible fraction, measured against the moisture-determined plateau rather than 100 %.
     total = mild_pct + severe_pct
     susceptible = max(0.0, 1.0 - total / plateau) if plateau > 0.0 else 0.0
-    alpha = (
-        params.fpd_alpha
-        * max(excess_moisture, params.fpd_dry_incidence_floor)
-        * age_factor
-        / params.fpd_moisture_scale
-        * susceptible
+    # Dry-litter incidence is positive but small (Wang's dry arms: 13-17 % prevalence), so the
+    # driver has a floor -- but ONLY at or above the threshold. Applying it below the threshold
+    # would generate lesions on bone-dry litter and contradict the dry-litter tests.
+    driver = (
+        max(excess_moisture, params.fpd_dry_incidence_floor)
+        if litter_moisture >= params.fpd_moisture_ref
+        else 0.0
     )
+    alpha = params.fpd_alpha * driver * age_factor / params.fpd_moisture_scale * susceptible
 ```
 
-Note the `fpd_dry_incidence_floor`: at exactly `litter_moisture == fpd_moisture_ref` the excess is 0, so alpha
-would be 0 and the dry plateau of 15 % could never be reached from 0. Add it to `ModelParams` next to the
-plateau params:
+and the severe-healing gate must also open when the flock sits **above** the plateau its litter supports:
+
+```python
+    d_mild = alpha - (params.fpd_heal + params.fpd_progress) * mild_pct
+    # Severe heals on dry litter, AND whenever prevalence exceeds what this litter supports --
+    # otherwise improving the litter can never reduce prevalence. Verified: without the second
+    # clause, a flock held 300 d at 40 % moisture (47.96 % prevalence) then moved to 20 % litter
+    # (plateau 31.6 %) stayed frozen at 47.96 % for the remaining 218 days. That would make DP16
+    # irreversible and path-dependent, and it contradicts Taira et al. 2014, which measured
+    # lesions regressing when birds were moved to drier litter. With it, the same run converges
+    # to 31.57 % against a 31.6 % target.
+    may_heal = excess_moisture <= 0.0 or total > plateau
+    heal_severe = params.fpd_heal * severe_pct if may_heal else 0.0
+    d_severe = params.fpd_progress * mild_pct - heal_severe
+```
+
+Add `fpd_dry_incidence_floor` to `ModelParams` next to the plateau anchors:
 
 ```python
     # At exactly fpd_moisture_ref the excess-moisture driver is 0, so without a floor the dry
     # plateau (15 %) could never be reached from an empty flock. Wang's dry-litter arms are the
-    # evidence that dry-litter incidence is positive.
+    # evidence that dry-litter incidence is positive. Applied ONLY at or above the threshold.
     fpd_dry_incidence_floor: float = 1.0
 ```
 
@@ -681,9 +754,10 @@ def test_prevalence_reaches_mid_30s_on_typical_aviary_litter():
     assert 33.0 <= mild + severe <= 42.0
 ```
 
-Check the other three original tests in that file still hold with the new threshold — in particular
-`test_dry_litter_does_not_worsen` uses `litter_moisture=22.0`, which is now ABOVE `fpd_moisture_ref=13.0`, so
-it will fail. It must be re-pointed at genuinely dry litter:
+**TWO other tests in that file call 22.0 % "dry litter", which was only true under the old 30 % threshold.**
+Both fail at `fpd_moisture_ref = 13.0` and both must be re-pointed at genuinely dry litter. Neither is fixed by
+the healing-gate change, because at moisture 22 % the plateau is ~36 % and a flock at 20 % prevalence is *below*
+it, so the `total > plateau` clause does not open either:
 
 ```python
 def test_dry_litter_does_not_worsen():
@@ -693,6 +767,17 @@ def test_dry_litter_does_not_worsen():
     # aviary. Was 22.0, which was "dry" only under the old 30 % threshold.
     mild1, _ = footpad_step(mild0, severe0, litter_moisture=12.0, age_weeks=30.0, params=p)
     assert mild1 <= mild0 + 0.5
+
+
+def test_dry_litter_severe_can_heal():
+    """On dry litter, severe eventually decreases (healing gated to dry, not globally zero)."""
+    p = ModelParams()
+    mild, severe = 0.0, 20.0   # start with elevated severe, no mild
+    for _ in range(500):
+        # 12.0 %, not 22.0 -- see test_dry_litter_does_not_worsen. At 22 % the litter is above
+        # the new threshold, so healing is correctly gated OFF and severe would not fall.
+        mild, severe = footpad_step(mild, severe, litter_moisture=12.0, age_weeks=30.0, params=p)
+    assert severe < 20.0, f"severe did not decrease on dry litter (still {severe:.2f}%)"
 ```
 
 - [ ] **Step 7: Run both footpad test files**
@@ -776,12 +861,25 @@ This task gives the named root cause a real mechanical effect, so DP16 scores a 
 - Produces: `litter_moisture_equilibrium(..., days_since_belt_service: float = <inert default>)`. Task 5 adds
   the density surplus through the same function; Task 6 reads the resulting moisture.
 
-> **Design decision to confirm before implementing.** Two shapes are defensible: (a) a manure-belt service
-> resets accumulated manure so the water input drops for some days afterward, decaying back; (b) the service
-> sets an effective belt interval that then drifts upward. (a) matches the physical story (the belt is cleared;
-> manure re-accumulates) and does not entangle the agent's setpoint with a maintenance action. **Implement (a).**
-> Keep the effect inert by default (`days_since_belt_service` defaulting to a value that yields no credit) so
-> every existing caller is unchanged, exactly as Task 5's density arguments do.
+> **Design decision, settled — and NOT the obvious one.** The intuitive shape is to have a service reduce the
+> litter **water input**. That cannot work, and both Codex reviewers caught it independently: below the
+> evaporative capacity `litter_moisture_equilibrium` uses the belt curve **alone** (the surplus term is gated on
+> `excess > 0`), and H4 — DP16's house — is authored at **124,200 birds, drawing ~143.8 g/kg/d against a 150
+> capacity**, so its surplus is zero before and after any credit. A water-input credit is invisible for exactly
+> the house DP16 scores.
+>
+> **Implement it on the belt equilibrium instead:** a service temporarily lowers the *effective* belt interval
+> fed to the belt curve, decaying back over `belt_service_decay_days`. This is the mirror image of the existing
+> `staffing_belt_lag_max`, which already *stretches* the effective interval for understaffing
+> (`docs/model-params.md:391`), so it reuses a mechanism the codebase and its docs already describe rather than
+> inventing a channel. It moves H4 because it moves the belt term, which is the only live moisture term below
+> capacity. Keep it inert by default so every existing caller is unchanged, exactly as Task 5's density
+> arguments do.
+>
+> Note the interaction with Task 2: the belt curve is now a *weak* lever (0.85 %/belt-day), so a service that
+> shortens the effective interval by a few days moves litter moisture only a few points. Whether that is enough
+> to cross DP16's bands is the open risk recorded in this plan's self-review — measure it in Step 5 and report
+> the number rather than inflating the coefficient to clear the bands.
 
 - [ ] **Step 1: Write the failing wiring test**
 
@@ -818,12 +916,21 @@ Expected: FAIL — the serviced and unserviced runs return identical moisture.
 - [ ] **Step 3: Add the params**
 
 ```python
-    # --- Manure-belt service -> litter water credit (DP16's named root cause) ---
-    # A manure-belt service clears accumulated manure, so less water reaches the litter for a
-    # few days while it re-accumulates. Inert by default (credit 0.0) so a bare ModelParams()
-    # leaves this pathway switched off, like the density params above.
-    belt_service_water_credit_g_kg: float = 0.0   # g/kg/d of water input removed right after a service
-    belt_service_decay_days: float = 7.0          # days over which the credit decays to zero
+    # --- Manure-belt service -> effective belt interval (DP16's named root cause) ---
+    # A manure-belt service clears accumulated manure, so the litter behaves as though the belt
+    # ran more often, decaying back as manure re-accumulates. This is the mirror of
+    # staffing_belt_lag_max, which STRETCHES the effective interval for understaffing
+    # (docs/model-params.md:391) -- same mechanism, opposite sign.
+    #
+    # It acts on the belt term, NOT on the water input, because below the evaporative capacity
+    # the belt term is the only live moisture term: density's surplus is gated on excess > 0 and
+    # H4 (124,200 birds, ~143.8 g/kg/d against a 150 capacity) has no surplus at all. A
+    # water-input credit would be invisible for exactly the house DP16 scores.
+    #
+    # Inert by default (credit 0.0) so a bare ModelParams() leaves this pathway switched off,
+    # like the density params above.
+    belt_service_days_credit: float = 0.0   # belt-days removed from the effective interval right after a service
+    belt_service_decay_days: float = 7.0    # days over which the credit decays to zero
 ```
 
 The real (non-zero) figure is farm content and belongs in `corpus/company.yml`, reaching `ModelParams` through
@@ -832,12 +939,27 @@ The real (non-zero) figure is farm content and belongs in `corpus/company.yml`, 
 
 - [ ] **Step 4: Thread it through the litter layer, state, action and integrator**
 
-Add `days_since_belt_service: float | None = None` to `litter_moisture_equilibrium` and
-`litter_moisture_step`; subtract a linearly-decaying credit from the water input when it is not None. Add the
-per-house `last_belt_service_day: int | None` to the house state model, set it in `episode.py` where
-`schedule_maintenance` is handled, and pass `current_day - last_belt_service_day` from `integrate.py`.
+Add `days_since_belt_service: float | None = None` to `litter_moisture_equilibrium` and `litter_moisture_step`.
+When it is not None, reduce the belt interval used by the belt curve by a linearly-decaying credit, floored at 1:
+
+```python
+    belt_days = max(1, belt_days)
+    if days_since_belt_service is not None and params.belt_service_days_credit > 0.0:
+        remaining = max(0.0, 1.0 - days_since_belt_service / params.belt_service_decay_days)
+        belt_days = max(1.0, belt_days - params.belt_service_days_credit * remaining)
+    eq = params.litter_moisture_belt_floor + params.litter_moisture_belt_slope * (belt_days - 1)
+```
+
+Add the per-house `last_belt_service_day: int | None` to the house state model, set it in `episode.py` where
+`schedule_maintenance` is handled (gated on the task being the manure belt), and pass
+`current_day - last_belt_service_day` from `integrate.py`.
 
 Remember `end_day` commits by replacing state field objects — do not hold references to house state across it.
+
+**Watch the `staffing_belt_lag_max` interaction:** `integrate.py` already computes
+`belt_days_eff = belt_days * (1 + staffing_u * staffing_belt_lag_max)`. Apply the service credit to the
+**post-lag** effective interval, not the raw setpoint, or a serviced-but-understaffed house gets the credit
+twice over. State which order you used in the commit message.
 
 - [ ] **Step 5: Run the test to verify it passes, then mutation-check the wiring**
 
@@ -1040,10 +1162,36 @@ domain, where `exp(0.0032·370) = 3.27×` collided with both belt anchors. After
 
 Two form mismatches to handle explicitly:
 - α3 is **multiplicative** (% of emission per g/kg), but `nh3_moisture_coeff` is **additive** (ppm per moisture
-  point). Convert at the reference operating point and say so in the comment, or change the term to
-  multiplicative. Prefer the multiplicative form — it is what the source fits — and note it is a form change.
-- `nh3_moisture_ref` is currently **25 %**, above the whole post-Task-2 operating band, so the moisture term is
-  inert. Re-centre it on Ch. 7's own centring, **80 g/kg = 8 %**, or on the band's dry end.
+  point). Use the **multiplicative** form — it is what the source fits — and note in the commit that it is a
+  form change, not just a coefficient change.
+- `nh3_moisture_ref` is currently **25 %**, above the whole post-Task-2 operating band, so the term is inert.
+
+> **Where to centre it — this is the whole task, and the obvious answer is wrong.** Both Codex reviewers caught
+> that centring on Ch. 7's own **80 g/kg** breaks the baseline rail: belt 2 would give
+> `5.4 · 1.259 · exp(0.0032·(158.5 − 80)) ≈ 8.7 ppm`, above the 8.5 ppm ceiling of the CSES anchor. The reason is
+> the same double-counting Task 1 fixed for winter: **`nh3_target_base = 4.2` was itself calibrated to the CSES
+> aviary's 6.7 ppm, measured at that house's real litter moisture.** A mean-centred coefficient must therefore be
+> centred at the operating point the base was calibrated at, so the factor is 1.0 there and only *deviations*
+> move ammonia.
+>
+> CSES removed belts every 3–4 days. Under Task 2's curve that is `15 + 0.85·2.5 = 17.12 % = 171.2 g/kg`, so
+> **`nh3_moisture_ref = 17.12 %`**. Verified numerically with Ch. 5's better-ranged 0.40 %/(g/kg):
+>
+> | belt days | litter moisture | f_MAT | moisture factor | ppm | rail |
+> |---|---|---|---|---|---|
+> | 1 | 15.00 % | 1.000 | 0.9185 | 4.96 | — |
+> | 2 | 15.85 % | 1.259 | 0.9503 | **6.46** | inside 5.0–8.5 ✓ |
+> | 4 | 17.55 % | 2.387 | 1.0171 | 13.11 | — |
+> | 7 | 20.10 % | 2.387 | 1.1264 | **14.52** | inside 6.0–19.0 ✓ |
+> | 14 | 26.05 % | 2.387 | 1.4290 | **18.42** | under Hinz's aviary max of 18.52 ✓ |
+>
+> Ch. 7's own 0.32 %/(g/kg) also satisfies every rail (belt 2 → 6.52, belt 7 → 14.18, belt 14 → 17.15). Use
+> **Ch. 5 eq. 18's 0.40**, per the research pass's recommendation, and record that Ch. 7's value was checked and
+> also passes.
+>
+> **This is also what clears the expected-red monotonicity test.** Litter moisture keeps rising with belt
+> interval, so `_eq_belt` is strictly increasing again past day 4, and belt 1 → 56 spans roughly 4.96 → ~72 ppm,
+> a ~14× range against the test's required 5×.
 
 Also recommended by the research pass: re-cite the moisture term to **Ch. 5 eq. (18)** (0.4 %/(g/kg), fitted
 over 52–438 g/kg — a range that actually covers our band) rather than to Kang et al. 2018, and downgrade the
@@ -1065,15 +1213,35 @@ Kang 2016 gives 1.48 %/pt over a wider range — a 2.2× disagreement between tw
 
 Create `tests/env/model/test_ammonia_moisture_term.py` asserting:
 1. Wetter litter raises ammonia, at fixed belt interval and ventilation (the Task 6 deliverable).
-2. The coefficient is evaluated **inside its fitted domain**: assert the operating band produced by
-   `litter_moisture_equilibrium` over belt 1–7 stays within 10–24 % moisture, so the α3 extrapolation defect
-   cannot silently return.
-3. The Task 1 anchors still hold with the moisture term live: belt 2 in [5.0, 8.5] and belt 7 in [6.0, 19.0]
-   at mild baseline. **This is the constraint that killed the original Task 6** — verify it explicitly.
-4. The turnover is respected: past the measured critical moisture the response must not keep climbing linearly.
+2. The coefficient is evaluated **inside its fitted domain** for every belt interval the agent can *set*
+   (1–14): assert `litter_moisture_equilibrium` stays within 10–30 % moisture there, so the α3 extrapolation
+   defect cannot silently return.
+3. The anchors still hold with the moisture term live: belt 2 in [5.0, 8.5] and belt 7 in [6.0, 19.0] at mild
+   baseline, and belt 14 at or below Hinz's aviary maximum of 18.52. **This is the constraint that killed the
+   original Task 6** — verify it explicitly.
+4. **The turnover is documented as a known limitation, not implemented.** An earlier draft of this task asked
+   for a test that the response "stops climbing past ~40 %", which both Codex reviewers correctly rejected: no
+   step of this task implements a turnover, and the multiplicative `exp()` form climbs monotonically forever, so
+   such a test could only fail. Implementing Miles's quadratic surface is not justified here — after Task 2 the
+   agent-reachable band is 15–26 % moisture, far below the ~37–43 % turnover, so the model never operates near
+   it in normal play. Assert the *actual* contract instead:
+
+   - across belt intervals 1–14 the litter stays below 30 %, i.e. below the turnover, so the monotone
+     log-linear form is only ever evaluated where it is valid;
+   - the extreme-neglect corner (`belt_days_eff` up to 56 under collapsed staffing, litter at the 60 % cap) is
+     **knowingly conservative-high**: real ammonia would turn over above ~40 % moisture and this model keeps
+     rising, bounded only by `nh3_ceiling_ppm = 100`. Assert the ceiling holds there, and put the limitation in
+     the test docstring and in `docs/model-params.md`.
+
    Miles et al. 2011's fitted surface gives `M_crit = −(β_ML + β_MTI·T) / (2·β_MQ)`, which at this sim's house
    temperatures is **~37.4 % at 18 °C, ~39 % at 21 °C, ~41 % at 24 °C, ~43 % at 28 °C** — about **40 %**, not
    the "40–60 %" the repo currently cites from a figure the thesis itself captions a *schematic*.
+5. The two **existing** ammonia tests that pass litter moisture explicitly must be re-pointed, because the
+   `_eq` helper at `tests/env/model/test_layer_ammonia.py:8` defaults to `moisture=25.0` — a value that is no
+   longer a reachable belt-2 equilibrium and that, with the moisture factor live, would push
+   `test_baseline_aviary_mean_near_6_7` to ~9.3 ppm and break its own 8.5 ceiling. Change that helper's default
+   to the belt-2 equilibrium (**15.85 %**) and re-check `test_winter_low_temp_pushes_over_25`, whose margin
+   narrows from 26.8 to **26.46 ppm** against its `> 25.0` assertion — still passing, but tighter, so note it.
 
 - [ ] **Step 2: Run it to verify it fails**
 
@@ -1086,19 +1254,68 @@ operating band, so `max(0, moisture − 25)` is 0 throughout and the term is ine
 
 - [ ] **Step 3: Re-centre and re-source the moisture term**
 
-Change `nh3_moisture_ref` to 8.0 (Ch. 7's own centring of 80 g/kg) and convert α3 into the layer's form,
-with a comment giving the coefficient, its units, its fitted domain, and the Ch. 5 eq. 18 corroboration
-(0.4 %/(g/kg) over 52–438 g/kg, VIFs 1.09–1.18). State plainly that Kang is a consistency check, not the
-primary citation.
+Set `nh3_moisture_ref = 17.12` (**not** 8.0 — see the boxed note above; 17.12 % is the litter moisture implied
+by CSES's 3–4-day belt interval under Task 2's curve, which is the operating point `nh3_target_base` was
+calibrated at). Set the coefficient to Ch. 5 eq. 18's **0.40 %/(g/kg)** and make the term **multiplicative**:
 
-- [ ] **Step 4: Run the test, then re-run Task 1's anchors**
+```python
+    # Litter-moisture factor on emission. MULTIPLICATIVE, because the source fits it that way:
+    # Groot Koerkamp Ch. 5 eq. (18), +4 % TAN per 10 g/kg litter water = 0.40 %/(g/kg), fitted
+    # over a measured 52-438 g/kg (VIFs 1.09-1.18) -- a range that actually covers our operating
+    # band. Ch. 7 eq. (9)'s alpha3 = 0.32 %/(g/kg) is the same quantity over a narrower fitted
+    # domain (100-240 g/kg) and was checked: it also satisfies every anchor (belt 2 -> 6.52,
+    # belt 7 -> 14.18, belt 14 -> 17.15 ppm).
+    #
+    # CENTRED at 17.12 % (171.2 g/kg), NOT at Ch. 7's 80 g/kg. nh3_target_base was itself
+    # calibrated to the CSES aviary's 6.7 ppm, measured with belts every 3-4 days = 17.12 %
+    # litter moisture under this model's belt curve. Centring anywhere else double-counts the
+    # moisture already baked into the base -- at 80 g/kg the belt-2 baseline reaches 8.7 ppm and
+    # breaks its own 5.0-8.5 rail. Same class of error as asserting Nimmermark's winter figure at
+    # mild baseline (see nh3_fmat_max's history).
+    #
+    # Kang et al. 2018's 3.28 %/pt is a CONSISTENCY CHECK, not the primary citation: it is a
+    # two-point secant whose own low arms imply -39.1/-1.68/+4.01 %/pt, and Kang et al. 2016
+    # gives 1.48 %/pt over a wider range -- a 2.2x disagreement between two papers by the same
+    # first author in the same journal.
+    nh3_moisture_coeff: float = 0.0040   # fractional emission change per g/kg litter water
+    nh3_moisture_ref: float = 17.12      # litter moisture (%) at which the factor is 1.0
+```
+
+In `ammonia_step`, replace the additive `nh3_moisture_coeff * max(0.0, litter_moisture - nh3_moisture_ref)`
+term inside the `emission` expression with a multiplicative factor applied to the whole emission, alongside
+`belt_mult`:
+
+```python
+    moisture_mult = math.exp(
+        params.nh3_moisture_coeff * (litter_moisture * 10.0 - params.nh3_moisture_ref * 10.0)
+    )
+    emission = (
+        params.nh3_target_base + params.nh3_litter_coeff * effective_litter_age
+    ) * belt_mult * moisture_mult
+```
+
+Note this **removes** the `max(0.0, ...)` floor deliberately: the factor must be allowed to go *below* 1.0 on
+litter drier than the centring, or daily belts would not be rewarded relative to CSES's 3–4-day baseline.
+
+- [ ] **Step 4: Run the test, re-run the ammonia anchors, and clear the expected-red test**
 
 ```bash
 cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_ammonia_moisture_term.py tests/env/model/test_layer_ammonia.py -v --tb=short 2>&1 | tail -35
 ```
 
-Both files must pass together. If the moisture term pushes belt 7 above 19.0 ppm, the coefficient conversion is
-wrong — do not widen the band to accommodate it; that band is the measured aviary evidence.
+All three of these must now be true together:
+
+1. Both files pass. If the moisture term pushes belt 7 above 19.0 ppm, the coefficient conversion is wrong — do
+   not widen the band to accommodate it; that band is the measured aviary evidence.
+2. **`test_belt_lever_stays_strictly_monotone_across_every_reachable_interval` is GREEN again.** This is the one
+   entry in the expected-red register, and this step is where it clears. It must pass on its merits — strict
+   monotonicity restored by rising litter moisture, and `values[-1] > values[0] * 5` satisfied by the ~14× span
+   from belt 1 (~4.96 ppm) to belt 56. Do not skip, xfail or relax it.
+3. The full suite has no failures beyond the known 3.
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_ammonia.py::test_belt_lever_stays_strictly_monotone_across_every_reachable_interval -v --tb=short 2>&1 | tail -15
+```
 
 - [ ] **Step 5: Correct the turnover claim in the docs**
 
@@ -1270,3 +1487,38 @@ says to keep the real name.
 depend on values the preceding tasks produce (Task 4 on the corpus figure, Task 6 on the coefficient
 conversion). Each lists the exact assertions required. Every parameter value, source attribution and expected
 failure message elsewhere in the plan is concrete.
+
+---
+
+## Review record — one fix wave applied 2026-08-03
+
+Reviewed by a Codex straight pass (`review --commit HEAD`) and a Codex adversarial pass
+(`--output-schema`, verdict **REVISE**, 7 findings), plus my own numerical stress test of the proposed footpad
+design. **Ten findings, all adjudicated and all fixed in a single wave.** Every fix was verified by running the
+real code, not by inspection.
+
+| # | Found by | Finding | Disposition |
+|---|---|---|---|
+| 1 | both passes | `nh3_fmat_max = 2.387` ≠ the true edge value `exp(0.87) = 2.386910853524277`, so the saturating branch stays belt-dependent (measured: 2.386910853…/2.386942815…/2.386976469… at belt 4/5/7) and the exact-equality test fails | **Fixed.** Delete the saturating branch and the two now-dead params; `fmat` returns its already-clamped `inner` value |
+| 2 | adversarial only | `test_layer_ammonia.py:110` asserts *strict* monotonicity to belt 56 and `values[-1] > values[0]*5`, and its own comment says it exists to forbid a lever that "rises to d=7 and is flat thereafter" — exactly what Task 1 does | **Fixed by design, not by weakening.** Added the expected-red register: it goes red at Task 1 and Task 6 clears it. Verified post-wave: strictly monotone across all 137 sampled intervals, span 4.96 → 71.64 ppm = **14.4×** |
+| 3 | both passes | The two-point linear plateau gives 26.9 % at 22.7 % moisture, so the 33–42 % survey anchor is unreachable at any `fpd_alpha` | **Fixed.** Plateau is now piecewise-linear through three *measured* anchors (13→15, 22.7→38, 40→48). Verified: 17.71 / 37.87 / 48.00 % at 15 / 22.7 / 40 % moisture |
+| 4 | mine, then adversarial | Prevalence cannot fall when litter improves: susceptibility clamps to 0 while severe healing stays gated off. Measured — 300 d at 40 % (47.96 %) then 218 d at 20 % (plateau 31.6 %) stayed **frozen at 47.96 %** | **Fixed.** Healing also opens when `total > plateau`. Verified: the same run now converges to 31.57 % |
+| 5 | adversarial only | Two existing tests call 22.0 % "dry litter" — true only under the old 30 % threshold. `test_dry_litter_severe_can_heal` is not rescued by fix #4 either, since 20 % prevalence is *below* the ~36 % plateau at 22 % moisture | **Fixed.** Both re-pointed to 12.0 % |
+| 6 | straight only | `fpd_dry_incidence_floor` fires below the threshold, generating lesions on bone-dry litter | **Fixed.** Floor applies only at or above `fpd_moisture_ref` |
+| 7 | both passes | A maintenance water-input credit cannot move H4: it is authored at 124,200 birds drawing **~143.8 g/kg/d** against a 150 capacity, so its surplus is zero either way and the surplus term is gated on `excess > 0` | **Fixed.** Task 4 now acts on the *effective belt interval* — the mirror of the existing `staffing_belt_lag_max` — which is the only live moisture term below capacity |
+| 8 | both passes | Centring the moisture term at Ch. 7's 80 g/kg breaks the baseline rail (belt 2 → 8.7 ppm vs an 8.5 ceiling), because `nh3_target_base` was itself calibrated to CSES's 6.7 ppm at that house's real litter moisture | **Fixed.** Centre at **17.12 %** (CSES's own 3–4-day belt equilibrium). Verified: belt 2 → 6.46, belt 7 → 14.52, belt 14 → 18.42 ppm, all inside their rails |
+| 9 | adversarial only | Task 6 demanded a turnover test but specified no turnover implementation, so the test could only fail | **Fixed.** Replaced with a domain-guard assertion plus an explicit, documented conservative-high limitation in the extreme-neglect corner |
+| 10 | adversarial only | The `_eq` helper hardcodes `moisture=25.0`, so with the multiplicative factor live `test_baseline_aviary_mean_near_6_7` rises to ~9.3 ppm and breaks its own ceiling | **Fixed.** Helper default → 15.85 %. Also re-checked `test_winter_low_temp_pushes_over_25`: margin narrows 26.8 → **26.46 ppm** against `> 25.0`, still passing, now noted in the plan |
+
+**Nothing was dismissed.** Two of the ten (#2 and #9) were design errors rather than arithmetic slips, and both
+were fixed by changing the plan's structure — an expected-red register and a documented limitation — rather than
+by relaxing a test. No assertion in this plan was weakened to accommodate an implementation.
+
+**Post-wave verification, all run against the real code:** every ammonia anchor satisfied simultaneously
+(belt 2 = 6.46, belt 7 = 14.52, belt 14 = 18.42, winter belt 2 = 26.46 > 25, worst-reachable state pinned at the
+100 ppm ceiling); footpad plateau flat across the cycle (29.81 % at day 300 → 31.38 % at day 518, a 1.56-point
+drift against a 6.0 tolerance) and monotone in moisture with a 30.3-point span; recovery after litter
+improvement converging to its plateau.
+
+**Round 2 not run.** The findings above are against the plan document, and the fixes are all in the plan. The
+Codex pair should be re-run against the *implementation* as each task lands, per the standing review discipline.
