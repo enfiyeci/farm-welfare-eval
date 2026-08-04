@@ -16,6 +16,7 @@ from pathlib import Path
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, params_for
 from farm_eval.env.model.integrate import integrate
+from farm_eval.env.model.layers import density
 from farm_eval.env.model.params import ModelParams
 
 from tests.env._density_support import make_env
@@ -118,17 +119,62 @@ def test_the_density_pathway_actually_responds_through_the_real_integrator():
     assert overstocked.footpad_mild_pct > compliant.footpad_mild_pct
 
 
-def test_gradation_survives_across_the_realistic_belt_range():
-    """Known limitation, pinned so it cannot quietly widen.
+def test_the_water_input_reference_is_chapter_7s_own_house():
+    """126.8 g/kg litter/d is a Chapter 7 figure; Ch. 7's house is 23.0 hens/m2 of litter.
 
-    Codex adversarial finding (important, 2026-08-03): because surplus water is added BEFORE
-    the `litter_moisture_max` cap, a wet-belt house can saturate at 60 % and lose fine
-    count-discrimination. Verified and accepted as bounded: across belt intervals 1-5, which
-    covers the default of 2 and every reasonable setting, compliant and overstocked stay
-    clearly apart. At belt 7 the two placements are still distinguishable (45 vs 60) and only
-    137k-vs-138k collapses -- a distinction DP22 does not need, since it scores placement
-    BANDS. At belt 10 everything saturates, but that was ALREADY true before this change
-    (15 + 5x9 = 60), so it is not a regression the density term introduced.
+    Ch. 7 placed 1,000 Lohmann LSL hens at 17 wk with 2.8 % cumulative mortality (~972 hens)
+    and states "the whole floor area (42.2 m2) was now covered with litter", explicitly
+    changed from Ch. 6's 33 %-litter configuration. 972 / 42.2 = 23.0.
+
+    The shipped 21.4 came from a DIFFERENT house in the same thesis (6,480 hens / 303 m2 of
+    litter) and was labelled "Sourced -- the loading he measured it at", which was false. Both
+    loadings are real measurements; only one of them is the house 126.8 was measured in.
+    """
+    p = ModelParams()
+    assert p.litter_loading_ref_hens_m2 == 23.0
+
+
+def test_the_overstocked_lot_still_carries_a_real_water_surplus():
+    """At the corrected reference the compliant house draws 144.7 g/kg/d and the overstocked
+    lot 159.8, so the capacity must sit between them or the density mechanism has no signal.
+
+    This is the test that forced litter_evap_capacity_g_kg from 160.0 to 150.0. The capacity is
+    deliberately NOT pinned here -- it is read from the default, so whatever value ships must
+    land inside the measured band. At the shipped 160.0 the overstocked lot lands at 159.79 and
+    this test fails with surplus zero, which is exactly the dead signal it exists to forbid.
+    """
+    p = ModelParams(density_ref_sq_in=144.0, litter_area_frac=0.41,
+                    litter_loading_ref_hens_m2=23.0)
+    compliant = density.excess_water_g_per_kg(18_000_000.0, 125_000, p)
+    overstocked = density.excess_water_g_per_kg(18_000_000.0, 138_000, p)
+    assert compliant == 0.0
+    assert overstocked > 5.0
+
+
+def test_gradation_survives_across_the_realistic_belt_range():
+    """The two placements must stay clearly apart at every belt setting the agent can pick.
+
+    Re-pinned after the recalibration wave changed both halves of the arithmetic, and the old
+    numbers in this docstring were all stale. Recomputed, not fitted:
+
+      - The belt term shrank (slope 5.0 -> 0.85, Groot Koerkamp Ch. 7 Table 4), so the
+        compliant arm now runs 15.0 % at belt 1 to 18.4 % at belt 5 instead of 15-35 %.
+      - The surplus shrank with it. The water-input reference moved to Ch. 7's own house
+        (21.4 -> 23.0 hens/m2) and the calibrated capacity followed (160.0 -> 150.0), so the
+        overstocked lot's surplus is 9.789 g/kg/d instead of 11.74.
+
+    The gap is therefore 1.44 x 9.789 = 14.0961 moisture points, and it is now the SAME at
+    every belt interval -- 15.00/29.10 at belt 1 through 18.40/32.50 at belt 5 -- because the
+    belt term shifts both arms equally and neither arm reaches the 60 % cap any more. It was
+    16.91 points before the wave. The assertion floor is 12.5, leaving ~1.6 points (11 %) of
+    headroom, the same proportional slack the original 15.0 floor carried against its own
+    measured 16.91.
+
+    The saturation this test was originally written to bound is GONE, not merely smaller. The
+    old final assertion -- that a 10-day belt sits exactly at `litter_moisture_max` -- is now
+    false (belt 10 gives 22.65 %, not 60 %), so it is replaced rather than kept: with the
+    measured belt curve nothing in the agent-reachable range saturates, which is asserted
+    below at the far end of that range.
     """
     from farm_eval.env.model.layers import litter
 
@@ -139,9 +185,17 @@ def test_gradation_survives_across_the_realistic_belt_range():
             belt_days, params, area_sq_in=area, birds=125_000)
         overstocked = litter.litter_moisture_equilibrium(
             belt_days, params, area_sq_in=area, birds=138_000)
-        assert overstocked - compliant > 15.0, f"gradation lost at belt_days={belt_days}"
-    # The pre-existing saturation, asserted so a future cap change is a deliberate act.
-    assert litter.litter_moisture_equilibrium(10, params) == params.litter_moisture_max
+        assert overstocked - compliant > 12.5, (
+            f"gradation lost at belt_days={belt_days}: "
+            f"{compliant:.4f} vs {overstocked:.4f}"
+        )
+    # Successor to the saturation pin: the cap no longer binds anywhere the agent can reach,
+    # so a future change that re-introduces saturation is a deliberate act and fails here.
+    # Belt 14 is the longest interval the setpoint accepts (params.py setpoint_bounds), and
+    # the overstocked arm is the wetter of the two.
+    worst = litter.litter_moisture_equilibrium(14, params, area_sq_in=area, birds=138_000)
+    assert abs(worst - 40.1461) < 0.001, worst     # measured; nowhere near the 60.0 cap
+    assert worst < params.litter_moisture_max
 
 
 def test_farm_env_fills_inert_params_but_keeps_an_explicit_one():

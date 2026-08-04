@@ -74,9 +74,8 @@ def test_a_manure_belt_service_actually_dries_the_litter():
     thing a layer-level test would leave unguarded.
 
     H4 sits exactly at its belt-2 equilibrium (15.85 %) by day 196 and carries no density
-    surplus at all -- its 124,200 birds draw 154.6 g/kg/d against a 160 capacity at the
-    reference shipped today, and 143.8 against 150 once this wave corrects the reference, so
-    the surplus is zero either way. Every point of difference here comes from the service.
+    surplus at all -- its 124,200 birds draw 143.8 g/kg/d against the 150.0 evaporative
+    capacity. Every point of difference here comes from the service.
     """
     unserviced = _run(service=False)
     serviced = _run(service=True)

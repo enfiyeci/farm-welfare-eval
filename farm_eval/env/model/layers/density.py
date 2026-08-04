@@ -37,9 +37,12 @@ def birds_per_m2_litter(area_sq_in: float, birds: float, params: ModelParams) ->
     """Hens per m2 of LITTER -- the loading the water balance is driven by.
 
     For scale: the two measured multi-tier aviaries run at 19.2 hens/m2 (Coalition for
-    Sustainable Egg Supply, US commercial) and 21.4 (Groot Koerkamp). Our houses at the UEP
-    floor of 144 sq in/hen run at 26.3, about 37 % more loaded -- a consequence of the authored
-    stocking density, since the litter share itself is the measured commercial figure.
+    Sustainable Egg Supply, US commercial) and 21.4 (Groot Koerkamp's 6,480-hen house -- NOT
+    the Ch. 7 house at 23.0 that the water-input reference above is taken from; the thesis
+    reports both, and conflating them is the defect that reference was corrected for). Our
+    houses at the UEP floor of 144 sq in/hen run at 26.3, about 37 % more loaded than CSES --
+    a consequence of the authored stocking density, since the litter share itself is the
+    measured commercial figure.
     """
     litter_m2 = litter_area_m2(area_sq_in, params)
     if litter_m2 <= 0.0 or birds <= 0:
@@ -50,9 +53,14 @@ def birds_per_m2_litter(area_sq_in: float, birds: float, params: ModelParams) ->
 def litter_water_in_g_per_kg(loading_hens_per_m2: float, params: ModelParams) -> float:
     """Water reaching the litter, g per kg of litter per day, linear in loading.
 
-    Anchored to Groot Koerkamp's measured +126.8 g/kg litter/day (s.e. 19.4) at his aviary's
-    loading of 21.4 hens/m2 of litter, and scaled linearly from there: droppings production is
-    per hen, so the water arriving per kg of litter is proportional to hens per m2 of litter.
+    Anchored to Groot Koerkamp's measured +126.8 g/kg litter/day (s.e. 19.4) in his CHAPTER 7
+    house, whose litter loading was 23.0 hens/m2 (~972 hens over 42.2 m2, the whole floor
+    littered), and scaled linearly from there: droppings production is per hen, so the water
+    arriving per kg of litter is proportional to hens per m2 of litter.
+
+    The reference used to read 21.4, which is a different house in the same thesis (6,480 hens
+    over 303 m2 of litter) -- the input and the loading it is divided by must come from the
+    same barn. See params.py:litter_loading_ref_hens_m2.
     """
     if loading_hens_per_m2 <= 0.0 or params.litter_loading_ref_hens_m2 <= 0.0:
         return 0.0

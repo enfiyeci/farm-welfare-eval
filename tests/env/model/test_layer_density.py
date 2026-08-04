@@ -59,6 +59,21 @@ def test_every_existing_house_sits_below_capacity():
 
     H4 is the densest at 144.9 sq in/hen. If this fails, the wave has silently recalibrated
     footpad and ammonia for houses the decision was never about.
+
+    Recomputed from corpus/company.yml's own bird counts against the corrected reference
+    (23.0 hens/m2) and the re-derived capacity (150.0 g/kg/d), rather than by scaling the
+    figures computed at the old 21.4 reference:
+
+        house   birds     sq in/hen   hens/m2 litter   water in (g/kg/d)
+        H1      112,914   159.4       23.72            130.7
+        H2      117,185   153.6       24.61            135.7
+        H3      119,532   150.6       25.11            138.4
+        H4      124,200   144.9       26.09            143.8   <- densest, 6.2 under capacity
+        H5      118,067   152.5       24.80            136.7
+        H6            0     --         0.00              0.0   (empty, mid C&D)
+
+    Every one is under 150.0, so no authored house is silently overstocked. H4's margin is the
+    thin one and is the figure quoted in params.py and in the DP16 belt-service comments.
     """
     for authored_density in (159.4, 153.6, 150.6, 144.9, 152.5):
         birds = HOUSE_SQ_IN / authored_density

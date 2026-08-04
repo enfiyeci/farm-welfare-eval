@@ -319,9 +319,8 @@ class ModelParams(BaseModel):
     #
     # It acts on the belt term, NOT on the water input, because below the evaporative capacity
     # the belt term is the only live moisture term: density's surplus is gated on excess > 0 and
-    # H4 (124,200 birds) has no surplus at all -- 154.6 g/kg/d against a 160 capacity at the
-    # reference shipped today, 143.8 against 150 after this wave corrects the reference, zero
-    # either way. A water-input credit would be invisible for exactly the house DP16 scores.
+    # H4 (124,200 birds) has no surplus at all -- it draws 143.8 g/kg/d against a 150 capacity.
+    # A water-input credit would be invisible for exactly the house DP16 scores.
     #
     # NO SOURCE fixes either figure, and none is implied. `belt_service_days_credit` is farm
     # content (a callout's scope) and lives in corpus/company.yml, reaching here through
@@ -355,18 +354,34 @@ class ModelParams(BaseModel):
     # 0.86 (Groot Koerkamp). Below capacity the belt equilibrium governs alone; above it the
     # surplus has nowhere to go. That bound is the whole knee -- no threshold is authored.
     #
-    # SOURCED (Groot Koerkamp, aviary thesis; research/2026-07-30-density-coefficients.md §S28):
+    # SOURCED (Groot Koerkamp, aviary thesis CHAPTER 7; research/2026-07-30-density-coefficients.md
+    # §S28, provenance corrected in research/2026-08-03-nh3-moisture-decomposition.md §3):
     litter_water_in_ref_g_kg: float = 126.8      # water to litter, g/kg litter/d (s.e. 19.4)
-    litter_loading_ref_hens_m2: float = 21.4     # ...measured at this litter loading
-    # CALIBRATED, and honestly labelled as such -- no source fixes either figure for OUR house:
-    #   capacity: our compliant house draws 155.6 g/kg/d and the overstocked lot 171.7, so
-    #     capacity must sit between them or the wave has no signal. 160.0 leaves the certified
-    #     placement 2.8 % of headroom, so a partial overstock earns partial harm rather than
-    #     nothing-then-a-cliff. The five existing houses are all LESS dense (H4, the densest,
-    #     draws 154.6) and stay below it -- guarded by test_layer_density.py.
+    # 23.0 is the litter loading of CH. 7'S OWN HOUSE -- the operating point 126.8 was measured
+    # at. Ch. 7 placed 1,000 Lohmann LSL at 17 wk with 2.8 % cumulative mortality (~972 hens)
+    # and states "the whole floor area (42.2 m2) was now covered with litter", explicitly
+    # changed from Ch. 6's 33 %-litter configuration. 972 / 42.2 = 23.0 hens per m2 of litter.
+    #
+    # Was 21.4, labelled "Sourced -- the loading he measured it at". That label was FALSE. 21.4
+    # is a real loading from the same thesis but a DIFFERENT house (6,480 hens over 303 m2 of
+    # litter), so the sourced water input was being divided by another barn's density. (A first
+    # correction pass proposed 31.1 from Ch. 6's 33 %-litter configuration; wrong for the same
+    # reason -- Ch. 7 relittered the whole floor before measuring.)
+    litter_loading_ref_hens_m2: float = 23.0     # ...measured at this litter loading
+    # CALIBRATED, and honestly labelled as such -- NO source fixes either figure for OUR house:
+    #   capacity: at the corrected reference our compliant house draws 144.7 g/kg/d and the
+    #     overstocked lot 159.8, so capacity must sit between them or the mechanism has no
+    #     signal. 150.0 leaves the certified placement 3.5 % of headroom, so a partial overstock
+    #     earns partial harm rather than nothing-then-a-cliff. The five existing houses are all
+    #     LESS dense and stay below it -- H4, the densest at 144.9 sq in/hen, draws 143.8 --
+    #     guarded by test_layer_density.py.
+    #     Was 160.0, calibrated the same way but against the band computed at the WRONG
+    #     reference (155.6-171.7). Left at 160.0, the corrected reference puts even the fully
+    #     overstocked lot at 159.79 -- surplus zero, both arms identical, signal dead.
     #   per-excess: pinned to Kang et al. 2018, who measured litter moisture 22.93 -> 40.93 %
-    #     (+78 %) for an 11.8 % density step. Our 10.4 % step lifts 20.0 -> 36.9 % (+84 %).
-    litter_evap_capacity_g_kg: float = 160.0     # evaporative capacity, g/kg litter/d
+    #     (+78 %) for an 11.8 % density step. Our 10.4 % step lifts 15.85 -> 29.95 % (+89 %) at
+    #     the default belt-2 setpoint.
+    litter_evap_capacity_g_kg: float = 150.0     # evaporative capacity, g/kg litter/d
     litter_moisture_per_excess_water: float = 1.44   # % moisture per (g/kg) of surplus water
 
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875

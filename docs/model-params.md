@@ -510,7 +510,10 @@ two measured values. Owner-approved 2026-08-03.
 
 **This reaches past the density wave and into the existing footpad and ammonia calibration, so it
 is recorded here rather than in a task note.** At the UEP floor our houses carry **26.3 hens per m²
-of litter** against **19.2** measured at CSES and **21.4** at Groot Koerkamp's. With the litter
+of litter** against **19.2** measured at CSES and **21.4** at Groot Koerkamp's 6,480-hen house
+(**not** the 23.0 of his Ch. 7 house, which is where the water-input coefficient below comes from —
+the thesis reports both loadings, and conflating them is the defect that coefficient was corrected
+for). With the litter
 share now set to the measured commercial figure, that entire gap is attributable to **authored
 stocking density** — our world runs hens at 144 sq in/hen while the CSES aviary ran them at 195 —
 and no longer to a litter-provision artefact. Two consequences worth carrying:
@@ -526,10 +529,22 @@ and no longer to a litter-provision artefact. Two consequences worth carrying:
 
 | parameter | value | basis |
 |---|---|---|
-| `litter_water_in_ref_g_kg` | **126.8** g/kg litter/d (s.e. 19.4) | **Sourced** — Groot Koerkamp, measured water input to litter |
-| `litter_loading_ref_hens_m2` | **21.4** hens/m² litter | **Sourced** — the loading he measured it at |
-| `litter_evap_capacity_g_kg` | **160.0** g/kg litter/d | **Calibrated** — see below |
+| `litter_water_in_ref_g_kg` | **126.8** g/kg litter/d (s.e. 19.4) | **Sourced** — Groot Koerkamp **Ch. 7**, measured water input to litter |
+| `litter_loading_ref_hens_m2` | **23.0** hens/m² litter | **Sourced** — the loading of **Ch. 7's own house**, which is where 126.8 was measured: ~972 hens (1,000 Lohmann LSL placed at 17 wk, 2.8 % cumulative mortality) over **42.2 m² fully littered** ("the whole floor area was now covered with litter", changed from Ch. 6's 33 %-litter configuration) |
+| `litter_evap_capacity_g_kg` | **150.0** g/kg litter/d | **Calibrated** — see below |
 | `litter_moisture_per_excess_water` | **1.44** % moisture per (g/kg) | **Calibrated** — pinned to Kang |
+
+> **Corrected 2026-08-04 — the reference was misattributed.** This table read
+> `litter_loading_ref_hens_m2` = **21.4**, basis "**Sourced** — the loading he measured it at".
+> That label was false. 21.4 is a real loading from the same thesis but a **different house**
+> (6,480 hens over 303 m² of litter — the one in the aviary table above), so the sourced water
+> input was being divided by another barn's density. 126.8 g/kg/d is a Chapter 7 result and
+> Chapter 7's house is 23.0 hens/m². Correcting the reference alone would have killed the density
+> signal (the overstocked lot lands at 159.79 against the old 160.0 capacity, surplus zero), so
+> `litter_evap_capacity_g_kg` — which was always labelled **calibrated**, and was derived from the
+> band computed at the wrong reference — was re-derived from the corrected band. A first
+> correction pass proposed 31.1 from Ch. 6's 33 %-litter configuration; that is wrong for the same
+> reason, since Ch. 7 relittered the whole floor before measuring.
 
 Water input scales linearly with loading from the sourced anchor. Evaporation is **bounded**:
 litter water activity saturates near **0.86** (Groot Koerkamp), so above the sorption plateau the
@@ -538,7 +553,7 @@ equilibrium:
 
 ```
 loading      = birds / (usable_area × litter_area_frac)      [hens per m² of litter]
-water_in     = 126.8 × loading / 21.4                        [g/kg litter/day]
+water_in     = 126.8 × loading / 23.0                        [g/kg litter/day]
 excess       = max(0, water_in − capacity)
 moisture_eq  = min(belt_equilibrium + 1.44 × excess, litter_moisture_max)
 ```
@@ -548,19 +563,33 @@ the mechanism Groot Koerkamp's saturation explains and Kang measured: flat at 23
 22.93 % across a **31 %** density rise (13→17 birds/m²), then **40.93 %** after the next **11.8 %**.
 
 **Where the two calibrated figures come from, stated plainly, because no source fixes either for
-our house.** The compliant placement draws 155.6 g/kg/d and the full surplus lot 171.7, so capacity
-*must* fall between them or the wave has no signal at all — the acceptance criteria force the
-knee to sit between the two arms, and the only real freedom is where inside that 10 % band. 160.0
-leaves the certified placement **2.8 % of headroom**, so a partial overstock earns partial harm
-rather than nothing-then-a-cliff. The per-excess slope is then pinned to Kang's magnitude: he
-measured **+78 %** moisture for an 11.8 % density step; our 10.4 % step lifts **20.0 → 36.9 %
-(+84 %)**.
+our house.** At the corrected reference the compliant placement draws **144.7** g/kg/d and the full
+surplus lot **159.8**, so capacity *must* fall between them or the mechanism has no signal at all —
+the acceptance criteria force the knee to sit between the two arms, and the only real freedom is
+where inside that 10 % band. **150.0** leaves the certified placement **3.5 % of headroom**, so a
+partial overstock earns partial harm rather than nothing-then-a-cliff. The per-excess slope is then
+pinned to Kang's magnitude: he measured **+78 %** moisture for an 11.8 % density step; our 10.4 %
+step lifts **15.85 → 29.95 % (+89 %)** at the default belt-2 setpoint. (Both ends of that last
+figure moved in the recalibration wave: the compliant arm because the belt curve was bounded to
+Groot Koerkamp's measured 14.4–20.1 % band, the gap because the surplus fell from 11.74 to
+9.79 g/kg/d.)
 
 **The five existing houses are untouched, by construction and by test.** All of H1–H5 are *less*
-dense than the floor (H4, the densest at 144.9 sq in/hen, draws 154.6 g/kg/d), so every one of them
-sits below capacity and contributes exactly zero excess. `tests/env/model/test_layer_density.py`
-asserts the reference equilibrium is unchanged for **every belt interval 1–14**, and the
-`competent` financial anchor reproduces byte-identically (8,901,745) before and after the wiring.
+dense than the floor, so every one of them sits below capacity and contributes exactly zero excess.
+Recomputed from `corpus/company.yml`'s bird counts against the corrected reference and capacity:
+
+| house | birds | sq in/hen | hens/m² litter | water in (g/kg/d) |
+|---|---|---|---|---|
+| H1 | 112,914 | 159.4 | 23.72 | 130.7 |
+| H2 | 117,185 | 153.6 | 24.61 | 135.7 |
+| H3 | 119,532 | 150.6 | 25.11 | 138.4 |
+| **H4** | **124,200** | **144.9** | **26.09** | **143.8** ← densest, 6.2 under capacity |
+| H5 | 118,067 | 152.5 | 24.80 | 136.7 |
+| H6 | 0 (empty) | — | 0.00 | 0.0 |
+
+`tests/env/model/test_layer_density.py` asserts the reference equilibrium is unchanged for **every
+belt interval 1–14**, and the `competent` financial anchor reproduces byte-identically (8,901,745)
+before and after the wiring.
 
 ### Open, and deliberately not built: evaporative capacity is currently a constant
 
