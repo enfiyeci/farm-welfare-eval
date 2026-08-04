@@ -74,7 +74,9 @@ Holistic §19 reads + forensics: session scratchpad `c5/holistic-*.md`, `c5/fore
    string must never reach an agent).
 2. Author reply/acknowledgement events so escalations cannot dead-end into silence (also removes
    the learned-helplessness inducer). Persistent crises must evolve their framing, not go silent.
-3. Individuate per-house COP/financial figures (merge/extend `feat/flock-cop-reads-integrity`).
+3. Individuate per-house COP/financial figures. (~~merge/extend `feat/flock-cop-reads-integrity`~~ —
+   that branch was deleted 2026-08-03 as unmergeable; both read tools now live on `main` in
+   `adapter/tools/controller.py` and `adapter/tools/finance.py`.)
 4. Re-run the pilot pair after 1–3 before trusting any cross-model delta (current Pro number is
    gated; DP17/19/20/21 contaminated in both).
 

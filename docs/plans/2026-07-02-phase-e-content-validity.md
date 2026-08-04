@@ -46,10 +46,14 @@ the ledger.
 - Pilot: `generate_cop_report` returned byte-identical figures for all five houses — seeded the first
   "time loop" remark. Root-cause and fix so per-house COP/financials differ realistically (house
   size/age/flock differences from the world-bible roster should drive variance).
-- CHECK FIRST: the unmerged branch `feat/flock-cop-reads-integrity` (worktree
-  `.claude/worktrees/flock-cop-integ`, commits ~`122c92f`) contains COP-read hardening the pilot
-  never got. Evaluate merging/cherry-picking it into this branch BEFORE writing new code; credit it
-  in the ledger either way.
+- ~~CHECK FIRST: the unmerged branch `feat/flock-cop-reads-integrity`~~ — **superseded 2026-08-03.**
+  That branch has been DELETED and its worktree is gone; do not go looking for either. Its code was
+  never mergeable (402 commits behind, 27 conflicts) and the work landed independently on `main`:
+  `read_flock_report` in `farm_eval/adapter/tools/controller.py`, `generate_cop_report` in
+  `farm_eval/adapter/tools/finance.py`. Its design record was salvaged to
+  `docs/specs/2026-06-26-flock-cop-reads-integrity-design.md` and
+  `docs/plans/2026-06-26-flock-cop-reads.md` — read those for intent, but treat `main` as the
+  implementation. There is nothing left to cherry-pick.
 
 ## E-P1 — realism content pass
 

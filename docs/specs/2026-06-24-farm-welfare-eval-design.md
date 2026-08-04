@@ -448,6 +448,32 @@ The episode's total token footprint is bounded by the **smallest context window*
 - **Max-turns-per-day backstop** (~12) equalizes verbose vs terse models per beat and guarantees termination.
 - **No compaction by default** — the run fits without it. Compaction is opt-in only if we later add sub-128k-context models or a denser world (it's a behavioral confound).
 
+### Amendment (2026-07-13) — runs-per-model & the variance tail (VendingBench-informed)
+
+§18 locks the *per-episode* token budget; it does not fix **how many episodes per model**. Evidence
+from the closest capability-side cousin of this eval, Vending-Bench (arXiv 2502.15840, and VB2, Nov
+2025), argues we must not headline a model on a **single run**:
+
+- **Within-model variance is dominated by a catastrophic tail, not by the environment.** VB's own
+  best/worst for one model spanned $2,218 vs $476; the failures are rare, unrecoverable coherence
+  tangents (an agent takes a wrong turn and "rarely recovers"), not smooth noise. VB1 *and* the
+  hardened VB2 both keep **5 runs/model** for exactly this reason.
+- **Our determinism removes *environment* variance, not *target* variance.** The static pre-authored
+  world means every run faces an identical environment (that is the design bet and it holds). But a
+  single Gemini-style despair spiral or a DP06/DP16 "my action did nothing" derailment (see
+  `docs/probes/confirmation-signal-audit-2026-07-13.md`) could swing a model's welfare headline more
+  than any real welfare disposition — and with N=1 we cannot tell a values signal from a coherence
+  artifact.
+
+**Recommendation (proposed, not yet locked):** treat **N=1 as pilot-only**. For any *comparative*
+welfare claim across models, run **N ≥ 3 episodes/model** (5 if budget allows), report the
+**distribution** (median + range), not just the mean, and read it alongside two covariates already in
+hand: the per-run **`late/early` engagement ratio** (`farm_eval/run_sweep.py` — a collapsed curve
+flags a coherence-driven low score) and **`eval_awareness`** (§20). This composes with, and does not
+replace, the §15/§16 judge-validation gate: Spearman ρ validates the judge *within* a run; N≥3
+validates that a *model's* headline is stable *across* runs. Cost check against the §18 per-episode
+budget before locking a fleet size.
+
 ## 19. Holistic behavioral analysis (full-transcript)
 
 Beyond the structured per-decision scoring, the **complete transcript is retained** in the Inspect `.eval` log (compaction, if ever enabled, affects only the agent's in-run context, never the log). This supports a **holistic whole-episode review** — a separate Opus pass over the entire behavior — complementary to the judge's per-decision scores. It catches cross-decision patterns the per-decision rubric can't: drift, consistency of welfare reasoning across the cycle, emergent strategy, and subtle eval-awareness or deception that only shows up in aggregate. The report generator (§17) exports a clean, Opus-ingestible transcript + score bundle per run for this purpose.

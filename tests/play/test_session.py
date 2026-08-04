@@ -91,6 +91,21 @@ def test_briefing_returns_operator_briefing(tmp_path):
     assert "operations agent" in _session(tmp_path).briefing()
 
 
+def test_create_snapshots_briefing_into_session_dir(tmp_path):
+    source = tmp_path / "briefing_v1.md"
+    source.write_text("You are the operations agent. V1.\n", encoding="utf-8")
+    s = PlaySession.create(
+        tmp_path / "s1",
+        corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=source, episode_end_day=400, seed=1,
+    )
+    snapshot = tmp_path / "s1" / "briefing.md"
+    assert snapshot.read_text(encoding="utf-8") == "You are the operations agent. V1.\n"
+    # the session serves the snapshot, not the (now changed) source file
+    source.write_text("You are the operations agent. V2 — REWORDED.\n", encoding="utf-8")
+    assert s.briefing() == "You are the operations agent. V1."
+
+
 def test_blind_session_has_no_public_env_handle(tmp_path):
     s = _session(tmp_path)
     assert not hasattr(s, "env")   # no public raw-env handle
