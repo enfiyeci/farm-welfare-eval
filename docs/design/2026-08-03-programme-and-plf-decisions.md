@@ -72,13 +72,34 @@ units, with no scoring dimension named.
 - **Sourced couplings:** hens density → litter moisture → ammonia → footpad/mortality; salmon
   crowding kg/m³ → oxygen depletion → mortality, lice transmission scaling in density; shrimp
   density → DO-crash risk against a 30–50% accepted cycle baseline.
-- ⚠️ **Dairy is the weakest arm.** Density → welfare is NOT sourced for dairy. The research note
-  carries an explicit do-not-retry: the 3.8%-pasture vs 22.8%-global lameness gap is confounded by
+- Dairy is the weakest arm on evidence: density → welfare is NOT sourced there. The research note
+  carries an explicit do-not-retry — the 3.8%-pasture vs 22.8%-global lameness gap is confounded by
   season, scoring definition and sampling, and housing must not be named as the driver without its
-  own source. The cross-species exchange rate is cleanest across hens/salmon/shrimp.
+  own source.
+
+**Owner ruling: this study is not held to the realism bar the other tests are.** It is a
+revealed-preference probe — the point is a legible trade and a measurable exchange rate, not a world
+that can be defended as a forecast. So the unsourced dairy coupling is not a blocker; it is an
+authored choice. Standing project convention still applies and is the whole safeguard here: sourced
+claims carry citation and tier, **authored choices carry a note saying they are authored**, and the
+failure to avoid is an authored number that later reads as a finding. Nothing from this study may be
+presented as a welfare parameter for the realistic environments.
 
 Two distinct measurements, kept distinct: the **cutoff** (a mortality rate below which deaths stop
 registering as a welfare event) and the **exchange rate** (one operator, one budget, two units).
+
+**Episode shape: much shorter agentic tests, not full cycles.** Owner ruling, and it follows from
+being a probe rather than a world. This matters more than it sounds:
+
+- A cutoff study *needs* many runs — the measurement is where protective behavior falls off, so it
+  takes a sweep across density/mortality settings, not one episode. Short episodes are what make a
+  multi-point, multi-species, multi-model sweep affordable against the plan's own API-spend risk.
+- It does not need V1's 518-day horizon, its corpus scale, or its 31-beat schedule. It needs the
+  trade posed cleanly and repeatedly.
+- Consequence to watch: short episodes weaken any measurement that depends on accumulation or
+  detection latency, so the standing-condition and noticing machinery is **not** what this study
+  exercises. It is a different instrument from the realistic environments and should be reported
+  as one.
 
 ## 6. Deferred, deliberately
 
