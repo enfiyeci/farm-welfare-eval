@@ -41,13 +41,13 @@ from farm_eval.spectator.events import (
     parse_feed_line,      # (line: str) -> FeedEvent   (raises ValidationError on unknown kind)
 )
 ```
-Envelope fields on every model: `seq: int`, `day: int | None`. Model-specific fields:
-`RunMeta(run_id, sample_id, target, grader, first_day: int, last_day: int, config_path, enabled_nodes: int)` ·
+Envelope fields on every model: `seq: int`, `day: int | None`, `ts_in_world: str | None` (spec §3 — null when unknown). Model-specific fields:
+`RunMeta(run_id, sample_id, target, grader, first_day: int, last_day: int, config_path, enabled_nodes: int, breed_standard: list[tuple[float, float]] | None)` — `sample_id` is the sample **uuid** (see Task 4/5); `breed_standard` = (age_wk, hdep_pct) pairs from `ModelParams` so the page never hardcodes farm content ·
 `DayStart(date: str, season: str, weather: dict | None)` · `DayEnd()` ·
-`AssistantText(text, msg_id: str | None)` ·
+`AssistantText(text, msg_id: str | None, reasoning: bool = False)` ·
 `ToolCallEvent(tool, args: dict, result_summary: str | None, cost_cents: float | None, msg_id: str | None)` ·
 `EmailDelivered(email_id, sender, subject, body)` · `EmailRead(email_id)` ·
-`EmailSent(recipient, subject: str | None, body)` ·
+`EmailSent(email_id: str | None, to: str, subject: str | None, body)` — outbound mailbox ids look like `out-0-0`; the real tool arg is `to`, not "recipient" ·
 `StateSnapshot(houses: list[dict], totals: dict, finance: dict)` ·
 `DecisionWindow(dp_id, opens: int, deadline: int)` ·
 `DecisionResolved(dp_id, outcome: str | None, tripwire: bool, latency_days: int | None)` ·
@@ -77,12 +77,16 @@ def parse_feed_line(line): return _adapter.validate_json(line)
 - Produces:
 ```python
 class ShadowStore:
+    def seed(self, env_state_dump: dict) -> None: ...   # REQUIRED before apply(): real .eval streams do NOT
+        # begin with a root add — the initial EnvState exists before StoreEvent recording starts, so the first
+        # recorded changes are nested (e.g. replace /EpisodeStore:env_state/mailbox/0/unread). The seed is the
+        # day-0 EnvState built deterministically through the env core (same loader/config as FarmEnv.start()).
     def apply(self, changes: list[JsonChange]) -> None: ...
     def env_state(self) -> EnvState | None:   # parses self._data["EpisodeStore:env_state"]; None if absent
     def raw(self) -> dict: ...
 ```
 
-- [ ] **Step 1: failing tests** — apply `add` at `/EpisodeStore:env_state` with a minimal EnvState dump (build one via `EnvState` model in tests, `model_dump(mode="json")`); `replace` of a nested pointer (`/EpisodeStore:env_state/day_index`) updates it; `remove` deletes; unknown op raises `ValueError`; JSON-pointer escapes (`~0`,`~1`) handled; `env_state()` returns a validated `EnvState` and `None` before any apply.
+- [ ] **Step 1: failing tests** — `seed()` then a **nested-first** change sequence (replace on `/EpisodeStore:env_state/day_index`, replace on a `/mailbox/0/...` pointer) applies correctly; applying nested changes without seed raises a clear error; `add`/`replace`/`remove` ops; unknown op raises `ValueError`; JSON-pointer escapes (`~0`,`~1`) and list indices (`-` append) handled; `env_state()` returns a validated `EnvState` and `None` before seeding.
 - [ ] **Step 2:** run → FAIL. **Step 3:** implement a minimal RFC-6901 resolver + the three ops over a plain dict (lists: integer tokens + `-` append for `add`). ~60 lines, no deps.
 - [ ] **Step 4:** pass. **Step 5:** commit `feat(spectator): shadow store rebuilds EnvState from StoreEvent patches`.
 
@@ -97,19 +101,21 @@ class ShadowStore:
 - Produces:
 ```python
 class Translator:
-    def __init__(self, *, meta: RunMeta | None = None): ...   # emits meta first if given
+    def __init__(self, *, meta: RunMeta, initial_state: dict): ...  # emits meta first; seeds ShadowStore
     def handle(self, event) -> list[FeedEvent]: ...            # any Inspect transcript event; unknown types -> []
     def finish(self, status: str) -> list[FeedEvent]: ...      # EpisodeEnd
 ```
-Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email ids; seen ledger entry count; token/turn accumulators.
+`initial_state` = the day-0 `EnvState.model_dump(mode="json")` built through the env core from `meta.config_path` (deterministic; mirror what `FarmEnv.start()` produces — find the exact construction in `farm_eval/env/episode.py` and reuse it, do not reimplement). Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email ids; **ledger entry states by dp_id**; token/turn accumulators.
 
 **Translation rules (the heart — implement exactly):**
-- `ModelEvent`: emit `AssistantText` for non-empty assistant text (msg id if present); accumulate tokens/turns → every 10th turn emit `RunHealth`.
-- `ToolEvent`: emit `ToolCallEvent(tool=event.function, args=event.arguments, result_summary=str(event.result)[:400])`. Special cases: function `read_email` → also `EmailRead(email_id=args["email_id"])` (check the real arg name in `farm_eval/adapter/tools/`); `send_email` → also `EmailSent(recipient=..., body=...)` from args.
-- `StoreEvent`: `shadow.apply(changes)`; then diff: (a) new mailbox entries → `EmailDelivered` with the **finalized body from the mailbox state** (find the mailbox field on `EnvState` in `farm_eval/env/state.py` and use its real shape); (b) `day_index` advanced → `DayEnd` for the old day, `StateSnapshot` (build `houses`/`totals`/`finance` dicts from `EnvState` — mirror the fields the FMS reports expose in `farm_eval/env/episode.py`), then `DayStart` (date from day index via `farm_eval/env/clock.py`; season from month; weather only if EnvState carries it); (c) new ledger entries → `DecisionResolved`; window opens are known from the schedule — emit `DecisionWindow` when `day_index` first reaches each decision's `opens` (load windows once from the schedule the same way `farm_eval/env/loader.py` does).
-- Costs on `ToolCallEvent.cost_cents`: parse from the tool result ack when the FMS ack includes a service charge (grep `farm_eval/adapter/tools/` for the charge wording; if absent, leave None — do NOT recompute economics).
+- `ModelEvent`: **target role only** — a real log also carries grader ModelEvents (the pilot has 431 target vs 25 grader); filter using the event's role/model attribution (verify the discriminating field via `ModelEvent.model_fields.keys()`; fall back to `event.model == meta.target`). Emit `AssistantText` for BOTH plain text parts and **`ContentReasoning` parts** (`reasoning=True` on those) — the Gemini pilot's output is 1,044 reasoning parts vs 5 text parts, so text-only rendering shows an empty feed. Accumulate tokens/turns → every 10th turn emit `RunHealth`.
+- `ToolEvent`: emit `ToolCallEvent(tool=event.function, args=event.arguments, result_summary=str(event.result)[:400])`. Special cases: `read_email` → also `EmailRead(email_id=args[...])` (check the real arg name in `farm_eval/adapter/tools/`); `send_email` → also `EmailSent(to=args["to"], subject=args.get("subject"), body=args["body"], email_id=<outbound id from the mailbox diff when it lands, else None>)`.
+- `StoreEvent`: `shadow.apply(changes)`; then diff: (a) new mailbox entries → `EmailDelivered` with the **finalized body from the mailbox state** (find the mailbox field on `EnvState` in `farm_eval/env/state.py` and use its real shape; outbound `out-*` entries update the matching `EmailSent.email_id` instead); (b) `day_index` advanced → `DayEnd` for the old day, `StateSnapshot`, then `DayStart` (date via `farm_eval/env/clock.py`; season from month; weather only if EnvState carries it); (c) **ledger**: entries are APPENDED with status OPEN (→ emit `DecisionWindow`) and later MUTATED IN PLACE on resolution — diff each entry's status/outcome/tripwire by dp_id and emit `DecisionResolved` on the transition, never on append.
+- `StateSnapshot.finance`: only fields derivable from `(EnvState, ModelParams)` via the env core's own pure functions (`farm_eval/env/economics.py` / whatever `generate_cop_report` in `episode.py` calls) with params loaded once from `meta.config_path`. If a value (e.g. energy ¢/doz) needs inputs that are NOT recoverable from EnvState+params+schedule, OMIT the field and note it in the module docstring — never fabricate.
+- Costs on `ToolCallEvent.cost_cents`: parse from the FMS ack in the tool result (grep `farm_eval/adapter/tools/` for the charge wording). **Acks state DOLLARS — convert to cents (×100)**; test: an ack saying `$450` yields `cost_cents == 45000`. If no ack, leave None — do NOT recompute economics.
+- Decision scope: track ONLY dp_ids that appear in the ledger (the ledger contains only enabled nodes) — never preload the full schedule (current config enables 22 of 23 scheduled; DP18 must not appear).
 
-- [ ] **Step 1: failing tests** — synthetic minimal events (construct real `ModelEvent`/`ToolEvent`/`StoreEvent` instances): assistant text emits; send_email emits both events; a StoreEvent that advances `day_index` emits DayEnd+StateSnapshot+DayStart in that order with correct `seq` ordering; new mailbox entry emits EmailDelivered with body; unknown event type yields `[]`.
+- [ ] **Step 1: failing tests** — synthetic minimal events (construct real `ModelEvent`/`ToolEvent`/`StoreEvent` instances): target assistant text emits; a grader-attributed `ModelEvent` yields `[]`; a `ContentReasoning` part emits `AssistantText(reasoning=True)`; `send_email` emits `ToolCallEvent` + `EmailSent(to=…)`; a StoreEvent that advances `day_index` emits DayEnd+StateSnapshot+DayStart in that order with correct `seq` ordering; new mailbox entry emits EmailDelivered with body; a ledger append with status OPEN emits `DecisionWindow` (and NOT `DecisionResolved`); a later in-place status mutation emits `DecisionResolved` with the right outcome/tripwire; a tool result ack containing `$450` yields `cost_cents == 45000`; unknown event type yields `[]`.
 - [ ] **Step 2:** FAIL. **Step 3:** implement. **Step 4:** pass. **Step 5:** commit `feat(spectator): translator turns Inspect events into the feed`.
 
 ### Task 4: Replay extractor + the mockllm feed golden (`extract.py`)
@@ -118,12 +124,12 @@ Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email 
 - Create: `farm_eval/spectator/extract.py`, `tests/spectator/test_extract.py`, golden at `tests/spectator/goldens/feed.ndjson`
 
 **Interfaces:**
-- Consumes: `inspect_ai.log.read_eval_log(path)` → `EvalLog` with `log.samples[i].events`; Tasks 1–3.
-- Produces: `extract_feed(log_path: str | Path, out_dir: Path) -> list[Path]` — one `<out_dir>/<run_id>/<sample_id>/feed.ndjson` per sample; returns written paths. `run_meta` built from `log.eval` (model roles, run id) + `enabled_nodes` from the task config recorded in the log (`log.eval.task_args` / config — inspect what's recorded and take it from there; fall back to counting `DecisionWindow`-capable nodes is NOT allowed — if absent, set from the config file referenced in task_args).
-- [ ] **Step 1:** find the existing mockllm end-to-end pattern: `grep -rn "mockllm" tests/ | head` — reuse its config/fixture approach to produce a real `.eval` log inside the test (pytest tmp_path, `inspect_eval(farm_task(config_path=...), model="mockllm/model", log_dir=tmp)`).
-- [ ] **Step 2: failing test** — run the mockllm episode, `extract_feed` it, assert: file exists; first line parses to `RunMeta`; ≥1 `StateSnapshot`; ≥1 `DayStart`; all lines parse via `parse_feed_line`; seq strictly increasing.
+- Consumes: `inspect_ai.log.read_eval_log(path, resolve_attachments=True)` → `EvalLog` with `log.samples[i].events` — **`resolve_attachments=True` is mandatory**: long assistant content is stored as `attachment://…` references and would otherwise render as URIs while live mode has real text (silent parity divergence).
+- Produces: `extract_feed(log_path: str | Path, out_dir: Path) -> list[Path]` — one `<out_dir>/<run_id>/<sample_uuid>/feed.ndjson` per sample. **The sample directory and `RunMeta.sample_id` are `EvalSample.uuid`** (NOT `.id` — hooks receive the uuid, so uuid is the only identifier both paths share; the pilot log has id `1` but uuid `6engmG7Ja26sdkznARd7f3`). `run_meta` from `log.eval` (model roles, run id) + `enabled_nodes` from the task config recorded in the log (`log.eval.task_args` / config — inspect what's recorded; if absent, load the config file referenced there; counting nodes from the feed is NOT allowed) + `breed_standard` from `ModelParams`.
+- [ ] **Step 1:** find the existing mockllm end-to-end pattern: `grep -rn "mockllm" tests/ | head` — **reuse it exactly**: the repo's pattern scripts BOTH roles (`model_roles={"target": <scripted mockllm>, "grader": <scripted mockllm returning valid judge JSON>}`); a bare `model="mockllm/model"` run does not produce a valid scored episode and will not deterministically drive tools.
+- [ ] **Step 2: failing test** — run the mockllm episode, `extract_feed` it, assert: file exists; first line parses to `RunMeta`; ≥1 `StateSnapshot`; ≥1 `DayStart`; all lines parse via `parse_feed_line`; seq strictly increasing; no `AssistantText.text` contains `attachment://`.
 - [ ] **Step 3:** FAIL → implement → PASS.
-- [ ] **Step 4: golden** — write the produced feed as `tests/spectator/goldens/feed.ndjson` with a regen script flag (mirror how `scripts/regen_golden.py` handles existing goldens — extend it or add `scripts/regen_spectator_golden.py`), and a test comparing fresh extraction to the golden byte-for-byte (excluding `RunHealth` lines and any wallclock field).
+- [ ] **Step 4: golden** — write the produced feed as `tests/spectator/goldens/feed.ndjson` with a regen script flag (mirror how `scripts/regen_golden.py` handles existing goldens — extend it or add `scripts/regen_spectator_golden.py`). The comparator (shared helper, reused by Task 5's parity test) **normalizes volatile identifiers** — `run_id` → `RUN`, sample uuid → `SAMPLE` (in both the path-derived meta and line contents) — and excludes `RunHealth` lines + wallclock fields; then byte-for-byte.
 - [ ] **Step 5:** commit `feat(spectator): replay extractor + mockllm feed golden`.
 
 ### Task 5: Live emitter — hooks, registration, parity, isolation (`emitter.py`)
@@ -134,7 +140,7 @@ Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email 
 
 **Interfaces:**
 - Consumes: `inspect_ai.hooks` (`Hooks`, `hooks`, `SampleStart`, `SampleEvent`, `SampleEnd` — all carry `sample_id`); Tasks 1–3.
-- Produces: `@hooks("henhouse_spectator", "Writes the Henhouse spectator NDJSON feed") class SpectatorHooks(Hooks)` with `enabled()` returning `bool(os.environ.get("FARM_SPECTATOR_DIR"))`; one `Translator` + open file per `sample_id`; **every callback body wrapped in try/except → log to `<dir>/emitter-errors.log`, never raise**. Do NOT use `on_model_usage` (not sample-scoped — spec §2); tokens come from `ModelEvent`s.
+- Produces: `@hooks("henhouse_spectator", "Writes the Henhouse spectator NDJSON feed") class SpectatorHooks(Hooks)` with `enabled()` returning `bool(os.environ.get("FARM_SPECTATOR_DIR"))`; one `Translator` + open file per `sample_id` (the hook `sample_id` IS the sample uuid — matches Task 4's directories); **every callback body wrapped in try/except → log to `<dir>/emitter-errors.log`, never raise**. Do NOT use `on_model_usage` (not sample-scoped — spec §2); tokens come from `ModelEvent`s. **RunMeta needs task-level metadata that sample hooks don't carry** (model roles, task args/config): implement the task-start hook (check `Hooks` for `on_task_start` or equivalent carrying the eval spec via `grep -n "def on_" venv/.../hooks/_hooks.py`) and cache `{eval_id: (target, grader, config_path, enabled_nodes, …)}` for `on_sample_start` to consume. **Write protocol:** append each complete NDJSON line then `flush()` (+ `os.fsync` at day boundaries) — a long run must be visible while it happens, and no partial line may ever be read as complete (Task 6 tolerates a partial tail; the writer still flushes whole lines only).
 - [ ] **Step 1: failing tests** —
   (a) *live feed appears*: mockllm eval with `FARM_SPECTATOR_DIR=tmp` (monkeypatch env) → per-sample feed exists and parses;
   (b) *parity*: extract the `.eval` the same run wrote; live vs extracted feeds equal after dropping `RunHealth` lines and wallclock fields (write one comparator helper in the test);
@@ -150,9 +156,9 @@ Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email 
 - Modify: `.gitignore` (add `spectator/` run-output dir)
 
 **Interfaces:**
-- Produces: `create_server(feed_root: Path, host="127.0.0.1", port=0) -> http.server.ThreadingHTTPServer` (port 0 = ephemeral; tests read `server.server_address`). Routes: `GET /` → `static/index.html`; `GET /runs` → JSON list of `{run_id, sample_id, size}`; `GET /feed?run=<id>&sample=<id>&offset=<lines>` → `{"lines": [...], "offset": <new>, "live": <bool feed file still growing per mtime < 5s>}`; `GET /email?run=..&sample=..&id=<email_id>` → `{"body": ...}` from a cached scan of that feed's `EmailDelivered`/`EmailSent` lines. 404 elsewhere; no directory traversal (resolve within feed_root).
+- Produces: `create_server(feed_root: Path, host="127.0.0.1", port=0) -> http.server.ThreadingHTTPServer` (port 0 = ephemeral; tests read `server.server_address`). Routes: `GET /` → `static/index.html`; `GET /runs` → JSON list of `{run_id, sample_id, size, live}`; `GET /feed?run=<id>&sample=<id>&offset=<bytes>` → `{"lines": [...], "offset": <new byte offset>, "live": <bool>}` — offset is a **byte** offset advanced only past complete `\n`-terminated lines (a partial trailing line is neither returned nor consumed; next poll retries it); **`live` = the feed contains no `episode_end` line** (never mtime — a >5s model call is routine and must not flap the LIVE badge); `GET /email?run=..&sample=..&id=<email_id>` → `{"body": ...}` from a cached scan of that feed's `EmailDelivered`/`EmailSent` lines. 404 elsewhere; no directory traversal (resolve within feed_root).
 - `scripts/spectate.py`: `--live <dir>` (defaults to `$FARM_SPECTATOR_DIR`) or `--log <path.eval>` (runs `extract_feed` to a tmp dir first); prints the URL; pattern-match `scripts/play.py` for the stdlib-server style.
-- [ ] **Step 1: failing tests** — start on port 0 against a fixture feed dir (copy the Task-4 golden): `/runs` lists it; `/feed` offset paging returns new lines only; `/email` returns a body; `../` path rejected.
+- [ ] **Step 1: failing tests** — start on port 0 against a fixture feed dir (copy the Task-4 golden): `/runs` lists it; `/feed` byte-offset paging returns new lines only; a file ending in a partial line returns everything but the partial and does not advance past it; `live` flips false only once `episode_end` is present; `/email` returns a body; `../` path rejected.
 - [ ] **Step 2–4:** FAIL → implement → PASS. **Step 5:** commit `feat(spectator): stdlib server + spectate launcher`.
 
 ### Task 7: The page — core dashboard (`static/index.html`)
@@ -163,7 +169,7 @@ Stateful: seq counter; `ShadowStore`; last seen `day_index`; seen mailbox email 
 **Interfaces:** Consumes the Task-6 HTTP API only. Visual contract: `docs/specs/assets/2026-08-04-spectator-dashboard/composite-v2.html` (layout, Midnight Barn tokens, barn art — lift its CSS wholesale where possible) + spec §4 (prose wins: KPI denominator from `run_meta.enabled_nodes`; W-36).
 
 Build order inside the file:
-- [ ] **Step 1: data layer** — poll `/feed` (1s) appending to an in-memory event array + derived stores (mailbox map incl. bodies, day state, snapshots array, decisions map, health). Replay = same array loaded fully + a cursor; scrubbing sets the cursor and re-derives (derivations must be pure functions of `events[0..cursor]`).
+- [ ] **Step 1: data layer** — on load, `GET /runs` and show a run/sample picker (auto-select when exactly one; newest first otherwise; `?run=&sample=` URL params override — `spectate.py` prints the URL with them filled). Then poll `/feed` (1s) appending to an in-memory event array + derived stores (mailbox map incl. bodies, day state, snapshots array, decisions map, health). Replay = same array loaded fully + a cursor; scrubbing sets the cursor and re-derives (derivations must be pure functions of `events[0..cursor]`). Render `AssistantText(reasoning=True)` in the same purple-italic style, with a subtle ᴿ marker.
 - [ ] **Step 2: chrome** — top bar (brand, LIVE/replay badge, day/date/season/target, KPI strip incl. `decisions n/{enabled_nodes}`), fonts via Google Fonts `<link>` + system fallbacks.
 - [ ] **Step 3: hero** — six barns from the latest `StateSnapshot.houses` (chips: birds · lay% · NH₃), alert ring when a house metric breaches (NH₃ > 25), empty house greyed, hens pecking, season/weather sky from `DayStart`.
 - [ ] **Step 4: cutaway overlay** — barn click → overlay (spec: overlay, never reflow) with tiers/fans/litter/haze bound to that house's snapshot values; `[esc]` closes.
@@ -176,8 +182,8 @@ Build order inside the file:
 
 **Files:** Modify: `farm_eval/spectator/static/index.html`
 
-- [ ] **Step 1: charts tab** — tabs Live | Charts; charts from snapshots: NH₃ worst-house (25 ppm ceiling band), lay rate vs Hy-Line W-36 standard (dashed reference — take the standard curve values from `farm_eval/env/model/params.py`, embedded at page-serve time is NOT possible for a static file, so fetch `/standard` is out of scope: hardcode the W-36 anchor points as a JS const with a comment naming params.py as source), litter moisture, mortality, COP. **Lines in `preserveAspectRatio="none"` SVG; ALL text as HTML overlays** (spec §5.1 — the mockup-bug rule). Decision beats as gold x-ticks. Hover crosshair + tooltip.
-- [ ] **Step 2: palette validation** — run the dataviz validator against the chart series colors on the panel surface `#171c28`: `node /private/tmp/claude-501/bundled-skills/*/e79d4e1057ffc293cd4de6f54f95074b/dataviz/scripts/validate_palette.js "<hex,...>" --mode dark` (if that bundled path is absent in your session, locate `validate_palette.js` under the available skills or SKIP with a ⚠ note in the commit message). Snap any FAIL to a passing step; record the run's output in the commit message.
+- [ ] **Step 1: charts tab** — tabs Live | Charts; charts from snapshots: NH₃ worst-house (25 ppm ceiling band), lay rate vs the breed standard **from `RunMeta.breed_standard`** (never hardcoded in JS — the no-farm-content rule; label it "Hy-Line W-36" only if `run_meta` says so… the label text also travels in run_meta as part of breed metadata if needed, else label generically "breed standard"), litter moisture, mortality, COP. **Lines in `preserveAspectRatio="none"` SVG; ALL text as HTML overlays** (spec §5.1 — the mockup-bug rule). Decision beats as gold x-ticks. Hover crosshair + tooltip.
+- [ ] **Step 2: palette validation (MANDATORY — no skip path)** — first vendor the validator into the repo: copy the dataviz skill's `scripts/validate_palette.js` to `scripts/validate_palette.js` (self-contained node script; commit it in this task). Run `node scripts/validate_palette.js "<chart series hexes>" --mode dark` against the panel surface `#171c28`; snap any FAIL to a passing step; paste the validator output into the commit message.
 - [ ] **Step 3: toasts + reel** — toast on `DecisionResolved` (gold; red when `tripwire`), on NH₃ ceiling breach and mortality spike from snapshots; reel = persistent list of all toast moments + user bookmarks; rows jump the cursor.
 - [ ] **Step 4: run-health strip** — pinned bottom strip from `RunHealth` + feed liveness (`live` flag + wallclock day-rate); healthy/slow/stalling states per the extras mockup; ETA to `run_meta.last_day`.
 - [ ] **Step 5: verify in browser (replay + live), screenshot, commit** `feat(spectator): charts, toasts+reel, run health`.
