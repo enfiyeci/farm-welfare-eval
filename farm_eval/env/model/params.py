@@ -2,10 +2,19 @@ from __future__ import annotations
 
 import math
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ModelParams(BaseModel):
+    # extra="forbid" so a stale or misspelled calibration key is a LOUD error, not a silent
+    # drop. Pydantic's default is to IGNORE unknown fields, and config.yml exposes a
+    # `model_params:` override hook -- so before this, copying a since-deleted parameter out of
+    # docs/model-params.md into that hook was accepted and discarded, and the model then behaved
+    # differently from its own calibration document with no warning at all. Surfaced by the Codex
+    # review of the f_MAT change, which deleted nh3_fmat_max and nh3_fmat_sat_rate. This matches
+    # the convention already used for every schedule model.
+    model_config = ConfigDict(extra="forbid")
+
     # Harm-accumulator thresholds (Task 12: integrate orchestrator)
     # nh3_aversion_threshold: NH3 ppm above which ppm·hours accumulate as harm.
     # heat_danger_thi:        THI at which heat-stress-hours start counting (DISTINCT

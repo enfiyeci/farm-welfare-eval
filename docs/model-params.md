@@ -68,24 +68,41 @@ Probe: `docs/probes/node-layer-audit-2026-07-29.md` (N2).
 
 | system | measured NH₃ |
 |---|---|
-| aviary, weekly belt removal | **32–38 ppm** |
-| litter with NO removal for two years | 9.2–**47.4** ppm |
+| **aviary, weekly belt removal** | **6.4–18.5 ppm** — Groot Koerkamp Ch. 7 period 2B = 6.4; Hinz 2010 *Volierenhaltung* median 11.40, max 18.52 |
+| floor housing (NOT an aviary), one-hour spot readings | 9.2–47.4 ppm — Hinz 2010 *Bodenhaltung* |
 | worst case in any system (deep litter, indoor manure storage) | ~85–**100** ppm |
 
-**The bound.** Keep the calibrated quadratic unchanged inside its validated domain; beyond it,
-saturate toward an asymptote anchored at the domain edge, and clamp the resulting concentration:
+**Corrected 2026-08-04.** The first row used to read "32–38 ppm" and the second "litter with NO
+removal for two years, 9.2–47.4 ppm". Both were misattributed. The 32–38 ppm is Nimmermark et al.
+2009's *multilevel* house, measured at 1.48 m³/h per hen with no supplemental heat, in a period
+averaging **+2.1 °C outdoors**, and with litter caking the farmer attributed to wheat in the feed;
+the paper states its highest readings came on cold days at reduced ventilation, so that figure
+belongs to the cold, throttled-ventilation operating point — which this model reaches through
+`nh3_cold_vent_penalty`, not at mild baseline. Asserting it at mild baseline counted winter twice.
+The 9.2–47.4 ppm is Hinz's **floor-housing** row; neither the housing type nor the "two years"
+framing is in that table, and Hinz cautions that comparing those one-hour spot readings to annual
+emission factors is "nicht oder nur bedingt zulässig".
+
+**The bound.** Keep the calibrated quadratic unchanged inside its validated domain; beyond the
+edge, **hold** the value the fit validates there:
 
 ```
-f_MAT(d) = exp(a*(d-1) + b*(d-1)^2)                      for d <= nh3_fmat_domain_max
-f_MAT(d) = f_max - (f_max - f_MAT(edge)) * exp(-k*(d-edge))   for d >  nh3_fmat_domain_max
+f_MAT(d) = exp(a*(min(d, edge)-1) + b*(min(d, edge)-1)^2)      for ALL d
 target   = clamp(emission - vent_clearing, 0, nh3_ceiling_ppm)
 ```
 
-`nh3_fmat_domain_max = 4.0`, `nh3_fmat_max = 6.35`, `nh3_fmat_sat_rate = 0.444`,
-`nh3_ceiling_ppm = 100.0`. Two mechanisms with distinct jobs: the saturation stops the
-unphysical extrapolation while keeping the belt lever graded over d=5..14; the ceiling is the
-absolute rail, and it is also what keeps this layer physical once stocking density becomes a
-second multiplier on the emission term.
+`nh3_fmat_domain_max = 4.0` (the edge), `nh3_ceiling_ppm = 100.0`.
+
+There used to be a second, saturating branch, `f_max - (f_max - f_MAT(edge))*exp(-k*(d-edge))`,
+with `nh3_fmat_max = 6.35` and `nh3_fmat_sat_rate = 0.444`. **Both parameters are deleted and the
+branch is gone**, because the asymptote existed only to reach the two misattributed rails above.
+The belt lever stays graded past `d = 4` through the channels that are actually measured — litter
+moisture and litter age — not through an invented asymptote. The ceiling remains the absolute rail
+and is what keeps this layer physical once stocking density becomes a second multiplier on the
+emission term.
+
+`ModelParams` is `extra="forbid"`, so a stale key copied from an older revision of this document
+into `config.yml`'s `model_params:` hook now fails loudly instead of being silently discarded.
 
 **This is not a fudge factor — it is a refusal to extrapolate a fit outside its domain.**
 

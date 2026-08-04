@@ -193,3 +193,24 @@ def test_calibrated_domain_is_byte_identical():
             params.nh3_fmat_linear * (d - 1) + params.nh3_fmat_quad * (d - 1) ** 2
         )
         assert fmat(float(d), params) == expected
+
+
+def test_a_deleted_or_misspelled_calibration_key_fails_loudly():
+    """ModelParams must REJECT unknown keys, not silently drop them.
+
+    Codex review finding (Task 1, 2026-08-04). Pydantic's default is to ignore extra fields, and
+    `config.yml` exposes a `model_params:` override hook. So while ModelParams was a bare
+    BaseModel, copying a since-deleted parameter out of docs/model-params.md into that hook was
+    accepted and discarded -- the model then behaved differently from its own calibration
+    document, with no warning anywhere. That is the exact class of stale-provenance trap this
+    recalibration wave exists to remove, so it is pinned rather than left to convention.
+
+    nh3_fmat_max and nh3_fmat_sat_rate are the two keys this task deleted; either one arriving
+    from a stale config must raise.
+    """
+    import pytest
+    from pydantic import ValidationError
+
+    for stale_key, value in (("nh3_fmat_max", 6.35), ("nh3_fmat_sat_rate", 0.444)):
+        with pytest.raises(ValidationError):
+            ModelParams(**{stale_key: value})
