@@ -1,6 +1,6 @@
 # Henhouse — the spectator dashboard (live + replay) — design spec
 
-**Date:** 2026-08-04 · **Status:** approved via visual brainstorm — the approved mockups are committed at `docs/specs/assets/2026-08-04-spectator-dashboard/` (`composite-v2.html` = the dashboard, `extras.html` = the six extras, `farm-scene-style.html` = barn art + cutaway)
+**Date:** 2026-08-04 · **Status:** approved via visual brainstorm — the approved mockups are committed at `docs/specs/assets/2026-08-04-spectator-dashboard/` (`composite-v2.html` = the dashboard, `extras.html` = the six extras, `farm-scene-style.html` = barn art + cutaway). **The mockups are the visual reference only; where they conflict with this prose, the prose wins.** Known stale spots baked into the mockup HTML: a hardcoded `6/21` KPI (see §3 `run_meta`), "Hy-Line W-80" labels (§5.1 — the substrate is W-36), and a "judge-validate rows"/`labels.csv` export (§5.4 — it is an annotations export)
 **Owner decisions baked in:** composite layout · Midnight Barn theme · storybook barns + cutaway on click (overlay) · built-in mail reading pane with follow-the-agent · six extras (charts, toasts+reel, run health, bookmarks/notes, snapshot, ambience) · ghost-run overlay and spoiler shield explicitly REJECTED for now.
 
 ## 1. Purpose
@@ -16,7 +16,7 @@ LIVE:    inspect eval ── Inspect hooks emitter ──▶ spectator feed (NDJ
 REPLAY:  finished .eval log ── extractor ────────▶ same NDJSON feed ─────────▶ same server ─────────▶ same page (scrubber)
 ```
 
-- **Feed emitter (live):** an `inspect_ai.hooks.Hooks` subclass (installed v0.3.244 has `on_sample_event`, `on_sample_start/end`, `on_model_usage`) that observes transcript events and appends NDJSON to `spectator/<run_id>/<sample_id>/feed.ndjson` — **one feed per sample execution**, so multi-epoch runs never interleave (the page lists samples and shows one). **Registration is explicit:** hooks do not load themselves — the emitter registers via the documented Inspect hooks entry-point mechanism, with a fallback import in `farm_task.py` guarded by the env var (exact mechanism pinned in Task 1; acceptance: setting `FARM_SPECTATOR_DIR` on a `run_pilot.sh` run produces a feed with no other change). Enabled only when `FARM_SPECTATOR_DIR` is set; **failure-isolated** — any exception inside the emitter is swallowed and logged, never propagated into the run; zero effect on determinism, agent-visible state, or the ledger.
+- **Feed emitter (live):** an `inspect_ai.hooks.Hooks` subclass (installed v0.3.244 has `on_sample_event`, `on_sample_start/end`) that observes transcript events — token/retry/health metrics come from the sample-scoped `ModelEvent`s inside `on_sample_event`, NOT from `on_model_usage` (its `ModelUsageData` carries no sample id, so it cannot be routed under concurrent epochs) and appends NDJSON to `spectator/<run_id>/<sample_id>/feed.ndjson` — **one feed per sample execution**, so multi-epoch runs never interleave (the page lists samples and shows one). **Registration is explicit:** hooks do not load themselves — the emitter registers via the documented Inspect hooks entry-point mechanism, with a fallback import in `farm_task.py` guarded by the env var (exact mechanism pinned in Task 1; acceptance: setting `FARM_SPECTATOR_DIR` on a `run_pilot.sh` run produces a feed with no other change). Enabled only when `FARM_SPECTATOR_DIR` is set; **failure-isolated** — any exception inside the emitter is swallowed and logged, never propagated into the run; zero effect on determinism, agent-visible state, or the ledger.
 - **Env-state snapshots:** the emitter must NOT read the live `EpisodeStore` — Inspect dispatches hook events through an async queue, so by the time an event is handled the store may already hold a later day's state. Instead the emitter maintains its own shadow `EnvState` by applying **StoreEvent patches in event order** (exactly what the replay extractor does with the recorded log), and emits `state_snapshot` when the shadow state's day advances. Live and replay therefore share one reconstruction code path by construction.
 - **Decision/ledger events:** derived from the silent ledger the same read-only way (window opened at `opens`, entry recorded, mechanical tripwires). Spectator-only; nothing about the ledger changes.
 - **Extractor (replay):** `farm_eval/spectator/extract.py` reads a finished `.eval` via the Inspect log API and writes the **identical** feed format. Parity is tested (see §7).
@@ -73,7 +73,7 @@ farm_eval/spectator/
 scripts/spectate.py
 ```
 
-Conventions honored: pydantic v2, `extra="forbid"`, no farm content hardcoded in logic (emails resolved from `corpus/` by id; UI labels generic), determinism untouched, venv at `./venv`.
+Conventions honored: pydantic v2, `extra="forbid"`, no farm content hardcoded in logic (email bodies travel in the feed per §3 — never resolved from `corpus/` at view time; UI labels generic), determinism untouched, venv at `./venv`.
 
 ## 7. Testing
 
