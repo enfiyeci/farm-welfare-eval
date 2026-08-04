@@ -220,8 +220,9 @@ def validate_reply_refs(corpus: Corpus) -> None:
 def params_for(corpus: Corpus, **overrides) -> ModelParams:
     """Build ModelParams with the corpus-owned farm content injected.
 
-    Two model inputs are farm content rather than calibration: the reference space allowance
-    per hen and the litter share of usable area. They default to 0.0 (inert) in ModelParams so
+    Three model inputs are farm content rather than calibration: the reference space allowance
+    per hen, the litter share of usable area, and how much of the belt cadence a maintenance
+    callout buys back. They default to 0.0 (inert) in ModelParams so
     no farm-specific number is hardcoded in logic, which means a bare ``ModelParams()`` leaves
     the density pathways switched OFF. Every construction surface routes through here instead;
     ``tests/env/test_density_reference_is_wired.py`` guards that a production env has them live.
@@ -238,6 +239,9 @@ def params_for(corpus: Corpus, **overrides) -> ModelParams:
     litter_frac = company.get("litter_area_frac")
     if litter_frac is not None:
         values["litter_area_frac"] = float(litter_frac)
+    belt_credit = company.get("belt_service_days_credit")
+    if belt_credit is not None:
+        values["belt_service_days_credit"] = float(belt_credit)
     values.update(overrides)
     return ModelParams(**values)
 

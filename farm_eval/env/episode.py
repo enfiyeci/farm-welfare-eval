@@ -162,7 +162,7 @@ class FarmEnv:
         _farm = params_for(corpus)
         _fill = {
             name: getattr(_farm, name)
-            for name in ("density_ref_sq_in", "litter_area_frac")
+            for name in ("density_ref_sq_in", "litter_area_frac", "belt_service_days_credit")
             if name not in params.model_fields_set and getattr(_farm, name) != 0.0
         }
         self.params = params.model_copy(update=_fill) if _fill else params
@@ -547,6 +547,15 @@ class FarmEnv:
                 else self.params.vet_visit_usd
             )
             self._charge_service_cost(fee)
+            if tool == "schedule_maintenance" and params.get("task") == "manure_belt":
+                # DP16's named root cause, and the ONE maintenance task with a mechanical
+                # effect: clearing the belts makes the litter behave as though they had run
+                # more recently. Recorded per house (the crew services one house's belts, not
+                # the complex) and only for a house that exists, so a typo'd id cannot seed a
+                # phantom entry. See model/layers/litter.py for the decay.
+                house = params.get("house_id") or ""
+                if house in self.state.welfare.houses:
+                    self.state.world.last_belt_service_day[house] = self.state.day_index
             if tool == "schedule_vet_visit":
                 # Round-3 vet tier: register the arc NOW (action time). The deliverer
                 # (farm_eval/env/vet.py) only walks these records — it never scans the

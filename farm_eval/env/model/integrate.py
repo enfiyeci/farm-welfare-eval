@@ -179,6 +179,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # untouched in state -- only the crew's actual cadence lags -- so footpad/nh3
             # degrade through the already-calibrated physics below.
             belt_days_eff = belt_days * (1.0 + staffing_u * params.staffing_belt_lag_max)
+            # DP16's named root cause: a `schedule_maintenance(house, manure_belt)` work order
+            # clears the belts, so for a while the litter behaves as though they had run more
+            # recently. The credit is applied to belt_days_eff -- the POST-lag interval -- not
+            # to the raw setpoint, so a serviced-but-understaffed house is not credited twice.
+            # None means "no service on record" and leaves the belt curve untouched.
+            svc_day = state.world.last_belt_service_day.get(hid)
+            days_since_service = None if svc_day is None else float(day - svc_day)
 
             # --- Litter moisture (daily): relax toward the belt-frequency-driven
             # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
@@ -190,8 +197,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # artifacts byte-identical. See layers/density.py.
             hw.litter_moisture = litter.litter_moisture_step(
                 hw.litter_moisture, belt_days_eff, params, area_sq_in=area, birds=birds,
+                days_since_belt_service=days_since_service,
             )
 
+            # NB the service credit is deliberately NOT passed to ammonia_step below. That
+            # argument feeds f_MAT, the manure-ACCUMULATION-time multiplier Wageningen fitted
+            # on belt residence time; crediting a callout there would be a second, unsourced
+            # channel, and once litter moisture drives ammonia (Task 6) the service already
+            # reaches ammonia through the moisture the line above just changed.
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,
                 litter_age,

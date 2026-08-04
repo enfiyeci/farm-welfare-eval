@@ -309,6 +309,35 @@ class ModelParams(BaseModel):
     litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
 
+    # --- Manure-belt service -> effective belt interval (DP16's named root cause) ---
+    # A manure-belt service clears accumulated manure, so the litter behaves as though the belt
+    # ran more often, decaying back as manure re-accumulates. This is the mirror of
+    # staffing_belt_lag_max, which STRETCHES the effective interval for understaffing
+    # (docs/model-params.md §Staffing->welfare coupling) -- same mechanism, opposite sign, and
+    # applied to the already-lagged interval so a serviced-but-understaffed house is not
+    # credited twice.
+    #
+    # It acts on the belt term, NOT on the water input, because below the evaporative capacity
+    # the belt term is the only live moisture term: density's surplus is gated on excess > 0 and
+    # H4 (124,200 birds) has no surplus at all -- 154.6 g/kg/d against a 160 capacity at the
+    # reference shipped today, 143.8 against 150 after this wave corrects the reference, zero
+    # either way. A water-input credit would be invisible for exactly the house DP16 scores.
+    #
+    # NO SOURCE fixes either figure, and none is implied. `belt_service_days_credit` is farm
+    # content (a callout's scope) and lives in corpus/company.yml, reaching here through
+    # loader.py:params_for; 0.0 here keeps a bare ModelParams() switched off, like the density
+    # figures below. `belt_service_decay_days` is a modelling choice: one week is the cadence at
+    # which the corpus's own belt work orders recur, and manure re-accumulates continuously, so
+    # the credit is bled off linearly rather than dropped in a step.
+    #
+    # Size, so nobody mistakes this for a large lever. The credit is floored at one belt-day, so
+    # at H4's authored belt-2 setpoint under full staffing the equilibrium can move at most
+    # litter_moisture_belt_slope * (2 - 1) = 0.85 moisture points -- and litter relaxes at
+    # 0.1/day against a 7-day decay, so one service realises about 0.16 of a point.
+    # tests/env/test_manure_belt_maintenance_moves_litter.py pins that measurement.
+    belt_service_days_credit: float = 0.0   # belt-days removed from the effective interval right after a service
+    belt_service_decay_days: float = 7.0    # days over which the credit decays to zero
+
     # --- Density -> litter loading (model-params.md §Density) ---
     # Both are FARM CONTENT and default to 0.0 (inert) on purpose: the real figures live in
     # corpus/company.yml and reach here through loader.py:params_for. A bare ModelParams()

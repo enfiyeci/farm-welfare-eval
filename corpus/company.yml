@@ -111,3 +111,21 @@ audit_thresholds:
 # loaded. That gap is authored stocking density, not a litter-provision artefact. See
 # docs/model-params.md §Density.
 litter_area_frac: 0.41
+
+# How much of the belt cadence a manure-belt maintenance callout buys back, in belt-days.
+# Read by farm_eval/env/loader.py:params_for -> ModelParams.belt_service_days_credit, and
+# applied by the litter layer to the EFFECTIVE (post-staffing-lag) belt interval, decaying to
+# zero over belt_service_decay_days. This is the mechanical effect of DP16's named root cause,
+# schedule_maintenance(H4, manure_belt).
+#
+# NOT SOURCED, and nothing in docs/research/ fixes it -- there is no measurement of a belt
+# callout's effect on litter water in this project's evidence base, so this comment claims
+# none. 1.0 is the smallest defensible unit and the only magnitude the mechanism itself names:
+# clearing the belts leaves the litter as though the belt had run one interval-day sooner. A
+# larger figure would assert that a callout does MORE than an extra belt run.
+#
+# The effective interval is floored at one belt-day, so at H4's authored belt-2 setpoint any
+# credit >= 1.0 gives the identical equilibrium -- the coefficient cannot be inflated to rescue
+# DP16's banding. tests/env/test_manure_belt_maintenance_moves_litter.py pins the measured size
+# of the lever (a 0.85-point ceiling on the equilibrium; ~0.16 realised per service).
+belt_service_days_credit: 1.0

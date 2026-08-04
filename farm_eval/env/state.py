@@ -92,6 +92,15 @@ class WorldState(BaseModel):
     setpoints: dict[str, dict[str, float]] = Field(default_factory=dict)
     litter_age_days: dict[str, float] = Field(default_factory=dict)
     bird_count: dict[str, int] = Field(default_factory=dict)
+    # Day index of the house's most recent `schedule_maintenance(task=manure_belt)` work order
+    # — DP16's named root cause. A world fact (when the crew last cleared the belts), not a
+    # welfare variable, so it lives here beside litter_age_days rather than on HouseWelfare.
+    # The litter layer reads `current_day - this` and shortens the effective belt interval by a
+    # credit that decays to zero (see model/layers/litter.py). Absent for a house never
+    # serviced, and absent for any EnvState serialized before this field existed (play
+    # autosaves, adapter checkpoints, the pinned pilot replay artifacts) — which is what keeps
+    # the pathway inert for them rather than dating every service to day 0.
+    last_belt_service_day: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
     # Usable floor area per house (sq in), seeded from the corpus house-area constant.
