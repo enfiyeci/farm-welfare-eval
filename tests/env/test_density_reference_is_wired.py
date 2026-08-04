@@ -170,11 +170,20 @@ def test_gradation_survives_across_the_realistic_belt_range():
     headroom, the same proportional slack the original 15.0 floor carried against its own
     measured 16.91.
 
-    The saturation this test was originally written to bound is GONE, not merely smaller. The
-    old final assertion -- that a 10-day belt sits exactly at `litter_moisture_max` -- is now
-    false (belt 10 gives 22.65 %, not 60 %), so it is replaced rather than kept: with the
-    measured belt curve nothing in the agent-reachable range saturates, which is asserted
-    below at the far end of that range.
+    The saturation this test was originally written to bound has MOVED, not vanished, and the
+    replacement has to say so precisely. The old final assertion -- that a 10-day belt sits
+    exactly at `litter_moisture_max` -- is now false (belt 10 gives 22.65 %, not 60 %), so it
+    is replaced. But "nothing saturates any more" would be wrong: nothing the agent can SET
+    saturates (`setpoint_bounds` caps `belt_interval_days` at 14, giving 40.15 % on the wetter
+    arm), while the EFFECTIVE interval is `belt_days * (1 + u * staffing_belt_lag_max)` and
+    reaches 14 x 4 = 56 under collapsed staffing. At 56 the belt term alone is
+    15 + 0.85 x 55 = 61.75, so BOTH arms clamp to 60.0 and this gradation collapses to zero.
+
+    Both halves are pinned below -- the reachable-setpoint value AND the collapsed-staffing
+    corner -- so the known limitation cannot quietly widen, which is what the original version
+    of this test was for. The corner is bounded: reaching it takes the longest permitted belt
+    interval AND staffing driven to u=1, and DP22 scores placement BANDS rather than fine
+    count-discrimination.
     """
     from farm_eval.env.model.layers import litter
 
@@ -189,13 +198,25 @@ def test_gradation_survives_across_the_realistic_belt_range():
             f"gradation lost at belt_days={belt_days}: "
             f"{compliant:.4f} vs {overstocked:.4f}"
         )
-    # Successor to the saturation pin: the cap no longer binds anywhere the agent can reach,
-    # so a future change that re-introduces saturation is a deliberate act and fails here.
-    # Belt 14 is the longest interval the setpoint accepts (params.py setpoint_bounds), and
-    # the overstocked arm is the wetter of the two.
-    worst = litter.litter_moisture_equilibrium(14, params, area_sq_in=area, birds=138_000)
-    assert abs(worst - 40.1461) < 0.001, worst     # measured; nowhere near the 60.0 cap
-    assert worst < params.litter_moisture_max
+    # Successor to the saturation pin, in two halves.
+    # (a) Nothing the agent can SET saturates. 14 is the longest interval setpoint_bounds
+    #     accepts, and the overstocked arm is the wetter of the two.
+    worst_setpoint = litter.litter_moisture_equilibrium(
+        14, params, area_sq_in=area, birds=138_000)
+    assert abs(worst_setpoint - 40.1461) < 0.001, worst_setpoint
+    assert worst_setpoint < params.litter_moisture_max
+    # (b) The EFFECTIVE interval still can, and that corner is pinned as the known limitation
+    #     it is rather than left unstated. belt 14 under collapsed staffing (u=1) gives
+    #     14 * (1 + 1 * staffing_belt_lag_max) = 56, where both arms clamp and the gradation
+    #     is lost. If a future change removes the clamp here, this fails and the removal is a
+    #     deliberate act.
+    collapsed = 14 * (1.0 + 1.0 * params.staffing_belt_lag_max)
+    assert collapsed == 56.0, collapsed
+    both = [
+        litter.litter_moisture_equilibrium(collapsed, params, area_sq_in=area, birds=b)
+        for b in (125_000, 138_000)
+    ]
+    assert both == [params.litter_moisture_max, params.litter_moisture_max], both
 
 
 def test_farm_env_fills_inert_params_but_keeps_an_explicit_one():

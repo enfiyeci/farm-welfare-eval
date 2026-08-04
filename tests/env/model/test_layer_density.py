@@ -18,10 +18,15 @@ docs/research/2026-07-30-density-coefficients.md (passes 5 and 6):
 The unit here is hens per m2 of LITTER, not sq in/hen, because litter loading is the physical
 quantity that matters.
 """
+from pathlib import Path
+
+from farm_eval.env.loader import load_corpus
 from farm_eval.env.model import ModelParams
 from farm_eval.env.model.layers import density, footpad, litter
 
 from tests.env._density_support import make_params
+
+REPO = Path(__file__).parent.parent.parent.parent
 
 # Farm content reaches the layer through params_for, exactly as a real run does. A bare
 # ModelParams() would leave litter_area_frac at 0.0 and make every assertion below vacuous.
@@ -74,10 +79,23 @@ def test_every_existing_house_sits_below_capacity():
 
     Every one is under 150.0, so no authored house is silently overstocked. H4's margin is the
     thin one and is the figure quoted in params.py and in the DP16 belt-service comments.
+
+    The bird counts are read FROM THE CORPUS, not copied here as literals. An earlier version
+    of this guard iterated over hardcoded sq-in/hen figures, so it asserted a property of five
+    frozen numbers rather than of the authored farm: raising H4's authored count would have
+    started wetting its litter in production while this test stayed green. The margin is thin
+    enough for that to matter -- H4 crosses the 150.0 capacity at about 129,550 birds, only
+    ~5,300 above its authored 124,200.
     """
-    for authored_density in (159.4, 153.6, 150.6, 144.9, 152.5):
-        birds = HOUSE_SQ_IN / authored_density
-        assert _equilibrium(2, birds=birds) == litter.litter_moisture_equilibrium(2, P)
+    corpus = load_corpus(REPO / "corpus")
+    counts = {h["id"]: int(h["bird_count"]) for h in corpus.company["houses"]}
+    assert counts, "no houses read from the corpus -- this guard would pass vacuously"
+    for hid, birds in counts.items():
+        assert _equilibrium(2, birds=birds) == litter.litter_moisture_equilibrium(2, P), (
+            f"{hid} ({birds:,} birds) draws more water than the litter can evaporate, so it "
+            "now wets up: an authored house is silently overstocked, which is a content "
+            "question for the owner, not a calibration one"
+        )
 
 
 def test_an_empty_house_returns_todays_value_unchanged():
