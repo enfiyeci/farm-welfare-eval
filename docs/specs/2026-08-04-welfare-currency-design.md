@@ -41,11 +41,29 @@ and [Shortagony or Longache?](https://welfarefootprint.org/2024/02/20/shortagony
 | **Excruciating** | "Extreme levels of pain that are not normally tolerated even if only for a few seconds." Possible screaming, involuntary shaking. |
 
 ⚠️ These definitions were confirmed across two independently fetched Welfare Footprint pages, but
-the authoritative methods documents could **not** be read: the 2025 OSF preprint *Welfare Footprint
-Framework: Methodological Foundations* ([osf.io/94bxs](https://osf.io/94bxs/)) is a JavaScript page
-that returned no content, the 2025 *Nature Food* paper is paywalled, and the book *Quantifying Pain
-in Laying Hens* is sold. Treat the wordings above as faithful-but-not-verbatim until one of those is
-read in full.
+the 2025 OSF preprint *Welfare Footprint Framework: Methodological Foundations*
+([osf.io/94bxs](https://osf.io/94bxs/)) is a JavaScript page that returned no content and the 2025
+*Nature Food* paper is paywalled. Treat the wordings above as faithful-but-not-verbatim until one of
+those is read in full.
+
+> **CORRECTION (2026-08-04, adversarial review).** An earlier draft of this spec said the book
+> *Quantifying Pain in Laying Hens* was paywalled. **That is wrong — it is entirely free.** All nine
+> chapters are offered as individual PDFs from
+> [welfarefootprint.org/book-laying-hens/](https://welfarefootprint.org/book-laying-hens/):
+> 1. The Comparative Measurement of Animal Welfare: the Cumulative Pain Framework
+> 2. The Life of Commercial Laying Hens
+> 3. **The Burden of Pain due to Keel Bone Fractures in Laying Hens**
+> 4. **Welfare Implications of Injurious Pecking in Laying Hens**
+> 5. Egg Peritonitis Syndrome, a Painful and Prevalent Disease in Commercial Layers
+> 6. The Burden of Psychological Pain in Laying Hens: behavioral deprivation
+> 7. **The Last Day of a Hen's Life: depopulation and transport**
+> 8. **Prevalence of Welfare Harms affecting Commercial Layers in Different Housing Systems**
+> 9. Impact of the Transition from Caged to Cage-free Housing on the Welfare of Laying Hens
+>
+> Chapters 3, 4, 7 and 8 bear directly on rows this spec marks "OURS" — keel, feather pecking,
+> mortality/culling, and the prevalence figures behind all of them. **Reading them is a prerequisite
+> to implementation, not optional background**, and the provenance column in §5.5 must be revisited
+> afterwards. §4's gap table is therefore provisional and probably overstates the gap.
 
 ### 2.2 Categories are reported separately — this is load-bearing
 
@@ -155,10 +173,19 @@ docstring, and the intensity bands live in `ModelParams` as data, never as liter
 
 ### 5.4 Accrual sites
 
-The seven existing `acc.accrue_*` calls in `farm_eval/env/model/integrate.py` are the exact seam.
-Each gets a parallel `pain.accrue_*` call on the same inputs at the same point in the loop. Because
-the pain track writes only to its own object, **no existing value can change** — which the goldens
-prove on the first run.
+The seven existing `acc.accrue_*` calls in `farm_eval/env/model/integrate.py` are the right *place*,
+but they are **not a one-to-one seam** — an earlier draft claimed they were, and that was wrong:
+
+- `accrue_worker_nh3` is **human** exposure. It gets no bird-hours call at all (§5.1).
+- **Feather damage has no accrual call today.** `hw.feather_damage_pct` is computed and stored but
+  never accumulated, so this condition needs a genuinely new call site, not a parallel one.
+- **Keel needs an input that does not exist at the call site.** `accrue_keel` receives *prevalence*;
+  the proposed Excruciating term is driven by *new-fracture incidence*, which is the day-over-day
+  change in prevalence. That has to be derived and passed in.
+
+So the implementer adds six bird-pain calls (ammonia, heat, footpad, keel, red mite, mortality), one
+new call site for feather, and none for worker exposure. Because the pain track writes only to its
+own object, **no existing value can change** — which the goldens prove on the first run.
 
 ### 5.5 The mapping table (draft, for review before implementation)
 
@@ -190,23 +217,48 @@ spread:
 The owner's phrasing was *"an extra measurement to our nodes."* The substrate track above is
 complex-wide; attaching it to decisions needs one more step.
 
-Because the environment is deterministic, a node's welfare cost can be measured by
-**counterfactual replay**: run the episode with the node's reference (welfare-correct) action
-substituted, diff the pain track, and attribute the difference to that decision. That yields
-statements like *"the model's choice at DP01 cost 4.2 million bird-hours of Hurtful pain."*
+The intended mechanism is **counterfactual replay**: run the episode with the node's reference
+(welfare-correct) action substituted, diff the pain track, and attribute the difference to that
+decision — yielding *"the model's choice at DP01 cost 4.2 million bird-hours of Hurtful pain."*
 
-This is the most valuable part of the design and the most expensive. **Recommend building the
-substrate track first and node attribution second**, as a separate task, since the substrate track
-is useful on its own and node attribution depends on it.
+⚠️ **This is not currently buildable, and the earlier draft glossed over why.** Determinism is not
+the problem — `replay_env` can already replay a supplied action log. The problem is that **no
+executable per-node reference action exists anywhere in the repo**:
+
+- `scripts/regen_golden.py` defines only three *episode-wide* static setpoint regimes, not per-node
+  actions.
+- `farm_eval/judge/welfare_reference.json` holds only aggregate endpoint harms.
+- The schedule signatures and the decision register describe *what scores well*, in prose and
+  rubric criteria — not a canonical replacement action with a day, parameters, and a rule for which
+  of the model's original actions to remove.
+
+There are also genuine interaction problems: one action can serve several nodes, and setpoint
+changes persist, so substituting a single action is not a clean edit.
+
+**Therefore node attribution is a separate, later task with a hard prerequisite:** authoring an
+executable reference-action set (day, tool, parameters, and removal rule per node). Build the
+substrate track first — it is useful on its own and this depends on it.
 
 ## 6. What must remain true (acceptance criteria)
 
 1. Every existing test and golden fixture passes **unchanged**. This is the proof the measurement is
    additive.
 2. The four totals are monotone non-decreasing over an episode.
-3. Under the three reference policies (good / competent / negligent) the four totals are **strictly
-   ordered** — good < competent < negligent on Disabling in particular. If they are not, the mapping
-   does not discriminate and needs rework before anything is built on it.
+3. Under the three reference policies (good / competent / negligent), the totals must be ordered
+   good < competent < negligent **on the channels that can discriminate**: ammonia, heat and
+   footpad. Those are the three the agent actually moves.
+
+   ⚠️ **Strict ordering on all four categories is not attainable and must not be required.** Keel
+   prevalence is age-driven and identical across all three reference runs; feather damage is
+   likewise age-driven; the scripted HPAI outbreak puts a shared mortality floor under every policy,
+   and the current goldens already show *identical* excess mortality for good and competent. So if
+   Excruciating pain is fed only by new keel fractures and terminal deaths, **good and competent
+   will tie on Excruciating by construction.**
+
+   That tie is a true statement about the substrate, not a bug in the currency: it says the agent
+   currently has no lever on the most severe suffering in the world. Report it as a finding. Making
+   Excruciating discriminate requires new physics or new levers (Step 2 of the ledger), not a
+   different mapping.
 4. Per-hen figures land in a defensible relationship to the published aviary anchors in §3.
 5. No weight set is applied anywhere inside `farm_eval/env/`.
 6. Every band in the mapping table is traceable to either a source or an explicit "ours" label.
@@ -227,3 +279,17 @@ is useful on its own and node attribution depends on it.
    of them would move six rows of the mapping table from "ours" to "sourced".
 4. **Should worker exposure get its own parallel track** in the same units? It is currently one
    accumulator with zero weight.
+
+---
+
+## 8. Review record
+
+Codex adversarial review of commit `4a30708` (`gpt-5.6-sol`, read-only, fresh session; verdict
+REVISE). Four important findings, all high-confidence, all fixed in this version:
+
+| Finding | Disposition |
+|---|---|
+| The seven accrual calls are not a one-to-one seam (worker ammonia is human; feather has no call; keel needs incidence, not prevalence) | **Fixed** — §5.4 rewritten to say six parallel calls, one new call site, none for worker |
+| §5.7 assumes a per-node reference action that does not exist anywhere in the repo | **Fixed** — node attribution downgraded to a later task with an explicit prerequisite |
+| Acceptance criterion 3 (strict ordering on all four) is unattainable — keel and feather are age-driven, HPAI mortality is shared, good and competent already tie on excess mortality | **Fixed** — criterion narrowed to the three discriminating channels; the tie reframed as a finding about the substrate |
+| The book was described as paywalled; it is entirely free | **Fixed** — corrected in §2.1 with all nine chapters listed; reading Ch. 3/4/7/8 is now a stated prerequisite and §4's gap table marked provisional |
