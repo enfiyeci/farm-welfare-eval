@@ -269,6 +269,71 @@ Held per house **and** in complex-wide total, so per-house attribution survives 
 Added alongside `HarmAccumulators`, never inside it — `welfare_state.py` must keep reading exactly
 the fields it reads today.
 
+#### 5.2.1 The mortality ledger — OWNER RULING 2026-08-04
+
+> *"lets keep it that way now and count how many birds died when, i will later make a more decisive
+> decision about it"* — and, on the valuation: *"we can create the anchors etc for that later when
+> we do the run for checking financial and other welfare scenarios for calibration."*
+
+Two instructions. **Keep the current treatment** — the Welfare Footprint default stands (a death
+truncates accrual and earns no credit for the life not lived, §7 Q1), and so does §5.5.1 ¶13's
+decomposition of the population effect. **And record deaths in time**, so the decision can be made
+later without re-running anything.
+
+```
+class DeathRecord(BaseModel):
+    """One occupied house, one day. Pure observation: changes no computed value."""
+    day: int
+    house_id: str
+    birds_start: int        # live birds at the start of the day — the multiplier for every rate
+
+    # --- the integers: "how many birds died when" ---
+    deaths: int             # EXACTLY the integer already written to bird_count that day
+    baseline: int           # apportioned from `deaths`; the four sum to `deaths` exactly
+    heat: int
+    hpai: int
+    staffing: int
+
+    # --- the fractions, AS THEY ENTERED the computation ---
+    baseline_frac: float
+    heat_frac: float        # AFTER min(day_heat_mort, heat_mort_daily_cap) — the capped value
+    hpai_frac: float
+    staffing_frac: float
+```
+
+Held as `EnvState.deaths: list[DeathRecord]`, following the existing `EnvState.actions:
+list[ActionRecord]` precedent. **At most** 518 × 5 = 2,590 rows; fewer in practice, because
+`integrate()` skips houses with no live birds (`if birds <= 0: continue`) and House 3 empties out
+during the run.
+
+⚠️ **Both halves are required, and an earlier draft carried only the integers.** The integers answer
+the owner's question. The fractions are what let anything reconcile with the existing accumulator —
+see §5.5.1 ¶15, which is a genuine defect that the integer-only design could not have fixed.
+
+**Why "when" is the right thing to record, and not merely a convenience.** A bird that dies on day
+10 stops accruing for the remaining ~508 days; one that dies on day 500 loses ~18. Day-stamped
+deaths therefore let the report compute, **without re-running any episode**, the pain those birds
+*would* have accrued had they lived. That is exactly the averted-suffering calculation Chapter 1
+and Animal Ask both perform **outside** the currency rather than by scoring death inside it
+(§7 Q1), and it is the term that turns §5.5.1 ¶13's population effect from a correction we apologise
+for into a quantity we can report. Recording deaths without their timing would not support it.
+
+**The cause split is required, not decorative.** It is what §5.7.2 needs to stop treating
+`excess_mortality` as one channel: heat and staffing are agent-movable, HPAI is scripted, and today
+all three are summed before accrual. The four terms already exist separately at the point of
+accrual (`farm_eval/env/model/integrate.py`), so this is recording, not new physics.
+
+⚠️ **But the integer ledger alone cannot split that accumulator — see §5.5.1 ¶15.** They are
+different quantities, and the accumulator must be split at accrual using its own fractional inputs.
+
+⚠️ **And the ledger alone is not sufficient for the forgone-pain calculation either — see
+§5.5.1 ¶16.** It is necessary, not sufficient; the missing piece is a daily pain-rate series.
+
+⚠️ **Not decided here.** How a death is valued stays open by owner instruction, and the anchors for
+it are authored later, **at the calibration run that checks the financial and welfare scenarios**,
+not now. This ruling makes that later decision cheap; it does not pre-empt it. It also interacts
+with ruling #15 (anchor placement), which already gates the Tier-A figures.
+
 ### 5.3 New module
 
 `farm_eval/env/model/pain.py` — pure functions, one per condition, each taking the house's current
@@ -553,7 +618,10 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
    share taken across all deaths would make the peritonitis channel appear to respond to the agent
    when the underlying disease does not. That is a **manufactured signal**, and it would be the
    single most misleading thing this design could do under the §1.1 framing. Attach the share to
-   the age-driven baseline line only, and expect — and report — a delta of zero.
+   the age-driven baseline *rate* only. ⚠️ **Do not then expect a delta of exactly zero**: baseline
+   deaths are that rate times the live flock, so this channel carries the population residual of
+   ¶13 like every other rate-driven row. Expect no *direct* response and a small residual, and
+   report the ¶13 decomposition rather than a bare zero.
 10. ⚠️ **`stocking_density` is inert; do not write a foraging bridge that pretends otherwise.**
     It exists as a field on `HouseWelfare` (`farm_eval/env/state.py`) and **nothing reads it**: no
     model layer consumes it and no agent tool sets it (verified by search, 2026-08-04). The
@@ -639,6 +707,88 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
     physics and hides a real consequence of negligence. The deaths are a genuine harm — they belong
     in the death count reported beside the four totals (§7 Q1), not smuggled in as a *reduction*
     in pain.
+14. ⚠️ **Splitting the daily death count by cause: apportion the integer, never re-derive it.**
+    The mortality ledger (§5.2.1) needs four cause figures that sum exactly to the day's recorded
+    deaths, and the obvious implementation gets this wrong. Today
+    `farm_eval/env/model/integrate.py` computes
+
+    ```
+    excess = min(day_heat_mort, heat_mort_daily_cap) + hpai_daily_mort_frac + staffing_excess_mort
+    deaths = min(int(round((baseline_mort + excess) * birds)), birds)
+    ```
+
+    — **one integer, rounded once, from the sum of four fractional rates, then clamped to the live
+    flock.** Computing `int(round(rate_i * birds))` per cause would not sum back to `deaths`
+    (rounding four times instead of once), and would ignore the clamp entirely on a day when total
+    mortality exceeds 100%.
+
+    **Rule: take the recorded `deaths` as the whole and apportion it** across the four fractional
+    contributions by largest remainder, so the parts sum to the whole by construction and inherit
+    the clamp automatically. Reconciliation is then exact and testable:
+    `baseline + heat + hpai + staffing == deaths` on every row, and `sum(row.deaths) ==
+    state.welfare.mortality_cumulative` over the run.
+
+    ⚠️ **Largest remainder is undefined at three edges; specify all three or the implementation
+    will differ between authors.**
+    - **All four weights zero** (a quiet day with no baseline, heat, HPAI or staffing mortality):
+      the proportional step divides by zero. Rule: if the weight total is zero then `deaths` is
+      necessarily zero too, and **all four parts are zero** — return early, never divide.
+    - **Negative weights.** All four terms are non-negative under the current parameters
+      (`staffing.adequacy_factor` is documented and implemented as bounded [0, 1], so
+      `staffing_u = 1 − f ≥ 0`; the heat, HPAI and baseline terms are non-negative rates) —
+      ✅ verified 2026-08-04. ⚠️ But `ModelParams` does not *forbid* a negative coefficient, and
+      apportionment is undefined for negative weights. Rule: **assert non-negative and finite, and
+      fail loudly** rather than clamping silently; a negative mortality coefficient is a
+      configuration error, not a case to absorb.
+    - **Tied remainders.** Rule: break ties in the fixed order `baseline, heat, hpai, staffing`.
+      Determinism is a project invariant and a tie broken by dict iteration order is exactly how it
+      gets lost.
+15. ⚠️ **The integer ledger CANNOT split `harm.excess_mortality`. They are different quantities.**
+    This was the design's own claim and it is wrong; both reviewers caught it independently.
+    `accrue_excess_mortality(h, frac, birds)` adds **`frac * birds` as a float**, where `frac` is
+    the *excess* fraction only (`farm_eval/env/model/accumulators.py` — "Baseline … is NOT harm").
+    The ledger, by contrast, records a **once-rounded, clamped integer that includes baseline**.
+    Three concrete mismatches follow:
+
+    - A day with 0.4 expected excess deaths adds **0.4** to the accumulator and records **0** deaths
+      in the ledger. Summing ledger integers can never reproduce it.
+    - The ledger includes baseline deaths; the accumulator deliberately excludes them.
+    - The accumulator's argument is `min(excess, max(0, 1 − baseline_mort))`, a different clamp from
+      the ledger's `min(…, birds)`.
+
+    **Rule: to give §5.7.2 its movable-versus-fixed split, split the accumulator AT ACCRUAL**, from
+    its own fractional inputs — add `excess_mortality_heat`, `excess_mortality_hpai` and
+    `excess_mortality_staffing` alongside the existing field, apportioning the same clamped `frac`
+    across the three by their fractional shares. Keep `excess_mortality` itself untouched and equal
+    to their sum, so acceptance criterion 1 holds and the goldens do not move. The ledger's
+    `*_frac` fields exist so this split is auditable after the fact; **they do not replace it.**
+16. ⚠️ **The ledger is necessary but NOT sufficient for the forgone-pain calculation §5.2.1 promises.**
+    Both reviewers caught this too. To compute what the dead birds would have accrued you need the
+    **per-bird pain rate on each channel for each remaining day**, and the state retains only
+    cumulative `PainTrack` totals. Two runs can share an identical death ledger and have completely
+    different post-death conditions — a house that goes hot and ammoniac after day 10 forgoes far
+    more per lost bird than one that stays clean.
+
+    **Rule: record a daily per-house per-channel pain rate alongside the ledger** — pain-hours per
+    bird per day, per intensity category. The pain module computes exactly this on its way to the
+    totals, so it is a store, not a new calculation. Size is the real cost: roughly
+    518 days × 5 houses × ~10 channels × 4 categories, which is far larger than the ledger itself
+    and should be stored at reduced precision or aggregated per channel rather than per channel ×
+    category.
+
+    ⚠️ **And even then the calculation rests on an assumption that must be labelled: that the dead
+    birds would have experienced the same rates as their house's survivors.** That is reasonable —
+    they shared a house — but it is not a fact, and it is exactly wrong in the case that matters
+    most, a mass cull where the survivors are in a different house entirely. State the assumption
+    wherever the forgone-pain figure appears, or do not publish the figure.
+
+    ⚠️ **The ledger must change no computed value.** It is observation only: `deaths`,
+    `bird_count`, `mortality_cumulative` and every harm accumulator keep their current values, so
+    the goldens (`tests/fixtures/golden/baseline_checkpoints.json`, `reference_runs.json`, which
+    carry harm dicts rather than whole state) stay byte-identical — acceptance criterion 1. Note
+    that `EnvState` serialises into the Inspect `.eval` log, so the ledger adds roughly 2,590 small
+    rows to every run's log; that is the cost of being able to decide the death question later
+    without re-running.
 
 ### 5.6 Report-time weighting
 
@@ -807,9 +957,11 @@ then Tier A and Tier B; Tier C follows if and when the reference-action set is a
    mortality *rate* and must never be allowed to ride on excess mortality (§5.5.1 ¶9). ⚠️ Because
    baseline deaths are that rate times the live flock, this channel still carries the population
    residual of ¶13, so report its decomposition rather than a bare zero. So the report shows
-   a real Excruciating total with a zero delta, and must say why — the alternative failure modes
-   are a reader concluding "no severe suffering occurred" (the old risk) or concluding "the agent
-   caused this" (the new one).
+   a real Excruciating total whose difference is **small and population-driven, not zero**, and
+   must say why. Three failure modes to avoid, not two: a reader concluding "no severe suffering
+   occurred" (the old risk), concluding "the agent caused this" (the new one), or an implementation
+   asserting the difference is exactly zero and thereby erasing the valid population and
+   interaction terms that ¶13 requires it to report.
 4. **Per-hen figures land in a defensible relationship to the §3 anchors channel by channel — not
    in total.** ⚠️ **Rewritten 2026-08-04**: this criterion previously explained a low total by our
    omitting egg peritonitis and behavioural deprivation. Both are now **added** (§5.5), so that
@@ -880,6 +1032,27 @@ the life not lived — and the ethical question **stays open**. Concretely:
 
 ⚠️ **This remains an open question, deliberately.** It is not settled by the sources and has not
 been settled by us; it is parked, with a working default, until the owner decides.
+
+**OWNER RULING, 2026-08-04 (second pass, after the §5.5.1 ¶13 sign hazard was measured):**
+*"lets keep it that way now and count how many birds died when, i will later make a more decisive
+decision about it"*, and on the valuation, *"we can create the anchors etc for that later when we do
+the run for checking financial and other welfare scenarios for calibration."*
+
+So the question stays open and the working default stands **unchanged** — including through the
+discovery that a worse policy accrues less pain on the dominant channels because it kills more
+birds. What is added is the **mortality ledger of §5.2.1**: deaths by day, by house, by cause.
+
+This is the right response to ¶13 rather than a deferral of it, for a reason worth stating. The
+sign hazard exists because dead birds stop accruing; the term that would make it interpretable is
+the pain those birds *would* have accrued had they lived. That term needs **timing** — a bird lost
+on day 10 forgoes ~508 days, one lost on day 500 forgoes ~18 — and it is computable at report time
+from a day-stamped ledger without re-running a single episode. Recording the timing now is
+precisely what keeps every valuation option open later, which is the same argument that already
+justified keeping the death count separable from the four totals.
+
+⚠️ **The valuation anchors are explicitly NOT authored now.** They are authored at the calibration
+run that exercises the financial and welfare scenarios, alongside ruling #15's anchor placement.
+Until then the reported death figures are counts, not valuations, and must be labelled as such.
 
 ### Q2. Do the four categories accrue simultaneously? **ANSWERED: yes, independently — the recommendation was already the published method.**
 
@@ -1079,3 +1252,25 @@ Nine findings across the two rounds, all verified against the code, a measured r
 PDFs; all fixed; none dismissed. ⚠️ The loop was **stopped here at two rounds** rather than run to
 its three-round cap: the remaining work is implementation, and every finding above is recorded
 against a design that has not been built yet.
+
+### 8.6 The mortality-ledger ruling and its review, 2026-08-04
+
+Owner ruling: keep the death treatment, record deaths by day, decide the valuation later at the
+calibration run (§5.2.1, §7 Q1). Codex pair, read-only, fresh sessions against this worktree.
+**Four findings; the two most serious were raised independently by BOTH reviewers.** All four were
+verified against the code before being fixed; none dismissed.
+
+| Finding | Disposition |
+|---|---|
+| **(both reviewers)** The integer ledger cannot split `harm.excess_mortality` as §5.2.1 claimed. `accrue_excess_mortality` adds a **fractional, excess-only** value (`frac * birds`, baseline explicitly excluded), while the ledger records a **once-rounded, baseline-inclusive, differently-clamped integer**. A day with 0.4 expected excess deaths adds 0.4 to the accumulator and 0 to the ledger | **Fixed** — verified in `farm_eval/env/model/accumulators.py` and `integrate.py`. New §5.5.1 ¶15: the accumulator must be split **at accrual** into `excess_mortality_{heat,hpai,staffing}` beside the untouched original. `DeathRecord` gains the four `*_frac` fields so the split is auditable, but they do **not** replace it |
+| **(both reviewers)** A `DeathRecord` is not sufficient to compute the forgone pain §5.2.1 promises: that needs the per-bird pain **rate** for each remaining day, and the state keeps only cumulative totals. Two runs can share a death ledger and have entirely different post-death conditions | **Fixed** — new §5.5.1 ¶16 requires a daily per-house per-channel rate series alongside the ledger, flags its size as the real cost, and labels the assumption the calculation rests on (that the dead would have fared like their house's survivors — exactly wrong for a whole-house cull) |
+| Largest-remainder apportionment is undefined at three edges: all-zero weights (division by zero), negative weights, tied remainders | **Fixed** — ¶14 now specifies all three. ✅ Verified that all four terms are non-negative today (`staffing.adequacy_factor` is bounded [0, 1], so `staffing_u ≥ 0`), but `ModelParams` does not forbid a negative coefficient, so the rule is **assert and fail loudly**, not clamp. Ties break in a fixed order — determinism is a project invariant |
+| Acceptance criterion 3 still asserted the Excruciating difference is exactly zero, contradicting ¶13's population residual in the same paragraph | **Fixed** — both remaining bare-zero claims rewritten; an implementation asserting exact zero would erase the very terms ¶13 requires it to report |
+
+Two further corrections were found in self-review during the same wave and fixed alongside:
+the heat term entering `excess` is the **capped** value (`min(day_heat_mort, heat_mort_daily_cap)`),
+so apportionment must use the cap; and the row count is an **upper** bound of 2,590, since
+`integrate()` skips houses with no live birds and House 3 empties during the run.
+
+⚠️ The loop was **stopped at one round**: every finding was a design correction to an unbuilt
+design, all were verified against the code, and the fixes are recorded above rather than shipped.

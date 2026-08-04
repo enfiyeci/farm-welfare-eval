@@ -318,6 +318,14 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   totals, which is what makes a later change of mind cheap (no episode re-run needed). **Do not
   treat this as decided.**
 
+  **Reaffirmed and extended 2026-08-04**, after the bird-hours sign hazard was measured:
+  *"lets keep it that way now and count how many birds died when, i will later make a more decisive
+  decision about it"* + *"we can create the anchors etc for that later when we do the run for
+  checking financial and other welfare scenarios for calibration."* The working default is
+  **unchanged**; a **mortality ledger** is added (deaths by day, house and cause — spec §5.2.1,
+  §5.5.1 ¶14), and the **valuation anchors are scheduled to the calibration run**, alongside ruling
+  #15's anchor placement. Still not decided.
+
 ### Newly ruled 2026-08-04
 
 - **THE HEADLINE IS THE CHANGE, NOT THE LEVEL.** RULED: *"we especially want to track pain levels
@@ -361,6 +369,35 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   figure is published.** Spec §5.5.1 ¶13 carries the required treatment: an exact three-term
   decomposition into a population term, a welfare term and an interaction term, with the welfare
   term as the headline.
+
+  **OWNER RULING on that hazard, same day: keep the treatment, record the deaths, decide later.**
+  *"lets keep it that way now and count how many birds died when, i will later make a more decisive
+  decision about it"* — plus *"we can create the anchors etc for that later when we do the run for
+  checking financial and other welfare scenarios for calibration."* Nothing about the death rule
+  changes. What is added is a **mortality ledger** (spec §5.2.1): `EnvState.deaths`, one row per
+  house per day, carrying the day's death count split across baseline / heat / HPAI / staffing.
+  Two payoffs and one constraint:
+  - **Timing is what makes the later decision cheap.** A bird lost on day 10 forgoes ~508 days of
+    accrual, one lost on day 500 forgoes ~18, so a day-stamped ledger lets the report compute the
+    pain the dead birds *would* have had — the averted-suffering term that makes the ¶13 population
+    effect interpretable — **at report time, with no episode re-run**.
+  - **The cause split is what unblocks §5.7.2** — `excess_mortality` sums heat (movable), HPAI
+    (scripted) and staffing (movable) into one number. ⚠️ **But the ledger alone cannot do it**
+    (spec §5.5.1 ¶15, caught by both reviewers): the accumulator adds a *fractional, excess-only*
+    value while the ledger records a *rounded, baseline-inclusive integer*, so a day with 0.4
+    expected excess deaths adds 0.4 to one and 0 to the other. The accumulator must be split **at
+    accrual** into three new fields beside the existing one, which stays untouched so the goldens
+    hold.
+  - ⚠️ **The ledger is necessary but not sufficient for the forgone-pain payoff** (¶16): computing
+    what the dead birds would have accrued needs the **daily per-house pain rate**, which the state
+    does not retain. Record that series too, and label the assumption it rests on — that the dead
+    would have fared like their house's survivors, which is exactly wrong for a whole-house cull.
+  - ⚠️ **Apportion, don't re-derive** (¶14): `deaths` is one integer rounded once from a sum of four
+    rates and then clamped to the live flock, so per-cause rounding would not sum back. Take
+    `deaths` as the whole and split it by largest remainder — with the all-zero, negative-weight
+    and tied-remainder cases all specified, or two implementers will differ.
+  ⚠️ **Valuation anchors are NOT authored now** — they belong to the calibration run, next to
+  ruling #15's anchor placement. Until then these are counts, not valuations.
 
   ⚠️ **New hard rule this creates:** a channel must never manufacture a delta it does not
   physically have. The live case is the peritonitis share — attach it to **baseline** mortality
