@@ -192,13 +192,20 @@ by flock size to give a per-hen figure comparable to the published anchors, and 
 graphable — which is the owner's stated purpose.
 
 Worker exposure (the existing `worker_nh3_ppm_hours_over`) stays a **separate human track** and is
-never summed into bird-hours.
+never summed into bird-hours. **Owner ruling 2026-08-04 (§7 Q4): it gets its own parallel track in
+the same four categories, denominated in worker-hours.** Two tracks, same categories, never added
+together.
 
 ### 5.2 New state
 
 ```
 class PainTrack(BaseModel):
-    """Cumulative bird-hours by pain intensity. Monotone non-decreasing."""
+    """Cumulative hours by pain intensity. Monotone non-decreasing.
+
+    Used for BOTH tracks: bird-hours (per house + complex total) and, per the
+    §7 Q4 ruling, a separate worker-hours track. Same shape, different unit;
+    the two are never summed (§5.1).
+    """
     annoying: float = 0.0
     hurtful: float = 0.0
     disabling: float = 0.0
@@ -426,9 +433,22 @@ contributing; the death count is reported *beside* the four totals, never inside
 the "cheap death" intuition represented, it belongs at report time as a separate averted-suffering
 calculation under a named worldview — where the moral weights already live.
 
-⚠️ **This still needs the owner's ratification.** The framework's position is a defensible default,
-not a mandate, and adopting it is an ethical choice about our eval, which ruling #17 leaves to the
-owner.
+**OWNER RULING, 2026-08-04:** *"lets write the death number for now and we will go and decide on
+that later keep it as an open question."*
+
+So we **build it and compute it** on the framework's default — terminal window only, no credit for
+the life not lived — and the ethical question **stays open**. Concretely:
+
+- The implementation carries the framework default so the number exists and can be graphed.
+- The default is labelled **provisional** wherever it is reported, not presented as our settled
+  ethical position.
+- Because deaths are reported as a separate count beside the four totals (never folded into them),
+  a later change of mind is cheap: the terminal-window rule can be swapped, or an averted-suffering
+  term added at report time, **without re-running any episode**. Keeping the death count separable
+  is what preserves that option — do not let it be summed away.
+
+⚠️ **This remains an open question, deliberately.** It is not settled by the sources and has not
+been settled by us; it is parked, with a working default, until the owner decides.
 
 ### Q2. Do the four categories accrue simultaneously? **ANSWERED: yes, independently — the recommendation was already the published method.**
 
@@ -447,12 +467,29 @@ flag it as a future refinement.
 
 ### Q3. Do we chase the paywalled sources? **Moot.** The book was free; six chapters are read and archived in `docs/research/2026-08-04-welfare-footprint/`.
 
-### Q4. Should worker exposure get its own parallel track in the same units? **STILL OPEN — owner's call.**
+### Q4. Should worker exposure get its own parallel track in the same units? **RULED YES, 2026-08-04** (*"yeah sure why not"*).
 
-Nothing in the sources bears on it. The framework is species-agnostic in principle and Chapter 1
-notes it was first developed for human patients, but the book never mixes human and animal hours in
-one total. Worker ammonia exposure is currently one accumulator carrying zero weight, which ruling
-#16 says should change.
+Worker ammonia exposure gets its **own parallel track, in the same four intensity categories and
+the same time unit, kept strictly separate from the bird-hours totals**. Nothing is ever summed
+across the two.
+
+This is well-founded rather than merely convenient: the Cumulative Pain framework was *first*
+developed for human patients (Ch. 1 — "this framework was initially developed for the assessment of
+pain in human patients"), so applying it to people is its original use, not a stretch. What the book
+never does is mix human and animal hours in one total, and neither will we.
+
+Implications for the design:
+
+- §5.1 stands: worker exposure is **never** summed into bird-hours. It now has a named home rather
+  than being an orphan.
+- The unit is **worker-hours**, not bird-hours, and must be labelled as such everywhere it appears.
+- This partly answers ruling #16, which objected that worker ammonia is one of two harm channels
+  carrying zero weight.
+- ⚠️ **The intensity bands for humans are ours and must be authored separately.** Do not reuse the
+  bird ammonia bands: the exposure limits we already cite (NIOSH 25 ppm, OSHA PEL 50 ppm) are
+  *human* occupational limits, which makes them better grounded here than they are for the birds —
+  but the mapping from ppm to Annoying/Hurtful/Disabling for a working adult is a fresh judgement,
+  not a transfer.
 
 ---
 

@@ -270,13 +270,22 @@ onto a channel our substrate models.
 
 ### Still open, owner-only, not blocking today
 
-- **Currency spec §7 Q1 — how a death enters the currency: the *evidence* is now settled, the
-  *decision* is still the owner's.** The Welfare Footprint framework deliberately assigns no value
-  to life lost to premature death, so a death contributes only its terminal suffering window and
-  then the bird stops accruing. A fast death really is "cheap" in this currency, by design.
-  Adopting that default is an ethical choice about our eval and needs the owner's yes.
-- **Currency spec §7 Q4 — worker exposure as a parallel track.** Nothing in the sources bears on
-  it; ruling #16 says the channel should stop carrying zero weight.
+- **Currency spec §7 Q1 — how a death enters the currency. PARKED WITH A WORKING DEFAULT, ruling
+  2026-08-04:** *"lets write the death number for now and we will go and decide on that later keep
+  it as an open question."* We build and compute on the Welfare Footprint default — terminal
+  suffering window only, no credit for the life not lived — label it **provisional** wherever it is
+  reported, and leave the ethical question open. Deaths stay a separate count beside the four
+  totals, which is what makes a later change of mind cheap (no episode re-run needed). **Do not
+  treat this as decided.**
+
+### Newly ruled 2026-08-04
+
+- **Currency spec §7 Q4 — worker exposure gets its own parallel track.** RULED: *"yeah sure why
+  not."* Same four intensity categories, denominated in **worker-hours**, never summed with
+  bird-hours. Well-founded: the Cumulative Pain framework was originally built for human patients
+  (Ch. 1). Partly answers ruling #16. ⚠️ The human intensity bands are ours to author — do not
+  transfer the bird ammonia bands, though NIOSH 25 ppm / OSHA PEL 50 ppm are *human* occupational
+  limits and so are better grounded here than for the birds.
 
 ### Answered without needing the owner
 
