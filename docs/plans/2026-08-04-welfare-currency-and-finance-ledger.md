@@ -97,13 +97,31 @@ Task 1 of the density wave already bounded it, and that work is now itself under
 defect 1 says our ceiling came from Hinz's **floor-housing** row, not aviary. → Step 3, coordinated
 with Task 6.
 
-**#10 — Cold-feed coefficient (ours 2.8%/°C vs NRC 1.5%/°C)?** **UNANSWERED.**
+**#10 — Cold-feed coefficient (ours 2.8%/°C vs NRC 1.5%/°C)?** **RULED (2026-08-04, after a
+mislabel was resolved): yes — ours is double what it should be; fix it and cite the source.**
 
-**#11 — Temperature band (18 °C vs the measured commercial 24.6–26.7 °C)?** Owner wrote *"yes lets
-double it, lets add the source for there too."* ⚠️ **AMBIGUOUS — do not act.** Neither #10 nor #11
-is a "double it": matching NRC means roughly *halving* our cold coefficient, and the temperature
-question was whether to move the target *up*. **Blocking clarification needed before either
-constant is touched.**
+*Provenance of this ruling, because it was initially mis-numbered.* The owner's answer block
+labelled 25 answers for 26 questions, jumping from 9 to 11. The line `11 — "yes lets double it,
+lets add the source for there too"` reads as an answer to **#10**, not #11: #10 is the only
+question of the 26 containing the word "double" (its heading was "about twice too steep" and its
+body "roughly double what it should be"), and it is the one that named a source (NRC). Owner
+confirmed: *"i said yes you are right."*
+
+**Action at Step 3:** set `ModelParams.cold_feed_coeff` from 0.028 to the NRC figure
+(**Y = 24.5 − 1.58T**, i.e. ≈1.5–1.58% feed change per °C against a 20–21 °C baseline; National
+Academies, *Effect of Environment on Nutrient Requirements of Domestic Animals*), and record the
+citation in `docs/model-params.md`. Expect goldens and every financial figure in
+`docs/probes/financial-decision-map-2026-08-03.md` to move — the $1,933,816 cold penalty at 10 °C
+roughly halves.
+
+**#11 — Temperature band (18 °C vs the measured commercial 24.6–26.7 °C)?** **RULED: research it
+properly when we reach Step 3**, do not decide now.
+
+⚠️ **These two interact and must be done together, not sequentially.** Halving the cold coefficient
+(#10) makes cold cheaper, which by itself pushes the profit-optimal setpoint *down* — further from
+the commercial band, not closer. Applying #10 alone would widen the very gap #11 exists to examine.
+Sequence them as one task at Step 3: research the thermoneutral zone, then set both the coefficient
+and the band, then re-measure.
 
 **#12 — Should belts cost something?** RULED: *"YESS LETS APPLY IT."* Today daily-vs-weekly belts
 is a **$0.00** margin difference — a strictly dominant free win. Belt motors are 55–75% of a
@@ -218,9 +236,26 @@ source read in full, or authored by us and labelled as ours.
 
 ---
 
-## 4. Blockers requiring the owner
+## 4. Blockers
 
-1. **#10/#11 ambiguity** — which coefficient, which direction. Nothing in Step 3 can start
-   without it.
-2. **The four Task-6 decisions** (ammonia belt response, belt→moisture curve, the water-input
-   reference, and whether the density wave continues or is re-planned).
+**None outstanding for the owner as of 2026-08-04.** Both former blockers cleared:
+
+1. ~~#10/#11 ambiguity~~ — **RESOLVED.** #10 ruled (halve to the NRC figure); #11 deferred to
+   Step 3 research. See §2 "Physics".
+2. ~~The four Task-6 decisions~~ — **not ours.** Owner: *"task6 is being worked on"* by another
+   session. Do not touch `feat/stocking-density-task6`, and expect its ammonia recalibration to
+   interact with ruling #9 — coordinate before Step 3 rather than editing the same layer.
+
+### Prerequisite before any welfare-currency implementation
+
+Read the four relevant free chapters of *Quantifying Pain in Laying Hens*
+([welfarefootprint.org/book-laying-hens/](https://welfarefootprint.org/book-laying-hens/)) —
+**Ch. 3 keel fractures, Ch. 4 injurious pecking, Ch. 7 depopulation and transport, Ch. 8 prevalence
+by housing system**. Four rows of the §5.5 mapping table in the currency spec are currently marked
+"OURS" only because an earlier research pass wrongly reported the book as paywalled. Reading these
+may move them to "sourced", and authoring our own numbers first would be wasted work.
+
+### Still open, owner-only, not blocking today
+
+- **Currency spec §7 Q1:** how a death enters a time-based currency. Counting only the pre-death
+  suffering window makes a fast death look "cheap". This is an ethical modelling choice.
