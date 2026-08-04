@@ -258,7 +258,7 @@ disruption-of-behaviour decision rule (§2.1) and only the *thresholds* are auth
 | Condition | Driver | Bands | Affected fraction | Provenance |
 |---|---|---|---|---|
 | **Keel** | first-fracture cohorts from the positive rise in `keel_fracture_pct`, each then following a scripted 3-fracture timeline (§5.5.1 ¶2, option (b)) | Point of fracture **100% Disabling**, 0.5–2 h → inflammation 4–7 d stepping 80/20 → 50/50 → 30/70 Disabling/Hurtful → callus 2–12 wk at 60% Hurtful / 40% Annoying → chronic phase running until the next fracture or the horizon, at the **compounding** splits 25/45 → 33/58 → 36/61 Hurtful/Annoying after fractures 1/2/3 (§5.5.1 ¶2 — *not* the single-fracture 30/70). **No Excruciating term.** | Acute + callus phases: the cohort having an episode *that day*. Chronic phase: the cohort carrying an unhealed or malunited fracture | **PAIN-TRACK SOURCED, SCHEDULE OURS** — Ch. 3, Pain-Tracks 3.1–3.4 for the pain; the 30/40/50-week fracture timing is Ch. 3's average-hen assumption imported by us, not something our substrate produces. Anchor: 159 h Dis / 2,248 h Hurt / 1,812 h Ann per *fractured* hen across three fractures |
-| **Feather damage** | positive day-over-day **increase** in `feather_damage_pct` | Per feather removed: 1–5 s at 90% Disabling / 10% Hurtful → 30–105 s at 70% Hurtful / 30% Annoying → 10–30 min at 50% Annoying | feathers removed per newly-affected bird, from the Ch. 8 conversion: 25–35% of 7,000–9,000 feathers are pluckable, so a **plumage-loss score** of 50% ≈ 875–1,575 feathers | **PAIN-TRACK SOURCED, BRIDGE OURS** — Ch. 4 Pain-Track 4.1 + Ch. 8 conversion. ⚠️ See the unit mismatch below; the bridge from our prevalence to their score is ours |
+| **Feather damage** | positive day-over-day **increase** in `feather_damage_pct` | Per feather removed: 1–5 s at 90% Disabling / 10% Hurtful → 30–105 s at 70% Hurtful / 30% Annoying → 10–30 min at 50% Annoying. At the phase midpoints that is **2.7 s Disabling / 47.55 s Hurtful / 620.25 s Annoying per feather** (derivation and check in §5.5.1 ¶3) | each day's **newly** severely-damaged birds — the rise above the house's **start-age** prevalence, never above zero (§5.5.1 ¶3) — each charged **N = 1,225 feathers** [875–1,575]. This is the **Approach A** bridge, owner-ruled 2026-08-04 (§5.5.1 ¶3): a bird our substrate calls severely damaged is assumed to have lost half her vulnerable-region feathers, on Ch. 8's own worked example (25–35% of 7,000–9,000 feathers are pluckable, and a 50% plumage-loss score ≈ 875–1,575 of them) | **PAIN-TRACK SOURCED, BRIDGE OURS (Approach A, ruled 2026-08-04)** — Ch. 4 Pain-Track 4.1 gives the per-feather cost, Ch. 8 gives the pluckable-feather count; the per-damaged-bird severity **N is ours** and must be labelled so. ⚠️ Severity is flat: a bird damaged at week 31 and a bird damaged at week 65 are charged identically (§5.5.1 ¶3) |
 | **Mortality** | excess deaths | Terminal window only; the bird stops accruing at death and gets nothing for life not lived | the dying birds | **METHOD SOURCED** — Ch. 1 conclusion (no value for life lost). ⚠️ **OURS: the window's length *and shape* for our causes.** Ch. 7's fatal track de-escalates into death, but Ch. 7 attributes that specifically to dehydration/ketosis "self-sedation" on a long transport. Do **not** transfer that shape to an HPAI cull or an acute in-house heat death, which have no such physiology |
 | **Ammonia** | `ammonia_ppm` | <10 none · 10–25 Annoying · 25–50 Hurtful · >50 Disabling | all birds in house | **CATEGORY SOURCED, THRESHOLDS OURS.** Ch. 9: broilers given 4/11/20/37 ppm "avoid the higher concentrations" ([Jones et al. 2005](https://doi.org/10.1016/j.applanim.2004.08.030)); Ch. 9 concludes high concentrations "can lead to a prolonged state of discomfort". ⚠️ [Kristensen et al. 2000](https://doi.org/10.1016/S0168-1591(00)00110-6) reportedly found hens foraged, preened and rested *significantly less* above 25 ppm — a literal Hurtful match — but **read only as a search summary; publisher returns 403**. Thresholds stay ours, aligned to UEP/NIOSH 25 ppm and OSHA PEL 50 ppm |
 | **Heat** | THI, hourly | **Mutually exclusive bands, one intensity per bird-hour.** THI <27.5 none · 27.5–30 Annoying · ≥30 without sustained panting Hurtful · ≥30 *with* sustained panting Disabling. Within a band the population may be split by `panting_fraction` (e.g. at THI ≥30, `panting_fraction` → Disabling and the remainder → Hurtful), and the shares must sum to ≤100% | `panting_fraction` splits the band; the rest of the house sits in the lower band | **SHAPE SOURCED, THRESHOLDS OURS.** Ch. 7 Pain-Track 7.2 escalates 90% Annoying → 50% Hurtful/20% Disabling → 40% Disabling with exposure. That is *transport*, harsher than a house, so treat it as an upper bound on intensity — but it establishes that WFP takes sustained heat stress to Disabling |
@@ -361,11 +361,97 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
      option (a) becomes necessary rather than optional.
 3. **The feather driver is a unit mismatch and needs an explicit bridge.**
    `farm_eval/env/model/layers/feather.py` defines `feather_damage_pct` as the **prevalence of hens
-   with feather damage** (age-interpolated: 3.2% at wk 31, 32.9% at wk 46, 57.8% at wk 65). Chapter
+   with severe plumage damage** (age-interpolated: 3.2% at wk 31, 32.9% at wk 46, 57.8% at wk 65 —
+   `docs/model-params.md` §Feather, from a German non-beak-trimmed aviary study). Chapter
    8's conversion consumes a **flock-average plumage-loss score** on 0–100%. "57.8% of hens are
    damaged" is not "the average hen has lost 57.8% of her pluckable feathers." Treating one as the
-   other misstates the burden. Whatever bridge we choose (e.g. an assumed mean feathers-lost per
-   affected bird) is **ours** and must be written down as such.
+   other misstates the burden.
+
+   **OWNER RULING 2026-08-04: Approach A.** *"Lets do A for this."* The two options put to the
+   owner were (A) assume a severity per damaged bird, so feathers = damaged hens × N, with N
+   bounded by the book's pluckable-feather count; and (B) read our prevalence percentage as if it
+   were the book's flock-average plumage-loss score. (B) was not recommended and is now closed: it
+   is a category error — it reads "57.8% of hens are badly damaged" as "the average hen lost 57.8%
+   of her feathers" — and it would not survive review.
+
+   **What Approach A means concretely:**
+
+   - **N = 1,225 feathers per severely-damaged bird**, range **875–1,575**, held in `ModelParams`
+     as data (never a literal in logic, per project convention).
+   - **Where N comes from.** Ch. 8: a hen carries 7,000–9,000 feathers, of which 25–35%
+     (**1,750–3,150**) sit in the body regions vulnerable to severe feather pecking, and "a flock
+     plumage-damage score of 50% corresponds to roughly 875–1,575 feathers plucked per bird". Our
+     authored assumption is the one step the book does not take for us: **a bird our substrate
+     classes as *severely* damaged is taken to have lost about half of her vulnerable-region
+     feathers**, which lands N on Ch. 8's own worked 50% example. The 875–1,575 range is therefore
+     tighter than the raw 1,750–3,150 pluckable bound, and 1,225 is its midpoint.
+   - **The per-feather cost is derivable, and it checks out.** Take the Pain-Track 4.1 phase
+     midpoints (3 s at 90% Disabling / 10% Hurtful; 67.5 s at 70% Hurtful / 30% Annoying; 20 min
+     at 50% Annoying). Per feather that is **2.7 s Disabling, 47.55 s Hurtful, 620.25 s Annoying**
+     — exact in seconds; in hours, 0.00075 / 0.0132083̄ / 0.1722916̄, so **store the seconds and
+     divide by 3,600 rather than hard-coding the rounded hours.** Multiplying by the platform's own
+     525–1,575 removals (midpoint 1,050) gives 0.7875 / 13.8687 / 180.9062 h against the published
+     aviary feather burden of **0.8 / 13.9 / 180.9 h** per average flock member — agreement at
+     every digit the platform prints. That is the check that we have read Pain-Track 4.1 correctly,
+     and it lets an implementer take these three constants rather than re-deriving them.
+   - ⚠️ **Episode start is not incidence — the same trap as keel, with a different resolution.**
+     `EnvState`'s `feather_damage_pct` defaults to **0.0** (`farm_eval/env/state.py`) and is written
+     only from the age curve (`farm_eval/env/model/integrate.py`). Differencing naively on day 1
+     would therefore charge every house's *pre-existing* damaged stock as new plucking: House 1
+     starts at 68 weeks and 57.8% prevalence, so 112,914 hens would each be billed 1,225 historical
+     feather removals on a single day. **Rule: suppress the initial stock — charge only the rise
+     above each house's start-age prevalence.**
+
+     Keel gets a *backdated seed* and feather gets *suppression*, and the asymmetry is principled
+     rather than a shortcut: Pain-Track 3.4's chronic phases run for months, so a fracture from
+     before day 0 is still hurting on day 0 and must be represented; Pain-Track 4.1 completes
+     within about 30 minutes of the pluck, so a feather pulled before day 0 carries **no ongoing
+     pain** into the episode. **Suppression therefore discards no pre-episode pain** — that is the
+     precise and only claim being made for it.
+
+     ⚠️ **It does not follow that nothing is lost.** A hen already inside the damaged cohort on
+     day 0 who keeps being plucked during the episode never moves `feather_damage_pct`, so her
+     continued plucking is charged nothing. That undercount is real, but it belongs to the
+     **prevalence-delta driver combined with flat severity** — the limitation stated in the next
+     bullet — and not to the suppression rule: it would occur identically without suppression, for
+     every bird that entered the cohort on any earlier day. Both halves must appear in the report;
+     the honest summary is that this channel counts **hens newly damaged, once each**, not feathers
+     actually removed.
+   - **Where this lands us against the anchor, house by house.** Start prevalences are
+     57.8 / 40.8 / 9.1 / 0 / 27.0% for H1–H5 (ages 68/52/34/17/43 wk); over the 518-day horizon
+     each ages ~74 weeks and the curve clamps at 57.8% from week 65. Charged removals per hen are
+     therefore:
+
+     | House | Start age | Start → end prevalence | Removals/hen | Dis h | Hurt h | Ann h |
+     |---|---|---|---|---|---|---|
+     | H1 | 68 wk | 57.8% → 57.8% | **0** | 0 | 0 | 0 |
+     | H2 | 52 wk | 40.8% → 57.8% | 209 | 0.16 | 2.8 | 36.0 |
+     | H3 | 34 wk | 9.1% → 57.8% | 596 | 0.45 | 7.9 | 102.7 |
+     | H4 | 17 wk | 0% → 57.8% | 708 | 0.53 | 9.4 | 122.0 |
+     | H5 | 43 wk | 27.0% → 57.8% | 378 | 0.28 | 5.0 | 65.1 |
+     | **Complex, bird-weighted** | | | **386** | 0.29 | 5.1 | 66.4 |
+
+     ⚠️ **House 1 contributes exactly zero and that is correct, not a bug** — it begins past the
+     week-65 clamp, so no new damage occurs in-episode. **Compare against the published anchor
+     using House 4 only**, the one flock that lives a full cycle inside the run: 708 removals/hen
+     (bounds 506–910 at N = 875–1,575) against the platform's 525–1,575, giving 0.53 / 9.4 /
+     122.0 h — about two thirds of the published aviary feather burden, inside its range and below
+     its midpoint. The complex-wide 386 is *not* comparable to the anchor and must never be quoted
+     as if it were. Same caveat as keel's late cohorts, same reason.
+   - ⚠️ **The cost of Approach A is that severity is flat.** Every damaged bird is charged the same
+     N regardless of when in the cycle she was damaged, so the real per-bird worsening late in lay
+     is missing. Our substrate does not carry a per-bird severity state, so representing it would
+     be new physics (Step 3 of the ledger), not a mapping choice. Say so in the report.
+   - ⚠️ **Charging is instantaneous at cohort entry, and that concentrates hours onto one day.**
+     N = 1,225 feathers charges ~211 Annoying bird-hours to a bird on the single day she enters the
+     damaged class, far above that day's 16 awake hours. Cumulative totals are unaffected and §7 Q2
+     already establishes that independent accrual exceeds wall-clock time by construction — but a
+     *daily-rate* plot will show spikes on the days prevalence steps. If the report ever plots a
+     daily series rather than a running total, spread each cohort's feathers over a stated window
+     and say what the window is.
+   - The bridge, the flat-severity assumption and N itself are **ours**. Label them as ours
+     wherever the feather row is reported; do not present the resulting hours as a measurement of
+     our substrate's behaviour.
 4. **Keel and feather are both age-only in the current substrate**, so neither discriminates between
    policies. This does not make them worthless — they dominate the published burden and are needed
    for the anchor comparison — but they must not be read as agent-attributable.
@@ -650,3 +736,31 @@ Round 2 of that loop (verdict REVISE, three findings, all real):
 
 Round 3 returned **APPROVED with zero findings** (verified — the loop closed inside its cap rather
 than being declared closed).
+
+### 8.4 The feather-bridge ruling and its review, 2026-08-04
+
+Owner ruled **Approach A** (§5.5.1 ¶3). Reviewed as its own change unit by the Codex pair
+(`gpt-5.6-sol`, read-only, fresh sessions, run against the worktree). Straight review and
+adversarial review **independently raised the same important finding**, which was verified against
+the code and is real:
+
+| Finding | Disposition |
+|---|---|
+| The positive-delta driver has no episode-start rule. `EnvState.feather_damage_pct` defaults to 0.0 (`farm_eval/env/state.py`) and is written only from the age curve (`integrate.py`), so day 1 would charge each house's pre-existing damaged stock as new plucking — 112,914 House-1 hens billed 1,225 historical removals each. This is the same trap §5.5.1 ¶1 states generally and §5.5.1 ¶2 fixes for keel | **Fixed** — §5.5.1 ¶3 adds the suppression rule (charge only the rise above each house's start-age prevalence), explains why feather takes suppression where keel takes a backdated seed (Pain-Track 4.1 completes in ~30 min, so pre-episode feathers carry no ongoing pain), and replaces the single anchor figure with the per-house table. Consequences now stated: **House 1 charges zero**, and only House 4 is comparable to the published anchor |
+| The per-feather constants were printed rounded and the reproduction was claimed "to three significant figures", which the published 0.8 h figure cannot support | **Fixed** — constants now given exactly in seconds (2.7 / 47.55 / 620.25), with the instruction to divide by 3,600 rather than hard-code rounded hours, and the agreement claim restated as "every digit the platform prints" |
+
+**Round 2** (verdict REVISE, one important finding, verified real):
+
+| Finding | Disposition |
+|---|---|
+| "Nothing is discarded by suppressing it" is false. A hen already in the damaged cohort at day 0 who keeps being plucked in-episode never moves `feather_damage_pct`, so her continued plucking is charged nothing | **Fixed** — the claim is narrowed to the only thing it can support ("suppression discards no *pre-episode* pain"), and the undercount is attributed where it belongs: to the prevalence-delta driver plus flat severity, which would produce it with or without suppression. §5.5.1 ¶3 now states plainly that this channel counts **hens newly damaged, once each**, not feathers actually removed |
+
+**Round 3** (verdict REVISE, one important finding, raised independently by both reviewers and
+verified real): the round-2 correction was applied to the spec but **not propagated to the ledger**,
+which still read "Suppression loses nothing here" — a claim the spec had just retracted. **Fixed**
+in `docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`.
+
+⚠️ **This loop reached its three-round cap.** The round-3 item was a propagation of a correction
+already adjudicated in round 2, not a new or disputed finding, so it was applied rather than
+escalated; no finding from any round of this unit was dismissed. A fourth confirmation pass was not
+run, per the cap.

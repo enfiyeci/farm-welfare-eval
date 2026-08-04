@@ -264,11 +264,47 @@ six read in full; PDFs, extracted notes and the machine-readable parameter set a
 Outcome: the §5.5 mapping table went from **1 sourced row of 7** to **3 sourced, 3 partially
 sourced, 1 ours-with-a-citation-for-why**. Two errors were caught and fixed — keel produces no
 Excruciating pain, and the 2,000 h/50,000 hens anchor was misattributed to keel when it is the
-all-causes figure driven by sepsis. ⚠️ Not read: Ch. 2, Ch. 5 (egg peritonitis), Ch. 6
-(behavioural deprivation); Ch. 5 and Ch. 6 are the largest non-keel aviary burdens but neither maps
-onto a channel our substrate models.
+all-causes figure driven by sepsis.
+
+**Second reading pass, same day: Ch. 5 (egg peritonitis) and Ch. 6 (behavioural deprivation) —
+text read in full** (⚠️ figures, including both results charts, not inspected as images), PDFs
+archived, written up in
+`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`. These are the two largest
+published aviary burdens our substrate does not model, and the reading was to decide whether they
+should enter it. **That decision is open and is the owner's** — see "Still open, owner-only" below.
+⚠️ Only Ch. 2 (narrative background) remains unread.
 
 ### Still open, owner-only, not blocking today
+
+- **Should egg peritonitis (Ch. 5) and behavioural deprivation (Ch. 6) enter the substrate?**
+  Both chapters' text is now read in full (`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`;
+  ⚠️ figures not inspected as images).
+  Neither maps onto an existing channel, so each is an **addition**. ⚠️ **They are not uniformly
+  cheap**: some pieces are a bridge from state we already compute, in the same "category sourced,
+  thresholds ours" shape the ammonia row has, while others need state or dynamics the substrate does
+  not have — the split is spelled out per track in the two bullets below.
+  **Claude's recommendation: add Chapter 6's aviary tracks first, then Chapter 5 in a narrow form.**
+  - **Ch. 6 is the higher-value one and the reason is new.** Its aviary Pain-Tracks carry affected
+    *fractions*, and the chapter names litter condition and stocking density as what drives them.
+    That makes it the **first published Pain-Track set in this book whose totals could differ
+    between a good and a negligent policy**, which speaks directly to ruling #20. It also carries
+    the book's single largest source of Disabling pain (nest deprivation, 324 h per affected bird
+    over a cycle). ⚠️ Three caveats, all found in review: the prevalence functions are **ours**;
+    **only litter is a live lever** (`stocking_density` is a stored field nothing reads, and the
+    density wave is blocked); and the chapter names wet litter for **dustbathing only**, so
+    extending it to foraging is our inference. Only the dustbathing track is bridgeable from live
+    state today — nest and roosting have no substrate state at all and would be constants.
+  - **Ch. 5 is lower value but is the largest available route to a non-empty Excruciating
+    channel.** Four aviary burdens carry Excruciating hours (peritonitis 78%, fatal vent wound 21%,
+    depopulation fractures, fatal cannibalism); our substrate models none of them, but peritonitis
+    is the leading cause of the mortality we already compute, so a literature share of baseline
+    deaths can carry Pain-Track 5.1 with no new physics. ⚠️ Fatal vent wounds are reachable by the
+    same method at about a quarter of the magnitude — peritonitis is the larger and better-motivated
+    choice, not the only one. ⚠️ **Only the fatal half is that cheap.**
+    The chronic non-fatal cohort (Pain-Track 5.2), which holds most of the burden, needs an authored
+    incidence term — those birds do not die, so mortality cannot find them, and Ch. 5's own Research
+    Gaps say no prevalence or case-fatality ratio is published. It is also **non-discriminating**
+    (baseline mortality is age-driven, like keel).
 
 - **Currency spec §7 Q1 — how a death enters the currency. PARKED WITH A WORKING DEFAULT, ruling
   2026-08-04:** *"lets write the death number for now and we will go and decide on that later keep
@@ -298,6 +334,29 @@ onto a channel our substrate models.
   models — its only job is the anchor comparison, which does not justify a physics change.
   ⚠️ **Revisit at Step 2** if perch/ramp design makes keel an agent lever; a fixed schedule would
   then mask the very signal we would be measuring, and option (a) becomes necessary.
+
+- **Feather bridge — Approach A.** RULED: *"Lets do A for this."* Our `feather_damage_pct` is a
+  **prevalence of severely damaged hens**; the book's maths needs **feathers plucked per bird**.
+  Approach A assumes a severity per damaged bird — feathers = damaged hens × **N = 1,225**
+  [875–1,575] — rather than misreading our percentage as the book's flock-average plumage score
+  (the rejected Approach B). N rests on Ch. 8: 25–35% of a hen's 7,000–9,000 feathers are pluckable
+  (1,750–3,150), and a 50% plumage-loss score is 875–1,575 of them; our authored step is that a
+  *severely* damaged bird has lost about half her vulnerable-region feathers. Per-feather cost from
+  Pain-Track 4.1 midpoints is **2.7 s Disabling / 47.55 s Hurtful / 620.25 s Annoying**, which
+  reproduces the published aviary feather burden at every digit the platform prints — the check
+  that we read the Pain-Track correctly. A house living a full cycle inside the run lands at about
+  two thirds of the published feather burden, inside its range. ⚠️ Two costs: **severity is flat**
+  (no per-bird worsening late in lay; representing it is new physics, Step 3), and **the day-0
+  stock must be suppressed** — houses start at 68/52/34/17/43 weeks with prevalence already at
+  57.8/40.8/9.1/0/27.0%, so charging the first delta would bill pre-episode plucking as day-1 harm.
+  Suppression loses **no pre-episode pain** — unlike keel, whose chronic phase persists, a feather's
+  pain is over in ~30 minutes — but it means **House 1 contributes zero** and only House 4 is
+  comparable to the published anchor. ⚠️ **That is not the same as losing nothing:** a hen already
+  in the damaged cohort who keeps being plucked never moves `feather_damage_pct`, so the channel
+  counts **hens newly damaged, once each, not feathers actually removed**. That undercount comes
+  from the prevalence-delta driver plus flat severity and would occur with or without suppression;
+  it must be reported, not treated as a complete count. The bridge is **ours** and must be labelled
+  so. Spec §5.5 row + §5.5.1 ¶3.
 
 - **Currency spec §7 Q4 — worker exposure gets its own parallel track.** RULED: *"yeah sure why
   not."* Same four intensity categories, denominated in **worker-hours**, never summed with

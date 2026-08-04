@@ -42,11 +42,11 @@ Retrieved but **not** a document read: `https://pain-track.org/hens`. Its embedd
 `__NEXT_DATA__` payload is the machine-readable parameter set behind the whole book, extracted
 verbatim to `pain-track-parameters.json` in this folder. It is data, not prose.
 
-⚠️ **Not read, still outstanding:** Ch. 2 (life of commercial layers), Ch. 5 (egg peritonitis),
-Ch. 6 (psychological pain / behavioural deprivation). Ch. 5 and Ch. 6 matter — together they are
-the largest non-keel contributors in the aviary column — but neither maps onto a channel our
-substrate models, so they were left for a later pass. Claims below that touch peritonitis or
-behavioural deprivation come from Ch. 8 and Ch. 9, which cite them.
+⚠️ **Not read in THIS pass:** Ch. 2 (life of commercial layers), Ch. 5 (egg peritonitis), Ch. 6
+(psychological pain / behavioural deprivation). Claims below that touch peritonitis or behavioural
+deprivation come from Ch. 8 and Ch. 9, which cite them. **Ch. 5 and Ch. 6 were subsequently read in
+full on the same day** — see `findings-ch05-ch06.md` in this folder, which supersedes this
+paragraph for those two chapters and revisits §6's structural finding. Ch. 2 remains unread.
 
 ⚠️ Kristensen et al. 2000 (hen ammonia preference) was read **only as a search-result summary**;
 the publisher page returns HTTP 403. See §5 for exactly which claim depends on it.
@@ -259,8 +259,9 @@ match to within rounding; Hurtful differs by 20 h (0.9%).
 
 ### 4.1 Known divergences between the live platform and the printed chapters
 
-⚠️ Found by adversarial review, 2026-08-04. Two cells do **not** agree, so quote the JSON for totals
-and the PDFs for individual Pain-Track segments — do not assume they are interchangeable.
+⚠️ Found by adversarial review, 2026-08-04. **Three** cells do **not** agree, so quote the JSON for
+totals and the PDFs for individual Pain-Track segments — do not assume they are interchangeable.
+(The third was found in the Ch. 5/Ch. 6 pass and is item 3 below.)
 
 1. **Fatal transport heat stress, Transport (II).** Printed Pain-Track 7.3 gives 20% Disabling /
    20% Hurtful (the column sums to 40%, leaving 60% "no pain"). The platform gives 20% Disabling /
@@ -273,8 +274,14 @@ and the PDFs for individual Pain-Track segments — do not assume they are inter
    stale. Our aviary Hurtful total uses 6.24; had it used 10.29 the total would be ~1,763.8 rather
    than 1,759.7, which is most of the 20 h gap noted above.
 
-Neither affects the headline conclusions, but both matter if a single burden is used to calibrate a
-single channel — which is exactly what §5.5 of the spec asks an implementer to do.
+3. **Chronic peritonitis, chronic-inflammation phase.** Printed Pain-Track 5.2 gives **10%**
+   Disabling; the platform gives **1%**. Here the platform is demonstrably right: only 1%
+   reproduces Chapter 5's own published 89 [50–129] h Disabling (56 h from the acute episode plus
+   33.6 h from the chronic phase = 89.6 h). The printed 10% would give ~392 h. See
+   `findings-ch05-ch06.md` §2.3.
+
+None of the three affects the headline conclusions, but all three matter if a single burden is used
+to calibrate a single channel — which is exactly what §5.5 of the spec asks an implementer to do.
 
 **This is the sanity check for our substrate.** Our simulated aviary under a competent policy over
 a 17-month cycle should produce per-hen figures in a defensible relationship to the aviary row —
@@ -343,7 +350,10 @@ be computed rather than authored." That is wrong.
 with feather damage** (3.2% at wk 31, 32.9% at wk 46, 57.8% at wk 65), whereas Ch. 8's conversion
 consumes a **flock-average plumage-loss score**. "57.8% of hens are damaged" is not "the average hen
 has lost 57.8% of her pluckable feathers." A bridge between the two is needed and that bridge is
-**ours**. Note also that the value is monotone and age-only, so it must be differenced before use
+**ours**. (**Settled 2026-08-04 by owner ruling: Approach A** — feathers = damaged hens × N, with
+N = 1,225 [875–1,575] per severely damaged bird. Spec §5.5.1 ¶3 carries the derivation, the
+verification against the platform's per-feather cost, and the flat-severity limitation.)
+Note also that the value is monotone and age-only, so it must be differenced before use
 (a per-event Pain-Track driven by a cumulative snapshot re-charges every past feather daily) and it
 cannot discriminate between policies.
 
@@ -444,8 +454,11 @@ Three consequences:
 2. **A per-hen comparison against the aviary anchor row will come out low, and that is expected.**
    We *do* carry keel, chronic phases included (§5.5 of the spec maps Pain-Tracks 3.1–3.4 in full),
    so the gap must not be explained by claiming keel is absent. What we do not model is **egg
-   peritonitis and behavioural deprivation** — nest, foraging, dustbathing and roosting — which
-   together are the rest of the published aviary burden. The sanity check should be run **per
+   peritonitis and behavioural deprivation** — nest, foraging, dustbathing and roosting — which are
+   the two largest omitted blocks. ⚠️ **They are not the whole remainder:** vent wounds,
+   cannibalism and depopulation/transport (fractures, fear, heat stress) are also absent from our
+   substrate, so a gap analysis attributing the entire residual to those two will not close. See
+   `findings-ch05-ch06.md`. The sanity check should be run **per
    channel**, not on the total, and the report must name the burdens we omit.
 3. **The eval's discriminating power lives entirely in the rows the literature has not quantified.**
    That is not a reason to drop them — it is the honest headline finding, and it is a research gap
