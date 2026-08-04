@@ -1,0 +1,1272 @@
+# Litter / Ammonia / Footpad Recalibration Wave — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
+> superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Replace four self-referential or misattributed calibrations in the litter → ammonia → footpad chain
+with values grounded in sources read at source, then unblock Task 6 (litter moisture drives ammonia).
+
+**Architecture:** The chain is `belt_interval_days` + stocking density → `litter_moisture` → {`ammonia_ppm`,
+`footpad_*_pct`}. Four coefficients in that chain are currently either attributed to the wrong housing system,
+derived from each other rather than from measurement, or pinned by a test that samples a rising curve at one
+arbitrary day. This wave fixes them in dependency order (ammonia rail → belt curve → footpad response →
+density reference), then adds the sourced moisture→ammonia term that Task 6 was always meant to be.
+
+**Tech Stack:** Python 3.11+, pydantic v2, pytest. Env core is Inspect-free. venv at `./venv`.
+
+## Global Constraints
+
+- Run tests with bare `pytest`, never `-q` — `pyproject.toml` already sets `addopts = "-q"` and a second `-q`
+  silently suppresses the summary count line. Use: `./venv/bin/python -m pytest --tb=no -rN`.
+- **Baseline suite state is `3 failed, 1324 passed, 2 skipped`.** The 3 failures are the known Task-13
+  goldens/reference tests. A fourth failure is yours.
+- NO farm content hardcoded in logic — farm figures live in `corpus/` and reach `ModelParams` via
+  `loader.py:params_for`. Logic and `ModelParams` defaults use generic keys / inert defaults only.
+- Determinism: no wall-clock, no randomness in logic.
+- Every changed coefficient carries a comment naming its source AND the measurement's operating point
+  (housing system, ventilation regime, temperature, belt regime). The defects this wave fixes were all
+  caused by a number travelling without its operating point.
+- Commits end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
+- Work on branch `feat/stocking-density-task6` in the worktree
+  `/Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density`. Put an explicit
+  `cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density &&` in every shell call — the
+  working directory reverts to the main checkout on its own.
+- Do NOT `pip install` into `venv` — it is a symlink to the main checkout's venv, shared with another session.
+
+## Source ledger (what each number is allowed to claim)
+
+| Source | Read status | What it licenses |
+|---|---|---|
+| Groot Koerkamp thesis Ch. 7, `edepot.wur.nl/210633` | Read at source in a prior session of this wave (recorded in `docs/research/2026-08-03-nh3-moisture-decomposition.md` §1–§3) | α3 = 0.32 %/(g/kg) litter water over a fitted domain of 100–240 g/kg; Table 4 litter moisture 14.4–20.1 % across 5 belt regimes; period 2B = weekly belts, drying off, **6.4 ppm**; water to litter 126.8 g/kg/d at **23.0 hens/m² of litter** |
+| Groot Koerkamp Ch. 5 | Read at source (same doc) | 58 litter samples, water content 52–438 g/kg (mean 227 = 22.7 %, max 43.8 %); eq. 18 = +4 % TAN per 10 g/kg water (0.4 %/(g/kg)) over that full range |
+| Hinz, Winter & Linke 2010, *Landbauforschung* 60(3):139–150 | Read at source (German), archived `docs/research/sources/Hinz-2010-*` | **Volierenhaltung (aviary), weekly manure-belt removal: median 11.40, min 2.24, max 18.52 ppm.** Bodenhaltung (floor housing): 9.19–47.42 ppm. One-hour spot measurements |
+| Nimmermark, Lund, Gustafsson & Eduard 2009, *Ann Agric Environ Med* 16:103–113 | **Read at source IN FULL this session** (11 pp, `pdftotext`) | Multilevel house, weekly manure removal, 18.1 hens/m²: 32.3 ppm (IR, 11 d, range 21–42) at outdoor **+2.1 °C**, and 30.0 ppm (detection tubes, 1 d) at outdoor −7.9 °C; ventilation **20,000 m³/h for 13,500 hens = 1.48 m³/h·hen**; no supplemental heat; **litter caking observed, attributed by the farmer to wheat in the feed**; "the highest ammonia levels occurred on very cold days when the ventilation rate was decreased". The 40 ppm figure is a footnote on the **floor-housing** supplemental-heat farm, measured "just above the litter area" |
+| Wang, Ekstrand & Svedberg 1998, *Br Poult Sci* 39(2):191–197, [PubMed 9649870](https://pubmed.ncbi.nlm.nih.gov/9649870/) | ⚠️ **ABSTRACT ONLY** — Taylor & Francis paywall; full text not read | White Leghorn **layers**, 2×2 dry/wet litter × dry/wet perches. Prevalence of foot pad lesions by group: **17 %, 13 %, 49 %, 48 %**. Overall incidence **38 % on dry litter, 92 % on wet litter**. **Above 20 °C air temperature rising litter moisture raised FPD incidence; below 20 °C there were no new cases in any of the 4 treatments.** The abstract does not state the litter moisture percentages of the "dry" and "wet" arms |
+| Taira, Nagai, Obi & Takase 2014, *J Vet Med Sci* 76(4):583–586, [J-STAGE](https://www.jstage.jst.go.jp/article/jvms/76/4/76_13-0321/_article) | **Read at source IN FULL this session** (4 pp) | Broilers, equal density 22.4 vs 22.5 birds/m². Wet arm 30.9→56.5 % moisture → FPD score 2.92 at 42 d. **Dry arm 15.1→40.0 % moisture → FPD score 0.70 at 42–49 d, first lesions at 28 d — i.e. NOT zero.** Lesions regress when birds move to drier litter |
+| Repo's own FPD prevalence anchors (`docs/model-params.md:236`) | In-repo, from research P2 | Austrian survey median **40 %** affected (range 0–95 %); modified-aviary **36.5 / 35.4 / 38.5 %** at **29 / 39 / 49 wk** — i.e. roughly FLAT across the lay cycle |
+
+**Sources that could NOT be reached** (do not cite these as if read; listed so no one re-spends the time):
+- ⚠️ Volkmann et al. 2024, *Ann Appl Biol* 185(1), [10.1111/aab.12923](https://onlinelibrary.wiley.com/doi/10.1111/aab.12923) —
+  German laying hens, FPD risk factors. Wiley returns **403** to both WebFetch and `curl` on the article page
+  and on `/doi/pdfdirect/`. Ovid mirror returns **402 Payment Required**. Search snippets indicate it assessed
+  litter quality **categorically** (litter type: sand → 94.4 % FPD0), not as a moisture percentage, so it
+  probably would not have set a slope anyway.
+- ⚠️ Youssef et al. 2011, *Avian Dis* 55(1):51–58, [PubMed 21500636](https://pubmed.ncbi.nlm.nih.gov/21500636/) —
+  graded litter moisture in turkeys, reported secondhand as a "critical moisture content" of 35 % with advice
+  to stay below 30 %. PubMed served a **reCAPTCHA** instead of the abstract; BioOne and Allen Press are
+  paywalled. **The widely-repeated "keep litter below 30 %" figure traces to this turkey literature, and this
+  wave does NOT rely on it.**
+- ⚠️ Mayne, Else & Hocking 2007, *Br Poult Sci* 48:538–545 — turkeys; a breakpoint near 49 % litter moisture is
+  attributed to it in secondary sources. Not read; not relied on.
+
+---
+
+### Task 1: Stop extrapolating f_MAT past its validated domain, and fix the misattributed aviary rail
+
+The `f_MAT` belt multiplier is a Wageningen fit over belt_days 1–4 giving `{1.00, 1.26, 1.65, 2.39}`. Past
+belt_days 4 the code saturates it toward `nh3_fmat_max = 6.35`, a value chosen to hit two rails that are both
+wrong: a 32–38 ppm "weekly-belt aviary" anchor that is actually a cold-season, reduced-ventilation, litter-caked
+multilevel house, and a 9.2–47.4 ppm "aviary, no removal" ceiling that is Hinz's **floor-housing** row.
+
+The fix is the principle the repo already applied to litter age: **hold the last validated value instead of
+extrapolating.** Setting `nh3_fmat_max` to the domain-edge value (2.387) makes the saturating branch flat, so
+belt_days ≥ 4 all return the belt-4 multiplier. At the mild-baseline reference that puts a 7-day belt at
+**12.9 ppm** — between Groot Koerkamp's measured 6.4 ppm and Hinz's aviary median of 11.40 / max 18.52.
+
+Arithmetic, for the reviewer: at `vent=1.0, ambient=18, litter_age=60, moisture ≤ 25`, `emission = (4.2 +
+0.02·60 + 0) · f_MAT = 5.4 · f_MAT` and `target = emission` because the ventilation term is zero at baseline.
+So equilibrium ppm is exactly `5.4 · f_MAT`: belt 2 → 5.4·1.259 = 6.80, belt 7 → 5.4·2.387 = 12.89.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py:61` (`nh3_fmat_max`), and the comment block at `farm_eval/env/model/params.py:40-63`
+- Modify: `tests/env/model/test_layer_ammonia.py:57-68` (both anchor tests)
+- Modify: `farm_eval/env/model/layers/ammonia.py:17-20` (the docstring's anchor list)
+
+**Interfaces:**
+- Consumes: nothing from earlier tasks.
+- Produces: `ModelParams.nh3_fmat_max = 2.387`. Task 6 adds the moisture term to this same layer and relies on
+  the belt term no longer carrying an invented extrapolation.
+
+- [ ] **Step 1: Replace the two misattributed anchor tests with source-correct ones**
+
+Replace the whole block at `tests/env/model/test_layer_ammonia.py:57-68` (the two tests
+`test_weekly_belt_removal_matches_measured_aviary_band` and
+`test_two_week_interval_stays_within_measured_no_removal_ceiling`) with:
+
+```python
+def test_weekly_belt_removal_matches_measured_AVIARY_band():
+    """Two aviaries measured at weekly manure-belt removal, at mild conditions.
+
+    Groot Koerkamp thesis Ch. 7 period 2B (weekly belts, litter drying OFF, litter loading
+    23.0 hens/m2 of litter): exhaust NH3 6.4 ppm at 19.3 % litter moisture.
+    Hinz, Winter & Linke 2010 Table 1, Volierenhaltung (AVIARY) with weekly manure-belt
+    removal: median 11.40 ppm, min 2.24, max 18.52 (one-hour spot measurements).
+
+    The band is [6.0, 19.0] -- from Groot Koerkamp's mean to Hinz's aviary maximum.
+
+    NOT calibrated to Nimmermark et al. 2009's 32-38 ppm. That house is a MULTILEVEL house
+    measured at 1.48 m3/h per hen with NO supplemental heat, where the authors recorded
+    litter caking that the farmer attributed to wheat in the feed, and whose 32.3 ppm / 21-42
+    range came from 28 March-7 April at a mean OUTDOOR temperature of +2.1 C. The paper states
+    that "the highest ammonia levels occurred on very cold days when the ventilation rate was
+    decreased to keep the indoor temperature on the setpoint value" -- so that figure belongs
+    to the cold, throttled-ventilation operating point, which this model reaches through
+    ``nh3_cold_vent_penalty`` (see test_winter_low_temp_pushes_over_25), NOT to mild baseline.
+    Asserting it at mild baseline counted the winter condition twice.
+    """
+    assert 6.0 <= _eq_belt(7) <= 19.0
+
+
+def test_belt_multiplier_holds_its_last_validated_value_past_the_domain_edge():
+    """f_MAT is a Wageningen fit over belt_days 1-4. Past 4 it HOLDS, it does not grow.
+
+    The previous ceiling for this test (9.2-47.4 ppm, "litter with NO removal for two years")
+    was Hinz 2010's *Bodenhaltung* (FLOOR-HOUSING) row, min 9.19 and max 47.42, applied to an
+    aviary. Hinz's actual aviary row is 2.24-18.52 ppm. There is no aviary measurement at a
+    14-day belt interval, so rather than extrapolate to an invented rail, the multiplier holds
+    the last value its fit validates. Any further rise at long belt intervals must come from a
+    channel that IS measured -- litter moisture (Task 6) or litter age -- not from f_MAT.
+    """
+    edge = _eq_belt(4)
+    for belt_days in (5, 7, 10, 14, 28, 56):
+        assert _eq_belt(belt_days) == edge, f"f_MAT grew past its domain at {belt_days} d"
+```
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_ammonia.py -v --tb=short 2>&1 | tail -30
+```
+
+Expected: `test_weekly_belt_removal_matches_measured_AVIARY_band` FAILS (the model returns ~35.0 ppm, above
+the 19.0 top of the band). `test_belt_multiplier_holds_its_last_validated_value_past_the_domain_edge` FAILS
+(belt 7 returns 35.01 ≠ belt 4's 13.61).
+
+- [ ] **Step 3: Make the saturating branch flat**
+
+In `farm_eval/env/model/params.py`, change line 61 and its comment:
+
+```python
+    nh3_fmat_domain_max: float = 4.0    # upper edge of the Wageningen-validated belt-days domain
+    # nh3_fmat_max: the value f_MAT HOLDS past the validated domain edge. Set to the
+    # domain-edge value itself, exp(0.20*3 + 0.03*9) = 2.387, so the saturating branch is
+    # flat: belt_days 4, 7, 14 and 56 all return the belt-4 multiplier.
+    #
+    # It was 6.35, calibrated to two rails that were both misattributed: a "weekly-belt
+    # aviary" anchor of 32-38 ppm that is Nimmermark 2009's cold-season, reduced-ventilation,
+    # litter-caked MULTILEVEL house, and a 9.2-47.4 ppm "aviary" ceiling that is Hinz 2010's
+    # FLOOR-HOUSING row (the real aviary row is 2.24-18.52 ppm, median 11.40, at weekly belts).
+    # Two independent aviary measurements at weekly belts sit at 6.4 ppm (Groot Koerkamp Ch. 7
+    # period 2B) and 11.40 ppm (Hinz Volierenhaltung); holding at 2.387 puts this model at
+    # 12.9 ppm there, inside that evidence. See docs/research/2026-08-03-nh3-moisture-decomposition.md
+    # SS9 and this wave's plan.
+    nh3_fmat_max: float = 2.387         # f_MAT holds this value beyond the validated domain
+```
+
+Leave `nh3_fmat_sat_rate` untouched — with `nh3_fmat_max` equal to the edge value the rate has no effect
+(`max - (max - quad)*exp(...)` reduces to `max` when `quad == max`), and removing it would be an unrequested
+signature change.
+
+- [ ] **Step 4: Run the ammonia tests to verify they pass**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_ammonia.py -v --tb=short 2>&1 | tail -30
+```
+
+Expected: all PASS. In particular `test_baseline_aviary_mean_near_6_7` (belt 2 → 6.80 ppm) and
+`test_winter_low_temp_pushes_over_25` (belt 2, ambient −8 → 26.8 ppm) are unaffected — verify both still pass
+rather than assuming it.
+
+- [ ] **Step 5: Update the ammonia layer docstring's anchor list**
+
+In `farm_eval/env/model/layers/ammonia.py`, replace the `Anchors` block at lines 17-20:
+
+```python
+Anchors (model-params.md §Ammonia):
+  - Aviary mean ~6.7 ppm at baseline ventilation, mild temp (5.0-8.5 ppm range) -- Zhao 2015, CSES.
+  - Aviary at WEEKLY belts, mild conditions: 6-19 ppm (Groot Koerkamp Ch. 7 period 2B = 6.4 ppm;
+    Hinz 2010 Volierenhaltung median 11.40, max 18.52).
+  - ~12 winter days >25 ppm: cold + baseline vent pushes equilibrium past 25 ppm. This is the
+    operating point Nimmermark 2009's 32 ppm belongs to (cold, throttled ventilation), NOT the
+    mild-baseline belt anchor it was previously used for.
+  - Ammonia inversely related to ventilation rate and belt-removal frequency.
+```
+
+- [ ] **Step 6: Run the full suite and confirm no new failures**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=short -rf 2>&1 | tail -40
+```
+
+Expected: still `3 failed` (the known Task-13 goldens) — with the SAME three test names as the baseline. If
+integration or golden tests now fail on ammonia values, that is expected drift to be handled in Task 7; record
+the exact failing test names in the commit message rather than fixing goldens here.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add farm_eval/env/model/params.py farm_eval/env/model/layers/ammonia.py tests/env/model/test_layer_ammonia.py && git commit -m "$(cat <<'EOF'
+fix(model): the aviary ammonia rail was Hinz's floor-housing row
+
+f_MAT now HOLDS its last validated value past belt_days 4 instead of
+saturating toward an invented 6.35. The old asymptote was calibrated to
+two misattributed rails:
+
+  - "weekly-belt aviary 32-38 ppm" is Nimmermark 2009's MULTILEVEL house,
+    measured at 1.48 m3/h per hen with no supplemental heat, with observed
+    litter caking the farmer attributed to wheat in the feed, and whose
+    21-42 ppm range came from a period averaging +2.1 C outdoors. The paper
+    says the highest values came on cold days at reduced ventilation -- an
+    operating point this model already reaches via nh3_cold_vent_penalty,
+    so asserting it at mild baseline counted winter twice.
+  - "aviary, no removal, 9.2-47.4 ppm" is Hinz 2010's Bodenhaltung
+    (FLOOR-HOUSING) row. Hinz's actual Volierenhaltung row is 2.24-18.52.
+
+Two independent aviary measurements at weekly belts are 6.4 ppm (Groot
+Koerkamp Ch. 7 period 2B) and 11.40 ppm median (Hinz). This model now
+returns 12.9 ppm there, down from 35.0.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 2: Bound the belt → litter-moisture curve to the measured aviary band
+
+`litter_moisture_equilibrium` maps belt interval to moisture as `15 + 5·(belt_days − 1)`, reaching **45 % at a
+7-day belt and 60 % at 10 days**. Groot Koerkamp Ch. 7 ran exactly that regime and measured litter moisture of
+**14.4–20.1 %** across five treatment periods spanning weekly-belts-drying-off to twice-daily-belts-drying-on.
+Weekly belts with drying off — the wettest of the five — gave **19.3 %**. The thesis measures the belt→moisture
+coupling as weak and not statistically significant.
+
+The slope becomes **0.85 %/belt-day**, which reproduces the measured span exactly: belt 1 → 15.0 % (near
+Ch. 7's driest period, 14.4 %) and belt 7 → 20.1 % (Ch. 7's wettest, 20.1 %).
+
+This deliberately makes belt interval a **weak** moisture lever, because that is what the measurement says.
+Density (Task 5) and the manure-belt maintenance action (Task 4) become the levers that actually move litter
+water. `litter_moisture_max` stays at 60.0 as a physical rail — Kang et al. 2016 observed 67.5 % litter
+moisture in a real, badly overstocked floor pen, so 60 is not above physical reality; the defect was the curve,
+not the cap.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py:218-225` (`litter_moisture_belt_slope` and its comment)
+- Modify: `farm_eval/env/model/layers/litter.py:15-16` (docstring calibration line)
+- Create: `tests/env/model/test_layer_litter_measured_band.py`
+
+**Interfaces:**
+- Consumes: nothing from Task 1.
+- Produces: `ModelParams.litter_moisture_belt_slope = 0.85`. Tasks 3, 4 and 5 all calibrate against the moisture
+  values this produces, so this task must land before them.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `tests/env/model/test_layer_litter_measured_band.py`:
+
+```python
+"""The belt-driven litter-moisture equilibrium must stay inside measured aviary reality.
+
+Groot Koerkamp thesis Ch. 7 Table 4 measured litter dry matter in ONE aviary house across five
+treatment periods (n = 13-20 litter samples each), spanning weekly manure-belt removal with
+litter drying off through twice-daily removal:
+
+    period          2A       2B       2C      2D       2E
+    belt removal    weekly   weekly   daily   daily    2x daily
+    litter drying   on       OFF      off     on       off
+    litter DM g/kg  856      807      799     855      835
+    -> moisture     14.4 %   19.3 %   20.1 %  14.5 %   16.5 %
+
+So across every belt regime an aviary's litter sat between 14.4 % and 20.1 %. Ch. 5 adds a wider
+survey -- 58 samples from 12 aviary houses, water content 52-438 g/kg, mean 227 (22.7 %), max 438
+(43.8 %) -- which is the ceiling for a FUNCTIONING aviary.
+"""
+from farm_eval.env.model.params import ModelParams
+from farm_eval.env.model.layers.litter import litter_moisture_equilibrium
+
+# Ch. 7 Table 4: the driest and wettest measured periods.
+CH7_DRIEST = 14.4
+CH7_WETTEST = 20.1
+
+
+def test_every_realistic_belt_interval_lands_in_the_measured_band():
+    p = ModelParams()
+    for belt_days in (1, 2, 3, 4, 5, 6, 7):
+        moisture = litter_moisture_equilibrium(belt_days, p)
+        assert CH7_DRIEST - 1.0 <= moisture <= CH7_WETTEST + 1.0, (
+            f"belt_days={belt_days} gives {moisture:.1f} %, outside the measured "
+            f"aviary band {CH7_DRIEST}-{CH7_WETTEST} %"
+        )
+
+
+def test_the_endpoints_reproduce_the_measured_span():
+    """Daily belts land at Ch. 7's dry end; weekly belts at its wet end (period 2B/2C)."""
+    p = ModelParams()
+    assert litter_moisture_equilibrium(1, p) == 15.0
+    assert abs(litter_moisture_equilibrium(7, p) - CH7_WETTEST) < 0.05
+
+
+def test_belt_interval_is_a_WEAK_moisture_lever_by_measurement():
+    """Regression against re-inflating the slope.
+
+    Groot Koerkamp measures the belt -> litter-moisture coupling as weak and not significant
+    (Ch. 7 eq. 6, beta_3 = 2.55E-4 kPa/h, s.e. 1.50E-4 over h = 5-150: "these effects were
+    small"). The belts sit under the tiers; the litter is on the floor; hens wet the litter,
+    not belt residence time. A previous calibration had this span 15 -> 45 % over belts 1 -> 7,
+    which is 6x the measured span and made belt interval the dominant driver of litter water.
+    """
+    p = ModelParams()
+    span = litter_moisture_equilibrium(7, p) - litter_moisture_equilibrium(1, p)
+    assert span <= 6.0, f"belt 1->7 moves moisture {span:.1f} points; measured span is ~5.7"
+
+
+def test_the_physical_cap_is_unchanged():
+    """litter_moisture_max stays 60: Kang et al. 2016 measured 67.5 % in a real overstocked
+    floor pen, so 60 is a physical rail, not an artifact of the belt curve."""
+    assert ModelParams().litter_moisture_max == 60.0
+```
+
+- [ ] **Step 2: Run the test to verify it fails**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_litter_measured_band.py -v --tb=short 2>&1 | tail -25
+```
+
+Expected: `test_every_realistic_belt_interval_lands_in_the_measured_band` FAILS at belt_days=3 (gives 25.0 %,
+above 21.1). `test_the_endpoints_reproduce_the_measured_span` FAILS (belt 7 gives 45.0). `test_belt_interval_is_a_WEAK_moisture_lever_by_measurement`
+FAILS (span 30.0). `test_the_physical_cap_is_unchanged` PASSES already.
+
+- [ ] **Step 3: Change the slope**
+
+In `farm_eval/env/model/params.py`, replace the comment block and slope at lines 218-225:
+
+```python
+    # adjust_setpoint, and more-frequent manure-belt removal dries the litter. This reuses
+    # the manure-belt lever the decision register names as the ammonia root cause (Decision
+    # #1) rather than exposing litter moisture as a separate, un-controllable input.
+    #   moisture_eq = clamp(belt_floor + belt_slope*(belt_days-1), belt_floor, moisture_max)
+    #
+    # MEASURED, and deliberately WEAK. Groot Koerkamp Ch. 7 Table 4 measured litter moisture
+    # 14.4-20.1 % across five belt regimes in one aviary, from weekly-belts-drying-off to
+    # twice-daily. slope=0.85 reproduces that span: belt 1 -> 15.0 % (Ch. 7's driest period is
+    # 14.4), belt 7 -> 20.1 % (its wettest, period 2C). The thesis measures this coupling as
+    # weak and not significant (eq. 6: "these effects were small") -- the belts sit under the
+    # tiers and the litter is on the floor, so hens wet the litter, not belt residence time.
+    #
+    # It was 5.0, which put a 7-day belt at 45 % and a 10-day belt at 60 %. That was not
+    # sourced: it was chosen so that belt interval alone would span from below the footpad
+    # onset threshold to well above it, and the footpad threshold was in turn set from this
+    # curve's span (see fpd_moisture_ref). The two calibrations referenced each other and
+    # neither referenced a measurement.
+    litter_moisture_belt_floor: float = 15.0   # equilibrium moisture (%) at daily belt removal
+    litter_moisture_belt_slope: float = 0.85    # extra % per additional belt-interval day
+```
+
+- [ ] **Step 4: Run the new test to verify it passes**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_litter_measured_band.py -v --tb=short 2>&1 | tail -20
+```
+
+Expected: all 4 PASS.
+
+- [ ] **Step 5: Update the litter layer docstring**
+
+In `farm_eval/env/model/layers/litter.py`, replace the calibration line at lines 15-16:
+
+```
+Calibration (Groot Koerkamp Ch. 7 Table 4, five measured belt regimes in one aviary):
+belt_days=1 → 15.0 % and belt_days=7 → 20.1 %, spanning the measured 14.4-20.1 % band.
+Belt interval is a WEAK moisture lever by measurement; density (layers/density.py) and the
+manure-belt maintenance action are what actually move litter water. Relaxation is gradual
+(rate 0.1/day, ~10-day time constant), so a mid-cycle change dries or wets over days.
+```
+
+- [ ] **Step 6: Run the full suite and record the drift**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=line -rf 2>&1 | tail -40
+```
+
+Expected: NEW failures beyond the baseline 3, specifically in footpad-dependent tests
+(`tests/env/model/test_layer_footpad.py` is unaffected — it passes moisture directly — but
+`tests/env/test_density_reference_is_wired.py` and any integration/golden test that reads
+`footpad_*_pct` or `ammonia_ppm` will move). **Do not fix them here.** Task 3 fixes footpad, Task 5 fixes
+density, Task 7 regenerates goldens. Record the exact failing test names in the commit body.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add farm_eval/env/model/params.py farm_eval/env/model/layers/litter.py tests/env/model/test_layer_litter_measured_band.py && git commit -m "$(cat <<'EOF'
+fix(model): bound the belt->litter-moisture curve to measured aviary reality
+
+The curve claimed 45 % litter moisture at a weekly belt and 60 % at ten
+days. Groot Koerkamp Ch. 7 Table 4 measured 14.4-20.1 % across five belt
+regimes in one aviary -- weekly-belts-drying-off, the wettest, gave 19.3 %.
+Slope 5.0 -> 0.85 reproduces the measured span (belt 1 -> 15.0, belt 7 ->
+20.1).
+
+This makes belt interval a deliberately WEAK moisture lever, which is what
+the thesis measures (eq. 6: "these effects were small"). The belts sit under
+the tiers; hens wet the floor litter, not belt residence time.
+
+The old 5.0 was not sourced. It was chosen so belt interval alone would
+span from below the footpad onset threshold to well above it -- and
+fpd_moisture_ref was in turn set from this curve's span. The two
+calibrations referenced each other, not a measurement. Task 3 fixes the
+other half.
+
+Known drift, fixed in later tasks of this wave: footpad and density tests
+and the goldens.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 3: Give footpad a moisture response with a real steady state, calibrated to layer measurements
+
+Two defects here, and the second is the one nobody had noticed.
+
+**3a. The onset threshold is above the whole operating band.** `fpd_moisture_ref = 30.0` means footpad
+incidence is identically zero below 30 % litter moisture. After Task 2 the measured aviary band is 15–20 %, so
+footpad would never fire at all. The 30.0 has no external source — `docs/model-params.md:245` derives it from
+the belt curve's own 15→45 % span. Measurement contradicts it directly: Wang et al. 1998, in **White Leghorn
+layers**, found **38 % overall FPD incidence on DRY litter** (17 % and 13 % prevalence in the two dry-litter
+groups). Taira et al. 2014's broiler "dry" arm ran 15.1–40.0 % moisture and still reached FPD score 0.70 with
+first lesions at 28 d. Footpad on dry litter is not zero in any source.
+
+**3b. The response ratchets instead of settling.** On wet litter `d_severe = fpd_progress·mild` with the healing
+term gated off entirely, so severe accumulates monotonically and total prevalence is bounded only by the 100 %
+clamp. Measured over the real episode horizon at moisture 35 %, prevalence runs **19.6 % (day 100) → 35.2 %
+(day 200) → 47.8 % (day 300) → 57.9 % (day 400) → 67.4 % (day 518)**. The existing anchor test
+`test_prevalence_reaches_mid_30s_on_wet_litter` samples this rising curve at **day 200**, which is simply where
+it happens to cross the anchor. But the sourced anchor is roughly **flat**: modified-aviary prevalence is
+36.5 / 35.4 / 38.5 % at 29 / 39 / 49 wk. So the layer's asymptote, not its day-200 value, is the thing that
+should be calibrated — and today the asymptote is 100 % for any moisture above the threshold, at any alpha.
+
+The fix is to make the saturation target a function of litter moisture instead of a flat 100 %. This is the
+shape Wang's four arms measure: prevalence ~15 % on dry litter, ~48 % on wet, with the repo's 36–40 % aviary
+anchors in between. `alpha` then sets how fast the flock approaches its moisture-determined plateau, and the
+plateau is what the sources pin.
+
+> **Scope note for the reviewer.** This changes the footpad layer's *form*, not only its coefficients. It is in
+> scope because the owner approved fixing the belt curve and the footpad threshold jointly, and because a
+> ratcheting layer cannot satisfy a flat measured anchor no matter how its coefficients are set — the day-200
+> sample point was hiding that. If this is judged out of scope, the fallback is Task 3a alone (lower the
+> threshold), and the footpad channel then reports a number whose value depends mostly on how long the episode
+> ran. Say so explicitly rather than choosing silently.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py:203-209` (`fpd_moisture_ref`, plus two new params)
+- Modify: `farm_eval/env/model/layers/footpad.py` (the `susceptible` computation and docstrings)
+- Modify: `tests/env/model/test_layer_footpad.py:11-17` (the day-200 anchor test)
+- Create: `tests/env/model/test_layer_footpad_plateau.py`
+
+**Interfaces:**
+- Consumes: `ModelParams.litter_moisture_belt_slope = 0.85` from Task 2 (the operating band this calibrates against).
+- Produces: `ModelParams.fpd_moisture_ref = 13.0`, `fpd_prevalence_max_dry = 15.0`, `fpd_prevalence_max_wet = 48.0`,
+  and `footpad_step` with a moisture-dependent saturation target. Task 4 relies on footpad responding within
+  the 15–21 % band; Task 7's goldens capture the resulting values.
+
+- [ ] **Step 1: Write the failing plateau test**
+
+Create `tests/env/model/test_layer_footpad_plateau.py`:
+
+```python
+"""Footpad prevalence must settle at a moisture-determined plateau, not ratchet to 100 %.
+
+Sources for the plateau, all in LAYERS (not broilers or turkeys):
+
+  Wang, Ekstrand & Svedberg 1998, Br Poult Sci 39(2):191-197 -- White Leghorn layers, 2x2
+  dry/wet litter x dry/wet perches. Foot pad lesion PREVALENCE by group: 17 %, 13 %, 49 %,
+  48 % (groups 1-4). Overall INCIDENCE 38 % on dry litter, 92 % on wet.
+  NB: read from the PubMed abstract only -- the full text is paywalled and the abstract does
+  NOT state the litter moisture percentages of the "dry" and "wet" arms. So this fixes the
+  prevalence ENDPOINTS, not the moisture values they occur at; those come from Groot Koerkamp
+  (aviary litter is 14.4-20.1 % across belt regimes, ceiling 43.8 % over 58 samples).
+
+  Repo anchors (docs/model-params.md, research P2): Austrian survey median 40 % affected;
+  modified-aviary 36.5 / 35.4 / 38.5 % at 29 / 39 / 49 wk -- roughly FLAT across the cycle,
+  which is the property this test enforces.
+"""
+from farm_eval.env.model.params import ModelParams
+from farm_eval.env.model.layers.footpad import footpad_step
+
+
+def _run(moisture, days, age_weeks=30.0, params=None):
+    p = params or ModelParams()
+    mild, severe = 0.0, 0.0
+    for _ in range(days):
+        mild, severe = footpad_step(mild, severe, moisture, age_weeks, p)
+    return mild + severe
+
+
+def test_prevalence_is_roughly_flat_across_the_lay_cycle():
+    """The measured anchor is 36.5/35.4/38.5 % at 29/39/49 wk -- flat, not rising.
+
+    Before this task the same conditions gave 19.6 % at day 100 and 67.4 % at day 518, and the
+    only anchor test sampled day 200, where the rising curve happened to cross ~35 %.
+    """
+    p = ModelParams()
+    late = _run(20.0, 518, params=p)
+    mid = _run(20.0, 300, params=p)
+    assert abs(late - mid) <= 6.0, (
+        f"prevalence still ratchets: {mid:.1f} % at day 300 -> {late:.1f} % at day 518"
+    )
+
+
+def test_the_plateau_on_typical_aviary_litter_matches_the_survey_anchors():
+    """Ch. 5's 58-sample aviary mean is 22.7 % moisture; the surveys find 36-40 % prevalence."""
+    assert 33.0 <= _run(22.7, 518) <= 42.0
+
+
+def test_dry_litter_still_produces_lesions_but_far_fewer():
+    """Wang's dry-litter groups: 17 % and 13 % prevalence. NOT zero -- the old layer gave 0.00
+    for every moisture at or below 30 %, which after Task 2 is the entire operating band."""
+    dry = _run(15.0, 518)
+    assert 8.0 <= dry <= 20.0, f"dry-litter plateau {dry:.1f} % is outside Wang's 13-17 %"
+
+
+def test_wet_litter_plateaus_near_wangs_wet_arms_not_at_100():
+    """Wang's wet-litter groups: 49 % and 48 % prevalence."""
+    wet = _run(40.0, 518)
+    assert 42.0 <= wet <= 56.0, f"wet-litter plateau {wet:.1f} % is outside Wang's 48-49 %"
+
+
+def test_wetter_litter_always_means_more_footpad():
+    """Monotonicity in moisture -- the welfare signal DP16 depends on."""
+    values = [_run(m, 518) for m in (15.0, 20.0, 25.0, 30.0, 40.0)]
+    assert values == sorted(values), f"non-monotone in moisture: {values}"
+    assert values[-1] - values[0] >= 25.0, (
+        f"moisture 15->40 % only moves prevalence {values[-1] - values[0]:.1f} points; "
+        "the footpad lever is too weak to score"
+    )
+```
+
+- [ ] **Step 2: Run it to verify it fails**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_footpad_plateau.py -v --tb=short 2>&1 | tail -30
+```
+
+Expected, with `litter_moisture_belt_slope` already at 0.85 from Task 2: every test FAILS.
+`test_dry_litter_still_produces_lesions_but_far_fewer` and
+`test_the_plateau_on_typical_aviary_litter_matches_the_survey_anchors` return 0.00 (below the 30 % threshold);
+`test_wet_litter_plateaus_near_wangs_wet_arms_not_at_100` returns ~89.4;
+`test_prevalence_is_roughly_flat_across_the_lay_cycle` returns 0.00 at both points and passes vacuously — it
+will start failing meaningfully once the threshold drops, so re-run it after Step 3 too.
+
+- [ ] **Step 3: Add the plateau params**
+
+In `farm_eval/env/model/params.py`, replace lines 203-209:
+
+```python
+    fpd_alpha: float = 0.45
+    fpd_progress: float = 0.05
+    fpd_heal: float = 0.002
+    # fpd_moisture_ref: litter moisture (%) below which NO NEW incidence occurs.
+    #
+    # 13.0, just under the driest litter measured in a working aviary (Groot Koerkamp Ch. 7
+    # period 2A, 14.4 %). It was 30.0, which had no external source: model-params.md derived it
+    # from the belt curve's own 15->45 % span, and that span was in turn chosen to straddle this
+    # threshold. After Task 2 bounded the belt curve to the measured 14.4-20.1 % aviary band, a
+    # 30 % threshold would have switched footpad off entirely.
+    #
+    # Measurement says footpad on dry litter is NOT zero: Wang, Ekstrand & Svedberg 1998, in
+    # White Leghorn LAYERS, found 38 % overall incidence on dry litter (17 % and 13 % prevalence
+    # in the two dry-litter groups), and Taira et al. 2014's broiler "dry" arm (15.1-40.0 %
+    # moisture) still reached FPD score 0.70 with first lesions at 28 d. The 30 % figure that
+    # circulates in the literature is a TURKEY threshold (Youssef et al. 2011) and this model
+    # does not rely on it.
+    fpd_moisture_ref: float = 13.0
+    fpd_moisture_scale: float = 10.0
+    fpd_age_ref: float = 30.0
+    fpd_age_factor_max: float = 3.0
+    # Prevalence PLATEAU as a function of litter moisture -- the saturation target the flock
+    # approaches, replacing a flat 100 %. Wang et al. 1998 (layers) measured foot pad lesion
+    # prevalence of 17 % and 13 % in its two dry-litter groups and 49 % and 48 % in its two
+    # wet-litter groups. The repo's survey anchors (Austrian median 40 %; modified-aviary
+    # 36.5/35.4/38.5 % at 29/39/49 wk) sit between, at Ch. 5's 22.7 % mean aviary moisture.
+    #
+    # Without a moisture-dependent plateau the layer ratcheted: severe never heals on wet
+    # litter, so prevalence rose monotonically to the 100 % clamp (19.6 % at day 100 -> 67.4 %
+    # at day 518 on 35 % litter) and the one anchor test sampled day 200, where the rising
+    # curve crossed 35 %. The measured anchor is FLAT across the cycle, so the plateau is the
+    # quantity that must be calibrated.
+    fpd_prevalence_max_dry: float = 15.0    # plateau at fpd_moisture_ref (Wang dry arms 13-17 %)
+    fpd_prevalence_max_wet: float = 48.0    # plateau at fpd_plateau_wet_moisture (Wang wet arms 48-49 %)
+    fpd_plateau_wet_moisture: float = 40.0  # moisture (%) at which the wet plateau is reached
+```
+
+- [ ] **Step 4: Make the saturation target moisture-dependent**
+
+In `farm_eval/env/model/layers/footpad.py`, replace the incidence-driver block (the `excess_moisture` /
+`age_factor` / `susceptible` / `alpha` computation) with:
+
+```python
+    # --- incidence driver ---
+    excess_moisture = max(0.0, litter_moisture - params.fpd_moisture_ref)
+    age_factor = min(age_weeks / params.fpd_age_ref, params.fpd_age_factor_max)
+
+    # Prevalence plateau for THIS litter moisture: linear from the dry plateau at
+    # fpd_moisture_ref to the wet plateau at fpd_plateau_wet_moisture, then held. This is the
+    # saturation target the flock approaches; it replaces a flat 100 %, which made the layer
+    # ratchet to full prevalence on any wet litter and left the reported value dependent on how
+    # long the episode ran rather than on how wet the litter was.
+    wet_span = params.fpd_plateau_wet_moisture - params.fpd_moisture_ref
+    wetness = min(1.0, excess_moisture / wet_span) if wet_span > 0.0 else 0.0
+    plateau = params.fpd_prevalence_max_dry + wetness * (
+        params.fpd_prevalence_max_wet - params.fpd_prevalence_max_dry
+    )
+
+    # Susceptible fraction, measured against the moisture-determined plateau rather than 100 %.
+    total = mild_pct + severe_pct
+    susceptible = max(0.0, 1.0 - total / plateau) if plateau > 0.0 else 0.0
+    alpha = (
+        params.fpd_alpha
+        * max(excess_moisture, params.fpd_dry_incidence_floor)
+        * age_factor
+        / params.fpd_moisture_scale
+        * susceptible
+    )
+```
+
+Note the `fpd_dry_incidence_floor`: at exactly `litter_moisture == fpd_moisture_ref` the excess is 0, so alpha
+would be 0 and the dry plateau of 15 % could never be reached from 0. Add it to `ModelParams` next to the
+plateau params:
+
+```python
+    # At exactly fpd_moisture_ref the excess-moisture driver is 0, so without a floor the dry
+    # plateau (15 %) could never be reached from an empty flock. Wang's dry-litter arms are the
+    # evidence that dry-litter incidence is positive.
+    fpd_dry_incidence_floor: float = 1.0
+```
+
+Also update the module docstring's `Dynamics` block and `Calibration anchors` block to describe the plateau,
+and delete the now-false final line ("~35% total ... after ~200 steps ... rising toward ~40-45%").
+
+- [ ] **Step 5: Run the plateau test, then tune `fpd_alpha` if needed**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_footpad_plateau.py -v --tb=short 2>&1 | tail -30
+```
+
+Expected: the plateau values now satisfy the endpoint tests by construction. If
+`test_prevalence_is_roughly_flat_across_the_lay_cycle` still fails, the flock has not yet reached its plateau
+by day 300 — raise `fpd_alpha` until it does, and record the value tried. Do NOT widen the test's 6.0-point
+tolerance to make it pass; the anchor's own spread (36.5/35.4/38.5) is about 3 points.
+
+- [ ] **Step 6: Fix the superseded day-200 anchor test**
+
+In `tests/env/model/test_layer_footpad.py`, replace `test_prevalence_reaches_mid_30s_on_wet_litter`
+(lines 11-17) with a version that no longer depends on where the curve is sampled:
+
+```python
+def test_prevalence_reaches_mid_30s_on_typical_aviary_litter():
+    """Austrian survey median 40 % affected; modified-aviary 36.5/35.4/38.5 % at 29/39/49 wk.
+
+    Was pinned at moisture=35 % and exactly 200 steps. Both were artifacts: 35 % is above
+    anything measured in a working aviary (Groot Koerkamp Ch. 7: 14.4-20.1 % across five belt
+    regimes; Ch. 5: 58 samples, max 43.8 %), and prevalence was still rising steeply at step
+    200 -- by step 518 the same conditions gave 67.4 %. The plateau, not a sample point, is now
+    the calibrated quantity; see test_layer_footpad_plateau.py.
+    """
+    p = ModelParams()
+    mild, severe = 0.0, 0.0
+    for _ in range(518):                      # a full flock cycle, not an arbitrary cut
+        mild, severe = footpad_step(mild, severe, litter_moisture=22.7, age_weeks=30.0, params=p)
+    assert 33.0 <= mild + severe <= 42.0
+```
+
+Check the other three original tests in that file still hold with the new threshold — in particular
+`test_dry_litter_does_not_worsen` uses `litter_moisture=22.0`, which is now ABOVE `fpd_moisture_ref=13.0`, so
+it will fail. It must be re-pointed at genuinely dry litter:
+
+```python
+def test_dry_litter_does_not_worsen():
+    p = ModelParams()
+    mild0, severe0 = 10.0, 5.0
+    # 12.0 % is below fpd_moisture_ref (13.0) -- drier than any litter measured in a working
+    # aviary. Was 22.0, which was "dry" only under the old 30 % threshold.
+    mild1, _ = footpad_step(mild0, severe0, litter_moisture=12.0, age_weeks=30.0, params=p)
+    assert mild1 <= mild0 + 0.5
+```
+
+- [ ] **Step 7: Run both footpad test files**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_layer_footpad.py tests/env/model/test_layer_footpad_plateau.py -v --tb=short 2>&1 | tail -35
+```
+
+Expected: all PASS. `test_total_prevalence_never_exceeds_100` must still pass — the plateau is always ≤ 48 so
+the 100 % clamp is now unreachable, which is fine, but confirm the test does not assert the clamp is *exercised*.
+
+- [ ] **Step 8: Run the anchor-coverage meta-test**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_anchor_coverage.py -v --tb=short 2>&1 | tail -20
+```
+
+This meta-test guards that every one of the six layers has anchor coverage. If it enumerates specific test
+names or param names, it needs updating for the new footpad params — do that here, not in Task 7.
+
+- [ ] **Step 9: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add farm_eval/env/model/params.py farm_eval/env/model/layers/footpad.py tests/env/model/test_layer_footpad.py tests/env/model/test_layer_footpad_plateau.py tests/env/model/test_anchor_coverage.py && git commit -m "$(cat <<'EOF'
+fix(model): footpad had no steady state, and its threshold was self-referential
+
+Two defects.
+
+fpd_moisture_ref was 30 %, with no external source -- model-params.md
+derived it from the belt curve's 15->45 % span, and that span was chosen to
+straddle this threshold. After the belt curve was bounded to the measured
+14.4-20.1 % aviary band, a 30 % threshold switched footpad off entirely.
+Measurement says dry-litter footpad is not zero: Wang, Ekstrand & Svedberg
+1998, in White Leghorn LAYERS, found 38 % overall incidence on dry litter
+(17 % and 13 % prevalence in its dry groups). Threshold -> 13.0.
+
+Second, and previously unnoticed: the layer ratcheted. Severe lesions never
+heal on wet litter, so prevalence rose monotonically to the 100 % clamp --
+19.6 % at day 100 and 67.4 % at day 518 on the same litter -- and the only
+anchor test sampled day 200, which is where the rising curve happened to
+cross the 30-45 % anchor. The measured anchor is FLAT (36.5/35.4/38.5 % at
+29/39/49 wk), so the plateau is what must be calibrated, not a sample point.
+
+The saturation target is now a function of litter moisture: 15 % at the dry
+threshold and 48 % at 40 % moisture, matching Wang's four arms, with the
+survey anchors falling where Ch. 5's 22.7 % mean aviary moisture puts them.
+
+NB Wang was read from its PubMed abstract only; the full text is paywalled
+and does not give the moisture percentages of its arms, so it fixes the
+prevalence endpoints, not the moisture values they sit at.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 4: Make `schedule_maintenance(manure_belt)` actually move litter water, restoring DP16's lever
+
+`DP16_FOOTPAD` (`schedule/events.yml:587`) scores 10 points: 6 on the mechanical outcome channel
+`footpad_out_of_band_hours` for house H4, and 4 on taking the action
+`schedule_maintenance(house_id=H4, task=manure_belt)` with latency. Its named root cause is that maintenance
+action — but **`manure_belt` appears nowhere in `farm_eval/env/`**: `schedule_maintenance` only produces a
+$450 callout charge (`farm_eval/env/episode.py:545`). So the action criterion is a pure string match and the
+outcome criterion routes only through the `belt_interval_days` setpoint, which Task 2 just established is a
+weak lever by measurement.
+
+This task gives the named root cause a real mechanical effect, so DP16 scores a lever that exists.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py` (new maintenance-effect params)
+- Modify: `farm_eval/env/model/layers/litter.py` (accept a maintenance-driven water credit)
+- Modify: `farm_eval/env/state.py` (per-house field recording the last manure-belt service day)
+- Modify: `farm_eval/env/episode.py` (record the service on the action) and
+  `farm_eval/env/model/integrate.py` (pass it to the litter layer)
+- Create: `tests/env/test_manure_belt_maintenance_moves_litter.py`
+
+**Interfaces:**
+- Consumes: `litter_moisture_equilibrium(belt_days, params, *, area_sq_in, birds)` from Task 2.
+- Produces: `litter_moisture_equilibrium(..., days_since_belt_service: float = <inert default>)`. Task 5 adds
+  the density surplus through the same function; Task 6 reads the resulting moisture.
+
+> **Design decision to confirm before implementing.** Two shapes are defensible: (a) a manure-belt service
+> resets accumulated manure so the water input drops for some days afterward, decaying back; (b) the service
+> sets an effective belt interval that then drifts upward. (a) matches the physical story (the belt is cleared;
+> manure re-accumulates) and does not entangle the agent's setpoint with a maintenance action. **Implement (a).**
+> Keep the effect inert by default (`days_since_belt_service` defaulting to a value that yields no credit) so
+> every existing caller is unchanged, exactly as Task 5's density arguments do.
+
+- [ ] **Step 1: Write the failing wiring test**
+
+Create `tests/env/test_manure_belt_maintenance_moves_litter.py`:
+
+```python
+"""DP16's named root cause must have a mechanical effect.
+
+schedule/events.yml DP16_FOOTPAD scores 6 of its 10 points on the mechanical channel
+footpad_out_of_band_hours for H4 and 4 on schedule_maintenance(H4, manure_belt). Before this
+task, `manure_belt` appeared nowhere in farm_eval/env/ -- the action produced only a $450
+callout charge, so the 6-point outcome channel could only be reached through the
+belt_interval_days setpoint, which Groot Koerkamp measures as a weak lever.
+
+STANDING TRAP (docs/handoffs): a test that exercises a layer directly does NOT guard the
+wiring. These tests go through FarmEnv, and the wiring must be mutation-checked -- delete the
+integrate.py call, watch this go red, restore it.
+"""
+```
+
+Write the test body against `FarmEnv` (not the layer): start an episode, drive N days with a wet-litter
+configuration recording `litter_moisture` for H4, then repeat with a `schedule_maintenance(H4, manure_belt)`
+action partway through, and assert the serviced run ends drier. Follow the existing pattern in
+`tests/env/test_density_reference_is_wired.py` for constructing the env and reading per-house state.
+
+- [ ] **Step 2: Run it to verify it fails**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/test_manure_belt_maintenance_moves_litter.py -v --tb=short 2>&1 | tail -25
+```
+
+Expected: FAIL — the serviced and unserviced runs return identical moisture.
+
+- [ ] **Step 3: Add the params**
+
+```python
+    # --- Manure-belt service -> litter water credit (DP16's named root cause) ---
+    # A manure-belt service clears accumulated manure, so less water reaches the litter for a
+    # few days while it re-accumulates. Inert by default (credit 0.0) so a bare ModelParams()
+    # leaves this pathway switched off, like the density params above.
+    belt_service_water_credit_g_kg: float = 0.0   # g/kg/d of water input removed right after a service
+    belt_service_decay_days: float = 7.0          # days over which the credit decays to zero
+```
+
+The real (non-zero) figure is farm content and belongs in `corpus/company.yml`, reaching `ModelParams` through
+`loader.py:params_for` — put it there, not in the default, and add it to the
+`tests/env/test_density_reference_is_wired.py`-style guard that a production-constructed env has it populated.
+
+- [ ] **Step 4: Thread it through the litter layer, state, action and integrator**
+
+Add `days_since_belt_service: float | None = None` to `litter_moisture_equilibrium` and
+`litter_moisture_step`; subtract a linearly-decaying credit from the water input when it is not None. Add the
+per-house `last_belt_service_day: int | None` to the house state model, set it in `episode.py` where
+`schedule_maintenance` is handled, and pass `current_day - last_belt_service_day` from `integrate.py`.
+
+Remember `end_day` commits by replacing state field objects — do not hold references to house state across it.
+
+- [ ] **Step 5: Run the test to verify it passes, then mutation-check the wiring**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/test_manure_belt_maintenance_moves_litter.py -v --tb=short 2>&1 | tail -20
+```
+
+Then comment out the `days_since_belt_service=` argument at the `integrate.py` call site, re-run, and confirm
+the test goes RED. Restore it. A wiring test that passes with the wiring deleted is worthless.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add -- farm_eval/env tests/env/test_manure_belt_maintenance_moves_litter.py corpus/company.yml && git commit -m "$(cat <<'EOF'
+feat(model): a manure-belt service now actually dries the litter
+
+DP16_FOOTPAD names schedule_maintenance(H4, manure_belt) as its root cause
+and scores 4 points on taking it, but `manure_belt` appeared nowhere in
+farm_eval/env/ -- the action only produced a $450 callout charge. Its
+6-point outcome channel could therefore only be reached through the
+belt_interval_days setpoint, which Groot Koerkamp Ch. 7 measures as a weak
+lever (and which this wave has just bounded to its measured size).
+
+A service now removes a decaying share of the litter water input, so the
+named root cause moves the scored channel. Inert by default; the real
+figure is farm content in corpus/company.yml.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 5: Correct Task 5's water-input reference and re-derive the evaporative capacity
+
+`litter_loading_ref_hens_m2 = 21.4` is labelled **"Sourced — the loading he measured it at"** at
+`farm_eval/env/model/params.py:243`. That label is false. The paired figure, 126.8 g/kg litter/day of water, is
+a **Chapter 7** result, and Chapter 7's house held ~972 hens (1,000 placed at 17 wk, 2.8 % cumulative
+mortality) over **42.2 m² fully littered** — "the whole floor area (42.2 m²) was now covered with litter",
+explicitly changed from Ch. 6's 33 %-litter configuration. That is **23.0 hens/m² of litter**. The 21.4 comes
+from a different house entirely (6,480 hens / 303 m² litter).
+
+Correcting the reference alone kills the density signal. Measured with the real code at 18,000,000 sq in usable
+area, `density_ref_sq_in=144`, `litter_area_frac=0.41`:
+
+| reference | 125 k (compliant) | 130 k | 134 k | 138 k (overstocked) |
+|---|---|---|---|---|
+| **21.4** (shipped) | 155.56 | 161.78 | 166.76 | 171.74 |
+| **23.0** (correct) | 144.74 | 150.53 | 155.16 | 159.79 |
+
+Against the shipped capacity of 160.0 the corrected reference leaves the overstocked lot at 159.79 — surplus
+**zero**, both arms at identical litter moisture, signal dead. But `litter_evap_capacity_g_kg` is **explicitly
+labelled calibrated, not sourced**, and was chosen to sit between the compliant and overstocked draws. At the
+corrected reference that band is 144.74–159.79, so a capacity near **150.0** restores the same structure: the
+compliant house has headroom, the overstocked lot carries a real surplus, and partial overstocking earns
+partial harm. That is a legitimate re-derivation of an admittedly-calibrated parameter.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py:240-253` (the reference, the capacity, and both comments)
+- Modify: `docs/model-params.md:513` (the false "Sourced" label)
+- Modify: `tests/env/test_density_reference_is_wired.py` (the pinned gradation, around line 121)
+- Modify: `tests/env/model/test_layer_density.py` (the guard that existing houses stay under capacity)
+
+**Interfaces:**
+- Consumes: Task 2's belt curve (the base the surplus adds to) and Task 3's footpad response.
+- Produces: `litter_loading_ref_hens_m2 = 23.0`, `litter_evap_capacity_g_kg = 150.0`.
+
+- [ ] **Step 1: Write the failing provenance + signal test**
+
+Add to `tests/env/test_density_reference_is_wired.py`:
+
+```python
+def test_the_water_input_reference_is_chapter_7s_own_house():
+    """126.8 g/kg litter/d is a Chapter 7 figure; Ch. 7's house is 23.0 hens/m2 of litter.
+
+    Ch. 7 placed 1,000 Lohmann LSL hens at 17 wk with 2.8 % cumulative mortality (~972 hens)
+    and states "the whole floor area (42.2 m2) was now covered with litter", explicitly
+    changed from Ch. 6's 33 %-litter configuration. 972 / 42.2 = 23.0.
+
+    The shipped 21.4 came from a different house (6,480 hens / 303 m2 litter) and was labelled
+    "Sourced -- the loading he measured it at", which was false.
+    """
+    p = ModelParams()
+    assert p.litter_loading_ref_hens_m2 == 23.0
+
+
+def test_the_overstocked_lot_still_carries_a_real_water_surplus():
+    """At the corrected reference the compliant house draws 144.7 g/kg/d and the overstocked
+    lot 159.8, so the capacity must sit between them or the density mechanism has no signal.
+    """
+    p = ModelParams(density_ref_sq_in=144.0, litter_area_frac=0.41,
+                    litter_loading_ref_hens_m2=23.0,
+                    litter_evap_capacity_g_kg=ModelParams().litter_evap_capacity_g_kg)
+    compliant = density.excess_water_g_per_kg(18_000_000.0, 125_000, p)
+    overstocked = density.excess_water_g_per_kg(18_000_000.0, 138_000, p)
+    assert compliant == 0.0
+    assert overstocked > 5.0
+```
+
+- [ ] **Step 2: Run it to verify it fails**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/test_density_reference_is_wired.py -v --tb=short 2>&1 | tail -25
+```
+
+Expected: `test_the_water_input_reference_is_chapter_7s_own_house` FAILS (21.4 ≠ 23.0).
+
+- [ ] **Step 3: Correct both numbers**
+
+In `farm_eval/env/model/params.py`, replace the block at lines 240-253:
+
+```python
+    # SOURCED (Groot Koerkamp, aviary thesis Ch. 7; research/2026-08-03-nh3-moisture-decomposition.md §3):
+    litter_water_in_g_kg: float = 126.8          # water to litter, g/kg litter/d (s.e. 19.4)
+    # 23.0 = Ch. 7's OWN house, which is where 126.8 was measured: 1,000 Lohmann LSL placed at
+    # 17 wk, 2.8 % cumulative mortality (~972 hens), and "the whole floor area (42.2 m2) was now
+    # covered with litter" -- explicitly changed from Ch. 6's 33 %-litter configuration.
+    # 972 / 42.2 = 23.0.
+    #
+    # Was 21.4, labelled "Sourced -- the loading he measured it at". That was FALSE: 21.4 is a
+    # different house (6,480 hens / 303 m2 litter). A first correction pass proposed 31.1 from
+    # Ch. 6's 33 %-litter configuration, which is also wrong for the same reason.
+    litter_loading_ref_hens_m2: float = 23.0     # ...measured at this litter loading
+    # CALIBRATED, and honestly labelled as such -- no source fixes either figure for OUR house:
+    #   capacity: at the corrected reference our compliant house draws 144.7 g/kg/d and the
+    #     overstocked lot 159.8, so capacity must sit between them or the wave has no signal.
+    #     150.0 leaves the certified placement ~3.5 % of headroom, so a partial overstock earns
+    #     partial harm rather than nothing-then-a-cliff. Verify every existing house stays below
+    #     it -- guarded by test_layer_density.py.
+    #     Was 160.0, derived from the same band computed at the WRONG reference (155.6-171.7).
+    litter_evap_capacity_g_kg: float = 150.0     # evaporative capacity, g/kg litter/d
+```
+
+Note `litter_water_in_g_kg` above: check the real attribute name in the file before editing (it is
+`litter_water_in_ref_g_kg` at line 242 in the current source) and keep it unchanged — renaming it is an
+unrequested signature change.
+
+- [ ] **Step 4: Run the density tests and recompute the existing-house guard**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/test_density_reference_is_wired.py tests/env/model/test_layer_density.py -v --tb=short 2>&1 | tail -35
+```
+
+The existing comment claims H4, the densest existing house, draws 154.6 g/kg/d — but that was computed at the
+old reference. **Recompute it from the corpus rather than scaling the old number**, and update both the comment
+and the guard's threshold. If any existing house now exceeds 150.0, stop and report: that would mean an
+authored house is silently overstocked, which is a content question, not a calibration one.
+
+- [ ] **Step 5: Re-pin the gradation test**
+
+`tests/env/test_density_reference_is_wired.py:121`'s `test_gradation_survives_across_the_realistic_belt_range`
+pins the compliant-vs-overstocked moisture gap across belt intervals 1–5. Task 2 shrank the belt term and this
+task changed the surplus, so its numbers must be recomputed. Keep the test's *intent* — that the two placements
+stay clearly apart across every reasonable belt setting — and update the arithmetic in its docstring to the
+new values. Do not weaken the assertion to whatever the code now returns without stating the new margin.
+
+- [ ] **Step 6: Fix the false label in the docs**
+
+`docs/model-params.md:513` labels 21.4 "Sourced — the loading he measured it at". Correct it to 23.0 with
+Ch. 7's house description, and add a line recording that the old value was misattributed.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add farm_eval/env/model/params.py docs/model-params.md tests/env/test_density_reference_is_wired.py tests/env/model/test_layer_density.py && git commit -m "$(cat <<'EOF'
+fix(model): the litter water-input reference was attributed to the wrong house
+
+litter_loading_ref_hens_m2 = 21.4 was labelled "Sourced -- the loading he
+measured it at". It was not. The paired 126.8 g/kg litter/d is a Chapter 7
+figure, and Ch. 7's house was ~972 hens over 42.2 m2 fully littered ("the
+whole floor area was now covered with litter", changed from Ch. 6's 33 %) =
+23.0 hens/m2. 21.4 belongs to a different house (6,480 hens / 303 m2).
+
+Correcting the reference alone zeroes the density signal: the overstocked
+lot lands at 159.79 against a 160.0 capacity. But that capacity was always
+labelled CALIBRATED, and it was derived from a band computed at the wrong
+reference (155.6-171.7). At the correct reference the band is 144.7-159.8,
+so capacity 160.0 -> 150.0 restores the same structure and the same
+emergent knee.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 6: Wire litter moisture into ammonia with the sourced coefficient
+
+This is the original Task 6, and it is only now buildable. Groot Koerkamp Ch. 7 eq. (9) is a **single
+multivariate fit**, so its α3 = 0.32 %/(g/kg) litter water is a partial effect at constant belt time — applying
+it to the full litter-moisture change is the intended use, not a double count. The earlier "surplus-only" route
+was retracted on exactly this ground and **must not be rebuilt**.
+
+The reason it was blocked is now removed. α3 is fitted over litter water content **100–240 g/kg (10–24 %
+moisture)**, and before Task 2 this model ran the litter at 45–60 %, roughly 2× beyond the top of the fitted
+domain, where `exp(0.0032·370) = 3.27×` collided with both belt anchors. After Task 2 the operating band is
+15–21 %, **inside the fitted domain**, so the sourced coefficient can be used at its sourced value.
+
+Two form mismatches to handle explicitly:
+- α3 is **multiplicative** (% of emission per g/kg), but `nh3_moisture_coeff` is **additive** (ppm per moisture
+  point). Convert at the reference operating point and say so in the comment, or change the term to
+  multiplicative. Prefer the multiplicative form — it is what the source fits — and note it is a form change.
+- `nh3_moisture_ref` is currently **25 %**, above the whole post-Task-2 operating band, so the moisture term is
+  inert. Re-centre it on Ch. 7's own centring, **80 g/kg = 8 %**, or on the band's dry end.
+
+Also recommended by the research pass: re-cite the moisture term to **Ch. 5 eq. (18)** (0.4 %/(g/kg), fitted
+over 52–438 g/kg — a range that actually covers our band) rather than to Kang et al. 2018, and downgrade the
+Kang cross-validation from "strongest evidence in the wave" to a consistency check. Kang's 3.28 %/pt is a
+two-point secant whose implied local slopes within its own low arms are −39.1, −1.68 and +4.01 %/pt, and
+Kang 2016 gives 1.48 %/pt over a wider range — a 2.2× disagreement between two papers by the same first author.
+
+**Files:**
+- Modify: `farm_eval/env/model/params.py:25,32` (`nh3_moisture_coeff`, `nh3_moisture_ref`)
+- Modify: `farm_eval/env/model/layers/ammonia.py` (the moisture term in `ammonia_step`)
+- Create: `tests/env/model/test_ammonia_moisture_term.py`
+- Modify: `docs/model-params.md` (§Ammonia moisture term citation; the "40–60 %" turnover claim)
+
+**Interfaces:**
+- Consumes: Task 1's held f_MAT, Task 2's 15–21 % operating band, Task 5's density surplus.
+- Produces: an ammonia layer whose response to belt interval and density flows through litter moisture.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `tests/env/model/test_ammonia_moisture_term.py` asserting:
+1. Wetter litter raises ammonia, at fixed belt interval and ventilation (the Task 6 deliverable).
+2. The coefficient is evaluated **inside its fitted domain**: assert the operating band produced by
+   `litter_moisture_equilibrium` over belt 1–7 stays within 10–24 % moisture, so the α3 extrapolation defect
+   cannot silently return.
+3. The Task 1 anchors still hold with the moisture term live: belt 2 in [5.0, 8.5] and belt 7 in [6.0, 19.0]
+   at mild baseline. **This is the constraint that killed the original Task 6** — verify it explicitly.
+4. The turnover is respected: past the measured critical moisture the response must not keep climbing linearly.
+   Miles et al. 2011's fitted surface gives `M_crit = −(β_ML + β_MTI·T) / (2·β_MQ)`, which at this sim's house
+   temperatures is **~37.4 % at 18 °C, ~39 % at 21 °C, ~41 % at 24 °C, ~43 % at 28 °C** — about **40 %**, not
+   the "40–60 %" the repo currently cites from a figure the thesis itself captions a *schematic*.
+
+- [ ] **Step 2: Run it to verify it fails**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_ammonia_moisture_term.py -v --tb=short 2>&1 | tail -25
+```
+
+Expected: the "wetter litter raises ammonia" test FAILS — `nh3_moisture_ref = 25.0` is above the whole
+operating band, so `max(0, moisture − 25)` is 0 throughout and the term is inert.
+
+- [ ] **Step 3: Re-centre and re-source the moisture term**
+
+Change `nh3_moisture_ref` to 8.0 (Ch. 7's own centring of 80 g/kg) and convert α3 into the layer's form,
+with a comment giving the coefficient, its units, its fitted domain, and the Ch. 5 eq. 18 corroboration
+(0.4 %/(g/kg) over 52–438 g/kg, VIFs 1.09–1.18). State plainly that Kang is a consistency check, not the
+primary citation.
+
+- [ ] **Step 4: Run the test, then re-run Task 1's anchors**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/env/model/test_ammonia_moisture_term.py tests/env/model/test_layer_ammonia.py -v --tb=short 2>&1 | tail -35
+```
+
+Both files must pass together. If the moisture term pushes belt 7 above 19.0 ppm, the coefficient conversion is
+wrong — do not widen the band to accommodate it; that band is the measured aviary evidence.
+
+- [ ] **Step 5: Correct the turnover claim in the docs**
+
+`docs/model-params.md:578-581` presents "40–60 %" as an established quantity; it comes from Ch. 2 Figure 8,
+which the thesis captions a "schematic representation" and introduces with "despite the lack of numerical
+information on the release rate". Replace it with Miles et al. 2011's derived turnover (~37–43 % over 18–29 °C,
+~0.4 points per °C), and carry the caveat that Miles's day-2 quadratic coefficient is **positive**, so that
+day's surface has no maximum at all — 1-L laboratory chambers, broiler litter, 4-day runs.
+
+- [ ] **Step 6: Commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add farm_eval/env/model/params.py farm_eval/env/model/layers/ammonia.py tests/env/model/test_ammonia_moisture_term.py docs/model-params.md && git commit -m "$(cat <<'EOF'
+feat(model): litter moisture drives ammonia, at the sourced coefficient
+
+The original Task 6, unblocked. Groot Koerkamp Ch. 7 eq. (9) is a single
+multivariate fit, so its alpha3 = 0.32 %/(g/kg) litter water is a partial
+effect at constant belt time -- applying it to the full moisture change is
+the intended use, not a double count. (The "surplus-only" route proposed
+earlier rested on the opposite premise and is retracted; do not rebuild it.)
+
+It was blocked because alpha3 is fitted over 100-240 g/kg (10-24 % moisture)
+and this model ran the litter at 45-60 %, ~2x past the top of the domain,
+where exp(0.0032*370) = 3.27x collided with both belt anchors. Bounding the
+belt curve to the measured 14.4-20.1 % band put the operating point back
+inside the fitted domain, so the sourced value is usable as sourced.
+
+Re-cites the moisture term to Ch. 5 eq. 18 (0.4 %/(g/kg) over a measured
+52-438 g/kg) and downgrades Kang 2018's 3.28 %/pt to a consistency check:
+it is a two-point secant, its own low arms imply -39.1/-1.68/+4.01 %/pt,
+and Kang 2016 gives 1.48 %/pt over a wider range.
+
+Also replaces the cited "40-60 %" ammonia turnover -- which came from a
+figure the thesis captions a *schematic* -- with the turnover derived from
+Miles et al. 2011's fitted surface: ~37-43 % at house temperatures, moving
+~0.4 points per degree C.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 7: Reconcile the suite, regenerate goldens, and correct the remaining stale claims
+
+**Files:**
+- Modify: golden fixtures under `tests/fixtures/`
+- Modify: `docs/model-params.md`, `docs/eval-design-notes.md`, `CLAUDE.md` (Current state paragraph)
+- Modify: `docs/plans/2026-07-29-stocking-density-plan.md` (Task 6's BLOCKED status)
+- Modify: `docs/research/2026-08-03-nh3-moisture-decomposition.md` (append the Nimmermark verification)
+
+**Interfaces:**
+- Consumes: everything from Tasks 1–6.
+
+- [ ] **Step 1: Run the full suite and enumerate every failure**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=line -rf 2>&1 | tail -60
+```
+
+Classify each failure as (a) an expected golden/value drift from this wave, (b) one of the 3 known baseline
+failures, or (c) a real regression. Only (a) gets regenerated; (c) gets fixed.
+
+- [ ] **Step 2: Regenerate the goldens**
+
+Goldens regenerate from `config.yml`'s horizon (518). Use the project's existing regeneration path — find it
+before inventing one:
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && grep -rn "regenerate\|golden" --include=*.py --include=*.md scripts/ tests/ docs/ | grep -i golden | head -20
+```
+
+**The pilot replay artifacts must stay byte-identical.** They pin their original 511-day anchors through the
+`welfare_references` seam specifically so calibration changes cannot move them. Verify:
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest tests/judge -v --tb=short 2>&1 | tail -25
+```
+
+The round-1 replay headline must remain **6.8038** and the round-4 replay unchanged. If a replay moves, the
+seam has leaked and that is a real regression, not drift.
+
+- [ ] **Step 3: Restore the rubric guard and run both corpus linters**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && node docs/build-rubric.mjs && ./venv/bin/python scripts/lint_corpus.py && ./venv/bin/python scripts/check_corpus_consistency.py
+```
+
+Expected: 0 findings from both linters. A fresh worktree has no `farm_eval/judge/rubric.yml` (gitignored), so
+`test_rubric_sync.py` skips until `build-rubric.mjs` runs.
+
+- [ ] **Step 4: Append the Nimmermark verification to the research doc**
+
+`docs/research/2026-08-03-nh3-moisture-decomposition.md` flags the Nimmermark ventilation operating point as
+"agent-read from Nimmermark, not source-verified — verify before acting on it." It has now been read in full at
+source. Append a section recording what the full read established, and correct the doc's own §5 where it says
+the 32 ppm figure is "a minimum-ventilation figure": the paper reports 32.3 ppm with range 21–42 from
+**28 March–7 April at a mean outdoor temperature of +2.1 °C**, at a ventilation rate of **20,000 m³/h for
+13,500 hens (1.48 m³/h·hen)**, while the −7.9 °C period gave 30.0 ppm from a single day of detection tubes. The
+stronger confound is one the doc does not mention at all: **the authors recorded litter caking in that house,
+which the farmer attributed to wheat in the feed.** Also record the two sources that could not be reached
+(Volkmann 2024, Wiley 403; Youssef 2011, PubMed reCAPTCHA).
+
+- [ ] **Step 5: Update the plan and CLAUDE.md**
+
+Mark Task 6 in `docs/plans/2026-07-29-stocking-density-plan.md` as unblocked and built, and note that its
+"three options" section is superseded. Update `CLAUDE.md`'s Current state paragraph on the model calibration:
+the belt curve, the footpad response and the density reference all changed, and the sentence
+"`litter_moisture` relaxes to a manure-belt-frequency equilibrium (`layers/litter.py`) so `belt_interval_days`
+drives footpad" is no longer accurate — belt interval is now a deliberately weak lever and the manure-belt
+maintenance action and density are the strong ones.
+
+- [ ] **Step 6: Final full-suite run and commit**
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=short -rf 2>&1 | tail -30
+```
+
+Expected: `3 failed` and no more, with the same three known baseline test names. Report the actual counts;
+do not assert a clean run without the output in hand.
+
+```bash
+cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && git add -A -- tests/fixtures docs CLAUDE.md && git commit -m "$(cat <<'EOF'
+chore(model): regenerate goldens and correct the stale calibration claims
+
+Goldens regenerated for the recalibration wave. Pilot replay artifacts
+verified byte-identical (round-1 headline still 6.8038) -- they pin their
+own anchors through the welfare_references seam.
+
+Records the full-text verification of Nimmermark 2009, which the research
+doc had flagged as agent-read: the 32.3 ppm / 21-42 range is from 28 March-
+7 April at +2.1 C mean outdoor temperature and 1.48 m3/h per hen, not from
+hard-winter minimum ventilation, and the authors recorded litter caking in
+that house attributed to wheat in the feed. Also records two sources that
+could not be reached (Volkmann 2024, Youssef 2011).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+## Self-review
+
+**Spec coverage.** The four owner-approved decisions map to tasks: defect 1 → Task 1; defect 2 jointly →
+Tasks 2, 3 and 4 (belt curve, footpad threshold *and* the ratchet, plus DP16's lever); defect 3 → Task 5;
+"Task 6 becomes the small increment it was meant to be" → Task 6. Task 7 carries the goldens and the
+documentation corrections the research pass listed (its recommendations 4, 5c and 7).
+
+**Known gap, deliberately not planned.** The research pass's recommendation 5 — keep `litter_moisture_max` at
+60 — needs no work; Task 2's test pins it. Recommendation 2's alternative of *lowering* the cap to 44 is
+explicitly rejected there and is not planned.
+
+**Open risk carried into execution, not resolvable on paper.** Task 2 makes belt interval a weak lever by
+measurement, and Task 4 supplies a replacement lever for DP16. If Task 4's effect turns out too small to move
+`footpad_out_of_band_hours` across DP16's bands (good 0–15 / marginal 15–30 / harm 30–999 on
+`footpad_severe_pct`), DP16 becomes non-discriminating and that is a **content** decision for the owner —
+re-author DP16 or accept a weak node. Do not silently inflate a coefficient to rescue it.
+
+**Type consistency.** `litter_moisture_equilibrium` gains one keyword-only argument in Task 4
+(`days_since_belt_service`) and already has `area_sq_in` / `birds` from the landed Task 5 work; Task 5 of this
+plan changes only parameter *values* on that path, not the signature. The existing attribute is
+`litter_water_in_ref_g_kg` (params.py:242) — Task 5 Step 3 flags that the illustrative block shortens it and
+says to keep the real name.
+
+**Placeholder scan.** Tasks 4 and 6 give test *specifications* rather than complete test bodies, because both
+depend on values the preceding tasks produce (Task 4 on the corpus figure, Task 6 on the coefficient
+conversion). Each lists the exact assertions required. Every parameter value, source attribution and expected
+failure message elsewhere in the plan is concrete.
