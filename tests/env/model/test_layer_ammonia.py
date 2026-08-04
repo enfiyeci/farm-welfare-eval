@@ -54,18 +54,50 @@ def _eq_belt(belt_days, litter_age=60.0, ventilation=1.0, ambient_c=18.0):
     return ppm
 
 
-def test_weekly_belt_removal_matches_measured_aviary_band():
-    # research 2026-07-29: aviary with weekly belt removal measures 32-38 ppm
-    assert 32.0 <= _eq_belt(7) <= 38.0
+def test_weekly_belt_removal_matches_measured_AVIARY_band():
+    """Two aviaries measured at weekly manure-belt removal, at mild conditions.
+
+    Groot Koerkamp thesis Ch. 7 period 2B (weekly belts, litter drying OFF, litter loading
+    23.0 hens/m2 of litter): exhaust NH3 6.4 ppm at 19.3 % litter moisture.
+    Hinz, Winter & Linke 2010 Table 1, Volierenhaltung (AVIARY) with weekly manure-belt
+    removal: median 11.40 ppm, min 2.24, max 18.52 (one-hour spot measurements).
+
+    The band is [6.0, 19.0] -- from Groot Koerkamp's mean to Hinz's aviary maximum.
+
+    NOT calibrated to Nimmermark et al. 2009's 32-38 ppm. That house is a MULTILEVEL house
+    measured at 1.48 m3/h per hen with NO supplemental heat, where the authors recorded
+    litter caking that the farmer attributed to wheat in the feed, and whose 32.3 ppm / 21-42
+    range came from 28 March-7 April at a mean OUTDOOR temperature of +2.1 C. The paper states
+    that "the highest ammonia levels occurred on very cold days when the ventilation rate was
+    decreased to keep the indoor temperature on the setpoint value" -- so that figure belongs
+    to the cold, throttled-ventilation operating point, which this model reaches through
+    ``nh3_cold_vent_penalty`` (see test_winter_low_temp_pushes_over_25), NOT to mild baseline.
+    Asserting it at mild baseline counted the winter condition twice.
+    """
+    assert 6.0 <= _eq_belt(7) <= 19.0
 
 
-def test_two_week_interval_stays_within_measured_no_removal_ceiling():
-    # research: litter with NO removal for two years reaches only 9.2-47.4 ppm.
-    # Checked at EVERY reachable litter age, not just the calibrated 60 d -- the whole
-    # point of the source is a house whose litter has not been removed for two years, so
-    # evaluating it on young litter would be the right band against the wrong condition.
-    for litter_age in (60.0, 180.0, 365.0, 578.0, 730.0):
-        assert _eq_belt(14, litter_age=litter_age) <= 47.4, f"at litter age {litter_age}"
+def test_belt_multiplier_holds_its_last_validated_value_past_the_domain_edge():
+    """f_MAT is a Wageningen fit over belt_days 1-4. Past 4 it HOLDS, it does not grow.
+
+    The previous ceiling for this test (9.2-47.4 ppm, "litter with NO removal for two years")
+    was Hinz 2010's *Bodenhaltung* (FLOOR-HOUSING) row, min 9.19 and max 47.42, applied to an
+    aviary. Hinz's actual aviary row is 2.24-18.52 ppm. There is no aviary measurement at a
+    14-day belt interval, so rather than extrapolate to an invented rail, the multiplier holds
+    the last value its fit validates. Any further rise at long belt intervals must come from a
+    channel that IS measured -- litter moisture or litter age -- not from f_MAT.
+
+    Asserted on ``fmat`` itself, not on ``_eq_belt``: ``_eq_belt`` also carries the
+    litter-moisture channel (``litter_moisture_equilibrium`` keeps rising with belt interval),
+    so equal end-to-end ppm past the domain edge is NOT what this fix claims, and would
+    contradict the sentence above.
+    """
+    params = ModelParams()
+    edge = fmat(float(params.nh3_fmat_domain_max), params)
+    for belt_days in (5, 7, 10, 14, 28, 56):
+        assert fmat(float(belt_days), params) == edge, (
+            f"f_MAT grew past its domain at {belt_days} d"
+        )
 
 
 def test_the_litter_age_input_is_capped_at_its_calibrated_range():

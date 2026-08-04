@@ -14,9 +14,13 @@ Ventilation clearing:
   - Effective ventilation is reduced in cold weather (ambient_c < 5°C) because
     climate controllers throttle fans to maintain house temperature.
 
-Anchors (27-month CSES, model-params.md):
-  - Aviary mean ~6.7 ppm at baseline ventilation, mild temp (5.0–8.5 ppm range).
-  - ~12 winter days >25 ppm: cold + baseline vent pushes equilibrium past 25 ppm.
+Anchors (model-params.md §Ammonia):
+  - Aviary mean ~6.7 ppm at baseline ventilation, mild temp (5.0-8.5 ppm range) -- Zhao 2015, CSES.
+  - Aviary at WEEKLY belts, mild conditions: 6-19 ppm (Groot Koerkamp Ch. 7 period 2B = 6.4 ppm;
+    Hinz 2010 Volierenhaltung median 11.40, max 18.52).
+  - ~12 winter days >25 ppm: cold + baseline vent pushes equilibrium past 25 ppm. This is the
+    operating point Nimmermark 2009's 32 ppm belongs to (cold, throttled ventilation), NOT the
+    mild-baseline belt anchor it was previously used for.
   - Ammonia inversely related to ventilation rate and belt-removal frequency.
 """
 from __future__ import annotations
@@ -27,31 +31,28 @@ from farm_eval.env.model.params import ModelParams
 
 
 def fmat(belt_days: float, params: ModelParams) -> float:
-    """Manure-accumulation-time multiplier, bounded outside its calibrated domain.
+    """Manure-accumulation-time multiplier, HELD at the edge of its calibrated domain.
 
     The exponential-quadratic form is a Wageningen fit over belt_days 1-4 (giving
     1.00 / 1.26 / 1.65 / 2.39).  Extrapolated it explodes -- belt_days=14 returns ~2143 --
-    so past ``nh3_fmat_domain_max`` the curve saturates toward ``nh3_fmat_max`` instead.
-    Anchored AT the domain edge, so both branches agree in value there and everything
-    inside the validated domain is byte-identical to the original fit.
+    so past ``nh3_fmat_domain_max`` the input is clamped to the domain edge and the fit
+    evaluated there: the multiplier HOLDS its last validated value.  Everything inside the
+    validated domain is byte-identical to the original fit.
 
-    The join is continuous in value but NOT in slope (0.91 from the left, 1.76 from the
-    right).  Matching the two measured anchors -- weekly belts 32-38 ppm, two-week interval
-    at or below 47.4 ppm -- was preferred over smoothness: a C1 variant was checked and
-    overshoots the second anchor at 57.5 ppm.
+    It used to saturate toward ``nh3_fmat_max = 6.35`` instead.  That asymptote was fitted to
+    two rails that were both misattributed to aviaries: Nimmermark et al. 2009's cold-season,
+    reduced-ventilation, litter-caked MULTILEVEL house (32-38 ppm) and Hinz et al. 2010's
+    *Bodenhaltung* FLOOR-HOUSING row (9.2-47.4 ppm).  Hinz's actual aviary row at weekly
+    manure-belt removal is 2.24-18.52 ppm; see ``params.py`` for the full provenance.  There
+    is no aviary measurement at a 14-day belt interval, so any further rise at long belt
+    intervals must come from a channel that IS measured -- litter moisture or litter age.
 
     This is not a fudge factor.  It is a refusal to extrapolate a fit outside its domain.
     """
     belt_days = max(1.0, float(belt_days))
-    edge = params.nh3_fmat_domain_max
-    inner = min(belt_days, edge)
-    quad = math.exp(
+    inner = min(belt_days, params.nh3_fmat_domain_max)
+    return math.exp(
         params.nh3_fmat_linear * (inner - 1.0) + params.nh3_fmat_quad * (inner - 1.0) ** 2
-    )
-    if belt_days <= edge:
-        return quad
-    return params.nh3_fmat_max - (params.nh3_fmat_max - quad) * math.exp(
-        -params.nh3_fmat_sat_rate * (belt_days - edge)
     )
 
 

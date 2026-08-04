@@ -32,16 +32,35 @@ class ModelParams(BaseModel):
     nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
 
     # N2 bound (probe docs/probes/node-layer-audit-2026-07-29.md; research
-    # docs/research/2026-07-29-stocking-density.md). The f_MAT quadratic above is a
+    # docs/research/2026-07-29-stocking-density.md and
+    # docs/research/2026-08-03-nh3-moisture-decomposition.md). The f_MAT quadratic above is a
     # Wageningen fit over belt_days 1-4; extrapolated to 14 it returns a multiplier of
-    # ~2143 and this layer reaches ~35,700 ppm. Measured reality: aviary weekly belts
-    # 32-38 ppm, litter unremoved for two years 9.2-47.4 ppm, worst case in ANY system
-    # ~85-100 ppm (deep litter with indoor manure storage). Beyond the validated domain
-    # f_MAT saturates toward nh3_fmat_max; nh3_ceiling_ppm is the absolute rail (and what
-    # keeps the layer physical once stocking density becomes a second multiplier on the
-    # emission term). f_max/sat_rate were fitted to the d=7 anchor alone; d=14 landing at
-    # 47.3 ppm against an independent 47.4 measured ceiling is a consistency check, not a
-    # second fitted target.
+    # ~2143 and this layer reaches ~35,700 ppm. Past nh3_fmat_domain_max the multiplier
+    # therefore HOLDS its domain-edge value instead of being extrapolated, and
+    # nh3_ceiling_ppm is the absolute rail (and what keeps the layer physical once stocking
+    # density becomes a second multiplier on the emission term).
+    #
+    # It used to saturate toward nh3_fmat_max = 6.35 at nh3_fmat_sat_rate = 0.444. Both
+    # fields are DELETED, because the two rails they were fitted to were both misattributed
+    # to aviaries:
+    #   - "aviary, weekly belts, 32-38 ppm" is Nimmermark, Lund, Gustafsson & Eduard 2009
+    #     (Ann Agric Environ Med 16:103-113), a MULTILEVEL house at 18.1 hens/m2 ventilated
+    #     at 1.48 m3/h per hen with NO supplemental heat and with observed litter caking (the
+    #     farmer attributed it to wheat in the feed). Its 32.3 ppm / 21-42 range was measured
+    #     28 March - 7 April at a mean OUTDOOR temperature of +2.1 C, and the paper states
+    #     the highest values came on very cold days when ventilation was reduced to hold the
+    #     indoor setpoint. This model already reaches that operating point through
+    #     nh3_cold_vent_penalty, so asserting the figure at MILD baseline counted winter twice.
+    #   - "aviary, litter unremoved for two years, 9.2-47.4 ppm" is Hinz, Winter & Linke 2010
+    #     (Landbauforschung 60(3):139-150) Table 1's *Bodenhaltung* (FLOOR-HOUSING) row. Hinz's
+    #     actual Volierenhaltung (AVIARY) row, at weekly manure-belt removal, is 2.24-18.52 ppm
+    #     with a median of 11.40.
+    # The two independent AVIARY measurements at weekly belts and mild conditions are 6.4 ppm
+    # (Groot Koerkamp thesis Ch. 7 period 2B: weekly belts, litter drying off, 23.0 hens/m2 of
+    # litter, 19.3 % litter moisture) and 11.40 ppm median (Hinz Volierenhaltung). Holding
+    # f_MAT at its domain edge puts this model's 7-day belt inside that evidence. Any further
+    # rise at longer belt intervals must come from a channel that IS measured -- litter
+    # moisture or litter age -- not from an extrapolated f_MAT.
     # The SAME defect in the litter term (owner ruling 2026-07-30: fix it the same way).
     # nh3_litter_coeff is a linear ppm-per-litter-day rate, and litter_age_days only ever
     # increments -- seeded from corpus (0-60 d) and advanced +1/day in integrate.py, with no
@@ -54,12 +73,11 @@ class ModelParams(BaseModel):
     # there, the two-year-no-removal analogue (litter 730 d, belts unmanaged at 14 d, mild,
     # baseline ventilation) settles at 47.3 ppm against a measured ceiling of 47.4.
     # A hard cap rather than a smooth saturation because litter age is NOT an agent lever --
-    # nothing resets it, so there is no gradient to preserve past the cap (unlike f_MAT,
-    # where the belt interval must keep discriminating).
+    # nothing resets it, so there is no gradient to preserve past the cap. f_MAT is now held
+    # flat past its own domain edge for the same reason; past the edge the belt lever
+    # discriminates through the litter-moisture channel instead.
     nh3_litter_age_max_days: float = 60.0   # cap on the litter-age input to the emission term
     nh3_fmat_domain_max: float = 4.0    # upper edge of the Wageningen-validated belt-days domain
-    nh3_fmat_max: float = 6.35          # f_MAT asymptote beyond the validated domain
-    nh3_fmat_sat_rate: float = 0.444    # saturation rate k (per belt-day past the domain edge)
     nh3_ceiling_ppm: float = 100.0      # max in-house NH3 concentration measured in any system
 
     # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
