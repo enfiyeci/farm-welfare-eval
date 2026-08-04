@@ -49,7 +49,11 @@ def _serviced_belt_days(
         return belt_days
     if params.belt_service_decay_days <= 0.0:
         return belt_days
-    remaining = max(0.0, 1.0 - days_since_belt_service / params.belt_service_decay_days)
+    # Clamped at BOTH ends. The upper clamp is load-bearing because EnvState is deserialized
+    # from outside this process (play autosaves, adapter checkpoints, .eval logs): a state
+    # whose last_belt_service_day sits AHEAD of the day being integrated would otherwise give
+    # remaining > 1 and hand a callout that has not happened yet more than its full credit.
+    remaining = min(1.0, max(0.0, 1.0 - days_since_belt_service / params.belt_service_decay_days))
     return max(1.0, belt_days - params.belt_service_days_credit * remaining)
 
 

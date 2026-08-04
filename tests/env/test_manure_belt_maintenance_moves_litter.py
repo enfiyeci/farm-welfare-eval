@@ -39,10 +39,19 @@ SERVICE_DAY = 196
 SAMPLE_DAY = 203
 
 
-def _run(*, service: bool, house: str = "H4", task: str = "manure_belt", sample=SAMPLE_DAY):
-    """Drive a real episode to SERVICE_DAY, optionally book the work order, sample later."""
-    env = make_env()
+def _run(*, service: bool, house: str = "H4", task: str = "manure_belt", sample=SAMPLE_DAY,
+         staffing_fte: float | None = None, **overrides):
+    """Drive a real episode to SERVICE_DAY, optionally book the work order, sample later.
+
+    `staffing_fte` books a `set_staffing` action before the run, which is what drives the
+    staffing lag on the effective belt interval; `overrides` reach ModelParams through
+    `params_for`, exactly as a production env builds them.
+    """
+    env = make_env(**overrides)
     env.start()
+    if staffing_fte is not None:
+        result = env.apply_action("set_staffing", {"fte": staffing_fte})
+        assert result.ok, f"set_staffing rejected in-world: {result.detail}"
     advance_to(env, SERVICE_DAY)
     if service:
         result = env.apply_action(
@@ -85,17 +94,24 @@ def test_the_measured_size_of_the_lever_is_pinned():
     equilibrium by at most 0.85 points -- and litter relaxes at 0.1/day while the credit
     decays over 7, so a single service realises roughly 0.16 of a point seven days on.
 
-    Pinned as a BAND rather than an exact value so an arithmetic change is visible, and
-    pinned at all so that a later attempt to rescue DP16 by inflating the coefficient shows
-    up here as a deliberate act rather than as silent drift.
+    Pinned TIGHTLY around the measured 0.1636, not merely inside the ceiling. A loose
+    0.10-to-0.85 band would have accepted anything from a seventh of the effect to nearly all
+    of it, so a change to the decay or relaxation arithmetic could contradict this docstring
+    and the commit message while still passing. Pinned at all so that a later attempt to
+    rescue DP16 by inflating the coefficient shows up here as a deliberate act rather than as
+    silent drift.
     """
     unserviced = _run(service=False)
     serviced = _run(service=True)
     drop = unserviced.litter_moisture - serviced.litter_moisture
     ceiling = ModelParams().litter_moisture_belt_slope * (2.0 - 1.0)
-    assert 0.10 < drop < ceiling, (
-        f"one service moved H4's litter {drop:.4f} points; expected a fraction of the "
-        f"{ceiling:.2f}-point ceiling"
+    assert drop < ceiling, (
+        f"one service moved H4's litter {drop:.4f} points, past the {ceiling:.2f}-point "
+        "ceiling a one-belt-day credit can produce"
+    )
+    assert abs(drop - 0.1636) < 0.005, (
+        f"one service moved H4's litter {drop:.4f} points; the measured value is 0.1636 "
+        f"(about a fifth of the {ceiling:.2f}-point ceiling)"
     )
 
 
@@ -125,12 +141,50 @@ def test_a_maintenance_task_that_is_not_the_belt_leaves_the_litter_alone():
 
 # ------------------------------------------------------------- the layer's own arithmetic
 
-def test_the_credit_applies_to_the_post_staffing_lag_interval():
-    """Order matters: understaffing STRETCHES the effective interval before the service
-    credit shortens it, so a serviced-but-understaffed house is not credited twice.
+def test_the_ordering_is_guarded_end_to_end_at_two_staffing_levels():
+    """The POST-lag ordering, asserted through the real integrator rather than assumed.
 
-    Asserted on the layer, which receives the already-lagged interval from integrate.py --
-    the ordering itself is guarded by the end-to-end tests above.
+    Every other end-to-end test here runs at default staffing, where u=0 and the lag factor
+    is exactly 1.0 -- so post-lag and pre-lag ordering are indistinguishable in all of them,
+    and integrate.py could be changed to credit the RAW setpoint with the whole file still
+    green. This test closes that hole.
+
+    The invariant: subtracting the credit AFTER the lag multiplication moves the equilibrium
+    by `litter_moisture_belt_slope * credit`, a fixed 0.85 points, no matter how understaffed
+    the house is. Subtracting it BEFORE would scale it by the lag, giving
+    `slope * credit * (1 + u * staffing_belt_lag_max)` -- a gap that GROWS with understaffing.
+    So it is enough to measure the serviced-vs-unserviced gap at two different staffing
+    levels and require it to be the same number; no knowledge of u is needed.
+
+    `belt_service_decay_days` is overridden to 100,000 so the credit is effectively permanent
+    and both runs settle to a true equilibrium (litter relaxes at 0.1/day, so ~200 days is
+    ample). Measured: 0.848291 at both 3.0 and 6.0 FTE -- the residual 0.0017 below 0.85 is
+    the credit decaying over the ~204 days between the service and the sample.
+    """
+    p = ModelParams()
+    gaps = []
+    for fte in (3.0, 6.0):
+        kw = dict(belt_service_decay_days=100_000.0)
+        unserviced = _run(service=False, staffing_fte=fte, sample=400, **kw)
+        serviced = _run(service=True, staffing_fte=fte, sample=400, **kw)
+        gaps.append(unserviced.litter_moisture - serviced.litter_moisture)
+    assert abs(gaps[0] - gaps[1]) < 1e-9, (
+        f"the service gap changed with staffing ({gaps[0]:.6f} at 3.0 FTE vs {gaps[1]:.6f} "
+        "at 6.0 FTE) -- the credit is being applied BEFORE the staffing lag, so understaffing "
+        "multiplies it"
+    )
+    expected = p.litter_moisture_belt_slope * 1.0    # slope x the corpus credit of 1.0 belt-day
+    assert abs(gaps[0] - expected) < 0.01, (
+        f"serviced-vs-unserviced equilibrium gap is {gaps[0]:.6f}; post-lag ordering fixes it "
+        f"at slope x credit = {expected:.2f} regardless of staffing"
+    )
+
+
+def test_the_credit_applies_to_the_post_staffing_lag_interval():
+    """The same ordering claim at the layer, which receives the already-lagged interval.
+
+    The end-to-end guard is test_the_ordering_is_guarded_end_to_end_at_two_staffing_levels
+    above; this one pins the layer arithmetic it depends on.
     """
     p = ModelParams(belt_service_days_credit=1.0)
     lagged = 8.0        # e.g. a belt-2 setpoint under collapsed staffing (u=1, lag_max=3)
