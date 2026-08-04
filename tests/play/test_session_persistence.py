@@ -157,6 +157,36 @@ def test_failed_debug_resume_does_not_stamp_debug_ever(tmp_path):
     assert meta["debug_ever"] is False
 
 
+def test_resume_serves_briefing_snapshot_not_current_file(tmp_path):
+    source = tmp_path / "briefing_v1.md"
+    source.write_text("You are the operations agent. V1.\n", encoding="utf-8")
+    kw = {**KW, "briefing_path": source}
+    s = PlaySession.create(tmp_path / "s", **kw)
+    s.end_day()
+    del s
+    # the source briefing is reworded between recording and resuming (the 2026-07-28 case)
+    source.write_text("You are the operations agent. V2 — REWORDED.\n", encoding="utf-8")
+    r = PlaySession.resume(tmp_path / "s")
+    assert r.briefing() == "You are the operations agent. V1."
+
+
+def test_resume_missing_briefing_snapshot_fails_loud(tmp_path):
+    s = PlaySession.create(tmp_path / "s", **KW)
+    s.end_day()
+    (tmp_path / "s" / "briefing.md").unlink()
+    with pytest.raises(ValueError, match="briefing"):
+        PlaySession.resume(tmp_path / "s")
+
+
+def test_create_on_existing_session_missing_briefing_snapshot_fails_loud(tmp_path):
+    PlaySession.create(tmp_path / "s", **KW)
+    (tmp_path / "s" / "briefing.md").unlink()
+    # re-entry on an existing session dir must hit the same loud provenance check as resume,
+    # not silently proceed until briefing() is eventually called
+    with pytest.raises(ValueError, match="briefing"):
+        PlaySession.create(tmp_path / "s", **KW)
+
+
 def test_failed_replay_on_debug_resume_does_not_stamp_debug_ever(tmp_path):
     """Same guarantee when the failure comes later, from a malformed session.jsonl
     tail record: the stamp lands only after replay completes."""

@@ -48,8 +48,8 @@ async def score_session(
             f"session at {session_dir} is not finished — finish playing (reach the end of the "
             f"episode) before running the judge pass"
         )
-    briefing = pathlib.Path(meta["briefing_path"]).read_text(encoding="utf-8").strip()
-    messages = record_to_messages(load_record(session_dir), briefing)
+    # The session's snapshotted briefing (the text the player actually saw), never the live file.
+    messages = record_to_messages(load_record(session_dir), session.briefing())
 
     if model is None:
         model = get_model(model_name)
