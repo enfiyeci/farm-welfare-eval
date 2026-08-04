@@ -22,13 +22,13 @@ The owner asked to be told whenever a study could not be reached in full.
 | Dunlop, Blackall & Stuetz 2015 (evaporation, Task 5b) | READ IN FULL | Open access. Agent-read. |
 | David et al. 2015 *Animals* 5(3):886 (the review that tabulates our anchors) | Table 1 extracted | Agent-read. |
 | Groot Koerkamp **Ch. 5** (the 58-sample litter survey + eq. 18) | **VERIFIED AT SOURCE** | Table 1 and eq. 18 read directly off the thesis by the primary session. Water content 52 / 227 / **438** g/kg (c.v. 33), water activity **0.84 / 0.93 / 0.99**, pH 7.4–9.2, n = 58, eight further samples excluded as "not granular, but clotted". Eq. 18 verbatim: TAN "increased with approximately 4 % per 1/10 unit of pH, approximately 4 % per unit of temperature (°C), and approximately 4 % per 10 units of water content (g/kg wet basis)", VIFs 1.09 / 1.18 / 1.18. **Not confirmed:** the "12 houses / 5 system types / 6 strains" breakdown — the thesis says notes were taken on system type and strain but I did not find that tally. |
-| **Miles, Rowe & Cathcart 2011**, *Poult. Sci.* **90(7):1397**, DOI 10.3382/ps.2010-01114 | ⚠️ **ABSTRACT READ AT SOURCE; FULL TEXT PAYWALLED** | Abstract verified verbatim via PubMed 21673154. Adds: moisture **20–55 %**, temperature **18.3–40.6 °C**, 100 g litter in 1-L containers, and "the maximum NH₃ was up to **7 times greater at 40.6 vs. 18.3 °C**". Turnover **37.4–51.1 %** confirmed. **Still missing: the fitted equation and the temperature→critical-moisture mapping** (OUP and ScienceDirect both refuse). **The "42 % at 75 °F / 46 % at 95 °F" figures circulating in search summaries come from no source anyone read. DO NOT SHIP THEM.** |
+| **Miles, Rowe & Cathcart 2011**, *Poult. Sci.* **90(7):1397–1405**, DOI 10.3382/ps.2010-01114 | ✅ **READ IN FULL AT SOURCE** — owner-supplied 2026-08-03, archived at `docs/research/sources/Miles-2011-high-litter-moisture-suppresses-NH3-volatilization.pdf` | **Gap closed.** Table 4 (p. 1402) gives the fitted equation and coefficients; §8 below derives the temperature→critical-moisture mapping the abstract withheld and reproduces the published 37.4–51.1 % range exactly. **The "42 % at 75 °F / 46 % at 95 °F" figures circulating in search summaries are still from no source and remain wrong — the correct mapping is in §8.** |
 | Miles, Rowe & Cathcart 2011 companion, *Poult. Sci.* **90(6):1162**, DOI 10.3382/ps.2010-01113 | ❌ COULD NOT ACCESS | Different paper — "…organic versus inorganic bedding materials". Reported open-access on ScienceDirect but the host 403s us. Lower priority: it is about bedding type, not the turnover. |
 | Oliveira, Xin, Chai & Millman 2018 | PARTIAL | Values via PMC fetch; methods not read. |
 | Zhao, Shepherd, Li & Xin 2015 Part I (the 6.7 ppm anchor) | PARTIAL | Abstract/results level only. |
 | **Kang et al. 2016** (S14, floor pens), *Poult. Sci.* **95(12):2764** | **NOW READ** — free full text at PMC5144664 | Gap closed this session. **Our notes' figures are exact** (27.8 / 23.6 / 25.8 / **67.5 %** moisture and 8.11 / 6.33 / 7.11 / **12.89** ppm). Corrections to our notes: **50 hens per pen, not 40**; densities 5/6/7/10 birds/m² of *floor pen*, deep litter of rice hulls; gas sampled at 4 wk of an 8-wk trial with the same Gastec detector-tube method (so litter gas again, not house air); **manure management is not described here either**. See §6a — this paper substantially changes the coefficient picture. |
-| **Hinz, Winter & Linke 2010** — *Landbauforschung* **60:139–150**, "Luftfremde Stoffe in und aus verschiedenen Haltungssystemen für Legehennen — Teil 1: Ammoniak" | ❌ **COULD NOT ACCESS — but now precisely identified** | **This is the actual source of our 9.2–47.4 ppm rail**, known only second-hand through David et al.'s table. The volume PDF exists at `thuenen.de/media/publikationen/landbauforschung/Landbauforschung_Vol60_3.pdf` but the whole host sits behind a bot challenge (HTTP 302 → `/challenge`), so this is **a gate, not a paywall — a human with a browser can very likely just download it.** Worth acquiring: David's table gives Hinz a *second* weekly-belt aviary row at **2.2–18.5 ppm**, ~10× below Nimmermark's 32–38 for the same nominal regime. |
-| **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067 | ❌ **COULD NOT ACCESS** | ASABE paywalled; the HAL mirror (`hal.science/hal-05028682v1`) is behind Anubis proof-of-work and refuses us. **This is the one published test of the density × manure-accumulation-time *interaction* — i.e. precisely the decomposition question this pass exists to settle.** Search summaries indicate low density gave 51 % lower emission for young pullets and ~22 % lower for laying hens over a 6-day accumulation, but the interaction term itself is what we need and that requires the full text. Highest-value acquisition. |
+| **Hinz, Winter & Linke 2010** — *Landbauforschung* **60(3):139–150**, "Luftfremde Stoffe in und aus verschiedenen Haltungssystemen für Legehennen — Teil 1: Ammoniak" | ✅ **READ AT SOURCE (German)** — owner-supplied 2026-08-03, archived as the full volume at `docs/research/sources/Hinz-2010-Landbauforschung-60-3-legehennen-ammoniak-FULL-VOLUME.pdf` (the article is PDF pp. 32–43) plus an extracted text layer at `Hinz-2010-article-text-pages-139-150.txt` | **Gap closed, and it found a misattribution in our own tests — see §9. Our 9.2–47.4 ppm "aviary" rail is Hinz's FLOOR-HOUSING row.** The aviary row is **2.24–18.52 ppm, median 11.40**, and that aviary ran **weekly** manure-belt removal. |
+| **Mendes, Xin & Li — ASABE 2010 Annual Meeting paper 1009252** (Pittsburgh), the conference version of Trans. ASABE 55(3):1067 | ✅ **READ AT SOURCE** — owner-supplied 2026-08-03, archived at `docs/research/sources/Mendes-2010-ASABE-1009252-density-x-manure-accumulation-time.pdf` | **Gap closed — this is the density × manure-accumulation-time interaction test.** The *Transactions* version (2012) is still paywalled, but this is the same study by the same three authors. See §10: the interaction is real and super-additive up to ~4-d accumulation, **but its mechanism is manure surface area, not moisture, and both its densities are more crowded than our worst case.** |
 
 ## 1. The double-count premise was wrong. Q1 is answered, and it reverses the proposal.
 
@@ -269,6 +269,145 @@ David et al. 2015 state their review "provides no direct connection between stoc
 ammonia concentrations." One unchased lead: Al-Homidian & Robertson 2003, litter type × stocking density
 — almost certainly broilers.
 
+---
+
+# Sources obtained 2026-08-03 (owner-supplied) — what they settle
+
+All three of the acquisitions requested above were obtained by the owner the same day and are now
+archived under `docs/research/sources/`. Each is read at source. This section records what each one
+settles, **against the specific decision or node it bears on**.
+
+## 8. Miles et al. 2011 — the turnover curve, now quantified rather than cited
+
+**Bears on:** `nh3_moisture_linear_max` (the clamp Task 6 could not justify), `litter_moisture_max`,
+and the "don't author the knee" rule.
+
+The fitted model (p. 1402) is:
+
+```
+log10(NH3) = b + β_TL·T + β_ML·M + β_MTI·(T·M) + β_MQ·M²
+```
+
+T = temperature (°C), M = litter moisture (%). Coefficients by day of the 4-day experiment (Table 4):
+
+| | day 1 | day 2 | day 3 | day 4 |
+|---|---|---|---|---|
+| b | −0.3716 | −0.5495 | −0.04700 | −0.01410 |
+| β_TL | 0.01877 | 0.01583 | −0.00026 | −0.00399 |
+| β_ML | 0.04019 | 0.05343 | 0.03728 | 0.03904 |
+| β_MTI | 0.000485 | 0.000520 | 0.000843 | 0.000771 |
+| β_MQ | **−0.00064** | **+0.00078** | **−0.00070** | **−0.00071** |
+
+T, M and M² are significant at P < 0.0001 on every day; the T×M interaction is significant on every
+day (P = 0.0231 / 0.0133 / 0.0004 / 0.0024); T² is never significant.
+
+**The turnover is the stationary point, so it can be derived rather than quoted:**
+`M_crit = −(β_ML + β_MTI·T) / (2·β_MQ)`.
+
+| day | 18.3 °C | 23.9 °C | 29.4 °C | 35.0 °C | 40.6 °C |
+|---|---|---|---|---|---|
+| 1 | 38.3 | 40.5 | 42.5 | 44.7 | 46.8 |
+| 2 | — | — | — | — | — |
+| 3 | 37.6 | 41.0 | 44.3 | 47.7 | **51.1** |
+| 4 | **37.4** | 40.5 | 43.5 | 46.5 | 49.5 |
+
+**This reproduces the published "between 37.4 and 51.1 % litter moisture" exactly** — it is the span
+across days 3–4 and the temperature extremes, which is a good check that we are reading the table right.
+
+**Two things we did not previously have.** First, **the turnover moves with temperature**, by ~0.4
+points per °C. Second, **at OUR house temperatures the turnover is ~37–43 %, not 40–60 %**: ~37.4 % at
+18 °C, ~39 % at 21 °C, ~41 % at 24 °C, ~43 % at 28 °C. So the relevant figure for this sim is
+**about 40 %**, and the repo's cited "40–60 %" band (from Ch. 2's *schematic*) is too high and too wide.
+
+**Caveat that must travel:** day 2's quadratic coefficient is **positive**, so that day's surface has no
+maximum at all. The paper does not remark on it. Broiler litter in 1-L laboratory chambers, 4-day runs.
+
+## 9. ⚠️ Hinz et al. 2010 — our 9.2–47.4 ppm "aviary" rail is the FLOOR-HOUSING row
+
+**Bears on:** `tests/env/model/test_layer_ammonia.py:63–68` (the `_eq_belt(14) <= 47.4` ceiling), the
+`nh3_ceiling_ppm` rationale, and the belt-7 anchor of 32–38 ppm.
+
+Table 1 (p. 145 area, "Kenngrößen der Konzentrationen für Ammoniak (in ppm) … einstündige Messungen"),
+read directly. Columns are Median / Minimum / lower quartile (25 %) / upper quartile (75 %) / Maximum:
+
+| Stallsystem (housing system) | median | min | LQ | UQ | max |
+|---|---|---|---|---|---|
+| Bodenhaltung mit Freilandzugang (floor + range) | 9.66 | 1.87 | 6.74 | 17.90 | 33.59 |
+| **Volierenhaltung (AVIARY)** | **11.40** | **2.24** | 8.80 | 14.18 | **18.52** |
+| **Bodenhaltung (FLOOR HOUSING)** | **22.38** | **9.19** | 18.77 | 28.79 | **47.42** |
+| Kleingruppenhaltung (furnished cages) | 1.74 | 0.42 | 1.05 | 2.85 | 4.18 |
+
+**Our repo's 9.2–47.4 ppm is the Bodenhaltung (floor-housing) minimum and maximum.** It is used in
+`test_layer_ammonia.py` as the ceiling for an *aviary* whose litter has gone unremoved, described in the
+test comment as "litter with NO removal for two years reaches only 9.2-47.4 ppm". Neither the housing
+type nor the two-year framing is in this table — these are **one-hour spot measurements**, and the paper
+explicitly cautions that comparing them to annual emission factors is "nicht oder nur bedingt zulässig".
+
+**The correct aviary numbers make our long-belt calibration look materially too high.** Hinz's aviary
+used **sand and wood-shaving litter with weekly manure-belt removal** ("Die Entmistung erfolgte
+wöchentlich über ein Kotband") and measured a **median of 11.40 ppm with a maximum of 18.52**. Set that
+beside the other measured weekly-belt aviary we now have — Groot Koerkamp Ch. 7 period 2B at **6.4 ppm**
+(§2) — and against our model's **35.0 ppm at a 7-day belt** and **47.3 ppm at 14 days**:
+
+| source | regime | measured NH₃ |
+|---|---|---|
+| Groot Koerkamp Ch. 7 (TWF aviary, drying off) | weekly belts | **6.4 ppm** |
+| Hinz 2010 (Volierenhaltung) | weekly belts | **median 11.4, max 18.5 ppm** |
+| Nimmermark 2009 (multilevel, hard winter, spot readings) | weekly belts | 32–38 ppm ← **our anchor** |
+| **our model** | 7-day belt | **35.0 ppm** |
+| **our model** | 14-day belt | **47.3 ppm** |
+
+**Two independent aviary measurements sit at 6–19 ppm and the one we calibrated to sits at 32–38.**
+Nimmermark now looks like the outlier — winter minimum-ventilation spot readings in multilevel houses —
+and we anchored the model to it and then bounded the model with a floor-housing maximum. Hinz also gives
+the aviary emission factor as **10.40 mg/(h·hen)** with a ventilated belt, against Groot Koerkamp
+Ch. 7's 2.85 mg/(h·hen) at daily removal.
+
+**This is a bigger finding than Task 6** and it is not a density issue at all: it says the ammonia
+layer's response to belt interval is calibrated high, on a misattributed rail. Owner call, and it
+should probably be its own task.
+
+## 10. Mendes et al. 2010 — the interaction is real, but not our mechanism
+
+**Bears on:** §1's central question (are belt and density separable partial effects?) and the choice of
+mechanism for Task 5.
+
+This is the study I flagged as the highest-value acquisition, and it does test the interaction.
+Lab-scale: four dynamic emission chambers at Iowa State, W-36 hens, **two densities — 413 vs 620 cm²/hen
+(64 vs 96 in²/hen), "HD" and "LD"** — over a **7-day manure accumulation time (MAT)**, resembling a
+manure-belt house.
+
+**The interaction exists and it is super-additive, then it saturates:**
+
+- "the difference in NH₃ ER between the HD and LD regimens **increased with MAT until approximately
+  4-d MAT (96 h), after which the difference remained by and large unchanged**"
+- the density effect is "consistently negative and relatively constant for **MAT ≥ 3 d**", i.e.
+  **density barely matters below 3 days of accumulation and matters steadily above it**
+- overall HD-vs-LD difference **−35 ± 20 %** (clean system) and **−29 ± 10 %** (non-clean)
+- at 7-d MAT: **307 ± 30 vs 188 ± 30 mg/hen-d**; at 3-d: 45 ± 3 vs 25 ± 3; at 4-d: 83 ± 8 vs 56 ± 8
+
+**So belt interval and density are NOT independent** — which is a genuine complication for §1's
+partial-effects reading. But three limits stop this from transferring directly:
+
+1. **The mechanism is manure surface area, not moisture.** The stated hypothesis is that density
+   "affects the amount of manure per unit of accumulated manure surface area", and they measured
+   *projected manure area* by tracing photographs in AutoCAD. Emissions differed **per kg of manure**
+   too (LD was 27 ± 16 % lower on an as-is basis, 31 ± 19 % on a dry basis), so it is not simply more
+   manure. **Our model has no manure-surface-area channel, and this is not the litter-wetting mechanism
+   Task 5 implements.**
+2. **It is not via intake.** Feed disappearance did not differ (P = 0.46–0.60; 98 ± 2 vs 99 ± 2 g/hen)
+   and neither did egg weight (58.5 vs 58.6 g). So density changed emission without changing what went
+   in — worth knowing, because our model routes density through droppings volume.
+3. **Both densities are more crowded than our worst case.** 413 and 620 cm²/hen are **64 and 96
+   in²/hen**; our compliant house is **144 in²/hen** and the overstocked lot is **130.4**. Mendes's
+   *low*-density arm is still substantially more crowded than our *high*-density arm, so every effect
+   size here is outside our range and only the qualitative shape transfers.
+
+**What it does license:** a density effect on ammonia that is **near-zero at short belt intervals and
+grows to a plateau by ~4 days** is measured behaviour, not an invention. That shape is a useful
+sanity check on whatever Task 6 ends up doing — and note our current model would produce the *opposite*
+of the plateau, since `f_MAT` keeps climbing.
+
 ## What this pass recommends, for owner decision
 
 1. **Do not build the surplus-only route.** Its premise is refuted (§1).
@@ -286,7 +425,18 @@ ammonia concentrations." One unchased lead: Al-Homidian & Robertson 2003, litter
    earlier draft of this document, which recommended lowering the cap to 44 — Kang 2016 observed 67.5 %
    in a real overstocked pen, so 60 is not above physical reality. The defect is the belt curve, not the
    cap.*
-6. **Acquisitions, in priority order.** All are blocked for automated fetching but likely trivial in a browser:
+5b. **NEW, and probably ahead of everything else on this list: fix the misattributed ammonia rail (§9).**
+   `test_layer_ammonia.py`'s 9.2–47.4 ppm ceiling is Hinz's **floor-housing** row; the aviary row is
+   **2.24–18.52 ppm, median 11.40, at weekly belts**. Two measured aviaries (Hinz 11.4, Groot Koerkamp
+   6.4) sit far below the 32–38 ppm Nimmermark anchor we calibrated the belt response to. This is not a
+   density question and deserves its own task — but Task 6 should not be built on top of a belt response
+   that is likely 2–3× high at long intervals.
+5c. **Use §8's derived turnover instead of the cited "40–60 %".** At this sim's house temperatures the
+   measured turnover is **~37–43 %**, about **40 %** at 21–24 °C, and it shifts ~0.4 points per °C.
+6. **Acquisitions — ALL THREE OBTAINED by the owner 2026-08-03 and archived under
+   `docs/research/sources/`.** Retained below for provenance. Only the *Transactions* (2012) version of
+   Mendes remains unread; the 2010 ASABE conference paper covering the same study is now in hand, so this
+   is no longer blocking.
    - **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067–1075 — the one published test of the
      density × manure-accumulation-time **interaction**, i.e. this document's central question.
      [ASABE eLibrary abstract](https://elibrary.asabe.org/abstract.asp?aid=29895) ·

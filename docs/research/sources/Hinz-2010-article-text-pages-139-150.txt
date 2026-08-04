@@ -1,0 +1,875 @@
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                          139
+
+
+
+
+Luftfremde Stoffe in und aus verschiedenen Haltungssystemen für Legehennen –
+Teil 1: Ammoniak
+Torsten Hinz*, Tatjana Winter* und Stefan Linke*
+
+
+
+                                                                              Abstract
+Zusammenfassung
+                                                                              Airborne contaminants in and from different keep-
+   Seit Januar 2010 ist in Deutschland die Käfighaltung von                   ing systems for laying hens – Part 1: ammonia
+Legehennen nicht mehr gestattet – zwei Jahre vor dem
+Zeitplan der EU. Alternative Haltungssysteme wie die Bo-                         Since January 2010 in Germany no permission exists for
+denhaltung, Volieren oder die Kleingruppenhaltung sind                        keeping laying hens in conventional cages – two years be-
+gefragt, die der Forderung der Öffentlichkeit nach mehr                       fore the EU regulation comes into force. Alternative sys-
+Tiergerechtheit entsprechen. Zudem dürfen aber die Be-                        tems like floor keeping, aviaries and small group systems
+lange der Arbeitsplatzhygiene und der Umwelt nicht ver-                       must follow the intentions of the society with high animal
+nachlässigt werden, wenn es darum geht, verschiedene                          welfare requirements. Nevertheless protection of work and
+Haltungssysteme zu vergleichen und zu beurteilen. Zu die-                     the environment cannot be neglected for evaluation and
+sem Zweck wurden die Konzentrationen in und die Emis-                         comparison of different systems. Concentration of ammo-
+sionen von Ammoniak aus verschiedenen Ställen einmal                          nia in and emissions from the stables were measured as
+im Monat für jeweils eine Stunde gemessen. Zusätzliches                       1 h spot once a month. Furthermore 24 h monitoring is
+24 h-Monitoring einmal im Quartal sollte die Zuordnung                        added for each stable once in a quarter of a year to have
+der Stundenmessungen in den Tagesgang ermöglichen.                            the opportunity to indicate how the spot measurements
+Diese Arbeit gibt einen umfassenden Blick auf Messtech-                       reflect the diurnal profile and how seasonal effects must
+nik und die Ergebnisse, die eine große Spannbreite für die                    be considered. The paper gives a comprehensive view to
+Ammoniakkonzentrationen und Emissionen aus verschie-                          the measuring procedure and the results of the investiga-
+denen Haltungssystemen aufzeigen.                                             tions which show a wide span for the concentrations and
+                                                                              emissions of ammonia for different alternative keepings of
+Schlüsselworte: Legehennen, Haltungssysteme, Luftgüte,                        laying hens.
+Emissionen, Ammoniak
+                                                                              Keywords: Laying hens, keeping system, air quality, emis-
+                                                                              sions, ammonia
+
+
+
+
+*   Johann Heinrich von Thünen-Institut, Bundesforschungsinstitut für Länd-
+    liche Räume, Wald und Fischerei, Institut für Agrartechnologie und Bio-
+    systemtechnik, Bundesallee 50, 38116 Braunschweig,
+    E-Mail: torsten.hinz@vti.bund.de
+140
+
+
+
+
+Einleitung                                                          de einmal pro Woche über Kotbänder aus dem Stall
+                                                                    befördert. Zur Zwangsbelüftung dienten drei compu-
+   Die Haltung von Legehennen zählt zu den am häu-                  tergesteuerte Ventilatoren. Der Stallrechner bediente
+figsten diskutierten Tierschutz-Themen der letzten Jahre            auch das Lichtprogramm.
+in Deutschland. Hauptkritikpunkte sind nach Ansicht vieler
+Verbraucher und Experten die zu geringe Platzbemessung,                                                         Entmistungsstrategie:
+                                                                 Kleingruppen-         Tierbe-      Einstreu:
+zu wenig Bewegung und der Mangel an Möglichkeiten                haltung               satz: 1500   ohne
+                                                                                                                Kotband,
+zur Ausübung typischer arteigener Verhaltensweisen.                                                             wöchentlich
+
+   Dies waren auch die Gründe, warum im Jahre 1999 das
+Bundesverfassungsgericht die Hennenhaltungs-Verord-
+nung von 1988 für nichtig erklärte und in der EU neue
+Mindestanforderungen zum Schutz von Legehennen vor-
+gelegt wurden (Richtlinie, 1999).
+   Die neuen Bestimmungen wurden in Deutschland
+2010 mit dem endgültigen Verbot der Käfighaltung für
+Legehennen umgesetzt (Tierschutz-Nutztierhaltungs-VO,
+2009). Es gilt nun Alternativen aufzuzeigen und diese an
+den vorgegebenen Kriterien für Arbeits-, Tier- und Um-
+weltschutz zu messen. Hierzu wurde ein umfassendes in-
+terdisziplinäres Projekt initiiert (Hinz et al., 2009a-c; Win-
+ter et al., 2009a-c).
+   In einem Teilprojekt, über das in zwei Beiträgen be-
+richtet werden soll, wurden verschiedene alternative             Abbildung 1:
+Haltungsformen für Legehennen hinsichtlich der Freiset-          Kleingruppenhaltung
+zung der luftfremden Stoffe untersucht. Es zeigten sich
+deutliche Unterschiede für Ammoniak und Staub. Wäh-              – Bodenhaltung
+rend die Emissionen von Ammoniak weitgehend von der                In dem Stall mit Bodenhaltung ohne Kaltscharrraum
+Entmistungsstrategie (Kotlagerung) bestimmt wurden, ist            oder Freilandzugang wurden 8000 Hennen gehalten.
+für die Staubemissionen die Tieraktivität verantwortlich.          Als Einstreu dienten Holzspäne, die vorher entstaubt
+In diesem ersten Teil wird nur die Ammoniakproblematik             wurden. Auch hier gab es kein Kotband, sondern der
+behandelt.                                                         Kot wurde mit der Einstreu am Ende des Legedurch-
+                                                                   ganges aus dem Stall gebracht. Der Stall wurde über
+Material und Methoden                                              sechs Ventilatoren zwangsbelüftet. Die Beleuchtung
+                                                                   hell/dunkel erfolgte über ein Lichtprogramm.
+Ställe
+                                                                                                    Einstreu:
+                                                                                       Tierbe-                  Entmistungsstrategie:
+   In dem vorliegenden Projekt wurden vier unterschied-          Bodenhaltung
+                                                                                       satz: 8000
+                                                                                                    Holzspäne
+                                                                                                                Kotlagerung im Stall
+liche Stallsysteme für Legehennen untersucht, die im Fol-                                           entstaubt
+
+genden kurz beschrieben werden. Bei der Bodenhaltung
+mit Freilandzugang, der Bodenhaltung und der Voliere
+handelte es sich um kommerzielle Betriebe, während die
+Kleingruppenhaltung Bestandteil einer Forschungs- und
+Versuchseinrichtung war. Alle Ställe waren zwangsbelüf-
+tet. Die Beleuchtung mit Kunstlicht folgte einem Lichtpro-
+gramm, das in der Regel 14 Stunden Helligkeit gewähr-
+leistete.
+
+– Kleingruppenhaltung
+  In der Kleingruppenhaltung wurden 1500 Hennen
+  ohne Einstreu in Gruppen von 40 und 60 Tieren unter-
+  gebracht. Die Anforderung auf eine uneingeschränkt
+  nutzbare Fläche von mindestens 800 Quadratzentime-             Abbildung 2:
+  tern pro Legehenne wurde entsprochen. Der Kot wur-             Bodenhaltung
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                                 141
+
+
+
+
+– Freilandhaltung
+                                                                                                             Einstreu:  Entmistungsstrategie:
+  Bei diesem Stall handelte es sich um eine Bodenhal-                                            Tierbe-
+                                                                             Volierenhaltung                 Sand/Holz- Kotband,
+  tung mit Freilandzugang, der im Folgenden jedoch nur                                           satz: 900
+                                                                                                             späne      wöchentlich
+  als Freilandhaltung bezeichnet wird.
+  In diesem Stall wurden 3000 Hennen auf Kunststoff-
+  gitterplatten ohne Einstreu gehalten. Darunter befin-
+  det sich die Kotgrube. Ein Kotband ist nicht vorhanden
+  und der Stall wird nach jedem Legedurchgang entmi-
+  stet.
+  Die Beleuchtung erfolgte durch ein Lichtprogramm, das
+  eine helle Phase von mindestens 14 Stunden Kunstlicht
+  beinhaltete. Die Dunkelphase begann erst dann, wenn
+  alle Hennen im Stall waren. Dementsprechend wurde
+  das Lichtprogramm vom Tageslicht beeinflusst. Der
+  Stall war zwangsbelüftet über zwei gleichartige Venti-
+  latoren.
+
+Bodenhaltung mit     Tierbe-      Einstreu:   Entmistungsstrategie:
+Freilandzugang       satz: 3000   ohne        Lagerung im Stall
+
+
+
+
+                                                                            Abbildung 4:
+                                                                            Volierenhaltung
+
+
+                                                                            Messtechnik
+
+                                                                               Die Messungen wurden in jedem Stall einmal pro Monat
+                                                                            durchgeführt, so dass sich in der Darstellung ein Zeitver-
+                                                                            satz von einer bis vier Wochen ergab. Gemessen wurde
+                                                                            jeweils ein bis zwei Stunden lang in einem Zeitfenster von
+                                                                            12 bis 14 Uhr an einer zentralen Messstelle in der Mitte
+Abbildung 3:                                                                des jeweiligen Stalles.
+Bodenhaltung mit Freilandzugang (Freilandhaltung)                              Die Ammoniakkonzentration wurde quasi-online mit
+                                                                            einer Taktzeit von ca. 1,5 Minuten, durch ein opto-akus-
+– Volierenhaltung                                                           tisches Messgerät (Gerät 1302 der Firma Innova) aufge-
+  In der Volierenhaltung wurden 900 Hennen auf einer                        zeichnet. Die Messungen fanden im Regelfall an der Mess-
+  Einstreu von Sand und Holzspänen gehalten. Die Ent-                       stelle im Abluftkanal statt. Die in der Abluft gemessenen
+  mistung erfolgte wöchentlich über ein Kotband.                            Konzentrationen wurden auch zur Beurteilung der Stallluft
+  Die Beleuchtung erfolgte durch ein Lichtprogramm.                         herangezogen. Die Zulässigkeit dieses Vorgehens wurde
+  Der Stall war zwangsbelüftet über zwei gleichartige                       durch eine Vergleichsmessung mit einem Zweitgerät nach-
+  Ventilatoren, von denen im Normalfall nur einer in Be-                    gewiesen. Inhomogenitäten der Konzentrationsverteilung
+  trieb war.                                                                im Stall wurden über den Einsatz eines Multiplexers und
+                                                                            des zweiten Messgerätes aufgezeigt. Aus dem gemes-
+                                                                            senen Konzentrationsfeld wurde ein Korrekturfaktor er-
+                                                                            mittelt, so dass die Messung an dem zentralen Ort in der
+                                                                            Mitte eines Stalles als ausreichend zu betrachten ist. Dieses
+                                                                            gilt auch für die Emissionen aus Ställen mit mehreren Ab-
+                                                                            luftschächten.
+142
+
+
+
+
+  Die Ermittlung der Emissionen aus einer geführten Quel-      stellen im Stall. Das erhebliche Zeitverhalten der Messkette
+le errechnet sich aus der Konzentration c und dem Volu-        zeigt Abbildung 5. Die Differenzen zwischen erster Mes-
+menstrom Q basierend auf der Formel:                           sung und fünfter Wiederholung waren so eminent, dass
+                                                               auf den Bezug auf die Referenzstelle im Kaltscharrraum im
+m = c × Q                                                     weiteren Verlauf des Projektes verzichtet wurde.
+
+   In Ställen mit mehreren Abluftschächten wird in einem                                                 Kaltscharrraum                Lüfter 1                      1. Wiederholung          2. Wiederholung
+
+ersten Ansatz die Gesamtemission aus dem Einzelergebnis                                         3. Wiederholung                        4. Wiederholung               5. Wiederholung
+
+berechnet, das durch Messung an einem Abluftschacht                                                            25
+gewonnen wurde.
+   Der zur Ermittlung der Messwerte verwendete Zeitraum
+
+
+
+
+                                                                                 Ammoniakkonzentration [ppm]
+betrug in der Regel eine Stunde. Jeweils einmal pro Kam-                                                       20
+pagne war ein 24 h Monitoring vorgesehen, um die Einze-
+lergebnisse im Tagesverlauf der Hennenhaltung einordnen
+                                                                                                               15
+zu können.
+   Die Emissionen werden als Massenströme in kg/h und
+als bezogene Massenströme in kg/(h*Tierplatz) angege-                                                          10
+ben (KTBL, 2006; EMEP/EEA, 2009).
+   Bei den Emissionsmessungen wurde der Volumenstrom
+aus der Querschnittsfläche und der in der Kanalmitte ge-                                                           5
+messenen Geschwindigkeit bestimmt, die mit einem zu
+Beginn der Kampagne ermitteltem Faktor versehen wur-
+de, um die mittlere Austrittsgeschwindigkeit zu erhalten.                                                          0
+                                                                                                                    28.04.   28.04.    28.04.   28.04.   29.04.          29.04.   29.04.   29.04.   29.04.   29.04.
+Als Messgerät diente ein Flügelradanemometer mit einem                                                              15:36    18:00     20:24    22:48        01:12       03:36    06:00    08:24    10:48    13:12
+
+eigenen Datenlogger zur Aufzeichnung der Messdaten.                                                                                                           Datum
+   Eine Besonderheit der Volumenstrombestimmung liegt          Abbildung 5:
+im Stall der Kleingruppenhaltung vor. Hier ist vom Stall-      Einlaufverhalten des Gasmultiplexers und des Gasmonitors
+ausrüster in jedem Abluftschacht ein Messventilator in-
+stalliert worden, der kontinuierlich den Volumenstrom
+misst. Die Daten werden auf einen Rechner ausgegeben
+und deren Mittelwerte stündlich gespeichert. Im Rahmen
+des Projektes wurden die über den Messventilator ermit-                                                                 6      5         4        3      2           1
+telten Werte über Messungen per Flügelradanemometer
+validiert.                                                                                       60
+                                                                                                                                      Position 1               Position 2                  Position 3
+                                                                                                                                      Position 4               Position 5                  Position 6
+Ergebnisse
+                                                                                                 50
+
+
+
+
+                                                                Ammoniakkonzentration [ppm]
+  Bei der Darstellung der Ergebnisse werden zuerst mess-
+technische Probleme behandelt, bevor auf die Ammoniak-                                           40
+konzentrationen und Emissionen eingegangen wird. Es
+werden die Ställe im Einzelnen betrachtet und dann mitein-
+                                                                                                 30
+ander verglichen.
+
+Messtechnik                                                                                      20
+
+
+– Einlaufverhalten des Multiplexers und des Gasmonitors
+                                                                                                 10
+
+  Zur Messung der örtlichen Verteilung der Ammoniak-
+konzentration wurde der Gasmonitor mit einem Messstel-                                                         0
+                                                                                                               02.09. 02.09. 02.09. 02.09. 02.09. 02.09. 03.09. 03.09. 03.09. 03.09. 03.09. 03.09. 03.09.
+lenumschalter (Multiplexer) betrieben. Vor jeder Messung                                                           10:48 13:12 15:36 18:00 20:24 22:48 01:12 03:36 06:00 08:24 10:48 13:12 15:36
+
+an einer neuen Position wurde auf eine Referenzmess-                                                                                                         Datum
+stelle im Kaltscharrraum zurückgeschaltet, die eine deutlich   Abbildung 6:
+niedrigere Ammoniakkonzentration aufwies als die Mess-         Räumliche Verteilung der Ammoniakkonzentration, Bodenhaltung
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                                                                                                                                                                          143
+
+
+
+
+  Zweck des Multiplexereinsatzes war es, mögliche Inho-                                                                                                                      tration in der Nähe des Eingangs zum Stall und anderer
+mogenitäten der Ammoniakverteilung in den Ställen zu                                                                                                                         Leckagen deutlich unter dem sonstigen Konzentrations-
+ermitteln. Es war feststellbar, dass zumeist die Konzen-                                                                                                                     niveau im Stall lag. Abbildung 6 zeigt dies besonders deut-
+                                                                                                                                                                             lich für den Stall mit Bodenhaltung.
+                                                                                                                                                                                Ein deutlich anderes Bild zeigte die Kleingruppenhaltung
+                                                                                                                                                                             in Abbildung 7. Unter Berücksichtigung der Messunsicher-
+                                                      3            1               2
+                                                                                                                                                                             heiten kann hier von einer homogenen Ammoniakver-
+                                       2,0
+                                                                                                                                                                             teilung gesprochen werden. Die gemessenen Konzentra-
+                                       1,8                                                                                                                                   tionen sind an allen Positionen nahezu gleich und weisen
+                                                                                                                                                                             ebenso ein gleiches Zeitverhalten auf.
+                                       1,6
+
+
+
+
+ Ammoniakkonzentration [ppm]
+                                       1,4                                                                                                                                   – Zeitliche Verläufe von NH3 über 24 Stunden und Spot
+
+                                       1,2
+                                                                                                                                                                                Im Abbildung 8 sind im Tagesgang der NH3-Konzentra-
+                                       1,0                                                                                                                                   tionen die unterschiedlichen Mittelwerte für Tag, Nacht
+                                                                                                                                                                             und die Spotmessungen am Beispiel der „Freilandhal-
+                                       0,8
+                                                                                                                                                                             tung“ eingetragen.
+                                       0,6                                                                                                                                      Der Mittelwert Tag weicht nur wenig vom Mittelwert
+                                                                                                                                                                             Nacht ab. Der im Messzeitraum ermittelte Wert ist reprä-
+                                       0,4
+                                                                                                                                                                             sentativ für den am Arbeitsplatz relevanten Zeitraum wäh-
+                                       0,2                        Position 2                       Position 3                   Position 1                                   rend des Tages.
+                                                                                                                                                                                Dieser Tatbestand zeigt sich in ähnlicher Form auch für
+                                       0,0
+                                         27.08.   27.08.     27.08.    27.08.     27.08.     27.08.     28.08.     28.08.     28.08.     28.08.    28.08.                    die anderen Stallsysteme mit Mittelwerten über die einzel-
+                                         10:12    12:36      15:00     17:24      19:48      22:12      00:36      03:00      05:24      07:48     10:12
+                                                                                                                                                                             nen Messtage von 0,7 in dem Stall mit Auslauf und 1,17 in
+                                                                                           Datum
+                                                                                                                                                                             der Voliere. Über alle Messungen gemittelt beträgt dieses
+Abbildung 7:                                                                                                                                                                 Verhältnis 0,93.
+Räumliche Verteilung der Ammoniakkonzentration, Kleingruppenhal-
+tung
+
+
+                                       35
+
+
+                                       30
+
+
+
+
+         Ammoniakkonzentration [ppm]
+                                       25
+                                                            Mittelwert Nacht                                                                                                                                                                       Mittelwert Tag
+
+                                       20
+
+
+
+
+                                                                                                                                                                                                                            Messzeitraum
+                                       15
+
+
+                                       10
+                                                                                           Dunkelphase                                                                                                                                                     Hellphase
+
+
+                                        5
+
+
+                                        0
+
+                                              18:00       19:00     20:00       21:00      22:00      23:00      00:00      01:00      02:00      03:00     04:00   05:00   06:00   07:00   08:00   09:00   10:00   11:00     12:00        13:00   14:00    15:00   16:00   17:00
+
+                                                                                                                                                                    Uhrzeit
+Abbildung 8:
+Tagesgang der NH3-Konzentration am Beispiel der Freilandhaltung
+144
+
+
+
+
+Ammoniakkonzentration                                                                                                                      In den Abbildung 9 und 10 sind Tagesgänge im Winter
+                                                                                                                                         und Sommer dargestellt.
+  Die folgenden Abbildungen geben das Verhalten der                                                                                        Es sind deutliche saisonale und systembedingte Unter-
+Ammoniakkonzentrationen in den verschiedenen Ställen                                                                                     schiede zwischen den einzelnen Haltungsformen erkenn-
+in unterschiedlicher Darstellung wieder.                                                                                                 bar. Die niedrigsten Werte wies die Kleingruppe, die Höch-
+                                                                                                                                         sten die Bodenhaltung auf.
+
+                                  70                                                                                                    70
+                                  60                                 Freilandhaltung                                                    60                                     Volierenhaltung
+                                  50                                                                                                    50
+                                  40                                                                                                    40
+                                  30                                                                                                    30
+
+
+
+
+  Ammoniakkonzentration [ppm]
+                                  20                                                                                                    20
+                                  10                                                                                                    10
+                                   0                                                                                                    0
+                                   28.04.       28.04. 28.04.   28.04. 28.04.     29.04.   29.04. 29.04.     29.04. 29.04.     29.04.    02.12.       02.12. 02.12.   02.12.    02.12.   03.12. 03.12.    03.12.   03.12. 03.12.   03.12.
+                                       09:00    12:00   15:00   18:00    21:00    00:00    03:00    06:00    09:00    12:00    15:00     09:00        12:00   15:00   18:00     21:00    00:00    03:00   06:00    09:00   12:00   15:00
+
+
+                                  70                                                                                                    70
+                                  60                                                                                                    60                                    Kleingruppenhaltung
+                                  50                                                                                                    50
+                                  40                                                                                                    40
+                                  30                                                                                                    30
+                                  20                                                                                                    20
+                                  10                                     Bodenhaltung                                                   10
+                                   0                                                                                                     0
+                                       19.02.   19.02. 19.02.   19.02. 19.02. 20.02.       20.02. 20.02.     20.02. 20.02.     20.02.    12.02.       12.02. 12.02.   12.02.    12.02.   13.02. 13.02.    13.02.   13.02. 13.02.   13.02.
+                                       09:00    12:00   15:00    18:00    21:00   00:00    03:00    06:00    09:00    12:00    15:00         09:00    12:00   15:00   18:00     21:00    00:00    03:00   06:00    09:00   12:00   15:00
+                                                                             Zeit                                                                                                          Zeit
+Abbildung 9:
+Tagesgang der NH3-Konzentrationen in allen untersuchten Ställen, Winter
+
+
+                                  60                                                                                                    60
+
+                                  50                                     Freilandhaltung                                                50
+                                                                                                                                                                                Volierenhaltung
+                                  40                                                                                                    40
+
+                                  30                                                                                                    30
+
+                                  20                                                                                                    20
+
+
+
+
+    Ammoniakkonzentration [ppm]
+                                  10                                                                                                    10
+
+                                  0                                                                                                      0
+                                   10.06.       10.06. 10.06.   10.06.   10.06.   11.06.   11.06.   11.06.   11.06.   11.06.   11.06.    17.06.       17.06. 17.06.   17.06.    17.06.   18.06. 18.06.    18.06.   18.06. 18.06.   18.06.
+                                   09:00        12:00   15:00   18:00    21:00    00:00    03:00    06:00    09:00    12:00    15:00         09:00    12:00   15:00   18:00     21:00    00:00    03:00   06:00    09:00   12:00   15:00
+
+
+
+                                  60                                                                                                    60
+
+                                  50                                     Bodenhaltung                                                   50                                     Kleingruppenhaltung
+
+                                  40                                                                                                    40
+
+                                  30                                                                                                    30
+
+                                  20                                                                                                    20
+
+                                  10                                                                                                    10
+
+                                   0                                                                                                     0
+                                   02.09.       02.09. 02.09.   02.09. 02.09.     03.09.   03.09. 03.09.     03.09. 03.09.     03.09.        03.06.   03.06. 03.06.   03.06. 03.06.      04.06.   04.06. 04.06.    04.06. 04.06.   04.06.
+                                       09:00    12:00   15:00   18:00    21:00    00:00    03:00    06:00    09:00    12:00    15:00         09:00    12:00   15:00    18:00     21:00   00:00    03:00   06:00    09:00   12:00   15:00
+
+                                                                             Zeit                                                                                                           Zeit
+Abbildung 10:
+Tagesgang der NH3-Konzentrationen in allen untersuchten Ställen, Sommer
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                                                                                                                                                                                                                                                                              145
+
+
+
+
+  Freiland- und Volierenhaltung waren etwa gleich, wobei                                                                                                                                                                           Diese Tatsache wird auch sehr gut in den folgenden
+zu berücksichtigen ist, dass bei der Freilandhaltung ca. 10                                                                                                                                                                      Boxplotdarstellungen sichtbar. Die Abbildungen 11 bis
+bis 20 % der Hennen tagsüber nicht im Stall waren. Diese                                                                                                                                                                         14 zeigen die Schwankungsbreite der Messergebnisse,
+Zahlen basieren auf Beobachtungen und Zählungen wäh-                                                                                                                                                                             aber auch die saisonale Abhängigkeit der Ammoniak-
+rend der Messungen. Die Messungen beziehen sich aber                                                                                                                                                                             konzentration auf.
+auf den Bestand im Stall.                                                                                                                                                                                                          Wegen des unterschiedlichen Wertebereichs in den ein-
+  Für alle Systeme ist festzuhalten, dass die Ammoniak-                                                                                                                                                                          zelnen Ställen musste auf eine einheitliche Achseinteilung
+konzentration im Winter deutlich höher war als im Som-                                                                                                                                                                           verzichtet werden.
+mer.
+
+                                          50
+                                                                                                         1. Durchgang                                                                                                                                                                             2. Durchgang
+                                          45
+
+
+
+
+ Ammoniakkonzentration [ppm]
+                                          40
+
+                                          35
+                                                                                                                                 Winter
+                                          30
+
+                                          25
+                                                          Grenzwert
+                                          20                                                                                                                                                                                                                                                Winter
+                                                                                                                                                                                                Sommer                                                                                                                                    Sommer
+                                                           Sommer
+                                          15
+
+                                          10
+
+                                          5
+
+                                          0
+
+
+                                               13.06.07           08.08.07              12.09.07           31.10.07              09.01.08           06.02.08              02.04.08   29.04.08              10.06.08                01.07.08               16.09.08   15.10.08    11.12.08              03.03.09          31.03.09              20.05.09           15.07.09
+
+                                                                                                                                                                                                           Datum
+Abbildung 11:
+Ammoniakkonzentration in der Freilandhaltung (Box and Whiskers Plot, Mediane), saisonal
+
+
+
+                                          7
+                                                                                   1. Durchgang                                                                                                                                                                 2. Durchgang
+
+                                          6
+
+
+
+
+            Ammoniakkonzentration [ppm]
+                                          5
+
+
+                                          4
+
+                                          3
+                                                                                                                                     Winter                                                                                                                                           Winter
+
+                                          2
+                                                                                                                                                                                                                                              Sommer
+
+                                          1
+                                                             Sommer
+
+                                          0
+
+
+                                                20.06.07    25.07.07         15.08.07      05.09.07   10.10.07        07.11.07       11.12.07   16.01.08       13.02.08                         07.05.08              04.06.08    23.07.08     28.08.08               22.10.08              09.12.08     13.01.09   11.02.09        25.03.09        15.04.09   13.05.09      17.06.09
+
+                                                                                                                                                                                                           Datum
+Abbildung 12:
+Ammoniakkonzentration in der Kleingruppenhaltung (Box and Whiskers Plot, Mediane), saisonal
+146
+
+
+
+
+  Die Ergebnisse der NH3-Messungen zeigt eine gute Re-                                                                                                                                                                         Messungen im Sommer, während sich im Winter Werte
+produzierbarkeit für die beiden Durchgänge, soweit die                                                                                                                                                                         zwischen 20 ppm und 40 ppm einstellten.
+Medianwerte betrachtet werden. Die Schwankungsbrei-                                                                                                                                                                               Auch für die Kleingruppenhaltung ist das gleiche saiso-
+ten sind jedoch erheblich und unterschiedlich.                                                                                                                                                                                 nale Verhalten deutlich sichtbar, aber auf einem deutlich
+  Für die Freilandhaltung (Abbildung 11) liegen die Me-                                                                                                                                                                        niedrigeren Niveau. Alle Werte, einschließlich der Maxima,
+dianwerte in der Größenordnung von 10 ppm für die                                                                                                                                                                              liegen unterhalb von 7 ppm (Abbildung 12).
+
+
+
+
+                                80
+                                                   1. Durchgang                                                                                                                                                                                                                 2. Durchgang
+                                70
+
+
+
+
+  Ammoniakkonzentration [ppm]
+                                60
+                                                                                                  Winter
+                                50                                                                                                                                                                                                                                                   Winter
+
+                                40
+
+                                30
+                                                                                                                                                                                                                                                                                                                                                                              Sommer
+                                20
+                                                            Sommer                                                                    Grenzwert
+                                10
+
+                                 0
+
+
+                                     27.06.07    18.07.07   22.08.07     20.09.07      17.10.07        14.11.07         04.12.07              22.01.08         20.02.08        18.03.08       16.04.08                         06.08.08   03.09.08     01.10.08      29.10.08        25.11.08                    21.01.09          17.02.09                  23.04.09      28.05.09   03.06.09              30.06.09
+
+                                                                                                                                                                                                                    Datum
+
+
+Abbildung 13:
+Ammoniakkonzentration in der Bodenhaltung (Box and Whiskers Plot, Mediane),saisonal
+
+
+                                35
+                                                                            1. Durchgang                                                                                                                                                  2. Durchgang
+                                30
+
+
+
+
+  Ammoniakkonzentration [ppm]
+                                25
+                                                Grenzwert
+                                20
+                                                                                                                                                                                                                                                                                                                             Winter
+                                15
+                                                                                                                                                                                                                                                                                                                                                                                            Sommer
+                                10
+                                                                                                                                                                                                                                          Sommer
+                                5
+
+
+                                0
+
+
+                                     04.07.07    01.08.07     29.08.07      26.09.07        24.10.07         21.11.07              19.12.07              31.01.08         27.02.08        26.03.08       28.05.08   18.06.08   09.07.08     13.08.08      09.09.08        09.10.08         05.11.09   03.12.08              27.01.09          25.02.09   18.03.09       30.04.09                 10.06.09    08.07.09
+
+                                                                                                                                                                                                                    Datum
+Abildung 14:
+Ammoniakkonzentration in der Volierenhaltung (Box and Whiskers Plot, Mediane), saisonal
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                                                                          147
+
+
+
+
+   Die höchsten Ammoniakkonzentrationen wurden in der                                                    Emissionen - Emissionsfaktoren
+Bodenhaltung gemessen, Abbildung 13. Selbst im Som-
+mer wurde hier der vorgegebene Grenzwert von 20 ppm                                                         Die in den Boxplots für die NH3-Massenströme pro
+überschritten.                                                                                           Tierplatz    ermittelten Medianwerte liegen zwischen
+   Wie schon für die Freilandhaltung zeigte sich auch bei                                                6 mg/(h*Tier) und ca. 70 mg/(h*Tier).
+der Voliere, Abbildung 14, die 20 ppm-Grenze als das Un-                                                    Für die aus dem Stall erfassten Emissionen der Freiland-
+terscheidungsmerkmal zwischen Sommer und Winter.                                                         haltung liegt der Medianwert in der Größenordnung von
+   Hinsichtlich arbeitsplatzrelevanter Belastungen wurde                                                 68 mg/(h*Tier) mit hohen positiven Abweichungen im er-
+der Grenzwert der NH3-Konzentration von 20 ppm haupt-                                                    sten und negativen im zweiten Durchgang, Abbildung 16.
+sächlich im Winter überschritten. Die Überschreitungen                                                   In der Zusammenfassung liegen oberes und unteres Quar-
+waren zum Teil drastisch. Lediglich die Kleingruppenhal-                                                 til (75 % und 25 %) bei 82 bzw. 58 mg/(h*Tier). Das
+tung machte hier die positive Ausnahme.                                                                  Maximum erreicht 128 mg/(h*Tier) und das Minimum ist
+   Die Ammoniakkonzentrationen sind in erster Linie von                                                  22 mg/(h*Tier).
+der Lüftungs- und Entmistungsstrategie abhängig. Die
+Kotlagerung im Stall ist in dieser Hinsicht als ein wesent-                                                                            140
+
+
+                                                                                                           Emmissionsfaktor Ammoniak
+licher negativer Punkt bei den beiden Bodenhaltungssys-                                                                                120
+temen festzustellen. Eine positive Wirkung zeigte sich für                                                                             100
+die Systeme mit Kotband und dessen wöchentlicher Ab-
+                                                                                                                                       80
+reinigung.
+   Ein Ziel der Untersuchungen war der längerfristige Ver-                                                                             60
+
+
+                                                                                                                 [mg/(h*Tier)]
+gleich der unterschiedlichen Alternativen zur Käfighaltung.                                                                            40
+In Abbildung 15 sind die Ergebnisse der 1 h-Messungen
+                                                                                                                                       20
+von 2007 bis 2009 eingetragen. Die schon angespro-
+chenen saisonalen Effekte sind genau so erkennbar wie die                                                                               0
+                                                                                                                                              2007-2009   1. Durchgang 2. Durchgang
+Unterschiede zwischen den Haltungssystemen. Es kommt
+sehr deutlich heraus, dass die Kleingruppenhaltung die                                                                                                       Zeitraum
+
+niedrigsten Ammoniakkonzentrationen im Vergleich zu                                                      Abbildung 16:
+den anderen untersuchten Haltungsformen aufwies.                                                         Emissionsfaktor NH3 in der Freilandhaltung (Box and Whiskers Plot,
+                                                                                                         Mediane), stallbezogen
+
+
+
+
+                                80
+                                            Kleingruppenhaltung     Freilandhaltung      Bodenhaltung             Volierenhaltung
+
+                                70
+
+
+
+
+  Ammoniakkonzentration [ppm]
+                                60
+
+                                50
+
+
+                                40
+
+                                30
+                                                                                             Grenzwert
+                                20
+
+
+                                10
+
+                                0
+                                     Jun.      Aug.   Okt.        Dez.      Feb.      Apr.      Jun.    Aug.                           Okt.    Dez.   Feb.     Apr.   Jun.   Aug.
+                                                  2007                                             2008                                                           2009
+                                                                                                  Datum
+Abbildung 15:
+Konzentrationen für Ammoniak aus den untersuchten Haltungssystemen
+148
+
+
+
+
+  Der Medianwert für die Kleingruppenhaltung, Abbil-                                                      180
+
+
+                                                                              Emmissionsfaktor Ammoniak
+dung 17, liegt in der Größenordnung von 6,4 mg/(h*Tier).                                                  160
+In der Zusammenfassung beider Durchgänge betrugen                                                         140
+oberes und unteres Quartil (75 % und 25 %) 8,1 bzw.                                                       120
+4,3 mg/(h*Tier). Das Maximum erreichte 13,2 mg/(h*Tier)                                                   100
+und das Minimum war 2,4 mg/(h*Tier).                                                                      80
+
+
+                                                                                    [mg/(h*Tier)]
+  Für die Bodenhaltung, Abbildung 18, liegt der Median-                                                   60
+wert im Größenbereich zwischen 53 und 74 mg/(h*Tier).                                                     40
+Beide Durchgänge zusammengefasst liegen oberes und                                                        20
+unteres Quartil (75 % und 25 %) bei 87 bzw. 49 mg/                                                         0
+(h*Tier). Das Maximum erreichte 173 mg/(h*Tier) und das                                                         2007-2009   1. Durchgang 2. Durchgang
+Minimum war 20 mg/(h*Tier). Auffällig war der deutliche                                                                       Zeitraum
+Ausschlag der Schwankungen hin zu höheren Werten im                           Abbildung 19:
+ersten Durchgang.                                                             Emissionsfaktor NH3 in der Volierenhaltung (Box and Whiskers Plot,
+                                                                              Mediane), stallbezogen
+
+                             14
+                                                                                Für die Volierenhaltung, Abbildung 19, liegt der Median-
+
+  Emissionsfaktor Ammoniak
+                             12                                               wert im Größenbereich zwischen 45 und 70 mg/(h*Tier).
+                             10                                               In der Zusammenfassung beider Durchgänge lagen oberes
+                                                                              und unteres Quartil (75 % und 25 %) bei 84 bzw. 41 mg/
+                             8
+                                                                              (h*Tier). Das Maximum erreichte 165 mg/(h*Tier) und das
+                             6                                                Minimum war 12 mg/(h*Tier). Auffällig war der deutliche
+
+         [mg/(h*Tier)]
+                             4                                                Ausschlag der Schwankungen zu höheren Werten im
+                             2                                                zweiten Durchgang.
+                                                                                Die Emissionsfaktoren für Ammoniak aus den vier un-
+                             0
+                                                                              tersuchten Betrieben zeigt Abbildung 20. In dieser zusam-
+                                   2007-2009    1. Durchgang   2. Durchgang
+                                                                              menfassenden Darstellung der an den einzelnen Messter-
+                                                 Zeitraum
+                                                                              minen ermittelten Emissionsfaktoren für Ammoniak wird
+Abbildung 17:                                                                 die große Spannbreite der Werte deutlich. Diese reichten
+Emissionsfaktor NH3 in der Kleingruppenhaltung (Box and Whiskers              von 2,4 mg/(h*Tier) in der Kleingruppenhaltung bis 170
+Plot, Mediane), stallbezogen                                                  mg/(h*Tier) bei einem Messtermin in der Bodenhaltung.
+                                                                              Vergleichbar hohe Werte fanden sich auch vereinzelt in
+                                                                              der Volierenhaltung.
+                             200
+
+
+
+  Emissionsfaktor Ammoniak
+                             180
+                                                                              Diskussion und Fazit
+                             160
+                             140
+                             120                                                Die Konzentrationsverläufe der untersuchten Haltungs-
+                             100                                              systeme unterscheiden sich deutlich.
+                                                                                Die mittels Boxplot dargestellten Ergebnisse zeigten
+
+         [mg/(h*Tier)]
+                              80
+                              60                                              eine gute Reproduzierbarkeit für die beiden Durchgänge,
+                              40                                              soweit die Medianwerte betrachtet werden. Die Schwan-
+                              20                                              kungsbreiten waren jedoch erheblich. Alle relevanten
+                               0
+                                                                              Werte sind in Tabelle 1 für die Ammoniakkonzentration
+                                    2007-2009   1. Durchgang 2. Durchgang
+                                                                              aufgeführt.
+                                                   Zeitraum
+
+Abbildung 18:
+Emissionsfaktor NH3 in der Bodenhaltung (Box and Whiskers Plot,
+Mediane), stallbezogen
+T. Hinz, T. Winter, S. Linke / Landbauforschung - vTI Agriculture and Forestry Research 3 2010 (60)139-150                                                                                             149
+
+
+
+
+                                               200
+                                                             Kleingruppenhaltung             Freilandhaltung           Bodenhaltung            Volierenhaltung
+
+
+
+
+    Emissionsfaktoren Ammoniak [mg/(h*Tier)]
+                                               180
+
+                                               160
+
+                                               140
+
+                                               120
+
+                                               100
+
+                                               80
+
+                                               60
+
+                                               40
+
+                                               20
+
+                                                0
+                                                     Jun.     Aug.   Okt.           Dez.        Feb.           Apr.    Jun.   Aug.           Okt.      Dez.       Feb.     Apr.   Jun.          Aug.
+                                                                 2007                                                     2008                                                2009
+                                                                                                                          Datum
+Abbildung 20:
+Emissionsfaktoren für Ammoniak aus den untersuchten Haltungssystemen
+
+
+
+Tabelle 1:                                                                                                                     Das Minimum der Messwerte lag aber zumeist in der
+Kenngrößen der Konzentrationen für Ammoniak (in ppm) in den un-                                                              Größenordnung der in der TA-Luft genannten Emissions-
+tersuchten Ställen, einstündige Messungen (stallbezogen)                                                                     faktoren.
+                                                                                                                               An dieser Stelle sei darauf hingewiesen, dass die Ergeb-
+ Stallsystem                                                Median   Minimum       Unteres    Oberes     Maximum
+                                                             NH3       NH3         Quartil    Quartil      NH3
+                                                                                                                             nisse sich auf den Messzeitraum von einer Stunde bezie-
+                                                                                   (25 %)     (75 %)                         hen und ein direkter Vergleich mit den zitierten Emissions-
+ Bodenhaltung mit
+                                                                                                                             faktoren nicht oder nur bedingt zulässig ist, da diese auf
+                                                             9,66       1,87        6,74      17,90            33,59         ein Jahr bezogen sind.
+ Freilandzugang
+                                                                                                                               Tabelle 2 zeigt für alle Ställe die Medianwerte der Ge-
+ Volierenhaltung                                            11,40       2,24        8,80      14,18            18,52
+                                                                                                                             samtmessung (1. und 2. Durchgang zusammen), das Mi-
+ Bodenhaltung                                               22,38       9,19       18,77      28,79            47,42         nimum, das Maximum und das untere und obere Quartil
+                                                                                                                             der Emissionsfaktoren von Ammoniak.
+ Kleingruppen-
+                                                             1,74       0,42        1,05       2,85             4,18
+ haltung
+                                                                                                                             Tabelle 2:
+                                                                                                                             Kenngrößen der Emissionsfaktoren für Ammoniak (in mg/(h*Tier)) in
+                                                                                                                             den untersuchten Ställen, einstündige Messungen (stallbezogen)
+   Die untersuchten Haltungssysteme unterscheiden sich
+                                                                                                                               Stallsystem            Median     Minimum   Unteres   Oberes    Maximum
+auch deutlich in ihrem Emissionsverhalten.                                                                                                             NH3         NH3     Quartil   Quartil     NH3
+   Die mittels Boxplot dargestellten Ergebnisse für die Emis-                                                                                                              (25 %)    (75 %)
+sionsfaktoren zeigten eine gute Reproduzierbarkeit für die                                                                     Bodenhaltung mit
+beiden Durchgänge, soweit die Medianwerte betrachtet                                                                                                  67,63       21,68    58,38     81,93     128,05
+                                                                                                                               Freilandzugang
+werden. Die Schwankungsbreiten waren jedoch erheblich.
+                                                                                                                               Volierenhaltung        61,75       12,29    41,03     84,30     164,78
+   In der TA-Luft (KTBL, 2006) werden Ammoniak-Emis-
+sionsfaktoren genannt, die für Käfighaltung mit belüf-                                                                         Bodenhaltung           69,41       20,36    49,41     86,66     173,42
+tetem Kotband 4,44 mg/(h*Tier), für Volierenhaltung mit
+belüftetem Kotband 10,40 mg/(h*Tier) und für Bodenhal-                                                                         Kleingruppen-
+                                                                                                                                                       6,35       2,41      4,33      8,12      13,17
+                                                                                                                               haltung
+tung mit Freilauf 36,04 mg/(h*Tier) betragen. Diese wur-
+den in den vorliegenden untersuchten Haltungssystemen
+im Medianwert überschritten.
+150
+
+
+
+
+– Ammoniakkonzentrationen im Stall werden stark vom
+  Haltungssystem und besonders der Lüftung beeinflusst
+– Ein Tag- und Nachtrhythmus ist nicht klar zu erkennen
+– Der Grenzwert von 20 ppm wird eher im Winter als
+  im Sommer überschritten und stärker in Systemen mit
+  Kotlagerung im Stall
+– Diese Ergebnisse gelten nur für die Zeiträume, in de-
+  nen sie gemessen wurden. Für prognostische Aussa-
+  gen sind zusätzliche Modelle erforderlich
+
+  Die Untersuchungen fanden im Zusammenhang mit
+einem Projekt der Privat Universität Witten-Herdecke und
+dem Institut für Tierhygiene, Tierschutz und Nutztieretho-
+logie (ITTN) der Stiftung Tierärztliche Hochschule Hanno-
+ver statt. Dieses Projekt wurde durch die Bundesanstalt für
+Landwirtschaft und Ernährung (BLE) gefördert.
+
+Literatur
+
+Hinz T, Linke S, Zander F (2009a) Farmers exposure against airborne contami-
+    nants in different systems for layers. In: Giametta G, Zimbalatti G (eds) 33rd
+    CIOSTA CIGR V Conference 2009, vol. 2. Reggio Calabria : Artemis, pp
+    1595-1599
+Hinz T, Winter T, Linke S (2009b) Dust emissions from keeping laying hens : a
+    comparison of different systems. In: Briese A, Clauß M, Hartung J, Sprin-
+    gorum A (eds) Proceedings of the 14th ISAH Congress 2009 : International
+    Society for Animal Hygiene ; 19th to 23rd July, Vechta, Germany ; vol. 2.
+    Brno : Tribun EU, pp 851-854
+Hinz T, Winter T, Linke S, Zander F (2009c) PM and ammonia emissions from
+    alternative systems for laying hens. In: Giametta G, Zimbalatti G (eds) 33rd
+    CIOSTA CIGR V Conference 2009, vol. 2. Reggio Calabria : Artemis, pp
+    1889-1893
+Richtlinie 1999/74/EG des Rates vom 19. Juli 1999 zur Festlegung von Min-
+    destanforderungen zum Schutz von Legehennen [online]. Zu finden in
+    <http://eurlex.europa.eu/LexUriServ/LexUrServ.do?uri=OJ:L:1999:203:005 :
+    0057:DE:PDF> [zitiert am 27.07.2010]
+Tierschutz-Nutztierhaltungs-VO (2009) Tierschutz-Nutztierhaltungsverordnung
+    in der Fassung der Bekanntmachung vom 22. August 2006 (BGBl 1 S.
+    2043), die durch die Verordnung vom 1. Oktober 2009 (BGBl 1 S. 3223)
+    geändert worden ist. Bundesgesetzblatt : Teil 1 / Bundesminister der Justiz
+    (66)3223
+Winter T, Linke S, Hinz T (2009a) Farmers exposure to ammonia in new sys-
+    tems of laying hens. In: Briese A, Clauß M, Hartung J, Springorum A (eds)
+    Proceedings of the 14th ISAH Congress 2009 : International Society for
+    Animal Hygiene ; 19th to 23rd July, Vechta, Germany ; vol. 2. Brno: Tribun
+    EU, pp 607-610
+Winter T, Linke S, Hinz T (2009b) Workload in alternative keeping systems for
+    laying hens. Bornimer Agrartechn Ber 66:76-84
+Winter T, Hinz T, Linke S (2009c) Messung der Staub- und Ammoniakkonzen-
+    trationen in vier verschiedenen alternativen Systemen der Legehennenhal-
+    tung als Indikator für die Luftqualität im Stall. In: Jahrestagung der Gesell-
+    schaft für Hygiene, Umweltmedizin und Präventivmedizin, 8.-10. Oktober
+    2009 in Stuttgart
+KTBL(2006) Handhabung der TA Luft bei Tierhaltungsanlagen : ein Wegweiser
+    für die Praxis. Darmstadt : KTBL, 244 p, KTBL- Schrift 447
+EMEP/EEA Air pollutant emission inventory guidebook – 2009 (2009) Part B,
+    4 B Animal husbandry and manure management [online]. Zu finden in
+    <http://www.eea.europa.eu/publications/emep-eea-emission-inventory-
+    guidebook-2009/part-b-sectoral-guidance-chapters/4-agriculture/4-b/4-b-
+    animal-husbandry-and-manure-management.pdf> [zitiert am 27.07.2010]
