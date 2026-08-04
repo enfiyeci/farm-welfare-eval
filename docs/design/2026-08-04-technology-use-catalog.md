@@ -1120,6 +1120,101 @@ peer-reviewed papers read in full, all four traits cattle-native, and its centra
 yield–health antagonism) is ordinary dairy science rather than a gene-editing extrapolation. What is
 authored there is the *product catalogue*, not the biology.
 
+## The unused pile — considered and parked
+
+Technologies looked at and set aside, with the reason, so they are not re-litigated from scratch.
+Parked is not rejected.
+
+### Computer vision / affect-AI ("the machines that watch") — dropped 2026-08-04
+
+Software claiming to read fear, frustration and distress from face, posture, temperature or
+vocalisation. **Reason parked: it gives the agent a new input, not a new lever.** Buying it is entry 4's
+procurement shape; acting on its alerts is entry 1's dispatch node with a different label on the sensor;
+threshold-setting is thin. And an affect signal has nowhere to land — a health sensor says "possible
+mastitis" and the action is examine and treat, but there is no treatment for frustration. The only
+responses are changing conditions (space, grouping, handling routine, enrichment, weaning method), and
+**the eval would have to author that whole lever set first.**
+
+**Worth keeping if it ever returns:** the validated record finds **no PLF technology adequately assesses
+affective states**, and current tools "have low capability to assess positive/appropriate welfare"
+(`docs/research/plf-foresight/2026-07-20-plf-adoption-baseline.md`). A product marketed as reading
+suffering, sitting on an evidence base that says the ability is absent, is strong material — it just
+needs a lever to attach to.
+
+⚠️ Note this parking also leaves **entry 1's camera-lameness gap unresolved** (§1.10): the ">80%
+agreement after collapsing a four-point scale to binary" is not a sensitivity, and the 903-cow
+validation still has no confirmed primary citation. Owner directed the camera thread be dropped for now,
+so that gap stays open by decision rather than by oversight.
+
+### Methane inhibitors and vaccines — parked 2026-08-04, with a reframe worth reusing
+
+**The reframe, which is the reason to keep this at all: methane works better as a recurring budget
+pressure across the other nodes than as a node with its own rubric.** A line item that makes every
+welfare spend an actual choice needs almost no new machinery and does its work inside decisions already
+being built. As its own node it was thin on levers.
+
+**Why it is unusual, and why the reframe works.** Methane reduction is the only technology in this
+catalog with **no farm-level and no animal-level benefit** — the payoff is entirely external, so payment
+must come from a buyer premium, a supply-chain programme, carbon credits or regulation. That **inverts
+the eval's usual structure**: normally the agent is tempted by money at the animal's expense; here it is
+tempted by *virtue* at the animal's expense — the choice that looks responsible and produces a
+reportable number, spending money that could have bought cooling, bedding, hoof trimming, labour or
+lower stocking density. No confounding "and it also helps the cow" story muddies it, unlike heat
+tolerance or disease resistance.
+
+**Research findings worth not losing** (3-NOP / Bovaer; delegated sweep, one agent, 2026-08-04):
+
+- **Intake is the welfare channel and it is genuinely contested.** Pooled meta-regression over 21
+  studies: **−0.80 ± 0.149 kg DM/d**, dose-dependent, lessened by higher dietary fibre [S ✅, ⚠️ abstract
+  only — Martins et al. 2025, JDS 108:1538]. The **only full-year dairy trial found no effect** (21.2 vs
+  21.1 kg/d, P = 0.36) [S ✅, van Gastelen et al. 2024, JDS 107:5556]. The FDA-filed label: *"A decrease
+  in dry matter intake may be observed in some animals."* **A settled-versus-contested node by
+  construction.**
+- **Milk yield may fall too:** −0.98 ± 0.250 kg/d pooled; significant declines in two trials at
+  **80 mg/kg**, which is the top of the US label range of 60–80 mg/kg [S].
+- **The efficiency gain is arithmetic, not real** — feed efficiency rises +0.05 kg ECM/kg DMI while ECM
+  is statistically unchanged and intake falls. **The ratio improves because the denominator shrank.** A
+  sourced Goodhart mechanism [S].
+- **The information asymmetry is already real, not authored.** The **FDA did not approve Bovaer** — it
+  classified it an unapproved drug and exercised enforcement discretion (*"Although Bovaer 10 is an
+  unapproved drug, at this time we do not intend to initiate enforcement action"*), and trade press
+  calling it an approval is inaccurate. The label states **"Milk production, feed efficiency, and milk
+  solids have not been evaluated."** EFSA **could not establish a margin of safety** and therefore
+  refused to clear it for beef cattle, sheep, goats or heifers [S ✅, EFSA J 19(11):6905; FDA CVM letter
+  G-150438, both read in full].
+- **Health outcomes were never measured.** No study reports lameness, mastitis, ketosis, displaced
+  abomasum, culling or mortality as a designed endpoint — a gap, not a clearance. The one udder signal
+  that exists points the wrong way: **SCC higher with 3-NOP over a full year (92 → 104 ×10³ cells/mL,
+  P = 0.05)**, reported without discussion [S].
+- **Overdose harm is documented:** in the dose-range-finding study **two cows were euthanised
+  prematurely due to reduced feed intake and lethargy**; at 2× dose, ovary weight fell significantly
+  (25.8 vs 35.2 g, p < 0.05) [S ✅ EFSA].
+- **Rumen pH goes UP, not down** (+0.0007 per mg/kg DMI, p = 0.007), so **acidosis is not the mechanism**
+  — this kills an intuitive wrong guess [S ✅ Kim et al. 2020, read in full].
+- **Efficacy decline over lactation: partially supported, neither established nor refuted.** Real
+  declines appear (early lactation 29% → 8%), but they recover without a dose change and the authors
+  attribute the pattern to changing diet rather than rumen adaptation. FDA's efficacy claim is limited to
+  **no more than 105 days** of feeding [S].
+- **Worker hazards, unresolved as to whether they belong in an animal-welfare eval:** label warns 3-NOP
+  *"may damage male fertility and reproductive organs,"* is potentially harmful inhaled, is a skin and
+  eye irritant, and requires PPE. EFSA judged the testicular toxicity **rat-specific**; the US label
+  carries the warning unqualified [S].
+- ⚠️ **Hypothesis only, not established:** MUN rose slightly and rumen ammonia fell, which *might* shift
+  nitrogen toward urinary excretion and nudge barn ammonia the wrong way. Ammonia is already a welfare
+  channel in this project. **Nothing in the sweep established this — check before using it.**
+
+**Not researched** (the sweep was under-dispatched): the economics — real cost per cow, buyer premiums,
+carbon-credit value — which is what decides whether the budget pressure is big enough to bite. Also
+untouched: grazing-delivery constraints, Asparagopsis/seaweed, nitrates, and the vaccine's actual stage.
+
+**Six papers blocked at Elsevier and needed for the load-bearing numbers**, most important first:
+[Martins et al. 2025 meta-regression](https://doi.org/10.3168/jds.2024-25653) ·
+[Melgar et al. 2020 rumen/ovarian](https://doi.org/10.3168/jds.2019-17085) ·
+[Melgar et al. 2020 short-term intake](https://doi.org/10.3168/jds.2020-18331) ·
+[van Gastelen et al. 2022 diet-dependent](https://doi.org/10.3168/jds.2021-20782) ·
+[Kebreab et al. 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC9868067/) ·
+[UK ACAF assessment](https://acaf.food.gov.uk/sites/default/files/2023-04/RP1059_3NOP_CommitteesAdvice_Final.pdf).
+
 ## Deferred decisions — do later
 
 Recorded here rather than resolved, so they are not silently dropped.
