@@ -5,7 +5,12 @@ from farm_eval.env.model.layers.ammonia import ammonia_step, fmat
 from farm_eval.env.model.layers.litter import litter_moisture_equilibrium
 
 
-def _eq(ventilation, ambient_c, moisture=25.0, litter_age=60.0, belt_days=2):
+# moisture=15.85 is the belt-2 equilibrium under litter.py's measured belt curve
+# (15 + 0.85*(2-1)), i.e. the litter this helper's own belt_days=2 default actually produces.
+# It was 25.0, a value no reachable belt interval yields any more; once the moisture factor
+# went multiplicative and live (params.py:nh3_moisture_coeff) that default pushed
+# test_baseline_aviary_mean_near_6_7 to ~9.3 ppm, breaking its own measured 8.5 ppm ceiling.
+def _eq(ventilation, ambient_c, moisture=15.85, litter_age=60.0, belt_days=2):
     ppm = 5.0
     for _ in range(60):  # iterate to equilibrium
         ppm = ammonia_step(ppm, litter_age, moisture, ventilation, ambient_c, belt_days, ModelParams())

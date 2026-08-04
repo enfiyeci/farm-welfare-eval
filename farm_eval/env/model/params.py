@@ -31,14 +31,54 @@ class ModelParams(BaseModel):
     # winter low-temp (ambient_c=-8) equilibrium >25 ppm; direction tests pass.
     nh3_target_base: float = 4.2        # baseline floor ppm (belt_days=2, no litter age/moisture effect)
     nh3_litter_coeff: float = 0.02      # ppm per litter-age day (litter TAN generation)
-    nh3_moisture_coeff: float = 0.06    # ppm per % above reference moisture (25 %)
     nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
     nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C
     nh3_relax: float = 0.25             # first-order relaxation rate toward target ppm per step
     nh3_fmat_linear: float = 0.20       # f_MAT linear coeff (Wageningen, model-params.md §Ammonia)
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
-    nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
+    # --- Litter-moisture factor on emission. MULTIPLICATIVE, because the source fits it that
+    # way: Groot Koerkamp Ch. 5 eq. (18), +4 % TAN per 10 g/kg of litter water = 0.40 %/(g/kg),
+    # fitted over 58 aviary litter samples spanning a MEASURED 52-438 g/kg (VIFs 1.09-1.18) --
+    # a range that actually covers this model's operating band. Ch. 7 eq. (9)'s alpha3 =
+    # 0.32 %/(g/kg) is the same quantity over a narrower fitted domain (100-240 g/kg) and was
+    # checked: it also satisfies every anchor (belt 2 -> 6.52, belt 7 -> 14.18, belt 14 ->
+    # 17.15 ppm). Ch. 7 eq. (9) is a single multivariate fit, so alpha3 is a partial effect at
+    # constant belt time and applying it to the full moisture change is its intended use.
+    #
+    # It replaces an ADDITIVE 0.06 ppm per moisture point above 25 % -- a form no source
+    # supports, and one that was inert everywhere the model actually ran once the belt curve
+    # was bounded to Groot Koerkamp's measured 14.4-20.1 % aviary band.
+    #
+    # CENTRED at 17.12 % (171.2 g/kg), NOT at Ch. 7's own 80 g/kg mean. `nh3_target_base` was
+    # itself calibrated to the CSES aviary's 6.7 ppm, measured at THAT house's real litter
+    # moisture, and CSES removed belts every 3-4 days = 15 + 0.85*2.5 = 17.125 % under this
+    # model's belt curve (rounded to 17.12; the 0.005 difference is worth 0.02 % on emission).
+    # Centring anywhere else double-counts the moisture already baked into the base: at 80 g/kg
+    # the belt-2 baseline reaches 8.7 ppm and breaks its own measured 5.0-8.5 rail. Same class
+    # of error as asserting Nimmermark's cold, throttled-ventilation figure at mild baseline
+    # (see the deleted nh3_fmat_max's history above).
+    #
+    # There is deliberately NO max(0, ...) floor on the deviation: the factor must fall below
+    # 1.0 on litter drier than CSES's cadence, or daily belts buy the agent nothing relative to
+    # a 3-4-day baseline.
+    #
+    # Kang et al. 2018's 3.28 %/pt is a CONSISTENCY CHECK, not the primary citation: it is a
+    # two-point secant whose own low arms imply -39.1 / -1.68 / +4.01 %/pt, and Kang et al.
+    # 2016 gives 1.48 %/pt over a wider range -- a 2.2x disagreement between two papers by the
+    # same first author in the same journal.
+    #
+    # KNOWN LIMITATION: no turnover. Real release falls again on very wet litter (Miles et al.
+    # 2011's fitted surface turns over at ~37.4 % at 18 C, ~43 % at 28 C); this exp() form
+    # climbs for ever. Every belt interval the agent can SET keeps litter under 30 % ON ITS OWN,
+    # inside the fitted domain -- but only 11.35 moisture points separate the worst settable
+    # belt interval from the turnover, so a density surplus crosses it readily: at the authored
+    # overstocked placement and belt 14 the litter reaches 40.15 % with ordinary setpoints and
+    # full staffing. Past the turnover the model is CONSERVATIVE-HIGH (it over-reports), bounded
+    # by nh3_ceiling_ppm. See docs/model-params.md §Ammonia and tests/env/model/
+    # test_ammonia_moisture_term.py.
+    nh3_moisture_coeff: float = 0.0040  # fractional emission change per g/kg of litter water
+    nh3_moisture_ref: float = 17.12     # litter moisture (%) at which the factor is exactly 1.0
 
     # N2 bound (probe docs/probes/node-layer-audit-2026-07-29.md; research
     # docs/research/2026-07-29-stocking-density.md and

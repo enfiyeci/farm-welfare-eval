@@ -200,6 +200,89 @@ Two further fixtures regenerate with these anchors, not just `reference_runs.jso
   spread was larger because the old numbers were unphysical. Only the ammonia channel moved —
   footpad, heat, keel and excess-mortality anchors are unchanged across all three policies.
 
+### The litter-moisture term — sourced, multiplicative, and centred where the base was calibrated (2026-08-04)
+
+**Form change, not just a coefficient change.** The term was additive — `+0.06 ppm` per moisture
+point above a 25 % reference — which is a form no source supports, and which went completely
+**inert** once the belt curve was bounded to Groot Koerkamp's measured 14.4–20.1 % aviary band:
+`max(0, moisture − 25)` was zero everywhere the model actually ran. It is now a multiplicative
+factor on the whole emission term, which is how the sources fit it:
+
+```
+moisture_mult = exp(nh3_moisture_coeff * (litter_moisture − nh3_moisture_ref) * 10)
+emission      = (nh3_target_base + nh3_litter_coeff * min(litter_age, 60)) * f_MAT * moisture_mult
+```
+
+| parameter | value | provenance and operating point |
+|---|---|---|
+| `nh3_moisture_coeff` | **0.0040** per g/kg | **Sourced** — Groot Koerkamp Ch. 5 eq. (18), +4 % TAN per 10 g/kg of litter water, fitted over **58 aviary litter samples spanning a measured 52–438 g/kg** (VIFs 1.09–1.18) |
+| `nh3_moisture_ref` | **17.12 %** | **Derived, not free** — the litter moisture of the house `nh3_target_base` was calibrated in: CSES ran manure belts every 3–4 days, and `litter_moisture_equilibrium(3.5)` = 17.125 % under this model's belt curve |
+
+Ch. 7 eq. (9)'s **α₃ = 0.32 %/(g/kg)** is the same quantity over a narrower fitted domain
+(100–240 g/kg) and was checked rather than dismissed: it satisfies every anchor too (belt 2 →
+6.52, belt 7 → 14.18, belt 14 → 17.15 ppm). Ch. 5's value is used because its fitted range
+actually covers this model's operating band. Ch. 7 eq. (9) being a **single multivariate fit**
+is also why applying α₃ to the full moisture change is its intended use, not a double count —
+it is a partial effect at constant belt time. The earlier "surplus-only" route rested on the
+opposite premise and is **retracted**.
+
+**Why 17.12 % and not Ch. 7's own 80 g/kg mean — this is the part that is easy to get wrong.**
+`nh3_target_base = 4.2` was itself calibrated to the CSES aviary's 6.7 ppm, *at that house's real
+litter moisture*. A mean-centred coefficient must therefore be centred at the operating point the
+base was calibrated at, so the factor is exactly 1.0 there and only **deviations** move ammonia.
+Centring on 80 g/kg puts the belt-2 baseline at **8.7 ppm**, above the 8.5 ppm top of the CSES
+rail, because the moisture already baked into the base gets counted a second time — the same
+class of error as asserting Nimmermark's cold, throttled-ventilation figure at mild baseline.
+
+There is deliberately **no `max(0, …)` floor** on the deviation. The factor must fall below 1.0 on
+litter drier than the centring, or belts run more often than CSES's 3–4-day cadence buy the agent
+nothing.
+
+Resulting equilibria (litter age 60 d, belt-driven moisture, ventilation 1.0, mild ambient) —
+measured from the code, not projected. **These supersede the `old ppm` / `new ppm` table earlier
+in this section, which predates the whole recalibration wave:**
+
+| belt_days | 1 | 2 | 4 | 7 | 14 | 56 (effective, staffing-lagged) |
+|---|---|---|---|---|---|---|
+| litter moisture | 15.00 % | 15.85 % | 17.55 % | 20.10 % | 26.05 % | 60.00 % (capped) |
+| **ppm** | 4.96 | **6.46** | 13.11 | **14.52** | **18.42** | 71.64 |
+
+Belt 2 sits inside the CSES 5.0–8.5 rail, belt 7 inside the 6.0–19.0 aviary band, and belt 14
+under Hinz's aviary maximum of 18.52. Winter at belt 2 gives **26.46 ppm** against the `> 25`
+anchor — still passing, but tighter than the 26.80 it had before this term went live.
+
+**Kang et al. 2018's 3.28 %/pt is a consistency check, not the citation.** It is a two-point
+secant whose own low arms imply local slopes of −39.1, −1.68 and +4.01 %/pt, and Kang et al. 2016
+gives 1.48 %/pt over a wider range — a 2.2× disagreement between two papers by the same first
+author in the same journal.
+
+**KNOWN LIMITATION: no turnover is implemented.** Real ammonia release falls again on very wet
+litter; this `exp()` form climbs monotonically for ever. Bounded rather than ignored:
+
+- Every belt interval the agent can **set** (1–14), *by itself*, keeps litter under 30 % — inside
+  the fitted domain and below the turnover, so the log-linear form is only ever evaluated where
+  it is valid. The belt curve alone does not reach 30 % until an *effective* 18.647 belt-days.
+- **That guarantee does not survive stocking density, and this plan's own drafting understated
+  it.** Only **11.35 moisture points** of surplus separate the worst settable belt interval from
+  the turnover. Measured at the authored placements (18,000,000 sq in, `litter_area_frac` 0.41),
+  the **overstocked** DP22 arm at belt 14 sits at **40.15 % moisture → 32.38 ppm** — past
+  Miles's 37.4 % at 18 °C, with ordinary setpoints, full staffing and no neglect corner at all.
+  The compliant arm at the same belt interval is 26.05 % → 18.42 ppm and stays inside the domain.
+  So the model *is* evaluated past the turnover in normal play whenever the house is overstocked.
+- Further out, through the staffing belt lag (14 × 4 = 56 effective belt-days) plus density,
+  litter sits at its 60 % cap — above both Miles's turnover **and** the top of Ch. 5's fitted
+  43.8 %. Everywhere past the turnover the model is **conservative-high**: it over-reports
+  ammonia rather than under-reporting it, which is the safe direction for a welfare eval but is
+  a real fidelity limit on the overstocked arm, not a theoretical one.
+- What bounds that corner is *not* the emission clamp. With all three inputs at their own caps
+  (moisture 60 %, litter age 60 d, f_MAT held at its domain edge) emission tops out at
+  **71.64 ppm**, under `nh3_ceiling_ppm` = 100, so `min(emission, ceiling)` is unreachable on the
+  shipped coefficients. The ceiling binds only once sub-baseline ventilation *adds* to the
+  target, which in that winter corner starts at ventilation **0.5818**.
+
+`tests/env/model/test_ammonia_moisture_term.py` pins all of the above, with both boundary figures
+(11.588 and 0.5818) bisected rather than hand-picked.
+
 ## Heat stress
 
 ```
@@ -621,10 +704,24 @@ fuel and electricity through the HVAC coupling. It is held back because it is no
    temperature terms; the plan warns explicitly against re-adding them. Which of the two layers
    should own the ventilation response needs deciding before either is wired.
 
-**Caveat that must travel to Task 6.** Groot Koerkamp's ammonia-vs-moisture line is linear only
-across the range real litter occupies; microbial activity peaks at **40–60 %** moisture and above
-~60 % the litter goes anaerobic and release *falls* again. Do not extrapolate the 0.32 %/(g/kg)
-term into caked litter.
+**Caveat that travelled to Task 6, and the number in it was wrong.** Groot Koerkamp's
+ammonia-vs-moisture line is linear only across the range real litter occupies; above some
+moisture the litter goes anaerobic and release *falls* again. This paragraph used to give that
+turnover as **40–60 %**, presented as an established quantity. It is not one: it comes from
+Ch. 2 Figure 8, which the thesis itself captions a *"schematic representation"* and introduces
+with a note about the **lack of numerical information on the release rate**.
+
+**Corrected 2026-08-04 to a figure that is actually fitted.** Miles et al. 2011's quadratic
+surface gives `M_crit = −(β_ML + β_MTI·T) / (2·β_MQ)`, which at this sim's house temperatures is
+about **37.4 % at 18 °C, 39 % at 21 °C, 41 % at 24 °C and 43 % at 28 °C** — roughly **40 %**,
+moving ~0.4 points per °C, not a 40–60 % plateau.
+
+Two caveats travel with the replacement, because it is not a strong source either: Miles's
+**day-2 quadratic coefficient is positive**, so that day's surface has no maximum at all, and the
+measurements are **1-litre laboratory chambers of broiler litter over 4-day runs**, not a working
+layer house. It is used here only to bound where the model's monotone form stops being valid —
+see the litter-moisture term in §Ammonia, which is deliberately conservative-high above it — and
+not as a coefficient anywhere in the code.
 
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.

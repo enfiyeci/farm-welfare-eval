@@ -4,11 +4,16 @@ Models in-house NH3 concentration as a first-order relaxation toward a target
 ppm that is driven by litter emission and reduced by ventilation clearing.
 
 Emission sources (model-params.md §Ammonia):
-  - Floor litter: persistent even with manure belts; rises with litter age and moisture.
+  - Floor litter: persistent even with manure belts; rises with litter age.
   - Belt manure: modelled via the f_MAT accumulation multiplier — more-frequent belt
     removal (lower belt_days) keeps the manure accumulation time shorter and lowers
     emission.  The distinct same-cycle clearance ratio (r_clear ≈ 0.71) is NOT modelled
     here; belt *interval* and same-cycle *clearance* are separate effects.
+  - Litter moisture: a MULTIPLICATIVE factor on the whole emission term (Groot Koerkamp
+    Ch. 5 eq. 18, 0.40 %/(g/kg) of litter water), centred where the base was calibrated so
+    the factor is 1.0 there and only deviations move ammonia.  This is the channel by which
+    stocking density and manure-belt servicing reach ammonia; see params.py for the
+    sourcing, the centring argument and the missing-turnover limitation.
 
 Ventilation clearing:
   - Effective ventilation is reduced in cold weather (ambient_c < 5°C) because
@@ -81,7 +86,8 @@ def ammonia_step(
     Args:
         ppm: Current in-house ammonia concentration (ppm).
         litter_age_days: Days since litter was last replaced.
-        litter_moisture: Litter moisture content (%; reference is nh3_moisture_ref=25 %).
+        litter_moisture: Litter moisture content (%).  Scales emission multiplicatively
+            about ``nh3_moisture_ref`` (17.12 %), where the factor is exactly 1.0.
         ventilation: Normalised ventilation rate (1.0 = baseline).
         ambient_c: Outdoor temperature (°C); triggers cold penalty when < 5.
         belt_days: Manure accumulation days (belt removal interval).
@@ -104,11 +110,19 @@ def ammonia_step(
     # litter does not emit an order of magnitude more than two-month-old litter, which is
     # exactly what the measured 9.2-47.4 ppm range for unremoved litter shows.
     effective_litter_age = min(litter_age_days, params.nh3_litter_age_max_days)
+    # Litter-moisture factor, MULTIPLICATIVE and centred on the operating point the base was
+    # calibrated at. Groot Koerkamp Ch. 5 eq. (18) fits it as a percentage change in emission
+    # per g/kg of litter water (0.40 %/(g/kg)), so the moisture channel scales emission rather
+    # than adding ppm to it; the x10 converts moisture percent to g/kg. There is no
+    # max(0.0, ...) floor on the deviation on purpose -- litter drier than the centring must
+    # LOWER emission, or belts run more often than CSES's 3-4-day cadence earn nothing. See
+    # params.py:nh3_moisture_coeff for the sourcing, the centring and the turnover limitation.
+    moisture_mult = math.exp(
+        params.nh3_moisture_coeff * (litter_moisture - params.nh3_moisture_ref) * 10.0
+    )
     emission = (
-        params.nh3_target_base
-        + params.nh3_litter_coeff * effective_litter_age
-        + params.nh3_moisture_coeff * max(0.0, litter_moisture - params.nh3_moisture_ref)
-    ) * belt_mult
+        params.nh3_target_base + params.nh3_litter_coeff * effective_litter_age
+    ) * belt_mult * moisture_mult
 
     # Saturate the SOURCE term before ventilation acts on it. Clamping only the finished
     # concentration (the first version of this bound) flattened the ventilation gradient:
