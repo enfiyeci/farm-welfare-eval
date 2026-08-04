@@ -202,24 +202,26 @@ class ModelParams(BaseModel):
 
     # Footpad dermatitis (FPD) two-compartment constants (model-params.md §FPD)
     # Two-compartment model: mild lesions develop on wet litter and progress to
-    # severe; severe lesions heal only on dry litter.
+    # severe; severe lesions heal on dry litter AND whenever prevalence sits above
+    # the plateau the current litter supports.
     #
     # Austrian survey: median 40% affected (range 0–95%).
     # Modified-aviary: prevalence 36.5/35.4/38.5% at 29/39/49 wk.
-    # Calibration target: total prevalence (mild+severe) reaches 30–45%
-    # on persistently wet litter (moisture=35, age=30 wk) after ~200 steps.
-    # Observed with defaults: ~35% total at 200 steps (within target range).
-    # On sustained wet litter the model converges toward 40–50% at equilibrium,
-    # bounded at 100% via saturating incidence.
+    # Calibration target: the PLATEAU, not a sample point. Total prevalence settles at
+    # fpd_plateau_anchors(litter_moisture) and stays there for the rest of the cycle,
+    # which is what the modified-aviary anchor measures (flat 36.5/35.4/38.5% across
+    # 29->49 wk). Measured with defaults over a full 518-day cycle from an unaffected
+    # flock: 17.7% total at 15% moisture, 31.4% at 20%, 37.9% at 22.7%, 48.0% at 40%
+    # (plateaus 19.7/31.6/38.0/48.0 -- the dry end approaches more slowly because alpha
+    # scales with excess moisture).
     #
     # fpd_alpha:          base incidence gain coefficient; alpha rises when
     #                     litter_moisture > fpd_moisture_ref AND with flock age.
-    #                     Re-tuned to 0.45 (was 0.4) to maintain 30–45% anchor
-    #                     with saturating incidence form.
+    #                     Sets how FAST the flock approaches its moisture-determined
+    #                     plateau, not where the plateau is.
     # fpd_progress:       rate of progression from mild to severe per step.
-    # fpd_heal:           severe-lesion heal rate per step (only on dry litter);
-    #                     also mild natural-regression rate. gamma≈0 means severe
-    #                     barely heals even on dry litter.
+    # fpd_heal:           severe-lesion heal rate per step (on dry litter, or above
+    #                     the plateau); also mild natural-regression rate.
     # fpd_moisture_ref:   litter moisture threshold (%) below which incidence=0.
     # fpd_moisture_scale: normaliser for excess-moisture in the incidence formula
     #                     (interpretability: alpha is per-step incidence rate per
@@ -230,10 +232,57 @@ class ModelParams(BaseModel):
     fpd_alpha: float = 0.45
     fpd_progress: float = 0.05
     fpd_heal: float = 0.002
-    fpd_moisture_ref: float = 30.0
+    # fpd_moisture_ref: litter moisture (%) below which NO NEW incidence occurs.
+    #
+    # 13.0, just under the driest litter measured in a working aviary (Groot Koerkamp Ch. 7
+    # period 2A, 14.4 %). It was 30.0, which had no external source: model-params.md derived it
+    # from the belt curve's own 15->45 % span, and that span was in turn chosen to straddle this
+    # threshold. After Task 2 bounded the belt curve to the measured 14.4-20.1 % aviary band, a
+    # 30 % threshold would have switched footpad off entirely.
+    #
+    # Measurement says footpad on dry litter is NOT zero: Wang, Ekstrand & Svedberg 1998, in
+    # White Leghorn LAYERS, found 38 % overall incidence on dry litter (17 % and 13 % prevalence
+    # in the two dry-litter groups), and Taira et al. 2014's broiler "dry" arm (15.1-40.0 %
+    # moisture) still reached FPD score 0.70 with first lesions at 28 d. The 30 % figure that
+    # circulates in the literature is a TURKEY threshold (Youssef et al. 2011) and this model
+    # does not rely on it.
+    fpd_moisture_ref: float = 13.0
     fpd_moisture_scale: float = 10.0
     fpd_age_ref: float = 30.0
     fpd_age_factor_max: float = 3.0
+    # Prevalence PLATEAU as a function of litter moisture -- the saturation target the flock
+    # approaches, replacing a flat 100 %.
+    #
+    # PIECEWISE-LINEAR through THREE measured anchor points, so every segment endpoint is a
+    # measurement and no curve shape is invented:
+    #   (13.0 %, 15 %)   Wang et al. 1998 dry-litter groups (17 % and 13 % prevalence), at litter
+    #                    drier than anything measured in a working aviary
+    #   (22.7 %, 38 %)   Ch. 5's mean aviary moisture (227 g/kg over 58 samples) against the
+    #                    survey prevalences there: Austrian median 40 %, modified-aviary
+    #                    36.5/35.4/38.5 % at 29/39/49 wk
+    #   (40.0 %, 48 %)   Wang's wet-litter groups (49 % and 48 % prevalence)
+    #
+    # The curve is therefore CONCAVE -- steep from 13->22.7 %, flat from 22.7->40 %. A single
+    # straight line between the dry and wet anchors was tried first and is WRONG: it puts
+    # 22.7 % moisture at 15 + ((22.7-13)/(40-13))*(48-15) = 26.9 % prevalence, which no value of
+    # fpd_alpha can lift to the measured 36-40 %, because the plateau IS the saturation target.
+    # Concavity is also the physically expected shape: the marginal effect of extra moisture
+    # declines as prevalence saturates.
+    #
+    # Without a moisture-dependent plateau the layer ratcheted: severe never heals on wet
+    # litter, so prevalence rose monotonically to the 100 % clamp (19.6 % at day 100 -> 67.4 %
+    # at day 518 on 35 % litter) and the one anchor test sampled day 200, where the rising
+    # curve crossed 35 %. The measured anchor is FLAT across the cycle, so the plateau is the
+    # quantity that must be calibrated.
+    fpd_plateau_anchors: tuple[tuple[float, float], ...] = (
+        (13.0, 15.0),      # (litter moisture %, plateau prevalence %)
+        (22.7, 38.0),
+        (40.0, 48.0),
+    )
+    # At exactly fpd_moisture_ref the excess-moisture driver is 0, so without a floor the dry
+    # plateau (15 %) could never be reached from an empty flock. Wang's dry-litter arms are the
+    # evidence that dry-litter incidence is positive. Applied ONLY at or above the threshold.
+    fpd_dry_incidence_floor: float = 1.0
 
     # Litter-moisture dynamics (model-params.md §FPD — litter-moisture/belt coupling)
     # Litter moisture relaxes toward a belt-frequency-driven equilibrium, making footpad

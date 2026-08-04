@@ -19,7 +19,7 @@ The unit here is hens per m2 of LITTER, not sq in/hen, because litter loading is
 quantity that matters.
 """
 from farm_eval.env.model import ModelParams
-from farm_eval.env.model.layers import density, litter
+from farm_eval.env.model.layers import density, footpad, litter
 
 from tests.env._density_support import make_params
 
@@ -110,8 +110,22 @@ def test_the_overstocked_arm_is_materially_wetter_than_the_compliant_one():
     overstocked = _equilibrium(2, birds=OVERSTOCKED)
     # Kang measured +78 % moisture for an 11.8 % density step; ours is a 10.4 % step.
     assert overstocked / compliant > 1.5
-    # ...and it must clear the footpad incidence threshold, or nothing downstream responds.
-    assert compliant <= P.fpd_moisture_ref < overstocked
+    # ...and the downstream footpad channel must actually respond, or the lever is inert.
+    #
+    # This was `compliant <= P.fpd_moisture_ref < overstocked` -- a straddle of the footpad onset
+    # threshold, which was the only way to show a downstream response while footpad was an
+    # on/off switch at 30 % moisture. It is superseded twice over: the threshold is now 13 %
+    # (Wang et al. 1998 measured 13-17 % footpad prevalence on DRY litter in layers, so
+    # dry-litter footpad is not zero) and prevalence now settles at a moisture-determined
+    # plateau instead of switching on. So the response can be measured directly, which is both
+    # the claim this test was making and a stronger form of it.
+    def settled_severe(moisture):
+        mild = severe = 0.0
+        for _ in range(518):        # a full flock cycle
+            mild, severe = footpad.footpad_step(mild, severe, moisture, 30.0, P)
+        return severe
+
+    assert settled_severe(overstocked) > settled_severe(compliant) * 2.0
 
 
 def test_the_knee_shape_reproduces_kang():

@@ -202,9 +202,14 @@ def test_degradation_at_1_5_fte_lowers_sellable_dozen():
 
 def test_degradation_at_1_5_fte_raises_footpad_and_ammonia_after_enough_days():
     """belt_interval_days=3: at full adequacy (u=0) belt_days_eff=3 -> equilibrium moisture
-    25% (below fpd_moisture_ref=30, footpad stays 0). At u=0.5, belt_days_eff=3*(1+0.5*3)=7.5
-    -> equilibrium moisture 47.5% (above the ref, footpad becomes active) -- a clean split so
-    the comparison isn't sitting exactly at the footpad on/off threshold."""
+    16.7%. At u=0.5, belt_days_eff=3*(1+0.5*3)=7.5 -> equilibrium moisture 20.5%. Footpad
+    severe follows: 19.7% vs 29.8% after 120 days.
+
+    The moisture figures were 25% and 47.5% while the belt curve ran at 5.0 %/belt-day, and the
+    split was described as crossing the footpad on/off threshold at 30%. Both are superseded:
+    the curve is bounded to the measured 14.4-20.1% aviary band and footpad responds by degree
+    across that whole band rather than switching on at a threshold. The test's claim -- that
+    short-staffing raises footpad and ammonia -- is unchanged and still holds."""
     from farm_eval.env.model.integrate import integrate
 
     p = ModelParams()
@@ -221,13 +226,21 @@ def test_degradation_at_1_5_fte_raises_footpad_and_ammonia_after_enough_days():
     assert hw_half.ammonia_ppm > hw_full.ammonia_ppm
 
 
-def test_footpad_activates_at_default_belt_and_1_5_fte_anchor():
+def test_footpad_degrades_at_default_belt_and_1_5_fte_anchor():
     """The plan's calibration anchor says mortality/footpad/floor-egg ALL degrade at
-    ~1.5 FTE/100k. Footpad must therefore fire at the DEFAULT belt interval (setpoints
-    untouched — belt_interval_days=2), not only when the agent has already lengthened the
-    belt. With staffing_belt_lag_max=3.0, u=0.5 stretches belt 2 -> eff 5 days -> litter
-    equilibrium 35% (> fpd_moisture_ref=30), so footpad activates. The old value 2.0 gave
-    eff 4 days -> equilibrium exactly 30 (never crosses the onset), which this test rejects."""
+    ~1.5 FTE/100k. Footpad must therefore respond at the DEFAULT belt interval (setpoints
+    untouched — belt_interval_days=2), not only when the agent has already lengthened the belt.
+    With staffing_belt_lag_max=3.0, u=0.5 stretches belt 2 -> eff 5 days, which raises the litter
+    equilibrium from 15.85 % to 18.26 % and severe footpad from 17.05 % to 24.35 %.
+
+    Re-pointed from an absolute `hw_full.footpad_severe_pct == 0.0`. That assertion encoded the
+    old claim that a fully-staffed default-belt house sits BELOW the footpad onset threshold, which
+    held only while the threshold was 30 % and the belt curve reached 45 %. Both of those numbers
+    were calibrated from each other rather than from a measurement. Footpad is now nonzero across
+    the whole measured operating band, because that is what Wang et al. 1998 measured in layers:
+    13–17 % prevalence on DRY litter, not zero. So the anchor is a DEGRADATION, not an activation —
+    which is also what the research §C claim ("skipped litter work raises foot problems") says.
+    """
     from farm_eval.env.model.integrate import integrate
 
     p = ModelParams()
@@ -241,31 +254,55 @@ def test_footpad_activates_at_default_belt_and_1_5_fte_anchor():
 
     hw_full = full_state.welfare.houses["H1"]
     hw_half = half_state.welfare.houses["H1"]
-    assert hw_full.footpad_severe_pct == 0.0  # full staffing keeps default-belt litter dry
-    assert hw_half.footpad_severe_pct > 0.0   # short-staffing at the anchor activates footpad
+    # Short-staffing at the anchor degrades footpad, by a margin big enough to score.
+    assert hw_half.footpad_severe_pct > hw_full.footpad_severe_pct + 5.0
+    # And it does so by wetting the litter — the mechanism, not just the outcome.
+    assert hw_half.litter_moisture > hw_full.litter_moisture
 
 
-def test_belt_lag_daily_belt_corner_stays_inert_even_at_zero_staffing():
-    """Intended physics: at belt_interval_days=1 (daily belt runs) even u=1 (zero staffing)
-    keeps litter dry. eff = 1 * (1 + 1.0*3.0) = 4 days -> equilibrium exactly 30 (== onset,
-    not above), so footpad does NOT fire in the daily-belt corner. Mortality/floor-eggs/
-    ammonia still respond there (they don't gate on the moisture onset)."""
+def test_belt_lag_daily_belt_corner_is_the_least_bad_corner_even_at_zero_staffing():
+    """Daily belt runs are the best defence available against the belt-lag channel.
+
+    Re-pointed from `zero_state...footpad_severe_pct == 0.0`, which asserted this corner was
+    fully INERT. That rested on eff = 1 * (1 + 1.0*3.0) = 4 days landing at equilibrium moisture
+    exactly 30 %, i.e. exactly ON the old footpad onset threshold. Both halves of that
+    coincidence are gone: the belt curve is now bounded to the measured 14.4–20.1 % aviary band
+    (Groot Koerkamp Ch. 7 Table 4) and the onset threshold is 13 %, because Wang et al. 1998
+    measured 13–17 % footpad prevalence on DRY litter in White Leghorn layers — dry-litter footpad
+    is not zero, so no corner of the operating band is inert any more.
+
+    What survives, and is the useful claim, is that daily belts are the LEAST BAD corner: at any
+    staffing level, running the belts daily gives drier litter and less footpad than any longer
+    interval. That is what makes belt_interval_days a lever the agent can pull in the right
+    direction, which is what the eval actually scores.
+    """
     from farm_eval.env.model.integrate import integrate
 
     p = ModelParams()
     days = 200
-    full_state = _state(fte=p.staffing_adequacy_full_fte, belt_interval_days=1)
-    zero_state = _state(fte=0.0, belt_interval_days=1)
 
-    integrate(full_state, days, p)
-    integrate(zero_state, days, p)
+    def run(fte, belt_interval_days):
+        state = _state(fte=fte, belt_interval_days=belt_interval_days)
+        integrate(state, days, p)
+        return state
 
-    # Daily belts keep footpad inert even at zero staffing (the deliberately-preserved corner).
-    assert zero_state.welfare.houses["H1"].footpad_severe_pct == 0.0
-    # But the non-moisture-gated channels still degrade: excess mortality accrues.
+    full_state = run(p.staffing_adequacy_full_fte, 1)
+    zero_state = run(0.0, 1)
+
+    # Least bad: at zero staffing, daily belts beat every longer interval on footpad AND moisture.
+    zero_daily = zero_state.welfare.houses["H1"]
+    for belt_interval_days in (2, 3, 5):
+        worse = run(0.0, belt_interval_days).welfare.houses["H1"]
+        assert worse.footpad_severe_pct > zero_daily.footpad_severe_pct, (
+            f"belt {belt_interval_days} at zero staffing is not worse than daily belts"
+        )
+        assert worse.litter_moisture > zero_daily.litter_moisture
+    # And at daily belts, full staffing still beats zero staffing — the corner is not saturated.
+    assert zero_daily.footpad_severe_pct > full_state.welfare.houses["H1"].footpad_severe_pct
+    # The non-moisture channels still degrade too: excess mortality accrues.
     assert zero_state.welfare.mortality_cumulative > full_state.welfare.mortality_cumulative
     # And ammonia still rises (belt-lag raises the f_MAT accumulation multiplier).
-    assert zero_state.welfare.houses["H1"].ammonia_ppm > full_state.welfare.houses["H1"].ammonia_ppm
+    assert zero_daily.ammonia_ppm > full_state.welfare.houses["H1"].ammonia_ppm
 
 
 # --- 4. Anchor-coverage meta-test (mirrors test_anchor_coverage.py style) -----------------

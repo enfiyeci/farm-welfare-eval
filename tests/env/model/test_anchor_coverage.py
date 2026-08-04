@@ -7,7 +7,11 @@ ANCHORS = {
     "panting onset THI 28.5": "test_panting_onset_at_thi_28_5",
     "keel 60/76/86.5": "test_keel_anchors",
     "feather 3.2/32.9/57.8": "test_feather_anchors",
-    "footpad mid-30s prevalence": "test_prevalence_reaches_mid_30s_on_wet_litter",
+    "footpad mid-30s prevalence": "test_prevalence_reaches_mid_30s_on_typical_aviary_litter",
+    "footpad moisture-determined plateau (Wang 13-17 % dry / 48-49 % wet)":
+        "test_wet_litter_plateaus_near_wangs_wet_arms_not_at_100",
+    "footpad prevalence flat across the cycle (36.5/35.4/38.5 %)":
+        "test_prevalence_is_roughly_flat_across_the_lay_cycle",
     "downgrade 3.2%@30wk / 23.8%@80wk": "test_downgrade_rises_with_age",
     "feed tons conversion": "test_feed_tons_conversion",
     "margin identity": "test_integrate_populates_pnl",
