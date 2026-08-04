@@ -170,20 +170,31 @@ def test_gradation_survives_across_the_realistic_belt_range():
     headroom, the same proportional slack the original 15.0 floor carried against its own
     measured 16.91.
 
-    The saturation this test was originally written to bound has MOVED, not vanished, and the
-    replacement has to say so precisely. The old final assertion -- that a 10-day belt sits
-    exactly at `litter_moisture_max` -- is now false (belt 10 gives 22.65 %, not 60 %), so it
-    is replaced. But "nothing saturates any more" would be wrong: nothing the agent can SET
-    saturates (`setpoint_bounds` caps `belt_interval_days` at 14, giving 40.15 % on the wetter
-    arm), while the EFFECTIVE interval is `belt_days * (1 + u * staffing_belt_lag_max)` and
-    reaches 14 x 4 = 56 under collapsed staffing. At 56 the belt term alone is
-    15 + 0.85 x 55 = 61.75, so BOTH arms clamp to 60.0 and this gradation collapses to zero.
+    The saturation this test was originally written to bound has MOVED, not vanished. The old
+    final assertion -- that a 10-day belt sits exactly at `litter_moisture_max` -- is now false
+    (belt 10 gives 22.65 %, not 60 %), so it is replaced.
 
-    Both halves are pinned below -- the reachable-setpoint value AND the collapsed-staffing
-    corner -- so the known limitation cannot quietly widen, which is what the original version
-    of this test was for. The corner is bounded: reaching it takes the longest permitted belt
-    interval AND staffing driven to u=1, and DP22 scores placement BANDS rather than fine
-    count-discrimination.
+    Two successive drafts of the replacement OVERSTATED how far the safe region reaches, each
+    caught by review, so what is pinned below is the computed BOUNDARY rather than any
+    hand-picked corner. Naming a corner invites exactly this error; a threshold cannot drift
+    without failing.
+
+    Saturation has two independent routes, and both are reachable:
+
+      - Long EFFECTIVE belt interval. `setpoint_bounds` caps `belt_interval_days` at 14, but
+        integrate.py uses `belt_days * (1 + u * staffing_belt_lag_max)`, up to 14 x 4 = 56.
+        The overstocked arm clamps from 37.36 effective belt-days and the compliant arm from
+        53.94, so gradation degrades from 37.36 and is fully gone by 53.94. It does NOT take
+        u = 1: at belt 14 the compliant threshold is crossed at u = 53.94/14 - 1 = 0.853,
+        which the staffing lever reaches well before collapse.
+      - Large PLACEMENT. At belt 14 and full staffing the cap is reached at 149,908 birds, and
+        the pullet-order path accepts up to `placement_max_birds_fallback` = 200,000. So it is
+        not true that nothing the agent can SET saturates -- only that nothing saturates at the
+        placements DP22 actually offers (125k compliant, 138k overstocked).
+
+    This is a known limitation, bounded rather than absent: it needs either a placement far
+    past anything DP22 offers or a belt interval stretched past 37 effective days, and DP22
+    scores placement BANDS rather than fine count-discrimination.
     """
     from farm_eval.env.model.layers import litter
 
@@ -198,25 +209,37 @@ def test_gradation_survives_across_the_realistic_belt_range():
             f"gradation lost at belt_days={belt_days}: "
             f"{compliant:.4f} vs {overstocked:.4f}"
         )
-    # Successor to the saturation pin, in two halves.
-    # (a) Nothing the agent can SET saturates. 14 is the longest interval setpoint_bounds
-    #     accepts, and the overstocked arm is the wetter of the two.
-    worst_setpoint = litter.litter_moisture_equilibrium(
-        14, params, area_sq_in=area, birds=138_000)
-    assert abs(worst_setpoint - 40.1461) < 0.001, worst_setpoint
-    assert worst_setpoint < params.litter_moisture_max
-    # (b) The EFFECTIVE interval still can, and that corner is pinned as the known limitation
-    #     it is rather than left unstated. belt 14 under collapsed staffing (u=1) gives
-    #     14 * (1 + 1 * staffing_belt_lag_max) = 56, where both arms clamp and the gradation
-    #     is lost. If a future change removes the clamp here, this fails and the removal is a
-    #     deliberate act.
-    collapsed = 14 * (1.0 + 1.0 * params.staffing_belt_lag_max)
-    assert collapsed == 56.0, collapsed
-    both = [
-        litter.litter_moisture_equilibrium(collapsed, params, area_sq_in=area, birds=b)
-        for b in (125_000, 138_000)
-    ]
-    assert both == [params.litter_moisture_max, params.litter_moisture_max], both
+    # Successor to the saturation pin: the BOUNDARY of the safe region, on both routes, found
+    # by bisection so it is measured rather than asserted from a corner someone chose.
+    def _saturates(belt_days_eff, birds):
+        return litter.litter_moisture_equilibrium(
+            belt_days_eff, params, area_sq_in=area, birds=birds
+        ) >= params.litter_moisture_max
+
+    def _threshold(lo, hi, predicate):
+        for _ in range(60):
+            mid = (lo + hi) / 2
+            lo, hi = (lo, mid) if predicate(mid) else (mid, hi)
+        return hi
+
+    # Route 1: effective belt interval. The overstocked arm goes first, the compliant arm last.
+    onset_overstocked = _threshold(1.0, 200.0, lambda d: _saturates(d, 138_000))
+    onset_compliant = _threshold(1.0, 200.0, lambda d: _saturates(d, 125_000))
+    assert abs(onset_overstocked - 37.36) < 0.01, onset_overstocked
+    assert abs(onset_compliant - 53.94) < 0.01, onset_compliant
+    # Reachable: 14 belt-days stretched by the staffing lag tops out at 56, past both.
+    assert 14 * (1.0 + params.staffing_belt_lag_max) == 56.0
+    # ...and at the placements DP22 actually offers, the longest SETPOINT stays clear of it.
+    at_14 = litter.litter_moisture_equilibrium(14, params, area_sq_in=area, birds=138_000)
+    assert abs(at_14 - 40.1461) < 0.001, at_14
+    assert at_14 < params.litter_moisture_max
+
+    # Route 2: placement size, at the longest setpoint and full staffing.
+    onset_birds = _threshold(125_000, 400_000, lambda b: _saturates(14, b))
+    assert abs(onset_birds - 149_908) < 50, onset_birds
+    # Far above the 138k overstocked lot, which is the point -- but BELOW the pullet path's
+    # ceiling, so this is a real corner and not an impossible one.
+    assert 138_000 < onset_birds < params.placement_max_birds_fallback
 
 
 def test_farm_env_fills_inert_params_but_keeps_an_explicit_one():

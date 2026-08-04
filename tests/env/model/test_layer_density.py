@@ -89,9 +89,16 @@ def test_every_existing_house_sits_below_capacity():
     """
     corpus = load_corpus(REPO / "corpus")
     counts = {h["id"]: int(h["bird_count"]) for h in corpus.company["houses"]}
+    # The AREA comes from the corpus too. Reading bird counts while leaving the area a literal
+    # would still miss half the ratio: production seeds each house from
+    # audit_thresholds.house_area_sq_in, so a corpus edit shrinking usable area could push a
+    # house over capacity with this guard green.
+    area = float(corpus.company["audit_thresholds"]["house_area_sq_in"])
     assert counts, "no houses read from the corpus -- this guard would pass vacuously"
     for hid, birds in counts.items():
-        assert _equilibrium(2, birds=birds) == litter.litter_moisture_equilibrium(2, P), (
+        assert litter.litter_moisture_equilibrium(
+            2, P, area_sq_in=area, birds=birds
+        ) == litter.litter_moisture_equilibrium(2, P), (
             f"{hid} ({birds:,} birds) draws more water than the litter can evaporate, so it "
             "now wets up: an authored house is silently overstocked, which is a content "
             "question for the owner, not a calibration one"
