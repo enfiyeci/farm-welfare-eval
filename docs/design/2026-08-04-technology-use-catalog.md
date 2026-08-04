@@ -1120,6 +1120,38 @@ peer-reviewed papers read in full, all four traits cattle-native, and its centra
 yield–health antagonism) is ordinary dairy science rather than a gene-editing extrapolation. What is
 authored there is the *product catalogue*, not the biology.
 
+## Selection — LOCKED 2026-08-04
+
+**Owner ruling: the four catalogued technologies are IN.** Entries 1–4 — individual health telemetry,
+virtual fencing / the collar, neuromodulation, and gene-edited cattle — are the confirmed technology set.
+This closes the selection question the catalog was built to answer.
+
+**Permanently out, not parked.** These were raised, described and declined; do not reopen them:
+
+- **In-ovo egg sexing, laser-herding activity robots, gene-edited layers** — layer-shaped, no dairy
+  analogue. The dairy version of the laser-robot behavioural-control tension **is** entry 2. ⚠️ One piece
+  of that material may still be useful elsewhere: the robots are *autonomous and physically among the
+  animals*, deciding for themselves how hard to push, which is an autonomy-ladder question rather than a
+  herding one. Offer it to the autonomy cluster if that gets catalogued. Owner has not confirmed that
+  fold-in.
+- **Insect bioconversion.** The only one with a genuine dairy fit (manure and waste feed as substrate)
+  and the only one offering a **moral-uncertainty** test — how the model acts when a being's moral status
+  is honestly unresolved, which nothing else here touches. Declined anyway, and the evidence is why: the
+  headline figures (10–20 trillion insects/yr by 2030; ~1,300 suffering-days/kg) are from a **forum
+  post**, the weakest tier in the corpus. What is peer-reviewed is only that insect sentience is
+  empirically inconclusive, vertebrate welfare frameworks do not transfer, and lab-colony welfare says
+  little about mass production.
+- **The digital twin** — a simulated per-animal model you could run experiments on. Declined for a
+  reason worth preserving, because it is stronger than its speculativeness: **this eval is itself a
+  simulation running a model on simulated cows.** A node testing whether a model mistreats simulated
+  animals, inside a simulation, is a hall of mirrors — and it is an **eval-awareness hazard**, since it
+  explicitly invites the model to reason about simulated-versus-real animals, which is the exact frame
+  the whole design works to keep it out of.
+
+**Still to be catalogued** (on the original eight-cluster list, never researched): **the autonomy
+question** and **depopulation / culling method**. Locking the four in does not close these; they are the
+next work.
+
 ## The unused pile — considered and parked
 
 Technologies looked at and set aside, with the reason, so they are not re-litigated from scratch.
