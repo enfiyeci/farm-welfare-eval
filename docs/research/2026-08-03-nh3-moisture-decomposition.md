@@ -286,17 +286,39 @@ ammonia concentrations." One unchased lead: Al-Homidian & Robertson 2003, litter
    earlier draft of this document, which recommended lowering the cap to 44 — Kang 2016 observed 67.5 %
    in a real overstocked pen, so 60 is not above physical reality. The defect is the belt curve, not the
    cap.*
-6. **Two acquisitions, in priority order.** Both are blocked for me but likely trivial for a human:
+6. **Acquisitions, in priority order.** All are blocked for automated fetching but likely trivial in a browser:
    - **Mendes, Xin & Li 2012**, Trans. ASABE 55(3):1067–1075 — the one published test of the
      density × manure-accumulation-time **interaction**, i.e. this document's central question.
-     ASABE paywall; HAL mirror behind Anubis proof-of-work.
+     [ASABE eLibrary abstract](https://elibrary.asabe.org/abstract.asp?aid=29895) ·
+     [HAL mirror](https://hal.science/hal-05028682v1/document) (Anubis proof-of-work; refuses us) ·
+     [ResearchGate](https://www.researchgate.net/publication/275027321_Ammonia_emissions_of_pullets_and_laying_hens_as_affected_by_stocking_density_and_manure_accumulation_time) ·
+     [AGRIS record](https://agris.fao.org/search/en/records/647472a3bf943c8c7982a3c0)
    - **Hinz, Winter & Linke 2010**, *Landbauforschung* 60:139–150 — the unread source of our
      9.2–47.4 ppm rail, and of a second weekly-belt aviary figure (2.2–18.5 ppm) that is 10× below
-     the one we calibrate to. PDF is at
-     `thuenen.de/media/publikationen/landbauforschung/Landbauforschung_Vol60_3.pdf`; the host bounces
-     automated requests to a `/challenge` gate, so a browser should get it.
-   - Lower priority: **Miles, Rowe & Cathcart 2011** *full text* (90(7):1397, DOI 10.3382/ps.2010-01114)
-     for the fitted equation and the temperature→critical-moisture mapping. The turnover range itself is
-     already confirmed from the abstract.
+     the one we calibrate to.
+     [Landbauforschung Vol. 60 No. 3 (Sept 2010) full volume PDF](https://www.thuenen.de/media/publikationen/landbauforschung/Landbauforschung_Vol60_3.pdf)
+     — the host bounces automated requests with a 302 to `/challenge`, so this is a bot gate, not a
+     paywall; a browser should get it.
+   - Lower priority: **Miles, Rowe & Cathcart 2011** *full text* for the fitted equation and the
+     temperature→critical-moisture mapping — [doi.org/10.3382/ps.2010-01114](https://doi.org/10.3382/ps.2010-01114) ·
+     [PubMed 21673154](https://pubmed.ncbi.nlm.nih.gov/21673154/) ·
+     [OUP](https://academic.oup.com/ps/article-lookup/doi/10.3382/ps.2010-01114). The turnover range
+     itself is already confirmed from the abstract.
+   - Lowest priority: the bedding-materials companion,
+     [Miles et al. 2011, *Poult. Sci.* 90(6):1162](https://academic.oup.com/ps/article/90/6/1162/1583009)
+     ([doi.org/10.3382/ps.2010-01113](https://doi.org/10.3382/ps.2010-01113)), and the
+     **Dunlop et al. 2015 supplementary material** (the empirical evaporation equation — needed for
+     Task 5b, not Task 6).
+
+**Sources read, for checking my reading:**
+[Groot Koerkamp thesis (WUR, 155 pp)](https://edepot.wur.nl/210633) ·
+[Kang et al. 2016, *Poult. Sci.* 95(12):2764 — free at PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC5144664/)
+([OUP](https://academic.oup.com/ps/article/95/12/2764/2656886)) ·
+Kang et al. 2018 (local PDF, `docs/research/sources/Kang-2018-EPS-aviary-stocking-density.pdf`) ·
+[David et al. 2015, *Animals* 5(3):886](https://www.mdpi.com/2076-2615/5/3/389) ·
+Nimmermark, Lund, Gustafsson & Eduard 2009, "Ammonia, dust and bacteria in welfare-oriented systems for
+laying hens", *Ann. Agric. Environ. Med.* 16:103–113 —
+[PDF at aaem.pl](https://www.aaem.pl/pdf-71597-8822?filename=Ammonia_+dust+and.pdf) ·
+[PubMed 19630203](https://pubmed.ncbi.nlm.nih.gov/19630203/)
 7. **Correct the stale/overstated claims** flagged in §4, §5 and §6, and the stale "S22 still paywalled —
    hold Task 6" note at `2026-07-30-density-coefficients.md:45`.
