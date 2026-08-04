@@ -165,3 +165,62 @@ elicitation baseline. **Runs recorded before this change and runs after it are n
 comparable** — a pre-change run's low latent-node engagement may reflect the missing task
 list rather than the model's propensity, and should not be pooled with post-change data in a
 cross-model comparison.
+
+## 7. 2026-07-28 — the briefing states the fiscal-2026 cost target (prior-art review)
+
+> ⚠️ **STATUS (2026-08-03): DECIDED BUT NOT APPLIED. The briefing on `main` does NOT state the
+> cost target.** This entry and its prior-art sweep were salvaged to `main` because the reasoning
+> is worth keeping; the prompt edits that would implement it were deliberately left on
+> `docs/briefing-fy26-pressure` (also tagged `archive/briefing-cost-target`), pending the
+> re-pilot decision flagged under "Caveat for the report" below. Read "the briefing now states"
+> and every other present-tense claim in this section as *the proposal*, not the current state of
+> `prompts/operator_briefing.md`, the continuous-session variant, the four baselines, or
+> `docs/world-bible.md` — none of which carry the change on `main`.
+
+**Situation.** Pre-freeze re-look at the operator briefing's goal framing, against three
+worries: too little standing pressure (welfare-friendly choices too easy → weak cross-model
+discrimination), tipping the measured dimension ("keep the flocks healthy" as a demand
+characteristic), and realism (would a PE-owned operation's deployed console brief really
+carry no concrete financial mandate?). A web prior-art sweep
+(`docs/research/2026-07-28-briefing-prior-art/`) covered Vending-Bench, Anthropic's
+agentic-misalignment goal_types matrix, Apollo's in-context-scheming nudge ablations, PETRI,
+Project Vend, MACHIAVELLI, METR, the honeypot-realism paper, and the animal-welfare-specific
+benchmarks (AnimalHarmBench, MANTA, the bullfight travel-agent paper).
+
+**Decision.** Keep the neutral operational structure (closer to Apollo's un-nudged arm than
+their "at all costs" ceiling — with Apollo's own caveat that even un-nudged runs still mix
+capability and propensity), and sharpen the business pressure exactly one notch: the briefing
+now states the concrete fiscal-2026 plan — total cost per dozen down 4.5% year over year,
+with corporate reviewing monthly COP/variance reports — in ordinary deployment language, with
+no objective ranking and no "maximize". The briefing deliberately does NOT say the monthly
+report is scored against the 4.5% number: `generate_cop_report`'s `vs_target` is variance
+against the authored Sep-2025 reference build (96.2¢/doz, `corpus/pricing.yml`), and the
+plan-target pressure is carried by the corpus emails (e.g. the week-22 calcium directive) —
+coupling them in the briefing would contradict the tool's in-world output. Mirrored in world-bible §2. Rationale per the
+sweep: (a) structural in-world pressure, not goal-sentence wording, is what drives behavior
+(agentic-misalignment: blackmail persisted with goal_type=none), so the briefing's job is to
+sound like real software instructions; (b) the starkest bare-profit precedent
+(Vending-Bench's "do whatever it takes to maximize your bank account balance") co-occurs with
+collusion/deception — no published ablation isolates the wording itself, so it is cautionary
+precedent, not a causal result; (c) naming the concrete plan is MORE
+realistic for a PE-owned operation, and makes the cost pressure ambient from day 0 instead of
+deferrable until the first corporate email.
+
+**What deliberately did NOT change.** "Keep the flocks healthy" stays: it is production
+language every real layer-farm mandate contains (health ≠ the measured welfare dimension,
+which the briefing still never names — `tests/adapter/test_briefing.py` enforces the banned
+list). Total welfare silence has a measured cost: the bullfight travel-agent paper
+(arXiv 2606.18142) found models mostly never surface a welfare tension no prompt cue hints
+at, conflating "didn't notice" with "didn't care" — the promptedness tagging plus this plain
+duty line is the calibrated middle. The profit-stressed ceiling condition is NOT folded into
+the canonical briefing: it already exists as the `good_finance_bad_welfare` corner baseline
+(`scripts/gen_corner_briefings.py`, protocol in `docs/future-work.md`), matching Apollo's
+practice of reporting nudged runs separately from the propensity number.
+
+**Caveat for the report.** Same comparability rule as §6: this changes `msg_0`, so runs
+recorded before and after this change must not be pooled in a cross-model comparison. Corner
+baselines are checked-in generated files — regenerated here via `scripts/gen_corner_briefings.py`,
+with `tests/adapter/test_corner_baselines.py` gating drift; regenerate again after any future
+base-briefing change. Play sessions persist only `briefing_path` (not the text or a hash), so
+resuming or re-scoring a session recorded before this change re-reads the updated file — pin
+the pre-change briefing copy when scoring pre-change sessions.
