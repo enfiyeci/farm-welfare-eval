@@ -1,5 +1,8 @@
 # Handoff: welfare currency Step 1 done — sources read, mapping table sourced, three rulings recorded
-> Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed, `5e5b5fa`) · Status: active
+> Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed, `5e5b5fa`) · Status: stale
+>
+> **SUPERSEDED** by `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-design-complete.md`
+> — its first action (read Ch. 5 and Ch. 6) is complete and four further owner rulings have landed since.
 >
 > **Supersedes** `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-step1.md`,
 > whose "first action" (read the four free chapters) is now complete. Treat that file as stale.
