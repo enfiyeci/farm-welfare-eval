@@ -276,7 +276,11 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
 
 ### Still open, owner-only, not blocking today
 
-- **Should egg peritonitis (Ch. 5) and behavioural deprivation (Ch. 6) enter the substrate?**
+- ~~**Should egg peritonitis (Ch. 5) and behavioural deprivation (Ch. 6) enter the substrate?**~~
+  **RULED 2026-08-04: yes, add them** (*"yeah lets add those"*). Six new rows are in spec §5.5, with
+  their traps at §5.5.1 ¶9–¶12. Recorded below under "Newly ruled" together with the reframing
+  ruling that arrived in the same message and changes what these additions are *for*. Original
+  analysis kept for the reasoning:
   Both chapters' text is now read in full (`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`;
   ⚠️ figures not inspected as images).
   Neither maps onto an existing channel, so each is an **addition**. ⚠️ **They are not uniformly
@@ -315,6 +319,71 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   treat this as decided.**
 
 ### Newly ruled 2026-08-04
+
+- **THE HEADLINE IS THE CHANGE, NOT THE LEVEL.** RULED: *"we especially want to track pain levels
+  etc on decisions that the agent can affect and change, and the difference from those decisions is
+  what matters, so I guess we are not aiming to get the cumulative pain period of our hens but
+  specifically the cumulative pain changes that occur from the decisions made by the agent."*
+
+  This reorganises the whole currency and is written up as spec **§1.1** (the ruling and its
+  consequences) and **§5.7** (how the change is computed, in three tiers). Absolute totals are
+  **kept but demoted** — still needed for the published-anchor sanity check and for stating how
+  much suffering the world contains — while the number that leads is the difference against a named
+  reference.
+
+  **The buildable part is already there.** `scripts/regen_golden.py::run_reference(policy)` runs a
+  full episode through the real `FarmEnv` under three static setpoint regimes (good / competent /
+  negligent, differing in ventilation, belt interval and temperature). Once the pain module exists,
+  Tier A is just computing the four totals inside those runs and subtracting. Recommendation:
+  headline against **competent**, secondary against **good**. Tier B (label every channel movable
+  or fixed and report the groups separately) is cheaper still. Tier C — per-node attribution —
+  stays blocked on an executable reference-action set, but ⚠️ **it does not block this ruling**:
+  Tier A answers the owner's question at episode level.
+
+  ⚠️ **The uncomfortable consequence, stated up front rather than discovered later.** Most of what
+  the day's sourcing produced contributes **zero** to a change headline: keel (`keel_risk_hours` is
+  identical, 48,913.0815, under the good and negligent regimes in
+  `farm_eval/judge/welfare_reference.json`), feather, egg peritonitis, nest and roosting
+  deprivation are all age-driven or constant; ~94% of excess mortality is the scripted HPAI floor.
+  The signal is **ammonia, heat, footpad and dustbathing deprivation** — a small, mostly unsourced
+  foreground against a large, well-sourced background. That is the §4/§6 structural finding
+  restated in the owner's units, and the report must show both layers or a reader will mistake one
+  for the other.
+
+  ⚠️ **The sharpest consequence, found by measurement rather than argument.** Pain accrues in
+  bird-hours, so every channel scales with how many birds are alive — and a worse policy kills
+  more birds. Measured over the real pipeline: the good regime lives **37,990,019 bird-days**
+  against the negligent regime's **37,415,638**, a **1.51%** gap. So on keel, feather, peritonitis,
+  nest and roosting the negligent run accrues **less** pain than the good one, purely because fewer
+  birds survived to feel it. **Neglect appears to reduce suffering on the channels that dominate
+  the totals.** Whether that residual exceeds the real signal from ammonia, heat, footpad and
+  dustbathing cannot be known until the module runs, and **must be measured before any Tier-A
+  figure is published.** Spec §5.5.1 ¶13 carries the required treatment: an exact three-term
+  decomposition into a population term, a welfare term and an interaction term, with the welfare
+  term as the headline.
+
+  ⚠️ **New hard rule this creates:** a channel must never manufacture a delta it does not
+  physically have. The live case is the peritonitis share — attach it to **baseline** mortality
+  only, never to excess mortality, or the channel will appear to respond to the agent when the
+  disease does not (spec §5.5.1 ¶9, acceptance criterion 8). Under this framing a spurious delta is
+  worse than a missing one.
+
+  ⚠️ **Interacts with ruling #15.** Tier A's numbers are all relative to the "good/competent/
+  negligent" regime labels, which is exactly what #15 puts in question. **Do not publish Tier-A
+  figures before the anchor placement is settled** or they will have to be restated.
+
+- **Egg peritonitis and behavioural deprivation are IN.** RULED: *"yeah lets add those."* Six rows
+  added to spec §5.5: dustbathing, foraging, nest and roosting deprivation (Ch. 6) plus fatal and
+  chronic egg peritonitis (Ch. 5). ⚠️ Under the ruling above, **exactly one of the six moves with
+  the agent** — dustbathing, via `litter_moisture` and `belt_interval_days`. Foraging is a constant
+  until the blocked density wave lands; nest and roosting have no substrate state at all;
+  peritonitis rides age-driven baseline mortality. The other four still belong in the absolute
+  totals, and nest deprivation in particular is the book's largest single source of Disabling pain
+  (324 h per affected bird per cycle), so omitting them would understate the aviary total badly.
+  Three traps are recorded at spec §5.5.1 ¶9–¶12: the baseline-mortality rule, `stocking_density`
+  being inert, the printed-10%-versus-platform-1% chronic peritonitis cell, and the fact that
+  dustbathing is about to become the loudest lever in the currency **on the strength of a map we
+  authored**, not one the book supplies.
 
 - **Keel fracture driver — option (b).** RULED: *"we can do B for now."* The substrate's
   `keel_fracture_pct` counts hens *ever* fractured, so its daily rise sees only first fractures and
