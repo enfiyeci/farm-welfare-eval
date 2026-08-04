@@ -280,6 +280,25 @@ onto a channel our substrate models.
 
 ### Newly ruled 2026-08-04
 
+- **Keel fracture driver — option (b).** RULED: *"we can do B for now."* The substrate's
+  `keel_fracture_pct` counts hens *ever* fractured, so its daily rise sees only first fractures and
+  undercounts Ch. 3's three-fracture anchor roughly threefold. Rather than change the keel physics
+  (option (a)) or accept the shortfall (option (c)), the pain module opens a cohort on each day's
+  rise and runs it through a **scripted three-fracture timeline** (first at entry, then +10 and +20
+  weeks, per Ch. 3's average-hen assumption) as **one integrated Pain-Track 3.4 sequence, not three
+  stacked copies** — a later fracture replaces the earlier chronic pain rather than adding to it —
+  with chronic-phase splits compounding 25/45 → 33/58 → 36/61 Hurtful/Annoying. Two boundary rules
+  are load-bearing and are spelled out in spec §5.5.1 ¶2: **day 0 is not incidence** (houses start
+  at 68/52/34/17/43 weeks, so the initial prevalence is history and needs a backdated seed cohort,
+  or most of the keel burden is silently discarded), and **scheduled fractures past the run's end
+  do not happen** (the only mechanically available cutoff is `episode_end_day`, since the substrate
+  has no per-flock depopulation date). Physics untouched; **the schedule is ours and must be
+  labelled so**. Decisive
+  reason: keel is age-driven and identical under every policy, so it can never discriminate between
+  models — its only job is the anchor comparison, which does not justify a physics change.
+  ⚠️ **Revisit at Step 2** if perch/ramp design makes keel an agent lever; a fixed schedule would
+  then mask the very signal we would be measuring, and option (a) becomes necessary.
+
 - **Currency spec §7 Q4 — worker exposure gets its own parallel track.** RULED: *"yeah sure why
   not."* Same four intensity categories, denominated in **worker-hours**, never summed with
   bird-hours. Well-founded: the Cumulative Pain framework was originally built for human patients

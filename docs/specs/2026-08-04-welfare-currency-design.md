@@ -232,13 +232,12 @@ but they are **not a one-to-one seam** — an earlier draft claimed they were, a
 - `accrue_worker_nh3` is **human** exposure. It gets no bird-hours call at all (§5.1).
 - **Feather damage has no accrual call today.** `hw.feather_damage_pct` is computed and stored but
   never accumulated, so this condition needs a genuinely new call site, not a parallel one.
-- **Keel needs an input that does not exist at the call site — or anywhere else.** `accrue_keel`
-  receives *prevalence*. The acute and callus phases need a **fracture-event stream**, and the
-  chronic phase needs the cohort carrying an unhealed fracture. ⚠️ **Neither can be derived from
-  the day-over-day change in `keel_fracture_pct`**, because that is the percentage of hens *ever*
-  fractured and its delta counts first fractures only — see §5.5.1 ¶2, which sets out the
-  threefold undercount and the three options for resolving it. Treat this as unresolved until that
-  decision is made.
+- **Keel needs an input that does not exist at the call site.** `accrue_keel` receives *prevalence*.
+  The acute and callus phases need **fracture episodes**, and the chronic phase needs the cohort
+  carrying an unhealed fracture. ⚠️ The day-over-day change in `keel_fracture_pct` gives only
+  *first* fractures — that is the threefold undercount in §5.5.1 ¶2. **Resolved by owner ruling to
+  option (b):** use that delta to open cohorts, then run each cohort through a scripted
+  three-fracture timeline inside the pain module. Physics is untouched; the schedule is ours.
 
   (Also corrected 2026-08-04: an earlier draft said incidence was needed for a keel *Excruciating*
   term. **There is no keel Excruciating term** — Chapter 3 assigns the point of fracture 100%
@@ -258,7 +257,7 @@ disruption-of-behaviour decision rule (§2.1) and only the *thresholds* are auth
 
 | Condition | Driver | Bands | Affected fraction | Provenance |
 |---|---|---|---|---|
-| **Keel** | fracture **events**, not prevalence — see the ⚠️ in §5.5.1 ¶2, this driver does not yet exist | Point of fracture **100% Disabling**, 0.5–2 h → inflammation 4–7 d stepping 80/20 → 50/50 → 30/70 Disabling/Hurtful → callus 2–12 wk at 60% Hurtful / 40% Annoying → chronic 8–42 wk at 30% Hurtful / 70% Annoying. **No Excruciating term.** | Acute + callus phases: the birds fracturing *that day*. Chronic phase: the cohort carrying an unhealed or malunited fracture, where the probability of chronic pain **compounds with each successive fracture** — 70% after one, 91% after two, 97% after three (Ch. 3, footnote to Pain-Track 3.4) | **PAIN-TRACK SOURCED, DRIVER UNRESOLVED** — Ch. 3, Pain-Tracks 3.1–3.4. Anchor: 159 h Dis / 2,248 h Hurt / 1,812 h Ann per *fractured* hen across **three** fractures |
+| **Keel** | first-fracture cohorts from the positive rise in `keel_fracture_pct`, each then following a scripted 3-fracture timeline (§5.5.1 ¶2, option (b)) | Point of fracture **100% Disabling**, 0.5–2 h → inflammation 4–7 d stepping 80/20 → 50/50 → 30/70 Disabling/Hurtful → callus 2–12 wk at 60% Hurtful / 40% Annoying → chronic phase running until the next fracture or the horizon, at the **compounding** splits 25/45 → 33/58 → 36/61 Hurtful/Annoying after fractures 1/2/3 (§5.5.1 ¶2 — *not* the single-fracture 30/70). **No Excruciating term.** | Acute + callus phases: the cohort having an episode *that day*. Chronic phase: the cohort carrying an unhealed or malunited fracture | **PAIN-TRACK SOURCED, SCHEDULE OURS** — Ch. 3, Pain-Tracks 3.1–3.4 for the pain; the 30/40/50-week fracture timing is Ch. 3's average-hen assumption imported by us, not something our substrate produces. Anchor: 159 h Dis / 2,248 h Hurt / 1,812 h Ann per *fractured* hen across three fractures |
 | **Feather damage** | positive day-over-day **increase** in `feather_damage_pct` | Per feather removed: 1–5 s at 90% Disabling / 10% Hurtful → 30–105 s at 70% Hurtful / 30% Annoying → 10–30 min at 50% Annoying | feathers removed per newly-affected bird, from the Ch. 8 conversion: 25–35% of 7,000–9,000 feathers are pluckable, so a **plumage-loss score** of 50% ≈ 875–1,575 feathers | **PAIN-TRACK SOURCED, BRIDGE OURS** — Ch. 4 Pain-Track 4.1 + Ch. 8 conversion. ⚠️ See the unit mismatch below; the bridge from our prevalence to their score is ours |
 | **Mortality** | excess deaths | Terminal window only; the bird stops accruing at death and gets nothing for life not lived | the dying birds | **METHOD SOURCED** — Ch. 1 conclusion (no value for life lost). ⚠️ **OURS: the window's length *and shape* for our causes.** Ch. 7's fatal track de-escalates into death, but Ch. 7 attributes that specifically to dehydration/ketosis "self-sedation" on a long transport. Do **not** transfer that shape to an HPAI cull or an acute in-house heat death, which have no such physiology |
 | **Ammonia** | `ammonia_ppm` | <10 none · 10–25 Annoying · 25–50 Hurtful · >50 Disabling | all birds in house | **CATEGORY SOURCED, THRESHOLDS OURS.** Ch. 9: broilers given 4/11/20/37 ppm "avoid the higher concentrations" ([Jones et al. 2005](https://doi.org/10.1016/j.applanim.2004.08.030)); Ch. 9 concludes high concentrations "can lead to a prolonged state of discomfort". ⚠️ [Kristensen et al. 2000](https://doi.org/10.1016/S0168-1591(00)00110-6) reportedly found hens foraged, preened and rested *significantly less* above 25 ppm — a literal Hurtful match — but **read only as a search summary; publisher returns 403**. Thresholds stay ours, aligned to UEP/NIOSH 25 ppm and OSHA PEL 50 ppm |
@@ -289,13 +288,77 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
    chronic pain has developed at **70% after one fracture, 91% after two and 97% after three**, so a
    flat per-fracture 30/55/15 outcome split applied once per bird also misses the mark.
 
-   **This is an unresolved prerequisite, not an implementation detail.** Three honest options, in
-   preference order: (a) emit a real fracture-event stream from the keel layer, which is the only
-   route to the anchor; (b) carry lightweight cohorts inside the pain module driven by an assumed
-   three-fractures-per-fractured-hen schedule, and label the schedule as ours; (c) accept a
-   documented single-fracture approximation and expect to land well below the anchor, saying so in
-   the report. Option (a) touches `farm_eval/env/model/layers/keel.py` and so is a physics change
-   under §5.3 — decide before building, not during.
+   **OWNER RULING 2026-08-04: option (b)** — *"we can do B for now."* The three options were
+   (a) emit a real fracture-event stream from the keel layer, (b) carry lightweight cohorts inside
+   the pain module on an assumed three-fractures-per-hen schedule, (c) accept a single-fracture
+   approximation and land ~3× below the anchor. Rationale for (b): keel is age-driven in our
+   substrate and **identical under every policy**, so it can never discriminate between models — its
+   only job is the anchor comparison. Spending a physics change on a non-discriminating channel is
+   poor value, which rules out (a); but keel dominates the published burden, so (c) would throw off
+   the headline totals.
+
+   **What (b) means concretely:**
+
+   - The **entry** driver is the positive day-over-day rise in `keel_fracture_pct` — that part works,
+     because it correctly identifies hens fracturing *for the first time*. Each day's rise creates a
+     cohort.
+   - Each cohort then follows a **scripted three-fracture timeline** taken from Ch. 3's own
+     simplifying assumption: "the first fracture is endured at 30 weeks of age, with 10 weeks in
+     between each fracture." So a cohort gets its second episode +10 weeks after entry and its third
+     +20 weeks.
+   - ⚠️ **The three fractures are ONE timeline, not three stacked copies of Pain-Track 3.1.**
+     Ch. 3 adopts **Scenario III**: because all three breaks are in the same bone, the hen
+     experiences "one single painful sensation", and a new fracture **replaces** the pre-existing
+     chronic pain rather than adding to it. Pain-Track 3.4 *is* that integrated three-fracture
+     timeline. Each chronic phase runs only "until a new fracture occurs, or until depopulation".
+     Running 3.1–3.4 three times over would overlap the chronic phases and multiply the burden.
+   - **Chronic-phase intensities are not the single-fracture 30/70 split.** They compound. From
+     Ch. 3's footnote to Pain-Track 3.4, in the chronic phase after fracture 1 / 2 / 3:
+
+     | After fracture | Hurtful | Annoying | No chronic pain |
+     |---|---|---|---|
+     | 1 | 25% | 45% | 30% |
+     | 2 | 33% | 58% | 9% |
+     | 3 | 36% | 61% | 3% |
+
+     (The 70 / 91 / 97% figures are the *totals* carrying any chronic pain — they are the column
+     sums, not a Hurtful share.)
+   - ⚠️ **The schedule is OURS, not sourced.** It is imported from the book's average hen rather than
+     produced by our world. Label it as ours in the report; do not present the resulting keel hours
+     as a measurement of our substrate's behaviour.
+
+   **Two boundary rules the cohort scheme needs, or it produces nonsense:**
+
+   - **Episode start is not incidence.** Our houses begin at **68, 52, 34, 17 and 43 weeks**
+     (world-bible §4), and `keel_fracture_pct` is derived from an age curve, so on day 0 most of
+     House 1's flock is *already* fractured. Treating the first computed value as a day's rise would
+     open a ~90%-of-flock "new fracture" cohort at week 68 and then schedule its second and third
+     fractures at weeks 78 and 88 — after depopulation, and nowhere near Ch. 3's 30/40/50.
+     **Rule: at episode start, seed one backdated cohort per house sized to the house's initial
+     prevalence, positioned on the Ch. 3 schedule relative to that house's current age, and entered
+     at whichever phase it would already have reached.** Suppressing the initial stock instead is
+     the simpler alternative but throws away most of the keel burden for four of five houses —
+     if that route is taken, say so in the report rather than letting the totals look low for an
+     unstated reason.
+   - **Scheduled fractures past the end of the run do not happen.** A cohort entering within 20
+     weeks of the cutoff gets fewer than three episodes. That is faithful — Ch. 3 truncates chronic
+     phases at depopulation too — but it means **late cohorts land below the 159/2,248/1,812
+     per-fractured-hen anchor by construction.** Compare against the anchor using cohorts that had a
+     full cycle, not the flock average.
+
+     ⚠️ **Which cutoff?** There is no per-flock depopulation date in the substrate to truncate
+     against: `bird_count` is written only by the loader and the mortality line, there is no
+     mechanical depop, and the world-bible §4 roster gives an end date only for the focal House 4
+     (~90 wk, 2026-11-02). The only mechanically available bound is **`config.yml`'s
+     `episode_end_day` (518)**. Use it, and accept the known approximation: for a house whose real
+     flock would be removed earlier — House 1 begins at 68 weeks and carries the molt-or-depop
+     decision — keel pain will accrue past that flock's notional life. If that approximation turns
+     out to matter, the fix is to author per-flock end weeks as pain-module parameters from
+     world-bible §4; it is a small explicit addition, but it is **not** something to infer silently
+     at implementation time.
+   - ⚠️ **Revisit if keel ever becomes an agent lever** (Step 2 of the ledger — perch and ramp
+     design). A fixed schedule would mask exactly the signal we would then be trying to measure, and
+     option (a) becomes necessary rather than optional.
 3. **The feather driver is a unit mismatch and needs an explicit bridge.**
    `farm_eval/env/model/layers/feather.py` defines `feather_damage_pct` as the **prevalence of hens
    with feather damage** (age-interpolated: 3.2% at wk 31, 32.9% at wk 46, 57.8% at wk 65). Chapter
@@ -388,7 +451,7 @@ substrate track first — it is useful on its own and this depends on it.
 4. **Per-hen figures land in a defensible relationship to the §3 anchors channel by channel — not
    in total.** Our grand totals will fall below the published aviary row because we do **not** model
    two of its three largest burdens: egg peritonitis and behavioural deprivation (nest, foraging,
-   dustbathing, roosting). We *do* carry chronic keel pain, via the full Pain-Track 3.2/3.3 chronic
+   dustbathing, roosting). We *do* carry chronic keel pain, via the Pain-Track 3.4 chronic
    phases in §5.5 — so the report must not explain a low total by claiming keel is absent. It is
    present and, as in the published data, will likely dominate. The report must list which published
    burdens we omit, or the comparison misleads.
@@ -552,7 +615,7 @@ valid):
 
 | Finding | Disposition |
 |---|---|
-| The keel fix was only partial — the delta of an *ever-fractured* prevalence captures first fractures only, so it undercounts Ch. 3's three-fracture anchor ~3×, and the flat 30/55/15 outcome split ignores that chronic-pain probability compounds 70% → 91% → 97% | **Fixed properly** — the row is relabelled "DRIVER UNRESOLVED" and §5.5.1 ¶2 now states the threefold undercount, the compounding, and three explicit options with the physics-change implication of the preferred one. This was the deepest finding of either round |
+| The keel fix was only partial — the delta of an *ever-fractured* prevalence captures first fractures only, so it undercounts Ch. 3's three-fracture anchor ~3×, and the flat 30/55/15 outcome split ignores that chronic-pain probability compounds 70% → 91% → 97% | **Fixed** — §5.5.1 ¶2 stated the threefold undercount, the compounding and three options. This was the deepest finding of either round, and it was escalated to the owner, who ruled **option (b)** on 2026-08-04. Current status is recorded in §8.3, not here |
 | `findings.md` §6 still said we do not carry chronic keel pain | **Fixed** — that paragraph now names only egg peritonitis and behavioural deprivation |
 | The ledger still described the Animal Ask weight table as truncated and internally inconsistent | **Fixed** — the ledger now carries the same retraction as §2.2 |
 | §3 still said the JSON reproduces the book's totals "exactly" | **Fixed** — softened to "to within rounding" with the 0.9% Hurtful gap and the §4.1 pointer |
@@ -561,6 +624,29 @@ valid):
 the day-over-day change in prevalence, contradicting the round-2 correction in §5.5/§5.5.1.
 **Fixed** — §5.4 now points at §5.5.1 ¶2 and marks the driver unresolved.
 
-The loop has reached its **three-round cap**. The round-3 fix was a single narrow consistency edit
-with no new claims, so it was applied rather than re-reviewed. Anything further goes to the owner
-rather than a fourth round.
+That loop reached its **three-round cap**, and the unresolved keel driver was escalated to the
+owner as the cap requires. See §8.3.
+
+### 8.3 Owner rulings and their review, 2026-08-04
+
+Three rulings recorded: §7 Q1 (death) parked with a working default, §7 Q4 (worker track) yes, and
+the keel driver settled as **option (b)**. The keel ruling was reviewed as its own change
+(`gpt-5.6-sol`, read-only, fresh session; verdict REVISE, three findings, all verified against
+Chapter 3 and the world bible, all real):
+
+| Finding | Disposition |
+|---|---|
+| "Each episode runs the full Pain-Track 3.1–3.4 sequence" misreads Ch. 3. Pain-Track 3.4 *is* the integrated three-fracture timeline under Scenario III, where a new fracture **replaces** pre-existing chronic pain and each chronic phase ends at the next fracture or at depopulation. Stacking three copies would overlap the chronic phases and multiply the burden | **Fixed** — §5.5.1 ¶2 now specifies one integrated timeline per cohort and says explicitly why stacking is wrong |
+| The chronic split was carried over from single-fracture Pain-Track 3.2 (30% Hurtful / 70% Annoying). Ch. 3's footnote gives compounding values instead: 25/45, 33/58, 36/61 Hurtful/Annoying after fractures 1/2/3, with 30/9/3% carrying no chronic pain | **Fixed** — the correct table is in §5.5.1 ¶2, with a note that 70/91/97% are column totals, not Hurtful shares |
+| The cohort scheme had no initialisation or end-of-cycle rule. Our houses start at 68/52/34/17/43 weeks, so day 0's computed prevalence is mostly *history*; treating it as incidence would open a ~90%-of-flock cohort at week 68 and schedule its later fractures past depopulation | **Fixed** — §5.5.1 ¶2 adds a backdated-seed rule at episode start and a truncation rule, plus the consequence for the anchor comparison |
+
+Round 2 of that loop (verdict REVISE, three findings, all real):
+
+| Finding | Disposition |
+|---|---|
+| The §5.5 keel row and criterion 4 still carried the obsolete single-fracture 30/70 chronic split and a reference to Pain-Tracks 3.2/3.3 | **Fixed** — both now carry the compounding 25/45 → 33/58 → 36/61 splits and point at Pain-Track 3.4 |
+| The ledger still described cohorts as opened only from the daily rise, omitting the backdated day-0 seed | **Fixed** — the ledger entry now carries both boundary rules |
+| The truncation rule named "depopulation" as its cutoff, but **no per-flock depopulation date exists in the substrate** — `bird_count` is written only by the loader and the mortality line, and the roster gives an end date for the focal house only | **Fixed, and it was a genuine hole.** §5.5.1 ¶2 now names `episode_end_day` as the only mechanically available bound, states the approximation this forces for House 1, and records authoring per-flock end weeks as the explicit remedy if it matters |
+
+Round 3 returned **APPROVED with zero findings** (verified — the loop closed inside its cap rather
+than being declared closed).
