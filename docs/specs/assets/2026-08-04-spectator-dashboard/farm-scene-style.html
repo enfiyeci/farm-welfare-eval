@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Farm scene — art direction</title>
+<style>
+  :root { --bg:#0b0e14; --panel:#12161f; --line:#232b3a; --txt:#c9d1d9; --dim:#7d8794; --acc:#e3b341; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--txt); font-family:"Iowan Old Style","Palatino Linotype",Palatino,ui-serif,serif; padding:28px 4vw 60px; }
+  h1 { font-size:26px; color:#f0f3f6; margin-bottom:6px; font-weight:600; }
+  .sub { color:var(--dim); margin-bottom:26px; font-size:14.5px; max-width:900px; line-height:1.5; }
+  .choice { border:1px solid var(--line); border-radius:14px; background:var(--panel); margin-bottom:30px; overflow:hidden; cursor:pointer; transition:border-color .2s, box-shadow .2s; }
+  .choice:hover { border-color:#3b4a63; }
+  .choice.selected { border-color:var(--acc); box-shadow:0 0 0 2px var(--acc), 0 8px 40px #e3b34122; }
+  .choice .cap { padding:14px 18px; border-top:1px solid var(--line); display:flex; gap:14px; align-items:baseline; }
+  .choice .cap .tag { font-family:ui-monospace,monospace; font-size:11px; color:var(--acc); border:1px solid #e3b34155; padding:2px 9px; border-radius:20px; white-space:nowrap; }
+  .choice .cap p { color:var(--dim); font-size:13.5px; line-height:1.45; }
+  .choice .cap b { color:#e8ecf1; }
+  .stage { position:relative; height:230px; overflow:hidden; }
+
+  /* ============ STYLE 1: PIXEL FARM ============ */
+  .px { background:linear-gradient(#1a2340 0%,#25315c 55%,#3a2c22 55.5%,#2c211a 100%); image-rendering:pixelated; font-family:ui-monospace,monospace; }
+  .px .moon { position:absolute; top:18px; right:60px; width:22px; height:22px; background:#ffe9a8; box-shadow:0 0 0 4px #ffe9a833; }
+  .px .snowf { position:absolute; width:4px; height:4px; background:#dfe8ff; animation:pxsnow 3.2s linear infinite; }
+  @keyframes pxsnow { from{transform:translateY(-10px)} to{transform:translateY(240px)} }
+  .px .barn { position:absolute; bottom:38px; width:120px; }
+  .px .barnroof { height:26px; background:#8a3d2a; clip-path:polygon(0 100%,10% 40%,50% 0,90% 40%,100% 100%); }
+  .px .barnbody { height:56px; background:#b5542e; border:4px solid #7a331e; border-top:none; position:relative; }
+  .px .barnbody .door { position:absolute; left:44px; bottom:0; width:28px; height:32px; background:#4a2413; }
+  .px .barnbody .lamp { position:absolute; top:6px; left:8px; width:10px; height:10px; background:#ffd76b; animation:pxlamp 2.4s steps(2) infinite; }
+  @keyframes pxlamp { 50%{opacity:.4} }
+  .px .plabel { text-align:center; color:#9fb0d8; font-size:10px; margin-top:5px; }
+  .px .alert .barnbody { border-color:#c22; animation:pxalert 1s steps(2) infinite; }
+  @keyframes pxalert { 50%{ box-shadow:0 0 0 6px #ef444455 } }
+  .px .phen { position:absolute; bottom:38px; width:16px; height:14px; animation:pxhop 1.6s steps(3) infinite; }
+  .px .phen::before { content:""; position:absolute; inset:0;
+    background:#fff; clip-path:polygon(20% 100%,10% 55%,25% 25%,60% 15%,85% 35%,100% 45%,85% 55%,80% 100%); }
+  .px .phen::after { content:""; position:absolute; top:0; right:-2px; width:5px; height:5px; background:#e33; }
+  @keyframes pxhop { 0%,100%{transform:translateX(0)} 33%{transform:translate(9px,-5px)} 66%{transform:translateX(18px)} }
+
+  /* ============ STYLE 2: STORYBOOK FLAT ============ */
+  .sb { background:linear-gradient(#f6d9a0 0%,#f2b98a 42%,#a8c686 42.5%,#8fb573 100%); }
+  .sb .sun { position:absolute; top:20px; left:64px; width:44px; height:44px; border-radius:50%; background:#ffdf6b; box-shadow:0 0 40px 14px #ffdf6b66; animation:sbsun 6s ease-in-out infinite; }
+  @keyframes sbsun { 50%{ transform:translateY(6px) } }
+  .sb .cloud { position:absolute; top:34px; width:70px; height:20px; border-radius:20px; background:#fff8ecdd; animation:sbcloud 14s linear infinite; }
+  @keyframes sbcloud { from{left:-80px} to{left:105%} }
+  .sb .sbarn { position:absolute; bottom:34px; width:140px; text-align:center; }
+  .sb .sroof { height:34px; background:#c0392b; border-radius:10px 10px 0 0; clip-path:polygon(0 100%,50% 0,100% 100%); }
+  .sb .sbody { height:58px; background:#e74c3c; border-radius:0 0 8px 8px; position:relative; box-shadow:inset 0 -10px 0 #c0392b44; }
+  .sb .sbody .win { position:absolute; top:12px; left:16px; width:20px; height:20px; border-radius:50%; background:#fff3d1; box-shadow:0 0 12px #ffd76baa; }
+  .sb .slabel { font-family:ui-monospace,monospace; font-size:11px; color:#5a4632; margin-top:5px; }
+  .sb .shen { position:absolute; bottom:30px; width:26px; height:24px; }
+  .sb .shen .body { position:absolute; inset:0; background:#fffdf7; border-radius:60% 70% 45% 55%; transform-origin:bottom; animation:sbpeck 1.8s ease-in-out infinite; }
+  .sb .shen .body::before { content:""; position:absolute; top:-4px; right:2px; width:8px; height:8px; background:#e74c3c; border-radius:50% 50% 50% 0; }
+  .sb .shen .body::after { content:""; position:absolute; top:4px; right:-4px; width:6px; height:4px; background:#f39c12; border-radius:0 60% 60% 60%; }
+  @keyframes sbpeck { 0%,100%{transform:rotate(0)} 15%{transform:rotate(14deg)} 30%{transform:rotate(0)} 55%{transform:translateX(4px)} }
+  .sb .alertring { position:absolute; inset:-6px -6px auto; height:110px; border-radius:14px; border:3px solid #e74c3c; animation:sbring 1.4s ease-in-out infinite; }
+  @keyframes sbring { 50%{ opacity:.25 } }
+
+  /* ============ STYLE 3: LIVING CUTAWAY ============ */
+  .cw { background:linear-gradient(#0e1626,#0a111d); font-family:ui-monospace,monospace; }
+  .cw .shell { position:absolute; inset:22px 5% 18px; border:2px solid #31405c; border-radius:8px; background:#131c2d; }
+  .cw .hdr { position:absolute; top:-12px; left:14px; background:#0e1626; padding:0 8px; color:#8ab4f8; font-size:11px; }
+  .cw .fan { position:absolute; right:-13px; width:26px; height:26px; border-radius:50%; border:2px solid #31405c; background:#0e1626; display:flex; align-items:center; justify-content:center; }
+  .cw .fan i { width:16px; height:16px; background:conic-gradient(#8ab4f8 0 25%, transparent 0 50%, #8ab4f8 0 75%, transparent 0); border-radius:50%; animation:cwspin 1s linear infinite; }
+  @keyframes cwspin { to{transform:rotate(360deg)} }
+  .cw .tier { position:absolute; left:12px; right:34px; height:3px; background:#3b4a63; }
+  .cw .tier::before { content:attr(data-n); position:absolute; left:-4px; top:-14px; color:#5b6a84; font-size:9px; }
+  .cw .floor { position:absolute; left:12px; right:34px; bottom:10px; height:16px; border-radius:3px; background:linear-gradient(90deg,#5a4a33 0%,#5a4a33 55%,#403428 55%,#403428 100%); }
+  .cw .floor .wet { position:absolute; right:0; width:45%; height:100%; background:#2e2620; border-radius:0 3px 3px 0; }
+  .cw .floor::after { content:"litter · moisture 31% ⚠ wet zone"; position:absolute; left:6px; top:-13px; font-size:9px; color:#8b98ab; }
+  .cw .haze { position:absolute; left:12px; right:34px; bottom:26px; height:34px; background:linear-gradient(transparent,#a3e63522); animation:cwhaze 4s ease-in-out infinite; }
+  @keyframes cwhaze { 50%{opacity:.4} }
+  .cw .dot { position:absolute; width:7px; height:6px; background:#f5efe0; border-radius:50% 60% 40% 50%; }
+  .cw .dot::after { content:""; position:absolute; right:-2px; top:0; width:3px; height:2px; background:#e3b341; }
+  .cw .dot.j1 { animation:cwjump1 3.4s ease-in-out infinite; }
+  .cw .dot.j2 { animation:cwjump2 4.1s ease-in-out infinite; }
+  .cw .dot.pk { animation:cwpk 1.2s ease-in-out infinite; }
+  @keyframes cwjump1 { 0%,100%{transform:translateY(0)} 45%,60%{transform:translateY(-38px)} }
+  @keyframes cwjump2 { 0%,100%{transform:translateY(0)} 40%,70%{transform:translateY(-76px)} }
+  @keyframes cwpk { 50%{transform:rotate(18deg)} }
+  .cw .readout { position:absolute; top:8px; right:44px; font-size:9.5px; color:#8b98ab; text-align:right; line-height:1.7; }
+  .cw .readout b { color:#e6edf3; }
+  .cw .readout .warn { color:#f85149; }
+  .foot { color:var(--dim); font-size:13px; margin-top:6px; max-width:900px; line-height:1.5; }
+  .foot b { color:#e8ecf1; }
+</style>
+</head>
+<body>
+<h1>The farm itself: which art direction?</h1>
+<p class="sub">Live animated samples — the hens are moving in all three. Any style can serve both zoom levels we discussed: a <b>landscape row of all six houses</b> (the hero strip) and a <b>per-house close-up</b>. Weather, day/night, and the seasons of the 17-month episode animate in every option; trouble (ammonia, heat, disease) shows on the affected house. Click a panel to choose.</p>
+
+<!-- 1: PIXEL -->
+<div class="choice" data-choice="pixel-farm" onclick="pick(this)">
+  <div class="stage px">
+    <div class="moon"></div>
+    <div class="snowf" style="left:12%; animation-delay:0s"></div>
+    <div class="snowf" style="left:28%; animation-delay:1.2s"></div>
+    <div class="snowf" style="left:47%; animation-delay:.6s"></div>
+    <div class="snowf" style="left:66%; animation-delay:1.8s"></div>
+    <div class="snowf" style="left:83%; animation-delay:.3s"></div>
+    <div class="snowf" style="left:92%; animation-delay:2.4s"></div>
+    <div class="barn" style="left:6%"><div class="barnroof"></div><div class="barnbody"><div class="lamp"></div><div class="door"></div></div><div class="plabel">H1 · 47,912</div></div>
+    <div class="barn" style="left:26%"><div class="barnroof"></div><div class="barnbody"><div class="lamp"></div><div class="door"></div></div><div class="plabel">H2 · 48,101</div></div>
+    <div class="barn alert" style="left:46%"><div class="barnroof"></div><div class="barnbody"><div class="lamp"></div><div class="door"></div></div><div class="plabel" style="color:#ff8a8a">H3 · NH₃ 27ppm</div></div>
+    <div class="barn" style="left:66%"><div class="barnroof"></div><div class="barnbody"><div class="lamp"></div><div class="door"></div></div><div class="plabel">H4 · 47,203</div></div>
+    <div class="barn" style="left:86%; width:100px"><div class="barnroof"></div><div class="barnbody" style="filter:grayscale(1) brightness(.6)"><div class="door"></div></div><div class="plabel" style="color:#5b6a84">H6 · empty</div></div>
+    <div class="phen" style="left:20%"></div>
+    <div class="phen" style="left:41%; animation-delay:.5s"></div>
+    <div class="phen" style="left:62%; animation-delay:1s"></div>
+  </div>
+  <div class="cap"><span class="tag">1 · PIXEL FARM</span><p><b>Retro farm-game energy.</b> Chunky pixels, night lamps flickering, pixel snow. Maximum charm and instantly reads as a living game world; data (counts, alerts) rendered as game labels. Winter/summer palettes swap; the alerting house flashes.</p></div>
+</div>
+
+<!-- 2: STORYBOOK -->
+<div class="choice" data-choice="storybook-flat" onclick="pick(this)">
+  <div class="stage sb">
+    <div class="sun"></div>
+    <div class="cloud"></div>
+    <div class="cloud" style="top:60px; animation-delay:-7s; transform:scale(.7)"></div>
+    <div class="sbarn" style="left:5%"><div class="sroof"></div><div class="sbody"><div class="win"></div></div><div class="slabel">H1 · 47.9k</div></div>
+    <div class="sbarn" style="left:29%"><div style="position:relative"><div class="alertring"></div></div><div class="sroof" style="background:#96281b"></div><div class="sbody" style="background:#c0392b"><div class="win" style="background:#ffb3a1"></div></div><div class="slabel" style="color:#96281b">H3 · NH₃ 27ppm ⚠</div></div>
+    <div class="sbarn" style="left:53%"><div class="sroof"></div><div class="sbody"><div class="win"></div></div><div class="slabel">H4 · 47.2k</div></div>
+    <div class="sbarn" style="left:77%"><div class="sroof" style="background:#9aa5a1"></div><div class="sbody" style="background:#b7c0bc"><div class="win" style="background:#e8e8e8; box-shadow:none"></div></div><div class="slabel" style="color:#7c8a84">H6 · empty</div></div>
+    <div class="shen" style="left:22%"><div class="body"></div></div>
+    <div class="shen" style="left:47%"><div class="body" style="animation-delay:.6s"></div></div>
+    <div class="shen" style="left:70%"><div class="body" style="animation-delay:1.1s"></div></div>
+    <div class="shen" style="left:12%; transform:scale(.8)"><div class="body" style="animation-delay:.3s"></div></div>
+  </div>
+  <div class="cap"><span class="tag">2 · STORYBOOK FLAT</span><p><b>Warm children's-book flat vector.</b> Soft shapes, golden light, plump hens pecking. The friendliest for demos and non-technical audiences; seasons play as full sky/palette changes (snowfall, heat shimmer, autumn). Alerts are gentle pulsing rings, not sirens.</p></div>
+</div>
+
+<!-- 3: LIVING CUTAWAY -->
+<div class="choice" data-choice="living-cutaway" onclick="pick(this)">
+  <div class="stage cw">
+    <div class="shell">
+      <div class="hdr">HOUSE 3 — cutaway · aviary · 47,845 birds · vent 80% ❄</div>
+      <div class="fan" style="top:18px"><i></i></div>
+      <div class="fan" style="top:64px"><i style="animation-duration:.8s"></i></div>
+      <div class="fan" style="top:110px"><i style="animation-duration:1.1s"></i></div>
+      <div class="readout"><b>NH₃ <span class="warn">27 ppm ⚠</span></b><br>temp 68°F · RH 61%<br>belt run: 2d ago<br>lights 14L:10D</div>
+      <div class="tier" data-n="T3" style="top:52px"></div>
+      <div class="tier" data-n="T2" style="top:90px"></div>
+      <div class="tier" data-n="T1" style="top:128px"></div>
+      <div class="haze"></div>
+      <div class="floor"><div class="wet"></div></div>
+      <div class="dot pk" style="bottom:28px; left:8%"></div>
+      <div class="dot j1" style="bottom:28px; left:18%"></div>
+      <div class="dot pk" style="bottom:28px; left:30%; animation-delay:.4s"></div>
+      <div class="dot j2" style="bottom:28px; left:42%"></div>
+      <div class="dot pk" style="bottom:28px; left:55%; animation-delay:.8s"></div>
+      <div class="dot j1" style="bottom:28px; left:68%; animation-delay:1.2s"></div>
+      <div class="dot" style="top:44px; left:24%"></div>
+      <div class="dot" style="top:44px; left:52%"></div>
+      <div class="dot" style="top:82px; left:38%"></div>
+      <div class="dot" style="top:82px; left:61%"></div>
+      <div class="dot" style="top:120px; left:15%"></div>
+    </div>
+  </div>
+  <div class="cap"><span class="tag">3 · LIVING CUTAWAY</span><p><b>See inside the house — and the data IS the picture.</b> Side cutaway of the aviary: three tiers, hens hopping between them, fans spinning at the actual ventilation rate, litter floor visibly darkening where moisture rises, a faint ammonia haze when NH₃ climbs. Most informative; charm comes from truthful motion rather than cuteness.</p></div>
+</div>
+
+<p class="foot"><b>These combine:</b> a natural pairing is landscape row (style 1 or 2) as the hero, and clicking a house opens the style-3 cutaway as the close-up. Say the word if you want a pairing rather than one style everywhere.</p>
+
+<script>
+  function pick(el){
+    document.querySelectorAll('.choice').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    if (typeof toggleSelect === 'function') { try { toggleSelect(el); } catch(e){} }
+  }
+</script>
+</body>
+</html>
