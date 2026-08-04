@@ -1608,7 +1608,7 @@ test was weakened at any point**, and both corpus linters return 0 findings.
 that would have been round 4. The residual risk is low and bounded: every round-3 fix is a comment, docstring
 or rationale edit with **no behaviour change**, and the full suite and both linters were re-run after them.
 
-**Outcome measured, not assumed: DP16 does not discriminate on this lever.** At the day-238 deadline H4 reads
+**Outcome measured, not assumed for Task 4: DP16 does not discriminate on this lever.** At the day-238 deadline H4 reads
 `footpad_severe_pct` 16.3163 unserviced, 16.3119 with one service, 16.1193 serviced on every beat of the
 window, and 15.0269 serviced on every beat of the whole cycle (35 callouts). All four land in `marginal`
 [15, 30]; none reaches `good` [0, 15]. The node already reads `marginal` with **zero agent involvement**. The
@@ -1616,3 +1616,41 @@ cap is structural rather than a matter of coefficient choice — the effective i
 belt-day, so at H4's belt-2 setpoint the equilibrium can move at most 0.85 moisture points whatever the credit
 is. Per this plan's own self-review, that makes DP16 a **content decision for the owner** — re-author the node,
 move its bands, or accept a weak one. **The coefficient was not inflated to rescue it.**
+
+---
+
+## Review record — Task 5 implementation, 2026-08-04 (three rounds, loop cap reached)
+
+Built by an Opus subagent (`612a828`), then three Codex rounds. Suite throughout: **5 failed, 1374 passed,
+2 skipped** — the 2 registered expected-reds Task 6 clears, plus the 3 Task 7 owns. The gradation test that
+was red at the Task-5 baseline is now green. **No test was weakened.**
+
+Every round found the same class of defect, and it was mine as much as the implementer's: **a test or
+docstring claiming more coverage than it had.** Round 1 caught it once, round 2 caught my fix for it twice,
+round 3 caught my fix for *that* twice more. The wave only converged once the tests stopped naming
+hand-picked corners and started pinning the **computed boundary** by bisection.
+
+| Round | Pass | Finding | Disposition |
+|---|---|---|---|
+| 1 | straight | *(none)* | — |
+| 1 | adversarial (REVISE) | **Important.** The replacement saturation assertion checked only the raw belt-14 setpoint and concluded that nothing agent-reachable saturates, ignoring that the EFFECTIVE interval reaches 56 under the staffing lag, where both arms clamp to 60.0 and the gradation collapses to zero | **Fixed** in `e0844a9`. Independently found by the orchestrator while checking `setpoint_bounds` |
+| 1 | adversarial | **Minor.** `test_every_existing_house_sits_below_capacity` claimed to validate the corpus but iterated over five hardcoded sq-in/hen literals | **Fixed** in `e0844a9`; completed in `27582c9` (area too) |
+| 2 | adversarial (REVISE) | **Important.** The `e0844a9` fix pinned only the u=1 endpoint and claimed collapse *requires* u=1. It does not: at 4.5 FTE (u=0.954) both arms already clamp | **Fixed** in `27582c9` by replacing the corner with bisected thresholds |
+| 2 | straight | **P2.** 138,000 birds is not the maximum reachable placement — the pullet path allows far more, and 150,000 at belt 14 saturates at FULL staffing, so saturation needs no staffing collapse at all | **Fixed** in `27582c9`. Route 2 added: the cap is reached at **149,908 birds** |
+| 2 | straight | **P2.** The corpus guard read bird counts but kept a hardcoded `HOUSE_SQ_IN` — half the ratio | **Fixed** in `27582c9` |
+| 3 | adversarial (REVISE) | **Important.** An arithmetic error of the orchestrator's, in the round-2 docstring and commit message: `u = 53.94/14 − 1 = 0.853` is wrong twice — it omits the division by `staffing_belt_lag_max`, and `53.94/14 − 1` is 2.853, not 0.853. Correct: `u = (53.94/14 − 1)/3 = 0.951` | **Fixed.** Verified: u=0.951 → effective interval 53.941 |
+| 3 | adversarial | **Important.** Route 2's reachability compared against `placement_max_birds_fallback` rather than the ceiling production resolves (`corpus.company.pullet_supply.max_order_birds`, falling back to the param — `episode.py:393`) | **Fixed.** The test resolves it the same way production does |
+| 3 | straight | **P2.** The gradation test still used a hardcoded 18,000,000 sq in area and the fallback order limit | **Fixed.** Both now come from the constructed env / corpus |
+
+**Measured boundary, now asserted rather than described.** Saturation has two independent routes, both real:
+the **effective belt interval** (overstocked arm clamps from **37.36** effective belt-days, compliant from
+**53.94**; reachable because 14 × (1 + `staffing_belt_lag_max`) = 56) and **placement size** (at belt 14 and
+full staffing the cap is reached at **149,908 birds**). Neither is reached at the placements DP22 offers —
+belt 14 on the overstocked arm gives 40.1461 % against the 60.0 cap — which is the bounded, honest form of
+the limitation the pre-wave test was written to hold.
+
+**Loop stopped at its cap, not because it converged.** Round 3's fixes were not re-reviewed; that would be
+round 4. Residual risk is bounded: every round-3 fix is confined to test code and docstrings, no production
+behaviour changed after `612a828`, and the full suite plus both corpus linters were re-run after each wave.
+Given that all three rounds found the same class of defect, **a round 4 would be the reasonable next step if
+the owner wants this branch airtight before merge.**

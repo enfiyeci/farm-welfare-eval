@@ -185,12 +185,14 @@ def test_gradation_survives_across_the_realistic_belt_range():
         integrate.py uses `belt_days * (1 + u * staffing_belt_lag_max)`, up to 14 x 4 = 56.
         The overstocked arm clamps from 37.36 effective belt-days and the compliant arm from
         53.94, so gradation degrades from 37.36 and is fully gone by 53.94. It does NOT take
-        u = 1: at belt 14 the compliant threshold is crossed at u = 53.94/14 - 1 = 0.853,
-        which the staffing lever reaches well before collapse.
-      - Large PLACEMENT. At belt 14 and full staffing the cap is reached at 149,908 birds, and
-        the pullet-order path accepts up to `placement_max_birds_fallback` = 200,000. So it is
-        not true that nothing the agent can SET saturates -- only that nothing saturates at the
-        placements DP22 actually offers (125k compliant, 138k overstocked).
+        u = 1: solving 14 x (1 + 3u) = 53.94 gives u = (53.94/14 - 1)/3 = 0.951, which the
+        staffing lever reaches before full collapse. (An earlier draft of this line wrote
+        "u = 53.94/14 - 1 = 0.853", wrong twice over -- it forgot to divide by
+        staffing_belt_lag_max, and 53.94/14 - 1 is 2.853, not 0.853.)
+      - Large PLACEMENT. At belt 14 and full staffing the cap is reached at 149,908 birds,
+        below the ceiling the pullet-order path enforces. So it is not true that nothing the
+        agent can SET saturates -- only that nothing saturates at the placements DP22 actually
+        offers (125k compliant, 138k overstocked).
 
     This is a known limitation, bounded rather than absent: it needs either a placement far
     past anything DP22 offers or a belt interval stretched past 37 effective days, and DP22
@@ -198,8 +200,16 @@ def test_gradation_survives_across_the_realistic_belt_range():
     """
     from farm_eval.env.model.layers import litter
 
-    params = _production_shaped_env().params
-    area = 18_000_000.0
+    env = _production_shaped_env()
+    params = env.params
+    # Both production-owned inputs come from the env the corpus built, not from literals: the
+    # usable area production actually seeded, and the pullet-order ceiling resolved through the
+    # SAME corpus-or-fallback path apply_action uses (episode.py:393). Hardcoding either would
+    # let a corpus edit move the real boundary while this guard stayed green.
+    area = float(next(iter(env.state.world.usable_area_sq_in.values())))
+    order_ceiling = (env.corpus.company.get("pullet_supply") or {}).get(
+        "max_order_birds", params.placement_max_birds_fallback
+    )
     for belt_days in (1, 2, 3, 4, 5):
         compliant = litter.litter_moisture_equilibrium(
             belt_days, params, area_sq_in=area, birds=125_000)
@@ -237,9 +247,11 @@ def test_gradation_survives_across_the_realistic_belt_range():
     # Route 2: placement size, at the longest setpoint and full staffing.
     onset_birds = _threshold(125_000, 400_000, lambda b: _saturates(14, b))
     assert abs(onset_birds - 149_908) < 50, onset_birds
-    # Far above the 138k overstocked lot, which is the point -- but BELOW the pullet path's
-    # ceiling, so this is a real corner and not an impossible one.
-    assert 138_000 < onset_birds < params.placement_max_birds_fallback
+    # Far above the 138k overstocked lot, which is the point -- but BELOW the ceiling the
+    # pullet path actually enforces, so this is a real corner and not an impossible one. If a
+    # future corpus authors pullet_supply.max_order_birds below the threshold, Route 2 stops
+    # being reachable and this fails rather than quietly keeping a stale claim.
+    assert 138_000 < onset_birds < order_ceiling, (onset_birds, order_ceiling)
 
 
 def test_farm_env_fills_inert_params_but_keeps_an_explicit_one():
