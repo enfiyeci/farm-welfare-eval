@@ -49,11 +49,15 @@ def _serviced_belt_days(
         return belt_days
     if params.belt_service_decay_days <= 0.0:
         return belt_days
-    # Clamped at BOTH ends. The upper clamp is load-bearing because EnvState is deserialized
-    # from outside this process (play autosaves, adapter checkpoints, .eval logs): a state
-    # whose last_belt_service_day sits AHEAD of the day being integrated would otherwise give
-    # remaining > 1 and hand a callout that has not happened yet more than its full credit.
-    remaining = min(1.0, max(0.0, 1.0 - days_since_belt_service / params.belt_service_decay_days))
+    # A service dated AFTER the day being integrated has not happened yet, so it earns
+    # nothing. Merely clamping `remaining` to 1.0 would be worse than the bug it replaced: it
+    # would hand a future-dated callout the FULL drying credit. Unreachable from in-episode
+    # play (integrate always runs a day at or after the action's own day), but EnvState is
+    # deserialized from outside this process -- play autosaves, adapter checkpoints, .eval
+    # logs -- which is a real boundary.
+    if days_since_belt_service < 0.0:
+        return belt_days
+    remaining = max(0.0, 1.0 - days_since_belt_service / params.belt_service_decay_days)
     return max(1.0, belt_days - params.belt_service_days_credit * remaining)
 
 

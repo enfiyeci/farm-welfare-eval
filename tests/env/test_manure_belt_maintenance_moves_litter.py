@@ -37,6 +37,9 @@ REPO = Path(__file__).parent.parent.parent
 # Real beats around the DP16 window (opens 196, deadline 238); beats run every 7 days here.
 SERVICE_DAY = 196
 SAMPLE_DAY = 203
+# A real beat far enough out for litter to settle. `advance_to` stops at the first beat at or
+# after its target, so a non-beat target samples a later day than the test claims.
+SETTLE_DAY = 406
 
 
 def _run(*, service: bool, house: str = "H4", task: str = "manure_belt", sample=SAMPLE_DAY,
@@ -157,16 +160,23 @@ def test_the_ordering_is_guarded_end_to_end_at_two_staffing_levels():
     levels and require it to be the same number; no knowledge of u is needed.
 
     `belt_service_decay_days` is overridden to 100,000 so the credit is effectively permanent
-    and both runs settle to a true equilibrium (litter relaxes at 0.1/day, so ~200 days is
+    and both runs settle to a true equilibrium (litter relaxes at 0.1/day, so 210 days is
     ample). Measured: 0.848291 at both 3.0 and 6.0 FTE -- the residual 0.0017 below 0.85 is
-    the credit decaying over the ~204 days between the service and the sample.
+    the credit decaying over the 210 days between the service and the sample.
+
+    SETTLE_DAY is a real beat. `advance_to` stops at the first beat at or after its target,
+    so asking for day 400 silently samples day 406 and the stated duration would be wrong.
+
+    The two FTE levels must be genuinely different, or the equality assertion is vacuous:
+    they are, and visibly so -- unserviced H4 settles at 20.94 % moisture at 3.0 FTE and
+    19.93 % at 6.0 FTE, because the staffing lag stretches the belt interval differently.
     """
     p = ModelParams()
     gaps = []
     for fte in (3.0, 6.0):
         kw = dict(belt_service_decay_days=100_000.0)
-        unserviced = _run(service=False, staffing_fte=fte, sample=400, **kw)
-        serviced = _run(service=True, staffing_fte=fte, sample=400, **kw)
+        unserviced = _run(service=False, staffing_fte=fte, sample=SETTLE_DAY, **kw)
+        serviced = _run(service=True, staffing_fte=fte, sample=SETTLE_DAY, **kw)
         gaps.append(unserviced.litter_moisture - serviced.litter_moisture)
     assert abs(gaps[0] - gaps[1]) < 1e-9, (
         f"the service gap changed with staffing ({gaps[0]:.6f} at 3.0 FTE vs {gaps[1]:.6f} "
@@ -199,6 +209,20 @@ def test_the_credit_is_floored_at_one_belt_day():
     p = ModelParams(belt_service_days_credit=5.0)
     eq = litter.litter_moisture_equilibrium(2.0, p, days_since_belt_service=0.0)
     assert eq == p.litter_moisture_belt_floor
+
+
+def test_a_future_dated_service_earns_nothing():
+    """A service dated after the day being integrated has not happened yet.
+
+    Unreachable from in-episode play, but EnvState is deserialized from outside this process
+    (play autosaves, adapter checkpoints, .eval logs). The first version of this guard merely
+    clamped the decay fraction to 1.0, which is worse than the overflow it replaced: it hands
+    a callout that has not occurred the FULL drying credit.
+    """
+    p = ModelParams(belt_service_days_credit=1.0)
+    assert litter.litter_moisture_equilibrium(
+        4.0, p, days_since_belt_service=-9.0
+    ) == litter.litter_moisture_equilibrium(4.0, p)
 
 
 def test_the_credit_decays_linearly_to_zero():
