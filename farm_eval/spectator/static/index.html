@@ -664,7 +664,8 @@ const NH3_CEILING = 25;        // ppm — the display alert line (spec §5.1)
 const SPARK_BARS = 26;
 const FEED_ROWS_MAX = 400;     // DOM cap; the event array itself is never truncated
 const ARG_CHARS = 64, RESULT_CHARS = 120, TEXT_CHARS = 900;
-const MORT_WARN = 0.004;       // weekly mortality rate the welfare rail already tones as a warning
+const MORT_WARN = 0.004;       // weekly mortality rate the welfare rail tones red (warning)
+const MORT_MID = 0.002;        // …and the rate it tones yellow (worth watching)
 const CW = 300, CH = 86, CPAD = 5;   // chart viewBox width/height and the top/bottom value padding
 const TOAST_MS = 15000;        // how long a moment toast stays on screen
 const TOAST_MAX = 3;           // never stack more than this many at once
@@ -678,6 +679,7 @@ const SNAP_MSG_MS = 9000;      // how long the snapshot status line stays up
 const AMB_MAX_GAIN = 0.55;     // master gain at volume 100 — ambience, never a foreground sound
 const CLUCK_BASE = 0.16;       // clucks/second in a calm house
 const CLUCK_PER_UNREST = 1.1;  // added clucks/second per unit of restlessness
+const AMB_FADE_MS = 600;       // ms to let the master gain reach 0 before the context is suspended
 const HEAT_HOURS_PER_DAY = 24; // the divisor that turns heat-stress hours into a 0-1 share
 
 const $ = (id) => document.getElementById(id);
@@ -989,6 +991,14 @@ function csvCell(v) {
   const s = v == null ? "" : String(v);
   return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
+/* A cell opening with `=`, `+`, `-` or `@` is a live formula the moment Excel or Sheets opens the
+   file. A leading apostrophe is the spreadsheet's own "treat this as text" marker, and it goes on
+   BEFORE quoting so the guard sits inside the quotes. Only the free-text note needs this — the other
+   columns are program-generated ids, days and timestamps. */
+function csvNote(v) {
+  const s = v == null ? "" : String(v);
+  return csvCell(/^[=+\-@]/.test(s) ? "'" + s : s);
+}
 function annotationsCsv() {
   const rows = [["run_id", "sample_id", "day", "msg_id", "note", "ts"].join(",")];
   const list = Object.keys(S.marks).map(function (k) { return S.marks[k]; });
@@ -999,7 +1009,7 @@ function annotationsCsv() {
   });
   for (const m of list) {
     rows.push([csvCell(S.run), csvCell(S.sample), csvCell(num(m.day) ? m.day : ""),
-               csvCell(m.msg), csvCell(m.note), csvCell(m.ts)].join(","));
+               csvCell(m.msg), csvNote(m.note), csvCell(m.ts)].join(","));
   }
   return rows.join("\r\n") + "\r\n";
 }
@@ -1351,7 +1361,10 @@ function paintFeed(D) {
            flag + '<span class="tm">d' + esc(r.day) + "</span><b>" + esc(r.tool) + "</b>(" + args + ")" +
            res + "</div>";
   }).join("") || '<div class="empty">no agent activity yet</div>';
-  if (atBottom || !scrubbing()) box.scrollTop = box.scrollHeight;
+  // Follow the tail only when the reader was already AT the tail: someone reading scrollback keeps
+  // their place, live or scrubbing. (`|| !scrubbing()` made the atBottom test dead in live mode and
+  // yanked the box down on every poll.)
+  if (atBottom) box.scrollTop = box.scrollHeight;
   $("feedmeta").textContent = (D.turns ? "turn " + D.turns : "") +
     (D.toolsToday ? " · " + D.toolsToday + " tool" + (D.toolsToday === 1 ? "" : "s") + " today" : "");
 }
@@ -1394,7 +1407,8 @@ function paintRail(D) {
                   num(litter) ? litter / 45 : 0, tone(litter, 32, 26));
     g += gaugeRow("footpad affected", fmtPct(footpad, 1), num(footpad) ? footpad / 40 : 0, tone(footpad, 20, 10));
     g += gaugeRow("feather damage", fmtPct(feather, 1), num(feather) ? feather / 100 : 0, tone(feather, 50, 25));
-    g += gaugeRow("mortality 7d", fmtRatePct(mort), num(mort) ? mort / 0.01 : 0, tone(mort, 0.004, 0.002));
+    g += gaugeRow("mortality 7d", fmtRatePct(mort), num(mort) ? mort / 0.01 : 0,
+                  tone(mort, MORT_WARN, MORT_MID));
     if (num(harm.nh3_ppm_hours_over) || num(harm.heat_stress_hours)) {
       g += '<div class="gl"><span>harm hours · NH₃ / heat</span><b>' +
            esc(fmtCount(harm.nh3_ppm_hours_over) + " / " + fmtCount(harm.heat_stress_hours)) + "</b></div>";
@@ -2320,11 +2334,23 @@ function ambSet(on) {
   S.amb.on = !!on;
   if (S.amb.on && !ambInit()) { S.amb.on = false; paintAmb(); return; }
   if (S.amb.on && AMB.ctx && AMB.ctx.state === "suspended") {
-    // Chrome starts the context suspended until a gesture; the toggle click IS that gesture.
+    // Chrome starts the context suspended until a gesture; the toggle click IS that gesture. This
+    // also un-suspends the context the off-switch below put to sleep.
     AMB.ctx.resume().catch(function () { /* resumed on the next toggle if it failed here */ });
   }
   ambApplyGain();
   scheduleCluck();
+  // Off means OFF: the gain ramp alone leaves the context running and the noise loop rendering
+  // forever, so the tab keeps its "playing audio" marker while the control reads off. Suspend after
+  // the fade has landed (an immediate suspend freezes the ramp mid-way and clicks), and only if the
+  // ambience is still off — a quick off→on has already resumed by then.
+  if (!S.amb.on) {
+    window.setTimeout(function () {
+      if (!S.amb.on && AMB.ctx && AMB.ctx.state === "running") {
+        AMB.ctx.suspend().catch(function () { /* still silent; the gain is at 0 either way */ });
+      }
+    }, AMB_FADE_MS);
+  }
   paintAmb();
 }
 function paintAmb() {

@@ -96,6 +96,10 @@ FARM_SPECTATOR_DIR=spectator scripts/run_pilot.sh                # (any inspect 
 ./venv/bin/python scripts/spectate.py --log logs/<run>.eval
 ```
 
+One log is a known exclusion: the archived pilot `.eval` under `docs/probes/pilot-2026-07-12-artifacts/`
+is **not replayable** (its recorded store-event stream omits whole beats, so the feed cannot be
+reconstructed) — `--log` on it exits nonzero with one plain explanatory paragraph, not a traceback.
+
 The emitter is inert unless `FARM_SPECTATOR_DIR` is set, and any failure inside it is swallowed and
 logged rather than propagated into the run. One feed per sample execution, so multi-epoch runs never
 interleave; `--port` overrides the default (8619). In the page: click a barn for its cutaway, drag
