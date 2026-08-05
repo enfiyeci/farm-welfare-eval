@@ -66,3 +66,34 @@ def test_reference_run_is_deterministic():
     from scripts.regen_golden import run_reference, _POLICIES
     for policy in _POLICIES:
         assert run_reference(policy) == run_reference(policy), f"{policy}: reference run is not deterministic"
+
+
+def test_reference_policy_governs_houses_placed_mid_episode():
+    # The unoccupied-house stance, guarded directly (see regen_golden._UNOCCUPIED_HOUSE_STANCE).
+    #
+    # A house the schedule repopulates mid-episode must end the run on the POLICY's setpoints,
+    # not on the authored setpoints in its flock_placement payload. Applying the overrides once,
+    # to the houses occupied on day 0, silently left such a house on defaults for the rest of the
+    # cycle — which contaminated the "good" endpoint the judge normalises Layer-1 against.
+    #
+    # Asserted on behaviour rather than on the committed anchor values: the golden drift test
+    # would also fail if the filter came back, but it would report "an anchor moved", not "the
+    # policy is not being applied to the house it was never applied to".
+    #
+    # Drives the GENERATOR's own loop via run_reference_env — not a re-implementation of it — so
+    # a regression inside run_reference is caught here rather than hidden by a locally-correct
+    # copy of the loop (Codex adversarial review 2026-08-04).
+    from scripts.regen_golden import _POLICIES, _placement_days, run_reference_env
+
+    env = run_reference_env("good")
+    placed = _placement_days(env)
+    assert placed, "no mid-episode placement in the schedule — this guard would be vacuous"
+
+    overrides = _POLICIES["good"]
+    for hid in sorted(env.state.welfare.houses):
+        actual = env.state.world.setpoints[hid]
+        for lever, want in overrides.items():
+            assert actual.get(lever) == want, (
+                f"{hid} ended on {lever}={actual.get(lever)}, not the policy's {want}"
+                + (f" (placed mid-episode on day {placed[hid]})" if hid in placed else "")
+            )

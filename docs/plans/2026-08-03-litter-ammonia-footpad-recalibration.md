@@ -1745,6 +1745,36 @@ Layer-1 normalization and the financial floor, and it needs a design answer firs
 reference policy do about a house placed mid-episode?** — so it is not a change to make silently as the
 last act of a calibration wave. Spawned as separate tasks.
 
+> **RESOLVED 2026-08-04 on `fix/reference-policy-h6`** (findings 1 and 2 only; finding 3 stands open).
+> The design answer: **a reference policy is a standing regime, re-asserted on every house after
+> `start()` and after every `end_day()`, regardless of occupancy** — chosen over re-applying on the
+> placement day because it removes the generator's coupling to schedule content instead of patching
+> the one placement that exists today. It is free (`integrate` skips birdless houses before any harm
+> or P&L accrues) and exact (`end_day` integrates BEFORE firing the day's events, so a house placed
+> on day D is on-policy for the first day it is ever integrated with birds). The stance is now
+> recorded IN the artifacts: `policy.unoccupied_houses` + `policy.mid_episode_placements` in
+> `welfare_reference.json` / `reference_runs.json`, and `policy_stance` in `financial_reference.json`.
+>
+> Movement: good `nh3_ppm_hours_over` **19,032.6636 → 0.0**; negligent **1,528,150.0799 →
+> 1,658,955.5650**; competent **781,120.1963 → 827,987.7046** (footpad moves too). Absolute floor
+> **−$25,290,457 → −$29,565,257**. Of that, −$28,782,507 is the discard-roster fix alone (the figure
+> this review predicted, reproduced exactly), −$29,176,909 adds the mirror `_run` setpoint skip, and
+> the rest is a THIRD defect the fix-session's own Codex adversarial pass found: the discard acts
+> were dated day 1, but the first wake is day 7, so the opening beat sold $388,348 of eggs inside an
+> artifact claiming to discard the whole cycle. Now dated day 0.
+>
+> Also corrected for consistency: `scripts/financial_lever_map.py` and
+> `scripts/financial_decision_sweep.py` carried the identical occupancy skip, so their
+> `good`/`competent`/`negligent` rows would otherwise no longer mean what the committed anchors mean.
+> Their committed probe JSONs were NOT regenerated; `docs/financial-lever-map.md`'s staleness banner
+> was updated to say so and to retire its now-false "every figure moved by the same +$875,822" claim.
+> Suite 1388 passed / 2 skipped; pilot replay still 6.803790995188118 with `docs/probes/` clean.
+> **Still open (escalated, NOT fixed):** `floor_absolute` searches only ventilation × temperature, so
+> it misses a reachable `set_staffing` corner worth about **−$96.8M** — $67M below the committed
+> floor. The artifact hedges ("NOT a proven global minimum"), but the module docstring's "we compute
+> the true financial extremes" does not. Expanding that search changes what `floor_absolute` means,
+> so it is the owner's call.
+
 **3 — Task 2's belt→moisture direction may not be supported by its own source.** This one is
 uncomfortable, because it is the wave's own signature defect (a number claiming provenance it does not
 have) found in the wave's own work, and it sits **upstream of everything**: the belt slope feeds litter
