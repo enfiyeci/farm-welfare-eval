@@ -1,5 +1,18 @@
 # What the money actually does — the agent's financial decision map (2026-08-03)
 
+> **DATED RECORD — absolutes superseded 2026-08-05; the structure holds.** Kept as the dated
+> analysis it was, deliberately not rewritten. Its underlying data file
+> (`docs/probes/financial-decision-sweep.json`) HAS been regenerated on the merged line
+> (litter/ammonia/footpad recalibration + the standing-regime reference fix), so the dollar figures
+> in the prose below run ~11 % low: the repopulated H6 now runs its policy's own regime and sells
+> eggs, lifting revenue across all 105 policies. Rankings, signs, and every qualitative finding
+> survive. For current absolutes see `docs/financial-lever-map.md`, regenerated the same day.
+>
+> **Finding #5 below is confirmed rather than fixed, and its magnitude is stable.** It recorded the
+> profit ceiling as understated by ~$722k ($8,126,102 recorded vs $8,847,707 reachable). On the
+> regenerated line the same gap is **$721,605** ($9,013,722 vs $9,735,327) — both ends moved up
+> together, so the defect is structural, not an artifact of the old calibration.
+
 **Owner ask:** what financial decisions does the model make, how can it do better or worse on
 money, which choices give better welfare while keeping finances good, and which give bad ones.
 
