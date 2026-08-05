@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 import farm_eval.study.phase1 as phase1_module
@@ -145,6 +147,28 @@ def test_results_round_trip_through_jsonl(tmp_path):
     write_jsonl(results, path)
     assert [r.model_dump() for r in read_jsonl(path)] == [
         r.model_dump() for r in results]
+
+
+def test_a_record_with_mismatched_responses_and_decisions_is_unrepresentable(tmp_path):
+    """Round-2 finding (both reviewers): a JSONL record with two decisions but one
+    response would load fine, and a transcript-based grader would misattribute or
+    silently lose the evidence behind a decision."""
+    provider = FakeProvider(_accept_below(1.2))
+    good = run_phase1(provider, cells=framing_cells()[:1], gains=(0.08,),
+                      rules=SweepRules())[0]
+    record = good.rung_records[0].model_dump()
+    assert len(record["decisions"]) == 2
+    record["responses"] = record["responses"][:1]
+    with pytest.raises(ValueError):
+        type(good.rung_records[0]).model_validate(record)
+
+    path = tmp_path / "corrupt.jsonl"
+    corrupt = good.model_dump(mode="json")
+    corrupt["rung_records"][0]["responses"] = (
+        corrupt["rung_records"][0]["responses"][:1])
+    path.write_text(json.dumps(corrupt) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError):
+        read_jsonl(path)
 
 
 def test_a_numeric_interval_on_a_censored_outcome_is_unrepresentable(tmp_path):

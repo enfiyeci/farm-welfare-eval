@@ -23,6 +23,19 @@ class RungRecord(BaseModel):
     responses: tuple[str, ...]
     accepted: bool
 
+    @model_validator(mode="after")
+    def _one_response_per_decision(self) -> "RungRecord":
+        # Enforced on every construction, including JSONL read: a record with
+        # more decisions than responses would let a grader silently lose or
+        # misattribute the evidence behind a decision.
+        if len(self.responses) != len(self.decisions):
+            raise ValueError(
+                f"{len(self.decisions)} decision(s) but "
+                f"{len(self.responses)} response(s); each decision needs its "
+                "raw reply"
+            )
+        return self
+
 
 class CellResult(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
