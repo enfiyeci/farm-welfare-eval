@@ -5,7 +5,7 @@ directory built from the Task-4 golden, and talks to it over real HTTP with `url
 handler's routing, status codes and byte accounting are the contract Task 7's page consumes, so
 they are exercised through the socket rather than by calling handler internals.
 
-Two behaviours here are load-bearing enough to state outright:
+Three behaviours here are load-bearing enough to state outright:
 
 - **Byte offsets advance only past complete `\\n`-terminated lines.** The live emitter appends to a
   feed while the page polls it, so a poll can land mid-line. A partial tail is neither returned nor
@@ -13,12 +13,19 @@ Two behaviours here are load-bearing enough to state outright:
 - **`live` means the feed carries no `episode_end` line** -- never file mtime. A single model call
   routinely takes longer than any poll interval, so an mtime-based badge would flap on a perfectly
   healthy run.
+- **Only `\\n` ends a line.** The emitter writes with `ensure_ascii=False`, which leaves `U+2028`,
+  `U+2029` and `U+0085` raw inside a JSON string, so a body or model sentence can carry a character
+  `str.splitlines()` treats as a break. Such a line must survive the server whole.
+
+The last section covers the launcher (`scripts/spectate.py`) rather than the server: specifically
+that a log the extractor refuses becomes a plain message and a nonzero exit, never a traceback.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import sys
 import threading
 import time
 from collections.abc import Iterator
@@ -30,8 +37,15 @@ from urllib.request import Request, urlopen
 
 import pytest
 
-from farm_eval.spectator.extract import FEED_FILENAME
+from farm_eval.spectator.events import (
+    EmailDelivered,
+    EpisodeEnd,
+    dump_feed_line,
+    parse_feed_line,
+)
+from farm_eval.spectator.extract import FEED_FILENAME, FeedExtractionError
 from farm_eval.spectator.server import create_server, find_feeds
+from scripts import spectate
 
 GOLDEN = Path(__file__).parent / "goldens" / FEED_FILENAME
 
@@ -41,8 +55,12 @@ GOLDEN = Path(__file__).parent / "goldens" / FEED_FILENAME
 
 
 def golden_lines() -> list[str]:
-    """The committed golden feed as a list of NDJSON lines (no trailing newline on any)."""
-    return GOLDEN.read_text(encoding="utf-8").splitlines()
+    """The committed golden feed as a list of NDJSON lines (no trailing newline on any).
+
+    Split on `"\\n"` only: `splitlines()` would break a line on an embedded `U+2028`/`U+0085`
+    exactly as the server used to, and a helper that shares a bug cannot catch it.
+    """
+    return [line for line in GOLDEN.read_text(encoding="utf-8").split("\n") if line]
 
 
 def golden_ids() -> tuple[str, str]:
@@ -384,3 +402,113 @@ def test_post_is_not_served(feed_root: Path) -> None:
         except HTTPError as error:
             status = error.code
     assert status in {404, 501}
+
+
+# --------------------------------------------------------------------------------------------
+# line integrity: only `\n` ends a feed line
+
+#: The characters `str.splitlines()` breaks on that CAN reach a feed file raw. `dump_feed_line`
+#: writes with `ensure_ascii=False`, and `json.dumps` escapes every C0 control (`\v`, `\f`, `\r`,
+#: `\x1c`-`\x1e`) but none of these three -- so these are written literally inside a JSON string, on
+#: ONE physical NDJSON line, and a server splitting on anything but `\n` hands the page two
+#: unparseable fragments. Each case asserts the character really did survive into the written line,
+#: which is what proved `\v`/`\f` do not belong in this list.
+#: Written as escapes deliberately: a literal U+2028 here would be invisible to a reviewer, and
+#: which character it is is the whole point of the test.
+LINE_LIKE_CHARS = {
+    "line-separator": "\u2028",
+    "paragraph-separator": "\u2029",
+    "next-line": "\u0085",
+}
+
+
+@pytest.mark.parametrize("name", sorted(LINE_LIKE_CHARS))
+def test_a_body_holding_a_line_like_character_stays_one_feed_line(
+    feed_root: Path, name: str
+) -> None:
+    """An email body carrying one is served as ONE parseable line, and `/email` still finds it."""
+    char = LINE_LIKE_CHARS[name]
+    run_id, sample_id = golden_ids()
+    running, _ = split_episode_end(golden_lines())
+    body = f"Fans were off{char}then back on at 14:00."
+    mail = dump_feed_line(
+        EmailDelivered(
+            seq=900,
+            day=1,
+            email_id="evt-9-9",
+            sender="vet@example.test",
+            subject="ventilation",
+            body=body,
+        )
+    )
+    assert char in mail, "the emitter writes the character raw — nothing to regress otherwise"
+    assert "\n" not in mail, "one event is one physical line"
+    write_feed(feed_root, run_id, sample_id, [*running, mail])
+    query = urlencode({"run": run_id, "sample": sample_id, "id": "evt-9-9"})
+
+    with serving(feed_root) as base:
+        _, payload = get_json(base, feed_url(run_id, sample_id))
+        status, mailbox = get_json(base, "/email?" + query)
+
+    assert isinstance(payload, dict)
+    assert len(payload["lines"]) == len(running) + 1, "the line must not be torn in two"
+    assert payload["lines"][-1] == mail
+    parse_feed_line(payload["lines"][-1])  # what the page's JSON.parse must be able to do
+    assert json.loads(payload["lines"][-1])["body"] == body
+    assert (status, mailbox) == (200, {"body": body})
+
+
+def test_live_clears_on_an_episode_end_holding_a_line_like_character(feed_root: Path) -> None:
+    """A torn `episode_end` would leave the LIVE badge stuck on a finished run."""
+    run_id, sample_id = golden_ids()
+    running, _ = split_episode_end(golden_lines())
+    end_line = dump_feed_line(EpisodeEnd(seq=901, day=12, status="error\u2028output truncated"))
+    path = write_feed(feed_root, run_id, sample_id, running)
+
+    with serving(feed_root) as base:
+        _, before = get_json(base, feed_url(run_id, sample_id))
+        assert isinstance(before, dict)
+        assert before["live"] is True
+        append_line(path, end_line)
+        _, after = get_json(base, feed_url(run_id, sample_id, before["offset"]))
+
+    assert isinstance(after, dict)
+    assert after["lines"] == [end_line]
+    assert after["live"] is False
+
+
+# --------------------------------------------------------------------------------------------
+# the launcher (scripts/spectate.py)
+
+
+def test_launcher_reports_an_unreplayable_log_as_one_plain_paragraph(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """`--log` on a log the extractor refuses: exit 1, one stderr paragraph, no traceback.
+
+    A traceback here would read as a launcher crash; the log is simply not replayable (the archived
+    `docs/probes/pilot-2026-07-12-artifacts/` pilot is the known real case).
+    """
+    message = (
+        "list index out of range in JSON pointer: '50' while extracting the spectator feed from "
+        "broken.eval (sample abc, last reconstructed day_index 84). Likely cause: the log's "
+        "StoreEvent stream may be incomplete."
+    )
+
+    def refuse(log_path, out_dir):
+        raise FeedExtractionError(message)
+
+    log = tmp_path / "broken.eval"
+    log.write_text("not an eval log", encoding="utf-8")
+    monkeypatch.setattr(spectate, "extract_feed", refuse)
+    monkeypatch.setattr(sys, "argv", ["spectate.py", "--log", str(log)])
+
+    with pytest.raises(SystemExit) as exit_info:
+        spectate.main()  # returns only by exiting — it never reaches serve_forever()
+
+    captured = capsys.readouterr()
+    assert exit_info.value.code == 1
+    assert message in captured.err
+    assert "Traceback" not in captured.err
+    assert captured.err.count("\n") == 1, "one paragraph on one line"
+    assert captured.out == "", "a refused replay must not print a URL"

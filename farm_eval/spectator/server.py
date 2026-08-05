@@ -84,12 +84,22 @@ def complete_lines(data: bytes) -> tuple[list[str], int]:
     A trailing fragment is reported by neither: the caller advances its cursor by the returned byte
     count, which leaves the fragment to be re-read whole on the next pass. Splitting on `\\n` also
     means the decoded slice always ends on a character boundary.
+
+    The split is on `"\\n"` and nothing else, because `str.splitlines()` would break a line that a
+    feed legitimately contains. `dump_feed_line` writes with `json.dumps(ensure_ascii=False)`, which
+    escapes every C0 control (`\\v`, `\\f`, `\\r`, `\\x1c`-`\\x1e`) but NOT `U+0085`, `U+2028` or
+    `U+2029` — all three of which `splitlines()` treats as breaks. A model sentence or an email
+    body carrying one is written literally inside its JSON string, on ONE physical NDJSON line;
+    `splitlines()` would tear it into two unparseable fragments, which the page cannot render,
+    `_absorb` silently drops (an affected `episode_end` would leave the LIVE badge stuck on), and
+    `/email` never indexes. The empty string `split` leaves after the final `\\n` is dropped by the
+    `if line` filter, as is any blank line.
     """
     end = data.rfind(b"\n") + 1
     if end == 0:
         return [], 0
     text = data[:end].decode("utf-8")
-    return [line for line in text.splitlines() if line], end
+    return [line for line in text.split("\n") if line], end
 
 
 def read_lines(path: Path, offset: int) -> tuple[list[str], int]:
