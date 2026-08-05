@@ -17,7 +17,7 @@
 - The emitter must NOT read the live `EpisodeStore` (async hook queue) — state comes only from applying `StoreEvent` patches in order (spec §2).
 - Feeds are per sample: `<FARM_SPECTATOR_DIR>/<run_id>/<sample_id>/feed.ndjson`.
 - Decisions KPI denominator from `run_meta.enabled_nodes` (22 in current `config.yml`), never hardcoded.
-- Breed standard label: Hy-Line **W-36** (`farm_eval/env/model/params.py:34`).
+- Breed standard label: Hy-Line **Brown** — `ModelParams.breed_label` (`farm_eval/env/model/params.py`), matching `docs/model-params.md` §Breed-standard targets and world-bible §2. ("W-36"/"W-80" were stale labels on the same table; corrected 2026-08-04.)
 - Bookmark export is `annotations.csv` — explicitly NOT `judge/validate.py` input.
 - Commits end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
 - Approved visual reference: `docs/specs/assets/2026-08-04-spectator-dashboard/*.html` — prose spec wins over mockups (three known stale spots listed in the spec header).

@@ -16,9 +16,14 @@ import json
 from pathlib import Path
 
 import pytest
+from inspect_ai._util.error import EvalError
+from inspect_ai._util.json import JsonChange
+from inspect_ai.event import StoreEvent
+from inspect_ai.log import read_eval_log
 
 from farm_eval.env.loader import load_schedule
 from farm_eval.env.model import ModelParams
+from farm_eval.spectator import extract as extract_module
 from farm_eval.spectator.events import (
     AssistantText,
     DayStart,
@@ -26,9 +31,17 @@ from farm_eval.spectator.events import (
     RunMeta,
     StateSnapshot,
     ToolCallEvent,
+    dump_feed_line,
     parse_feed_line,
 )
-from farm_eval.spectator.extract import INLINE_CONFIG_LABEL, extract_feed
+from farm_eval.spectator.extract import (
+    INLINE_CONFIG_LABEL,
+    FeedExtractionError,
+    _sample_status,
+    extract_feed,
+    make_translator,
+)
+from farm_eval.spectator.shadow import ENV_STATE_KEY
 from scripts.regen_spectator_golden import CONFIG, GOLDEN_PATH, extract_golden_feed
 from tests.spectator.feed_compare import (
     assert_feeds_match,
@@ -87,10 +100,33 @@ def test_seq_is_strictly_increasing_from_zero(events):
     assert all(b > a for a, b in zip(seqs, seqs[1:])), f"seq not strictly increasing: {seqs}"
 
 
-def test_attachments_are_resolved_not_referenced(events, lines):
+def _translated_lines(log, sample) -> list[str]:
+    """The feed lines one sample's events translate to -- the extractor's loop, without its file."""
+    translator = make_translator(log.eval, sample.uuid)
+    lines = [
+        dump_feed_line(feed_event)
+        for event in sample.events or []
+        for feed_event in translator.handle(event)
+    ]
+    return lines + [dump_feed_line(feed_event) for feed_event in translator.finish("success")]
+
+
+def test_attachments_are_resolved_not_referenced(episode, events, lines):
     """`read_eval_log(resolve_attachments=True)` is mandatory -- see the module docstring of
     `farm_eval/spectator/extract.py`. An unresolved feed carries `attachment://` URIs where live
-    mode has real text: a silent live-vs-replay divergence rather than a failure."""
+    mode has real text: a silent live-vs-replay divergence rather than a failure.
+
+    The unresolved read is the CONTROL. Inspect only creates an attachment for event text longer
+    than 100 characters, so if the scripted episode's messages were all short there would be
+    nothing to resolve and this test would pass just as happily with the flag turned off.
+    """
+    log, _ = episode
+    unresolved = read_eval_log(log.location, resolve_attachments=False)
+    control = _translated_lines(unresolved, unresolved.samples[0])
+    assert [line for line in control if "attachment://" in line], (
+        "no attachment:// in the UNRESOLVED feed -- the scripted episode no longer has a message "
+        "over 100 characters, so this test can no longer detect an unresolved read"
+    )
     for event in events:
         if isinstance(event, AssistantText):
             assert "attachment://" not in event.text
@@ -166,6 +202,79 @@ def test_the_replayed_state_matches_the_state_the_run_itself_recorded(episode, e
             "ammonia_ppm", "litter_moisture", "hen_day_pct", "stocking_density", "lighting_lux",
         ):
             assert house[field] == pytest.approx(welfare[field], abs=0.05), field
+
+
+# --- failure policy: loud, and specific about WHERE ------------------------------------
+
+
+def _extract_doctored(monkeypatch, log, sample, out_dir: Path, log_path: str) -> list[Path]:
+    """Run `extract_feed` over a doctored copy of the episode's log (no second episode)."""
+    doctored = log.model_copy(update={"samples": [sample]})
+    monkeypatch.setattr(extract_module, "read_eval_log", lambda *a, **k: doctored)
+    return extract_feed(log_path, out_dir)
+
+
+def test_a_broken_store_patch_names_the_log_the_sample_and_the_day(episode, tmp_path, monkeypatch):
+    """A bare `JSON pointer ... traverses a missing key` says nothing about which log, which
+    sample, or how far the reconstruction got -- which is most of what tells a corrupt log apart
+    from a stale one."""
+    log, _ = episode
+    sample = log.samples[0]
+    poisoned = sample.model_copy(
+        update={
+            "events": [
+                *sample.events,
+                # An op the shadow store rejects, appended AFTER the real stream, so the failure
+                # happens at the last reconstructed day rather than at day 0.
+                StoreEvent(changes=[JsonChange(op="move", path=f"/{ENV_STATE_KEY}/seed", value=1)]),
+            ]
+        }
+    )
+    with pytest.raises(FeedExtractionError) as raised:
+        _extract_doctored(monkeypatch, log, poisoned, tmp_path, "PLACEHOLDER_LOG.eval")
+    message = str(raised.value)
+    assert "PLACEHOLDER_LOG.eval" in message
+    assert sample.uuid in message
+    assert f"day_index {sample.store[ENV_STATE_KEY]['day_index']}" in message
+    assert "StoreEvent stream may be incomplete" in message
+    # The original exception is chained, not swallowed.
+    assert isinstance(raised.value.__cause__, ValueError)
+
+
+def test_a_reconstruction_that_disagrees_with_the_run_fails(episode, tmp_path, monkeypatch):
+    """The run's own final `EnvState` is an independent witness: if the replay disagrees with it,
+    every number the page shows after the divergence is wrong, so no feed is written at all."""
+    log, _ = episode
+    sample = log.samples[0]
+    recorded = sample.store[ENV_STATE_KEY]
+    drifted = sample.model_copy(
+        update={
+            "store": {
+                **sample.store,
+                ENV_STATE_KEY: {**recorded, "day_index": recorded["day_index"] + 1},
+            }
+        }
+    )
+    with pytest.raises(FeedExtractionError) as raised:
+        _extract_doctored(monkeypatch, log, drifted, tmp_path, "PLACEHOLDER_LOG.eval")
+    assert "does not match the final EnvState the run recorded" in str(raised.value)
+    assert not list(tmp_path.rglob(extract_module.FEED_FILENAME)), "wrote a feed it should not have"
+
+
+def test_a_healthy_sample_is_not_labelled_with_the_runs_error_status(episode):
+    """`log.status` is a RUN-level verdict -- one errored sample makes the whole run "error", and
+    labelling its healthy siblings with that reports a failure they never had."""
+    log, _ = episode
+    sample = log.samples[0]
+    assert _sample_status(log.model_copy(update={"status": "error"}), sample) == "success"
+    errored = sample.model_copy(
+        update={"error": EvalError(message="PLACEHOLDER", traceback="", traceback_ansi="")}
+    )
+    assert _sample_status(log, errored) == "error"
+    # No sample-level signal at all (a log predating `completed_at`) -> the run's status.
+    unsignalled = sample.model_copy(update={"completed_at": None})
+    cancelled_run = log.model_copy(update={"status": "cancelled"})
+    assert _sample_status(cancelled_run, unsignalled) == "cancelled"
 
 
 # --- the golden ----------------------------------------------------------------------

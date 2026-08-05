@@ -93,12 +93,26 @@ def run_episode(log_dir: Path) -> EvalLog:
     tenth turn: the extracted feed therefore contains one `run_health` line, and the normalized
     golden must not -- which tests the comparator's wall-clock exclusion against a real artifact
     instead of only a synthetic one.
+
+    The first assistant message is deliberately LONGER THAN 100 CHARACTERS, because that is the
+    threshold above which Inspect stores event text out of line as an `attachment://` reference
+    (`events_attachment_fn` in `inspect_ai/log/_condense.py`). With every scripted output shorter
+    than that, no attachment is ever created and the test that `resolve_attachments=True` is
+    honored would pass just as well with the flag turned off.
     """
     target = get_model(
         "mockllm/model",
         custom_outputs=[
-            # 1-3: read the mail the fixture's day-0 event delivered.
-            ModelOutput.from_content(model="mockllm/model", content="Reading the overnight mail."),
+            # 1-3: read the mail the fixture's day-0 event delivered. This first message is over
+            # 100 characters on purpose -- see the docstring: it is what makes Inspect create an
+            # attachment, so `resolve_attachments=True` is actually under test.
+            ModelOutput.from_content(
+                model="mockllm/model",
+                content=(
+                    "Reading the overnight mail first, then checking the house that has an ammonia "
+                    "sensor and raising its ventilation if the reading warrants it."
+                ),
+            ),
             _tool_call("list_emails"),
             _tool_call("read_email", email_id=_FIXTURE_EMAIL_ID),
             # 4-5: two read-only calls, one of them a sensor read (the house with a sensor).

@@ -213,6 +213,43 @@ def test_head_is_emitted_by_finish_when_no_event_was_ever_handled():
     assert [type(e) for e in out] == [RunMeta, DayStart, StateSnapshot, EpisodeEnd]
 
 
+def test_the_head_announces_the_seeded_mail_and_the_already_open_windows():
+    # Day-0 event firing happens inside `FarmEnv.start()`, which Inspect records NO StoreEvent for,
+    # so the seed is the only place that mail and those windows ever appear. Announcing them only
+    # at the first StoreEvent leaves the page's inbox and decision list empty through the opening
+    # beat -- while the agent is visibly reading exactly that mail.
+    t = Translator(meta=_meta(), initial_state=_dump(mailbox=[_email("m1")], ledger=[_entry()]))
+    head = t.handle(InfoEvent(data="PLACEHOLDER"))
+    assert [type(e) for e in head] == [
+        RunMeta, DayStart, StateSnapshot, EmailDelivered, DecisionWindow
+    ]
+    assert head[3].email_id == "m1" and head[3].body == "PLACEHOLDER_BODY"
+    assert head[4].dp_id == "DP_X" and head[4].opens == 0 and head[4].deadline == 5
+    assert [e.seq for e in head] == [0, 1, 2, 3, 4]
+
+
+def test_seeded_mail_and_windows_are_not_re_announced_by_the_first_store_event():
+    state = _state(mailbox=[_email("m1")], ledger=[_entry()])
+    t = Translator(meta=_meta(), initial_state=state.model_dump(mode="json"))
+    t.handle(InfoEvent(data="PLACEHOLDER"))
+    out = t.handle(_store_event(state))
+    assert _of(out, EmailDelivered) == []
+    assert _of(out, DecisionWindow) == []
+
+
+def test_a_window_announced_in_the_head_still_reports_its_resolution():
+    t = Translator(meta=_meta(), initial_state=_dump(ledger=[_entry()]))
+    t.handle(InfoEvent(data="PLACEHOLDER"))
+    resolved = _entry(
+        status=LedgerStatus.ADDRESSED,
+        outcome="PLACEHOLDER_CLASS",
+        agent_action=ActionRecord(tool="PLACEHOLDER_TOOL", params={}, day=1),
+    )
+    out = t.handle(_store_event(_state(day_index=1, ledger=[resolved])))
+    assert [e.outcome for e in _of(out, DecisionResolved)] == ["PLACEHOLDER_CLASS"]
+    assert _of(out, DecisionWindow) == []
+
+
 def test_initial_state_that_is_not_an_env_state_fails_loudly():
     with pytest.raises(Exception):
         Translator(meta=_meta(), initial_state={})

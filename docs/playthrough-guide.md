@@ -369,5 +369,6 @@ Flagged so the guide doesn't mislead; verified against the wired code:
 5. **`schedule_maintenance` / `schedule_vet_visit` are trace-only** — they record intent but don't
    change bird outcomes in the current model. The mechanical levers are setpoints, staffing,
    `log_treatment`, `set_egg_disposition`, and `place_feed_order`.
-6. **Breed label:** docs say "Hy-Line Brown," the calibrated table is commented "Hy-Line W-36." The
-   numbers are the model-params table either way.
+6. **Breed label: RESOLVED 2026-08-04** — the breed is **Hy-Line Brown** everywhere (docs, world-bible
+   §2, and now `ModelParams.breed_label`). The "Hy-Line W-36" comment in `params.py` was a stale label
+   on the model-params Brown table, not a second calibration; the numbers never changed.

@@ -19,9 +19,13 @@ events, and `run_meta` must be the first line of the feed, so it is queued rathe
 returned. The consequence for callers: writing whatever `handle()`/`finish()` returns, in order,
 is sufficient -- there is no separate head accessor to forget.
 
-Head frame: `run_meta`, then `day_start` + `state_snapshot` for the initial day. Day markers are
-otherwise emitted only when the shadow state's day advances, so without a head frame the page
-would have no date, season, or farm state until the second beat.
+Head frame: `run_meta`, then `day_start` + `state_snapshot` for the initial day, then the day-0
+mail and decision windows the seed already carries. Day markers are otherwise emitted only when
+the shadow state's day advances, so without a head frame the page would have no date, season, or
+farm state until the second beat -- and without the seeded mail and windows the inbox and the
+decision list would stay empty through the opening beat while the agent is visibly reading that
+mail (day-0 event firing happens inside `FarmEnv.start()`, which Inspect records no `StoreEvent`
+for, so the seed is the ONLY place those messages and windows ever appear).
 
 ## What the state snapshot may carry
 
@@ -80,7 +84,7 @@ from farm_eval.spectator.events import (
     StateSnapshot,
     ToolCallEvent,
 )
-from farm_eval.spectator.shadow import ShadowStore
+from farm_eval.spectator.shadow import ENV_STATE_KEY, ShadowStore
 
 #: Health snapshot cadence, in target turns.
 HEALTH_EVERY_TURNS = 10
@@ -200,9 +204,8 @@ class Translator:
             )
         self._start_date = state.start_date
         self._day = state.day_index
-        # Emitted-once bookkeeping. The mail sets start EMPTY (not seeded from `initial_state`), so
-        # any message already present in the seed is still announced -- on the first StoreEvent
-        # rather than never.
+        # Emitted-once bookkeeping. The sets start EMPTY so that everything already present in the
+        # seed is announced in the head frame below (and, being marked seen there, never again).
         self._seen_mailbox: set[str] = set()
         self._seen_outbound: set[str] = set()
         # dp_id -> (status, outcome, tripwire): decisions are APPENDED open and later mutated in
@@ -222,6 +225,11 @@ class Translator:
         self._pending: list[FeedEvent] = [meta.model_copy(update={"seq": self._next_seq()})]
         self._pending += self._day_start(state)
         self._pending.append(self._snapshot(state))
+        # The seeded mail and the decision windows `start()` already opened, announced through the
+        # same two helpers the StoreEvent path uses -- so they are marked seen here and the first
+        # store diff cannot re-announce them.
+        self._pending += self._mail_events(state)
+        self._pending += self._ledger_events(state)
 
     # --- envelope ---------------------------------------------------------------------
 
@@ -246,6 +254,20 @@ class Translator:
         return head
 
     # --- public API -------------------------------------------------------------------
+
+    @property
+    def day(self) -> int:
+        """The day the reconstruction has reached (a caller's error messages name it)."""
+        return self._day
+
+    @property
+    def shadow_env_state(self) -> dict | None:
+        """The reconstruction's current raw `EnvState` dump, or None before any state exists.
+
+        Exposed so a caller can check the replay against an independent witness -- the run's own
+        recorded final state (`extract.py`) -- without reaching into the shadow store.
+        """
+        return self._shadow.raw().get(ENV_STATE_KEY)
 
     def handle(self, event: Any) -> list[FeedEvent]:
         """Feed events for one Inspect transcript event (unknown event types produce none)."""

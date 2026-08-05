@@ -36,10 +36,24 @@ config) and calls `start()` before dumping it.
 
 ## Failure policy
 
-Nothing here is caught. A log whose patches do not apply, or whose config no longer resolves, is a
-corrupt or mismatched input, and a feed reconstructed from half of it would be quietly wrong for
-every day after the break -- so extraction fails loudly instead. (The LIVE emitter is the opposite:
-it must never take a run down, so it wraps its own translation. Replay has no run to protect.)
+Nothing here is recovered from. A log whose patches do not apply, or whose config no longer
+resolves, is a corrupt or mismatched input, and a feed reconstructed from half of it would be
+quietly wrong for every day after the break -- so extraction fails loudly instead. (The LIVE
+emitter is the opposite: it must never take a run down, so it wraps its own translation. Replay has
+no run to protect.)
+
+Translation failures ARE re-raised as `FeedExtractionError`, chained to the original exception: a
+bare `JSON pointer '/mailbox/3' traverses a missing key` names neither the log, the sample, nor the
+day the reconstruction reached -- which is most of what tells a corrupt log apart from a stale
+reconstruction. The same wrapper covers the fidelity check below.
+
+## The fidelity check
+
+After the last event, the replayed state must equal the state the run itself recorded in
+`sample.store` -- the same state by a completely independent route. A mismatch means the
+reconstruction drifted (a store diff the log never recorded, or a day-0 baseline the recorded
+config no longer reproduces), so extraction fails rather than writing a feed whose numbers
+disagree with the run's own log.
 """
 
 from __future__ import annotations
@@ -51,7 +65,9 @@ from inspect_ai.log import EvalLog, EvalSample, EvalSpec, read_eval_log
 
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.model import ModelParams
+from farm_eval.env.state import EnvState
 from farm_eval.spectator.events import RunMeta, dump_feed_line
+from farm_eval.spectator.shadow import ENV_STATE_KEY
 from farm_eval.spectator.translate import Translator
 
 #: Per-sample feed file name, under `<out_dir>/<run_id>/<sample_uuid>/`.
@@ -156,12 +172,62 @@ def make_translator(spec: EvalSpec, sample_id: str) -> Translator:
     return Translator(meta=meta, initial_state=env.state.model_dump(mode="json"))
 
 
+class FeedExtractionError(RuntimeError):
+    """Replaying one sample failed. The message names the log, the sample and the day reached."""
+
+
+def _extraction_error(
+    problem: str, *, log_path: str | Path, sample_uuid: str, day: int
+) -> FeedExtractionError:
+    """One wording for every extraction failure, carrying the three facts needed to act on it."""
+    return FeedExtractionError(
+        f"{problem} while extracting the spectator feed from {log_path} "
+        f"(sample {sample_uuid}, last reconstructed day_index {day}). Likely cause: the log's "
+        "StoreEvent stream may be incomplete -- older logs omitted beats -- or the recorded task "
+        "config no longer produces the day-0 state this log's patches were diffed against."
+    )
+
+
 def _sample_status(log: EvalLog, sample: EvalSample) -> str:
-    """`EpisodeEnd.status` for one sample: its own error outranks the run's status."""
-    return "error" if sample.error is not None else log.status
+    """`EpisodeEnd.status` for ONE sample, from the sample's own evidence wherever it has any.
+
+    `log.status` is a RUN-level verdict: a single errored or cancelled sample makes the whole run
+    "error"/"cancelled", so labelling a healthy sample with it reports a failure that sample never
+    had. `EvalSample.error` is the sample's own halting error and outranks it; a sample that
+    reached `completed_at` carrying no error ran to completion whatever its siblings did. (A sample
+    stopped by a limit -- `sample.limit` -- is complete and unerrored, and Inspect itself counts
+    such a run as a success, so this does too.) `log.status` stays the fallback for a sample with no
+    signal of its own: a log old enough to predate `completed_at`, or a run still "started".
+    """
+    if sample.error is not None:
+        return "error"
+    if sample.completed_at is not None:
+        return "success"
+    return log.status
 
 
-def _write_sample_feed(log: EvalLog, sample: EvalSample, out_dir: Path) -> Path:
+def _check_reconstruction(translator: Translator, sample: EvalSample) -> None:
+    """Fail unless the replayed state equals the final state the run itself recorded.
+
+    Both sides are normalized through `EnvState` before comparing, so only a genuine state
+    difference trips this -- not a key order or a number rendering that differs between pydantic's
+    JSON dump and Inspect's log encoder.
+    """
+    recorded = (sample.store or {}).get(ENV_STATE_KEY)
+    replayed = translator.shadow_env_state
+    if recorded is None or replayed is None:
+        return
+    if EnvState.model_validate(replayed).model_dump(mode="json") != (
+        EnvState.model_validate(recorded).model_dump(mode="json")
+    ):
+        raise ValueError(
+            "the replayed EnvState does not match the final EnvState the run recorded in its store"
+        )
+
+
+def _write_sample_feed(
+    log: EvalLog, sample: EvalSample, out_dir: Path, log_path: str | Path
+) -> Path:
     if not sample.uuid:
         raise ValueError(
             f"sample {sample.id!r} (epoch {sample.epoch}) has no uuid; the spectator feed is "
@@ -170,9 +236,18 @@ def _write_sample_feed(log: EvalLog, sample: EvalSample, out_dir: Path) -> Path:
     translator = make_translator(log.eval, sample.uuid)
     status = _sample_status(log, sample)
     lines: list[str] = []
-    for event in sample.events or []:
-        lines += [dump_feed_line(feed_event) for feed_event in translator.handle(event)]
-    lines += [dump_feed_line(feed_event) for feed_event in translator.finish(status)]
+    try:
+        for event in sample.events or []:
+            lines += [dump_feed_line(feed_event) for feed_event in translator.handle(event)]
+        lines += [dump_feed_line(feed_event) for feed_event in translator.finish(status)]
+        _check_reconstruction(translator, sample)
+    except Exception as error:
+        raise _extraction_error(
+            str(error) or type(error).__name__,
+            log_path=log_path,
+            sample_uuid=sample.uuid,
+            day=translator.day,
+        ) from error
     path = out_dir / log.eval.run_id / sample.uuid / FEED_FILENAME
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -190,4 +265,4 @@ def extract_feed(log_path: str | Path, out_dir: Path) -> list[Path]:
             f"eval log carries no samples (header only?): {log_path} -- nothing to extract"
         )
     out_dir = Path(out_dir)
-    return [_write_sample_feed(log, sample, out_dir) for sample in log.samples]
+    return [_write_sample_feed(log, sample, out_dir, log_path) for sample in log.samples]
