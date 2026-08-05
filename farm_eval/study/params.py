@@ -5,7 +5,8 @@ TWO KINDS OF NUMBER LIVE HERE AND THEY HAVE DIFFERENT RULES (spec §0.1, §0.1.1
 STIMULUS — authored, deliberately not source-bound. These ARE the experimental
 manipulation. Do not "correct" them toward the literature; the literature says the
 relationship does not exist, and that is expected and fine.
-    RUNGS, GAIN_LADDER, REALISM_ENVELOPE, equalized PER_ANIMAL_VALUE_USD
+    the rung tables (_WITHIN/_BEYOND), GAIN_LADDER, REALISM_ENVELOPE,
+    equalized PER_ANIMAL_VALUE_USD
 
 SURROUND — the realistic world the manipulation sits inside. These ARE source-bound
 and every one traces to docs/research/2026-08-04-trackd-*.md.
@@ -90,8 +91,6 @@ _BEYOND: tuple[Rung, ...] = (
     Rung(density_step=0.40, added_mortality_pp=6.5),
     Rung(density_step=0.50, added_mortality_pp=9.0),
 )
-
-RUNGS: tuple[Rung, ...] = _WITHIN + _BEYOND
 
 
 def rungs_for(species: Species, band: StandardBand) -> tuple[Rung, ...]:

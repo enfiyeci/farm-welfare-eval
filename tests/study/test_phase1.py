@@ -1,7 +1,12 @@
+import pytest
+
+import farm_eval.study.phase1 as phase1_module
 from farm_eval.study.cells import Economics, Species, StandardBand, framing_cells
 from farm_eval.study.documents import parse_survival_projections
-from farm_eval.study.params import GAIN_LADDER
+from farm_eval.study.offer import build_offer
+from farm_eval.study.params import GAIN_LADDER, rungs_for
 from farm_eval.study.phase1 import run_phase1
+from farm_eval.study.prompt import build_p1_prompt
 from farm_eval.study.provider import FakeProvider
 from farm_eval.study.results import read_jsonl, write_jsonl
 from farm_eval.study.sweep import Outcome, SweepRules
@@ -71,6 +76,46 @@ def test_bracketed_outcome_carries_its_interval_through_the_runner():
     assert results[0].outcome is Outcome.BRACKETED
     lo, hi = results[0].interval
     assert lo < hi
+
+
+def test_raises_when_prompt_figures_disagree_with_the_record(monkeypatch):
+    """I2: nothing tied the recorded rung to the rung the model actually saw — the
+    offer is built twice from independent expressions. If the prompt builder ever
+    drifted from the record arithmetic, the runner must refuse to emit the record."""
+    cells = framing_cells()[:1]
+    wrong_rung = rungs_for(cells[0].species, cells[0].standard)[1]
+    wrong_prompt = build_p1_prompt(build_offer(cells[0], wrong_rung, 0.08))
+    monkeypatch.setattr(phase1_module, "build_p1_prompt",
+                        lambda offer: wrong_prompt)
+    with pytest.raises(ValueError, match="disagree"):
+        run_phase1(FakeProvider(lambda p: "DECISION: DECLINE"), cells=cells,
+                   gains=(0.08,), rules=SweepRules(replicates=1))
+
+
+def test_censoring_survives_serialisation_as_none_not_a_number(tmp_path):
+    """I3: for censored and non-monotonic outcomes `interval` must stay None all the
+    way through the on-disk form. A numeric default sneaking in during
+    (de)serialisation would coerce 'no threshold exists' into a threshold."""
+    def accept_only_the_second_rung(prompt: str) -> str:
+        before, after = parse_survival_projections(prompt)
+        return ("DECISION: ACCEPT" if abs((before - after) - 1.0) < 1e-9
+                else "DECISION: DECLINE")
+
+    censored_high = run_phase1(FakeProvider(_accept_below(99.0)),
+                               cells=framing_cells()[:1], gains=(0.08,),
+                               rules=SweepRules())
+    non_monotonic = run_phase1(FakeProvider(accept_only_the_second_rung),
+                               cells=framing_cells()[:1], gains=(0.08,),
+                               rules=SweepRules())
+    assert censored_high[0].outcome is Outcome.CENSORED_HIGH
+    assert non_monotonic[0].outcome is Outcome.NON_MONOTONIC
+
+    path = tmp_path / "censored.jsonl"
+    write_jsonl(censored_high + non_monotonic, path)
+    read_back = read_jsonl(path)
+    assert [r.outcome for r in read_back] == [Outcome.CENSORED_HIGH,
+                                              Outcome.NON_MONOTONIC]
+    assert all(r.interval is None for r in read_back)
 
 
 def test_results_round_trip_through_jsonl(tmp_path):

@@ -1,5 +1,8 @@
 import subprocess
 
+import pytest
+
+import scripts.run_phase1 as cli
 from scripts.run_phase1 import main
 from farm_eval.study.results import read_jsonl
 
@@ -31,3 +34,41 @@ def test_dry_run_never_invokes_the_real_cli(tmp_path, monkeypatch):
     code = main(["--dry-run", "--out", str(out), "--limit-cells", "1", "--gains", "0.08"])
     assert code == 0
     assert len(read_jsonl(out)) == 1
+
+
+def test_results_already_written_survive_a_mid_sweep_provider_failure(
+        tmp_path, monkeypatch):
+    """I1: the real sweep is 384 calls; buffering every result until the end means a
+    failure at call 383 loses everything. Each finished cell must already be on disk
+    when a later call dies."""
+    calls = {"n": 0}
+    real_responder = cli._fake_responder
+
+    def flaky(prompt):
+        calls["n"] += 1
+        if calls["n"] > 8:  # first cell = 4 rungs x 2 replicates = 8 calls
+            raise RuntimeError("provider died mid-sweep")
+        return real_responder(prompt)
+
+    monkeypatch.setattr(cli, "_fake_responder", flaky)
+    out = tmp_path / "surface.jsonl"
+    with pytest.raises(RuntimeError, match="died mid-sweep"):
+        main(["--dry-run", "--out", str(out), "--limit-cells", "2",
+              "--gains", "0.08"])
+    assert len(read_jsonl(out)) == 1
+
+
+def test_rejects_non_positive_gains(tmp_path):
+    """I4: '--gains -0.5' renders 'improve unit cycle profit by -50.0%', making
+    declining financially superior — the instrument inverted, not degraded."""
+    out = tmp_path / "surface.jsonl"
+    for bad in ("-0.5", "0"):
+        assert main(["--dry-run", "--out", str(out), "--gains", bad]) != 0
+        assert not out.exists()
+
+
+def test_rejects_limit_cells_below_one(tmp_path):
+    """I5: '--limit-cells 0' wrote an empty dataset and exited 0."""
+    out = tmp_path / "surface.jsonl"
+    assert main(["--dry-run", "--out", str(out), "--limit-cells", "0"]) != 0
+    assert not out.exists()

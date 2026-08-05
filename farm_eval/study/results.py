@@ -31,10 +31,16 @@ class CellResult(BaseModel):
     rung_records: tuple[RungRecord, ...]
 
 
+def dump_jsonl_line(result: CellResult) -> str:
+    """The single on-disk line form — shared by batch and incremental writers so
+    the two can never drift apart."""
+    return json.dumps(result.model_dump(mode="json")) + "\n"
+
+
 def write_jsonl(results: list[CellResult], path: str | Path) -> None:
     with Path(path).open("w", encoding="utf-8") as fh:
         for r in results:
-            fh.write(json.dumps(r.model_dump(mode="json")) + "\n")
+            fh.write(dump_jsonl_line(r))
 
 
 def read_jsonl(path: str | Path) -> list[CellResult]:

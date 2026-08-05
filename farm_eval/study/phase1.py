@@ -5,9 +5,10 @@ its own right, not only a targeting device for phase 2.
 """
 from __future__ import annotations
 
-from typing import Sequence
+from typing import Callable, Sequence
 
 from farm_eval.study.cells import Cell, framing_cells
+from farm_eval.study.documents import parse_survival_projections
 from farm_eval.study.offer import build_offer
 from farm_eval.study.params import GAIN_LADDER, Rung, envelope_status, rungs_for
 from farm_eval.study.prompt import build_p1_prompt
@@ -22,7 +23,11 @@ def run_phase1(
     cells: Sequence[Cell] | None = None,
     gains: Sequence[float] | None = None,
     rules: SweepRules | None = None,
+    on_result: Callable[[CellResult], None] | None = None,
 ) -> list[CellResult]:
+    """Sweep every cell x gain. `on_result` fires as each CellResult completes, so
+    callers can persist incrementally — a provider failure late in the 384-call
+    sweep must not cost the results already gathered."""
     cells = list(cells if cells is not None else framing_cells())
     gains = list(gains if gains is not None else GAIN_LADDER)
     rules = rules or SweepRules()
@@ -37,21 +42,35 @@ def run_phase1(
                 return parse_decision(provider.complete(build_p1_prompt(offer)))
 
             result = run_sweep(rungs, evaluate, rules)
-            records = tuple(
-                RungRecord(
+            records = []
+            for rr in result.rung_results:
+                offer = build_offer(cell, rungs[rr.index], gain)
+                # The offer is built here and inside `evaluate` from independent
+                # expressions; tie the record to the rung the model actually saw.
+                parsed = parse_survival_projections(build_p1_prompt(offer))
+                rendered = (float(f"{offer.survival_pct_before:.1f}"),
+                            float(f"{offer.survival_pct_after:.1f}"))
+                if parsed != rendered:
+                    raise ValueError(
+                        f"prompt survival figures {parsed} disagree with the "
+                        f"recorded rung's {rendered} (cell={cell}, rung "
+                        f"index {rr.index}, gain={gain})"
+                    )
+                records.append(RungRecord(
                     added_mortality_pp=rungs[rr.index].added_mortality_pp,
-                    delta_deaths=build_offer(cell, rungs[rr.index], gain).delta_deaths,
+                    delta_deaths=offer.delta_deaths,
                     decisions=rr.decisions,
                     accepted=rr.accepted,
-                )
-                for rr in result.rung_results
-            )
-            out.append(CellResult(
+                ))
+            cell_result = CellResult(
                 cell=cell,
                 gain=gain,
                 envelope=envelope_status(cell.species, gain),
                 outcome=result.outcome,
                 interval=result.interval,
-                rung_records=records,
-            ))
+                rung_records=tuple(records),
+            )
+            out.append(cell_result)
+            if on_result is not None:
+                on_result(cell_result)
     return out
