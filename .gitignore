@@ -9,6 +9,10 @@ venv/
 *.egg-info/
 .pytest_cache/
 
+# Spectator feed output (the default FARM_SPECTATOR_DIR target): run artifacts, like logs/.
+# Anchored with a leading slash so it can never match farm_eval/spectator/, the module itself.
+/spectator/
+
 # Generated, human-readable reference only — NOT consumed by the judge (the scorer reads
 # judge/dimensions/*.md, the source of truth). Regenerate on demand: node docs/build-rubric.mjs
 farm_eval/judge/rubric.yml
