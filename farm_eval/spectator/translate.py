@@ -56,8 +56,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from inspect_ai._util.content import ContentReasoning, ContentText
 from inspect_ai.event import ModelEvent, StoreEvent, ToolEvent
+from inspect_ai.model import ContentReasoning, ContentText
 
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
@@ -249,14 +249,18 @@ class Translator:
 
     def handle(self, event: Any) -> list[FeedEvent]:
         """Feed events for one Inspect transcript event (unknown event types produce none)."""
-        out = self._drain()
+        # Build the body FIRST and drain the head only once it cannot be lost: translation can
+        # raise (a malformed store patch), and draining before that point would destroy the
+        # queued `run_meta` -- the feed's required first line -- permanently. Head seqs are
+        # assigned in `__init__`, so prepending the head keeps `seq` in order.
+        body: list[FeedEvent] = []
         if isinstance(event, ModelEvent):
-            out += self._on_model(event)
+            body = self._on_model(event)
         elif isinstance(event, ToolEvent):
-            out += self._on_tool(event)
+            body = self._on_tool(event)
         elif isinstance(event, StoreEvent):
-            out += self._on_store(event)
-        return out
+            body = self._on_store(event)
+        return self._drain() + body
 
     def finish(self, status: str) -> list[FeedEvent]:
         return self._drain() + [self._new(EpisodeEnd, status=status)]
@@ -338,7 +342,11 @@ class Translator:
                 args=dict(event.arguments),
                 result_summary=result_text[:RESULT_SUMMARY_CHARS],
                 cost_cents=_charge_cents(result_text),
-                msg_id=event.message_id,
+                # The ToolCall id, which matches `assistant.tool_calls[].id` -- so the page can
+                # join a call to the turn that made it. NOT `event.message_id`, which is the id of
+                # the tool-RESULT message: a different namespace from assistant message ids (what
+                # `AssistantText.msg_id` carries), so it joins to nothing.
+                msg_id=event.id,
             )
         ]
         # `read_email(email_id=...)` is the agent opening a message -- the page's follow-along cue.
@@ -371,6 +379,10 @@ class Translator:
         # changes can carry both the new day AND that day's mail and freshly opened decisions.
         # Emitting the day frame first keeps those stamped with the day they actually belong to.
         if state.day_index != self._day:
+            # The solver resets its blank streak whenever the day ACTUALLY advanced, including a
+            # forced advance (farm_eval/adapter/solver/farm_solver.py) -- mirror that, or the
+            # run-health strip reports a streak the solver no longer holds.
+            self._blank_streak = 0
             out.append(self._new(DayEnd, day=self._day))
             self._day = state.day_index
             out.append(self._snapshot(state))

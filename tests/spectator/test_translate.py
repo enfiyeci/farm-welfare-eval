@@ -8,11 +8,12 @@ instance, not a stub, so the translator is tested against the shapes it will act
 from __future__ import annotations
 
 import pytest
-from inspect_ai._util.content import ContentReasoning, ContentText
 from inspect_ai._util.json import JsonChange
 from inspect_ai.event import InfoEvent, ModelEvent, StoreEvent, ToolEvent
 from inspect_ai.model import (
     ChatMessageAssistant,
+    ContentReasoning,
+    ContentText,
     GenerateConfig,
     ModelOutput,
     ModelUsage,
@@ -326,6 +327,20 @@ def test_a_tool_call_turn_is_not_blank():
     assert _of(t.handle(event), RunHealth)[0].blank_streak == 0
 
 
+def test_a_day_advance_resets_the_blank_streak_like_the_solver():
+    # The solver resets its streak whenever the day ACTUALLY advanced, including a forced advance
+    # (farm_solver.py); the strip must report the streak the solver holds, not a longer one.
+    t = _translator()
+    for _ in range(7):
+        t.handle(_model_event())
+    t.handle(_model_event(empty=True))  # turn 8 -> streak 1
+    t.handle(_model_event(empty=True))  # turn 9 -> streak 2
+    t.handle(_store_event(_state(day_index=1)))  # the day advances -> streak back to 0
+    health = _of(t.handle(_model_event(empty=True)), RunHealth)[0]  # turn 10 -> streak 1
+    assert health.turns == 10
+    assert health.blank_streak == 1
+
+
 # --- ToolEvent -------------------------------------------------------------------------
 
 
@@ -339,7 +354,9 @@ def test_tool_event_emits_a_tool_call_with_args_and_summary():
     assert calls[0].tool == "PLACEHOLDER_TOOL"
     assert calls[0].args == {"house_id": "H_X"}
     assert calls[0].result_summary == "ok"
-    assert calls[0].msg_id == "tm1"
+    # The ToolCall id (joins to `assistant.tool_calls[].id`), NOT the tool-RESULT message id
+    # `message_id="tm1"` -- that lives in a different namespace and joins to no turn.
+    assert calls[0].msg_id == "t1"
     assert calls[0].cost_cents is None
 
 
@@ -663,6 +680,18 @@ def test_a_bad_patch_raises_and_latches_off_state_derivation():
     assert t.handle(_store_event(_state(day_index=31, mailbox=[_email("m1")]))) == []
     # Transcript translation still works (it does not depend on the shadow state).
     assert _of(t.handle(_model_event()), AssistantText)
+
+
+def test_a_failing_first_event_does_not_destroy_the_head():
+    # The head is drained only after the body is built, so a raising FIRST event cannot lose
+    # `run_meta` -- the feed's required first line (Task 4's golden, Task 6's /runs contract).
+    t = Translator(meta=_meta(), initial_state=_dump())
+    with pytest.raises(ValueError):
+        t.handle(StoreEvent(changes=[JsonChange(op="move", path=f"/{ENV_STATE_KEY}/seed", value=1)]))
+    out = t.handle(_model_event())
+    assert [type(e) for e in out] == [RunMeta, DayStart, StateSnapshot, AssistantText]
+    assert out[0].run_id == "RUN"
+    assert [e.seq for e in out] == [0, 1, 2, 3]  # no seq gap
 
 
 # --- envelope / finish -----------------------------------------------------------------
