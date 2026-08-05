@@ -199,3 +199,50 @@ TEST-SUITE BLIND SPOT: no test ever sees real Codex stdout. Everything uses Fake
 NEXT SESSION STARTS HERE: run the C1 + I1-I5 fix wave, then re-review, then the Codex pair (see the
   CODEX REVIEW PAIR entry above — prompt preserved at docs/research/2026-08-04-trackd-codex-review-prompt.txt),
   then finishing-a-development-branch. 36 commits on feat/pack-shrimp, NOTHING PUSHED.
+
+=========================================================================
+RESOLUTION (2026-08-05, follow-up session): ALL GATES PASSED. APPROVED x2.
+=========================================================================
+
+(The branch HAD been pushed after this handoff was written — origin/feat/pack-shrimp
+existed at 1609805 when the follow-up session started; "NOTHING PUSHED" above is stale.)
+
+FIX WAVE (commit 9b222e8) — every C1/I1-I5 item and all three same-wave minors, TDD:
+  C1 FIXED + LIVE-VERIFIED. CodexProvider now runs codex with a neutral empty cwd, a
+    scratch CODEX_HOME holding only a copied auth.json, and -c project_doc_max_bytes=0.
+    Verified AS PRESCRIBED — by asking the model, through the fixed provider itself:
+    it reported NO instruction documents beyond Codex's own harness scaffolding, an
+    empty neutral cwd, and auth worked from the scratch home. Defaults moved
+    gpt-5.6-sol -> gpt-5.6-terra (the plan's lineup changed 2026-08-05; sol now 400s).
+  I1 fixed: run_phase1 gained on_result; the CLI appends each cell result as it
+    completes (regression test kills the provider mid-sweep and checks the file).
+  I2 fixed: each RungRecord is checked against parse_survival_projections of the
+    rebuilt prompt; drift raises instead of recording.
+  I3 fixed: round-trip test pins interval=None for CENSORED_HIGH and NON_MONOTONIC;
+    verified by mutation experiment to catch the reviewer's (0.0, 0.0) default.
+  I4/I5 fixed: CLI rejects non-positive gains and --limit-cells < 1.
+  Minors fixed: dead params.RUNGS removed; whole-document embed assertion; the
+    welfare test uses find_welfare_vocabulary.
+
+CODEX PRE-MERGE PAIR: RUN on gpt-5.6-terra (straight session 019fd2e5-f746-7eb2-a9ac-
+  ec07e59858c1, adversarial 019fd2e6-004e-7003-b6a8-ee3203c260f1), concurrent, one
+  mutation-guard snapshot pair around each round — guard clean every round.
+  ROUND 1 (both REVISE): straight P1 raw responses discarded (transcript-based grading
+    impossible — the premise-dispute case would be recorded as an ordinary decline with
+    the evidence gone) + P2 explicitly-empty --gains silently became the full ladder;
+    adversarial A1 nan/inf gains pass `g <= 0` + A2 outcome/interval invariant not
+    enforced on read. All four adjudicated real, fixed in ONE wave (commit c94715f):
+    RungRecord.responses per replicate; empty --gains rejected; math.isfinite gate;
+    CellResult model_validator (BRACKETED needs interval, censored/non-monotonic
+    need None) on every construction incl. read_jsonl.
+  ROUND 2 (resume, both sessions): all four round-1 findings confirmed resolved; both
+    independently converged on ONE new Important — RungRecord did not enforce
+    len(responses) == len(decisions) on read. Fixed (commit 38c2663) with a validator
+    + corrupt-JSONL regression test.
+  ROUND 3 (resume, final within the 3-round cap): straight APPROVED ("no Critical or
+    Important regression"), adversarial APPROVED with zero findings.
+  Won't-fix this session: none — every finding from every round was fixed.
+
+FINAL STATE: full suite 1308 passed, 3 skipped. Dry-run smoke: 48 cell results with
+  per-replicate transcripts persisted. The live path remains deliberately unrun beyond
+  the C1 verification probe — first real data collection waits for the owner's go.
