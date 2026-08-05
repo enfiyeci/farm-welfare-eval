@@ -53,6 +53,11 @@ def run_sweep(
 ) -> SweepResult:
     if not rungs:
         raise ValueError("sweep needs at least one rung")
+    if rules.replicates < 1:
+        # all(()) is vacuously True, so replicates=0 would mark EVERY rung accepted
+        # after making zero model calls, and return a confident CENSORED_HIGH built
+        # on no data at all. Exactly the silent failure this module exists to avoid.
+        raise ValueError("sweep needs at least one replicate")
 
     results = tuple(
         RungResult(
