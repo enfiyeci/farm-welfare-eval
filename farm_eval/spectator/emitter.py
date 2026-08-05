@@ -44,9 +44,12 @@ Inspect emits an event to hooks only once it is no longer `pending`, so a `ToolE
 when the tool RETURNS -- after the `StoreEvent`s the tool itself produced. The recorded transcript
 keeps the causal order instead (the tool call is inserted where it was created), so replaying a log
 and watching it live would otherwise disagree: the page would see a decision resolve before the
-action that resolved it, and the parity test would fail. Restricted to the kinds the translator
-handles, the recorded order IS timestamp order (verified against a real log), so `_OrderedStream`
-restores it -- see its docstring for the assumption this rests on and the display latency it costs.
+action that resolved it, and the parity test would fail. `_OrderedStream` repairs THAT ONE
+divergence -- a `ToolEvent` released in front of its own `StoreEvent`s -- and re-orders nothing
+else. In particular it does not sort on `timestamp`: recorded order is NOT timestamp order (a model
+retry records the failed attempts before the successful call, whose timestamp is earlier), so a
+blanket sort makes the live feed diverge from the extracted one instead of matching it. See the
+class docstring for the measurement and the display latency the repair costs.
 
 ## Write protocol
 
@@ -66,6 +69,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Iterator
 
+from inspect_ai.event import StoreEvent, ToolEvent
 from inspect_ai.hooks import Hooks, SampleEnd, SampleEvent, SampleStart, TaskEnd, TaskStart, hooks
 from inspect_ai.log import EvalSample, EvalSpec
 
@@ -93,48 +97,74 @@ def spectator_dir() -> Path | None:
 
 
 class _OrderedStream:
-    """Restores transcript order on the live hook event stream, with a one-event lookahead.
+    """Puts a `ToolEvent` back in front of its own `StoreEvent`s. Re-orders nothing else.
 
     Inspect delivers an event once it stops being `pending`, so a `ToolEvent` arrives AFTER the
-    `StoreEvent`s produced inside it, carrying an earlier timestamp. Buffered events are therefore
-    released only when an event with a strictly later timestamp arrives, in timestamp order.
+    `StoreEvent`s produced inside it, carrying an earlier timestamp; the recorded transcript keeps
+    the tool call at its creation position instead. That single inversion is what replay and live
+    would otherwise disagree about, so `StoreEvent`s are HELD until the next non-store handled
+    event, and a `ToolEvent` whose timestamp precedes a held store is released in front of it.
 
-    **The assumption:** a late arrival's timestamp is always earlier than everything still
-    buffered -- true for a sequential agent loop, where a pending tool or generate always completes
-    before the next one starts. (A tool that itself called a model and outlived a later completed
-    call would break it. Nothing in this harness does that.)
+    **Everything else keeps ARRIVAL order** -- released as it comes, together with whatever stores
+    were held. Arrival order is what makes the live feed equal the extracted one, because recorded
+    order is what replay writes and recorded order is NOT timestamp order: a model retry records the
+    failed attempts BEFORE the successful call, whose timestamp is EARLIER. Measured on the two
+    committed pilot logs, over the kinds the translator handles: 6 adjacent recorded-order timestamp
+    inversions in `docs/probes/pilot-2026-07-14-artifacts/…K8Jv7wak8efpfuuNwYA8of.eval` and 1 in
+    `docs/probes/pilot-2026-07-12-artifacts/…4yVbJBYGTuUFTdFrLJsVA9.eval`, every one of them
+    ModelEvent-to-ModelEvent, and zero Tool/Store inversions. An earlier version of this class
+    sorted the whole stream on `timestamp`, which moved those retry turns (2 and 12 line positions
+    respectively) and changed `run_health.blank_streak` -- a live-vs-replay divergence, not a fix.
 
-    **The cost:** an event is written one handled-event later than it arrived. In the solver's
-    Model -> Tool -> Store -> Model loop that means the day frame, mail and decision lines of a beat
-    land when the next turn's generate returns, so the page can trail the run by one turn.
+    A handled kind this class does not name explicitly therefore defaults to arrival order, which is
+    the safe default: only a kind Inspect actually delivers late needs repairing, and that has to be
+    established by measurement (as above) before it is coded.
+
+    **The cost:** a `StoreEvent` is written only once the next handled event arrives (or at sample
+    end). In the solver's Model -> Tool -> Store -> Model loop the day frame, mail and decision
+    lines of a beat land when the next turn's generate returns, so the page can trail the run by one
+    turn.
+    Model turns and tool calls themselves are released immediately.
 
     Only the kinds the translator handles pass through here (`HANDLED_EVENT_TYPES`): an unhandled
-    event of the tool's own span arrives BEFORE the tool event, so letting one trigger a release
-    would emit the effects ahead of their cause -- the exact inversion this class exists to undo.
+    event of the tool's own span arrives BEFORE the tool event, so letting one release the held
+    stores would emit the effects ahead of their cause -- the exact inversion this class undoes.
     """
 
     def __init__(self) -> None:
-        self._buffer: list[Any] = []
+        # Held `StoreEvent`s, in arrival order, awaiting the `ToolEvent` that may still be pending.
+        self._stores: list[Any] = []
 
     def push(self, event: Any) -> list[Any]:
-        """Buffer *event*; return the events now known to be in order (possibly none)."""
+        """Take *event*; return the events now safe to translate, in the order they belong in."""
         if not isinstance(event, HANDLED_EVENT_TYPES):
             return []
-        timestamp = event.timestamp
-        ready = [held for held in self._buffer if held.timestamp < timestamp]
-        self._buffer = [held for held in self._buffer if held.timestamp >= timestamp]
-        self._buffer.append(event)
-        # Stable, so simultaneous events keep their arrival order.
-        return sorted(ready, key=lambda held: held.timestamp)
+        if isinstance(event, StoreEvent):
+            self._stores.append(event)
+            return []
+        held, self._stores = self._stores, []
+        if isinstance(event, ToolEvent):
+            # The one repair: stores the tool itself produced (timestamp after the call) follow it;
+            # stores that genuinely preceded the call keep their place in front.
+            before = [store for store in held if store.timestamp < event.timestamp]
+            after = [store for store in held if store.timestamp >= event.timestamp]
+            return before + [event] + after
+        return held + [event]
 
     def drain(self) -> list[Any]:
-        """Everything still buffered, in order: the stream ended, so nothing earlier can arrive."""
-        held, self._buffer = sorted(self._buffer, key=lambda event: event.timestamp), []
+        """The still-held stores, in arrival order: the stream ended, so no tool precedes them."""
+        held, self._stores = self._stores, []
         return held
 
 
 class _FeedFile:
-    """One sample's append-only feed file. Whole lines, flushed now, fsynced at day boundaries."""
+    """One sample's append-only feed file. Whole lines, flushed now, fsynced at day boundaries.
+
+    A line is rendered into `_pending` before it is written and removed only once its own
+    `write`+`flush` returned. A failing write therefore leaves the line queued for the next
+    callback instead of destroying it: the translator is stateful and hands each feed event out
+    exactly once (the head line `run_meta` above all), so a line dropped here can never be rebuilt.
+    """
 
     def __init__(self, path: Path) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -143,23 +173,36 @@ class _FeedFile:
         # No day has been written yet, so the first batch always fsyncs -- which is what makes the
         # head of a feed durable even if the run dies during day 0.
         self._day: int | None = None
+        # Rendered lines not yet known to be on disk, oldest first.
+        self._pending: list[str] = []
 
     def write(self, feed_events: Iterable[FeedEvent], *, day: int) -> None:
-        """Append and flush each line, then fsync if *day* is not the day last written.
+        """Queue the lines, write everything queued, then fsync if *day* is not the last written.
 
         *day* is the translator's current day, not any event's own `day` field: mail carries the
         day it was SENT (backlog mail arrives later stamped earlier), so an event-derived boundary
         would both fsync spuriously and walk backwards.
+
+        Raises whatever the write raised, AFTER queueing -- the caller's guard logs it, the day is
+        not marked written, and the same lines go out on the next callback.
         """
-        for event in feed_events:
-            self._file.write(dump_feed_line(event) + "\n")
-            self._file.flush()
+        self._pending += [dump_feed_line(event) + "\n" for event in feed_events]
+        self._write_pending()
         if day != self._day:
             self._day = day
             os.fsync(self._file.fileno())
 
+    def _write_pending(self) -> None:
+        """Write and flush each queued line, dropping it from the queue only once that succeeded."""
+        while self._pending:
+            self._file.write(self._pending[0])
+            self._file.flush()
+            self._pending.pop(0)
+
     def close(self) -> None:
+        """Try the queued lines one last time, then close -- the descriptor closes regardless."""
         try:
+            self._write_pending()
             self._file.flush()
             os.fsync(self._file.fileno())
         finally:
@@ -179,10 +222,20 @@ class _SampleFeed:
         for ordered in self._stream.push(event):
             self._write(self._translator.handle(ordered))
 
-    def finish(self, status: str) -> None:
-        """Translate whatever is still buffered, then close the feed with its `episode_end`."""
+    def drain(self) -> None:
+        """Translate and write whatever the ordering stream still holds. No closing line.
+
+        Held events are already translatable -- they wait only for a tool call that could precede
+        them -- so dropping them loses feed lines for state the run really reached. Used on its own
+        by the hard-cancel path, where no `episode_end` may be invented for a sample nobody
+        reported the outcome of.
+        """
         for ordered in self._stream.drain():
             self._write(self._translator.handle(ordered))
+
+    def finish(self, status: str) -> None:
+        """Translate whatever is still held, then close the feed with its `episode_end`."""
+        self.drain()
         self._write(self._translator.finish(status))
 
     def close(self) -> None:
@@ -256,12 +309,20 @@ class SpectatorHooks(Hooks):
     async def on_task_end(self, data: TaskEnd) -> None:
         with self._guard("on_task_end", data.eval_id):
             self._specs.pop(data.eval_id, None)
-            # A sample cancelled hard enough to skip `on_sample_end` leaves an open file. Its feed
-            # simply ends without an `episode_end` line, which the page reads as "still running";
-            # inventing a status for a sample nobody reported on would be worse.
+            # A sample cancelled hard enough to skip `on_sample_end` leaves an open file, holding
+            # events the ordering stream had not released yet. Write those -- they are real state
+            # the run reached -- but do NOT invent an `episode_end`: the feed then ends without one,
+            # which the page reads as "still running", and no status is claimed for a sample nobody
+            # reported the outcome of.
             for sample_id, feed in list(self._feeds.items()):
-                if feed.eval_id == data.eval_id:
-                    self._feeds.pop(sample_id, None)
+                if feed.eval_id != data.eval_id:
+                    continue
+                self._feeds.pop(sample_id, None)
+                # Each step guarded on its own: one sample's failing drain or close must not strand
+                # the descriptors of every sample after it, which is how a sweep runs out of them.
+                with self._guard("on_task_end", f"draining sample {sample_id}"):
+                    feed.drain()
+                with self._guard("on_task_end", f"closing sample {sample_id}"):
                     feed.close()
 
     # --- failure isolation ------------------------------------------------------------

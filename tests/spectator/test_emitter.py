@@ -24,8 +24,9 @@ from pathlib import Path
 
 import pytest
 from inspect_ai.event import ModelEvent, SpanEndEvent, StoreEvent, ToolEvent
-from inspect_ai.hooks import SampleEvent, SampleStart
+from inspect_ai.hooks import SampleEvent, SampleStart, TaskEnd
 from inspect_ai.hooks._hooks import get_all_hooks
+from inspect_ai.model import GenerateConfig, ModelOutput
 
 from farm_eval.spectator import emitter as emitter_module
 from farm_eval.spectator.emitter import (
@@ -313,29 +314,74 @@ def _tool(seconds: float, function: str = "end_day"):
     return _stamped(ToolEvent, seconds, id="PLACEHOLDER_CALL", function=function, arguments={})
 
 
+def _model(seconds: float):
+    return _stamped(
+        ModelEvent,
+        seconds,
+        model="PLACEHOLDER_MODEL",
+        input=[],
+        tools=[],
+        tool_choice="auto",
+        config=GenerateConfig(),
+        output=ModelOutput(),
+    )
+
+
 def test_a_tool_event_delivered_after_its_own_store_events_is_put_back_in_front():
-    """The divergence this exists to fix: Inspect delivers a `ToolEvent` when the tool RETURNS, so
-    it arrives after the `StoreEvent`s it caused while carrying an earlier timestamp. Replaying the
-    log gives the causal order, so the live stream must be restored to it."""
+    """The ONE divergence the stream exists to fix: Inspect delivers a `ToolEvent` when the tool
+    RETURNS, so it arrives after the `StoreEvent`s it caused while carrying an earlier timestamp.
+    Replay writes the recorded (causal) order, so the live stream must be restored to it."""
     stream = _OrderedStream()
-    store, tool, later = _store(2.0), _tool(1.0), _store(3.0)
-    assert stream.push(store) == []
-    assert stream.push(tool) == [], "nothing can be released while an earlier event may still come"
-    assert stream.push(later) == [tool, store], "the tool call precedes the state it changed"
-    assert stream.drain() == [later]
+    store, later_store, tool = _store(2.0), _store(2.5), _tool(1.0)
+    assert stream.push(store) == [], "a store waits: the tool that caused it may still be pending"
+    assert stream.push(later_store) == []
+    assert stream.push(tool) == [tool, store, later_store], "the call precedes the state it changed"
     assert stream.drain() == []
 
 
-def test_an_unhandled_event_kind_neither_releases_the_buffer_nor_enters_it():
-    """A tool's span events arrive BEFORE the tool event, so letting one release the buffer would
-    emit the effects ahead of their cause -- the exact inversion the stream undoes. The filter is
-    the translator's OWN tuple, so a newly translated kind cannot stay un-ordered by accident."""
+def test_model_events_keep_arrival_order_when_their_timestamps_invert():
+    """A model RETRY is recorded as the failed attempts followed by the successful call, whose
+    timestamp is EARLIER (measured: 6 such adjacent inversions among the handled kinds in the
+    2026-07-14 pilot log, 1 in the 2026-07-12 one, every one ModelEvent-to-ModelEvent).
+
+    Replay writes recorded order, so re-ordering these -- as a blanket timestamp sort did -- makes
+    the live feed diverge from the extracted feed, moving lines and changing `run_health`."""
+    stream = _OrderedStream()
+    first_error, second_error, success = _model(9.0), _model(11.0), _model(3.0)
+    released = stream.push(first_error) + stream.push(second_error) + stream.push(success)
+    assert released == [first_error, second_error, success], "arrival order, not timestamp order"
+    assert stream.drain() == [], "and nothing is held back: model turns are released immediately"
+
+
+def test_a_store_event_that_genuinely_precedes_a_tool_call_keeps_its_place():
+    """Only the tool's OWN stores move behind it. A store already written before the call was made
+    carries an earlier timestamp and stays in front of it."""
+    stream = _OrderedStream()
+    earlier, tool, caused = _store(1.0), _tool(2.0), _store(3.0)
+    assert stream.push(earlier) == []
+    assert stream.push(caused) == []
+    assert stream.push(tool) == [earlier, tool, caused]
+
+
+def test_held_stores_are_released_in_front_of_the_next_model_turn():
+    """Nothing else is re-ordered, so a `ModelEvent` releases the held stores ahead of itself in
+    arrival order -- whatever the timestamps say."""
+    stream = _OrderedStream()
+    store, model = _store(9.0), _model(3.0)
+    assert stream.push(store) == []
+    assert stream.push(model) == [store, model]
+
+
+def test_an_unhandled_event_kind_neither_releases_the_held_stores_nor_enters_them():
+    """A tool's span events arrive BEFORE the tool event, so letting one release the held stores
+    would emit the effects ahead of their cause -- the exact inversion the stream undoes. The filter
+    is the translator's OWN tuple, so a newly translated kind cannot stay un-ordered by accident."""
     assert HANDLED_EVENT_TYPES == (ModelEvent, ToolEvent, StoreEvent)
     stream = _OrderedStream()
     store = _store(2.0)
     stream.push(store)
     span_end = _stamped(SpanEndEvent, 2.5, id="PLACEHOLDER_SPAN")
-    assert stream.push(span_end) == [], "an unhandled event must not release the buffered store"
+    assert stream.push(span_end) == [], "an unhandled event must not release the held store"
     assert stream.drain() == [store], "and must not be handed to the translator either"
 
 
@@ -361,6 +407,124 @@ def test_a_sample_start_with_no_task_start_logs_instead_of_raising(tmp_path, mon
     assert "on_sample_start" in errors
     assert "PLACEHOLDER_EVAL" in errors
     assert hook._feeds == {}
+
+
+def _task_end(eval_id: str) -> TaskEnd:
+    """A `TaskEnd` payload. The hook reads only `eval_id`; `log` is unused (the dataclass is frozen
+    but does no runtime type checking, so None is enough)."""
+    return TaskEnd(eval_set_id=None, run_id="PLACEHOLDER_RUN", eval_id=eval_id, log=None)
+
+
+class _StubTranslator:
+    """A `Translator` stand-in: one `day_end` line per handled event, no state reconstruction."""
+
+    day = 0
+
+    def __init__(self) -> None:
+        self.handled: list[object] = []
+
+    def handle(self, event) -> list:
+        self.handled.append(event)
+        return [DayEnd(seq=len(self.handled) - 1, day=0)]
+
+    def finish(self, status: str) -> list:
+        return [EpisodeEnd(seq=len(self.handled), day=0, status=status)]
+
+
+def test_a_hard_cancelled_sample_keeps_the_events_the_stream_was_still_holding(
+    tmp_path, monkeypatch
+):
+    """`on_task_end` closes what a sample cancelled before `on_sample_end` left open. The ordering
+    stream holds already-translatable events (they wait only for a tool call that could precede
+    them), so closing without draining silently loses feed lines for state the run really reached --
+    while still inventing no `episode_end`, since nobody reported this sample's outcome."""
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, str(tmp_path))
+    hook = SpectatorHooks()
+    path = tmp_path / "run" / "sample" / FEED_FILENAME
+    feed = emitter_module._SampleFeed(_StubTranslator(), path, "PLACEHOLDER_EVAL")
+    hook._feeds["PLACEHOLDER_SAMPLE"] = feed
+    feed.handle(_store(1.0))
+    assert path.read_text(encoding="utf-8") == "", "the store is held, so nothing is written yet"
+
+    asyncio.run(hook.on_task_end(_task_end("PLACEHOLDER_EVAL")))
+
+    kinds = [json.loads(line)["kind"] for line in path.read_text(encoding="utf-8").splitlines()]
+    assert kinds == ["day_end"], "the held event's line must be written before the file closes"
+    assert "episode_end" not in kinds, "no status may be invented for an unreported sample"
+    assert hook._feeds == {}
+
+
+def test_one_feed_that_fails_to_close_does_not_strand_the_rest(tmp_path, monkeypatch):
+    """A single failing `close()` used to abort the loop, leaking every remaining open feed into the
+    next task of a sweep -- which is how a long sweep runs out of file descriptors."""
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, str(tmp_path))
+    hook = SpectatorHooks()
+
+    class _Feed:
+        def __init__(self, *, explodes: bool) -> None:
+            self.eval_id = "PLACEHOLDER_EVAL"
+            self._explodes = explodes
+            self.closed = False
+
+        def drain(self) -> None:
+            pass
+
+        def close(self) -> None:
+            self.closed = True
+            if self._explodes:
+                raise RuntimeError(_BOOM)
+
+    broken, healthy = _Feed(explodes=True), _Feed(explodes=False)
+    hook._feeds = {"PLACEHOLDER_BROKEN": broken, "PLACEHOLDER_HEALTHY": healthy}
+
+    asyncio.run(hook.on_task_end(_task_end("PLACEHOLDER_EVAL")))
+
+    assert healthy.closed, "the feed after the failing one must still be closed"
+    assert hook._feeds == {}
+    errors = (tmp_path / ERROR_LOG_FILENAME).read_text(encoding="utf-8")
+    assert _BOOM in errors and "PLACEHOLDER_BROKEN" in errors
+
+
+class _FlakyFile:
+    """A file object that accepts *allow* writes and then raises, to model a full disk."""
+
+    def __init__(self, allow: int) -> None:
+        self.written: list[str] = []
+        self.allow = allow
+
+    def write(self, text: str) -> None:
+        if len(self.written) >= self.allow:
+            raise OSError("PLACEHOLDER_DISK_FULL")
+        self.written.append(text)
+
+    def flush(self) -> None:
+        pass
+
+    def fileno(self) -> int:
+        return -1
+
+    def close(self) -> None:
+        pass
+
+
+def test_a_write_that_fails_mid_batch_retries_the_same_lines_next_callback(tmp_path, monkeypatch):
+    """The translator hands each feed event out exactly ONCE -- the head `run_meta` line above
+    all -- so a line dropped by a failed write can never be rebuilt. Lines therefore stay queued
+    until their own write returned: a transient failure costs a retry, not the head of the feed."""
+    monkeypatch.setattr("os.fsync", lambda fd: None)
+    feed = _FeedFile(tmp_path / "run" / "sample" / FEED_FILENAME)
+    flaky = _FlakyFile(allow=1)
+    monkeypatch.setattr(feed, "_file", flaky)
+
+    with pytest.raises(OSError):
+        feed.write([DayEnd(seq=0, day=0), DayEnd(seq=1, day=0)], day=0)
+    assert [json.loads(text)["seq"] for text in flaky.written] == [0], "one line got through"
+
+    flaky.allow = 99
+    feed.write([DayEnd(seq=2, day=0)], day=0)
+    assert [json.loads(text)["seq"] for text in flaky.written] == [0, 1, 2], (
+        "the failed line is retried, the rest of its batch is not dropped, and nothing is doubled"
+    )
 
 
 def test_an_event_for_an_unknown_sample_is_ignored_silently(tmp_path, monkeypatch):
