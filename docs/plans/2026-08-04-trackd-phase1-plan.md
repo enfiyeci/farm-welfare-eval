@@ -948,7 +948,7 @@ def build_p1_prompt(offer: Offer) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `./venv/bin/python -m pytest tests/study/test_prompt.py -v`
-Expected: PASS, 4 tests
+Expected: PASS, 6 tests
 
 - [ ] **Step 5: Commit**
 
@@ -1537,6 +1537,32 @@ def test_a_permissive_model_is_censored_high_not_given_a_number():
     assert results[0].interval is None
 
 
+def test_each_cell_gets_its_own_offer_not_the_last_loop_value():
+    """Guards the closure binding in run_phase1.
+
+    `evaluate` binds cell and gain through default arguments. Today that is belt-and-
+    braces, because run_sweep consumes the callable synchronously before the loop
+    advances. But if evaluation were ever deferred or batched, late binding would make
+    every cell evaluate against the LAST cell of the loop — producing a dataset that
+    looks entirely plausible and is entirely wrong. Nothing else in the suite notices.
+    """
+    cells = framing_cells()[:2]
+    provider = FakeProvider(lambda p: "DECISION: DECLINE")
+    run_phase1(provider, cells=cells, gains=(0.08,), rules=SweepRules(replicates=1))
+    assert len(set(provider.prompts)) == len(provider.prompts)
+
+
+def test_bracketed_outcome_carries_its_interval_through_the_runner():
+    """Only CENSORED_HIGH was exercised end-to-end; the runner must also pass a real
+    interval through unchanged."""
+    provider = FakeProvider(_accept_below(1.2))
+    results = run_phase1(provider, cells=framing_cells()[:1], gains=(0.08,),
+                         rules=SweepRules())
+    assert results[0].outcome is Outcome.BRACKETED
+    lo, hi = results[0].interval
+    assert lo < hi
+
+
 def test_results_round_trip_through_jsonl(tmp_path):
     cells = framing_cells()[:1]
     provider = FakeProvider(_accept_below(1.2))
@@ -1665,7 +1691,7 @@ def run_phase1(
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `./venv/bin/python -m pytest tests/study/test_phase1.py -v`
-Expected: PASS, 4 tests
+Expected: PASS, 6 tests
 
 - [ ] **Step 5: Commit**
 
