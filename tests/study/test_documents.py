@@ -1,28 +1,51 @@
-import pytest
-
 from farm_eval.study.cells import Cell, Economics, Scale, Species, StandardBand
 from farm_eval.study.documents import (
-    WELFARE_VOCABULARY, render_all, render_contract, render_cost_report,
+    find_welfare_vocabulary, render_all, render_contract, render_cost_report,
     render_production_projection,
 )
 from farm_eval.study.offer import build_offer
 from farm_eval.study.params import rungs_for
 
 
-def _offer(species=Species.HEN, economics=Economics.EQUALIZED):
-    cell = Cell(species=species, scale=Scale.SMALL,
-                standard=StandardBand.WITHIN, economics=economics)
-    return build_offer(cell, rungs_for(species, StandardBand.WITHIN)[0], 0.08)
+def _offer(species=Species.HEN, economics=Economics.EQUALIZED,
+           scale=Scale.SMALL, band=StandardBand.WITHIN):
+    cell = Cell(species=species, scale=scale, standard=band, economics=economics)
+    return build_offer(cell, rungs_for(species, band)[0], 0.08)
 
 
 def test_no_welfare_vocabulary_in_any_document():
-    """Spec §16.8 — livability is stated in industry units only."""
+    """Spec §16.8 — livability is stated in industry units only.
+
+    Sweeps the FULL factorial, not a sample: a welfare word introduced into a
+    beyond-standard or large-scale branch must not slip through because the guard
+    only ever rendered one corner of the design.
+    """
     for species in Species:
         for economics in Economics:
-            docs = render_all(_offer(species, economics))
-            blob = " ".join(docs.values()).lower()
-            found = [w for w in WELFARE_VOCABULARY if w in blob]
-            assert found == [], f"welfare vocabulary leaked: {found}"
+            for scale in Scale:
+                for band in StandardBand:
+                    docs = render_all(_offer(species, economics, scale, band))
+                    found = find_welfare_vocabulary(" ".join(docs.values()))
+                    assert found == [], (
+                        f"welfare vocabulary leaked in "
+                        f"{species}/{economics}/{scale}/{band}: {found}")
+
+
+def test_prefix_boundary_matching_avoids_false_positives():
+    """'harm' must catch 'harmful' but not 'pharmaceutical', or the guard becomes
+    unusable in any document that mentions veterinary supplies."""
+    assert find_welfare_vocabulary("harmful crowding") == ["harm"]
+    assert find_welfare_vocabulary("pharmaceutical schedule") == []
+
+
+def test_contract_names_each_species_correctly():
+    """Regression: singularising by slicing turned 'shrimp' into 'shrim', which
+    reached the rendered contract. The documents must read as real paperwork."""
+    hen = render_contract(_offer(Species.HEN).cell)
+    shrimp = render_contract(_offer(Species.SHRIMP).cell)
+    assert "per surviving hen at collection" in hen
+    assert "per surviving shrimp at collection" in shrimp
+    assert "shrim " not in shrimp and "shrim." not in shrimp
 
 
 def test_projection_carries_survival_at_both_stocking_levels():
