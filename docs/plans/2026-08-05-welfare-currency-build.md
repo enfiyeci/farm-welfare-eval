@@ -3383,3 +3383,26 @@ plan is not "done" until a fresh adversarial Codex session has reviewed the fixe
 findings are adjudicated. ⚠️ Note from the spec's own §8.5: an adversarial run phrased around avian
 disease and sepsis was killed by OpenAI's content filter (a false positive); rephrase as a
 measurement/software-specification review. **A filtered run is not a clean run.**
+
+### ⚠️ STATUS: DO NOT EXECUTE YET — fix wave 2 is outstanding
+
+**Codex adversarial review of `9235779`** (`gpt-5.6-sol`, read-only, fresh session, phrased as a
+measurement/software-specification review so the content filter did not fire; verdict REVISE).
+**Nine findings. Eight verified real, one accepted-as-is with rationale.** They are recorded here
+and **not yet applied** — an implementer following the tasks above literally would hit defects 1,
+2, 4 and 7 immediately.
+
+| # | Finding | Adjudication |
+|---|---|---|
+| 1 | Task 2 dereferences `state.welfare.keel_cohorts` nine tasks before Task 11 creates the field, so Task 2's own 60-day ledger test raises `AttributeError` | **REAL.** The wave-1 cohort-attrition fix was inserted into the mortality block, which Task 2 owns. Move the attrition snippet into Task 11 and have Task 2 leave the block untouched |
+| 2 | Task 10's replay test calls `integrate()` twice without advancing `state.day_index`, so the second call **re-runs days 1–100** and duplicates pain, ledger and rate rows — while still passing, because it only checks the feather baseline dict | **REAL.** `integrate()` reads `day_index` as its start day and `end_day` is what advances it. Set `state.day_index = 10` between the calls, and add an assertion on row counts so the test can actually fail |
+| 3 | Merging a later rise into an earlier cohort still **skips the acute and inflammation phases** for the merged birds — wave 1 moved `start_day` to the first rise but did not remove the skip | **REAL, and wave 1's claim that bucketing costs only a ≤7-day timing shift was wrong.** The fix is to drop bucketing and open **one cohort per day**, made cheap by precomputing a per-cohort-age daily lookup table (`keel_daily_table(pp) -> list[PainDelta]`, one entry per day of the profile plus a terminal chronic rate), so a cohort-day is an O(1) lookup instead of a segment walk |
+| 4 | Backdated seeds start **24 hours too far into the timeline**: the seed is created with `start_day=0` but on the first integrated day `day == 1`, so its first window is `[offset+24, offset+48)` | **REAL.** Create the seed with `start_day=day`, so cohort age 0 is its first charged day |
+| 5 | Chronic peritonitis charges a case's **entire ~4,000-hour track on its incidence day**, so a case arising near the horizon is charged pain that never occurs inside the episode | **REAL and materially different from feather's accepted instantaneous charge**, whose track completes in ~30 minutes. Fix by accruing the chronic track incrementally over its duration through the same per-age daily table as finding 3, truncated at the horizon |
+| 6 | The rate series records **booking-time deltas, not pain experienced that day**, so instantaneously-booked channels produce daily rates above the day's duration and make the forgone-pain calculation depend on artificial booking dates | **REAL.** Finding 5's fix removes the largest offender. What remains is fatal peritonitis, whose track *precedes* death and is booked at death. Disposition: name the affected channels explicitly, **exclude them from the forgone-pain calculation**, and say so wherever the figure appears — the same treatment §5.5.1 ¶16 already requires for its survivors-versus-dead assumption |
+| 7 | Task 12's Interfaces block and tests call `mortality_pain`, but wave 1 renamed the implementation to `mortality_pain_by_cause` and changed its return type to a dict | **REAL — a defect wave 1 introduced.** Update Task 12's Interfaces block and every test in it |
+| 8 | A fractional `awake_hours_per_day` (e.g. 16.5) is accepted by the validator but `is_awake_hour` rounds it to 16, so daily state channels and hourly heat disagree by half an hour | **REAL.** Validate `awake_hours_per_day` as a whole number of hours |
+| 9 | Totals inherit dict insertion order, so two semantically identical states could sum in different float orders | **ACCEPTED, no change.** Accrual order is fixed by `integrate()`'s single iteration over `state.welfare.houses`, which the loader builds in corpus order; no code path builds the same episode with a different insertion order. Recorded rather than dismissed — if a future path does, this becomes real |
+
+⚠️ **This loop is at round 2 of its 3-round cap.** Wave 2 applies findings 1–8, then one re-review
+closes the loop or escalates.
