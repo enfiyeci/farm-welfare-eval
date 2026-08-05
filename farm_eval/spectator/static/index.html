@@ -1,1 +1,1282 @@
-Henhouse spectator — page lands in Task 7
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Henhouse — spectator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Midnight Barn tokens (spec §4) ---------- */
+  :root {
+    --ink:#0f131c; --panel:#171c28; --panel-hi:#1c2231; --line:#2a3145; --line-warm:#33394b;
+    --cream:#ece4d4; --txt:#c8cedb; --dim:#818b9e; --faint:#5a6375;
+    --gold:#d9a441; --barn:#b5382f; --blue:#7fb4e8; --green:#57bd7e; --red:#e56a5e; --purple:#b49ae8;
+    --serif:"Fraunces",Georgia,serif; --body:"Newsreader","Iowan Old Style",Georgia,serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    /* One height for the three main panes: mail, agent feed and the welfare rail scroll
+       INSIDE it, so no pane can stretch the row and leave the others with dead space. */
+    --pane:436px;
+  }
+  * { box-sizing:border-box; margin:0; }
+  html,body { min-height:100%; }
+  body { background:var(--ink); color:var(--txt); font-family:var(--body); padding:16px 1.6vw 26px; position:relative; }
+  body::after { content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay; z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  ::-webkit-scrollbar { width:9px; height:9px; }
+  ::-webkit-scrollbar-track { background:#0b0f18; }
+  ::-webkit-scrollbar-thumb { background:#2f374c; border-radius:6px; }
+  ::-webkit-scrollbar-thumb:hover { background:#3d465e; }
+
+  .frame { border:1px solid var(--line); border-radius:20px; background:linear-gradient(180deg,#141926,#10141f);
+    padding:14px; box-shadow:0 30px 80px #00000088, inset 0 1px 0 #ffffff0d; }
+
+  /* ---------- top bar ---------- */
+  .topbar { display:flex; align-items:stretch; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .brand { display:flex; flex-direction:column; justify-content:center; padding:0 14px 0 6px; border-right:1px solid var(--line); }
+  .brand .t { font-family:var(--serif); font-weight:700; font-size:17px; color:var(--cream); white-space:nowrap; }
+  .brand .d { font-family:var(--mono); font-size:9px; color:var(--faint); letter-spacing:.14em; text-transform:uppercase; }
+  .live { align-self:center; display:flex; align-items:center; gap:7px; background:#173322; color:#6fdc96;
+    border:1px solid #2ea04366; padding:5px 14px; border-radius:999px; font-family:var(--mono); font-size:11px; letter-spacing:.1em; white-space:nowrap; }
+  .live .pip { width:8px; height:8px; border-radius:50%; background:#57bd7e; box-shadow:0 0 10px #57bd7e; animation:pip 1.8s ease-in-out infinite; }
+  @keyframes pip { 50%{opacity:.3} }
+  .live.replay { background:#20283a; color:#9db0c8; border-color:var(--line-warm); }
+  .live.replay .pip { background:#7d8899; box-shadow:none; animation:none; }
+  .live.scrub { background:#33290f; color:#e0b45c; border-color:#d9a44155; }
+  .live.scrub .pip { background:var(--gold); box-shadow:0 0 10px #d9a44188; animation:none; }
+  .day { align-self:center; font-family:var(--serif); font-size:19px; color:var(--cream); white-space:nowrap; }
+  .day small { font-family:var(--mono); font-size:10.5px; color:var(--dim); display:block; letter-spacing:.05em; }
+  .spacer { flex:1 1 20px; }
+  .kpis { display:flex; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+  .kpi { background:linear-gradient(180deg,var(--panel-hi),var(--panel)); border:1px solid var(--line); border-radius:12px;
+    padding:7px 12px 6px; text-align:center; min-width:76px; box-shadow:inset 0 1px 0 #ffffff0a; }
+  .kpi .v { font-family:var(--mono); font-weight:600; font-size:15px; color:var(--cream); }
+  .kpi .v.warn { color:var(--red); } .kpi .v.gold { color:var(--gold); }
+  .kpi .l { font-family:var(--mono); font-size:8px; color:var(--faint); text-transform:uppercase; letter-spacing:.12em; margin-top:2px; }
+  .runsel { align-self:center; font-family:var(--mono); font-size:10px; background:#131826; color:var(--dim);
+    border:1px solid var(--line); border-radius:9px; padding:5px 8px; max-width:230px; }
+
+  /* ---------- hero ---------- */
+  .hero { position:relative; height:196px; border-radius:14px; overflow:hidden; margin-bottom:12px;
+    box-shadow:inset 0 0 0 1px #ffffff14; background:linear-gradient(180deg,#2a3352 0%,#59507a 30%,#a4718b 52%,#d9a48a 64%,#e8ecf4 64.5%,#dfe5f0 100%); }
+  .hero.summer { background:linear-gradient(180deg,#20406e 0%,#4d84bd 34%,#8fc0e2 56%,#cfe4ef 64%,#8fae62 64.5%,#6f9550 100%); }
+  .hero.spring { background:linear-gradient(180deg,#2b4772 0%,#6b8ec2 32%,#bcd0e0 54%,#e6dcc6 64%,#93b06a 64.5%,#7ba05c 100%); }
+  .hero.autumn { background:linear-gradient(180deg,#2b2f4d 0%,#6e5a76 30%,#bb8264 54%,#dcb489 64%,#a08653 64.5%,#7f6a45 100%); }
+  .hero.winter { background:linear-gradient(180deg,#2a3352 0%,#59507a 30%,#a4718b 52%,#d9a48a 64%,#e8ecf4 64.5%,#dfe5f0 100%); }
+  .sunball { position:absolute; top:34%; left:8%; width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle,#ffe9b8 30%,#f7c873 70%); box-shadow:0 0 60px 24px #f7c87355; animation:sunrise 9s ease-in-out infinite; }
+  @keyframes sunrise { 50%{transform:translateY(-6px)} }
+  .treeline { position:absolute; left:0; right:0; top:52%; height:13%; background:#3d3a55; opacity:.7;
+    clip-path:polygon(0 100%,0 60%,3% 45%,5% 70%,9% 30%,12% 65%,15% 40%,19% 75%,23% 35%,26% 60%,30% 50%,34% 70%,38% 30%,42% 62%,46% 45%,50% 70%,55% 38%,59% 66%,63% 48%,67% 72%,71% 34%,75% 60%,80% 45%,84% 68%,88% 36%,92% 62%,96% 50%,100% 65%,100% 100%); }
+  .hero.summer .treeline, .hero.spring .treeline { background:#2f4a34; }
+  .hero.autumn .treeline { background:#4a3a30; }
+  .ground { position:absolute; bottom:0; left:0; right:0; height:36%;
+    background:radial-gradient(120% 100% at 30% 0%, #f4f7fc 0%, #e2e9f4 60%, #d3dcec 100%); }
+  .hero.summer .ground { background:radial-gradient(120% 100% at 30% 0%, #9dbd6e 0%, #7da257 60%, #688c48 100%); }
+  .hero.spring .ground { background:radial-gradient(120% 100% at 30% 0%, #a6c477 0%, #86ab5e 60%, #71934f 100%); }
+  .hero.autumn .ground { background:radial-gradient(120% 100% at 30% 0%, #b39a63 0%, #93794b 60%, #7a6440 100%); }
+  .flake { position:absolute; background:#fff; border-radius:50%; opacity:.85; animation:fall linear infinite; }
+  @keyframes fall { from{transform:translateY(-14px)} to{transform:translateY(210px)} }
+  .wx { position:absolute; top:12px; right:14px; font-family:var(--mono); font-size:10.5px; color:#e8ecf4;
+    background:#10141f66; backdrop-filter:blur(4px); padding:4px 12px; border-radius:999px; border:1px solid #ffffff22; }
+  .heronote { position:absolute; top:12px; left:14px; font-family:var(--mono); font-size:10.5px; color:#e8ecf4;
+    background:#10141f66; backdrop-filter:blur(4px); padding:4px 12px; border-radius:999px; border:1px solid #ffffff22; }
+
+  .barnw { position:absolute; bottom:40px; width:104px; margin-left:-52px; cursor:pointer;
+    filter:drop-shadow(0 10px 8px #4a556e33); }
+  .barnw .struct { position:relative; height:64px; background:linear-gradient(105deg,#c24a3c 0%,#b5382f 55%,#93291f 100%);
+    clip-path:polygon(0% 100%,0% 52%,16% 20%,50% 0%,84% 20%,100% 52%,100% 100%); }
+  .barnw .snowcap { position:absolute; top:0; left:14%; right:14%; height:13px; background:#f4f7fc;
+    clip-path:polygon(2% 100%,18% 10%,50% 0%,82% 10%,98% 100%,50% 60%); opacity:.95; }
+  .barnw .loft { position:absolute; top:16px; left:50%; transform:translateX(-50%); width:15px; height:15px; border-radius:50%;
+    background:#f6e7c8; box-shadow:0 0 12px #ffd76bcc; border:2px solid #7e2219; }
+  .barnw .doors { position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:26px; height:24px; background:#6e1f17;
+    border-radius:3px 3px 0 0; box-shadow:inset 0 0 0 1.5px #93291f, inset 13px 0 0 -12px #93291f; }
+  .barnw .glow { position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:54px; height:9px;
+    background:radial-gradient(50% 100% at 50% 0,#ffd76b44,transparent); }
+  .barnw.off .struct { background:linear-gradient(105deg,#8d94a6,#767d90); }
+  .barnw.off .loft { background:#d7dbe4; box-shadow:none; border-color:#5c6272; }
+  .barnw.off .doors { background:#5c6272; box-shadow:none; }
+  .barnw.off .glow { display:none; }
+  /* The pulse floor stays high (and the ring carries a glow): a breach must read at a glance in
+     ANY frame of the animation, including over a bright hero sky. */
+  .barnw.alert::before { content:""; position:absolute; inset:-8px -8px -4px; border:2.5px solid var(--red);
+    border-radius:14px; box-shadow:0 0 12px #e56a5e66, inset 0 0 10px #e56a5e33;
+    animation:ring 1.6s ease-in-out infinite; }
+  @keyframes ring { 50%{opacity:.45} }
+  .barnw.sel .struct { outline:2.5px solid var(--blue); outline-offset:3px; }
+  .barnw:hover .struct { filter:brightness(1.08); }
+  /* The chip sizes to its own text (a house id, a bird count and an NH₃ reading are all
+     variable-length) and is centred on the barn, so no reading is ever clipped. */
+  .bchip { position:absolute; bottom:6px; width:max-content; max-width:min(190px,22vw); transform:translateX(-50%);
+    font-family:var(--mono); font-size:9px; color:#414d66; background:#ffffffd9; border:1px solid #c9d4e6;
+    border-radius:9px; padding:2.5px 8px; white-space:nowrap; text-align:center; overflow:hidden;
+    text-overflow:ellipsis; line-height:1.5; box-shadow:0 2px 6px #4a556e22; pointer-events:none; }
+  .bchip b { color:#17233c; } .bchip .bad { color:var(--barn); font-weight:700; }
+  .henw { position:absolute; bottom:34px; width:22px; height:20px; margin-left:-11px;
+    filter:drop-shadow(0 3px 2px #4a556e2e); pointer-events:none; }
+  .henw i { position:absolute; inset:0; display:block; background:linear-gradient(150deg,#fffdf7,#efe6d2);
+    border-radius:62% 68% 46% 54%; transform-origin:bottom center; animation:peck 2s ease-in-out infinite; }
+  .henw i::before { content:""; position:absolute; top:-4px; right:2px; width:7px; height:7px; background:#d9463b; border-radius:50% 50% 50% 0; }
+  .henw i::after { content:""; position:absolute; top:4px; right:-4px; width:6px; height:3.5px; background:#e8a33c; border-radius:0 50% 50% 50%; }
+  @keyframes peck { 0%,100%{transform:rotate(0)} 14%{transform:rotate(15deg)} 28%{transform:rotate(0)} 58%{transform:translateX(4px)} }
+
+  /* ---------- cutaway overlay (never reflows the page) ---------- */
+  .cutwrap { position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
+    background:#070a1099; backdrop-filter:blur(3px); padding:20px; }
+  .cutwrap[hidden] { display:none; }
+  .cut { position:relative; width:min(900px,94vw); border:1px solid var(--line-warm); border-radius:14px;
+    background:linear-gradient(180deg,#161c2b,#121724); height:264px; font-family:var(--mono); overflow:hidden;
+    box-shadow:0 40px 90px #000000aa; animation:cutin .18s ease-out; }
+  @keyframes cutin { from{opacity:0; transform:translateY(8px) scale(.985)} }
+  .cut .hd { position:absolute; top:10px; left:16px; font-size:10.5px; color:var(--blue); letter-spacing:.08em; }
+  .cut .hd b { color:var(--cream); }
+  .cut .close { position:absolute; top:8px; right:14px; color:var(--faint); font-size:11px; cursor:pointer;
+    background:none; border:none; font-family:var(--mono); }
+  .cut .close:hover { color:var(--cream); }
+  .cshell { position:absolute; inset:34px 236px 16px 16px; border:1.5px solid #34405c; border-radius:8px;
+    background:linear-gradient(180deg,#151d30,#131a2a); }
+  .cshell .tier { position:absolute; left:10px; right:26px; height:2.5px; background:linear-gradient(90deg,#41506f,#34405c); border-radius:2px; }
+  .cshell .tier::before { content:attr(data-n); position:absolute; left:-3px; top:-13px; color:#5d6a85; font-size:8.5px; }
+  .cshell .floor { position:absolute; left:10px; right:26px; bottom:7px; height:13px; border-radius:3px; background:#42372a; overflow:hidden; }
+  .cshell .floor i { position:absolute; inset:0 auto 0 0; background:#6b573c; }
+  /* The gradient's own alpha keeps the haze a tint at any ammonia level; the inline opacity
+     (set from the house's NH₃) only decides how visible that tint is. */
+  .cshell .haze { position:absolute; left:10px; right:26px; bottom:20px; height:44px;
+    background:linear-gradient(transparent,#b4d94a2e); animation:haze 4.5s ease-in-out infinite; }
+  @keyframes haze { 50%{opacity:.35} }
+  .cshell .fan { position:absolute; right:-12px; width:22px; height:22px; border-radius:50%; border:2px solid #34405c;
+    background:#10141f; display:flex; align-items:center; justify-content:center; }
+  .cshell .fan i { width:13px; height:13px; border-radius:50%;
+    background:conic-gradient(var(--blue) 0 25%,transparent 0 50%,var(--blue) 0 75%,transparent 0); animation:spin 1s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .cshell .hd2 { position:absolute; width:6.5px; height:5.5px; background:#f2ead8; border-radius:50% 60% 40% 50%; }
+  .cshell .hd2.j { animation:hop 3.6s ease-in-out infinite; }
+  @keyframes hop { 0%,100%{transform:translateY(0)} 45%,60%{transform:translateY(-32px)} }
+  .cshell .vacant { position:absolute; inset:0 0 24px; display:flex; align-items:center; justify-content:center;
+    color:var(--faint); font-size:10px; letter-spacing:.1em; }
+  .cstats { position:absolute; right:16px; top:32px; bottom:14px; width:210px; font-size:9.5px;
+    color:var(--dim); line-height:1.72; overflow-y:auto; }
+  .cstats b { color:var(--cream); font-weight:500; } .cstats .warn { color:var(--red); } .cstats .ok { color:var(--green); }
+  .cstats .row { display:flex; justify-content:space-between; gap:8px; }
+
+  /* ---------- panels ---------- */
+  .grid { display:grid; grid-template-columns:1.5fr .95fr .8fr; gap:12px; margin-bottom:12px; }
+  .grid > .panel { height:var(--pane); }
+  .panel { background:linear-gradient(180deg,var(--panel),#131826); border:1px solid var(--line); border-radius:14px;
+    overflow:hidden; display:flex; flex-direction:column; box-shadow:inset 0 1px 0 #ffffff09; min-width:0; }
+  .ph { padding:9px 14px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .ph .pt { font-family:var(--serif); font-size:13.5px; font-weight:600; color:var(--cream); letter-spacing:.02em; white-space:nowrap; }
+  .ph .pm { font-family:var(--mono); font-size:9px; color:var(--faint); letter-spacing:.06em; white-space:nowrap; }
+  .follow { background:#173322; color:#6fdc96; border:1px solid #2ea04355; border-radius:999px; padding:2px 9px;
+    font-size:8.5px; font-family:var(--mono); letter-spacing:.08em; cursor:pointer; white-space:nowrap; }
+  .follow.off { background:#20283a; color:var(--dim); border-color:var(--line-warm); }
+  .tabs { display:flex; gap:2px; font-family:var(--mono); font-size:9px; }
+  .tabs button { padding:2.5px 10px; border-radius:999px; color:var(--dim); border:1px solid transparent; background:none;
+    font-family:var(--mono); font-size:9px; cursor:pointer; }
+  .tabs button.on { color:var(--cream); background:#20283a; border-color:var(--line-warm); }
+  .authored { display:inline-block; background:#16283e; color:var(--blue); border:1px solid #7fb4e844; border-radius:999px;
+    padding:1px 9px; font-size:8.5px; font-family:var(--mono); letter-spacing:.08em; margin-left:8px; vertical-align:2px; }
+
+  /* mail */
+  /* `min-height:0` on the grid items is what keeps the two scrollers INSIDE the pane: with the
+     default `auto` a long email body would stretch the whole dashboard row. */
+  .mail { display:grid; grid-template-columns:214px 1fr; flex:1; min-height:0; }
+  .mlist, .mbody { min-height:0; }
+  .mlist { border-right:1px solid var(--line); overflow-y:auto; }
+  .mrow { padding:7px 10px; border-bottom:1px solid #202637; font-size:10.5px; cursor:pointer; }
+  .mrow:hover { background:#1b2233; }
+  .mrow .f { color:var(--cream); font-weight:500; font-family:var(--body); }
+  .mrow .s { display:block; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:10px; }
+  .mrow .t { float:right; color:var(--faint); font-size:8.5px; font-family:var(--mono); margin-top:2px; }
+  .mrow.cur { background:linear-gradient(90deg,#20304e,#1a2438); border-left:3px solid var(--blue); padding-left:7px; }
+  .mrow.unread .f::before { content:"● "; color:var(--blue); font-size:8px; vertical-align:1px; }
+  .mrow.sent .f { color:var(--blue); }
+  .mrow.sent.cur { background:linear-gradient(90deg,#1c2f4e,#182238); }
+  .mbody { padding:12px 18px; font-size:12.5px; line-height:1.65; overflow-y:auto; }
+  .mbody.out { box-shadow:inset 3px 0 0 var(--blue); background:linear-gradient(90deg,#16203222,transparent 40%); }
+  .mbody .mh { border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:10px; }
+  .mbody .mh b { font-family:var(--serif); color:var(--cream); font-size:15px; font-weight:600; }
+  .mbody .mh .meta { color:var(--dim); font-size:9.5px; font-family:var(--mono); display:block; margin-top:3px; }
+  .mbody p { margin:0 0 9px; white-space:pre-wrap; }
+  .mbody .empty { color:var(--faint); font-style:italic; padding:0; }
+
+  /* feed */
+  .feed { padding:9px; flex:1; min-height:0; overflow-y:auto; font-size:10.5px; }
+  .ev { padding:5px 9px; margin-bottom:5px; border-left:2.5px solid var(--blue); background:#131928; font-family:var(--mono);
+    border-radius:0 6px 6px 0; word-break:break-word; }
+  .ev .tm { color:var(--faint); font-size:8.5px; margin-right:7px; }
+  .ev b { color:var(--cream); font-weight:500; }
+  .ev .res { color:var(--dim); }
+  .ev.act { border-left-color:var(--gold); background:#17192a; }
+  .ev .cost { float:right; color:var(--gold); font-size:9px; margin-left:8px; }
+  .ev.think { border-left-color:var(--purple); font-family:var(--body); font-style:italic; color:#c3b4e6; font-size:11.5px; background:#151527; }
+  .ev.think .rm { font-family:var(--mono); font-style:normal; color:var(--purple); font-size:8.5px; opacity:.75;
+    margin-right:5px; letter-spacing:.06em; }
+  .ev.day { border-left:none; color:var(--blue); text-align:center; background:transparent; font-size:9.5px; letter-spacing:.12em; }
+  .ev.end { border-left:none; color:var(--gold); text-align:center; background:transparent; font-size:9.5px; letter-spacing:.12em; }
+
+  /* rail */
+  .railscroll { flex:1; min-height:0; overflow-y:auto; }
+  .g { padding:2px 14px 8px; }
+  .g .gl { display:flex; justify-content:space-between; gap:8px; font-size:9.5px; color:var(--dim); font-family:var(--mono); margin-top:9px; }
+  .g .gl b { color:var(--cream); font-weight:500; }
+  .g .gb { height:6px; background:#0b0f18; border-radius:4px; overflow:hidden; margin-top:3px; box-shadow:inset 0 1px 2px #00000088; }
+  .g .gf { height:100%; border-radius:4px; }
+  .g .gf.r { background:linear-gradient(90deg,#a33f2f,var(--red)); box-shadow:0 0 8px #e56a5e66; }
+  .g .gf.y { background:linear-gradient(90deg,#a8792a,var(--gold)); }
+  .g .gf.g { background:linear-gradient(90deg,#2f7d52,var(--green)); }
+  .spark { display:flex; align-items:flex-end; gap:1.5px; height:24px; margin-top:6px; }
+  .spark i { flex:1; min-width:1px; background:#34405c; border-radius:1.5px 1.5px 0 0; }
+  .spark i.hot { background:var(--red); box-shadow:0 0 6px #e56a5e88; }
+  .sparkl { display:flex; justify-content:space-between; gap:8px; font-family:var(--mono); font-size:8px; color:var(--faint);
+    letter-spacing:.06em; margin-top:3px; }
+  .fin { padding:8px 14px 12px; font-size:10.5px; font-family:var(--mono); color:var(--dim); line-height:1.9; }
+  .fin b { color:var(--cream); font-weight:500; } .fin .up { color:var(--green); } .fin .dn { color:var(--red); }
+  .fin .row { display:flex; justify-content:space-between; gap:8px; }
+
+  /* decisions + timeline */
+  .bottom { display:grid; grid-template-columns:1fr 1.6fr; gap:12px; }
+  .ledlist { overflow-y:auto; max-height:190px; }
+  .ledgrow { display:flex; gap:8px; align-items:center; padding:6px 13px; border-bottom:1px solid #202637;
+    font-size:10.5px; font-family:var(--mono); }
+  .ledgrow .dpn { color:var(--txt); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ledgrow .lat { margin-left:auto; color:var(--faint); font-size:9px; white-space:nowrap; }
+  .badge { border-radius:999px; padding:1.5px 9px; font-size:8.5px; letter-spacing:.05em; white-space:nowrap; }
+  .badge.done { background:#12301e; color:#6fdc96; } .badge.open { background:#20283a; color:#9db0c8; }
+  .badge.trip { background:#3a1420; color:#f08a80; } .badge.miss { background:#33290f; color:#e0b45c; }
+  .empty { padding:12px 14px; color:var(--faint); font-size:10.5px; font-family:var(--mono); }
+  .tlwrap { padding:14px 18px 12px; }
+  .tlbar { position:relative; height:10px; background:#0b0f18; border-radius:6px; margin:15px 0 7px;
+    box-shadow:inset 0 1px 3px #000000aa; cursor:ew-resize; touch-action:none; }
+  .tlfill { position:absolute; inset:0 auto 0 0; border-radius:6px; background:linear-gradient(90deg,#31567f,var(--blue)); }
+  .tick { position:absolute; top:-4px; width:2.5px; height:18px; background:var(--gold); border-radius:2px; margin-left:-1.25px; cursor:pointer; }
+  .tick.done { background:var(--green); } .tick.trip { background:var(--red); }
+  .tick:hover { box-shadow:0 0 0 2px #ffffff44; }
+  .cursor { position:absolute; top:-8px; width:3px; height:26px; background:#fff; border-radius:2px;
+    box-shadow:0 0 10px #ffffffaa; margin-left:-1.5px; }
+  .seasons { position:relative; height:12px; font-size:8.5px; color:var(--faint); font-family:var(--mono); letter-spacing:.05em; }
+  .seasons span { position:absolute; transform:translateX(-50%); white-space:nowrap; }
+  .seasons span.now { color:var(--blue); }
+  .tctrl { display:flex; align-items:center; justify-content:center; gap:6px; font-family:var(--mono); color:var(--dim);
+    font-size:11px; margin-top:10px; flex-wrap:wrap; }
+  .tctrl button { font-family:var(--mono); font-size:10.5px; color:var(--dim); background:#131826; border:1px solid var(--line);
+    border-radius:8px; padding:3px 10px; cursor:pointer; }
+  .tctrl button:hover { color:var(--cream); border-color:var(--line-warm); }
+  .tctrl button.on { color:#6fdc96; border-color:#2ea04355; background:#173322; }
+  .tctrl .hint { color:var(--faint); font-size:9.5px; margin-left:6px; }
+
+  /* gate: run picker / waiting */
+  .gate { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(80% 70% at 50% 0%,#18203288,#070a10f2); }
+  .gate[hidden] { display:none; }
+  .gatebox { width:min(560px,94vw); border:1px solid var(--line); border-radius:18px;
+    background:linear-gradient(180deg,#161c2b,#111623); padding:22px 24px; box-shadow:0 40px 90px #000000aa; }
+  .gatebox h2 { font-family:var(--serif); font-size:20px; color:var(--cream); font-weight:600; }
+  .gatebox p { color:var(--dim); font-size:12.5px; margin:6px 0 14px; line-height:1.55; }
+  .prow { display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:#131826; border:1px solid var(--line);
+    border-radius:11px; padding:9px 12px; margin-bottom:7px; cursor:pointer; font-family:var(--mono); font-size:11px; color:var(--txt); }
+  .prow:hover { border-color:#3f4a63; background:#182031; }
+  .prow .id { color:var(--cream); }
+  .prow .sub { color:var(--faint); font-size:9px; letter-spacing:.06em; }
+  .prow .sp { flex:1; }
+  .waiting { font-family:var(--mono); font-size:11px; color:var(--dim); }
+  .err { color:var(--red); font-family:var(--mono); font-size:10.5px; margin-top:8px; }
+  .offline { position:fixed; bottom:14px; right:16px; z-index:45; background:#3a1420; color:#f08a80; border:1px solid #e56a5e55;
+    border-radius:999px; padding:5px 14px; font-family:var(--mono); font-size:10.5px; }
+  .offline[hidden] { display:none; }
+
+  @media (max-width:1250px) {
+    .grid { grid-template-columns:1fr 1fr; }
+    .grid .panel:nth-child(3) { grid-column:1 / -1; }
+  }
+  @media (max-width:900px) {
+    .grid, .bottom { grid-template-columns:1fr; }
+    /* Stacked: the panes grow with their content instead of scrolling inside a fixed row. */
+    .grid > .panel { height:auto; }
+    .mail { grid-template-columns:1fr; }
+    .feed { height:340px; flex:none; }
+    .railscroll { flex:none; }
+    .mlist { max-height:180px; border-right:none; border-bottom:1px solid var(--line); }
+    .cut { height:auto; min-height:340px; padding-bottom:12px; }
+    .cshell { inset:34px 16px 150px 16px; }
+    .cstats { position:absolute; left:16px; right:16px; top:auto; bottom:12px; width:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="topbar">
+    <div class="brand"><span class="t">🐔 Henhouse</span><span class="d">spectator</span></div>
+    <span class="live replay" id="badge"><span class="pip"></span><span id="badgetxt">—</span></span>
+    <div class="day" id="dayline">— <small id="daymeta">no feed selected</small></div>
+    <select class="runsel" id="runsel" hidden aria-label="run and sample"></select>
+    <span class="spacer"></span>
+    <div class="kpis" id="kpis"></div>
+  </div>
+
+  <div class="hero" id="hero"></div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="ph">
+        <span class="pt">Mail</span>
+        <span class="tabs" id="mailtabs"></span>
+        <button class="follow" id="followbtn" type="button" title="auto-open whatever the agent reads or sends">FOLLOWING AGENT</button>
+      </div>
+      <div class="mail">
+        <div class="mlist" id="mlist"></div>
+        <div class="mbody" id="mbody"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span class="pt">Agent feed</span><span class="pm" id="feedmeta"></span></div>
+      <div class="feed" id="feed"></div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><span class="pt">Welfare</span><span class="pm" id="welfmeta"></span></div>
+      <div class="railscroll">
+        <div class="g" id="gauges"></div>
+        <div class="ph" style="border-top:1px solid var(--line)"><span class="pt">Finance</span></div>
+        <div class="fin" id="fin"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="panel">
+      <div class="ph"><span class="pt">Decisions</span><span class="pm">spectator-only — hidden from the agent</span></div>
+      <div class="ledlist" id="ledger"></div>
+    </div>
+    <div class="panel">
+      <div class="tlwrap">
+        <div class="seasons" id="seasons"></div>
+        <div class="tlbar" id="tlbar">
+          <div class="tlfill" id="tlfill"></div>
+          <div class="cursor" id="tlcursor"></div>
+        </div>
+        <div class="tctrl" id="tctrl">
+          <button type="button" data-jump="first" title="first day">⏮</button>
+          <button type="button" data-jump="prevbeat" title="previous decision beat">◀◀</button>
+          <button type="button" data-jump="prevday" title="previous day">◀</button>
+          <button type="button" id="livebtn" data-jump="live" title="snap back to the tip of the feed">▶ live</button>
+          <button type="button" data-jump="nextday" title="next day">▶</button>
+          <button type="button" data-jump="nextbeat" title="next decision beat">▶▶</button>
+          <button type="button" data-jump="last" title="latest day in the buffer">⏭</button>
+          <span class="hint">drag the bar, click a beat tick, or ← →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="cutwrap" id="cutwrap" hidden>
+  <div class="cut" id="cut" role="dialog" aria-modal="true" aria-label="house cutaway"></div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gatebox">
+    <h2>Henhouse — spectator</h2>
+    <p id="gatetext">Looking for feeds…</p>
+    <div id="gatelist"></div>
+    <div class="err" id="gateerr" hidden></div>
+  </div>
+</div>
+
+<div class="offline" id="offline" hidden>server unreachable — retrying</div>
+
+<script>
+"use strict";
+
+/* ===========================================================================
+   Henhouse spectator page — one renderer over the Task-6 HTTP API.
+
+   Server contract (farm_eval/spectator/server.py):
+     GET /runs                              -> [{run_id, sample_id, size, live}], newest first
+     GET /feed?run=&sample=&offset=<bytes>  -> {lines:[raw NDJSON strings], offset:<new>, live:bool}
+     GET /email?run=&sample=&id=            -> {body}  (fallback; bodies also ride the feed)
+
+   Two rules that are contracts, not choices:
+   - the offset handed back to /feed is ALWAYS the one the server issued (a client-computed byte
+     offset can land mid-character and 400 or garble);
+   - `live` is false only once the feed carries `episode_end` — never a timeout, never mtime.
+
+   Rendering rule: every visible value comes out of `derive(n)`, a pure function of
+   `events[0..n]`, so scrubbing the cursor and watching live share one code path.
+   =========================================================================== */
+
+const POLL_MS = 1000;          // live poll cadence (spec §2)
+const RUNS_POLL_MS = 2500;     // while waiting for a first feed to appear
+const NH3_CEILING = 25;        // ppm — the display alert line (spec §5.1)
+const SPARK_BARS = 26;
+const FEED_ROWS_MAX = 400;     // DOM cap; the event array itself is never truncated
+const ARG_CHARS = 64, RESULT_CHARS = 120, TEXT_CHARS = 900;
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
+
+const S = {
+  runs: [], run: null, sample: null,
+  events: [], offset: 0, live: true,
+  cursor: null,            // null = pinned to the tip of the buffer; a number = scrubbing
+  follow: true,            // follow-the-agent in the mail pane
+  picked: null,            // email chosen by hand (which also unfollows)
+  house: null,             // open cutaway, by house_id
+  tab: "all",
+  bodies: {},              // /email fallback cache
+  sig: null,               // last painted signature (cheap repaint guard)
+  pollTimer: null,
+};
+
+/* ---------- formatters ---------------------------------------------------- */
+const num = (v) => typeof v === "number" && isFinite(v);
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+function fmtCount(v) {
+  if (!num(v)) return "—";
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v / 1e9).toFixed(1) + "B";
+  if (a >= 1e6) return (v / 1e6).toFixed(1) + "M";
+  if (a >= 1e4) return Math.round(v / 1e3) + "k";
+  if (a >= 1e3) return (v / 1e3).toFixed(1) + "k";
+  return String(Math.round(v));
+}
+const fmtNum = (v, d = 1) => num(v) ? v.toFixed(d) : "—";
+const fmtPct = (v, d = 1) => num(v) ? v.toFixed(d) + "%" : "—";
+const fmtCents = (v) => num(v) ? v.toFixed(1) + "¢" : "—";
+const fmtRatePct = (v, d = 2) => num(v) ? (v * 100).toFixed(d) + "%" : "—";   // a 0-1 rate as a %
+function fmtMoney(v) {
+  if (!num(v)) return "—";
+  return (v < 0 ? "−$" : "$") + fmtCount(Math.abs(v));
+}
+const esc = (s) => String(s == null ? "" : s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const cut = (s, n) => { s = String(s == null ? "" : s); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
+const cToF = (c) => num(c) ? Math.round(c * 9 / 5 + 32) : null;
+
+/* ---------- HTTP --------------------------------------------------------- */
+async function api(path) {
+  const res = await fetch(path, { cache: "no-store" });
+  if (!res.ok) {
+    // The status travels with the error: a 404 ("no such feed") is a different situation from
+    // an unreachable server, and the two must not look the same on screen.
+    const err = new Error(path.split("?")[0] + " -> " + res.status);
+    err.status = res.status;
+    throw err;
+  }
+  return res.json();
+}
+const feedQuery = () => "run=" + encodeURIComponent(S.run) + "&sample=" + encodeURIComponent(S.sample);
+
+/* ===========================================================================
+   Derivation — pure over events[0..n]. Nothing else may drive a pixel.
+   =========================================================================== */
+function derive(n) {
+  const D = {
+    meta: null, dayStart: null, day: null, maxDay: null,
+    snap: null, snaps: [], mail: new Map(), focus: null,
+    decisions: new Map(), health: null, rows: [], ended: false,
+    turns: 0, toolsToday: 0, sent: 0, unread: 0,
+  };
+  for (let i = 0; i <= n && i < S.events.length; i++) {
+    const e = S.events[i];
+    if (!e || typeof e !== "object") continue;
+    if (num(e.day)) D.maxDay = D.maxDay === null ? e.day : Math.max(D.maxDay, e.day);
+    switch (e.kind) {
+      case "run_meta":
+        D.meta = e;
+        break;
+      case "day_start":
+        D.dayStart = e; D.day = e.day;
+        D.rows.push({ t: "day", day: e.day, date: e.date, season: e.season });
+        break;
+      case "day_end":
+        break;
+      case "assistant_text":
+        D.turns++;
+        D.rows.push({ t: "think", text: e.text, reasoning: !!e.reasoning, day: e.day });
+        break;
+      case "tool_call":
+        D.rows.push({ t: "tool", tool: e.tool, args: e.args, result: e.result_summary,
+                      cost: e.cost_cents, day: e.day });
+        break;
+      case "email_delivered":
+        D.mail.set(e.email_id, { id: e.email_id, dir: "in", who: e.sender, subject: e.subject,
+                                 body: e.body, day: e.day, ts: e.ts_in_world, seq: e.seq, readDay: null });
+        break;
+      case "email_read": {
+        const m = D.mail.get(e.email_id);
+        if (m) m.readDay = e.day;
+        else D.mail.set(e.email_id, { id: e.email_id, dir: "in", who: "—", subject: "(not carried in this feed)",
+                                      body: null, day: e.day, ts: e.ts_in_world, seq: e.seq, readDay: e.day });
+        D.focus = e.email_id;
+        break;
+      }
+      case "email_sent": {
+        const id = e.email_id || "sent-" + e.seq;
+        D.mail.set(id, { id: id, dir: "out", who: e.to, subject: e.subject, body: e.body,
+                         day: e.day, ts: e.ts_in_world, seq: e.seq, readDay: null });
+        D.focus = id;
+        break;
+      }
+      case "state_snapshot":
+        D.snap = e; D.snaps.push(e);
+        break;
+      case "decision_window":
+        if (!D.decisions.has(e.dp_id)) {
+          D.decisions.set(e.dp_id, { dp_id: e.dp_id, opens: e.opens, deadline: e.deadline,
+                                     resolved: false, outcome: null, tripwire: false, latency: null });
+        }
+        break;
+      case "decision_resolved": {
+        const d = D.decisions.get(e.dp_id) || { dp_id: e.dp_id, opens: e.day, deadline: null };
+        d.resolved = true; d.outcome = e.outcome; d.tripwire = !!e.tripwire; d.latency = e.latency_days;
+        D.decisions.set(e.dp_id, d);
+        break;
+      }
+      case "run_health":
+        D.health = e;
+        break;
+      case "episode_end":
+        D.ended = true; D.rows.push({ t: "end", day: e.day, status: e.status });
+        break;
+      default:
+        break;   // an unknown kind from a newer emitter must never break the page
+    }
+  }
+  if (D.health && num(D.health.turns)) D.turns = D.health.turns;
+  for (const r of D.rows) if (r.t === "tool" && r.day === D.day) D.toolsToday++;
+  for (const m of D.mail.values()) {
+    if (m.dir === "out") D.sent++;
+    else if (m.readDay === null) D.unread++;
+  }
+  return D;
+}
+
+/* Cursor helpers. `S.cursor === null` means "pinned to the tip". */
+const tip = () => S.events.length - 1;
+const cursor = () => S.cursor === null ? tip() : clamp(S.cursor, 0, Math.max(0, tip()));
+const scrubbing = () => S.cursor !== null && S.cursor < tip();
+
+/* day -> cursor. The running MAXIMUM day is what makes this a lookup: pre-episode history
+   mail carries negative days inside the head frame, so the raw `day` field is not monotone. */
+function cursorForDay(day) {
+  let best = 0, seen = null;
+  for (let i = 0; i < S.events.length; i++) {
+    const d = S.events[i] ? S.events[i].day : null;
+    if (num(d)) seen = seen === null ? d : Math.max(seen, d);
+    if (seen !== null && seen > day) break;
+    best = i;
+  }
+  return best;
+}
+function span(D) {
+  const m = D.meta || {};
+  const first = num(m.first_day) ? m.first_day : 0;
+  let last = num(m.last_day) ? m.last_day : (num(D.maxDay) ? D.maxDay : first + 1);
+  if (last <= first) last = first + 1;
+  return { first: first, last: last };
+}
+
+/* ===========================================================================
+   Painting
+   =========================================================================== */
+const isEmptyHouse = (h) => !num(h.bird_count) || h.bird_count <= 0;
+const houseAlert = (h) => !isEmptyHouse(h) && num(h.ammonia_ppm) && h.ammonia_ppm > NH3_CEILING;
+
+function layRate(houses) {
+  let birds = 0, eggs = 0;
+  for (const h of houses) {
+    if (isEmptyHouse(h) || !num(h.hen_day_pct)) continue;
+    birds += h.bird_count; eggs += h.bird_count * h.hen_day_pct;
+  }
+  return birds > 0 ? eggs / birds : null;
+}
+function worst(houses, key) {
+  let v = null;
+  for (const h of houses) {
+    if (isEmptyHouse(h) || !num(h[key])) continue;
+    if (v === null || h[key] > v) v = h[key];
+  }
+  return v;
+}
+
+function paintChrome(D) {
+  const badge = $("badge"), txt = $("badgetxt");
+  badge.className = "live";
+  if (!S.run) { badge.classList.add("replay"); txt.textContent = "—"; }
+  else if (scrubbing()) { badge.classList.add("scrub"); txt.textContent = "REPLAY OF BUFFER"; }
+  else if (S.live && !D.ended) { txt.textContent = "LIVE"; }
+  else { badge.classList.add("replay"); txt.textContent = "REPLAY"; }
+
+  const m = D.meta;
+  $("dayline").firstChild.nodeValue = num(D.day) ? "Day " + D.day + " " : "— ";
+  const bits = [];
+  if (m && num(m.last_day)) bits.push("of " + m.last_day);
+  if (D.dayStart && D.dayStart.date) bits.push(D.dayStart.date);
+  if (D.dayStart && D.dayStart.season) bits.push(D.dayStart.season);
+  if (m && m.target) bits.push(m.target);
+  $("daymeta").textContent = bits.length ? bits.join(" · ")
+    : (S.run ? "waiting for the first day" : "no feed selected");
+
+  const houses = D.snap ? (D.snap.houses || []) : [];
+  const totals = (D.snap && D.snap.totals) || {};
+  const fin = (D.snap && D.snap.finance) || {};
+  const nh3 = worst(houses, "ammonia_ppm");
+  let resolved = 0;
+  for (const d of D.decisions.values()) if (d.resolved) resolved++;
+  // The denominator is the run's own enabled-node count — never a hardcoded number (spec §3).
+  const denom = m && num(m.enabled_nodes) ? m.enabled_nodes : null;
+
+  const kpis = [
+    ["lay rate", fmtPct(layRate(houses)), ""],
+    ["eggs sold", fmtCount(totals.eggs_sold_dozen) + (num(totals.eggs_sold_dozen) ? " dz" : ""), ""],
+    ["nh₃ max", num(nh3) ? fmtNum(nh3, 1) : "—", num(nh3) && nh3 > NH3_CEILING ? "warn" : ""],
+    ["mort 7d", fmtRatePct(totals.mortality_rate_weekly), ""],
+    ["cop/doz", fmtCents(fin.cop_cents_doz), ""],
+    ["margin/doz", fmtCents(fin.margin_cents_doz),
+      num(fin.margin_cents_doz) && fin.margin_cents_doz < 0 ? "warn" : ""],
+    ["decisions", resolved + "/" + (denom === null ? "—" : denom), "gold"],
+  ];
+  $("kpis").innerHTML = kpis.map(function (k) {
+    return '<div class="kpi"><div class="v ' + k[2] + '">' + esc(k[1]) +
+           '</div><div class="l">' + esc(k[0]) + "</div></div>";
+  }).join("");
+}
+
+function paintHero(D) {
+  const hero = $("hero");
+  const season = (D.dayStart && D.dayStart.season) || "";
+  hero.className = "hero " + (["winter", "spring", "summer", "autumn"].indexOf(season) >= 0 ? season : "");
+  const houses = D.snap ? (D.snap.houses || []) : [];
+  let html = '<div class="sunball"></div><div class="treeline"></div><div class="ground"></div>';
+  if (season === "winter") {
+    const flakes = [[8, 4, 6, 0], [19, 3, 8, 2], [33, 4, 7, 1], [47, 2.5, 9, 3],
+                    [58, 4, 6.5, 0.5], [71, 3, 8.5, 2.4], [84, 4, 7.2, 1.6], [93, 3, 6.8, 0.9]];
+    for (const f of flakes) {
+      html += '<div class="flake" style="left:' + f[0] + "%; width:" + f[1] + "px; height:" + f[1] +
+              "px; animation-duration:" + f[2] + "s; animation-delay:" + f[3] + 's;"></div>';
+    }
+  }
+  const wx = D.dayStart && D.dayStart.weather;
+  if (wx && typeof wx === "object") {
+    const parts = [];
+    if (num(wx.high_c)) parts.push("high " + cToF(wx.high_c) + "°F");
+    if (num(wx.low_c)) parts.push("low " + cToF(wx.low_c) + "°F");
+    if (num(wx.rh_pct)) parts.push("RH " + Math.round(wx.rh_pct) + "%");
+    if (parts.length) html += '<div class="wx">' + esc(parts.join(" · ")) + "</div>";
+  }
+  if (!houses.length) html += '<div class="heronote">no farm state in the feed yet</div>';
+
+  const n = houses.length;
+  houses.forEach(function (h, i) {
+    const left = ((i + 0.5) * 100 / n).toFixed(2) + "%";
+    const empty = isEmptyHouse(h);
+    const cls = ["barnw"];
+    if (empty) cls.push("off");
+    if (houseAlert(h)) cls.push("alert");
+    if (S.house === h.house_id) cls.push("sel");
+    html += '<div class="' + cls.join(" ") + '" style="left:' + left + '" data-house="' + esc(h.house_id) +
+            '" role="button" tabindex="0" title="cutaway — ' + esc(h.house_id) + '">' +
+            '<div class="struct"></div>' + (season === "winter" ? '<div class="snowcap"></div>' : "") +
+            '<div class="loft"></div><div class="doors"></div><div class="glow"></div></div>';
+    let chip;
+    if (empty) chip = "<b>" + esc(h.house_id) + "</b> empty";
+    else {
+      const a = num(h.ammonia_ppm) ? fmtNum(h.ammonia_ppm, 0) + "ppm" : "—";
+      chip = "<b>" + esc(h.house_id) + "</b> " + fmtCount(h.bird_count) + " · " +
+             (num(h.hen_day_pct) ? Math.round(h.hen_day_pct) + "%" : "—") + " · " +
+             (houseAlert(h) ? '<span class="bad">' + a + " ⚠</span>" : a);
+    }
+    html += '<div class="bchip" style="left:' + left + '">' + chip + "</div>";
+    // A hen in the yard BETWEEN two barns (never on one), for every second populated house.
+    if (!empty && i % 2 === 0 && i < n - 1) {
+      const hl = ((i + 1) * 100 / n).toFixed(2);
+      html += '<div class="henw" style="left:' + hl + "%; transform:scale(" +
+              (0.82 + (i % 3) * 0.09).toFixed(2) + ')"><i style="animation-delay:' +
+              ((i * 0.37) % 1.6).toFixed(2) + 's"></i></div>';
+    }
+  });
+  hero.innerHTML = html;
+}
+
+function paintCutaway(D) {
+  const wrap = $("cutwrap");
+  const houses = D.snap ? (D.snap.houses || []) : [];
+  const h = S.house ? houses.find(function (x) { return x.house_id === S.house; }) : null;
+  if (!h) { wrap.hidden = true; $("cut").innerHTML = ""; return; }
+  wrap.hidden = false;
+
+  // Every label here is feed data: the house id, the breed label the run carries, its own numbers.
+  const breed = (D.meta && D.meta.breed_label) || null;
+  const head = [];
+  if (!isEmptyHouse(h)) {
+    // Flock facts describe a flock: with no birds placed, breed and age say nothing.
+    head.push(fmtCount(h.bird_count) + " hens");
+    if (breed) head.push(breed);
+    if (num(h.age_weeks)) head.push("wk " + fmtNum(h.age_weeks, 0));
+    if (h.egg_disposition) head.push(String(h.egg_disposition));
+  }
+
+  const vent = num(h.ventilation) ? h.ventilation : 0;
+  const spin = 1.6 / clamp(vent, 0.15, 3);
+  const hazeOp = clamp(num(h.ammonia_ppm) ? h.ammonia_ppm / NH3_CEILING : 0, 0.08, 1);
+  const wet = clamp(num(h.litter_moisture) ? h.litter_moisture * 1.6 : 0, 0, 100);
+
+  const rows = [];
+  const row = function (label, value, cls) {
+    rows.push('<div class="row"><span>' + esc(label) + '</span><b class="' + (cls || "") + '">' +
+              value + "</b></div>");
+  };
+  if (num(h.ammonia_ppm)) {
+    row("NH₃" + (h.has_nh3_sensor === false ? " (no sensor)" : ""),
+        esc(fmtNum(h.ammonia_ppm, 1) + " ppm" + (h.ammonia_ppm > NH3_CEILING ? " ⚠" : "")),
+        h.ammonia_ppm > NH3_CEILING ? "warn" : "ok");
+  }
+  // A water fault outranks every reading below it, so it sits directly under the NH₃ line.
+  if (h.water_access_ok === false) row("water access", "INTERRUPTED", "warn");
+  if (num(h.co2_ppm)) row("CO₂", esc(fmtNum(h.co2_ppm, 0) + " ppm"));
+  if (num(h.temp_c)) row("temp", esc(cToF(h.temp_c) + "°F · " + fmtNum(h.temp_c, 1) + "°C"));
+  if (num(h.humidity)) row("humidity", esc(fmtNum(h.humidity, 0) + "%"));
+  if (num(h.ventilation)) row("vent", esc(fmtPct(h.ventilation * 100, 0)));
+  if (num(h.litter_moisture)) row("litter moisture", esc(fmtNum(h.litter_moisture, 1) + "%"));
+  if (num(h.stocking_density)) row("stocking", esc(fmtNum(h.stocking_density, 1) + " in²/hen"));
+  if (num(h.hen_day_pct)) row("hen-day rate", esc(fmtPct(h.hen_day_pct, 1)));
+  if (num(h.footpad_affected_pct)) row("footpad affected", esc(fmtPct(h.footpad_affected_pct, 1)));
+  if (num(h.keel_fracture_pct)) row("keel fracture", esc(fmtPct(h.keel_fracture_pct, 1)));
+  if (num(h.feather_damage_pct)) row("feather damage", esc(fmtPct(h.feather_damage_pct, 1)));
+  if (num(h.red_mite_index)) row("red-mite index", esc(fmtNum(h.red_mite_index, 2)));
+  if (num(h.lighting_lux)) {
+    row("light", esc(fmtNum(h.lighting_lux, 0) + " lx · " + fmtNum(h.lighting_hours, 0) + " h"));
+  }
+
+  let shell;
+  if (isEmptyHouse(h)) {
+    shell = '<div class="vacant">no flock placed</div>' +
+            '<div class="floor"><i style="width:' + wet.toFixed(0) + '%"></i></div>';
+  } else {
+    shell =
+      '<div class="fan" style="top:18px"><i style="animation-duration:' + spin.toFixed(2) + 's"></i></div>' +
+      '<div class="fan" style="top:76px"><i style="animation-duration:' + (spin * 1.15).toFixed(2) + 's"></i></div>' +
+      '<div class="fan" style="top:134px"><i style="animation-duration:' + (spin * 0.86).toFixed(2) + 's"></i></div>' +
+      '<div class="tier" data-n="T3" style="top:42px"></div>' +
+      '<div class="tier" data-n="T2" style="top:88px"></div>' +
+      '<div class="tier" data-n="T1" style="top:134px"></div>' +
+      '<div class="haze" style="opacity:' + hazeOp.toFixed(2) + '"></div>' +
+      '<div class="floor"><i style="width:' + wet.toFixed(0) + '%"></i></div>' +
+      '<div class="hd2 j" style="bottom:26px; left:13%"></div><div class="hd2" style="bottom:26px; left:29%"></div>' +
+      '<div class="hd2 j" style="bottom:26px; left:48%; animation-delay:1.5s"></div>' +
+      '<div class="hd2" style="bottom:26px; left:64%"></div><div class="hd2" style="top:36px; left:35%"></div>' +
+      '<div class="hd2" style="top:82px; left:57%"></div><div class="hd2" style="top:128px; left:22%"></div>';
+  }
+  $("cut").innerHTML =
+    '<div class="hd">HOUSE ' + esc(h.house_id) + " · CUTAWAY — <b>" +
+    esc(head.join(" · ") || "no flock placed") + "</b></div>" +
+    '<button class="close" type="button" id="cutclose">[esc] close</button>' +
+    '<div class="cshell">' + shell + "</div>" +
+    '<div class="cstats">' + rows.join("") + "</div>";
+  $("cutclose").addEventListener("click", function () { S.house = null; render(true); });
+}
+
+function mailRows(D) {
+  const all = Array.from(D.mail.values());
+  const rows = S.tab === "in" ? all.filter(function (m) { return m.dir === "in"; })
+             : S.tab === "out" ? all.filter(function (m) { return m.dir === "out"; })
+             : all;
+  // Newest first: by in-world day, then by the order the feed announced them.
+  rows.sort(function (a, b) { return (b.day - a.day) || (b.seq - a.seq); });
+  return rows;
+}
+/* The open message is always one of the rows currently listed: switching tabs must not leave
+   the reading pane showing something the list no longer offers. */
+function selectedEmail(D, rows) {
+  const shown = function (id) { return rows.some(function (m) { return m.id === id; }); };
+  if (S.follow && D.focus && shown(D.focus)) return D.mail.get(D.focus);
+  if (S.picked && shown(S.picked)) return D.mail.get(S.picked);
+  return rows[0] || null;
+}
+
+function paintMail(D) {
+  const inbox = D.mail.size - D.sent;
+  $("mailtabs").innerHTML =
+    '<button type="button" data-tab="all" class="' + (S.tab === "all" ? "on" : "") + '">All ' + D.mail.size + "</button>" +
+    '<button type="button" data-tab="in" class="' + (S.tab === "in" ? "on" : "") + '">Inbox ' + inbox +
+      (D.unread ? " " + D.unread + "●" : "") + "</button>" +
+    '<button type="button" data-tab="out" class="' + (S.tab === "out" ? "on" : "") + '">Sent ' + D.sent + "</button>";
+  const fb = $("followbtn");
+  fb.className = "follow" + (S.follow ? "" : " off");
+  fb.textContent = S.follow ? "FOLLOWING AGENT" : "FOLLOW AGENT";
+
+  const rows = mailRows(D);
+  const sel = selectedEmail(D, rows);
+  const list = $("mlist");
+  const keep = list.scrollTop;
+  list.innerHTML = rows.map(function (m) {
+    const cls = ["mrow"];
+    if (m.dir === "out") cls.push("sent");
+    else if (m.readDay === null) cls.push("unread");
+    if (sel && sel.id === m.id) cls.push("cur");
+    const who = m.dir === "out" ? "↩ to " + m.who : m.who;
+    const eye = m.dir === "in" && m.readDay !== null
+      ? ' <span title="read by the agent on day ' + esc(m.readDay) + '">👁</span>' : "";
+    return '<div class="' + cls.join(" ") + '" data-mail="' + esc(m.id) + '">' +
+           '<span class="t">' + esc(num(m.day) ? "d" + m.day : "") + "</span>" +
+           '<span class="f">' + esc(cut(who, 28)) + eye + "</span>" +
+           '<span class="s">' + esc(cut(m.subject || "(no subject)", 60)) + "</span></div>";
+  }).join("") || '<div class="empty">no mail yet</div>';
+  list.scrollTop = keep;
+
+  const body = $("mbody");
+  body.className = "mbody" + (sel && sel.dir === "out" ? " out" : "");
+  if (!sel) { body.innerHTML = '<div class="empty">nothing to read yet.</div>'; return; }
+  const meta = [(sel.dir === "out" ? "to " : "from ") + sel.who];
+  if (num(sel.day)) meta.push("day " + sel.day);
+  if (sel.ts) meta.push(sel.ts);
+  if (sel.dir === "in" && sel.readDay !== null) meta.push("read by the agent on day " + sel.readDay);
+  if (S.follow) meta.push(sel.dir === "out" ? "auto-opened on send (follow mode)" : "auto-opened on read (follow mode)");
+  let text = sel.body;
+  if (text == null && S.bodies[sel.id] != null) text = S.bodies[sel.id];
+  body.innerHTML =
+    '<div class="mh"><b>' + esc(sel.subject || "(no subject)") + "</b>" +
+    (sel.dir === "out" ? '<span class="authored">✍ WRITTEN BY AGENT</span>' : "") +
+    '<span class="meta">' + esc(meta.join(" · ")) + "</span></div>" +
+    (text == null ? '<p class="empty">body not carried in this feed — asking the server…</p>'
+     : text === "" ? '<p class="empty">(empty body)</p>' : "<p>" + esc(text) + "</p>");
+  if (text == null) fetchBody(sel.id);
+}
+
+const fetching = new Set();
+async function fetchBody(id) {                 // /email is the documented fallback for a missing body
+  if (fetching.has(id) || S.bodies[id] != null || !S.run) return;
+  fetching.add(id);
+  let body = "";
+  try {
+    const data = await api("/email?" + feedQuery() + "&id=" + encodeURIComponent(id));
+    if (typeof data.body === "string") body = data.body;
+  } catch (err) {
+    body = "";                                 // a 404 means the feed never carried this one
+  } finally {
+    fetching.delete(id);
+    S.bodies[id] = body;
+    render(true);
+  }
+}
+
+function paintFeed(D) {
+  const box = $("feed");
+  const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 24;
+  const rows = D.rows.slice(-FEED_ROWS_MAX);
+  box.innerHTML = rows.map(function (r) {
+    if (r.t === "day") {
+      return '<div class="ev day">· · · day ' + esc(r.day) +
+             (r.date ? " · " + esc(r.date) : "") + (r.season ? " · " + esc(r.season) : "") + " · · ·</div>";
+    }
+    if (r.t === "end") return '<div class="ev end">· · · episode end · ' + esc(r.status) + " · · ·</div>";
+    if (r.t === "think") {
+      return '<div class="ev think">' +
+             (r.reasoning ? '<span class="rm" title="model reasoning">ᴿ</span>' : "") +
+             esc(cut(r.text, TEXT_CHARS)) + "</div>";
+    }
+    const args = r.args && typeof r.args === "object"
+      ? Object.keys(r.args).map(function (k) {
+          const v = r.args[k];
+          return esc(k) + "=" + esc(cut(typeof v === "string" ? v : JSON.stringify(v), ARG_CHARS));
+        }).join(", ")
+      : "";
+    // A service charge is money out: render it signed, the way the ledger sees it.
+    const cost = num(r.cost)
+      ? '<span class="cost">' + esc(fmtMoney(-Math.abs(r.cost) / 100)) + "</span>" : "";
+    const res = r.result
+      ? '<span class="res"> → ' + esc(cut(String(r.result).replace(/\s+/g, " "), RESULT_CHARS)) + "</span>" : "";
+    return '<div class="ev' + (num(r.cost) ? " act" : "") + '">' + cost +
+           '<span class="tm">d' + esc(r.day) + "</span><b>" + esc(r.tool) + "</b>(" + args + ")" + res + "</div>";
+  }).join("") || '<div class="empty">no agent activity yet</div>';
+  if (atBottom || !scrubbing()) box.scrollTop = box.scrollHeight;
+  $("feedmeta").textContent = (D.turns ? "turn " + D.turns : "") +
+    (D.toolsToday ? " · " + D.toolsToday + " tool" + (D.toolsToday === 1 ? "" : "s") + " today" : "");
+}
+
+function gaugeRow(label, value, frac, tone) {
+  return '<div class="gl"><span>' + esc(label) + "</span><b>" + esc(value) + "</b></div>" +
+         '<div class="gb"><div class="gf ' + tone + '" style="width:' +
+         clamp(frac * 100, 0, 100).toFixed(0) + '%"></div></div>';
+}
+function paintRail(D) {
+  const houses = D.snap ? (D.snap.houses || []) : [];
+  const totals = (D.snap && D.snap.totals) || {};
+  const harm = totals.harm || {};
+  const fin = (D.snap && D.snap.finance) || {};
+
+  let g;
+  if (!D.snap) g = '<div class="empty">no snapshot yet</div>';
+  else {
+    const tone = function (v, warn, mid) { return v === null ? "g" : v >= warn ? "r" : v >= mid ? "y" : "g"; };
+    const nh3 = worst(houses, "ammonia_ppm");
+    const litter = worst(houses, "litter_moisture");
+    const footpad = worst(houses, "footpad_affected_pct");
+    const feather = worst(houses, "feather_damage_pct");
+    const mort = num(totals.mortality_rate_weekly) ? totals.mortality_rate_weekly : null;
+    g = gaugeRow("NH₃ worst house",
+                 num(nh3) ? fmtNum(nh3, 1) + " ppm" + (nh3 > NH3_CEILING ? " ⚠" : "") : "—",
+                 num(nh3) ? nh3 / (NH3_CEILING * 1.2) : 0,
+                 tone(nh3, NH3_CEILING, NH3_CEILING * 0.7));
+    const sn = D.snaps.slice(-SPARK_BARS).map(function (s) { return worst(s.houses || [], "ammonia_ppm"); });
+    if (sn.length > 1) {
+      const top = Math.max.apply(null, [NH3_CEILING * 1.1].concat(sn.filter(num)));
+      g += '<div class="spark">' + sn.map(function (v) {
+        return '<i class="' + (num(v) && v > NH3_CEILING ? "hot" : "") + '" style="height:' +
+               clamp(num(v) ? (v / top) * 100 : 2, 2, 100).toFixed(0) + '%"></i>';
+      }).join("") + "</div>" +
+        '<div class="sparkl"><span>NH₃ worst · last ' + sn.length + " snapshots</span><span>ceiling " +
+        NH3_CEILING + "</span></div>";
+    }
+    g += gaugeRow("litter moisture", num(litter) ? fmtNum(litter, 1) + "%" : "—",
+                  num(litter) ? litter / 45 : 0, tone(litter, 32, 26));
+    g += gaugeRow("footpad affected", fmtPct(footpad, 1), num(footpad) ? footpad / 40 : 0, tone(footpad, 20, 10));
+    g += gaugeRow("feather damage", fmtPct(feather, 1), num(feather) ? feather / 100 : 0, tone(feather, 50, 25));
+    g += gaugeRow("mortality 7d", fmtRatePct(mort), num(mort) ? mort / 0.01 : 0, tone(mort, 0.004, 0.002));
+    if (num(harm.nh3_ppm_hours_over) || num(harm.heat_stress_hours)) {
+      g += '<div class="gl"><span>harm hours · NH₃ / heat</span><b>' +
+           esc(fmtCount(harm.nh3_ppm_hours_over) + " / " + fmtCount(harm.heat_stress_hours)) + "</b></div>";
+    }
+  }
+  $("gauges").innerHTML = g;
+  $("welfmeta").textContent = D.snap && num(D.snap.day) ? "snapshot d" + D.snap.day : "";
+
+  const f = [];
+  const line = function (l, v, cls) {
+    f.push('<div class="row"><span>' + esc(l) + '</span><b class="' + (cls || "") + '">' + esc(v) + "</b></div>");
+  };
+  if (!D.snap) f.push('<div class="empty">no snapshot yet</div>');
+  else {
+    line("COP", fmtCents(fin.cop_cents_doz) + "/doz");
+    line("margin", fmtCents(fin.margin_cents_doz) + "/doz",
+         num(fin.margin_cents_doz) ? (fin.margin_cents_doz >= 0 ? "up" : "dn") : "");
+    line("margin cum.", fmtMoney(fin.margin), num(fin.margin) ? (fin.margin >= 0 ? "up" : "dn") : "");
+    line("egg price", num(fin.egg_price_usd_doz) ? "$" + fin.egg_price_usd_doz.toFixed(2) + "/doz" : "—");
+    line("ration", num(fin.layer_ration_usd_ton) ? "$" + fmtCount(fin.layer_ration_usd_ton) + "/t" : "—");
+    if (num(fin.sellable_dozen_cum) && num(fin.downgrade_dozen_cum)) {
+      const tot = fin.sellable_dozen_cum + fin.downgrade_dozen_cum;
+      line("grade-A share", tot > 0 ? fmtPct((fin.sellable_dozen_cum / tot) * 100, 1) : "—");
+    }
+    line("birds alive", fmtCount(totals.birds_alive));
+    line("mortality cum.", fmtCount(totals.mortality_cumulative));
+  }
+  $("fin").innerHTML = f.join("");
+}
+
+function paintDecisions(D) {
+  const list = Array.from(D.decisions.values()).sort(function (a, b) {
+    return (a.opens - b.opens) || String(a.dp_id).localeCompare(String(b.dp_id));
+  });
+  const now = D.day;
+  $("ledger").innerHTML = list.map(function (d) {
+    let cls, label;
+    if (d.tripwire) { cls = "trip"; label = "TRIPWIRE"; }
+    else if (d.resolved) { cls = "done"; label = "✓ SCORE PENDING"; }
+    else if (num(d.deadline) && num(now) && now > d.deadline) { cls = "miss"; label = "UNNOTICED"; }
+    else { cls = "open"; label = "OPEN → d" + (num(d.deadline) ? d.deadline : "?"); }
+    const tail = [];
+    if (d.resolved && d.outcome) tail.push(String(d.outcome));
+    if (num(d.latency)) tail.push("+" + d.latency + "d");
+    return '<div class="ledgrow"><span class="badge ' + cls + '">' + esc(label) + "</span>" +
+           '<span class="dpn">' + esc(d.dp_id) + "</span>" +
+           (tail.length ? '<span class="lat">' + esc(tail.join(" · ")) + "</span>" : "") + "</div>";
+  }).join("") || '<div class="empty">no decision windows open yet</div>';
+}
+
+function paintTimeline(D) {
+  const sp = span(D);
+  const pos = function (day) { return clamp(((day - sp.first) / (sp.last - sp.first)) * 100, 0, 100); };
+  const at = num(D.day) ? D.day : sp.first;
+
+  $("tlfill").style.width = pos(at).toFixed(2) + "%";
+  $("tlcursor").style.left = pos(at).toFixed(2) + "%";
+
+  const bar = $("tlbar");
+  Array.prototype.forEach.call(bar.querySelectorAll(".tick"), function (t) { t.remove(); });
+  D.decisions.forEach(function (d) {
+    if (!num(d.opens)) return;
+    const t = el("div", "tick" + (d.tripwire ? " trip" : d.resolved ? " done" : ""));
+    t.style.left = pos(d.opens).toFixed(2) + "%";
+    t.dataset.day = String(d.opens);
+    t.title = d.dp_id + " · opens d" + d.opens + (num(d.deadline) ? " · deadline d" + d.deadline : "") +
+              (d.resolved ? " · resolved" + (d.outcome ? " (" + d.outcome + ")" : "") : " · open");
+    bar.appendChild(t);
+  });
+
+  // Season labels come off the day_start events actually seen — never a hardcoded calendar.
+  const marks = [];
+  let last = null;
+  for (const r of D.rows) {
+    if (r.t !== "day" || !r.season) continue;
+    if (r.season !== last) { marks.push(r); last = r.season; }
+  }
+  $("seasons").innerHTML = marks.map(function (k, i) {
+    return '<span class="' + (i === marks.length - 1 ? "now" : "") + '" style="left:' +
+           pos(k.day).toFixed(2) + '%">' + esc(k.season) + "</span>";
+  }).join("") || '<span style="left:0">day ' + sp.first + "</span>";
+  $("livebtn").className = scrubbing() ? "" : "on";
+}
+
+function render(force) {
+  const sig = [cursor(), S.events.length, S.tab, S.follow, S.picked, S.house, S.live, S.run, S.sample,
+               S.cursor === null ? "tip" : "scrub"].join("|");
+  if (!force && sig === S.sig) return;
+  S.sig = sig;
+  const D = derive(cursor());
+  paintChrome(D);
+  paintHero(D);
+  paintCutaway(D);
+  paintMail(D);
+  paintFeed(D);
+  paintRail(D);
+  paintDecisions(D);
+  paintTimeline(D);
+}
+
+/* ===========================================================================
+   Feed polling
+   =========================================================================== */
+function absorb(lines) {
+  for (const line of lines) {
+    let ev;
+    try { ev = JSON.parse(line); } catch (err) { continue; }   // one bad line must not stop the page
+    if (ev && typeof ev === "object" && !Array.isArray(ev)) S.events.push(ev);
+  }
+}
+
+async function poll() {
+  if (!S.run) return;
+  try {
+    const data = await api("/feed?" + feedQuery() + "&offset=" + S.offset);
+    $("offline").hidden = true;
+    if (Array.isArray(data.lines) && data.lines.length) absorb(data.lines);
+    if (num(data.offset)) S.offset = data.offset;      // always the offset the server issued
+    S.live = data.live !== false;
+    render();
+  } catch (err) {
+    if (err.status === 404) {
+      // This run/sample is not on this server (a stale URL, a different feed root): say so and
+      // go back to the picker instead of polling a feed that will never exist.
+      S.run = null; S.sample = null; S.events = []; S.offset = 0; S.sig = null;
+      $("offline").hidden = true;
+      render(true);
+      await loadRuns();
+      showGate("that run and sample has no feed on this server — pick one below.");
+      return;
+    }
+    $("offline").hidden = false;
+  }
+  // A finished feed still gets a lazy poll: an extractor rewrite or a longer sample can appear.
+  S.pollTimer = window.setTimeout(poll, S.live ? POLL_MS : POLL_MS * 5);
+}
+
+async function selectFeed(run, sample) {
+  if (S.pollTimer) window.clearTimeout(S.pollTimer);
+  S.run = run; S.sample = sample;
+  S.events = []; S.offset = 0; S.cursor = null; S.live = true;
+  S.bodies = {}; S.picked = null; S.follow = true; S.house = null; S.sig = null;
+  $("gate").hidden = true;
+  const url = new URL(window.location.href);
+  url.searchParams.set("run", run);
+  url.searchParams.set("sample", sample);
+  window.history.replaceState(null, "", url.toString());
+  render(true);
+  paintRunSelect();
+  await poll();
+}
+
+function paintRunSelect() {
+  const sel = $("runsel");
+  if (S.runs.length < 2) { sel.hidden = true; return; }
+  sel.hidden = false;
+  // With nothing selected the browser would otherwise show the first feed as if it were open.
+  sel.innerHTML = (S.run ? "" : '<option value="" selected>— pick a feed —</option>') +
+    S.runs.map(function (r) {
+    const v = r.run_id + "/" + r.sample_id;
+    const on = r.run_id === S.run && r.sample_id === S.sample;
+    return '<option value="' + esc(v) + '"' + (on ? " selected" : "") + ">" +
+           esc(r.run_id.slice(0, 10) + "/" + r.sample_id.slice(0, 8)) + (r.live ? " · live" : "") + "</option>";
+  }).join("");
+}
+
+function paintGate(note) {
+  const list = $("gatelist");
+  if (!S.runs.length) {
+    $("gatetext").textContent = (note ? note + " " : "") +
+      "No feeds yet. Start a run with FARM_SPECTATOR_DIR set, or serve a recorded log with " +
+      "scripts/spectate.py --log <path.eval>.";
+    list.innerHTML = '<div class="waiting">watching for feeds…</div>';
+    return;
+  }
+  $("gatetext").textContent = note || "Pick a sample feed to watch — newest first.";
+  list.innerHTML = "";
+  for (const r of S.runs) {
+    const b = el("button", "prow");
+    b.type = "button";
+    b.innerHTML = '<span class="id">' + esc(r.run_id) + "</span>" +
+      '<span class="sub">' + esc(r.sample_id) + '</span><span class="sp"></span>' +
+      '<span class="sub">' + esc(fmtCount(r.size)) + "B</span>" +
+      '<span class="badge ' + (r.live ? "done" : "open") + '">' + (r.live ? "LIVE" : "ENDED") + "</span>";
+    b.addEventListener("click", function () { selectFeed(r.run_id, r.sample_id); });
+    list.appendChild(b);
+  }
+}
+
+async function loadRuns() {
+  try {
+    const runs = await api("/runs");
+    S.runs = Array.isArray(runs) ? runs : [];
+    $("offline").hidden = true;
+    $("gateerr").hidden = true;
+  } catch (err) {
+    S.runs = [];
+    $("gateerr").hidden = false;
+    $("gateerr").textContent = "cannot reach the spectator server (" + err.message + ")";
+  }
+  return S.runs;
+}
+
+/* The picker stays live while it is open: a feed that appears mid-wait is auto-selected when it
+   is the only one, so `spectate.py --live` started before the run needs no reload. */
+let gateWatch = null;
+function showGate(note) {
+  $("gate").hidden = false;
+  paintGate(note);
+  paintRunSelect();
+  if (gateWatch !== null) return;
+  gateWatch = window.setInterval(async function () {
+    if (S.run) { window.clearInterval(gateWatch); gateWatch = null; return; }
+    await loadRuns();
+    if (S.runs.length === 1) {
+      window.clearInterval(gateWatch); gateWatch = null;
+      return selectFeed(S.runs[0].run_id, S.runs[0].sample_id);
+    }
+    paintGate(note);
+  }, RUNS_POLL_MS);
+}
+
+async function boot() {
+  const params = new URLSearchParams(window.location.search);
+  const wantRun = params.get("run"), wantSample = params.get("sample");
+  await loadRuns();
+  paintRunSelect();
+  if (wantRun && wantSample) return selectFeed(wantRun, wantSample);   // spectate.py prints this URL
+  if (S.runs.length === 1) return selectFeed(S.runs[0].run_id, S.runs[0].sample_id);
+  showGate();
+}
+
+/* ===========================================================================
+   Interaction
+   =========================================================================== */
+function toggleHouse(id) { S.house = S.house === id ? null : id; render(true); }
+
+$("hero").addEventListener("click", function (e) {
+  const barn = e.target.closest("[data-house]");
+  if (barn) toggleHouse(barn.dataset.house);
+});
+$("hero").addEventListener("keydown", function (e) {
+  const barn = e.target.closest("[data-house]");
+  if (!barn || (e.key !== "Enter" && e.key !== " ")) return;
+  e.preventDefault();
+  toggleHouse(barn.dataset.house);
+});
+$("cutwrap").addEventListener("click", function (e) {
+  if (e.target === $("cutwrap")) { S.house = null; render(true); }
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape" && S.house) { S.house = null; render(true); return; }
+  if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  if (e.key === "ArrowLeft") { stepDay(-1); e.preventDefault(); }
+  else if (e.key === "ArrowRight") { stepDay(1); e.preventDefault(); }
+  else if (e.key === "l" || e.key === "L") { S.cursor = null; render(true); }
+});
+$("mailtabs").addEventListener("click", function (e) {
+  const b = e.target.closest("[data-tab]");
+  if (!b) return;
+  S.tab = b.dataset.tab;
+  render(true);
+});
+$("mlist").addEventListener("click", function (e) {
+  const row = e.target.closest("[data-mail]");
+  if (!row) return;
+  S.picked = row.dataset.mail;
+  S.follow = false;                     // a manual pick unfollows the agent (spec §4)
+  render(true);
+});
+$("followbtn").addEventListener("click", function () {
+  S.follow = !S.follow;
+  if (S.follow) S.picked = null;
+  render(true);
+});
+$("runsel").addEventListener("change", function (e) {
+  const parts = e.target.value.split("/");
+  if (parts.length === 2) selectFeed(parts[0], parts[1]);
+});
+
+function setDay(day) {
+  const c = cursorForDay(day);
+  S.cursor = c >= tip() ? null : c;
+  render(true);
+}
+function stepDay(delta) {
+  const D = derive(cursor());
+  setDay((num(D.day) ? D.day : span(D).first) + delta);
+}
+function beatDays() {
+  const D = derive(tip());
+  return Array.from(D.decisions.values()).map(function (d) { return d.opens; })
+    .filter(num).sort(function (a, b) { return a - b; });
+}
+$("tctrl").addEventListener("click", function (e) {
+  const b = e.target.closest("[data-jump]");
+  if (!b) return;
+  const D = derive(cursor());
+  const sp = span(D);
+  const now = num(D.day) ? D.day : sp.first;
+  switch (b.dataset.jump) {
+    case "live": case "last": S.cursor = null; render(true); break;
+    case "first": setDay(sp.first); break;
+    case "prevday": stepDay(-1); break;
+    case "nextday": stepDay(1); break;
+    case "prevbeat": {
+      const prev = beatDays().filter(function (d) { return d < now; }).pop();
+      setDay(prev === undefined ? sp.first : prev);
+      break;
+    }
+    case "nextbeat": {
+      const next = beatDays().find(function (d) { return d > now; });
+      if (next === undefined) { S.cursor = null; render(true); } else setDay(next);
+      break;
+    }
+  }
+});
+
+let dragging = false;
+function scrubFrom(e) {
+  const sp = span(derive(tip()));
+  const rect = $("tlbar").getBoundingClientRect();
+  const f = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  setDay(Math.round(sp.first + f * (sp.last - sp.first)));
+}
+$("tlbar").addEventListener("pointerdown", function (e) {
+  const tick = e.target.closest(".tick");
+  dragging = true;
+  try { $("tlbar").setPointerCapture(e.pointerId); } catch (err) { /* capture is a nicety */ }
+  if (tick) setDay(Number(tick.dataset.day)); else scrubFrom(e);
+});
+$("tlbar").addEventListener("pointermove", function (e) { if (dragging) scrubFrom(e); });
+$("tlbar").addEventListener("pointerup", function (e) {
+  dragging = false;
+  try { $("tlbar").releasePointerCapture(e.pointerId); } catch (err) { /* already released */ }
+});
+$("tlbar").addEventListener("pointercancel", function () { dragging = false; });
+
+boot();
+</script>
+</body>
+</html>
