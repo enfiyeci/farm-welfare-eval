@@ -565,6 +565,10 @@ const S = {
      still a pure function of events[0..tip]; the cache only avoids re-deriving per interaction. */
   tipLen: -1, tipD: null, moments: [],
   toasts: [],              // live toast objects {m, until}; transient, never derived state
+  /* Rendered-key signatures for the two live-region/focusable surfaces. render() runs on every
+     poll, and rewriting these two containers' innerHTML would restart the toast slide-in, make
+     role="status" re-announce once a second, and steal focus from a tabbed-to reel row. */
+  toastSig: null, reelSig: null,
   seen: new Set(),         // moment keys already announced — the anti-repeat set
   primed: false,           // the backlog a feed opens with is history, not news: prime, don't toast
   hover: null,             // {key, i} — the chart crosshair position, so a repaint can restore it
@@ -1488,6 +1492,11 @@ function paintToasts() {
   // height changes with the viewport (so it is measured rather than guessed).
   const tabs = $("viewtabs").getBoundingClientRect();
   $("toasts").style.top = Math.max(16, tabs.bottom + 12).toFixed(0) + "px";
+  // A toast's content is fixed at creation, so the same keys mean the same DOM: rewriting it would
+  // replay the entry animation and re-announce the live region on every poll. Reposition only.
+  const sig = S.toasts.map(function (t) { return t.m.key; }).join("|");
+  if (sig === S.toastSig) return;
+  S.toastSig = sig;
   $("toasts").innerHTML = S.toasts.map(function (t) {
     return '<div class="toast ' + t.m.kind + '" data-day="' + esc(t.m.day) +
       '" data-key="' + esc(t.m.key) + '" role="status">' +
@@ -1505,20 +1514,31 @@ function paintReel(D) {
   let curKey = null;
   for (const m of S.moments) if (at !== null && m.day <= at) curKey = m.key;
   const rows = S.moments.slice(-REEL_ROWS_MAX);
-  $("reel").innerHTML = rows.map(function (m) {
-    return '<div class="reelrow' + (m.key === curKey ? " cur" : "") + '" data-day="' + esc(m.day) +
-      '" role="button" tabindex="0">' +
-      '<span class="d">d' + esc(m.day) + "</span>" +
-      '<span class="k ' + m.kind + '">' + esc(m.tag) + "</span>" +
-      // The toast's leading glyph is dropped here — the row's own pill already carries the kind.
-      // Only a non-word run is stripped, so a title that never had one keeps its first word.
-      '<span class="x">' + esc(m.title.replace(/^[^\w]+\s/, "") + " — " + m.text) + "</span>" +
-      '<span class="j">jump →</span></div>';
-  }).join("") || '<div class="empty">no moments yet — decisions, ceiling breaches and mortality ' +
-    "spikes land here as the run goes</div>";
-  $("reelmeta").textContent = S.moments.length
-    ? S.moments.length + " moment" + (S.moments.length === 1 ? "" : "s") + " · a row jumps the dashboard"
-    : "the run's table of contents";
+  // Row content is fixed at creation, so only a changed row SET needs a rewrite; a repaint on every
+  // poll would drop keyboard focus out of a tabbed-to row about once a second on a live feed.
+  const sig = S.moments.length + "@" + rows.map(function (m) { return m.key; }).join("|");
+  if (sig !== S.reelSig) {
+    S.reelSig = sig;
+    $("reel").innerHTML = rows.map(function (m) {
+      return '<div class="reelrow" data-day="' + esc(m.day) + '" data-key="' + esc(m.key) +
+        '" role="button" tabindex="0">' +
+        '<span class="d">d' + esc(m.day) + "</span>" +
+        '<span class="k ' + m.kind + '">' + esc(m.tag) + "</span>" +
+        // The toast's leading glyph is dropped here — the row's own pill already carries the kind.
+        // Only a non-word run is stripped, so a title that never had one keeps its first word.
+        '<span class="x">' + esc(m.title.replace(/^[^\w]+\s/, "") + " — " + m.text) + "</span>" +
+        '<span class="j">jump →</span></div>';
+    }).join("") || '<div class="empty">no moments yet — decisions, ceiling breaches and mortality ' +
+      "spikes land here as the run goes</div>";
+    $("reelmeta").textContent = S.moments.length
+      ? S.moments.length + " moment" + (S.moments.length === 1 ? "" : "s") + " · a row jumps the dashboard"
+      : "the run's table of contents";
+  }
+  // "You are here" moves with the cursor, which the row set does not: toggle the class on the
+  // surviving nodes rather than rebuilding them.
+  for (const el of $("reel").querySelectorAll(".reelrow")) {
+    el.classList.toggle("cur", el.dataset.key === curKey);
+  }
 }
 
 /* ---------- run health (spec §5.3) --------------------------------------- */
@@ -1565,11 +1585,15 @@ function paintHealth(D) {
   const last = hs[hs.length - 1];
   const rates = healthRates(hs);
   const nowRate = rates.length ? rates[rates.length - 1] : null;
-  const base = median(rates);
+  // The baseline pace is the median of the intervals that actually ADVANCED a day: a stall emits
+  // zero-rate intervals, and counting them would drag the median to 0 and disable both alarms
+  // below. Invariant: a stalled run must never read healthy — hence the explicit zero branch too.
+  const base = median(rates.filter(function (r) { return r > 0; }));
   const ended = T.ended || !S.live;
   let state, tone;
   if (ended) { state = "● replay"; tone = ""; }
   else if (num(last.blank_streak) && last.blank_streak >= 3) { state = "● stalling"; tone = "bad"; }
+  else if (num(nowRate) && nowRate === 0) { state = "● stalling"; tone = "bad"; }
   else if (num(nowRate) && num(base) && base > 0 && nowRate < base * 0.25) { state = "● stalling"; tone = "bad"; }
   else if (num(nowRate) && num(base) && base > 0 && nowRate < base * 0.6) { state = "● slow"; tone = "warn"; }
   else { state = "● healthy"; tone = "ok"; }
@@ -1693,6 +1717,7 @@ async function selectFeed(run, sample) {
   // toasts on screen and the crosshair all describe the feed being left behind.
   S.tipLen = -1; S.tipD = null; S.moments = [];
   S.toasts = []; S.seen = new Set(); S.primed = false; S.hover = null;
+  S.toastSig = null; S.reelSig = null;   // the surviving DOM belongs to the feed being left behind
   for (const k of Object.keys(CHARTS)) delete CHARTS[k];
   $("gate").hidden = true;
   const url = new URL(window.location.href);
