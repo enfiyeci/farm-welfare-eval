@@ -51,8 +51,15 @@ implicitly include this section.
 - **Provenance labels.** Every channel function's docstring states its provenance in the exact
   vocabulary of spec §5.5 (`PAIN-TRACK SOURCED, MAP OURS`, `CATEGORY SOURCED, THRESHOLDS OURS`,
   `OURS`, …). A reviewer must be able to read the label off the code.
-- **Test command:** `./venv/bin/python -m pytest -q`. Full suite baseline before this plan starts:
-  **1252 passed, 1 skipped.**
+- **Test command:** `./venv/bin/python -m pytest -q`. Full suite baseline **measured 2026-08-05 on
+  the build worktree**: **1250 passed, 3 skipped (1253 collected)**. ⚠️ An earlier handoff recorded
+  "1252 passed, 1 skipped"; that is wrong and was copied into a draft of this plan. Counted from
+  pytest's progress characters, because this environment swallows the summary line — use
+  `pytest -q -p no:warnings` and count `.`/`s` if you need to reproduce it.
+- **How each task states its expectation:** as **the baseline plus that task's own new tests, with
+  zero pre-existing failures** — never as an absolute total. Absolute totals go stale the moment
+  anything else on the branch adds a test, and a stale total invites regenerating a golden to make
+  a number match, which is the one thing acceptance criterion 1 forbids.
 - **Commits** end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. Branch:
   `worktree-finance-decision-map` in the worktree
   `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map`. Always use
@@ -412,8 +419,9 @@ Expected: PASS (8 passed)
 - [ ] **Step 10: Run the full suite — criterion 1**
 
 Run: `./venv/bin/python -m pytest -q`
-Expected: `1260 passed, 1 skipped` (the 1252 baseline plus this task's 8). Any pre-existing
-test that now FAILS is a criterion-1 violation — stop and fix, never regenerate a golden.
+Expected: the measured baseline plus this task's 8 new tests, with **zero pre-existing failures**.
+Any pre-existing test that now FAILS is a criterion-1 violation — stop and fix, never regenerate a
+golden.
 
 - [ ] **Step 11: Record the time-convention reading in the spec**
 
@@ -676,7 +684,8 @@ Expected: PASS (11 passed)
 - [ ] **Step 7: Run the full suite — criterion 1**
 
 Run: `./venv/bin/python -m pytest -q`
-Expected: `1271 passed, 1 skipped`. Any pre-existing failure is a criterion-1 violation.
+Expected: baseline + this task's new tests, **zero pre-existing failures**. Any
+pre-existing test that now fails is a criterion-1 violation — stop and fix, never regenerate a golden.
 
 - [ ] **Step 8: Commit**
 
@@ -862,7 +871,7 @@ Expected: PASS (7 passed)
 - [ ] **Step 7: Run the full suite — criterion 1**
 
 Run: `./venv/bin/python -m pytest -q`
-Expected: `1278 passed, 1 skipped`. ⚠️ If any other caller of `accrue_excess_mortality` exists it
+Expected: the baseline plus this task's new tests. ⚠️ If any other caller of `accrue_excess_mortality` exists it
 will now fail on the required keyword arguments — find them with
 `grep -rn "accrue_excess_mortality" --include=*.py .` and update each; do not add defaults, the
 whole point is that no caller can forget the split.
@@ -1031,7 +1040,8 @@ In the welfare-currency block added by Task 1, after `awake_h = params.pain.awak
 - [ ] **Step 6: Run the tests, then the full suite**
 
 Run: `./venv/bin/python -m pytest tests/env/model/test_pain_ammonia.py -q` → PASS (8 passed)
-Run: `./venv/bin/python -m pytest -q` → `1286 passed, 1 skipped`, goldens untouched.
+Run: `./venv/bin/python -m pytest -q` → baseline + this task's new tests, zero pre-existing
+failures, goldens byte-identical.
 
 - [ ] **Step 7: Commit**
 
@@ -1207,7 +1217,8 @@ def test_heat_pain_edges_match_the_substrate_thresholds():
 - [ ] **Step 7: Run the tests, then the full suite**
 
 Run: `./venv/bin/python -m pytest tests/env/model/test_pain_heat.py -q` → PASS (10 passed)
-Run: `./venv/bin/python -m pytest -q` → `1296 passed, 1 skipped`, goldens untouched.
+Run: `./venv/bin/python -m pytest -q` → baseline + this task's new tests, zero pre-existing
+failures, goldens byte-identical.
 
 - [ ] **Step 8: Commit**
 
@@ -1370,7 +1381,7 @@ def red_mite_pain(index: float, birds: int, hours: float, pp) -> PainDelta:
 ammonia block near line 178 — reading the values before their layers run would charge yesterday's
 prevalence.
 
-- [ ] **Step 6: Run the tests, then the full suite** → `1304 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 6: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 7: Commit**
 
@@ -1543,7 +1554,7 @@ CHANNEL_PROVENANCE: dict[str, str] = {
                 hw.litter_moisture, birds, 1.0, params.pain))
 ```
 
-- [ ] **Step 6: Run the tests, then the full suite** → `1312 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 6: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 7: Commit**
 
@@ -1763,7 +1774,7 @@ it, **verify each result is still inside its printed range**, and write the new 
 anchor — if that is what it takes, stop and report it, because it means the published anchor and
 our lay-rate assumption disagree about something real.
 
-- [ ] **Step 7: Run the tests, then the full suite** → `1319 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 7: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 8: Commit**
 
@@ -2026,7 +2037,7 @@ bounded and the state addition is ~835 floats.
             # Step 5 is where it is actually written. Nothing is added here.
 ```
 
-- [ ] **Step 6: Run the tests, then the full suite** → `1326 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 6: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 7: Commit**
 
@@ -2239,7 +2250,7 @@ Replace the feather line (currently line 242) with:
 ⚠️ `setdefault` is load-bearing. A plain assignment would re-baseline the house on every
 `integrate()` call, and the adapter calls it once per day.
 
-- [ ] **Step 6: Run the tests, then the full suite** → `1333 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 6: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 7: Commit**
 
@@ -2693,7 +2704,8 @@ it rather than widening the range.
 
 - [ ] **Step 8: Run the full suite and time a reference run**
 
-Run: `./venv/bin/python -m pytest -q` → `1344 passed, 1 skipped`, goldens untouched.
+Run: `./venv/bin/python -m pytest -q` → baseline + this task's new tests, zero pre-existing
+failures, goldens byte-identical.
 Run: `time ./venv/bin/python -c "from scripts.regen_golden import run_reference; run_reference('good')"`
 Expected: under ~60 s. If not, report the measured time — do NOT reintroduce cohort bucketing,
 which adversarial review removed for correctness, not performance.
@@ -2909,7 +2921,7 @@ In the mortality block, immediately after the `DeathRecord` append, reusing the 
                             pain.peritonitis_fatal_pain(parts[0], params.pain))
 ```
 
-- [ ] **Step 6: Run the tests, then the full suite** → `1351 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 6: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 7: Commit**
 
@@ -3089,7 +3101,7 @@ At the very end of the house-day block (after `state.world.litter_age_days[hid] 
 ⚠️ Divide by `birds`, the **day-start** count, matching `DeathRecord.birds_start` — that is what
 makes the two series reconcile row for row.
 
-- [ ] **Step 5: Run the tests, then the full suite** → `1356 passed, 1 skipped`, goldens untouched.
+- [ ] **Step 5: Run the tests, then the full suite** → baseline + this task's new tests, zero pre-existing failures, goldens untouched.
 
 - [ ] **Step 6: Commit**
 
@@ -3491,7 +3503,8 @@ Expected: PASS (14 passed). ⚠️ These run several full episodes and will be s
 `@pytest.mark.slow` if the suite time becomes a problem, but do NOT skip them by default: criterion
 3 is the one the whole design lives or dies on.
 
-Run: `./venv/bin/python -m pytest -q` → `1370 passed, 1 skipped`, goldens byte-identical.
+Run: `./venv/bin/python -m pytest -q` → baseline + this task's new tests, zero pre-existing
+failures, goldens byte-identical.
 
 Measure the log growth ¶16 warns about and record the number in the commit message:
 
