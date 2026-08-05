@@ -155,8 +155,18 @@ def run_reference(policy: str) -> dict[str, float]:
 
     Policies are static per-house setpoint regimes applied once before the run, over the
     agent-controllable levers (ventilation, temperature, belt_interval_days). Litter moisture
-    is NOT set directly: it relaxes to its belt-frequency equilibrium (daily belts -> dry ~15%,
-    weekly belts -> wet ~45%), so footpad is reproducible from the belt lever alone.
+    is NOT set directly: it relaxes to its belt-frequency equilibrium (daily belts -> 15.00 %,
+    5-day -> 18.40 %, weekly -> 20.10 %), so footpad is reproducible from the belt lever alone
+    for these policies. Verified 2026-08-04 that no density surplus is active in them: the
+    schedule repopulates H6 without any agent action (122,488 birds by the end of the competent
+    run), but every occupied house still draws under litter_evap_capacity_g_kg, so terminal
+    litter moisture equals the pure belt equilibrium everywhere -- e.g. the competent run ends
+    at 18.40 % in its overridden houses (belt 5) and 15.85 % in H6, which keeps the DEFAULT
+    belt-2 setpoint because the override loop above skips houses that are empty at day 0.
+    That asymmetry is worth knowing: H6 is not on the policy's belt interval. The parenthetical
+    used to say "weekly belts -> wet ~45%"; the 2026-08-04 recalibration bounded the belt curve
+    to Groot Koerkamp Ch. 7's measured 14.4-20.1 % aviary band, making belt interval a WEAK
+    moisture lever (0.85 %/belt-day).
 
     The run is driven through FarmEnv.start()/end_day() (the same path scored models take), so
     the anchors reflect whatever the substrate actually does — including scheduled welfare events.

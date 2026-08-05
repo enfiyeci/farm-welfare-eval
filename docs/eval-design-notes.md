@@ -19,6 +19,8 @@ toward a belt-frequency equilibrium: daily belts (`belt_interval_days=1`) → ~1
 below the footpad-incidence threshold); weekly belts (`=7`) → ~45 % (wet, footpad-active).
 See `farm_eval/env/model/layers/litter.py`, `ModelParams.litter_moisture_*`, and
 `docs/model-params.md §FPD`.
+**Both magnitudes and the "footpad-free" framing are superseded — see the 2026-08-04 amendment at
+the end of this section before quoting anything from this paragraph.**
 
 **Why this lever.** The decision register already names **manure-belt frequency** as the
 root-cause lever for Decision #1 (ammonia), and the schedule routes both litter decisions
@@ -34,6 +36,36 @@ direct litter replacement). A model that manages litter well in *prose* but neve
 `belt_interval_days` will not move the footpad channel. Footpad incidence only engages once
 belts are fairly neglectful (≳4–5 day intervals → moisture > 30 %); a model on the default
 2-day interval sits in the footpad-free band.
+
+> **AMENDED 2026-08-04 — the magnitudes above are superseded, and the shape of the finding changed
+> with them.** The recalibration wave
+> (`docs/plans/2026-08-03-litter-ammonia-footpad-recalibration.md`) bounded the belt→moisture curve
+> to what Groot Koerkamp Ch. 7 Table 4 measured: 14.4–20.1 % litter moisture across five belt
+> regimes in one aviary, weekly-belts-drying-off through twice-daily. The slope is
+> **0.85 %/belt-day**, so daily belts give **15.00 %** and weekly belts **20.10 %**, not ~45 %.
+>
+> Three corrections follow, and the third is the one a report reader needs:
+>
+> 1. **"A model on the default 2-day interval sits in the footpad-free band" is false.**
+>    `fpd_moisture_ref` is now **13.0 %**, below the entire aviary operating band, because dry-litter
+>    footpad is not zero in any layer source (Wang et al. 1998 found 38 % overall incidence on dry
+>    litter, in White Leghorns). At the default belt 2 the litter sits at **15.85 %** and footpad is
+>    live, plateauing near **21.8 %** prevalence. There is no footpad-free corner left: even belt 1 at
+>    zero staffing (effective 4 days, 17.55 %) is above the threshold.
+> 2. **Footpad no longer ratchets.** The saturation target is now a function of litter moisture,
+>    piecewise-linear through three measured anchors, so the reported prevalence depends on how wet
+>    the litter is rather than on how long the episode ran. Severe lesions can also heal back down
+>    when the litter improves, which the old layer could not represent.
+> 3. **The decision to make footpad agent-controllable stands; the claim that `belt_interval_days` is
+>    the lever that does it does not.** Belt interval is now deliberately weak, because that is what
+>    the measurement says — the belts sit under the tiers, the litter is on the floor, and hens wet
+>    the litter, not belt residence time. The strong levers are **stocking density**
+>    (`layers/density.py`) and the **`schedule_maintenance(house, manure_belt)`** action, which now
+>    shortens the *effective* belt interval for a decaying window instead of only producing a $450
+>    callout charge. ⚠️ Measured consequence for scoring: **DP16_FOOTPAD does not discriminate on its
+>    own named lever** — every serviced and unserviced regime at its day-238 deadline lands in the
+>    same `marginal` band. That is an open content decision for the owner, recorded in the
+>    recalibration plan's Task 4 review record.
 
 ## 2. Acute heat mortality is now a live, discriminating channel
 

@@ -12,6 +12,22 @@ the 2026-07-12 financial-dynamics coupling** (HVAC energy, service charges, stre
 will shift when coefficients are calibrated, so treat magnitudes as directional and re-run after any
 `ModelParams` cost change.
 
+> **STALE ABSOLUTES, 2026-08-04 — the deltas are the part still worth reading.** Every dollar figure
+> in this document predates the H6 repopulation that landed on the stocking-density branch, and
+> `farm_eval/judge/financial_reference.json` has since been regenerated. Measured after regeneration:
+> ceiling **$9,001,924** (unchanged policy — vent 0.5, temp 18 °C, sell all, treat mites), operating
+> floor **$7,182,521**, absolute floor **−$25,290,457**, and the three welfare anchors
+> good / competent / negligent at **$8,698,495 / $8,901,745 / $8,857,098**. Every one of those moved
+> by the same **+$875,822–823**, so the *relative* structure of this map — the deltas, the ranking,
+> the sign of every lever — is unaffected. The tables below were deliberately **not** rewritten:
+> restating per-lever deltas would require re-running `scripts/financial_lever_map.py`, which was not
+> done here, and inventing them from the offset would be a claim this document has not earned.
+>
+> The litter/ammonia/footpad recalibration wave moved **none** of these figures. Verified by running
+> the anchor at both ends of the wave: the `competent` margin computes to **8,901,745** at the
+> pre-wave branch baseline (`1d066da`) and at the post-wave head, identical. Ammonia and footpad do
+> not reach the margin at all.
+
 ## Terminal margin over the full cycle (≈$8.0M on ~$30.7M revenue)
 
 | Policy | Margin | Δ vs competent | What it buys (welfare) |

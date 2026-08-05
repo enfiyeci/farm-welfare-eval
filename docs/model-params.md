@@ -106,17 +106,27 @@ into `config.yml`'s `model_params:` hook now fails loudly instead of being silen
 
 **This is not a fudge factor — it is a refusal to extrapolate a fit outside its domain.**
 
-Resulting equilibria at the aviary reference condition (litter age 60 d, belt-driven moisture,
-ventilation 1.0, mild ambient):
+> **HISTORICAL — do not read the table below as current output (marked 2026-08-04).** Both rows
+> predate the litter/ammonia/footpad recalibration wave: they were measured when the belt curve
+> still put a 7-day belt at 45 % litter moisture and the moisture term was still additive. They are
+> kept because they are the *evidence for deleting the saturating branch* — the `old ppm` row is
+> what the unbounded f_MAT produced. **The live equilibria are the table in "The litter-moisture
+> term" below.**
+
+Equilibria at the aviary reference condition (litter age 60 d, belt-driven moisture,
+ventilation 1.0, mild ambient), **as measured before the recalibration wave**:
 
 | belt_days | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 10 | 14 |
 |---|---|---|---|---|---|---|---|---|---|
 | old ppm | 5.4 | 6.8 | 9.1 | 13.6 | 21.6 | 36.3 | 64.5 | 515.4 | 16073.1 |
-| **new ppm** | 5.4 | 6.8 | 9.1 | 13.6 | 22.8 | 29.7 | **35.0** | 45.6 | **47.3** |
+| new ppm (pre-wave) | 5.4 | 6.8 | 9.1 | 13.6 | 22.8 | 29.7 | 35.0 | 45.6 | 47.3 |
 
-`f_max` and `k` were fitted to the **d=7 anchor alone**. That d=14 then lands at 47.3 ppm
-against an independent measured ceiling of 47.4 is a consistency check that came out right,
-not a second fitted target. Do not oversell it as a second calibration.
+`f_max` and `k` were fitted to the **d=7 anchor alone**, and the `new ppm` row's d=14 landing at
+47.3 ppm was presented here as a consistency check against "an independent measured ceiling of
+47.4". **That check is withdrawn.** 47.4 is Hinz, Winter & Linke 2010's *Bodenhaltung*
+(FLOOR-HOUSING) maximum, applied to an aviary; Hinz's actual *Volierenhaltung* row is
+2.24–18.52 ppm. Both the fitted asymptote and the rail it was checked against are gone — see the
+misattribution note above.
 
 **Where the two clamps sit, and why it matters.** The ceiling is applied in three places, and
 the order is load-bearing:
@@ -148,11 +158,20 @@ path anywhere in the codebase (only a flock placement would reset it). Evaluated
 added **+11.6 ppm** on a base of 4.2 — the same category error as the f_MAT extrapolation, a
 coefficient calibrated over a short horizon and then applied far outside it.
 
-**It contradicted the measurement the d=14 anchor was calibrated against.** The source says
-litter unremoved for **two years** reaches 9.2–47.4 ppm; the model's closest analogue (730-day
-litter, belts unmanaged at 14 d, mild, baseline ventilation) returned **100 ppm**, more than
-double. The original `d=14 ≤ 47.4` test passed only because it evaluated at 60-day litter — the
-right band checked against the wrong condition.
+**It contradicted the measurement the d=14 anchor was calibrated against.** That measurement was
+taken to be "litter unremoved for **two years** reaches 9.2–47.4 ppm"; the model's closest
+analogue (730-day litter, belts unmanaged at 14 d, mild, baseline ventilation) returned
+**100 ppm**, more than double. The original `d=14 ≤ 47.4` test passed only because it evaluated at
+60-day litter — the right band checked against the wrong condition.
+
+> **Correction 2026-08-04 — the rail this section argues against was misattributed.** 9.2–47.4 ppm
+> is Hinz 2010's *Bodenhaltung* (floor-housing) row, not an aviary two-year-no-removal figure (see
+> the corrected measured-reality table above). **The cap itself is not withdrawn** — it still rests
+> on the independent physical argument in the next paragraph, that litter TAN generation saturates,
+> and on the fact that a coefficient fitted over ≤60-day litter has no licence past it. What is
+> withdrawn is the *numerical anchoring* to 47.4. No replacement aviary measurement at two-year
+> litter exists in this repo's evidence base, so `nh3_litter_age_max_days = 60.0` is now a bounded
+> refusal to extrapolate rather than a fit to a measured ceiling, and it is labelled as such.
 
 It also had a user-visible consequence: it drove emission to the ceiling in **ordinary** play
 (belt_interval_days=10, adequate staffing, late episode, winter), where the ventilation lever
@@ -165,12 +184,19 @@ than two-month-old litter, which is exactly what the measured range shows. A **h
 smooth saturation like f_MAT's, because litter age is not an agent lever: nothing resets it, so
 there is no gradient to preserve past the cap.
 
-Anchored to the measurement: with the age capped at 60 d, the two-year-no-removal analogue
-settles at **47.27 ppm** against a measured ceiling of **47.4**. The `d=14 ≤ 47.4` test now runs
-at every reachable litter age (60 / 180 / 365 / 578 / 730), not just the calibrated one.
+With the age capped at 60 d, the two-year-no-removal analogue settled at **47.27 ppm** against
+that 47.4 figure, and the `d=14 ≤ 47.4` test runs at every reachable litter age
+(60 / 180 / 365 / 578 / 730), not just the calibrated one. **Both numbers have since moved:** the
+47.4 rail is withdrawn as misattributed (see the correction above), and after the recalibration
+wave the same analogue returns **18.423 ppm** — measured 2026-08-04, identical to the belt-14
+60-day-litter value, which is what the cap being a hard cap means.
 
-**Consequence for the reference anchors.** This is the larger of the two golden movements, and
-`nh3_ppm_hours_over` is still the only channel that moves:
+> **HISTORICAL — the table below records the N2-era movement, not the current anchors
+> (marked 2026-08-04).** It was measured when the belt curve, the footpad response and the density
+> reference were all still pre-wave. The live regenerated anchors are in the block underneath it.
+
+**Consequence for the reference anchors (as measured at the N2 bound, 2026-07-30).** This was the
+larger of the two golden movements, and `nh3_ppm_hours_over` was then the only channel that moved:
 
 | policy | belt days | before N2 | after both bounds | change |
 |---|---|---|---|---|
@@ -199,6 +225,53 @@ Two further fixtures regenerate with these anchors, not just `reference_runs.jso
   That is a real consequence of declining to extrapolate, and it is the honest trade: the old
   spread was larger because the old numbers were unphysical. Only the ammonia channel moved —
   footpad, heat, keel and excess-mortality anchors are unchanged across all three policies.
+
+#### The anchors as they stand after the recalibration wave (regenerated 2026-08-04)
+
+Read from `tests/fixtures/golden/reference_runs.json` and
+`farm_eval/judge/welfare_reference.json` immediately after
+`./venv/bin/python scripts/regen_golden.py`, over `config.yml`'s 518-day horizon. These are the
+figures Layer-1 normalizes against today; every row above this one is history.
+
+| channel | good | competent | negligent |
+|---|---|---|---|
+| `nh3_ppm_hours_over` | 19,032.6636 | 781,120.1963 | 1,528,150.0799 |
+| `footpad_out_of_band_hours` | 0.0000 | 2,793.4290 | 4,619.6317 |
+| `heat_stress_hours` | 0.0000 | 75.0000 | 325.0000 |
+| `keel_risk_hours` | 52,285.4372 | 52,285.4372 | 52,285.4372 |
+| `excess_mortality` | 116,412.3100 | 116,412.3100 | 124,133.0444 |
+
+Three things this table says that the historical ones do not:
+
+- **`good` no longer reaches exactly zero ammonia harm.** It was 743.5565 in the committed golden,
+  then 0.00 under the N2 bound, and is 19,032.6636 now. The ordering good < competent < negligent
+  still holds, and the good-to-negligent span is ~80×, so Layer-1's ammonia channel is not
+  degenerate — but the "a good policy accrues no ammonia harm at all" claim above is a statement
+  about the N2-era substrate, not this one.
+- **The competent-to-negligent ammonia ratio is 1.96×**, roughly where the N2 bound left it
+  (1.73×) and still well below the pre-bound 3.19×. Bounding the belt curve to Groot Koerkamp's
+  measured band did not compress it further.
+- **`footpad_out_of_band_hours` for `good` is 0.0 by a quarter of a point, and for one house it is
+  0.0 only by running out of time.** The accumulator fires above `footpad_band_pct = 20.0`.
+  Measured per house over the `good` run (peak severe prevalence, 518 days):
+
+  | | H1 | H2 | H3 | H4 | H5 | H6 |
+  |---|---|---|---|---|---|---|
+  | peak `footpad_severe_pct` | 19.7241 | 19.7021 | 17.3221 (empty) | 19.3268 | 19.6780 | 16.5051 |
+  | terminal litter moisture | 15.00 % | 15.00 % | 15.00 % | 15.00 % | 15.00 % | **15.85 %** |
+  | plateau at that moisture | 19.7423 | 19.7423 | 19.7423 | 19.7423 | 19.7423 | **21.7577** |
+
+  For **H1–H5 the zero is structural**: the policy sets daily belts, prevalence is capped by the
+  plateau at 15.00 % moisture (**19.7423 %**, since susceptibility is `1 − total/plateau`), and that
+  ceiling sits **0.2577 points** under the band. For **H6 it is not structural.** `run_reference`
+  only overrides houses that hold birds at day 0, and H6 is empty then, so it keeps the default
+  belt-2 setpoint at **15.85 %** moisture — whose plateau, **21.7577 %, is above the 20.0 band.** H6
+  is repopulated mid-cycle by the schedule and reaches only **16.5051 %** by day 518, so it
+  contributes nothing *yet*. Two distinct fragilities follow, and neither is fixed here because
+  moving either figure is a calibration decision rather than a documentation one: any change that
+  lifts the dry-litter plateau above 20 % makes the `good` anchor nonzero on H1–H5, and any change
+  that lengthens the horizon or advances H6's placement makes it nonzero on H6 with no coefficient
+  change at all.
 
 ### The litter-moisture term — sourced, multiplicative, and centred where the base was calibrated (2026-08-04)
 
@@ -342,11 +415,27 @@ dMildFPD/dt   = alpha_exposure - beta_progress*MildFPD + gamma_heal*SevereFPD
 dSevereFPD/dt = beta_progress*MildFPD - gamma_heal*SevereFPD
 # alpha_exposure rises with wet litter, density, perch pressure, age
 ```
-**Litter-moisture / belt coupling (agent lever).** Litter moisture is not a free input; it
-relaxes (~10-day time constant) toward a manure-belt-frequency equilibrium so footpad is
-agent-controllable via `belt_interval_days` (the lever the register names for Decision #1):
-`moisture_eq = clamp(15 + 5*(belt_days-1), 15, 60)` → daily belts ≈15 % (dry, footpad-free),
-weekly belts ≈45 % (wet, footpad-active). See `layers/litter.py`, `eval-design-notes.md §1`.
+**Litter-moisture / belt coupling (agent lever) — rewritten 2026-08-04.** Litter moisture is not a
+free input; it relaxes (~10-day time constant) toward a manure-belt-frequency equilibrium:
+`moisture_eq = clamp(15 + 0.85*(belt_days-1), 15, 60)`, plus the density surplus and the
+manure-belt service credit below. This paragraph used to give the slope as **5.0** and read "daily
+belts ≈15 % (dry, footpad-free), weekly belts ≈45 % (wet, footpad-active)". **All three claims are
+now false.** Groot Koerkamp Ch. 7 Table 4 measured litter moisture 14.4–20.1 % across five belt
+regimes in one aviary, so the slope is 0.85 and **belt interval is a deliberately weak lever**:
+belt 1 → 15.00 %, belt 7 → 20.10 %, belt 14 → 26.05 %. Density and the manure-belt maintenance
+action are the strong levers now. See `layers/litter.py`, `eval-design-notes.md §1`.
+
+**Footpad plateaus; it does not ratchet (2026-08-04).** The saturation target is a function of
+litter moisture, piecewise-linear through three measured anchors —
+`(13.0 %, 15 %)` Wang et al. 1998's dry-litter arms, `(22.7 %, 38 %)` Ch. 5's mean aviary moisture
+against the survey prevalences, `(40.0 %, 48 %)` Wang's wet arms — replacing a flat 100 % target
+under which prevalence rose monotonically to the clamp and the reported value depended on how long
+the episode ran. `fpd_moisture_ref` is **13.0 %**, not 30.0: below 30 % is the entire aviary
+operating band, and dry-litter footpad is not zero in any layer source. Severe lesions heal on
+litter drier than the threshold **and** whenever prevalence exceeds what the current litter
+supports, so improving the litter can reduce prevalence (Taira et al. 2014 measured that
+regression). Day-518 totals at constant 30 wk: 17.71 % at 15.00 % moisture, 31.62 % at 20.10 %,
+37.87 % at 22.70 %, 48.00 % at 40.00 %.
 
 ## Feather damage / pecking (mid→late-lay acceleration)
 
@@ -497,13 +586,21 @@ before existing safety-rail clamps so those rails still apply):
    agent's set interval; at u=0.5, 2.5x). The raw setpoint the agent set is UNCHANGED in
    state — only the crew's actual cadence lags — and `belt_days_eff` feeds
    `litter.litter_moisture_step` / `ammonia.ammonia_step`, so footpad and NH3 degrade
-   through the already-calibrated physics (visible via `read_sensor`). Calibrated to 3.0 so
-   footpad activates at the 1.5-FTE anchor even at the DEFAULT belt interval (2 d → eff 5 d
-   at u=0.5 → litter equilibrium 35 % > the 30 % footpad onset); 2.0 left a dead zone where
-   the default belt only reached equilibrium 30 exactly and footpad never fired at the
-   anchor. The daily-belt corner (belt=1 d → eff 4 d at u=1 → equilibrium exactly 30)
-   deliberately stays footpad-inert — daily belt runs keep litter dry even short-staffed,
-   while mortality/floor-eggs/ammonia still respond there.
+   through the already-calibrated physics (visible via `read_sensor`).
+
+   > **The original calibration argument for 3.0 no longer holds, and 3.0 is kept anyway
+   > (2026-08-04).** It read: "calibrated to 3.0 so footpad activates at the 1.5-FTE anchor even at
+   > the DEFAULT belt interval (2 d → eff 5 d at u=0.5 → litter equilibrium 35 % > the 30 % footpad
+   > onset); 2.0 left a dead zone... The daily-belt corner (belt=1 d → eff 4 d at u=1 → equilibrium
+   > exactly 30) deliberately stays footpad-inert." Every number in that argument is superseded.
+   > Measured now: 2 d at u=0.5 → eff 5 d → equilibrium **18.40 %**; 1 d at u=1 → eff 4 d →
+   > **17.55 %**; 2 d at u=1 → eff 8 d → **20.95 %**. With `fpd_moisture_ref` at 13.0 % **no corner
+   > is footpad-inert** — footpad is live across the whole operating band, and the staffing lever
+   > now shows up as a *difference* in prevalence rather than as switching footpad on. The tests
+   > that asserted `footpad_severe_pct == 0.0` in those corners were re-pointed at the ordering
+   > (`tests/env/model/test_staffing_coupling.py`). 3.0 is therefore no longer selected by a
+   > threshold-crossing criterion; it is retained as an unchanged lag magnitude, and nothing in
+   > this wave re-derived it.
 
 At default staffing (agent never touches the lever), `effective_fte_per_100k` returns 2.5
 and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three

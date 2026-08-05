@@ -1492,7 +1492,49 @@ double count. Consequently Groot Koerkamp's **+103 % per m/s is an emission-side
 coefficient that our ammonia layer does not represent and this task must not add**; it stays a
 documented cross-check, as the design section below already requires.
 
-### STATUS 2026-08-03: BLOCKED on an owner decision — the sourced coefficient collides with two measured anchors
+### STATUS 2026-08-04: UNBLOCKED AND BUILT — everything below this box is superseded
+
+> Task 6 landed on branch `feat/litter-ammonia-recalib` (commit `7a747db`, hardened by `0d22e07`).
+> The block was cleared by the **litter/ammonia/footpad recalibration wave**,
+> `docs/plans/2026-08-03-litter-ammonia-footpad-recalibration.md`, which took **option 1** below —
+> bound the litter-moisture equilibrium to its validated domain — and found that the collision had a
+> second cause the analysis below did not identify: **two of the three "measured anchors" the
+> coefficient collided with were misattributed to the wrong housing system.**
+>
+> What actually changed, and why the arithmetic below no longer applies:
+>
+> - **The belt→moisture curve is bounded.** Slope 5.0 → **0.85 %/belt-day** (Groot Koerkamp Ch. 7
+>   Table 4: 14.4–20.1 % measured across five belt regimes in one aviary). The table below showing
+>   belt 7 → 45 % and belt 10 → 60 % is superseded; the live values are belt 7 → **20.10 %**,
+>   belt 14 → **26.05 %**.
+> - **The "want 32–38 ppm at belt 7" anchor is withdrawn.** It is Nimmermark et al. 2009's
+>   *multilevel* house — no supplemental heat, 1.48 m³/h·hen, litter caking the farmer blamed on
+>   wheat in the feed, headline figure measured at **+2.1 °C outdoors**. Verified at source; see
+>   `docs/research/2026-08-03-nh3-moisture-decomposition.md` §11. The measured aviary band at weekly
+>   belts is **6.0–19.0 ppm**.
+> - **The "want ≤47.4 ppm at belt 14" anchor is withdrawn.** It is Hinz 2010's *Bodenhaltung*
+>   (floor-housing) maximum. Hinz's aviary row is 2.24–18.52 ppm (§9 of the same research doc).
+> - **The form changed, and so did the centring.** The term is now **multiplicative**, not a floored
+>   linear multiplier, at the sourced Ch. 5 eq. 18 value **0.0040 fraction per g/kg** — and the
+>   parameter was **renamed `nh3_moisture_frac_per_g_kg`** because its units changed. It is centred
+>   at **17.12 %**, not 25 %.
+> - **`nh3_moisture_linear_max` does not exist.** The clamp the table below tunes was never built;
+>   the domain guard is a test assertion instead.
+>
+> Measured after the wave, from the real code: belts 1 / 2 / 4 / 7 / 14 → **4.96 / 6.46 / 13.11 /
+> 14.52 / 18.42 ppm**, winter belt 2 → 26.46 ppm (> 25), all rails satisfied simultaneously.
+>
+> **Two things below still stand.** The "do not lower the clamp to ~35 and call it evidence" warning
+> is the right instinct and the wave honoured it — no coefficient was fitted to an anchor. And
+> **option 2 (splitting the belt and floor-litter emission sources) was never taken**; `belt_mult`
+> still multiplies the whole emission term, so that critique is open, not resolved.
+>
+> ⚠️ **One question is open, not closed, and it is load-bearing.** The 17.12 % centring assumes CSES
+> ran belts every 3–4 days, which no one on the wave has read at source (Zhao 2015 is abstract-level
+> only in this repo). See the Task 6 review record in the recalibration plan. If the owner overturns
+> the centring, the ammonia values above and the goldens both move again.
+
+**Superseded — retained for the reasoning, not the numbers. STATUS 2026-08-03: BLOCKED on an owner decision — the sourced coefficient collides with two measured anchors**
 
 Task 6 was built test-first and **reverted**, deliberately, rather than landed. The branch is back
 to exactly its three known Task-13 failures. The reason is not a bug in the implementation; it is

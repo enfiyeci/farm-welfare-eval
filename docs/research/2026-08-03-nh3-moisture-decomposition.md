@@ -18,7 +18,7 @@ The owner asked to be told whenever a study could not be reached in full.
 |---|---|---|
 | **Groot Koerkamp PhD thesis (S28)**, `edepot.wur.nl/210633`, 155 pp | **READ AT SOURCE, verified in this session** | Downloaded and text-extracted locally. Every number attributed to Ch. 7 below was read directly off the thesis by the primary session, not taken on report. |
 | Kang et al. 2018 (S22), local PDF | **READ IN FULL** | 13/13 pp, verified twice (rendered pages + independent `pdftotext`). Table 6 and the hard negatives re-checked by the primary session. |
-| Nimmermark et al. 2009 (source of "32–38 ppm") | READ IN FULL | Open PDF, aaem.pl. Agent-read; not independently re-verified. |
+| Nimmermark et al. 2009 (source of "32–38 ppm") | ✅ **READ IN FULL AT SOURCE, re-verified 2026-08-04** | Open PDF, aaem.pl, text-extracted with `pdftotext -layout` and read end to end. **See §11**, which records every figure and corrects §5's "minimum-ventilation figure" label. ⚠️ Figures 1–2 are raster images; their data points were not recoverable from the text layer. |
 | Dunlop, Blackall & Stuetz 2015 (evaporation, Task 5b) | READ IN FULL | Open access. Agent-read. |
 | David et al. 2015 *Animals* 5(3):886 (the review that tabulates our anchors) | Table 1 extracted | Agent-read. |
 | Groot Koerkamp **Ch. 5** (the 58-sample litter survey + eq. 18) | **VERIFIED AT SOURCE** | Table 1 and eq. 18 read directly off the thesis by the primary session. Water content 52 / 227 / **438** g/kg (c.v. 33), water activity **0.84 / 0.93 / 0.99**, pH 7.4–9.2, n = 58, eight further samples excluded as "not granular, but clotted". Eq. 18 verbatim: TAN "increased with approximately 4 % per 1/10 unit of pH, approximately 4 % per unit of temperature (°C), and approximately 4 % per 10 units of water content (g/kg wet basis)", VIFs 1.09 / 1.18 / 1.18. **Not confirmed:** the "12 houses / 5 system types / 6 strains" breakdown — the thesis says notes were taken on system type and strain but I did not find that tally. |
@@ -183,6 +183,13 @@ parameter — but it re-derives a coefficient inside review-APPROVED, landed wor
   averages spanned **21–42 ppm**. Measured in hard winter, outdoor −10 to +2 °C, indoor 16–18 °C —
   a minimum-ventilation figure. **No litter moisture is reported anywhere in the paper**, so this anchor
   can neither validate nor refute any litter-moisture value.
+  > **Corrected 2026-08-04 by the full-text read (§11).** "A minimum-ventilation figure" is
+  > **withdrawn** — the paper reports no minimum-ventilation rate; its CO₂-balance ventilation rate is
+  > 20,000 m³/h over 12 days (1.48 m³/h·hen). And the 21–42 ppm range is not hard winter: it comes from
+  > **28 March–7 April at a mean outdoor +2.1 °C**. The one genuinely cold window (−7.9 °C) gave
+  > **30.0 ppm from a single day of detection tubes**. The "no litter moisture reported" claim is
+  > confirmed by machine check. §11 adds the confound this bullet misses: **observed litter caking,
+  > attributed by the farmer to wheat in the feed.**
 - **The same review's other weekly-belt aviary row is 2.2–18.5 ppm** (Hinz 2010) — a ~10× spread for the
   same nominal regime. Calibrating to the top of it biases the model high.
 - **The 6.7 ppm and 32–38 ppm anchors are not consistent as a belt response.** Zhao et al. 2015 measured
@@ -472,3 +479,106 @@ laying hens", *Ann. Agric. Environ. Med.* 16:103–113 —
 [PubMed 19630203](https://pubmed.ncbi.nlm.nih.gov/19630203/)
 7. **Correct the stale/overstated claims** flagged in §4, §5 and §6, and the stale "S22 still paywalled —
    hold Task 6" note at `2026-07-30-density-coefficients.md:45`.
+
+---
+
+## 11. Nimmermark et al. 2009 — read at source in full, and §5 needs one correction (2026-08-04)
+
+**Added by Task 7 of the litter/ammonia/footpad recalibration wave** (plan
+`docs/plans/2026-08-03-litter-ammonia-footpad-recalibration.md`). The access table at the top of this
+document listed Nimmermark as "READ IN FULL · Agent-read; **not independently re-verified**". It has
+now been re-verified: the open PDF at
+[aaem.pl](https://www.aaem.pl/pdf-71597-8822?filename=Ammonia_+dust+and.pdf) was fetched and text-extracted
+with `pdftotext -layout`, and the **whole 11-page article was read end to end** — abstract, methods,
+Tables 1–8, Results, Discussion, Conclusions and the reference list. Every figure below was read off
+that extraction directly. ⚠️ The two embedded **figures** (Fig. 1 bacteria-vs-dust, Fig. 2
+NH₃-vs-CO₂ by day) are raster images and their data points were **not** recoverable from the text
+layer; nothing below depends on them.
+
+### What the full read establishes
+
+**The house.** Table 1, p. 105, farm No. 4 — the multilevel house selected for the longer-term
+measurements: **13,500 hens**, Vencomatic equipment, stock density **18.1 hens·m⁻²**, manure removed
+**1 time/week**, litter of **wood carvings**, exhaust ventilation, and the Ventilation/Heat column
+reads `Exhaust vent/–` — i.e. **no supplemental heat**. Hen age 60 wk at the visit.
+
+**The two measurement periods, Table 4, p. 107 — this is the correction to §5.** The multilevel
+house was measured over two distinct windows, and they are not the same operating point:
+
+| period | indoor °C | outdoor °C | outdoor °C (Gardermoen airport series) | CO₂ ppm | NH₃ ppm | N (days) | method |
+|---|---|---|---|---|---|---|---|
+| 1–9 March | 17.9 (0.79) | **−7.9** (1.48), N=3 | [−10.0 (2.66), N=9] | 2066 | **30.0** | **1** | detection tubes (average of 2 samples) |
+| **28 March–7 April** | 16.1 (0.44) | **+2.1** (0.60), N=11 | [0.7 (1.13), N=11] | 1723 | **32.3** (SD 6.8), range **21–42** | **11** | IR instrument |
+
+**So the 32.3 ppm / 21–42 range — the figure the model's belt anchor was built on — comes from
+28 March to 7 April at a mean outdoor temperature of +2.1 °C, not from hard winter.** The genuinely
+cold window (−7.9 °C, or −10.0 °C on the airport series) produced **30.0 ppm from a single day of
+detection tubes**, which is *lower* than the mild-period IR mean and rests on one measurement.
+
+**§5 of this document says the 32–38 ppm is "a minimum-ventilation figure". That is withdrawn.**
+Table 8, p. 109 gives the multilevel system's ventilation rate, derived from a CO₂ balance, as
+**20,000 m³·h⁻¹ (SD 1,700) over 12 days** — **1.48 m³/h per hen** at 13,500 hens — with ammonia
+emission 0.16 mg·m⁻²·s⁻¹ and 0.78 g·day⁻¹·hen⁻¹. The paper reports **no separate minimum-ventilation
+figure at all**, so the label was an inference, not a reading. What the paper *does* say, in the
+Discussion's CR/TR section, is that the highest ammonia levels came on very cold days when
+ventilation was cut to hold the indoor setpoint — which is a statement about the *peaks within* the
+range, not about the 32.3 ppm mean.
+
+**The confound this document did not mention, and it is the stronger one.** Discussion, p. 110:
+litter caking was observed in the multilevel house and "may have increased the ammonia release";
+according to the farmer the caking was attributed to **wheat in the feed composition**, with less
+wheat and a better balance of salt, fat and enzymes intended to fix it. Insufficient floor insulation
+is offered as a second possible cause. So the house our belt anchor came from was **a house with a
+known, farmer-diagnosed litter problem**, and the paper says so in as many words.
+
+**Confirmed: no litter moisture is reported anywhere in the paper.** Machine-checked against the full
+extraction — "moisture" occurs four times, all qualitative Discussion prose or a reference title, and
+no litter dry-matter or moisture percentage appears in any table. §5's claim on this point stands: the
+anchor can neither validate nor refute any litter-moisture value.
+
+**Confirmed: the 40 ppm row is floor housing, not an aviary.** Table 2 footnote (p. 106) and Results
+(p. 107): one **floor-housing** farm with supplemental heat, excluded from the averages, where
+concentrations were 6–7 ppm at three breathing-zone locations "and 40 ppm just above the litter area".
+§5's third bullet was already right about this; it is now verified at source.
+
+**Confirmed unchanged: Table 2's headline numbers.** Multilevel — direct readings during visits across
+3 farms: **38 ppm (SD 13), N=6**; longer-term at 1 farm: **32 ppm (SD 6.5) over 12 days**. Floor
+housing: 57 ppm instantaneous (2 farms, the heated one excluded) and 85 ppm (SD 17) longer-term.
+Furnished cages: 2.5 and 5.2 ppm.
+
+**One internal inconsistency, noted for completeness.** Methods (p. 104) says the longer-term
+measurements ran "28 February–3 April", but Table 4 lists a multilevel period ending **7 April**.
+Nothing here depends on the resolution; the dates used above are Table 4's.
+
+### Net effect on this wave
+
+None of the wave's coefficients move. The verification **strengthens** Task 1's disposition rather
+than changing it: the 32–38 ppm anchor belongs to a multilevel (not aviary) house, with caked litter
+the farmer blamed on the feed, whose headline figure was measured at **+2.1 °C outdoors** at 1.48
+m³/h·hen. Asserting it at this model's mild baseline was counting a house-specific litter defect and
+a season together, and the two measured aviary anchors at weekly belts remain 6.4 ppm (Groot Koerkamp
+Ch. 7 period 2B) and 11.40 ppm median / 18.52 max (Hinz *Volierenhaltung*).
+
+### Sources that still could not be reached (re-attempted 2026-08-04)
+
+- ⚠️ **Volkmann et al. 2024**, *Ann Appl Biol* 185(1),
+  [10.1111/aab.12923](https://onlinelibrary.wiley.com/doi/10.1111/aab.12923) — **still blocked**.
+  Re-attempted this session; Wiley returned **HTTP 403 Forbidden** with no response body. German laying
+  hens, FPD risk factors. Search snippets indicate it assessed litter quality **categorically** (litter
+  type: sand → 94.4 % FPD0), not as a moisture percentage, so it probably would not set a slope. **No
+  coefficient in this repo depends on it.**
+- ⚠️ **Youssef et al. 2011**, *Avian Dis* 55(1):51–58,
+  [PubMed 21500636](https://pubmed.ncbi.nlm.nih.gov/21500636/) — **the abstract IS now reachable**
+  (the reCAPTCHA reported earlier in this wave did not recur), and it changes the record. The full
+  abstract was retrieved and read: female turkeys, 3 weeks, four groups of 20 on daily-changed dry wood
+  shavings, with three groups additionally exposed 8 h/day to shavings wetted with water, water +
+  NH₄Cl, or water + uric acid. Finding: FPD severity "markedly higher (about 3 times) on wet than on
+  dry litter", **no** negative effect of ammonia or uric acid, conclusion that litter moisture is the
+  causal factor.
+  **The abstract contains no moisture percentages at all** — no "critical moisture content", no 35 %,
+  no 30 %. The widely-repeated "keep litter below 30 %" figure is therefore **not sourced to this
+  abstract**, contrary to how it has been reported secondhand. ⚠️ The **full text** remains unread
+  (BioOne and Allen Press paywalled), so the 35 % may yet appear in the body; what can be said is that
+  it is not in the abstract. **This wave does not rely on the figure either way** — `fpd_moisture_ref`
+  is 13.0, sourced to Wang et al. 1998 in layers, and the turkey threshold is explicitly disclaimed in
+  `params.py`.

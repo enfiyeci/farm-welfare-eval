@@ -1429,7 +1429,7 @@ EOF
 **Interfaces:**
 - Consumes: everything from Tasks 1–6.
 
-- [ ] **Step 1: Run the full suite and enumerate every failure**
+- [x] **Step 1: Run the full suite and enumerate every failure**
 
 ```bash
 cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=line -rf 2>&1 | tail -60
@@ -1438,7 +1438,7 @@ cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/
 Classify each failure as (a) an expected golden/value drift from this wave, (b) one of the 3 known baseline
 failures, or (c) a real regression. Only (a) gets regenerated; (c) gets fixed.
 
-- [ ] **Step 2: Regenerate the goldens**
+- [x] **Step 2: Regenerate the goldens**
 
 Goldens regenerate from `config.yml`'s horizon (518). Use the project's existing regeneration path — find it
 before inventing one:
@@ -1457,7 +1457,7 @@ cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/
 The round-1 replay headline must remain **6.8038** and the round-4 replay unchanged. If a replay moves, the
 seam has leaked and that is a real regression, not drift.
 
-- [ ] **Step 3: Restore the rubric guard and run both corpus linters**
+- [x] **Step 3: Restore the rubric guard and run both corpus linters**
 
 ```bash
 cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && node docs/build-rubric.mjs && ./venv/bin/python scripts/lint_corpus.py && ./venv/bin/python scripts/check_corpus_consistency.py
@@ -1466,7 +1466,7 @@ cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && node do
 Expected: 0 findings from both linters. A fresh worktree has no `farm_eval/judge/rubric.yml` (gitignored), so
 `test_rubric_sync.py` skips until `build-rubric.mjs` runs.
 
-- [ ] **Step 4: Append the Nimmermark verification to the research doc**
+- [x] **Step 4: Append the Nimmermark verification to the research doc**
 
 `docs/research/2026-08-03-nh3-moisture-decomposition.md` flags the Nimmermark ventilation operating point as
 "agent-read from Nimmermark, not source-verified — verify before acting on it." It has now been read in full at
@@ -1478,7 +1478,7 @@ stronger confound is one the doc does not mention at all: **the authors recorded
 which the farmer attributed to wheat in the feed.** Also record the two sources that could not be reached
 (Volkmann 2024, Wiley 403; Youssef 2011, PubMed reCAPTCHA).
 
-- [ ] **Step 5: Update the plan and CLAUDE.md**
+- [x] **Step 5: Update the plan and CLAUDE.md**
 
 Mark Task 6 in `docs/plans/2026-07-29-stocking-density-plan.md` as unblocked and built, and note that its
 "three options" section is superseded. Update `CLAUDE.md`'s Current state paragraph on the model calibration:
@@ -1487,7 +1487,7 @@ the belt curve, the footpad response and the density reference all changed, and 
 drives footpad" is no longer accurate — belt interval is now a deliberately weak lever and the manure-belt
 maintenance action and density are the strong ones.
 
-- [ ] **Step 6: Final full-suite run and commit**
+- [x] **Step 6: Final full-suite run and commit**
 
 ```bash
 cd /Users/ardaenf/Desktop/farm-welfare-eval/.claude/worktrees/density && ./venv/bin/python -m pytest --tb=short -rf 2>&1 | tail -30

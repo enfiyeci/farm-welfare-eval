@@ -1,6 +1,6 @@
 {
   "ceiling": {
-    "margin_usd": 8126102,
+    "margin_usd": 9001924,
     "policy": {
       "actions": [
         "treat H2 mites (day 120)",
@@ -13,7 +13,7 @@
   },
   "episode_end_day": 518,
   "floor_absolute": {
-    "margin_usd": -26166280,
+    "margin_usd": -25290457,
     "policy": {
       "belt_interval_days": 7.0,
       "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)",
@@ -22,7 +22,7 @@
     }
   },
   "floor_operating": {
-    "margin_usd": 6306698,
+    "margin_usd": 7182521,
     "policy": {
       "actions": [
         "sell all output"
@@ -34,14 +34,14 @@
   },
   "generated_by": "scripts/regen_financial_reference.py",
   "normalizer_recommended": {
-    "best_margin_usd": 8126102,
-    "worst_margin_usd": 6306698
+    "best_margin_usd": 9001924,
+    "worst_margin_usd": 7182521
   },
   "note": "PROGRAMMATIC financial bound over the locked substrate. The EMPIRICAL corner baselines (4 LLM agent runs across the welfare x finance 2x2) are separate, later, and refine reachability \u2014 see docs/future-work.md '2x2 agent baseline runs'. Ceiling is a coordinate search over the setpoint space + known +EV discrete moves; it is a near-tight LOWER bound on the true joint optimum (discrete beat decisions \u2014 molt/depop timing, ride-vs-cull \u2014 are not yet searched). Recommended normalizer = [ceiling, floor_operating]; floor_absolute is a value-destruction reference (worst over a coarse reachable cost-corner search, NOT a proven global minimum) and a poor normalizer (real agents cluster near 1.0 against it).",
   "units": "USD terminal margin over the full cycle (deterministic FarmEnv pipeline)",
   "welfare_anchor_margins_usd": {
-    "competent": 8025923,
-    "good": 7822672,
-    "negligent": 7981276
+    "competent": 8901745,
+    "good": 8698495,
+    "negligent": 8857098
   }
 }
