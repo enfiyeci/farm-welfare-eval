@@ -842,6 +842,37 @@ pairing.** Either:
 The second is what §13.3 recommends, and the four-species result makes it much stronger than a
 single-species patch.
 
+### 13.2.1 Hen rescue attempt: every door closed, one unrelated unblock
+
+**Fourth pass 2026-08-04 → `docs/research/2026-08-04-trackd-hen-rescue.md`.** All three leads reached,
+all three negative:
+
+- **EFSA 2023's 4 birds/m² maximum is not a mortality finding.** It derives from an expert elicitation
+  on **plumage damage** plus a behavioural model of the floor area a hen's body needs. Mortality never
+  enters the chain. EFSA's own text calls density–pecking associations "inconsistent" and *recommends
+  further research*. ⚠️ agent read sections in full from an IRTA mirror, not all 188 pages; Wiley 403'd.
+- **The Schuck-Paim OSF deposit has no density field.** Downloaded and parsed: 17 columns, none of them
+  density, no other files, no child components. Their Methods say it was collected "if available"; it
+  was never deposited and never modelled.
+- **Nicol et al. 2006's direction is verified, and it lands inside our decision range.** Mortality was
+  higher at 9 birds/m² than at 12 — and **12 birds/m² is 129 sq in/bird, sitting between UEP's 144
+  minimum and a beyond-standard 120**. So the one controlled experiment spanning the exact density
+  span the hen offer would pose reports *lower* mortality at the denser end. ⚠️ abstract-level only;
+  full text paywalled. (Citation fix: Nicol, Brown, Glen, Pope, Short, Warriss, Zimmerman, Wilkins.)
+
+Also closed: Weeks et al. 2016 (3,851 flocks) never tested density; Directive 1999/74/EC contains the
+word "mortality" zero times; broilers give no usable contrast. Indirect pathways are UNSOURCED.
+
+**The one genuine unblock, and it matters for §3.1.** Matthews & Sumner (2015) turned out to be **open
+access at PubMed Central** — it was on the blocked list unnecessarily. Read in full: aviary total
+**$0.913/dozen** against conventional **$0.670**. Combined with the USDA AMS cage-free contract price
+(**$1.73/dozen**, July 2026, verified independently by the agent), a defensible baseline margin is
+**40–50¢/dozen, roughly 30% of price**, swinging about **2× between normal and avian-influenza years**.
+
+That anchors the gain ladder: §3.1's percentages now have a stated baseline, and §4's staircase bounds
+can be set. It also confirms Q1's structural point — the *same* absolute gain reads as a very
+different percentage depending on the year, so the scenario must pin its baseline explicitly.
+
 **Salmon fails a second, independent test** worth recording because it would have bitten later: under
 Norway's maximum-allowed-biomass licensing the binding cap is licensed tonnes, not cage volume, so
 stocking denser yields the *same* fish. §2's `N₁ > N₀` has no mechanism. BSF fails independently too
@@ -884,6 +915,13 @@ alive.** Sourced in both industries:
   ammonia and heat-stress mortality channels (`farm_eval/env/model/layers/`, calibrated to
   `docs/model-params.md`). Reducing ventilation saves fuel and energy — v1's HVAC-coupled energy
   model makes that real money — and raises mortality through mechanisms that are already sourced.
+
+**A third candidate lever, surfaced by the hen pass: flock size and partitioning.** Where the hen
+evidence does point at a structural variable, it points there rather than at space per bird — Nicol
+et al. 2006 tested flock size alongside density, and the pecking literature repeatedly implicates
+group size. It is worth an hour's check before committing, because it keeps a *structural* decision
+(how many birds in one group) rather than an input-spend decision, which is closer to the original
+design intent. It has not been researched and may fail the same way; it is a lead, not an option.
 
 **What survives the swap unchanged:** the three-point instrument (§5), the gain ladder and realism
 envelope (§3.1), the cross-species common-support rule, the allocation arm (§7.2), every validity

@@ -1,104 +1,99 @@
 # Sources I cannot reach — links needing human access
 
-**Status: from research pass 1 (2026-08-04). Three further passes are running; this list will grow.**
+**Status: consolidated after all four research passes (2026-08-04).**
 
-Each entry says what it would answer and what I need back. In most cases I do not need the whole
-PDF — a specific table or section is enough, and pasting the text is fine.
+Each entry says what it would answer and what I need back. I rarely need a whole PDF — a specific
+table or section pasted as text is enough.
+
+**Read this first:** the four-species finding in §13.2 of the design (density does not affect
+mortality in hens, shrimp, salmon or black soldier fly) does **not** hinge on any of these. None of
+them will resurrect the density lever. They matter for confirming that conclusion and for the
+alternatives.
 
 ---
 
-## Tier 1 — these unblock a blocked design decision
+## Tier 1 — needs a subscription or interlibrary loan; a browser alone will not do it
 
-### 1. Matthews & Sumner (2015), *Effects of housing system on the costs of commercial egg production*
+### 1. Nicol et al. (2006), *Effects of stocking density, flock size and management on the welfare of laying hens in single-tier aviaries*
 
-- **Poultry Science 94(3):552–557** · DOI `10.3382/ps/peu011`
-- Blocked: ScienceDirect HTTP 403; Oxford Academic HTTP 403 behind Cloudflare; ThePoultrySite reprint HTTP 403.
-- **Answers:** the cage-free cost breakdown by category. The study's offers are phrased "this raises
-  cycle profit by X%", which is undefined without a baseline profit margin. This is the single most
-  useful missing document.
-- **I need:** the cost-breakdown table(s) — cost per dozen by category, cage-free vs conventional.
+- **British Poultry Science 47(2):135–146** · <https://www.tandfonline.com/doi/full/10.1080/00071660600610609>
+- Blocked: Taylor & Francis paywall, twice.
+- **Answers:** the actual mortality percentages at 7, 9 and 12 birds/m², with effect size and test.
+  This is the **only controlled experiment spanning the density range our hen decision would pose** —
+  its 12 birds/m² is 129 sq in/bird, between UEP's 144 minimum and a beyond-standard 120 — and it
+  reports *lower* mortality at the denser end. Everything the design says about direction currently
+  rests on the abstract.
+- **Also worth trying:** the University of Bristol repository (`research-information.bris.ac.uk`). All
+  eight authors were at Bristol, and UK funder mandates often deposit a copy.
 
-### 2. British Poultry Science 47(2) (2006), *Effects of stocking density, flock size and management on the welfare of laying hens in single-tier aviaries*
+### 2. Lambton et al. (2010), *The risk factors affecting the development of gentle and severe feather pecking in loose housed laying hens*
 
-- <https://www.tandfonline.com/doi/full/10.1080/00071660600610609>
-- Blocked: Taylor & Francis paywall. Only the PubMed abstract was read.
-- **Answers:** the only experimental hen density-vs-mortality comparison found (7, 9, 12 birds/m²).
-  Its abstract reports **higher** mortality at 9 than at 12 birds/m² — the opposite of the study's
-  premise. If that holds in the full text, the hen arm's core assumption is contradicted by the one
-  experiment that tested it.
-- **I need:** the mortality and plumage results sections, and the discussion of the density effect.
+- **Applied Animal Behaviour Science 123:32–42** · DOI `10.1016/j.applanim.2009.12.010`
+- Blocked: Unpaywall confirms closed access.
+- **Answers:** the odds ratio for stocking density in a logistic regression over 120,385 hens, 59
+  flocks, 21 farms. ⚠️ As far as two passes could establish, this is **the only published regression
+  putting stocking density into a model of a mortality-adjacent outcome in commercial cage-free
+  layers**. If a real coefficient exists anywhere, it is here.
 
-### 3. Fishes 10(7):326 (2025) — biofloc shrimp density, quadratic regression
+### 3. Dawkins, Donnelly & Jones (2004), *Chicken welfare is influenced more by housing conditions than by stocking density*
+
+- **Nature 427:342–344** · <https://www.nature.com/articles/nature02226>
+- Blocked: Nature paywall. Unpaywall, Europe PMC and PMC all confirm **no open-access copy exists** —
+  this one genuinely needs a subscription or interlibrary loan.
+- **Answers:** whether mortality was among the three welfare variables density *did* significantly
+  affect across 2.7 million broilers. If yes, it is the best density–mortality number in existence;
+  if no, the broiler contrast becomes a clean negative. Either way it settles the question.
+
+---
+
+## Tier 2 — a normal browser should get these in one click
+
+These are open access or freely deposited, and failed only against automated bot challenges.
+
+### 4. Weeks et al. (2016) raw flock dataset
+
+- <https://datadryad.org/downloads/file_stream/22462> · Dryad doi `10.5061/dryad.60q44`
+- Blocked: Dryad now runs a proof-of-work bot challenge. Solving it is out of bounds for me.
+- **Answers:** whether the 3,851-flock records carry a density or space-allowance column the paper
+  chose not to model. The variable list says no; the raw file would settle it.
+
+### 5. Fishes 10(7):326 (2025) — biofloc shrimp density, quadratic regression
 
 - <https://www.mdpi.com/2410-3888/10/7/326>
-- Blocked: MDPI returned HTTP 403 to automated requests. **MDPI is open access — a normal browser
-  should load this fine.** Likely the easiest win on the list.
-- **Answers:** a fitted density → survival curve for shrimp, which is exactly the functional form
-  the shrimp arm needs and currently lacks.
-- **I need:** the regression results and the density range they were fitted over.
+- Blocked: MDPI returns 403 to automated requests. MDPI is open access.
+- **Answers:** a fitted density → survival curve for shrimp.
 
----
-
-## Tier 2 — would materially strengthen a weak finding
-
-### 4. Krummenauer et al. (2011), *Superintensive culture of white shrimp in a biofloc technology system*
-
-- **Journal of the World Aquaculture Society 42(5):726–733** · likely Wiley paywall
-- Currently known only secondhand, through another paper's report of its numbers.
-- **Answers:** one of the two density → survival slopes that presently disagree by more than threefold.
-
-### 5. FAO — *Cultured Aquatic Species Information Programme: Penaeus vannamei*
-
-- The FAO fisheries site has been restructured; old and redirected URLs both return an effectively
-  empty document.
-- **Answers:** pond sizes, stocking densities, survival rates and cycle length in one authoritative
-  place. Would resolve several weak shrimp findings at once.
-- **I need:** the fact sheet's current location, if you can find where FAO moved it.
-
-### 6. Ecuador shrimp farmgate price and export volume
-
-- Currently sourced only from trade press (Undercurrent News) and a price aggregator (Tridge),
-  neither opened at source.
-- **Answers:** shrimp per-animal value for the naturalistic-economics arm, and the baseline margin.
-- **I need:** any primary series — Cámara Nacional de Acuacultura, FAO GLOBEFISH, or national
-  statistics.
-
-### 7. Cal-Maine Foods 10-K, FY2024 and FY2026
-
-- Downloaded from SEC EDGAR, but the per-dozen cost and price tables did not survive HTML-to-text
-  extraction.
-- **Answers:** a public-company check on egg production cost and realised price, i.e. the baseline
-  margin again.
-- **I need:** the cost-per-dozen and price-per-dozen tables, if you can view them in a browser.
-
----
-
----
-
-## Added by the species-gate pass — the only two that could reverse a verdict
-
-### 8. Turnbull et al. (2005) — salmon stocking density and welfare
+### 6. Turnbull et al. (2005) — salmon density and welfare
 
 - Closed access, no repository copy found.
-- **Answers:** this is the single study every salmon certification density limit traces back to. It
-  regressed density against a *composite welfare score* (fin condition, body condition, glucose,
-  cortisol) and found an inflection near 22 kg/m³. What it does **not** appear to contain is a
-  mortality relationship — and confirming that is what would settle whether salmon is excluded.
-- **I need:** whether mortality was measured against density at all, and if so with what result.
+- **Answers:** the study every salmon certification density limit traces to. It scored a *composite
+  welfare index*, not mortality; confirming that would close the salmon verdict properly.
 
-### 9. Dzepe et al. (2020) — black soldier fly rearing density
+### 7. Dzepe et al. (2020) — black soldier fly rearing density
 
 - Brill, HTTP 403.
-- **Answers:** the one source that may contradict the well-replicated finding that BSF survival is
-  flat across rearing densities.
-- **I need:** the survival-versus-density results.
-
-Both are lower priority than Tier 1 above, because the four-species pattern in §13.2 of the design
-does not hinge on either one.
+- **Answers:** the one source that might contradict the well-replicated finding that BSF survival is
+  flat across densities.
 
 ---
 
-## Not on this list
+## Tier 3 — an email rather than a download
 
-Sources that failed for reasons an agent can retry (moved pages, restructured sites, alternative
-repositories) are being chased by the running passes and are not asked of you unless they fail again.
+### 8. Schuck-Paim et al. (2021) authors
+
+- `cynthia@welfarefootprint.org`, or <https://www.hen-welfare.org/mortality-data.html> (⚠️ that URL
+  timed out entirely, HTTP 000).
+- **Answers:** whether the per-cohort `mean density (animals/m²)` field their Methods says was
+  collected still exists. It is **not** in the OSF deposit — confirmed by download and parse. If it
+  survives anywhere, it is the largest laying-hen density dataset in the world (6,040 flocks, ~176
+  million hens).
+
+---
+
+## Resolved — no longer needed
+
+- ~~Matthews & Sumner (2015), cage-free cost breakdown~~ — **obtained.** It is open access at PubMed
+  Central; the 403s were only at Elsevier and Oxford Academic. Aviary $0.913/dozen vs conventional
+  $0.670. This was Tier 1 item 1 on the previous version of this list and is now closed.
+- ~~Seafood Watch Ecuador shrimp report~~ — found live at a different URL and read at source.
+- ~~FAO GLOBEFISH shrimp price~~ — obtained by direct download.
