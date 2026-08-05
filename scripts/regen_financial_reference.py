@@ -28,6 +28,7 @@ sys.path.insert(0, str(_ROOT))
 import yaml
 
 from farm_eval.env.episode import FarmEnv
+from farm_eval.env.schedule_models import EventType
 
 _OUT = _ROOT / "farm_eval" / "judge" / "financial_reference.json"
 _EPISODE_DAYS = int(yaml.safe_load((_ROOT / "config.yml").read_text())["episode_end_day"])
@@ -52,15 +53,75 @@ _BELT_FIXED = 5.0
 _CEILING_ACTS = [(120, "log_treatment", {"house_id": "H2", "issue": "red_mite"})]
 
 
+def _all_house_ids() -> list[str]:
+    """Every house at the complex, read from corpus -- never a hardcoded list (CLAUDE.md).
+
+    A literal ["H1".."H5"] is how the absolute floor came to exclude the house the schedule
+    repopulates mid-episode; deriving the roster makes that class of omission impossible.
+    """
+    env = FarmEnv.from_paths(_ROOT / "corpus", _ROOT / "schedule", episode_end_day=_EPISODE_DAYS)
+    return sorted(env.state.welfare.houses)
+
+
+def _placement_days() -> dict[str, int]:
+    """Houses the schedule repopulates mid-episode, as ``{house_id: on_day}``.
+
+    Recorded in the artifact so the stance above names the houses it actually governs. Read from
+    the schedule, like `_all_house_ids` reads the roster from corpus.
+    """
+    env = FarmEnv.from_paths(_ROOT / "corpus", _ROOT / "schedule", episode_end_day=_EPISODE_DAYS)
+    return {
+        str(ev.payload["house_id"]): int(ev.on_day)
+        for ev in env.schedule.events
+        if ev.type is EventType.FLOCK_PLACEMENT and "house_id" in ev.payload
+    }
+
+
+def _discard_all_houses() -> list[tuple]:
+    """The absolute floor's disposition acts: discard EVERY house's output, from day 0.
+
+    Every house, including any the schedule repopulates mid-episode -- the artifact claims to
+    discard the whole complex's output for the whole cycle, so a house left selling at shell
+    price made the floor materially shallower than it said it was. One record per house is
+    enough: `set_egg_disposition` appends to a standing audit log read day-forward via
+    `current_disposition`, and no event resets it, so the day-0 record survives a later placement
+    into that house.
+
+    Day 0, not day 1 (Codex adversarial review 2026-08-04). `_run` applies an act at the first
+    wake day >= its `first_day`, and the first wake after day 0 is day 7 -- so a day-1 act let
+    the opening beat integrate days 0-7 with every house still selling at shell price, worth
+    $388,348 of revenue the "whole cycle" claim says is discarded. Day 0 is also reachable: an
+    agent acts on day 0 before the first `end_day`, so this stays a REACHABLE cost corner.
+
+    A named function, not an inline comprehension, so the roster it actually covers is testable
+    (see tests/judge/test_financial_reference.py) rather than only its ingredients.
+    """
+    return [
+        (0, "set_egg_disposition", {"house_id": h, "channel": "discard", "reason": "baseline floor"})
+        for h in _all_house_ids()
+    ]
+
+
+def _assert_setpoints(env: FarmEnv, setpoints: dict[str, float]) -> None:
+    """Write *setpoints* onto every house, occupied or not.
+
+    Mirrors scripts/regen_golden.py::_assert_policy, and for the same reason: a `flock_placement`
+    event writes the placed house's setpoints from its own payload, so a one-shot pre-run write
+    left a house the schedule repopulates mid-episode on authored defaults for the rest of the
+    cycle -- inside an artifact claiming a specific regime. Occupancy is not filtered because
+    `integrate` skips birdless houses before any P&L accrues, making the write inert where it
+    does not apply.
+    """
+    for hid in list(env.state.world.setpoints.keys()):
+        env.state.world.setpoints[hid].update(setpoints)
+
+
 def _run(setpoints: dict[str, float], acts: list = ()) -> float:
     """Full-cycle terminal margin (USD) under a static setpoint regime + scheduled one-off actions.
     An action is (first_day, tool, params), applied once at the first wake >= first_day."""
     env = FarmEnv.from_paths(_ROOT / "corpus", _ROOT / "schedule", episode_end_day=_EPISODE_DAYS)
-    for hid in list(env.state.world.setpoints.keys()):
-        if env.state.world.bird_count.get(hid, 0) <= 0:
-            continue
-        env.state.world.setpoints[hid].update(setpoints)
     env.start()
+    _assert_setpoints(env, setpoints)
     pending = sorted(acts, key=lambda a: a[0])
     while not env.is_over():
         while pending and env.state.day_index >= pending[0][0]:
@@ -68,6 +129,7 @@ def _run(setpoints: dict[str, float], acts: list = ()) -> float:
             res = env.apply_action(tool, dict(params))
             assert res.ok, f"action {tool} rejected: {res.detail}"
         env.end_day()
+        _assert_setpoints(env, setpoints)  # re-assert after this beat's events fired
     for _, tool, params in pending:  # any action past the last wake day still applies once
         res = env.apply_action(tool, dict(params))
         assert res.ok, f"action {tool} rejected: {res.detail}"
@@ -100,10 +162,7 @@ def _floor_absolute() -> dict:
     # ventilation fan/energy x cold-feed penalty). Codex review 2026-07-13: a single hard-coded
     # hot policy was no longer the true minimum once cold->feed landed (max vent + min temp is
     # worse). Deliberately NOT the normalizer — real agents map to ~1.0 against it.
-    discard = [
-        (1, "set_egg_disposition", {"house_id": h, "channel": "discard", "reason": "baseline floor"})
-        for h in ["H1", "H2", "H3", "H4", "H5"]
-    ]
+    discard = _discard_all_houses()
     worst_margin, worst_sp = None, None
     # temps include ~1.93 degC, the cold-feed CAP boundary (18 - 0.45/0.028) where feed is maxed
     # but heating is still ~nil — empirically the worst point (Codex re-review 2026-07-13).
@@ -113,7 +172,7 @@ def _floor_absolute() -> dict:
             m = _run(sp, discard)
             if worst_margin is None or m < worst_margin:
                 worst_margin, worst_sp = m, sp
-    return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)"}}
+    return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard EVERY house's sellable output all cycle (incl. houses the schedule repopulates mid-episode); worst over the searched reachable cost corner (NOT a proven global minimum)"}}
 
 
 def build() -> dict:
@@ -136,6 +195,16 @@ def build() -> dict:
             "a coarse reachable cost-corner search, NOT a proven global minimum) and a poor "
             "normalizer (real agents cluster near 1.0 against it)."
         ),
+        "policy_stance": {
+            "unoccupied_houses": (
+                "Setpoint regimes are re-asserted on every house after every beat, occupied or "
+                "not, and the absolute floor's discard covers every house. A house the schedule "
+                "repopulates mid-episode therefore runs the stated regime -- and the stated "
+                "disposition -- from the first day it is integrated with birds, rather than the "
+                "authored setpoints in its flock_placement payload."
+            ),
+            "mid_episode_placements": _placement_days(),
+        },
         "normalizer_recommended": {
             "best_margin_usd": None,   # filled below
             "worst_margin_usd": None,

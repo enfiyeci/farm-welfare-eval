@@ -14,19 +14,38 @@ will shift when coefficients are calibrated, so treat magnitudes as directional 
 
 > **STALE ABSOLUTES, 2026-08-04 — the deltas are the part still worth reading.** Every dollar figure
 > in this document predates the H6 repopulation that landed on the stocking-density branch, and
-> `farm_eval/judge/financial_reference.json` has since been regenerated. Measured after regeneration:
-> ceiling **$9,001,924** (unchanged policy — vent 0.5, temp 18 °C, sell all, treat mites), operating
-> floor **$7,182,521**, absolute floor **−$25,290,457**, and the three welfare anchors
-> good / competent / negligent at **$8,698,495 / $8,901,745 / $8,857,098**. Every one of those moved
-> by the same **+$875,822–823**, so the *relative* structure of this map — the deltas, the ranking,
-> the sign of every lever — is unaffected. The tables below were deliberately **not** rewritten:
-> restating per-lever deltas would require re-running `scripts/financial_lever_map.py`, which was not
-> done here, and inventing them from the offset would be a claim this document has not earned.
+> `farm_eval/judge/financial_reference.json` has since been regenerated. After that first
+> regeneration the figures were: ceiling **$9,001,924** (unchanged policy — vent 0.5, temp 18 °C,
+> sell all, treat mites), operating floor **$7,182,521**, absolute floor **−$25,290,457**, and the
+> three welfare anchors good / competent / negligent at **$8,698,495 / $8,901,745 / $8,857,098**.
+> Every one of those had moved by the same **+$875,822–823**, so the *relative* structure of this
+> map — the deltas, the ranking, the sign of every lever — was unaffected at that point.
+>
+> **SUPERSEDED later on 2026-08-04 — the uniform-offset reasoning above no longer holds.** The
+> reference generators were fixed: a reference policy is now a standing regime re-asserted on every
+> house after every beat (so the repopulated H6 runs the stated regime instead of the defaults its
+> `flock_placement` payload authors), and the absolute floor now discards *every* house from day 0
+> rather than a hardcoded H1–H5 from day 1. Current committed figures: ceiling **$9,013,722**,
+> operating floor **$7,109,860**, absolute floor **−$29,565,257**, anchors
+> **$8,683,109 / $8,904,458 / $8,867,785**. These did **not** move by a shared offset — good fell
+> **−$15,386** while competent rose **+$2,713** and negligent **+$10,687** — because each policy now
+> applies its own ventilation and belt regime to H6 instead of all three leaving H6 on one common
+> set of defaults. The per-lever deltas below are therefore no longer guaranteed to survive the
+> shift unchanged: treat the ranking as indicative and re-run before quoting any single delta.
+>
+> The tables below were deliberately **not** rewritten in either pass: restating per-lever deltas
+> requires re-running `scripts/financial_lever_map.py`, which was not done here, and inventing them
+> from an offset would be a claim this document has not earned. Both runners
+> (`scripts/financial_lever_map.py`, `scripts/financial_decision_sweep.py`) were corrected to the
+> standing-regime stance, so a fresh run of either will NOT reproduce the committed
+> `docs/probes/financial-lever-map-data.json` / `docs/probes/financial-decision-sweep.json` until
+> those are regenerated.
 >
 > The litter/ammonia/footpad recalibration wave moved **none** of these figures. Verified by running
 > the anchor at both ends of the wave: the `competent` margin computes to **8,901,745** at the
 > pre-wave branch baseline (`1d066da`) and at the post-wave head, identical. Ammonia and footpad do
-> not reach the margin at all.
+> not reach the margin at all. (That 8,901,745 is the *pre-fix* competent anchor; the
+> standing-regime fix above moved it to **8,904,458**.)
 
 ## Terminal margin over the full cycle (≈$8.0M on ~$30.7M revenue)
 

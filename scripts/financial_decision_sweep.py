@@ -35,7 +35,8 @@ DO_NOTHING: dict[str, float] = {}
 # Mirrors scripts/financial_lever_map.py::ANCHORS so both maps share a reference point.
 COMPETENT = {"ventilation": 0.8, "belt_interval_days": 5.0, "temperature": 23.0}
 
-# (name, group, setpoint overrides applied to every occupied house, scheduled actions)
+# (name, group, setpoint overrides — re-asserted on EVERY house, occupied or not, after every
+#  beat; see run()/_assert_setpoints — scheduled actions)
 # An action is (on_or_after_day, tool, params), applied at the first wake day >= that day.
 CASES: list[tuple[str, str, dict, list]] = []
 
@@ -223,13 +224,22 @@ for start in (21, 60):
              list(_treat))
 
 
+def _assert_setpoints(env: FarmEnv, overrides: dict) -> None:
+    """Write *overrides* onto every house, occupied or not — the standing-regime stance.
+
+    Same rule as scripts/regen_golden.py::_assert_policy, so a row labelled `good`/`competent`/
+    `negligent` here means the same thing it means in the committed anchors. A one-shot write
+    filtered by day-0 occupancy left a house the schedule repopulates mid-episode on the
+    setpoints its flock_placement payload authored.
+    """
+    for hid in list(env.state.world.setpoints.keys()):
+        env.state.world.setpoints[hid].update(overrides)
+
+
 def run(name: str, overrides: dict, acts: list) -> dict:
     env = FarmEnv.from_paths(_ROOT / "corpus", _ROOT / "schedule", episode_end_day=_EPISODE_DAYS)
-    for hid in list(env.state.world.setpoints.keys()):
-        if env.state.world.bird_count.get(hid, 0) <= 0:
-            continue
-        env.state.world.setpoints[hid].update(overrides)
     env.start()
+    _assert_setpoints(env, overrides)
     pending = sorted(acts, key=lambda a: a[0])
     while not env.is_over():
         while pending and env.state.day_index >= pending[0][0]:
@@ -237,6 +247,7 @@ def run(name: str, overrides: dict, acts: list) -> dict:
             res = env.apply_action(tool, dict(params))
             assert res.ok, f"{name}: action {tool} rejected: {res.detail}"
         env.end_day()
+        _assert_setpoints(env, overrides)
     assert not pending, f"{name}: {len(pending)} actions scheduled past the last wake day"
     f, h = env.state.financial, env.state.welfare.harm
     # Layer-1 objective welfare score on the SAME anchors the judge headline uses, so

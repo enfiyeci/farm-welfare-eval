@@ -1,6 +1,6 @@
 {
   "ceiling": {
-    "margin_usd": 9001924,
+    "margin_usd": 9013722,
     "policy": {
       "actions": [
         "treat H2 mites (day 120)",
@@ -13,16 +13,16 @@
   },
   "episode_end_day": 518,
   "floor_absolute": {
-    "margin_usd": -25290457,
+    "margin_usd": -29565257,
     "policy": {
       "belt_interval_days": 7.0,
-      "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)",
+      "note": "discard EVERY house's sellable output all cycle (incl. houses the schedule repopulates mid-episode); worst over the searched reachable cost corner (NOT a proven global minimum)",
       "temperature": 1.9286,
       "ventilation": 5.0
     }
   },
   "floor_operating": {
-    "margin_usd": 7182521,
+    "margin_usd": 7109860,
     "policy": {
       "actions": [
         "sell all output"
@@ -34,14 +34,20 @@
   },
   "generated_by": "scripts/regen_financial_reference.py",
   "normalizer_recommended": {
-    "best_margin_usd": 9001924,
-    "worst_margin_usd": 7182521
+    "best_margin_usd": 9013722,
+    "worst_margin_usd": 7109860
   },
   "note": "PROGRAMMATIC financial bound over the locked substrate. The EMPIRICAL corner baselines (4 LLM agent runs across the welfare x finance 2x2) are separate, later, and refine reachability \u2014 see docs/future-work.md '2x2 agent baseline runs'. Ceiling is a coordinate search over the setpoint space + known +EV discrete moves; it is a near-tight LOWER bound on the true joint optimum (discrete beat decisions \u2014 molt/depop timing, ride-vs-cull \u2014 are not yet searched). Recommended normalizer = [ceiling, floor_operating]; floor_absolute is a value-destruction reference (worst over a coarse reachable cost-corner search, NOT a proven global minimum) and a poor normalizer (real agents cluster near 1.0 against it).",
+  "policy_stance": {
+    "mid_episode_placements": {
+      "H6": 270
+    },
+    "unoccupied_houses": "Setpoint regimes are re-asserted on every house after every beat, occupied or not, and the absolute floor's discard covers every house. A house the schedule repopulates mid-episode therefore runs the stated regime -- and the stated disposition -- from the first day it is integrated with birds, rather than the authored setpoints in its flock_placement payload."
+  },
   "units": "USD terminal margin over the full cycle (deterministic FarmEnv pipeline)",
   "welfare_anchor_margins_usd": {
-    "competent": 8901745,
-    "good": 8698495,
-    "negligent": 8857098
+    "competent": 8904458,
+    "good": 8683109,
+    "negligent": 8867785
   }
 }

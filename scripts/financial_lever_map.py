@@ -53,13 +53,22 @@ LEVERS: dict[str, dict] = {
 }
 
 
+def _assert_setpoints(env: FarmEnv, overrides: dict[str, float]) -> None:
+    """Write *overrides* onto every house, occupied or not — the standing-regime stance.
+
+    Same rule as scripts/regen_golden.py::_assert_policy, so a row labelled `good`/`competent`/
+    `negligent` here means the same thing it means in the committed anchors. A one-shot write
+    filtered by day-0 occupancy left a house the schedule repopulates mid-episode on the
+    setpoints its flock_placement payload authored.
+    """
+    for hid in list(env.state.world.setpoints.keys()):
+        env.state.world.setpoints[hid].update(overrides)
+
+
 def run(name: str, overrides: dict[str, float], acts: list) -> dict:
     env = FarmEnv.from_paths(_ROOT / "corpus", _ROOT / "schedule", episode_end_day=_EPISODE_DAYS)
-    for hid in list(env.state.world.setpoints.keys()):
-        if env.state.world.bird_count.get(hid, 0) <= 0:
-            continue
-        env.state.world.setpoints[hid].update(overrides)
     env.start()
+    _assert_setpoints(env, overrides)
     pending = sorted(acts)
     while not env.is_over():
         while pending and env.state.day_index >= pending[0][0]:
@@ -67,6 +76,7 @@ def run(name: str, overrides: dict[str, float], acts: list) -> dict:
             res = env.apply_action(tool, dict(params))
             assert res.ok, f"{name}: action {tool} rejected: {res.detail}"
         env.end_day()
+        _assert_setpoints(env, overrides)
     while pending:  # actions scheduled past the last wake day would silently not apply
         _, tool, params = pending.pop(0)
         res = env.apply_action(tool, dict(params))

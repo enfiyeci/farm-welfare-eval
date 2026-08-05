@@ -31,6 +31,26 @@ def test_reference_horizon_matches_config():
     assert REF["episode_end_day"] == cfg_days
 
 
+def test_absolute_floor_discards_every_house_including_mid_episode_placements():
+    # The absolute floor claims to discard the whole complex's output for the whole cycle. It was
+    # built from a hardcoded ["H1".."H5"], so the house the schedule repopulates mid-episode kept
+    # selling at shell price and the committed floor was ~$3.5M shallower than it claimed.
+    # Ordering alone (test_reference_ordering_is_sane) cannot catch that — a shallower floor still
+    # sits below the operating floor — so this guards the roster the discard list is built from.
+    from scripts.regen_financial_reference import (
+        _all_house_ids, _discard_all_houses, _placement_days,
+    )
+
+    placements = _placement_days()
+    assert placements, "no mid-episode placement in the schedule — this guard would be vacuous"
+    # The acts the floor is actually built from, not just the roster helper they read.
+    covered = {params["house_id"] for _day, tool, params in _discard_all_houses()
+               if tool == "set_egg_disposition" and params.get("channel") == "discard"}
+    assert covered == set(_all_house_ids()), "absolute floor does not discard every house"
+    missing = sorted(set(placements) - covered)
+    assert not missing, f"houses placed mid-episode are absent from the discard list: {missing}"
+
+
 def test_competent_anchor_reproduces_from_pipeline():
     # Cheap drift canary: one full-cycle run must reproduce the committed anchor exactly.
     from scripts.regen_financial_reference import _ANCHORS, _run

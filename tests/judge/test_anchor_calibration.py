@@ -36,10 +36,15 @@ def test_competent_lands_in_sane_midband():
 
 
 def test_welfare_reference_excludes_competent():
-    # welfare_reference.json holds ONLY the scorer's 0/1 endpoints (good/negligent);
-    # the competent middle anchor lives in reference_runs.json, never here.
-    assert set(REF) == {"good", "negligent"}
+    # welfare_reference.json holds ONLY the scorer's 0/1 endpoints (good/negligent) as ANCHORS;
+    # the competent middle anchor lives in reference_runs.json, never here. `policy` is
+    # provenance, not an anchor: it records the regimes and the unoccupied-house stance the
+    # endpoints were generated under (see scripts/regen_golden.py::_UNOCCUPIED_HOUSE_STANCE),
+    # so a reader can tell what full credit was normalized against. The scorer indexes
+    # references["good"]/["negligent"] and ignores it.
+    assert set(REF) - {"policy"} == {"good", "negligent"}
     assert "competent" not in REF
+    assert "competent" not in REF["policy"]["regimes"]
 
 
 # Live (weighted) welfare channels; keel_risk_hours is intentionally degenerate (age-only).

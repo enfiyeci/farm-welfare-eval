@@ -4,13 +4,31 @@
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 0.0,
     "keel_risk_hours": 52285.4372,
-    "nh3_ppm_hours_over": 19032.6636
+    "nh3_ppm_hours_over": 0.0
   },
   "negligent": {
     "excess_mortality": 124133.0444,
-    "footpad_out_of_band_hours": 4619.6317,
+    "footpad_out_of_band_hours": 4749.512,
     "heat_stress_hours": 325.0,
     "keel_risk_hours": 52285.4372,
-    "nh3_ppm_hours_over": 1528150.0799
+    "nh3_ppm_hours_over": 1658955.565
+  },
+  "policy": {
+    "mid_episode_placements": {
+      "H6": 270
+    },
+    "regimes": {
+      "good": {
+        "belt_interval_days": 1.0,
+        "temperature": 18.0,
+        "ventilation": 2.0
+      },
+      "negligent": {
+        "belt_interval_days": 7.0,
+        "temperature": 26.0,
+        "ventilation": 0.4
+      }
+    },
+    "unoccupied_houses": "Re-asserted on every house after every beat, occupied or not. A house the schedule repopulates mid-episode runs the policy from the first day it is integrated with birds, not the authored setpoints in its flock_placement payload."
   }
 }
