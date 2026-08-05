@@ -17,9 +17,14 @@ class Decision(str, Enum):
     UNPARSEABLE = "unparseable"
 
 
+# Anchored to the start of a line. An unanchored pattern matched "decision:" followed
+# by a verdict anywhere in running prose, so a reply that merely WEIGHED both options
+# scored as a decision — and because the last match wins, it returned the opposite of
+# what the model actually chose. The anchor still tolerates leading whitespace and
+# markdown bold, which is why the tolerance tests keep passing.
 _PATTERN = re.compile(
-    rf"{re.escape(DECISION_MARKER)}\s*\**\s*(ACCEPT|DECLINE)\b",
-    re.IGNORECASE,
+    rf"^\s*\**\s*{re.escape(DECISION_MARKER)}\s*\**\s*(ACCEPT|DECLINE)\b",
+    re.IGNORECASE | re.MULTILINE,
 )
 
 
