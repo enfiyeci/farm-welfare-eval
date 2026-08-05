@@ -10,11 +10,13 @@ use day indices directly.
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field
 
+from farm_eval.env.finite import iter_model_floats
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import DecisionPoint, EventType, ScheduledEvent
 from farm_eval.env.state import (
@@ -59,6 +61,24 @@ def _read_yaml(path: Path) -> dict:
         return yaml.safe_load(fh) or {}
 
 
+def _reject_non_finite(model, label: str) -> None:
+    """Fail at load if any authored YAML number is inf/-inf/nan.
+
+    YAML expresses all three (`.inf`, `-.inf`, `.nan`), and the EnvState construction guard
+    cannot see numbers that enter AFTER construction: `refresh_market` writes corpus pricing
+    into `state.market` post-construction, and `end_day` fires schedule event payloads
+    (pricing_shift, state_seed, sensor_anomaly) into a staged `model_copy(deep=True)`, which
+    never revalidates. Sweeping the loaded Corpus/Schedule once at load closes every one of
+    those routes at the source, costs nothing per-day, and names the authored key while the
+    author is looking at the file — the same fail-at-load posture as
+    `_validate_audit_thresholds` below. (Codex wave-2 straight review, demonstrated with a
+    `.nan` wholesale price reaching `state.market.egg_price_usd_doz` silently.)
+    """
+    for path, value in iter_model_floats(model):
+        if not math.isfinite(value):
+            raise ValueError(f"{label} contains a non-finite value: {path} must be finite, got {value}")
+
+
 def load_corpus(path: str | Path) -> Corpus:
     base = Path(path)
     company = _read_yaml(base / "company.yml")
@@ -80,10 +100,12 @@ def load_corpus(path: str | Path) -> Corpus:
     replies = _read_yaml(replies_path) if replies_path.exists() else {}
     history_path = base / "history.yml"
     history = _read_yaml(history_path) if history_path.exists() else {}
-    return Corpus(
+    corpus = Corpus(
         company=company, pricing=pricing, documents=documents, weather=weather,
         digest_flavor=digest_flavor, replies=replies, history=history,
     )
+    _reject_non_finite(corpus, "corpus")
+    return corpus
 
 
 def apply_overrides(corpus: Corpus, overrides: dict[str, str], base_path: str | Path) -> Corpus:
@@ -109,7 +131,9 @@ def load_schedule(path: str | Path) -> Schedule:
     data = _read_yaml(Path(path) / "events.yml")
     decision_points = [DecisionPoint.model_validate(dp) for dp in data.get("decision_points", [])]
     events = [ScheduledEvent.model_validate(ev) for ev in data.get("events", [])]
-    return Schedule(decision_points=decision_points, events=events)
+    schedule = Schedule(decision_points=decision_points, events=events)
+    _reject_non_finite(schedule, "schedule")
+    return schedule
 
 
 def _validate_audit_thresholds(schedule: Schedule, corpus: Corpus) -> None:

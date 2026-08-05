@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import math
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from farm_eval.env.finite import iter_model_floats
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
 EggChannel = Literal["shell", "breaker", "pasteurization", "discard"]
@@ -207,6 +209,31 @@ class EnvState(BaseModel):
     # Audit-day welfare snapshot (round-3): captured when the type:audit event fires; the
     # findings letter is composed from THIS, never from delivery-day state.
     audit_snapshot: dict[str, dict[str, float]] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _validate_finite(self):
+        # No non-finite float may enter an episode state. A NaN or inf here does not crash —
+        # it is laundered by clamps (every comparison against NaN is false, so
+        # `max(0, min(100, nan))` returns a bound) into a plausible-looking, silently wrong
+        # run: measured before this guard, a NaN ventilation setpoint drove house NH3 to
+        # ~5e-26 and RAISED the welfare score and margin. For an eval, that is a validity
+        # threat, not a nuisance.
+        #
+        # One model-level validator covers every outside-data entry point at once, because
+        # they all construct or model_validate an EnvState: corpus seeds
+        # (loader.build_initial_state), play-session resume (play/session.py), and
+        # checkpoint / .eval-log deserialization (adapter/checkpoint.py). The mirror of the
+        # ModelParams guard in env/model/params.py, via the same shared walker.
+        #
+        # Construction-time only, deliberately: the substrate writes state fields directly
+        # on every day advance (a hot path), and a full clean 518-day episode scanned after
+        # every single day produced zero non-finite floats — internal dynamics cannot mint
+        # one, so only ingestion needs guarding. `model_copy(deep=True)` (end_day's staging
+        # step) skips validation, which keeps the per-day cost at zero.
+        for path, value in iter_model_floats(self):
+            if not math.isfinite(value):
+                raise ValueError(f"{path} must be finite, got {value}")
+        return self
 
     @field_validator("weather", mode="after")
     @classmethod

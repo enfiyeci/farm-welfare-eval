@@ -133,23 +133,22 @@ def _write_corpus(base: Path, company: dict) -> Path:
 
 
 @pytest.mark.parametrize(
-    "yaml_body, expected_field",
+    "company, expected_field",
     [
-        ("audit_thresholds:\n  space_sq_in_per_hen_min: .inf\n", "density_ref_sq_in"),
-        ("litter_area_frac: .nan\n", "litter_area_frac"),
-        ("belt_service_days_credit: .inf\n", "belt_service_days_credit"),
+        ({"audit_thresholds": {"space_sq_in_per_hen_min": float("inf")}}, "density_ref_sq_in"),
+        ({"litter_area_frac": float("nan")}, "litter_area_frac"),
+        ({"belt_service_days_credit": float("inf")}, "belt_service_days_credit"),
     ],
 )
-def test_params_for_rejects_non_finite_corpus_values(tmp_path, yaml_body, expected_field):
-    # `.inf` / `.nan` are valid YAML floats, and params_for coerces with a bare float(), so
-    # the guard has to live in ModelParams itself.
-    base = tmp_path / "corpus"
-    base.mkdir()
-    (base / "company.yml").write_text(yaml_body, encoding="utf-8")
-    (base / "pricing.yml").write_text("{}\n", encoding="utf-8")
-    corpus = load_corpus(base)
+def test_params_for_rejects_non_finite_corpus_values(company, expected_field):
+    # params_for coerces these corpus keys with a bare float(), so the guard has to live in
+    # ModelParams itself. The Corpus is built IN MEMORY on purpose: a YAML `.inf`/`.nan` now
+    # dies even earlier, at load_corpus (tests/env/test_loader_finiteness.py), and going
+    # through it here would exercise that guard instead of this one.
+    from farm_eval.env.loader import Corpus
+
     with pytest.raises(ValidationError) as exc:
-        params_for(corpus)
+        params_for(Corpus(company=company))
     assert expected_field in str(exc.value)
 
 

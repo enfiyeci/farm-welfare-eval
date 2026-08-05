@@ -1,29 +1,10 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Iterator
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-
-def _floats_in(value: Any, path: str) -> Iterator[tuple[str, float]]:
-    """Yield ``(path, value)`` for every float reachable inside one field value.
-
-    Fields here are scalars, parallel lists, dicts of scalars, and tuples of pairs, so the
-    walk descends lists/tuples/dicts and stops at anything else. ints are skipped: an int
-    field cannot hold inf or nan (pydantic refuses the coercion), and bools are ints.
-    """
-    if isinstance(value, bool):
-        return
-    if isinstance(value, float):
-        yield path, value
-    elif isinstance(value, (list, tuple)):
-        for i, item in enumerate(value):
-            yield from _floats_in(item, f"{path}[{i}]")
-    elif isinstance(value, dict):
-        for key, item in value.items():
-            yield from _floats_in(item, f"{path}[{key!r}]")
-
+from farm_eval.env.finite import iter_model_floats
 
 # Sign/range constraints, applied ON TOP of the blanket finiteness sweep below. Deliberately
 # NOT a table over every field: finiteness is objective and universal, while a range is a
@@ -551,11 +532,11 @@ class ModelParams(BaseModel):
         # adversarial review of the litter/ammonia recalibration wave, and deferred out of it
         # because the exposure is repo-wide rather than confined to one layer.
         # Same intent as the non-finite rejection in FarmEnv.apply_action's `set_staffing`,
-        # one layer up at the agent-facing boundary.
-        for name in type(self).model_fields:
-            for path, value in _floats_in(getattr(self, name), name):
-                if not math.isfinite(value):
-                    raise ValueError(f"{path} must be finite, got {value}")
+        # one layer up at the agent-facing boundary — and the mirror of EnvState's
+        # `_validate_finite`, via the same shared walker (env/finite.py).
+        for path, value in iter_model_floats(self):
+            if not math.isfinite(value):
+                raise ValueError(f"{path} must be finite, got {value}")
         for name, minimum in _MIN_ONLY.items():
             value = getattr(self, name)
             if value < minimum:
@@ -591,12 +572,15 @@ class ModelParams(BaseModel):
 
     @model_validator(mode="after")
     def _validate_egg_channel_value_frac(self):
-        # Each channel value must be a finite fraction in [0.0, 1.0]. NaN/inf must never
-        # reach financial.revenue_cum; a value outside the valid price-fraction range is
-        # a config mistake that should fail loudly here, not silently distort revenue.
+        # Each channel value must be a fraction in [0.0, 1.0]: a value outside the valid
+        # price-fraction range is a config mistake that should fail loudly here, not
+        # silently distort revenue. This validator used to also check isfinite, but that
+        # branch became unreachable when `_validate_finite_and_bounded` was added above it
+        # (after-validators run in declaration order), so it was removed rather than left
+        # looking like live protection. Belt and braces regardless: `not (0.0 <= nan <= 1.0)`
+        # is True, so even alone this range check would reject a non-finite — only the error
+        # message would be less specific.
         for channel, frac in self.egg_channel_value_frac.items():
-            if not math.isfinite(frac):
-                raise ValueError(f"egg_channel_value_frac[{channel!r}] must be finite, got {frac}")
             if not (0.0 <= frac <= 1.0):
                 raise ValueError(
                     f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"
