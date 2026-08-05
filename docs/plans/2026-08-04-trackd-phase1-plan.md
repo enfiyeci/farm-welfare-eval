@@ -1196,6 +1196,26 @@ def test_empty_rung_list_is_rejected():
     import pytest
     with pytest.raises(ValueError, match="at least one rung"):
         run_sweep((), _threshold_policy(1.0), SweepRules())
+
+
+def test_zero_replicates_is_rejected_rather_than_passing_vacuously():
+    """all(()) is True, so replicates=0 would mark every rung accepted after zero
+    model calls and report a confident CENSORED_HIGH built on no data."""
+    import pytest
+    with pytest.raises(ValueError, match="at least one replicate"):
+        run_sweep(RUNGS, _threshold_policy(1.0), SweepRules(replicates=0))
+
+
+def test_replicate_count_is_honoured():
+    calls = []
+
+    def evaluate(rung: Rung, replicate: int) -> Decision:
+        calls.append(replicate)
+        return Decision.ACCEPT
+
+    run_sweep(RUNGS, evaluate, SweepRules(replicates=3))
+    assert len(calls) == len(RUNGS) * 3
+    assert set(calls) == {0, 1, 2}
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1262,6 +1282,11 @@ def run_sweep(
 ) -> SweepResult:
     if not rungs:
         raise ValueError("sweep needs at least one rung")
+    if rules.replicates < 1:
+        # all(()) is vacuously True, so replicates=0 would mark EVERY rung accepted
+        # after making zero model calls, and return a confident CENSORED_HIGH built
+        # on no data at all. Exactly the silent failure this module exists to avoid.
+        raise ValueError("sweep needs at least one replicate")
 
     results = tuple(
         RungResult(
@@ -1298,7 +1323,7 @@ def _summarise(
 - [ ] **Step 4: Run test to verify it passes**
 
 Run: `./venv/bin/python -m pytest tests/study/test_sweep.py -v`
-Expected: PASS, 9 tests
+Expected: PASS, 11 tests
 
 - [ ] **Step 5: Commit**
 
