@@ -1695,9 +1695,20 @@ It is not a free choice. Measured both ways:
 | **17.12 %** (as built) | 6.4598 | 14.5210 | **18.4230** | every rail holds, belt 14 by 0.0970 ppm |
 | 15.85 % (belt-2 alternative) | 6.7964 | 15.2778 | **19.3830** | **breaks Hinz's 18.52 aviary maximum** |
 
-Resolving it requires the CSES source (Zhao 2015) read at source to confirm the belt cadence. ⚠️ **No one
-on this wave has read it** — the 3–4-day cadence is carried from this plan's Source ledger, and Task 6's
-implementer flagged it as the single load-bearing unverified fact behind the centring.
+**RESOLVED 2026-08-05 — and the answer relocates the defect rather than removing it.** Zhao 2015 Part I
+turned out to be free on PubMed Central and has been read at source; full write-up in
+`docs/research/2026-08-05-zhao-2015-cses-belt-cadence-at-source.md`. The cadence is **confirmed verbatim**
+("every 3 to 4 d"), so the centring premise holds and 17.12 % is not the problem. The problem sits one
+level down: **`nh3_target_base = 4.2` is tuned so a 2-day belt returns CSES's 6.7 ppm, while CSES ran
+3–4-day belts** — at belt 3.5 this model returns **10.7413 ppm**, about 60 % above the measurement.
+Re-basing to **2.169** matches the source at the source's own operating point and retires the 0.0970 ppm
+belt-14 knife-edge, at the cost of a redrawn anchor band (belt 2 falls to 4.0302) and another regeneration.
+
+⚠️ **It is coupled to the belt-slope question and must be ruled on with it.** Zhao reports no litter
+moisture at all, so 17.12 % is derived by pushing 3.5 days through the very belt curve that
+`docs/research/2026-08-04-groot-koerkamp-ch7-table4-at-source.md` shows is inverted by treatment. Change
+the slope and the re-base target changes again. Decide the belt slope, the ammonia base and DP16's
+banding as ONE batch, then regenerate once.
 
 **Sequencing consequence: do not regenerate goldens (Task 7 Step 2) until this is settled.** A change of
 centring moves every ammonia value in the episode, so goldens regenerated now would have to be regenerated
