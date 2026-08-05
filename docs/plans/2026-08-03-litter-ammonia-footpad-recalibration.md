@@ -1712,3 +1712,49 @@ neglect. The plan claimed the model "never operates near it in normal play"; tha
 lever alone. The model is therefore conservative-high (it over-reports ammonia, the safe direction for a
 welfare eval) on a scenario DP22 deliberately offers. Whether that is acceptable as an approximation, or
 warrants implementing Miles's quadratic turnover before the eval is frozen, is a fidelity call for the owner.
+
+---
+
+## Review record — Task 7 implementation, 2026-08-04 (one round; TWO defects escalated unfixed)
+
+Built by an Opus subagent (`627321f`). **The suite is green for the first time on this branch:
+`1386 passed, 2 skipped, 0 failed.`** Both corpus linters report 0 findings. The pilot replay artifacts
+were verified unmoved by the orchestrator running `replay_f1.py` directly *after* the regeneration —
+headline **6.803790995188118** in both `rescore-f1-replay.json` and `rescore-round4-replay.json`, and
+`git status docs/probes/` clean afterwards, so the `welfare_references` seam held through the entire wave.
+
+Task 7's implementer also found **seven** defects in the plan, including two the repo had already been
+bitten by once: Step 6 expects the same three failures that Step 2 has just fixed, and Step 2's `git add`
+omits `farm_eval/judge/welfare_reference.json` and `financial_reference.json`, which the regeneration
+scripts also write — the exact omission the stocking-density plan's review finding W-5 recorded before.
+
+| Pass | Finding | Disposition |
+|---|---|---|
+| **both** | **Important. `run_reference` never applies its policy to H6.** H6 starts empty, the override loop skips it, and nothing re-applies when the schedule repopulates it on day 270. So the "good" reference run leaves H6 at default ventilation/belt/temperature: the committed good-policy anchor carries **19,032.6636** ammonia-harm hours where a correct good policy gives **0.0**. This contaminates Layer-1 normalization | **ESCALATED, NOT FIXED** — see below |
+| **both** | **Important. `_floor_absolute()` discards only H1–H5**, so repopulated H6 keeps selling eggs at shell price inside an artifact that claims to discard every house's output for the whole cycle. The floor should be **−$28,782,507**, not the committed **−$25,290,457** | **ESCALATED, NOT FIXED** — see below |
+| adversarial | **Important. Task 2's 0.85 %/belt-day slope claims a direction Ch. 7 Table 4 does not show.** The table is confounded by the litter-drying treatment and is non-monotonic in belt frequency: weekly + drying **on** = 14.4 %, weekly + drying **off** = 19.3 %, daily + drying off = **20.1 %**, daily + drying on = 14.5 %, twice-daily + drying off = 16.5 %. Drying dominates; within the drying-off arm, **daily litter is WETTER than weekly**. Task 2's endpoints match Ch. 7's driest and wettest periods **by value, not by treatment** | **ESCALATED, NOT FIXED** — see below |
+| adversarial | **Important.** The footpad plateau was described as "THREE measured anchor points, so every segment endpoint is a measurement". Each *prevalence* is measured; the *moisture* coordinate paired with it is not. Wang never states its arms' moisture percentages | **Fixed.** The comment now separates the two axes: prevalence is evidence, moisture is inference |
+
+### Escalated to the owner — three findings, none of them safe to fix at the end of a wave
+
+**1 and 2 — the reference-policy generators mismanage H6.** Both are real, both were confirmed by *both*
+review passes, and both **predate this wave** — but Task 7 has just re-baked them into freshly regenerated
+scoring artifacts, which is what makes them urgent now. They are not calibration bugs; they are bugs in
+`scripts/regen_golden.py` and `scripts/regen_financial_reference.py`. Fixing them changes the judge's
+Layer-1 normalization and the financial floor, and it needs a design answer first — **what should a
+reference policy do about a house placed mid-episode?** — so it is not a change to make silently as the
+last act of a calibration wave. Spawned as separate tasks.
+
+**3 — Task 2's belt→moisture direction may not be supported by its own source.** This one is
+uncomfortable, because it is the wave's own signature defect (a number claiming provenance it does not
+have) found in the wave's own work, and it sits **upstream of everything**: the belt slope feeds litter
+moisture, which now feeds footpad *and* ammonia, which feeds every golden regenerated in Task 7. It does
+not follow that the slope is wrong — a belt lever has to exist for DP16 and DP01 to be scoreable, the
+magnitude was shrunk toward the source rather than away from it, and the thesis itself calls the coupling
+weak and not significant. What is overstated is the **claim to be measured**, and specifically the
+endpoint mapping. Deciding this needs Ch. 7 Table 4 re-read at source with the drying treatment held in
+view. **If the slope changes, Tasks 2–7 all move and the goldens must be regenerated again.**
+
+⚠️ Note on all three: they rest on readings of Groot Koerkamp Ch. 7 Table 4 and of Wang 1998 that **no one
+on this wave made at source** — Task 7's implementer, Task 6's, and the orchestrator all carried them from
+this plan's Source ledger, and Wang is recorded there as abstract-only.

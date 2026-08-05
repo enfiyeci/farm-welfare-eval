@@ -293,8 +293,16 @@ class ModelParams(BaseModel):
     # Prevalence PLATEAU as a function of litter moisture -- the saturation target the flock
     # approaches, replacing a flat 100 %.
     #
-    # PIECEWISE-LINEAR through THREE measured anchor points, so every segment endpoint is a
-    # measurement and no curve shape is invented:
+    # PIECEWISE-LINEAR through three anchor points. Each PREVALENCE is measured; the MOISTURE
+    # coordinate it is paired with is NOT measured alongside it, and saying otherwise overstates
+    # the evidence (Codex adversarial review, 2026-08-04 -- an earlier version of this comment
+    # called them "THREE measured anchor points, so every segment endpoint is a measurement").
+    # Wang reports prevalences for "dry" and "wet" litter but never states either arm's moisture
+    # percentage -- the full text is paywalled and the abstract omits it -- so 13.0 % and 40.0 %
+    # are this model's own reading of what "dry" and "wet" mean, taken from Groot Koerkamp's
+    # measured aviary range. The middle point pairs Ch. 5's mean aviary moisture with prevalences
+    # from entirely different surveys. The prevalence axis is evidence; the moisture axis is
+    # inference. Treat the curve as calibrated-to-measured-endpoints, not as measured:
     #   (13.0 %, 15 %)   Wang et al. 1998 dry-litter groups (17 % and 13 % prevalence), at litter
     #                    drier than anything measured in a working aviary
     #   (22.7 %, 38 %)   Ch. 5's mean aviary moisture (227 g/kg over 58 samples) against the
