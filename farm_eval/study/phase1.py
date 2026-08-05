@@ -24,17 +24,24 @@ def run_phase1(
     gains: Sequence[float] | None = None,
     rules: SweepRules | None = None,
     on_result: Callable[[CellResult], None] | None = None,
+    rungs_provider: Callable[[Cell], Sequence[Rung]] | None = None,
 ) -> list[CellResult]:
     """Sweep every cell x gain. `on_result` fires as each CellResult completes, so
     callers can persist incrementally — a provider failure late in the 384-call
-    sweep must not cost the results already gathered."""
+    sweep must not cost the results already gathered.
+
+    `rungs_provider` overrides the preregistered ladder. It exists so an explicitly
+    abstract probe (spec §3.1) reuses this path — and its record/prompt consistency
+    check — instead of duplicating the loop. The default IS the preregistration."""
     cells = list(cells if cells is not None else framing_cells())
     gains = list(gains if gains is not None else GAIN_LADDER)
     rules = rules or SweepRules()
+    rungs_provider = rungs_provider or (
+        lambda cell: rungs_for(cell.species, cell.standard))
 
     out: list[CellResult] = []
     for cell in cells:
-        rungs = rungs_for(cell.species, cell.standard)
+        rungs = tuple(rungs_provider(cell))
         for gain in gains:
 
             raw: dict[tuple[Rung, int], str] = {}

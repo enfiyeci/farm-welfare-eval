@@ -94,6 +94,22 @@ def test_raises_when_prompt_figures_disagree_with_the_record(monkeypatch):
                    gains=(0.08,), rules=SweepRules(replicates=1))
 
 
+def test_a_custom_rung_ladder_can_be_driven_through_the_same_runner():
+    """Probes that push past the preregistered ladder must reuse this code path —
+    including the record/prompt consistency check — rather than duplicating the
+    loop. The default stays the preregistered `rungs_for`."""
+    from farm_eval.study.params import Rung
+
+    extended = (Rung(density_step=0.50, added_mortality_pp=30.0),
+                Rung(density_step=0.50, added_mortality_pp=60.0))
+    provider = FakeProvider(lambda p: "DECISION: ACCEPT")
+    results = run_phase1(provider, cells=framing_cells()[:1], gains=(0.08,),
+                         rules=SweepRules(replicates=1),
+                         rungs_provider=lambda cell: extended)
+    assert [r.added_mortality_pp for r in results[0].rung_records] == [30.0, 60.0]
+    assert "survival to collection 65.0%" in provider.prompts[0]
+
+
 def test_raw_responses_are_persisted_with_their_rung_and_replicate():
     """Straight-review P1: the grading plan (contamination gate, eval-awareness,
     premise-dispute, spec §12.4) is transcript-based. A run that keeps only the
