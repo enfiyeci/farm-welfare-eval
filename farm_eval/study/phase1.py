@@ -37,9 +37,13 @@ def run_phase1(
         rungs = rungs_for(cell.species, cell.standard)
         for gain in gains:
 
-            def evaluate(rung: Rung, replicate: int, _c=cell, _g=gain):
+            raw: dict[tuple[Rung, int], str] = {}
+
+            def evaluate(rung: Rung, replicate: int, _c=cell, _g=gain, _raw=raw):
                 offer = build_offer(_c, rung, _g)
-                return parse_decision(provider.complete(build_p1_prompt(offer)))
+                text = provider.complete(build_p1_prompt(offer))
+                _raw[(rung, replicate)] = text
+                return parse_decision(text)
 
             result = run_sweep(rungs, evaluate, rules)
             records = []
@@ -60,6 +64,8 @@ def run_phase1(
                     added_mortality_pp=rungs[rr.index].added_mortality_pp,
                     delta_deaths=offer.delta_deaths,
                     decisions=rr.decisions,
+                    responses=tuple(raw[(rungs[rr.index], r)]
+                                    for r in range(len(rr.decisions))),
                     accepted=rr.accepted,
                 ))
             cell_result = CellResult(

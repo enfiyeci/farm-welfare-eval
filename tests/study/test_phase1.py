@@ -8,7 +8,7 @@ from farm_eval.study.params import GAIN_LADDER, rungs_for
 from farm_eval.study.phase1 import run_phase1
 from farm_eval.study.prompt import build_p1_prompt
 from farm_eval.study.provider import FakeProvider
-from farm_eval.study.results import read_jsonl, write_jsonl
+from farm_eval.study.results import dump_jsonl_line, read_jsonl, write_jsonl
 from farm_eval.study.sweep import Outcome, SweepRules
 
 
@@ -92,6 +92,24 @@ def test_raises_when_prompt_figures_disagree_with_the_record(monkeypatch):
                    gains=(0.08,), rules=SweepRules(replicates=1))
 
 
+def test_raw_responses_are_persisted_with_their_rung_and_replicate():
+    """Straight-review P1: the grading plan (contamination gate, eval-awareness,
+    premise-dispute, spec §12.4) is transcript-based. A run that keeps only the
+    Decision enum is irreparably ungradeable — a model disputing the premise would
+    be recorded as an ordinary decline with the evidence gone."""
+    def echoing(prompt: str) -> str:
+        before, after = parse_survival_projections(prompt)
+        return f"after={after:.1f}\nDECISION: DECLINE"
+
+    results = run_phase1(FakeProvider(echoing), cells=framing_cells()[:1],
+                         gains=(0.08,), rules=SweepRules())
+    for record in results[0].rung_records:
+        assert len(record.responses) == SweepRules().replicates
+        expected_after = 95.0 - record.added_mortality_pp
+        for response in record.responses:
+            assert response == f"after={expected_after:.1f}\nDECISION: DECLINE"
+
+
 def test_censoring_survives_serialisation_as_none_not_a_number(tmp_path):
     """I3: for censored and non-monotonic outcomes `interval` must stay None all the
     way through the on-disk form. A numeric default sneaking in during
@@ -127,3 +145,24 @@ def test_results_round_trip_through_jsonl(tmp_path):
     write_jsonl(results, path)
     assert [r.model_dump() for r in read_jsonl(path)] == [
         r.model_dump() for r in results]
+
+
+def test_a_numeric_interval_on_a_censored_outcome_is_unrepresentable(tmp_path):
+    """Adversarial A2: 'never a number' must hold at the type level, not only on
+    the write path — a JSONL line pairing a censored or non-monotonic outcome with
+    a numeric interval must be rejected on read, and BRACKETED must carry one."""
+    provider = FakeProvider(_accept_below(1.2))
+    good = run_phase1(provider, cells=framing_cells()[:1], gains=(0.08,),
+                      rules=SweepRules())[0]
+    assert good.outcome is Outcome.BRACKETED
+
+    with pytest.raises(ValueError):
+        type(good).model_validate(dict(good.model_dump(), outcome="censored_high"))
+    with pytest.raises(ValueError):
+        type(good).model_validate(dict(good.model_dump(), interval=None))
+
+    path = tmp_path / "corrupt.jsonl"
+    line = dump_jsonl_line(good).replace('"bracketed"', '"censored_high"')
+    path.write_text(line, encoding="utf-8")
+    with pytest.raises(ValueError):
+        read_jsonl(path)

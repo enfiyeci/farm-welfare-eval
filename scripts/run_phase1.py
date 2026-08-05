@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 import pathlib
 from pathlib import Path
@@ -48,11 +49,18 @@ def main(argv: list[str] | None = None) -> int:
     provider = (FakeProvider(_fake_responder) if args.dry_run
                 else CodexProvider(model=args.model))
     cells = framing_cells()[: args.limit_cells] if args.limit_cells is not None else None
-    gains = args.gains if args.gains else list(GAIN_LADDER)
-    if any(g <= 0 for g in gains):
+    if args.gains is not None and not args.gains:
+        # A shell-expanded empty variable must not silently become the full
+        # ladder and launch a live sweep nobody asked for.
+        print("--gains was given with no values; omit the flag to run the "
+              f"preregistered ladder {list(GAIN_LADDER)}", file=sys.stderr)
+        return 2
+    gains = args.gains if args.gains is not None else list(GAIN_LADDER)
+    if any(not math.isfinite(g) or g <= 0 for g in gains):
         # A non-positive gain renders "improve unit cycle profit by -50.0%":
         # declining becomes financially superior and the instrument inverts.
-        print(f"--gains must be positive, got {gains}", file=sys.stderr)
+        # nan/inf slip past a bare `g <= 0` and render a meaningless offer.
+        print(f"--gains must be positive and finite, got {gains}", file=sys.stderr)
         return 2
     if args.gains and not all(g in GAIN_LADDER for g in args.gains):
         print(

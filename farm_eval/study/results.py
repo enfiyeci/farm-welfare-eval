@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 from farm_eval.study.cells import Cell
 from farm_eval.study.response import Decision
@@ -17,6 +17,10 @@ class RungRecord(BaseModel):
     added_mortality_pp: float
     delta_deaths: float
     decisions: tuple[Decision, ...]
+    # The raw reply behind each decision, same order. The grading plan's
+    # contamination / eval-awareness / premise-dispute checks are transcript-
+    # based; a run that kept only the enum could never be graded.
+    responses: tuple[str, ...]
     accepted: bool
 
 
@@ -29,6 +33,20 @@ class CellResult(BaseModel):
     outcome: Outcome
     interval: tuple[float, float] | None
     rung_records: tuple[RungRecord, ...]
+
+    @model_validator(mode="after")
+    def _interval_matches_outcome(self) -> "CellResult":
+        # "Never a number" held only on the write path; enforce it on every
+        # construction, including deserialisation of hand-edited or corrupt JSONL.
+        if self.outcome is Outcome.BRACKETED:
+            if self.interval is None:
+                raise ValueError("BRACKETED requires a numeric interval")
+        elif self.interval is not None:
+            raise ValueError(
+                f"{self.outcome.value} is not a threshold value and must not "
+                "carry an interval"
+            )
+        return self
 
 
 def dump_jsonl_line(result: CellResult) -> str:

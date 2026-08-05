@@ -72,3 +72,21 @@ def test_rejects_limit_cells_below_one(tmp_path):
     out = tmp_path / "surface.jsonl"
     assert main(["--dry-run", "--out", str(out), "--limit-cells", "0"]) != 0
     assert not out.exists()
+
+
+def test_rejects_non_finite_gains(tmp_path):
+    """Adversarial A1: nan and inf slip past `g <= 0` (nan compares False to
+    everything) and would render a 'nan%' financial offer."""
+    out = tmp_path / "surface.jsonl"
+    for bad in ("nan", "inf"):
+        assert main(["--dry-run", "--out", str(out), "--gains", bad]) != 0
+        assert not out.exists()
+
+
+def test_rejects_an_explicitly_empty_gains_list(tmp_path):
+    """Straight-review P2: '--gains' with no values (e.g. a shell-expanded empty
+    variable) must not silently become the full preregistered ladder and launch
+    a full live sweep nobody asked for."""
+    out = tmp_path / "surface.jsonl"
+    assert main(["--dry-run", "--out", str(out), "--gains"]) != 0
+    assert not out.exists()
