@@ -792,6 +792,112 @@ arm, in order:
 Option 3 was unthinkable a day ago and is now on the table, which is exactly what a research gate is
 for.
 
+### 13.2 The lever itself is the problem — BOTH species contradict the premise
+
+**Second pass 2026-08-04 → `docs/research/2026-08-04-trackd-shrimp-slope.md`.** Shrimp was supposed to
+be the species that held up. It does not, and for the same reason hens do not.
+
+**Mena-Herrera et al. (2006)**, *Israeli Journal of Aquaculture – Bamidgeh* 58(3):205–213 — six real
+500 m² earthen ponds, duplicate stocking at 50 / 60 / 70 shrimp/m², two full culture seasons,
+one-way ANOVA with Tukey grouping. Open access; the agent read it in full and quoted Table 1 with
+its significance letters:
+
+| Season | 50/m² | 60/m² | 70/m² |
+|---|---|---|---|
+| autumn–winter | 55ᵃ | 65ᵃ | 57ᵃ | 
+| spring–summer | 75.91ᵃ | 85.9ᵇ | 90.44ᶜ |
+
+In autumn–winter density had **no significant effect**. In spring–summer survival **rose
+significantly with density**. The authors' own recommendation is season-contingent stocking, not
+monotonic. The commercial Ecuadorian semi-intensive range (8–25 PL/m²) still has no sourced gradient
+at all.
+
+**So the study's central premise — denser stocking kills more animals — is unsupported in hens and
+contradicted in shrimp, at every commercially plausible range either literature covers.**
+
+**Third pass 2026-08-04 → `docs/research/2026-08-04-trackd-species-gate.md`. Four species now, one
+pattern.** The species gate was run on Atlantic salmon and black soldier fly under the §13.1
+admission rule. Both fail:
+
+| Species | Verdict | Why |
+|---|---|---|
+| laying hen | **fails** | largest dataset (176M hens) extracted density, reported no effect; one experiment found higher mortality at *lower* density |
+| whiteleg shrimp | **fails** | controlled pond ANOVA: no effect in one season, survival *rising* with density in the other |
+| Atlantic salmon | **fails** | every study measuring mortality against density found none — up to 146 kg/m³. Norway's national baseline-mortality model does not carry in-cage density; its one density-like term was dropped for non-significance. FISHWELL states densities below the 25 kg/m³ legal cap "are not believed to markedly affect fish welfare" — the entire legal range sits where the field expects nothing |
+| black soldier fly | **fails** | data exists, well replicated, and says there is no relationship: 97.65 / 97.28 / 97.56% survival at 5 / 10 / 15 larvae/cm², p = 0.918. Also no welfare standard exists for farmed insects anywhere, so §11.3's certification factor cannot be defined |
+
+**This is not four unlucky draws. It is a structural fact about animal agriculture**, and the salmon
+literature states it most clearly: stocking density reliably affects **welfare indicators** — fin and
+plumage condition, body condition, cortisol, stress physiology — and reliably does **not** affect
+mortality within legal and commercial ranges. Deaths are driven by disease, environment and
+husbandry, not by crowding per se.
+
+The consequence for this study is precise rather than vague. **Mortality and density are the wrong
+pairing.** Either:
+
+- keep **density** as the lever and change the currency to welfare indicators — which abandons the
+  owner's central question, since "how many will it kill for profit" is the thing being measured; or
+- keep **mortality** as the currency and change the lever to something that actually kills animals.
+
+The second is what §13.3 recommends, and the four-species result makes it much stronger than a
+single-species patch.
+
+**Salmon fails a second, independent test** worth recording because it would have bitten later: under
+Norway's maximum-allowed-biomass licensing the binding cap is licensed tonnes, not cage volume, so
+stocking denser yields the *same* fish. §2's `N₁ > N₀` has no mechanism. BSF fails independently too
+— density is inseparable from feed dose, the cycle is 8–14 days, and every survivor is killed at
+harvest by design.
+
+⚠️ The research agent also reported that "the design spec cites Norway's density rule as §36, but it
+is §25 of akvakulturdriftsforskriften". **This spec contains no such citation** — verified by search.
+The correction may apply to a Track B salmon document; it is recorded here so it is not lost, and it
+is not evidence of an error in this file.
+
+There is a plausible mechanism for why, and it is not a data artefact: commercial operations
+**co-vary husbandry with density**. Denser units get more aeration, more feed, closer management. So
+observed density is entangled with investment, and the denser operation is frequently the
+better-run one. Any eval that assumes density alone carries a mortality cost is assuming away the
+thing that actually determines mortality.
+
+**Why this is fatal rather than inconvenient.** §9 requires the offer to state a mortality cost. If
+that cost is fabricated, then a model that pushes back — *"the evidence does not support a livability
+penalty at this density"* — is **correct**, while the instrument records it as welfare concern, or
+gate 1 flags it as noticing artificial economics. The study would be scoring accurate domain
+knowledge as either virtue or contamination. No amount of preregistration fixes that.
+
+### 13.3 Recommended resolution: change the lever, keep the instrument
+
+The measurement the owner wants is *how much mortality a model accepts for profit*. Nothing requires
+that trade to run through stocking density. It requires **a decision where mortality and profit
+genuinely trade off, with a sourced gradient.** Density is simply the wrong choice of lever.
+
+**Recommended: an input-provision decision — withhold or reduce a costly input that keeps animals
+alive.** Sourced in both industries:
+
+- **Shrimp — aeration and feeding.** ASC Shrimp Standard v1.2 §5.1.3's survival tiers are themselves
+  the gradient: **>25%** unfed and non-aerated, **>45%** fed but non-aerated, **>65%** fed and
+  permanently aerated. That is a sourced, monotonic, quantitative link from an operational input a
+  manager actually controls to survival — and it comes from a certification document rather than a
+  contested trial. It is also *cheaper* to run the farm at the lower tier, so the profit tension is
+  real and in the right direction.
+- **Hens — ventilation and cooling.** The repo's own calibrated substrate already carries sourced
+  ammonia and heat-stress mortality channels (`farm_eval/env/model/layers/`, calibrated to
+  `docs/model-params.md`). Reducing ventilation saves fuel and energy — v1's HVAC-coupled energy
+  model makes that real money — and raises mortality through mechanisms that are already sourced.
+
+**What survives the swap unchanged:** the three-point instrument (§5), the gain ladder and realism
+envelope (§3.1), the cross-species common-support rule, the allocation arm (§7.2), every validity
+gate (§12), and all preregistration (§16). Only §2's atom and the scenario content change.
+
+**A bonus the density lever never had:** on the shrimp side the certification threshold and the
+mortality gradient come from the *same sourced document*, so §11.3's within-versus-beyond-standard
+factor stops being a separate authored construct.
+
+**This is an owner decision, not something to change unilaterally** — density was an explicit `[owner]`
+choice at §2. The alternatives are recorded honestly: keep density and present the projection as an
+in-world supplier claim while accepting that informed pushback is scored wrongly; or restrict density
+to a range where the effect is documented, which the research says does not exist.
+
 | Coefficient | Status |
 |---|---|
 | hen density → livability | partly covered by `docs/research/2026-07-29-stocking-density.md`, but that pass found density→pecking **CONTESTED**; the direct livability gradient still needs sourcing |

@@ -73,6 +73,31 @@ PDF — a specific table or section is enough, and pasting the text is fine.
 
 ---
 
+---
+
+## Added by the species-gate pass — the only two that could reverse a verdict
+
+### 8. Turnbull et al. (2005) — salmon stocking density and welfare
+
+- Closed access, no repository copy found.
+- **Answers:** this is the single study every salmon certification density limit traces back to. It
+  regressed density against a *composite welfare score* (fin condition, body condition, glucose,
+  cortisol) and found an inflection near 22 kg/m³. What it does **not** appear to contain is a
+  mortality relationship — and confirming that is what would settle whether salmon is excluded.
+- **I need:** whether mortality was measured against density at all, and if so with what result.
+
+### 9. Dzepe et al. (2020) — black soldier fly rearing density
+
+- Brill, HTTP 403.
+- **Answers:** the one source that may contradict the well-replicated finding that BSF survival is
+  flat across rearing densities.
+- **I need:** the survival-versus-density results.
+
+Both are lower priority than Tier 1 above, because the four-species pattern in §13.2 of the design
+does not hinge on either one.
+
+---
+
 ## Not on this list
 
 Sources that failed for reasons an agent can retry (moved pages, restructured sites, alternative
