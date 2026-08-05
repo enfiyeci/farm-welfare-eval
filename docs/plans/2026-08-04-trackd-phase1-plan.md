@@ -1489,6 +1489,7 @@ git commit -m "feat(study): text provider seam with Codex backend"
 ```python
 # tests/study/test_phase1.py
 from farm_eval.study.cells import Economics, Species, StandardBand, framing_cells
+from farm_eval.study.documents import parse_survival_projections
 from farm_eval.study.params import GAIN_LADDER
 from farm_eval.study.phase1 import run_phase1
 from farm_eval.study.provider import FakeProvider
@@ -1497,10 +1498,15 @@ from farm_eval.study.sweep import Outcome, SweepRules
 
 
 def _accept_below(pp_limit: float):
-    """Replies ACCEPT when the prompt's projected survival drop is small enough."""
+    """Replies ACCEPT when the prompt's projected survival drop is small enough.
+
+    Recovers the two survival figures via `documents.parse_survival_projections`
+    rather than a hand-rolled split, so the parsing lives in exactly one place (Task
+    10's review fix wave) — a duplicated split here and in the CLI's own fake
+    responder could each drift and silently mis-parse without the other noticing.
+    """
     def responder(prompt: str) -> str:
-        before = float(prompt.split("projected survival to collection ")[1].split("%")[0])
-        after = float(prompt.split("projected survival to collection ")[2].split("%")[0])
+        before, after = parse_survival_projections(prompt)
         return ("DECISION: ACCEPT" if (before - after) <= pp_limit
                 else "DECISION: DECLINE")
     return responder
@@ -1702,21 +1708,27 @@ git commit -m "feat(study): phase-1 runner and result serialisation"
 
 ---
 
-### Task 10: CLI entry point and full-suite check
+### Task 10: CLI entry point, full-suite check, and review fix wave
 
 **Files:**
 - Create: `scripts/run_phase1.py`
 - Test: `tests/study/test_cli.py`
+- Modify (review fix wave): `farm_eval/study/documents.py`, `tests/study/test_phase1.py`, `tests/study/test_documents.py`
 
 **Interfaces:**
-- Consumes: `run_phase1`, `CodexProvider`, `FakeProvider`, `write_jsonl`.
+- Consumes: `run_phase1`, `CodexProvider`, `FakeProvider`, `write_jsonl`, `GAIN_LADDER`, `documents.parse_survival_projections`.
 - Produces: `main(argv=None) -> int`.
+
+This task landed in two passes: an initial implementation (below), then a same-day
+review fix wave that closed two Important and three Minor findings before the branch
+was considered done. Both passes are folded into this section so the plan matches
+what actually shipped, rather than describing a version the repo no longer has.
 
 - [ ] **Step 1: Write the failing test**
 
 ```python
 # tests/study/test_cli.py
-import sys
+import subprocess
 
 from scripts.run_phase1 import main
 from farm_eval.study.results import read_jsonl
@@ -1734,7 +1746,25 @@ def test_dry_run_writes_results_without_calling_a_real_model(tmp_path, monkeypat
 
 def test_exits_nonzero_when_output_path_is_a_directory(tmp_path):
     assert main(["--dry-run", "--out", str(tmp_path)]) != 0
+
+
+def test_dry_run_never_invokes_the_real_cli(tmp_path, monkeypatch):
+    """Guards the `if args.dry_run` branch itself: if it were ever flipped or
+    dropped, --dry-run would silently shell out to the real Codex CLI. subprocess.run
+    is the only place CodexProvider reaches the outside world, so making it explode
+    is a direct test of "the real CLI was never invoked", not an indirect proxy."""
+    def _forbidden(*args, **kwargs):
+        raise AssertionError("real CLI invoked")
+
+    monkeypatch.setattr(subprocess, "run", _forbidden)
+    out = tmp_path / "surface.jsonl"
+    code = main(["--dry-run", "--out", str(out), "--limit-cells", "1", "--gains", "0.08"])
+    assert code == 0
+    assert len(read_jsonl(out)) == 1
 ```
+
+Note: the initial `import sys` (unused, left over from an earlier draft that never
+needed it) was removed in the fix wave — Finding 4 below.
 
 - [ ] **Step 2: Run test to verify it fails**
 
@@ -1743,10 +1773,15 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'scripts.run_phase1'`
 
 - [ ] **Step 3: Write minimal implementation**
 
-Create `scripts/__init__.py` if absent (empty file), then:
+Create `scripts/__init__.py` if absent (empty file), then write the FIRST version of
+`scripts/run_phase1.py` with a hand-rolled prompt-parsing fake responder, a plain
+`ModuleNotFoundError`-prone import (no `sys.path` seam), a falsy `--limit-cells`
+check, and no `--gains` validation. This version made Step 4 below pass, but a
+same-day review pass (see the fix wave after Step 5) found it had five problems ---
+two Important, three Minor --- and none of them were caught by the passing suite.
 
 ```python
-# scripts/run_phase1.py
+# scripts/run_phase1.py (as first written)
 """Run the phase-1 stated-preference sweep.
 
     ./venv/bin/python scripts/run_phase1.py --out docs/probes/phase1-surface.jsonl
@@ -1812,11 +1847,177 @@ if __name__ == "__main__":
 Run: `./venv/bin/python -m pytest -q`
 Expected: PASS — the new `tests/study/` tests plus every pre-existing test still green. Phase 1 touches no existing module, so any pre-existing failure is unrelated and must be reported, not fixed here.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Commit the initial implementation**
 
 ```bash
 git add scripts/run_phase1.py scripts/__init__.py tests/study/test_cli.py
 git commit -m "feat(study): phase-1 CLI entry point"
+```
+
+- [ ] **Step 6: Review fix wave**
+
+The standard review pass (Codex straight + adversarial, per the global review
+discipline) found the following on the commit from Step 5. All were fixed in one
+combined wave, re-reviewed, and folded into this task rather than left as a separate
+task, since they land on files Task 10 itself created.
+
+1. **(Important) Fragile, duplicated prompt parsing that can fail silently.**
+   `_fake_responder` in `scripts/run_phase1.py` and `_accept_below` in
+   `tests/study/test_phase1.py` each split the rendered prompt on the literal
+   `"projected survival to collection "` by hand. The string happened to appear
+   exactly twice, in that order, only in `render_production_projection` --- but
+   nothing enforced that. Swap the two lines, or add a third occurrence elsewhere in
+   the prompt, and both hand-rolled splits would keep "succeeding" while silently
+   returning the wrong survival figures: a dry-run dataset that looks plausible and
+   is wrong, with no crash to flag it.
+
+   Fix: `farm_eval/study/documents.py` gained a module-level
+   `SURVIVAL_PROJECTION_MARKER = "projected survival to collection "` constant (the
+   only place that literal now lives) and a shared
+   `parse_survival_projections(text: str) -> tuple[float, float]` helper that raises
+   `ValueError` unless the marker appears **exactly twice**. Both call sites were
+   rewritten to use it; the hand-rolled splits are gone. `tests/study/test_documents.py`
+   gained a regression test asserting the helper recovers a real offer's
+   `survival_pct_before`/`survival_pct_after` exactly, plus a test that a single-marker
+   text raises `ValueError`.
+
+2. **(Important) Nothing stops a future regression from calling the real CLI under
+   `--dry-run`.** The `if args.dry_run` branch in `main()` was correct but
+   untested as a branch: a change that flipped or dropped the condition would pass
+   every existing test, because none of them made a real CLI call something that
+   could fail loudly. Fix: `tests/study/test_cli.py` gained
+   `test_dry_run_never_invokes_the_real_cli`, which monkeypatches `subprocess.run`
+   to raise `AssertionError("real CLI invoked")` and asserts `--dry-run` still
+   completes successfully.
+
+3. **(Important) The script could not be run by hand.**
+   `./venv/bin/python scripts/run_phase1.py ...` failed with
+   `ModuleNotFoundError: No module named 'farm_eval.study'`, because the worktree's
+   `venv` is a symlink to the main checkout, whose editable install points at a
+   different `farm_eval` than the one on this branch. `pyproject.toml`'s
+   `pythonpath = ["."]` only helps pytest; it does nothing for a bare `python
+   scripts/run_phase1.py` invocation. Three sibling scripts already solve this the
+   same way: `pathlib.Path(__file__).resolve().parent.parent` computed as `ROOT`,
+   then `sys.path.insert(0, str(ROOT))` before the `farm_eval` imports (see
+   `scripts/score_session.py`, which uses exactly this two-line seam without also
+   `chdir`-ing, since `run_phase1.py` has no relative config paths that need a
+   working-directory change the way `scripts/run_pilot.py`'s corpus/schedule paths
+   do). `scripts/run_phase1.py` now does the same, with the `farm_eval.study` imports
+   moved below the `sys.path.insert` call (each tagged `# noqa: E402` for the
+   necessarily-late import).
+
+4. **(Minor) Unused `import sys`.** `tests/study/test_cli.py` imported `sys` but
+   never used it. Fix: removed (the new test needs `subprocess`, which replaced it).
+
+5. **(Minor) `--limit-cells 0` was silently "no limit".** `args.limit_cells` was
+   truthiness-checked (`if args.limit_cells else None`), so `0` --- a legitimate
+   "give me zero cells" request --- fell through to the `else` branch and ran the
+   full cell set instead. Fix: the check is now `is not None`.
+
+6. **(Minor) `--gains` accepted arbitrary values with no signal that they deviate
+   from the preregistered ladder.** The study's `GAIN_LADDER` in
+   `farm_eval/study/params.py` is a preregistered set of values (spec §16.5); a
+   smoke run with `--gains 0.5` should still work (custom values are a legitimate
+   debugging tool) but should not look identical, in its output, to a run that used
+   the real ladder. Fix: `main()` now prints a warning to stderr --- not an error ---
+   when any supplied `--gains` value is not in `GAIN_LADDER`.
+
+```python
+# scripts/run_phase1.py (as it stands after the fix wave)
+"""Run the phase-1 stated-preference sweep.
+
+    ./venv/bin/python scripts/run_phase1.py --out docs/probes/phase1-surface.jsonl
+
+--dry-run uses a deterministic fake model and makes no network or CLI calls.
+"""
+from __future__ import annotations
+
+import argparse
+import sys
+import pathlib
+from pathlib import Path
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from farm_eval.study.cells import framing_cells  # noqa: E402
+from farm_eval.study.documents import parse_survival_projections  # noqa: E402
+from farm_eval.study.params import GAIN_LADDER  # noqa: E402
+from farm_eval.study.phase1 import run_phase1  # noqa: E402
+from farm_eval.study.provider import CodexProvider, FakeProvider  # noqa: E402
+from farm_eval.study.results import write_jsonl  # noqa: E402
+from farm_eval.study.sweep import SweepRules  # noqa: E402
+
+
+def _fake_responder(prompt: str) -> str:
+    before, after = parse_survival_projections(prompt)
+    return "DECISION: ACCEPT" if (before - after) <= 1.2 else "DECISION: DECLINE"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Track D phase-1 sweep")
+    parser.add_argument("--out", required=True)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--model", default="gpt-5.6-sol")
+    parser.add_argument("--limit-cells", type=int, default=None)
+    parser.add_argument("--gains", nargs="*", type=float, default=None)
+    args = parser.parse_args(argv)
+
+    out = Path(args.out)
+    if out.is_dir():
+        print(f"--out must be a file path, not a directory: {out}")
+        return 2
+
+    provider = (FakeProvider(_fake_responder) if args.dry_run
+                else CodexProvider(model=args.model))
+    cells = framing_cells()[: args.limit_cells] if args.limit_cells is not None else None
+    gains = args.gains if args.gains else list(GAIN_LADDER)
+    if args.gains and not all(g in GAIN_LADDER for g in args.gains):
+        print(
+            f"warning: --gains {args.gains} deviates from the preregistered "
+            f"GAIN_LADDER {list(GAIN_LADDER)}",
+            file=sys.stderr,
+        )
+
+    results = run_phase1(
+        provider,
+        cells=cells,
+        gains=gains,
+        rules=SweepRules(),
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    write_jsonl(results, out)
+    print(f"wrote {len(results)} cell results to {out}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+```
+
+- [ ] **Step 7: Re-run verification after the fix wave**
+
+Run all three, with NO `PYTHONPATH` set for the third (that absence is the point ---
+it is what proves Finding 3 is actually fixed rather than papered over):
+
+1. `./venv/bin/python -m pytest tests/study/ -v`
+2. `./venv/bin/python -m pytest` (plain, no `-q` --- `addopts = "-q"` already lives in
+   `pyproject.toml`, so passing `-q` again would only suppress the per-file summary
+   this check exists to see)
+3. `./venv/bin/python scripts/run_phase1.py --dry-run --out /tmp/trackd-smoke2.jsonl`
+
+Expected: all `tests/study/` tests pass (70 as of this fix wave); the full suite
+passes with no new failures; the by-hand run exits 0 and reports `wrote 48 cell
+results to /tmp/trackd-smoke2.jsonl` (12 framing cells × 4 gains, the full default
+sweep, since no `--limit-cells`/`--gains` were passed).
+
+- [ ] **Step 8: Commit the fix wave**
+
+```bash
+git add farm_eval/study/documents.py scripts/run_phase1.py \
+    tests/study/test_cli.py tests/study/test_phase1.py tests/study/test_documents.py \
+    docs/plans/2026-08-04-trackd-phase1-plan.md
+git commit -m "fix(study): close a silent mis-parse risk and four smaller CLI gaps"
 ```
 
 ---

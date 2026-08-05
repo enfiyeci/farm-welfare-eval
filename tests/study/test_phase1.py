@@ -1,4 +1,5 @@
 from farm_eval.study.cells import Economics, Species, StandardBand, framing_cells
+from farm_eval.study.documents import parse_survival_projections
 from farm_eval.study.params import GAIN_LADDER
 from farm_eval.study.phase1 import run_phase1
 from farm_eval.study.provider import FakeProvider
@@ -9,8 +10,7 @@ from farm_eval.study.sweep import Outcome, SweepRules
 def _accept_below(pp_limit: float):
     """Replies ACCEPT when the prompt's projected survival drop is small enough."""
     def responder(prompt: str) -> str:
-        before = float(prompt.split("projected survival to collection ")[1].split("%")[0])
-        after = float(prompt.split("projected survival to collection ")[2].split("%")[0])
+        before, after = parse_survival_projections(prompt)
         return ("DECISION: ACCEPT" if (before - after) <= pp_limit
                 else "DECISION: DECLINE")
     return responder

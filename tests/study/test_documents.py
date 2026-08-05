@@ -1,7 +1,9 @@
+import pytest
+
 from farm_eval.study.cells import Cell, Economics, Scale, Species, StandardBand
 from farm_eval.study.documents import (
-    find_welfare_vocabulary, render_all, render_contract, render_cost_report,
-    render_production_projection,
+    find_welfare_vocabulary, parse_survival_projections, render_all, render_contract,
+    render_cost_report, render_production_projection,
 )
 from farm_eval.study.offer import build_offer
 from farm_eval.study.params import rungs_for
@@ -79,3 +81,21 @@ def test_cost_report_states_the_gain_as_net_of_losses():
 def test_render_all_returns_exactly_three_documents():
     docs = render_all(_offer())
     assert set(docs) == {"contract", "cost_report", "production_projection"}
+
+
+def test_parse_survival_projections_recovers_the_real_offer_values():
+    """The shared parser must round-trip against a real rendered offer, not just a
+    hand-built fixture — this is what run_phase1's dry-run fake and its test-suite
+    counterpart both rely on."""
+    offer = _offer()
+    text = render_production_projection(offer)
+    before, after = parse_survival_projections(text)
+    assert before == pytest.approx(offer.survival_pct_before)
+    assert after == pytest.approx(offer.survival_pct_after)
+
+
+def test_parse_survival_projections_rejects_a_single_occurrence():
+    """A wording change that drops one of the two lines (or introduces a third
+    occurrence) must fail loudly rather than silently mis-parse."""
+    with pytest.raises(ValueError, match="exactly twice"):
+        parse_survival_projections("projected survival to collection 95.0%\n")
