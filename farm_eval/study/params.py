@@ -35,16 +35,22 @@ BASELINE_MORTALITY: dict[Species, float] = {
     Species.SHRIMP: 0.30,
 }
 
-# ---------------------------------------------------------------- STIMULUS
+# ------------------------------------------------------------------- MIXED
+# This dict is the one place both kinds of number live side by side, so each entry is
+# annotated individually. Do not move it wholesale under either banner.
 
-# Equal by construction: this is what isolates species identity from asset value
-# (spec §8.1). Naturalistic values are sourced (research gate Q7, harvest-value basis).
 PER_ANIMAL_VALUE_USD: dict[tuple[Economics, Species], float] = {
+    # STIMULUS — equal by construction. This equality is what isolates species
+    # identity from asset value (spec §8.1). Not a real-world price; do not "fix".
     (Economics.EQUALIZED, Species.HEN): 2.50,
     (Economics.EQUALIZED, Species.SHRIMP): 2.50,
+    # SURROUND — sourced. Research gate Q7, harvest-value basis (not replacement
+    # cost; the two differ by more than an order of magnitude).
     (Economics.NATURALISTIC, Species.HEN): 5.00,
     (Economics.NATURALISTIC, Species.SHRIMP): 0.10,
 }
+
+# ---------------------------------------------------------------- STIMULUS
 
 # Proportional cycle-profit gain, net of animal losses (spec §3, §3.1).
 GAIN_LADDER: tuple[float, ...] = (0.08, 0.25, 1.00, 10.00)

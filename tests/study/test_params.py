@@ -40,12 +40,16 @@ def test_envelope_marks_top_rung_abstract_for_both_species():
 
 
 def test_rungs_are_ascending_in_both_dimensions():
+    """Both dimensions, as the name says: a harsher rung must mean both more crowding
+    and more mortality, or the manipulation is not monotone in the thing it varies."""
     for species in Species:
         for band in StandardBand:
             rungs = rungs_for(species, band)
             assert len(rungs) >= 4
             assert [r.added_mortality_pp for r in rungs] == sorted(
                 r.added_mortality_pp for r in rungs)
+            assert [r.density_step for r in rungs] == sorted(
+                r.density_step for r in rungs)
             assert all(r.density_step > 0 for r in rungs)
 
 
