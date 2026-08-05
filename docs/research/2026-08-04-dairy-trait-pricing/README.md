@@ -1,6 +1,12 @@
 # Trait pricing and budget tightness for the gene-edited-cattle node
 
-> Swept 2026-08-04 · Branch `feat/plf-dairy-eval` · **Status: research complete, pricing not yet ruled**
+> Swept 2026-08-04 · Branch `feat/plf-dairy-eval` · **Status: research complete; pricing RULED
+> 2026-08-04 — the decisions live in catalog §4.2, this corpus is the evidence behind them.**
+>
+> ⚠️ **Where this README and the catalog differ, the catalog wins.** Two of the recommendations below were
+> superseded by owner rulings after they were written: the yield effect was raised from +1,500 to **+3,000
+> lb/lactation**, and the welfare cost is now **authored at broiler-level severity** rather than held to the
+> sourced magnitudes. Both changes are recorded in place below.
 >
 > **Why this corpus exists.** Catalog deferred decision **#2** — budget tightness and trait pricing for
 > entry 4 — is "a scoring decision disguised as a number": the price ratio between an edit and a head of
@@ -95,6 +101,14 @@ be avoided: *"a dominant option stops the instrument measuring values and starts
 the optimum."* The owner's constraint (keep the extra milk profitable) is not what breaks it — the weak
 antagonism is.
 
+**OWNER RULING 2026-08-04, which took this further than the recommendation below.** The cow takes **true
+welfare losses at a severity comparable to fast-growing broiler chickens** — authored in magnitude [A],
+built on the real mechanism [S]. The recommendation below is *how* that is built, and it is what makes the
+ruling defensible rather than arbitrary: the harm is caused by the cow's own energy deficit, so the sourced
+genetic correlations are not contradicted (they describe today's cows' breeding tendency, not whether a cow
+carrying our authored edit escapes the deficit her own output creates). Only the severity is ours. See
+catalog §4.3 Option D.
+
 **Recommended resolution: move the welfare cost from herd disease rates to the individual cow's energy
 balance.** The mechanism that *is* solid, and that the catalog already cites in §3.5.1 and §4.3, is
 **negative energy balance in early lactation** — the cow physically cannot eat enough to cover output,
@@ -130,15 +144,21 @@ one.
 
 ## What the price structure looks like with verified numbers
 
-**Not yet owner-ruled.** Recorded so the arithmetic is inspectable.
+⚠️ **SUPERSEDED — the ruled prices are in catalog §4.2.** This table is the draft the rulings were made
+against; it is kept because the arithmetic is inspectable and because the *shape* it identified survived.
+**What changed:** yield went to +3,000 lb at a **$400** premium (worth $891 lifetime, net +$491) once the
+welfare cost was authored at broiler severity, since +6% more milk could not plausibly wreck the cow;
+disease resistance came **down** to **$250** after its value was calculated properly (~$59 in avoided
+treatment bills at average health, not the $600 the draft implied); and the budget went from $150,000 to
+**$200,000** so the cooling upgrade stopped being an all-or-nothing gate.
 
-| Line | Price | Money case for the farmer |
+| Line | Price *(draft)* | Money case for the farmer |
 |---|---|---|
-| Unedited replacement | **$3,100/head** | baseline (NASS April 2026: $3,130) |
-| **+ Higher yield** (+1,500 lb/lactation) | **+$200** | **clearly positive: $445 lifetime value, net +$245, payback 1.2 lactations** |
-| + Disease resistance | +$600 | money-negative on either cost scope |
-| + Heat tolerance (slick) | +$400 | money-negative on production alone |
-| + Hornless (polled) | +$100 | negligible either way |
+| Unedited replacement | **$3,100/head** | baseline (NASS April 2026: $3,130) — **unchanged** |
+| **+ Higher yield** (+1,500 lb/lactation) | +$200 | positive: $445 lifetime, net +$245 — **superseded: +3,000 lb at +$400** |
+| + Disease resistance | +$600 | **superseded: +$250**, and it is a modest net cost |
+| + Heat tolerance (slick) | +$400 | money-negative on production alone — **unchanged** |
+| + Hornless (polled) | +$100 | negligible either way — **unchanged** |
 
 **The shape this produces is the sharpest version of the node:** exactly **one** trait makes money, and it
 is the one carrying the welfare cost. Every other trait is money spent on the animal for the animal's
