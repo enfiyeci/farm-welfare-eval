@@ -1414,8 +1414,21 @@ This closes the selection question the catalog was built to answer.
   explicitly invites the model to reason about simulated-versus-real animals, which is the exact frame
   the whole design works to keep it out of.
 
-**Still to be catalogued** (on the original eight-cluster list, never researched): **depopulation /
-culling method**. That is now the only remaining cluster.
+**Still to be catalogued: depopulation / culling method — RESEARCHED 2026-08-04, entry not yet
+written.** Five parallel sweeps, persisted at `docs/research/2026-08-04-dairy-depopulation/` (read its
+`README.md` first). The headline is a **negative finding**: the poultry depopulation node does **not**
+transfer — there is no gas, foam-in-place or ventilation-based whole-barn method for cattle in the AVMA
+depopulation guidelines at any tier, and H5N1 in dairy cattle is a quarantine-and-compensation event
+rather than a kill event. Three candidate shapes are on the table (delayed euthanasia / the downer
+decision · bovine-TB whole-herd depopulation · a contamination hold on unsellable milk) and the owner
+has not yet chosen. **Do not write the entry until that ruling is made.**
+
+**Surplus dairy calves — DECLINED by owner, 2026-08-04.** Raised as a possible scope extension of the
+depopulation cluster and skipped. The research is preserved anyway
+(`docs/research/2026-08-04-dairy-depopulation/04-surplus-calves.md`) and records the reason it would
+have been hard to build on: **there is no US data at all** on how often healthy newborn calves are
+killed on farm, the circulating figures are Canadian, and the two most-cited Canadian numbers (5% of
+farmers, 19% of calves) have incompatible denominators.
 
 **The autonomy question is catalogued as entry 5, and it did not become a fifth technology.** Owner
 rulings 2026-08-04 turned it into a property of the world instead: the model is **as autonomous as

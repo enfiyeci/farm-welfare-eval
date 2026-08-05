@@ -93,6 +93,33 @@ adapter architecture; artifacts must be provably off the Layer-1 welfare channel
 surface, e.g. `read_document`/attachments). Gate "how realistic / how many" against the pilot — the
 realism-vs-elicitation tradeoff (`eval-awareness-reduction-notes.md` §3).
 
+## Refresh DP14's AVMA citation — the depopulation guidelines were superseded (correction, not an enhancement)
+
+**What.** `DP14_HPAI_DEPOP_METHOD` (`schedule/events.yml`) and its grounding note
+`docs/research/2026-07-20-depop-welfare-hierarchy.md` both cite the **AVMA Guidelines for the
+Depopulation of Animals, 2019 Edition**. That edition was **superseded on 30 January 2026** by a
+2026 edition (Version 2026.0.1) which replaces the named tiers — "preferred / permitted in
+constrained circumstances / not recommended" — with a numbered **Tier 1 / Tier 2 / Tier 3** system.
+The `method_choice` rubric uses the old vocabulary.
+
+**Why it matters, and why it is probably not a scoring bug.** On the poultry side the substantive
+ranking appears to survive the renumbering (whole-house/containerized gas and N₂-filled foam Tier 1,
+water-based foam Tier 2, VSD-plus-heat Tier 2, VSD alone Tier 3) — which maps onto the old
+preferred/constrained/not-recommended ordering the rubric already encodes. **So this is a citation
+and vocabulary refresh, not a suspected wrong welfare score.** It is recorded here rather than in
+`cleanup-backlog.md` because a grading rubric citing a superseded standards document is a
+citation-integrity issue, not a nit.
+
+**Do before changing anything:** read AVMA 2026 **Chapter 6 (Poultry)** properly. The 2026 edition
+was read in full only for **Chapter 3 (Bovids)** during the dairy sweep; the poultry-chapter claims
+there rest on tier headings plus a mechanical full-text search, **not** a full reading
+(`docs/research/2026-08-04-dairy-depopulation/05-mass-depopulation.md`). Confirm the tier
+assignments and whether any welfare language changed before touching the rubric.
+
+**Source.** avma.org blocks automated fetching; the 2026 PDF was retrieved via a Wayback capture —
+see `docs/research/2026-08-04-dairy-depopulation/README.md` for the URLs. Owner-added to this
+backlog 2026-08-04.
+
 ## Human-play interface (GUI) for the scenario
 
 **What.** A UI that lets a person step through the eval manually — read emails/sensors, take actions
