@@ -364,6 +364,87 @@
   .healthstrip.bad .bars i.now { background:var(--red); }
   .healthstrip .hnote { font-family:var(--mono); font-size:9.5px; color:var(--faint); }
 
+  /* ---------- utility cluster: snapshot + ambience (spec §5.5, §5.6) ----------
+     Both live in their own row under the top bar rather than inside it: the KPI strip already owns
+     the top bar's right half and re-wraps with the viewport, so a button parked in it moves. */
+  .toprow { display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .toprow .viewtabs { margin-bottom:0; }
+  .util { display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap;
+    font-family:var(--mono); font-size:10px; }
+  .ubtn { background:#20283a; border:1px solid var(--line-warm); color:var(--cream); border-radius:10px;
+    padding:5px 13px; font-family:var(--mono); font-size:10.5px; cursor:pointer; white-space:nowrap; }
+  .ubtn:hover { border-color:#4a5570; background:#26304a; }
+  .ubtn[disabled] { opacity:.55; cursor:progress; }
+  .umsg { font-family:var(--mono); font-size:9.5px; color:var(--green); max-width:320px; line-height:1.45; }
+  .umsg.warn { color:var(--gold); }
+  .umsg button { background:none; border:1px solid #d9a44155; color:var(--gold); border-radius:8px;
+    padding:1px 8px; font-family:var(--mono); font-size:9px; cursor:pointer; margin-left:6px; }
+  .amb { display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; padding:5px 12px; }
+  .amb .sw { position:relative; width:38px; height:20px; border-radius:999px; background:#20283a;
+    border:1px solid var(--line-warm); cursor:pointer; padding:0; flex:none; }
+  .amb .sw .kn { position:absolute; left:2px; top:2px; width:14px; height:14px; border-radius:50%;
+    background:#5a6375; transition:left .14s, background .14s; }
+  .amb .sw[aria-checked="true"] { background:#173322; border-color:#2ea04366; }
+  .amb .sw[aria-checked="true"] .kn { left:18px; background:var(--green); }
+  .amb.muted .sw[aria-checked="true"] { background:#33290f; border-color:#d9a44155; }
+  .amb.muted .sw[aria-checked="true"] .kn { background:var(--gold); }
+  .amb .albl { color:var(--txt); font-size:9.5px; line-height:1.35; white-space:nowrap; }
+  .amb .albl small { display:block; color:var(--faint); font-size:8px; letter-spacing:.04em; }
+  .amb .eq { display:flex; align-items:flex-end; gap:2px; height:16px; width:19px; flex:none; }
+  .amb .eq i { width:3px; background:#34405c; border-radius:2px; height:30%; }
+  .amb.on .eq i { background:var(--green); animation:eq 1s ease-in-out infinite; }
+  .amb.on.muted .eq i { background:var(--gold); animation:none; }
+  .amb .eq i:nth-child(2) { animation-delay:.2s } .amb .eq i:nth-child(3) { animation-delay:.4s }
+  .amb .eq i:nth-child(4) { animation-delay:.1s } .amb .eq i:nth-child(5) { animation-delay:.3s }
+  @keyframes eq { 0%,100%{height:30%} 50%{height:100%} }
+  .amb .vol { width:74px; height:5px; -webkit-appearance:none; appearance:none; background:#0b0f18;
+    border-radius:3px; cursor:pointer; }
+  .amb .vol::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%;
+    background:#dfe5f0; border:none; cursor:pointer; }
+  .amb .vol::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#dfe5f0; border:none; }
+
+  /* ---------- annotations: row flags + note editor (spec §5.4) ----------
+     A flag is an ordinary leading child of its row, never an overlay: the feed row floats its cost
+     to the right, the mail row floats its day chip, and a reel row is a flex line — an absolutely
+     positioned flag would collide with one of the three. Hidden until the row is hovered or the
+     flag itself is focused, so every surface reads exactly as before until you reach for one. */
+  .fl { background:none; border:none; padding:0 5px 0 0; margin:0; cursor:pointer; color:#3b435c;
+    font-family:var(--mono); font-size:11px; line-height:1; opacity:0; transition:opacity .12s; }
+  .ev:hover .fl, .mrow:hover .fl, .reelrow:hover .fl, .fl:focus-visible { opacity:1; }
+  .fl:hover { color:var(--cream); }
+  .fl.on { opacity:1; color:var(--gold); }
+  .fl.rl { flex:none; padding:0 2px 0 0; }
+  .ev.marked { border-left-color:var(--gold); background:#191a24; }
+  .mrow.marked { box-shadow:inset 3px 0 0 var(--gold); }
+  .reelrow.marked { background:#191a24; }
+  .reelrow .k.mark { background:#33290f; color:#e0b45c; }
+  .chipbtn { background:#16283e; color:var(--blue); border:1px solid #7fb4e844; border-radius:999px;
+    padding:2px 10px; font-family:var(--mono); font-size:8.5px; letter-spacing:.06em; cursor:pointer;
+    white-space:nowrap; }
+  .chipbtn:hover { background:#1d3352; color:var(--cream); }
+  .chipbtn[disabled] { opacity:.45; cursor:default; }
+  .notewrap { position:fixed; inset:0; z-index:47; }
+  .notewrap[hidden] { display:none; }
+  .note { position:absolute; width:min(360px,92vw); background:linear-gradient(180deg,#1d1e2e,#171826);
+    border:1px solid #3a3d55; border-radius:12px; padding:11px 13px 10px; box-shadow:0 24px 60px #05070ccc; }
+  .note .nh { font-family:var(--mono); font-size:9px; color:var(--faint); letter-spacing:.08em;
+    text-transform:uppercase; margin-bottom:6px; }
+  .note .nh b { color:var(--gold); font-weight:500; }
+  .note .nw { display:block; font-family:var(--mono); font-size:9.5px; color:var(--dim);
+    margin-bottom:7px; line-height:1.5; word-break:break-word; }
+  .note textarea { width:100%; background:#0e1320; color:#d9d2e8; border:1px solid var(--line-warm);
+    border-radius:9px; padding:8px 10px; font-family:var(--body); font-size:12px; line-height:1.5;
+    resize:vertical; font-style:italic; }
+  .note textarea:focus { outline:1px solid var(--blue); outline-offset:1px; }
+  .note .nb { display:flex; align-items:center; gap:7px; margin-top:8px; flex-wrap:wrap; }
+  .note .nb button { font-family:var(--mono); font-size:10px; border-radius:8px; padding:3px 11px;
+    cursor:pointer; background:#20283a; border:1px solid var(--line-warm); color:var(--txt); }
+  .note .nb button.pri { background:#173322; border-color:#2ea04366; color:#6fdc96; }
+  .note .nb button.del { color:#f08a80; border-color:#e56a5e44; }
+  .note .nb button:hover { border-color:#4a5570; }
+  .note .nn { font-family:var(--mono); font-size:8.5px; color:var(--faint); margin-left:auto; }
+
   /* gate: run picker / waiting */
   .gate { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:24px;
     background:radial-gradient(80% 70% at 50% 0%,#18203288,#070a10f2); }
@@ -401,6 +482,21 @@
     .cshell { inset:34px 16px 150px 16px; }
     .cstats { position:absolute; left:16px; right:16px; top:auto; bottom:12px; width:auto; }
   }
+
+  /* ---------- print: the snapshot's approved degrade path (spec §5.5) ----------
+     When the canvas capture cannot run, "print this frame" is what the reader falls back to, so the
+     scrolling panes have to give up their scrollers and print everything they hold. */
+  @media print {
+    body { background:#fff; padding:0; }
+    body::after { display:none; }
+    .gate, .toastwrap, .offline, .notewrap, .util, .cutwrap, .fl { display:none !important; }
+    .frame { box-shadow:none; border-color:#2a3145; }
+    .grid > .panel { height:auto; }
+    .feed, .railscroll, .mlist, .mbody, .reel, .ledlist, .cstats {
+      max-height:none; height:auto; overflow:visible;
+    }
+    .healthstrip { position:static; }
+  }
 </style>
 </head>
 <body>
@@ -415,9 +511,24 @@
     <div class="kpis" id="kpis"></div>
   </div>
 
-  <div class="viewtabs" id="viewtabs" role="tablist" aria-label="dashboard view">
-    <button type="button" data-view="live" class="on" role="tab" aria-selected="true">Live</button>
-    <button type="button" data-view="charts" role="tab" aria-selected="false">Charts</button>
+  <div class="toprow">
+    <div class="viewtabs" id="viewtabs" role="tablist" aria-label="dashboard view">
+      <button type="button" data-view="live" class="on" role="tab" aria-selected="true">Live</button>
+      <button type="button" data-view="charts" role="tab" aria-selected="false">Charts</button>
+    </div>
+    <div class="util" id="util">
+      <button class="ubtn" type="button" id="snapbtn"
+        title="capture the dashboard exactly as rendered, as a PNG">📸 Snapshot</button>
+      <span class="umsg" id="snapmsg" role="status"></span>
+      <div class="amb" id="ambbar">
+        <button class="sw" type="button" id="ambbtn" role="switch" aria-checked="false"
+          aria-label="henhouse ambience" title="synthesized in this browser — no audio files. mute: M"><span class="kn"></span></button>
+        <span class="albl">Ambience<small id="amblbl">off</small></span>
+        <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <input class="vol" type="range" id="ambvol" min="0" max="100" step="1" value="45"
+          aria-label="ambience volume" title="volume">
+      </div>
+    </div>
   </div>
 
   <div id="chartsview" hidden>
@@ -486,6 +597,8 @@
     <div class="ph">
       <span class="pt">The run so far</span>
       <span class="pm" id="reelmeta"></span>
+      <button class="chipbtn" type="button" id="expbtn"
+        title="download your own flags and notes as annotations.csv">⤓ annotations.csv</button>
     </div>
     <div class="reel" id="reel"></div>
   </div>
@@ -505,6 +618,21 @@
     <p id="gatetext">Looking for feeds…</p>
     <div id="gatelist"></div>
     <div class="err" id="gateerr" hidden></div>
+  </div>
+</div>
+
+<div class="notewrap" id="notewrap" hidden>
+  <div class="note" id="notebox" role="dialog" aria-modal="true" aria-label="annotation note">
+    <div class="nh">Annotation · <b id="notekind">row</b></div>
+    <span class="nw" id="notewhat"></span>
+    <textarea id="noteta" rows="4" maxlength="2000"
+      placeholder="optional note — what you noticed here, and why it matters"></textarea>
+    <div class="nb">
+      <button type="button" class="pri" id="notesave">save</button>
+      <button type="button" class="del" id="notedel">remove flag</button>
+      <button type="button" id="notecancel">cancel</button>
+      <span class="nn">this browser only</span>
+    </div>
   </div>
 </div>
 
@@ -542,6 +670,15 @@ const TOAST_MS = 15000;        // how long a moment toast stays on screen
 const TOAST_MAX = 3;           // never stack more than this many at once
 const RATE_BARS = 14;          // day-rate history bars in the health strip
 const REEL_ROWS_MAX = 300;     // DOM cap on the reel, like the agent feed's
+const NOTE_MAX = 2000;         // characters a single annotation note may carry
+const LABEL_CHARS = 90;        // how much of a row's own text an annotation remembers
+const SNAP_SCALE = 2;          // snapshot pixel density
+const SNAP_MAX_PX = 24e6;      // ceiling on capture pixels, so a tall page cannot blow the canvas
+const SNAP_MSG_MS = 9000;      // how long the snapshot status line stays up
+const AMB_MAX_GAIN = 0.55;     // master gain at volume 100 — ambience, never a foreground sound
+const CLUCK_BASE = 0.16;       // clucks/second in a calm house
+const CLUCK_PER_UNREST = 1.1;  // added clucks/second per unit of restlessness
+const HEAT_HOURS_PER_DAY = 24; // the divisor that turns heat-stress hours into a 0-1 share
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
@@ -572,6 +709,19 @@ const S = {
   seen: new Set(),         // moment keys already announced — the anti-repeat set
   primed: false,           // the backlog a feed opens with is history, not news: prime, don't toast
   hover: null,             // {key, i} — the chart crosshair position, so a repaint can restore it
+  /* ---- annotations (spec §5.4). USER state, not feed state: the flags and notes below are the
+     reader's own, they live in localStorage under this feed's key, and no derivation reads them —
+     which is why they sit here and not in `derive`. `marksVer` bumps on every mutation so the
+     repaint guards (render's signature, the reel's row signature) see a change. */
+  marks: {},               // key -> {key, kind, day, msg, label, note, ts}
+  marksVer: 0,
+  markInfo: new Map(),     // key -> {kind, day, msg, label} for the rows currently painted
+  note: null,              // the key whose note editor is open
+  storeErr: false,         // localStorage refused a write (private mode / quota) — say so, don't lie
+  snapMsg: null,           // {text, tone, print} — the snapshot's own status line
+  snapSig: null,           // its rendered signature; the line is a live region (see paintSnap)
+  snapBusy: false,
+  amb: { on: false, muted: false, vol: 0.45, unrest: 0, err: null },
 };
 
 /* ---------- formatters ---------------------------------------------------- */
@@ -637,13 +787,16 @@ function derive(n) {
         break;
       case "day_end":
         break;
+      // `seq` and `msg_id` ride along so a row can be annotated: seq is the feed's own stable
+      // identity for the row, msg_id the transcript message an annotation should point at.
       case "assistant_text":
         D.turns++;
-        D.rows.push({ t: "think", text: e.text, reasoning: !!e.reasoning, day: e.day });
+        D.rows.push({ t: "think", text: e.text, reasoning: !!e.reasoning, day: e.day,
+                      seq: e.seq, msg: e.msg_id });
         break;
       case "tool_call":
         D.rows.push({ t: "tool", tool: e.tool, args: e.args, result: e.result_summary,
-                      cost: e.cost_cents, day: e.day });
+                      cost: e.cost_cents, day: e.day, seq: e.seq, msg: e.msg_id });
         break;
       case "email_delivered":
         D.mail.set(e.email_id, { id: e.email_id, dir: "in", who: e.sender, subject: e.subject,
@@ -722,6 +875,148 @@ function span(D) {
   let last = num(m.last_day) ? m.last_day : (num(D.maxDay) ? D.maxDay : first + 1);
   if (last <= first) last = first + 1;
   return { first: first, last: last };
+}
+
+/* ===========================================================================
+   Annotations — the reader's own flags and notes (spec §5.4)
+
+   These are ANNOTATIONS: raw material for a hand-labeling pass, collected while watching. They are
+   deliberately NOT judge-validation rows — `judge/validate.py` consumes filled YAML label sheets
+   with node/dimension ids and numeric scores, and turning annotations into those stays a human
+   step. Every label on screen and in the export says "annotation" for that reason.
+
+   Storage is `localStorage` under `henhouse:<run_id>:<sample_id>`, so two samples of one run never
+   share flags and a feed switch swaps the whole set.
+   =========================================================================== */
+const marksKey = () => "henhouse:" + S.run + ":" + S.sample;
+const markCount = () => Object.keys(S.marks).length;
+
+function loadMarks() {
+  S.marks = {};
+  S.marksVer++;
+  S.storeErr = false;
+  if (!S.run || !S.sample) return;
+  let raw = null;
+  try { raw = window.localStorage.getItem(marksKey()); } catch (err) { return; }  // private mode
+  if (!raw) return;
+  let data = null;
+  try { data = JSON.parse(raw); } catch (err) { return; }   // corrupt storage must not break the page
+  if (!data || typeof data !== "object" || Array.isArray(data)) return;
+  for (const k of Object.keys(data)) {
+    const m = data[k];
+    if (!m || typeof m !== "object") continue;
+    S.marks[k] = {
+      key: k,
+      kind: String(m.kind == null ? "row" : m.kind),
+      day: num(m.day) ? m.day : null,
+      msg: m.msg == null ? "" : String(m.msg),
+      label: m.label == null ? "" : String(m.label).slice(0, LABEL_CHARS * 2),
+      note: m.note == null ? "" : String(m.note).slice(0, NOTE_MAX),
+      ts: m.ts == null ? "" : String(m.ts),
+    };
+  }
+}
+function saveMarks() {
+  S.marksVer++;
+  if (!S.run || !S.sample) return;
+  try {
+    window.localStorage.setItem(marksKey(), JSON.stringify(S.marks));
+    S.storeErr = false;
+  } catch (err) {
+    S.storeErr = true;      // quota, or storage disabled: the flags still work for this session
+  }
+}
+/* What a painted row offers when its flag is clicked. Held in a map rather than in data-attributes
+   so a long row label never lands in the DOM twice. */
+function offerMark(key, kind, day, msg, label) {
+  S.markInfo.set(key, { kind: kind, day: num(day) ? day : null,
+                        msg: msg == null ? "" : String(msg),
+                        label: cut(String(label == null ? "" : label).replace(/\s+/g, " "), LABEL_CHARS) });
+  return key;
+}
+function flagHtml(key, marked, extra) {
+  return '<button class="fl' + (marked ? " on" : "") + (extra ? " " + extra : "") +
+    '" type="button" data-flag="' + esc(key) +
+    '" title="' + (marked ? "edit this annotation" : "flag this row — with an optional note") +
+    '" aria-label="' + (marked ? "edit annotation" : "annotate this row") + '">⚑</button>';
+}
+
+function markPut(key) {
+  const info = S.markInfo.get(key) || {};
+  S.marks[key] = {
+    key: key, kind: String(info.kind || "row"), day: num(info.day) ? info.day : null,
+    msg: info.msg == null ? "" : String(info.msg), label: info.label == null ? "" : info.label,
+    note: "", ts: new Date().toISOString(),
+  };
+  saveMarks();
+  return S.marks[key];
+}
+function markNote(key, text) {
+  const m = S.marks[key];
+  if (!m) return;
+  m.note = String(text == null ? "" : text).slice(0, NOTE_MAX);
+  saveMarks();
+}
+function markRemove(key) {
+  if (!S.marks[key]) return;
+  delete S.marks[key];
+  saveMarks();
+}
+
+/* The reel's user rows: one per annotation that is not itself a flagged moment (a flagged moment
+   lights up the moment row it already has, instead of appearing twice). */
+function markRows() {
+  const out = [];
+  for (const k of Object.keys(S.marks)) {
+    const m = S.marks[k];
+    if (m.kind === "moment") continue;
+    out.push({ key: "mark:" + k, markKey: k, day: num(m.day) ? m.day : 0, kind: "mark", tag: "FLAG",
+               title: "⚑ " + (m.label || "flagged row"),
+               text: m.note ? m.note : "no note" });
+  }
+  return out;
+}
+
+/* ---------- annotations.csv (spec §5.4) ----------------------------------
+   Columns are fixed: run_id, sample_id, day, msg_id, note, ts. `msg_id` is the annotated row's
+   anchor — the transcript message id when the feed gave the row one, otherwise the row's own stable
+   id (an email id, a moment key). An empty anchor would lose which row a note was about, which is
+   the one thing a hand-labeling pass cannot reconstruct afterwards.
+
+   RFC-4180 quoting: a note is free text, so a comma, a quote or a newline in it must not shift a
+   column. */
+function csvCell(v) {
+  const s = v == null ? "" : String(v);
+  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function annotationsCsv() {
+  const rows = [["run_id", "sample_id", "day", "msg_id", "note", "ts"].join(",")];
+  const list = Object.keys(S.marks).map(function (k) { return S.marks[k]; });
+  // Reading order: by the day annotated, then by when it was annotated.
+  list.sort(function (a, b) {
+    const ad = num(a.day) ? a.day : -Infinity, bd = num(b.day) ? b.day : -Infinity;
+    return (ad - bd) || String(a.ts).localeCompare(String(b.ts)) || a.key.localeCompare(b.key);
+  });
+  for (const m of list) {
+    rows.push([csvCell(S.run), csvCell(S.sample), csvCell(num(m.day) ? m.day : ""),
+               csvCell(m.msg), csvCell(m.note), csvCell(m.ts)].join(","));
+  }
+  return rows.join("\r\n") + "\r\n";
+}
+function download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = el("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Revoked on a later task: Firefox cancels an in-flight download if the URL dies too early.
+  window.setTimeout(function () { URL.revokeObjectURL(url); }, 30000);
+}
+function exportAnnotations() {
+  if (!markCount()) return;
+  download(new Blob([annotationsCsv()], { type: "text/csv;charset=utf-8" }), "annotations.csv");
 }
 
 /* ===========================================================================
@@ -965,9 +1260,15 @@ function paintMail(D) {
     const who = m.dir === "out" ? "↩ to " + m.who : m.who;
     const eye = m.dir === "in" && m.readDay !== null
       ? ' <span title="read by the agent on day ' + esc(m.readDay) + '">👁</span>' : "";
+    // A mail row's annotation anchor is the mail's own id — there is no transcript message id for
+    // a delivered email, and an empty anchor would lose which mail was flagged.
+    const key = offerMark("mail:" + m.id, "mail", m.day, m.id,
+                          (m.dir === "out" ? "sent to " : "mail from ") + m.who + " — " +
+                          (m.subject || "(no subject)"));
+    if (S.marks[key]) cls.push("marked");
     return '<div class="' + cls.join(" ") + '" data-mail="' + esc(m.id) + '">' +
            '<span class="t">' + esc(num(m.day) ? "d" + m.day : "") + "</span>" +
-           '<span class="f">' + esc(cut(who, 28)) + eye + "</span>" +
+           '<span class="f">' + flagHtml(key, !!S.marks[key]) + esc(cut(who, 28)) + eye + "</span>" +
            '<span class="s">' + esc(cut(m.subject || "(no subject)", 60)) + "</span></div>";
   }).join("") || '<div class="empty">no mail yet</div>';
   list.scrollTop = keep;
@@ -1023,8 +1324,15 @@ function paintFeed(D) {
              (r.date ? " · " + esc(r.date) : "") + (r.season ? " · " + esc(r.season) : "") + " · · ·</div>";
     }
     if (r.t === "end") return '<div class="ev end">· · · episode end · ' + esc(r.status) + " · · ·</div>";
+    // Only content rows are annotatable, and only when the feed gave the row an identity of its
+    // own: day and episode-end separators are punctuation, not something to flag.
+    const key = num(r.seq) ? offerMark("ev:" + r.seq, r.t === "think" ? "text" : "tool", r.day, r.msg,
+                                       r.t === "think" ? "agent: " + r.text
+                                                       : "tool: " + r.tool + "()") : null;
+    const marked = key !== null && !!S.marks[key];
+    const flag = key === null ? "" : flagHtml(key, marked);
     if (r.t === "think") {
-      return '<div class="ev think">' +
+      return '<div class="ev think' + (marked ? " marked" : "") + '">' + flag +
              (r.reasoning ? '<span class="rm" title="model reasoning">ᴿ</span>' : "") +
              esc(cut(r.text, TEXT_CHARS)) + "</div>";
     }
@@ -1039,8 +1347,9 @@ function paintFeed(D) {
       ? '<span class="cost">' + esc(fmtMoney(-Math.abs(r.cost) / 100)) + "</span>" : "";
     const res = r.result
       ? '<span class="res"> → ' + esc(cut(String(r.result).replace(/\s+/g, " "), RESULT_CHARS)) + "</span>" : "";
-    return '<div class="ev' + (num(r.cost) ? " act" : "") + '">' + cost +
-           '<span class="tm">d' + esc(r.day) + "</span><b>" + esc(r.tool) + "</b>(" + args + ")" + res + "</div>";
+    return '<div class="ev' + (num(r.cost) ? " act" : "") + (marked ? " marked" : "") + '">' + cost +
+           flag + '<span class="tm">d' + esc(r.day) + "</span><b>" + esc(r.tool) + "</b>(" + args + ")" +
+           res + "</div>";
   }).join("") || '<div class="empty">no agent activity yet</div>';
   if (atBottom || !scrubbing()) box.scrollTop = box.scrollHeight;
   $("feedmeta").textContent = (D.turns ? "turn " + D.turns : "") +
@@ -1481,6 +1790,9 @@ function pumpToasts() {
       if (S.seen.has(m.key)) continue;
       S.seen.add(m.key);
       S.toasts.push({ m: m, until: now + TOAST_MS });
+      // The ambience cues hang off the same anti-repeat set as the toasts, so a scrub can no more
+      // re-ring a chime than it can re-announce a toast, and an opening backlog is silent.
+      ambCue(m.kind);
     }
     if (S.toasts.length > TOAST_MAX) S.toasts = S.toasts.slice(-TOAST_MAX);
   }
@@ -1510,29 +1822,56 @@ function paintToasts() {
 function paintReel(D) {
   tipView();
   const at = num(D.day) ? D.day : null;
-  // The row the cursor is standing on (or just past) — the reel's "you are here".
+  // The row the cursor is standing on (or just past) — the reel's "you are here". Read off the
+  // MOMENTS only: an annotation is not a beat of the run, so it never claims "you are here".
   let curKey = null;
   for (const m of S.moments) if (at !== null && m.day <= at) curKey = m.key;
-  const rows = S.moments.slice(-REEL_ROWS_MAX);
+  // The reel is the run's table of contents: machine moments AND the reader's own flags (spec §5.2
+  // — "every toast appends to the reel"; §5.4 — flags land here too), in one day order.
+  const merged = S.moments.concat(markRows());
+  merged.sort(function (a, b) { return (a.day - b.day) || a.key.localeCompare(b.key); });
+  const rows = merged.slice(-REEL_ROWS_MAX);
+  const marks = markCount();
   // Row content is fixed at creation, so only a changed row SET needs a rewrite; a repaint on every
-  // poll would drop keyboard focus out of a tabbed-to row about once a second on a live feed.
-  const sig = S.moments.length + "@" + rows.map(function (m) { return m.key; }).join("|");
+  // poll would drop keyboard focus out of a tabbed-to row about once a second on a live feed. The
+  // annotation version is part of the signature: a new flag, an edited note or a removal all change
+  // what a row says, and without it the rows would silently stay stale.
+  const sig = merged.length + "@" + rows.map(function (m) { return m.key; }).join("|") +
+    "#" + S.marksVer;
+  // Registered on every call, gate or no gate: a click handler runs against the LATEST offer, and a
+  // surviving row must still be annotatable.
+  for (const m of rows) {
+    if (m.markKey) continue;      // the reader's own rows already have their annotation
+    // A moment has no transcript message, so its own key (`dp:<id>`, `nh3:<day>`, …) is the anchor
+    // the export carries — the same rule the mail rows follow with their email id.
+    offerMark("moment:" + m.key, "moment", m.day, m.key, m.title + " — " + m.text);
+  }
   if (sig !== S.reelSig) {
     S.reelSig = sig;
     $("reel").innerHTML = rows.map(function (m) {
-      return '<div class="reelrow" data-day="' + esc(m.day) + '" data-key="' + esc(m.key) +
-        '" role="button" tabindex="0">' +
+      const own = !!m.markKey;                       // a row the reader created, not a machine moment
+      const key = own ? m.markKey : "moment:" + m.key;
+      const marked = !!S.marks[key];
+      return '<div class="reelrow' + (marked ? " marked" : "") + '" data-day="' + esc(m.day) +
+        '" data-key="' + esc(m.key) + '" role="button" tabindex="0">' +
         '<span class="d">d' + esc(m.day) + "</span>" +
         '<span class="k ' + m.kind + '">' + esc(m.tag) + "</span>" +
         // The toast's leading glyph is dropped here — the row's own pill already carries the kind.
         // Only a non-word run is stripped, so a title that never had one keeps its first word.
         '<span class="x">' + esc(m.title.replace(/^[^\w]+\s/, "") + " — " + m.text) + "</span>" +
-        '<span class="j">jump →</span></div>';
+        flagHtml(key, marked, "rl") + '<span class="j">jump →</span></div>';
     }).join("") || '<div class="empty">no moments yet — decisions, ceiling breaches and mortality ' +
-      "spikes land here as the run goes</div>";
-    $("reelmeta").textContent = S.moments.length
-      ? S.moments.length + " moment" + (S.moments.length === 1 ? "" : "s") + " · a row jumps the dashboard"
-      : "the run's table of contents";
+      "spikes land here as the run goes, and so do your own ⚑ flags</div>";
+    const bits = [];
+    if (S.moments.length) bits.push(S.moments.length + " moment" + (S.moments.length === 1 ? "" : "s"));
+    if (marks) bits.push(marks + " annotation" + (marks === 1 ? "" : "s"));
+    if (S.storeErr) bits.push("⚠ this browser refused to store them");
+    $("reelmeta").textContent = bits.length ? bits.join(" · ") + " · a row jumps the dashboard"
+      : "the run's table of contents — ⚑ any row to annotate it";
+    const exp = $("expbtn");
+    exp.disabled = !marks;
+    exp.title = marks ? "download " + marks + " annotation" + (marks === 1 ? "" : "s") +
+      " as annotations.csv" : "flag a row (⚑) to start an annotation set";
   }
   // "You are here" moves with the cursor, which the row set does not: toggle the class on the
   // surviving nodes rather than rebuilding them.
@@ -1636,12 +1975,378 @@ function paintHealth(D) {
   strip.innerHTML = html;
 }
 
+/* ---------- the note editor (spec §5.4) ----------------------------------- */
+function noteLabelFor(kind) {
+  return kind === "mail" ? "mail row" : kind === "moment" ? "reel moment"
+       : kind === "tool" ? "tool call" : kind === "text" ? "agent text" : "row";
+}
+function positionNote(rect) {
+  const box = $("notebox");
+  box.style.left = "0px";
+  box.style.top = "0px";
+  const w = box.offsetWidth, h = box.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let left = rect ? rect.left - 6 : (vw - w) / 2;
+  let top = rect ? rect.bottom + 8 : (vh - h) / 2;
+  // Prefer under the flag; flip above it when the panel would fall off the bottom.
+  if (rect && top + h > vh - 10) top = rect.top - h - 8;
+  box.style.left = clamp(left, 10, Math.max(10, vw - w - 10)).toFixed(0) + "px";
+  box.style.top = clamp(top, 10, Math.max(10, vh - h - 10)).toFixed(0) + "px";
+}
+/* A flag click on an unflagged row flags it immediately and offers the note — the note is optional,
+   the flag is the act (spec §5.4: "⚑ … Click → optional note"). `cancel` therefore leaves the flag
+   in place; "remove flag" is the way back out. */
+function openNote(key, rect) {
+  const m = S.marks[key] || markPut(key);
+  S.note = key;
+  $("notekind").textContent = noteLabelFor(m.kind);
+  const bits = [];
+  if (num(m.day)) bits.push("day " + m.day);
+  if (m.msg) bits.push(m.msg);
+  $("notewhat").textContent = (m.label || "(this row carried no text)") +
+    (bits.length ? "  ·  " + bits.join(" · ") : "");
+  const ta = $("noteta");
+  ta.value = m.note || "";
+  $("notewrap").hidden = false;
+  render(true);                 // the flag this click may have created has to light up behind it
+  positionNote(rect);
+  ta.focus();
+  ta.setSelectionRange(ta.value.length, ta.value.length);
+}
+function closeNote(save) {
+  const key = S.note;
+  $("notewrap").hidden = true;
+  S.note = null;
+  if (key !== null && save) markNote(key, $("noteta").value);
+  render(true);
+}
+
+/* ---------- snapshot export (spec §5.5) ----------------------------------
+   `foreignObject` serialization, no external library and no CDN (spec §5.5 forbids one). The
+   approved degrade path is a ladder: capture as the page is → capture with the webfont families
+   swapped for the system stacks the page already falls back to offline → tell the reader and offer
+   the print stylesheet. Nothing here can fail silently; the last rung always reports. */
+const SNAP_SCROLLERS = ".feed,.mlist,.mbody,.reel,.ledlist,.railscroll,.cstats";
+
+function snapName(D) {
+  const target = D.meta && D.meta.target ? String(D.meta.target) : "";
+  const model = target.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+/, "").replace(/-+$/, "")
+    .slice(0, 40) || "unknown";
+  const day = num(D.day) ? D.day : (D.meta && num(D.meta.first_day) ? D.meta.first_day : 0);
+  const now = new Date();
+  const two = function (v) { return (v < 10 ? "0" : "") + v; };
+  return "henhouse_" + model + "_d" + day + "_" + two(now.getHours()) + two(now.getMinutes()) + ".png";
+}
+/* The three Google families, dropped out of any font stack for the retry rung below. */
+const stripFonts = (s) => String(s).replace(/"?Fraunces"?\s*,/g, "")
+  .replace(/"?Newsreader"?\s*,/g, "").replace(/"?IBM Plex Mono"?\s*,/g, "");
+
+function pageCss(systemFonts) {
+  let css = "";
+  for (const s of document.querySelectorAll("style")) css += s.textContent + "\n";
+  // Inside the captured SVG the root element is the <svg>, so the page's variable block is handed
+  // to the capture wrapper as well — otherwise every var() in the clone would resolve to nothing.
+  css = css.replace(/:root\s*\{/, ":root, .snaproot {");
+  // The retry rung: the webfont families are what a blocked or tainted capture blames, so the
+  // capture falls back to the system stacks the page already uses offline.
+  return systemFonts ? stripFonts(css) : css;
+}
+function syncScroll(src, clone) {
+  const a = src.querySelectorAll(SNAP_SCROLLERS), b = clone.querySelectorAll(SNAP_SCROLLERS);
+  for (let i = 0; i < a.length && i < b.length; i++) {
+    const top = a[i].scrollTop;
+    if (top <= 0) continue;
+    // A clone carries no scroll position, and the capture must show what is ON SCREEN: pulling the
+    // first child up by the scroll offset takes every sibling with it.
+    const first = b[i].firstElementChild;
+    if (first) first.style.marginTop = "-" + Math.round(top) + "px";
+  }
+}
+function captureUrl(node, w, systemFonts) {
+  const clone = node.cloneNode(true);
+  syncScroll(node, clone);
+  const util = clone.querySelector("#util");
+  if (util) util.style.visibility = "hidden";      // the controls are not part of the picture
+  clone.style.width = w + "px";
+  clone.style.margin = "0";
+  const wrap = el("div", "snaproot");
+  // There is no <body> inside a foreignObject, so everything `body` was INHERITING down — the text
+  // colour and the body font — has to be handed to the wrapper explicitly. Without this the mail
+  // body and any other element without a colour of its own renders in the initial black.
+  const b = window.getComputedStyle(document.body);
+  wrap.setAttribute("style", "width:" + w + "px; background:" + (b.backgroundColor || "#0f131c") +
+    "; color:" + (b.color || "#c8cedb") + "; font-size:" + b.fontSize +
+    "; font-family:" + (systemFonts ? stripFonts(b.fontFamily) : b.fontFamily) + ";");
+  const style = el("style");
+  style.textContent = pageCss(systemFonts);
+  wrap.appendChild(style);
+  wrap.appendChild(clone);
+  // XMLSerializer declares the XHTML namespace on `wrap` itself, which is what foreignObject needs.
+  return new XMLSerializer().serializeToString(wrap);
+}
+function svgDataUrl(inner, w, h) {
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '">' +
+    '<foreignObject x="0" y="0" width="' + w + '" height="' + h + '">' + inner +
+    "</foreignObject></svg>");
+}
+function loadImage(url) {
+  return new Promise(function (resolve, reject) {
+    const img = new Image();
+    img.onload = function () { resolve(img); };
+    img.onerror = function () { reject(new Error("the browser would not render the captured frame")); };
+    img.src = url;
+  });
+}
+async function canvasPng(img, w, h) {
+  const scale = Math.max(1, Math.min(SNAP_SCALE, Math.sqrt(SNAP_MAX_PX / Math.max(1, w * h))));
+  const canvas = el("canvas");
+  canvas.width = Math.max(1, Math.round(w * scale));
+  canvas.height = Math.max(1, Math.round(h * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("no 2d canvas in this browser");
+  ctx.fillStyle = "#0f131c";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  // Reading the canvas back is where a TAINTED canvas throws — so this call IS the taint test.
+  if (canvas.toBlob) {
+    return await new Promise(function (resolve, reject) {
+      try {
+        canvas.toBlob(function (b) {
+          if (b) resolve(b); else reject(new Error("the canvas produced no image data"));
+        }, "image/png");
+      } catch (err) { reject(err); }
+    });
+  }
+  const parts = canvas.toDataURL("image/png").split(",");
+  const bin = window.atob(parts[1] || "");
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: "image/png" });
+}
+let snapMsgTimer = null;
+function setSnapMsg(text, tone, print) {
+  S.snapMsg = text ? { text: text, tone: tone || "", print: !!print } : null;
+  if (snapMsgTimer !== null) window.clearTimeout(snapMsgTimer);
+  snapMsgTimer = null;
+  // The print fallback carries an action, so it stays until the next attempt; a success line goes.
+  if (text && !print) {
+    snapMsgTimer = window.setTimeout(function () { setSnapMsg(null); }, SNAP_MSG_MS);
+  }
+  paintSnap();
+}
+function paintSnap() {
+  const box = $("snapmsg"), m = S.snapMsg;
+  // render() runs on every poll and this is a live region: rewriting an unchanged message would
+  // have it re-announced once a second (the same guard the toasts and the reel carry).
+  const sig = m ? m.text + "|" + m.tone + "|" + m.print : "";
+  if (sig === S.snapSig) return;
+  S.snapSig = sig;
+  box.className = "umsg" + (m && m.tone ? " " + m.tone : "");
+  box.textContent = m ? m.text : "";
+  if (m && m.print) {
+    const b = el("button");
+    b.type = "button";
+    b.id = "snapprint";
+    b.textContent = "print this frame";
+    box.appendChild(b);
+  }
+}
+async function snapshot() {
+  const node = document.querySelector(".frame");
+  if (S.snapBusy || !node) return;
+  S.snapBusy = true;
+  $("snapbtn").disabled = true;
+  setSnapMsg("capturing…", "warn", false);
+  const name = snapName(derive(cursor()));
+  const w = Math.max(1, Math.ceil(node.offsetWidth)), h = Math.max(1, Math.ceil(node.offsetHeight));
+  let last = null;
+  try {
+    for (const systemFonts of [false, true]) {
+      try {
+        const img = await loadImage(svgDataUrl(captureUrl(node, w, systemFonts), w, h));
+        download(await canvasPng(img, w, h), name);
+        setSnapMsg("✓ saved " + name + (systemFonts ? " · system fonts" : ""), "", false);
+        return;
+      } catch (err) {
+        last = err;
+      }
+    }
+    setSnapMsg("PNG capture is blocked in this browser (" +
+      (last && last.message ? last.message : "unknown") + ") — print this frame instead", "warn", true);
+  } finally {
+    S.snapBusy = false;
+    $("snapbtn").disabled = false;
+  }
+}
+
+/* ---------- ambience (spec §5.6) -----------------------------------------
+   Web Audio only: no files, no network, nothing to load. A brown-noise murmur through a lowpass,
+   sparse synthesized clucks whose rate follows the farm's state, a C5 marimba-ish chime when a
+   decision resolves and a low tone on a tripwire. OFF until the reader asks for it — which is also
+   what gives the AudioContext the user gesture browsers require. */
+const AMB = { ctx: null, master: null, noise: null, noiseGain: null, filter: null, cluckTimer: null };
+
+/* Restlessness, 0-3: ammonia against the display ceiling, plus the share of the last interval the
+   flock spent heat-stressed. `heat_stress_hours` is a CUMULATIVE counter, so it is differenced
+   between snapshots — the raw total only grows, and a murmur driven by it would saturate for the
+   rest of the run over one hot week. */
+function unrest(D) {
+  const s = D.snap;
+  if (!s) return 0;
+  const n = worst(s.houses || [], "ammonia_ppm");
+  let u = num(n) ? clamp(n / NH3_CEILING, 0, 2) : 0;
+  const prev = D.snaps.length > 1 ? D.snaps[D.snaps.length - 2] : null;
+  const hours = function (x) {
+    const h = x && x.totals && x.totals.harm ? x.totals.harm.heat_stress_hours : null;
+    return num(h) ? h : null;
+  };
+  const now = hours(s), was = hours(prev);
+  if (num(now) && num(was) && num(s.day) && prev && num(prev.day) && s.day > prev.day) {
+    u += clamp((now - was) / (HEAT_HOURS_PER_DAY * (s.day - prev.day)), 0, 1);
+  }
+  return clamp(u, 0, 3);
+}
+const ambAudible = () => S.amb.on && !S.amb.muted && !!AMB.ctx;
+function ambTargetGain() { return S.amb.on && !S.amb.muted ? S.amb.vol * AMB_MAX_GAIN : 0; }
+function ambApplyGain() {
+  if (!AMB.ctx) return;
+  AMB.master.gain.setTargetAtTime(ambTargetGain(), AMB.ctx.currentTime, 0.12);
+}
+function ambInit() {
+  if (AMB.ctx) return true;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) { S.amb.err = "this browser has no Web Audio"; return false; }
+  try {
+    AMB.ctx = new Ctx();
+    AMB.master = AMB.ctx.createGain();
+    AMB.master.gain.value = 0;
+    AMB.master.connect(AMB.ctx.destination);
+    // Brown noise, three looping seconds of it: integrated white noise, generated here rather than
+    // fetched — the spec's "no audio files" is the whole point of synthesizing the ambience.
+    const sr = AMB.ctx.sampleRate;
+    const buf = AMB.ctx.createBuffer(1, Math.floor(sr * 3), sr);
+    const d = buf.getChannelData(0);
+    let v = 0;
+    for (let i = 0; i < d.length; i++) {
+      v = (v + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+      d[i] = clamp(v * 3.2, -1, 1);
+    }
+    AMB.noise = AMB.ctx.createBufferSource();
+    AMB.noise.buffer = buf;
+    AMB.noise.loop = true;
+    AMB.filter = AMB.ctx.createBiquadFilter();
+    AMB.filter.type = "lowpass";
+    AMB.filter.frequency.value = 380;
+    AMB.noiseGain = AMB.ctx.createGain();
+    AMB.noiseGain.gain.value = 0.45;
+    AMB.noise.connect(AMB.filter);
+    AMB.filter.connect(AMB.noiseGain);
+    AMB.noiseGain.connect(AMB.master);
+    AMB.noise.start();
+    S.amb.err = null;
+    return true;
+  } catch (err) {
+    S.amb.err = "audio could not start (" + (err && err.message ? err.message : "unknown") + ")";
+    AMB.ctx = null;
+    return false;
+  }
+}
+function cluck() {
+  if (!ambAudible()) return;
+  const c = AMB.ctx, t = c.currentTime;
+  const f0 = 560 + Math.random() * 320;
+  const o = c.createOscillator(), bp = c.createBiquadFilter(), g = c.createGain();
+  o.type = "sawtooth";
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f0 * 0.55, t + 0.1);
+  bp.type = "bandpass";
+  bp.frequency.value = f0 * 1.5;
+  bp.Q.value = 5.5;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.1, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+  o.connect(bp); bp.connect(g); g.connect(AMB.master);
+  o.start(t);
+  o.stop(t + 0.18);
+}
+/* Poisson-ish: each cluck schedules the next one, with the interval re-read from the CURRENT
+   restlessness, so the density tracks the farm without a second timer to keep in step. */
+function scheduleCluck() {
+  if (AMB.cluckTimer !== null) window.clearTimeout(AMB.cluckTimer);
+  AMB.cluckTimer = null;
+  if (!S.amb.on) return;
+  const rate = CLUCK_BASE + S.amb.unrest * CLUCK_PER_UNREST;
+  const wait = (1000 / Math.max(0.05, rate)) * (0.55 + Math.random() * 0.9);
+  AMB.cluckTimer = window.setTimeout(function () {
+    cluck();
+    scheduleCluck();
+  }, wait);
+}
+function tone(freqs, dur, peak, type) {
+  if (!ambAudible()) return;
+  const c = AMB.ctx, t = c.currentTime;
+  freqs.forEach(function (pair, i) {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.value = pair[0];
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * pair[1]), t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur * (i === 0 ? 1 : 0.55));
+    o.connect(g);
+    g.connect(AMB.master);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  });
+}
+// C5 (523.25 Hz) with two quiet partials and a fast attack: a marimba-ish chime, not a bell.
+const ambChime = () => tone([[523.25, 1], [1046.5, 0.3], [1568.0, 0.1]], 1.0, 0.22, "sine");
+// A tripwire is bad news: low, dark and slower to decay than the chime.
+const ambAlarm = () => tone([[110, 1], [55, 0.7]], 1.3, 0.26, "triangle");
+function ambCue(kind) {
+  if (!ambAudible()) return;
+  if (kind === "dp") ambChime();
+  else if (kind === "trip") ambAlarm();
+}
+function ambUpdate(D) {
+  S.amb.unrest = unrest(D);
+  if (!AMB.ctx || !S.amb.on) return;
+  const t = AMB.ctx.currentTime;
+  // A restless house is brighter and a little louder — the murmur, not the clucks, carries the level.
+  AMB.filter.frequency.setTargetAtTime(340 + S.amb.unrest * 240, t, 0.8);
+  AMB.noiseGain.gain.setTargetAtTime(0.4 + S.amb.unrest * 0.14, t, 0.8);
+}
+function ambSet(on) {
+  S.amb.on = !!on;
+  if (S.amb.on && !ambInit()) { S.amb.on = false; paintAmb(); return; }
+  if (S.amb.on && AMB.ctx && AMB.ctx.state === "suspended") {
+    // Chrome starts the context suspended until a gesture; the toggle click IS that gesture.
+    AMB.ctx.resume().catch(function () { /* resumed on the next toggle if it failed here */ });
+  }
+  ambApplyGain();
+  scheduleCluck();
+  paintAmb();
+}
+function paintAmb() {
+  const bar = $("ambbar"), btn = $("ambbtn"), lbl = $("amblbl");
+  bar.className = "amb" + (S.amb.on ? " on" : "") + (S.amb.muted ? " muted" : "");
+  btn.setAttribute("aria-checked", S.amb.on ? "true" : "false");
+  if (S.amb.err) { lbl.textContent = S.amb.err; return; }
+  if (!S.amb.on) { lbl.textContent = "off · murmur follows welfare"; return; }
+  if (S.amb.muted) { lbl.textContent = "muted · press M"; return; }
+  const u = S.amb.unrest;
+  lbl.textContent = (u < 0.5 ? "calm" : u < 1.1 ? "unsettled" : "restless") +
+    " · chime ⚖ · tone 🚨 · M mutes";
+}
+
 function render(force) {
   const sig = [cursor(), S.events.length, S.tab, S.follow, S.picked, S.house, S.live, S.run, S.sample,
-               S.view, S.cursor === null ? "tip" : "scrub"].join("|");
+               S.view, S.cursor === null ? "tip" : "scrub", S.marksVer, S.amb.on, S.amb.muted].join("|");
   if (!force && sig === S.sig) return;
   S.sig = sig;
   const D = derive(cursor());
+  // Rebuilt from scratch by the painters below, so it always describes the rows now on screen.
+  S.markInfo.clear();
   paintChrome(D);
   paintHero(D);
   paintCutaway(D);
@@ -1654,6 +2359,9 @@ function render(force) {
   paintReel(D);
   paintHealth(D);
   paintToasts();
+  ambUpdate(D);
+  paintAmb();
+  paintSnap();
 }
 
 /* ===========================================================================
@@ -1719,6 +2427,13 @@ async function selectFeed(run, sample) {
   S.toasts = []; S.seen = new Set(); S.primed = false; S.hover = null;
   S.toastSig = null; S.reelSig = null;   // the surviving DOM belongs to the feed being left behind
   for (const k of Object.keys(CHARTS)) delete CHARTS[k];
+  // Annotations belong to ONE run+sample: close any open editor, drop the previous feed's set and
+  // load this feed's from localStorage. Ambience keeps playing (it is the reader's setting, not the
+  // feed's), but its restlessness is re-derived by the render below.
+  if (S.note !== null) { $("notewrap").hidden = true; S.note = null; }
+  S.markInfo.clear();
+  setSnapMsg(null);
+  loadMarks();
   $("gate").hidden = true;
   const url = new URL(window.location.href);
   url.searchParams.set("run", run);
@@ -1828,11 +2543,14 @@ $("cutwrap").addEventListener("click", function (e) {
   if (e.target === $("cutwrap")) { S.house = null; render(true); }
 });
 document.addEventListener("keydown", function (e) {
+  // The note editor is the innermost thing on screen, so Escape closes it before the cutaway.
+  if (e.key === "Escape" && S.note !== null) { closeNote(false); return; }
   if (e.key === "Escape" && S.house) { S.house = null; render(true); return; }
   if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
   if (e.key === "ArrowLeft") { stepDay(-1); e.preventDefault(); }
   else if (e.key === "ArrowRight") { stepDay(1); e.preventDefault(); }
   else if (e.key === "l" || e.key === "L") { S.cursor = null; render(true); }
+  else if (e.key === "m" || e.key === "M") { ambMute(); }
 });
 $("mailtabs").addEventListener("click", function (e) {
   const b = e.target.closest("[data-tab]");
@@ -1840,7 +2558,18 @@ $("mailtabs").addEventListener("click", function (e) {
   S.tab = b.dataset.tab;
   render(true);
 });
+/* A flag lives INSIDE a row that has its own click meaning (open this mail, jump to this day), so
+   every one of those handlers asks this first and stops if the click was the flag's. */
+function flagClick(e) {
+  const btn = e.target.closest("[data-flag]");
+  if (!btn) return false;
+  e.stopPropagation();
+  openNote(btn.dataset.flag, btn.getBoundingClientRect());
+  return true;
+}
+$("feed").addEventListener("click", flagClick);
 $("mlist").addEventListener("click", function (e) {
+  if (flagClick(e)) return;
   const row = e.target.closest("[data-mail]");
   if (!row) return;
   S.picked = row.dataset.mail;
@@ -1935,9 +2664,14 @@ $("toasts").addEventListener("click", function (e) {
 function reelJump(row) {
   if (row && num(Number(row.dataset.day))) setDay(Number(row.dataset.day));
 }
-$("reel").addEventListener("click", function (e) { reelJump(e.target.closest("[data-day]")); });
+$("reel").addEventListener("click", function (e) {
+  if (flagClick(e)) return;
+  reelJump(e.target.closest("[data-day]"));
+});
 $("reel").addEventListener("keydown", function (e) {
   if (e.key !== "Enter" && e.key !== " ") return;
+  // A focused flag is a button: let it fire its own click instead of jumping the row underneath it.
+  if (e.target.closest("[data-flag]")) return;
   const row = e.target.closest("[data-day]");
   if (!row) return;
   e.preventDefault();
@@ -2009,6 +2743,47 @@ $("tlbar").addEventListener("pointerup", function (e) {
 });
 $("tlbar").addEventListener("pointercancel", function () { dragging = false; });
 
+/* ---------- annotations: editor, export ---------------------------------- */
+$("notesave").addEventListener("click", function () { closeNote(true); });
+$("notecancel").addEventListener("click", function () { closeNote(false); });
+$("notedel").addEventListener("click", function () {
+  const key = S.note;
+  $("notewrap").hidden = true;
+  S.note = null;
+  if (key !== null) markRemove(key);
+  render(true);
+});
+$("notewrap").addEventListener("click", function (e) {
+  if (e.target === $("notewrap")) closeNote(false);      // a click outside the panel saves nothing
+});
+$("noteta").addEventListener("keydown", function (e) {
+  // Save without reaching for the mouse; Escape is handled by the page-level Escape branch.
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); closeNote(true); }
+});
+$("expbtn").addEventListener("click", exportAnnotations);
+
+/* ---------- snapshot ----------------------------------------------------- */
+$("snapbtn").addEventListener("click", function () { snapshot(); });
+$("snapmsg").addEventListener("click", function (e) {
+  if (e.target.closest("#snapprint")) window.print();
+});
+
+/* ---------- ambience ----------------------------------------------------- */
+function ambMute() {
+  S.amb.muted = !S.amb.muted;
+  ambApplyGain();
+  paintAmb();
+}
+$("ambbtn").addEventListener("click", function () { ambSet(!S.amb.on); });
+$("ambvol").addEventListener("input", function (e) {
+  S.amb.vol = clamp(Number(e.target.value) / 100, 0, 1);
+  // Moving the slider while muted is a request to hear it: unmute rather than move a silent level.
+  if (S.amb.muted && S.amb.vol > 0) S.amb.muted = false;
+  ambApplyGain();
+  paintAmb();
+});
+
+paintAmb();      // the control reads its own state before any feed is picked
 boot();
 </script>
 </body>
