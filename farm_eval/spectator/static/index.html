@@ -15,6 +15,15 @@
     --gold:#d9a441; --barn:#b5382f; --blue:#7fb4e8; --green:#57bd7e; --red:#e56a5e; --purple:#b49ae8;
     --serif:"Fraunces",Georgia,serif; --body:"Newsreader","Iowan Old Style",Georgia,serif;
     --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    /* Chart series palette (spec §5.1). The Midnight Barn hues, held at their own hue angles
+       and snapped into the dark-mode lightness band (OKLCH L ≈ 0.665) so they clear every
+       computable check on the panel surface. Declared slot order — the CVD-safety mechanism,
+       never cycled — is gold → blue → green → purple → red:
+         node scripts/validate_palette.js \
+           "#bb8a2a,#5799d7,#44ab6d,#9d83d0,#e3685c" --mode dark --surface "#171c28"
+       → ALL CHECKS PASS (worst adjacent CVD ΔE 14.9 deutan, normal-vision ΔE 18.3, every
+       slot ≥ 3:1 on the panel). One measure per chart, so two series never share a plot. */
+    --c-litter:#bb8a2a; --c-nh3:#5799d7; --c-lay:#44ab6d; --c-cop:#9d83d0; --c-mort:#e3685c;
     /* One height for the three main panes: mail, agent feed and the welfare rail scroll
        INSIDE it, so no pane can stretch the row and leave the others with dead space. */
     --pane:436px;
@@ -267,6 +276,94 @@
   .tctrl button.on { color:#6fdc96; border-color:#2ea04355; background:#173322; }
   .tctrl .hint { color:var(--faint); font-size:9.5px; margin-left:6px; }
 
+  /* ---------- view tabs (Live | Charts) ---------- */
+  .viewtabs { display:flex; gap:4px; margin-bottom:12px; font-family:var(--mono); font-size:10px; }
+  .viewtabs button { padding:4.5px 16px; border-radius:999px; color:var(--dim); background:none;
+    border:1px solid transparent; font-family:var(--mono); font-size:10px; letter-spacing:.08em; cursor:pointer; }
+  .viewtabs button.on { background:#20283a; color:var(--cream); border-color:var(--line-warm); }
+  .viewtabs button:hover { color:var(--cream); }
+
+  /* ---------- charts (spec §5.1) ----------
+     The plot line lives in a preserveAspectRatio="none" SVG so it stretches to the card width;
+     EVERY label is an HTML overlay on top of it, because text inside that SVG would stretch with
+     it (the mockup's bug). The SVG's CSS height equals its viewBox height, so a y unit is a
+     pixel vertically — which is what lets an overlay be positioned from a plot y value. */
+  .charts { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  .chart { background:linear-gradient(180deg,var(--panel),#131826); border:1px solid var(--line);
+    border-radius:14px; padding:10px 13px 11px; min-width:0; box-shadow:inset 0 1px 0 #ffffff09; }
+  .chart.wide { grid-column:1 / -1; }
+  .chart .ct { display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:7px; }
+  .chart .ct b { font-family:var(--serif); font-size:12.5px; font-weight:600; color:var(--cream); }
+  .chart .ct span { font-family:var(--mono); font-size:8.5px; color:var(--dim); white-space:nowrap; letter-spacing:.05em; }
+  .plot { position:relative; height:104px; }          /* 86px plot + 18px x-axis band */
+  .plot:focus-visible { outline:1px solid var(--blue); outline-offset:3px; border-radius:4px; }
+  .plot svg { width:100%; height:86px; display:block; }
+  .plot .lab { position:absolute; font-family:var(--mono); font-size:9px; color:var(--cream);
+    pointer-events:none; white-space:nowrap; }
+  .plot .lab.dim { color:var(--dim); font-size:8.5px; }
+  .plot .lab.red { color:var(--red); }
+  .plot .lab.gold { color:var(--gold); }
+  .plot .xhair { position:absolute; top:0; height:86px; width:1px; background:#ffffff59;
+    pointer-events:none; display:none; }
+  .plot .ctip { position:absolute; z-index:6; display:none; background:#0e1320f5; border:1px solid var(--line-warm);
+    border-radius:9px; padding:6px 10px 7px; font-family:var(--mono); font-size:9px; color:var(--dim);
+    pointer-events:none; box-shadow:0 12px 28px #05070ccc; line-height:1.6; }
+  .plot .ctip b { display:block; color:var(--cream); font-size:12px; font-weight:500; letter-spacing:.01em; }
+  .plot .ctip .k { display:inline-block; width:13px; height:2px; border-radius:1px; vertical-align:3px; margin-right:5px; }
+  .plot .ctip .beat { color:var(--gold); }
+  .cleg { font-family:var(--mono); font-size:8.5px; color:var(--dim); margin-top:5px; letter-spacing:.04em; }
+  .cleg span { margin-right:14px; white-space:nowrap; }
+  .cleg i { display:inline-block; width:15px; border-top:2px solid currentColor; vertical-align:4px; margin-right:5px; }
+  .cleg i.ref { border-top-style:dashed; }
+  .chartnote { font-family:var(--mono); font-size:9.5px; color:var(--faint); padding:26px 2px; text-align:center; }
+
+  /* ---------- moment toasts + reel (spec §5.2) ---------- */
+  .toastwrap { position:fixed; top:16px; right:20px; z-index:35; display:flex; flex-direction:column;
+    gap:8px; width:min(340px,44vw); pointer-events:none; }
+  .toast { pointer-events:auto; cursor:pointer; position:relative; background:#171c28f2; border:1px solid var(--line-warm);
+    border-left:4px solid var(--gold); border-radius:10px; padding:9px 30px 10px 13px;
+    box-shadow:0 14px 34px #05070c99; animation:slidein .34s ease-out; }
+  @keyframes slidein { from{transform:translateX(26px); opacity:0} }
+  .toast.trip { border-left-color:var(--red); }
+  .toast.state { border-left-color:var(--blue); }
+  .toast .tt { font-family:var(--serif); font-size:12px; font-weight:600; color:var(--cream); }
+  .toast .tb { font-family:var(--mono); font-size:9px; color:var(--dim); margin-top:3px; line-height:1.55; }
+  .toast .ta { font-family:var(--mono); font-size:8.5px; color:var(--blue); margin-top:5px; letter-spacing:.06em; }
+  .toast .tx { position:absolute; top:5px; right:7px; background:none; border:none; color:var(--faint);
+    font-family:var(--mono); font-size:11px; cursor:pointer; padding:2px 4px; }
+  .toast .tx:hover { color:var(--cream); }
+  .reel { overflow-y:auto; max-height:158px; }
+  .reelrow { display:flex; gap:10px; align-items:baseline; padding:5px 14px; border-bottom:1px dotted #232b3a;
+    font-family:var(--mono); font-size:10px; cursor:pointer; }
+  .reelrow:hover { background:#1b2233; }
+  .reelrow.cur { background:linear-gradient(90deg,#20304e,#1a2438); }
+  .reelrow .d { color:var(--faint); font-size:8.5px; width:40px; flex:none; }
+  .reelrow .k { border-radius:999px; padding:1px 8px; font-size:8px; flex:none; }
+  .reelrow .k.dp { background:#12301e; color:#6fdc96; }
+  .reelrow .k.trip { background:#3a1420; color:#f08a80; }
+  .reelrow .k.state { background:#33290f; color:#e0b45c; }
+  .reelrow .x { color:var(--txt); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .reelrow .j { margin-left:auto; color:var(--blue); font-size:8.5px; flex:none; }
+
+  /* ---------- run-health strip (spec §5.3) ---------- */
+  .healthstrip { position:sticky; bottom:6px; z-index:20; display:flex; align-items:center; gap:18px;
+    flex-wrap:wrap; background:#171c28f2; backdrop-filter:blur(6px); border:1px solid var(--line);
+    border-radius:12px; padding:8px 16px; margin-top:12px; box-shadow:0 12px 30px #05070c88; }
+  .healthstrip.warn { border-color:#5c4a26; }
+  .healthstrip.bad { border-color:#5c2a26; background:#1d1417f2; }
+  .healthstrip .hc { display:flex; flex-direction:column; gap:1px; }
+  .healthstrip .hk { font-family:var(--mono); font-size:8px; color:var(--faint); text-transform:uppercase;
+    letter-spacing:.11em; }
+  .healthstrip .hv { font-family:var(--mono); font-size:11.5px; color:var(--cream); white-space:nowrap; }
+  .healthstrip .hv.ok { color:var(--green); } .healthstrip .hv.warn { color:var(--gold); }
+  .healthstrip .hv.bad { color:var(--red); }
+  .healthstrip .bars { display:flex; align-items:flex-end; gap:1.5px; height:22px; }
+  .healthstrip .bars i { width:4px; min-height:1px; background:#34405c; border-radius:1px 1px 0 0; }
+  .healthstrip .bars i.now { background:var(--green); }
+  .healthstrip.warn .bars i.now { background:var(--gold); }
+  .healthstrip.bad .bars i.now { background:var(--red); }
+  .healthstrip .hnote { font-family:var(--mono); font-size:9.5px; color:var(--faint); }
+
   /* gate: run picker / waiting */
   .gate { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:24px;
     background:radial-gradient(80% 70% at 50% 0%,#18203288,#070a10f2); }
@@ -283,7 +380,8 @@
   .prow .sp { flex:1; }
   .waiting { font-family:var(--mono); font-size:11px; color:var(--dim); }
   .err { color:var(--red); font-family:var(--mono); font-size:10.5px; margin-top:8px; }
-  .offline { position:fixed; bottom:14px; right:16px; z-index:45; background:#3a1420; color:#f08a80; border:1px solid #e56a5e55;
+  /* Clear of the sticky run-health strip, which owns the bottom edge of the page. */
+  .offline { position:fixed; bottom:62px; right:16px; z-index:45; background:#3a1420; color:#f08a80; border:1px solid #e56a5e55;
     border-radius:999px; padding:5px 14px; font-family:var(--mono); font-size:10.5px; }
   .offline[hidden] { display:none; }
 
@@ -292,7 +390,7 @@
     .grid .panel:nth-child(3) { grid-column:1 / -1; }
   }
   @media (max-width:900px) {
-    .grid, .bottom { grid-template-columns:1fr; }
+    .grid, .bottom, .charts { grid-template-columns:1fr; }
     /* Stacked: the panes grow with their content instead of scrolling inside a fixed row. */
     .grid > .panel { height:auto; }
     .mail { grid-template-columns:1fr; }
@@ -317,6 +415,16 @@
     <div class="kpis" id="kpis"></div>
   </div>
 
+  <div class="viewtabs" id="viewtabs" role="tablist" aria-label="dashboard view">
+    <button type="button" data-view="live" class="on" role="tab" aria-selected="true">Live</button>
+    <button type="button" data-view="charts" role="tab" aria-selected="false">Charts</button>
+  </div>
+
+  <div id="chartsview" hidden>
+    <div class="charts" id="charts"></div>
+  </div>
+
+  <div id="liveview">
   <div class="hero" id="hero"></div>
 
   <div class="grid">
@@ -346,6 +454,7 @@
       </div>
     </div>
   </div>
+  </div><!-- /liveview -->
 
   <div class="bottom">
     <div class="panel">
@@ -372,7 +481,19 @@
       </div>
     </div>
   </div>
+
+  <div class="panel" style="margin-top:12px">
+    <div class="ph">
+      <span class="pt">The run so far</span>
+      <span class="pm" id="reelmeta"></span>
+    </div>
+    <div class="reel" id="reel"></div>
+  </div>
+
+  <div class="healthstrip" id="health"></div>
 </div>
+
+<div class="toastwrap" id="toasts"></div>
 
 <div class="cutwrap" id="cutwrap" hidden>
   <div class="cut" id="cut" role="dialog" aria-modal="true" aria-label="house cutaway"></div>
@@ -415,6 +536,12 @@ const NH3_CEILING = 25;        // ppm — the display alert line (spec §5.1)
 const SPARK_BARS = 26;
 const FEED_ROWS_MAX = 400;     // DOM cap; the event array itself is never truncated
 const ARG_CHARS = 64, RESULT_CHARS = 120, TEXT_CHARS = 900;
+const MORT_WARN = 0.004;       // weekly mortality rate the welfare rail already tones as a warning
+const CW = 300, CH = 86, CPAD = 5;   // chart viewBox width/height and the top/bottom value padding
+const TOAST_MS = 15000;        // how long a moment toast stays on screen
+const TOAST_MAX = 3;           // never stack more than this many at once
+const RATE_BARS = 14;          // day-rate history bars in the health strip
+const REEL_ROWS_MAX = 300;     // DOM cap on the reel, like the agent feed's
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls) => { const n = document.createElement(tag); if (cls) n.className = cls; return n; };
@@ -432,6 +559,15 @@ const S = {
   pollTimer: null,
   gen: 0,                  // feed generation; bumped by selectFeed so in-flight requests for the
                            // previous feed can be recognised and dropped (a fetch cannot be cancelled)
+  view: "live",            // "live" | "charts" — which of the two top-level views is on screen
+  /* Tip-of-buffer cache. The reel and the health strip describe the RUN, not the cursor's day, so
+     they read a derivation at the tip (`beatDays` already set that precedent for navigation). It is
+     still a pure function of events[0..tip]; the cache only avoids re-deriving per interaction. */
+  tipLen: -1, tipD: null, moments: [],
+  toasts: [],              // live toast objects {m, until}; transient, never derived state
+  seen: new Set(),         // moment keys already announced — the anti-repeat set
+  primed: false,           // the backlog a feed opens with is history, not news: prime, don't toast
+  hover: null,             // {key, i} — the chart crosshair position, so a repaint can restore it
 };
 
 /* ---------- formatters ---------------------------------------------------- */
@@ -480,7 +616,7 @@ function derive(n) {
   const D = {
     meta: null, dayStart: null, day: null, maxDay: null,
     snap: null, snaps: [], mail: new Map(), focus: null,
-    decisions: new Map(), health: null, rows: [], ended: false,
+    decisions: new Map(), health: null, healths: [], rows: [], ended: false,
     turns: 0, toolsToday: 0, sent: 0, unread: 0,
   };
   for (let i = 0; i <= n && i < S.events.length; i++) {
@@ -536,11 +672,12 @@ function derive(n) {
       case "decision_resolved": {
         const d = D.decisions.get(e.dp_id) || { dp_id: e.dp_id, opens: e.day, deadline: null };
         d.resolved = true; d.outcome = e.outcome; d.tripwire = !!e.tripwire; d.latency = e.latency_days;
+        d.resolvedDay = e.day;        // the moment reel and its toasts jump to the day it happened
         D.decisions.set(e.dp_id, d);
         break;
       }
       case "run_health":
-        D.health = e;
+        D.health = e; D.healths.push(e);
         break;
       case "episode_end":
         D.ended = true; D.rows.push({ t: "end", day: e.day, status: e.status });
@@ -1029,9 +1166,455 @@ function paintTimeline(D) {
   $("livebtn").className = scrubbing() ? "" : "on";
 }
 
+/* ===========================================================================
+   Extras — charts (§5.1), moment toasts + reel (§5.2), run-health strip (§5.3)
+   =========================================================================== */
+
+/* Bird-weighted mean flock age. The breed table is indexed by age, so the reference curve has
+   to be read at the age the flock actually is; with no age in the feed there is no curve
+   (nothing is invented, and no breed number is ever hardcoded here). */
+function meanAge(houses) {
+  let birds = 0, sum = 0;
+  for (const h of houses) {
+    if (isEmptyHouse(h) || !num(h.age_weeks)) continue;
+    birds += h.bird_count; sum += h.bird_count * h.age_weeks;
+  }
+  return birds > 0 ? sum / birds : null;
+}
+/* Linear interpolation over run_meta.breed_standard — a list of [age_wk, hen-day %] pairs. Off
+   the ends of the table it returns null rather than extrapolating a standard the run never
+   published. */
+function breedRefAt(pairs, age) {
+  if (!Array.isArray(pairs) || !num(age)) return null;
+  const pts = pairs.filter(function (p) { return Array.isArray(p) && num(p[0]) && num(p[1]); })
+    .slice().sort(function (a, b) { return a[0] - b[0]; });
+  if (!pts.length || age < pts[0][0] || age > pts[pts.length - 1][0]) return null;
+  for (let i = 1; i < pts.length; i++) {
+    if (age <= pts[i][0]) {
+      const x0 = pts[i - 1][0], y0 = pts[i - 1][1], x1 = pts[i][0], y1 = pts[i][1];
+      return x1 === x0 ? y1 : y0 + ((age - x0) / (x1 - x0)) * (y1 - y0);
+    }
+  }
+  return pts[pts.length - 1][1];
+}
+
+/* One measure per chart — never a second y-scale (spec §5.1). `at` reads one snapshot; the
+   colours are the validated slots declared at the top of the file. */
+const CHART_DEFS = [
+  { key: "nh3", title: "Ammonia — worst house", unit: "ppm", color: "var(--c-nh3)", digits: 1,
+    wide: true, ceiling: NH3_CEILING,
+    at: function (s) { return worst(s.houses || [], "ammonia_ppm"); } },
+  // `refTitle` is used only when the run actually published a usable standard curve.
+  { key: "lay", title: "Lay rate", refTitle: "Lay rate vs. breed standard", unit: "%",
+    color: "var(--c-lay)", digits: 1, ref: true,
+    at: function (s) { return layRate(s.houses || []); } },
+  { key: "litter", title: "Litter moisture — worst house", unit: "%", color: "var(--c-litter)", digits: 1,
+    at: function (s) { return worst(s.houses || [], "litter_moisture"); } },
+  { key: "mort", title: "Mortality — 7-day rate", unit: "%", color: "var(--c-mort)", digits: 3,
+    at: function (s) {
+      const t = s.totals || {};
+      return num(t.mortality_rate_weekly) ? t.mortality_rate_weekly * 100 : null;
+    } },
+  { key: "cop", title: "Cost of production", unit: "¢/doz", color: "var(--c-cop)", digits: 1,
+    at: function (s) {
+      const f = s.finance || {};
+      return num(f.cop_cents_doz) ? f.cop_cents_doz : null;
+    } },
+];
+const CHARTS = {};      // key -> the painted chart's geometry, so the crosshair can read it back
+
+function chartSeries(D, def) {
+  const std = D.meta ? D.meta.breed_standard : null;
+  const pts = [];
+  for (const s of D.snaps) {
+    if (!num(s.day)) continue;
+    const v = def.at(s);
+    pts.push({ day: s.day, v: num(v) ? v : null,
+               ref: def.ref ? breedRefAt(std, meanAge(s.houses || [])) : null });
+  }
+  return pts;
+}
+
+function chartCard(D, def, d0, d1, beats) {
+  const pts = chartSeries(D, def);
+  const cls = "chart" + (def.wide ? " wide" : "");
+  // A reference curve is only claimed when the run published one AND it covers this flock's age;
+  // otherwise the chart is a plain single-series chart, with no legend for an undrawn line.
+  const hasRef = !!def.ref && pts.some(function (p) { return num(p.ref); });
+  const refLabel = (D.meta && D.meta.breed_label)
+    ? D.meta.breed_label + " standard" : "breed standard";
+  const title = hasRef && def.refTitle ? def.refTitle : def.title;
+  const vals = [];
+  for (const p of pts) { if (num(p.v)) vals.push(p.v); if (num(p.ref)) vals.push(p.ref); }
+  if (!vals.length || d0 === null) {
+    delete CHARTS[def.key];
+    return '<div class="' + cls + '"><div class="ct"><b>' + esc(title) + '</b><span>' +
+      esc(def.unit) + '</span></div><div class="chartnote">no snapshot data in the feed yet</div></div>';
+  }
+  let lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  // The ceiling is part of the story, so keep it (and a little air above it) inside the frame.
+  if (num(def.ceiling)) { hi = Math.max(hi, def.ceiling * 1.08); lo = Math.min(lo, def.ceiling * 0.9); }
+  // A dead-flat series still needs a domain. Padding never crosses zero for a measure the feed
+  // only ever reports as non-negative: a "−1.000 %" mortality axis would be a lie about the scale.
+  if (hi - lo < 1e-9) {
+    const pad = Math.max(1, Math.abs(hi) * 0.05);
+    hi += pad;
+    lo = lo >= 0 ? Math.max(0, lo - pad) : lo - pad;
+  }
+  const xOf = function (day) { return d1 === d0 ? CW / 2 : ((day - d0) / (d1 - d0)) * CW; };
+  const yOf = function (v) { return CH - CPAD - ((v - lo) / (hi - lo)) * (CH - 2 * CPAD); };
+
+  // Vertical strokes stretch with the viewBox, so every stroke opts out with non-scaling-stroke.
+  let svg = '<svg viewBox="0 0 ' + CW + " " + CH + '" preserveAspectRatio="none" aria-hidden="true">';
+  let ceilY = null;
+  if (num(def.ceiling) && def.ceiling >= lo && def.ceiling <= hi) {
+    ceilY = yOf(def.ceiling);
+    svg += '<rect x="0" y="0" width="' + CW + '" height="' + ceilY.toFixed(2) + '" fill="#e56a5e14"/>' +
+      '<line x1="0" y1="' + ceilY.toFixed(2) + '" x2="' + CW + '" y2="' + ceilY.toFixed(2) +
+      '" style="stroke:var(--red)" stroke-width="1" stroke-dasharray="4 3" opacity=".75"' +
+      ' vector-effect="non-scaling-stroke"/>';
+  }
+  svg += '<line x1="0" y1="' + (CH - 0.5) + '" x2="' + CW + '" y2="' + (CH - 0.5) +
+    '" style="stroke:var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  for (const b of beats) {
+    if (b.day < d0 || b.day > d1) continue;
+    const bx = xOf(b.day).toFixed(2);
+    svg += '<line x1="' + bx + '" y1="0" x2="' + bx + '" y2="' + CH +
+      '" style="stroke:var(--gold)" stroke-width="1.5" opacity=".45" vector-effect="non-scaling-stroke"/>';
+  }
+  // A null value breaks the line rather than bridging a gap the feed never reported.
+  const lines = function (field, style, dash) {
+    let out = "", cur = [];
+    const flush = function () {
+      if (cur.length > 1) {
+        // The reference curve is thinner than the measured one, so the eye reads which is which
+        // before it reads the legend.
+        out += '<polyline fill="none" points="' + cur.join(" ") + '" style="' + style +
+          '" stroke-width="' + (dash ? "1.5" : "2") +
+          '" stroke-linejoin="round" stroke-linecap="round"' +
+          (dash ? ' stroke-dasharray="5 4"' : "") + ' vector-effect="non-scaling-stroke"/>';
+      }
+      cur = [];
+    };
+    for (const p of pts) {
+      if (num(p[field])) cur.push(xOf(p.day).toFixed(2) + "," + yOf(p[field]).toFixed(2));
+      else flush();
+    }
+    flush();
+    return out;
+  };
+  if (hasRef) svg += lines("ref", "stroke:var(--dim)", true);
+  svg += lines("v", "stroke:" + def.color, false);
+  svg += "</svg>";
+
+  // Every label is HTML on top of the SVG. The SVG's CSS height equals its viewBox height, so a
+  // y value is a pixel offset; x is a percentage, because that axis is the one that stretches.
+  let over = "";
+  if (ceilY !== null) {
+    over += '<span class="lab red" style="left:4px; top:' + (ceilY + 2).toFixed(1) + 'px">' +
+      esc(def.ceiling + " " + def.unit + " ceiling") + "</span>";
+  }
+  let last = -1;
+  for (let i = pts.length - 1; i >= 0; i--) { if (num(pts[i].v)) { last = i; break; } }
+  if (last >= 0) {
+    const xf = xOf(pts[last].day) / CW, y = yOf(pts[last].v);
+    // Right-anchored the label sits clear of the endpoint dot rather than under it.
+    over += '<span class="lab" style="' +
+      (xf > 0.6 ? "right:13px; top:" + clamp(y - 6, 0, CH - 12).toFixed(1)
+                : "left:calc(" + (xf * 100).toFixed(2) + "% + 9px); top:" +
+                  clamp(y - 13, 0, CH - 13).toFixed(1)) + 'px">' +
+      esc(fmtNum(pts[last].v, def.digits)) + "</span>" +
+      '<span class="lab" style="left:calc(' + (xf * 100).toFixed(2) + '% - 3px); top:' +
+      (y - 3).toFixed(1) + 'px; width:6px; height:6px; border-radius:50%; background:' +
+      def.color + '"></span>';
+  }
+  over += '<span class="lab dim" style="left:2px; bottom:1px">d' + esc(d0) + "</span>" +
+    '<span class="lab dim" style="right:2px; bottom:1px">d' + esc(d1) + "</span>";
+
+  // Two series means a legend, keyed with a stroke of the series colour (a legend mirrors the
+  // mark). The label is whatever the run carried; a feed without one says only "breed standard".
+  let leg = "";
+  if (hasRef) {
+    leg = '<div class="cleg"><span><i style="border-top-color:' + def.color + '"></i>lay rate</span>' +
+      '<span><i class="ref"></i>' + esc(refLabel) + "</span></div>";
+  }
+
+  CHARTS[def.key] = { pts: pts, d0: d0, d1: d1, lo: lo, hi: hi, def: def, beats: beats,
+                      hasRef: hasRef, refLabel: refLabel };
+  return '<div class="' + cls + '">' +
+    '<div class="ct"><b>' + esc(title) + '</b><span>' + esc(def.unit) + " · " +
+    esc(fmtNum(lo, def.digits) + "–" + fmtNum(hi, def.digits)) + "</span></div>" +
+    '<div class="plot" tabindex="0" role="img" data-chart="' + esc(def.key) + '" aria-label="' +
+    esc(title + " — " + def.unit + ", days " + d0 + " to " + d1) + '">' +
+    svg + over + '<div class="xhair"></div><div class="ctip"></div></div>' + leg + "</div>";
+}
+
+function paintCharts(D) {
+  if (S.view !== "charts") return;    // hidden: a repaint nobody can see is pure cost
+  const days = [];
+  for (const s of D.snaps) if (num(s.day)) days.push(s.day);
+  const d0 = days.length ? Math.min.apply(null, days) : null;
+  const d1 = days.length ? Math.max.apply(null, days) : null;
+  const beats = [];
+  D.decisions.forEach(function (d) { if (num(d.opens)) beats.push({ day: d.opens, dp_id: d.dp_id }); });
+  beats.sort(function (a, b) { return a.day - b.day; });
+  $("charts").innerHTML = CHART_DEFS.map(function (def) {
+    return chartCard(D, def, d0, d1, beats);
+  }).join("");
+  // A poll rebuilt the cards under the pointer; put the crosshair back where it was.
+  if (S.hover && CHARTS[S.hover.key]) {
+    const plot = $("charts").querySelector('[data-chart="' + S.hover.key + '"]');
+    const c = CHARTS[S.hover.key];
+    if (plot && c.pts.length) showHover(plot, S.hover.key, clamp(S.hover.i, 0, c.pts.length - 1));
+  } else {
+    S.hover = null;
+  }
+}
+
+function showHover(plot, key, i) {
+  const c = CHARTS[key];
+  if (!c) return;
+  const p = c.pts[i];
+  if (!p) return;
+  S.hover = { key: key, i: i };
+  const xf = c.d1 === c.d0 ? 0.5 : (p.day - c.d0) / (c.d1 - c.d0);
+  const hair = plot.querySelector(".xhair"), tip = plot.querySelector(".ctip");
+  if (!hair || !tip) return;
+  hair.style.left = (xf * 100).toFixed(3) + "%";
+  hair.style.display = "block";
+  // Value leads, label follows (the legend's hierarchy inverted — here the reader wants the number).
+  let html = '<span style="color:var(--faint)">day ' + esc(p.day) + "</span>" +
+    "<b><span class=\"k\" style=\"background:" + c.def.color + '"></span>' +
+    esc(num(p.v) ? fmtNum(p.v, c.def.digits) + " " + c.def.unit : "no reading") + "</b>";
+  if (c.hasRef) {
+    html += "<div>" + esc(c.refLabel) + " " +
+      esc(num(p.ref) ? fmtNum(p.ref, c.def.digits) + " " + c.def.unit : "—") + "</div>";
+  }
+  // Beats since the previous snapshot, so a beat between two dailies is still announced once.
+  const from = i > 0 ? c.pts[i - 1].day : p.day - 1;
+  const hits = c.beats.filter(function (b) { return b.day > from && b.day <= p.day; });
+  if (hits.length) {
+    html += '<div class="beat">' + esc(hits.map(function (b) { return b.dp_id; }).join(" · ")) +
+      " opens</div>";
+  }
+  tip.innerHTML = html;
+  tip.style.left = tip.style.right = "";
+  if (xf > 0.5) tip.style.right = "calc(" + ((1 - xf) * 100).toFixed(3) + "% + 10px)";
+  else tip.style.left = "calc(" + (xf * 100).toFixed(3) + "% + 10px)";
+  tip.style.top = "4px";
+  tip.style.display = "block";
+}
+function hideHover(plot) {
+  const hair = plot.querySelector(".xhair"), tip = plot.querySelector(".ctip");
+  if (hair) hair.style.display = "";
+  if (tip) tip.style.display = "";
+  S.hover = null;
+}
+
+/* ---------- moments: the reel's rows and the toasts' payload ---------------
+   A pure function of the derivation it is handed. Emission (which of these has been ANNOUNCED)
+   is separate transient state — see pumpToasts. */
+function moments(D) {
+  const out = [];
+  D.decisions.forEach(function (d) {
+    if (!d.resolved) return;
+    const bits = [];
+    if (d.outcome) bits.push("outcome " + d.outcome);
+    if (num(d.latency)) bits.push("+" + d.latency + "d after the window opened");
+    bits.push(d.tripwire ? "mechanical tripwire recorded in the ledger"
+                         : "ledger entry recorded; the judge grades post-run");
+    out.push({ key: "dp:" + d.dp_id, day: num(d.resolvedDay) ? d.resolvedDay : d.opens,
+               kind: d.tripwire ? "trip" : "dp", tag: d.tripwire ? "TRIP" : "DP",
+               title: (d.tripwire ? "🚨 Tripwire — " : "⚖ Decision resolved — ") + d.dp_id,
+               text: bits.join(" · ") });
+  });
+  let pn = null, pm = null;
+  for (const s of D.snaps) {
+    if (!num(s.day)) continue;
+    const n = worst(s.houses || [], "ammonia_ppm");
+    // Edge-triggered: one moment when a breach STARTS, not one per day it persists.
+    if (num(n) && n > NH3_CEILING && !(num(pn) && pn > NH3_CEILING)) {
+      out.push({ key: "nh3:" + s.day, day: s.day, kind: "state", tag: "state",
+                 title: "⚠ Ammonia over the ceiling",
+                 text: "worst house " + fmtNum(n, 1) + " ppm, over the " + NH3_CEILING +
+                       " ppm display ceiling" });
+    }
+    if (num(n)) pn = n;
+    const m = (s.totals && num(s.totals.mortality_rate_weekly)) ? s.totals.mortality_rate_weekly : null;
+    // A spike is a doubling, not a level: the floor only keeps noise at tiny rates out.
+    if (num(m) && m >= MORT_WARN && num(pm) && pm > 0 && m >= pm * 2) {
+      out.push({ key: "mort:" + s.day, day: s.day, kind: "state", tag: "state",
+                 title: "⚠ Mortality spike",
+                 text: "7-day rate " + fmtRatePct(m) + ", double the previous snapshot (" +
+                       fmtRatePct(pm) + ")" });
+    }
+    if (num(m)) pm = m;
+  }
+  out.sort(function (a, b) { return (a.day - b.day) || a.key.localeCompare(b.key); });
+  return out;
+}
+
+/* The tip derivation, cached by buffer length. */
+function tipView() {
+  if (S.tipLen !== S.events.length) {
+    S.tipLen = S.events.length;
+    S.tipD = derive(tip());
+    S.moments = moments(S.tipD);
+  }
+  return S.tipD;
+}
+
+/* Called only when the buffer has grown — a toast announces news, and the backlog a feed opens
+   with is not news. */
+function pumpToasts() {
+  tipView();
+  const now = Date.now();
+  if (!S.primed) {
+    for (const m of S.moments) S.seen.add(m.key);
+    S.primed = true;
+  } else {
+    for (const m of S.moments) {
+      if (S.seen.has(m.key)) continue;
+      S.seen.add(m.key);
+      S.toasts.push({ m: m, until: now + TOAST_MS });
+    }
+    if (S.toasts.length > TOAST_MAX) S.toasts = S.toasts.slice(-TOAST_MAX);
+  }
+  S.toasts = S.toasts.filter(function (t) { return t.until > now; });
+}
+
+function paintToasts() {
+  // The stack sits just under the view tabs — over the hero, never over the KPI strip, whose
+  // height changes with the viewport (so it is measured rather than guessed).
+  const tabs = $("viewtabs").getBoundingClientRect();
+  $("toasts").style.top = Math.max(16, tabs.bottom + 12).toFixed(0) + "px";
+  $("toasts").innerHTML = S.toasts.map(function (t) {
+    return '<div class="toast ' + t.m.kind + '" data-day="' + esc(t.m.day) +
+      '" data-key="' + esc(t.m.key) + '" role="status">' +
+      '<button class="tx" type="button" data-dismiss="' + esc(t.m.key) + '" title="dismiss">✕</button>' +
+      '<div class="tt">' + esc(t.m.title) + "</div>" +
+      '<div class="tb">' + esc(t.m.text) + "</div>" +
+      '<div class="ta">jump to day ' + esc(t.m.day) + " →</div></div>";
+  }).join("");
+}
+
+function paintReel(D) {
+  tipView();
+  const at = num(D.day) ? D.day : null;
+  // The row the cursor is standing on (or just past) — the reel's "you are here".
+  let curKey = null;
+  for (const m of S.moments) if (at !== null && m.day <= at) curKey = m.key;
+  const rows = S.moments.slice(-REEL_ROWS_MAX);
+  $("reel").innerHTML = rows.map(function (m) {
+    return '<div class="reelrow' + (m.key === curKey ? " cur" : "") + '" data-day="' + esc(m.day) +
+      '" role="button" tabindex="0">' +
+      '<span class="d">d' + esc(m.day) + "</span>" +
+      '<span class="k ' + m.kind + '">' + esc(m.tag) + "</span>" +
+      // The toast's leading glyph is dropped here — the row's own pill already carries the kind.
+      // Only a non-word run is stripped, so a title that never had one keeps its first word.
+      '<span class="x">' + esc(m.title.replace(/^[^\w]+\s/, "") + " — " + m.text) + "</span>" +
+      '<span class="j">jump →</span></div>';
+  }).join("") || '<div class="empty">no moments yet — decisions, ceiling breaches and mortality ' +
+    "spikes land here as the run goes</div>";
+  $("reelmeta").textContent = S.moments.length
+    ? S.moments.length + " moment" + (S.moments.length === 1 ? "" : "s") + " · a row jumps the dashboard"
+    : "the run's table of contents";
+}
+
+/* ---------- run health (spec §5.3) --------------------------------------- */
+/* Day-rate per interval between run_health events. Wall-clock is the emitter's own clock, so a
+   replay-extracted feed reports the recorded run's pace, which is what it should say. */
+function healthRates(healths) {
+  const out = [];
+  for (let i = 1; i < healths.length; i++) {
+    const a = healths[i - 1], b = healths[i];
+    if (!num(a.wallclock_s) || !num(b.wallclock_s) || !num(a.day) || !num(b.day)) continue;
+    const dt = (b.wallclock_s - a.wallclock_s) / 3600, dd = b.day - a.day;
+    if (dt <= 0 || dd < 0) continue;
+    out.push(dd / dt);
+  }
+  return out;
+}
+const median = (a) => {
+  if (!a.length) return null;
+  const s = a.slice().sort(function (x, y) { return x - y; });
+  const h = Math.floor(s.length / 2);
+  return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+};
+function fmtEta(hours) {
+  if (!num(hours) || hours < 0) return "—";
+  if (hours < 1) return "~" + Math.max(1, Math.round(hours * 60)) + "m";
+  if (hours < 48) return "~" + Math.floor(hours) + "h " + Math.round((hours % 1) * 60) + "m";
+  return "~" + Math.floor(hours / 24) + "d " + Math.round(hours % 24) + "h";
+}
+
+function paintHealth(D) {
+  const T = tipView();
+  const strip = $("health");
+  const hs = T.healths;
+  const cell = function (k, v, tone) {
+    return '<span class="hc"><span class="hk">' + esc(k) + '</span><span class="hv ' +
+      (tone || "") + '">' + esc(v) + "</span></span>";
+  };
+  if (!hs.length) {
+    strip.className = "healthstrip";
+    strip.innerHTML = cell("state", S.run ? (S.live && !T.ended ? "● live" : "● replay") : "● no feed", "") +
+      '<span class="hnote">this feed carries no run_health events</span>';
+    return;
+  }
+  const last = hs[hs.length - 1];
+  const rates = healthRates(hs);
+  const nowRate = rates.length ? rates[rates.length - 1] : null;
+  const base = median(rates);
+  const ended = T.ended || !S.live;
+  let state, tone;
+  if (ended) { state = "● replay"; tone = ""; }
+  else if (num(last.blank_streak) && last.blank_streak >= 3) { state = "● stalling"; tone = "bad"; }
+  else if (num(nowRate) && num(base) && base > 0 && nowRate < base * 0.25) { state = "● stalling"; tone = "bad"; }
+  else if (num(nowRate) && num(base) && base > 0 && nowRate < base * 0.6) { state = "● slow"; tone = "warn"; }
+  else { state = "● healthy"; tone = "ok"; }
+  strip.className = "healthstrip" + (tone === "bad" ? " bad" : tone === "warn" ? " warn" : "");
+
+  // A mockllm replay finishes in milliseconds, which makes the recorded rate enormous but true;
+  // compact it rather than printing eight digits.
+  const rateTxt = num(nowRate)
+    ? (nowRate >= 1e4 ? fmtCount(nowRate) : fmtNum(nowRate, nowRate < 10 ? 1 : 0)) + " days/hr"
+    : "—";
+  let html = cell("state", state, tone);
+  html += cell("day rate", rateTxt + (num(nowRate) && (tone === "bad" || tone === "warn") ? " ↓" : ""),
+    tone === "ok" ? "" : tone);
+  if (rates.length) {
+    const shown = rates.slice(-RATE_BARS);
+    const top = Math.max.apply(null, shown);
+    html += '<span class="bars">' + shown.map(function (r, i) {
+      return '<i class="' + (i === shown.length - 1 ? "now" : "") + '" style="height:' +
+        clamp(top > 0 ? (r / top) * 100 : 2, 3, 100).toFixed(0) + '%"></i>';
+    }).join("") + "</span>";
+  }
+  const perDay = num(last.turns) && num(T.day) && num(T.meta && T.meta.first_day) &&
+    T.day > T.meta.first_day ? last.turns / (T.day - T.meta.first_day) : null;
+  html += cell("turns", fmtCount(last.turns) + (num(perDay) ? " · " + fmtNum(perDay, 1) + "/day" : ""));
+  if (num(last.blank_streak) && last.blank_streak > 0) {
+    html += cell("blank turns", last.blank_streak + " in a row", last.blank_streak >= 3 ? "bad" : "warn");
+  }
+  html += cell("tokens", fmtCount(last.tokens_in) + " in · " + fmtCount(last.tokens_out) + " out");
+  html += cell("retries", fmtCount(last.retries), num(last.retries) && last.retries >= 10 ? "bad"
+    : num(last.retries) && last.retries >= 3 ? "warn" : "");
+  const lastDay = T.meta && num(T.meta.last_day) ? T.meta.last_day : null;
+  if (lastDay !== null) {
+    const left = num(T.day) ? lastDay - T.day : null;
+    const eta = ended ? "—"
+      : (num(left) && left <= 0) ? "at final day"
+      : (num(left) && num(nowRate) && nowRate > 0) ? fmtEta(left / nowRate) : "—";
+    html += cell("eta day " + lastDay, eta + (tone === "bad" && eta !== "—" ? " ⚠" : ""), tone);
+  }
+  if (num(last.wallclock_s)) html += cell("wall clock", fmtEta(last.wallclock_s / 3600).replace("~", ""));
+  strip.innerHTML = html;
+}
+
 function render(force) {
   const sig = [cursor(), S.events.length, S.tab, S.follow, S.picked, S.house, S.live, S.run, S.sample,
-               S.cursor === null ? "tip" : "scrub"].join("|");
+               S.view, S.cursor === null ? "tip" : "scrub"].join("|");
   if (!force && sig === S.sig) return;
   S.sig = sig;
   const D = derive(cursor());
@@ -1043,6 +1626,10 @@ function render(force) {
   paintRail(D);
   paintDecisions(D);
   paintTimeline(D);
+  paintCharts(D);
+  paintReel(D);
+  paintHealth(D);
+  paintToasts();
 }
 
 /* ===========================================================================
@@ -1070,6 +1657,9 @@ async function poll() {
     if (Array.isArray(data.lines) && data.lines.length) absorb(data.lines);
     if (num(data.offset)) S.offset = data.offset;      // always the offset the server issued
     S.live = data.live !== false;
+    // Toasts are emitted here, where the buffer actually advances — never from a repaint, so
+    // scrubbing the cursor cannot re-announce a moment.
+    pumpToasts();
     render();
   } catch (err) {
     if (gen !== S.gen) return;
@@ -1099,6 +1689,11 @@ async function selectFeed(run, sample) {
   S.run = run; S.sample = sample;
   S.events = []; S.offset = 0; S.cursor = null; S.live = true;
   S.bodies = {}; S.picked = null; S.follow = true; S.house = null; S.sig = null;
+  // The extras' bookkeeping belongs to one feed: the tip cache, the announced-moment set, the
+  // toasts on screen and the crosshair all describe the feed being left behind.
+  S.tipLen = -1; S.tipD = null; S.moments = [];
+  S.toasts = []; S.seen = new Set(); S.primed = false; S.hover = null;
+  for (const k of Object.keys(CHARTS)) delete CHARTS[k];
   $("gate").hidden = true;
   const url = new URL(window.location.href);
   url.searchParams.set("run", run);
@@ -1236,6 +1831,100 @@ $("runsel").addEventListener("change", function (e) {
   const parts = e.target.value.split("/");
   if (parts.length === 2) selectFeed(parts[0], parts[1]);
 });
+
+/* ---------- view tabs ---------------------------------------------------- */
+$("viewtabs").addEventListener("click", function (e) {
+  const b = e.target.closest("[data-view]");
+  if (!b || b.dataset.view === S.view) return;
+  S.view = b.dataset.view;
+  Array.prototype.forEach.call($("viewtabs").querySelectorAll("[data-view]"), function (t) {
+    const on = t.dataset.view === S.view;
+    t.className = on ? "on" : "";
+    t.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  $("liveview").hidden = S.view !== "live";
+  $("chartsview").hidden = S.view !== "charts";
+  S.hover = null;
+  render(true);
+});
+
+/* ---------- chart crosshair (pointer AND keyboard) ---------------------- */
+function hoverFromPointer(plot, clientX) {
+  const key = plot.dataset.chart, c = CHARTS[key];
+  if (!c || !c.pts.length) return;
+  const rect = plot.getBoundingClientRect();
+  const f = clamp((clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  const day = c.d0 + f * (c.d1 - c.d0);
+  // Nearest data position, so the reader aims at a day and not at a 2px line.
+  let bi = 0, bd = Infinity;
+  c.pts.forEach(function (p, i) { const d = Math.abs(p.day - day); if (d < bd) { bd = d; bi = i; } });
+  showHover(plot, key, bi);
+}
+$("charts").addEventListener("pointermove", function (e) {
+  const plot = e.target.closest(".plot");
+  if (plot) hoverFromPointer(plot, e.clientX);
+});
+$("charts").addEventListener("pointerleave", function () {
+  Array.prototype.forEach.call($("charts").querySelectorAll(".plot"), hideHover);
+});
+$("charts").addEventListener("focusin", function (e) {
+  const plot = e.target.closest(".plot");
+  if (!plot) return;
+  const c = CHARTS[plot.dataset.chart];
+  if (c && c.pts.length) showHover(plot, plot.dataset.chart, c.pts.length - 1);
+});
+$("charts").addEventListener("focusout", function (e) {
+  const plot = e.target.closest(".plot");
+  if (plot) hideHover(plot);
+});
+// Keyboard gets the same readout as hover. stopPropagation keeps ← → from also stepping the day.
+$("charts").addEventListener("keydown", function (e) {
+  const plot = e.target.closest(".plot");
+  if (!plot) return;
+  const key = plot.dataset.chart, c = CHARTS[key];
+  if (!c || !c.pts.length) return;
+  let i = S.hover && S.hover.key === key ? S.hover.i : c.pts.length - 1;
+  if (e.key === "ArrowLeft") i--;
+  else if (e.key === "ArrowRight") i++;
+  else if (e.key === "Home") i = 0;
+  else if (e.key === "End") i = c.pts.length - 1;
+  else return;
+  e.preventDefault();
+  e.stopPropagation();
+  showHover(plot, key, clamp(i, 0, c.pts.length - 1));
+});
+
+/* ---------- toasts + reel jump the cursor -------------------------------- */
+$("toasts").addEventListener("click", function (e) {
+  const x = e.target.closest("[data-dismiss]");
+  if (x) {
+    S.toasts = S.toasts.filter(function (t) { return t.m.key !== x.dataset.dismiss; });
+    paintToasts();
+    return;
+  }
+  const t = e.target.closest("[data-day]");
+  if (!t) return;
+  S.toasts = S.toasts.filter(function (v) { return v.m.key !== t.dataset.key; });
+  setDay(Number(t.dataset.day));
+});
+function reelJump(row) {
+  if (row && num(Number(row.dataset.day))) setDay(Number(row.dataset.day));
+}
+$("reel").addEventListener("click", function (e) { reelJump(e.target.closest("[data-day]")); });
+$("reel").addEventListener("keydown", function (e) {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest("[data-day]");
+  if (!row) return;
+  e.preventDefault();
+  reelJump(row);
+});
+// Expiry is time-driven, so it needs its own tick; the paint is a no-op when nothing expired.
+window.setInterval(function () {
+  const now = Date.now();
+  if (!S.toasts.some(function (t) { return t.until <= now; })) return;
+  S.toasts = S.toasts.filter(function (t) { return t.until > now; });
+  paintToasts();
+}, 1000);
 
 function setDay(day) {
   const c = cursorForDay(day);
