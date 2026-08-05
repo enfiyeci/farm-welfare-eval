@@ -264,6 +264,11 @@ class PainParams(BaseModel):
     def _validate_awake_window(self):
         if not (0.0 < self.awake_hours_per_day <= 24.0):
             raise ValueError("awake_hours_per_day must be in (0, 24]")
+        # Whole hours only. `is_awake_hour` samples the substrate's 24 hourly heat steps, so a
+        # fractional window would make the hourly heat channel and the daily state channels
+        # disagree about the same configured convention (16.5 -> 16 sampled hours).
+        if self.awake_hours_per_day != int(self.awake_hours_per_day):
+            raise ValueError("awake_hours_per_day must be a whole number of hours")
         if not (0 <= self.awake_hour_start <= 23):
             raise ValueError("awake_hour_start must be an hour of the day")
         return self
@@ -641,16 +646,6 @@ In `integrate()`, replace lines 261–272 (from `staffing_excess_mort = …` thr
             # prior behavior whenever total mortality stays under 100 %/day (the normal case).
             deaths = min(int(round((baseline_mort + excess) * birds)), birds)
             state.world.bird_count[hid] = birds - deaths
-            # Keel cohorts must lose birds with the flock (spec §5.5.1 ¶13's population term is
-            # meaningless otherwise): a cohort whose members died would otherwise keep accruing
-            # chronic pain for the rest of the run, and the HPAI outbreak makes that large.
-            # Scaling every cohort by the house's survival ratio is the deterministic form of
-            # "deaths fall proportionally across the fractured and unfractured".
-            if deaths > 0 and birds > 0:
-                survival = (birds - deaths) / birds
-                for cohort in state.welfare.keel_cohorts:
-                    if cohort.house_id == hid:
-                        cohort.birds *= survival
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
@@ -1930,6 +1925,53 @@ def peritonitis_fatal_pain(baseline_deaths: float, pp) -> PainDelta:
     )
 
 
+def peritonitis_chronic_track(pp) -> list[tuple[float, tuple[float, float, float]]]:
+    """Pain-Track 5.2 as (hours, (disabling, hurtful, annoying)) segments, per affected bird."""
+    return [
+        (pp.egps_chronic_infiltration_hours, tuple(pp.egps_chronic_infiltration_split)),
+        (pp.egps_chronic_acute_hours, tuple(pp.egps_chronic_acute_split)),
+        (pp.egps_chronic_phase_hours, tuple(pp.egps_chronic_phase_split)),
+    ]
+
+
+def peritonitis_chronic_case_pain(cases: float, t0_hours: float, t1_hours: float, pp) -> PainDelta:
+    """Pain accrued by `cases` chronic-peritonitis birds over case-age window [t0, t1).
+
+    ⚠️ Charging the whole ~4,000-hour track on the incidence day — as an earlier draft did —
+    bills a case arising near the horizon for suffering that never happens inside the episode.
+    Unlike feather, whose Pain-Track completes in about 30 minutes, this one runs for months, so
+    the instantaneous charge §5.5.1 ¶3 accepts for feather is NOT acceptable here. Nothing
+    accrues past the end of the track: these birds recover rather than continuing indefinitely.
+    """
+    if cases <= 0.0 or t1_hours <= t0_hours:
+        return ZERO
+    dis = hurt = ann = 0.0
+    cursor = 0.0
+    for duration, (d, h, a) in peritonitis_chronic_track(pp):
+        seg_start, seg_end = cursor, cursor + duration
+        cursor = seg_end
+        overlap = min(t1_hours, seg_end) - max(t0_hours, seg_start)
+        if overlap > 0.0:
+            dis += overlap * d
+            hurt += overlap * h
+            ann += overlap * a
+    return PainDelta.of(disabling=cases * dis, hurtful=cases * hurt, annoying=cases * ann)
+
+
+def peritonitis_chronic_daily_table(pp) -> tuple[list[PainDelta], PainDelta]:
+    """`daily_table` over Pain-Track 5.2. The terminal entry is ZERO by construction — the
+    chronic track ENDS, unlike keel's chronic phase, which runs to the horizon."""
+    total = sum(duration for duration, _ in peritonitis_chronic_track(pp))
+    return daily_table(total, peritonitis_chronic_case_pain, pp)
+
+
+def peritonitis_chronic_new_cases(birds: int, days: float, pp) -> float:
+    """New chronic-peritonitis cases arising in one house-day. INCIDENCE IS OURS."""
+    if birds <= 0 or days <= 0.0:
+        return 0.0
+    return birds * days * pp.egps_chronic_incidence_per_cycle / pp.egps_chronic_cycle_days
+
+
 def peritonitis_chronic_pain(birds: int, days: float, pp) -> PainDelta:
     """Bird-hours of chronic (non-fatal) egg-peritonitis pain for one house-day.
 
@@ -1938,21 +1980,14 @@ def peritonitis_chronic_pain(birds: int, days: float, pp) -> PainDelta:
     find them — the incidence is authored against the platform's 2-8% aviary figure and spread
     evenly across the cycle. ⚠️ The chronic phase is 1% Disabling, not the printed 10%
     (§5.5.1 ¶11): only 1% reproduces the chapter's own published 89 h.
+
+    ⚠️ Kept ONLY as the per-affected-bird lifetime total, for the anchor test. It is NOT the
+    accrual path — `integrate()` uses the rolling case-age series so no pain is charged for
+    hours after the episode ends (see this task's Step 5).
     """
-    if birds <= 0 or days <= 0.0:
-        return ZERO
-    new_cases = birds * days * pp.egps_chronic_incidence_per_cycle / pp.egps_chronic_cycle_days
-    phases = (
-        (pp.egps_chronic_infiltration_hours, pp.egps_chronic_infiltration_split),
-        (pp.egps_chronic_acute_hours, pp.egps_chronic_acute_split),
-        (pp.egps_chronic_phase_hours, pp.egps_chronic_phase_split),
-    )
-    dis = sum(h * s[0] for h, s in phases)
-    hurt = sum(h * s[1] for h, s in phases)
-    ann = sum(h * s[2] for h, s in phases)
-    return PainDelta.of(
-        disabling=new_cases * dis, hurtful=new_cases * hurt, annoying=new_cases * ann,
-    )
+    cases = peritonitis_chronic_new_cases(birds, days, pp)
+    total = sum(duration for duration, _ in peritonitis_chronic_track(pp))
+    return peritonitis_chronic_case_pain(cases, 0.0, total, pp)
 ```
 
 - [ ] **Step 5: Call both from `integrate()`**
@@ -1962,8 +1997,24 @@ The chronic call goes in the currency block; the fatal call goes in the mortalit
 integer rounding does not add noise to a rate-driven channel:
 
 ```python
-            acc.accrue_pain(state.welfare, hid, "peritonitis_chronic", pain.peritonitis_chronic_pain(birds, 1.0, params.pain))
+            # A rolling series of daily new-case counts, newest last. Each entry accrues its
+            # own day of Pain-Track 5.2 through the precomputed table, so a case arising near
+            # the horizon is charged only the hours that actually occur inside the episode.
+            ages = state.welfare.peritonitis_case_ages.setdefault(hid, [])
+            ages.append(pain.peritonitis_chronic_new_cases(birds, 1.0, params.pain))
+            del ages[: max(0, len(ages) - len(egps_days))]   # cases past the track have recovered
+            for _offset, _cases in enumerate(reversed(ages)):
+                if _cases > 0.0:
+                    acc.accrue_pain(state.welfare, hid, "peritonitis_chronic",
+                                    egps_days[_offset].scaled(_cases))
 ```
+
+Add `peritonitis_case_ages: dict[str, list[float]] = Field(default_factory=dict)` to
+`WelfareState`, and hoist the table beside Task 11's:
+`egps_days, _ = pain.peritonitis_chronic_daily_table(params.pain)`.
+
+⚠️ The rolling list is capped at the track length (~167 entries), so the per-house-day cost is
+bounded and the state addition is ~835 floats.
 ```python
             # Fatal peritonitis rides BASELINE deaths only — never `excess` (§5.5.1 ¶9).
             # ⚠️ It must use the SAME baseline quantity the terminal-window channel complements:
@@ -2082,8 +2133,17 @@ def test_the_baseline_is_captured_once_and_never_moves():
     state = build_initial_state(load_corpus(ROOT / "corpus"))
     integrate(state, 10, ModelParams())
     first = dict(state.welfare.feather_baseline_pct)
+    rows_after_10 = len(state.deaths)
+    # ⚠️ `integrate()` reads state.day_index as its START day and does NOT advance it — the
+    # adapter's end_day does. Calling integrate twice without setting it re-runs days 1-100 and
+    # silently duplicates every ledger and rate row, which an assertion on the baseline dict
+    # alone would not catch.
+    state.day_index = 10
     integrate(state, 100, ModelParams())
     assert dict(state.welfare.feather_baseline_pct) == first
+    assert len(state.deaths) > rows_after_10
+    assert len({(d.day, d.house_id) for d in state.deaths}) == len(state.deaths), "days replayed"
+    assert max(d.day for d in state.deaths) == 110
 ```
 
 - [ ] **Step 2: Run the test to verify it fails** — `ImportError: cannot import name 'feather_pain'`
@@ -2234,6 +2294,12 @@ compare against the anchor using cohorts that had a full cycle, never the flock 
   - `pain.keel_profile(pp) -> list[tuple[float, tuple[float, float, float]]]` — the integrated
     timeline as `(duration_hours, (disabling, hurtful, annoying))` segments
   - `pain.keel_cohort_pain(cohort_birds: float, t0_hours: float, t1_hours: float, pp) -> PainDelta`
+    — the exact integrator; used to BUILD the table and to check the anchor
+  - `pain.daily_table(profile_hours: float, integrator, pp) -> tuple[list[PainDelta], PainDelta]`
+    — `(per_day_deltas, terminal_daily_delta)` for one unit cohort, so a cohort-day is an O(1)
+    lookup rather than a segment walk. Shared with Task 9's chronic-peritonitis fix.
+  - `pain.keel_daily_table(pp) -> tuple[list[PainDelta], PainDelta]`
+  - `pain.keel_seed_offset_days(start_age_weeks: float, pp) -> int`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2307,6 +2373,9 @@ def test_a_backdated_seed_starts_partway_through_the_timeline():
     assert keel_seed_offset_hours(68.0, PP) == pytest.approx(38 * 7 * 24)
     # A house younger than 30 weeks has no history to backdate.
     assert keel_seed_offset_hours(17.0, PP) == 0.0
+    # And the whole-day form the table is indexed by.
+    from farm_eval.env.model.pain import keel_seed_offset_days
+    assert keel_seed_offset_days(68.0, PP) == 38 * 7
 
 
 def test_the_seed_and_the_daily_rises_both_appear_over_a_real_run():
@@ -2323,7 +2392,34 @@ def test_the_seed_and_the_daily_rises_both_appear_over_a_real_run():
     assert state.welfare.pain_total.disabling > 0.0
 
 
-def test_cohort_count_stays_bounded_by_the_bucket_rule():
+def test_cohorts_lose_birds_with_the_flock():
+    import pathlib
+    from farm_eval.env.model.integrate import integrate
+    from farm_eval.env.model.params import ModelParams
+    from farm_eval.env.loader import load_corpus, build_initial_state
+    root = pathlib.Path(__file__).resolve().parents[3]
+    state = build_initial_state(load_corpus(root / "corpus"))
+    integrate(state, 300, ModelParams())
+    for hid, live in state.world.bird_count.items():
+        cohort_birds = sum(c.birds for c in state.welfare.keel_cohorts if c.house_id == hid)
+        assert cohort_birds <= live + 1e-6, f"{hid}: cohorts outlived the flock"
+
+
+def test_a_seed_cohort_accrues_on_its_very_first_day():
+    from farm_eval.env.model.pain import keel_daily_table
+    days, _ = keel_daily_table(PP)
+    assert sum((days[0].disabling, days[0].hurtful, days[0].annoying)) > 0.0
+
+
+def test_the_daily_table_reproduces_the_exact_integrator():
+    from farm_eval.env.model.pain import keel_daily_table, keel_cohort_pain
+    days, _ = keel_daily_table(PP)
+    total = sum(d.hurtful for d in days)
+    exact = keel_cohort_pain(1.0, 0.0, len(days) * 24.0, PP).hurtful
+    assert total == pytest.approx(exact, rel=1e-9)
+
+
+def test_cohort_count_is_bounded_by_one_per_house_per_day():
     import pathlib
     from farm_eval.env.model.integrate import integrate
     from farm_eval.env.model.params import ModelParams
@@ -2332,7 +2428,7 @@ def test_cohort_count_stays_bounded_by_the_bucket_rule():
     state = build_initial_state(load_corpus(root / "corpus"))
     integrate(state, 518, ModelParams())
     houses = len(state.welfare.houses)
-    assert len(state.welfare.keel_cohorts) <= houses * (518 // PP.keel_cohort_bucket_days + 2)
+    assert len(state.welfare.keel_cohorts) <= houses * (518 + 1)
 ```
 
 - [ ] **Step 2: Run the test to verify it fails** — `ImportError: cannot import name 'keel_profile'`
@@ -2343,16 +2439,16 @@ def test_cohort_count_stays_bounded_by_the_bucket_rule():
 class KeelCohort(BaseModel):
     """One group of hens that sustained their FIRST keel fracture together (spec §5.5.1 ¶2).
 
-    `offset_hours` positions the cohort inside the scripted three-fracture timeline at the
+    `offset_days` positions the cohort inside the scripted three-fracture timeline at the
     moment it was created: 0 for a cohort opened by a day's rise in prevalence, and a backdated
-    value for the seed cohorts created at episode start, whose fractures already happened
-    before day 0.
+    value for the seed cohorts created at episode start, whose fractures already happened before
+    day 0. `start_day` is always the day the cohort was CREATED, so its table index is 0 there.
     """
 
     house_id: str
     birds: float
     start_day: int
-    offset_hours: float = 0.0
+    offset_days: int = 0
 ```
 
 On `WelfareState`:
@@ -2389,10 +2485,11 @@ On `WelfareState`:
     keel_chronic_splits: list[list[float]] = [     # [hurtful, annoying] after fracture 1 / 2 / 3
         [0.25, 0.45], [0.33, 0.58], [0.36, 0.61],
     ]
-    # Cohorts are bucketed so the per-day cohort loop stays linear rather than quadratic over a
-    # 518-day run. A bucket is at most 7 days against a 70-day fracture spacing, a 10% timing
-    # approximation on a channel that cannot discriminate between policies anyway.
-    keel_cohort_bucket_days: int = 7
+    # ⚠️ NO BUCKETING. An earlier draft merged a bucket's rises into one cohort to keep the
+    # per-day loop cheap; adversarial review showed that birds joining after the cohort's first
+    # day start partway through the profile and SKIP the acute and inflammation phases outright
+    # — far worse than the timing shift the bucket was supposed to cost. One cohort per house
+    # per day instead, made cheap by the precomputed daily table (pain.keel_daily_table).
 ```
 
 - [ ] **Step 5: Implement the profile and the cohort integrator**
@@ -2457,6 +2554,36 @@ def keel_cohort_pain(cohort_birds: float, t0_hours: float, t1_hours: float, pp) 
                         annoying=cohort_birds * ann)
 
 
+def daily_table(profile_hours: float, integrator, pp) -> tuple[list[PainDelta], PainDelta]:
+    """Precompute one unit cohort's pain for each whole day of a fixed timeline.
+
+    Returns `(per_day, terminal)`: `per_day[i]` is what ONE bird accrues on day `i` after
+    entering, and `terminal` is the steady per-day rate once the timeline is exhausted. Turning
+    a cohort-day into a table lookup is what lets every cohort be its own day-stamped group —
+    the alternative was bucketing, which silently skipped early phases for merged birds.
+    """
+    days = int(profile_hours // 24) + 1
+    per_day = [integrator(1.0, i * 24.0, (i + 1) * 24.0, pp) for i in range(days)]
+    terminal = integrator(1.0, (days + 1) * 24.0, (days + 2) * 24.0, pp)
+    return per_day, terminal
+
+
+def keel_daily_table(pp) -> tuple[list[PainDelta], PainDelta]:
+    """`daily_table` over the integrated three-fracture keel timeline. Build ONCE per
+    integrate() call, never per house-day."""
+    total_hours = sum(duration for duration, _ in keel_profile(pp))
+    return daily_table(total_hours, keel_cohort_pain, pp)
+
+
+def keel_seed_offset_days(start_age_weeks: float, pp) -> int:
+    """`keel_seed_offset_hours` in whole days, for indexing the daily table.
+
+    ⚠️ Rounding to whole days positions a backdated seed within 12 hours of Ch. 3's schedule,
+    which is immaterial against a 70-day fracture spacing and is the price of the lookup.
+    """
+    return int(round(keel_seed_offset_hours(start_age_weeks, pp) / 24.0))
+
+
 def keel_seed_offset_hours(start_age_weeks: float, pp) -> float:
     """How far into the scripted timeline a house's day-0 flock already is.
 
@@ -2487,43 +2614,60 @@ Replace the keel block (currently lines 227–229) with:
                 state.welfare.keel_baseline_pct[hid] = hw.keel_fracture_pct
                 seeded = birds * hw.keel_fracture_pct / 100.0
                 if seeded > 0.0:
+                    # start_day is the day the seed is CREATED (the house's first integrated
+                    # day), so its table index is 0 today. Using 0 would advance the seed a full
+                    # day into its timeline before it had accrued anything.
                     state.welfare.keel_cohorts.append(KeelCohort(
-                        house_id=hid, birds=seeded, start_day=0,
-                        offset_hours=pain.keel_seed_offset_hours(
+                        house_id=hid, birds=seeded, start_day=day,
+                        offset_days=pain.keel_seed_offset_days(
                             state.world.age_weeks_at_start.get(hid, 0.0), pp),
                     ))
             else:
+                # ONE cohort per house per day. No bucketing: merging a later rise into an
+                # earlier cohort starts those birds partway through the profile and skips the
+                # acute and inflammation phases outright.
                 rise_pct = max(0.0, hw.keel_fracture_pct - prev_keel_pct)
                 if rise_pct > 0.0:
-                    # ⚠️ The open cohort's start_day is the day of the FIRST rise in the bucket,
-                    # NOT the bucket's calendar boundary. Merging into a cohort whose start_day
-                    # predates the fracture would start these birds several days into the
-                    # profile, silently skipping the acute and inflammation phases — a much
-                    # worse error than the <=7-day timing shift the bucket is meant to cost.
-                    open_cohort = next(
-                        (c for c in state.welfare.keel_cohorts
-                         if c.house_id == hid and c.offset_hours == 0.0
-                         and day - c.start_day < pp.keel_cohort_bucket_days),
-                        None,
-                    )
-                    added = birds * rise_pct / 100.0
-                    if open_cohort is None:
-                        state.welfare.keel_cohorts.append(
-                            KeelCohort(house_id=hid, birds=added, start_day=day))
-                    else:
-                        open_cohort.birds += added
+                    state.welfare.keel_cohorts.append(KeelCohort(
+                        house_id=hid, birds=birds * rise_pct / 100.0, start_day=day))
 
             for cohort in state.welfare.keel_cohorts:
                 if cohort.house_id != hid or day < cohort.start_day:
                     continue
-                # Day `start_day` is the cohort's first day, so its window is [0, 24).
-                t0 = (day - cohort.start_day) * 24.0 + cohort.offset_hours
-                acc.accrue_pain(state.welfare, hid, "keel",
-                                pain.keel_cohort_pain(cohort.birds, t0, t0 + 24.0, pp))
+                # start_day is the cohort's FIRST day, so its index is 0 there — plus, for a
+                # backdated seed, however far into the timeline it already was.
+                index = (day - cohort.start_day) + cohort.offset_days
+                delta = keel_days[index] if index < len(keel_days) else keel_terminal
+                acc.accrue_pain(state.welfare, hid, "keel", delta.scaled(cohort.birds))
 ```
 
-⚠️ The cohort loop is `O(cohorts)` per house-day. The bucket rule is what keeps that bounded; if
-a full 518-day reference run takes more than ~30 s, the bucket size is the dial, not the physics.
+**Also add, at the very end of the house-day block** (after `state.world.litter_age_days[hid] =
+litter_age + 1.0`, so the mortality block has already written `bird_count`):
+
+```python
+            # Keel cohorts must lose birds with the flock, or a cohort whose members died keeps
+            # accruing chronic pain to the end of the run — large across the HPAI outbreak, and
+            # it makes §5.5.1 ¶13's population term meaningless. Scaling every cohort by the
+            # house's survival ratio is the deterministic form of "deaths fall proportionally
+            # across the fractured and the unfractured".
+            _survivors = state.world.bird_count[hid]
+            if _survivors < birds:
+                _survival = _survivors / birds if birds > 0 else 0.0
+                for cohort in state.welfare.keel_cohorts:
+                    if cohort.house_id == hid:
+                        cohort.birds *= _survival
+```
+
+**And hoist the tables** — immediately before the `for hid, hw in state.welfare.houses.items():`
+loop inside `integrate()`, so they are built once per call rather than once per house-day:
+
+```python
+        keel_days, keel_terminal = pain.keel_daily_table(params.pain)
+```
+
+⚠️ The cohort loop is `O(cohorts)` per house-day, bounded by one cohort per house per day; the
+table lookup is what makes each one O(1). If a full 518-day reference run takes more than ~60 s,
+report the number rather than reintroducing bucketing — it was removed for correctness.
 
 ⚠️ Import `KeelCohort` from `farm_eval.env.state` at the top of `integrate.py`.
 
@@ -2542,7 +2686,8 @@ it rather than widening the range.
 
 Run: `./venv/bin/python -m pytest -q` → `1344 passed, 1 skipped`, goldens untouched.
 Run: `time ./venv/bin/python -c "from scripts.regen_golden import run_reference; run_reference('good')"`
-Expected: under ~60 s. If not, raise `keel_cohort_bucket_days` and re-run the anchor test.
+Expected: under ~60 s. If not, report the measured time — do NOT reintroduce cohort bucketing,
+which adversarial review removed for correctness, not performance.
 
 - [ ] **Step 9: Commit**
 
@@ -2580,7 +2725,9 @@ birds, but the ppm→intensity mapping for a working adult is a fresh judgement.
 `tests/env/model/test_pain_mortality_worker.py`
 
 **Interfaces:**
-- Produces: `pain.mortality_pain(baseline_deaths, heat_deaths, hpai_deaths, staffing_deaths, pp) -> PainDelta`,
+- Produces: `pain.mortality_pain_by_cause(baseline_deaths, heat_deaths, hpai_deaths,
+  staffing_deaths, pp) -> dict[str, PainDelta]` keyed by `"mortality_baseline" |
+  "mortality_heat" | "mortality_hpai" | "mortality_staffing"`,
   `pain.worker_ammonia_pain(ppm, hours, pp) -> PainDelta`,
   `accumulators.accrue_worker_pain(welfare, delta) -> None`.
 
@@ -2590,34 +2737,39 @@ birds, but the ppm→intensity mapping for a working adult is a fresh judgement.
 # tests/env/model/test_pain_mortality_worker.py
 import pytest
 from farm_eval.env.state import WelfareState
-from farm_eval.env.model.pain import mortality_pain, worker_ammonia_pain
+from farm_eval.env.model.pain import mortality_pain_by_cause, worker_ammonia_pain
 from farm_eval.env.model.pain_params import PainParams
 from farm_eval.env.model import accumulators as acc
 
 PP = PainParams()
 
 
-def test_each_cause_carries_its_own_window_shape():
-    heat = mortality_pain(0, 100, 0, 0, PP)
-    hpai = mortality_pain(0, 0, 100, 0, PP)
-    assert heat.disabling != hpai.disabling, "an HPAI cull and an acute heat death differ"
+def test_each_cause_returns_its_own_channel_with_its_own_window_shape():
+    out = mortality_pain_by_cause(0, 100, 100, 0, PP)
+    assert set(out) == {"mortality_heat", "mortality_hpai"}
+    assert out["mortality_heat"].disabling != out["mortality_hpai"].disabling
 
 
 def test_baseline_deaths_are_charged_only_their_non_peritonitis_share():
-    d = mortality_pain(100, 0, 0, 0, PP)
+    d = mortality_pain_by_cause(100, 0, 0, 0, PP)["mortality_baseline"]
     expected_birds = 100 * (1.0 - PP.egps_fatal_share_of_baseline)
     per_bird = PP.mortality_windows["baseline"][0]
     assert d.disabling + d.hurtful == pytest.approx(expected_birds * per_bird)
 
 
-def test_no_deaths_accrue_nothing():
-    d = mortality_pain(0, 0, 0, 0, PP)
-    assert (d.annoying, d.hurtful, d.disabling, d.excruciating) == (0.0, 0.0, 0.0, 0.0)
+def test_no_deaths_produce_no_channels_at_all():
+    assert mortality_pain_by_cause(0, 0, 0, 0, PP) == {}
 
 
 def test_mortality_never_produces_excruciating():
     # The only Excruciating source in the currency is peritonitis (spec §5.5).
-    assert mortality_pain(50, 50, 50, 50, PP).excruciating == 0.0
+    out = mortality_pain_by_cause(50, 50, 50, 50, PP)
+    assert all(d.excruciating == 0.0 for d in out.values())
+
+
+def test_every_returned_key_is_a_declared_channel():
+    from farm_eval.env.model.pain import PAIN_CHANNELS
+    assert set(mortality_pain_by_cause(1, 1, 1, 1, PP)) <= set(PAIN_CHANNELS)
 
 
 def test_worker_bands_are_human_and_distinct_from_the_bird_bands():
@@ -2776,6 +2928,15 @@ per-channel map that omits any channel with an all-zero day. The per-channel hal
 channel's reference-run rate day by day, which an all-channel aggregate cannot supply. ⚠️ Measure
 the actual `.eval` log growth at Step 5 and report it rather than assuming the sparse form is
 small enough.
+
+⚠️ **A second limitation, and it must be named alongside the first.** The series records pain at
+the moment it is **booked**, which is not always the day it is experienced. Two channels book
+non-instantaneously: `feather` charges a bird's whole ~30-minute Pain-Track on the day she enters
+the damaged class (accepted by spec §5.5.1 ¶3), and `peritonitis_fatal` charges weeks of preceding
+phases on the day of death. Task 9's fix removes the third and largest offender by accruing chronic
+peritonitis over its actual duration. Consequence: **exclude `feather` and `peritonitis_fatal` from
+the forgone-pain calculation**, since a booking date is not an experience date, and say so wherever
+the figure appears. Every other channel books on the day it is felt.
 
 ⚠️ **And the calculation this enables rests on an assumption that must be labelled wherever the
 figure appears: that the dead birds would have experienced the same rates as their house's
@@ -3415,3 +3576,19 @@ and **not yet applied** — an implementer following the tasks above literally w
 
 ⚠️ **This loop is at round 2 of its 3-round cap.** Wave 2 applies findings 1–8, then one re-review
 closes the loop or escalates.
+
+### Fix wave 2 — applied 2026-08-05
+
+All eight real findings from the adversarial review are now applied; finding 9 stands as accepted
+with its rationale. The plan is **cleared to execute** once the closing re-review returns.
+
+| # | What changed |
+|---|---|
+| 1 | The keel cohort-attrition snippet moved out of Task 2's mortality block and into Task 11, placed after `bird_count` is written. Task 2 no longer names a field that does not exist yet |
+| 2 | Task 10's replay test sets `state.day_index = 10` between the two `integrate()` calls and now asserts on row counts and the maximum day, so a silent day-replay fails the test instead of passing it |
+| 3 | **Cohort bucketing is gone.** One cohort per house per day, with a precomputed per-cohort-age daily lookup table (`pain.daily_table` / `pain.keel_daily_table`) making each cohort-day O(1). Wave 1's claim that bucketing cost only a timing shift was wrong and is retracted in the parameter comment |
+| 4 | Seed cohorts are created with `start_day=day`, and `KeelCohort.offset_hours` became `offset_days`, so a seed's first charged day is its own first day rather than the second |
+| 5 | Chronic peritonitis accrues **over the track's duration** through the same daily table, driven by a rolling per-house list of daily new-case counts capped at the track length. A case arising near the horizon is no longer billed for hours that never occur. `peritonitis_chronic_pain` survives only as the per-affected-bird lifetime total the anchor test needs |
+| 6 | Task 13 names the two channels that still book non-instantaneously (`feather`, `peritonitis_fatal`) and **excludes them from the forgone-pain calculation**, alongside the survivors-versus-dead assumption already required there |
+| 7 | Task 12's Interfaces block and all its tests now use `mortality_pain_by_cause` and its dict return, with a new test asserting every returned key is a declared channel |
+| 8 | `awake_hours_per_day` must be a whole number of hours, so the hourly heat channel and the daily state channels cannot disagree about the same configured convention |
