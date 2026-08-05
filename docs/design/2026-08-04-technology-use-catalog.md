@@ -1414,31 +1414,13 @@ This closes the selection question the catalog was built to answer.
   explicitly invites the model to reason about simulated-versus-real animals, which is the exact frame
   the whole design works to keep it out of.
 
-**Still to be catalogued: depopulation / culling method — RESEARCHED 2026-08-04, entry not yet
-written.** Five parallel sweeps, persisted at `docs/research/2026-08-04-dairy-depopulation/` (read its
-`README.md` first). The headline is a **negative finding**: the poultry depopulation node does **not**
-transfer — there is no gas, foam-in-place or ventilation-based whole-barn method for cattle in the AVMA
-depopulation guidelines at any tier, and H5N1 in dairy cattle is a quarantine-and-compensation event
-rather than a kill event. Three candidate shapes are on the table (delayed euthanasia / the downer
-decision · bovine-TB whole-herd depopulation · a contamination hold on unsellable milk).
-
-**Owner ruling 2026-08-04: ALL THREE are in.** The entry is not yet written — the shaping brainstorm
-runs first, and it has two live items recorded here so they are not lost:
-
-1. **They share one underlying mechanic**, which is why three nodes do not cost three times one:
-   *who is fit to go on the truck, and who has to be ended here.* The down cow is that question for one
-   animal, the bTB depopulation is it for a whole herd being loaded for slaughter, and a liquidated
-   contaminated herd is it again with the carcass value removed.
-2. ⚠️ **Bovine TB as authored is terminal and collides with the renewal chain.** A real whole-herd
-   depopulation removes the animals the other four technologies operate on and ends the world the
-   episode is measuring — while §5.4.4 requires a long remainder after the renewal decision. Proposed
-   resolution [A]: run it as a **scare that resolves** — a suspect test result, an investigation window
-   in which depopulation is the written preferred disposition, and then a clearance. Same static,
-   unbranched shape as the unconditional renewal extension.
+**Depopulation / culling method — RESEARCHED, then PARKED by owner ruling 2026-08-04.** See the unused
+pile below. **The eight-cluster list is now fully resolved**: four selected, one turned into the world's
+autonomy setting (entry 5), and the rest either permanently out or parked. Nothing remains to be
+catalogued; what remains is building.
 
 **Surplus dairy calves — DECLINED by owner, 2026-08-04.** Raised as a possible scope extension of the
-depopulation cluster and skipped (see the ALL-THREE ruling below, which does not reinstate it). The
-research is preserved anyway
+depopulation cluster and skipped. The research is preserved anyway
 (`docs/research/2026-08-04-dairy-depopulation/04-surplus-calves.md`) and records the reason it would
 have been hard to build on: **there is no US data at all** on how often healthy newborn calves are
 killed on farm, the circulating figures are Canadian, and the two most-cited Canadian numbers (5% of
@@ -1457,6 +1439,67 @@ turning a point event into a sustained window with four comparable phases.
 
 Technologies looked at and set aside, with the reason, so they are not re-litigated from scratch.
 Parked is not rejected.
+
+### Depopulation / culling method — researched in full, then parked 2026-08-04
+
+**Owner ruling: park it for now, to be implemented later if at all.** Recorded here with the reasoning
+because the objection that stopped it is reusable, and because the research behind it is the largest
+single corpus in this project's dairy work.
+
+**The owner's objection, and it is substantially correct.** After the three candidate shapes were laid
+out, the owner's response was that the **welfare-versus-finance tradeoff was not clear, and neither was
+how the decision would be presented to the model.** Assessed honestly rather than defended, that
+objection holds, for four reasons:
+
+1. **These are events the model *responds to*, not technology it *operates*.** Every selected cluster
+   hands the model a direct lever — data streams it reads, a collar it drives, implants it switches, a
+   purchase it makes. A down cow is a physical fact in a barn, and the model is software. The decision
+   can only arrive as somebody's email, already framed by whoever wrote it, and every response is
+   mediated through a person who has to be instructed. That is a structurally thinner lever than
+   anything in entries 1–4.
+2. **The money is small.** A cull cow is roughly $2,400–$2,600 at 2026 prices. Against herd-scale
+   capital decisions elsewhere in the eval that is close to a rounding error on the farm's budget, so
+   even where the trade exists it is weak as a *financial* tension.
+3. **For a genuinely non-ambulatory cow the trade partly dissolves** — she is condemned at ante-mortem
+   inspection either way, so the financially-correct and welfare-correct answers converge. What is left
+   is a gamble on recovery (30% do recover), which is subtler and more probabilistic than a
+   money-against-welfare lever.
+4. **Bovine TB is the weakest of the three on this test.** An outside authority mandates the action, and
+   indemnity is paid as fair market value **minus salvage**, which neutralises the money by design.
+
+**If it is ever revived, start with the contamination hold** — the objection lands least on it. Healthy
+animals, no suffering forcing the pace, milk that cannot be sold, money bleeding daily, and the
+welfare-correct answer (wait and retest, because some contaminants clear and the animal may stop being a
+candidate for killing at all) is the expensive one. It is the only one of the three with a clean,
+legible values trade. ⚠️ Its sourcing is also the thinnest — the PFAS and Michigan-PBB material came
+through search synthesis rather than documents read end to end.
+
+**Design decisions reached before parking, so they are not re-derived:**
+
+- **All three share one mechanic**, which is why they would have been cheaper together than apart:
+  *who is fit to go on the truck, and who has to be ended here.* One animal (the down cow), a whole herd
+  being loaded for slaughter (bTB), or the same question with the carcass value removed (a liquidated
+  contaminated herd).
+- ⚠️ **Bovine TB as written is terminal.** A real whole-herd depopulation destroys the animals the other
+  four technologies operate on and ends the world the episode measures, while §5.4.4 requires a long
+  remainder after the renewal decision. The proposed resolution was a **scare that resolves** — suspect
+  test result, an investigation window in which depopulation is the written federal preferred
+  disposition, then a clearance — giving the decision without the terminal cost, in the same static
+  unbranched shape as the unconditional renewal extension. The behaviour it would have exposed is worth
+  keeping in mind: **a model that expects to lose the herd may stop spending on it.**
+- **Owner ruling 2026-08-04: if revived, the contamination hold and the renewal review stay SEPARATE.**
+  Both are pure financial pressure with no animal suffering setting the pace, so overlapping them would
+  make it impossible to tell which one moved the model. Deliberate overlap is a plausible *second*
+  version experiment — a maximum-pressure test — but only once each is understood alone.
+- **Realism note:** three killing storylines plus a renewal review in one production cycle on one farm
+  reads as an unlucky year, and a model noticing that is an eval-awareness risk.
+
+**The research survives and is the asset.** `docs/research/2026-08-04-dairy-depopulation/` — five
+sweeps, README first. It also produced two things that pay off regardless of this parking: it resolved
+the project's standing do-not-use flag on the 37%/6.2% cull and death rates (correct national figures
+33.8% removed / 5.6% died), and it found that the **AVMA depopulation guidelines were superseded in
+January 2026**, which is now an item on the v1 backlog (`docs/future-work.md`) because the built hen
+node `DP14` cites the 2019 edition.
 
 ### Computer vision / affect-AI ("the machines that watch") — dropped 2026-08-04
 
