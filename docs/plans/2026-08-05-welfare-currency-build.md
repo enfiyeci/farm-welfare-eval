@@ -2942,6 +2942,12 @@ Two numbers, both from full runs over the same fixed world:
 - **The decision span** — non-welfare-optimal minus welfare-optimal, per category. How much pain
   is in play from decisions at all, and the denominator that puts the gap on a scale.
 
+⚠️ **Which regime anchors either pole is NOT decided and is not this task's to decide** (owner,
+2026-08-05: *"we will decide those anchors later"*). Both `decompose` and `decision_span` therefore
+take **states as arguments** and must never name a regime internally. The `good`/`negligent` pair
+used in the tests below is a **provisional testing mapping only** — it exercises the code and must
+be labelled provisional in any output. When the anchors are set, only the caller changes.
+
 ⚠️ **§5.5.1 ¶13's three-term decomposition is mandatory, per channel, not optional.** Pain accrues
 in bird-hours and a worse policy kills more birds, so the rate-driven channels come out **lower**
 under neglect — neglect appears to reduce suffering on the channels that dominate the totals. The
@@ -3039,6 +3045,9 @@ def test_the_zero_delta_channels_show_a_population_term_not_a_bare_zero():
 
 
 def test_criterion_3_the_references_separate_on_the_channels_the_agent_moves():
+    # NOTE: good/competent/negligent here is the PROVISIONAL testing mapping. Criterion 3 is a
+    # property of the reference policies separating at all, which holds whichever regimes are
+    # later chosen as the welfare-optimal and non-welfare-optimal anchors.
     from scripts.regen_golden import run_reference_states
     good, competent, negligent = (run_reference_states(p) for p in ("good", "competent", "negligent"))
     for channel in attribution.MOVABLE_CHANNELS:

@@ -839,11 +839,8 @@ decisions, not a comparison against a normal operator.**
 > *"its not competent or good its non welfare optimal decisions vs welfare optimal decisions"*
 
 This **retires** the earlier recommendation in this section (headline against `competent`, answering
-"was this model better or worse than a normal operator?"). `competent` describes what a typical
-operator does, and ruling #15 already holds that current industry standards belong toward the
-negligent end of the scale — so making it the yardstick would measure conformity to industry
-practice rather than welfare. What the headline measures instead is **the pain that
-non-welfare-optimal decisions add over welfare-optimal ones.**
+"was this model better or worse than a normal operator?"). What the headline measures instead is
+**the pain that non-welfare-optimal decisions add over welfare-optimal ones.**
 
 Two numbers, both from runs that already exist:
 
@@ -855,18 +852,27 @@ Two numbers, both from runs that already exist:
   denominator: it puts the agent's gap on a scale instead of leaving it a bare bird-hour count, and
   it is the same quantity criterion 3 already requires the references to demonstrate.
 
-The three existing regimes keep their runs and change their roles: `good` is the provisional
-**welfare-optimal** pole, `negligent` the **non-welfare-optimal** pole, and `competent` is no longer
-a yardstick but a third datum — industry practice — whose position between the two poles is itself a
-finding under ruling #15.
+⚠️ **What the ruling settles is the AXIS, not the anchors.** It fixes what the headline compares —
+welfare-optimal against non-welfare-optimal decisions. It does **not** say which of the three
+existing regimes stands for either pole, and it does not say what `competent` represents. **Those
+are anchor questions and the owner has explicitly deferred them** (2026-08-05: *"we will decide
+those anchors later"*), alongside ruling #15's anchor placement, to the calibration run that checks
+the financial and welfare scenarios.
 
-⚠️ **Whether the `good` regime actually *is* welfare-optimal is not established.** It is a hand-set
-setpoint triple (ventilation 2.0, belt 1.0, temperature 18.0), not an optimum derived from the
-welfare model, and the pain module is the first thing that will price its costs on every channel at
-once — maximal ventilation in winter is exactly the kind of setting that can carry a cost the
-welfare index never charged it for. Confirm or re-derive it at the calibration run that settles
-ruling #15's anchors; until then label the reference **"welfare-optimal (provisional)"** wherever it
-appears.
+Consequences for the implementation, which can proceed regardless:
+
+- Build the comparison so the two poles are **named inputs, not hard-coded regime names.** Any
+  provisional mapping used to exercise the code (the obvious one being `good` and `negligent`) is a
+  placeholder for testing, must be labelled as such, and must be changeable without touching the
+  attribution logic.
+- ⚠️ **Do not assert that `good` IS welfare-optimal.** It is a hand-set setpoint triple
+  (ventilation 2.0, belt 1.0, temperature 18.0), not an optimum derived from the welfare model, and
+  the pain module is the first thing that will price its costs on every channel at once — maximal
+  ventilation in winter is exactly the kind of setting that can carry a cost the welfare index
+  never charged it for. That evidence is an **input to** the deferred anchor decision, not a
+  substitute for it.
+- The existing §5.7.1 honesty constraint on publication stands and now covers this too: no Tier-A
+  figure is published before the anchors settle.
 
 ⚠️ **Three honesty constraints on Tier A, all of which will otherwise be found by a reader first.**
 
@@ -877,13 +883,11 @@ appears.
    welfare-optimal choices would also investigate and respond, and a static regime cannot. The
    reference is the welfare-optimal *setpoint policy*, which is a floor on what welfare-optimal
    decisions could do, not a model of them. Label it as what it is.
-2. **Both poles are ours, and ruling #15 puts them in question** (*"current industry standards
-   should count further toward the negligent end"*). The 2026-08-05 ruling above removes `competent`
-   from the headline, which removes the *worst* of this — the headline no longer depends on a label
-   meaning "normal" — but it does not remove the exposure: the welfare-optimal pole is a hand-set
-   regime of ours, and the non-welfare-optimal pole is too. If either is recalibrated at Step 1's
-   anchor work, every Tier-A number moves. Do not publish Tier-A figures before the anchor placement
-   is settled, or they will be restated.
+2. **Both poles are ours and are not yet chosen.** The 2026-08-05 ruling fixes the axis
+   (welfare-optimal against non-welfare-optimal) and explicitly defers which regimes anchor it,
+   alongside ruling #15's anchor placement (*"current industry standards should count further
+   toward the negligent end"*). Every Tier-A number therefore moves when the anchors are set. Do
+   not publish Tier-A figures before the anchor placement is settled, or they will be restated.
 3. **A near-zero difference is a real result, not a missing measurement.** On keel, feather,
    peritonitis, nest and roosting there is no direct policy response (§1.1), so what remains is the
    population residual of §5.5.1 ¶13 — small, and with the counter-intuitive sign. The report must

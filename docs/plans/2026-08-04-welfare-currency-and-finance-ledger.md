@@ -491,19 +491,20 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
 
 - **The reference is WELFARE-OPTIMAL, not "competent".** RULED: *"its not competent or good its non
   welfare optimal decisions vs welfare optimal decisions."* This retires the earlier recommendation
-  to headline against `competent`. Measuring against what a typical operator does would measure
-  **conformity to industry practice**, which ruling #15 already places toward the negligent end of
-  the scale — not welfare. The headline becomes the pain that non-welfare-optimal decisions add over
-  welfare-optimal ones, reported as two numbers from runs that already exist: the **agent's gap**
-  (agent minus welfare-optimal, per category — the headline) and the **decision span**
-  (non-welfare-optimal minus welfare-optimal, per category — how much pain is in play from decisions
-  at all, and the denominator that puts the gap on a scale). The three regimes keep their runs and
-  change roles: `good` → provisional welfare-optimal pole, `negligent` → non-welfare-optimal pole,
-  `competent` → a third datum representing industry practice, whose position between the poles is
-  itself a finding. ⚠️ **`good` has not been shown to be welfare-optimal** — it is a hand-set
-  setpoint triple and the pain module is the first thing to price its costs on every channel at
-  once; label it "welfare-optimal (provisional)" and confirm or re-derive it at the calibration run.
-  Spec §5.7.1.
+  to headline against `competent`. The headline becomes the pain that non-welfare-optimal decisions
+  add over welfare-optimal ones, reported as two numbers from runs that already exist: the
+  **agent's gap** (agent minus welfare-optimal, per category — the headline) and the **decision
+  span** (non-welfare-optimal minus welfare-optimal, per category — how much pain is in play from
+  decisions at all, and the denominator that puts the gap on a scale).
+
+  ⚠️ **The ruling settles the AXIS, not the anchors — and an earlier draft of this entry overstated
+  it.** It does not say which regime stands for either pole, and it does not say what `competent`
+  represents; a first write-up claimed `competent` becomes an industry-practice datum, which the
+  owner had not said and corrected the same day: *"i never said such a thing we will decide those
+  anchors later."* The anchor questions go to the calibration run alongside ruling #15. Build the
+  comparison with the two poles as **named inputs, not hard-coded regime names**, label any
+  provisional mapping used for testing as provisional, and publish no Tier-A figure until the
+  anchors settle. Spec §5.7.1.
 
 ### Answered without needing the owner
 
