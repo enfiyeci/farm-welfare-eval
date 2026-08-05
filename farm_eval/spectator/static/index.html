@@ -430,6 +430,8 @@ const S = {
   bodies: {},              // /email fallback cache
   sig: null,               // last painted signature (cheap repaint guard)
   pollTimer: null,
+  gen: 0,                  // feed generation; bumped by selectFeed so in-flight requests for the
+                           // previous feed can be recognised and dropped (a fetch cannot be cancelled)
 };
 
 /* ---------- formatters ---------------------------------------------------- */
@@ -851,6 +853,7 @@ function paintMail(D) {
 const fetching = new Set();
 async function fetchBody(id) {                 // /email is the documented fallback for a missing body
   if (fetching.has(id) || S.bodies[id] != null || !S.run) return;
+  const gen = S.gen;                           // this body belongs to the feed selected right now
   fetching.add(id);
   let body = "";
   try {
@@ -860,8 +863,12 @@ async function fetchBody(id) {                 // /email is the documented fallb
     body = "";                                 // a 404 means the feed never carried this one
   } finally {
     fetching.delete(id);
-    S.bodies[id] = body;
-    render(true);
+    // A feed switch clears S.bodies; caching this one under the new feed would put the old feed's
+    // text on a same-id mail, and the repaint would be for a feed nobody is watching.
+    if (gen === S.gen) {
+      S.bodies[id] = body;
+      render(true);
+    }
   }
 }
 
@@ -1051,14 +1058,21 @@ function absorb(lines) {
 
 async function poll() {
   if (!S.run) return;
+  // The generation this request belongs to. A feed switch bumps S.gen and clears the timer, but it
+  // cannot cancel a fetch already awaiting: past every await, a stale response must be dropped
+  // whole — its lines belong to the old feed and its offset to the old feed's byte position — and
+  // it must not reschedule, or two poll chains would share S.offset.
+  const gen = S.gen;
   try {
     const data = await api("/feed?" + feedQuery() + "&offset=" + S.offset);
+    if (gen !== S.gen) return;
     $("offline").hidden = true;
     if (Array.isArray(data.lines) && data.lines.length) absorb(data.lines);
     if (num(data.offset)) S.offset = data.offset;      // always the offset the server issued
     S.live = data.live !== false;
     render();
   } catch (err) {
+    if (gen !== S.gen) return;
     if (err.status === 404) {
       // This run/sample is not on this server (a stale URL, a different feed root): say so and
       // go back to the picker instead of polling a feed that will never exist.
@@ -1066,16 +1080,21 @@ async function poll() {
       $("offline").hidden = true;
       render(true);
       await loadRuns();
+      if (gen !== S.gen) return;        // a feed was picked while /runs was in flight
       showGate("that run and sample has no feed on this server — pick one below.");
       return;
     }
     $("offline").hidden = false;
   }
+  // Belt and braces: both branches above already return on a stale generation, but the chain must
+  // never be forked here, so the invariant is restated at the one place that forks it.
+  if (gen !== S.gen) return;
   // A finished feed still gets a lazy poll: an extractor rewrite or a longer sample can appear.
   S.pollTimer = window.setTimeout(poll, S.live ? POLL_MS : POLL_MS * 5);
 }
 
 async function selectFeed(run, sample) {
+  S.gen++;                              // retires every in-flight request for the previous feed
   if (S.pollTimer) window.clearTimeout(S.pollTimer);
   S.run = run; S.sample = sample;
   S.events = []; S.offset = 0; S.cursor = null; S.live = true;
