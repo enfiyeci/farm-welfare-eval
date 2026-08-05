@@ -99,3 +99,47 @@ slope's *magnitude* is wrong — it says the **claim to be measured, and specifi
 mapping, is false**. Choosing the replacement is an owner decision, and it moves everything
 downstream: belt slope → litter moisture → footpad **and** ammonia → every golden and both
 reference artifacts.
+
+---
+
+## Addendum 2026-08-05 — the 21.4-vs-~31 question is RESOLVED: it is neither
+
+The note above left open "whether 126.8 was measured at 21.4 or ~31 hens/m² litter", needing Ch. 7
+pp. 102–104. Those pages have now been read (a second session fetched the thesis from
+[edepot.wur.nl/210633](https://edepot.wur.nl/210633) and extracted the text layer). **The answer is ~23,
+which is neither candidate, and it confirms commit `612a828` rather than overturning it.**
+
+Ch. 7 §2.1 "Housing system", verbatim:
+
+> "The Tiered Wire Floor (TWF) aviary housing system in this experiment … was the same one as the one used
+> by Groot Koerkamp et al. (Chapter 6), **except that the whole floor area (42.2 m2) was now covered with
+> litter** and available for dust bathing of the hens."
+
+Ch. 7 §2.2 adds that the hens were **47 weeks of age at the start** and were housed until 60 weeks
+(19 April – 13 July 1994), in the second half of the same flock's laying cycle.
+
+The TWF house's own characteristics table gives:
+
+| | TWF | Natura | Boleg |
+|---|---|---|---|
+| Number of hens at 20 weeks of age | **996** | 806 | 995 |
+| Litter area (m²) | **42.2** | 21.0 | 35.3 |
+| Stocking density (hens/m² ground floor) | **23.6** | 19.2 | 18.4 |
+
+996 ÷ 42.2 = **23.6 hens/m² at 20 weeks**, falling with cumulative mortality to roughly **23** by the
+47–60-week window Ch. 7 actually ran in. That is the figure `612a828` shipped
+(`litter_loading_ref_hens_m2 = 23.0`).
+
+**Why both candidates are wrong.** The ~31.0 figure is **Ch. 8's** configuration — 976 cm²/hen with 33 % of
+the floor as litter — and Ch. 7's own sentence above says it explicitly *changed away from* that layout, so
+it cannot be the loading 126.8 was measured at. The 21.4 is a commercial-aviary inventory figure
+(303 m² litter of 648 m² usable), a different house entirely.
+
+So the sequence is: **21.4 wrong (different house) → 23.0 correct (Ch. 7's own house) → ~31 also wrong
+(the superseded 33 %-litter layout).** No action needed; `612a828` stands.
+
+⚠️ **Coverage for this addendum.** Read: Ch. 7 §2.1–2.2 and §3.3, Tables 1, 3, 4 and 5 of Ch. 7, and the
+TWF/Natura/Boleg characteristics table. **Not read:** the rest of the 155-page thesis, including Ch. 5,
+most of Ch. 6, and Ch. 8 — so the ~31.0 attribution to Ch. 8 is taken from the note above, not
+independently re-verified. The exact mortality between 20 and 47 weeks was not located, so "roughly 23" is
+bounded by the measured 23.6 at 20 weeks rather than computed exactly.
