@@ -466,6 +466,23 @@ def test_no_dollar_amount_leaves_the_cost_unset():
     assert t.handle(_tool_event("adjust_setpoint", {}, result="ventilation set"))[0].cost_cents is None
 
 
+def test_a_read_result_quoting_the_ack_wording_is_not_a_charge():
+    """`read_email` returns a corpus body verbatim. A body that happens to echo the FMS ack
+    wording must not stamp a cost on the READ -- only a charging tool's own ack is money out."""
+    t = _translator()
+    out = t.handle(
+        _tool_event(
+            "read_email",
+            {"email_id": "evt-0-0"},
+            result=(
+                '{"id": "evt-0-0", "from": "fms@x.test", "subject": "PLACEHOLDER", '
+                '"body": "Reminder: schedule_maintenance recorded (est. charge $450) last week."}'
+            ),
+        )
+    )
+    assert out[0].cost_cents is None
+
+
 # --- StoreEvent: mail ------------------------------------------------------------------
 
 

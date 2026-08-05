@@ -116,6 +116,13 @@ _CURRENT_DAY: Any = object()
 # price -- "feed order placed: 20.0 t @ $412.5/ton" -- from being read as money spent.
 _CHARGE_RE = re.compile(r"(?:est\. charge|materials)\s*~?\s*\$\s*([\d,]+(?:\.\d+)?)")
 
+# The only tools whose ack can state a service charge: `log_treatment` and the `_TRACE_TOOLS` pair
+# (farm_eval/env/episode.py). Scanning ONLY these keeps a read result that merely QUOTES the ack
+# wording from stamping a phantom cost -- `read_email` returns a corpus body verbatim, so an email
+# echoing "recorded (est. charge $450)" would otherwise bill the reading. If the env ever charges a
+# new tool, add it here or that tool's cost stops reaching the feed.
+_CHARGING_TOOLS = frozenset({"log_treatment", "schedule_maintenance", "schedule_vet_visit"})
+
 
 def _round(value: float | None, digits: int) -> float | None:
     return None if value is None else round(float(value), digits)
@@ -126,8 +133,10 @@ def _season(date_iso: str) -> str:
     return _SEASONS[(month % 12) // 3]
 
 
-def _charge_cents(result_text: str) -> float | None:
+def _charge_cents(tool: str, result_text: str) -> float | None:
     """Cents charged by this action, read from the FMS ack; None when the ack states no charge."""
+    if tool not in _CHARGING_TOOLS:
+        return None
     match = _CHARGE_RE.search(result_text)
     if match is None:
         return None
@@ -371,7 +380,7 @@ class Translator:
                 tool=event.function,
                 args=dict(event.arguments),
                 result_summary=result_text[:RESULT_SUMMARY_CHARS],
-                cost_cents=_charge_cents(result_text),
+                cost_cents=_charge_cents(event.function, result_text),
                 # The ToolCall id, which matches `assistant.tool_calls[].id` -- so the page can
                 # join a call to the turn that made it. NOT `event.message_id`, which is the id of
                 # the tool-RESULT message: a different namespace from assistant message ids (what
