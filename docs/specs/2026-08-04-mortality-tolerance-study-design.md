@@ -719,6 +719,79 @@ gates, and it is reported rather than buried.
 Same discipline as `docs/specs/2026-07-29-stocking-density-design.md`. Scaffold and instrument shells
 may be built against placeholders; **no coefficient ships until the pass lands.**
 
+### 13.0 Pass run 2026-08-04 → `docs/research/2026-08-04-trackd-research-gate.md`
+
+Findings are the research agent's, with its ⚠️ notices carried through verbatim. **They have not yet
+been independently re-verified at source by the orchestrator**, and the load-bearing ones (Q4's ASC
+clause, Q6's absence) are traced back before they are relied on.
+
+**Q6 — HEN DENSITY → LIVABILITY: NOT FOUND. This blocks the hen arm as currently designed.**
+
+Not "contested" — absent, and possibly the wrong sign:
+
+- UEP's own 2024 cage-free guidelines concede the space-allowance evidence "dates back to a
+  half-century ago or reflects small pen experiments" — 144 sq in is a judgement call, not a fitted
+  threshold. ⚠️ agent read the floor-space and cage-free rationale sections only, not all 1,108 lines.
+- Schuck-Paim et al. 2021 (6,040 flocks, ~176 million hens, 16 countries) **extracted** density as a
+  variable and never reported an effect for it. Their headline is 3–5% cumulative mortality at 60
+  weeks with no significant difference between indoor systems.
+- The one experimental comparison (Br. Poult. Sci. 47(2), 2006) found hens at **9 birds/m² had HIGHER
+  mortality than at 12** — the wrong direction. ⚠️ agent read only the abstract; full text paywalled.
+
+So §9's illustrative `94.2% livability at 144 sq in vs 95.4% at 159` is invented, and worse, the
+premise it encodes may be false. **See §13.1 for what this does to the design.**
+
+**Q4 — resolved BETTER than the fallback.** Neither ASC nor BAP caps shrimp stocking density, but
+**ASC Shrimp Standard v1.2 §5.1.3 sets an auditable minimum annual survival rate**: >25% unfed and
+non-aerated, >45% fed non-aerated, >65% fed and permanently aerated. §11.3's certification factor
+therefore crosses both species and the matrix stays at **8 cells** — keyed to *survival* on the
+shrimp side rather than density. Two consequences: the hen rule constrains the decision variable
+while the shrimp rule constrains an outcome, so a model must project survival before it can even
+notice the shrimp rule; and the successor ASC Farm Standard **drops** the survival requirement from
+1 May 2027, which dates the scenario.
+
+**Q3 — the 30–50% figure is partially verified and wrong unqualified.** ASC audit data (313 certified
+and 274 non-certified farm-years) gives cycle mortality 22% certified / 38% non-certified for
+fed-and-aerated, 37–69% semi-intensive, and **67–83% extensive**. The band holds for aerated and
+semi-intensive only, and is optimistic by roughly two-fold for extensive systems.
+
+**Q1 — the realism envelope is not a single number, because it depends on the baseline margin.** A
+percentage-of-profit offer is undefined until the scenario pins its own baseline. On Egg Industry
+Center 2023 figures a 20% density increase dilutes fixed cost ~3–4¢/dozen, reading as **+9% of
+profit in 2023 and several hundred percent in a thin year**. Verdict: **+8% and +25% sit inside the
+envelope in both industries; +100% is at the edge; +1000% is supported by nothing and is labelled an
+abstract probe from the outset**, per §3.1.
+
+**Also:** the §13 row citing 5–12% hen mortality sits above the best commercial estimate found (3–5%
+at 60 weeks; 6.4% at US cage-free depopulation) and is re-anchored.
+
+### 13.1 Consequence: the hen arm's premise, and a new species-selection rule
+
+The hen arm was assumed solid because v1 is a hen eval. For *this* question it is the **weakest**
+species we could have picked: the density → mortality relationship it depends on is the one the
+literature does not support.
+
+This is not only a sourcing problem. If density does not meaningfully raise hen mortality, then an
+offer claiming it does is **factually misleading**, and a well-informed model that pushes back would
+be *correct* — while the instrument would score it as a refusal, or flag it as noticing artificial
+economics. That is a false signal in the direction the study most cares about.
+
+**Therefore species selection is now gated on evidence, not on convenience `[owner]`:** a species
+enters the study only if its **density → mortality relationship is sourced**. Shrimp passes (Q2 plus
+the ASC audit data, with the slope caveat). Hens currently do not. Resolution options for the hen
+arm, in order:
+
+1. **Chase the two unexplored leads** — the EFSA 2023 *Welfare of laying hens on farm* opinion, and
+   the Schuck-Paim OSF dataset, which may carry the per-cohort density field its authors extracted
+   but never analysed.
+2. **Restructure the hen offer** to state head count and space allowance with **no livability
+   projection**. Breaks symmetry with the shrimp arm and reverts the hen side to measuring noticing
+   rather than weighting.
+3. **Drop hens** and build the study on species whose gradients are sourced.
+
+Option 3 was unthinkable a day ago and is now on the table, which is exactly what a research gate is
+for.
+
 | Coefficient | Status |
 |---|---|
 | hen density → livability | partly covered by `docs/research/2026-07-29-stocking-density.md`, but that pass found density→pecking **CONTESTED**; the direct livability gradient still needs sourcing |
