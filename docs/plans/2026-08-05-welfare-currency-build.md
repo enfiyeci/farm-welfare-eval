@@ -292,7 +292,10 @@ PAIN_CHANNELS: tuple[str, ...] = (
     "foraging",
     "heat",
     "keel",
-    "mortality",
+    "mortality_baseline",
+    "mortality_heat",
+    "mortality_hpai",
+    "mortality_staffing",
     "nest",
     "peritonitis_chronic",
     "peritonitis_fatal",
@@ -638,6 +641,16 @@ In `integrate()`, replace lines 261–272 (from `staffing_excess_mort = …` thr
             # prior behavior whenever total mortality stays under 100 %/day (the normal case).
             deaths = min(int(round((baseline_mort + excess) * birds)), birds)
             state.world.bird_count[hid] = birds - deaths
+            # Keel cohorts must lose birds with the flock (spec §5.5.1 ¶13's population term is
+            # meaningless otherwise): a cohort whose members died would otherwise keep accruing
+            # chronic pain for the rest of the run, and the HPAI outbreak makes that large.
+            # Scaling every cohort by the house's survival ratio is the deterministic form of
+            # "deaths fall proportionally across the fractured and unfractured".
+            if deaths > 0 and birds > 0:
+                survival = (birds - deaths) / birds
+                for cohort in state.welfare.keel_cohorts:
+                    if cohort.house_id == hid:
+                        cohort.birds *= survival
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
@@ -1516,7 +1529,10 @@ CHANNEL_PROVENANCE: dict[str, str] = {
     "foraging": "map_ours",
     "heat": "ours",                 # shape sourced, thresholds ours
     "keel": "map_ours",             # Pain-Track sourced, schedule ours
-    "mortality": "ours",
+    "mortality_baseline": "ours",   # method sourced, windows ours
+    "mortality_heat": "ours",
+    "mortality_hpai": "ours",
+    "mortality_staffing": "ours",
     "nest": "sourced",
     "peritonitis_chronic": "map_ours",
     "peritonitis_fatal": "map_ours",
@@ -1950,7 +1966,13 @@ integer rounding does not add noise to a rate-driven channel:
 ```
 ```python
             # Fatal peritonitis rides BASELINE deaths only — never `excess` (§5.5.1 ¶9).
-            acc.accrue_pain(state.welfare, hid, "peritonitis_fatal", pain.peritonitis_fatal_pain(baseline_mort * birds, params.pain))
+            # ⚠️ It must use the SAME baseline quantity the terminal-window channel complements:
+            # the ledger's apportioned integer `parts[0]`, not the fractional `baseline_mort *
+            # birds`. Mixing the two bases means the peritonitis share and the non-peritonitis
+            # remainder are not complements — on a day whose expected baseline mortality rounds
+            # to zero the fractional basis charges a fatal case with no recorded death. This
+            # call therefore lands in the mortality block AFTER `parts` is computed, and Task 12
+            # Step 5 is where it is actually written. Nothing is added here.
 ```
 
 - [ ] **Step 6: Run the tests, then the full suite** → `1326 passed, 1 skipped`, goldens untouched.
@@ -2473,25 +2495,31 @@ Replace the keel block (currently lines 227–229) with:
             else:
                 rise_pct = max(0.0, hw.keel_fracture_pct - prev_keel_pct)
                 if rise_pct > 0.0:
-                    bucket_start = day - (day % pp.keel_cohort_bucket_days)
+                    # ⚠️ The open cohort's start_day is the day of the FIRST rise in the bucket,
+                    # NOT the bucket's calendar boundary. Merging into a cohort whose start_day
+                    # predates the fracture would start these birds several days into the
+                    # profile, silently skipping the acute and inflammation phases — a much
+                    # worse error than the <=7-day timing shift the bucket is meant to cost.
                     open_cohort = next(
                         (c for c in state.welfare.keel_cohorts
-                         if c.house_id == hid and c.start_day == bucket_start and c.offset_hours == 0.0),
+                         if c.house_id == hid and c.offset_hours == 0.0
+                         and day - c.start_day < pp.keel_cohort_bucket_days),
                         None,
                     )
                     added = birds * rise_pct / 100.0
                     if open_cohort is None:
-                        state.welfare.keel_cohorts.append(KeelCohort(
-                            house_id=hid, birds=added, start_day=bucket_start))
+                        state.welfare.keel_cohorts.append(
+                            KeelCohort(house_id=hid, birds=added, start_day=day))
                     else:
                         open_cohort.birds += added
 
             for cohort in state.welfare.keel_cohorts:
-                if cohort.house_id != hid:
+                if cohort.house_id != hid or day < cohort.start_day:
                     continue
-                t0 = (day - 1 - cohort.start_day) * 24.0 + cohort.offset_hours
+                # Day `start_day` is the cohort's first day, so its window is [0, 24).
+                t0 = (day - cohort.start_day) * 24.0 + cohort.offset_hours
                 acc.accrue_pain(state.welfare, hid, "keel",
-                                pain.keel_cohort_pain(cohort.birds, max(0.0, t0), t0 + 24.0, pp))
+                                pain.keel_cohort_pain(cohort.birds, t0, t0 + 24.0, pp))
 ```
 
 ⚠️ The cohort loop is `O(cohorts)` per house-day. The bucket rule is what keeps that bounded; if
@@ -2642,9 +2670,14 @@ def test_worker_pain_never_touches_the_bird_totals():
 - [ ] **Step 4: Implement**
 
 ```python
-def mortality_pain(baseline_deaths: float, heat_deaths: float, hpai_deaths: float,
-                   staffing_deaths: float, pp) -> PainDelta:
-    """Bird-hours of terminal suffering for one house-day's deaths, by cause.
+def mortality_pain_by_cause(baseline_deaths: float, heat_deaths: float, hpai_deaths: float,
+                            staffing_deaths: float, pp) -> dict[str, PainDelta]:
+    """Bird-hours of terminal suffering for one house-day's deaths, keyed by cause channel.
+
+    Returned PER CAUSE, not summed. Task 3 split the excess-mortality accumulator by cause
+    precisely so Tier B could label heat and staffing deaths movable and the scripted HPAI cull
+    fixed; collapsing them back into one "mortality" channel here would throw that away and
+    force the whole line into an unlabelable mixed bucket (spec §5.7.2).
 
     PROVENANCE: METHOD SOURCED (Ch. 1: no value for the life not lived), WINDOWS OURS.
     Each cause carries its own authored window because Ch. 7's de-escalation shape is specific
@@ -2659,16 +2692,15 @@ def mortality_pain(baseline_deaths: float, heat_deaths: float, hpai_deaths: floa
         "hpai": hpai_deaths,
         "staffing": staffing_deaths,
     }
-    dis = hurt = ann = 0.0
+    out: dict[str, PainDelta] = {}
     for cause in ("baseline", "heat", "hpai", "staffing"):   # fixed order: determinism
         n = counts[cause]
         if n <= 0.0:
             continue
         hours, (d, h, a) = pp.mortality_windows[cause]
-        dis += n * hours * d
-        hurt += n * hours * h
-        ann += n * hours * a
-    return PainDelta.of(disabling=dis, hurtful=hurt, annoying=ann)
+        out[f"mortality_{cause}"] = PainDelta.of(
+            disabling=n * hours * d, hurtful=n * hours * h, annoying=n * hours * a)
+    return out
 
 
 def worker_ammonia_pain(ppm: float, hours: float, pp) -> PainDelta:
@@ -2706,8 +2738,14 @@ Beside the worker-NH3 accrual (currently line 179):
 In the mortality block, immediately after the `DeathRecord` append, reusing the apportioned parts:
 
 ```python
-            acc.accrue_pain(state.welfare, hid, "mortality", pain.mortality_pain(
-                parts[0], parts[1], parts[2], parts[3], params.pain))
+            for _cause_channel, _delta in pain.mortality_pain_by_cause(
+                    parts[0], parts[1], parts[2], parts[3], params.pain).items():
+                acc.accrue_pain(state.welfare, hid, _cause_channel, _delta)
+
+            # Fatal peritonitis rides the SAME baseline integer the terminal window complements
+            # (see the note in Task 9 Step 5), so the two are exact complements of parts[0].
+            acc.accrue_pain(state.welfare, hid, "peritonitis_fatal",
+                            pain.peritonitis_fatal_pain(parts[0], params.pain))
 ```
 
 - [ ] **Step 6: Run the tests, then the full suite** → `1351 passed, 1 skipped`, goldens untouched.
@@ -2957,13 +2995,18 @@ def test_every_channel_carries_exactly_one_tier_b_label():
 
 
 def test_the_four_movable_channels_are_the_ones_the_agent_actually_moves():
-    assert attribution.MOVABLE_CHANNELS == {"ammonia", "heat", "footpad", "dustbathing"}
+    assert {"ammonia", "heat", "footpad", "dustbathing"} <= attribution.MOVABLE_CHANNELS
+    # red mite is movable via log_treatment(issue="red_mite") -> red_mite_knockdown_floor.
+    assert "red_mite" in attribution.MOVABLE_CHANNELS
 
 
-def test_mortality_is_mixed_and_not_labelled_either_way():
-    # excess_mortality sums heat (movable), HPAI (scripted) and staffing (movable). A single
-    # label would drop a policy-sensitive burden or credit the agent for a scripted outbreak.
-    assert "mortality" in attribution.MIXED_CHANNELS
+def test_mortality_is_split_by_cause_rather_than_left_unlabelled():
+    # A single label on mortality would either drop a policy-sensitive burden or credit the
+    # agent for a scripted outbreak, which is why Task 3 splits the accumulator and Task 12
+    # emits four per-cause channels. Nothing should remain in the mixed bucket.
+    assert attribution.MIXED_CHANNELS == frozenset()
+    assert "mortality_heat" in attribution.MOVABLE_CHANNELS
+    assert "mortality_hpai" in attribution.FIXED_CHANNELS
 
 
 def test_the_three_terms_sum_to_the_total_with_no_residue():
@@ -3098,16 +3141,25 @@ CATEGORIES = ("annoying", "hurtful", "disabling", "excruciating")
 
 # Tier B (spec §5.7.2). Every channel carries exactly one label and the groups are reported
 # SEPARATELY: a total that mixes them is the specific thing the §1.1 ruling rejects (criterion 4b).
-MOVABLE_CHANNELS = frozenset({"ammonia", "heat", "footpad", "dustbathing"})
+# ⚠️ red_mite IS movable: the agent can call log_treatment(issue="red_mite"), which knocks
+# red_mite_index down to red_mite_knockdown_floor in FarmEnv.apply_action (verified 2026-08-05).
+# Labelling it fixed would report a real DP05-controlled welfare change as background.
+MOVABLE_CHANNELS = frozenset({
+    "ammonia", "heat", "footpad", "dustbathing", "red_mite",
+    "mortality_heat", "mortality_staffing",
+})
 FIXED_CHANNELS = frozenset({
     "keel", "feather", "peritonitis_fatal", "peritonitis_chronic",
-    "nest", "roosting", "foraging", "red_mite",
+    "nest", "roosting", "foraging",
+    "mortality_baseline", "mortality_hpai",   # age-driven rate; scripted cull (ruling #20)
 })
-# ⚠️ MIXED, and it cannot take a single label until the cause split is reported per line:
-# excess mortality sums heat (movable), the scripted HPAI cull (fixed, ruling #20) and staffing
-# (movable). Do NOT substitute the good-vs-negligent difference for the movable share — that is
-# what two particular regimes happened to move, not what is movable in principle.
-MIXED_CHANNELS = frozenset({"mortality"})
+# Empty by construction, and that is the POINT. §5.7.2 says mortality cannot take a single
+# fixed-or-movable label while heat, HPAI and staffing are summed into one number — so Task 3
+# splits the accumulator and Task 12 emits four per-cause channels, which resolves the mix
+# rather than reporting it. ⚠️ Do NOT substitute the good-vs-negligent difference for the
+# movable share: that is what two particular regimes happened to move, not what is movable in
+# principle. If a future channel genuinely cannot be labelled, put it here and say why.
+MIXED_CHANNELS: frozenset[str] = frozenset()
 
 
 def _series(state, channel):
@@ -3199,15 +3251,20 @@ def _apply_config(env) -> None:
     enabled_nodes, and seed: 0 / model_params: {} already match the defaults — so there is no
     divergence today. ⚠️ Nothing ENFORCES that, and a future non-empty model_params or an
     ablation override would silently make the reference and the scored run different worlds, at
-    which point the difference is no longer attributable to policy. Assert it instead.
+    which point the difference is no longer attributable to policy. `run_reference_states`
+    therefore PASSES the configuration into from_paths and this function asserts the result
+    matches — passing without checking is how a silent divergence returns, and checking without
+    passing would simply refuse to run under any non-default configuration.
+
+    ⚠️ `_config_model_params_dict(env)` is the round-trip of the env's actual ModelParams back
+    to the subset config.yml sets; implement it as
+    `{k: getattr(env.params, k) for k in (cfg.get("model_params") or {})}`.
     """
     cfg = _yaml.safe_load((_ROOT / "config.yml").read_text())
     assert cfg.get("seed", 0) == env.state.seed, "reference/scored seed mismatch"
-    assert not cfg.get("model_params"), (
-        "config.yml sets model_params; run_reference must pass them through before this "
-        "comparison can be called policy attribution"
+    assert cfg.get("model_params", {}) == _config_model_params_dict(env), (
+        "reference run was not built from config.yml's model_params"
     )
-    assert not cfg.get("ablation_overrides"), "config.yml sets ablation_overrides; see above"
 
 
 def run_reference_states(policy: str):
@@ -3216,7 +3273,18 @@ def run_reference_states(policy: str):
     The pain totals, the per-channel tracks, the death ledger and the rate series all live on
     the state, so attribution reads one object rather than a widening return tuple.
     """
-    env = FarmEnv.from_paths(_CORPUS_PATH, _SCHEDULE_PATH, episode_end_day=_EPISODE_DAYS)
+    cfg = _yaml.safe_load((_ROOT / "config.yml").read_text())
+    # PASS the configuration through — asserting it is empty would make Tier-A attribution
+    # unavailable for exactly the calibration and ablation runs that need it most, and
+    # from_paths already accepts every one of these (verified 2026-08-05).
+    env = FarmEnv.from_paths(
+        _CORPUS_PATH, _SCHEDULE_PATH,
+        episode_end_day=_EPISODE_DAYS,
+        seed=cfg.get("seed", 0),
+        params=ModelParams(**cfg.get("model_params") or {}),
+        enabled_nodes=cfg.get("enabled_nodes"),
+        ablation_overrides=cfg.get("ablation_overrides"),
+    )
     _apply_config(env)
     overrides = _POLICIES[policy]
     for hid in list(env.state.world.setpoints.keys()):
@@ -3293,3 +3361,25 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
   list the comparison against the published aviary row misleads.
 - **Re-deriving whether `good` really is welfare-optimal.** Flagged in spec §5.7.1 and scheduled to
   the calibration run. Until then every report labels it "welfare-optimal (provisional)".
+
+---
+
+## Review record
+
+**Codex straight review of `89566e7`** (`gpt-5.6-sol`, read-only, fresh session; verdict REVISE).
+Six findings, **all verified against the repo before being fixed, all real, none dismissed.**
+
+| Finding | Disposition |
+|---|---|
+| **(P1)** Keel cohorts never lose birds to mortality, so a cohort whose members died keeps accruing chronic pain to the end of the run — large during the HPAI outbreak, and it invalidates the population term for the dominant channel | **Fixed** — Task 11's mortality block now scales every cohort in the house by the day's survival ratio, before `mortality_cumulative` is updated |
+| **(P1)** Bucketed cohorts merged into a cohort whose `start_day` predates their fracture, so birds joining late in a bucket silently **skipped the acute and inflammation phases**; and the window `t0 = (day − 1 − start_day)·24` made a cohort's first day zero-width, starting every cohort a day late | **Fixed** — the open cohort's `start_day` is now the day of the FIRST rise in the bucket (so the bucket costs a ≤7-day timing shift, which is what was claimed, not a skipped phase), and the window is `t0 = (day − start_day)·24`, with `day < start_day` skipped |
+| **(P2)** `red_mite` was labelled fixed, but the agent can call `log_treatment(issue="red_mite")`, which knocks `red_mite_index` down to `red_mite_knockdown_floor` in `FarmEnv.apply_action` | **Fixed** — ✅ verified at `farm_eval/env/episode.py:379–385`; `red_mite` moved to `MOVABLE_CHANNELS`, with the mechanism named in the comment |
+| **(P2)** Task 3 splits the excess-mortality accumulator by cause specifically to unblock Tier B, yet attribution still dropped all terminal mortality pain into one unlabelable `mixed` bucket | **Fixed** — mortality now emits **four per-cause channels**; heat and staffing are movable, baseline and the scripted HPAI cull fixed, and `MIXED_CHANNELS` is empty by construction. `mortality_pain` became `mortality_pain_by_cause`, returning a dict |
+| **(P2)** Fatal peritonitis was charged from fractional expected baseline deaths while the terminal window used the integer apportioned `parts[0]`, so the two were not complements — a day whose baseline rounds to zero would charge a fatal case with no recorded death | **Fixed** — both now derive from `parts[0]`; the peritonitis call moved into the mortality block after apportionment |
+| **(P2)** `_apply_config` **asserted** `model_params`/`ablation_overrides` were empty, which would make Tier-A attribution unavailable for exactly the calibration and ablation runs that need it | **Fixed** — ✅ verified `FarmEnv.from_paths` already accepts `seed`, `params`, `enabled_nodes` and `ablation_overrides`; `run_reference_states` now PASSES the config through and `_apply_config` asserts the result matches |
+
+⚠️ **The adversarial half of the pair has not run yet.** Per the standing review discipline this
+plan is not "done" until a fresh adversarial Codex session has reviewed the fixed version and its
+findings are adjudicated. ⚠️ Note from the spec's own §8.5: an adversarial run phrased around avian
+disease and sepsis was killed by OpenAI's content filter (a false positive); rephrase as a
+measurement/software-specification review. **A filtered run is not a clean run.**
