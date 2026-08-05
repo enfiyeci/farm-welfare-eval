@@ -60,10 +60,16 @@ implicitly include this section.
   zero pre-existing failures** — never as an absolute total. Absolute totals go stale the moment
   anything else on the branch adds a test, and a stale total invites regenerating a golden to make
   a number match, which is the one thing acceptance criterion 1 forbids.
-- **Commits** end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. Branch:
-  `worktree-finance-decision-map` in the worktree
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map`. Always use
-  `git -C <that path>` — the shell's working directory silently reverts to the main checkout.
+- **Commits** end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`. The build runs on
+  branch **`feat/welfare-currency`** in the isolated worktree
+  **`/Users/ardaenfiyeci/worktrees/farm-eval-currency`** (branched from
+  `worktree-finance-decision-map`, which is where the plan and spec live). Always use
+  `git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency` — the shell's working directory
+  silently reverts to the main checkout between calls.
+- ⚠️ **A delegated implementer may be unable to commit**: a linked worktree's git directory lives
+  under the main repo's `.git/worktrees/`, outside a sandboxed agent's writable root, so `git add`
+  fails on `index.lock`. That is expected. The implementer leaves the work uncommitted and the
+  orchestrator reviews and commits it — which is the required order anyway.
 
 ## File Structure
 
@@ -414,12 +420,12 @@ In `farm_eval/env/model/integrate.py`, import `pain` and add, immediately after 
 - [ ] **Step 9: Run the tests**
 
 Run: `./venv/bin/python -m pytest tests/env/model/test_pain_spine.py -q`
-Expected: PASS (8 passed)
+Expected: PASS (11 passed — the test block above defines 11, not 8)
 
 - [ ] **Step 10: Run the full suite — criterion 1**
 
 Run: `./venv/bin/python -m pytest -q`
-Expected: the measured baseline plus this task's 8 new tests, with **zero pre-existing failures**.
+Expected: the measured baseline plus this task's 11 new tests, with **zero pre-existing failures**.
 Any pre-existing test that now FAILS is a criterion-1 violation — stop and fix, never regenerate a
 golden.
 
@@ -440,8 +446,8 @@ In `docs/specs/2026-08-04-welfare-currency-design.md` §2.1.1, append to convent
 - [ ] **Step 12: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_spine.py docs/specs/2026-08-04-welfare-currency-design.md
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): PainTrack/PainDelta/PainParams spine + inert integrate seam
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_spine.py docs/specs/2026-08-04-welfare-currency-design.md
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): PainTrack/PainDelta/PainParams spine + inert integrate seam
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -690,8 +696,8 @@ pre-existing test that now fails is a criterion-1 violation — stop and fix, ne
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/integrate.py tests/env/model/test_death_ledger.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): mortality ledger — deaths by day, house and cause, apportioned by largest remainder
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/integrate.py tests/env/model/test_death_ledger.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): mortality ledger — deaths by day, house and cause, apportioned by largest remainder
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -879,8 +885,8 @@ whole point is that no caller can forget the split.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_excess_mortality_split.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): split excess_mortality at accrual into heat/hpai/staffing
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_excess_mortality_split.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): split excess_mortality at accrual into heat/hpai/staffing
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1046,8 +1052,8 @@ failures, goldens byte-identical.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_ammonia.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): ammonia pain channel + mutually-exclusive band helper
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_ammonia.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): ammonia pain channel + mutually-exclusive band helper
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1223,8 +1229,8 @@ failures, goldens byte-identical.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_heat.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): heat pain channel — hourly, mutually exclusive, panting-split
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_heat.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): heat pain channel — hourly, mutually exclusive, panting-split
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1386,8 +1392,8 @@ prevalence.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_footpad_mite.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): footpad (severity-graded, no Disabling band) + red-mite pain channels
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_footpad_mite.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): footpad (severity-graded, no Disabling band) + red-mite pain channels
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1559,8 +1565,8 @@ CHANNEL_PROVENANCE: dict[str, str] = {
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_dustbathing.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): dustbathing deprivation — the one published track the agent moves
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_dustbathing.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): dustbathing deprivation — the one published track the agent moves
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -1779,8 +1785,8 @@ our lay-rate assumption disagree about something real.
 - [ ] **Step 8: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_deprivation_constants.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): nest, roosting and foraging deprivation as non-discriminating constants
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_deprivation_constants.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): nest, roosting and foraging deprivation as non-discriminating constants
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -2042,8 +2048,8 @@ bounded and the state addition is ~835 floats.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_peritonitis.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): egg peritonitis (fatal + chronic) — baseline-only share, 1% chronic Disabling
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_peritonitis.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): egg peritonitis (fatal + chronic) — baseline-only share, 1% chronic Disabling
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -2255,8 +2261,8 @@ Replace the feather line (currently line 242) with:
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_feather.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): feather channel — Approach A bridge, event-driven, start-prevalence suppression
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_feather.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): feather channel — Approach A bridge, event-driven, start-prevalence suppression
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -2713,8 +2719,8 @@ which adversarial review removed for correctness, not performance.
 - [ ] **Step 9: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_keel.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): keel cohorts — backdated seed + integrated 3-fracture timeline
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/integrate.py tests/env/model/test_pain_keel.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): keel cohorts — backdated seed + integrated 3-fracture timeline
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -2926,8 +2932,8 @@ In the mortality block, immediately after the `DeathRecord` append, reusing the 
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_mortality_worker.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): mortality terminal windows by cause + separate worker-hours track
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_mortality_worker.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): mortality terminal windows by cause + separate worker-hours track
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -3106,8 +3112,8 @@ makes the two series reconcile row for row.
 - [ ] **Step 6: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/integrate.py tests/env/model/test_pain_rate_series.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): daily per-house per-bird pain-rate series
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/state.py farm_eval/env/model/integrate.py tests/env/model/test_pain_rate_series.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): daily per-house per-bird pain-rate series
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
@@ -3525,8 +3531,8 @@ parameter to adjust. Report which channel failed and by how much.
 - [ ] **Step 7: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/model/attribution.py scripts/regen_golden.py tests/env/test_attribution.py tests/env/model/test_pain_anchors.py
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): Tier A/B attribution — three-term decomposition, decision span, movable/fixed split
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency add farm_eval/env/model/attribution.py scripts/regen_golden.py tests/env/test_attribution.py tests/env/model/test_pain_anchors.py
+git -C /Users/ardaenfiyeci/worktrees/farm-eval-currency commit -m "feat(currency): Tier A/B attribution — three-term decomposition, decision span, movable/fixed split
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
