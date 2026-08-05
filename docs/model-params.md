@@ -205,17 +205,20 @@ Two further fixtures regenerate with these anchors, not just `reference_runs.jso
 **Form change, not just a coefficient change.** The term was additive — `+0.06 ppm` per moisture
 point above a 25 % reference — which is a form no source supports, and which went completely
 **inert** once the belt curve was bounded to Groot Koerkamp's measured 14.4–20.1 % aviary band:
-`max(0, moisture − 25)` was zero everywhere the model actually ran. It is now a multiplicative
+`max(0, moisture − 25)` was zero across the BELT-driven band. It was not zero everywhere: with
+Task 5's density surplus live the authored 138,000-bird DP22 arm at belt 14 sits at 40.15 %
+moisture, where the old term still contributed 0.9088 ppm before f_MAT. "Inert" is true of the
+belt lever alone, which is the correction this line carries. It is now a multiplicative
 factor on the whole emission term, which is how the sources fit it:
 
 ```
-moisture_mult = exp(nh3_moisture_coeff * (litter_moisture − nh3_moisture_ref) * 10)
+moisture_mult = exp(nh3_moisture_frac_per_g_kg * (litter_moisture − nh3_moisture_ref) * 10)
 emission      = (nh3_target_base + nh3_litter_coeff * min(litter_age, 60)) * f_MAT * moisture_mult
 ```
 
 | parameter | value | provenance and operating point |
 |---|---|---|
-| `nh3_moisture_coeff` | **0.0040** per g/kg | **Sourced** — Groot Koerkamp Ch. 5 eq. (18), +4 % TAN per 10 g/kg of litter water, fitted over **58 aviary litter samples spanning a measured 52–438 g/kg** (VIFs 1.09–1.18) |
+| `nh3_moisture_frac_per_g_kg` | **0.0040** per g/kg | **Sourced** — Groot Koerkamp Ch. 5 eq. (18), +4 % TAN per 10 g/kg of litter water, fitted over **58 aviary litter samples spanning a measured 52–438 g/kg** (VIFs 1.09–1.18) |
 | `nh3_moisture_ref` | **17.12 %** | **Derived, not free** — the litter moisture of the house `nh3_target_base` was calibrated in: CSES ran manure belts every 3–4 days, and `litter_moisture_equilibrium(3.5)` = 17.125 % under this model's belt curve |
 
 Ch. 7 eq. (9)'s **α₃ = 0.32 %/(g/kg)** is the same quantity over a narrower fitted domain

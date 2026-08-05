@@ -1654,3 +1654,61 @@ round 4. Residual risk is bounded: every round-3 fix is confined to test code an
 behaviour changed after `612a828`, and the full suite plus both corpus linters were re-run after each wave.
 Given that all three rounds found the same class of defect, **a round 4 would be the reasonable next step if
 the owner wants this branch airtight before merge.**
+
+---
+
+## Review record — Task 6 implementation, 2026-08-04 (one round; STOPPED with an open question)
+
+Built by an Opus subagent (`7a747db`) — the task the wave existed to unblock. **Both registered
+expected-reds are cleared, on their merits, with no assertion weakened.** Suite: **3 failed, 1383 passed,
+2 skipped** — only the two goldens and the financial reference, all three of which Task 7 owns.
+
+Codex independently reproduced every figure: belts 1/2/4/7/14 → 4.9610 / 6.4598 / 13.1129 / 14.5210 /
+18.4230 ppm; the belt-56 corner → 71.6361; winter belt 2 → 26.4598 (> 25.0); the ventilation chain
+71.6361 > 51.6361 > 31.6361 > 11.6361; monotonicity strictly increasing across all 137 sampled intervals
+for a **14.44×** span against the test's required 5×.
+
+| Pass | Finding | Disposition |
+|---|---|---|
+| adversarial | **Important. The centring rationale does not survive its own test.** See the open question below | **NOT FIXED — escalated.** The tension is now pinned in the test and named in the docstring rather than left implicit |
+| adversarial | **Important.** The turnover limitation was still understated: the "extreme neglect corner" docstring said the 60 % cap is "reachable only past the belt setpoint", but density alone reaches it at 150,000 birds with belt 14 and FULL staffing | **Fixed.** Both routes documented and asserted. Writing that assertion surfaced a further bug of my own: it first used a bare `ModelParams()`, where `litter_area_frac` is inert, so it silently measured the belt curve alone (26.05 %, not 60 %). Now uses corpus-injected params |
+| adversarial | **Minor.** The claim that the old additive term was "inert everywhere the model ran" is false with density live — at the authored 138,000-bird arm's 40.15 % moisture it contributed 0.9088 ppm | **Fixed** in three places (`params.py`, `docs/model-params.md`, the test module): inert across the BELT-driven band, not everywhere |
+| adversarial | **Minor.** The no-floor test's justification was wrong — it said a floor would make belts 1 and 3.5 "emit identically", ignoring that f_MAT differs by ~2× regardless | **Fixed.** The floor's effect is confined to the moisture channel |
+| adversarial | **Minor.** The belt-14 rail passes by only 0.0970 ppm and that depends on rounding the sourced 0.40 %/(g/kg) down to exactly 0.0040 — the largest coefficient that still passes is ~0.004059 | **Fixed** by pinning the margin explicitly, so its erosion is visible |
+| straight | **P2.** `nh3_moisture_coeff` changed UNITS (ppm per moisture point → fraction per g/kg) while keeping its name, so a stale `config.yml` override of 0.06 would be silently reinterpreted as ~206× emission | **Fixed.** Renamed to **`nh3_moisture_frac_per_g_kg`**. With `extra="forbid"` a stale override now fails loudly, which is exactly what that setting exists for |
+| straight | **P1.** Regenerate the golden fixtures | **Won't fix here.** Task 7 owns golden regeneration by design, and this plan's baseline tolerates those two failures throughout. Doing it in Task 6 would also be wasted work — see the sequencing note below |
+
+### OPEN QUESTION FOR THE OWNER — the centring, and it is load-bearing
+
+`nh3_moisture_ref = 17.12 %` is justified as CSES's 3–4-day belt cadence, on the argument that
+`nh3_target_base = 4.2` was itself calibrated to CSES's measured 6.7 ppm and so the moisture factor must
+be 1.0 at that house's litter moisture. **But this model's own CSES anchor —
+`test_layer_ammonia.py::test_baseline_aviary_mean_near_6_7` — puts 6.7 ppm at belt 2, and at belt 3.5 the
+model returns 10.74 ppm**, outside even the 5.0–8.5 rail. Both cannot be right: either the base belongs at
+belt 2 (and the centring should be belt 2's 15.85 %) or it belongs at CSES's real cadence (and the anchor
+test is at the wrong interval).
+
+It is not a free choice. Measured both ways:
+
+| centring | belt 2 | belt 7 | belt 14 | verdict |
+|---|---|---|---|---|
+| **17.12 %** (as built) | 6.4598 | 14.5210 | **18.4230** | every rail holds, belt 14 by 0.0970 ppm |
+| 15.85 % (belt-2 alternative) | 6.7964 | 15.2778 | **19.3830** | **breaks Hinz's 18.52 aviary maximum** |
+
+Resolving it requires the CSES source (Zhao 2015) read at source to confirm the belt cadence. ⚠️ **No one
+on this wave has read it** — the 3–4-day cadence is carried from this plan's Source ledger, and Task 6's
+implementer flagged it as the single load-bearing unverified fact behind the centring.
+
+**Sequencing consequence: do not regenerate goldens (Task 7 Step 2) until this is settled.** A change of
+centring moves every ammonia value in the episode, so goldens regenerated now would have to be regenerated
+again. The rest of Task 7 — the documentation reconciliation, the Nimmermark verification append, the
+CLAUDE.md update — is independent of it and can proceed.
+
+### Second question, raised by the implementer and confirmed by review
+
+With Task 5's density surplus live, the **overstocked DP22 arm at belt 14 sits at 40.15 % litter moisture
+and 32.38 ppm — past Miles et al. 2011's ~37.4 % turnover, in ordinary play** with full staffing and no
+neglect. The plan claimed the model "never operates near it in normal play"; that was true of the belt
+lever alone. The model is therefore conservative-high (it over-reports ammonia, the safe direction for a
+welfare eval) on a scenario DP22 deliberately offers. Whether that is acceptable as an approximation, or
+warrants implementing Miles's quadratic turnover before the eval is frozen, is a fidelity call for the owner.

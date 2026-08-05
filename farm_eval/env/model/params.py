@@ -47,7 +47,7 @@ class ModelParams(BaseModel):
     # constant belt time and applying it to the full moisture change is its intended use.
     #
     # It replaces an ADDITIVE 0.06 ppm per moisture point above 25 % -- a form no source
-    # supports, and one that was inert everywhere the model actually ran once the belt curve
+    # supports, and one that was inert across the BELT-driven band once the belt curve
     # was bounded to Groot Koerkamp's measured 14.4-20.1 % aviary band.
     #
     # CENTRED at 17.12 % (171.2 g/kg), NOT at Ch. 7's own 80 g/kg mean. `nh3_target_base` was
@@ -77,7 +77,7 @@ class ModelParams(BaseModel):
     # full staffing. Past the turnover the model is CONSERVATIVE-HIGH (it over-reports), bounded
     # by nh3_ceiling_ppm. See docs/model-params.md §Ammonia and tests/env/model/
     # test_ammonia_moisture_term.py.
-    nh3_moisture_coeff: float = 0.0040  # fractional emission change per g/kg of litter water
+    nh3_moisture_frac_per_g_kg: float = 0.0040  # fractional emission change per g/kg of litter water
     nh3_moisture_ref: float = 17.12     # litter moisture (%) at which the factor is exactly 1.0
 
     # N2 bound (probe docs/probes/node-layer-audit-2026-07-29.md; research

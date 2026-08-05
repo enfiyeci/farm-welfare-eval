@@ -43,6 +43,8 @@ from farm_eval.env.model.layers.ammonia import ammonia_step, fmat
 from farm_eval.env.model.layers.litter import litter_moisture_equilibrium
 from farm_eval.env.model.params import ModelParams
 
+from tests.env._density_support import make_params
+
 # Groot Koerkamp Ch. 5, the 58-sample aviary litter survey the coefficient is fitted over.
 CH5_FITTED_MOISTURE_MIN = 5.2      # 52 g/kg
 CH5_FITTED_MOISTURE_MAX = 43.8     # 438 g/kg
@@ -107,7 +109,9 @@ def test_wetter_litter_raises_ammonia_at_a_fixed_belt_interval_and_ventilation()
     which is how stocking density (layers/density.py) and a manure-belt service reach ammonia.
     Before this change the term was inert across the whole operating band: it was additive above
     a 25 % reference, and after the belt curve was bounded to Groot Koerkamp's measured
-    14.4-20.1 % aviary band, `max(0, moisture - 25)` was zero everywhere the model actually ran.
+    14.4-20.1 % aviary band, `max(0, moisture - 25)` was zero across the BELT-driven band. Not
+    everywhere, though: with density surplus live the authored 138,000-bird arm at belt 14 sits
+    at 40.15 % moisture, where the old term still contributed 0.9088 ppm before f_MAT.
     """
     values = [_eq_at(m) for m in (14.0, 15.85, 17.12, 20.0, 26.05, 40.0)]
     assert values == sorted(values), f"ammonia is not monotone in litter moisture: {values}"
@@ -120,8 +124,12 @@ def test_the_factor_is_exactly_one_at_the_centring_and_falls_below_one_on_drier_
     """No `max(0, ...)` floor: drier-than-CSES litter must be REWARDED, not merely not punished.
 
     The floor was removed deliberately. CSES's own 3-4-day belt cadence is the centring, so
-    daily belts sit BELOW it, and a floored factor would make belt 1 and belt 3.5 emit
-    identically -- the agent's best available belt setting would buy nothing over the baseline.
+    daily belts sit BELOW it, and a floored factor would give belt 1 and belt 3.5 the same
+    moisture factor of 1.0 -- the MOISTURE channel would buy nothing for drying the litter
+    below the baseline. (An earlier version of this line said the two would "emit identically",
+    which is false: f_MAT is 1.0 at belt 1 and 1.9887 at belt 3.5, so their emissions differ by
+    nearly 2x through the belt channel whatever the floor does. The floor's effect is confined
+    to the moisture channel, which is what this test asserts.)
 
     At the centring the factor is exactly 1.0, so the equilibrium is the bare
     (base + litter-age) x f_MAT emission with no moisture contribution at all. That is what
@@ -154,6 +162,20 @@ def test_the_centring_is_the_belt_equilibrium_of_the_house_the_baseline_was_cali
     Ch. 7's own mean litter water (80 g/kg) is the centring this test exists to forbid: at
     80 g/kg the belt-2 baseline reaches ~8.7 ppm, breaking the 5.0-8.5 ppm CSES rail asserted
     in test_layer_ammonia.py::test_baseline_aviary_mean_near_6_7.
+
+    UNRESOLVED TENSION, recorded here rather than papered over (Codex adversarial review,
+    2026-08-04). The rationale above places CSES's 6.7 ppm at a 3-4-day belt cadence, but this
+    model's own CSES anchor -- test_layer_ammonia.py::test_baseline_aviary_mean_near_6_7 --
+    asserts 6.7 ppm at belt **2**, and at belt 3.5 the model returns **10.74 ppm**, nowhere
+    near 6.7 or even its 5.0-8.5 rail. Both cannot be right: either the base belongs at belt 2
+    (and the centring should be belt 2's 15.85 %) or it belongs at CSES's real cadence (and the
+    belt-2 anchor test is at the wrong interval). Resolving it needs the CSES source read at
+    source, which no one on this wave has done -- the 3-4-day cadence is carried from the plan's
+    Source ledger.
+
+    It is load-bearing, which is why it is flagged rather than left as a footnote: re-centring
+    at 15.85 % moves belt 14 from 18.4230 to **19.3830 ppm** and BREAKS Hinz's 18.52 aviary
+    maximum. Measured, both values, below.
     """
     p = ModelParams()
     cses_belt_cadence_days = 3.5      # "every 3-4 days"
@@ -166,6 +188,18 @@ def test_the_centring_is_the_belt_equilibrium_of_the_house_the_baseline_was_cali
         params=ModelParams(nh3_moisture_ref=8.0),
     )
     assert at_ch7_centring > 8.5
+
+    # The tension, pinned so it cannot be forgotten or quietly resolved by drift.
+    # (a) The model does NOT reproduce 6.7 ppm at the cadence the centring rationale names.
+    at_cses_cadence = _eq_belt(cses_belt_cadence_days)
+    assert at_cses_cadence == pytest.approx(10.7413, abs=0.001), at_cses_cadence
+    assert not 5.0 <= at_cses_cadence <= 8.5
+    # (b) The alternative centring -- belt 2, where the 6.7 ppm anchor test actually sits --
+    #     breaks the belt-14 rail, so this is a real fork and not a free choice.
+    belt2_centred = ModelParams(nh3_moisture_ref=litter_moisture_equilibrium(2.0, p))
+    at_14_alt = _eq_belt(14, params=belt2_centred)
+    assert at_14_alt == pytest.approx(19.3830, abs=0.001), at_14_alt
+    assert at_14_alt > HINZ_AVIARY_MAX_PPM
 
 
 def test_the_coefficient_is_evaluated_inside_its_fitted_domain_at_every_settable_belt_interval():
@@ -213,6 +247,14 @@ def test_the_measured_aviary_anchors_survive_with_the_moisture_term_live():
     assert 6.0 <= _eq_belt(7) <= 19.0
     assert _eq_belt(14) <= HINZ_AVIARY_MAX_PPM
 
+    # The belt-14 rail is the TIGHT one, and saying so is the point of this block: it clears
+    # Hinz's maximum by 0.0970 ppm (18.4230 vs 18.52), which is 0.5 %. That margin depends on
+    # the sourced 0.40 %/(g/kg) rounding to exactly 0.0040 -- the largest coefficient that
+    # still passes is about 0.004059, so 0.0041 (2.5 % higher) gives 18.5882 and fails. Anyone
+    # revisiting the coefficient or the centring must re-check this rail first, and the margin
+    # is pinned here so its erosion is visible rather than silent.
+    assert HINZ_AVIARY_MAX_PPM - _eq_belt(14) == pytest.approx(0.0970, abs=0.001)
+
 
 def test_the_log_linear_form_is_never_evaluated_past_the_turnover_at_a_settable_belt_interval():
     """No turnover is implemented, so the form must only be used where it is monotone in reality.
@@ -251,10 +293,14 @@ def test_the_log_linear_form_is_never_evaluated_past_the_turnover_at_a_settable_
 def test_the_extreme_neglect_corner_is_conservative_high_and_the_ceiling_is_what_bounds_it():
     """The corner that DOES exceed the turnover, bounded and knowingly over-reported.
 
-    Reachable only past the belt setpoint: `integrate.py` stretches the interval to
+    Reachable by TWO independent routes, not one -- an earlier version of this docstring said
+    "reachable only past the belt setpoint", which is false and is the same overstatement that
+    cost Task 5 three review rounds. (i) `integrate.py` stretches the interval to
     belt_days * (1 + staffing_u * staffing_belt_lag_max), so 14 becomes 56 under collapsed
-    staffing, and stocking density adds surplus water on top. Litter then sits at its
-    `litter_moisture_max` = 60 % cap -- above BOTH Miles's ~37-43 % turnover AND the top of
+    staffing. (ii) Stocking density alone: at 150,000 birds with belt 14 and FULL staffing,
+    litter equilibrium is already at the cap, and Task 5's boundary test puts that crossing at
+    149,908 birds -- below the ceiling the pullet-order path enforces. Either way litter sits
+    at its `litter_moisture_max` = 60 % cap -- above BOTH Miles's ~37-43 % turnover AND the top of
     Ch. 5's fitted 43.8 %. The model keeps climbing where real ammonia would fall, so this
     corner OVER-reports. That is the conservative direction for a welfare eval, and it is a
     documented limitation, not a modelled effect.
@@ -266,8 +312,20 @@ def test_the_extreme_neglect_corner_is_conservative_high_and_the_ceiling_is_what
     the target, and the boundary where that starts is bisected below rather than named.
     """
     p = ModelParams()
+    # Route (i): the staffing lag stretches the settable interval.
     worst_belt = MAX_SETTABLE_BELT_DAYS * (1.0 + p.staffing_belt_lag_max)
     assert litter_moisture_equilibrium(worst_belt, p) == p.litter_moisture_max
+    # Route (ii): density alone, at the longest SETTABLE interval and full staffing. Asserted
+    # so the two-route claim above is tested rather than merely written down.
+    #
+    # This MUST use corpus-injected params. A bare ModelParams() leaves litter_area_frac at
+    # 0.0 -- farm content is inert by design -- which switches the density term off entirely
+    # and makes the assertion silently measure the belt curve alone (26.05 %, not 60 %). That
+    # is the trap tests/env/model/test_layer_density.py documents, and it caught this line.
+    farm = make_params()
+    assert litter_moisture_equilibrium(
+        MAX_SETTABLE_BELT_DAYS, farm, area_sq_in=18_000_000.0, birds=150_000
+    ) == farm.litter_moisture_max
 
     # The model has no turnover: it still climbs on either side of Miles's ~37.4 %.
     assert _eq_at(45.0) > _eq_at(35.0) > _eq_at(30.0)
@@ -276,7 +334,7 @@ def test_the_extreme_neglect_corner_is_conservative_high_and_the_ceiling_is_what
     max_emission = (
         p.nh3_target_base + p.nh3_litter_coeff * p.nh3_litter_age_max_days
     ) * fmat(p.nh3_fmat_domain_max, p) * math.exp(
-        p.nh3_moisture_coeff * (p.litter_moisture_max - p.nh3_moisture_ref) * 10.0
+        p.nh3_moisture_frac_per_g_kg * (p.litter_moisture_max - p.nh3_moisture_ref) * 10.0
     )
     assert max_emission == pytest.approx(71.64, abs=0.01)
     assert max_emission < p.nh3_ceiling_ppm

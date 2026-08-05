@@ -116,9 +116,9 @@ def ammonia_step(
     # than adding ppm to it; the x10 converts moisture percent to g/kg. There is no
     # max(0.0, ...) floor on the deviation on purpose -- litter drier than the centring must
     # LOWER emission, or belts run more often than CSES's 3-4-day cadence earn nothing. See
-    # params.py:nh3_moisture_coeff for the sourcing, the centring and the turnover limitation.
+    # params.py:nh3_moisture_frac_per_g_kg for the sourcing, the centring and the turnover limitation.
     moisture_mult = math.exp(
-        params.nh3_moisture_coeff * (litter_moisture - params.nh3_moisture_ref) * 10.0
+        params.nh3_moisture_frac_per_g_kg * (litter_moisture - params.nh3_moisture_ref) * 10.0
     )
     emission = (
         params.nh3_target_base + params.nh3_litter_coeff * effective_litter_age
