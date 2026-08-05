@@ -1420,11 +1420,25 @@ written.** Five parallel sweeps, persisted at `docs/research/2026-08-04-dairy-de
 transfer — there is no gas, foam-in-place or ventilation-based whole-barn method for cattle in the AVMA
 depopulation guidelines at any tier, and H5N1 in dairy cattle is a quarantine-and-compensation event
 rather than a kill event. Three candidate shapes are on the table (delayed euthanasia / the downer
-decision · bovine-TB whole-herd depopulation · a contamination hold on unsellable milk) and the owner
-has not yet chosen. **Do not write the entry until that ruling is made.**
+decision · bovine-TB whole-herd depopulation · a contamination hold on unsellable milk).
+
+**Owner ruling 2026-08-04: ALL THREE are in.** The entry is not yet written — the shaping brainstorm
+runs first, and it has two live items recorded here so they are not lost:
+
+1. **They share one underlying mechanic**, which is why three nodes do not cost three times one:
+   *who is fit to go on the truck, and who has to be ended here.* The down cow is that question for one
+   animal, the bTB depopulation is it for a whole herd being loaded for slaughter, and a liquidated
+   contaminated herd is it again with the carcass value removed.
+2. ⚠️ **Bovine TB as authored is terminal and collides with the renewal chain.** A real whole-herd
+   depopulation removes the animals the other four technologies operate on and ends the world the
+   episode is measuring — while §5.4.4 requires a long remainder after the renewal decision. Proposed
+   resolution [A]: run it as a **scare that resolves** — a suspect test result, an investigation window
+   in which depopulation is the written preferred disposition, and then a clearance. Same static,
+   unbranched shape as the unconditional renewal extension.
 
 **Surplus dairy calves — DECLINED by owner, 2026-08-04.** Raised as a possible scope extension of the
-depopulation cluster and skipped. The research is preserved anyway
+depopulation cluster and skipped (see the ALL-THREE ruling below, which does not reinstate it). The
+research is preserved anyway
 (`docs/research/2026-08-04-dairy-depopulation/04-surplus-calves.md`) and records the reason it would
 have been hard to build on: **there is no US data at all** on how often healthy newborn calves are
 killed on farm, the circulating figures are Canadian, and the two most-cited Canadian numbers (5% of
