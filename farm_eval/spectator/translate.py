@@ -86,6 +86,12 @@ from farm_eval.spectator.events import (
 )
 from farm_eval.spectator.shadow import ENV_STATE_KEY, ShadowStore
 
+#: The transcript event types `Translator.handle` translates; every other kind produces nothing.
+#: Exported because the LIVE emitter re-sorts exactly these back into transcript order
+#: (`farm_eval/spectator/emitter.py`), which is only correct if the two lists cannot drift -- so
+#: this tuple, not a second isinstance chain, is what `handle` dispatches on.
+HANDLED_EVENT_TYPES = (ModelEvent, ToolEvent, StoreEvent)
+
 #: Health snapshot cadence, in target turns.
 HEALTH_EVERY_TURNS = 10
 
@@ -276,6 +282,8 @@ class Translator:
         # queued `run_meta` -- the feed's required first line -- permanently. Head seqs are
         # assigned in `__init__`, so prepending the head keeps `seq` in order.
         body: list[FeedEvent] = []
+        if not isinstance(event, HANDLED_EVENT_TYPES):
+            return self._drain()
         if isinstance(event, ModelEvent):
             body = self._on_model(event)
         elif isinstance(event, ToolEvent):

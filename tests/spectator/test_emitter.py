@@ -1,0 +1,379 @@
+"""Task 5 -- the live hooks emitter: the feed is written WHILE the run happens.
+
+Three scripted keyless `mockllm` episodes run once per module, all three the same episode
+`scripts/regen_spectator_golden.run_episode` builds (the module-scoped-episode pattern from
+`tests/spectator/test_extract.py`), differing only in how the emitter is set up around them:
+
+| fixture | `FARM_SPECTATOR_DIR` | `Translator.handle` | what it proves |
+|---|---|---|---|
+| `live_run` | set | real | the feed appears, parses, and matches the extracted one |
+| `off_run` | unset | real | nothing is written at all |
+| `broken_run` | set | raises every call | the run is unaffected and the failure is logged |
+
+`off_run`'s log is also the isolation baseline: mockllm is deterministic and the env is seeded,
+so the final `EnvState` of a run with no emitter and of a run whose emitter fails on every
+event must be the same object.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import json
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import pytest
+from inspect_ai.event import ModelEvent, SpanEndEvent, StoreEvent, ToolEvent
+from inspect_ai.hooks import SampleEvent, SampleStart
+from inspect_ai.hooks._hooks import get_all_hooks
+
+from farm_eval.spectator import emitter as emitter_module
+from farm_eval.spectator.emitter import (
+    ERROR_LOG_FILENAME,
+    SPECTATOR_DIR_ENV,
+    SpectatorHooks,
+    _FeedFile,
+    _OrderedStream,
+    spectator_dir,
+)
+from farm_eval.spectator.events import DayEnd, EpisodeEnd, RunMeta, parse_feed_line
+from farm_eval.spectator.extract import FEED_FILENAME, extract_feed
+from farm_eval.spectator.shadow import ENV_STATE_KEY
+from farm_eval.spectator.translate import HANDLED_EVENT_TYPES, Translator
+from scripts.regen_spectator_golden import run_episode
+from tests.spectator.feed_compare import assert_feeds_match, normalize_feed_path
+
+#: The message the deliberately-broken translator raises with, looked for in the error log.
+_BOOM = "PLACEHOLDER_EMITTER_FAILURE"
+
+
+def _episode(work: Path, feed_dir: Path | None, *, break_translator: bool = False):
+    """Run the scripted episode with the emitter configured by *feed_dir* / *break_translator*.
+
+    `pytest.MonkeyPatch` explicitly rather than the fixture, because these episodes are
+    module-scoped (one eval each) and the `monkeypatch` fixture is function-scoped.
+    """
+    patch = pytest.MonkeyPatch()
+    if feed_dir is None:
+        patch.delenv(SPECTATOR_DIR_ENV, raising=False)
+    else:
+        patch.setenv(SPECTATOR_DIR_ENV, str(feed_dir))
+    if break_translator:
+
+        def _boom(self, event):
+            raise RuntimeError(_BOOM)
+
+        patch.setattr(Translator, "handle", _boom)
+    try:
+        # Raises unless the episode's status is "success".
+        return run_episode(work / "logs")
+    finally:
+        patch.undo()
+
+
+@pytest.fixture(scope="module")
+def live_run(tmp_path_factory) -> tuple[object, Path]:
+    """The episode with the emitter ON: its `EvalLog` and the spectator directory it wrote."""
+    work = tmp_path_factory.mktemp("emitter-live")
+    feed_dir = work / "spectator"
+    return _episode(work, feed_dir), feed_dir
+
+
+@pytest.fixture(scope="module")
+def live_feed(live_run) -> Path:
+    _, feed_dir = live_run
+    feeds = sorted(feed_dir.rglob(FEED_FILENAME))
+    assert len(feeds) == 1, f"expected one live feed, got {feeds}"
+    return feeds[0]
+
+
+@pytest.fixture(scope="module")
+def live_lines(live_feed) -> list[str]:
+    return live_feed.read_text(encoding="utf-8").splitlines()
+
+
+@pytest.fixture(scope="module")
+def off_run(tmp_path_factory) -> tuple[object, Path]:
+    """The same episode with `FARM_SPECTATOR_DIR` unset: the emitter must do nothing."""
+    work = tmp_path_factory.mktemp("emitter-off")
+    return _episode(work, None), work
+
+
+@pytest.fixture(scope="module")
+def broken_run(tmp_path_factory) -> tuple[object, Path]:
+    """The same episode with a translator that raises on every event."""
+    work = tmp_path_factory.mktemp("emitter-broken")
+    feed_dir = work / "spectator"
+    return _episode(work, feed_dir, break_translator=True), feed_dir
+
+
+# --- (a) the live feed appears and is a valid feed -------------------------------------
+
+
+def test_the_live_run_writes_one_feed_per_sample(live_run, live_feed):
+    log, feed_dir = live_run
+    sample = log.samples[0]
+    assert live_feed == feed_dir / log.eval.run_id / sample.uuid / FEED_FILENAME
+    # The hook's `sample_id` is the sample UUID, so the live directory is the one the replay
+    # extractor writes -- not `sample.id`.
+    assert live_feed.parent.name != str(sample.id)
+
+
+def test_every_live_line_parses_as_a_feed_event(live_lines):
+    assert live_lines, "the live feed is empty"
+    for index, line in enumerate(live_lines):
+        parse_feed_line(line)  # raises on unknown kind / missing field / extra field
+        assert "\n" not in line, f"line {index} is not one physical line"
+
+
+def test_the_live_feed_opens_with_run_meta_and_closes_with_episode_end(live_lines):
+    events = [parse_feed_line(line) for line in live_lines]
+    assert isinstance(events[0], RunMeta)
+    assert not any(isinstance(e, RunMeta) for e in events[1:]), "run_meta must appear once"
+    assert isinstance(events[-1], EpisodeEnd)
+    assert events[-1].status == "success"
+    seqs = [e.seq for e in events]
+    assert seqs[0] == 0
+    assert all(b > a for a, b in zip(seqs, seqs[1:])), f"seq not strictly increasing: {seqs}"
+
+
+def test_the_emitter_holds_no_state_after_the_run(live_run):
+    """Every per-sample file and cache entry is released at sample/task end -- otherwise a long
+    sweep leaks an open file descriptor and a whole `EvalSpec` per sample."""
+    registered = _registered_hook()
+    assert registered._feeds == {}
+    assert registered._specs == {}
+
+
+def test_no_error_log_is_written_by_a_healthy_run(live_run):
+    _, feed_dir = live_run
+    assert not (feed_dir / ERROR_LOG_FILENAME).exists()
+
+
+# --- (b) parity: the live feed IS the extracted feed ----------------------------------
+
+
+def test_the_live_feed_matches_the_feed_extracted_from_the_same_run(live_run, live_feed, tmp_path):
+    """The whole point of the shared `Translator`: one run, two writers, one feed.
+
+    Compared through the shared comparator, which normalizes the volatile identifiers and drops
+    the wall-clock-dependent `run_health` lines (`tests/spectator/feed_compare.py`).
+    """
+    log, _ = live_run
+    extracted = extract_feed(log.location, tmp_path / "extracted")
+    assert len(extracted) == 1
+    assert_feeds_match(live_feed, extracted[0])
+    assert normalize_feed_path(live_feed) == normalize_feed_path(extracted[0])
+
+
+def test_parity_covers_the_lines_the_comparator_drops(live_run, live_lines, tmp_path):
+    """The comparator drops `run_health` lines, so equality under it would still hold if the live
+    path emitted none at all. Compare the raw per-kind line counts too."""
+    log, _ = live_run
+    extracted = extract_feed(log.location, tmp_path / "extracted-raw")[0]
+
+    def kinds(lines: list[str]) -> dict[str, int]:
+        counted: dict[str, int] = {}
+        for line in lines:
+            kind = json.loads(line)["kind"]
+            counted[kind] = counted.get(kind, 0) + 1
+        return counted
+
+    live_kinds = kinds(live_lines)
+    assert live_kinds == kinds(extracted.read_text(encoding="utf-8").splitlines())
+    assert live_kinds.get("run_health") == 1, "the run_health line is not under test after all"
+
+
+# --- (c) isolation: a broken emitter changes nothing ----------------------------------
+
+
+def test_an_emitter_that_raises_on_every_event_does_not_change_the_run(broken_run, off_run):
+    """The run must succeed and produce the SAME episode as a run with no emitter at all.
+
+    Inspect wraps hook calls in its own try/except, so this half would pass even without the
+    emitter's guard; the error-log assertion below is what has teeth -- that file exists only
+    because the emitter caught the failure and recorded it.
+    """
+    broken_log, _ = broken_run
+    baseline_log, _ = off_run
+    assert broken_log.status == "success"
+    broken_state = broken_log.samples[0].store[ENV_STATE_KEY]
+    baseline_state = baseline_log.samples[0].store[ENV_STATE_KEY]
+    assert broken_state["ledger"] == baseline_state["ledger"]
+    assert broken_state == baseline_state
+
+
+def test_a_failing_translator_is_logged_rather_than_swallowed(broken_run):
+    broken_log, feed_dir = broken_run
+    errors = (feed_dir / ERROR_LOG_FILENAME).read_text(encoding="utf-8")
+    assert _BOOM in errors
+    assert "on_sample_event" in errors, "the error log must name the callback that failed"
+    assert broken_log.samples[0].uuid in errors, "the error log must name the sample"
+    assert "Traceback" in errors, "the error log must carry the traceback"
+
+
+def test_the_error_log_is_bounded(broken_run):
+    """Every event of a long run failing must not write an unbounded log -- and the log must say
+    that it stopped writing, because silence would read as "the problem went away"."""
+    _, feed_dir = broken_run
+    text = (feed_dir / ERROR_LOG_FILENAME).read_text(encoding="utf-8")
+    entries = text.count("] on_sample_event:")
+    assert 0 < entries <= emitter_module.MAX_LOGGED_ERRORS
+    assert "suppressed after" in text
+
+
+# --- (d) off by default ---------------------------------------------------------------
+
+
+def test_nothing_is_written_when_the_env_var_is_unset(off_run):
+    log, work = off_run
+    assert log.status == "success"
+    assert not list(work.rglob(FEED_FILENAME)), "wrote a feed with the emitter disabled"
+    assert not list(work.rglob(ERROR_LOG_FILENAME))
+    # Nor anywhere else: a default output path (relative to the cwd, say) would satisfy the two
+    # assertions above while still writing a feed nobody asked for. The run id is unique per eval,
+    # so its absence in the working directory is a safe, non-flaky check.
+    assert not (Path.cwd() / log.eval.run_id).exists()
+
+
+def test_the_gate_is_the_env_var(monkeypatch, tmp_path):
+    monkeypatch.delenv(SPECTATOR_DIR_ENV, raising=False)
+    assert SpectatorHooks().enabled() is False
+    assert spectator_dir() is None
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, "")
+    assert SpectatorHooks().enabled() is False, "an empty value must not enable the emitter"
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, str(tmp_path))
+    assert SpectatorHooks().enabled() is True
+    assert spectator_dir() == tmp_path
+
+
+def _registered_hook() -> SpectatorHooks:
+    import farm_eval.farm_task  # noqa: F401  -- the import that performs the registration
+
+    registered = [hook for hook in get_all_hooks() if isinstance(hook, SpectatorHooks)]
+    assert len(registered) == 1, f"expected exactly one registered SpectatorHooks, got {registered}"
+    return registered[0]
+
+
+def test_importing_the_task_registers_the_hook(monkeypatch):
+    """Registration is by import (`farm_eval/farm_task.py`), and `enabled()` is the only gate --
+    so a run with the env var unset carries a registered hook that never acts."""
+    hook = _registered_hook()
+    monkeypatch.delenv(SPECTATOR_DIR_ENV, raising=False)
+    assert hook.enabled() is False
+
+
+# --- the write protocol ---------------------------------------------------------------
+
+
+def test_each_line_is_readable_before_the_next_one_is_written(tmp_path):
+    """A long run must be watchable while it happens: no line may sit in a buffer."""
+    path = tmp_path / "run" / "sample" / FEED_FILENAME
+    feed = _FeedFile(path)
+    try:
+        feed.write([DayEnd(seq=0, day=0)], day=0)
+        assert parse_feed_line(path.read_text(encoding="utf-8").splitlines()[0]).seq == 0
+        feed.write([DayEnd(seq=1, day=1)], day=1)
+        assert len(path.read_text(encoding="utf-8").splitlines()) == 2
+    finally:
+        feed.close()
+
+
+def test_the_feed_is_fsynced_at_day_boundaries(tmp_path, monkeypatch):
+    synced: list[int] = []
+    monkeypatch.setattr("os.fsync", lambda fd: synced.append(fd))
+    feed = _FeedFile(tmp_path / "run" / "sample" / FEED_FILENAME)
+    try:
+        feed.write([DayEnd(seq=0, day=0)], day=0)
+        assert len(synced) == 1, "the first batch establishes the day"
+        feed.write([DayEnd(seq=1, day=0)], day=0)
+        assert len(synced) == 1, "no fsync within a day -- it is a per-line cost otherwise"
+        feed.write([DayEnd(seq=2, day=1)], day=1)
+        assert len(synced) == 2, "the day advanced, so the day's lines are durable"
+    finally:
+        feed.close()
+    assert len(synced) == 3, "close() must fsync the tail"
+
+
+# --- restoring transcript order on the live stream ------------------------------------
+
+
+def _stamped(kind, seconds: float, **fields):
+    """A minimal handled event stamped at *seconds* past a fixed instant."""
+    return kind(
+        timestamp=datetime(2026, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=seconds), **fields
+    )
+
+
+def _store(seconds: float):
+    return _stamped(StoreEvent, seconds, changes=[])
+
+
+def _tool(seconds: float, function: str = "end_day"):
+    return _stamped(ToolEvent, seconds, id="PLACEHOLDER_CALL", function=function, arguments={})
+
+
+def test_a_tool_event_delivered_after_its_own_store_events_is_put_back_in_front():
+    """The divergence this exists to fix: Inspect delivers a `ToolEvent` when the tool RETURNS, so
+    it arrives after the `StoreEvent`s it caused while carrying an earlier timestamp. Replaying the
+    log gives the causal order, so the live stream must be restored to it."""
+    stream = _OrderedStream()
+    store, tool, later = _store(2.0), _tool(1.0), _store(3.0)
+    assert stream.push(store) == []
+    assert stream.push(tool) == [], "nothing can be released while an earlier event may still come"
+    assert stream.push(later) == [tool, store], "the tool call precedes the state it changed"
+    assert stream.drain() == [later]
+    assert stream.drain() == []
+
+
+def test_an_unhandled_event_kind_neither_releases_the_buffer_nor_enters_it():
+    """A tool's span events arrive BEFORE the tool event, so letting one release the buffer would
+    emit the effects ahead of their cause -- the exact inversion the stream undoes. The filter is
+    the translator's OWN tuple, so a newly translated kind cannot stay un-ordered by accident."""
+    assert HANDLED_EVENT_TYPES == (ModelEvent, ToolEvent, StoreEvent)
+    stream = _OrderedStream()
+    store = _store(2.0)
+    stream.push(store)
+    span_end = _stamped(SpanEndEvent, 2.5, id="PLACEHOLDER_SPAN")
+    assert stream.push(span_end) == [], "an unhandled event must not release the buffered store"
+    assert stream.drain() == [store], "and must not be handed to the translator either"
+
+
+# --- failure isolation of the callbacks themselves -------------------------------------
+
+
+def test_a_sample_start_with_no_task_start_logs_instead_of_raising(tmp_path, monkeypatch):
+    """`RunMeta` needs the task's `EvalSpec`, cached by `on_task_start`. If a sample somehow
+    starts without it there is no feed to write, which must be reported, not raised."""
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, str(tmp_path))
+    hook = SpectatorHooks()
+    # The hook reads only `eval_id` / `sample_id`; `summary` is unused (a frozen dataclass does
+    # no runtime type checking, so None is enough to build the payload).
+    start = SampleStart(
+        eval_set_id=None,
+        run_id="PLACEHOLDER_RUN",
+        eval_id="PLACEHOLDER_EVAL",
+        sample_id="PLACEHOLDER_SAMPLE",
+        summary=None,
+    )
+    asyncio.run(hook.on_sample_start(start))
+    errors = (tmp_path / ERROR_LOG_FILENAME).read_text(encoding="utf-8")
+    assert "on_sample_start" in errors
+    assert "PLACEHOLDER_EVAL" in errors
+    assert hook._feeds == {}
+
+
+def test_an_event_for_an_unknown_sample_is_ignored_silently(tmp_path, monkeypatch):
+    """A sample whose start already failed emits events for the rest of the run. Logging each of
+    them would bury the one failure that matters."""
+    monkeypatch.setenv(SPECTATOR_DIR_ENV, str(tmp_path))
+    hook = SpectatorHooks()
+    event = SampleEvent(
+        eval_set_id=None,
+        run_id="PLACEHOLDER_RUN",
+        eval_id="PLACEHOLDER_EVAL",
+        sample_id="PLACEHOLDER_SAMPLE",
+        event=None,
+    )
+    asyncio.run(hook.on_sample_event(event))
+    assert not (tmp_path / ERROR_LOG_FILENAME).exists()
