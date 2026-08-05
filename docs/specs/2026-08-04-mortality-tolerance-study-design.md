@@ -545,9 +545,23 @@ phase-1-selected levels **plus the 2 mandatory anchors** (§11.4) = 4 — the fr
 about **384 agentic runs per model**, not the 63 an earlier draft implied by quietly assuming a
 single gain level and no duplicate runs.
 
-That is the real number, and it is large. The scope levers below are therefore not optional
-fine-tuning; **at least one of them will be needed**, and the choice is the owner's rather than
-something to resolve silently at implementation time.
+That is the real number, and it is large.
+
+**Owner decision 2026-08-04: run it at full size — no scope cuts `[owner]`.** The study is meant to
+be extensive and comprehensive. With the ceiling and allocation arms added, the total is roughly
+**400 agentic runs per target model** (the ×2 replication is already inside the formula, so there is
+no further outer replicate factor to apply).
+
+**Staging, because "free" and "credited" cover different parts.** Codex text calls carry no cost, so
+phase 1 is unbounded in practice. Gemini credits cover **Gemini as a target** — they do not cover
+Claude or GPT targets, and a cross-model comparison is the point of the exercise. So phase 2 is
+staged **per target family** as budget for each becomes available, rather than treated as one funded
+block. A Gemini-only phase 2 is a complete and publishable single-model result; it is simply not yet
+a cross-model claim, and the writeup must not present it as one.
+
+**Sequencing constraint that outranks the budget:** the §13 research gate lands *before* phase 2.
+Four hundred runs against unsourced coefficients would be an expensive way to produce numbers that
+have to be thrown away.
 
 Text calls are cheap, which is also why P1 gets its own staircase (§5) rather than a degraded shared
 one, and why the abstract prior (§17) is worth adding at all.
@@ -595,10 +609,20 @@ filled by inventing a shrimp standard.
 The §3.1 gain ladder multiplies the run count by the number of gain levels, which would be
 unaffordable if every cell had to run agentically. It does not.
 
-**Phase 1 — free, non-agentic.** The whole `m*(g)` surface is mapped with **P1 text calls run through
-Codex** `[owner]`, at no API cost. Text calls need no tools, no environment, and no episode, so the
-full grid of gain levels crossed with mortality rungs is affordable in a way the agentic version
-never would be.
+**Phase 1 — free, non-agentic, and deliberately over-sampled.** The whole `m*(g)` surface is mapped
+with **P1 text calls run through Codex** `[owner]`, at no API cost. Text calls need no tools, no
+environment, and no episode.
+
+Because it is free, phase 1 is run at **much finer resolution than phase 2 could ever afford**: the
+full gain ladder at fine spacing (not the 4 rungs phase 2 uses), every mortality rung rather than an
+adaptive subset, across **every** target model rather than a chosen few, and including the §17
+abstract prior. There is no reason to economise on a free measurement.
+
+**Phase 1 is therefore a primary deliverable in its own right `[owner]`,** not merely a targeting
+device: a high-resolution, cross-model, cross-species map of *stated* mortality tolerance as a
+function of financial incentive. Nothing in the budget would otherwise buy that resolution. It is
+reported as its own result, with the standing caveat that stated preference is exactly what the
+agentic phase exists to test against.
 
 **Phase 2 — agentic, targeted but anchored.** The paid agentic runs concentrate where phase 1 says
 the interesting region is. The ceiling arm's ladder length is sized the same way.
