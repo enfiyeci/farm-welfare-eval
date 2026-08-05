@@ -2289,7 +2289,7 @@ compare against the anchor using cohorts that had a full cycle, never the flock 
 
 **Interfaces:**
 - Produces:
-  - `farm_eval.env.state.KeelCohort` — `house_id: str, birds: float, start_day: int, offset_hours: float`
+  - `farm_eval.env.state.KeelCohort` — `house_id: str, birds: float, start_day: int, offset_days: int`
   - `WelfareState.keel_cohorts: list[KeelCohort]`, `WelfareState.keel_baseline_pct: dict[str, float]`
   - `pain.keel_profile(pp) -> list[tuple[float, tuple[float, float, float]]]` — the integrated
     timeline as `(duration_hours, (disabling, hurtful, annoying))` segments
@@ -2386,9 +2386,12 @@ def test_the_seed_and_the_daily_rises_both_appear_over_a_real_run():
     root = pathlib.Path(__file__).resolve().parents[3]
     state = build_initial_state(load_corpus(root / "corpus"))
     integrate(state, 120, ModelParams())
-    seeds = [c for c in state.welfare.keel_cohorts if c.start_day == 0]
-    assert seeds, "expected one backdated seed cohort per occupied house"
-    assert any(c.start_day > 0 for c in state.welfare.keel_cohorts)
+    # A seed is identified by its BACKDATED position, not by start_day: seeds are created on
+    # the house's first integrated day (day 1), the same day rise-cohorts can open.
+    seeds = [c for c in state.welfare.keel_cohorts if c.offset_days > 0]
+    assert seeds, "expected a backdated seed cohort for each house older than 30 weeks"
+    assert all(c.start_day == 1 for c in seeds), "seeds are created on the first integrated day"
+    assert any(c.offset_days == 0 for c in state.welfare.keel_cohorts), "expected rise cohorts too"
     assert state.welfare.pain_total.disabling > 0.0
 
 
@@ -2656,6 +2659,12 @@ litter_age + 1.0`, so the mortality block has already written `bird_count`):
                 for cohort in state.welfare.keel_cohorts:
                     if cohort.house_id == hid:
                         cohort.birds *= _survival
+                # The chronic-peritonitis case series carries birds too, and for the same
+                # reason: an unscaled case list keeps charging pain for cases belonging to
+                # birds no longer in bird_count.
+                _ages = state.welfare.peritonitis_case_ages.get(hid)
+                if _ages:
+                    state.welfare.peritonitis_case_ages[hid] = [c * _survival for c in _ages]
 ```
 
 **And hoist the tables** — immediately before the `for hid, hw in state.welfare.houses.items():`
@@ -3139,10 +3148,13 @@ is equally valid and gives different splits.
     keyed by channel
   - `attribution.tier_b_split(state) -> dict[str, dict[str, float]]` keyed by
     `"movable" | "fixed" | "mixed"`
-  - `regen_golden.run_reference(policy, *, with_config: bool = True)` returning
-    `{"harm": {...}, "pain_total": {...}, "pain_by_channel": {...}}` — ⚠️ existing callers read
-    the harm dict, so keep a `run_reference_harm(policy)` shim with the old return shape and
-    point the golden writer and `tests/env/test_golden_baseline.py` at it.
+  - `regen_golden.run_reference_states(policy) -> EnvState` — the NEW entry point; the pain
+    totals, per-channel tracks, death ledger and rate series all hang off the returned state.
+  - ⚠️ `regen_golden.run_reference(policy)` **keeps its existing harm-only dict return,
+    unchanged**, and becomes a one-line wrapper over `run_reference_states`. The golden writer
+    and `tests/env/test_golden_baseline.py` compare it against the checked-in harm dictionary,
+    so widening its return type would break acceptance criterion 1. Do not add a `with_config`
+    parameter: `run_reference_states` always applies the config.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -3554,7 +3566,7 @@ findings are adjudicated. ⚠️ Note from the spec's own §8.5: an adversarial 
 disease and sepsis was killed by OpenAI's content filter (a false positive); rephrase as a
 measurement/software-specification review. **A filtered run is not a clean run.**
 
-### ⚠️ STATUS: DO NOT EXECUTE YET — fix wave 2 is outstanding
+### Review status (superseded — see "Loop closed" at the end of this section)
 
 **Codex adversarial review of `9235779`** (`gpt-5.6-sol`, read-only, fresh session, phrased as a
 measurement/software-specification review so the content filter did not fire; verdict REVISE).
@@ -3592,3 +3604,27 @@ with its rationale. The plan is **cleared to execute** once the closing re-revie
 | 6 | Task 13 names the two channels that still book non-instantaneously (`feather`, `peritonitis_fatal`) and **excludes them from the forgone-pain calculation**, alongside the survivors-versus-dead assumption already required there |
 | 7 | Task 12's Interfaces block and all its tests now use `mortality_pain_by_cause` and its dict return, with a new test asserting every returned key is a declared channel |
 | 8 | `awake_hours_per_day` must be a whole number of hours, so the hourly heat channel and the daily state channels cannot disagree about the same configured convention |
+
+### Round 3 and the closed loop — 2026-08-05
+
+Re-review by `resume` on the same adversarial session (verdict REVISE, four findings, **all real,
+all applied**). ⚠️ **The pinned model changed mid-session**: `gpt-5.6-sol` began returning
+`400 — model is not supported when using Codex with a ChatGPT account` partway through this work,
+so round 3 ran on `gpt-5.6-terra`. Rounds 1 and 2 ran on `sol` before the entitlement changed.
+
+| Finding | Disposition |
+|---|---|
+| The rolling chronic-peritonitis case list is never scaled when the mortality block removes birds, so pain keeps accruing for cases belonging to dead birds — the same defect wave 2 fixed for keel cohorts, missed on the channel wave 2 itself introduced | **Fixed** — the case list is scaled by the same survival ratio, in the same block, immediately after the keel cohorts |
+| Task 11's test still searched for seed cohorts with `start_day == 0`, which wave 2's own `start_day=day` change made unfindable (day 1 is the first integrated day) | **Fixed** — seeds are now identified by `offset_days > 0`, which is what actually distinguishes a backdated seed from a rise cohort, plus an assertion that they are created on day 1 |
+| Task 11's Interfaces block still declared `KeelCohort.offset_hours` while the state definition and the integration code had moved to `offset_days` | **Fixed** — the Interfaces block matches |
+| Task 14 declared a widened `run_reference` return in its Interfaces block while Step 4 required the old harm-only shape — implementing either breaks the other, and the widened form breaks `tests/env/test_golden_baseline.py` against the checked-in goldens | **Fixed, and it was a pre-existing contradiction rather than a wave-2 defect** — `run_reference` keeps its exact current return and becomes a one-line wrapper; `run_reference_states` is the new entry point |
+
+⚠️ **Loop closed at its three-round cap without a fourth confirmation pass.** All four round-3
+items were mechanical propagation defects of corrections already adjudicated in wave 2, not new or
+disputed findings, so they were applied rather than escalated — the same disposition spec §8.4
+records for its own capped loop. Across the three rounds **nineteen findings were raised, eighteen
+verified real and fixed, one accepted with rationale, and none dismissed.**
+
+**The plan is cleared to execute.** ⚠️ It has never been run: every line of code in it is
+unexecuted, and the first three tasks are where that assumption gets tested. Treat a Task 1–3
+failure as information about the plan, not only about the implementation.
