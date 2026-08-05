@@ -66,11 +66,33 @@ class HarmAccumulators(BaseModel):
     red_mite_index_hours_over: float = 0.0
 
 
+class PainTrack(BaseModel):
+    """Cumulative time in pain by intensity category. Monotone non-decreasing.
+
+    Used for BOTH tracks (spec §5.2): bird-hours per house and complex-wide, and — per the
+    §7 Q4 ruling — a separate worker-hours track. Same shape, different unit; the two are
+    NEVER summed. The four categories are never combined into a fifth number (spec §2.2).
+    """
+
+    annoying: float = 0.0
+    hurtful: float = 0.0
+    disabling: float = 0.0
+    excruciating: float = 0.0
+
+
 class WelfareState(BaseModel):
     houses: dict[str, HouseWelfare] = Field(default_factory=dict)
     mortality_cumulative: float = 0.0
     mortality_rate_weekly: float = 0.0
     harm: HarmAccumulators = Field(default_factory=HarmAccumulators)
+    # --- welfare currency (spec 2026-08-04). Additive: nothing above reads these. ---
+    pain_by_house: dict[str, PainTrack] = Field(default_factory=dict)
+    pain_by_channel: dict[str, PainTrack] = Field(default_factory=dict)  # Tier B + criterion 4
+    # house -> channel -> track. 5 houses x 16 channels is 80 small objects; it is what lets
+    # Task 13's rate series be per channel, which §5.5.1 ¶13's decomposition needs.
+    pain_by_house_channel: dict[str, dict[str, PainTrack]] = Field(default_factory=dict)
+    pain_total: PainTrack = Field(default_factory=PainTrack)
+    worker_pain: PainTrack = Field(default_factory=PainTrack)  # WORKER-HOURS, never summed with birds
 
 
 class FinancialState(BaseModel):

@@ -4,6 +4,8 @@ import math
 
 from pydantic import BaseModel, Field, model_validator
 
+from farm_eval.env.model.pain_params import PainParams
+
 
 class ModelParams(BaseModel):
     # Harm-accumulator thresholds (Task 12: integrate orchestrator)
@@ -293,6 +295,9 @@ class ModelParams(BaseModel):
     # daily belt runs keep litter dry even short-staffed; mortality/floor-eggs/ammonia still
     # respond there.
     staffing_belt_lag_max: float = 3.0
+
+    # Welfare currency (spec 2026-08-04). Additive: no existing layer reads this.
+    pain: PainParams = PainParams()
 
     @model_validator(mode="after")
     def _validate_anchor_tables(self):

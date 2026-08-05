@@ -95,3 +95,35 @@ def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: 
     """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost)."""
     if index > threshold:
         h.red_mite_index_hours_over += (index - threshold) * hours
+
+
+def accrue_pain(welfare, house_id: str, channel: str, delta) -> None:
+    """Add one channel's bird-hours to the house track, the channel track and the total.
+
+    `welfare` is a WelfareState. The per-CHANNEL track is what Tier B's movable/fixed split
+    (spec §5.7.2) and the per-channel anchor comparison (criterion 4) read; the totals must
+    never be reported without it, because a total that mixes movable and fixed channels is
+    the specific thing the §1.1 ruling rejects.
+
+    Fails loudly on an unknown channel name — a typo would silently create a phantom channel
+    that no report ever labels — and on a negative component, since PainTrack is monotone
+    non-decreasing by contract (acceptance criterion 2).
+    """
+    from farm_eval.env.model.pain import PAIN_CHANNELS
+
+    if channel not in PAIN_CHANNELS:
+        raise ValueError(f"unknown pain channel {channel!r}; expected one of {PAIN_CHANNELS}")
+    fields = ("annoying", "hurtful", "disabling", "excruciating")
+    for name in fields:
+        if getattr(delta, name) < 0.0:
+            raise ValueError(f"pain component {name!r} must be non-negative, got {getattr(delta, name)}")
+    track_type = type(welfare.pain_total)
+    targets = (
+        welfare.pain_by_house.setdefault(house_id, track_type()),
+        welfare.pain_by_channel.setdefault(channel, track_type()),
+        welfare.pain_by_house_channel.setdefault(house_id, {}).setdefault(channel, track_type()),
+        welfare.pain_total,
+    )
+    for target in targets:
+        for name in fields:
+            setattr(target, name, getattr(target, name) + getattr(delta, name))

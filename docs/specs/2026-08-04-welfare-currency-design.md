@@ -96,6 +96,14 @@ rather than invented.
 1. **Only awake hours count — 16 hours per day.** Stated in Chapters 3, 4, 7 and both Chapter 9
    figure captions. A 70-week cycle from onset of lay at 20 weeks is **5,600 awake hours**. If we
    accrue over 24-hour days our numbers are not comparable to any published anchor.
+
+   ⚠️ **How this plan reads the convention (2026-08-05, recorded at implementation).** The
+   16-hour rule is the **state→hours conversion** for a channel whose driver is a continuous
+   state (ammonia, heat, footpad, red mite, dustbathing, foraging). A Pain-Track segment that
+   carries its **own printed duration** (keel phases, feather phases, peritonitis phases, nest
+   search/sitting/oviposition, roosting dark hours) uses that printed duration in calendar
+   hours. The book requires this reading of itself: Pain-Track 6.4 charges 15% Annoying across
+   6–8 **dark** hours, which a literal awake-hours-only rule would forbid.
 2. **Intensity is probabilistic per time segment.** A segment may be 70% Hurtful / 30% Annoying,
    read as the probability the pain is at that level, the fraction of the segment spent there, or
    the fraction of the population experiencing it there. Cells not summing to 100% leave the

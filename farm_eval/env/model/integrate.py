@@ -245,6 +245,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
             acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
 
+            # --- Welfare currency (spec 2026-08-04): bird-hours by pain intensity. ---
+            # ADDITIVE ONLY. Every call below reads state and writes to state.welfare.pain_*;
+            # none of them touches hw, bird_count, the harm accumulators or the financials,
+            # which is what keeps acceptance criterion 1 (goldens byte-identical) true.
+            awake_h = params.pain.awake_hours_per_day
+
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
             # heat_mortality_frac is unbounded as hours-over-30 grows. hours_over_30 already
