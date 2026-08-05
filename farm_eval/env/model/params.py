@@ -4,6 +4,29 @@ import math
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from farm_eval.env.finite import iter_model_floats
+
+# Sign/range constraints, applied ON TOP of the blanket finiteness sweep below. Deliberately
+# NOT a table over every field: finiteness is objective and universal, while a range is a
+# per-field semantic judgement, and inventing plausible-looking bounds for eighty calibration
+# constants would assert precision this model does not have. Pinned here are the four fields
+# the review actually flagged — the three corpus-owned values loader.py:params_for injects
+# from company.yml, plus belt_service_decay_days, which has no corpus key and arrives only
+# through config.yml's `model_params:` block. That config block can set ANY field; the
+# blanket sweep, not this table, is what covers the rest.
+_MIN_ONLY: dict[str, float] = {
+    # A negative credit would STRETCH the effective belt interval, inverting the lever a
+    # manure-belt service pulls; a negative decay would make the credit grow with age. 0.0 is
+    # the inert "switched off" default for the credit and is read as "off" in layers/litter.py
+    # for the decay, so zero stays valid for both.
+    "belt_service_days_credit": 0.0,
+    "belt_service_decay_days": 0.0,
+    "density_ref_sq_in": 0.0,   # a reference area per hen; 0.0 = density pathways off
+}
+_RANGES: dict[str, tuple[float, float]] = {
+    "litter_area_frac": (0.0, 1.0),   # a SHARE of usable floor area
+}
+
 
 class ModelParams(BaseModel):
     # extra="forbid" so a stale or misspelled calibration key is a LOUD error, not a silent
@@ -13,7 +36,24 @@ class ModelParams(BaseModel):
     # differently from its own calibration document with no warning at all. Surfaced by the Codex
     # review of the f_MAT change, which deleted nh3_fmat_max and nh3_fmat_sat_rate. This matches
     # the convention already used for every schedule model.
-    model_config = ConfigDict(extra="forbid")
+    #
+    # validate_assignment so a later `p.belt_service_decay_days = inf` RAISES instead of
+    # silently reaching layers/litter.py. Nothing in the repo assigns to a ModelParams field,
+    # so this costs nothing today (~44 us per assignment when something does).
+    #
+    # It buys a LOUD FAILURE, not a full object invariant, and the difference is worth knowing
+    # (both halves measured, Codex review round 2). Pydantic installs the new value BEFORE
+    # running the model-level `after` validators below, so a rejected assignment raises with
+    # the bad value still in place — harmless while the error propagates and kills the run,
+    # wrong if anyone ever catches it and keeps using the object. Two further routes stay
+    # unguarded for the same structural reason: in-place container mutation
+    # (`p.breed_hdep[0] = nan`) assigns no attribute at all, and `model_copy(update=...)`
+    # skips validation outright (FarmEnv.__init__ uses it, but only with values it just read
+    # off an already-validated `params_for(corpus)`). Closing those means a __setattr__
+    # rollback and frozen containers — a lot of machinery for routes no code in this repo
+    # takes. Construction is the surface external data actually arrives through, and that is
+    # what the validators below cover.
+    model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
     # Harm-accumulator thresholds (Task 12: integrate orchestrator)
     # nh3_aversion_threshold: NH3 ppm above which ppm·hours accumulate as harm.
@@ -538,6 +578,39 @@ class ModelParams(BaseModel):
     staffing_belt_lag_max: float = 3.0
 
     @model_validator(mode="after")
+    def _validate_finite_and_bounded(self):
+        # Pydantic accepts inf/-inf/nan for a `float` field by default, and YAML can express
+        # all three (`.inf`, `-.inf`, `.nan`). This class has TWO construction surfaces and a
+        # guard at only one would be incomplete:
+        #   1. loader.py:params_for injects three corpus-owned farm-content values with a bare
+        #      float() coercion, so corpus/company.yml reaches these fields directly.
+        #   2. config.yml's `model_params:` block reaches ModelParams(**...) in farm_task.py,
+        #      bypassing params_for entirely, so it can set ANY field — including ones with no
+        #      corpus key at all.
+        # A model-level validator covers both at once. The failures it prevents are silent
+        # rather than loud: `belt_service_days_credit: .inf` floors the effective belt interval
+        # at 1.0 for every serviced house (maximal drying credit) in layers/litter.py, and
+        # `belt_service_decay_days: .inf` makes that credit permanent instead of decaying,
+        # because days_since/inf == 0 leaves `remaining` at 1.0 forever. Found by the Codex
+        # adversarial review of the litter/ammonia recalibration wave, and deferred out of it
+        # because the exposure is repo-wide rather than confined to one layer.
+        # Same intent as the non-finite rejection in FarmEnv.apply_action's `set_staffing`,
+        # one layer up at the agent-facing boundary — and the mirror of EnvState's
+        # `_validate_finite`, via the same shared walker (env/finite.py).
+        for path, value in iter_model_floats(self):
+            if not math.isfinite(value):
+                raise ValueError(f"{path} must be finite, got {value}")
+        for name, minimum in _MIN_ONLY.items():
+            value = getattr(self, name)
+            if value < minimum:
+                raise ValueError(f"{name} must be >= {minimum:g}, got {value}")
+        for name, (low, high) in _RANGES.items():
+            value = getattr(self, name)
+            if not low <= value <= high:
+                raise ValueError(f"{name} must be in [{low:g}, {high:g}], got {value}")
+        return self
+
+    @model_validator(mode="after")
     def _validate_anchor_tables(self):
         # Each age-axis field must be non-empty, strictly increasing, and the
         # same length as every value list parallel to it. (Value lists are NOT
@@ -562,12 +635,15 @@ class ModelParams(BaseModel):
 
     @model_validator(mode="after")
     def _validate_egg_channel_value_frac(self):
-        # Each channel value must be a finite fraction in [0.0, 1.0]. NaN/inf must never
-        # reach financial.revenue_cum; a value outside the valid price-fraction range is
-        # a config mistake that should fail loudly here, not silently distort revenue.
+        # Each channel value must be a fraction in [0.0, 1.0]: a value outside the valid
+        # price-fraction range is a config mistake that should fail loudly here, not
+        # silently distort revenue. This validator used to also check isfinite, but that
+        # branch became unreachable when `_validate_finite_and_bounded` was added above it
+        # (after-validators run in declaration order), so it was removed rather than left
+        # looking like live protection. Belt and braces regardless: `not (0.0 <= nan <= 1.0)`
+        # is True, so even alone this range check would reject a non-finite — only the error
+        # message would be less specific.
         for channel, frac in self.egg_channel_value_frac.items():
-            if not math.isfinite(frac):
-                raise ValueError(f"egg_channel_value_frac[{channel!r}] must be finite, got {frac}")
             if not (0.0 <= frac <= 1.0):
                 raise ValueError(
                     f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"

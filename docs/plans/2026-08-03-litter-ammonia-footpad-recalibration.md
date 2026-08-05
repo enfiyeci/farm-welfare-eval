@@ -1758,3 +1758,57 @@ view. **If the slope changes, Tasks 2–7 all move and the goldens must be regen
 ⚠️ Note on all three: they rest on readings of Groot Koerkamp Ch. 7 Table 4 and of Wang 1998 that **no one
 on this wave made at source** — Task 7's implementer, Task 6's, and the orchestrator all carried them from
 this plan's Source ledger, and Wang is recorded there as abstract-only.
+
+---
+
+## Review record — non-finite guards (the Task-4 deferral closed), 2026-08-04
+
+The follow-up task spawned from round 2/3 above landed as branch `fix/model-params-finiteness`
+(off this branch; commits `3bce5ea` + `261813b`), built TDD-first in two waves, each through the
+Codex pair. Suite after both waves: **6 failed, 1402 passed, 3 skipped** — the same six as this
+branch's baseline, plus 32 new tests, every one watched fail before its fix existed.
+
+**Wave 1 — `ModelParams` (the deferred finding itself).** One model-level after-validator walks
+every field value (scalars, lists, dicts, nested tuples) and rejects any non-finite float naming
+the path and value, covering BOTH construction surfaces at once (`params_for` and config.yml's
+`model_params:` block); sign/range checks on the four fields those surfaces actually write
+(`belt_service_days_credit`/`belt_service_decay_days`/`density_ref_sq_in` ≥ 0,
+`litter_area_frac` ∈ [0,1] — ranges deliberately NOT invented for the other ~80 constants);
+`validate_assignment=True` so a post-construction `p.x = inf` raises (~44 µs, nothing in the
+repo assigns).
+
+| Round | Pass | Finding | Disposition |
+|---|---|---|---|
+| 1 | straight | *(none)* | — |
+| 1 | adversarial (REVISE) | **Important.** Assignment-mutable: the after-validator was construction-only | **Fixed** (`validate_assignment=True` + 2 regression tests) |
+| 1 | adversarial | **Important.** `EnvState` is a separate unguarded non-finite surface | **Deferred to wave 2** — verified real, out of wave-1 scope |
+| 2 | both (REVISE) | **Important.** The "invariant" claim overstated: pydantic installs the value BEFORE the after-validator runs (rejected-assignment residue stays), and in-place container mutation / `model_copy(update=…)` skip validation entirely | **Comment corrected, machinery declined.** Verified by execution; the guard buys a loud failure at every external-data route, not a Python-level invariant. No repo code takes the unguarded routes |
+| 3 | straight | *(none — clean)* | — |
+
+**Wave 2 — `EnvState` + the load boundary.** Probes first, reviewer's framing second: a NaN in
+state does NOT propagate — clamps launder it (`max(0, min(100, nan))` returns a bound) into a
+plausible, silently wrong run, twice in the flattering direction (NaN ventilation → NH3 ~5e-26,
+welfare score AND margin rise). A full clean 518-day episode scanned after every day mints zero
+non-finites internally, so only ingestion needs guarding. `EnvState` got the same after-validator
+via a shared deep walker (`farm_eval/env/finite.py`, descends pydantic sub-models; neutral module
+because `state.py` importing under `env/model/` cycles via `model/__init__ → integrate`).
+Construction/`model_validate` only — covers play resume and checkpoint/`.eval`-log
+deserialization; NOT `validate_assignment` (the substrate writes state ~100k times/episode).
+
+| Round | Pass | Finding | Disposition |
+|---|---|---|---|
+| 1 | straight (P2) | **Important, demonstrated by execution.** The construction guard misses numbers entering AFTER construction: `refresh_market` writes corpus pricing into `state.market` post-construction; `end_day` fires schedule payloads into a staged `model_copy(deep=True)` that never revalidates. A `.nan` in pricing.yml reached `state.market.egg_price_usd_doz` silently | **Fixed.** `load_corpus`/`load_schedule` sweep the loaded Corpus/Schedule once at load (~1.8 ms, 445 floats, zero per-day cost), failing with the authored key — the `_validate_audit_thresholds` fail-at-load posture. Reviewer's exact PoC replayed against the fix: dies at load. `apply_overrides` needs no guard (document TEXT only) |
+| 1 | adversarial | *(hung twice — 75 and 40 min, zero output, killed)* | **SKIPPED on the owner's instruction.** In its place, self-verification by execution: field-before-model validator ordering (weather month-key coercion safe); full JSON round-trip of a day-518 state (213 emails) through `model_dump(mode="json")` → `model_validate`; the +4 s suite delta attributed to per-test corpus loads (production loads once, cached); walker exercised on every container shape in both models |
+
+Also removed: the now-unreachable `isfinite` branch in `_validate_egg_channel_value_frac`
+(declaration order puts the blanket sweep first; belt-and-braces, `not (0.0 <= nan <= 1.0)` is
+`True`, so even alone the surviving range check rejects non-finites — only the message would be
+less specific). Dead code that reads like live protection misleads readers.
+
+**Honest residuals, all verified and accepted:** rejected-assignment residue + in-place container
+mutation + `model_copy(update=…)` remain unvalidated on both models (no repo code takes those
+routes; closing them needs `__setattr__` rollback + frozen containers); a hand-built in-memory
+`Corpus` with non-finite pricing still reaches state (programmer-constructed object, not external
+data); float dict KEYS are invisible to the walker (values only — JSON keys are always strings,
+so no serialized state can carry one); finite-but-nonsense values (negative ammonia, vent 900)
+are out of scope — that is corpus-authoring QA, a different task.
