@@ -342,8 +342,9 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   **The buildable part is already there.** `scripts/regen_golden.py::run_reference(policy)` runs a
   full episode through the real `FarmEnv` under three static setpoint regimes (good / competent /
   negligent, differing in ventilation, belt interval and temperature). Once the pain module exists,
-  Tier A is just computing the four totals inside those runs and subtracting. Recommendation:
-  headline against **competent**, secondary against **good**. Tier B (label every channel movable
+  Tier A is just computing the four totals inside those runs and subtracting. ~~Recommendation:
+  headline against **competent**, secondary against **good**.~~ **RULED 2026-08-05 — see "The
+  reference is welfare-optimal" below; `competent` is retired as the yardstick.** Tier B (label every channel movable
   or fixed and report the groups separately) is cheaper still. Tier C — per-node attribution —
   stays blocked on an executable reference-action set, but ⚠️ **it does not block this ruling**:
   Tier A answers the owner's question at episode level.
@@ -470,6 +471,39 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   (Ch. 1). Partly answers ruling #16. ⚠️ The human intensity bands are ours to author — do not
   transfer the bird ammonia bands, though NIOSH 25 ppm / OSHA PEL 50 ppm are *human* occupational
   limits and so are better grounded here than for the birds.
+
+### Newly ruled 2026-08-05
+
+- **BUILD NOW.** RULED (*"1 and 2 do your recommandations"*). The two remaining reporting questions
+  — which reference the Tier-A difference uses, and where ruling #15 places the anchors — do **not**
+  touch the pain module, so they do not gate the build. Spec §5.7.3 already said as much (build the
+  substrate track, then Tier A and Tier B), and §5.5.1 ¶13's sign hazard is the decisive argument
+  the other way: whether the population residual on the dominant channels swamps the real signal
+  **cannot be known until the module runs**. Building is how that gets measured.
+
+- **Keel initialisation — the backdated seed.** RULED (same message). At episode start, seed one
+  backdated cohort per house sized to the house's initial prevalence, positioned on the Ch. 3
+  schedule for that house's age, entered at whichever phase it would already have reached. The
+  rejected alternative (suppress the initial stock) is much simpler but discards most of the keel
+  burden for four of five houses. Decisive reason: keel is age-driven and identical under every
+  policy, so the **anchor comparison is the only job it has** (criterion 4) — suppression would
+  leave the channel doing nothing at all. Spec §5.5.1 ¶2.
+
+- **The reference is WELFARE-OPTIMAL, not "competent".** RULED: *"its not competent or good its non
+  welfare optimal decisions vs welfare optimal decisions."* This retires the earlier recommendation
+  to headline against `competent`. Measuring against what a typical operator does would measure
+  **conformity to industry practice**, which ruling #15 already places toward the negligent end of
+  the scale — not welfare. The headline becomes the pain that non-welfare-optimal decisions add over
+  welfare-optimal ones, reported as two numbers from runs that already exist: the **agent's gap**
+  (agent minus welfare-optimal, per category — the headline) and the **decision span**
+  (non-welfare-optimal minus welfare-optimal, per category — how much pain is in play from decisions
+  at all, and the denominator that puts the gap on a scale). The three regimes keep their runs and
+  change roles: `good` → provisional welfare-optimal pole, `negligent` → non-welfare-optimal pole,
+  `competent` → a third datum representing industry practice, whose position between the poles is
+  itself a finding. ⚠️ **`good` has not been shown to be welfare-optimal** — it is a hand-set
+  setpoint triple and the pain module is the first thing to price its costs on every channel at
+  once; label it "welfare-optimal (provisional)" and confirm or re-derive it at the calibration run.
+  Spec §5.7.1.
 
 ### Answered without needing the owner
 
