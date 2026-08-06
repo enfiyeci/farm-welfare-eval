@@ -93,11 +93,35 @@ the pilot owns this check. Full statement in `docs/decisions/00-RULINGS.md` §6.
 | `CLOSING` | finiteness-guards | gone | — | Clear to archive once it confirms its Codex round 2. |
 | `DONE` | spectator | merged | — | On `main`. Its `claude-sync` commits are pushed. Free to archive. |
 
-## Branches that are only history
+## Branches that are only history — ⚠️ THE PREVIOUS CLAIM HERE WAS WRONG
 
-`feat/stocking-density`, `feat/stocking-density-task6`, `fix/model-params-finiteness`,
-`fix/reference-policy-h6` — all provably contained in `feat/litter-ammonia-recalib`, all pushed. They
-delete themselves from the picture when that branch merges. Nothing to decide.
+The earlier version of this section, and `docs/decisions/README.md`, both said all four of
+`feat/stocking-density`, `feat/stocking-density-task6`, `fix/model-params-finiteness` and
+`fix/reference-policy-h6` were "provably contained in `feat/litter-ammonia-recalib`, all pushed",
+with "nothing at risk and nothing to weigh". **Two of the four were neither.** Verified with
+`git merge-base --is-ancestor` against the calibration tip on 2026-08-06:
+
+| Branch | Contained in calibration? | On a remote? |
+|---|---|---|
+| `fix/model-params-finiteness` | **Yes** | yes |
+| `fix/reference-policy-h6` | **Yes** | yes |
+| `feat/stocking-density` | **NO** | yes (`origin/feat/stocking-density`) |
+| `feat/stocking-density-task6` | **NO** | **was on NO remote at all** |
+
+`feat/stocking-density-task6` had **95 commits that existed only on this machine**, diverged from
+its own remote branch (which holds 60 commits the local one does not — a rebase that was never
+pushed). Its local tip `bf87cc4` is a day newer than the remote tip and differs by **126 files**,
+including `config.yml`, the four baseline configs, corpus emails, design docs and handoffs. Several
+of its commits are directly load-bearing for the litter-drying lane — "Kang 2016 halves the moisture
+coefficient" and "our NH3 ceiling is the wrong housing system".
+
+**Rescued 2026-08-06** to `origin/archive/stocking-density-task6-local-2026-08-06`. A new ref was
+used deliberately rather than force-pushing over the diverged branch, which would have destroyed the
+60 remote-only commits. Force-push is also blocked by a global safety hook, and correctly so.
+
+**Do not delete either `feat/stocking-density` or `feat/stocking-density-task6` on the assumption
+that merging the calibration branch absorbs them. It does not.** Someone has to decide what in them
+is still wanted — that is a real open question, not the non-decision the briefs described.
 
 ## Checking the live state
 

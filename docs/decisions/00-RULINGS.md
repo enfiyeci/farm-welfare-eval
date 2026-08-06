@@ -212,6 +212,29 @@ of every engineering lane, so it can start immediately.
 Another session pushed them between the handoff being written and this session running. The
 handoff's ⚠️ warning is stale. No push was needed.
 
+### ⚠️ But a different branch WAS at risk, and the briefs said it was not
+
+While verifying the above I checked the README's claim that the four "history only" branches are
+"all provably contained in the calibration branch, all four pushed … nothing is at risk and there is
+nothing to weigh." **That claim is false for two of the four.**
+
+`feat/stocking-density` and `feat/stocking-density-task6` are **not** ancestors of
+`feat/litter-ammonia-recalib`. Worse, `feat/stocking-density-task6` had **95 commits on no remote at
+all** — diverged from its own remote branch, local tip a day newer, 126 files different, including
+`config.yml`, the four baseline configs, corpus emails and handoffs. Some of it bears directly on
+the litter-drying lane ("Kang 2016 halves the moisture coefficient", "our NH3 ceiling is the wrong
+housing system").
+
+Rescued to `origin/archive/stocking-density-task6-local-2026-08-06` — a **new** ref, because
+force-pushing over the diverged branch would have destroyed the 60 commits the remote has and the
+local does not.
+
+**Open question this creates:** what in those two branches is still wanted? The briefs recorded this
+as a non-decision; it is a real one. Full detail in `docs/LANES.md`.
+
+The lesson worth keeping: "provably contained" was asserted without running the proof.
+`git merge-base --is-ancestor <tip> <branch>` is the proof, and it takes one second.
+
 Archiving: the spectator lane is `DONE` and free to archive. The finiteness-guards lane is clear
 once it confirms its Codex round 2. The h6-refpolicy lane **still waits** — it is recovering a
 staffing-fork design analysis that exists in no file, and that analysis is now more valuable than it
