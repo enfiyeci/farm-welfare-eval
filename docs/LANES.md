@@ -39,42 +39,76 @@ STATUS · topic · @folder
    produces two irreconcilable sets of numbers and no way to tell which is right.
 5. When a lane finishes, set its status to `DONE`, update the row, and archive the session.
 
-## The post-ruling lane plan (2026-08-06)
+## The program to finish the hen eval (2026-08-06)
 
-Five lanes on **this machine**, three on the **other machine**. The split is designed so that no two
-concurrently-running lanes write the same files.
+**Goal (owner):** finish the hen eval — a complete, runnable, defensible version, then a real full
+pilot run of it. "Demo" = finished project, not a screenshot and not a replay.
 
-### The one rule that shapes everything
+**Order (owner):** **(1) folder restructuring first → (2) the design lanes → (3) the finishing
+pilot.** Rulings and rationale in `docs/decisions/00-RULINGS.md` ("The program to finish the hen
+eval").
 
-**Exactly one lane owns `farm_eval/env/model/` and the golden regeneration: `litter-drying`.**
+### Step 1 — Folder restructuring (do FIRST; blocks the lanes)
+
+> 🚧 **GATE (owner, 2026-08-06): do NOT start the reorg until the OTHER machine has pushed
+> everything and both machines are synced.** A restructure while the other machine holds unpushed
+> commits would create irreconcilable conflicts (the exact failure this project keeps hitting). The
+> other machine has been told to push all it has; wait for confirmation, `git fetch --all`, verify
+> no branch is ahead of origin anywhere, THEN reorder. Also gated on the owner's structural
+> preferences — it is not a mechanical reorg.
+
+Not a mechanical reorg — it needs the owner's taste on the target layout. It also applies ruling 12
+(instruction-file protocol): trim `CLAUDE.md` to stable conventions + pointers (Anthropic targets
+<200 lines), move the drifting "Current state" narrative into this file (`docs/LANES.md`) as the
+single-owner status doc, decide the `AGENTS.md`/`CLAUDE.md` relationship, and fix the stale breed
+label on `feat/stocking-density` + `feat/litter-ammonia-recalib` before either merges. Research
+backing: `docs/research/2026-08-06-claudemd-governance/`. **Blocked on the owner's structural
+preferences.**
+
+### The one rule that shapes everything (Step 2)
+
+**Exactly one lane owns `farm_eval/env/model/` and the golden regeneration: the `litter` lane.**
 Everything else is either docs-only, or additive in its own new module. Two lanes regenerating
 goldens produces two irreconcilable sets of numbers with no way to tell which is right.
 
-### This machine
+### Step 2 — the design lanes (start AFTER the folder restructure)
+
+Five lanes on **this machine**. The split is designed so no two concurrently-running lanes write the
+same files. Aquatic is explicitly **deferred** by the owner (2026-08-06) — the focus is finishing the
+hen eval.
 
 | # | Lane | Worktree / branch | Owns (writes) | Must not touch | Blocked on |
 |---|---|---|---|---|---|
-| 1 | **litter-drying** — the critical path | `~/worktrees/fwe-drying` · `feat/litter-drying` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01+DP16 signatures, the new drying tool + its corpus/schedule content | anything outside the model core | The litter-drying research pass (realism verdict first) |
-| 2 | **staffing-design** — deep brainstorm, docs only | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `docs/design/**`, `docs/research/**` (staffing topics only) | **all code** — this lane writes no Python until its design is ruled | Nothing. Can start now. |
-| 3 | **behaviour-report** — ruling 8's third deliverable | `~/worktrees/fwe-behaviour` · `feat/behaviour-report` | a new module (suggest `farm_eval/analysis/`), its own tests | `farm_eval/env/**`, `farm_eval/judge/**` (read-only) | Nothing. Can start now. |
-| 4 | **node-triage** — measure, do not change | `~/worktrees/fwe-node-triage` · `feat/node-triage` | `docs/probes/**` only | **`config.yml`, `schedule/events.yml`, `farm_eval/env/model/**`** — measures them, never edits | Nothing. Can start now. |
-| 5 | **plf-dairy** — already running | `~/worktrees/farm-welfare-eval-plf-decisions` · `feat/plf-dairy-eval` | `pyproject.toml`, root `README.md`, the PLF package | the layer-hen model core | Nothing. In flight. |
+| 1 | **litter** — the critical path | `~/worktrees/fwe-litter` · `feat/litter-lever` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01/DP16/DP22 signatures, the new lever's tool + corpus/schedule content | anything outside the model core | **The lever re-pick (ruling 1): litter drying vs litter access hours** + the ammonia target (6.0 vs 6.7, ruling 2). Both are owner calls. |
+| 2 | **staffing-design** — deep brainstorm, docs only first | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `docs/design/**`, `docs/research/**` (staffing only) | **all code** until its design is ruled | The h6 session's recovered staffing-fork analysis (see below). |
+| 3 | **behaviour-report** — ruling 8's third deliverable | `~/worktrees/fwe-behaviour` · `feat/behaviour-report` | a new module (suggest `farm_eval/analysis/`), its own tests | `farm_eval/env/**`, `farm_eval/judge/**` (read-only) | Nothing once Step 1 lands. |
+| 4 | **node-triage** — measure, do not change | `~/worktrees/fwe-node-triage` · `feat/node-triage` | `docs/probes/**` only | **`config.yml`, `schedule/events.yml`, `farm_eval/env/model/**`** — measures, never edits | Nothing once Step 1 lands. |
+| 5 | **plf-dairy** — already running | `~/worktrees/farm-welfare-eval-plf-decisions` · `feat/plf-dairy-eval` | `pyproject.toml`, root `README.md`, the PLF package | the layer-hen model core | Nothing. In flight (background to the hen focus). |
 
-**Why 2, 3 and 4 are safe to run at once:** lane 2 writes only prose, lane 3 writes only a new
-module that does not yet exist, lane 4 writes only probe reports. None of them touches a file lane 1
-owns. Lane 4 is the one to watch — node triage naturally *wants* to edit `enabled_nodes`, and it
-must not; it reports what it measures and lane 1 applies any change.
+**Why 2, 3 and 4 are safe to run at once:** lane 2 writes only prose, lane 3 writes only a new module
+that does not yet exist, lane 4 writes only probe reports. None touches a file lane 1 owns. Lane 4 is
+the one to watch — node triage naturally *wants* to edit `enabled_nodes`, and it must not; it reports,
+lane 1 applies.
 
-### Other machine
+**The litter lane absorbs several rulings** into its one golden regeneration: ruling 1 (lever), 2
+(ammonia base — through TAN, target chosen), 3 (DP16 rework), and the DP22 band collapse. See the
+research in `docs/research/2026-08-06-litter-lever-and-ammonia/` — the model form must lag ammonia
+through litter TAN, not map moisture→NH₃ same-day.
 
-Chosen because none of them touches the layer-hen model core at all, so they cannot collide with
-anything above.
+### Step 3 — the finishing pilot
 
-| # | Lane | Worktree / branch | Why it is safe here |
-|---|---|---|---|
-| A | **aquatic** | `~/worktrees/fwe-aquatic` · `feat/aquatic-outreach` | A separate eval. Zero shared files. Branch already exists with rescued research on it. |
-| B | **validation-gate prep** | `fwe-validation` · `docs/validation-gate` | Docs only: the expert labelling pack, the eval-awareness blind sheets, and the outreach for an actual vet/welfare labeller. The long pole for the "result" demo, and entirely independent of engineering. |
-| C | **research-backlog** | `fwe-research` · `docs/research-backlog` | Docs only: the still-blocked sources — EFSA 2023, Sirovnik 2018, Campe 2018, Bell & Weaver. Writes only under `docs/research/`. |
+FY26 cost target ruled first (ruling 6, `msg_0`, irreversible). Out-of-family grader. Full 518-day
+episode = the finished hen eval demonstrated. Vertex ADC works; `scripts/pilot-vertex.env` (gitignored)
+is created. **Do NOT run before Step 2 lands** (owner: no fresh pilots until the design is done).
+
+### Other machine (docs-only support, safe to run anytime — no model-core collision)
+
+| Lane | Branch | Why safe here |
+|---|---|---|
+| **validation-gate prep** | `docs/validation-gate` | The expert labelling pack, eval-awareness blind sheets, and outreach for a real vet/welfare labeller. The long pole for the "result" half of the eval, independent of engineering. |
+| **research-backlog** | `docs/research-backlog` | The still-blocked sources — EFSA 2023, Sirovnik 2018, Campe 2018, Bell & Weaver. Writes only under `docs/research/`. |
+
+**Aquatic is deferred**, not on either machine's active list, per the owner.
 
 ### 🔔 Standing gate — do not let this one slip
 

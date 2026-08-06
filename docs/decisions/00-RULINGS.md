@@ -7,6 +7,22 @@ Read alongside `docs/decisions/README.md` (the index) and `docs/decisions/10-mea
 (the in-repo measurements). Briefs 01–09 keep their analysis; their "what to say to unblock" lines
 are superseded by the rulings below.
 
+## The goal, restated by the owner (2026-08-06)
+
+**"Demo" means finishing the project — the hen eval at least.** The objective is a complete,
+runnable, defensible hen version of the eval, then a real full pilot run of it. The order the owner
+set: **(1) folder restructuring first** (make the repo layout clean), **(2) then work the lanes that
+finish the design**, **(3) then the finishing pilot run.** A replay of an old pilot is explicitly
+NOT what is wanted, and no fresh pilot runs until the design lanes land.
+
+## Research landed 2026-08-06 — two rulings below are reopened by it
+
+Four deep passes ran (`docs/research/2026-08-06-litter-lever-and-ammonia/`) plus a CLAUDE.md
+governance pass (`docs/research/2026-08-06-claudemd-governance/`). They are delegated findings with
+coverage statements, **not yet independently re-read at source** — trace the load-bearing ones
+before regenerating any golden. Their net effect: ruling 1's lever choice and ruling 2's number are
+both reopened, and the CLAUDE.md protocol now has a clear best-practice answer (Fix 3).
+
 ---
 
 ## 1 · Belt slope → **switch the lever to litter drying** (brief 01, option C)
@@ -20,23 +36,46 @@ agent-facing lever, new corpus and schedule content so the agent can discover it
 rework of DP01 and DP16. It was chosen with that cost understood.
 
 **Standing constraint on this lane, from the owner:** *"we will take some liberties but we try to
-get it as realistic as possible."* So the drying lever must survive a realism check before it is
-built — see the open question below.
+get it as realistic as possible."*
 
-**Open and blocking: is a controllable litter-drying lever realistic in a US commercial cage-free
-aviary at all?** Forced litter drying is well attested in the European literature (Groot Koerkamp's
-−5.2 pp is a European house). Whether US cage-free aviaries have an equivalent controllable system
-is an unverified assumption, and building a lever no real US operator has would trade one realism
-defect for another. A research pass was commissioned on 2026-08-06 to settle this first; if the
-answer is no, the fallback is the set of levers that *are* real in a US house — ventilation rate,
-litter-directed airflow, litter access hours, litter depth and refresh, density, drinker
-management.
+### ⚠️ REOPENED by research — the litter-drying pick may be the wrong lever
 
-**The tradeoff must be sourced, not invented** (owner, explicitly). The same research pass must
-return the cost side — fan power draw and fan counts, energy attributable to drying per hen or per
-dozen, the winter make-up-air penalty (drying air is house air, so more drying means more heat loss
-means more propane), and current US farm electricity and propane prices. A welfare lever with an
-authored cost is not a welfare-versus-profit tension, it is a decoration.
+The realism + cost research the owner asked for came back and it undercuts the "litter drying"
+choice. Full detail in `docs/research/2026-08-06-litter-lever-and-ammonia/` (README first).
+
+**Finding 1 — litter drying is not a real US cage-free lever.** US commercial cage-free aviaries
+have manure-*belt* drying air, not a floor-*litter* dryer. Floor litter is managed by ventilation
+and stir fans (UGA extension, read in full). Building a dedicated "litter dryer" would put a machine
+in the world that real US operators don't have — the opposite of the owner's realism standard.
+
+**Finding 2 — even as airflow, drying is a weak welfare-vs-profit lever, AND the two cost passes
+disagree.** The realism pass found litter-directed *mixing fans* recirculate house air (cheap, even
+fuel-saving) and are roughly ammonia-neutral short-run — a lever with little profit tension. The
+dedicated cost pass found the *belt-drying blowers* (~51% of house electricity) and
+*above-minimum ventilation* (winter propane penalty up to ~15×, ≈$35,600/yr across 750k birds) ARE
+expensive. So "drying" isn't one lever; it splits into a cheap channel and expensive channels. That
+split has to be adjudicated, not averaged.
+
+**Finding 3 — the research's recommended lever is `litter access hours`, not drying.** Measured in
+our exact housing type (Oliveira 2019, 50k-hen Iowa Natura aviary): restricting litter access
+16 h → 10.2 h moved litter moisture −11 pp, NH₃ −22%, caking 33% → 0%, **and floor eggs 12.6 → 1.4
+per hen** (the profit payoff). It is capped by an auditable UEP limit of **30 confinement-days over
+the flock life with mandatory records**. Welfare, profit, and integrity load onto one dial — a
+near-perfect node, and it does not require inventing a machine.
+
+**Finding 4 — the ammonia effect must be lagged through litter TAN, not an instantaneous
+moisture→NH₃ map.** At fixed nitrogen, adding water slightly *lowers* same-day ammonia (Liu 2009;
+pH is ~25× more powerful than moisture). A same-day moisture→NH₃ mapping is mechanistically backwards
+and is exactly the kind of thing that gets a model discredited a second time. Use Miles 2011's
+continuous curve (verified), capped at ~40% (it is non-monotonic and turns over), driving accumulated
+TAN.
+
+**⚠️ THE OWNER DECISION THIS CREATES.** The owner chose "litter drying" on 2026-08-06, *before* this
+research. The research says litter access hours is the better, more realistic, better-evidenced
+lever. **This is a lever re-pick, not something to switch silently.** The litter lane is BLOCKED on
+the owner confirming: keep litter drying (as the mixing-fan airflow lever), or switch to litter
+access hours (recommended by the research). Either way the ammonia effect goes through TAN and the
+belt→ammonia route uses the sourced +0.763%/h.
 
 ### Discoverability — measured in-repo 2026-08-06, and it is currently half-closed
 
@@ -59,10 +98,27 @@ status readout) is part of this lane's definition of done, not a follow-up.**
 
 ---
 
-## 2 · Ammonia base → **re-base to 2.169** (brief 02, option A)
+## 2 · Ammonia base → **re-base, but the exact number is REOPENED by research** (brief 02, option A)
 
-**Ruled:** apply the correction. A deeper verification pass was also commissioned on 2026-08-06 to
-confirm the underlying belt-cadence reading before it lands.
+**Ruled:** apply the correction. The direction is confirmed; the exact number is now open.
+
+### ⚠️ REOPENED by research — 2.169 rests on two unstated choices
+
+The verification pass (`docs/research/2026-08-06-litter-lever-and-ammonia/ammonia-calibration-verification.md`)
+**confirmed the belt cadence outright** — CSES ran belts every 3–4 days, stated in three places
+including a config table. So the direction of the correction is solid. But it found two things that
+move the *number*:
+
+1. **6.7 ppm is a blended mean, not bird-level.** It is the average of two exhaust points and one
+   bird-level point; **the bird-level mean alone is 6.0 ppm** (~10% lower). If `nh3_ppm` in the model
+   means what a hen breathes, the anchor is 6.0, not 6.7. **Owner decision needed.**
+2. **2.169 silently assumes a ~67-day litter-age operating point.** It can't be reproduced by simple
+   scaling (that gives ~2.62); it only works if a ~1.33 ppm litter term is held fixed. A reasonable
+   construction, but it must be written next to the constant, not left implicit.
+
+**Net: re-base stands, but the target (6.0 vs 6.7) and the operating point must be ruled before the
+golden regeneration.** Since ruling 1 already forces a regeneration and re-plumbs the
+belt→ammonia→moisture pathway, do the ammonia re-base in that same wave, once the target is chosen.
 
 ### ⚠️ Sequencing finding — this should NOT land before the drying rework
 
@@ -267,3 +323,61 @@ rule or the intent), §G (how automated is this farm — feeds ruling 4), §H (t
 simulation of a hen house is infinitely deep. The proposed test — *does fixing this change which
 model comes out ahead?* — is what stops that from becoming an infinite regress. Ruling 1 is a large
 scope expansion, which makes having a stopping rule more urgent, not less.
+
+---
+
+## 12 · Instruction-file protocol (CLAUDE.md drift) → **Fix 3, per research** (owner asked to research it)
+
+The owner flagged that `CLAUDE.md` / `AGENTS.md` drift across branches and handoffs is unsolved, and
+asked for deep research. It landed (`docs/research/2026-08-06-claudemd-governance/`) and the answer
+is clear:
+
+- **The cure is Fix 3:** shrink `CLAUDE.md` to stable conventions + pointers (well under 200 lines,
+  which Anthropic's own docs target), and move the volatile "Current state" narrative — the thing
+  that drifted into five versions — into **one committed, single-owner status doc** with a
+  gated-append rule. `docs/LANES.md` already is that pattern.
+- **Fix 1** (verification claims carry their command, e.g. `git merge-base --is-ancestor`, checked
+  <date>) is kept as a standing evidence rule — it is what would have caught the false "provably
+  contained" claim.
+- **Fix 2** (diff branch CLAUDE.md vs main at handoff) is an interim guard only; it becomes trivial
+  once Fix 3 removes the drifting prose.
+- Cross-machine: the status doc must be **committed** (git is the only sync); auto memory is
+  machine-local and would make cross-machine coherence worse.
+
+**This is folded into the folder-restructuring step (below), because trimming CLAUDE.md and choosing
+where the status doc lives IS part of making the repo layout clean.** Not independently re-verified
+at source; the two load-bearing claims came from official Anthropic docs read verbatim.
+
+---
+
+## The program to finish the hen eval (owner sequence, 2026-08-06)
+
+The owner set the order explicitly: **folder restructuring first, then the design lanes, then the
+finishing pilot.** Mapped to the rulings above:
+
+**Step 1 — Folder restructuring (blocks the lanes; do first).**
+Make the repo layout clean, and apply ruling 12 while doing it: trim `CLAUDE.md` to stable
+conventions + pointers, move the "Current state" narrative into the single-owner status doc, decide
+the `AGENTS.md`/`CLAUDE.md` relationship (import or symlink), and fix the stale breed label still on
+`feat/stocking-density` and `feat/litter-ammonia-recalib` before either merges. **Needs the owner's
+taste on the target layout — it is not a mechanical reorg.**
+
+**Step 2 — The design lanes that finish the eval** (see `docs/LANES.md` for worktrees/ownership):
+- **litter lane** — resolve ruling 1's lever re-pick (litter drying vs litter access hours), build
+  it, plumb ammonia through TAN, re-base ammonia (ruling 2, target chosen), rework DP16 (ruling 3)
+  and DP22, regenerate goldens + both reference artifacts **once**.
+- **staffing lane** — ruling 4 redesign (event-driven headcount + overtime hours), score the
+  exploit, absorb DP20 (ruling 5) and the financial-floor widening (ruling 7). Deep-brainstorm first.
+- **behaviour-report lane** — ruling 8's third deliverable (per-node, per-tool, off-node behaviour).
+- **node-triage lane** — measure DP16/DP20/DP21 discrimination; report the running count of
+  non-functional nodes.
+
+**Step 3 — The finishing pilot.**
+FY26 cost target ruled (ruling 6) *before* the run; out-of-family grader; then the full 518-day
+episode = the finished hen eval demonstrated. Vertex ADC is confirmed working
+(`scripts/pilot-vertex.env`, gitignored, already created) so the run is unblocked once the design
+lands.
+
+**The stopping rule (brief 11 §H) governs all of this:** fix a defect only if it changes which model
+comes out ahead; everything else becomes a documented known-limitation. That is what makes "finish
+the eval" a finite target rather than an infinite one.
