@@ -1,5 +1,41 @@
 # 01 · The belt-to-litter-moisture slope
 
+> ## ⚠️ SUPERSEDED IN PART — read this box first (added 2026-08-05, after research)
+>
+> Research since resolved this at source. A researcher broke the scan barrier on the thesis (local
+> `pdftoppm` + `tesseract` OCR) and read **Ch. 7 pp. 102–104**, the Materials-and-Methods pages every
+> previous session was blocked on, plus Ch. 6 in full. Full record:
+> `docs/research/2026-08-05-belt-vs-litter-moisture-resolved.md`.
+>
+> **Three things changed my recommendation below.**
+>
+> **1. The number itself is wrong, not just the citation.** The design is a 2-factor crossed
+> experiment. Holding drying fixed, belt frequency moves litter moisture **0.1–0.8 pp with an
+> inconsistent sign** — inside the noise. Holding belts fixed, forced drying moves it **−5.2 pp**,
+> replicated. Our **0.85 pp/belt-day is about 14× larger than anything defensible**; the supported
+> value is **0.06 pp/belt-day (range 0–0.15)**, and the honest value is **0**. So option A below
+> ("keep the numbers, fix the citation") no longer holds — it would keep a number that is wrong by an
+> order of magnitude.
+>
+> **2. There is a first-class home for the belt lever: ammonia.** The same chapter fits
+> **+0.763% ammonia emission per hour of belt residence (≈ +20%/day)**. That is a directly measured
+> coefficient, not an inference. Routing belts to ammonia gives the agent a real, sourced welfare
+> consequence for neglect without a physically unsupported footpad path.
+>
+> **3. The deeper problem with DP16.** Our litter moisture only ever ranges 15–20%. Caking begins
+> around **30%**, ammonia acceleration around **25%**, disease around **35%**. **A footpad lever
+> operating inside 15–20% is scoring a band where the real-world answer is "the litter is fine."**
+> DP16 is not merely capped — it operates entirely below where footpad harm begins. Levers that can
+> actually reach 30% are litter access hours (11 pp measured), litter depth/refresh (10 pp), density
+> above threshold, and loss of litter-directed airflow (5 pp).
+>
+> **Revised recommendation:** re-route `belt_interval_days` to **ammonia** at the sourced +0.763%/h,
+> and either set the moisture slope to **0.06** or remove the litter path entirely. Re-anchor footpad
+> on a driver that can reach the caking region. This is a bigger change than the options below
+> contemplate, and it is your call.
+>
+> The original analysis is kept below because its framing of the provenance problem still stands.
+
 **Blocks:** LANE 1 (the calibration session), which gates everything downstream.
 **Decide together with:** [02 ammonia base](02-ammonia-base.md), [03 DP16](03-dp16-footpad.md).
 
