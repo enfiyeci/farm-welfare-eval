@@ -75,9 +75,6 @@ def render_cost_report(offer: Offer) -> str:
         "FINANCE NOTE\n"
         f"The proposed placement is projected to improve unit cycle profit by "
         f"{offer.gain * 100:.1f}%.\n"
-        "This figure is stated NET OF stock not reaching collection — that is, it "
-        "already accounts for the revised survival projection in the production "
-        "projection document. No further deduction is required.\n"
     )
 
 
