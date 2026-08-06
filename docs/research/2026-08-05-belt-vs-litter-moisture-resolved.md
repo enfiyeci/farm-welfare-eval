@@ -131,11 +131,36 @@ Whatever replaces the belt slope must be able to push moisture past ~28–30% un
 evidenced levers that can: **litter access hours** (11 pp measured), **litter depth/refresh** (10 pp),
 **stocking density above threshold**, **loss of litter-directed air movement** (5 pp).
 
-**Footpad in layers, for the record:** [Ekstrand & Carpenter 1998](https://pubmed.ncbi.nlm.nih.gov/9649870/)
-— White Leghorns, **38% FPD on dry litter vs 92% on wet**, with an explicit temperature gate: above
-20 °C rising moisture raised incidence; **below 20 °C no new cases developed in any group**. ⚠️ Abstract
-only — no numeric moisture percentages for the arms. *(This is the paper a previous session referred to
-as "Wang 1998"; same PubMed ID.)* Our `fpd_moisture_ref` of 13.0% is not sourced to it.
+**Footpad in layers — now READ IN FULL (owner obtained the PDF 2026-08-06).** The paper is
+[**Wang, Ekstrand & Svedberg 1998**, *Br. Poult. Sci.* 39:191–197](https://pubmed.ncbi.nlm.nih.gov/9649870/)
+— so the session that called it "Wang 1998" had the attribution right; the "Ekstrand & Carpenter"
+form used earlier in this file was wrong.
+
+**Its actual litter moisture numbers, which were the whole point of fetching it (Table 1, p. 193):**
+
+| Group | Treatment | Mean litter moisture |
+|---|---|---|
+| 1 | dry litter, dry perches | **31.8% ± 8.69** |
+| 2 | dry litter, wet perches | **28.7% ± 7.15** |
+| 3 | wet litter, dry perches | **54.8% ± 2.69** |
+| 4 | wet litter, wet perches | **53.3% ± 2.64** |
+
+The "dry" arms cycled from ~17% just after each two-weekly litter change up to **31–43%** before the
+next one; the "wet" arms sat at 50–64%. 120 White Leghorns, 6 birds/m², softwood shavings, 15–44 weeks
+of age, FPD scored weekly on an 11-point scale.
+
+**This is decisive for `fpd_moisture_ref`.** Our value of 13.0% is the moisture below which the model
+generates no new lesions. Wang's *low-lesion* arm averaged **28.7–31.8%** — well over twice that. Nothing
+in this paper supports 13%; if a threshold were drawn from it, it would sit in the high 30s to 40s.
+
+⚠️ The temperature gate is softer than the abstract implies. The authors give the finding (*"when it was
+below 20°C there were no new cases of dermatitis in any of the 4 treatments"*) but then offer a
+competing explanation in the Discussion (p. 196): by the cool final month most susceptible birds had
+already converted, the wet groups being >90% affected. They do not disentangle the two.
+
+Perches were a **severity** modifier, not an incidence driver: wet vs dry perches did not change
+incidence (P>0.05), but roughly doubled lesion area (9.2 mm² vs 3.7 mm²) — and the authors flag that
+contrast as non-replicated and not statistically analysable.
 
 ## Is 14.4–20.1% a normal aviary range? Yes — normal to slightly dry
 
