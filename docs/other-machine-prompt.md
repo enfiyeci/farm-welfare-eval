@@ -1,90 +1,69 @@
-# Prompt for the other computer — 2026-08-06
+# Prompt for the other computer — 2026-08-06 (revised)
 
-Paste the block below into a fresh Claude Code session on the second Mac. It is self-contained:
-it verifies the commit, points at the rulings, and opens three lanes that cannot collide with the
-five running on the first machine.
+Paste the block below into a fresh Claude Code session on the second Mac. The **first** job is to
+push everything that machine has — this machine's folder restructuring is gated on it.
 
 ---
 
 ```
-We are splitting the farm-welfare-eval project across two machines. This machine takes three
-lanes; the other machine runs five. The lanes were chosen so that no two of them write the same
-files — read docs/LANES.md for the full ownership table before you touch anything.
+We are syncing the farm-welfare-eval project across two machines before a repo folder
+restructuring. The single most important thing you can do right now is get EVERYTHING this
+machine has onto the remote, because the other machine cannot start the restructure until you do.
 
 Repo:   git@github.com:enfiyeci/farm-welfare-eval.git
-Branch: docs/decision-briefs
-Commit: ca24da4053151f207ed3901e8efd2d7539542c82
+Origin: git@github.com:enfiyeci/farm-welfare-eval.git
 
-FIRST: verify that commit is fetchable (git fetch && git cat-file -t <sha>). Do not touch
-anything until it verifies.
+STEP 1 — PUSH EVERYTHING (do this first, report back when done):
+  - For every git worktree and branch on this machine, check for uncommitted work and unpushed
+    commits:  git worktree list  then per worktree  git status -sb  and
+    git log --oneline @{u}..HEAD
+  - Commit anything uncommitted that should travel (scoped paths, never git add -A, since other
+    sessions may share a tree). Commits end with:
+      Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+  - Push every branch that is ahead of origin. Ask the owner before pushing (standing rule), then
+    push. If a branch has no upstream: git push -u origin HEAD.
+  - Watch specifically for a branch that has diverged from its own remote (local ahead AND behind):
+    do NOT force-push. Push the local tip to a new archive/ ref instead and tell the owner.
+  - Report a clear inventory: every branch, whether it is fully pushed, and anything you could not
+    push and why. THIS INVENTORY IS THE GATE the other machine is waiting on.
 
-THEN read, in this order:
-  1. docs/decisions/00-RULINGS.md  — the owner's answers to all eleven decision briefs. This is
-     authoritative; where it contradicts a brief, it wins.
-  2. docs/LANES.md                 — the lane plan, the file-ownership table, and the one rule
-     that matters: exactly ONE lane owns farm_eval/env/model/ and the golden regeneration, and
-     it is not on this machine.
-  3. docs/decisions/README.md      — the index, for background on how the briefs are structured.
+STEP 2 — only after Step 1 is reported, and only if the owner wants work done here:
+  Two docs-only support lanes, each in its own worktree off current main (one session per worktree).
+  Both are safe here because neither touches the layer-hen model core.
 
-THE HARD CONSTRAINT: nothing on this machine may write to farm_eval/env/model/**, params.py,
-config.yml, schedule/events.yml, the golden fixtures, or either reference artifact. Those belong
-to the litter-drying lane on the other machine. All three lanes here are docs-only or additive.
+    LANE — validation-gate prep   branch docs/validation-gate
+      The long pole for the eval's "result" claim, independent of engineering:
+      - finish the expert labelling pack (docs/expert-labeling-pack.md) so a domain expert could
+        use it cold
+      - prepare the eval-awareness instrument (15 blind sheets, 120 cells, Cohen's kappa >= 0.6)
+      - draft outreach to find a real vet or poultry-welfare specialist to label transcripts. This
+        is the ONE task on the whole project that needs a person who is neither the owner nor a
+        model. Treat finding that person as the deliverable.
 
-YOUR THREE LANES. Create a separate git worktree for each, off current main, at
-~/worktrees/<name>. One session per worktree, never two.
-
-  LANE A — aquatic          ~/worktrees/fwe-aquatic     branch feat/aquatic-outreach (exists)
-    A separate eval from the layer-hen one, so it shares no files. The branch already carries
-    rescued RP outreach planning and SWIM research. Pick it up from what is committed there.
-
-  LANE B — validation-gate  ~/worktrees/fwe-validation  branch docs/validation-gate (new)
-    Docs only. This is the long pole for the project's "result" demo and it is entirely
-    independent of engineering, which is why it is here.
-      - Finish the expert labelling pack (docs/expert-labeling-pack.md) so a domain expert could
-        actually sit down and use it cold.
-      - Prepare the eval-awareness instrument: 15 blind sheets, 120 cells, needing Cohen's
-        kappa >= 0.6.
-      - Draft outreach for finding an actual vet or poultry-welfare specialist to label
-        transcripts. This is the single task on the whole project that needs a person who is
-        neither the owner nor a model. Treat finding that person as the deliverable.
-
-  LANE C — research-backlog ~/worktrees/fwe-research    branch docs/research-backlog (new)
-    Docs only, writes only under docs/research/. Chase the sources five previous research passes
-    could not reach. In priority order:
+    LANE — research-backlog       branch docs/research-backlog   (writes only under docs/research/)
+      Chase the still-blocked sources, in priority order:
       - EFSA 2023, Welfare of laying hens on farm:
-        https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2023.7789
-        Top gap across five passes. The EFSA Journal is fully open access, so the 403 is
-        bot-blocking rather than a paywall — try a real browser. It may carry an authoritative
-        quantitative space-allowance threshold, which several open design questions need.
+        https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2023.7789  (open access; the 403 is
+        bot-blocking, a real browser will likely work; top gap across many passes)
       - Campe et al. 2018, Poult. Sci. 97:358-367  https://pubmed.ncbi.nlm.nih.gov/29177490/
-        Abstract only so far. Analyses the German aviary dataset that may be the source of our
-        feather-damage anchors and may contain a density term.
-      - Sirovnik et al. 2018, feeder space and aggression:
-        https://doi.org/10.1016/j.applanim.2017.09.017  (paywalled)
-      - Bell & Weaver, Commercial Chickens Meat and Egg Production, 5th ed. (2002). Not online.
-        Needs a library copy. It is the source of the 0.03 hours-per-hen automated-complex
-        figure that the farm's whole 13-14 FTE staffing reconciliation rests on, and Anderson
-        quotes it in one sentence without saying whether it is per cycle or per year.
+      - Sirovnik et al. 2018 feeder space  https://doi.org/10.1016/j.applanim.2017.09.017 (paywalled)
+      - Bell & Weaver, Commercial Chickens Meat and Egg Production, 5th ed. (2002) — not online;
+        needs a library copy; it is the source of the 0.03 hours-per-hen automated-complex figure
+        the 13-14 FTE staffing reconciliation rests on.
 
-RESEARCH DISCIPLINE — this project has been burned by it twice, so it is not optional:
-  - Read every source end to end before asserting anything from it. Not from the abstract, not
-    from a search snippet, not from memory.
-  - Flag ANY partial read with a literal warning sign character on the claim itself, naming the
-    source and what was missing (paywalled, 403, would not extract, truncated, read in part).
-  - End every research document with an explicit coverage statement: what you opened, what you
-    read to the end, what you could not reach and why.
-  - Every source gets a full clickable markdown link.
-  The two burns: a calibration coefficient was matched to operating conditions nobody had read,
-  and a model coefficient turned out ~14x too large and the wrong sign once the source's methods
-  pages were finally OCR'd and read.
+  AQUATIC IS DEFERRED. The owner's focus is finishing the hen eval; do not open the aquatic lane.
 
-GIT RULES ON THIS PROJECT:
-  - Work on a branch, never directly on main. One session per worktree.
-  - Commits end with:  Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
-  - Commit AND push when a task finishes — the owner moves between machines, and unpushed work
-    is stranded work. Ask before pushing.
-  - Update the lane's row in docs/LANES.md whenever its status changes, in the same breath.
+CONTEXT to read (do not re-derive):
+  - docs/decisions/00-RULINGS.md  — the owner's rulings; the goal is "finish the hen eval",
+    sequenced folder-restructure -> design lanes -> finishing pilot.
+  - docs/LANES.md                 — the lane plan + the restructure gate you are unblocking.
+  - docs/research/2026-08-06-*    — five deep research passes just landed (litter lever, ammonia,
+    CLAUDE.md governance). Delegated findings with coverage statements; trace at source before
+    acting on any number.
 
-Start by reading the three documents, then tell me which lane you are opening and what you found
-in it. Do not start all three at once.
+RESEARCH DISCIPLINE (this project has been burned twice): read sources end to end before asserting
+from them; flag any partial read with a literal warning-sign character on the claim, naming what was
+missing; end every research doc with an explicit coverage statement; every source a clickable link.
+
+Start with Step 1 and report the push inventory. Do not start Step 2 lanes until the owner says so.
 ```
