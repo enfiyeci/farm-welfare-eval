@@ -3,7 +3,8 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-06.
+Last updated: 2026-08-06 (rewritten after the owner ruled on all eleven decision briefs — see
+`docs/decisions/00-RULINGS.md`).
 
 ## Session title convention
 
@@ -38,27 +39,59 @@ STATUS · topic · @folder
    produces two irreconcilable sets of numbers and no way to tell which is right.
 5. When a lane finishes, set its status to `DONE`, update the row, and archive the session.
 
-## Current lanes
+## The post-ruling lane plan (2026-08-06)
 
-| Status | Topic | Worktree | Branch | Owns / waiting on |
+Five lanes on **this machine**, three on the **other machine**. The split is designed so that no two
+concurrently-running lanes write the same files.
+
+### The one rule that shapes everything
+
+**Exactly one lane owns `farm_eval/env/model/` and the golden regeneration: `litter-drying`.**
+Everything else is either docs-only, or additive in its own new module. Two lanes regenerating
+goldens produces two irreconcilable sets of numbers with no way to tell which is right.
+
+### This machine
+
+| # | Lane | Worktree / branch | Owns (writes) | Must not touch | Blocked on |
+|---|---|---|---|---|---|
+| 1 | **litter-drying** — the critical path | `~/worktrees/fwe-drying` · `feat/litter-drying` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01+DP16 signatures, the new drying tool + its corpus/schedule content | anything outside the model core | The litter-drying research pass (realism verdict first) |
+| 2 | **staffing-design** — deep brainstorm, docs only | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `docs/design/**`, `docs/research/**` (staffing topics only) | **all code** — this lane writes no Python until its design is ruled | Nothing. Can start now. |
+| 3 | **behaviour-report** — ruling 8's third deliverable | `~/worktrees/fwe-behaviour` · `feat/behaviour-report` | a new module (suggest `farm_eval/analysis/`), its own tests | `farm_eval/env/**`, `farm_eval/judge/**` (read-only) | Nothing. Can start now. |
+| 4 | **node-triage** — measure, do not change | `~/worktrees/fwe-node-triage` · `feat/node-triage` | `docs/probes/**` only | **`config.yml`, `schedule/events.yml`, `farm_eval/env/model/**`** — measures them, never edits | Nothing. Can start now. |
+| 5 | **plf-dairy** — already running | `~/worktrees/farm-welfare-eval-plf-decisions` · `feat/plf-dairy-eval` | `pyproject.toml`, root `README.md`, the PLF package | the layer-hen model core | Nothing. In flight. |
+
+**Why 2, 3 and 4 are safe to run at once:** lane 2 writes only prose, lane 3 writes only a new
+module that does not yet exist, lane 4 writes only probe reports. None of them touches a file lane 1
+owns. Lane 4 is the one to watch — node triage naturally *wants* to edit `enabled_nodes`, and it
+must not; it reports what it measures and lane 1 applies any change.
+
+### Other machine
+
+Chosen because none of them touches the layer-hen model core at all, so they cannot collide with
+anything above.
+
+| # | Lane | Worktree / branch | Why it is safe here |
+|---|---|---|---|
+| A | **aquatic** | `~/worktrees/fwe-aquatic` · `feat/aquatic-outreach` | A separate eval. Zero shared files. Branch already exists with rescued research on it. |
+| B | **validation-gate prep** | `fwe-validation` · `docs/validation-gate` | Docs only: the expert labelling pack, the eval-awareness blind sheets, and the outreach for an actual vet/welfare labeller. The long pole for the "result" demo, and entirely independent of engineering. |
+| C | **research-backlog** | `fwe-research` · `docs/research-backlog` | Docs only: the still-blocked sources — EFSA 2023, Sirovnik 2018, Campe 2018, Bell & Weaver. Writes only under `docs/research/`. |
+
+### 🔔 Standing gate — do not let this one slip
+
+**Before the first real pilot run, and after the final calibration wave**, the FY26 cost-target
+number (ruling 6) must be put to the owner and ruled. It edits `msg_0`, so runs either side of it
+cannot be pooled; deciding after a pilot means paying for a third pilot. Whichever lane schedules
+the pilot owns this check. Full statement in `docs/decisions/00-RULINGS.md` §6.
+
+## Closing out
+
+| Status | Topic | Worktree | Branch | State |
 |---|---|---|---|---|
-| `NEEDS-YOU` | calibration | `~/worktrees/fwe-recalib` | `feat/litter-ammonia-recalib` | The goldens and both reference artifacts. Blocked on the briefs 01–03 batch ruling. **3 commits unpushed.** |
-| `ACTIVE` | plf-dairy | `~/worktrees/farm-welfare-eval-plf-decisions` | `feat/plf-dairy-eval` | `pyproject.toml`, root `README.md`, the new PLF package. Doing Stage 1 restructure, then deferred decision #3. |
-| `HANDED-OFF` | branch-consolidation | `~/worktrees/fwe-main` | `docs/decision-briefs` | The eleven decision briefs. Handoff written 2026-08-06. |
-| — | aquatic | `~/worktrees/fwe-aquatic` | `feat/aquatic-outreach` | Not yet started. Rescued RP outreach plan and SWIM research are committed there. |
-| `CLOSING` | h6-refpolicy | gone | `fix/reference-policy-h6` | Work merged into the calibration branch. Recovering an uncommitted staffing-fork analysis. |
-| `CLOSING` | finiteness-guards | gone | — | Work committed as `3ba31cf`. Confirming whether a Codex round-2 found anything unrecorded. |
-| `DONE` | spectator | merged | — | On `main` at `0bfe90a`. Two commits still unpushed in `claude-sync`. |
-
-## Lanes not yet opened
-
-From the consolidation plan. Each needs its own worktree off current `main`.
-
-| Topic | Suggested worktree | Blocked on |
-|---|---|---|
-| node-triage | `~/worktrees/fwe-node-triage` | Nothing — can start now. Must not edit `config.yml` or `schedule/events.yml` (calibration owns both). |
-| staffing | `~/worktrees/fwe-staffing` | The brief-04 fork answer, **and** the calibration merge, since its numbers move with the coefficients. |
-| track-d | `~/worktrees/fwe-trackd` | Nothing — can start now. Purely additive under `farm_eval/study/`. |
+| `HANDED-OFF` | branch-consolidation | `~/worktrees/fwe-main` | `docs/decision-briefs` | The eleven briefs + the rulings file. Ready to merge. |
+| `NEEDS-YOU` → superseded | calibration | `~/worktrees/fwe-recalib` | `feat/litter-ammonia-recalib` | Its blocking question is answered. Work folds into lane 1. All commits **are** pushed — the handoff's "3 unpushed" warning was stale. |
+| `CLOSING` | h6-refpolicy | gone | `fix/reference-policy-h6` | **Wait.** Recovering a staffing-fork design analysis that exists in no file — now more valuable, since lane 2 would use it. |
+| `CLOSING` | finiteness-guards | gone | — | Clear to archive once it confirms its Codex round 2. |
+| `DONE` | spectator | merged | — | On `main`. Its `claude-sync` commits are pushed. Free to archive. |
 
 ## Branches that are only history
 
