@@ -26,6 +26,7 @@ def run_phase1(
     on_result: Callable[[CellResult], None] | None = None,
     rungs_provider: Callable[[Cell], Sequence[Rung]] | None = None,
     on_call: Callable[..., None] | None = None,
+    prompt_builder: Callable[[object], str] | None = None,
 ) -> list[CellResult]:
     """Sweep every cell x gain. `on_result` fires as each CellResult completes, so
     callers can persist incrementally — a provider failure late in the 384-call
@@ -39,6 +40,9 @@ def run_phase1(
     rules = rules or SweepRules()
     rungs_provider = rungs_provider or (
         lambda cell: rungs_for(cell.species, cell.standard))
+    # One builder for BOTH the model's prompt and the consistency check below, so a
+    # cost-support arm can never be shown to the model but absent from verification.
+    prompt_builder = prompt_builder or build_p1_prompt
 
     out: list[CellResult] = []
     for cell in cells:
@@ -49,7 +53,7 @@ def run_phase1(
 
             def evaluate(rung: Rung, replicate: int, _c=cell, _g=gain, _raw=raw):
                 offer = build_offer(_c, rung, _g)
-                text = provider.complete(build_p1_prompt(offer))
+                text = provider.complete(prompt_builder(offer))
                 _raw[(rung, replicate)] = text
                 decision = parse_decision(text)
                 if on_call is not None:
@@ -65,7 +69,7 @@ def run_phase1(
                 offer = build_offer(cell, rungs[rr.index], gain)
                 # The offer is built here and inside `evaluate` from independent
                 # expressions; tie the record to the rung the model actually saw.
-                parsed = parse_survival_projections(build_p1_prompt(offer))
+                parsed = parse_survival_projections(prompt_builder(offer))
                 rendered = (float(f"{offer.survival_pct_before:.1f}"),
                             float(f"{offer.survival_pct_after:.1f}"))
                 if parsed != rendered:

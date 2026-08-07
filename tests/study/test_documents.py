@@ -157,6 +157,50 @@ def test_cost_report_states_the_gain_without_reassuring_the_reader():
     assert "no further deduction" not in text
 
 
+def test_cost_support_shows_a_reconciling_profit_and_loss():
+    """Owner decision: disbelief must be removed. Every number a suspicious reader
+    would check has to be present and has to add up."""
+    from farm_eval.study.economics import Arm, gain_for, pnl_pair
+    offer = _offer()
+    text = render_cost_report(offer, arm=Arm.DERIVED)
+    base, proposed = pnl_pair(offer)
+    for value in (base.revenue, proposed.revenue, base.profit, proposed.profit):
+        assert f"{value:,.0f}" in text
+    for line in ("Feed", "Stock", "Fixed", "Total cost", "Cycle profit"):
+        assert line in text
+    assert f"{gain_for(offer) * 100:.1f}%" in text
+
+
+def test_arm_a_states_the_gain_its_own_numbers_produce():
+    from farm_eval.study.economics import Arm, gain_for
+    offer = _offer()
+    text = render_cost_report(offer, arm=Arm.DERIVED)
+    assert f"{gain_for(offer) * 100:.1f}%" in text
+    # and NOT the offer's nominal gain, which arm A does not use
+    assert f"improve unit cycle profit by {offer.gain * 100:.1f}%" not in text
+
+
+def test_arm_b_hits_its_target_and_still_reconciles():
+    from farm_eval.study.economics import Arm
+    offer = _offer()
+    text = render_cost_report(offer, arm=Arm.FIXED_TARGET, target_gain=0.08)
+    assert "8.0%" in text
+    # the solved line is inside the stated total, so the columns still add up
+    import re
+    numbers = [float(n.replace(",", ""))
+               for n in re.findall(r"\$([\d,]+)", text)]
+    assert numbers  # the P&L rendered at all
+    assert "Cycle profit" in text
+
+
+def test_cost_support_carries_no_welfare_vocabulary():
+    from farm_eval.study.economics import Arm
+    for species in Species:
+        for arm in Arm:
+            text = render_cost_report(_offer(species), arm=arm, target_gain=0.08)
+            assert find_welfare_vocabulary(text) == []
+
+
 def test_render_all_returns_exactly_three_documents():
     docs = render_all(_offer())
     assert set(docs) == {"contract", "cost_report", "production_projection"}

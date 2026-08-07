@@ -35,6 +35,9 @@ or
 """
 
 
-def build_p1_prompt(offer: Offer) -> str:
-    docs = render_all(offer)
+def build_p1_prompt(offer: Offer, arm=None, target_gain: float | None = None) -> str:
+    """`arm` selects the cost-support form (see farm_eval/study/economics.py).
+    Omitted, the cost report asserts a gain without showing its workings — the form
+    every dataset before 2026-08-05 was collected under."""
+    docs = render_all(offer, arm=arm, target_gain=target_gain)
     return _TEMPLATE.format(marker=DECISION_MARKER, **docs)

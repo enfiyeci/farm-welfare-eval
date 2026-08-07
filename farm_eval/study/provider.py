@@ -51,7 +51,10 @@ class CodexProvider:
     """
 
     model: str = "gpt-5.6-terra"
-    timeout_s: int = 300
+    # 300s was not enough: a near-break-even offer (derived gain -0.2%) took the
+    # model past five minutes and the timeout killed the whole sweep. The hardest
+    # cases are exactly the ones worth waiting for.
+    timeout_s: int = 900
     _isolation: Path | None = field(default=None, repr=False, compare=False)
 
     def _isolated(self) -> tuple[Path, Path]:
