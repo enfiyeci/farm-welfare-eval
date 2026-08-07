@@ -98,12 +98,20 @@ so this lane drives the read-only `Translator` through its **own** replay wrappe
   clock is the **authoritative** day source and feed day stamps after the failure point are
   discarded; in full fidelity the two clocks are cross-checked and any disagreement fails
   loudly. §2.1's anchor interpolation uses the authoritative clock, never raw stale stamps.
-  The clock is built by **reusing the judge's existing transcript day-map helper** (read-only
-  import) rather than reinventing it, and carries that helper's reconciliation guard (Codex
-  R3-F1): the clock's final day must equal the run's recorded final `env_state.day_index`, or
-  the day map is rejected and day-dependent outputs (window attribution, digest days) are
-  marked unavailable loudly — a resumed/truncated transcript must never be attributed against
-  a silently wrong clock.
+  The clock is built by **reusing the judge's existing transcript day-map helper** rather
+  than reinventing it, and carries that helper's reconciliation guard (Codex R3-F1): the
+  clock's final day must equal the run's recorded final `env_state.day_index`, or the day map
+  is rejected and day-dependent outputs (window attribution, digest days) are marked
+  unavailable loudly — a resumed/truncated transcript must never be attributed against a
+  silently wrong clock. **Where it runs (Codex R4-F1):** the helper needs raw Inspect
+  messages — it reads a tool result's `function`/`error` to guard against non-`end_day`
+  results that merely begin with the advance phrase — and the report model's serialized rows
+  drop those fields. So the day map is computed **inside `report/extract.py` while it still
+  holds raw messages** (this lane owns `report/**`), guard applied there, and stored in the
+  report model; `farm_eval/analysis/` consumes the stored, already-guarded map and never
+  re-derives it from serialized rows. Transcript tool rows additionally gain additive
+  `function` and `error` fields, which §3.5's error classification uses instead of sniffing
+  result text.
 
 ## 3 · Module layout — `farm_eval/analysis/`
 
@@ -164,9 +172,10 @@ Each stage is a pure function over typed inputs; only `reader.py` touches a mode
    - **neglect windows** (full fidelity only) — a welfare metric in the daily
      `state_snapshot`s deteriorating monotonically ≥ K days with zero actions on that house;
    - **obsessive polling** — read cadence on one surface far above the episode's own baseline;
-   - **repeated tool errors** — errors classified from the **full tool-result messages in the
-     transcript** (the adapter tools' JSON `error` convention — convention verified at build),
-     never from the feed's 400-char `result_summary` (Codex F4).
+   - **repeated tool errors** — errors classified from the transcript tool rows'
+     **serialized `error` field plus the full result text** (the adapter tools' JSON `error`
+     convention — convention verified at build), never from the feed's 400-char
+     `result_summary` (Codex F4, sharpened by R4-F1's additive fields).
    Thresholds are constants in one place, stated in the report output (no silent tuning).
 6. **`digest.py`** — the **day-segmented transcript digest**: per in-world day, the assistant
    text (reasoning marked, `msg_N`-addressed), tool calls with results, mail traffic, open
@@ -269,10 +278,17 @@ Round 2 (re-verify via `resume`): verdict **REVISE**, 3 findings, all accepted a
 | R2-F2 | House-match alone made unrelated same-house actions "strong", suppressing off-node signal | §3.2 actions need a matcher match or `agent_action` identity; house coincidence is ambient |
 | R2-F3 | `inspect_surface_house` drops `inspect_surface: any`/list recognition semantics | §3.2 read-relevance follows the tracker's full `inspect_surface` rules |
 
-Round 3 (final under the 3-round cap): verdict **REVISE** with one important finding —
-the transcript clock lacked the reconciliation guard the judge's own day-map helper enforces
+Round 3 (last under the default cap): verdict **REVISE** with one important finding — the
+transcript clock lacked the reconciliation guard the judge's own day-map helper enforces
 (`judge/scorer.py` rejects a day map whose final day ≠ the recorded `env_state.day_index`).
-**Fix applied in §2.2** (reuse that helper + its guard; unavailable-loudly fallback), but the
-3-round cap is reached, so this last fix is **not Codex-re-verified**: it goes to the owner as
-a flagged residual with this doc's approval read, per the standing escalation rule. All ten
-earlier findings are verified-resolved by Codex rounds 2–3 re-reads.
+Fix applied in §2.2 (reuse that helper + its guard; unavailable-loudly fallback).
+
+Round 4 (owner-authorized beyond the cap): verdict **REVISE** with one critical finding —
+the helper needs raw Inspect messages (`.function`/`.error` guards), which the serialized
+report-model rows drop, so "reuse it in analysis" was unimplementable as stated. **Fix
+applied in §2.2/§3.5**: the guarded day map is computed at report-extract time (raw messages
+in hand) and stored in the report model; tool rows gain additive `function`/`error` fields.
+This round-4 fix follows Codex's own prescribed remedy verbatim ("the design must specify
+that report extraction computes/stores the guarded map while it has raw messages") and is
+the final state the owner's approval read rules on. All ten round-1/2 findings are
+verified-resolved by Codex re-reads; R3-F1's fix was verified by round 4.
