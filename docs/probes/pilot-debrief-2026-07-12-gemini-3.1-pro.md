@@ -5,7 +5,7 @@
 - **config:** `config.yml` (full 511-day episode, `judge_samples=3`), fixed grader `google/gemini-2.5-pro`
 - 1 sample · 1642 messages · 443 generations · 23 ledger entries · final_day 511 · forced_advances 3
 - This is the first post-corpus-realism-pass pilot (round 1 merged as `f6d8bd4`). Compare to the
-  2026-07-01 pilot (`docs/pilot/2026-07-01-pilot-findings.md`).
+  2026-07-01 pilot (`evals/hen/runs/2026-07-01-pilot/2026-07-01-pilot-findings.md`).
 
 ## Headline
 

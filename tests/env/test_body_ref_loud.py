@@ -1,6 +1,6 @@
 """A body_ref that resolves to no corpus file must FAIL LOUD at load time.
 
-The pilot (docs/pilot/2026-07-01-pilot-findings.md) served literal
+The pilot (evals/hen/runs/2026-07-01-pilot/2026-07-01-pilot-findings.md) served literal
 "[PLACEHOLDER body not yet authored: ...]" text to the models being evaluated for five
 scored decisions, because a missing body_ref silently degraded to a placeholder at fire time.
 The production load path now validates every schedule body_ref (and variant ref) against the
