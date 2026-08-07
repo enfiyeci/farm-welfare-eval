@@ -242,3 +242,36 @@ def test_unreachable_cushion_returns_none_rather_than_a_silly_density():
     from farm_eval.study.economics import density_for_target_cushion
     cell = _offer(Species.SHRIMP, band=StandardBand.BEYOND).cell
     assert density_for_target_cushion(cell, 30.0, 11.0) is None
+
+
+def test_target_exactly_at_the_ceiling_is_infeasible_despite_float_dust():
+    """Codex review 2026-08-06: subtracting the algebraic ceiling can leave a tiny
+    POSITIVE denominator, returning a ~1e16 density instead of None. The check must
+    tolerate float dust, not just exact non-positivity."""
+    from farm_eval.study.economics import (
+        _VARIABLE_LINES, density_for_target_cushion, pnl_pair,
+    )
+    from farm_eval.study.params import (
+        BASELINE_MORTALITY, PER_ANIMAL_VALUE_USD, Rung,
+    )
+    cell = _offer(band=StandardBand.BEYOND).cell
+    for pp in (9.0, 22.0):
+        rate = PER_ANIMAL_VALUE_USD[(cell.economics, cell.species)]
+        m1 = BASELINE_MORTALITY[cell.species] + pp / 100.0
+        probe = build_offer(cell, Rung(density_step=0.0, added_mortality_pp=pp), 0.0)
+        base, _ = pnl_pair(probe)
+        v = sum(base.lines[k] for k in _VARIABLE_LINES) / probe.n0
+        ceiling = ((1.0 - m1) * rate - v) / (0.01 * rate)
+        assert density_for_target_cushion(cell, pp, ceiling) is None
+
+
+def test_non_positive_or_non_finite_cushion_target_is_rejected_loudly():
+    """Codex review 2026-08-06: target 0 'succeeds' with zero gain, target -10
+    returns a SUB-BASELINE placement, and NaN sails through '<= 0' and propagates
+    NaN populations — none is a rung the study could use, so the solver must
+    refuse rather than hand back plausible-looking nonsense."""
+    from farm_eval.study.economics import density_for_target_cushion
+    cell = _offer(band=StandardBand.BEYOND).cell
+    for bad in (0.0, -10.0, float("nan"), float("inf")):
+        with pytest.raises(ValueError, match="target_cushion_pp"):
+            density_for_target_cushion(cell, 9.0, bad)

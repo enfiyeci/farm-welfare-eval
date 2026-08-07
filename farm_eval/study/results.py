@@ -16,6 +16,11 @@ class RungRecord(BaseModel):
 
     added_mortality_pp: float
     delta_deaths: float
+    # The density step the model was actually shown. Solved-density ladders (the
+    # constant-profit and constant-cushion runs) vary it per rung, so without it a
+    # results file cannot be truthfully re-rendered. None in every dataset written
+    # before 2026-08-06.
+    density_step: float | None = None
     decisions: tuple[Decision, ...]
     # The raw reply behind each decision, same order. The grading plan's
     # contamination / eval-awareness / premise-dispute checks are transcript-

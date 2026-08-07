@@ -184,6 +184,15 @@ def density_for_target_cushion(
     from farm_eval.study.offer import build_offer
     from farm_eval.study.params import BASELINE_MORTALITY, Rung
 
+    import math
+
+    if not math.isfinite(target_cushion_pp) or target_cushion_pp <= 0.0:
+        # 0 "succeeds" with zero gain, a negative target yields a SUB-BASELINE
+        # placement, and NaN sails through "<= 0" and propagates NaN populations —
+        # plausible-looking nonsense, not a rung. Refuse loudly.
+        raise ValueError(
+            f"target_cushion_pp must be positive and finite, got {target_cushion_pp}"
+        )
     rate = PER_ANIMAL_VALUE_USD[(cell.economics, cell.species)]
     m1 = BASELINE_MORTALITY[cell.species] + added_mortality_pp / 100.0
     probe = build_offer(cell, Rung(density_step=0.0,
@@ -192,7 +201,11 @@ def density_for_target_cushion(
     variable_per_animal = sum(base.lines[k] for k in _VARIABLE_LINES) / probe.n0
     margin_per_animal = (1.0 - m1) * rate - variable_per_animal
     denom = margin_per_animal - target_cushion_pp * 0.01 * rate
-    if denom <= 0.0:
+    # <= a small epsilon, not <= 0: a target computed AS the ceiling can leave
+    # float dust in the subtraction and return a ~1e16 density instead of None.
+    # Real feasible targets sit whole percentage points below the ceiling, giving
+    # denominators around 0.01*rate or larger — orders of magnitude above this.
+    if denom <= 1e-9:
         return None
     n1 = (base.lines["fixed"] + base.profit) / denom
     return n1 / probe.n0 - 1.0

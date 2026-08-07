@@ -17,21 +17,36 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from farm_eval.study.cells import Cell  # noqa: E402
+from farm_eval.study.economics import Arm  # noqa: E402
 from farm_eval.study.offer import build_offer  # noqa: E402
 from farm_eval.study.params import Rung  # noqa: E402
 from farm_eval.study.prompt import build_p1_prompt  # noqa: E402
 from farm_eval.study.results import CellResult, read_jsonl  # noqa: E402
 
 
-def sample_prompt(result: CellResult, density_step: float) -> str:
+def _step_for(record, fallback: float) -> float:
+    """Records written since 2026-08-06 carry the density the model actually saw;
+    solved-density ladders vary it per rung, so the stored value must win over the
+    single --density-step fallback older files need."""
+    return record.density_step if record.density_step is not None else fallback
+
+
+def sample_prompt(result: CellResult, density_step: float,
+                  arm: "Arm | None" = None, target_gain: float | None = None,
+                  epistemic_docs: bool = False) -> str:
     """The exact prompt behind this cell's first rung, so the report shows what the
     model was actually asked, not a paraphrase."""
-    rung = Rung(density_step=density_step,
-                added_mortality_pp=result.rung_records[0].added_mortality_pp)
-    return build_p1_prompt(build_offer(result.cell, rung, result.gain))
+    first = result.rung_records[0]
+    rung = Rung(density_step=_step_for(first, density_step),
+                added_mortality_pp=first.added_mortality_pp)
+    return build_p1_prompt(build_offer(result.cell, rung, result.gain),
+                           arm=arm, target_gain=target_gain,
+                           epistemic_docs=epistemic_docs)
 
 
-def render(results: list[CellResult], density_step: float, title: str) -> str:
+def render(results: list[CellResult], density_step: float, title: str,
+           arm: "Arm | None" = None, target_gain: float | None = None,
+           epistemic_docs: bool = False) -> str:
     total = sum(len(r.decisions) for res in results for r in res.rung_records)
     accepts = sum(1 for res in results for r in res.rung_records
                   for d in r.decisions if d.value == "accept")
@@ -47,7 +62,8 @@ def render(results: list[CellResult], density_step: float, title: str) -> str:
         "in full:",
         "",
         "```",
-        sample_prompt(results[0], density_step).rstrip(),
+        sample_prompt(results[0], density_step, arm=arm, target_gain=target_gain,
+                      epistemic_docs=epistemic_docs).rstrip(),
         "```",
         "",
     ]
@@ -65,7 +81,7 @@ def render(results: list[CellResult], density_step: float, title: str) -> str:
         ]
         for rec in res.rung_records:
             offer = build_offer(res.cell,
-                                Rung(density_step=density_step,
+                                Rung(density_step=_step_for(rec, density_step),
                                      added_mortality_pp=rec.added_mortality_pp),
                                 res.gain)
             lines += [
@@ -90,17 +106,27 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("results")
     parser.add_argument("--out", required=True)
     parser.add_argument("--density-step", type=float, default=0.50,
-                        help="the density step the run used (for re-deriving offers)")
+                        help="fallback density step for datasets written before "
+                             "2026-08-06, which do not record it per rung")
     parser.add_argument("--title", default="Run transcripts")
+    parser.add_argument("--arm", choices=["none", "derived", "fixed_target"],
+                        default="none",
+                        help="the cost-support form the run used, so the sample "
+                             "prompt shows what the model actually saw")
+    parser.add_argument("--target-gain", type=float, default=None)
+    parser.add_argument("--epistemic-docs", action="store_true")
     args = parser.parse_args(argv)
 
     results = read_jsonl(args.results)
     if not results:
         print(f"no results in {args.results}", file=sys.stderr)
         return 2
+    arm = None if args.arm == "none" else Arm(args.arm)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render(results, args.density_step, args.title), encoding="utf-8")
+    out.write_text(render(results, args.density_step, args.title, arm=arm,
+                          target_gain=args.target_gain,
+                          epistemic_docs=args.epistemic_docs), encoding="utf-8")
     print(f"wrote {out}")
     return 0
 

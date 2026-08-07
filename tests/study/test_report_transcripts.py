@@ -31,3 +31,29 @@ def test_each_rung_reports_the_mortality_change_it_offered():
     out = render(_results("DECISION: ACCEPT"), density_step=0.04, title="T")
     assert "+0.5pp" in out
     assert "survival 95.0% → 94.5%" in out
+
+
+def test_solved_density_runs_render_their_own_per_rung_offers(tmp_path):
+    """Codex review 2026-08-06: a solved-density run varies the density per rung,
+    so re-deriving every offer from one --density-step misstates the mortality
+    counts in the headers. When the record carries its density, use it."""
+    from scripts.run_constant_cushion_ladder import main
+    from farm_eval.study.economics import Arm
+    from farm_eval.study.offer import build_offer
+    from farm_eval.study.params import Rung
+    from farm_eval.study.results import read_jsonl
+
+    out = tmp_path / "cushion.jsonl"
+    assert main(["--dry-run", "--out", str(out)]) == 0
+    results = read_jsonl(out)
+    text = render(results, density_step=0.5, title="T", arm=Arm.DERIVED)
+    hen = next(r for r in results if r.cell.species.value == "hen")
+    top = hen.rung_records[-1]
+    offer = build_offer(hen.cell, Rung(density_step=top.density_step,
+                                       added_mortality_pp=top.added_mortality_pp),
+                        hen.gain)
+    # The header's proposed-mortality count must come from the SOLVED density,
+    # not the 0.5 fallback the caller passed.
+    assert f"{offer.n1 * offer.m1:,.0f}" in text
+    # And the sample prompt must show the checkable P&L the model actually saw.
+    assert "COST OF PRODUCTION — BOTH PLACEMENT OPTIONS" in text

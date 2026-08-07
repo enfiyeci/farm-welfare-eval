@@ -81,6 +81,7 @@ def run_phase1(
                 records.append(RungRecord(
                     added_mortality_pp=rungs[rr.index].added_mortality_pp,
                     delta_deaths=offer.delta_deaths,
+                    density_step=rungs[rr.index].density_step,
                     decisions=rr.decisions,
                     responses=tuple(raw[(rungs[rr.index], r)]
                                     for r in range(len(rr.decisions))),

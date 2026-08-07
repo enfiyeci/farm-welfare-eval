@@ -19,6 +19,7 @@ sensitivity block and the sister-unit benchmark line to the documents.
 from __future__ import annotations
 
 import argparse
+import math
 import pathlib
 import sys
 from pathlib import Path
@@ -76,8 +77,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args(argv)
 
-    if args.target_cushion <= 0:
-        print("--target-cushion must be positive", file=sys.stderr)
+    # isfinite first: "nan <= 0" is False, so NaN would otherwise sail through and
+    # produce a completed-looking sweep whose offers are all NaN.
+    if not math.isfinite(args.target_cushion) or args.target_cushion <= 0:
+        print("--target-cushion must be a positive finite number", file=sys.stderr)
         return 2
     out = Path(args.out)
     if out.is_dir():
@@ -86,18 +89,45 @@ def main(argv: list[str] | None = None) -> int:
 
     cells = [Cell(species=sp, scale=Scale.LARGE, standard=StandardBand.BEYOND,
                   economics=Economics.EQUALIZED) for sp in Species]
+    rung_map = {cell.species: rungs_for_cell(cell, args.target_cushion)
+                for cell in cells}
+    # A cushion can be reachable for one species and not the other; run what is
+    # feasible and say so, rather than crashing inside run_sweep on an empty
+    # ladder after the feasible species' calls were already spent (Codex review
+    # 2026-08-06, round 3).
+    live_cells = [cell for cell in cells if rung_map[cell.species]]
+    for cell in cells:
+        if not rung_map[cell.species]:
+            print(f"{cell.species.value}: no rung can reach a "
+                  f"{args.target_cushion:.1f}pp cushion within the density cap — "
+                  f"skipping this species", file=sys.stderr)
+    if not live_cells:
+        print("no species has a feasible rung at this cushion", file=sys.stderr)
+        return 2
+    # The gain FLOATS per rung on this ladder, but CellResult.gain is one number.
+    # Recording each cell's OWN ladder maximum makes it an honest upper bound and
+    # makes envelope_status conservative per cell: in_envelope only if that cell's
+    # worst rung is. (A shared cross-species max mislabeled the lower-gain
+    # species; gain=0.0 labeled everything in_envelope and printed "+0%" in
+    # transcript headings — Codex review 2026-08-06, rounds 2-3.) Per-rung gains
+    # stay reconstructible from the recorded density_step (arm A).
+    cell_max_gain = {
+        cell.species: max(gain_for(build_offer(cell, rung, 0.0))
+                          for rung in rung_map[cell.species])
+        for cell in live_cells
+    }
 
     print(f"every offer carries the same cushion: {args.target_cushion:.1f}pp of "
           f"survival shortfall before the extra profit vanishes\n")
-    for cell in cells:
-        for rung in rungs_for_cell(cell, args.target_cushion):
+    for cell in live_cells:
+        for rung in rung_map[cell.species]:
             offer = build_offer(cell, rung, 0.0)
             print(f"  {cell.species.value:7} +{rung.added_mortality_pp:>4.1f}pp  "
                   f"mortality {offer.m1 * 100:>4.0f}%  density +{rung.density_step * 100:>4.0f}%  "
                   f"extra deaths {offer.delta_deaths:>10,.0f}  "
                   f"gain {gain_for(offer) * 100:+.1f}%  "
                   f"cushion {survival_cushion_pp(offer):.2f}pp")
-        dropped = len(LADDER_PP) - len(rungs_for_cell(cell, args.target_cushion))
+        dropped = len(LADDER_PP) - len(rung_map[cell.species])
         if dropped:
             print(f"  {cell.species.value:7} {dropped} rung(s) dropped: the cushion "
                   f"is unreachable at that mortality, or the density would exceed "
@@ -115,21 +145,24 @@ def main(argv: list[str] | None = None) -> int:
             fh.flush()
             count += 1
 
-        # The recorded `gain` is the rung's own floating gain, recomputed inside
-        # the prompt builder from the offer — one value per rung, so run_phase1's
-        # gains list carries a single placeholder and the prompt builder ignores it.
-        run_phase1(
-            provider,
-            cells=cells,
-            gains=[0.0],
-            rules=SweepRules(replicates=args.replicates,
-                             min_accepts=args.min_accepts),
-            on_result=persist,
-            on_call=None if args.quiet else live_line,
-            rungs_provider=lambda cell: rungs_for_cell(cell, args.target_cushion),
-            prompt_builder=lambda offer: build_p1_prompt(
-                offer, arm=Arm.DERIVED, epistemic_docs=args.epistemic_docs),
-        )
+        # One run_phase1 call per cell so each carries its own ladder-max gain
+        # (see cell_max_gain above). The prompt builder ignores the gain —
+        # Arm.DERIVED renders the P&L's own per-rung figure — so the prompts are
+        # identical to what a placeholder would produce; only the recorded labels
+        # become truthful.
+        for cell in live_cells:
+            run_phase1(
+                provider,
+                cells=[cell],
+                gains=[cell_max_gain[cell.species]],
+                rules=SweepRules(replicates=args.replicates,
+                                 min_accepts=args.min_accepts),
+                on_result=persist,
+                on_call=None if args.quiet else live_line,
+                rungs_provider=lambda c: rung_map[c.species],
+                prompt_builder=lambda offer: build_p1_prompt(
+                    offer, arm=Arm.DERIVED, epistemic_docs=args.epistemic_docs),
+            )
     print(f"wrote {count} cell results to {out}")
     return 0
 
