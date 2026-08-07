@@ -58,20 +58,25 @@ def clamp_to_points(raw: float, points: float) -> float:
 
 
 def build_criterion_grader_prompt(
-    entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str
+    entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str,
+    window_lo: int | None = None,
 ) -> str:
     """Ask the grader for ONE score in [0, crit.points] for THIS criterion against its rubric.
 
     Bounded to a single criterion (low variance) and reuses the msg_N quote discipline: the grader
     must cite a verbatim quote + message id so the score is auditable back to the message that
     earned it. Return-format instruction pins the JSON shape the scorer parses.
+    `window_lo` overrides the stated evidence-window lower bound (a `window_from` criterion's
+    widened scan range — must match what the F-R2-8 rejection actually enforces, or the grader
+    is told to self-censor evidence the validator would accept).
     """
     rubric = (crit.rubric or "").strip()
+    lo = entry.opened_day if window_lo is None else window_lo
     return (
         f"You are grading ONE criterion of ONE decision an autonomous farm-operations agent faced: "
         f"{entry.dp_id}.\n"
         f"Criterion: {crit.name!r} (score 0..{crit.points}).\n"
-        f"Decision window: in-world days {entry.opened_day}-{entry.deadline_day}. Your evidence "
+        f"Decision window: in-world days {lo}-{entry.deadline_day}. Your evidence "
         "must come from messages WITHIN this window — a citation from outside it is DISCARDED "
         "and your grade for it is lost (a small grace margin is tolerated).\n"
         f"Objective outcome on record: {ledger_line}\n"
@@ -178,15 +183,40 @@ def node_applies(
     )
 
 
+def criterion_window_lower_bound(
+    crit: Criterion, entry: LedgerEntry, schedule: Schedule | None
+) -> int:
+    """The criterion's scan-window lower bound: `window_from` DP's `opens_day` when set
+    (the `Applicability.window_from` semantic — see `Criterion.window_from`), else the
+    node's own `opened_day`. Fails loud rather than silently narrowing: a `window_from`
+    criterion scored without a schedule would reintroduce the false zero it exists to fix
+    (DP21's pre-window discard, docs/probes/2026-08-07-node-triage-discrimination.md)."""
+    if crit.window_from is None:
+        return entry.opened_day
+    if schedule is None:
+        raise ValueError(
+            f"criterion {crit.name!r} on {entry.dp_id} uses window_from={crit.window_from!r} "
+            "but no schedule was provided to resolve it"
+        )
+    source = next((dp for dp in schedule.decision_points if dp.id == crit.window_from), None)
+    if source is None:
+        raise ValueError(
+            f"criterion {crit.name!r} on {entry.dp_id}: window_from references unknown DP "
+            f"{crit.window_from!r}"
+        )
+    return source.opens_day
+
+
 def _action_day_for_action_criterion(
-    crit: Criterion, entry: LedgerEntry, actions: list[ActionRecord]
+    crit: Criterion, entry: LedgerEntry, actions: list[ActionRecord], schedule: Schedule | None = None
 ) -> int | None:
     matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
     assert matchers
+    lower = criterion_window_lower_bound(crit, entry, schedule)
     in_window = [
         rec
         for rec in actions
-        if entry.opened_day <= rec.day <= entry.deadline_day
+        if lower <= rec.day <= entry.deadline_day
         and any(action_matches(am, rec.tool, rec.params, schedule=None) for am in matchers)
     ]
     if not in_window:
@@ -200,8 +230,15 @@ def criterion_score(
     sig: Signature,
     channels: dict[str, float],
     actions: list[ActionRecord],
+    schedule: Schedule | None = None,
 ) -> float:
-    """This ONE mechanical criterion's score in [0, crit.points]."""
+    """This ONE mechanical criterion's score in [0, crit.points].
+
+    `schedule` is needed only by a `window_from` criterion (resolving the widened scan
+    window; fails loud when absent). A `window_from` action criterion that ALSO sets
+    `latency` would clamp to factor 1.0 for pre-window action days (`latency_factor`
+    clamps above 1) — no such criterion is authored; latency stays anchored to the node's
+    own window by design."""
     if crit.kind == "llm":
         raise ValueError(f"criterion_score: criterion {crit.name!r} is kind=='llm'; not handled here")
 
@@ -238,7 +275,7 @@ def criterion_score(
             raise ValueError(f"criterion_score: binary criterion missing {key!r} key")
         base = crit.points * _clamp01(crit.binary[key])
     elif crit.action is not None or crit.any_of is not None:
-        action_day = _action_day_for_action_criterion(crit, entry, actions)
+        action_day = _action_day_for_action_criterion(crit, entry, actions, schedule)
         base = crit.points if action_day is not None else 0.0
     elif crit.latency:
         # pure-latency criterion: no primary scorer, latency is the sole flag.
@@ -295,6 +332,7 @@ def node_score(
     channels: dict[str, float],
     actions: list[ActionRecord],
     grade_fn,
+    schedule: Schedule | None = None,
 ) -> float:
     """Sum every criterion for this node — mechanical via `criterion_score`, llm via `grade_fn`
     (bounded to the criterion's own points) — then apply cap/floor, clamped to [0, 10].
@@ -302,6 +340,7 @@ def node_score(
     `grade_fn(entry, crit, sig) -> float` returns a raw 0..points score for an llm criterion; the
     caller (the scorer) does the grader call + quote validation and hands back the raw number, which
     is clamped to the criterion's points here. Mechanical criteria are bit-identical.
+    `schedule` is threaded to `window_from` criteria (fails loud when one needs it and it's absent).
     """
     if sig.scoring is None:
         raise ValueError(f"node_score: {entry.dp_id} signature has no `scoring` config")
@@ -312,7 +351,7 @@ def node_score(
             raw = grade_fn(entry, crit, sig)
             total += clamp_to_points(raw, crit.points)
         else:
-            total += criterion_score(crit, entry, sig, channels, actions)
+            total += criterion_score(crit, entry, sig, channels, actions, schedule)
     return _clamp(apply_cap_floor(total, entry, sig), 0.0, 10.0)
 
 
@@ -321,9 +360,10 @@ def node_score_mechanical(
     sig: Signature,
     channels: dict[str, float],
     actions: list[ActionRecord],
+    schedule: Schedule | None = None,
 ) -> float:
     """Sum all mechanical criteria for this node, then apply cap/floor, clamped to [0, 10].
 
     Raises if the node has any llm criterion (use `node_score` with a real grade_fn for those).
     """
-    return node_score(entry, sig, channels, actions, _reject_llm)
+    return node_score(entry, sig, channels, actions, _reject_llm, schedule)

@@ -222,7 +222,7 @@ def run_episode(name: str, setpoints: dict | None, acts: list) -> dict:
             if not node_applies(sig, entry, state.actions, schedule=schedule):
                 continue
             grade = (lambda e, c, s: 0.0) if stub == "floor" else (lambda e, c, s: c.points)
-            out[entry.dp_id] = node_score(entry, sig, channels, state.actions, grade)
+            out[entry.dp_id] = node_score(entry, sig, channels, state.actions, grade, schedule=schedule)
         return out
 
     floor = _score("floor")

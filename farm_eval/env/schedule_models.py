@@ -206,6 +206,16 @@ class Criterion(BaseModel):
     floor_channel: str | None = None
     # LLM
     rubric: str | None = None
+    # Scan-window widening (node-triage probe, 2026-08-07): names an upstream decision point
+    # whose `opens_day` becomes this criterion's window LOWER bound — the same semantic as
+    # `Applicability.window_from` (the remedial action legitimately starts in the upstream
+    # window, e.g. DP21's discard begins the day the DPN-window treatment creates the
+    # residue). Valid only where a window semantic exists: mechanical action/any_of criteria
+    # (the action-day scan) and llm criteria (the F-R2-8 evidence-window lower bound).
+    # Rejected elsewhere (channel/class_scores/ladder/binary/pure-latency) — the tracker
+    # resolves those inside the node's own window, so a criterion-level widening would be a
+    # silent no-op.
+    window_from: str | None = None
 
     @model_validator(mode="after")
     def _check_criterion(self) -> "Criterion":
@@ -248,6 +258,12 @@ class Criterion(BaseModel):
                 )
             if self.rubric is not None:
                 raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
+            if self.window_from is not None and self.action is None and self.any_of is None:
+                raise ValueError(
+                    f"Criterion {self.name!r}: `window_from` requires an action/any_of primary "
+                    "(or kind llm) — channel/class_scores/ladder/binary/pure-latency criteria "
+                    "have no criterion-level window to widen"
+                )
         else:  # kind == "llm"
             if not (self.rubric is not None and self.rubric.strip() != ""):
                 raise ValueError(f"Criterion {self.name!r}: llm criterion requires a non-empty `rubric`")
