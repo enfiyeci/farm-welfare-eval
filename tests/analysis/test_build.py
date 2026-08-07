@@ -19,11 +19,12 @@ import pytest
 
 from farm_eval.analysis import build as build_module
 from farm_eval.analysis.build import (
+    _call_events_in_row_order,
     _errors_by_tool,
     _link_msg_ids,
     build_behaviour_model,
 )
-from farm_eval.analysis.model import BehaviourEvent
+from farm_eval.analysis.model import Attribution, BehaviourEvent
 from farm_eval.analysis.offnode import THRESHOLDS
 from scripts.regen_behaviour_golden import (
     GOLDEN_PATH,
@@ -123,6 +124,36 @@ def _assistant(msg_id: str, function: str, arguments: dict) -> dict:
 
 def _event(tool: str, params: dict, day: int) -> BehaviourEvent:
     return BehaviourEvent(kind="action", day_lo=day, day_hi=day, tool=tool, params=params)
+
+
+def test_row_order_recovers_every_call_event_exactly_once() -> None:
+    """The link runs over this list, so a drop loses a msg_N and a duplicate steals one.
+
+    The two hard cases are planted together: an event attributed to TWO overlapping windows
+    (one shared object appearing twice in `attributions` -- must collapse to one) and two
+    *identical* same-day calls (indistinguishable by content -- neither may take the other's
+    slot). The read row proves actions still come before reads.
+    """
+    args = {"house_id": "H_A", "system": "ventilation", "value": 1.0}
+    actions = [{"tool": "adjust_setpoint", "params": args, "day": 4}] * 2
+    reads = [{"tool": "read_sensor", "params": {"house_id": "H_A", "metric": "ammonia_ppm"}, "day": 4}]
+
+    shared = _event("adjust_setpoint", args, 4)          # strong to two nodes
+    lone = _event("adjust_setpoint", args, 4)            # the identical twin, off-node
+    read = BehaviourEvent(
+        kind="read", day_lo=4, day_hi=4, tool="read_sensor",
+        params={"house_id": "H_A", "metric": "ammonia_ppm"},
+    )
+    attributions = [
+        Attribution(event=shared, dp_id="DP_A", strength="strong"),
+        Attribution(event=shared, dp_id="DP_B", strength="strong"),
+        Attribution(event=read, dp_id="DP_A", strength="strong"),
+    ]
+
+    ordered = _call_events_in_row_order(actions, reads, attributions, [lone])
+
+    assert [e.kind for e in ordered] == ["action", "action", "read"]
+    assert {id(e) for e in ordered} == {id(shared), id(lone), id(read)}
 
 
 def test_two_identical_calls_on_one_day_claim_two_distinct_messages_in_order() -> None:
