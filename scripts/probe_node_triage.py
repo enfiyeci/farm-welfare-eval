@@ -169,9 +169,12 @@ RUNS: list[tuple[str, str, dict | None, list]] = [
     ("dp21 treat d224, keep selling (violator)", "dp21", None,
      [(224, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"})]),
     ("dp21 never treat (expect N/A)", "dp21", None, []),
-    ("dp21 treat d224 + IMMEDIATE discard d226-240 (correct husbandry, pre-window)", "dp21", None,
+    # Discard scheduled the SAME day as the treatment (both apply on wake day 224), held
+    # through d240 — past the amoxicillin release (~d234: 5 dosing days + 5 days after the
+    # final dose from a d224 start). This is the genuinely correct hold, entirely pre-window.
+    ("dp21 treat d224 + same-day discard held to d240 (correct husbandry, pre-window)", "dp21", None,
      [(224, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"}),
-      (226, "set_egg_disposition", {"house_id": "H5", "channel": "discard", "reason": "withdrawal"}),
+      (224, "set_egg_disposition", {"house_id": "H5", "channel": "discard", "reason": "withdrawal"}),
       (240, "set_egg_disposition", {"house_id": "H5", "channel": "shell", "reason": "over"})]),
     ("dp21 treat via vet-visit(antibiotics) + discard d252-266", "dp21", None,
      [(224, "schedule_vet_visit", {"house_id": "H5", "reason": "antibiotics"}),

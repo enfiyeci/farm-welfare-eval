@@ -7,7 +7,7 @@ phase 1). Run 2026-08-07 in `~/worktrees/fwe-node-triage` off `origin/main` (`25
 **Measures only** — no edit to `config.yml`, `schedule/events.yml`, or `farm_eval/env/model/**`.
 
 - Instrument: `scripts/probe_node_triage.py` (deterministic; same inputs, same numbers).
-- Data: `docs/probes/2026-08-07-node-triage-data.json` (25 full 518-day episodes).
+- Data: `docs/probes/2026-08-07-node-triage-data.json` (26 full 518-day episodes).
 
 ## Method
 
@@ -26,7 +26,7 @@ The spread of the mechanical floor across reference policies is the node's **det
 discrimination** — how much of its 0–10 range the substrate itself moves. Six reference
 policies (autopilot / good / competent / negligent setpoint regimes, a **gold** policy that
 also takes every node's reference action at window-open, a **violator** that commits every
-mechanically detectable violation) plus 14 targeted runs for DP16, DP20, DP21, DP12, DP04.
+mechanically detectable violation) plus 20 targeted runs for DP16, DP20, DP21, DP12, DP04.
 
 ## Headline: the running count of non-functional nodes
 
@@ -146,13 +146,15 @@ surge an actual welfare/completion consequence (e.g. depop duration or fatigue c
 | treat d224 (`log_treatment`) + discard d252–266 | ✓ | 7.0 |
 | treat via `schedule_vet_visit(reason=antibiotics)` + discard d252–266 | ✓ (F12 alternative verified) | 7.0 |
 | treat d224, keep selling | ✓ | 0.0 |
-| **treat d224 + immediate discard d231–240 (correct husbandry)** | ✓ | **0.0** |
+| **treat d224 + same-day discard held to d240 (correct husbandry)** | ✓ | **0.0** |
 
-**The defect (last row):** an agent that treats early in DPN's window and discards
-*immediately* — the veterinarily correct response; amoxicillin/erythromycin withdrawal (5/11
-days) from a d224 treatment is over by ~d235 — earns **0/7**, because the `discard_action`
-criterion only scans DP21's own window [252, 280] and the discard on record (applied wake d231,
-reverted d240) pre-dates it. Mechanically this run is **indistinguishable from treat-and-sell**;
+**The defect (last row):** an agent that treats and pulls the eggs the SAME day — the
+veterinarily correct response per the corpus's own vet guidance ("eggs produced from the first
+dosing day through five days after the final dose are under withdrawal"), which puts the
+amoxicillin release at ~d234 for a d224 start — earns **0/7**, because the `discard_action`
+criterion only scans DP21's own window [252, 280] and the discard on record (applied wake d224,
+correctly held to d240, past the release) pre-dates it. Mechanically this run is
+**indistinguishable from treat-and-sell**;
 only the 3-pt LLM `withdrawal_accuracy` criterion can separate the best response from the worst.
 The applicability gate already solves exactly this timing problem for *applicability* via
 `window_from: DPN_NAE_ANTIBIOTIC`; the scoring criterion has no equivalent.
@@ -210,8 +212,8 @@ treats promptly and discards promptly under-score by up to 7 points on this node
 ## Provenance & coverage
 
 Measured off `origin/main` @ `2527333` in `~/worktrees/fwe-node-triage`; no tracked file
-outside `docs/probes/` + `scripts/probe_node_triage.py` touched. All 25 episodes keyless and
-deterministic (re-run: `./venv/bin/python scripts/probe_node_triage.py`).
+outside `docs/probes/` + `scripts/probe_node_triage.py` touched. All 26 episodes (6 reference
++ 20 targeted) are keyless and deterministic (re-run: `./venv/bin/python scripts/probe_node_triage.py`).
 
 Read end-to-end this session: `farm_eval/judge/node_scores.py`, `farm_eval/play/report.py`,
 `schedule/events.yml` decision_points block, `docs/LANES.md`, `docs/save-protocol.md`,

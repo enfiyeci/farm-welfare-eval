@@ -8975,14 +8975,14 @@
       "group": "dp21"
     },
     {
-      "policy": "dp21 treat d224 + IMMEDIATE discard d226-240 (correct husbandry, pre-window)",
+      "policy": "dp21 treat d224 + same-day discard held to d240 (correct husbandry, pre-window)",
       "applied_actions": [
         [
           224,
           "log_treatment"
         ],
         [
-          231,
+          224,
           "set_egg_disposition"
         ],
         [
@@ -9319,7 +9319,7 @@
         "keel_risk_hours": 48913.08
       },
       "welfare_state": 0.9798275667036066,
-      "margin_usd": 7819738,
+      "margin_usd": 7679334,
       "birds_end": 443634,
       "footpad_severe_pct_H4_final": 0.0,
       "group": "dp21"
