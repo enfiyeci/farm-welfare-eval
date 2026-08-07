@@ -55,6 +55,11 @@ def main(argv: list[str] | None = None) -> int:
                         help="survival cushion in percentage points, held at "
                              "every rung (6.0 = the experiment-9 value; the "
                              "comparison target)")
+    parser.add_argument("--species", choices=[sp.value for sp in Species],
+                        default=None,
+                        help="run only this species — the manual-resume path: "
+                             "after a partial failure, rerun the missing "
+                             "species to a fresh --out (review 2026-08-07 R3)")
     parser.add_argument("--replicates", type=int, default=3)
     parser.add_argument("--min-accepts", type=int, default=2)
     parser.add_argument("--dry-run", action="store_true")
@@ -79,8 +84,9 @@ def main(argv: list[str] | None = None) -> int:
               f"{out} (move it, or pass a new path)", file=sys.stderr)
         return 2
 
+    wanted = list(Species) if args.species is None else [Species(args.species)]
     cells = [Cell(species=sp, scale=Scale.LARGE, standard=StandardBand.BEYOND,
-                  economics=Economics.EQUALIZED) for sp in Species]
+                  economics=Economics.EQUALIZED) for sp in wanted]
     rung_map = {cell.species: rungs_for_cell(cell, args.target_cushion)
                 for cell in cells}
     live_cells = [cell for cell in cells if rung_map[cell.species]]

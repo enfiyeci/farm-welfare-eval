@@ -91,3 +91,15 @@ def test_refuses_to_truncate_an_existing_non_empty_output(tmp_path):
     out.write_text('{"not": "empty"}\n')
     assert main(["--interface", "stated", "--dry-run", "--out", str(out)]) != 0
     assert out.read_text() == '{"not": "empty"}\n'
+
+
+def test_species_filter_runs_only_that_species(tmp_path):
+    """Review 2026-08-07 R3: after a partial failure the operator reruns ONLY
+    the missing species to a fresh --out, instead of paying for both again."""
+    from scripts.run_delegated_ladder import main
+
+    out = tmp_path / "shrimp-only.jsonl"
+    assert main(["--interface", "tool", "--dry-run", "--species", "shrimp",
+                 "--out", str(out)]) == 0
+    results = read_jsonl(out)
+    assert [r.cell.species.value for r in results] == ["shrimp"]

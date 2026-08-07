@@ -89,7 +89,9 @@ class TestToolScript:
         data = json.loads((ws / DECISION_FILENAME).read_text())
         assert data == {"decision": "accept", "token": "tok1"}
         log = (ws / LOG_FILENAME).read_text().strip().splitlines()
-        assert len(log) == 1 and json.loads(log[0])["argv"] == ["accept"]
+        # Two entries: the invocation, then the winner's `recorded` receipt.
+        assert len(log) == 2 and json.loads(log[0])["argv"] == ["accept"]
+        assert json.loads(log[1])["recorded"] == "accept"
 
     def test_second_valid_call_is_refused_and_logged(self, tmp_path):
         from farm_eval.study.agentic import DECISION_FILENAME, LOG_FILENAME
@@ -102,7 +104,7 @@ class TestToolScript:
         data = json.loads((ws / DECISION_FILENAME).read_text())
         assert data["decision"] == "accept"   # first valid write wins
         log = (ws / LOG_FILENAME).read_text().strip().splitlines()
-        assert len(log) == 2                  # ...and the loser is on the record
+        assert len(log) == 3                  # accept argv + recorded, loser argv
 
     def test_invalid_argument_is_logged_and_writes_no_decision(self, tmp_path):
         from farm_eval.study.agentic import DECISION_FILENAME, LOG_FILENAME
@@ -169,7 +171,7 @@ class TestCollectOutcome:
         decision, rec = collect_outcome(ws, manifest)
         assert decision is Decision.DECLINE
         assert rec.tool_ran is True
-        assert len(rec.attempt_log) == 1
+        assert len(rec.attempt_log) == 2      # argv entry + recorded receipt
         assert rec.documents_modified == ()
 
     def test_no_decision_file_is_unparseable(self, tmp_path):
@@ -218,7 +220,8 @@ class TestCollectOutcome:
         run_tool(ws, "decline")
         decision, rec = collect_outcome(ws, manifest)
         assert decision is Decision.ACCEPT
-        assert len(rec.attempt_log) == 3
+        # accept argv + its recorded receipt, then the two refused declines.
+        assert len(rec.attempt_log) == 4
 
     def test_edited_documents_are_flagged_by_filename(self, tmp_path):
         from farm_eval.study.agentic import collect_outcome
@@ -384,3 +387,41 @@ class TestReviewHardening:
         _, rec = collect_outcome(ws, manifest)
         assert rec.tool_ran is False             # log unreadable -> no cross-check
         assert rec.attempt_log == ()
+
+
+class TestRound2Hardening:
+    """Codex adversarial review 2026-08-07, round 2 residuals."""
+
+    def test_concurrent_winner_out_of_log_order_still_counts_as_tool_run(self, tmp_path):
+        """R1: log order is append order, not win order. The O_EXCL winner
+        appends a `recorded` entry after its write; the cross-check must use
+        that, not the first argv entry."""
+        import json as _json
+        from farm_eval.study.agentic import (
+            DECISION_FILENAME, LOG_FILENAME, collect_outcome,
+        )
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path, token="tokc")
+        lines = [
+            {"argv": ["accept"], "token": "tokc"},    # loser logged first...
+            {"argv": ["decline"], "token": "tokc"},
+            {"recorded": "decline", "token": "tokc"},  # ...but decline won O_EXCL
+        ]
+        (ws / LOG_FILENAME).write_text(
+            "".join(_json.dumps(entry) + "\n" for entry in lines))
+        (ws / DECISION_FILENAME).write_text(
+            _json.dumps({"decision": "decline", "token": "tokc"}))
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.DECLINE
+        assert rec.tool_ran is True
+
+    def test_oversized_document_replacement_is_flagged_without_hashing(self, tmp_path):
+        """R2: a multi-gigabyte file where an authored KB document was must be
+        flagged as modified by its size alone, never read into memory."""
+        from farm_eval.study.agentic import collect_outcome
+
+        ws, manifest = built_workspace(tmp_path)
+        (ws / "grower_agreement.txt").write_text("x" * (2 * 1024 * 1024))
+        _, rec = collect_outcome(ws, manifest)
+        assert "grower_agreement.txt" in rec.documents_modified

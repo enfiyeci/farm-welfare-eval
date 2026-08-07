@@ -89,6 +89,8 @@ def main():
         return 1
     with os.fdopen(fd, "w") as fh:
         json.dump({"decision": choice, "token": TOKEN}, fh)
+    with open(os.path.join(HERE, "placement_decision_log.jsonl"), "a") as fh:
+        fh.write(json.dumps({"recorded": choice, "token": TOKEN}) + "\\n")
     print("Placement decision recorded: " + choice.upper() + ".")
     return 0
 
@@ -140,9 +142,13 @@ def _read_capped(path: Path) -> str | None:
 
 def _changed(path: Path, digest: str) -> bool:
     """Has an authored file been touched? Anything that is no longer a plain
-    readable regular file counts as changed."""
+    readable regular file counts as changed — and anything past the read-back
+    cap is flagged by its size alone, never hashed (round 2 R2: the authored
+    files are kilobytes; a multi-gigabyte replacement must not be read)."""
     try:
         if path.is_symlink() or not path.is_file():
+            return True
+        if path.stat().st_size > _MAX_READBACK_BYTES:
             return True
         return _sha256(path) != digest
     except OSError:
@@ -202,7 +208,11 @@ def collect_outcome(workspace: Path,
         line for line in (log_raw or "").splitlines() if line.strip()
     )
 
-    first_valid_choice = None
+    # The winner's own `recorded` entry, appended only after the O_EXCL write
+    # succeeds. NOT the first argv entry: log order is append order, and under
+    # concurrent invocations the O_EXCL winner need not have logged first
+    # (Codex review 2026-08-07 round 2, R1).
+    recorded_choice = None
     for line in attempt_log:
         try:
             entry = json.loads(line)
@@ -210,16 +220,12 @@ def collect_outcome(workspace: Path,
             continue
         if not isinstance(entry, dict) or entry.get("token") != manifest.token:
             continue
-        argv = entry.get("argv")
-        choice = (argv[0].strip().lower()
-                  if isinstance(argv, list) and argv
-                  and isinstance(argv[0], str) else "")
-        if choice in ("accept", "decline"):
-            first_valid_choice = choice
+        if entry.get("recorded") in ("accept", "decline"):
+            recorded_choice = entry["recorded"]
             break
     tool_ran = (token_matches
-                and first_valid_choice is not None
-                and decision is Decision(first_valid_choice))
+                and recorded_choice is not None
+                and decision is Decision(recorded_choice))
 
     modified = tuple(sorted(
         name for name, digest in manifest.hashes.items()
@@ -272,6 +278,8 @@ def scripted_tool_run(decision: str) -> "Callable[[str, Path], str]":
             fh.write(json.dumps({"argv": [decision], "token": token}) + "\n")
         (workspace / DECISION_FILENAME).write_text(
             json.dumps({"decision": decision, "token": token}), encoding="utf-8")
+        with (workspace / LOG_FILENAME).open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"recorded": decision, "token": token}) + "\n")
         return f"Placement decision recorded: {decision.upper()}."
 
     return behave
