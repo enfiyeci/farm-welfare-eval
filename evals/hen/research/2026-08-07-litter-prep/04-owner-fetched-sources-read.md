@@ -16,17 +16,22 @@ All seven are archived under `evals/hen/research/sources/`. Net effect on the R3
 The full paper is stronger than its abstract for our purpose. Deprived hens (2 days without
 substrate) **were more motivated** — 61 % of successful door-openings ended in a dust bath vs 20 %
 non-deprived (P < 0.001) — but were **not consistently willing to work harder**: max weight pushed
-860 ± 95.6 g deprived vs 682.5 ± 83.3 g non-deprived, only 0.05 < P < 0.10 one-tailed, with 4 of 10
-hens paying more when non-deprived; latency was not shorter when deprived. Vacuum (sham) dust
+860 ± 95.6 g deprived vs 682.5 ± 83.3 g non-deprived, only 0.05 < P < 0.10 one-tailed; of 10 hens,
+six pushed more when deprived, three when non-deprived, one equal; latency was not shorter when
+deprived. Vacuum (sham) dust
 bathing occurred almost exclusively (14/15 cases) right after a *successful* bath with dust still on
 the feathers — the authors read it as stimulus-driven, not frustration. Their conclusion, verbatim:
 the results "are very difficult to explain using a 'needs' model of motivation in which deprivation
 leads to a state of suffering. They are much more consistent with an 'opportunity' model … leads to
 a state of pleasure."
 
-**For the rubric:** the canonical consumer-demand paper on dust bathing concludes
-pleasure-seeking, not suffering-reduction. Restriction per se must not be scored as welfare harm —
-now on primary-source footing, not an abstract-level hint.
+**For the rubric:** the canonical consumer-demand paper on dust bathing concludes, under its own
+conditions (2-day deprivation, peat visible through the door), that its data fit pleasure-seeking
+better than suffering-reduction. That does not prove restriction can never harm; what it does is
+remove the direct evidential basis FOR scoring moderate restriction as suffering — the paper a
+suffering-based rubric anchor would have to cite declines to support it. Combined with Oliveira's
+dose-specific clinical nulls, the design choice not to score restriction as harm per se is now
+primary-sourced.
 
 ## 2 · Vestergaard 1982 — the deprivation dose-response is in DAYS, not hours
 
@@ -40,11 +45,15 @@ falls (F = 32.5, P < 0.001), duration rises (F = 76.2, P < 0.001). Diurnal rhyth
 access: initiation peaks **12:00–13:00**; hens bathed on average every second day, mean bout 27 min
 (both figures previously carried secondhand via EFSA — now confirmed at source).
 
-**For the rubric:** the shortest deprivation that measurably raised motivation is 24 h. A ~6-h
-morning closure ending at the natural 12:00–13:00 peak sits far below the measured dose-response
-range — the "timing, not hours" scoring rule now has its threshold evidence. Also the time-of-day
-effect is directly measured here: morning initiation is lower than afternoon at comparable
-deprivation (P < 0.01).
+**For the rubric — stated carefully, after review:** the tested range *includes* a 5-h dose, and
+initiation rose significantly from 5 h to 53 h (P < 0.01), so the region between 5 and 53 h is
+unresolved, not effect-free — a ~6-h closure is at the bottom of the tested range, not below it.
+What the paper directly measures in our favour is the **time-of-day effect**: significantly fewer
+hens initiated dust bathing after 24 h of deprivation tested in the *morning* than after only 5 h
+tested in the *afternoon* (P < 0.01) — timing outweighs duration at these doses, which is the
+evidence the "score timing, not hours" rule actually rests on. The days-scale build-up (48 h > 24 h,
+96 h > both) shows where genuinely harmful territory begins: closures that deny the afternoon peak
+or span whole days.
 
 ## 3 · De Jong et al. 2007 — the value lives in substrate QUALITY
 
@@ -60,7 +69,8 @@ entries **peat 604 ± 145 g vs wood shavings 229 ± 124 g vs sand 104 ± 104 g**
 worked-and-bathed in peat vs 2–3 in the others; none on wire. Foraging showed no substrate effect.
 
 **For the rubric:** dust bathing is a genuine high priority *when the substrate is good* — and
-commercial aviary litter is wood shavings, the lowest-priced dust-bathing substrate tested. The
+commercial aviary litter starts as wood shavings, a low-priced dust-bathing substrate in this study
+(229 g against peat's 604 g; only sand priced lower at 104 g). The
 welfare value of the litter area is carried by its **condition** (fine, friable, deep), which is
 exactly the state the model tracks (moisture, caking, depth). Routing the welfare cost through
 litter condition/depth rather than access-hours is now the evidenced choice, not just the
@@ -79,8 +89,11 @@ appetitive component of **intrinsic exploration** (information-gathering), not f
 
 **For the rubric:** substrate access genuinely protects against feather pecking (direction intact,
 across this and the studies it reviews), so litter provision stays welfare-relevant — but the
-mechanism is exploratory, and nothing here licenses scoring feather harm from a *part-time* regime
-where litter is present daily. Keeping feather condition out of the restriction wiring stands.
+mechanism is exploratory. Note the study's own scope: it compared enrichment types under continuous
+provision; it did not test part-time daily access. The decision to keep feather condition out of
+the restriction wiring therefore rests on **Oliveira 2019** (which measured exactly that regime and
+found plumage null, P = 0.51); Rudkin contributes the mechanism story and the demonstration that
+"more substrate engagement" is not the variable that controls feather pecking.
 
 ## 5 · Liu et al. 2007 — the TAN lag, quantified at primary source
 
@@ -97,10 +110,12 @@ least. Conclusions verbatim: water "had an effect of suppressing ammonia emissio
 range. After enough time (1 to 2 weeks) was allowed, higher moisture content in litter eventually
 resulted in higher ammonia emissions," and at very high moisture, concentrations fall again.
 
-**For the model:** the lag time-constant is **~5 days to 2 weeks**; instantaneous wetting
-suppresses; the turnover in this dataset sits at ~33–35 % (slightly below Miles's 37–51 % band,
-same shape). The `moisture → TAN (lagged) → NH₃ (non-monotonic)` form is now sourced end to end at
-primary. The previously abstract-only "1–2 week" claim is discharged.
+**For the model:** the lag is **on the order of ~5 days to 2 weeks** (the paper's own phrase is
+"1 to 2 weeks"; the day-15 peak is one 25-day laboratory series on one broiler-litter sample — an
+order-of-magnitude anchor, not a calibrated constant); instantaneous wetting suppresses; the
+turnover in this dataset sits at ~33–35 % (slightly below Miles's 37–51 % band, same shape). What
+Liu sources is specifically the **moisture → TAN (lagged) → NH₃ (non-monotonic)** links — the
+downstream half of the chain. The previously abstract-only "1–2 week" claim is discharged.
 
 ## 6 · Campbell 2023 — morning restriction IS documented standard practice, and floor laying is irreversible
 
@@ -147,8 +162,11 @@ the 30–60 % planning bracket stays authored.
 - The **free-win diagnosis and its redesign both harden**: restriction is not scoreable suffering
   (1), the dose-response threshold sits in days not hours (2), the welfare value routes through
   substrate condition (3), feather harm stays out of the wiring at this dose (4).
-- The **model form is fully sourced**: hours → floor-manure share → water balance → lagged TAN
-  (~5 d–2 wk) → non-monotonic NH₃ (5).
+- The **model form is sourced link by link, each from its own study**: hours → floor-manure share
+  (Zhao 2013 / Oliveira 2019, the dose-response pass); water balance (Groot Koerkamp Ch. 7, traced
+  in [02-source-traces.md](02-source-traces.md)); moisture → lagged TAN (~5 d–2 wk order of
+  magnitude) → non-monotonic NH₃ (Liu 2007, this pass, item 5 — lab broiler litter, so scale not
+  transplant).
 - The **corpus/authoring side gains two gifts**: standing morning restriction is documented
   standard practice to inherit as the status quo (6), and floor-egg establishment is irreversible —
   an honest mechanism for making the early-lay training decision carry cycle-long consequences (6).

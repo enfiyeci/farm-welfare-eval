@@ -91,8 +91,15 @@ it), one adjudication (Miles day-2 β_MQ is genuinely **negative**; the archive 
 upgrade (Zhao 2015 Part I, listed as "PARTIAL, abstract/results level" in the archive branch's
 source-access table, is now read end to end).
 
-Fetch-list movements: **Miles 2011 full PDF is already in repo history** (archive branch,
-`docs/research/sources/Miles-2011-high-litter-moisture-suppresses-NH3-volatilization.pdf`) — that
-item is closed on claim. **Still open and unchanged:** the Zhao Figure 1 probe height (raster image,
-cheapest remaining gap on the ammonia semantics), the Oliveira dissertation, Liu 2007, and the
-behavioural-motivation paywall set from the welfare-cost pass.
+Fetch-list movements (updated through the same-day follow-ups): **Miles 2011 full PDF is already in
+repo history** (archive branch, `docs/research/sources/Miles-2011-…pdf`) — closed on claim. **The
+Zhao Figure 1 probe height is closed as a definitive negative**: the figure was obtained via Europe
+PMC's PDF render and read visually — it is a plan-view schematic; the hen-level port's height is
+not published anywhere in Part I. **Oliveira Figure 3 was likewise read visually** (the moisture
+gap is first-cycle/deep-bed driven and converges after cleanouts). **The tier-1/tier-2 list was
+fetched by the owner and read end to end** — Widowski & Duncan 2000, Vestergaard 1982, De Jong
+2007, Rudkin 2021, Liu 2007, Campbell 2023, De Reu 2009 (see
+[04-owner-fetched-sources-read.md](04-owner-fetched-sources-read.md)). **Still open:** the Oliveira
+dissertation (interior of the monthly series beyond what Fig. 3 shows), Vestergaard 1997
+(corticosterone; now low-stakes), Baugh et al. 2026 (traceable via Bongiorno's references), and the
+floor-egg downgrade fraction (unmeasured in the literature — authored, labelled).

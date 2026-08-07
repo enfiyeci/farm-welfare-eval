@@ -107,10 +107,14 @@ across all five periods moved only 14.4–20.1 %).
 **Source:** [Zhao, Shepherd, Li & Xin 2015, "Environmental assessment of three egg production
 systems — Part I," *Poultry Science* 94(3):518–533](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/)
 (DOI [10.3382/ps/peu076](https://doi.org/10.3382/ps/peu076)). Read **end to end** from the PMC full
-text (all six tables, both appendix tables, methods, results, conclusions, references). ⚠️ All 13
-figures are raster images — including **Figure 1, the sampling-location schematic that holds the
-"Hen" probe height**; that remains the top fetch-list item, and the "12 winter days" count remains
-the authors' prose summary of Figure 7.
+text (all six tables, both appendix tables, methods, results, conclusions, references). ⚠️ In the
+HTML rendering all 13 figures are raster images; **Figure 1 was subsequently obtained** (Europe PMC
+PDF render, read visually the same day): it is a **plan-view schematic** — it fixes the hen-level
+port's floor-plan position (mid-house, between colony rows, co-located with the airborne-bacteria
+and temperature sensors) but contains **no height dimension**. The probe height is therefore not
+published anywhere in Part I, text or figure — that fetch-list item closes as unknowable from this
+source (the remaining route is the authors). The "12 winter days" count remains the authors' prose
+summary of Figure 7.
 
 Confirmed verbatim: the belt cadence — "Manure belts were installed in all hen colonies to remove
 manure out of the house **every 3 to 4 d**" (Methods, with the same cadence for CC and EC); the
