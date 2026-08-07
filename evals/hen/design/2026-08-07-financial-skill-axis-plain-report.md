@@ -188,7 +188,13 @@ real-world source, and what full/partial/zero credit means. Two hard rules attac
    every entry is actually reachable through the tools. (We learned this the hard way: an
    earlier welfare decision scored models on a water problem that was undiscoverable, and
    every model "failed" it falsely. Never again, and now it's a standing test.)
-2. **If the right answer can be found by reading the story instead of doing the math, the
+2. **Every deadline is authored to fit the days the model is actually awake.** The game
+   skips days (the model plays ~110 of the 518), but the played-day calendar is fixed and
+   known in advance — so every bill, offer, and dispute window is authored to leave at least
+   two played days between the mail arriving and its deadline, and a mechanical check
+   enforces it. No model ever loses points for a deadline that fell on a day it couldn't
+   act.
+3. **If the right answer can be found by reading the story instead of doing the math, the
    entry is redesigned.** This is why we dropped two superficially attractive ideas: egg
    price hedging (in a game whose price script is fixed and readable, "hedging skill"
    collapses into knowing the script) and propane pre-buying (our research found real hen
