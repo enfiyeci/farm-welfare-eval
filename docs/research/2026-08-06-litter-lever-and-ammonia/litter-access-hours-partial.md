@@ -1,9 +1,16 @@
 # Litter access hours as a lever — PARTIAL research (2 of 5 questions answered)
 
+> ✅ **THE MISSING TWO WERE RE-RUN AND LANDED (2026-08-06, 20:50 PT).** Q1 is now
+> [litter-access-dose-response.md](litter-access-dose-response.md); Q2 is
+> [litter-access-welfare-cost.md](litter-access-welfare-cost.md). Read both — Q2 in particular
+> reports that the lever as framed is close to a free win, and it **conflicts with this file's Q3**
+> on which UEP edition governs (this file read 2024, that one read 2017). This file is kept for the
+> three sub-questions it does answer.
+>
 > ⚠️ **INCOMPLETE BY FAILURE, NOT BY CHOICE.** The parent research pass was terminated mid-run by an
-> API session limit (resets 20:00 America/Los_Angeles, 2026-08-06). Two of its five sub-questions had
+> API session limit (reset 20:00 America/Los_Angeles, 2026-08-06). Two of its five sub-questions had
 > already returned and are preserved below. **Q1 (dose-response) and Q2 (behavioural welfare cost) were
-> never delivered and must be re-commissioned.**
+> never delivered and were re-commissioned — see above.**
 >
 > Delegated findings; coverage statements and ⚠️ flags are the subagents' own. Not independently
 > re-read at source.

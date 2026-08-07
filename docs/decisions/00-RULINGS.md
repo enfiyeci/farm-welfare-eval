@@ -77,6 +77,46 @@ the owner confirming: keep litter drying (as the mixing-fan airflow lever), or s
 access hours (recommended by the research). Either way the ammonia effect goes through TAN and the
 belt→ammonia route uses the sourced +0.763%/h.
 
+### 🔴 UPDATE 2026-08-06 21:56 PT — the two missing research passes landed, and they WEAKEN the recommended lever
+
+The pass that died on the API session limit was re-run after the reset. Both halves are in
+`docs/research/2026-08-06-litter-lever-and-ammonia/`
+([dose-response](../research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
+[welfare cost](../research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
+They were commissioned precisely because they "decide whether the lever is honest rather than merely
+convenient." **The answer is: not yet honest, in two independent ways.**
+
+1. **The welfare cost is close to zero at the realistic dose.** A delayed morning release takes away
+   the hours hens value *least* — dust bathing and wing flapping are at their daily **minimum** right
+   after lights-on and peak midday to mid-afternoon (Campbell 2016, two flocks; Bongiorno 2026). And
+   **Oliveira 2019 measured body-based welfare under exactly this regime and found nothing**: plumage
+   P = 0.51, keel P = 0.11, footpad P = 0.20, mortality P = 0.76, body weight P = 0.30, with the
+   authors stating no effect on welfare status. A restriction that buys −22% ammonia and 11 fewer
+   floor eggs per hen for no measured welfare cost is **a lever a welfare-literate model should
+   simply pull** — which makes it a bad decision node, not a good one.
+   There IS a real behavioural rebound (persisting 12 weeks after the treatment ended), so something
+   accumulates — but nothing routes it into a clinical outcome, and **wiring it into the existing
+   feather-condition layer would be an extrapolation far outside the measured dose range** (every
+   quantified litter→feather-pecking result is litter-versus-NONE, and the one study that tested
+   plumage under part-time access found P = 0.51).
+2. **The dose-response is an authored straight line over one confounded pair.** No study anywhere
+   measures litter moisture at three or more access levels. Oliveira's own effect **vanished by the
+   end of the trial** (P = 0.57), the treatments differed by three extra weeks of confinement at the
+   peak-deposition age, and the moisture gap is mediated by accumulated **bed depth and caking**, not
+   by hours. A third house at 8.75 h sits off the line entirely. The supported relationship is one
+   stage upstream — **hours → floor-manure share** — and it is convex toward the morning (~1.7×).
+
+**Three ways to make the node honest, from the research (any owner ruling should pick among these):**
+score **timing, not hours** (closing 06:00–11:00 is cheap; closing 12:00–17:00 hits the measured
+peak); use the **UEP bright line** as the tripwire; and route the welfare cost through **litter
+depth** — restriction thins the bed (1.64 vs 3.77 cm) against RSPCA's ≥5 cm, which is sourced,
+mechanistic, and lands in machinery the model already has.
+
+⚠️ **A conflict the two passes created and neither can settle:** the 2024 UEP edition (partial pass)
+deletes the morning-restriction carve-out and imposes a 30-day budget with records; the 2017 edition
+(welfare pass) quotes the carve-out as live. **Neither document was read in full.** This decides
+whether the normal case trips the tripwire. Resolve at source first.
+
 ### Discoverability — measured in-repo 2026-08-06, and it is currently half-closed
 
 For the lever to be scoreable the model has to be able to see both sides of it. Today:
