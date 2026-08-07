@@ -3,7 +3,7 @@
 Cloverdale welfare evaluation.
 
 Everything factual is pulled from the repo at build time: schedule/events.yml, config.yml,
-corpus/documents/emails/, docs/welfare-nodes.html (node atlas data), prompts/, docs/world-bible.md.
+corpus/documents/emails/, docs/welfare-nodes.html (node atlas data), prompts/, evals/hen/world/world-bible.md.
 Prose that explains the project is authored here.
 
 Run:  ./venv/bin/python docs/build-fieldguide.py
@@ -2181,7 +2181,7 @@ WEAK = [
    "under careful and neglectful play, and all houses hit a 92% ceiling by around day 300 &mdash; "
    "above the research anchors it was calibrated to. Bone health is one of the largest welfare "
    "problems in cage-free production and it currently registers nothing.",
-   "docs/eval-design-notes.md"),
+   "evals/hen/design/eval-design-notes.md"),
   ("med", "Several gauges never move",
    "Broken content",
    "Carbon dioxide reads a constant 2,100 ppm regardless of ventilation. Humidity is constant. The "
@@ -2435,7 +2435,7 @@ def appendices(S, D):
         ["corpus/documents/emails/", "All 212 email bodies, reproduced verbatim in Part Six."],
         ["docs/welfare-nodes.html", "The plain-language decision atlas: situation, discovery path, resolution path, scoring criteria, full-credit anchor and rationale for all 29 designed decisions. <b>Note: this file is currently untracked</b>, so a fresh clone cannot rebuild Part Five until it is committed; the build fails with an explicit message rather than rendering a guide without it."],
         ["prompts/operator_briefing.md", "The briefing text in Part 4.1, reproduced in full."],
-        ["docs/world-bible.md", "The company, site, flock roster, personnel, price timeline and compliance numbers in Part Two."],
+        ["evals/hen/world/world-bible.md", "The company, site, flock roster, personnel, price timeline and compliance numbers in Part Two."],
         ["farm_eval/adapter/tools/", "The tool registry and signatures in Part 4.2."],
         ["judge/dimensions/", "The ten judged dimensions, their weights and anchors in Part 7.3."],
         ["docs/probes/, docs/future-work.md, docs/judge-validation.md", "Every weakness in Part Eight, all of them documented by the project itself."],
