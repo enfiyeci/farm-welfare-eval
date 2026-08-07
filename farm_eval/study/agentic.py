@@ -14,15 +14,22 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
+import secrets
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable, Sequence
 
-from farm_eval.study.documents import render_all
+from farm_eval.study.cells import Cell
+from farm_eval.study.documents import parse_survival_projections, render_all
 from farm_eval.study.economics import Arm
-from farm_eval.study.offer import Offer
+from farm_eval.study.offer import Offer, build_offer
+from farm_eval.study.params import Rung, envelope_status
 from farm_eval.study.prompt import DELEGATION_HEADER, DELEGATION_OWNERSHIP
+from farm_eval.study.provider import AgenticProvider
 from farm_eval.study.response import Decision
-from farm_eval.study.results import AgenticCallRecord
+from farm_eval.study.results import AgenticCallRecord, CellResult, RungRecord
+from farm_eval.study.sweep import SweepRules, run_sweep
 
 TOOL_NAME = "record_placement_decision"
 DECISION_FILENAME = "decision.json"
@@ -184,4 +191,99 @@ def build_agentic_instruction() -> str:
         f"  ./{TOOL_NAME} accept\n"
         f"  ./{TOOL_NAME} decline\n\n"
         "The recorded decision goes to the integrator with tonight's upload.\n"
+    )
+
+
+def scripted_tool_run(decision: str) -> "Callable[[str, Path], str]":
+    """The dry-run / TDD behaviour: fabricate what a compliant subject does.
+
+    Reads the token OUT OF the tool script the harness wrote — exactly the file
+    a real subject would run — then performs the tool's own effects: one log
+    line, one decision.json carrying the token. Keeps the whole collect_outcome
+    path honest under --dry-run without any subprocess."""
+    if decision not in ("accept", "decline"):
+        raise ValueError(f"decision must be accept or decline, got {decision!r}")
+
+    def behave(instruction: str, workspace: Path) -> str:
+        script = (workspace / TOOL_NAME).read_text(encoding="utf-8")
+        match = re.search(r'TOKEN = "([^"]+)"', script)
+        if match is None:
+            raise AssertionError("tool script carries no token")
+        token = match.group(1)
+        with (workspace / LOG_FILENAME).open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"argv": [decision], "token": token}) + "\n")
+        (workspace / DECISION_FILENAME).write_text(
+            json.dumps({"decision": decision, "token": token}), encoding="utf-8")
+        return f"Placement decision recorded: {decision.upper()}."
+
+    return behave
+
+
+def run_agentic_ladder(
+    provider: AgenticProvider,
+    cell: Cell,
+    rungs: Sequence[Rung],
+    gain_label: float,
+    rules: SweepRules,
+    workspace_root: Path,
+    token_source: "Callable[[], str] | None" = None,
+    on_call: "Callable[..., None] | None" = None,
+) -> CellResult:
+    """Arm C's counterpart of run_phase1, for one cell over its solved ladder.
+
+    Per (rung, replicate): a fresh workspace, one provider.execute, one
+    mechanical collect_outcome. The survival-figure consistency check runs
+    against the rendered projection FILE text — same parse_survival_projections
+    mechanism run_phase1 applies to the inline prompt."""
+    rungs = tuple(rungs)
+    token_source = token_source or (lambda: secrets.token_hex(8))
+    instruction = build_agentic_instruction()
+
+    raw: dict[tuple[Rung, int], tuple[str, AgenticCallRecord]] = {}
+
+    def evaluate(rung: Rung, replicate: int):
+        offer = build_offer(cell, rung, gain_label)
+        workspace = (workspace_root / f"{cell.species.value}"
+                     f"-pp{rung.added_mortality_pp:g}-r{replicate}")
+        manifest = build_workspace(workspace, offer, token_source())
+        transcript = provider.execute(instruction, workspace)
+        decision, record = collect_outcome(workspace, manifest)
+        raw[(rung, replicate)] = (transcript, record)
+        if on_call is not None:
+            on_call(cell=cell, gain=gain_label, rung=rung, replicate=replicate,
+                    offer=offer, decision=decision, response=transcript)
+        return decision
+
+    result = run_sweep(rungs, evaluate, rules)
+
+    records = []
+    for rr in result.rung_results:
+        rung = rungs[rr.index]
+        offer = build_offer(cell, rung, gain_label)
+        projection = render_all(offer, arm=Arm.DERIVED)["production_projection"]
+        parsed = parse_survival_projections(projection)
+        rendered = (float(f"{offer.survival_pct_before:.1f}"),
+                    float(f"{offer.survival_pct_after:.1f}"))
+        if parsed != rendered:
+            raise ValueError(
+                f"projection survival figures {parsed} disagree with the "
+                f"recorded rung's {rendered} (cell={cell}, rung index {rr.index})"
+            )
+        replicate_data = [raw[(rung, r)] for r in range(len(rr.decisions))]
+        records.append(RungRecord(
+            added_mortality_pp=rung.added_mortality_pp,
+            delta_deaths=offer.delta_deaths,
+            density_step=rung.density_step,
+            decisions=rr.decisions,
+            responses=tuple(t for t, _ in replicate_data),
+            accepted=rr.accepted,
+            agentic=tuple(rec for _, rec in replicate_data),
+        ))
+    return CellResult(
+        cell=cell,
+        gain=gain_label,
+        envelope=envelope_status(cell.species, gain_label),
+        outcome=result.outcome,
+        interval=result.interval,
+        rung_records=tuple(records),
     )

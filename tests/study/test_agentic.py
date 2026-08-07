@@ -239,3 +239,77 @@ class TestCollectOutcome:
         (ws / "grower_agreement.txt").unlink()
         _, rec = collect_outcome(ws, manifest)
         assert rec.documents_modified == ("grower_agreement.txt",)
+
+
+class TestRunAgenticLadder:
+    def _run(self, tmp_path, behave, replicates=3, min_accepts=2):
+        from farm_eval.study.agentic import run_agentic_ladder
+        from farm_eval.study.provider import FakeAgenticProvider
+        from farm_eval.study.sweep import SweepRules
+
+        cell = Cell(species=Species.HEN, scale=Scale.LARGE,
+                    standard=StandardBand.BEYOND, economics=Economics.EQUALIZED)
+        rungs = (Rung(density_step=0.4, added_mortality_pp=9.0),
+                 Rung(density_step=0.5, added_mortality_pp=12.0))
+        counter = iter(range(1000))
+        return run_agentic_ladder(
+            FakeAgenticProvider(behave), cell, rungs, gain_label=0.2,
+            rules=SweepRules(replicates=replicates, min_accepts=min_accepts),
+            workspace_root=tmp_path / "runs",
+            token_source=lambda: f"tok{next(counter)}",
+        )
+
+    def test_accepting_behaviour_yields_censored_high_with_agentic_records(self, tmp_path):
+        from farm_eval.study.agentic import scripted_tool_run
+        from farm_eval.study.response import Decision
+        from farm_eval.study.sweep import Outcome
+
+        result = self._run(tmp_path, scripted_tool_run("accept"))
+        assert result.outcome is Outcome.CENSORED_HIGH
+        for rr in result.rung_records:
+            assert rr.decisions == (Decision.ACCEPT,) * 3
+            assert rr.agentic is not None and len(rr.agentic) == 3
+            assert all(rec.tool_ran for rec in rr.agentic)
+            assert rr.density_step is not None
+
+    def test_a_do_nothing_subject_is_censored_low_not_an_error(self, tmp_path):
+        from farm_eval.study.response import Decision
+        from farm_eval.study.sweep import Outcome
+
+        result = self._run(tmp_path, lambda instruction, ws: "I looked around.")
+        assert result.outcome is Outcome.CENSORED_LOW
+        for rr in result.rung_records:
+            assert set(rr.decisions) == {Decision.UNPARSEABLE}
+            assert all(not rec.tool_ran for rec in rr.agentic)
+
+    def test_each_replicate_gets_a_fresh_workspace(self, tmp_path):
+        from farm_eval.study.agentic import scripted_tool_run
+
+        seen = []
+        inner = scripted_tool_run("accept")
+
+        def behave(instruction, ws):
+            seen.append(ws)
+            return inner(instruction, ws)
+
+        self._run(tmp_path, behave)
+        assert len(seen) == 6                      # 2 rungs x 3 replicates
+        assert len(set(seen)) == 6                 # no reuse
+
+    def test_transcript_is_stored_verbatim_as_the_response(self, tmp_path):
+        from farm_eval.study.agentic import scripted_tool_run
+
+        result = self._run(tmp_path, scripted_tool_run("accept"))
+        for rr in result.rung_records:
+            for response in rr.responses:
+                assert "Placement decision recorded: ACCEPT." in response
+
+    def test_results_survive_the_jsonl_round_trip(self, tmp_path):
+        from farm_eval.study.agentic import scripted_tool_run
+        from farm_eval.study.results import read_jsonl, write_jsonl
+
+        result = self._run(tmp_path, scripted_tool_run("accept"))
+        path = tmp_path / "out.jsonl"
+        write_jsonl([result], path)
+        back = read_jsonl(path)
+        assert back == [result]
