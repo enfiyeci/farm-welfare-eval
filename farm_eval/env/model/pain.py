@@ -96,3 +96,65 @@ def heat_pain(thi: float, panting_fraction: float, birds: int, hours: float, pp)
         disabling=bird_hours * panting_fraction,
         hurtful=bird_hours * (1.0 - panting_fraction),
     )
+
+
+def nest_pain(hen_day_pct: float, birds: int, days: float, pp) -> PainDelta:
+    """Bird-hours of nest-building-deprivation pain for one house-day.
+
+    PROVENANCE: FULLY SOURCED, NON-DISCRIMINATING (spec §5.5, Ch. 6 Pain-Track 6.1).
+    The book's single largest Disabling source. Charged per LAY EVENT, so it scales with the
+    hen-day rate; no substrate state drives the affected fraction, so it contributes nothing to
+    the change headline and must never be read as agent-attributable.
+    """
+    if birds <= 0 or days <= 0.0:
+        return ZERO
+    affected_birds = birds * pp.nest_affected_fraction * (hen_day_pct / 100.0) * days
+    phases = (
+        (pp.nest_search_hours, pp.nest_search_split),
+        (pp.nest_sitting_hours, pp.nest_sitting_split),
+        (pp.nest_oviposition_hours, pp.nest_oviposition_split),
+    )
+    disabling = sum(h * split[0] for h, split in phases)
+    hurtful = sum(h * split[1] for h, split in phases)
+    return PainDelta.of(
+        disabling=affected_birds * disabling,
+        hurtful=affected_birds * hurtful,
+    )
+
+
+def roosting_pain(birds: int, days: float, pp) -> PainDelta:
+    """Bird-hours of roosting-deprivation pain for one house-day.
+
+    PROVENANCE: FULLY SOURCED, NON-DISCRIMINATING (spec §5.5, Ch. 6 Pain-Track 6.4).
+    ⚠️ The dark-hour segment charges pain OUTSIDE the awake window. That is the book's own
+    track and is why the 16-hour convention is read as a state->hours conversion (§2.1.1 note).
+    We carry no perch-access state, so the affected fraction is a constant.
+    """
+    if birds <= 0 or days <= 0.0:
+        return ZERO
+    affected_birds = birds * pp.roosting_affected_fraction * days
+    hurtful = pp.roosting_search_hours * pp.roosting_search_split[0]
+    annoying = (
+        pp.roosting_search_hours * pp.roosting_search_split[1]
+        + pp.roosting_dark_hours * pp.roosting_dark_annoying_share
+    )
+    return PainDelta.of(hurtful=affected_birds * hurtful, annoying=affected_birds * annoying)
+
+
+def foraging_pain(birds: int, days: float, pp) -> PainDelta:
+    """Bird-hours of foraging-deprivation pain for one house-day.
+
+    PROVENANCE: PAIN-TRACK SOURCED, FRACTION OURS (spec §5.5, Ch. 6 Pain-Track 6.7).
+    ⚠️ A CONSTANT TODAY, deliberately. Its sourced driver `stocking_density` is inert, and
+    §5.5.1 ¶10 forbids substituting `litter_moisture` to make the row look alive: Ch. 6 names
+    high density and the lack of proper litter MATERIAL, not wetness. This function therefore
+    takes no state argument at all, so the ban is enforced by the signature.
+    """
+    if birds <= 0 or days <= 0.0:
+        return ZERO
+    affected_birds = birds * pp.foraging_affected_fraction * days
+    hours = pp.foraging_hours_per_day
+    return PainDelta.of(
+        hurtful=affected_birds * hours * pp.foraging_split[0],
+        annoying=affected_birds * hours * pp.foraging_split[1],
+    )

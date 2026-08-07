@@ -133,6 +133,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
+            acc.accrue_pain(state.welfare, hid, "nest", pain.nest_pain(hw.hen_day_pct, birds, 1.0, params.pain))
+            acc.accrue_pain(state.welfare, hid, "roosting", pain.roosting_pain(birds, 1.0, params.pain))
+            acc.accrue_pain(state.welfare, hid, "foraging", pain.foraging_pain(birds, 1.0, params.pain))
             # Cold-thermoregulation feed uplift (owner directive 2026-07-13): below the
             # thermoneutral floor the hen eats more to stay warm. Driven by the DAY'S indoor
             # temperature trajectory (mean of the hourly cold multiplier — Codex review: the
