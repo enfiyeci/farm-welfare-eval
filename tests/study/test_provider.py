@@ -190,3 +190,25 @@ def test_codex_agentic_provider_raises_on_nonzero_exit(monkeypatch, tmp_path):
     ws.mkdir()
     with pytest.raises(RuntimeError, match="boom"):
         CodexAgenticProvider().execute("go", ws)
+
+
+def test_codex_agentic_provider_uses_a_fresh_codex_home_per_call(
+        monkeypatch, tmp_path):
+    """Review 2026-08-07 F5: codex persists session artifacts under CODEX_HOME,
+    and the subject can read its own home from inside the sandbox — a shared
+    home would let replicate 2 read replicate 1's transcript. One home per call."""
+    from farm_eval.study.provider import CodexAgenticProvider
+
+    homes = []
+
+    def fake_run(cmd, **kwargs):
+        homes.append(kwargs["env"]["CODEX_HOME"])
+        return subprocess.CompletedProcess(cmd, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    provider = CodexAgenticProvider()
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    provider.execute("one", ws)
+    provider.execute("two", ws)
+    assert len(homes) == 2 and homes[0] != homes[1]

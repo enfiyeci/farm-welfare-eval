@@ -313,3 +313,74 @@ class TestRunAgenticLadder:
         write_jsonl([result], path)
         back = read_jsonl(path)
         assert back == [result]
+
+
+class TestReviewHardening:
+    """Codex adversarial review 2026-08-07, round 1 — the fix wave's regressions."""
+
+    def test_hand_created_decision_file_is_not_overwritten_by_the_tool(self, tmp_path):
+        """F1: the tool must create decision.json atomically (O_EXCL) — a file
+        that appears between any check and the write must survive untouched."""
+        from farm_eval.study.agentic import DECISION_FILENAME
+
+        ws, _ = built_workspace(tmp_path)
+        (ws / DECISION_FILENAME).write_text("pre-existing content")
+        proc = run_tool(ws, "accept")
+        assert proc.returncode == 1
+        assert (ws / DECISION_FILENAME).read_text() == "pre-existing content"
+
+    def test_decision_file_rewritten_after_a_real_tool_run_loses_tool_ran(self, tmp_path):
+        """F2: harvesting the token and rewriting decision.json must not read as
+        a tool run — the attempt log's first valid entry is the cross-check."""
+        import json as _json
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path, token="tok9")
+        run_tool(ws, "decline")
+        (ws / DECISION_FILENAME).write_text(
+            _json.dumps({"decision": "accept", "token": "tok9"}))
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.ACCEPT       # the mechanical readout stands
+        assert rec.tool_ran is False             # ...but it is not a tool run
+
+    def test_agreeing_tool_run_keeps_tool_ran(self, tmp_path):
+        from farm_eval.study.agentic import collect_outcome
+
+        ws, manifest = built_workspace(tmp_path)
+        run_tool(ws, "accept")
+        _, rec = collect_outcome(ws, manifest)
+        assert rec.tool_ran is True
+
+    def test_decision_json_as_directory_is_unparseable_not_a_crash(self, tmp_path):
+        """F4: the workspace is subject-controlled; a directory (or any unreadable
+        thing) where decision.json should be is evidence, not an abort."""
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path)
+        (ws / DECISION_FILENAME).mkdir()
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.UNPARSEABLE
+        assert rec.decision_file_raw is None
+
+    def test_oversized_decision_file_is_unparseable_not_a_memory_hazard(self, tmp_path):
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path)
+        (ws / DECISION_FILENAME).write_text("x" * (2 * 1024 * 1024))
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.UNPARSEABLE
+        assert rec.decision_file_raw is None
+
+    def test_oversized_log_still_yields_a_record_without_tool_ran(self, tmp_path):
+        from farm_eval.study.agentic import LOG_FILENAME, collect_outcome
+
+        ws, manifest = built_workspace(tmp_path)
+        run_tool(ws, "accept")
+        with (ws / LOG_FILENAME).open("a") as fh:
+            fh.write("y" * (2 * 1024 * 1024))
+        _, rec = collect_outcome(ws, manifest)
+        assert rec.tool_ran is False             # log unreadable -> no cross-check
+        assert rec.attempt_log == ()

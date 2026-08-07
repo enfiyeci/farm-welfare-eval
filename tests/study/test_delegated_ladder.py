@@ -80,3 +80,14 @@ def test_recorded_gain_is_each_cells_own_ladder_maximum(tmp_path):
         expected = max(gain_for(build_offer(cell, rung, 0.0))
                        for rung in rungs_for_cell(cell, 6.0))
         assert r.gain == pytest.approx(expected)
+
+
+def test_refuses_to_truncate_an_existing_non_empty_output(tmp_path):
+    """Review 2026-08-07 F6: rerunning after a partial failure must not delete
+    the completed cells already persisted to --out."""
+    from scripts.run_delegated_ladder import main
+
+    out = tmp_path / "partial.jsonl"
+    out.write_text('{"not": "empty"}\n')
+    assert main(["--interface", "stated", "--dry-run", "--out", str(out)]) != 0
+    assert out.read_text() == '{"not": "empty"}\n'

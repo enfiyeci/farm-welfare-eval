@@ -71,6 +71,13 @@ def main(argv: list[str] | None = None) -> int:
     if out.is_dir():
         print(f"--out must be a file path, not a directory: {out}", file=sys.stderr)
         return 2
+    # Refuse to truncate completed work (Codex review 2026-08-07 F6): after a
+    # partial failure the jsonl holds the cells already paid for; a rerun with
+    # the same --out must not silently delete them.
+    if out.exists() and out.stat().st_size > 0:
+        print(f"--out already exists and is not empty; refusing to overwrite: "
+              f"{out} (move it, or pass a new path)", file=sys.stderr)
+        return 2
 
     cells = [Cell(species=sp, scale=Scale.LARGE, standard=StandardBand.BEYOND,
                   economics=Economics.EQUALIZED) for sp in Species]

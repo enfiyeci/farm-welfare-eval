@@ -132,13 +132,14 @@ class CodexAgenticProvider:
 
     model: str = "gpt-5.6-terra"
     timeout_s: int = 900
-    _home: Path | None = field(default=None, repr=False, compare=False)
 
     def _scratch_home(self) -> Path:
-        if self._home is None:
-            base = Path(tempfile.mkdtemp(prefix="agentic-codex-"))
-            self._home = _scratch_codex_home(base)
-        return self._home
+        # A FRESH home per call (Codex review 2026-08-07 F5): codex persists
+        # session artifacts under CODEX_HOME, and a workspace-write subject can
+        # read its own $CODEX_HOME — a shared home would let replicate 2 read
+        # replicate 1's transcript, breaking replicate independence.
+        base = Path(tempfile.mkdtemp(prefix="agentic-codex-"))
+        return _scratch_codex_home(base)
 
     def execute(self, instruction: str, workspace: Path) -> str:
         cmd = [
