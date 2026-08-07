@@ -78,6 +78,36 @@ your transcript (needs an API key):
 > Their value is as reference transcripts — e.g. a welfare-first, a profit-first, and a negligent
 > run give the judge-validation ρ gate the score spread it needs.
 
+## Spectate a run (live or replay)
+
+Watch an episode the way you'd watch a game — the mail the agent opens, every tool call with its
+args and cost, the farm's welfare state evolving — live while a run executes, or as a scrubbable
+replay of any finished `.eval` log (spec
+[`docs/specs/2026-08-04-spectator-dashboard-design.md`](docs/specs/2026-08-04-spectator-dashboard-design.md)).
+Strictly read-only over the run: invisible to the agent, and it never feeds anything back into the
+eval or the judge.
+
+```bash
+# live — set FARM_SPECTATOR_DIR on the run, then serve the feed it writes
+FARM_SPECTATOR_DIR=spectator scripts/run_pilot.sh                # (any inspect eval works too)
+./venv/bin/python scripts/spectate.py --live spectator            # opens on :8619
+
+# replay — reconstruct the same feed from a finished log
+./venv/bin/python scripts/spectate.py --log logs/<run>.eval
+```
+
+One log is a known exclusion: the archived pilot `.eval` under `docs/probes/pilot-2026-07-12-artifacts/`
+is **not replayable** (its recorded store-event stream omits whole beats, so the feed cannot be
+reconstructed) — `--log` on it exits nonzero with one plain explanatory paragraph, not a traceback.
+
+The emitter is inert unless `FARM_SPECTATOR_DIR` is set, and any failure inside it is swallowed and
+logged rather than propagated into the run. One feed per sample execution, so multi-epoch runs never
+interleave; `--port` overrides the default (8619). In the page: click a barn for its cutaway, drag
+the timeline to scrub (`▶ live` snaps back), `⚑` any feed/mail/reel row to annotate it and export the
+set as `annotations.csv` (raw material for a hand-labeling pass — not `judge/validate.py` input),
+`📸 Snapshot` for a PNG of the frame, and the ambience toggle for a synthesized henhouse murmur
+(off by default; `M` mutes).
+
 ## Status
 
 **Built and content-complete.** The harness (deterministic env core + Inspect adapter + judge

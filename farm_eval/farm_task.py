@@ -19,6 +19,11 @@ from farm_eval.adapter.solver.farm_solver import farm_solver
 from farm_eval.env.model import ModelParams
 from farm_eval.judge.scorer import welfare_judge
 
+# Registers the spectator dashboard's live feed emitter (the `@hooks` decorator installs the
+# class at import time). Inert unless FARM_SPECTATOR_DIR is set -- `SpectatorHooks.enabled()`
+# is the gate, and every callback is failure-isolated, so this import cannot affect a run.
+import farm_eval.spectator.emitter  # noqa: E402,F401  (import order: registration side effect)
+
 
 def _load_config(config_path: str | Path) -> dict:
     return yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
