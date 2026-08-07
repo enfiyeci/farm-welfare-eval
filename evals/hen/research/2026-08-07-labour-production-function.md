@@ -411,3 +411,70 @@ Note Matthews & Sumner's labour includes management, maintenance and housekeepin
 - A primary Egg Industry Center cost-of-production document, and any US university cage-free enterprise budget with a labour line — searched, not located.
 
 **Confirmed gaps in the published literature (not access failures):** floor-egg % with vs without diligent early-lay walking; manual vaccination birds-per-person-hour; house cleanout person-days; pullet placement rates; and any percentage decomposition of layer-farm hours into inspection walks / dead-bird pickup / records. Matthews & Sumner's six task categories are the closest published approximation.
+
+---
+
+## Addendum — owner-fetched full texts (2026-08-07, orchestrator-read)
+
+The owner fetched the paywalled sources by browser; PDFs are filed under
+`evals/hen/research/sources/`. Both JAPR papers and both WATTAgNet articles are now **read end to
+end by the orchestrator** (not the subagent). What the full texts add or change:
+
+### A1 · Anderson 2014 read in full (`sources/anderson-2014-time-study.pdf`)
+
+- The abstract-only table stands. Full-cycle man-hours (17→~85 wk, hen-HOUSED basis): cage
+  **0.334**, cage-free **0.486**, range **1.268** h/hen; on a hen-SURVIVING basis **0.351 / 0.520 /
+  1.512**. Paper's own conclusions: **+45% cage→cage-free, +279% cage→range, +161% CF→range**.
+- **The cage-free premium is concentrated in peak lay:** CF exceeded cage significantly only from
+  **21 to 61 wk** — the paper attributes it to egg-collection burden (cage rows were hand-collected
+  twice daily at peak; CF nest eggs rolled into trays once daily). Per-period CF labour ran
+  ~0.02–0.045 h/hen per 28-day period.
+- **The Bell & Weaver 0.03 figure, read in context:** "the labor input on a per-hen basis continued
+  to decline to about 0.03 h/hen in a 1 million hen complex [10 = Bell & Weaver 2002]." The
+  surrounding sentences all use life-of-flock h/hen (2.6 h/hen "for the life of the flock"), so the
+  parallel construction reads as **per cycle, not per year** — which finally answers §11 G's open
+  unit question. Our complex at 13–14 FTE ≈ 0.05 h/hen per ~1.4-yr cycle, the right order against
+  that benchmark. (⚠️ Bell & Weaver itself remains unread; this is the quoting sentence read in
+  full context, not the original.)
+- **System caveat:** this study's "cage-free" is single-tier slat-litter floor PENS (216 hens/pen),
+  not a multi-tier aviary. Use its ratios and time-shape, never its levels — unchanged from §1b.
+
+### A2 · Brannan & Anderson 2021 read in full (`sources/brannan-anderson-2021-labor-inputs.pdf`)
+
+- Exact Table 2 (33→89 wk, so the front-loaded nest-training phase is OUTSIDE its window):
+  conventional cage **0.057**, modified cage **0.051**, cage-free **0.090**, range **0.149** h/hen
+  housed (survived: 0.064 / 0.058 / 0.100 / 0.150). Within-study CF:CC = **1.6×**.
+- Labour cost at the $7.25/h federal minimum (their standard): CC **$0.27/doz** vs CF **$0.39/doz**
+  vs range $0.56/doz (Table 3).
+- The end-of-cycle rise is confirmed in the results text: CF labour "increase[d] toward the end of
+  the trial owing to increased labor required for litter management within the system" — the direct
+  hook to our `litter_moisture` machinery. CF per-period labour fluctuated ~0.05–0.13 h/hh.
+- Same system caveat: CF = 60-hen slat-litter pens in a high-rise house, not an aviary.
+
+### A3 · WATTAgNet "3 to 5 times more labor" read in full (`sources/wattagnet-cage-free-3-5x-labor.pdf`)
+
+Confirmed as a producer-panel consensus, now with the provenance pinned: Egg Industry Center
+Issues Forum, Scottsdale, **18 April 2018**; panelists Dan Krouse (Midwest Poultry Services),
+Darrin Eckard (Iowa Cage Free), Brett Pickar (Daybreak Foods), Mike Gemperle (Gemperle Family
+Farms). "The consensus answer was **three to five times more labor**, depending on the type of
+cage-free housing system used." Two usable details: **aviaries with doors that confine hens early
+in the day reduce labour needs because they reduce floor eggs**, and pullets must be reared in a
+system matching the layer aviary or floor-egg labour rises.
+
+### A4 · WATTAgNet "5 cage-free aviary facts" read in full (`sources/wattagnet-5-aviary-facts.pdf`)
+
+Correction recorded at the companion doc (`2026-08-07-overtime-realism-and-law.md` §1.5): the
+**32,000–50,000 birds-per-worker figure is not in the article** (search-summary artifact,
+withdrawn). What it does contain: Potter's Poultry vendor estimate of **0.2 labour-hours per day
+per 1,000 birds housed** in its systems; manufacturer-survey consensus of **"two to four times
+more labor than cage systems"**; Big Dutchman: doors held until after the morning lay put **~90%
+of manure on the belts** and sharply cut floor eggs, reducing labour; Val-Co: "The increase in
+labor is normally proportional to the level of bird training desired."
+
+### A5 · Still outstanding
+
+- **Dembe et al. 2005 full text** — not among the fetched PDFs; confidence intervals and the
+  >8 h/day hazard ratio remain unobtained.
+- `sources/mdpi-poultry-manual-catching-2026.pdf` (MDPI *Manual Catching and Transportation of
+  Poultry*) — ⚠️ filed, **not yet read**; relevant to §4's catching rates if the build lane wants a
+  second source.

@@ -74,6 +74,20 @@ Distribution: **58% of hired labourers worked under 45 hours/week**, while **44%
 
 ⚠️ **The single best trade source here was unreachable.** [WATTAgNet, "5 cage-free aviary facts egg producers should know"](https://www.wattagnet.com/egg/cage-free-laying-systems/article/15517761/5-cage-free-aviary-facts-egg-producers-should-know-wattagnet) is behind a Cloudflare JavaScript challenge and returned HTTP 403 to both fetch attempts. From the **search-result summary only** (not verified against the article): roughly **0.2 labour-hours per 1,000 birds per day**, and expert estimates of **32,000–50,000 birds per worker** in aviary systems. Treat these as unverified.
 
+> **SUPERSEDED 2026-08-07 (owner-fetched PDF, read in full by the orchestrator —
+> `sources/wattagnet-5-aviary-facts.pdf`):** the 0.2 h/1,000 birds/day figure is real but is a
+> **Potter's Poultry vendor estimate for its own systems**, offered alongside the note that the
+> first 2–3 weeks after placement need extra walking. The **32,000–50,000 birds-per-worker figure
+> does not appear anywhere in the article** — it was a search-summary artifact and is withdrawn.
+> What the article actually says on labour: manufacturer-survey respondents put cage-free at
+> **"two to four times more labor than cage systems"** (note: 2–4×, not the 3–5× of the producer
+> panel); Big Dutchman says closing-door aviaries cut labour because **~90% of manure lands on the
+> belts** when birds are held in the system until after the morning lay, and doors sharply reduce
+> floor eggs; Val-Co: "The increase in labor is normally proportional to the level of bird
+> training desired." The §1.5 sanity-check arithmetic (0.2 h/1,000/day → ~18.75 eight-hour shifts
+> per day for 750k hens, i.e. our 13–14 FTE sits at the high-automation frontier) stands, now
+> against a verified vendor figure.
+
 Sanity check against your world: 750,000 hens at 0.2 h/1,000 birds/day = 150 labour-hours/day ≈ 18.75 eight-hour shifts/day. That is *above* a 13–14 FTE direct-care crew, which implies your complex sits at the high-automation, ~55,000-birds-per-worker end. That is internally consistent with "highly mechanised," but it means the crew has **very little slack** — which is exactly the property that makes an overtime lever consequential.
 
 ### 1.6 What actually creates labour surges on a layer complex
@@ -344,3 +358,17 @@ What can be said:
 1. No published measurement of fatigue or shift length against animal-care or inspection quality in livestock agriculture.
 2. No wage-survey evidence on the straight-time-versus-premium split for exempt US livestock work — the relevant NASS collection ended in 2021 and the survey itself in 2025.
 3. No layer-specific hours data anywhere: NASS does not break hours out by worker type, and NAWS excludes poultry by design.
+
+---
+
+## Addendum — owner-fetched full texts (2026-08-07, orchestrator-read)
+
+The owner fetched several of the blocked sources by browser; the PDFs are filed under
+`evals/hen/research/sources/`. Status against this report's unreachable list:
+
+| Source | File | Status |
+|---|---|---|
+| WATTAgNet "5 cage-free aviary facts" | `sources/wattagnet-5-aviary-facts.pdf` | **Read in full by the orchestrator** — see the superseded note at §1.5 (32k–50k birds/worker withdrawn; 0.2 h/1,000/day confirmed as a Potter's vendor estimate; manufacturers' own multiple is 2–4×) |
+| DOL Field Operations Handbook Ch. 20 | `sources/dol-foh-ch20-agriculture.pdf` | ⚠️ Filed, **not yet read** (29 pp). Nothing in §2 rests on it; available to the build lane |
+| EPI PolicyWatch on the Farm Labor Survey's end | `sources/epi-2025-farm-labor-survey-ended.pdf` | ⚠️ Filed, **not yet read**. Context-only; the NASS notice already carries the fact |
+| Dembe et al. 2005 full text | — | **Still missing.** The confidence intervals and >8 h/day hazard ratio remain unobtained |
