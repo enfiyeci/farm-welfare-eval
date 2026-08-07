@@ -109,9 +109,36 @@ The verification pass (`docs/research/2026-08-06-litter-lever-and-ammonia/ammoni
 including a config table. So the direction of the correction is solid. But it found two things that
 move the *number*:
 
-1. **6.7 ppm is a blended mean, not bird-level.** It is the average of two exhaust points and one
-   bird-level point; **the bird-level mean alone is 6.0 ppm** (~10% lower). If `nh3_ppm` in the model
-   means what a hen breathes, the anchor is 6.0, not 6.7. **Owner decision needed.**
+1. **~~The anchor should be bird-level 6.0.~~ RESOLVED 2026-08-06: the anchor is 6.7. My earlier
+   recommendation of 6.0 was WRONG and is withdrawn.**
+
+   I argued for 6.0 from our own code's threshold semantics. The owner rejected that reasoning as
+   circular — we wrote both the threshold and the variable — and was right to. Commissioned research
+   (`docs/research/2026-08-06-litter-lever-and-ammonia/ammonia-model-semantics.md`) then reversed the
+   conclusion on the evidence:
+
+   - **6.0 is not "the bird-level value" — it is the value at the best-ventilated point in the
+     house.** Zhao attributes the gradient to non-uniform ventilation and says the mid-house probe
+     "received fresher air." Hens also occupy the low-ventilation end zones reading **7.8 ppm**. So
+     6.0 systematically *understates* flock-average exposure — the wrong direction of error for a
+     welfare eval.
+   - **A single-compartment mass balance is structurally a statement about the air leaving the
+     house**, so its scalar is closer in kind to an exhaust-weighted value than to one interior probe.
+   - **Our two anchors are the same measurement.** The 6.7 mean and the "12 winter days > 25 ppm"
+     count are both computed on the 3-location mean series; re-basing one to 6.0 while keeping the
+     other would silently mix two spatial definitions.
+   - **No usable correction factor exists.** The bird-level-to-house-mean ratio is 0.89 against a
+     within-house CV of 16% ± 10 — the scatter is as large as the offset.
+
+   **Ruled: calibrate to 6.7**, and document that `ammonia_ppm` is the *house-representative
+   spatial-mean* concentration (the quantity CSES reports and the quantity UEP's threshold has
+   historically been judged against), noting bird-level ≈ 0.89× and end-wall exhaust ≈ 1.15× as a
+   stated limitation. One scalar genuinely cannot serve both the hen and worker thresholds; say so in
+   the docs rather than faking precision in the coefficient.
+
+   ⚠️ **One unresolved fact:** the sampling *height* of the CSES "Hen" probe appears only in Figure 1,
+   a raster image the agent could not read. It is item 1 on the owner fetch list and is the single
+   fact that could still sharpen this.
 2. **2.169 silently assumes a ~67-day litter-age operating point.** It can't be reproduced by simple
    scaling (that gives ~2.62); it only works if a ~1.33 ppm litter term is held fixed. A reasonable
    construction, but it must be written next to the constant, not left implicit.
