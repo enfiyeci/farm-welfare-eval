@@ -473,10 +473,49 @@ Why this over a new `engine/` or `shared/` directory:
 Without that edit the next staffing session re-contaminates the shared slot — R5 Finding 2 shows this
 is *scheduled*, not merely possible.
 
-### 13c · Which scheme → **STILL OPEN** — lifecycle-first vs species-first
+### 13c · Which scheme → **plan-first, then rule** (owner, 2026-08-06 late evening)
 
-The one decision everything else waits on. See the elaboration put to the owner 2026-08-06 evening.
-**No file moves until this is ruled.**
+**Ruled procedurally, not yet finally.** The owner chose *"Hold — refine first"*: write the full move
+plan — per-file destination table compiled from the six reorg catalogues, batch order, verification
+gates — as a reviewable document, and rule on it **as a whole** before any `git mv` runs.
+
+**The working scheme the plan is drafted against: species folders for documentation, lifecycle inside
+each, save protocol on top.** The owner's decisive input: *"next month will include a wide variety of
+animals dairy, salmon, shrimp, the general animal mortality comparison tests."* Four species plus a
+cross-species test programme makes "which eval is this for?" the first question about nearly every
+new document — the axis you write into weekly should be structural. Concretely:
+
+- `evals/hen/`, `evals/dairy/`, `evals/salmon/`, `evals/shrimp/` — **documentation only** in this
+  pass, with a lifecycle `archive/` inside each.
+- Cross-species material (the mortality comparison tests, judge methodology, the citation audit)
+  stays in `docs/` per ruling 13b, which was chosen to be scheme-independent.
+- **Code and code-coupled content do not move**: `farm_eval/`, `corpus/`, `schedule/`,
+  `judge/dimensions/`, all configs, `tests/`, `scripts/`. That is where all of the breakage risk
+  sits; that seam gets its own decision when dairy's substrate is real.
+
+**Standing owner constraint on the whole reorg:** *"lets be very attentive and precise we dont break
+anything while reorganizing."* Operationalised: pre-move baseline recorded (full suite, exit 0, 3
+standing skips, 2026-08-06 in the `fwe-main` worktree); the same suite plus the two corpus guards
+re-run after every move batch; `git mv` only; the three semantic hazards handled by hand (aquatic
+reading list human-edited, `heat-balance-and-belt-energy.md` never split, mixed files placed by
+majority with pointer lines); Codex adversarial review of the finished branch before merge.
+
+### 13d · The file-save protocol (drafted 2026-08-06, rules with the plan)
+
+Commissioned by the owner mid-session: *"we should have a protocol for how we save files from now on
+too."* Six rules, kept deliberately small; final text and home to be confirmed when the reorg plan is
+ruled:
+
+1. **Every new document gets a `YYYY-MM-DD-` prefix** unless it is a living reference document. The
+   date prefix IS the lifecycle declaration: dated means "true when written; archive when superseded."
+2. **Living reference documents are a closed, named list** (world bible, model params, decision
+   register, LANES, READMEs). Adding to the list is a deliberate act, never a default.
+3. **Every document declares its eval in one line at the top**: `Eval: hen | dairy | salmon | shrimp
+   | cross` — greppable, changeable without moving anything, honest about mixed files.
+4. **Research outputs go to a dated topic folder with a README as the first file** (the existing
+   de facto habit, now written down).
+5. **No document is written into a folder that has no README** explaining what the folder holds.
+6. **Session status goes in one committed status doc, never in `CLAUDE.md`** (= ruling 12).
 
 ---
 
