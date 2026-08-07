@@ -50,12 +50,18 @@ eval").
 
 ### Step 1 — Folder restructuring (do FIRST; blocks the lanes)
 
-> 🚧 **GATE (owner, 2026-08-06): do NOT start the reorg until the OTHER machine has pushed
-> everything and both machines are synced.** A restructure while the other machine holds unpushed
-> commits would create irreconcilable conflicts (the exact failure this project keeps hitting). The
-> other machine has been told to push all it has; wait for confirmation, `git fetch --all`, verify
-> no branch is ahead of origin anywhere, THEN reorder. Also gated on the owner's structural
-> preferences — it is not a mechanical reorg.
+> ✅ **GATE CLEARED 2026-08-06.** The other machine confirmed its pushes. Verified rather than
+> assumed (`git fetch --all --prune`, then every branch and worktree checked):
+> - every local branch in sync with origin, **except** `feat/stocking-density-task6`
+>   (`[ahead 95, behind 60]` — the known divergence, already rescued to
+>   `origin/archive/stocking-density-task6-local-2026-08-06`, so nothing is at risk);
+> - **all seven worktrees clean** (no uncommitted work anywhere);
+> - two new branches arrived from the other machine: `archive/c6-sdd-process-2026-07`,
+>   `wip/2026-08-06-owner-html-snapshot`;
+> - `docs/decision-briefs` contains `origin/main`, so it is the correct base for the reorg.
+>
+> Still gated on the owner's structural preferences — the reorg strategy comes back for approval
+> before any file moves.
 
 Not a mechanical reorg — it needs the owner's taste on the target layout. It also applies ruling 12
 (instruction-file protocol): trim `CLAUDE.md` to stable conventions + pointers (Anthropic targets
@@ -70,6 +76,19 @@ preferences.**
 **Exactly one lane owns `farm_eval/env/model/` and the golden regeneration: the `litter` lane.**
 Everything else is either docs-only, or additive in its own new module. Two lanes regenerating
 goldens produces two irreconcilable sets of numbers with no way to tell which is right.
+
+### RUNNING NOW — two lanes (owner, 2026-08-06)
+
+| Lane | Where | What it is doing | State |
+|---|---|---|---|
+| **L1 · research** | this session | The open design questions: the litter-access-hours lever (dose-response, behavioural welfare cost, the UEP confinement rule, floor-egg economics, control realism) and the ammonia model-semantics question (does a single-compartment house value calibrate to bird-level 6.0 or whole-house 6.7). Both passes must return an **owner fetch list** of paywalled sources. | 2 passes in flight |
+| **L2 · repo reorg** | `~/worktrees/fwe-reorg` · `chore/repo-reorg` (off `docs/decision-briefs`) | Reading **every one of 309 candidate files** — all of `docs/`, the root loose files, `judge/dimensions/`, and the stray label dirs — six readers with no gaps between them. Produces a per-file record: what it is, domain, which eval it belongs to, live-vs-stale, inbound/outbound refs, code/config coupling, proposed destination, move risk. | 6 readers in flight |
+
+**L2 discipline (owner: "every single file will be read, I don't want laziness"):** readers may not
+move, edit or delete anything. Binary/bulk artifacts (`.eval` logs, PDFs, large JSON) are catalogued
+by type and provenance rather than falsely claimed as read — and every reader must close with a
+coverage statement whose counts reconcile. **The reorg strategy returns to the owner for approval
+before a single file moves**, and implementation then runs cautiously with Codex review.
 
 ### Step 2 — the design lanes (start AFTER the folder restructure)
 
