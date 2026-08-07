@@ -117,3 +117,76 @@ def test_codex_provider_reuses_one_isolation_dir_across_calls(monkeypatch):
     provider.complete("second")
     assert captured["kwargs"]["cwd"] == first_cwd
     assert captured["kwargs"]["env"]["CODEX_HOME"] == first_home
+
+
+# --- Arm C providers (2026-08-06 delegated-agentic spec §4/§6) ---
+
+def test_fake_agentic_provider_lets_the_behaviour_act_in_the_workspace(tmp_path):
+    from farm_eval.study.provider import FakeAgenticProvider
+
+    def behave(instruction, workspace):
+        (workspace / "decision.json").write_text('{"decision": "accept"}')
+        return "did the thing"
+
+    provider = FakeAgenticProvider(behave)
+    out = provider.execute("the instruction", tmp_path)
+    assert out == "did the thing"
+    assert (tmp_path / "decision.json").exists()
+    assert provider.calls == [("the instruction", tmp_path)]
+
+
+def test_codex_agentic_provider_runs_workspace_write_in_the_workspace(
+        monkeypatch, tmp_path):
+    from farm_eval.study.provider import CodexAgenticProvider
+
+    captured = _capture_run(monkeypatch)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    out = CodexAgenticProvider(model="gpt-5.6-terra").execute("go", ws)
+
+    assert out == "DECISION: ACCEPT"
+    cmd = captured["cmd"]
+    assert "-s" in cmd and "workspace-write" in cmd
+    assert "read-only" not in cmd
+    assert captured["kwargs"]["cwd"] == str(ws)
+    assert captured["kwargs"]["stdin"] is subprocess.DEVNULL
+
+
+def test_codex_agentic_provider_isolates_codex_home(monkeypatch, tmp_path):
+    """Same contamination trap as the stated arms: nothing from the operator's
+    CODEX_HOME but auth.json may reach the subject (spec §6)."""
+    import farm_eval.study.provider as provider_module
+    from farm_eval.study.provider import CodexAgenticProvider
+
+    real_home = tmp_path / "real-codex-home"
+    real_home.mkdir()
+    (real_home / "auth.json").write_text("{}")
+    (real_home / "AGENTS.md").write_text("reviewer contract")
+    monkeypatch.setattr(provider_module, "_real_codex_home", lambda: real_home)
+    captured = _capture_run(monkeypatch)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+
+    CodexAgenticProvider().execute("go", ws)
+
+    cmd = captured["cmd"]
+    i = cmd.index("-c")
+    assert cmd[i + 1] == "project_doc_max_bytes=0"
+    env = captured["kwargs"]["env"]
+    scratch_home = Path(env["CODEX_HOME"])
+    assert scratch_home != real_home
+    assert (scratch_home / "auth.json").exists()
+    assert not (scratch_home / "AGENTS.md").exists()
+
+
+def test_codex_agentic_provider_raises_on_nonzero_exit(monkeypatch, tmp_path):
+    from farm_eval.study.provider import CodexAgenticProvider
+
+    def fake_run(cmd, **kwargs):
+        return subprocess.CompletedProcess(cmd, 1, stdout="", stderr="boom")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    with pytest.raises(RuntimeError, match="boom"):
+        CodexAgenticProvider().execute("go", ws)

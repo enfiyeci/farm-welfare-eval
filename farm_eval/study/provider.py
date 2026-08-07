@@ -35,6 +35,18 @@ def _real_codex_home() -> Path:
     return Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex")
 
 
+def _scratch_codex_home(base: Path) -> Path:
+    """A CODEX_HOME holding a copy of auth.json and nothing else — no AGENTS.md,
+    no config.toml. Shared by both Codex providers (spec §6)."""
+    home = base / "home"
+    home.mkdir(mode=0o700)
+    auth = _real_codex_home() / "auth.json"
+    if auth.exists():
+        shutil.copy2(auth, home / "auth.json")
+        (home / "auth.json").chmod(0o600)
+    return home
+
+
 @dataclass
 class CodexProvider:
     """Shells out to the Codex CLI. Read-only sandbox; stdin closed.
@@ -62,12 +74,7 @@ class CodexProvider:
         if self._isolation is None:
             base = Path(tempfile.mkdtemp(prefix="phase1-codex-"))
             (base / "cwd").mkdir()
-            home = base / "home"
-            home.mkdir(mode=0o700)
-            auth = _real_codex_home() / "auth.json"
-            if auth.exists():
-                shutil.copy2(auth, home / "auth.json")
-                (home / "auth.json").chmod(0o600)
+            _scratch_codex_home(base)
             self._isolation = base
         return self._isolation / "cwd", self._isolation / "home"
 
@@ -89,6 +96,67 @@ class CodexProvider:
             timeout=self.timeout_s,
             cwd=str(cwd),
             env={**os.environ, "CODEX_HOME": str(home)},
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(f"codex exec failed ({proc.returncode}): {proc.stderr}")
+        return proc.stdout
+
+
+class AgenticProvider(Protocol):
+    def execute(self, instruction: str, workspace: Path) -> str: ...
+
+
+@dataclass
+class FakeAgenticProvider:
+    """Deterministic arm-C provider for tests and --dry-run: `behave` acts inside
+    the workspace (writing decision.json, editing files, or nothing) and returns
+    the transcript text. Records every call."""
+
+    behave: Callable[[str, Path], str]
+    calls: list[tuple[str, Path]] = field(default_factory=list)
+
+    def execute(self, instruction: str, workspace: Path) -> str:
+        self.calls.append((instruction, workspace))
+        return self.behave(instruction, workspace)
+
+
+@dataclass
+class CodexAgenticProvider:
+    """codex exec with write access to ONE scratch workspace (arm C, spec §4/§6).
+
+    Same isolation as CodexProvider — scratch CODEX_HOME, project_doc_max_bytes=0,
+    stdin closed — but the sandbox is workspace-write and the cwd is the workspace
+    itself: the documents and the tool ARE the interface, so unlike the stated
+    arms the cwd is not empty. It must contain only what build_workspace put there.
+    """
+
+    model: str = "gpt-5.6-terra"
+    timeout_s: int = 900
+    _home: Path | None = field(default=None, repr=False, compare=False)
+
+    def _scratch_home(self) -> Path:
+        if self._home is None:
+            base = Path(tempfile.mkdtemp(prefix="agentic-codex-"))
+            self._home = _scratch_codex_home(base)
+        return self._home
+
+    def execute(self, instruction: str, workspace: Path) -> str:
+        cmd = [
+            "codex", "exec",
+            "-m", self.model,
+            "-s", "workspace-write",
+            "-c", "project_doc_max_bytes=0",
+            "--skip-git-repo-check",
+            instruction,
+        ]
+        proc = subprocess.run(
+            cmd,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=self.timeout_s,
+            cwd=str(workspace),
+            env={**os.environ, "CODEX_HOME": str(self._scratch_home())},
         )
         if proc.returncode != 0:
             raise RuntimeError(f"codex exec failed ({proc.returncode}): {proc.stderr}")
