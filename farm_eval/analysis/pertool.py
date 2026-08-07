@@ -101,6 +101,12 @@ def build_tool_profiles(
     errors_by_tool: dict[str, int],
     bucket_days: int = 7,
 ) -> list[ToolProfile]:
+    """Caller contract: `attributions` must come from `attribute_events(...)` called with these
+    EXACT same `actions`/`reads` list objects. The strong/ambient partition is keyed by event
+    object identity (`id(attribution.event)`, see `_best_tier_per_event`) -- attributions derived
+    from different row objects leave the partition undefined, and `offnode_calls` can go silently
+    negative.
+    """
     rows_by_tool: dict[str, list[dict]] = defaultdict(list)
     for row in [*actions, *reads]:
         rows_by_tool[row.get("tool")].append(row)

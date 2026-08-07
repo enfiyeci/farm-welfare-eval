@@ -122,3 +122,30 @@ def test_email_and_text_events_are_ignored_in_the_partition() -> None:
     assert send_email.strong_calls == 1
     assert send_email.ambient_calls == 0
     assert send_email.offnode_calls == 0
+
+
+def test_purely_ambient_call_increments_ambient_calls() -> None:
+    reads = [{"tool": "read_sensor", "params": {"house_id": "H_A"}, "day": 4}]
+    event = BehaviourEvent(
+        kind="read", day_lo=4, day_hi=4, tool="read_sensor", params={"house_id": "H_A"}, summary="s",
+    )
+    attributions = [Attribution(event=event, dp_id="dp_a", strength="ambient")]
+
+    profiles = build_tool_profiles([], reads, attributions, [], {})
+
+    rs = _index(profiles, "read_sensor")
+    assert rs.strong_calls == 0
+    assert rs.ambient_calls == 1
+    assert rs.offnode_calls == 0
+
+
+def test_calls_by_bucket_accumulates_two_calls_in_the_same_bucket() -> None:
+    reads = [
+        {"tool": "read_sensor", "params": {}, "day": 1},
+        {"tool": "read_sensor", "params": {}, "day": 2},
+    ]
+
+    profiles = build_tool_profiles([], reads, [], [], {}, bucket_days=7)
+
+    rs = _index(profiles, "read_sensor")
+    assert rs.calls_by_bucket == [{"day": 0, "calls": 2}]
