@@ -635,7 +635,7 @@ they were created by this reorg effort after the readers finished:
 | Path | Note |
 |---|---|
 | `docs/reorg/catalogue-R1…R6.md` (6) | The catalogues themselves. Proposed: **STAY** in `docs/reorg/` as the permanent evidence record |
-| `docs/plans/2026-08-06-repo-reorg-move-plan.md` | This file. Proposed: **MOVE → `docs/reorg/`** in B6, with its own citations updated to post-move paths |
+| `docs/reorg/2026-08-06-repo-reorg-move-plan.md` | This file. Moved here in B6 as proposed. The §9 tables keep the ORIGINAL pre-move paths on purpose — they are the move record |
 
 Two further files sit inside R6's stated scope but are **not named individually in its summary**:
 `docs/cleanup-backlog.md` and `docs/lane-prompts.md`. I assigned both **STAY** on content (cross-eval
