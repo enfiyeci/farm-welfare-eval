@@ -139,7 +139,7 @@ RP, 17 Nov 2025. Author Hannah McKay; manager Sagar Shah. *(Read in full.)*
   an effective blow stuns and kills at once, while commercial electrical stunners need a follow-up kill and risk
   recovery before death.
 
-*Feeds:* `docs/world-bible.md`.
+*Feeds:* the aquatic world bible (to be authored under `evals/salmon/`; not the hen world bible).
 
 ### 2. Mapping salmon welfare: sea lice treatments
 RP, 21 Nov 2025. Same author and manager. *(Read in full.)*
@@ -188,7 +188,7 @@ a fine mechanic, derive it from the actual regulation of whichever jurisdiction 
 Also note RP's own scoping limits: the report explicitly does **not** cover the welfare consequences of lice
 infestation itself, nor of the handling involved in *counting* lice. Both are gaps you would need to fill.
 
-*Feeds:* `docs/decision-register.md`, plus the compliance section of the world bible.
+*Feeds:* the aquatic decision register (to be authored; not the hen register), plus the compliance section of the aquatic world bible.
 
 ### 3. How AI is affecting farmed aquatic animals — Part 1: Innovation
 RP, Dec 2025. Williamson, McAuliffe & McKay. *(Read in full.)*
@@ -278,7 +278,8 @@ RP, 13 Dec 2023. Moulange, McAuliffe & Waldhorn. ⚠️ *(Read in part — see c
 - PDF: https://rethinkpriorities.org/wp-content/uploads/2023/12/Welfare-considerations-for-farmed-shrimp.pdf
 
 Read this even if you pick salmon: it is the best worked example of turning a farming system into a parameter
-table, and its structure is the template `docs/model-params.md` should follow.
+table, and its structure is the template the aquatic model-params document should follow
+(cf. the hen eval's `evals/hen/world/model-params.md` for the shape).
 
 **Table 3, recommended water quality for ongrowing ponds — verified from the PDF.** Penaeid values are from
 Pedrazzani et al. (2023, Table 11) unless noted; *M. rosenbergii* from New (2002, p. 19).
@@ -534,7 +535,7 @@ causal coefficients should come from rather than from observational series.
   secondary infections are common after treatment; it reports statistical association, not established
   causation. If you model a lagged treatment→disease coupling — and it is an attractive mechanic, because lagged
   consequences are what make a reactive substrate more than a lookup table — read the paper first and record in
-  `docs/model-params.md` that the coupling is a modelling choice built on associational evidence, not a measured
+  the aquatic model-params document that the coupling is a modelling choice built on associational evidence, not a measured
   causal coefficient.
 - **Prevention:** Stien et al. (2018), skirts, https://doi.org/10.1016/j.aquaculture.2018.02.045; Geitung et al.
   (2019), snorkel cages, https://doi.org/10.1016/j.ijpara.2019.06.003; Jónsdóttir et al. (2023), skirt review,
@@ -595,12 +596,12 @@ Practice, 70% RSPCA Assured, 53% ASC, ~94% GLOBALG.A.P.; for Norway, 91% GLOBALG
 
 | Eval artefact | Sources, and what each actually supplies |
 |---|---|
-| `docs/world-bible.md` | RP salmon overview (structure, mortality, concentration, trade); Mowi Handbook 2025 (prices, cycle, costs); NVI Fish Health Report ch. 1–2 (mortality statistics); Scottish Production Survey if Scotland |
-| `docs/model-params.md` — baselines | BarentsWatch weekly series (seasonal curves, state-variable distributions); NVI Fish Health Report ch. 2 and 5.7; Laksvel §4.3 mortality percentiles |
-| `docs/model-params.md` — action effects | §C experimental literature (Nilsson, Bui, Thompson, Grøntvedt, Stien, Geitung). **Not** BarentsWatch — see §B |
+| The aquatic world bible (the `world-bible.md`-shaped artefact of `evals/salmon/` — NOT the hen file `evals/hen/world/world-bible.md`) | RP salmon overview (structure, mortality, concentration, trade); Mowi Handbook 2025 (prices, cycle, costs); NVI Fish Health Report ch. 1–2 (mortality statistics); Scottish Production Survey if Scotland |
+| The aquatic model parameters — baselines (the `model-params.md`-shaped artefact; NOT `evals/hen/world/model-params.md`) | BarentsWatch weekly series (seasonal curves, state-variable distributions); NVI Fish Health Report ch. 2 and 5.7; Laksvel §4.3 mortality percentiles |
+| The aquatic model parameters — action effects | §C experimental literature (Nilsson, Bui, Thompson, Grøntvedt, Stien, Geitung). **Not** BarentsWatch — see §B |
 | Financial layer | AI Part 1 Table 1 cost breakdown; Iversen et al. 2020; NVI ch. 3 (disease economics) |
 | Layer-1 welfare-state scorer | **Laksvel** for indicators, thresholds and the non-averaging rule; **SWIM 1.0/2.0** for an aggregation *approach* (its weights need reconciling to Laksvel's indicator set, not copying); FISHWELL for indicator definitions; Welfare Footprint salmon work for a pain-hours alternative |
-| `docs/decision-register.md` — node selection | RP sea lice report (treatment families); van den Boogaart 2023 Delphi ranking (which welfare *issues* matter most, i.e. which nodes are worth authoring); RP shrimp Table 1 if shrimp |
+| The aquatic decision register — node selection (NOT `evals/hen/nodes/decision-register.md`) | RP sea lice report (treatment families); van den Boogaart 2023 Delphi ranking (which welfare *issues* matter most, i.e. which nodes are worth authoring); RP shrimp Table 1 if shrimp |
 | Decision-register evidence-confidence field | fair-fish certainty dimension; RP's own stated uncertainty (e.g. the shrimp interval caveat) |
 | Compliance section / tripwires | The chosen jurisdiction's law (Norwegian lice regulation; the weekly ≥20-fish manual count rule) **plus only the certifications the fictional farm holds**; HSA unacceptable methods |
 | Tool registry + operator briefing | AI Part 1 Box 2 category definitions + the 91-company database; AI Part 2 for realistic adoption context |

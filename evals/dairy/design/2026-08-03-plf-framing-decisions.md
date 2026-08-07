@@ -307,6 +307,6 @@ file:line citations carried through. Findings that **corrected** the source docu
 than share precisely because of this.
 
 ⚠️ **Path note for future sessions:** the predecessor handoffs cite
-`/Users/ardaenfiyeci/Desktop/farm-eval/…`. On this machine the checkout is
+`…`. On this machine the checkout is
 `/Users/ardaenf/Desktop/farm-welfare-eval/`. Those absolute paths do not resolve here; the
 repo-relative paths do.

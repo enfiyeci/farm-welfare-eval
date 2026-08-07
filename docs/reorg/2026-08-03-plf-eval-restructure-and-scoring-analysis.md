@@ -488,11 +488,11 @@ appears in every import in the new eval.
 ⚠️ **This document was written without knowing that a repository structure audit already existed.**
 It was committed to this working copy at 14:15 on 2026-08-03 by a concurrent session
 (commit `3c79a88`), while section 3 above was being written. The audit is
-`/Users/ardaenfiyeci/Desktop/farm-eval/docs/farm-eval-repo-audit.pdf` (16 pages, **read in full**),
+`docs/farm-eval-repo-audit.pdf` (16 pages, **read in full**),
 with its session handoff at
-`/Users/ardaenfiyeci/Desktop/farm-eval/docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
+`docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
 (read in full). ⚠️ The companion aquatic reading list
-(`/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-aquatic-farm-reading-list.md`,
+(`docs/research/2026-08-03-aquatic-farm-reading-list.md`,
 ~53 KB) has **not** been read.
 
 ### Where the two agree

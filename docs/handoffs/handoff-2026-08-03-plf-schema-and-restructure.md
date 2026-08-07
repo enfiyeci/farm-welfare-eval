@@ -2,7 +2,7 @@
 > Written: 2026-08-03 · Branch: `docs/substrate-realism-wave` · Status: active
 
 **Supersedes the "Goal for next session" of
-`/Users/ardaenfiyeci/Desktop/farm-eval/docs/handoffs/handoff-2026-08-03-futuristic-dairy-design.md`.**
+`docs/handoffs/handoff-2026-08-03-futuristic-dairy-design.md`.**
 That document's **Decisions made** section is still fully authoritative — species, operator framing,
 unstated date, hybrid housing, herd size, cluster order, and its do-not-retry list. Do not treat it
 as stale. Only its first action ("ask which cluster to research next") is overtaken: the owner
@@ -21,7 +21,7 @@ redirected to the schema question before more nodes are written.
   three sections of the analysis assume it.
 - **Costed five scoring approaches for standing conditions and three for look-resolution**, and
   surveyed the repository for restructure. Committed as
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md`.
+  `docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md`.
   **Verified** — commit `c20f072`, pushed to origin.
 - **Ran three Codex adversarial review rounds on that document; 21 findings, all accepted, three
   fix waves. The 3-round cap is reached.** **Verified** — findings JSON written and read each round;
@@ -127,30 +127,30 @@ alone. ⚠️ The aquatic reading list was never read by this session.
 ## References
 
 - This session's deliverable:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md`
+  `docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md`
   — the five scoring options, the three look-resolution options, the four restructure options, the
   species-coupling measurement across all 76 Python files, the reconciliation with the audit, and a
   Review record mapping all 21 findings to where each was corrected. Commit `c20f072` on
   `docs/substrate-realism-wave`, pushed.
 - Predecessor handoff, still authoritative for design decisions:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/handoffs/handoff-2026-08-03-futuristic-dairy-design.md`
+  `docs/handoffs/handoff-2026-08-03-futuristic-dairy-design.md`
 - Parallel effort's handoff:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
+  `docs/handoffs/handoff-2026-08-03-aquatic-research-and-repo-audit.md`
   (on branch `docs/aquatic-research-and-repo-audit`)
 - Repository structure audit, 16 pages, its §07 holds Moves 1–4:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/farm-eval-repo-audit.pdf`
+  `docs/farm-eval-repo-audit.pdf`
   (on branch `docs/aquatic-research-and-repo-audit` only)
 - Dairy research already done, cluster 1 and cluster 2:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-dairy-telemetry-parameters.md` and
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-virtual-fencing-parameters.md`
+  `evals/dairy/research/2026-08-03-dairy-telemetry-parameters.md` and
+  `evals/dairy/research/2026-08-03-virtual-fencing-parameters.md`
 - The code read in full this session, and the files any schema change must touch:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/schedule_models.py`,
-  `/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/tracker.py`,
-  `/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/state.py`,
-  `/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/judge/node_scores.py`,
-  `/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/judge/welfare_state.py`
+  `farm_eval/env/schedule_models.py`,
+  `farm_eval/env/tracker.py`,
+  `farm_eval/env/state.py`,
+  `farm_eval/judge/node_scores.py`,
+  `farm_eval/judge/welfare_state.py`
 - Reference policies that produce the Layer-1 anchors:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/scripts/regen_golden.py` lines 140–187
+  `scripts/regen_golden.py` lines 140–187
 - Branches: `docs/substrate-realism-wave` (this work, pushed) and
   `docs/aquatic-research-and-repo-audit` (the parallel effort). Remote:
   https://github.com/enfiyeci/farm-welfare-eval

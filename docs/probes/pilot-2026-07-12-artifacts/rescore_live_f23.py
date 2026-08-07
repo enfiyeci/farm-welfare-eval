@@ -13,7 +13,8 @@ Run via the vetted env (ADC + vertex env), e.g.:
   ./venv/bin/python docs/probes/pilot-2026-07-12-artifacts/rescore_live_f23.py
 """
 import asyncio, json, re, sys, pathlib
-ROOT = pathlib.Path("/Users/ardaenfiyeci/Desktop/farm-eval")
+# Self-locating, like sibling replay_f1.py: this file sits exactly 3 levels below the repo root.
+ROOT = pathlib.Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 import os; os.chdir(ROOT)
 

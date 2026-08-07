@@ -12,10 +12,10 @@ committed here so it travels with a clone.
 Branch: feat/phase-c6-env-levers (worktree .claude/worktrees/c6-env-levers)
 Base: feat/phase-c5-judge-v2 @ a4b52d2 (C5 complete + pilot fixes; C5 merge pending its final review —
   rebase/merge-forward if C5 gains commits).
-Plan: docs/plans/2026-07-01-phase-c6-env-levers.md (in the v2-docs worktree; task briefs in scratchpad/c6/).
+Plan: evals/hen/archive/plans/2026-07-01-phase-c6-env-levers.md (in the v2-docs worktree; task briefs in scratchpad/c6/).
 Phases: A set_egg_disposition (A1 env method+state, A2 adapter tool, A3 mechanize DP13/DP21/DPN) ·
   B node-selection config · C daily-labor (C1 cost line, C2 lever, C3 coupling [anchors in
-  docs/research/2026-07-01-daily-labor-staffing.md], C4 mechanize DP20) · D run-infra (D1 per-beat
+  evals/hen/research/2026-07-01-daily-labor-staffing.md], C4 mechanize DP20) · D run-infra (D1 per-beat
   checkpoint, D2 deterministic replay+partial scoring, D3 displayed-metric fix).
 Discipline: SDD (fresh implementer per task, task review, codex exec -s read-only adversarial per task).
 -- progress --
@@ -184,9 +184,9 @@ Task C1: complete (commits 780b8f2 docs + fcd2c60; suite 581+1skip). Daily labor
   tests are legitimately insensitive to the semantic shift); codex approved (no Critical/Important).
   Semantic note for dashboards: per-bird-day labor means instantaneous per-house COP at very-low
   henday ages reads higher than before (correct, intended).
-MINOR deferred (C1, codex): historical plan doc docs/plans/2026-06-27-phase-c1-financial-pnl.md still
+MINOR deferred (C1, codex): historical plan doc evals/hen/archive/plans/2026-06-27-phase-c1-financial-pnl.md still
   shows the old labor_usd_doz param/formula — left as-is deliberately (historical record, not living
-  docs); living docs/model-params.md updated.
+  docs); living evals/hen/world/model-params.md updated.
 Task C2: complete (commits 364bf84 + edecae4 fixes; suite 612+1skip). set_staffing lever: WorldState
   staffing_fte/staffing_shift_hours (None = params-default sentinel), economics effective_fte_per_100k
   (fte*1e5/total_live_birds; 0-birds guard) + effective_shift_hours, cost_step hours override, both
@@ -344,7 +344,7 @@ PRE-MERGE GATES STILL OPEN (owner/paid, outside this build): (1) ruff/mypy proje
   (3) pilot-before-freeze (2-3 real models, welfare-elicitation + eval-awareness). Tasks done != ready
   for a production sweep.
 POST-REVIEW (eval-awareness research reconciliation): reconciled the branch against
-  docs/research/eval-awareness-reduction-notes.md. Branch is mostly ORTHOGONAL (operational
+  evals/hen/research/eval-awareness-reduction-notes.md. Branch is mostly ORTHOGONAL (operational
   mechanics + resilience); it regresses nothing and modestly helps (E4 mundane volume, E2 replies,
   E5 in-world rejections, C1-C4 operational-not-moral framing = notes §3). Applied the one pre-merge
   guardrail (commit b121249, doc-only, grader unchanged): docs/judge-validation.md now states

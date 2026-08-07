@@ -6,18 +6,18 @@ Build Phase C6 — the environment levers that make several C5 welfare/integrity
 need. "Done" = Phases A, B, C, D of the plan implemented task-by-task with reviews, full suite green,
 branch ready for the merge decision.
 
-**The plan (read it first, it is the authority):** `docs/plans/2026-07-01-phase-c6-env-levers.md`
+**The plan (read it first, it is the authority):** `evals/hen/archive/plans/2026-07-01-phase-c6-env-levers.md`
 (in THIS worktree — it was copied onto this branch so you need nothing outside it).
 
 ## Where you are
-- **Worktree:** `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers`, branch
+- **Worktree:** `.claude/worktrees/c6-env-levers`, branch
   `feat/phase-c6-env-levers`, based on `feat/phase-c5-judge-v2` @ `a4b52d2` (C5 judge v2 complete +
   pilot hardening). Baseline suite: **461 passed, 1 skipped** (the skip is `test_rubric_sync` —
   gitignored `rubric.yml` absent in worktrees, benign; 2 third-party deprecation warnings from
   websockets/uvicorn are pre-existing and NOT yours to fix).
 - **venv:** symlinked at `./venv` (do NOT create one). Run everything from the worktree root:
   `./venv/bin/python -m pytest -q`. The shell cwd resets between commands — prefix with
-  `cd /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers &&`.
+  `cd .claude/worktrees/c6-env-levers &&`.
 - **SDD ledger:** `.superpowers/sdd/progress.md` in this worktree — the durable task record. Read it
   FIRST on any resume; append one line per completed task. Never re-dispatch a task it marks complete.
 - **⚠️ Task A1 may already be done or in flight** (a prior session dispatched it). Before starting:
@@ -33,11 +33,11 @@ branch ready for the merge decision.
   Default channel `shell`; audit log `EnvState.egg_dispositions`; multipliers from pricing DATA, never
   hardcoded in logic.
 - **Task C3 (staffing→welfare coupling) is a HEURISTIC, deliberately** — the research
-  (`docs/research/2026-07-01-daily-labor-staffing.md`, in this worktree) states no published
+  (`evals/hen/research/2026-07-01-daily-labor-staffing.md`, in this worktree) states no published
   dose-response exists. Build it as ONE monotone adequacy factor hitting the report's anchors (full
   adequacy ≥2.5 FTE/100k; nonlinear degradation below ~2.0; floor-eggs → 10–15%, mortality toward the
   7.2%-vs-3.1% gap, footpad/NH₃ worsen; plateau above ~3). Document it as heuristic-grounded-in-the-report
-  in `docs/model-params.md`. Do NOT invent per-channel curves beyond the anchors.
+  in `evals/hen/world/model-params.md`. Do NOT invent per-channel curves beyond the anchors.
 - **Phase D is not optional** — the pilot lost a 93%-complete paid episode to a process kill (no flush)
   and salvage-re-scoring saved two other runs. D1 per-beat checkpointing, D2 deterministic replay +
   partial scoring, D3 the mis-keyed displayed metric.

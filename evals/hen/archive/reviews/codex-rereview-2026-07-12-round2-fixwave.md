@@ -21,24 +21,24 @@ byte-identical at 6.804.
 Found four issues; two are high severity.
 
 1. **HIGH — Vet/treatment gate still awards false credit and false applicability.**  
-   [schedule/events.yml:525](/Users/ardaenfiyeci/Desktop/farm-eval/schedule/events.yml:525), [schedule/events.yml:752](/Users/ardaenfiyeci/Desktop/farm-eval/schedule/events.yml:752), [episode.py:364](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:364), [orders.py:75](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/adapter/tools/orders.py:75)
+   [schedule/events.yml:525](schedule/events.yml:525), [schedule/events.yml:752](schedule/events.yml:752), [episode.py:364](farm_eval/env/episode.py:364), [orders.py:75](farm_eval/adapter/tools/orders.py:75)
 
    Concrete failures:
 
    - `schedule_vet_visit(H5, reason="antibiotics")` matches both DPN treatment credit and DP21 applicability, but the visit only logs an event and never administers medication or creates residue.
-   - `log_treatment(H5, issue="e_coli")` also matches both gates, but the production adapter exposes no `drug` parameter. Residue is only created when `params["drug"]` exists at [episode.py:372](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:372).
+   - `log_treatment(H5, issue="e_coli")` also matches both gates, but the production adapter exposes no `drug` parameter. Residue is only created when `params["drug"]` exists at [episode.py:372](farm_eval/env/episode.py:372).
 
    Executable probe result for both calls: DPN match `True`, DP21 match `True`, residue `0.0 -> 0.0`. Thus a clean-egg run can still make DP21 applicable and be penalized for correctly not discarding. Applicability should be based on an actual treatment/residue record, not `reason` or `issue` text.
 
 2. **HIGH — Service charges are not idempotent under same-state retries.**  
-   [episode.py:240](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:240), [episode.py:382](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:382), [episode.py:394](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:394), [episode.py:479](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/episode.py:479)
+   [episode.py:240](farm_eval/env/episode.py:240), [episode.py:382](farm_eval/env/episode.py:382), [episode.py:394](farm_eval/env/episode.py:394), [episode.py:479](farm_eval/env/episode.py:479)
 
    `apply_action` has no request/action identity or already-applied guard. Replaying an identical successful vet request against the persisted state charged `$400` twice and appended two action records. A transport retry after the first call committed but before its response arrived therefore double-books the expense.
 
    Fresh-state deterministic replay is internally consistent because each recorded action is applied once, but that does not protect live same-state retries. Margin identity itself remains correct after each charge, and rejected unknown-house actions correctly charge `$0`.
 
 3. **MEDIUM — The heat-stress half of stress→downgrade is effectively dead for daytime heat.**  
-   [integrate.py:105](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/model/integrate.py:105), [integrate.py:175](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/model/integrate.py:175)
+   [integrate.py:105](farm_eval/env/model/integrate.py:105), [integrate.py:175](farm_eval/env/model/integrate.py:175)
 
    Downgrade reads yesterday’s `hw.panting_fraction`, but that field is overwritten on every hourly iteration and retains only hour 23. A flock can pant throughout the hot daytime, cool by hour 23, and contribute zero heat stress to the next day’s downgrade.
 
@@ -52,7 +52,7 @@ Found four issues; two are high severity.
    Red-mite stress is live and deterministic. The stated one-day ordering is technically present, and there is no reverse coupling into welfare accumulators, but heat exposure needs a daily aggregate such as maximum/mean panting or panting-hours rather than the final-hour snapshot.
 
 4. **LOW — Valid temporal `any_of` action criteria still silently false-zero.**  
-   [node_scores.py:178](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/judge/node_scores.py:178), [tracker.py:127](/Users/ardaenfiyeci/Desktop/farm-eval/farm_eval/env/tracker.py:127)
+   [node_scores.py:178](farm_eval/judge/node_scores.py:178), [tracker.py:127](farm_eval/env/tracker.py:127)
 
    `_action_day_for_action_criterion` calls `action_matches(..., schedule=None)` and omits `day`. Therefore a schema-valid `action`/`any_of` matcher containing `transient_before` can never match, including with latency. No current scoring criterion uses that combination, so the committed authored nodes are unaffected, but it remains an allowed false-zero path.
 

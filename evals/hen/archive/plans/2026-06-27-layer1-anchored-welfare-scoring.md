@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Python 3.11+, pydantic v2. Package root `farm_eval/`.
-- **Test runner:** the venv lives in the PRIMARY checkout, not this worktree. From the worktree root run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest -q`. All test invocations below use this interpreter.
+- **Test runner:** the venv lives in the PRIMARY checkout, not this worktree. From the worktree root run: `venv/bin/python -m pytest -q`. All test invocations below use this interpreter.
 - Tests run from the worktree root (cwd). `pyproject.toml` sets `pythonpath=["."]` so `from scripts.regen_golden import ...` and relative paths (`"corpus"`, `"schedule/events.yml"`, `"tests/fixtures/golden"`) resolve.
 - **Determinism:** no wall-clock, no random. The substrate is a pure function of `(state, day, params)` (verified: `farm_eval/env/model/integrate.py`, `drivers.py`). Re-running the generator must be byte-identical.
 - **No farm content hardcoded in `farm_eval/` logic.** Reference-policy setpoint constants live in `scripts/regen_golden.py` (a generator script, not eval logic) — this is allowed; do NOT move them into `farm_eval/`.
@@ -80,7 +80,7 @@ def test_event_driven_anchor_exceeds_bare_integrate_on_nh3():
 
 - [ ] **Step 2: Run it to verify it fails**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_event_driven_anchor_exceeds_bare_integrate_on_nh3 -v`
+Run: `venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_event_driven_anchor_exceeds_bare_integrate_on_nh3 -v`
 Expected: FAIL (current `run_reference` uses bare `integrate`, so `env_nh3 == bare_nh3`, assertion fails).
 
 - [ ] **Step 3: Reroute `run_reference` through `FarmEnv`**
@@ -153,19 +153,19 @@ _POLICIES: dict[str, dict[str, float]] = {
 
 - [ ] **Step 4: Run the event-fidelity test to verify it passes**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_event_driven_anchor_exceeds_bare_integrate_on_nh3 -v`
+Run: `venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_event_driven_anchor_exceeds_bare_integrate_on_nh3 -v`
 Expected: PASS.
 
 - [ ] **Step 5: Regenerate the fixtures (values change — this is expected)**
 
 In `scripts/regen_golden.py` `main()`, the existing reference-runs block stays valid for now (good/negligent). Run the generator:
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python scripts/regen_golden.py`
+Run: `venv/bin/python scripts/regen_golden.py`
 Expected: prints "wrote tests/fixtures/golden/reference_runs.json" and "wrote farm_eval/judge/welfare_reference.json". The good `nh3_ppm_hours_over` is now higher than the prior committed 330.2475 (day-182 injection included).
 
 - [ ] **Step 6: Verify the existing golden + welfare_state suites still pass against regenerated fixtures**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/env/test_golden_baseline.py tests/judge/test_welfare_state.py -q`
+Run: `venv/bin/python -m pytest tests/env/test_golden_baseline.py tests/judge/test_welfare_state.py -q`
 Expected: PASS. (`test_welfare_state.py` assertions are relative — good ≥ 0.9, negligent ≤ 0.1 — and still hold; `test_reference_runs_match_golden` matches the freshly written fixture.)
 
 - [ ] **Step 7: Commit**
@@ -218,7 +218,7 @@ def test_competent_reports_all_channels():
 
 - [ ] **Step 2: Run to verify failure**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_reference_runs_match_golden tests/env/test_golden_baseline.py::test_competent_reports_all_channels -v`
+Run: `venv/bin/python -m pytest tests/env/test_golden_baseline.py::test_reference_runs_match_golden tests/env/test_golden_baseline.py::test_competent_reports_all_channels -v`
 Expected: FAIL — `run_reference("competent")` raises ValueError (policy not in `_POLICIES`) and the fixture has no `"competent"` key.
 
 - [ ] **Step 3: Add the competent policy**
@@ -263,12 +263,12 @@ And update the sanity-report loop to show the competent column:
 
 - [ ] **Step 5: Regenerate fixtures**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python scripts/regen_golden.py`
+Run: `venv/bin/python scripts/regen_golden.py`
 Expected: `reference_runs.json` now has `good`, `competent`, `negligent`; sanity report shows competent between good and negligent on the active channels (nh3, footpad; heat/mortality may be 0 for both good and competent if neither crosses thresholds — acceptable).
 
 - [ ] **Step 6: Run the tests to verify they pass**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/env/test_golden_baseline.py -q`
+Run: `venv/bin/python -m pytest tests/env/test_golden_baseline.py -q`
 Expected: PASS (3-policy determinism + completeness green).
 
 - [ ] **Step 7: Commit**
@@ -338,7 +338,7 @@ def test_competent_lands_in_sane_midband():
 
 - [ ] **Step 2: Run to verify it passes (or surfaces a calibration finding)**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest tests/judge/test_anchor_calibration.py -v`
+Run: `venv/bin/python -m pytest tests/judge/test_anchor_calibration.py -v`
 Expected: PASS. If `test_competent_lands_in_sane_midband` FAILS, that is a real calibration finding — adjust `_POLICIES["competent"]` in `scripts/regen_golden.py` (e.g. `belt_interval_days` 4→5 to wet the litter more, or `ventilation` 1.0→0.8 to raise nh3), regenerate (`scripts/regen_golden.py`), and re-run. The probe is the instrument; tuning it once is the intended workflow, not a defect.
 
 - [ ] **Step 3: Commit**
@@ -401,7 +401,7 @@ modeling of DPH should be reconciled separately.
 
 - [ ] **Step 2: Run the FULL suite to confirm no regressions**
 
-Run: `/Users/ardaenfiyeci/Desktop/farm-eval/venv/bin/python -m pytest -q`
+Run: `venv/bin/python -m pytest -q`
 Expected: all pass (prior baseline was 226 passed, 1 skipped; this plan adds ~4 tests → ~230 passed, 1 skipped, 0 failed).
 
 - [ ] **Step 3: Commit**
