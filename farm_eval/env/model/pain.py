@@ -158,3 +158,103 @@ def foraging_pain(birds: int, days: float, pp) -> PainDelta:
         hurtful=affected_birds * hours * pp.foraging_split[0],
         annoying=affected_birds * hours * pp.foraging_split[1],
     )
+
+
+def keel_profile(pp) -> list[tuple[float, tuple[float, float, float]]]:
+    """The integrated three-fracture keel timeline as (hours, (dis, hurt, ann)) segments.
+
+    PROVENANCE: PAIN-TRACK SOURCED, SCHEDULE OURS (spec §5.5.1 ¶2, Ch. 3 Pain-Track 3.4).
+    ONE timeline, not three stacked Pain-Tracks: a new fracture REPLACES the prior chronic
+    pain (Scenario III), so each chronic phase runs only until the next fracture. The chronic
+    splits COMPOUND across fractures. There is NO Excruciating term.
+
+    The final segment is open-ended in effect: `keel_cohort_pain` applies the last chronic rate
+    to any time past the end of the list, which is what "runs until depopulation" means for us.
+    """
+    interval_h = pp.keel_fracture_interval_weeks * 7 * 24
+    segments: list[tuple[float, tuple[float, float, float]]] = []
+    step_h = pp.keel_inflammation_hours / len(pp.keel_inflammation_steps)
+    for k in range(pp.keel_fracture_count):
+        segments.append((pp.keel_acute_hours, (1.0, 0.0, 0.0)))
+        for dis, hurt in pp.keel_inflammation_steps:
+            segments.append((step_h, (dis, hurt, 0.0)))
+        segments.append((pp.keel_callus_hours, (0.0, pp.keel_callus_split[0], pp.keel_callus_split[1])))
+        hurt, ann = pp.keel_chronic_splits[k]
+        used = pp.keel_acute_hours + pp.keel_inflammation_hours + pp.keel_callus_hours
+        chronic_h = max(0.0, interval_h - used)
+        segments.append((chronic_h, (0.0, hurt, ann)))
+    return segments
+
+
+def keel_cohort_pain(cohort_birds: float, t0_hours: float, t1_hours: float, pp) -> PainDelta:
+    """Bird-hours accrued by one cohort over the timeline window [t0_hours, t1_hours).
+
+    Integrating the piecewise-constant profile over an explicit window is what makes this
+    additive across day boundaries and makes truncation at the run's end automatic: a cohort
+    that entered within 20 weeks of the cutoff simply never reaches its later segments, which
+    is faithful (Ch. 3 truncates at depopulation too) but means late cohorts land BELOW the
+    per-fractured-hen anchor by construction (spec §5.5.1 ¶2).
+    """
+    if cohort_birds <= 0.0 or t1_hours <= t0_hours:
+        return ZERO
+    dis = hurt = ann = 0.0
+    cursor = 0.0
+    segments = keel_profile(pp)
+    for duration, (d, h, a) in segments:
+        seg_start, seg_end = cursor, cursor + duration
+        cursor = seg_end
+        overlap = min(t1_hours, seg_end) - max(t0_hours, seg_start)
+        if overlap > 0.0:
+            dis += overlap * d
+            hurt += overlap * h
+            ann += overlap * a
+    if t1_hours > cursor:
+        tail = t1_hours - max(t0_hours, cursor)
+        _, (d, h, a) = segments[-1]
+        dis += tail * d
+        hurt += tail * h
+        ann += tail * a
+    return PainDelta.of(disabling=cohort_birds * dis, hurtful=cohort_birds * hurt,
+                        annoying=cohort_birds * ann)
+
+
+def daily_table(profile_hours: float, integrator, pp) -> tuple[list[PainDelta], PainDelta]:
+    """Precompute one unit cohort's pain for each whole day of a fixed timeline.
+
+    Returns `(per_day, terminal)`: `per_day[i]` is what ONE bird accrues on day `i` after
+    entering, and `terminal` is the steady per-day rate once the timeline is exhausted. Turning
+    a cohort-day into a table lookup is what lets every cohort be its own day-stamped group —
+    the alternative was bucketing, which silently skipped early phases for merged birds.
+    """
+    days = int(profile_hours // 24) + 1
+    per_day = [integrator(1.0, i * 24.0, (i + 1) * 24.0, pp) for i in range(days)]
+    terminal = integrator(1.0, (days + 1) * 24.0, (days + 2) * 24.0, pp)
+    return per_day, terminal
+
+
+def keel_daily_table(pp) -> tuple[list[PainDelta], PainDelta]:
+    """`daily_table` over the integrated three-fracture keel timeline. Build ONCE per
+    integrate() call, never per house-day."""
+    total_hours = sum(duration for duration, _ in keel_profile(pp))
+    return daily_table(total_hours, keel_cohort_pain, pp)
+
+
+def keel_seed_offset_days(start_age_weeks: float, pp) -> int:
+    """`keel_seed_offset_hours` in whole days, for indexing the daily table.
+
+    ⚠️ Rounding to whole days positions a backdated seed within 12 hours of Ch. 3's schedule,
+    which is immaterial against a 70-day fracture spacing and is the price of the lookup.
+    """
+    return int(round(keel_seed_offset_hours(start_age_weeks, pp) / 24.0))
+
+
+def keel_seed_offset_hours(start_age_weeks: float, pp) -> float:
+    """How far into the scripted timeline a house's day-0 flock already is.
+
+    Ch. 3's average hen takes her first fracture at 30 weeks, so a house starting older than
+    that is already that many weeks in. A younger house has no history to backdate and starts
+    at zero. This is the backdated-seed rule of spec §5.5.1 ¶2, owner-ruled 2026-08-05: without
+    it, treating day 0's computed prevalence as a day's rise would open a ~90%-of-flock "new
+    fracture" cohort at week 68 and schedule its later fractures past depopulation.
+    """
+    return max(0.0, (start_age_weeks - pp.keel_first_fracture_age_weeks) * 7 * 24)

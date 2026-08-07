@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 
-from farm_eval.env.state import DeathRecord, EnvState, current_disposition
+from farm_eval.env.state import DeathRecord, EnvState, KeelCohort, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
@@ -93,6 +93,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
         ambient = lambda d, h: (21.0, 55.0)  # noqa: E731
 
     start_day = state.day_index
+    keel_days, keel_terminal = pain.keel_daily_table(params.pain)
     for offset in range(elapsed_days):
         # Absolute calendar day for this iteration (1-based relative to eval start).
         # start_day is the day index BEFORE this call, so day=start_day+1 is the
@@ -275,8 +276,43 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             hw.water_ml = prod["water_ml_base"] * (water_mult_sum / 24.0)
 
             # --- Keel-bone fracture (daily snapshot from age curve) ---
+            prev_keel_pct = hw.keel_fracture_pct
             hw.keel_fracture_pct = keel.keel_prevalence_pct(age, params)
             acc.accrue_keel(state.welfare.harm, hw.keel_fracture_pct, 1.0)
+
+            # Keel currency: cohorts on the scripted 3-fracture timeline (spec §5.5.1 ¶2).
+            pp = params.pain
+            if hid not in state.welfare.keel_baseline_pct:
+                # Day-0 backdated seed: this house's initial prevalence is HISTORY, not
+                # incidence. Seed it once, positioned on Ch. 3's schedule for its age.
+                state.welfare.keel_baseline_pct[hid] = hw.keel_fracture_pct
+                seeded = birds * hw.keel_fracture_pct / 100.0
+                if seeded > 0.0:
+                    # start_day is the day the seed is CREATED (the house's first integrated
+                    # day), so its table index is 0 today. Using 0 would advance the seed a full
+                    # day into its timeline before it had accrued anything.
+                    state.welfare.keel_cohorts.append(KeelCohort(
+                        house_id=hid, birds=seeded, start_day=day,
+                        offset_days=pain.keel_seed_offset_days(
+                            state.world.age_weeks_at_start.get(hid, 0.0), pp),
+                    ))
+            else:
+                # ONE cohort per house per day. No bucketing: merging a later rise into an
+                # earlier cohort starts those birds partway through the profile and skips the
+                # acute and inflammation phases outright.
+                rise_pct = max(0.0, hw.keel_fracture_pct - prev_keel_pct)
+                if rise_pct > 0.0:
+                    state.welfare.keel_cohorts.append(KeelCohort(
+                        house_id=hid, birds=birds * rise_pct / 100.0, start_day=day))
+
+            for cohort in state.welfare.keel_cohorts:
+                if cohort.house_id != hid or day < cohort.start_day:
+                    continue
+                # start_day is the cohort's FIRST day, so its index is 0 there — plus, for a
+                # backdated seed, however far into the timeline it already was.
+                index = (day - cohort.start_day) + cohort.offset_days
+                delta = keel_days[index] if index < len(keel_days) else keel_terminal
+                acc.accrue_pain(state.welfare, hid, "keel", delta.scaled(cohort.birds))
 
             # --- Footpad dermatitis (daily two-compartment step) ---
             hw.footpad_mild_pct, hw.footpad_severe_pct = footpad.footpad_step(
@@ -347,6 +383,18 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
+
+            # Keel cohorts must lose birds with the flock, or a cohort whose members died keeps
+            # accruing chronic pain to the end of the run — large across the HPAI outbreak, and
+            # it makes §5.5.1 ¶13's population term meaningless. Scaling every cohort by the
+            # house's survival ratio is the deterministic form of "deaths fall proportionally
+            # across the fractured and the unfractured".
+            _survivors = state.world.bird_count[hid]
+            if _survivors < birds:
+                _survival = _survivors / birds if birds > 0 else 0.0
+                for cohort in state.welfare.keel_cohorts:
+                    if cohort.house_id == hid:
+                        cohort.birds *= _survival
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum

@@ -87,6 +87,21 @@ class PainTrack(BaseModel):
     excruciating: float = 0.0
 
 
+class KeelCohort(BaseModel):
+    """One group of hens that sustained their FIRST keel fracture together (spec §5.5.1 ¶2).
+
+    `offset_days` positions the cohort inside the scripted three-fracture timeline at the
+    moment it was created: 0 for a cohort opened by a day's rise in prevalence, and a backdated
+    value for the seed cohorts created at episode start, whose fractures already happened before
+    day 0. `start_day` is always the day the cohort was CREATED, so its table index is 0 there.
+    """
+
+    house_id: str
+    birds: float
+    start_day: int
+    offset_days: int = 0
+
+
 class WelfareState(BaseModel):
     houses: dict[str, HouseWelfare] = Field(default_factory=dict)
     mortality_cumulative: float = 0.0
@@ -100,6 +115,8 @@ class WelfareState(BaseModel):
     pain_by_house_channel: dict[str, dict[str, PainTrack]] = Field(default_factory=dict)
     pain_total: PainTrack = Field(default_factory=PainTrack)
     worker_pain: PainTrack = Field(default_factory=PainTrack)  # WORKER-HOURS, never summed with birds
+    keel_cohorts: list[KeelCohort] = Field(default_factory=list)
+    keel_baseline_pct: dict[str, float] = Field(default_factory=dict)
 
 
 class FinancialState(BaseModel):

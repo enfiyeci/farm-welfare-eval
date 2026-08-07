@@ -62,6 +62,36 @@ class PainParams(BaseModel):
     foraging_hours_per_day: float = 8.0
     foraging_split: list[float] = [0.40, 0.60]       # [hurtful, annoying]
 
+    # --- Keel (spec §5.5, Ch. 3 Pain-Track 3.4): PAIN-TRACK SOURCED, SCHEDULE OURS ---
+    # ONE integrated three-fracture timeline (Scenario III: same bone, one sensation, a new
+    # fracture REPLACES the prior chronic pain). NOT three stacked copies of 3.1-3.4.
+    # Ch. 3's average hen: first fracture at 30 weeks, 10 weeks between each.
+    # Phase durations sit inside their printed ranges (acute 0.5-2 h, inflammation 4-7 d,
+    # callus 2-12 wk) and were solved so a full-cycle cohort reproduces the published
+    # 159 h Disabling and 2,248 h Hurtful per fractured hen.
+    # ⚠️ Annoying then lands at ~2,274 h against a 1,812 h midpoint — high, but inside the
+    # published [1,312-2,312] range. The shape cannot hit all three midpoints at once; this is
+    # recorded rather than tuned away, because moving a duration outside its printed range to
+    # chase the third number would be invention, not calibration.
+    keel_first_fracture_age_weeks: float = 30.0
+    keel_fracture_interval_weeks: float = 10.0
+    keel_fracture_count: int = 3
+    keel_acute_hours: float = 1.25                 # printed 0.5-2 h, 100% Disabling
+    keel_inflammation_hours: float = 96.9          # printed 4-7 d
+    keel_inflammation_steps: list[list[float]] = [ # three equal sub-steps, [dis, hurt]
+        [0.80, 0.20], [0.50, 0.50], [0.30, 0.70],
+    ]
+    keel_callus_hours: float = 727.0               # printed 2-12 wk, 60% Hurtful / 40% Annoying
+    keel_callus_split: list[float] = [0.60, 0.40]  # [hurtful, annoying]
+    keel_chronic_splits: list[list[float]] = [     # [hurtful, annoying] after fracture 1 / 2 / 3
+        [0.25, 0.45], [0.33, 0.58], [0.36, 0.61],
+    ]
+    # ⚠️ NO BUCKETING. An earlier draft merged a bucket's rises into one cohort to keep the
+    # per-day loop cheap; adversarial review showed that birds joining after the cohort's first
+    # day start partway through the profile and SKIP the acute and inflammation phases outright
+    # — far worse than the timing shift the bucket was supposed to cost. One cohort per house
+    # per day instead, made cheap by the precomputed daily table (pain.keel_daily_table).
+
     @model_validator(mode="after")
     def _validate_awake_window(self):
         if not (0.0 < self.awake_hours_per_day <= 24.0):
@@ -73,4 +103,27 @@ class PainParams(BaseModel):
             raise ValueError("awake_hours_per_day must be a whole number of hours")
         if not (0 <= self.awake_hour_start <= 23):
             raise ValueError("awake_hour_start must be an hour of the day")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_keel_timeline(self):
+        # A structurally impossible keel parameterization must fail HERE, not silently
+        # zero the chronic phase or delay the next scripted fracture (adversarial review
+        # 2026-08-07): keel_profile() clamps chronic to max(0, interval - phases), which is
+        # only sound while the phases actually fit inside the fracture interval.
+        if not self.keel_inflammation_steps:
+            raise ValueError("keel_inflammation_steps must not be empty")
+        if self.keel_fracture_count > len(self.keel_chronic_splits):
+            raise ValueError(
+                "keel_fracture_count exceeds the chronic splits provided "
+                f"({self.keel_fracture_count} > {len(self.keel_chronic_splits)})"
+            )
+        interval_h = self.keel_fracture_interval_weeks * 7 * 24
+        used = self.keel_acute_hours + self.keel_inflammation_hours + self.keel_callus_hours
+        if used > interval_h:
+            raise ValueError(
+                "keel acute+inflammation+callus hours "
+                f"({used}) exceed the fracture interval ({interval_h} h); the scripted "
+                "timeline cannot host them without displacing the next fracture"
+            )
         return self
