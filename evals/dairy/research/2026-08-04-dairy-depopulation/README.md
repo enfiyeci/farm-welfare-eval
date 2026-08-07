@@ -2,7 +2,7 @@
 
 > Run 2026-08-04 · Branch `feat/plf-dairy-eval` · For the PLF dairy eval's last uncatalogued cluster
 > (depopulation / culling method). **This is the research layer, not a design document.** Node design
-> belongs in `docs/design/2026-08-04-technology-use-catalog.md` after the owner has reacted.
+> belongs in `evals/dairy/design/2026-08-04-technology-use-catalog.md` after the owner has reacted.
 
 ## Why this corpus exists
 

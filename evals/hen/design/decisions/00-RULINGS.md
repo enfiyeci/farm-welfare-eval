@@ -430,7 +430,7 @@ becomes a lie, whereas the species never changes. Same reasoning that makes `hen
 
 This **supersedes** the three variants in circulation: `evals/plf-dairy/` and `evals/dairy/` (the two
 R1 dairy subagents disagreed) and `evals/plf_dairy/` (written into
-`docs/design/2026-08-03-plf-framing-decisions.md`). That design doc's naming line is now history.
+`evals/dairy/design/2026-08-03-plf-framing-decisions.md`). That design doc's naming line is now history.
 
 ### 13b · Cross-eval evidence → **`docs/` is the shared slot** (owner delegated the call, 2026-08-06)
 

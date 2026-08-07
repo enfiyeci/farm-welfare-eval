@@ -16,7 +16,7 @@
 > **Selection is deferred.** How many entries make it into the eval, and whether a technology arrives
 > already installed or as an adoption decision, are both owner decisions taken later.
 >
-> Reading order for context: `docs/design/2026-08-03-programme-and-plf-decisions.md` (the settled
+> Reading order for context: `evals/dairy/design/2026-08-03-programme-and-plf-decisions.md` (the settled
 > spine), `docs/handoffs/handoff-2026-08-03-futuristic-dairy-design.md` (world decisions and the
 > do-not-retry list).
 

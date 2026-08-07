@@ -66,7 +66,7 @@ not move the headline. (b) The thin stakeholder axis is COMMUNITY (1 node), not 
 search omits staffing; a ~$96.8M corner sits below the reported floor, and the honest interim fix is
 a one-line docstring correction.
 
-YOU OWN: docs/design/** and docs/research/** for staffing topics only.
+YOU OWN: evals/hen/design/** and evals/hen/research/** for staffing topics only.
 YOU MUST NOT TOUCH: any Python. This lane writes NO code until its design is ruled by the owner.
 Another lane owns farm_eval/env/model/** and the goldens.
 

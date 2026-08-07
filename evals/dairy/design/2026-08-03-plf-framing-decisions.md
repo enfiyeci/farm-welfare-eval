@@ -1,5 +1,9 @@
 # PLF eval: the four blocking decisions, resolved
 
+> **Naming superseded 2026-08-06:** this document's `evals/plf_dairy/` was overruled by ruling 13a
+> (`evals/hen/design/decisions/00-RULINGS.md`) — the folder is `evals/dairy/`, species not framing,
+> hyphens not underscores. The rest of the record stands.
+
 > Written 2026-08-03 · Branch `docs/substrate-realism-wave` · **Status: decisions with evidence**
 > Answers open questions 1, 3, 4, 5 and 6 of
 > `docs/handoffs/handoff-2026-08-03-plf-schema-and-restructure.md`, which blocked all further work.
