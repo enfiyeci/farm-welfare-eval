@@ -102,9 +102,10 @@ Zhao Figure 1 probe height is closed as a definitive negative**: the figure was 
 PMC's PDF render and read visually — it is a plan-view schematic; the hen-level port's height is
 not published anywhere in Part I. **Oliveira Figure 3 was likewise read visually** (the moisture
 gap is first-cycle/deep-bed driven and converges after cleanouts). **The tier-1/tier-2 list was
-fetched by the owner and read end to end** — Widowski & Duncan 2000, Vestergaard 1982, De Jong
-2007, Rudkin 2021, Liu 2007, Campbell 2023, De Reu 2009 (see
-[04-owner-fetched-sources-read.md](04-owner-fetched-sources-read.md)). **Still open:** the Oliveira
-dissertation (interior of the monthly series beyond what Fig. 3 shows), Vestergaard 1997
-(corticosterone; now low-stakes), Baugh et al. 2026 (traceable via Bongiorno's references), and the
-floor-egg downgrade fraction (unmeasured in the literature — authored, labelled).
+fetched by the owner and read end to end, COMPLETE** — Widowski & Duncan 2000, Vestergaard 1982,
+De Jong 2007, Rudkin 2021, Liu 2007, Campbell 2023, De Reu 2009, and Vestergaard 1997 (the stress
+boundary confirmed at total deprivation — see
+[04-owner-fetched-sources-read.md](04-owner-fetched-sources-read.md) §8). **Still open:** the
+Oliveira dissertation (interior of the monthly series beyond what Fig. 3 shows), Baugh et al. 2026
+(traceable via Bongiorno's references), and the floor-egg downgrade fraction (unmeasured in the
+literature — authored, labelled).

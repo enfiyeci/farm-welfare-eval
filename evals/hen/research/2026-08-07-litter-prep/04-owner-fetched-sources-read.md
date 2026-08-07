@@ -2,8 +2,9 @@
 
 Eval: hen
 
-Owner supplied seven PDFs on 2026-08-07 (the tier-1/tier-2 fetch list from this folder's README,
-complete except Vestergaard 1997). **Every one was read end to end by this session** — full pages,
+Owner supplied seven PDFs on 2026-08-07 (the tier-1/tier-2 fetch list from this folder's README),
+then Vestergaard 1997 later the same day (§8), **completing the list**. **Every one was read end to
+end by this session** — full pages,
 figures included (PDFs render visually, unlike the text extractions earlier passes were limited to).
 All seven are archived under `evals/hen/research/sources/`. Net effect on the R3 recommendation:
 **strengthens it on every axis it touches; changes nothing structural.**
@@ -170,6 +171,32 @@ furnished-cage differences in shell bacteria are statistically significant but "
 relevancy" (0.23 log cfu); within-system farm-to-farm variation exceeds between-system differences
 (>1 log cfu). **The floor-egg-specific downgrade fraction remains unmeasured in the literature**;
 the 30–60 % planning bracket stays authored.
+
+## 8 · Vestergaard, Skadhauge & Lawson 1997 — the stress boundary sits at TOTAL deprivation (fetched later the same day; tier-1 list now COMPLETE)
+
+[*Physiol. Behav.* 62(2):413–419](https://doi.org/10.1016/S0031-9384(97)00041-3) ·
+`sources/Vestergaard-1997-stress-of-not-dustbathing-corticosterone.pdf` — read end to end (7 pp).
+
+Design: hens reared and kept **2.5 years** on sand or wire floors, then swapped — the sand birds
+lost sand entirely, the wire birds gained sand boxes. Results: in the sand birds, dust bathing
+**totally disappeared** for the remaining 48 days and **corticosterone rose significantly**
+(≈1.9 → ≈3.4 ng/ml geometric mean; significantly above the wire birds after the change, P < 0.05);
+their comfort behaviours and stereotypies did not change significantly. In the wire birds *gaining*
+sand: dust bathing rose (P < 0.05), **threats and non-stereotypic allopecks fell** (P < 0.05), and
+corticosterone did not change (the authors themselves flag possible ACTH-adrenal exhaustion in old
+caged hens as a caveat on that null). 10 of 13 wire birds had pecking stereotypies vs **zero** sand
+birds (P < 0.001), and in wire birds total feather pecking correlated positively with
+corticosterone (r_s = 0.67, P < 0.01; regression R² = 0.34, P < 0.036). Conclusion, verbatim: "the
+nonperformance of dustbathing behavior is associated with the experience of stress."
+
+**For the rubric:** the physiological-stress boundary is confirmed at source to sit at **total,
+chronic deprivation** — substrate removed outright from birds with lifelong access — not at
+partial daily restriction (small n: 9 sand birds in 3 cage groups, 2.5-year-old hens). So stress
+cannot be invoked at the ruled ~10-h-access dose, closing the last tier-1 question exactly as the
+delegated pass predicted from the abstract. Two bonuses: gaining substrate access *reduced
+aggression* — a measured positive-welfare effect in the directive's direction
+([05](05-positive-welfare-directive.md)) — and the feather-pecking↔corticosterone correlation
+localizes the stress→pecking link to the no-substrate condition, far from our dose.
 
 ## Net effect on R3 and P8
 
