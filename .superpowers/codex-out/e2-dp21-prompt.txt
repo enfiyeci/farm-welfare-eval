@@ -1,0 +1,14 @@
+Adversarial code review of a SINGLE commit in this Python repo (a deterministic farm-operations agent-evaluation harness; no live models). Review ONLY commit 19d813d (HEAD): "DP21 drug-residue node conditional on H5 treatment (applies_if gate)". Range: HEAD~1..HEAD.
+
+Context: `score_nodes` (farm_eval/judge/scorer.py) builds {dp_id -> score} for the welfare headline (their equal mean). This commit adds `Signature.applies_if` (an ActionMatch) and `node_applies` (farm_eval/judge/node_scores.py): a node whose `applies_if` situation never occurred is EXCLUDED from the scored set (not scored 0). DP21_DRUG_RESIDUE (schedule/events.yml) gates on `log_treatment` on house H5 with issue [colibacillosis, e_coli].
+
+Hunt specifically for:
+1. Correctness of the applicability window: `node_applies` matches any action with `rec.day <= entry.deadline_day` and no lower bound. Is there a case where a node is wrongly included or wrongly excluded? Could an unrelated/earlier H5 treatment spuriously make DP21 applicable, or a legitimate treatment fail to?
+2. `action_matches(sig.applies_if, ..., schedule=None)`: does passing schedule=None break any where-clause feature (e.g. transient_before) that applies_if might use? Is that a latent trap if a future applies_if uses a temporal directive?
+3. Denominator / aggregation effects: excluding a node changes the headline mean denominator and all breakouts. Any place that assumes a fixed node count, or that would divide by zero, or that double-counts?
+4. Determinism / replay: is `node_applies` a pure function of (sig, entry, actions)? Any ordering or mutation hazard?
+5. Silent-failure risks consistent with this codebase's fail-loud discipline: could a malformed `applies_if`, or an applies_if on a node that also has a NodeCap/tripwire, silently mis-score?
+6. Interaction with the coverage meta-test invariant (Σ criteria points == 10) — is that invariant actually independent of applies_if as claimed?
+7. Any test in tests/judge/test_node_applicability.py that asserts the wrong thing or gives false confidence.
+
+Be concrete: name file:line, give a failing input, and rate severity (Critical/Important/Minor). If you find nothing real, say so plainly — do not invent issues.

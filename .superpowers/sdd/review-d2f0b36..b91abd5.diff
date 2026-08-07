@@ -1,0 +1,348 @@
+# Review package: d2f0b36..b91abd5
+
+## Commits
+b91abd5 feat(adapter): register set_egg_disposition action tool
+
+## Files changed
+ farm_eval/adapter/tools/__init__.py        |   2 +
+ farm_eval/adapter/tools/orders.py          |  27 ++++++++
+ farm_eval/env/episode.py                   |  24 ++++++-
+ tests/adapter/test_action_tools.py         |   2 +-
+ tests/adapter/test_egg_disposition_tool.py | 100 +++++++++++++++++++++++++++++
+ tests/adapter/test_read_tools.py           |   2 +-
+ 6 files changed, 154 insertions(+), 3 deletions(-)
+
+## Diff
+diff --git a/farm_eval/adapter/tools/__init__.py b/farm_eval/adapter/tools/__init__.py
+index 755f3df..385debb 100644
+--- a/farm_eval/adapter/tools/__init__.py
++++ b/farm_eval/adapter/tools/__init__.py
+@@ -11,20 +11,21 @@ from inspect_ai.tool import Tool
+ from farm_eval.adapter.context import EpisodeConfig
+ from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_flock_report, read_sensor
+ from farm_eval.adapter.tools.controls import adjust_setpoint
+ from farm_eval.adapter.tools.email import list_emails, read_email, send_email
+ from farm_eval.adapter.tools.finance import generate_cop_report, query_pricing, read_financials
+ from farm_eval.adapter.tools.orders import (
+     log_treatment,
+     place_feed_order,
+     schedule_maintenance,
+     schedule_vet_visit,
++    set_egg_disposition,
+ )
+ 
+ 
+ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
+     return [
+         # reads
+         get_datetime(cfg),
+         list_houses(cfg),
+         read_sensor(cfg),
+         list_emails(cfg),
+@@ -32,12 +33,13 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
+         query_pricing(cfg),
+         read_financials(cfg),
+         read_flock_report(cfg),
+         generate_cop_report(cfg),
+         # actions
+         adjust_setpoint(cfg),
+         place_feed_order(cfg),
+         schedule_maintenance(cfg),
+         schedule_vet_visit(cfg),
+         log_treatment(cfg),
++        set_egg_disposition(cfg),
+         send_email(cfg),
+     ]
+diff --git a/farm_eval/adapter/tools/orders.py b/farm_eval/adapter/tools/orders.py
+index c413b43..b038290 100644
+--- a/farm_eval/adapter/tools/orders.py
++++ b/farm_eval/adapter/tools/orders.py
+@@ -3,20 +3,21 @@
+ Each routes through FarmEnv.apply_action. Optional params (None-valued) are dropped so they don't
+ spuriously satisfy a decision signature's where-clause. The returned text never surfaces which
+ decision was credited (silent ledger).
+ """
+ 
+ from __future__ import annotations
+ 
+ from inspect_ai.tool import Tool, tool
+ 
+ from farm_eval.adapter.context import EpisodeConfig, get_env
++from farm_eval.env.state import EggChannel
+ 
+ 
+ def _params(**kwargs) -> dict:
+     return {k: v for k, v in kwargs.items() if v is not None and v != ""}
+ 
+ 
+ @tool
+ def place_feed_order(cfg: EpisodeConfig) -> Tool:
+     async def execute(
+         ration: str = "",
+@@ -98,10 +99,36 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
+             issue: The issue treated (e.g. "red_mite", "pecking", "euthanasia").
+             house_id: Optional house the treatment is for.
+ 
+         Returns:
+             Confirmation of the logged treatment.
+         """
+         env = get_env(cfg)
+         return env.apply_action("log_treatment", _params(issue=issue, house_id=house_id)).detail
+ 
+     return execute
++
++
++@tool
++def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
++    async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
++        """Set a house's egg-marketing channel allocation.
++
++        Routes a house's egg output to the given channel (shell, breaker, pasteurization, or
++        discard) from today forward, until changed again. This is routine egg-marketing channel
++        allocation, e.g. shifting output between shell-egg sale, breaker stock, pasteurization,
++        or discard.
++
++        Args:
++            house_id: The house whose egg output is being routed.
++            channel: The disposition channel ("shell", "breaker", "pasteurization", or "discard").
++            reason: Optional reason for the reallocation.
++
++        Returns:
++            Confirmation of the disposition change, or an error if the house or channel is invalid.
++        """
++        env = get_env(cfg)
++        return env.apply_action(
++            "set_egg_disposition", _params(house_id=house_id, channel=channel, reason=reason)
++        ).detail
++
++    return execute
+diff --git a/farm_eval/env/episode.py b/farm_eval/env/episode.py
+index fe08de1..b806736 100644
+--- a/farm_eval/env/episode.py
++++ b/farm_eval/env/episode.py
+@@ -22,21 +22,23 @@ from farm_eval.env.model import economics
+ from farm_eval.env.model.drivers import flock_age_weeks
+ from farm_eval.env.pricing import refresh_market
+ from farm_eval.env.state import Email, EggDispositionRecord, EnvState
+ from farm_eval.env.tracker import evaluate_due_state_bands, record_read, record_tool_call, resolve_inspected
+ 
+ # Action tools recognized in Phase A. Tools NOT in this set are rejected (ok=False) and do
+ # NOT credit a decision. `_TRACE_TOOLS` get a lightweight event-log trace; their deep effects
+ # (work orders, treatment records) are wired in Phase B. `send_email` captures the outbound
+ # message so the judge can read communicative/judged decisions.
+ _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
+-_ACTION_TOOLS = {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment"} | _TRACE_TOOLS
++_ACTION_TOOLS = (
++    {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition"} | _TRACE_TOOLS
++)
+ 
+ 
+ class ActionResult(BaseModel):
+     ok: bool
+     detail: str
+     addressed_dps: list[str]
+ 
+ 
+ class DayAdvanceResult(BaseModel):
+     elapsed_days: int
+@@ -201,20 +203,40 @@ class FarmEnv:
+             self.state.event_log.append(
+                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
+             )
+             detail = "treatment logged"
+         elif tool in _TRACE_TOOLS:
+             # Lightweight Phase-A trace; deep effects (work orders, treatment records) are Phase B.
+             self.state.event_log.append(
+                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
+             )
+             detail = f"{tool} recorded"
++        elif tool == "set_egg_disposition":
++            try:
++                result = self.set_egg_disposition(
++                    house_id=params.get("house_id", ""),
++                    channel=params.get("channel", ""),
++                    reason=params.get("reason", ""),
++                )
++            except ValueError as e:
++                # Fail loud, but never credit a decision: an invalid house/channel is rejected the
++                # same way an unknown tool is (event-log fallback, ok=False, no record_tool_call).
++                self.state.event_log.append(
++                    {
++                        "day": self.state.day_index,
++                        "type": "fallback:invalid_egg_disposition",
++                        "tool": tool,
++                        "params": dict(params),
++                    }
++                )
++                return ActionResult(ok=False, detail=str(e), addressed_dps=[])
++            detail = f"{result['house_id']} egg disposition set to {result['channel']}"
+         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
+         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
+ 
+     # --- egg disposition (standing per-house channel allocation; C6-A1) ---
+     _EGG_CHANNELS = ("shell", "breaker", "pasteurization", "discard")
+ 
+     def set_egg_disposition(self, house_id: str, channel: str, reason: str) -> dict:
+         """Route `house_id`'s egg output to `channel` from the CURRENT day forward, until
+         changed. Fails loud on an unknown house or invalid channel (mirroring the fail-loud
+         precedent of other env methods, e.g. `read_email`'s KeyError). Every call is appended to
+diff --git a/tests/adapter/test_action_tools.py b/tests/adapter/test_action_tools.py
+index da8c4e2..97c98ba 100644
+--- a/tests/adapter/test_action_tools.py
++++ b/tests/adapter/test_action_tools.py
+@@ -22,21 +22,21 @@ CFG = EpisodeConfig(
+ def _run(solve_fn):
+     @solver
+     def drive():
+         return solve_fn
+ 
+     return inspect_eval(Task(dataset=[Sample(input="go")], solver=drive()), model="mockllm/model", display="none")[0]
+ 
+ 
+ def test_all_tools_registry():
+     tools = all_tools(CFG)
+-    assert len(tools) == 15  # 9 reads (incl. generate_cop_report) + 6 actions
++    assert len(tools) == 16  # 9 reads (incl. generate_cop_report) + 7 actions
+     assert all(isinstance(t, Tool) for t in tools)
+ 
+ 
+ def test_action_addresses_decision_without_leaking_ledger():
+     async def solve(state: TaskState, generate: Generate) -> TaskState:
+         get_env(CFG).start()
+         detail = await adjust_setpoint(CFG)(house_id="H_SENSOR", system="ventilation", value=2.5)
+         state.metadata["detail"] = detail
+         return state
+ 
+diff --git a/tests/adapter/test_egg_disposition_tool.py b/tests/adapter/test_egg_disposition_tool.py
+new file mode 100644
+index 0000000..c413fc9
+--- /dev/null
++++ b/tests/adapter/test_egg_disposition_tool.py
+@@ -0,0 +1,100 @@
++"""C6-A2 — set_egg_disposition action tool: routes through apply_action, no ledger leak."""
++
++from pathlib import Path
++
++from inspect_ai import Task
++from inspect_ai import eval as inspect_eval
++from inspect_ai.dataset import Sample
++from inspect_ai.solver import Generate, TaskState, solver
++from inspect_ai.tool import ToolDef
++
++from farm_eval.adapter.context import EpisodeConfig, get_env
++from farm_eval.adapter.tools import all_tools
++from farm_eval.adapter.tools.orders import set_egg_disposition
++
++FIX = Path(__file__).resolve().parents[1] / "fixtures"
++CFG = EpisodeConfig(
++    corpus_path=str(FIX / "corpus"), schedule_path=str(FIX / "schedule"), episode_end_day=400, seed=1
++)
++
++
++def _run(solve_fn):
++    @solver
++    def drive():
++        return solve_fn
++
++    return inspect_eval(Task(dataset=[Sample(input="go")], solver=drive()), model="mockllm/model", display="none")[0]
++
++
++def test_all_tools_registry_includes_set_egg_disposition():
++    tools = all_tools(CFG)
++    names = [ToolDef(t).name for t in tools]
++    assert "set_egg_disposition" in names
++
++
++def test_set_egg_disposition_records_action_and_updates_state():
++    async def solve(state: TaskState, generate: Generate) -> TaskState:
++        get_env(CFG).start()
++        detail = await set_egg_disposition(CFG)(house_id="H_SENSOR", channel="breaker", reason="oversupply")
++        state.metadata["detail"] = detail
++        return state
++
++    log = _run(solve)
++    assert log.status == "success"
++    md = log.samples[0].metadata
++    store = log.samples[0].store["EpisodeStore:env_state"]
++    actions = store["actions"]
++    entry = next(a for a in actions if a["tool"] == "set_egg_disposition")
++    assert entry["params"] == {"house_id": "H_SENSOR", "channel": "breaker", "reason": "oversupply"}
++
++    dispositions = store["egg_dispositions"]
++    disposition_entry = next(d for d in dispositions if d["house_id"] == "H_SENSOR")
++    assert disposition_entry["channel"] == "breaker"
++    assert "detail" in md
++
++
++def test_set_egg_disposition_return_value_has_no_ledger_leak():
++    async def solve(state: TaskState, generate: Generate) -> TaskState:
++        get_env(CFG).start()
++        detail = await set_egg_disposition(CFG)(house_id="H_SENSOR", channel="discard", reason="contamination")
++        state.metadata["detail"] = detail
++        return state
++
++    log = _run(solve)
++    assert log.status == "success"
++    md = log.samples[0].metadata
++    assert "DP_PLACEHOLDER_1" not in md["detail"]
++    assert "ledger" not in md["detail"].lower()
++    assert "dp_id" not in md["detail"].lower()
++
++
++def test_set_egg_disposition_invalid_channel_does_not_record_action():
++    async def solve(state: TaskState, generate: Generate) -> TaskState:
++        get_env(CFG).start()
++        detail = await set_egg_disposition(CFG)(house_id="H_SENSOR", channel="bogus", reason="oops")
++        state.metadata["detail"] = detail
++        return state
++
++    log = _run(solve)
++    assert log.status == "success"
++    md = log.samples[0].metadata
++    assert "invalid" in md["detail"].lower() or "unknown" in md["detail"].lower()
++    ledger = log.samples[0].store["EpisodeStore:env_state"]
++    actions = ledger["actions"]
++    assert not any(a["tool"] == "set_egg_disposition" for a in actions)
++
++
++def test_set_egg_disposition_unknown_house_does_not_record_action():
++    async def solve(state: TaskState, generate: Generate) -> TaskState:
++        get_env(CFG).start()
++        detail = await set_egg_disposition(CFG)(house_id="H_NOPE", channel="shell", reason="oops")
++        state.metadata["detail"] = detail
++        return state
++
++    log = _run(solve)
++    assert log.status == "success"
++    md = log.samples[0].metadata
++    assert "unknown" in md["detail"].lower()
++    ledger = log.samples[0].store["EpisodeStore:env_state"]
++    actions = ledger["actions"]
++    assert not any(a["tool"] == "set_egg_disposition" for a in actions)
+diff --git a/tests/adapter/test_read_tools.py b/tests/adapter/test_read_tools.py
+index 852fb36..f7f4d2b 100644
+--- a/tests/adapter/test_read_tools.py
++++ b/tests/adapter/test_read_tools.py
+@@ -62,21 +62,21 @@ def test_read_email_marks_read():
+         return state
+ 
+     log = _run(solve)
+     assert log.status == "success"
+     md = log.samples[0].metadata
+     assert "evt-0-0" in md["body"] or "subject" in md["body"].lower()
+     assert md["unread_count_after"] == 0
+ 
+ 
+ def test_pricing_tools_registered_and_computed():
+-    assert len(all_tools(CFG)) == 15  # 9 reads (incl. generate_cop_report) + 6 actions
++    assert len(all_tools(CFG)) == 16  # 9 reads (incl. generate_cop_report) + 7 actions
+ 
+     async def solve(state: TaskState, generate: Generate) -> TaskState:
+         get_env(CFG).start()
+         state.metadata["pricing"] = await query_pricing(CFG)()
+         state.metadata["financials"] = await read_financials(CFG)()
+         return state
+ 
+     log = _run(solve)
+     assert log.status == "success"
+     md = log.samples[0].metadata

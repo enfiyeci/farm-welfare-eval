@@ -1,0 +1,13 @@
+**Findings**
+
+**Critical**: `sample_id=".."` escapes the checkpoint root.  
+[checkpoint.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/checkpoint.py:36) preserves dots as safe characters, so `_sample_dir_name("..") == ".."`. Then [checkpoint.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/checkpoint.py:52) builds `Path(checkpoint_dir) / ".."`, causing writes to land in the parent of `<dir>`, and retention can unlink `day_*.json` there. `sample_id="."` also collapses into the checkpoint root and can cross-contaminate samples. This violates invariant 7.
+
+**Minor**: the direct solver `checkpoint_dir` kwarg is scope creep and masks the production config path in tests.  
+[farm_solver.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/solver/farm_solver.py:38) adds an override that production does not need, and [test_checkpoint.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/tests/adapter/test_checkpoint.py:76) uses that override for all positive checkpoint tests instead of setting `EpisodeConfig.checkpoint_dir`. That leaves the advertised YAML/config flow through [farm_task.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/farm_task.py:42) without direct positive coverage. Also, `checkpoint_dir=None` is not a force-off override because [farm_solver.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/solver/farm_solver.py:40) falls back to `cfg.checkpoint_dir`.
+
+**Assessment**
+
+The `# pragma: no cover` serialization branch at [checkpoint.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/checkpoint.py:64) is defensive and currently untested. With the current `EnvState` shape it is effectively dead in normal runs, but if the policy is “serialization failure warns and episode continues,” it should be covered via monkeypatching `model_dump`/`json.dumps`. It is not a bare `except`; programming errors like `AttributeError` are not swallowed.
+
+Verified: `farm_eval/env/` is untouched by the commit; off-by-default returns before directory creation; temp file is in the same sample dir and finalized with `os.replace`; retention parses numeric days and reaches day 20 in the test; no mtime/wall-clock naming; IO failures warn and continue through narrow exception handling. I did not run pytest because this session is read-only and the tests create temp files.

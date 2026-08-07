@@ -1,0 +1,11 @@
+**Findings**
+
+Low - [farm_eval/adapter/checkpoint.py](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/checkpoint.py:51): the F1 traversal remap is complete for POSIX path escape, but the sentinel names are not collision-free. `"" -> "_"` collides with legitimate `"_"`; `"." -> "__"` collides with `"__"`; `".. "?? wait no` correction: `".. "??` not relevant. `"..” -> "___"` collides with `"___"`. Other sanitized inputs can also collapse to those names because non-allowed chars become `_`. This can cause cross-sample checkpoint overwrite/pruning if such sample IDs share a `checkpoint_dir`. This is not path traversal and the sanitizer was already non-injective, but the sentinel collision is plausible.
+
+**Verification Notes**
+
+F1 path traversal: clean for the original issue. The remap is applied to the final sanitized string at [checkpoint.py:49-51](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/checkpoint.py:49), after separators and other unsafe chars are replaced. On POSIX, remaining values like `"..."`, leading/trailing dots other than exact `"."`/`".."`, and Windows reserved names do not resolve outside `checkpoint_dir`; reserved Windows names may fail as filesystem names but are not an escape.
+
+F2 config path: clean. The test sets `EpisodeConfig.checkpoint_dir` and calls `_run(... checkpoint_dir=None)` at [test_checkpoint.py:281-289](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/tests/adapter/test_checkpoint.py:281). `farm_solver` then falls back to `cfg.checkpoint_dir` at [farm_solver.py:40](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/solver/farm_solver.py:40) and writes through `write_checkpoint` at [farm_solver.py:42-46](/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/c6-env-levers/farm_eval/adapter/solver/farm_solver.py:42).
+
+I did not run tests because the requested review was read-only and the sandbox is read-only.
