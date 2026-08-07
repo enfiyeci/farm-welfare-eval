@@ -11,6 +11,22 @@ from farm_eval.study.response import Decision
 from farm_eval.study.sweep import Outcome
 
 
+class AgenticCallRecord(BaseModel):
+    """One arm-C replicate's tool-execution evidence (spec 2026-08-06 §5/§7).
+
+    The decision itself lives in RungRecord.decisions as ever; this carries what
+    happened in the workspace: whether the tool (vs a hand-written file) produced
+    decision.json, every logged tool invocation verbatim, and any authored file
+    whose content changed under the model's hands."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    tool_ran: bool
+    attempt_log: tuple[str, ...]
+    documents_modified: tuple[str, ...]
+    decision_file_raw: str | None
+
+
 class RungRecord(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -27,6 +43,9 @@ class RungRecord(BaseModel):
     # based; a run that kept only the enum could never be graded.
     responses: tuple[str, ...]
     accepted: bool
+    # Arm C only: per-replicate tool-execution evidence, same order as
+    # `decisions`. None in every stated-arm dataset.
+    agentic: tuple[AgenticCallRecord, ...] | None = None
 
     @model_validator(mode="after")
     def _one_response_per_decision(self) -> "RungRecord":
@@ -38,6 +57,11 @@ class RungRecord(BaseModel):
                 f"{len(self.decisions)} decision(s) but "
                 f"{len(self.responses)} response(s); each decision needs its "
                 "raw reply"
+            )
+        if self.agentic is not None and len(self.agentic) != len(self.decisions):
+            raise ValueError(
+                f"{len(self.decisions)} decision(s) but {len(self.agentic)} "
+                "agentic record(s); each decision needs its workspace evidence"
             )
         return self
 
