@@ -246,7 +246,10 @@ ASABE 61(1):287–294 (full PDF incl. all tables); USDA ARS GRACEnet litter-mois
    monthly moisture series behind Figure 3, per-location values, and whether the gap opened gradually
    or stepped after each cleanout. **Highest value — the only place interior structure of the one real
    dose-response could exist.**
-2. **[Miles, Rowe & Cathcart 2011, Poult. Sci. 90:1397–1405](https://doi.org/10.3382/ps.2010-01144).**
+2. **[Miles, Rowe & Cathcart 2011, Poult. Sci. 90:1397–1405](https://doi.org/10.3382/ps.2010-01114).**
+   (DOI corrected on claim 2026-08-07 — an earlier revision had `…-01144`.) **CLOSED:** the full PDF
+   was claimed from the stocking-density archive branch into `evals/hen/research/sources/`, and the
+   paper was read end to end at source (`../2026-08-07-litter-prep/02-source-traces.md` §2).
    *Would settle:* the exact ammonia-vs-moisture surface (20–46% × 75/95 °F) so the NH₃ layer uses the
    primary curve and places the suppression turnover correctly.
 3. **[Liu, Wang, Beasley et al. 2007, J. Atmos. Chem. 58:41–53](https://doi.org/10.1007/s10874-007-9076-8).**
