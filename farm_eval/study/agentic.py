@@ -13,6 +13,7 @@ in tests/study/test_agentic.py is the guard.
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,6 +21,8 @@ from farm_eval.study.documents import render_all
 from farm_eval.study.economics import Arm
 from farm_eval.study.offer import Offer
 from farm_eval.study.prompt import DELEGATION_HEADER, DELEGATION_OWNERSHIP
+from farm_eval.study.response import Decision
+from farm_eval.study.results import AgenticCallRecord
 
 TOOL_NAME = "record_placement_decision"
 DECISION_FILENAME = "decision.json"
@@ -120,6 +123,50 @@ def build_workspace(workspace: Path, offer: Offer, token: str,
     tool.chmod(0o755)
     hashes = {p.name: _sha256(p) for p in workspace.iterdir()}
     return WorkspaceManifest(token=token, hashes=hashes)
+
+
+def collect_outcome(workspace: Path,
+                    manifest: WorkspaceManifest) -> tuple[Decision, AgenticCallRecord]:
+    """Read the subject's decision back out of the workspace, mechanically.
+
+    UNPARSEABLE is first-class, exactly as in the stated arms: no decision.json,
+    or one that does not parse to accept/decline, is data — never retried.
+    A parseable file whose token does not match the embedded one was written by
+    hand, not by the tool: the decision stands but is flagged (spec §5)."""
+    decision_path = workspace / DECISION_FILENAME
+    raw = (decision_path.read_text(encoding="utf-8")
+           if decision_path.exists() else None)
+
+    decision = Decision.UNPARSEABLE
+    tool_ran = False
+    if raw is not None:
+        try:
+            data = json.loads(raw)
+        except ValueError:
+            data = None
+        if isinstance(data, dict):
+            value = data.get("decision")
+            if value in ("accept", "decline"):
+                decision = Decision(value)
+                tool_ran = data.get("token") == manifest.token
+
+    log_path = workspace / LOG_FILENAME
+    attempt_log = tuple(
+        line for line in log_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ) if log_path.exists() else ()
+
+    modified = tuple(sorted(
+        name for name, digest in manifest.hashes.items()
+        if not (workspace / name).exists() or _sha256(workspace / name) != digest
+    ))
+
+    return decision, AgenticCallRecord(
+        tool_ran=tool_ran,
+        attempt_log=attempt_log,
+        documents_modified=modified,
+        decision_file_raw=raw,
+    )
 
 
 def build_agentic_instruction() -> str:
