@@ -48,6 +48,24 @@ implicitly include this section.
   interpretation of §2.1.1 and must be recorded in the spec (Task 1 does that).
 - **Monotone non-decreasing.** Every `PainTrack` field only ever increases (criterion 2). This
   applies to each run's absolute accumulators, NOT to the signed Tier-A difference.
+- **⚠️ THE SUBSTRATE UNDER THIS IS STILL MOVING — write for adjustment (owner directive,
+  2026-08-06).** The litter/ammonia/footpad calibration is being reworked and *further* changes are
+  expected after that. Three rules follow, and they are binding, not advisory:
+  1. **Never hard-code a number that mirrors a substrate value.** If a `PainParams` field has to
+     agree with something the substrate computes, **derive it at load time from the substrate's own
+     function or parameter** rather than copying the number. The live case is Task 7's dustbathing
+     map, whose moisture anchors are the belt-driven litter equilibria: compute them from
+     `litter.litter_moisture_equilibrium()` so a recalibrated belt slope moves them automatically.
+  2. **Where derivation is not possible, pin the agreement with a drift test** that fails loudly
+     when the two diverge — the pattern Task 5 uses for `heat_thi_mild` vs `heat_danger_thi` and
+     Task 6 for the mite action threshold. A silent divergence between a pain band and the physics
+     it reads is the failure this prevents.
+  3. **Keep every channel's calibration in `PainParams` and its logic in `pain.py`**, with no
+     numbers in the logic at all. A recalibration should then be a parameter edit and a re-run of
+     the anchor tests — never a rewrite of a channel function.
+  Corollary for the anchor tests: assert a channel lands inside its **published range** and state
+  the tolerance, rather than pinning an exact figure that a substrate change will break for reasons
+  that have nothing to do with the channel being wrong.
 - **Provenance labels.** Every channel function's docstring states its provenance in the exact
   vocabulary of spec §5.5 (`PAIN-TRACK SOURCED, MAP OURS`, `CATEGORY SOURCED, THRESHOLDS OURS`,
   `OURS`, …). A reviewer must be able to read the label off the code.
@@ -1487,7 +1505,16 @@ def test_every_channel_carries_a_provenance_label():
     # ⚠️ §5.5.1 ¶12: this is the loudest lever in the currency and the swing is OUR artefact.
     dustbathing_hours_per_day: float = 5.0        # midpoint of the printed 2.5-7.5 h
     dustbathing_annoying_share: float = 0.50      # printed
-    dustbathing_moisture_anchors: list[float] = [15.0, 45.0]
+    # ⚠️ DO NOT hard-code these two moisture numbers (Global Constraints, owner directive
+    # 2026-08-06). They are the substrate's OWN belt-driven equilibria, and the belt->moisture
+    # slope is being recalibrated — the consolidation record has it ~14x too large and the wrong
+    # sign. Derive them so a recalibration moves this map automatically:
+    #     from farm_eval.env.model.layers.litter import litter_moisture_equilibrium
+    #     dry = litter_moisture_equilibrium(1.0, params)   # daily belts
+    #     wet = litter_moisture_equilibrium(7.0, params)   # weekly belts
+    # Because that needs ModelParams, resolve it in `dustbathing_affected_fraction` from the
+    # params object passed in, and keep only the FRACTION anchors as data here. If a default is
+    # needed for a bare PainParams(), make it None and fail loudly rather than guessing.
     dustbathing_fraction_anchors: list[float] = [0.10, 0.50]
 ```
 
@@ -1502,6 +1529,11 @@ def dustbathing_affected_fraction(litter_moisture: float, pp) -> float:
     is an authored choice, and §5.5.1 ¶12 requires it to be labelled wherever it is reported.
     Clamped outside the anchors so an extreme moisture cannot push the fraction out of the
     published range.
+
+    ⚠️ The two MOISTURE anchors are DERIVED from the substrate's belt equilibria, never copied.
+    The belt->moisture slope is under active recalibration and more changes are expected, so a
+    copied constant would silently misstate this channel — which is the loudest lever in the
+    currency — the moment the physics moves.
     """
     lo_m, hi_m = pp.dustbathing_moisture_anchors
     lo_f, hi_f = pp.dustbathing_fraction_anchors
