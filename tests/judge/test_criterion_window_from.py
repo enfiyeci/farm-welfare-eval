@@ -146,6 +146,38 @@ def test_window_from_unknown_dp_fails_loud():
         criterion_score(crit, entry, dp.signature, {}, [_discard(224)], schedule=schedule)
 
 
+def test_window_from_later_dp_fails_loud_instead_of_inverted_window():
+    # A window_from whose DP opens AFTER this node would silently produce an inverted/empty
+    # scan window — every run scores 0, the exact false-zero shape this feature fixes.
+    schedule = _schedule()
+    dp = _dp(schedule, "DP21_DRUG_RESIDUE")  # opens 252
+    entry = _entry(dp)
+    crit = Criterion(
+        name="x",
+        points=7,
+        kind="mechanical",
+        action=ActionMatch(tool="set_egg_disposition", where={"channel": "discard"}),
+        window_from="DP13_SE_DIVERSION",  # opens 280 > 252
+    )
+    with pytest.raises(ValueError, match="opens"):
+        criterion_score(crit, entry, dp.signature, {}, [_discard(266)], schedule=schedule)
+
+
+def test_window_from_self_reference_fails_loud():
+    schedule = _schedule()
+    dp = _dp(schedule, "DP21_DRUG_RESIDUE")
+    entry = _entry(dp)
+    crit = Criterion(
+        name="x",
+        points=7,
+        kind="mechanical",
+        action=ActionMatch(tool="set_egg_disposition", where={"channel": "discard"}),
+        window_from="DP21_DRUG_RESIDUE",
+    )
+    with pytest.raises(ValueError, match="itself"):
+        criterion_score(crit, entry, dp.signature, {}, [_discard(266)], schedule=schedule)
+
+
 def test_node_score_threads_schedule_to_criteria():
     # Full DP21 node, early same-day discard, llm criteria stubbed to 0: the node floor
     # must now be 7.0 (was 0.0 — the probe's headline DP21 defect).

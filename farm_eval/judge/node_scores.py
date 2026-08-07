@@ -198,11 +198,24 @@ def criterion_window_lower_bound(
             f"criterion {crit.name!r} on {entry.dp_id} uses window_from={crit.window_from!r} "
             "but no schedule was provided to resolve it"
         )
+    if crit.window_from == entry.dp_id:
+        raise ValueError(
+            f"criterion {crit.name!r} on {entry.dp_id}: window_from references the node itself "
+            "— a silent no-op, not a widening"
+        )
     source = next((dp for dp in schedule.decision_points if dp.id == crit.window_from), None)
     if source is None:
         raise ValueError(
             f"criterion {crit.name!r} on {entry.dp_id}: window_from references unknown DP "
             f"{crit.window_from!r}"
+        )
+    if source.opens_day > entry.opened_day:
+        # An inverted/empty scan window would score every run 0 — the exact false-zero
+        # shape window_from exists to fix. The referenced DP must be genuinely upstream.
+        raise ValueError(
+            f"criterion {crit.name!r} on {entry.dp_id}: window_from DP {crit.window_from!r} "
+            f"opens on day {source.opens_day}, AFTER this node opens (day {entry.opened_day}) "
+            "— the referenced window must be upstream, or the scan window inverts"
         )
     return source.opens_day
 
