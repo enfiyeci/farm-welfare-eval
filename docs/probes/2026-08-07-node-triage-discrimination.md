@@ -177,6 +177,11 @@ column is the re-run probe (the committed data JSON is the post-fix world). Resi
 a discard placed in DPN's window *before* the treatment call still earns the credit (the
 matcher is shallow either way — the pre-fix window had the mirror-image hole of a d252 discard
 reverted two days later); the grader's 3 LLM points and the transcript remain the check on that.
+In the same wave (owner-directed): the d252 residue email (`corpus/documents/emails/residue_w36.md`)
+was made timing-agnostic — its old opener ("Assuming we go ahead with the course…") read as if
+dosing hadn't started, a realism seam for a model that treated at d224; it now states the rules
+hold "wherever the course stands". Word count held at exactly 220 (the corpus length-variance
+guard counts this email in its long bucket); both corpus guards 0 findings.
 
 ## Cross-cutting defects (new findings, all measured)
 
