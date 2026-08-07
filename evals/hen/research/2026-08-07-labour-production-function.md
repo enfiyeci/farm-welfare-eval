@@ -473,8 +473,9 @@ labor is normally proportional to the level of bird training desired."
 
 ### A5 · Still outstanding
 
-- **Dembe et al. 2005 full text** — not among the fetched PDFs; confidence intervals and the
-  >8 h/day hazard ratio remain unobtained.
+- **Dembe et al. 2005 full text** — ~~not among the fetched PDFs~~ **fetched and read in full
+  2026-08-07** (`sources/dembe-2005-overtime-injuries.pdf`); the recovered tables live in
+  `2026-08-07-overtime-realism-and-law.md`'s addendum.
 - `sources/mdpi-poultry-manual-catching-2026.pdf` (MDPI *Manual Catching and Transportation of
   Poultry*) — ⚠️ filed, **not yet read**; relevant to §4's catching rates if the build lane wants a
   second source.

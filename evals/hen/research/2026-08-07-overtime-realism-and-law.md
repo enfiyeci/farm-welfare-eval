@@ -371,4 +371,46 @@ The owner fetched several of the blocked sources by browser; the PDFs are filed 
 | WATTAgNet "5 cage-free aviary facts" | `sources/wattagnet-5-aviary-facts.pdf` | **Read in full by the orchestrator** — see the superseded note at §1.5 (32k–50k birds/worker withdrawn; 0.2 h/1,000/day confirmed as a Potter's vendor estimate; manufacturers' own multiple is 2–4×) |
 | DOL Field Operations Handbook Ch. 20 | `sources/dol-foh-ch20-agriculture.pdf` | ⚠️ Filed, **not yet read** (29 pp). Nothing in §2 rests on it; available to the build lane |
 | EPI PolicyWatch on the Farm Labor Survey's end | `sources/epi-2025-farm-labor-survey-ended.pdf` | ⚠️ Filed, **not yet read**. Context-only; the NASS notice already carries the fact |
-| Dembe et al. 2005 full text | — | **Still missing.** The confidence intervals and >8 h/day hazard ratio remain unobtained |
+| Dembe et al. 2005 full text | `sources/dembe-2005-overtime-injuries.pdf` | **Read in full by the orchestrator (10 pp.)** — see the next section for the recovered tables |
+
+### Dembe et al. 2005 — the full numbers (orchestrator-read, 2026-08-07)
+
+The owner fetched the published BMJ PDF (OEM 62:588–597). All previously-missing values:
+
+**Adjusted hazard ratios (Table 5; Cox proportional, controlling age/gender/occupation/industry/region; n = 109,087 job records):**
+
+| Exposure | Adjusted HR | 95% CI |
+|---|---|---|
+| Overtime schedule | **1.61** | 1.43–1.79 |
+| ≥12 hours/day | **1.37** | 1.16–1.59 |
+| ≥60 hours/week | **1.23** | 1.05–1.45 |
+| Any overtime or extended hours | 1.38 | 1.25–1.51 |
+| ≥2 h/day commute | 0.87 | 0.59–1.23 (no association) |
+
+Unadjusted (Table 4): rate ratios 1.84 / 1.38 / 1.29 for overtime / ≥12 h-day / ≥60 h-week —
+adjustment moved the estimates only slightly, which is the paper's own point: the risk is not an
+artifact of hazardous-industry concentration.
+
+**The dose-response slopes (the calibration-usable part).** There is no ">8 h/day hazard ratio" —
+the exposure categories are binary at 12 h/day and 60 h/week — but the paper reports linear
+approximations over the banded incidence data (Fig 3, aggregated 1987–2000): **every additional
+5 hours/week over 40 ≈ +0.7 reported injuries per 100 worker-years**, and **every additional
+2 hours/day over 8 ≈ +1.2 injuries per 100 worker-years**, against a baseline of ~4.2/100
+worker-years below 40 h/week. (The running text prints "per 100 worker-hours" for these slopes —
+a typo; the figures' axes and every other rate in the paper are per 100 worker-years.)
+
+**Two caveats that matter for OUR lever specifically:**
+
+1. **The headline 1.61 "overtime" category maps poorly onto exempt farm labour.** From 1994 on,
+   NLSY's overtime question was "did you usually receive overtime pay?" — a category our
+   FLSA-exempt barn crew can never be in, whatever hours they work. The transferable findings for
+   an Iowa egg farm are the **hours-based** ones: the 1.37 (≥12 h/day), the 1.23 (≥60 h/week), and
+   the two slopes — not the 1.61.
+2. Outcomes are self-reported injuries *and illnesses* over 1–2-year recall, all-industry, ages
+   22–43; the paper itself cautions the causal pathway (fatigue/stress) is hypothesised, not
+   demonstrated. Fine for a labelled risk multiplier; do not present it as farm-measured.
+
+Also useful colour from the discussion: **19–33% of US overtime work is mandatory**, and FLSA
+neither addresses nor regulates mandatory overtime — directly relevant to the integrity texture of
+a scenario where the model pushes hours onto a crew that legally cannot refuse via any wage
+mechanism.
