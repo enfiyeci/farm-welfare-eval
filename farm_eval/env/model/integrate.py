@@ -18,7 +18,9 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 """
 from __future__ import annotations
 
-from farm_eval.env.state import EnvState, current_disposition
+import math
+
+from farm_eval.env.state import DeathRecord, EnvState, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
@@ -26,6 +28,46 @@ from farm_eval.env.model.layers import (
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
+
+
+# Fixed cause order — baseline, heat, hpai, staffing. Load-bearing: it is the tie-break order
+# for the apportionment below, and a tie broken by dict iteration order is exactly how
+# determinism gets lost (spec §5.5.1 ¶14).
+_DEATH_CAUSES = ("baseline", "heat", "hpai", "staffing")
+
+
+def apportion_deaths(deaths: int, weights: list[float]) -> list[int]:
+    """Split the day's recorded `deaths` across cause `weights` by largest remainder.
+
+    `deaths` is ONE integer, rounded once from the sum of four fractional rates and then
+    clamped to the live flock. Re-deriving each cause as int(round(rate*birds)) would round
+    four times instead of once and would ignore the clamp, so the parts would not sum back.
+    Taking `deaths` as the whole and apportioning it makes reconciliation exact by
+    construction and inherits the clamp automatically (spec §5.5.1 ¶14).
+
+    Edges, all three specified because largest remainder is undefined at them:
+      - total weight zero  -> every part is zero; `deaths` must be zero too, else raise.
+      - negative or non-finite weight -> raise. A negative mortality coefficient is a
+        configuration error, not a case to clamp away.
+      - tied remainders -> the earlier cause in `_DEATH_CAUSES` wins.
+    """
+    for w in weights:
+        if not math.isfinite(w):
+            raise ValueError(f"death-cause weights must be finite, got {weights!r}")
+        if w < 0.0:
+            raise ValueError(f"death-cause weights must be non-negative, got {weights!r}")
+    total = math.fsum(weights)
+    if total <= 0.0:
+        if deaths != 0:
+            raise ValueError(f"{deaths} deaths recorded with zero weight total: {weights!r}")
+        return [0] * len(weights)
+    exact = [deaths * w / total for w in weights]
+    parts = [int(math.floor(x)) for x in exact]
+    shortfall = deaths - sum(parts)
+    order = sorted(range(len(weights)), key=lambda i: (-(exact[i] - parts[i]), i))
+    for i in order[:shortfall]:
+        parts[i] += 1
+    return parts
 
 
 def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
@@ -264,7 +306,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # per-flock safety rail still applies; at u=0 (default staffing) this term is 0.0
             # and `excess` is byte-identical to pre-C3.
             staffing_excess_mort = staffing_u * params.staffing_excess_mort_daily_frac
-            excess = min(day_heat_mort, params.heat_mort_daily_cap) + hw.hpai_daily_mort_frac + staffing_excess_mort
+            heat_mort_capped = min(day_heat_mort, params.heat_mort_daily_cap)
+            excess = heat_mort_capped + hw.hpai_daily_mort_frac + staffing_excess_mort
             baseline_mort = prod["baseline_daily_mortality_frac"]
             # A day cannot kill more than the live flock: heat + HPAI excess can sum past 1.0,
             # so clamp deaths to `birds` before writing the bird-loss count, the sunk-cost line,
@@ -276,6 +319,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
+
+            # --- Mortality ledger (spec §5.2.1): observation only, changes nothing above. ---
+            cause_fracs = [baseline_mort, heat_mort_capped, hw.hpai_daily_mort_frac, staffing_excess_mort]
+            parts = apportion_deaths(deaths, cause_fracs)
+            state.deaths.append(DeathRecord(
+                day=day, house_id=hid, birds_start=birds, deaths=deaths,
+                baseline=parts[0], heat=parts[1], hpai=parts[2], staffing=parts[3],
+                baseline_frac=baseline_mort, heat_frac=heat_mort_capped,
+                hpai_frac=hw.hpai_daily_mort_frac, staffing_frac=staffing_excess_mort,
+            ))
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0

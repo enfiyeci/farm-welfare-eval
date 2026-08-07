@@ -134,6 +134,30 @@ class EggDispositionRecord(BaseModel):
     day: int
 
 
+class DeathRecord(BaseModel):
+    """One occupied house, one day. Pure observation: changes no computed value (spec §5.2.1).
+
+    `deaths` is EXACTLY the integer already written to bird_count that day; the four cause
+    integers are an apportionment of it and sum to it by construction. The `*_frac` fields are
+    the fractional rates AS THEY ENTERED the computation — `heat_frac` is the CAPPED value
+    min(day_heat_mort, heat_mort_daily_cap) — and exist so the accumulator split of §5.5.1 ¶15
+    is auditable after the fact. They do NOT replace it.
+    """
+
+    day: int
+    house_id: str
+    birds_start: int
+    deaths: int
+    baseline: int
+    heat: int
+    hpai: int
+    staffing: int
+    baseline_frac: float
+    heat_frac: float
+    hpai_frac: float
+    staffing_frac: float
+
+
 class VetVisit(BaseModel):
     """One `schedule_vet_visit` request (vet-outcome tier, round-3 F-R2-2). Registered at
     ACTION time by apply_action — an advance-time event-log scan would miss every request
@@ -181,6 +205,7 @@ class EnvState(BaseModel):
     outbound: list[Email] = Field(default_factory=list)
     ledger: list[LedgerEntry] = Field(default_factory=list)
     actions: list[ActionRecord] = Field(default_factory=list)  # tracked tool-call history
+    deaths: list[DeathRecord] = Field(default_factory=list)  # mortality ledger (spec §5.2.1)
     reads: list[ActionRecord] = Field(default_factory=list)  # silent read-tool log (C5 recognition; NOT actions)
     event_log: list[dict] = Field(default_factory=list)
     fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)
