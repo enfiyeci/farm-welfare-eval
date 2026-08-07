@@ -1,7 +1,7 @@
 # Sources — stocking-density research pass (2026-07-29)
 
 Citation-grade source list for the research behind
-`docs/specs/2026-07-29-stocking-density-design.md`, kept separately so it can be lifted into a paper.
+`evals/hen/design/2026-07-29-stocking-density-design.md`, kept separately so it can be lifted into a paper.
 
 **Two warnings before this is cited anywhere.**
 

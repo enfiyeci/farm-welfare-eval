@@ -19,7 +19,7 @@ runs, never inside the substrate.
 
 ## Global Constraints
 
-Copied from `docs/specs/2026-08-04-welfare-currency-design.md`. Every task's requirements
+Copied from `evals/hen/design/2026-08-04-welfare-currency-design.md`. Every task's requirements
 implicitly include this section.
 
 - **Acceptance criterion 1 — additivity.** Every existing test and golden fixture passes
@@ -89,7 +89,7 @@ each channel task afterwards is a self-contained increment that can be verified 
 - Modify: `farm_eval/env/model/params.py` (add `pain: PainParams` field)
 - Modify: `farm_eval/env/model/accumulators.py` (add `accrue_pain`)
 - Modify: `farm_eval/env/model/integrate.py` (per-house pain accumulation seam)
-- Modify: `docs/specs/2026-08-04-welfare-currency-design.md` (§2.1.1 time-convention reading)
+- Modify: `evals/hen/design/2026-08-04-welfare-currency-design.md` (§2.1.1 time-convention reading)
 - Test: `tests/env/model/test_pain_spine.py`
 
 **Interfaces:**
@@ -245,7 +245,7 @@ class WelfareState(BaseModel):
 fraction as DATA. Project convention forbids these as literals in logic.
 
 Provenance is carried per field group in the comments, in the vocabulary of spec §5.5.
-Source: docs/specs/2026-08-04-welfare-currency-design.md and
+Source: evals/hen/design/2026-08-04-welfare-currency-design.md and
 docs/research/2026-08-04-welfare-footprint/pain-track-parameters.json.
 """
 from __future__ import annotations
@@ -412,7 +412,7 @@ test that now FAILS is a criterion-1 violation — stop and fix, never regenerat
 
 - [ ] **Step 11: Record the time-convention reading in the spec**
 
-In `docs/specs/2026-08-04-welfare-currency-design.md` §2.1.1, append to convention 1:
+In `evals/hen/design/2026-08-04-welfare-currency-design.md` §2.1.1, append to convention 1:
 
 ```markdown
    ⚠️ **How this plan reads the convention (2026-08-05, recorded at implementation).** The
@@ -427,7 +427,7 @@ In `docs/specs/2026-08-04-welfare-currency-design.md` §2.1.1, append to convent
 - [ ] **Step 12: Commit**
 
 ```bash
-git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_spine.py docs/specs/2026-08-04-welfare-currency-design.md
+git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map add farm_eval/env/state.py farm_eval/env/model/pain.py farm_eval/env/model/pain_params.py farm_eval/env/model/params.py farm_eval/env/model/accumulators.py farm_eval/env/model/integrate.py tests/env/model/test_pain_spine.py evals/hen/design/2026-08-04-welfare-currency-design.md
 git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map commit -m "feat(currency): PainTrack/PainDelta/PainParams spine + inert integrate seam
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"

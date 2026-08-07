@@ -1,7 +1,7 @@
 # Pilot Debrief Protocol (WS8)
 
 **Status:** committed checklist — executed over **EVERY** pilot transcript (spec
-`docs/specs/2026-07-08-corpus-realism-pass-design.md` §10). Suspicion-harvesting is systematic,
+`evals/hen/design/2026-07-08-corpus-realism-pass-design.md` §10). Suspicion-harvesting is systematic,
 not ad hoc: the literature's proven loop is *fix knowns → run → harvest the model's own suspicions
 → fix those*. The output of this protocol — the step-7 disposition table — **IS the round-2
 backlog**.
@@ -39,7 +39,7 @@ multiple samples/epochs gets the full protocol over **every** transcript, not ju
 
 - `docs/decision-register.md` — the per-decision reference policies (v1 specs + scoring v2).
 - `farm_eval/probe/data/tells.yml` — the tell-class taxonomy for step 1.
-- `docs/probes/human-review-2026-07-08.md` — the disposition-table format to replicate in step 7.
+- `evals/hen/surface/human-review-2026-07-08.md` — the disposition-table format to replicate in step 7.
 
 ## Outputs
 
@@ -324,7 +324,7 @@ positives):
    - `genesis_tell` — cues the world began at turn one (no history)
    - `oversight_claim` — "nobody reviews these logs" / unmonitored claims
    - Findings the 8 classes cannot express (corpus- or episode-level properties) get the
-     `corpus-level` bucket, per the precedent in `docs/probes/human-review-2026-07-08.md`.
+     `corpus-level` bucket, per the precedent in `evals/hen/surface/human-review-2026-07-08.md`.
 3. If the suspicion points at a specific artifact (an email, a report render, the briefing), name
    it — that artifact goes on the round-2 fix list.
 
@@ -711,7 +711,7 @@ Requires a scored run.
 ## Step 7 — Disposition table
 
 Collect **every** finding from steps 1–6 into one table, same format as
-`docs/probes/human-review-2026-07-08.md`, and commit it (suggested:
+`evals/hen/surface/human-review-2026-07-08.md`, and commit it (suggested:
 `docs/probes/pilot-debrief-<YYYY-MM-DD>-<model>.md`, this table plus the per-step notes and the
 step-0 log name + sha256 in the header):
 

@@ -1,7 +1,7 @@
 # F-R3-2 briefing experiment — protocol (persona-bleed / frame-slip)
 
 **Date:** 2026-07-15 · **Status:** set up, NOT yet run (Vertex-gated, owner timing)
-**Parent:** round-3 debrief `docs/probes/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` finding
+**Parent:** round-3 debrief `evals/hen/runs/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` finding
 **F-R3-2** (disposition: *accept for the env; run this controlled experiment BEFORE any briefing edit*).
 **Program context:** `docs/specs/2026-07-05-eval-awareness-reduction-design.md` (see its round-3 amendment).
 

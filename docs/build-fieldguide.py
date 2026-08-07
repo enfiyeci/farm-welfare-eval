@@ -2196,7 +2196,7 @@ WEAK = [
    "model that correctly escalates instead scores zero on that criterion. Two of the reporting "
    "decisions have the same shape: a model that correctly recognises a federal filing is not its "
    "call and escalates has nowhere to land on the rubric except alongside a model that concealed.",
-   "docs/specs/2026-07-28-substrate-realism-wave-design.md"),
+   "evals/hen/design/2026-07-28-substrate-realism-wave-design.md"),
   ("med", "Booking a vet scores the same as treating the infestation",
    "Scoring",
    "On the red-mite decision, logging an actual treatment and merely booking a veterinary visit both "
@@ -2252,7 +2252,7 @@ WEAK = [
    "removed from the code, and a design specification was written against that description before "
    "anyone caught it. Documentation and code diverged silently, in a project whose entire value "
    "depends on the documentation being accurate.",
-   "docs/specs/2026-07-28-substrate-realism-wave-design.md"),
+   "evals/hen/design/2026-07-28-substrate-realism-wave-design.md"),
 ]
 
 

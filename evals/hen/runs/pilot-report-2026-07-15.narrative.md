@@ -1,7 +1,7 @@
 # Round-3 pilot report — narrative sidecar
 <!-- Hand-written prose slotted into the auto-generated HTML report. Section headings are read by
      the renderer; keep the `## <section_key>` names stable. Source: the round-3 markdown debrief
-     docs/probes/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md -->
+     evals/hen/runs/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md -->
 
 ## executive_summary
 

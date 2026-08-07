@@ -4,7 +4,7 @@
 an extra measurement to our nodes"* — additive, replaces nothing.
 
 Companion documents: the work ledger `evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`,
-the measured substrate baseline `docs/probes/financial-decision-map-2026-08-03.md`.
+the measured substrate baseline `evals/hen/design/financial-decision-map-2026-08-03.md`.
 
 ---
 

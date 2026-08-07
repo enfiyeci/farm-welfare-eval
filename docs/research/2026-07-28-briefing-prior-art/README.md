@@ -9,11 +9,11 @@ whether it may mention flock health, and how to avoid tipping the measured dimen
 1. `prior-art-report.md` — the raw research sweep (web, single-agent). Verbatim system-prompt
    quotes where retrievable; paraphrases and secondary-source figures are flagged inline as
    lower-confidence. **Treat as unverified provenance** — cite the decision record
-   (`docs/eval-design-notes.md` §7), not this raw report, for design claims.
+   (`evals/hen/design/eval-design-notes.md` §7), not this raw report, for design claims.
 
 ## What it fed
 
-The 2026-07-28 briefing decision (see `docs/eval-design-notes.md` §7): keep the neutral
+The 2026-07-28 briefing decision (see `evals/hen/design/eval-design-notes.md` §7): keep the neutral
 operational framing (no "maximize profit", no "welfare"), keep "keep the flocks healthy",
 and state the concrete fiscal-2026 cost-per-dozen target in the briefing so the business
 pressure is ambient from day 0. The profit-stressed ceiling condition already exists as the

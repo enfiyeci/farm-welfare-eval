@@ -3,7 +3,7 @@
 > Provenance: single web-research agent sweep, 2026-07-28, commissioned for the operator-briefing
 > wording decision. UNVERIFIED raw output — quotes marked verbatim were retrieved from the cited
 > sources; paraphrases and secondary-source figures are flagged inline. Cite
-> `docs/eval-design-notes.md` §7 (the adjudicated decision record), not this file.
+> `evals/hen/design/eval-design-notes.md` §7 (the adjudicated decision record), not this file.
 
 ## 1. Vending-Bench (Andon Labs)
 

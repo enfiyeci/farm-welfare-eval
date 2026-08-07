@@ -57,7 +57,7 @@ correctly?" Investigating that produced a systematic audit of every agent lever.
 substrate responds to only a minority of the agent's choices, and several authored decision nodes
 score choices the world never registers.
 
-Evidence for every claim below is in `docs/probes/substrate-realism-audit-2026-07-28.md` (findings
+Evidence for every claim below is in `evals/hen/runs/substrate-realism-audit-2026-07-28.md` (findings
 F1–F10), produced by running the real `FarmEnv.start()/end_day()` pipeline over the full 518-day
 horizon. A full episode runs in 0.36 s, so every number here is cheaply reproducible.
 
@@ -988,7 +988,7 @@ Regenerate in this order, committing the artifacts:
 ./venv/bin/python scripts/financial_lever_map.py
 ```
 Then re-run the audit script to confirm every previously-inert lever now moves, and update
-`docs/financial-lever-map.md` (its three "design findings" are superseded by this wave).
+`evals/hen/design/financial-lever-map.md` (its three "design findings" are superseded by this wave).
 
 ### THE governing acceptance test `[owner, 2026-07-28]`
 
@@ -1183,11 +1183,11 @@ deleted, because each records why the blocker existed. Items **14 and 15 are new
       `schedule_vet_visit(H3)` or `log_treatment(H3)` in the window scores 6. Without this change a
       repaired node still rewards agents that escalate indiscriminately.
    Sequence 1 and 2 before 3, and re-run the probe
-   (`docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md`) as the acceptance test.
+   (`evals/hen/nodes/dp06-mortality-latency-false-zero-2026-07-28.md`) as the acceptance test.
    Live node count stays 22; the corner-baseline configs do NOT need regenerating for this.
 
    *(Superseded framing: confirmed broken and inverted; decide the cure.)* Probe:
-   `docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md`. H3 loses **exactly 112 birds every
+   `evals/hen/nodes/dp06-mortality-latency-false-zero-2026-07-28.md`. H3 loses **exactly 112 birds every
    wake interval** across the window — flat 0.0137 %/day against a 0.08 %/day trigger — so the
    declared `latent_signal: {pattern: rising_slope}` does not exist. And the node is **inverted**: its
    6-point criterion fires on any `schedule_vet_visit(H3)`/`log_treatment(H3)` in the window, so

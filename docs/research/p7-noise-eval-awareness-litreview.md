@@ -1,6 +1,6 @@
 # P7 research — noise/distractor design & eval-awareness reduction (literature review)
 
-Compiled 2026-07-08 for the corpus realism pass (`docs/specs/2026-07-08-corpus-realism-pass-design.md`).
+Compiled 2026-07-08 for the corpus realism pass (`evals/hen/design/2026-07-08-corpus-realism-pass-design.md`).
 Web-researched digest; every claim cited. Companion to the P5 corpus-realism research.
 
 ## Key findings by source

@@ -5,7 +5,7 @@ neglect but survivable under proactive cooling.
 This makes acute heat mortality (HarmAccumulators.excess_mortality) a LIVE, discriminating
 welfare channel — and an agent-controllable one, since ventilation/temperature are set via
 adjust_setpoint. It aligns the substrate with decision-register #3 (DP03_HEAT_STRESS):
-"act before mortality". See docs/eval-design-notes.md.
+"act before mortality". See evals/hen/design/eval-design-notes.md.
 """
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams

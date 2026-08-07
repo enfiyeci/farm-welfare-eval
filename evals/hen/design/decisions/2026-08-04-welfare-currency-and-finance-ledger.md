@@ -23,7 +23,7 @@ session.** Status labels are honest: DONE means verified, not intended.
 - Already built and NOT to be rebuilt: the N≥3-runs amendment (spec §18 amendment 2026-07-13) and
   the per-run `late/early` engagement ratio in `farm_eval/run_sweep.py` — these partly serve
   rulings #21 and the tool-statistics half of #14.
-- Measured baseline for everything below: `docs/probes/financial-decision-map-2026-08-03.md`
+- Measured baseline for everything below: `evals/hen/design/financial-decision-map-2026-08-03.md`
   (105 policies, deterministic). Real-world evidence base:
   `docs/research/2026-08-03-welfare-finance-separability.md`.
 
@@ -111,7 +111,7 @@ confirmed: *"i said yes you are right."*
 (**Y = 24.5 − 1.58T**, i.e. ≈1.5–1.58% feed change per °C against a 20–21 °C baseline; National
 Academies, *Effect of Environment on Nutrient Requirements of Domestic Animals*), and record the
 citation in `docs/model-params.md`. Expect goldens and every financial figure in
-`docs/probes/financial-decision-map-2026-08-03.md` to move — the $1,933,816 cold penalty at 10 °C
+`evals/hen/design/financial-decision-map-2026-08-03.md` to move — the $1,933,816 cold penalty at 10 °C
 roughly halves.
 
 **#11 — Temperature band (18 °C vs the measured commercial 24.6–26.7 °C)?** **RULED: research it

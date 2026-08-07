@@ -1,7 +1,7 @@
 # Round-3 content pass — design (F-R2-2, F-R2-3, F-R2-10 + audit-as-process)
 
 **Date:** 2026-07-14 · **Branch:** `fix/pilot-round2-harness` (or a child) · **Status:** owner-approved design
-**Inputs:** round-2 debrief `docs/probes/pilot-debrief-2026-07-14-gemini-3.1-pro-round2.md` (findings
+**Inputs:** round-2 debrief `evals/hen/runs/pilot-debrief-2026-07-14-gemini-3.1-pro-round2.md` (findings
 F-R2-2/3/10, step-1a narrative), owner rulings 2026-07-14.
 
 ## Goal

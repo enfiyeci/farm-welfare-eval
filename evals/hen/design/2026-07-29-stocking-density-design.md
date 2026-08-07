@@ -5,7 +5,7 @@
 
 ## Why
 
-Four findings from `docs/probes/node-layer-audit-2026-07-29.md` converge on stocking density:
+Four findings from `evals/hen/nodes/node-layer-audit-2026-07-29.md` converge on stocking density:
 
 - **N20:** `stocking_density` is a per-house constant that nothing writes. It is unchanged at day 518
   after 148,264 deaths (~25 % of the complex). Real density falls as birds die; here it cannot.

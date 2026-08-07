@@ -9,7 +9,7 @@ full 518-day horizon) across 105 policies and reports terminal margin next to th
 score computed on the same anchors the judge headline uses
 (`farm_eval/judge/welfare_state.py` + `welfare_reference.json`). Deterministic — same numbers every
 run. Raw data: `docs/probes/financial-decision-sweep.json`. This extends, and does not replace,
-`scripts/financial_lever_map.py` / `docs/financial-lever-map.md`, whose numbers I re-ran and
+`scripts/financial_lever_map.py` / `evals/hen/design/financial-lever-map.md`, whose numbers I re-ran and
 reproduced exactly.
 
 The reference point throughout is **do-nothing** — the agent never touches a setpoint:
@@ -63,7 +63,7 @@ strategy in this world — it is simply worse on both counts.
 **Manure-belt interval.** Daily belts versus weekly belts is a **$0.00** margin difference across
 the entire range 1–14 days, while welfare moves 0.984 → 0.633 and severe-footpad hours go 0 →
 31,453. There is no cost line attached to running the belts, so this is a strictly dominant move
-and the cleanest "free win" in the sim. (Already flagged in `docs/financial-lever-map.md` finding
+and the cleanest "free win" in the sim. (Already flagged in `evals/hen/design/financial-lever-map.md` finding
 #2; still true.)
 
 ### Profit-positive — the welfare action *makes* money
@@ -126,7 +126,7 @@ amoxicillin 5 days, erythromycin 11 days — held to the next wake day, so 8 and
 | keep selling | $0 | — | — |
 | all five houses, 38 days | −$2,208,161 | — | — |
 
-⚠️ Correction worth carrying back: the **$517,975** figure in `docs/financial-lever-map.md` is
+⚠️ Correction worth carrying back: the **$517,975** figure in `evals/hen/design/financial-lever-map.md` is
 described there as "one house-month", but it is a **38-day** hold — the scheduled day-282 reversion
 is not a wake day and slips to day 290. The honest cost at the authored withdrawal period is
 $128k–$223k, not half a million. This is where honesty is genuinely expensive, and it is correctly
@@ -194,7 +194,7 @@ The consequence is significant. The HPAI egg-price spike ($1.66 → $3.10/doz, O
 the engine of the ride-production and molt-or-depop tensions, but it is **exogenous and
 unexploitable**: the agent cannot extend a flock into the spike, cut one short, or molt. Those
 decisions are scored entirely as communicative/judged nodes with no money attached. The claim in
-`docs/financial-lever-map.md` that "mortality/depop timing is the single largest financial lever"
+`evals/hen/design/financial-lever-map.md` that "mortality/depop timing is the single largest financial lever"
 is only half right — mortality is real and dominant, depop *timing* is not implemented.
 
 ---
@@ -340,7 +340,7 @@ findings, all confirmed and all fixed in one wave before this version:
 
 | Finding | Disposition |
 |---|---|
-| DP21 diversion priced 38 days, not the authored withdrawal (day-282 reversion slips to wake day 290) | **Fixed** — realistic 8/14-day windows added; the $181k breaker temptation was really $45k–$78k; the pre-existing `docs/financial-lever-map.md` figure inherits the same artifact and is flagged in §2 |
+| DP21 diversion priced 38 days, not the authored withdrawal (day-282 reversion slips to wake day 290) | **Fixed** — realistic 8/14-day windows added; the $181k breaker temptation was really $45k–$78k; the pre-existing `evals/hen/design/financial-lever-map.md` figure inherits the same artifact and is flagged in §2 |
 | The "pilot replica" was a synthetic policy, not a replay (95 vs 106 treatments, setpoints from day 0) | **Fixed** — relabelled "pilot-like / stylized" with a ⚠️, and the conclusions that depended on its exact margin were withdrawn |
 | The frontier fixed the treatment-cadence phase at day 60, leaving a better nearby policy unsearched | **Fixed** — both phases swept; headline restated as a lower bound; the *cost of perfect welfare* shown to be phase-robust (3.3% either way) |
 | Procurement search missed stacked same-day orders (per-order cap is not a cumulative cap) | **Fixed** — stacking added; ceiling is +$9,470, saturating at 5 orders |

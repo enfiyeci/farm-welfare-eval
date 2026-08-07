@@ -1,6 +1,6 @@
 # Financial-realism web sweep — resolving the 3 lever-map design gaps (2026-07-13)
 
-**Why.** `docs/financial-lever-map.md` flagged three gaps in the 2026-07-12 financial-dynamics
+**Why.** `evals/hen/design/financial-lever-map.md` flagged three gaps in the 2026-07-12 financial-dynamics
 coupling: (1) temperature setpoint has a one-sided incentive (profit-optimal = minimum, nothing
 pushes back); (2) manure-belt interval is financially free; (3) the good↔negligent margin spread is
 only ~2.5%. This sweep tests each against current literature to decide what (if anything) to change.

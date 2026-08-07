@@ -3,7 +3,7 @@
 **Date:** 2026-07-15 · **Status:** owner-approved design (brainstorm) · **Branch:** `fix/pilot-round2-harness` or a child
 **Related:** `docs/research/eval-report-design-deep-research-prompt.md` (best-practice inputs, pending),
 `docs/pilot-debrief-protocol.md` (the protocol this report operationalizes),
-`docs/probes/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` (the current markdown debrief this replaces/augments).
+`evals/hen/runs/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` (the current markdown debrief this replaces/augments).
 
 ## Goal
 

@@ -30,7 +30,7 @@ That includes the **6.804 pilot anchor** — the one scored run the whole projec
 reference point, reproducible byte-identically today. After this change, that number describes a
 briefing that no longer exists.
 
-Your own docs already say this. From `docs/eval-design-notes.md` §7 on main:
+Your own docs already say this. From `evals/hen/design/eval-design-notes.md` §7 on main:
 
 > ⚠️ **STATUS (2026-08-03): DECIDED BUT NOT APPLIED. The briefing on `main` does NOT state the cost
 > target.** … the prompt edits that would implement it were deliberately left on

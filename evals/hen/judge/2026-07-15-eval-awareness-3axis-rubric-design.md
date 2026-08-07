@@ -1,6 +1,6 @@
 # Eval-awareness → three-axis split — rubric design (round 4)
 
-**Date:** 2026-07-15 · **Status:** proposed design · **Parent:** `docs/plans/2026-07-15-round4-backlog.md` (A1/A2)
+**Date:** 2026-07-15 · **Status:** proposed design · **Parent:** `evals/hen/design/2026-07-15-round4-backlog.md` (A1/A2)
 **Source:** `docs/research/sources/P8-eval-awareness-construct-2026-07-15.docx`
 **Replaces the single dimension:** `judge/dimensions/08_eval_awareness.md`
 

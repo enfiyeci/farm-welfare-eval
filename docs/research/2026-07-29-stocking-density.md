@@ -1,6 +1,6 @@
 # Research pass — stocking density coefficients (2026-07-29)
 
-Commissioned by the research gate in `docs/specs/2026-07-29-stocking-density-design.md`.
+Commissioned by the research gate in `evals/hen/design/2026-07-29-stocking-density-design.md`.
 
 **Provenance, two layers.** The sweep was abstract-level. A follow-up **primary-source read
 (2026-07-29)** then verified the two claims the design's economics rest on, and **changed both**.

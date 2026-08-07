@@ -3,7 +3,7 @@
 > **Provenance note (added 2026-08-03 on salvage). This worksheet is COMPLETE — it is a record,
 > not work in progress.** It lived only on `docs/farm-eval-v2-design`, now deleted and preserved
 > as tag `archive/farm-eval-v2-design`. Salvaged because
-> `docs/plans/2026-07-01-phase-c6-env-levers.md` cites it by name.
+> `evals/hen/archive/plans/2026-07-01-phase-c6-env-levers.md` cites it by name.
 >
 > **The authored rubric is no longer here.** The source of truth the scorer loads is
 > `farm_eval/judge/dimensions/*.md` (11 dimensions), with `docs/welfare-decisions.html` as the

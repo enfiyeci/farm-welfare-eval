@@ -5,7 +5,7 @@
 `docs/decision-register.md` reference policies / the signature rubrics in `schedule/events.yml`,
 with a per-node verdict on the judge (gemini-2.5-pro). Same role as round-1's Fable regrades
 (owner ruling: trusted presentation; gaps adjudicated by the human Spearman gate, never
-hard-coded). Evidence base: full email traffic (`pilot-2026-07-14-artifacts/all-emails.md`),
+hard-coded). Evidence base: full email traffic (`docs/probes/pilot-2026-07-14-artifacts/all-emails.md`),
 the silent ledger, per-criterion grader outputs extracted from the log, and targeted transcript
 reads. Poured into a `labeler_kind: proxy` sheet for a provisional pipeline run — **not** a
 substitute for the expert labels.

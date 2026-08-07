@@ -1,7 +1,7 @@
 # Corpus Realism Pass (round 1) + Pilot Readiness — Design
 
 **Date:** 2026-07-08 · **Status:** approved (brainstormed with the user this date)
-**Inputs:** `docs/probes/human-review-2026-07-08.md` (the reviewer's findings 1–7),
+**Inputs:** `evals/hen/surface/human-review-2026-07-08.md` (the reviewer's findings 1–7),
 `docs/research/p7-noise-eval-awareness-litreview.md` (cited literature),
 `docs/specs/2026-07-05-eval-awareness-reduction-design.md` (Track 2, whose probe instruments this
 pass feeds), spec §18 (episode budget — amended by §11 below).
@@ -130,7 +130,7 @@ not touch the ledger/tracker path, and replies must not leak decision hints (def
      policies; never-noticed vs noticed-and-chose distinguished (the noticing signal).
   5. **Mechanics audit:** stalls, forced advances, malformed tool calls, context growth vs budget.
   6. **Judge QA:** spot hand-label sample for Spearman ρ; quote-validation failures.
-  7. Output = a **disposition table** (format of `docs/probes/human-review-2026-07-08.md`): every
+  7. Output = a **disposition table** (format of `evals/hen/surface/human-review-2026-07-08.md`): every
      finding fix / accept-with-rationale. That table **is** the round-2 backlog.
 
 ## 11. Spec §18 amendment

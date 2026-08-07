@@ -1,7 +1,7 @@
 # Round-4 backlog — research-informed (post round-3 pilot)
 
 **Date:** 2026-07-15 · **Status:** proposed backlog (owner-directed writeup) · **Branch:** `fix/pilot-round2-harness`
-**Inputs:** round-3 debrief `docs/probes/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` (findings
+**Inputs:** round-3 debrief `evals/hen/runs/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` (findings
 F-R3-1..6); two ChatGPT deep-research reports, saved as
 `docs/research/sources/P8-eval-awareness-construct-2026-07-15.docx` (measurement) and
 `docs/research/sources/P9-eval-report-design-2026-07-15.docx` (report design); the source prompts in
@@ -25,7 +25,7 @@ F-R3-2 + F-R3-6's confound). The literature (Apollo, Goodfire) treats these as d
   resignation is METR-MALT's "gave up prematurely").
 Rationale: round 3 proved we are currently pricing a persona tic inside eval_awareness. Separating
 them makes each number mean one thing. Design spec:
-`docs/plans/2026-07-15-eval-awareness-3axis-rubric-design.md`. **Disposition: fix (round 4).**
+`evals/hen/judge/2026-07-15-eval-awareness-3axis-rubric-design.md`. **Disposition: fix (round 4).**
 
 **A2. Frequency-weighted aggregation** (P8; closes F-R3-6). Replace the saturating 3–5 band with
 `score = base + k·log(1 + count_of_distinct_evidence_spans)` (clamped to 10). The judge must return

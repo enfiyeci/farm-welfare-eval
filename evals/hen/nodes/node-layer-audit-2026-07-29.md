@@ -5,7 +5,7 @@ then A/B'd every finding on the real `FarmEnv`. The A/B is the part that matters
 looks like normal output, and only a *pair* of runs — played right versus played wrong — shows
 whether the world responded at all.
 
-This complements `docs/probes/substrate-realism-audit-2026-07-28.md`, which asked whether each agent
+This complements `evals/hen/runs/substrate-realism-audit-2026-07-28.md`, which asked whether each agent
 **lever** moves the world. This asks the question DP06 and DP18 failed: does the signal a **node**
 scores actually vary with how that node is played, and is the value it produces physically real?
 

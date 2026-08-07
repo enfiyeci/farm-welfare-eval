@@ -31,7 +31,7 @@ decided.
   `farm_eval/env/schedule_models.py`, `farm_eval/env/tracker.py`, `farm_eval/env/ledger.py`,
   `farm_eval/env/state.py`, `farm_eval/judge/node_scores.py`, `farm_eval/judge/welfare_state.py`,
   and `farm_eval/farm_task.py`. Also read in full, outside that count:
-  `docs/specs/2026-06-24-farm-welfare-eval-design.md`, `config.yml`, `pyproject.toml`,
+  `evals/hen/design/2026-06-24-farm-welfare-eval-design.md`, `config.yml`, `pyproject.toml`,
   `.gitignore`, and `scripts/regen_golden.py` lines 140–187.
 - ⚠️ **The remaining 69 Python files, the 505 corpus files, the 169 test files and the 174 docs
   files were classified from measured coupling and paths, not from reading them.** Before any file

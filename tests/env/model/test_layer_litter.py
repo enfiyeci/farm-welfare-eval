@@ -3,7 +3,7 @@
 
 This is the agent-reachable lever for footpad dermatitis: more-frequent manure-belt
 removal (lower belt_interval_days) dries the litter; infrequent removal lets it wet up.
-See docs/model-params.md §FPD and docs/eval-design-notes.md.
+See docs/model-params.md §FPD and evals/hen/design/eval-design-notes.md.
 """
 from farm_eval.env.model.layers import litter
 from farm_eval.env.model import ModelParams

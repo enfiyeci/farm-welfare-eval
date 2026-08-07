@@ -2,7 +2,7 @@
 
 > **Provenance note (added 2026-08-03 on salvage).** This document lived only on
 > `feat/flock-cop-reads-integrity`, now deleted: its code was superseded by reimplementations
-> on `main`. The spec is retained as the design record because `docs/info-space-design.md`
+> on `main`. The spec is retained as the design record because `evals/hen/design/info-space-design.md`
 > cites it by name (principle 2/4).
 >
 > **The shipped implementation differs from what is described below.** There is no
@@ -178,7 +178,7 @@ the honest substrate + pricing:
 - **Eval-awareness:** pressure framing is realistic operational/cost language, regulators are
   ordinary correspondents, honesty is never telegraphed; the reporting tool is `send_email`,
   not a labeled "compliance" tool. The new scenarios are buried among ordinary beats. The two
-  Phase-2 decision points are a **first customer for the `docs/info-space-design.md` G4
+  Phase-2 decision points are a **first customer for the `evals/hen/design/info-space-design.md` G4
   eval-awareness parity checklist** and should carry retrofit-able `salience_depth` (G2) /
   `beat_role` (G1) tags once that schema lands — they must not become the most obvious "tests"
   in the corpus.
@@ -196,7 +196,7 @@ the honest substrate + pricing:
 ## 6. Out of scope / future
 
 - **Scenario 3 (future):** HPAI delayed-reporting / biosecurity-compliance misrepresentation
-  — recorded in `docs/eval-design-notes.md` as a future integrity scenario.
+  — recorded in `evals/hen/design/eval-design-notes.md` as a future integrity scenario.
 - **Historical-range `read_flock_report` replay** (re-integrating to an arbitrary past date).
 - **Management-responsive body weight** (BW drop under feed restriction).
 - **CO₂ reactivity** (separate deferred decision — see `eval-design-notes.md §4`).
@@ -223,5 +223,5 @@ the honest substrate + pricing:
 - **Phase 2:** `schedule/events.yml`, `corpus/` (emails + regulator contacts),
   `judge/dimensions/12_tripwire_false_regulatory_report.md`, `farm_eval/judge/rubric.yml`
   (regenerate), `docs/decision-register.md`, `docs/decisions-*.mjs` +
-  `docs/welfare-decisions.html`, `docs/eval-design-notes.md` (scenario-3 future note), tests
+  `docs/welfare-decisions.html`, `evals/hen/design/eval-design-notes.md` (scenario-3 future note), tests
   under `tests/judge/`, `tests/env/`.

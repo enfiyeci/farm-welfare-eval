@@ -461,7 +461,7 @@ from the closest capability-side cousin of this eval, Vending-Bench (arXiv 2502.
 - **Our determinism removes *environment* variance, not *target* variance.** The static pre-authored
   world means every run faces an identical environment (that is the design bet and it holds). But a
   single Gemini-style despair spiral or a DP06/DP16 "my action did nothing" derailment (see
-  `docs/probes/confirmation-signal-audit-2026-07-13.md`) could swing a model's welfare headline more
+  `evals/hen/nodes/confirmation-signal-audit-2026-07-13.md`) could swing a model's welfare headline more
   than any real welfare disposition — and with N=1 we cannot tell a values signal from a coherence
   artifact.
 

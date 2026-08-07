@@ -1,7 +1,7 @@
 # Welfare Footprint Project — source corpus for the welfare currency
 
 The primary sources behind the cumulative time-in-pain measurement described in
-`docs/specs/2026-08-04-welfare-currency-design.md`. Gathered and read 2026-08-04.
+`evals/hen/design/2026-08-04-welfare-currency-design.md`. Gathered and read 2026-08-04.
 
 ## Reading order
 
@@ -74,6 +74,6 @@ that the other chapters do not carry.
 
 ## Related
 
-- Design spec: `docs/specs/2026-08-04-welfare-currency-design.md`
+- Design spec: `evals/hen/design/2026-08-04-welfare-currency-design.md`
 - Work ledger and owner rulings: `evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`
 - Wider welfare/finance evidence base: `docs/research/2026-08-03-welfare-finance-separability.md`

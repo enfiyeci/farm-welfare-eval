@@ -32,7 +32,7 @@ legible* to an agent through the tools, and whether profit-max and welfare-max g
 reference-policy seam; prepend the behavioral instruction to the operator briefing per corner; run
 the SAME locked env; record margin + Layer-1 welfare-state + the judge headline for each. Plot the
 four corners against `financial_reference.json`'s ceiling/floors and `welfare_reference.json`'s
-good/negligent. The deterministic reference and the lever map (`docs/financial-lever-map.md`) are
+good/negligent. The deterministic reference and the lever map (`evals/hen/design/financial-lever-map.md`) are
 the programmatic half and are done.
 
 **Status (owner, 2026-07-13): pulled forward — run AFTER the round-2 re-pilot debrief is clean**

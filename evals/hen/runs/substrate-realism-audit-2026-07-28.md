@@ -1,6 +1,6 @@
 # Substrate realism audit — which agent levers actually move the world (2026-07-28)
 
-**Companion to** `docs/specs/2026-07-28-substrate-realism-wave-design.md` (findings F1–F10 are cited
+**Companion to** `evals/hen/design/2026-07-28-substrate-realism-wave-design.md` (findings F1–F10 are cited
 there by number). Prompted by the owner asking what is stopping a production run and whether costs
 like ventilation are reflected realistically.
 
@@ -203,6 +203,6 @@ Note `end_day()` advances to the next WAKE day, not the next calendar day (70 wa
 farm_eval/env/model/{economics,integrate,params}.py, layers/keel.py,
 scripts/regen_golden.py, tests/env/model/{test_economics_cost,test_economics_params,test_layer_keel}.py,
 tests/env/test_egg_disposition.py, docs/{model-params,cleanup-backlog}.md,
-docs/plans/2026-06-26-model-calibration.md.
+evals/hen/archive/plans/2026-06-26-model-calibration.md.
 `generate_cop_report` (episode.py:755-800) calls `cost_step` directly, so new cost terms surface to
 the agent through `energy_cents_doz` automatically — that is the discoverability seam.

@@ -25,7 +25,7 @@ Degenerate-channel guard (negligent == good):
     STATE_SEED HPAI onset kills birds regardless of management, an equal component of the
     good/negligent anchors that cancels in the (negligent - actual)/(negligent - good)
     anchoring, leaving management-driven mortality (heat + staffing shortfall) as the live
-    signal.  See docs/eval-design-notes.md.)
+    signal.  See evals/hen/design/eval-design-notes.md.)
 
     For a degenerate channel the agent cannot worsen below the reference floor, so
     it receives full credit (subscore = 1.0) unconditionally.  Such channels neither

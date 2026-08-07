@@ -1,9 +1,9 @@
 # Substrate realism research (2026-07-28)
 
-Research supporting `docs/specs/2026-07-28-substrate-realism-wave-design.md`. Three independent
+Research supporting `evals/hen/design/2026-07-28-substrate-realism-wave-design.md`. Three independent
 passes, run to answer the owner's question of whether the sim's costs and welfare couplings reflect
 reality. The empirical companion — what the sim actually does today — is
-`docs/probes/substrate-realism-audit-2026-07-28.md`.
+`evals/hen/runs/substrate-realism-audit-2026-07-28.md`.
 
 ## Reading order
 
