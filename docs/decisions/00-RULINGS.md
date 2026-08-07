@@ -77,6 +77,46 @@ the owner confirming: keep litter drying (as the mixing-fan airflow lever), or s
 access hours (recommended by the research). Either way the ammonia effect goes through TAN and the
 belt→ammonia route uses the sourced +0.763%/h.
 
+### 🔴 UPDATE 2026-08-06 21:56 PT — the two missing research passes landed, and they WEAKEN the recommended lever
+
+The pass that died on the API session limit was re-run after the reset. Both halves are in
+`docs/research/2026-08-06-litter-lever-and-ammonia/`
+([dose-response](../research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
+[welfare cost](../research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
+They were commissioned precisely because they "decide whether the lever is honest rather than merely
+convenient." **The answer is: not yet honest, in two independent ways.**
+
+1. **The welfare cost is close to zero at the realistic dose.** A delayed morning release takes away
+   the hours hens value *least* — dust bathing and wing flapping are at their daily **minimum** right
+   after lights-on and peak midday to mid-afternoon (Campbell 2016, two flocks; Bongiorno 2026). And
+   **Oliveira 2019 measured body-based welfare under exactly this regime and found nothing**: plumage
+   P = 0.51, keel P = 0.11, footpad P = 0.20, mortality P = 0.76, body weight P = 0.30, with the
+   authors stating no effect on welfare status. A restriction that buys −22% ammonia and 11 fewer
+   floor eggs per hen for no measured welfare cost is **a lever a welfare-literate model should
+   simply pull** — which makes it a bad decision node, not a good one.
+   There IS a real behavioural rebound (persisting 12 weeks after the treatment ended), so something
+   accumulates — but nothing routes it into a clinical outcome, and **wiring it into the existing
+   feather-condition layer would be an extrapolation far outside the measured dose range** (every
+   quantified litter→feather-pecking result is litter-versus-NONE, and the one study that tested
+   plumage under part-time access found P = 0.51).
+2. **The dose-response is an authored straight line over one confounded pair.** No study anywhere
+   measures litter moisture at three or more access levels. Oliveira's own effect **vanished by the
+   end of the trial** (P = 0.57), the treatments differed by three extra weeks of confinement at the
+   peak-deposition age, and the moisture gap is mediated by accumulated **bed depth and caking**, not
+   by hours. A third house at 8.75 h sits off the line entirely. The supported relationship is one
+   stage upstream — **hours → floor-manure share** — and it is convex toward the morning (~1.7×).
+
+**Three ways to make the node honest, from the research (any owner ruling should pick among these):**
+score **timing, not hours** (closing 06:00–11:00 is cheap; closing 12:00–17:00 hits the measured
+peak); use the **UEP bright line** as the tripwire; and route the welfare cost through **litter
+depth** — restriction thins the bed (1.64 vs 3.77 cm) against RSPCA's ≥5 cm, which is sourced,
+mechanistic, and lands in machinery the model already has.
+
+⚠️ **A conflict the two passes created and neither can settle:** the 2024 UEP edition (partial pass)
+deletes the morning-restriction carve-out and imposes a 30-day budget with records; the 2017 edition
+(welfare pass) quotes the carve-out as live. **Neither document was read in full.** This decides
+whether the normal case trips the tripwire. Resolve at source first.
+
 ### Discoverability — measured in-repo 2026-08-06, and it is currently half-closed
 
 For the lever to be scoreable the model has to be able to see both sides of it. Today:
@@ -109,9 +149,36 @@ The verification pass (`docs/research/2026-08-06-litter-lever-and-ammonia/ammoni
 including a config table. So the direction of the correction is solid. But it found two things that
 move the *number*:
 
-1. **6.7 ppm is a blended mean, not bird-level.** It is the average of two exhaust points and one
-   bird-level point; **the bird-level mean alone is 6.0 ppm** (~10% lower). If `nh3_ppm` in the model
-   means what a hen breathes, the anchor is 6.0, not 6.7. **Owner decision needed.**
+1. **~~The anchor should be bird-level 6.0.~~ RESOLVED 2026-08-06: the anchor is 6.7. My earlier
+   recommendation of 6.0 was WRONG and is withdrawn.**
+
+   I argued for 6.0 from our own code's threshold semantics. The owner rejected that reasoning as
+   circular — we wrote both the threshold and the variable — and was right to. Commissioned research
+   (`docs/research/2026-08-06-litter-lever-and-ammonia/ammonia-model-semantics.md`) then reversed the
+   conclusion on the evidence:
+
+   - **6.0 is not "the bird-level value" — it is the value at the best-ventilated point in the
+     house.** Zhao attributes the gradient to non-uniform ventilation and says the mid-house probe
+     "received fresher air." Hens also occupy the low-ventilation end zones reading **7.8 ppm**. So
+     6.0 systematically *understates* flock-average exposure — the wrong direction of error for a
+     welfare eval.
+   - **A single-compartment mass balance is structurally a statement about the air leaving the
+     house**, so its scalar is closer in kind to an exhaust-weighted value than to one interior probe.
+   - **Our two anchors are the same measurement.** The 6.7 mean and the "12 winter days > 25 ppm"
+     count are both computed on the 3-location mean series; re-basing one to 6.0 while keeping the
+     other would silently mix two spatial definitions.
+   - **No usable correction factor exists.** The bird-level-to-house-mean ratio is 0.89 against a
+     within-house CV of 16% ± 10 — the scatter is as large as the offset.
+
+   **Ruled: calibrate to 6.7**, and document that `ammonia_ppm` is the *house-representative
+   spatial-mean* concentration (the quantity CSES reports and the quantity UEP's threshold has
+   historically been judged against), noting bird-level ≈ 0.89× and end-wall exhaust ≈ 1.15× as a
+   stated limitation. One scalar genuinely cannot serve both the hen and worker thresholds; say so in
+   the docs rather than faking precision in the coefficient.
+
+   ⚠️ **One unresolved fact:** the sampling *height* of the CSES "Hen" probe appears only in Figure 1,
+   a raster image the agent could not read. It is item 1 on the owner fetch list and is the single
+   fact that could still sharpen this.
 2. **2.169 silently assumes a ~67-day litter-age operating point.** It can't be reproduced by simple
    scaling (that gives ~2.62); it only works if a ~1.33 ppm litter term is held fixed. A reasonable
    construction, but it must be written next to the constant, not left implicit.
@@ -347,6 +414,108 @@ is clear:
 **This is folded into the folder-restructuring step (below), because trimming CLAUDE.md and choosing
 where the status doc lives IS part of making the repo layout clean.** Not independently re-verified
 at source; the two load-bearing claims came from official Anthropic docs read verbatim.
+
+---
+
+## 13 · The folder restructure — two of three settled (2026-08-06 evening)
+
+Step 1 of the programme below needs three decisions. Two are now ruled.
+
+### 13a · Eval folder names → **`evals/hen/` and `evals/dairy/`** (owner, ruled)
+
+Name the folder for the **species, not the framing**. "PLF" (precision livestock farming) is what the
+dairy eval is about in *this* iteration; if a later iteration drops that framing the folder name
+becomes a lie, whereas the species never changes. Same reasoning that makes `hen` right rather than
+`cage-free-layer-v2`. **Hyphens, not underscores** — these are directories, not Python packages.
+
+This **supersedes** the three variants in circulation: `evals/plf-dairy/` and `evals/dairy/` (the two
+R1 dairy subagents disagreed) and `evals/plf_dairy/` (written into
+`docs/design/2026-08-03-plf-framing-decisions.md`). That design doc's naming line is now history.
+
+### 13b · Cross-eval evidence → **`docs/` is the shared slot** (owner delegated the call, 2026-08-06)
+
+The owner asked for the most practical and efficient answer rather than picking from the three
+options. Ruled: **`docs/` becomes exactly the cross-eval slot.** One rule, statable in a sentence:
+
+> **If a document belongs to one eval it lives under `evals/<eval>/`. Everything else stays in `docs/`.**
+
+Why this over a new `engine/` or `shared/` directory:
+
+- **It costs nothing and risks nothing.** The four genuine orphans (`2026-08-03-citation-integrity-audit.md`,
+  `2026-07-12-web-sweep-eval-awareness-judge.md`, `2026-07-28-briefing-prior-art/`,
+  `2026-08-03-welfare-finance-separability.md` §§4–5) **do not move at all** — zero link rewrites. That
+  matters: R5 counted 28 internal relative links inside `docs/decisions/` that survive only if the
+  folder moves as one piece, and every rewrite is a chance to break a pointer.
+- **`engine/` would repeat a defect the audit named.** Audit finding 6 is that a top-level `judge/`
+  "looks like a Python package but is a data directory." `engine/` holding prose recreates exactly
+  that under a new name. Deliberately reproducing a flagged defect is hard to defend, and only four
+  to eight files justify a new top-level directory today.
+- **`shared/` is the vaguest available label** — everything is arguably shared — so it becomes the
+  drawer for anything whose home is unclear, attracting precisely the material that most needs a real
+  decision. A worse failure mode than `docs/`, which at least carries a positive meaning.
+- **It is scheme-independent.** Under the lifecycle scheme it is the automatic answer; under a species
+  scheme it is the cheapest one. So it can be ruled before 13c without constraining it.
+
+**Two rules travel with it, and they are part of the ruling:**
+
+1. **Mixed files live where their majority is, and the minority gets a pointer line — never a copy,
+   never a split.** This covers `v2-future-tech/` and `plf-foresight/` (dairy-dominant with hen rows),
+   `judge-validation.md` and `pilot-debrief-protocol.md` (cross-eval method with hen anchors), and the
+   design spec (~55% engine). R1 flags one file that must **never** be split at all —
+   `heat-balance-and-belt-energy.md`, which carries its own ⛔ erratum.
+2. **`2026-08-03-aquatic-farm-reading-list.md` gets a human editing pass, not find-and-replace.** It
+   names `docs/world-bible.md`, `docs/model-params.md` and `docs/decision-register.md` — the **live
+   hen files** — as its own destinations. A path rewriter would silently cement salmon guidance onto
+   hen documents. R1 calls this "the sharpest hazard, and it is semantic not mechanical."
+
+**Required in the same commit as any move:** write the rule into `docs/README.md`, and fix
+**`docs/LANES.md:83`**, which today gives the hen staffing lane write-ownership of `docs/design/**`.
+Without that edit the next staffing session re-contaminates the shared slot — R5 Finding 2 shows this
+is *scheduled*, not merely possible.
+
+### 13c · Which scheme → **plan-first, then rule** (owner, 2026-08-06 late evening)
+
+**Ruled procedurally, not yet finally.** The owner chose *"Hold — refine first"*: write the full move
+plan — per-file destination table compiled from the six reorg catalogues, batch order, verification
+gates — as a reviewable document, and rule on it **as a whole** before any `git mv` runs.
+
+**The working scheme the plan is drafted against: species folders for documentation, lifecycle inside
+each, save protocol on top.** The owner's decisive input: *"next month will include a wide variety of
+animals dairy, salmon, shrimp, the general animal mortality comparison tests."* Four species plus a
+cross-species test programme makes "which eval is this for?" the first question about nearly every
+new document — the axis you write into weekly should be structural. Concretely:
+
+- `evals/hen/`, `evals/dairy/`, `evals/salmon/`, `evals/shrimp/` — **documentation only** in this
+  pass, with a lifecycle `archive/` inside each.
+- Cross-species material (the mortality comparison tests, judge methodology, the citation audit)
+  stays in `docs/` per ruling 13b, which was chosen to be scheme-independent.
+- **Code and code-coupled content do not move**: `farm_eval/`, `corpus/`, `schedule/`,
+  `judge/dimensions/`, all configs, `tests/`, `scripts/`. That is where all of the breakage risk
+  sits; that seam gets its own decision when dairy's substrate is real.
+
+**Standing owner constraint on the whole reorg:** *"lets be very attentive and precise we dont break
+anything while reorganizing."* Operationalised: pre-move baseline recorded (full suite, exit 0, 3
+standing skips, 2026-08-06 in the `fwe-main` worktree); the same suite plus the two corpus guards
+re-run after every move batch; `git mv` only; the three semantic hazards handled by hand (aquatic
+reading list human-edited, `heat-balance-and-belt-energy.md` never split, mixed files placed by
+majority with pointer lines); Codex adversarial review of the finished branch before merge.
+
+### 13d · The file-save protocol (drafted 2026-08-06, rules with the plan)
+
+Commissioned by the owner mid-session: *"we should have a protocol for how we save files from now on
+too."* Six rules, kept deliberately small; final text and home to be confirmed when the reorg plan is
+ruled:
+
+1. **Every new document gets a `YYYY-MM-DD-` prefix** unless it is a living reference document. The
+   date prefix IS the lifecycle declaration: dated means "true when written; archive when superseded."
+2. **Living reference documents are a closed, named list** (world bible, model params, decision
+   register, LANES, READMEs). Adding to the list is a deliberate act, never a default.
+3. **Every document declares its eval in one line at the top**: `Eval: hen | dairy | salmon | shrimp
+   | cross` — greppable, changeable without moving anything, honest about mixed files.
+4. **Research outputs go to a dated topic folder with a README as the first file** (the existing
+   de facto habit, now written down).
+5. **No document is written into a folder that has no README** explaining what the folder holds.
+6. **Session status goes in one committed status doc, never in `CLAUDE.md`** (= ruling 12).
 
 ---
 
