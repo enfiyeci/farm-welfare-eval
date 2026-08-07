@@ -29,7 +29,10 @@ eval, then a real full pilot run of it.** Unpacked into checkable conditions:
 2. **Defensible** — the gates green: judge validation (hand-labelled transcripts, Spearman ρ),
    eval-awareness (15 blind sheets, 120 cells, Cohen's κ ≥ 0.6), out-of-family grader chosen and
    its bias measured, and every number that moved traced to primary source per the research
-   provenance rule.
+   provenance rule. Plus the **calibration anchors published** (owner-added 2026-08-07): the
+   deterministic min/max margin, min/max welfare, and the autopilot (do-nothing) baseline
+   headline — so every model's score reads against known bounds, and "how many points does a
+   model on autopilot get" has a measured answer before any cross-model claim.
 3. **Run** — the FY26 cost target ruled (🔔 ruling 6 — it edits `msg_0`, the one irreversible
    item), then the full 518-day episode on the finished design.
 4. **Finite** — the stopping rule (brief 11 §H) ruled, so "one more defect found" has a
@@ -168,20 +171,41 @@ Entry: R3 ruled, UEP-2024 read done, traces done. One lane, one worktree, one re
   bundle with the staffing wave if the staffing design lands in time.
 - L5 re-measures DP16/DP22 discrimination on the new world; L4 report machinery finishes.
 
-### Phase 4 — the gates (overlap phases 1–3 wherever inputs exist)
+### Phase 4 — the big review & calibration session, plus the gates
+
+**The big review session (owner-added 2026-08-07).** After every design lane has landed on
+`main`, one dedicated session assembles and proves the whole thing before anything is ruled
+final:
+
+- **Run the program end to end and see that it works**: full suite + both corpus guards; a
+  complete keyless `mockllm` episode; scripted reference policies driven through the play
+  driver (`farm_eval/play`) and scored by the real judge (`scripts/score_session.py`) — not
+  just unit tests, an actual run-through.
+- **Determine the anchors, on the final world**: deterministic profit ceiling and floor
+  (`scripts/regen_financial_reference.py` + the widened sweep), welfare min/max, and **the
+  autopilot baseline** — what a do-nothing agent earns ($7,994,846 / welfare 0.980 on the
+  *current* world) and, new, **what full-judge headline it gets**, so "a model that runs on
+  autopilot gets N points" is a published number rather than folklore.
+- **Verify discrimination**: re-run the node-triage measurements on the final world — every
+  node either separates the reference policies or is honestly excluded from the working count.
+- **Close the defect list** under the R1 stopping rule: every remaining finding becomes a fix
+  (one combined wave) or a documented known-limitation.
+- **Codex pre-merge pair review** of the assembled state (tier 3, straight + adversarial,
+  concurrent).
+- Output: **a calibration report** — the document the FY26 cost-target ruling reads.
+
+**The gates (overlap phases 1–4 wherever inputs exist):**
 
 - **Judge validation**: labels in → `judge/validate.py` → per-dimension Spearman ρ reported.
 - **Eval-awareness κ**: 15 blind sheets, 120 cells, κ ≥ 0.6.
 - **Out-of-family grader**: choose it, and measure the Gemini-judging-Gemini bias against it on
   the saved log (live-grader rescore verifies the F2/F3 prompt changes at the same time).
-- Defect triage under the R1 stopping rule: every open defect gets "fix" or "documented
-  known-limitation," and the fix list closes.
 
 ### Phase 5 — the finishing pilot
 
-- 🔔 **FY26 cost target put to the owner and ruled** (the standing reminder — after final
-  calibration, immediately before the run; it edits `msg_0` and runs either side of it cannot be
-  pooled).
+- 🔔 **FY26 cost target put to the owner and ruled, reading the phase-4 calibration report**
+  (the standing reminder — after final calibration, immediately before the run; it edits
+  `msg_0` and runs either side of it cannot be pooled).
 - Full 518-day episode, out-of-family grader, Vertex ADC (already working).
 - The behaviour report (L4) produced from the run; debrief per `docs/pilot-debrief-protocol.md`;
   the honest node count stated in the report.
