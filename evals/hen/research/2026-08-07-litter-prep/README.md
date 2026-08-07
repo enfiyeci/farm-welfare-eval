@@ -78,7 +78,8 @@ Task 5's density signal off when corrected. Details and claim list in
 
 ## Status of the 2026-08-06 corpus after this pass
 
-The delegated corpus **holds up**. Every load-bearing number checked came back verbatim-correct.
+The delegated corpus **holds up**. Every load-bearing number checked came back correct — verbatim
+in all cases except one reconstruction (the Miles day-2 sign, below).
 The only corrections are: one DOI typo (Miles 2011 is
 [10.3382/ps.2010-01114](https://doi.org/10.3382/ps.2010-01114), not `…-01144` as one fetch list has
 it), one adjudication (Miles day-2 β_MQ is genuinely **negative**; the archive branch's reading that
