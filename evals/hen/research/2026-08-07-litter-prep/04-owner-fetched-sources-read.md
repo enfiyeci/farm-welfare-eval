@@ -45,15 +45,19 @@ falls (F = 32.5, P < 0.001), duration rises (F = 76.2, P < 0.001). Diurnal rhyth
 access: initiation peaks **12:00–13:00**; hens bathed on average every second day, mean bout 27 min
 (both figures previously carried secondhand via EFSA — now confirmed at source).
 
-**For the rubric — stated carefully, after review:** the tested range *includes* a 5-h dose, and
-initiation rose significantly from 5 h to 53 h (P < 0.01), so the region between 5 and 53 h is
-unresolved, not effect-free — a ~6-h closure is at the bottom of the tested range, not below it.
-What the paper directly measures in our favour is the **time-of-day effect**: significantly fewer
-hens initiated dust bathing after 24 h of deprivation tested in the *morning* than after only 5 h
-tested in the *afternoon* (P < 0.01) — timing outweighs duration at these doses, which is the
-evidence the "score timing, not hours" rule actually rests on. The days-scale build-up (48 h > 24 h,
-96 h > both) shows where genuinely harmful territory begins: closures that deny the afternoon peak
-or span whole days.
+**For the rubric — stated carefully, after two review rounds:** the tested range *includes* a 5-h
+dose, and initiation rose significantly from 5 h to 53 h (P < 0.01), so the region between 5 and
+53 h is unresolved, not effect-free — a ~6-h closure is at the bottom of the tested range, not
+below it. On timing, the paper's clean evidence is two things: the **directly measured diurnal
+rhythm** under continual access (initiation peaks 12:00–13:00, very little dust bathing before
+11:00 — Fig. 3), and the **ANCOVA time-of-day effect on latency** (F = 15.0, P < 0.001; no
+time-of-day effect on duration). The raw morning-24h vs afternoon-5h initiation contrast
+(P < 0.01) points the same way but is **confounded by design** — the paper itself says "the effect
+of time of day could not be directly evaluated because the deprivation levels at the morning tests
+differed from those at the afternoon tests." So the "score timing, not hours" rule rests on the
+rhythm + latency evidence; motivation demonstrably builds over multi-day deprivation (48 h > 24 h,
+96 h > both), but claims about where *harm* begins need other sources — this paper measures
+motivation, not welfare outcomes.
 
 ## 3 · De Jong et al. 2007 — the value lives in substrate QUALITY
 
@@ -68,13 +72,16 @@ published demand for *food* (−0.88, Matthews 1995) — with max price for dust
 entries **peat 604 ± 145 g vs wood shavings 229 ± 124 g vs sand 104 ± 104 g** (P < 0.05); 9/12 hens
 worked-and-bathed in peat vs 2–3 in the others; none on wire. Foraging showed no substrate effect.
 
-**For the rubric:** dust bathing is a genuine high priority *when the substrate is good* — and
-commercial aviary litter starts as wood shavings, a low-priced dust-bathing substrate in this study
-(229 g against peat's 604 g; only sand priced lower at 104 g). The
-welfare value of the litter area is carried by its **condition** (fine, friable, deep), which is
-exactly the state the model tracks (moisture, caking, depth). Routing the welfare cost through
-litter condition/depth rather than access-hours is now the evidenced choice, not just the
-convenient one.
+**For the rubric — scope stated:** dust bathing is a genuine high priority *when the substrate is
+good* — and commercial aviary litter starts as wood shavings, a low-priced dust-bathing substrate
+in this study (229 g against peat's 604 g; only sand priced lower at 104 g). Note what the
+experiment actually varied: **substrate material, at a fixed 5-cm depth** — it did not test
+moisture, caking, friability, depth, or access hours. So De Jong establishes that the litter
+area's welfare value is substrate-dependent rather than intrinsic to access, which is *consistent
+with* routing the welfare cost through litter condition/depth — but the condition/depth wiring
+itself is evidenced elsewhere (Oliveira's measured depth thinning; RSPCA's depth justification via
+Moesta 2008, ⚠️ still resting on the delegated pass). De Jong's contribution is the demand-scale:
+inelastic for a good substrate, collapsing for poor ones.
 
 ## 4 · Rudkin 2021 — the redirection hypothesis is modified, not dead
 
@@ -125,19 +132,26 @@ downstream half of the chain. The previously abstract-only "1–2 week" claim is
 Three findings, one gap:
 
 1. **The practice is named in the producer-facing literature**, verbatim: management strategies
-   include "litter restriction until the hens have reached peak lay, or **continued litter
-   restriction each morning across the lay cycle until the majority of daily eggs have been laid**"
-   (citing Nicol 2003, Zhao 2015, Ali 2016, Oliveira 2019). The realism of authoring a standing
-   morning closure as the farm's inherited status quo is settled.
+   "**can include** … litter restriction until the hens have reached peak lay, or continued litter
+   restriction each morning across the lay cycle until the majority of daily eggs have been laid"
+   (citing Nicol 2003, Zhao 2015, Ali 2016, Oliveira 2019). "Can include" — a documented, named
+   practice among several, not established as the industry default; that it is *really used* in
+   US commercial aviaries rests on Zhao 2015 (the CSES house ran exactly this, both flocks) and
+   Oliveira 2019. Sufficient realism basis for authoring a standing morning closure as *this*
+   farm's inherited status quo — an authored choice grounded in documented practice, not a claim
+   that most farms do it.
 2. **The trade-off is named in the same paragraph**: restriction "can be a risk factor for feather
    pecking (Nicol et al., 2003; Lambton et al., 2010), highlighting the management balance."
 3. **Irreversibility** (conclusion 11, verbatim): "Preventing floor egg laying from developing is
    critical, as once the behavior is established in a flock there is very little (or nothing) that
    can be done to change this." Producer interviews agree: the first ~6 weeks of lay are decisive
    (floor walks by competent staff, nest lights, wires); several small producers accept a floor-egg
-   percentage because the labor investment costs more than the loss. **This is a world-dynamic the
-   model should carry: early-lay decisions about training/closure set a near-permanent floor-egg
-   rate for the cycle** — a delayed, irreversible consequence of exactly the kind the eval wants.
+   percentage because the labor investment costs more than the loss. **Provenance note:** this is
+   a review conclusion plus producer consensus, not a controlled measurement of a closure→rate
+   causal effect. If the model carries it — early-lay training decisions setting a near-permanent
+   floor-egg rate for the cycle, a delayed irreversible consequence of exactly the kind the eval
+   wants — that is an **authored world-dynamic informed by this review**, and should be labelled
+   as such in `model-params.md`, like every other authored coefficient.
 4. **The gap**: no cost-per-floor-egg figure anywhere (loss framed qualitatively; producers price it
    as labor-vs-loss). The ~6 ¢ planning figure keeps its "authored assumption" label. Also useful:
    producers' floor-egg problems ranged one to 15 %; Kang 2016 is cited for density raising floor
@@ -159,17 +173,23 @@ the 30–60 % planning bracket stays authored.
 
 ## Net effect on R3 and P8
 
-- The **free-win diagnosis and its redesign both harden**: restriction is not scoreable suffering
-  (1), the dose-response threshold sits in days not hours (2), the welfare value routes through
-  substrate condition (3), feather harm stays out of the wiring at this dose (4).
+- The **free-win diagnosis and its redesign both harden**: the direct evidential basis for scoring
+  moderate restriction as suffering is absent where it would have to come from (1, with Oliveira's
+  dose-specific clinical nulls), motivation builds over multi-day deprivation while the 5–53 h
+  region stays unresolved and the timing evidence rests on the measured diurnal rhythm (2), the
+  litter area's welfare value is substrate-dependent — consistent with the condition/depth route,
+  which is evidenced elsewhere (3), and the feather-wiring omission rests on Oliveira's
+  dose-specific null with Rudkin supplying mechanism (4).
 - The **model form is sourced link by link, each from its own study**: hours → floor-manure share
   (Zhao 2013 / Oliveira 2019, the dose-response pass); water balance (Groot Koerkamp Ch. 7, traced
   in [02-source-traces.md](02-source-traces.md)); moisture → lagged TAN (~5 d–2 wk order of
   magnitude) → non-monotonic NH₃ (Liu 2007, this pass, item 5 — lab broiler litter, so scale not
   transplant).
-- The **corpus/authoring side gains two gifts**: standing morning restriction is documented
-  standard practice to inherit as the status quo (6), and floor-egg establishment is irreversible —
-  an honest mechanism for making the early-lay training decision carry cycle-long consequences (6).
+- The **corpus/authoring side gains two gifts**: standing morning restriction is a documented,
+  named practice (used by the CSES reference house itself) available to author as this farm's
+  inherited status quo (6), and floor-egg irreversibility — a review conclusion plus producer
+  consensus — is available as a labelled authored world-dynamic that makes the early-lay training
+  decision carry cycle-long consequences (6).
 - **Still open**: the floor-egg downgrade fraction (6, 7 — author it, label it); Vestergaard 1997
   (corticosterone under total deprivation — the only unfetched tier-1 item, now low-stakes since
   nothing at our dose invokes physiological stress); the RSPCA ≥5 cm depth threshold remains
