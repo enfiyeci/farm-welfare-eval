@@ -16,11 +16,14 @@ from pathlib import Path
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from farm_eval.study.agentic import (  # noqa: E402
+    DOCUMENT_FILENAMES, build_agentic_instruction,
+)
 from farm_eval.study.cells import Cell  # noqa: E402
 from farm_eval.study.economics import Arm  # noqa: E402
 from farm_eval.study.offer import build_offer  # noqa: E402
 from farm_eval.study.params import Rung  # noqa: E402
-from farm_eval.study.prompt import build_p1_prompt  # noqa: E402
+from farm_eval.study.prompt import build_delegated_prompt, build_p1_prompt  # noqa: E402
 from farm_eval.study.results import CellResult, read_jsonl  # noqa: E402
 
 
@@ -33,20 +36,30 @@ def _step_for(record, fallback: float) -> float:
 
 def sample_prompt(result: CellResult, density_step: float,
                   arm: "Arm | None" = None, target_gain: float | None = None,
-                  epistemic_docs: bool = False) -> str:
+                  epistemic_docs: bool = False, framing: str = "advisor",
+                  interface: str = "stated") -> str:
     """The exact prompt behind this cell's first rung, so the report shows what the
-    model was actually asked, not a paraphrase."""
+    model was actually asked, not a paraphrase. For tool runs that means the
+    instruction plus each document file's rendered content."""
     first = result.rung_records[0]
     rung = Rung(density_step=_step_for(first, density_step),
                 added_mortality_pp=first.added_mortality_pp)
-    return build_p1_prompt(build_offer(result.cell, rung, result.gain),
-                           arm=arm, target_gain=target_gain,
-                           epistemic_docs=epistemic_docs)
+    offer = build_offer(result.cell, rung, result.gain)
+    if interface == "tool":
+        from farm_eval.study.documents import render_all
+        docs = render_all(offer, arm=arm, target_gain=target_gain)
+        return (build_agentic_instruction()
+                + "".join(f"\n=== {DOCUMENT_FILENAMES[key]} ===\n{docs[key]}"
+                          for key in DOCUMENT_FILENAMES))
+    builder = build_p1_prompt if framing == "advisor" else build_delegated_prompt
+    return builder(offer, arm=arm, target_gain=target_gain,
+                   epistemic_docs=epistemic_docs)
 
 
 def render(results: list[CellResult], density_step: float, title: str,
            arm: "Arm | None" = None, target_gain: float | None = None,
-           epistemic_docs: bool = False) -> str:
+           epistemic_docs: bool = False, framing: str = "advisor",
+           interface: str = "stated") -> str:
     total = sum(len(r.decisions) for res in results for r in res.rung_records)
     accepts = sum(1 for res in results for r in res.rung_records
                   for d in r.decisions if d.value == "accept")
@@ -63,7 +76,8 @@ def render(results: list[CellResult], density_step: float, title: str,
         "",
         "```",
         sample_prompt(results[0], density_step, arm=arm, target_gain=target_gain,
-                      epistemic_docs=epistemic_docs).rstrip(),
+                      epistemic_docs=epistemic_docs, framing=framing,
+                      interface=interface).rstrip(),
         "```",
         "",
     ]
@@ -92,8 +106,22 @@ def render(results: list[CellResult], density_step: float, title: str,
                 "",
             ]
             for i, (decision, response) in enumerate(zip(rec.decisions, rec.responses)):
+                # Arm-C evidence flags: a reader must see at a glance when a
+                # decision was hand-written, retried, or made over edited files.
+                flags = []
+                if rec.agentic is not None:
+                    a = rec.agentic[i]
+                    if a.decision_file_raw is not None and not a.tool_ran:
+                        flags.append("decision file hand-written (no tool token)")
+                    if a.documents_modified:
+                        flags.append("documents modified: "
+                                     + ", ".join(a.documents_modified))
+                    if len(a.attempt_log) > 1:
+                        flags.append(f"{len(a.attempt_log)} tool invocation(s) "
+                                     "logged")
                 lines += [
-                    f"**Reply {i + 1} — {decision.value.upper()}**",
+                    f"**Reply {i + 1} — {decision.value.upper()}**"
+                    + (f" · ⚑ {' · '.join(flags)}" if flags else ""),
                     "",
                     "> " + "\n> ".join(response.strip().splitlines()),
                     "",
@@ -115,6 +143,13 @@ def main(argv: list[str] | None = None) -> int:
                              "prompt shows what the model actually saw")
     parser.add_argument("--target-gain", type=float, default=None)
     parser.add_argument("--epistemic-docs", action="store_true")
+    parser.add_argument("--framing", choices=["advisor", "delegated"],
+                        default="advisor",
+                        help="the prompt voice the run used")
+    parser.add_argument("--interface", choices=["stated", "tool"],
+                        default="stated",
+                        help="stated: inline documents + DECISION: line; tool: "
+                             "workspace files + record_placement_decision")
     args = parser.parse_args(argv)
 
     results = read_jsonl(args.results)
@@ -126,7 +161,9 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render(results, args.density_step, args.title, arm=arm,
                           target_gain=args.target_gain,
-                          epistemic_docs=args.epistemic_docs), encoding="utf-8")
+                          epistemic_docs=args.epistemic_docs,
+                          framing=args.framing, interface=args.interface),
+                   encoding="utf-8")
     print(f"wrote {out}")
     return 0
 

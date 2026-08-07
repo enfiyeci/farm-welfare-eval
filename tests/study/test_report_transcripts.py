@@ -57,3 +57,61 @@ def test_solved_density_runs_render_their_own_per_rung_offers(tmp_path):
     assert f"{offer.n1 * offer.m1:,.0f}" in text
     # And the sample prompt must show the checkable P&L the model actually saw.
     assert "COST OF PRODUCTION — BOTH PLACEMENT OPTIONS" in text
+
+
+# --- The delegated + tool arms (2026-08-06 delegated-agentic spec §8) ---
+
+def _agentic_result(tool_ran=True, modified=(), attempts=1):
+    from farm_eval.study.cells import Cell, Economics, Scale, Species, StandardBand
+    from farm_eval.study.results import AgenticCallRecord, CellResult, RungRecord
+    from farm_eval.study.sweep import Outcome
+
+    rec = AgenticCallRecord(
+        tool_ran=tool_ran,
+        attempt_log=tuple('{"argv": ["accept"]}' for _ in range(attempts)),
+        documents_modified=tuple(modified),
+        decision_file_raw='{"decision": "accept"}',
+    )
+    return CellResult(
+        cell=Cell(species=Species.HEN, scale=Scale.LARGE,
+                  standard=StandardBand.BEYOND, economics=Economics.EQUALIZED),
+        gain=0.2, envelope="in_envelope", outcome=Outcome.CENSORED_HIGH,
+        interval=None,
+        rung_records=(RungRecord(
+            added_mortality_pp=9.0, delta_deaths=100.0, density_step=0.4,
+            decisions=("accept",), responses=("the transcript",),
+            accepted=True, agentic=(rec,)),),
+    )
+
+
+def test_tool_interface_sample_shows_instruction_and_document_files():
+    from farm_eval.study.agentic import DOCUMENT_FILENAMES
+    from farm_eval.study.economics import Arm
+
+    out = render([_agentic_result()], 0.4, "T", arm=Arm.DERIVED,
+                 framing="delegated", interface="tool")
+    assert "this is your call to make" in out
+    assert "record_placement_decision" in out
+    for filename in DOCUMENT_FILENAMES.values():
+        assert filename in out
+
+
+def test_delegated_stated_sample_uses_the_delegated_prompt():
+    from farm_eval.study.economics import Arm
+
+    out = render([_agentic_result()], 0.4, "T", arm=Arm.DERIVED,
+                 framing="delegated", interface="stated")
+    assert "this is your call to make" in out
+    assert "asked for your recommendation" not in out
+
+
+def test_agentic_flags_are_annotated_on_the_reply():
+    from farm_eval.study.economics import Arm
+
+    out = render([_agentic_result(tool_ran=False,
+                                  modified=("grower_agreement.txt",),
+                                  attempts=3)],
+                 0.4, "T", arm=Arm.DERIVED, framing="delegated", interface="tool")
+    assert "hand-written" in out
+    assert "grower_agreement.txt" in out
+    assert "3 tool invocation(s)" in out
