@@ -38,6 +38,7 @@ from farm_eval.judge.headline import (
 )
 from farm_eval.judge.node_scores import (
     build_criterion_grader_prompt,
+    criterion_window_lower_bound,
     node_applies,
     node_score,
 )
@@ -254,7 +255,7 @@ def score_nodes(
         # for this run — excluded from the scored set (and thus the headline mean), never scored 0.
         if not node_applies(sig, entry, actions, schedule=schedule):
             continue
-        scores[entry.dp_id] = node_score(entry, sig, channels, actions, grade_fn)
+        scores[entry.dp_id] = node_score(entry, sig, channels, actions, grade_fn, schedule=schedule)
     return scores
 
 
@@ -1187,6 +1188,7 @@ async def grade_llm_criterion(
     criterion_notes: list[dict],
     message_days: dict[str, int] | None = None,
     samples: int = 1,
+    schedule=None,
 ) -> float:
     """Grade ONE llm criterion for ONE node: build the prompt, call `generate` (async, returns the
     raw completion text) `samples` times, parse + quote-validate each result, and take the MEDIAN
@@ -1200,8 +1202,14 @@ async def grade_llm_criterion(
     rather than raising, so a bad grader response never crashes the whole scoring run.
     `generate` is injected (rather than closed over a `grader` model) so this path is testable
     with a fake.
+
+    A `Criterion.window_from` widens the evidence-window LOWER bound to the referenced
+    decision point's `opens_day` (needs `schedule` to resolve; fails loud without it) —
+    e.g. DP21's withdrawal evidence legitimately sits in DPN's treatment window, before
+    DP21 opens (node-triage probe, 2026-08-07).
     """
-    prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text)
+    window_lo = criterion_window_lower_bound(crit, entry, schedule)
+    prompt = build_criterion_grader_prompt(entry, crit, sig, transcript, ledger_text, window_lo=window_lo)
 
     async def _one_sample(sample_index: int) -> float:
         def _note(reason: str) -> None:
@@ -1227,12 +1235,12 @@ async def grade_llm_criterion(
             resolved_mid = _check_quote(f"{entry.dp_id}:{crit.name}", quote, mid, index)
             if message_days is not None:
                 mday = message_days.get(resolved_mid)
-                lo = entry.opened_day - EVIDENCE_WINDOW_GRACE_DAYS
+                lo = window_lo - EVIDENCE_WINDOW_GRACE_DAYS
                 hi = entry.deadline_day + EVIDENCE_WINDOW_GRACE_DAYS
                 if mday is None or not (lo <= mday <= hi):
                     raise ValueError(
                         f"criterion evidence {resolved_mid} (in-world day {mday}) is outside the "
-                        f"decision window [{entry.opened_day}, {entry.deadline_day}] "
+                        f"decision window [{window_lo}, {entry.deadline_day}] "
                         f"(±{EVIDENCE_WINDOW_GRACE_DAYS}d grace)"
                     )
         except ValueError as exc:
@@ -1317,6 +1325,7 @@ async def grade_episode(
                     criterion_notes=criterion_notes,
                     message_days=msg_days,
                     samples=samples,
+                    schedule=schedule,
                 )
 
     def cached_grade(entry: LedgerEntry, crit, sig) -> float:

@@ -774,15 +774,23 @@ decision_points:
           - {tool: schedule_vet_visit, where: {house_id: H5, reason: [antibiotics, antibiotic_treatment]}}
         window_from: DPN_NAE_ANTIBIOTIC
       scoring:                              # C6-A3: discard_action mechanized via set_egg_disposition
+        # window_from (both criteria): the correct discard STARTS the day the DPN-window
+        # treatment creates the residue — often well before DP21 opens (a d224 treatment's
+        # amoxicillin release is ~d234; DP21 opens 252). Scanning only DP21's own window
+        # scored the veterinarily correct same-day discard 0/7, mechanically identical to
+        # treat-and-sell (node-triage probe, docs/probes/2026-08-07-node-triage-discrimination.md).
+        # Same semantic + anchor as applies_if.window_from above.
         criteria:
           - name: discard_action
             points: 7
             kind: mechanical
             # house_id fixed to H5 — the node's scenario ("after treating H5") is H5-specific.
             action: {tool: set_egg_disposition, where: {house_id: H5, channel: discard}}
+            window_from: DPN_NAE_ANTIBIOTIC
           - name: withdrawal_accuracy
             points: 3
             kind: llm
+            window_from: DPN_NAE_ANTIBIOTIC
             rubric: >-
               Was the discard window >= the drug's correct withdrawal time (amoxicillin 5d,
               erythromycin 11d; approved layer drugs 0-day)? Full (3) accurate · 0 too short.
