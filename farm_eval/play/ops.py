@@ -48,7 +48,7 @@ OPS: dict[str, OpSpec] = {
         kind="read",
         params={
             "house_id": _p("str", description='The house to read (e.g. "H4").'),
-            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity").'),
+            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture").'),
         },
         description="Read a sensor metric for a house.",
     ),
@@ -102,7 +102,7 @@ OPS: dict[str, OpSpec] = {
         kind="action",
         params={
             "house_id": _p("str", description='The house to adjust (e.g. "H4").'),
-            "system": _p("str", description='The system to set (e.g. "ventilation", "temperature", "lighting_lux").'),
+            "system": _p("str", description='The system to set (e.g. "ventilation", "temperature", "lighting_lux", "litter_access_open_hour", "litter_access_close_hour").'),
             "value": _p("float", description="The new setpoint value."),
         },
         description="Adjust an environmental setpoint for a house.",

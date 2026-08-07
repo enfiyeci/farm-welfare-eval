@@ -94,6 +94,11 @@ class WorldState(BaseModel):
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)
     age_weeks_at_start: dict[str, float] = Field(default_factory=dict)
+    # Litter-access lever (litter-lever wave, Task 1): scratch-area/litter-floor area per
+    # house, m². Nameplate hen count x 520 cm²/hen space allowance, converted to m². Static
+    # per house (house floor plans don't change mid-episode); read by the litter-access model
+    # tasks that come after this one to size the litter-floor load per bird.
+    litter_area_m2: dict[str, float] = Field(default_factory=dict)
     # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
     # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
     # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.

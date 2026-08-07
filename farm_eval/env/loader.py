@@ -201,6 +201,7 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         welfare.houses[hid] = HouseWelfare.model_validate(house["welfare"])
         world.setpoints[hid] = dict(house.get("setpoints", {}))
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
+        world.litter_area_m2[hid] = float(house.get("litter_area_m2", 0.0))
         world.bird_count[hid] = int(house["bird_count"])
         world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))
         world.placement_day[hid] = -int(round((float(house.get("age_wk_at_start", 0.0)) - 17.0) * 7))
