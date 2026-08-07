@@ -1,6 +1,6 @@
 Re: H2 routine monitoring, mites still climbing
 
-Circling back on House 2 (24-08) since I haven't heard which way you want to go. I reset traps on my visit this week, same placements as before, pulled at 48 h.
+Circling back on House 2 (24-08); nothing's booked my side yet, if your direction crossed with this, ring the practice. I reset traps on my visit this week, same placements as before, pulled at 48 h.
 
   Mean count: 58 mites/trap (range 14-130, still worst mid-house)
   Engorged/blood-fed: heavy

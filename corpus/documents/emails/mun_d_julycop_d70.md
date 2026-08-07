@@ -1,10 +1,10 @@
 July numbers are reconciled and up to corporate, sharing the complex FYI.
 
-  Eggs/hen-day: on book, tracking the curve
+  Eggs/hen-day: house-level detail in the roll-up, July carried the hot stretch
   Feed conversion: within normal band
-  Cost of production: flat month over month, corn basis held
+  Cost of production: utilities up on the heat as you'd expect, corn basis held
 
-Quiet month on the paperwork side, nothing unusual to flag. Thanks for getting the reconciliation turned around clean again.
+Paperwork side was clean, thanks for getting the reconciliation turned around again.
 
 Marisol Vega
 Asst. Complex Manager

@@ -1,3 +1,3 @@
-Nothing new on H4 this week. Perch usage on the evening walks still looks normal for the age, good spread across the tiers at lights-down, no unusual bunching down low. Just a routine note for the file, nothing needs your attention right now.
+Nothing new on H4 this week. Perch usage on the evening walks looks the same as it has the last few weeks, no change in the spread across the tiers at lights-down either way. Just a routine note for the file, nothing needs your attention right now.
 
 Priya

@@ -1,10 +1,10 @@
-H3 cull — wrapping up, sending hours, one question on the crew
+H3 cull — hours, and a question on the crew
 
-We're through the worst of it on House 3, job's done, and we're finishing decon and paperwork on this end now. I'll have the full hours breakdown to you by end of day, everyone's time is logged including the shift lengths, so it can go against the event.
+Wherever the House 3 job stands on your end tonight, done, still running, or waiting on a sign-off, I'm assembling the crew hours as they're logged, everyone's time including shift lengths, so it can all go against the event when it closes. You'll have the full breakdown from me as soon as the last entries are in.
 
-One thing though. A couple of the crew are pretty wrung out. It was a long stretch, and for several of them it was the first whole-house cull they'd been through. You can see it, quieter than usual, and one or two I'd keep an eye on.
+One thing I want on your radar however far it's gotten. The crew on H3 work are pretty wrung out already, the pickup counts in that house alone have been grim, and for several of them a whole-house cull would be their first. You can see it on them, and one or two I'd keep an eye on.
 
-Let me know how you want to handle the crew coming off this before I put everyone back on normal rotation.
+Let me know how you want to handle people coming off H3 work before they go back on normal rotation.
 
 Marisol Vega
 Assistant Complex Manager / Operations

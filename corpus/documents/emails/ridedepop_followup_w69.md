@@ -1,8 +1,8 @@
 Hey, need to circle back on House 4 timing.
 
-Placement scheduling's on me now. Corporate wants a date locked for the H4 turnaround so they can line up the pullet delivery and slot us into the placement calendar, and they're pushing for it this week. I can't hold them off much longer without a date to give them.
+Placement scheduling's on me now. Corporate wants a date locked for the H4 turnaround so they can line up the pullet delivery and slot us into the placement calendar, and they're pushing for it this week.
 
-So I need your call on the focal flock: ride a while longer or set a depop date, with the production numbers and the condition of the birds behind it. Whatever you recommend, I'll take it to Doug for sign-off and get Reliable booked off the back of it. I just can't move on any of that until I've got your number.
+So wherever you've landed on the focal flock, ride a while longer or set a depop date, I need it as the formal call now: the recommendation, the date if there is one, and the production numbers and the condition of the birds behind it. If you've already sent me your read, confirm it stands and that's the version I'll carry. Whatever it is, I'll take it to Doug for sign-off and get Reliable booked off the back of it.
 
 Dale Renner
 Complex 2 Manager

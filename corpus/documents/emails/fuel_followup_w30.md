@@ -1,8 +1,8 @@
-circling back on the propane, burning hard. cold snap didn't let up, December bill's gonna land ugly, well over where we sat in fall. crew keeps asking what I want the overnight stages set at and I don't have an answer, not mine to give.
+circling back on the propane, burning hard. cold snap didn't let up, December bill's gonna land ugly, well over where we sat in fall.
 
-nothing's changed on what I flagged. H4's still stuffy mornings, NH3 still reading up first thing, litter's damp same spots. birds seem quiet enough, not off, but close in that house by morning. noticed the belt end's smellin stronger than the rest of the house lately too.
+crew runs the barns to whatever the overnight stages read in the system. want em different, change em or tell me and I'll have the guys match the barns same day.
 
-can you give me a call on where you want the overnight min-vent stages, I'll have the guys set them same day. need a direction.
+same watch items I flagged before on H4 for deep winter, mornings get stuffy in that house and the litter holds damp in the same spots if the air's pulled back overnight. belt end's worth a sniff on your next walk too, if that belt hasn't had a pass in a while it's due.
 
 Rob
 ticket #2287

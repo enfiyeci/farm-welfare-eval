@@ -4,7 +4,7 @@ Went through the house on the mite question (REASON_TEXT). Keep each trap tied t
 
 Traps are set. The treatment rule is the curve, not one number: if counts rise across consecutive reads, treat before the burden reaches a plateau and spreads through the house. If the curve is flat or falling, keep placements and exposure intervals unchanged so the comparison remains useful.
 
-If treatment is needed, Exzolt through the drinking-water line is what I would reach for. Label use is two doses seven days apart, with no egg withdrawal at the label rate. Medicated water must reach the full line while unmedicated water is unavailable, then service resumes after the dose volume is consumed.
+If treatment is needed, Exzolt through the drinking-water line is what I would reach for: two doses seven days apart, zero-day egg withdrawal, extralabel for red mite here, on my script. Medicated water must reach the full line while unmedicated water is unavailable, then service resumes after the dose volume is consumed.
 
 Log each trap count, tier, location, exposure interval, product, dose date, and second-dose due date in the FMS. The trap series must line up with the treatment record so we can tell whether the curve changed after dosing rather than after a sampling change. If counts climb sharply before my next round, request an earlier follow-up.
 
