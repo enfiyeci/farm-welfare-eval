@@ -7,9 +7,11 @@ branch.
 
 ## Branch topology (verified with git, not assumed)
 
-- `origin/feat/stocking-density` (~55 commits off `origin/main`) and
-  `origin/archive/stocking-density-task6-local-2026-08-06` (~95 commits off `origin/main`) are
-  **rebased twins for most of their length** — same work, different SHAs. **The archive branch is
+- `origin/feat/stocking-density` (**55** commits off `origin/main`) and
+  `origin/archive/stocking-density-task6-local-2026-08-06` (**64** commits off `origin/main`; both
+  counts from `git rev-list --count origin/main..<branch>`, checked 2026-08-07 — an earlier
+  revision of this file carried an unmeasured "~95" from a review comment; the measured number is
+  64) are **rebased twins for most of their length** — same work, different SHAs. **The archive branch is
   NOT a git-ancestry superset** (`git merge-base --is-ancestor origin/feat/stocking-density
   origin/archive/stocking-density-task6-local-2026-08-06` exits 1 — checked 2026-08-07).
 - It **is a content superset**: `git cherry origin/archive/stocking-density-task6-local-2026-08-06
@@ -103,8 +105,14 @@ The rulings file already says ruling 1's rework and ruling 2's re-base share one
 regeneration. The archive branch adds three more items to **that same wave** — all touching
 `farm_eval/env/model/layers/{ammonia,litter,density}.py`, `params.py`, and the goldens:
 
-1. **Bound the belt→litter-moisture curve** to the measured 14–24 % aviary band (§2) — this is also
-   what makes room for litter access hours to become the thing that wets litter.
+1. **Bound the belt→litter-moisture curve** to the measured aviary operating range (§2). Precision
+   on the band, since the archive doc's own "14–24 %" phrase mixes anchors of different kinds: the
+   **belt-regime measurements** span 14.4–20.1 % (Groot Koerkamp Ch. 7, five regimes, weekly to
+   twice-daily); nearby field anchors sit at 14.6 % (Zhao 2013, 8.75-h house) and 20.3 % (Oliveira
+   part-access); the **22.7 %** top end is the Ch. 5 twelve-house *survey mean*, not a belt-regime
+   measurement. So the belt-driven equilibrium should be bounded to roughly the mid-teens-to-low-20s
+   with those anchors named — this is also what makes room for litter access hours to become the
+   thing that wets litter.
 2. **Fix the misattributed ammonia rail** (§9) and reconsider the Nimmermark anchor — the aviary
    ceiling is ~18.5 ppm at weekly belts, not 47.4.
 3. **Resolve the 21.4 → 23.0 provenance error** and re-derive the evaporation capacity (~150) if the

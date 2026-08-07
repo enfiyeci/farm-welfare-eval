@@ -52,8 +52,9 @@ the physics, winter fuel its price — already half-built.
 
 **What this adds to P8's scope (and it belongs in the SAME regeneration):** the archived
 stocking-density work found three calibration defects underneath any litter lever —
-the belt→litter-moisture curve claims 45 % at weekly belts where the measured aviary band is
-14–24 %; the 9.2–47.4 ppm "aviary" ammonia rail is actually Hinz 2010's **floor-housing** row (the
+the belt→litter-moisture curve claims 45 % at weekly belts where the belt-regime measurements span
+14.4–20.1 % (with field anchors to the low 20s — precise anchor list in
+[03](03-stocking-density-branch-claims.md) §C); the 9.2–47.4 ppm "aviary" ammonia rail is actually Hinz 2010's **floor-housing** row (the
 real aviary row is median 11.4, max 18.5 ppm at weekly belts, so the belt response is ~2–3× high at
 long intervals); and a provenance error in the density reference (21.4 → 23.0 hens/m²) that switches
 Task 5's density signal off when corrected. Details and claim list in

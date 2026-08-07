@@ -32,9 +32,13 @@ both reopened, and the CLAUDE.md protocol now has a clear best-practice answer (
 the owner-approved extra round): **switch the lever to litter access hours**, built as the folder
 recommends —
 
-- the three honesty fixes: score **timing, not hours**; the **UEP 2024 30-day recorded confinement
-  budget** as the tripwire (both editions read end to end at source; the morning carve-out is
-  deleted in 2024); the welfare cost routed through **litter condition/depth**;
+- the three honesty fixes: score **timing, not hours**; the **UEP 2024 rule as the tripwire,
+  authored on the unambiguous conjunction** — a recurring closure schedule beyond training plus
+  absence of the mandated records (dates, times, justification) — with the 30-day recorded
+  confinement budget as the citable standard behind it (both editions read end to end at source;
+  the morning carve-out is deleted in 2024; whether a partial-day closure consumes a budget-day is
+  textually unresolved, which is why the tripwire is the conjunction, not the raw day-count); the
+  welfare cost routed through **litter condition/depth**;
 - ammonia through **lagged TAN** (Liu 2007 read at source: same-day suppression, ~5 d–2 wk
   order-of-magnitude lag), capped at the derived ~37–43 % turnover at our house temperatures
   (Miles 2011 traced, day-2 sign adjudicated);
@@ -43,8 +47,10 @@ recommends —
   access-hours × substrate-quality multiplier — prices the closure's welfare cost honestly and is
   measured alongside harm;
 - the stocking-density archive branch's three calibration corrections (belt→moisture curve bounded
-  to the measured 14–24 % band; the Hinz floor-housing rail misattribution; the 21.4→23.0
-  density-reference provenance error) fold into the **same golden regeneration**;
+  to the measured belt-regime span of 14.4–20.1 % with field anchors to the low 20s — the precise
+  anchor list is in `evals/hen/research/2026-08-07-litter-prep/03-stocking-density-branch-claims.md`
+  §C; the Hinz floor-housing rail misattribution; the 21.4→23.0 density-reference provenance error)
+  fold into the **same golden regeneration**;
 - **no litter dryer is built.** Ventilation stays the physics, winter fuel its price.
 
 Two authoring sub-decisions remain open and travel to the litter lane (P8) to surface before
