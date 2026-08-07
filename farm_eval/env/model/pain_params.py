@@ -92,6 +92,22 @@ class PainParams(BaseModel):
     # — far worse than the timing shift the bucket was supposed to cost. One cohort per house
     # per day instead, made cheap by the precomputed daily table (pain.keel_daily_table).
 
+    # --- Feather damage (spec §5.5): PAIN-TRACK SOURCED, BRIDGE OURS (Approach A) ---
+    # Per-feather cost from Pain-Track 4.1 phase midpoints, stored in SECONDS and divided by
+    # 3,600 at use — the rounded hour values cannot reproduce the published figures.
+    # Multiplying these by the platform's own 1,050 midpoint removals gives 0.7875 / 13.8687 /
+    # 180.9062 h against the published aviary 0.8 / 13.9 / 180.9 — agreement at every printed
+    # digit, which is the check that Pain-Track 4.1 was read correctly.
+    feather_disabling_seconds: float = 2.7
+    feather_hurtful_seconds: float = 47.55
+    feather_annoying_seconds: float = 620.25
+    # ⚠️ N IS OURS: a bird our substrate calls SEVERELY damaged is assumed to have lost about
+    # half her vulnerable-region feathers, landing on Ch. 8's own worked 50% example
+    # (875-1,575 of the 1,750-3,150 pluckable). 1,225 is that range's midpoint.
+    # ⚠️ Severity is FLAT: a bird damaged at week 31 and one damaged at week 65 are charged
+    # identically. Per-bird severity would be new physics (Step 3), not a mapping choice.
+    feather_removals_per_damaged_bird: float = 1225.0
+
     # --- Egg peritonitis, FATAL / acute (Ch. 5 Pain-Track 5.1): PAIN-TRACK SOURCED, SHARE OURS ---
     # Phase hours and splits below reproduce the chapter's published 2.25 h Excruciating per
     # affected bird. ⚠️ The SHARE of baseline deaths attributed to EGPS is OURS: Ch. 5's Research

@@ -326,7 +326,20 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             acc.accrue_footpad(state.welfare.harm, hw.footpad_severe_pct, 1.0, params.footpad_band_pct)
 
             # --- Feather damage (daily snapshot from age curve) ---
+            prev_feather_pct = hw.feather_damage_pct
             hw.feather_damage_pct = feather.feather_damage_pct(age, params)
+            # Capture the house's baseline prevalence ONCE, on the first day it is
+            # integrated — the suppression rule of §5.5.1 ¶3. The value stored is the DAY-1
+            # snapshot, not the day-0 start-age value: that suppresses the first day's own
+            # curve increment (~0.15 pt, once per house — accepted, adversarial review
+            # 2026-08-07) in exchange for never billing the historical stock even when the
+            # stored prev has no seeded value. setdefault makes this idempotent across the
+            # chunked/replayed integrate calls the path-independence guarantee allows.
+            start_feather_pct = state.welfare.feather_baseline_pct.setdefault(
+                hid, hw.feather_damage_pct
+            )
+            acc.accrue_pain(state.welfare, hid, "feather", pain.feather_pain(
+                prev_feather_pct, hw.feather_damage_pct, start_feather_pct, birds, params.pain))
 
             # --- Red-mite burden (daily logistic growth) ---
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)

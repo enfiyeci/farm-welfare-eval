@@ -160,6 +160,41 @@ def foraging_pain(birds: int, days: float, pp) -> PainDelta:
     )
 
 
+def feather_pain(prev_pct: float, new_pct: float, start_pct: float, birds: int, pp) -> PainDelta:
+    """Bird-hours of feather-damage pain for one house-day.
+
+    PROVENANCE: PAIN-TRACK SOURCED, BRIDGE OURS — Approach A, owner-ruled (spec §5.5.1 ¶3).
+    Ch. 4 Pain-Track 4.1 gives the per-feather cost; Ch. 8 gives the pluckable-feather count;
+    the per-damaged-bird severity N is OURS.
+
+    Driven by the positive day-over-day RISE, never by the level (§5.5.1 ¶1): the prevalence is
+    monotone and the Pain-Track describes one feather, so charging the snapshot re-bills every
+    past event daily. The rise is measured above max(prev, start_pct), which is the suppression
+    rule — a pre-episode feather's pain completed ~30 minutes after the pluck and cannot be
+    ongoing on day 0.
+
+    ⚠️ What this counts is HENS NEWLY DAMAGED, ONCE EACH — not feathers actually removed. A hen
+    already in the damaged cohort who keeps being plucked never moves the prevalence. That
+    undercount comes from the prevalence-delta driver plus flat severity and must be reported;
+    it is NOT caused by suppression and would occur without it.
+    ⚠️ Charging is instantaneous at cohort entry, so ~211 Annoying bird-hours land on a bird on
+    the single day she enters the damaged class, far above that day's 16 awake hours. Cumulative
+    totals are unaffected; a daily-RATE plot must spread each cohort over a stated window.
+    """
+    if birds <= 0:
+        return ZERO
+    floor_pct = max(prev_pct, start_pct)
+    rise_pct = new_pct - floor_pct
+    if rise_pct <= 0.0:
+        return ZERO
+    feathers = birds * (rise_pct / 100.0) * pp.feather_removals_per_damaged_bird
+    return PainDelta.of(
+        disabling=feathers * pp.feather_disabling_seconds / 3600.0,
+        hurtful=feathers * pp.feather_hurtful_seconds / 3600.0,
+        annoying=feathers * pp.feather_annoying_seconds / 3600.0,
+    )
+
+
 def keel_profile(pp) -> list[tuple[float, tuple[float, float, float]]]:
     """The integrated three-fracture keel timeline as (hours, (dis, hurt, ann)) segments.
 

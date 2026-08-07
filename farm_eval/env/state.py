@@ -117,6 +117,11 @@ class WelfareState(BaseModel):
     worker_pain: PainTrack = Field(default_factory=PainTrack)  # WORKER-HOURS, never summed with birds
     keel_cohorts: list[KeelCohort] = Field(default_factory=list)
     keel_baseline_pct: dict[str, float] = Field(default_factory=dict)
+    # Per-house feather prevalence at episode start, captured once on the house's first
+    # integrated day. The suppression rule of spec §5.5.1 ¶3 charges only the rise ABOVE this,
+    # so a house's pre-episode damaged stock is never billed as day-1 plucking. Stored in state
+    # rather than recomputed so replay and resume see the identical baseline.
+    feather_baseline_pct: dict[str, float] = Field(default_factory=dict)
     peritonitis_case_ages: dict[str, list[float]] = Field(default_factory=dict)
 
 
