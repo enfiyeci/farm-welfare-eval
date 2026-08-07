@@ -25,6 +25,7 @@ def run_phase1(
     rules: SweepRules | None = None,
     on_result: Callable[[CellResult], None] | None = None,
     rungs_provider: Callable[[Cell], Sequence[Rung]] | None = None,
+    on_call: Callable[..., None] | None = None,
 ) -> list[CellResult]:
     """Sweep every cell x gain. `on_result` fires as each CellResult completes, so
     callers can persist incrementally — a provider failure late in the 384-call
@@ -50,7 +51,13 @@ def run_phase1(
                 offer = build_offer(_c, rung, _g)
                 text = provider.complete(build_p1_prompt(offer))
                 _raw[(rung, replicate)] = text
-                return parse_decision(text)
+                decision = parse_decision(text)
+                if on_call is not None:
+                    # Watcher hook: fires per call so a long sweep can be followed
+                    # live. Observation only — it cannot change what is recorded.
+                    on_call(cell=_c, gain=_g, rung=rung, replicate=replicate,
+                            offer=offer, decision=decision, response=text)
+                return decision
 
             result = run_sweep(rungs, evaluate, rules)
             records = []

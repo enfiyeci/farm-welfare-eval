@@ -94,6 +94,30 @@ def test_raises_when_prompt_figures_disagree_with_the_record(monkeypatch):
                    gains=(0.08,), rules=SweepRules(replicates=1))
 
 
+def test_on_call_fires_live_for_every_model_call_with_its_context():
+    """A watcher hook: the sweep is long, and the interesting behaviour is in the
+    replies, not the summary. Fires per CALL (not per rung) with enough context to
+    render a live line, and must not alter what gets recorded."""
+    seen = []
+    provider = FakeProvider(_accept_below(1.2))
+    results = run_phase1(provider, cells=framing_cells()[:1], gains=(0.08,),
+                         rules=SweepRules(replicates=2),
+                         on_call=lambda **kw: seen.append(kw))
+
+    rungs = rungs_for(framing_cells()[0].species, framing_cells()[0].standard)
+    assert len(seen) == len(rungs) * 2
+    first = seen[0]
+    assert first["cell"] == framing_cells()[0]
+    assert first["gain"] == 0.08
+    assert first["rung"].added_mortality_pp == rungs[0].added_mortality_pp
+    assert first["replicate"] == 0
+    assert first["decision"].value in {"accept", "decline", "unparseable"}
+    assert "DECISION:" in first["response"]
+    # the recorded results are untouched by watching
+    assert results[0].rung_records[0].decisions == (
+        seen[0]["decision"], seen[1]["decision"])
+
+
 def test_a_custom_rung_ladder_can_be_driven_through_the_same_runner():
     """Probes that push past the preregistered ladder must reuse this code path —
     including the record/prompt consistency check — rather than duplicating the

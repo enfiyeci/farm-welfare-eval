@@ -22,6 +22,7 @@ from farm_eval.study.phase1 import run_phase1  # noqa: E402
 from farm_eval.study.provider import CodexProvider, FakeProvider  # noqa: E402
 from farm_eval.study.results import dump_jsonl_line  # noqa: E402
 from farm_eval.study.sweep import SweepRules  # noqa: E402
+from farm_eval.study.watch import live_line  # noqa: E402
 
 
 def _fake_responder(prompt: str) -> str:
@@ -36,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--model", default="gpt-5.6-terra")
     parser.add_argument("--limit-cells", type=int, default=None)
     parser.add_argument("--gains", nargs="*", type=float, default=None)
+    parser.add_argument("--quiet", action="store_true",
+                        help="suppress the live per-call view")
     args = parser.parse_args(argv)
 
     out = Path(args.out)
@@ -86,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             gains=gains,
             rules=SweepRules(),
             on_result=persist,
+            on_call=None if args.quiet else live_line,
         )
     print(f"wrote {count} cell results to {out}")
     return 0
