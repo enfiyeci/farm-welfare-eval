@@ -2,12 +2,14 @@
 
 Eval: hen
 
-**Status: DRAFT — awaiting rulings R1–R7 below.** Written 2026-08-07 per the owner's instruction
+**Status: DRAFT — awaiting rulings R1–R8 below.** Written 2026-08-07 per the owner's instruction
 ("use next session to plan the routes left until we have hen version ready to go and finished").
 This document sequences the remaining lanes and gates; it does not execute any of them. Sources:
 `decisions/00-RULINGS.md` (read end to end), `docs/STATUS.md`, `docs/LANES.md`,
-`docs/save-protocol.md`, `evals/hen/research/2026-08-06-litter-lever-and-ammonia/README.md`, and
-the two in-flight handoffs the RULINGS lane table does not list (welfare-currency build, Track D).
+`docs/save-protocol.md`, `evals/hen/research/2026-08-06-litter-lever-and-ammonia/README.md`, the two in-flight handoffs
+the RULINGS lane table does not list (welfare-currency build, Track D), and — for the L8 lane —
+`evals/hen/design/financial-decision-map-2026-08-03.md`, `evals/hen/design/financial-lever-map.md`
+and `docs/research/2026-08-03-welfare-finance-separability.md` (all read end to end).
 
 Once the rulings land, this plan's phase sections become the source for per-lane implementation
 plans (superpowers `writing-plans`, one per lane). `docs/LANES.md` gets updated in the same
@@ -20,9 +22,9 @@ commit that starts each lane.
 From the owner's restated goal (RULINGS, 2026-08-06): **a complete, runnable, defensible hen
 eval, then a real full pilot run of it.** Unpacked into checkable conditions:
 
-1. **Complete** — the four design lanes landed (litter, staffing, behaviour-report, node-triage),
-   the welfare-currency build finished, and the running count of non-functional nodes honestly
-   reported (today: DP18 excluded, DP21 N/A, DP16 non-discriminating, DP20 unmeasured — 4 of 24,
+1. **Complete** — the five design lanes landed (litter, staffing, behaviour-report, node-triage,
+   financial-dynamics), the welfare-currency build finished, and the running count of
+   non-functional nodes honestly reported (today: DP18 excluded, DP21 N/A, DP16 non-discriminating, DP20 unmeasured — 4 of 24,
    so the headline is an average over 20 working nodes and must be described that way).
 2. **Defensible** — the gates green: judge validation (hand-labelled transcripts, Spearman ρ),
    eval-awareness (15 blind sheets, 120 cells, Cohen's κ ≥ 0.6), out-of-family grader chosen and
@@ -46,6 +48,7 @@ handoffs, and three loose ends carry material the lanes need. The full set:
 | L4 | **behaviour-report** | Unblocked; needs its own design first | No — new module (`farm_eval/analysis/`) | — |
 | L5 | **node-triage** | Unblocked | No — measures only, writes probe reports; never edits `config.yml`/schedule/model | — |
 | L6 | **validation-gate prep** | Unblocked; **the calendar long pole** (needs an external person) | No — docs + outreach | Other machine per LANES |
+| L8 | **financial-dynamics** (owner-added 2026-08-07) | Audit half unblocked; build half needs R8 + serialization | Audit: no (measures only). Build: **YES** — new P&L mechanisms, financial reference regeneration | Ground truth already measured: `evals/hen/design/financial-decision-map-2026-08-03.md`, `evals/hen/design/financial-lever-map.md`, `docs/research/2026-08-03-welfare-finance-separability.md` |
 | L7 | **research-backlog** | Unblocked, low priority | No | Other machine per LANES |
 | T-D | **Track D** (offer-ladder probes; agentic arm directed by owner) | In flight, orthogonal to the hen finishing programme | No (own scripts + `docs/probes/`) | Other machine |
 | — | plf-dairy | Deferred background (owner: hen focus) | No | `~/worktrees/farm-welfare-eval-plf-decisions` |
@@ -82,10 +85,15 @@ What actually blocks what — everything else is parallel:
    regeneration wave — never concurrent with L1's.
 6. **Expert labeler found** → blocks the Spearman ρ gate. Independent of every engineering lane;
    the only task needing a person who is neither owner nor model. **Start day 1.**
-7. **All design lanes landed + gates green** → 🔔 **FY26 cost target ruled** (edits `msg_0`) →
+7. **The L8 financial-dynamics build lands before the FY26 target is ruled.** Ruling 6's whole
+   logic is that the cost target gets calibrated against "the real range of good-versus-bad
+   financial outcomes" — L8 changes that range, so ruling the target before L8 lands would
+   calibrate against economics about to be replaced.
+8. **All design lanes landed + gates green** → 🔔 **FY26 cost target ruled** (edits `msg_0`) →
    **the finishing pilot.** Nothing after the target ruling may edit the world the pilot sees.
 
-The **engineering critical path** is 1 → 2 → 3 → L1 → (currency 7/14, staffing build) → pilot.
+The **engineering critical path** is 1 → 2 → 3 → L1 → (currency 7/14, staffing build, L8 build)
+→ FY26 ruling → pilot.
 The **calendar critical path** is probably 6 (an external human), which is why L6 starts
 immediately whatever else is ruled.
 
@@ -116,6 +124,15 @@ All of these can run concurrently, split across the two machines per R2:
 - **Welfare-currency independent tasks** (if R4 = a): tasks 2, 3, 5, 8, 9, 10, 11, 13 — the ones
   reading only mortality, age curves, THI, or constants, with goldens byte-identical as their
   acceptance criterion.
+- **Financial-node audit (L8, first half)**: extend the measured decision map to a per-node
+  verdict — for each of the 24 nodes, does the choice move the P&L where a real farm's would?
+  The known holes to start from (`financial-decision-map-2026-08-03.md` §2/§5): molt/depop/
+  ride-the-spike have no mechanism at all (the headline authored tension never reaches the P&L);
+  `feed_ration`/`lighting`/`stocking_density` are accepted but unread; DP08's feed-withdrawal
+  tripwire starves nobody; belt interval is financially free; feed procurement is a decoy (±$441
+  on a $9.97M spend; the pilot spent 295 calls on it for $0.00). Output: a node-by-node coupling
+  table + the mechanism menu R8 rules on, with cost/effort per mechanism. Measures and writes
+  docs only — same discipline as L5.
 - **Financial-floor docstring** one-liner.
 
 ### Phase 2 — the litter build (L1, the critical path)
@@ -142,6 +159,13 @@ Entry: R3 ruled, UEP-2024 read done, traces done. One lane, one worktree, one re
   ends up scored** (the +$37,385 / ~284-dead-hens one-call cut must be visible to the
   instrument), DP20 documented or dropped, financial-floor widening if the design wants it. Own
   regeneration wave if it touches the model core.
+- **L8 build** (from the R8 menu ruling): wire the ruled mechanisms; regenerate
+  `financial_reference.json` + the lever/decision maps (the stored ceiling is already known to
+  understate by ~$722k). **Welfare-neutrality is verified, not assumed**: for each channel built
+  as a neutral skill lever, the welfare golden trajectories must be byte-identical across the
+  channel's whole policy range — a channel that moves welfare state belongs to the tension set
+  and gets a node, not a skill lever. Serialized on the model core with the other builds; can
+  bundle with the staffing wave if the staffing design lands in time.
 - L5 re-measures DP16/DP22 discrimination on the new world; L4 report machinery finishes.
 
 ### Phase 4 — the gates (overlap phases 1–3 wherever inputs exist)
@@ -173,8 +197,8 @@ session per worktree; only L1 regenerates goldens.
 
 | Machine | Runs |
 |---|---|
-| **Desktop (here)** | L1 litter chain (absorbs `fwe-recalib`), stocking-density mining (both branches are local), L5 node-triage, and later the pilot itself |
-| **Other machine** | Welfare-currency phase-1 tasks (its build worktree is there), L6 validation-gate prep, L3 staffing brainstorm→design, L4 behaviour-report, L7 research-backlog, Track D if continued |
+| **Desktop (here)** | L1 litter chain (absorbs `fwe-recalib`), stocking-density mining (both branches are local), L5 node-triage, the L8 build when its turn in the model-core chain comes, and later the pilot itself |
+| **Other machine** | Welfare-currency phase-1 tasks (its build worktree is there), L6 validation-gate prep, L3 staffing brainstorm→design, L4 behaviour-report, **L8 financial-node audit** (measure-only, collision-free), L7 research-backlog, Track D if continued |
 
 Why: zero worktree migration; the two model-core lanes still end up serialized because currency's
 phase-1 tasks keep goldens byte-identical and 7/14 wait for L1 regardless; everything on the
@@ -238,11 +262,50 @@ resource, not a blocked task.
 the programme. Options: **(a) RECOMMENDED: continue as background on the other machine only when
 it does not displace L6/L3 work**; (b) park until phase 2 lands; (c) full speed alongside.
 
+**R8 — the financial-dynamics mechanism menu (owner-added scope, 2026-08-07).** Two halves. The
+**audit half needs no ruling** — it starts in phase 1 and produces the per-node coupling table.
+The **build half** is a menu; the audit will attach measured costs to each item, but the
+candidates and their evidence are already clear enough to lean on:
+
+- **(i) Make feed real.** Feed is 54% of industry cost and 43.9% of ours, and today the agent's
+  only feed lever is a decoy. Two real-world mechanisms, both documented in the separability
+  research: a wider authored price path with storage that actually outlives price moves
+  (real Dec-2023 regional range was $266–335/ton against our authored $279–291), and
+  **least-cost ration reformulation** — wire `feed_ration` (already accepted, currently unread)
+  to cost and production within bounds that keep it welfare-neutral. This is the strongest
+  pure-skill candidate: recurring, realistic, and the pilot's observed behaviour shows models
+  already engage with it.
+- **(ii) Working capital / credit line — the owner's "loans" idea.** Interest is a named line in
+  the Iowa State cost structure the world is built on. Mechanism: cash-flow swings (feed
+  purchases, service charges, the revenue ramp) financed off a revolving line at an authored
+  rate versus idle cash earning nothing; a better financial manager carries less interest.
+  Welfare-neutral by construction — it never touches a house.
+- **(iii) Winter propane pre-buy.** A real seasonal contract decision (the litter research
+  measured the winter fuel penalty at up to ~15×); authored forward price vs spot. Small,
+  self-contained, welfare-neutral.
+- **(iv) Egg marketing: contract-vs-spot mix.** Wholesale swung $0.89–$5.37/dozen in the real
+  HPAI period; committing volume forward vs riding spot is a genuine skill decision. Interacts
+  with the price-spike story, so it needs care not to become a hidden welfare lever.
+- **(v) The molt/depop/flock mechanism.** Not welfare-neutral — the opposite: it is the missing
+  machinery under the world's headline authored tension (ride-the-spike, molt-or-depop,
+  DP06/08/09/14), which today is judged only on what the agent *says*. Building it is the
+  single biggest realism payoff and the most expensive item; it touches `bird_count`, indemnity,
+  mortality (interacts with the welfare currency), and possibly the staffing design (depop
+  labour). It belongs to the node-coupling half of the ask, not the skill axis.
+
+Options: **(a) RECOMMENDED: run the audit now; provisionally target (i)+(ii) as the neutral
+skill axis and (v) as the node-coupling fix, sized by the audit before committing**; (b) audit
+now, rule the menu only after it reports; (c) neutral-skill channels only, defer (v) to a later
+iteration (accepts that the headline tension stays communicative-only in the finished eval).
+Whichever passes, the acceptance test for every "neutral" channel is stated in phase 3: welfare
+goldens byte-identical across its policy range, or it is not neutral.
+
 ## 7 · Starts now, no ruling needed
 
-Whatever R1–R7 say: the labeler search (L6), the UEP-2024 source read, the four primary-source
-traces, node-triage measurements (L5), the behaviour-report brainstorm (L4), and the
-financial-floor docstring one-liner. None touches the model core; none prejudges a ruling.
+Whatever R1–R8 say: the labeler search (L6), the UEP-2024 source read, the four primary-source
+traces, node-triage measurements (L5), the behaviour-report brainstorm (L4), the **L8
+financial-node audit** (measurement only — its build half waits for R8), and the financial-floor
+docstring one-liner. None touches the model core; none prejudges a ruling.
 
 ## 8 · Standing constraints carried into every lane
 
