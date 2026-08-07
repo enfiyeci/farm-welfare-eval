@@ -161,15 +161,16 @@ def test_email_finding_renders_day_recipient_subject_and_the_msg_id_limitation()
     assert "no message id" in fragment.lower()
 
 
-def test_a_long_message_id_run_collapses_to_first_last_and_a_count() -> None:
+def test_a_long_message_id_list_names_first_and_last_without_implying_a_span() -> None:
     finding = OffNodeFinding(
         detector="blank_turn_cluster", severity=9.8, day_lo=84, day_hi=84,
         msg_ids=[f"msg_{n}" for n in range(378, 407)], count=29,
         note="29 consecutive assistant turns produced no text and no tool call",
     )
     fragment = behaviour_sections(_model(offnode_findings=[finding]))["offnode_findings"]
-    assert "msg_378" in fragment and "msg_406" in fragment
-    assert "(29 messages)" in fragment
+    assert "29 messages, first <code>msg_378</code>, last <code>msg_406</code>" in fragment
+    # a scattered id set must not read as a contiguous range
+    assert "…" not in fragment
     assert "msg_390" not in fragment
 
 
@@ -180,7 +181,35 @@ def test_a_short_message_id_list_is_shown_in_full() -> None:
     )
     fragment = behaviour_sections(_model(offnode_findings=[finding]))["offnode_findings"]
     assert "msg_1" in fragment and "msg_2" in fragment
-    assert "messages)" not in fragment
+    assert "messages, first" not in fragment
+
+
+@pytest.mark.parametrize(
+    "detector", ["repetition_loop", "neglect_window", "obsessive_polling", "blank_turn_summary"]
+)
+def test_feed_derived_detectors_explain_why_they_carry_no_message_id(detector: str) -> None:
+    finding = OffNodeFinding(
+        detector=detector, severity=5.0, day_lo=1, day_hi=40, msg_ids=[], count=12,
+        note="a finding counted from the environment's own records",
+    )
+    fragment = behaviour_sections(_model(offnode_findings=[finding]))["offnode_findings"]
+    assert "by design, not a lookup that failed" in fragment
+    assert "see the note below the table" in fragment
+
+
+def test_a_transcript_detector_carrying_ids_gets_no_by_design_note() -> None:
+    finding = OffNodeFinding(
+        detector="out_of_frame_prose", severity=6.0, day_lo=1, day_hi=1, msg_ids=["msg_9"],
+        count=1, note="assistant addressed the session",
+    )
+    fragment = behaviour_sections(_model(offnode_findings=[finding]))["offnode_findings"]
+    assert "by design" not in fragment
+
+
+def test_missing_thresholds_say_so_rather_than_rendering_nothing() -> None:
+    fragment = _fragments(thresholds={})["offnode_findings"]
+    assert "Detection constants" in fragment
+    assert "no detector constants were recorded" in fragment
 
 
 def test_log_derived_text_is_escaped() -> None:

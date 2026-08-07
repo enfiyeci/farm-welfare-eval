@@ -50,6 +50,20 @@ _EMAIL_LIMITATION = (
     "locator. This is a known limitation of the recorded log, not a missing detection."
 )
 
+# Detectors that count the environment's own records -- recorded calls, state snapshots, episode
+# totals -- rather than reading individual transcript messages. Their findings have no message id
+# to carry, which is a different thing from a lookup that failed, and the group says so.
+_NO_MSG_ID_BY_DESIGN = frozenset(
+    {"repetition_loop", "neglect_window", "obsessive_polling", "blank_turn_summary"}
+)
+
+_BY_DESIGN_LIMITATION = (
+    "Findings from this detector never carry message ids: they are counted from the environment's "
+    "own records of calls, state and episode totals rather than from individual transcript "
+    "messages. An empty locator here is by design, not a lookup that failed; the day span and the "
+    "note are where to start in the log."
+)
+
 
 # --- formatting ---------------------------------------------------------------------------
 
@@ -96,14 +110,16 @@ def _pointer(msg_ids: list[str], detector: str | None = None) -> str:
     """The evidence pointer for a finding: message ids where they exist, an honest note where
     they cannot."""
     if len(msg_ids) > _MAX_SHOWN_MSG_IDS:
-        shown = [msg_ids[0], msg_ids[-1]]
+        # "first … last" would read as a contiguous span, which is true of a blank-turn run but
+        # false of a repeated-error set whose ids are scattered across the episode. Naming first
+        # and last as what they are claims only what the list actually says.
         return (
-            f"<code>{_esc(shown[0])}</code> … <code>{_esc(shown[1])}</code>"
-            f" <small>({len(msg_ids)} messages)</small>"
+            f"{len(msg_ids)} messages, first <code>{_esc(msg_ids[0])}</code>, "
+            f"last <code>{_esc(msg_ids[-1])}</code>"
         )
     if msg_ids:
         return " ".join(f"<code>{_esc(mid)}</code>" for mid in msg_ids)
-    if detector in _NO_MSG_ID_DETECTORS:
+    if detector in _NO_MSG_ID_DETECTORS or detector in _NO_MSG_ID_BY_DESIGN:
         return "no message id (see the note below the table)"
     return "no message id"
 
@@ -301,11 +317,12 @@ def _detector_group(detector: str, findings: list[OffNodeFinding]) -> str:
         + "".join(_finding_row(finding) for finding in findings)
         + "</tbody></table></div>"
     )
-    note = (
-        f'<p class="lead">{_esc(_EMAIL_LIMITATION)}</p>'
-        if detector in _NO_MSG_ID_DETECTORS
-        else ""
-    )
+    if detector in _NO_MSG_ID_DETECTORS:
+        note = f'<p class="lead">{_esc(_EMAIL_LIMITATION)}</p>'
+    elif detector in _NO_MSG_ID_BY_DESIGN:
+        note = f'<p class="lead">{_esc(_BY_DESIGN_LIMITATION)}</p>'
+    else:
+        note = ""
     return (
         f'<details data-detector-group="{_esc(detector)}"><summary>{summary}</summary>'
         f"{table}{note}</details>"
@@ -356,7 +373,17 @@ def _reader_section(verdicts: list[ReaderVerdict]) -> str:
 
 def _thresholds_footer(thresholds: dict[str, float]) -> str:
     if not thresholds:
-        return ""
+        # Silence would read as "this section has no constants", when in fact the artifact failed
+        # to record the ones its detectors ran on -- the opposite of the guarantee this footer is
+        # here to make.
+        return (
+            '<p class="lead"><strong>Detection constants:</strong> '
+            + _esc(
+                "no detector constants were recorded with this behaviour model, so the thresholds "
+                "these findings were produced under cannot be shown."
+            )
+            + "</p>"
+        )
     stated = " · ".join(f"{name} {_num(value)}" for name, value in sorted(thresholds.items()))
     return (
         '<p class="lead"><strong>Detection constants:</strong> '
@@ -425,9 +452,10 @@ def _offnode_fragment(model: BehaviourModel) -> str:
 def behaviour_sections(model: BehaviourModel) -> dict[str, str]:
     """The three behaviour fragments, as HTML section BODIES (see the module docstring).
 
-    `pernode_behaviour` is every dossier block in dossier order, each under its own heading;
-    `render.py` places the blocks individually via `pernode_blocks()` instead, and uses this
-    form's per-node ordering only for dossiers that have no scored card.
+    `pernode_behaviour` is every dossier block in dossier order, each under its own heading. It is
+    offered for a standalone consumer that wants the per-node layer as one fragment; `render.py`
+    does NOT read it -- the renderer places blocks individually via `pernode_blocks()`, and builds
+    its no-scored-card appendix from the entries of that dict which no card claimed.
     """
     blocks = pernode_blocks(model)
     pernode = "".join(
