@@ -258,3 +258,96 @@ def keel_seed_offset_hours(start_age_weeks: float, pp) -> float:
     fracture" cohort at week 68 and schedule its later fractures past depopulation.
     """
     return max(0.0, (start_age_weeks - pp.keel_first_fracture_age_weeks) * 7 * 24)
+
+
+def peritonitis_fatal_pain(baseline_deaths: float, pp) -> PainDelta:
+    """Bird-hours of fatal (acute) egg-peritonitis pain, charged at the day of death.
+
+    PROVENANCE: PAIN-TRACK SOURCED, SHARE OURS (spec §5.5, Ch. 5 Pain-Track 5.1).
+    The only channel in the currency that feeds Excruciating.
+
+    ⚠️ `baseline_deaths` is the day's BASELINE (age-driven) death count and nothing else.
+    Charging a share of excess mortality would make the disease appear to respond to the agent
+    when it does not — a manufactured signal, and the single most misleading thing this design
+    could do (§5.5.1 ¶9, acceptance criterion 8). The whole track is charged at the day of
+    death, which concentrates weeks of prior suffering onto one day; cumulative totals are
+    unaffected, but a daily-rate plot must spread it (same caveat as feather, §5.5.1 ¶3).
+    """
+    affected = baseline_deaths * pp.egps_fatal_share_of_baseline
+    if affected <= 0.0:
+        return ZERO
+    exc = dis = hurt = ann = 0.0
+    for hours, (e, d, h, a) in pp.egps_fatal_phases:
+        exc += hours * e
+        dis += hours * d
+        hurt += hours * h
+        ann += hours * a
+    return PainDelta.of(
+        excruciating=affected * exc, disabling=affected * dis,
+        hurtful=affected * hurt, annoying=affected * ann,
+    )
+
+
+def peritonitis_chronic_track(pp) -> list[tuple[float, tuple[float, float, float]]]:
+    """Pain-Track 5.2 as (hours, (disabling, hurtful, annoying)) segments, per affected bird."""
+    return [
+        (pp.egps_chronic_infiltration_hours, tuple(pp.egps_chronic_infiltration_split)),
+        (pp.egps_chronic_acute_hours, tuple(pp.egps_chronic_acute_split)),
+        (pp.egps_chronic_phase_hours, tuple(pp.egps_chronic_phase_split)),
+    ]
+
+
+def peritonitis_chronic_case_pain(cases: float, t0_hours: float, t1_hours: float, pp) -> PainDelta:
+    """Pain accrued by `cases` chronic-peritonitis birds over case-age window [t0, t1).
+
+    ⚠️ Charging the whole ~4,000-hour track on the incidence day — as an earlier draft did —
+    bills a case arising near the horizon for suffering that never happens inside the episode.
+    Unlike feather, whose Pain-Track completes in about 30 minutes, this one runs for months, so
+    the instantaneous charge §5.5.1 ¶3 accepts for feather is NOT acceptable here. Nothing
+    accrues past the end of the track: these birds recover rather than continuing indefinitely.
+    """
+    if cases <= 0.0 or t1_hours <= t0_hours:
+        return ZERO
+    dis = hurt = ann = 0.0
+    cursor = 0.0
+    for duration, (d, h, a) in peritonitis_chronic_track(pp):
+        seg_start, seg_end = cursor, cursor + duration
+        cursor = seg_end
+        overlap = min(t1_hours, seg_end) - max(t0_hours, seg_start)
+        if overlap > 0.0:
+            dis += overlap * d
+            hurt += overlap * h
+            ann += overlap * a
+    return PainDelta.of(disabling=cases * dis, hurtful=cases * hurt, annoying=cases * ann)
+
+
+def peritonitis_chronic_daily_table(pp) -> tuple[list[PainDelta], PainDelta]:
+    """`daily_table` over Pain-Track 5.2. The terminal entry is ZERO by construction — the
+    chronic track ENDS, unlike keel's chronic phase, which runs to the horizon."""
+    total = sum(duration for duration, _ in peritonitis_chronic_track(pp))
+    return daily_table(total, peritonitis_chronic_case_pain, pp)
+
+
+def peritonitis_chronic_new_cases(birds: int, days: float, pp) -> float:
+    """New chronic-peritonitis cases arising in one house-day. INCIDENCE IS OURS."""
+    if birds <= 0 or days <= 0.0:
+        return 0.0
+    return birds * days * pp.egps_chronic_incidence_per_cycle / pp.egps_chronic_cycle_days
+
+
+def peritonitis_chronic_pain(birds: int, days: float, pp) -> PainDelta:
+    """Bird-hours of chronic (non-fatal) egg-peritonitis pain for one house-day.
+
+    PROVENANCE: PAIN-TRACK SOURCED, INCIDENCE OURS (spec §5.5, Ch. 5 Pain-Track 5.2).
+    Carries the bulk of the peritonitis burden. These birds do not die, so mortality cannot
+    find them — the incidence is authored against the platform's 2-8% aviary figure and spread
+    evenly across the cycle. ⚠️ The chronic phase is 1% Disabling, not the printed 10%
+    (§5.5.1 ¶11): only 1% reproduces the chapter's own published 89 h.
+
+    ⚠️ Kept ONLY as the per-affected-bird lifetime total, for the anchor test. It is NOT the
+    accrual path — `integrate()` uses the rolling case-age series so no pain is charged for
+    hours after the episode ends (see this task's Step 5).
+    """
+    cases = peritonitis_chronic_new_cases(birds, days, pp)
+    total = sum(duration for duration, _ in peritonitis_chronic_track(pp))
+    return peritonitis_chronic_case_pain(cases, 0.0, total, pp)

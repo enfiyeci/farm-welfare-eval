@@ -92,6 +92,37 @@ class PainParams(BaseModel):
     # — far worse than the timing shift the bucket was supposed to cost. One cohort per house
     # per day instead, made cheap by the precomputed daily table (pain.keel_daily_table).
 
+    # --- Egg peritonitis, FATAL / acute (Ch. 5 Pain-Track 5.1): PAIN-TRACK SOURCED, SHARE OURS ---
+    # Phase hours and splits below reproduce the chapter's published 2.25 h Excruciating per
+    # affected bird. ⚠️ The SHARE of baseline deaths attributed to EGPS is OURS: Ch. 5's Research
+    # Gaps state outright that no prevalence or case-fatality ratio is published. Ch. 9 names
+    # peritonitis the leading source of Excruciating hours, which motivates a large share but
+    # does not fix it. Label it ours wherever it is reported.
+    # ⚠️ §5.5.1 ¶9: this share attaches to BASELINE mortality ONLY. Never to excess.
+    egps_fatal_share_of_baseline: float = 0.25
+    # [hours, [excruciating, disabling, hurtful, annoying]] per affected bird
+    egps_fatal_phases: list[list] = [
+        [72.0, [0.00, 0.00, 0.00, 0.25]],
+        [560.0, [0.00, 0.20, 0.70, 0.10]],
+        [18.0, [0.00, 0.90, 0.10, 0.00]],
+        [7.5, [0.30, 0.40, 0.30, 0.00]],
+        [3.0, [0.00, 0.10, 0.80, 0.10]],
+    ]
+
+    # --- Egg peritonitis, CHRONIC (Ch. 5 Pain-Track 5.2): PAIN-TRACK SOURCED, INCIDENCE OURS ---
+    # These birds do not die, so mortality cannot find them; the incidence is authored, anchored
+    # on the platform's 2-8% aviary figure. Phase hours were solved so the per-affected totals
+    # reproduce the chapter's published 89.6 h Dis / 1,120 h Hurt / 2,090 h Ann exactly.
+    # ⚠️ §5.5.1 ¶11: the chronic phase is 1% Disabling, NOT the printed 10%.
+    egps_chronic_incidence_per_cycle: float = 0.05
+    egps_chronic_cycle_days: float = 490.0
+    egps_chronic_infiltration_hours: float = 72.0
+    egps_chronic_infiltration_split: list[float] = [0.00, 0.00, 0.25]
+    egps_chronic_acute_hours: float = 560.0
+    egps_chronic_acute_split: list[float] = [0.10, 0.80, 0.10]
+    egps_chronic_phase_hours: float = 3360.0
+    egps_chronic_phase_split: list[float] = [0.01, 0.20, 0.60]
+
     @model_validator(mode="after")
     def _validate_awake_window(self):
         if not (0.0 < self.awake_hours_per_day <= 24.0):

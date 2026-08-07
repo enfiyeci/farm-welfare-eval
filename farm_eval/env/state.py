@@ -117,6 +117,7 @@ class WelfareState(BaseModel):
     worker_pain: PainTrack = Field(default_factory=PainTrack)  # WORKER-HOURS, never summed with birds
     keel_cohorts: list[KeelCohort] = Field(default_factory=list)
     keel_baseline_pct: dict[str, float] = Field(default_factory=dict)
+    peritonitis_case_ages: dict[str, list[float]] = Field(default_factory=dict)
 
 
 class FinancialState(BaseModel):

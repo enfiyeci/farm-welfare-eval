@@ -94,6 +94,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
     start_day = state.day_index
     keel_days, keel_terminal = pain.keel_daily_table(params.pain)
+    egps_days, _ = pain.peritonitis_chronic_daily_table(params.pain)
     for offset in range(elapsed_days):
         # Absolute calendar day for this iteration (1-based relative to eval start).
         # start_day is the day index BEFORE this call, so day=start_day+1 is the
@@ -336,6 +337,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # none of them touches hw, bird_count, the harm accumulators or the financials,
             # which is what keeps acceptance criterion 1 (goldens byte-identical) true.
             awake_h = params.pain.awake_hours_per_day
+            # A rolling series of daily new-case counts, newest last. Each entry accrues its
+            # own day of Pain-Track 5.2 through the precomputed table, so a case arising near
+            # the horizon is charged only the hours that actually occur inside the episode.
+            ages = state.welfare.peritonitis_case_ages.setdefault(hid, [])
+            ages.append(pain.peritonitis_chronic_new_cases(birds, 1.0, params.pain))
+            del ages[: max(0, len(ages) - len(egps_days))]   # cases past the track have recovered
+            for _offset, _cases in enumerate(reversed(ages)):
+                if _cases > 0.0:
+                    acc.accrue_pain(state.welfare, hid, "peritonitis_chronic",
+                                    egps_days[_offset].scaled(_cases))
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
@@ -395,6 +406,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 for cohort in state.welfare.keel_cohorts:
                     if cohort.house_id == hid:
                         cohort.birds *= _survival
+                # The chronic-peritonitis case series carries birds too, and for the same
+                # reason: an unscaled case list keeps charging pain for cases belonging to
+                # birds no longer in bird_count.
+                _ages = state.welfare.peritonitis_case_ages.get(hid)
+                if _ages:
+                    state.welfare.peritonitis_case_ages[hid] = [c * _survival for c in _ages]
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
