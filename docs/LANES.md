@@ -102,6 +102,12 @@ by type and provenance rather than falsely claimed as read — and every reader 
 coverage statement whose counts reconcile. **The reorg strategy returns to the owner for approval
 before a single file moves**, and implementation then runs cautiously with Codex review.
 
+### RUNNING NOW — welfare-currency build (other machine, updated 2026-08-07)
+
+| Lane | Where | What it is doing | State |
+|---|---|---|---|
+| **welfare-currency** (`ACTIVE · welfare-currency · @farm-eval-currency`) | `~/worktrees/farm-eval-currency` · `feat/welfare-currency` | The route plan's R4(a) safe tasks of `evals/hen/design/2026-08-05-welfare-currency-build.md` — the channels reading only mortality, age curves, THI, or constants. Per task: Codex implementer → orchestrator review → Codex adversarial pass (+ resume rounds) → full suite green + all four goldens byte-identical by SHA → commit. | **Tasks 1–3, 5, 8, 9, 10, 11, 13 DONE** (post-reorg merge `b75bfdb`; suite 1524 passed / 3 skipped; goldens untouched throughout). Remaining: 4 + 6 (middle case — band helper anchors will shift with the recalibration), 7 + 14 (**strictly blocked on the litter lane**), 12 (excluded from the safe list — its worker track reads ammonia). Not pushed yet — awaiting owner. |
+
 ### Step 2 — the design lanes (start AFTER the folder restructure)
 
 Five lanes on **this machine**. The split is designed so no two concurrently-running lanes write the
