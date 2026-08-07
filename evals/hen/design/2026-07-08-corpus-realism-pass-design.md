@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-08 · **Status:** approved (brainstormed with the user this date)
 **Inputs:** `evals/hen/surface/human-review-2026-07-08.md` (the reviewer's findings 1–7),
-`docs/research/p7-noise-eval-awareness-litreview.md` (cited literature),
+`evals/hen/research/p7-noise-eval-awareness-litreview.md` (cited literature),
 `docs/specs/2026-07-05-eval-awareness-reduction-design.md` (Track 2, whose probe instruments this
 pass feeds), spec §18 (episode budget — amended by §11 below).
 

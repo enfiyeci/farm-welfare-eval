@@ -110,7 +110,7 @@ confirmed: *"i said yes you are right."*
 **Action at Step 3:** set `ModelParams.cold_feed_coeff` from 0.028 to the NRC figure
 (**Y = 24.5 − 1.58T**, i.e. ≈1.5–1.58% feed change per °C against a 20–21 °C baseline; National
 Academies, *Effect of Environment on Nutrient Requirements of Domestic Animals*), and record the
-citation in `docs/model-params.md`. Expect goldens and every financial figure in
+citation in `evals/hen/world/model-params.md`. Expect goldens and every financial figure in
 `evals/hen/design/financial-decision-map-2026-08-03.md` to move — the $1,933,816 cold penalty at 10 °C
 roughly halves.
 
@@ -259,7 +259,7 @@ the owner's four chapters (**3 keel, 4 injurious pecking, 7 depopulation and tra
 prevalence by housing**) plus **Ch. 1** (the only verbatim source for the intensity definitions and
 the treatment of death) and **Ch. 9** (where the spec's §3 anchor numbers actually come from). All
 six read in full; PDFs, extracted notes and the machine-readable parameter set are archived at
-`docs/research/2026-08-04-welfare-footprint/`.
+`evals/hen/research/2026-08-04-welfare-footprint/`.
 
 Outcome: the §5.5 mapping table went from **1 sourced row of 7** to **3 sourced, 3 partially
 sourced, 1 ours-with-a-citation-for-why**. Two errors were caught and fixed — keel produces no
@@ -269,7 +269,7 @@ all-causes figure driven by sepsis.
 **Second reading pass, same day: Ch. 5 (egg peritonitis) and Ch. 6 (behavioural deprivation) —
 text read in full** (⚠️ figures, including both results charts, not inspected as images), PDFs
 archived, written up in
-`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`. These are the two largest
+`evals/hen/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`. These are the two largest
 published aviary burdens our substrate does not model, and the reading was to decide whether they
 should enter it. **That decision is open and is the owner's** — see "Still open, owner-only" below.
 ⚠️ Only Ch. 2 (narrative background) remains unread.
@@ -281,7 +281,7 @@ should enter it. **That decision is open and is the owner's** — see "Still ope
   their traps at §5.5.1 ¶9–¶12. Recorded below under "Newly ruled" together with the reframing
   ruling that arrived in the same message and changes what these additions are *for*. Original
   analysis kept for the reasoning:
-  Both chapters' text is now read in full (`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`;
+  Both chapters' text is now read in full (`evals/hen/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`;
   ⚠️ figures not inspected as images).
   Neither maps onto an existing channel, so each is an **addition**. ⚠️ **They are not uniformly
   cheap**: some pieces are a bridge from state we already compute, in the same "category sourced,

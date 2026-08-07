@@ -246,7 +246,7 @@ fraction as DATA. Project convention forbids these as literals in logic.
 
 Provenance is carried per field group in the comments, in the vocabulary of spec §5.5.
 Source: evals/hen/design/2026-08-04-welfare-currency-design.md and
-docs/research/2026-08-04-welfare-footprint/pain-track-parameters.json.
+evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json.
 """
 from __future__ import annotations
 

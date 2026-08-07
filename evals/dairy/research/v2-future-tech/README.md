@@ -24,7 +24,7 @@ limit, so [`findings.md`](findings.md) is the hand-synthesis from the verified +
 4. **[`raw-claims.md`](raw-claims.md)** — provenance only. All 115 extracted claims verbatim
    with verification status. Cite the verification layer (findings/sources), not this file.
 
-## Confidence discipline (inherited from `docs/research/SOURCES.md`)
+## Confidence discipline (inherited from `evals/hen/research/SOURCES.md`)
 
 - Load-bearing welfare mechanisms and hardcoded numbers must trace to a ✅ peer-reviewed source
   and, ideally, a claim in the **verified** sample.
@@ -52,7 +52,7 @@ limit, so [`findings.md`](findings.md) is the hand-synthesis from the verified +
 
 ## Related project docs
 
-- `docs/research/SOURCES.md` — the master v1/v2 anchor register (UEP/FDA/AVMA compliance spine).
+- `evals/hen/research/SOURCES.md` — the master v1/v2 anchor register (UEP/FDA/AVMA compliance spine).
 - `docs/welfare-decisions.html` — v1 decision deck (evidence-confidence / settled-vs-contested
   convention this registry reuses).
 - Memory: `farm-eval-v2-redesign`, `v2-nodes-cite-real-papers`.

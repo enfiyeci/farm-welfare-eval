@@ -74,7 +74,7 @@ Metrics) and the owner-supplied [Animal Ask post](https://www.animalask.org/post
 
 **Verbatim from Box 1.2, Chapter 1** of *Quantifying Pain in Laying Hens* (Alonso & Schuck-Paim
 2021), read in full 2026-08-04. Source PDF and extracted notes:
-`docs/research/2026-08-04-welfare-footprint/`.
+`evals/hen/research/2026-08-04-welfare-footprint/`.
 
 | Category | Definition (abridged, wording preserved) |
 |---|---|
@@ -150,7 +150,7 @@ the **intensity assignment**, not the epidemiology.
 ## 3. Published anchors we can calibrate against
 
 **Absolute burden per average flock member, awake hours, 70-week cycle** — from
-`docs/research/2026-08-04-welfare-footprint/pain-track-parameters.json`, which reproduces the
+`evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json`, which reproduces the
 book's published totals **to within rounding** (that agreement is the check that the extraction is
 faithful). ⚠️ It is the *live* platform, not the 2021 print run: the Hurtful total differs by 0.9%
 and two segment-level cells have drifted. See `findings.md` §4.1 before quoting any single cell:
@@ -174,7 +174,7 @@ misattributed. That figure is Chapter 9's **all-causes** total, and Chapter 9 sa
 hours come "predominantly" from conditions progressing to **severe sepsis** — acute bacterial
 peritonitis first, infected vent wounds second. **Keel fractures produce zero Excruciating hours**;
 the row is empty in every keel Pain-Track (3.1–3.4). See
-`docs/research/2026-08-04-welfare-footprint/findings.md` §1.
+`evals/hen/research/2026-08-04-welfare-footprint/findings.md` §1.
 
 **Resolved:** the flagged "mutual inconsistency" was not one. Chapter 9: "although only a few
 minutes of excruciating pain are expected for the average population member …, the time in
@@ -230,7 +230,7 @@ the Welfare Footprint authors name themselves in every chapter's "Research Gaps"
 ⚠️ **Two same-day amendments to this finding.** First, Chapter 6 **narrows** it: the book's aviary
 behavioural-deprivation tracks carry affected *fractions*, and it names litter condition as one
 driver — so dustbathing deprivation is a published Pain-Track that our agent does move
-(`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md` §1). It is the one exception to
+(`evals/hen/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md` §1). It is the one exception to
 "silent on every channel it can move". Second, the §1.1 ruling makes this finding the **centre** of
 the design rather than a caveat on it: if the headline is the attributable change, then the
 unquantified rows *are* the measurement and the well-sourced rows are the background.
@@ -387,7 +387,7 @@ disruption-of-behaviour decision rule (§2.1) and only the *thresholds* are auth
 
 Egg peritonitis (Ch. 5) and behavioural deprivation (Ch. 6) are added. Neither maps onto an
 existing channel; the evidence and the cost of each is in
-`docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`. **Read §1.1 first** — only one
+`evals/hen/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`. **Read §1.1 first** — only one
 of these six rows contributes to the change headline.
 
 ⚠️ **These six behave differently from every row above them.** Keel and feather are *event*
@@ -504,7 +504,7 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
 3. **The feather driver is a unit mismatch and needs an explicit bridge.**
    `farm_eval/env/model/layers/feather.py` defines `feather_damage_pct` as the **prevalence of hens
    with severe plumage damage** (age-interpolated: 3.2% at wk 31, 32.9% at wk 46, 57.8% at wk 65 —
-   `docs/model-params.md` §Feather, from a German non-beak-trimmed aviary study). Chapter
+   `evals/hen/world/model-params.md` §Feather, from a German non-beak-trimmed aviary study). Chapter
    8's conversion consumes a **flock-average plumage-loss score** on 0–100%. "57.8% of hens are
    damaged" is not "the average hen has lost 57.8% of her pluckable feathers." Treating one as the
    other misstates the burden.
@@ -636,7 +636,7 @@ adversarial review of the first sourced draft and each is a genuine defect, not 
     reproduces Chapter 5's own published 89 [50–129] h Disabling (56 h from the acute episode plus
     33.6 h from the chronic phase). The printed value would give ~392 h, over four times the figure
     the chapter prints two pages later. This is the **third** known print-versus-platform
-    divergence (`docs/research/2026-08-04-welfare-footprint/findings.md` §4.1).
+    divergence (`evals/hen/research/2026-08-04-welfare-footprint/findings.md` §4.1).
 12. ⚠️ **Dustbathing is about to become the loudest lever in the currency — check that before
     trusting it.** At the sourced numbers, the affected fraction swings 10% → 50% between dry and
     wet litter and each affected bird carries 875 h of Annoying pain per cycle, so the swing is
@@ -1113,7 +1113,7 @@ by construction so no reader mistakes it for a bug. The one caveat the authors r
 model: harms are not truly independent — early trauma can raise the intensity of later pain. They
 flag it as a future refinement.
 
-### Q3. Do we chase the paywalled sources? **Moot.** The book was free; six chapters are read and archived in `docs/research/2026-08-04-welfare-footprint/`.
+### Q3. Do we chase the paywalled sources? **Moot.** The book was free; six chapters are read and archived in `evals/hen/research/2026-08-04-welfare-footprint/`.
 
 ### Q4. Should worker exposure get its own parallel track in the same units? **RULED YES, 2026-08-04** (*"yeah sure why not"*).
 
@@ -1156,7 +1156,7 @@ REVISE). Four important findings, all high-confidence, all fixed in this version
 ### 8.1 Source-reading pass, 2026-08-04
 
 The prerequisite reading is **done**. Chapters 1, 3, 4, 7, 8 and 9 read in full from the publisher
-PDFs, now archived with extracted notes in `docs/research/2026-08-04-welfare-footprint/`
+PDFs, now archived with extracted notes in `evals/hen/research/2026-08-04-welfare-footprint/`
 (see its `README.md` for the coverage statement and what was *not* read). Changes to this spec:
 
 | Change | Section |
@@ -1189,7 +1189,7 @@ real.** One combined fix wave:
 | Heat bands overlap, so a bird at THI ≥30 while panting is counted both Hurtful and Disabling | **Fixed** — bands made mutually exclusive with an explicit `panting_fraction` split summing to ≤100% |
 | Footpad's "infected/necrotic → Disabling" band cannot be derived: `layers/footpad.py` has only mild and severe compartments and §5.3 forbids new physics | **Fixed** — band removed; escalating footpad to Disabling recorded as a Step-3 physics change |
 
-Two further errors in `docs/research/2026-08-04-welfare-footprint/findings.md` were found and fixed
+Two further errors in `evals/hen/research/2026-08-04-welfare-footprint/findings.md` were found and fixed
 in the same wave: the claim that a dying bird accrues less than a surviving one (it compared
 prevalence-weighted averages against unweighted ones — withdrawn, see §7 Q1), and the claim that the
 extracted parameter set reproduces the book "exactly" (it matches on totals; two segment-level cells

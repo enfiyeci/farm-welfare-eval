@@ -18,7 +18,7 @@ a triage gate that orders everything after.
 | 0 | Partial-scoring graceful degradation | NOW | S | none |
 | 1 | Judge-validation harness (Spearman ρ gate) | NOW | M | none to build; expert labels gate cross-model claims |
 | — | **Pilot triage** (decision, not a build) | when pilot lands | — | is the gate |
-| 2 | Eval-awareness reduction (recover/reconstruct `docs/research/eval-awareness-reduction-notes.md` first — never committed, confirmed absent from all branches/history) | after triage + trusted judge | L | HIGH |
+| 2 | Eval-awareness reduction (recover/reconstruct `evals/hen/research/eval-awareness-reduction-notes.md` first — never committed, confirmed absent from all branches/history) | after triage + trusted judge | L | HIGH |
 | 3 | Document-artifact corpus (structured text via `read_document`) | later | M | medium |
 | 4 | Human-play GUI (label-generation enabler for Track 1) | later, only if hand-labeling proves insufficient | M–L | low |
 

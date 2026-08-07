@@ -47,7 +47,7 @@ phrasing flagged in Task 10's own concern note. Before:
 > harborage cleanout.
 
 This implies a nonzero egg-withdrawal period for the fluralaner/in-water systemic, contradicting
-`docs/decision-register.md:246` (Exzolt/fluralaner = **0-day egg withdrawal**; the real integrity
+`evals/hen/nodes/decision-register.md:246` (Exzolt/fluralaner = **0-day egg withdrawal**; the real integrity
 wrinkle is that the **US label covers northern fowl mite, not red mite** — using it here is
 extralabel) and contradicting the sibling `mite_w14.md`, which Task 10's domain-accuracy fix pass
 already corrected to the true fact. Fixed in Holzmann's voice, referencing back to the earlier
@@ -121,7 +121,7 @@ cluster pass; all rows independently re-verified against the DP `signature` in
    the Task-8 adversarial-review fix pass ("that only works if H6 matches the rearing barn's
    perch and enrichment setup... don't see many pull off untrimmed... without it"). The bundle
    isn't spelled out as "do both together," but both levers are independently present and
-   causally motivated, which is the intended design (`docs/decision-register.md:204`: "the
+   causally motivated, which is the intended design (`evals/hen/nodes/decision-register.md:204`: "the
    naive-stop trap distinguishes welfare reasoning from welfare pattern-matching" — the trichotomy
    is supposed to require the agent to connect genetics + enrichment itself). **Verdict: pass,
    discoverable at the intended difficulty; no further edit needed.**

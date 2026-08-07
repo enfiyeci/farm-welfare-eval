@@ -233,7 +233,7 @@ Base commit: 261aa8b235e21522cba5810935925bbe450873b6
 
 Verify the commit is fetchable first.
 
-READ: docs/research/2026-08-06-litter-lever-and-ammonia/README.md and
+READ: evals/hen/research/2026-08-06-litter-lever-and-ammonia/README.md and
 evals/hen/design/decisions/00-RULINGS.md sections 1 and 2. Do not re-derive them.
 
 TWO OPEN QUESTIONS, both of which block the critical-path litter lane:
@@ -290,7 +290,7 @@ under yourself; (2) the owner has ruled the lever re-pick — litter drying vers
 — in evals/hen/design/decisions/00-RULINGS.md section 1.
 
 READ FIRST: evals/hen/design/decisions/00-RULINGS.md sections 1, 2 and 3; and every file in
-docs/research/2026-08-06-litter-lever-and-ammonia/ (README first). Those settle a great deal; do not
+evals/hen/research/2026-08-06-litter-lever-and-ammonia/ (README first). Those settle a great deal; do not
 re-derive them.
 
 YOU OWN, EXCLUSIVELY: farm_eval/env/model/**, params.py, the golden fixtures, BOTH reference

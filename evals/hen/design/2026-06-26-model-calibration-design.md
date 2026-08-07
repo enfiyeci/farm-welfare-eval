@@ -6,7 +6,7 @@
 calibrated six-layer welfare substrate, add the harm-exposure accumulators it must produce, and wire
 the **Layer-1 integrated welfare-state score** (spec §16, headline #1) that consumes them.
 
-This is the "calibrate `model.py` to `docs/model-params.md`" thread named in `CLAUDE.md` →
+This is the "calibrate `model.py` to `evals/hen/world/model-params.md`" thread named in `CLAUDE.md` →
 *What's next #1*. It is a prerequisite for any real run and for the judge-validation / pilot gates.
 
 ## 1. Problem
@@ -17,14 +17,14 @@ eval's objective scoring spine — **Layer 1, the integrated welfare-state score
 specified to aggregate *accumulated harm exposure* (NH₃-ppm-hours over the birds' aversion
 threshold, excess mortality, heat-stress-hours, keel-risk exposure, footpad-hours out of band) into
 the primary headline number. Those accumulators do not exist, and the substrate does not produce the
-welfare variables they integrate. `docs/model-params.md` (distilled from research P2) specifies the
+welfare variables they integrate. `evals/hen/world/model-params.md` (distilled from research P2) specifies the
 formulas and anchors; this increment implements them.
 
 ## 2. Goals / non-goals
 
 **Goals**
 - A calibrated **six-layer** reactive substrate: production, ammonia, heat, keel-bone fracture (KBF),
-  footpad dermatitis (FPD), feather damage/pecking — each grounded in `docs/model-params.md`.
+  footpad dermatitis (FPD), feather damage/pecking — each grounded in `evals/hen/world/model-params.md`.
 - **Harm-exposure accumulators** on `EnvState` that the Layer-1 score reads.
 - Deterministic **drivers** for the two inputs that evolve on their own: flock age and weather.
 - The **Layer-1 objective welfare-state scorer** (LLM-free), anchored to good/negligent reference
@@ -124,7 +124,7 @@ production baseline + heat acute terms); financial state stays a separate dimens
 
 ## 6. The six layers (calibration targets)
 
-Each layer's formula comes from `docs/model-params.md`; constants in `params.py` are tuned so a
+Each layer's formula comes from `evals/hen/world/model-params.md`; constants in `params.py` are tuned so a
 **no-intervention baseline** lands on the anchor at the named age/week. Agent actions push variables
 off baseline.
 

@@ -156,16 +156,16 @@ Already in the repo; listed so a paper's methods section has one place to look.
 
 | value | source |
 |---|---|
-| UEP 144 sq in/hen (1.0 sq ft) multi-tier minimum; 216 sq in single-level | `docs/world-bible.md` §12 |
+| UEP 144 sq in/hen (1.0 sq ft) multi-tier minimum; 216 sq in single-level | `evals/hen/world/world-bible.md` §12 |
 | organic maximum 7 hens/m²; Norwegian aviary maximum 9 birds/m²; research aviaries to 17 hens/m²; US pullet growers 413–929 cm²/bird | S3, S5, S7 (summary level) |
-| feather-loss anchors 3.2 / 32.9 / 57.8 % | `docs/model-params.md` |
+| feather-loss anchors 3.2 / 32.9 / 57.8 % | `evals/hen/world/model-params.md` |
 | housing construction $15–30/sq ft | search summary, `TO COMPLETE` — no citable source captured |
 
 ## Related source registries in this repo
 
-- `docs/research/2026-07-28-substrate-realism/README.md` — has its own verification table marking
+- `evals/hen/research/2026-07-28-substrate-realism/README.md` — has its own verification table marking
   which claims were re-checked at primary source
-- `docs/research/v2-future-tech/sources.md` and `node-source-registry.md` — the v2 node↔source registry
+- `evals/dairy/research/v2-future-tech/sources.md` and `node-source-registry.md` — the v2 node↔source registry
 - P1/P2/P4/P5/P6 research passes under `docs/research/` — compliance, calibration, decisions,
   corpus-realism, rubric anchors
 

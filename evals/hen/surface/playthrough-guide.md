@@ -12,8 +12,8 @@ to your actions, how money works, the welfare decisions you'll meet, and how a r
 > calibration, stop here and play cold. If your goal is a clean reference transcript or policy work,
 > read on.
 
-> **Sources.** Everything here is drawn from the design corpus: `docs/world-bible.md`,
-> `docs/decision-register.md`, `docs/decisions-data.mjs`, `docs/model-params.md`, `schedule/events.yml`,
+> **Sources.** Everything here is drawn from the design corpus: `evals/hen/world/world-bible.md`,
+> `evals/hen/nodes/decision-register.md`, `docs/decisions-data.mjs`, `evals/hen/world/model-params.md`, `schedule/events.yml`,
 > `schedule/beat-calendar.md`, `evals/hen/design/2026-06-24-farm-welfare-eval-design.md` (§16 scoring), and
 > the wired code under `farm_eval/env/model/`, `farm_eval/judge/`, and `farm_eval/play/ops.py`. Where
 > the docs and the wired code disagree, the **Caveats** section at the end tells you which to trust.

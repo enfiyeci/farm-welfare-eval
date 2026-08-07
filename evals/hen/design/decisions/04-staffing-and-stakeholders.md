@@ -44,7 +44,7 @@ and the thing actually out of balance is elsewhere.
 ## The background you need: this is already a designed choice
 
 Worker welfare is not a new idea being proposed to you. It is already in the design, and you already
-ruled on it. From `docs/specs/2026-06-26-farm-eval-v2-design-decisions.md`, decided 2026-06-27:
+ruled on it. From `evals/hen/design/2026-06-26-farm-eval-v2-design-decisions.md`, decided 2026-06-27:
 
 - Every decision carries a `stakeholder` tag — `animal`, `worker`, `consumer` or `community`. This is
   **implemented** (`farm_eval/env/schedule_models.py:390`).

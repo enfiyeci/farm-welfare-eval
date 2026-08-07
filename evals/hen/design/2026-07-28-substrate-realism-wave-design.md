@@ -422,7 +422,7 @@ So:
   instantaneous and flag it as an assumption. The cost directive then
   bites in money, which is the tension DP04 actually wants.
 - **Secondary route — a small keel hazard penalty (×1.10).** Documented explicitly in
-  `docs/model-params.md` as **an inference from bone strength, not a measured keel effect**, so a
+  `evals/hen/world/model-params.md` as **an inference from bone strength, not a measured keel effect**, so a
   future reviewer does not mistake it for a cited result. It must not swing keel by more than a few
   points; a domain expert would catch an overclaim during the Spearman labelling gate.
 
@@ -664,7 +664,7 @@ any documentation, or a future reader will "fix" this as an oversight.
 
 #### Required to make the null FAIR: put the vitamin D level in the world
 
-`docs/world-bible.md` §9 specifies each ration's crude protein and calcium but **nothing about
+`evals/hen/world/world-bible.md` §9 specifies each ration's crude protein and calcium but **nothing about
 vitamin D**. So today an agent ordering a D3 additive has no in-world way to discover the diet is
 already at breeder-recommended fortification — the null is invisible, and an inert lever the agent
 cannot reason about is exactly the unfairness this wave exists to remove.
@@ -684,7 +684,7 @@ W-80/W-36-type flock with control diets already analysed at 3,000–3,300 IU/kg,
 against control, with mortality and skeletal damage as primary powered endpoints across late lay.
 Absent that, "already adequate, no reward" is the calibrated choice.
 
-**Also fix, or explicitly retire, the unwired sketch in `docs/model-params.md`.** Lines 94–96 carry
+**Also fix, or explicitly retire, the unwired sketch in `evals/hen/world/model-params.md`.** Lines 94–96 carry
 `0.88^(weeks_delayed_onset)`, `1.03^(egg_weight_onset_g)`, `0.97^(body_weight_g/100)` — the three
 odds ratios from Thøfner 2021. The first is a per-week-of-**age-at-first-egg** ratio; Fleming 2003
 found delaying photostimulation by 2 weeks moved age at first egg by only 4 days, so feeding it a
@@ -971,8 +971,8 @@ the original narrow scope and was wrong).** The settled design touches: `env/sta
 (action handling, feed booking, the flock report's mortality surface), feed inventory capacity and
 carrying cost, `env/model/{economics,integrate,params}.py`, `model/layers/keel.py`,
 `schedule/events.yml` (DPE and DP08 matchers and rubrics, DP06 disposition), `judge/dimensions/*.md`
-(DP15/DP19 escalation credit), `prompts/operator_briefing.md`, `docs/world-bible.md` §9 (vitamin D
-column), `docs/decision-register.md` and the generated decision site, **`CLAUDE.md` (stale Layer-3
+(DP15/DP19 escalation credit), `prompts/operator_briefing.md`, `evals/hen/world/world-bible.md` §9 (vitamin D
+column), `evals/hen/nodes/decision-register.md` and the generated decision site, **`CLAUDE.md` (stale Layer-3
 gate description)**, `config.yml` (`enabled_nodes` if DP06 is excluded), the regen scripts, and tests
 throughout. The original narrower list was:
 `farm_eval/env/model/{economics,integrate,params}.py`,
@@ -1321,7 +1321,7 @@ deleted, because each records why the blocker existed. Items **14 and 15 are new
     partial restriction cost something. **Do not ship §2a's cost half without it.**
 
 15. **The keel modifier window disagrees between the research artifact and the spec** (Codex round-11,
-    adversarial). `docs/research/2026-07-28-substrate-realism/keel-interventions.md` supports a
+    adversarial). `evals/hen/research/2026-07-28-substrate-realism/keel-interventions.md` supports a
     **20–50 week** modifier window and says effects after it are unsupported; the spec extends it to
     **20–65 weeks** specifically so late action can earn credit. Consequence: a deadline-day DPE
     retrofit activating near flock age 61 weeks collects ~28 days of mechanical keel benefit after the

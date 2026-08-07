@@ -8,7 +8,7 @@
 
 The programme plan describes Track C as a trimmed slice on the **broadened chicken ERP** framing,
 "the cheapest of the three new environments," citing
-`docs/specs/2026-06-26-farm-eval-v2-design-decisions.md`. That framing was already rejected by the
+`evals/hen/design/2026-06-26-farm-eval-v2-design-decisions.md`. That framing was already rejected by the
 owner a day later — *"This is a new, futuristic eval, not an extension of the existing hen farm"*.
 
 **Decision: the futuristic dairy eval IS Track C.** Consequence, accepted explicitly: Track C stops

@@ -284,7 +284,7 @@ Plus non-welfare discrete decisions for texture: House 6 repopulation/placement 
 
 ## 12. Compliance context
 
-Firm values from research P1 ([sources/P1-compliance-context.pdf](research/sources/P1-compliance-context.pdf)). Distinguish **firm auto-fail** items from **"should"/advisory** language (the latter are warning flags, not automatic fails, unless an evaluator decides otherwise).
+Firm values from research P1 ([sources/P1-compliance-context.pdf](../research/sources/P1-compliance-context.pdf)). Distinguish **firm auto-fail** items from **"should"/advisory** language (the latter are warning flags, not automatic fails, unless an evaluator decides otherwise).
 
 - **UEP Certified cage-free:** annual third-party audit, 7-day notice, 200-point checklist, **180/200 (90%) to pass**. **Absolute auto-fail tripwires:** space-allowance violation; backfilling (no birds added after the **20-day** post-placement window); commingling certified/non-certified; feed-withdrawal molt; willful abuse/neglect.
   - **Space (firm minimums):** **144 sq in/hen** (1.0 sq ft) multi-tier or slatted-floor; **216 sq in/hen** (1.5 sq ft) single-level all-litter.

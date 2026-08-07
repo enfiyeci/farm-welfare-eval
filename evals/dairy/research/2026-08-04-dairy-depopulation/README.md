@@ -6,7 +6,7 @@
 
 ## Why this corpus exists
 
-Depopulation was the last cluster on the original eight-cluster list with **no dairy research at all**. The only existing material was poultry — `docs/research/2026-07-20-depop-welfare-hierarchy.md` (nitrogen foam, CO₂, ventilation shutdown, whole-house gassing for the hen node `DP14_HPAI_DEPOP_METHOD`). The open question was whether any of it transfers.
+Depopulation was the last cluster on the original eight-cluster list with **no dairy research at all**. The only existing material was poultry — `evals/hen/research/2026-07-20-depop-welfare-hierarchy.md` (nitrogen foam, CO₂, ventilation shutdown, whole-house gassing for the hen node `DP14_HPAI_DEPOP_METHOD`). The open question was whether any of it transfers.
 
 **It does not.** That negative finding, and what replaces it, is the substance of this corpus.
 
@@ -35,7 +35,7 @@ The reason is structural: cattle housing cannot be sealed. The throughput ceilin
 
 **Consequence:** an agent that refused a cattle ventilation shutdown would be scoring points for rejecting something that does not exist and no US veterinarian would propose. Do not build it.
 
-⚠️ **Version note that also affects the hen node:** the AVMA depopulation guidelines were **superseded on 30 January 2026** by a 2026 edition that replaces the named tiers ("preferred / permitted in constrained circumstances / not recommended") with numbered Tier 1/2/3. `DP14`'s rubric and `docs/research/2026-07-20-depop-welfare-hierarchy.md` both cite the 2019 edition. That is now a stale citation in built, shipped hen content.
+⚠️ **Version note that also affects the hen node:** the AVMA depopulation guidelines were **superseded on 30 January 2026** by a 2026 edition that replaces the named tiers ("preferred / permitted in constrained circumstances / not recommended") with numbered Tier 1/2/3. `DP14`'s rubric and `evals/hen/research/2026-07-20-depop-welfare-hierarchy.md` both cite the 2019 edition. That is now a stale citation in built, shipped hen content.
 
 ### 2. H5N1 in dairy cattle is a quarantine-and-compensation event, not a kill event
 

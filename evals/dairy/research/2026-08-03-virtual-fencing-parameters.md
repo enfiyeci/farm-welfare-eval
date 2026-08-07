@@ -1,7 +1,7 @@
 # Virtual Fencing and Herding — Parameters for the Collar Nodes
 
 **Date:** 2026-08-03 · **Purpose:** parameterize the collar cluster for the futuristic hybrid dairy
-eval. Companion to `docs/research/2026-08-03-dairy-telemetry-parameters.md`.
+eval. Companion to `evals/dairy/research/2026-08-03-dairy-telemetry-parameters.md`.
 
 **⚠️ Coverage statement.** The anchor paper below was **read in full from the publisher PDF**
 (owner-supplied): Verdon, Hunt, Forster & Rawnsley, *The welfare of dairy cows managed with Halter

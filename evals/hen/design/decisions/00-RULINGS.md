@@ -17,7 +17,7 @@ NOT what is wanted, and no fresh pilot runs until the design lanes land.
 
 ## Research landed 2026-08-06 — two rulings below are reopened by it
 
-Four deep passes ran (`docs/research/2026-08-06-litter-lever-and-ammonia/`) plus a CLAUDE.md
+Four deep passes ran (`evals/hen/research/2026-08-06-litter-lever-and-ammonia/`) plus a CLAUDE.md
 governance pass (`docs/research/2026-08-06-claudemd-governance/`). They are delegated findings with
 coverage statements, **not yet independently re-read at source** — trace the load-bearing ones
 before regenerating any golden. Their net effect: ruling 1's lever choice and ruling 2's number are
@@ -41,7 +41,7 @@ get it as realistic as possible."*
 ### ⚠️ REOPENED by research — the litter-drying pick may be the wrong lever
 
 The realism + cost research the owner asked for came back and it undercuts the "litter drying"
-choice. Full detail in `docs/research/2026-08-06-litter-lever-and-ammonia/` (README first).
+choice. Full detail in `evals/hen/research/2026-08-06-litter-lever-and-ammonia/` (README first).
 
 **Finding 1 — litter drying is not a real US cage-free lever.** US commercial cage-free aviaries
 have manure-*belt* drying air, not a floor-*litter* dryer. Floor litter is managed by ventilation
@@ -80,9 +80,9 @@ belt→ammonia route uses the sourced +0.763%/h.
 ### 🔴 UPDATE 2026-08-06 21:56 PT — the two missing research passes landed, and they WEAKEN the recommended lever
 
 The pass that died on the API session limit was re-run after the reset. Both halves are in
-`docs/research/2026-08-06-litter-lever-and-ammonia/`
-([dose-response](../../../docs/research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
-[welfare cost](../../../docs/research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
+`evals/hen/research/2026-08-06-litter-lever-and-ammonia/`
+([dose-response](../../research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
+[welfare cost](../../research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
 They were commissioned precisely because they "decide whether the lever is honest rather than merely
 convenient." **The answer is: not yet honest, in two independent ways.**
 
@@ -144,7 +144,7 @@ status readout) is part of this lane's definition of done, not a follow-up.**
 
 ### ⚠️ REOPENED by research — 2.169 rests on two unstated choices
 
-The verification pass (`docs/research/2026-08-06-litter-lever-and-ammonia/ammonia-calibration-verification.md`)
+The verification pass (`evals/hen/research/2026-08-06-litter-lever-and-ammonia/ammonia-calibration-verification.md`)
 **confirmed the belt cadence outright** — CSES ran belts every 3–4 days, stated in three places
 including a config table. So the direction of the correction is solid. But it found two things that
 move the *number*:
@@ -154,7 +154,7 @@ move the *number*:
 
    I argued for 6.0 from our own code's threshold semantics. The owner rejected that reasoning as
    circular — we wrote both the threshold and the variable — and was right to. Commissioned research
-   (`docs/research/2026-08-06-litter-lever-and-ammonia/ammonia-model-semantics.md`) then reversed the
+   (`evals/hen/research/2026-08-06-litter-lever-and-ammonia/ammonia-model-semantics.md`) then reversed the
    conclusion on the evidence:
 
    - **6.0 is not "the bird-level value" — it is the value at the best-ventilated point in the
@@ -464,7 +464,7 @@ Why this over a new `engine/` or `shared/` directory:
    design spec (~55% engine). R1 flags one file that must **never** be split at all —
    `heat-balance-and-belt-energy.md`, which carries its own ⛔ erratum.
 2. **`2026-08-03-aquatic-farm-reading-list.md` gets a human editing pass, not find-and-replace.** It
-   names `docs/world-bible.md`, `docs/model-params.md` and `docs/decision-register.md` — the **live
+   names `evals/hen/world/world-bible.md`, `evals/hen/world/model-params.md` and `evals/hen/nodes/decision-register.md` — the **live
    hen files** — as its own destinations. A path rewriter would silently cement salmon guidance onto
    hen documents. R1 calls this "the sharpest hazard, and it is semantic not mechanical."
 

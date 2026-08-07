@@ -5,7 +5,7 @@
 > Research since resolved this at source. A researcher broke the scan barrier on the thesis (local
 > `pdftoppm` + `tesseract` OCR) and read **Ch. 7 pp. 102–104**, the Materials-and-Methods pages every
 > previous session was blocked on, plus Ch. 6 in full. Full record:
-> `docs/research/2026-08-05-belt-vs-litter-moisture-resolved.md`.
+> `evals/hen/research/2026-08-05-belt-vs-litter-moisture-resolved.md`.
 >
 > **Three things changed my recommendation below.**
 >

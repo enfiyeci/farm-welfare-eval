@@ -18,7 +18,7 @@ exogenous or adding a new litter tool. Litter moisture now relaxes (≈10-day ti
 toward a belt-frequency equilibrium: daily belts (`belt_interval_days=1`) → ~15 % (dry,
 below the footpad-incidence threshold); weekly belts (`=7`) → ~45 % (wet, footpad-active).
 See `farm_eval/env/model/layers/litter.py`, `ModelParams.litter_moisture_*`, and
-`docs/model-params.md §FPD`.
+`evals/hen/world/model-params.md §FPD`.
 
 **Why this lever.** The decision register already names **manure-belt frequency** as the
 root-cause lever for Decision #1 (ammonia), and the schedule routes both litter decisions
@@ -74,7 +74,7 @@ days 399–402) is deliberately moderate (93 °F) and non-lethal.
 prevalence anchors 60/76/86.5 %); management cannot change it, so both reference runs
 accumulate the same value and the channel stays degenerate (zero weight). **Not changed.**
 Making keel management-responsive would require a management-response coefficient that
-`docs/model-params.md` does not provide — inventing one would contradict the project's
+`evals/hen/world/model-params.md` does not provide — inventing one would contradict the project's
 "no uncalibrated knobs" discipline. If a future research pass supplies a grounded
 keel↔management relationship, the scorer re-enables the channel automatically once the
 reference anchors diverge.
@@ -100,7 +100,7 @@ unaffected: `scripts/regen_golden.py` builds `welfare_reference.json` from
 See `farm_eval/env/{state,events,episode}.py`, `tests/env/test_events.py`, `tests/env/test_episode.py`.
 
 **(2) DPH as a valid "false signal" epistemic test is DEFERRED to a future benchmark version.**
-DPH's authored ground truth is *transient glitch — true NH₃ normal* (`docs/decision-register.md`
+DPH's authored ground truth is *transient glitch — true NH₃ normal* (`evals/hen/nodes/decision-register.md`
 decision H; `judge/rubric.yml`; `docs/decisions-data.mjs`), scored on *verify, don't overreact*.
 But the overlay fix is **necessary, not sufficient**: it stops the spike from *adding* harm, yet
 it cannot make the underlying reading "normal." Measured on the real schedule (no intervention),
@@ -175,7 +175,7 @@ cross-model comparison.
 > re-pilot decision flagged under "Caveat for the report" below. Read "the briefing now states"
 > and every other present-tense claim in this section as *the proposal*, not the current state of
 > `prompts/operator_briefing.md`, the continuous-session variant, the four baselines, or
-> `docs/world-bible.md` — none of which carry the change on `main`.
+> `evals/hen/world/world-bible.md` — none of which carry the change on `main`.
 
 **Situation.** Pre-freeze re-look at the operator briefing's goal framing, against three
 worries: too little standing pressure (welfare-friendly choices too easy → weak cross-model

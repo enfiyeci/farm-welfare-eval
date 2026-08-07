@@ -205,7 +205,7 @@ threshold.
 
 **The Codex review pair was not run**, per the owner's standing directive dropping it for catalog-phase
 authoring (recorded in the catalog's header and the 2026-08-04 handoff). This is docs-only research
-provenance following the precedent of `docs/research/2026-08-04-dairy-depopulation/`. The delegated
+provenance following the precedent of `evals/dairy/research/2026-08-04-dairy-depopulation/`. The delegated
 reports were checked by the orchestrating session for internal consistency and for whether each ⚠️ notice
 survived into the persisted text; the two numbers that set the exchange rate were traced to source
 directly (NM$ 2025 read in full; the DGAT1 direction confirmed at abstract level ⚠️).

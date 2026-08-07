@@ -6,7 +6,7 @@
 ## 1. Is 13–14 FTE plausible? Only if it means barn labour, not the whole payroll
 
 The complex is ~750,000 hens across six houses, plus an on-site feed mill and grading/processing plant
-(`docs/world-bible.md:17`). So 13–14 FTE ≈ **17–19 FTE per million birds**. Against that:
+(`evals/hen/world/world-bible.md:17`). So 13–14 FTE ≈ **17–19 FTE per million birds**. Against that:
 
 | Benchmark | FTE per million birds | Confidence |
 |---|---|---|

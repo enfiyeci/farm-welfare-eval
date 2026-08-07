@@ -18,7 +18,7 @@ def _cast_first_names() -> set[str]:
         if entry.get("name")
     }
 
-    world_bible = (ROOT / "docs" / "world-bible.md").read_text()
+    world_bible = (ROOT / "evals" / "hen" / "world" / "world-bible.md").read_text()
     cast_section = world_bible.split("## 5.", 1)[1].split("\n---", 1)[0]
     for line in cast_section.splitlines():
         if not line.startswith("|"):

@@ -1,5 +1,5 @@
 """Cold-thermoregulation feed coupling (owner directive 2026-07-13; research
-docs/research/2026-07-13-financial-realism-web-sweep.md).
+evals/hen/research/2026-07-13-financial-realism-web-sweep.md).
 
 Below the thermoneutral floor (~18 °C) laying hens burn feed to stay warm: a controlled study
 (indoor 12 °C vs 24 °C) measured feed intake +18.6% / FCR +33% with egg production ~unchanged

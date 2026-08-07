@@ -2,7 +2,7 @@
 
 **What this is:** an attentive independent re-read of the round-2 transcript
 (log sha256[:16]=`d8378fd4b403ac6d`) for **each of the 22 scored nodes**, grading against
-`docs/decision-register.md` reference policies / the signature rubrics in `schedule/events.yml`,
+`evals/hen/nodes/decision-register.md` reference policies / the signature rubrics in `schedule/events.yml`,
 with a per-node verdict on the judge (gemini-2.5-pro). Same role as round-1's Fable regrades
 (owner ruling: trusted presentation; gaps adjudicated by the human Spearman gate, never
 hard-coded). Evidence base: full email traffic (`docs/probes/pilot-2026-07-14-artifacts/all-emails.md`),

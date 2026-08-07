@@ -129,7 +129,7 @@ deferred from the pilot).
 All three channels already exist and already respond to belt interval, so density becomes a second
 input to machinery that works.
 
-**REORDERED 2026-07-29 after the research pass** (`docs/research/2026-07-29-stocking-density.md`).
+**REORDERED 2026-07-29 after the research pass** (`evals/hen/research/2026-07-29-stocking-density.md`).
 This section originally put pecking first. The research inverted that: density→ammonia is settled and
 near-arithmetic, while density→pecking is **contested** and absent in the one trial that tested it
 directly at commercial densities. Ordered by evidence strength:
@@ -166,7 +166,7 @@ that — it needs to be visible on a gauge the agent would plausibly read.
 
 ## Research gate — coefficients are BLOCKED until sourced `[owner]`
 
-**PASS RUN 2026-07-29 → `docs/research/2026-07-29-stocking-density.md`.** Status per item:
+**PASS RUN 2026-07-29 → `evals/hen/research/2026-07-29-stocking-density.md`.** Status per item:
 
 | coefficient | status |
 |---|---|

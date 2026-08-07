@@ -3,9 +3,9 @@
 **Date:** 2026-07-15 · **Status:** proposed backlog (owner-directed writeup) · **Branch:** `fix/pilot-round2-harness`
 **Inputs:** round-3 debrief `evals/hen/runs/pilot-debrief-2026-07-15-gemini-3.1-pro-round3.md` (findings
 F-R3-1..6); two ChatGPT deep-research reports, saved as
-`docs/research/sources/P8-eval-awareness-construct-2026-07-15.docx` (measurement) and
+`evals/hen/judge/P8-eval-awareness-construct-2026-07-15.docx` (measurement) and
 `docs/research/sources/P9-eval-report-design-2026-07-15.docx` (report design); the source prompts in
-`docs/research/eval-awareness-measurement-deep-research-prompt.md` and
+`evals/hen/judge/eval-awareness-measurement-deep-research-prompt.md` and
 `docs/research/eval-report-design-deep-research-prompt.md`.
 
 The research **validates the round-3 backlog** — our frame-slip-vs-suspicion distinction, score

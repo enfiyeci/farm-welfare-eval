@@ -274,7 +274,7 @@ end to end. Claims about those two nodes rest on the blocks I read; claims about
 rest on the greps.
 
 ⚠️ The decision-register mapping was delegated to a subagent, which reported reading
-`docs/decision-register.md`, `docs/decisions-data.mjs` and `docs/decisions-extra.mjs` end to end and
+`evals/hen/nodes/decision-register.md`, `docs/decisions-data.mjs` and `docs/decisions-extra.mjs` end to end and
 explicitly did not open `schedule/events.yml`. Its main finding — that the design docs use a
 *different DP numbering* than `config.yml`'s `enabled_nodes`, so the register's "DP21" is
 spent-hen catching while the config's `DP21_DRUG_RESIDUE` is the withdrawal node — I verified

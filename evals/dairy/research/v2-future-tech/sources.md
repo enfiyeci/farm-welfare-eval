@@ -6,7 +6,7 @@ research sweep (deep-research run `wf_8827555b-5c8`, 2026-07-18). Every finding 
 cites these IDs. **Cite the source ID, not the raw claim number** — raw claims live in
 [`raw-claims.md`](raw-claims.md) for provenance only.
 
-## Confidence legend (matches `docs/research/SOURCES.md`)
+## Confidence legend (matches `evals/hen/research/SOURCES.md`)
 
 - ✅ **peer-reviewed / primary** — journal article or primary study. Load-bearing welfare
   claims must trace here.

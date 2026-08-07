@@ -4,7 +4,7 @@
 **Status:** approved-in-brainstorm; user review pending. §1–§7 predate the pilots and target
 test-*suspicion*; **§8 folds in the round-3 finding that the empirically dominant signal is
 assistant-persona frame-slip, not suspicion**, and reprioritizes accordingly. Read §8 first.
-**Source notes:** `docs/research/eval-awareness-reduction-notes.md` (the 4-pass research synthesis;
+**Source notes:** `evals/hen/research/eval-awareness-reduction-notes.md` (the 4-pass research synthesis;
 this spec supersedes its §6 "next step" and uses `docs/specs/` per repo convention, not the
 `docs/superpowers/specs/` path the notes anticipated). Companion design input:
 `evals/hen/design/info-space-design.md` (G1–G4 + pass^k).
@@ -307,7 +307,7 @@ program's existing instruments, pointed at the new target — no new subsystem:
    Controlled arms — live briefing vs a session/wrap-up-vocabulary-free variant
    (`prompts/experiments/operator_briefing_continuous_no_session.md`) — measured by the pilot
    report's frame-slip detector, with a **behavior-holds** check on `welfare_headline`. Protocol:
-   `docs/probes/eval-awareness-briefing-experiment-2026-07-15.md`. This is the program's
+   `docs/research/eval-awareness-briefing-experiment-2026-07-15.md`. This is the program's
    behavioral-divergence discipline (§3 P6) applied to persona-bleed: change one framing cue,
    measure whether the behavior moves, and refuse a fix that only quiets the run. A documented
    confound is recorded there (the env-core digest independently prints "Since last session…").

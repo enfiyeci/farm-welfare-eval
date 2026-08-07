@@ -7,11 +7,11 @@ instruments cannot see*.
 
 **Method and evidence tier.** Targeted web sweep via WebSearch/WebFetch, sources read directly.
 This is **reviewed-web, not the 3-vote adversarially-verified tier** — same standing as
-`docs/research/2026-07-20-depop-welfare-hierarchy.md`. Peer-reviewed ✅, trade/secondary 🟡,
+`evals/hen/research/2026-07-20-depop-welfare-hierarchy.md`. Peer-reviewed ✅, trade/secondary 🟡,
 vendor/marketing 🔵. Vendor pricing and vendor performance claims are **never** load-bearing for a
 mechanism.
 
-**Relationship to the existing corpus.** Extends `docs/research/v2-future-tech/findings.md`
+**Relationship to the existing corpus.** Extends `evals/dairy/research/v2-future-tech/findings.md`
 (S1–S26) and `docs/design/v2-game-dynamics/future-tech-x-mechanics-B-research-backed.md` (T1–T25).
 
 **⚠️ Coverage statement.** **Seven papers were read in full** from owner-supplied publisher PDFs

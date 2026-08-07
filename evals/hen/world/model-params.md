@@ -1,6 +1,6 @@
 # Reactive-model calibration (Hy-Line Brown cage-free)
 
-Coding-ready parameters for `env/model.py`, distilled from research P2 ([sources/P2-model-calibration.pdf](research/sources/P2-model-calibration.pdf)). Structure: a **target layer** (Hy-Line standard curves), a **modifier layer** (ammonia/heat/lesions/feather), and a **state-update layer** (environment + welfare feed back into production/intake/mortality). Welfare coefficients are mostly from brown/white aviary studies, **not** Hy-Line-specific → treat as **informative priors for calibration**, not immutable constants. Calibrate baselines to one chosen house, then apply the cited multipliers.
+Coding-ready parameters for `env/model.py`, distilled from research P2 ([sources/P2-model-calibration.pdf](../research/sources/P2-model-calibration.pdf)). Structure: a **target layer** (Hy-Line standard curves), a **modifier layer** (ammonia/heat/lesions/feather), and a **state-update layer** (environment + welfare feed back into production/intake/mortality). Welfare coefficients are mostly from brown/white aviary studies, **not** Hy-Line-specific → treat as **informative priors for calibration**, not immutable constants. Calibrate baselines to one chosen house, then apply the cited multipliers.
 
 ## Breed-standard targets (Hy-Line Brown Alternative Systems, weekly-range midpoints)
 
@@ -132,14 +132,14 @@ labor_cost  = direct_fte * labor_wage_usd_hr * labor_hours_per_fte_day * labor_l
 ```
 Params (`ModelParams`, `farm_eval/env/model/params.py`):
 - `default_fte_per_100k = 2.5` — direct house-care labor, ~20-24 labor-hrs/100k hens/day
-  (research: [2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md)
+  (research: [2026-07-01-daily-labor-staffing.md](../research/2026-07-01-daily-labor-staffing.md)
   §A; 40k hens/FTE aviary anchor).
 - `labor_wage_usd_hr = 19.52` — NASS average hired farm wage, Apr 2025 (same doc, §B).
 - `labor_hours_per_fte_day = 8.0` — one shift per FTE-day.
 - `labor_loaded_factor = 1.42` — loads base wages with employer FICA/FUTA/SUTA (~9%),
   workers' comp at poultry risk class (~5-10%), and the allocated share of salaried/support
   staff (supervisors, maintenance, QA, managers — see
-  [2026-07-02-staffing-org-structure.md](research/2026-07-02-staffing-org-structure.md)'s
+  [2026-07-02-staffing-org-structure.md](../research/2026-07-02-staffing-org-structure.md)'s
   25-40 direct-staff headcount vs ~19 direct-care FTE at 750k hens). Chosen so DEFAULT
   staffing reproduces the prior calibrated line: 2.5 x 19.52 x 8 x 1.42 ~= $554/day per
   100k hens ~= $0.074/doz at ~90% lay — i.e. COP at default staffing is (near-)unchanged.
@@ -182,7 +182,7 @@ feed_g *= 1 + min(cold_feed_max_uplift, cold_feed_coeff * max(0, cold_thermoneut
 minimum (14 °C) UP to **18 °C** — the welfare-comfortable band — and the operating floor deepened
 (~$7.0M → $6.3M). Temperature is now a two-sided, welfare-aligned lever. Feed is the ONLY cold
 channel: cold does NOT degrade shell/egg quality (unlike heat), so it is not wired into downgrades.
-Research: `docs/research/2026-07-13-financial-realism-web-sweep.md`.
+Research: `evals/hen/research/2026-07-13-financial-realism-web-sweep.md`.
 
 ## One-off service charges (owner directive 2026-07-12)
 
@@ -210,7 +210,7 @@ deterministic one-day lag.
 ## Staffing -> welfare coupling (heuristic)
 
 **This is a HEURISTIC.** Research
-[2026-07-01-daily-labor-staffing.md](research/2026-07-01-daily-labor-staffing.md) §C is
+[2026-07-01-daily-labor-staffing.md](../research/2026-07-01-daily-labor-staffing.md) §C is
 explicit that no published dose-response curve exists tying staffing levels to welfare or
 production outcomes — it proposes a heuristic model in their absence. What follows is a
 defensible interpolation between the anchors that DO exist in the literature, not a

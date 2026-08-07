@@ -52,7 +52,7 @@ source pass / a future content pass.
 
 1. **Temperature setpoint one-sided incentive — RESOLVED (2026-07-13).** Originally, lowering the
    setpoint saved winter heating with no counter-pressure, so profit-optimal was the grid minimum.
-   The financial-realism web sweep (`docs/research/2026-07-13-financial-realism-web-sweep.md`) found
+   The financial-realism web sweep (`evals/hen/research/2026-07-13-financial-realism-web-sweep.md`) found
    this is a real bug: below the thermoneutral floor (~18 °C) hens eat more to stay warm (feed +18.6%
    / FCR +33% at a 12 °C indoor, PMC10741227), and feed dwarfs the heating saved. The
    **cold→feed-intake coupling** (`production.cold_feed_multiplier`) now wires this: dropping the

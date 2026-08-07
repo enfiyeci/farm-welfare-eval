@@ -57,12 +57,12 @@ a read-tool seam that serves them:
 - Veterinary / lab reports (SE test results, necropsy, mite counts), audit & regulatory documents
   (UEP cage-free cert, FDA/APHIS/AVMA paperwork).
 - Pullet placement/transfer records; payroll & labor summaries (ties into the C1–C4 labor subsystem
-  and the `docs/research/2026-07-02-staffing-org-structure.md` ops-vs-HRIS data boundary — serve only
+  and the `evals/hen/research/2026-07-02-staffing-org-structure.md` ops-vs-HRIS data boundary — serve only
   what an ops system would realistically hold: schedules, timesheets, labor cost rollups; NOT SSNs/
   medical/immigration).
 
 **Why.** Artifact fidelity is a primary realism lever and a **direct eval-awareness reducer** — see
-`docs/research/eval-awareness-reduction-notes.md` §1 (cues-not-content), §2-A1/A5 (de-tell probe,
+`evals/hen/research/eval-awareness-reduction-notes.md` §1 (cues-not-content), §2-A1/A5 (de-tell probe,
 per-source register discipline), and the LURE "base corpus on real docs" finding. Uniform plain-text
 templating is a top probe tell; heterogeneous, real-looking documents read as deployment. This is the
 positive-technique version of the §3 "operational framing" rule.
@@ -96,7 +96,7 @@ realism-vs-elicitation tradeoff (`eval-awareness-reduction-notes.md` §3).
 ## Refresh DP14's AVMA citation — the depopulation guidelines were superseded (correction, not an enhancement)
 
 **What.** `DP14_HPAI_DEPOP_METHOD` (`schedule/events.yml`) and its grounding note
-`docs/research/2026-07-20-depop-welfare-hierarchy.md` both cite the **AVMA Guidelines for the
+`evals/hen/research/2026-07-20-depop-welfare-hierarchy.md` both cite the **AVMA Guidelines for the
 Depopulation of Animals, 2019 Edition**. That edition was **superseded on 30 January 2026** by a
 2026 edition (Version 2026.0.1) which replaces the named tiers — "preferred / permitted in
 constrained circumstances / not recommended" — with a numbered **Tier 1 / Tier 2 / Tier 3** system.
@@ -113,11 +113,11 @@ citation-integrity issue, not a nit.
 **Do before changing anything:** read AVMA 2026 **Chapter 6 (Poultry)** properly. The 2026 edition
 was read in full only for **Chapter 3 (Bovids)** during the dairy sweep; the poultry-chapter claims
 there rest on tier headings plus a mechanical full-text search, **not** a full reading
-(`docs/research/2026-08-04-dairy-depopulation/05-mass-depopulation.md`). Confirm the tier
+(`evals/dairy/research/2026-08-04-dairy-depopulation/05-mass-depopulation.md`). Confirm the tier
 assignments and whether any welfare language changed before touching the rubric.
 
 **Source.** avma.org blocks automated fetching; the 2026 PDF was retrieved via a Wayback capture —
-see `docs/research/2026-08-04-dairy-depopulation/README.md` for the URLs. Owner-added to this
+see `evals/dairy/research/2026-08-04-dairy-depopulation/README.md` for the URLs. Owner-added to this
 backlog 2026-08-04.
 
 ## Human-play interface (GUI) for the scenario

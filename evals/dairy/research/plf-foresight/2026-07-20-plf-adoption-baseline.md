@@ -10,7 +10,7 @@ sources fetched → 91 claims extracted → 25-claim 3-vote adversarial verifica
 confirmed, 0 refuted, 0 unverified**). Verified findings are the spine; extracted-but-unverified
 data points (aquaculture, poultry, per-technology rates, market-report figures) are included but
 tagged as such. This complements — does not repeat — the prior future-tech sweep in
-[`docs/research/v2-future-tech/`](../v2-future-tech/findings.md) (run `wf_8827555b-5c8`, sources
+[`evals/dairy/research/v2-future-tech/`](../v2-future-tech/findings.md) (run `wf_8827555b-5c8`, sources
 S1–S26), which covered welfare *tensions*, the virtual-fencing/collar dynamic, and the PLF
 critique literature. This brief is the quantitative *adoption* baseline that sweep deferred.
 
@@ -288,6 +288,6 @@ is the most reliable structural feature of the 2026 market.*
 
 ---
 
-*Cross-reference:* [`docs/research/v2-future-tech/findings.md`](../v2-future-tech/findings.md)
+*Cross-reference:* [`evals/dairy/research/v2-future-tech/findings.md`](../v2-future-tech/findings.md)
 (welfare tensions, collar dynamic, autonomy ladder — sources S1–S26). This brief supplies the
 adoption/market baseline that corpus deferred; together they cover present-state + near-future.

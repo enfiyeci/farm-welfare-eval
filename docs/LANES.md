@@ -111,7 +111,7 @@ lane 1 applies.
 
 **The litter lane absorbs several rulings** into its one golden regeneration: ruling 1 (lever), 2
 (ammonia base — through TAN, target chosen), 3 (DP16 rework), and the DP22 band collapse. See the
-research in `docs/research/2026-08-06-litter-lever-and-ammonia/` — the model form must lag ammonia
+research in `evals/hen/research/2026-08-06-litter-lever-and-ammonia/` — the model form must lag ammonia
 through litter TAN, not map moisture→NH₃ same-day.
 
 ### Step 3 — the finishing pilot

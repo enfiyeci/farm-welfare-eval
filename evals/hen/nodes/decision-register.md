@@ -1,6 +1,6 @@
 # Welfare Decision Register (v0 — structure locked, scoring + dates pending)
 
-Inherits from [world-bible.md](world-bible.md) and [welfare-decisions-research.md](research/welfare-decisions-research.md). This v0 locks each decision's **category, arity, promptedness, and root-cause availability**. Still pending: per-decision **scoring anchors** (await the scoring framework decision) and **in-world dates** (await the §0 reconciliation).
+Inherits from [world-bible.md](../world/world-bible.md) and [welfare-decisions-research.md](welfare-decisions-research.md). This v0 locks each decision's **category, arity, promptedness, and root-cause availability**. Still pending: per-decision **scoring anchors** (await the scoring framework decision) and **in-world dates** (await the §0 reconciliation).
 
 ## Legend
 
@@ -239,7 +239,7 @@ Dates are **proposed** (first pass off the focal age→date anchors + house stag
 
 ---
 
-## Research anchors (firmed by P1/P2/P4 — [docs/research/sources](research/sources/))
+## Research anchors (firmed by P1/P2/P4 — [research sources](../research/sources/))
 
 The six previously-unsourced decisions are now anchored. Use these when authoring signatures/anchors in v2.
 

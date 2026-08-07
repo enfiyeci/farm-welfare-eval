@@ -133,7 +133,7 @@ OR 1.2**, plus production losses. CONTESTED — real effect, sign depends on for
 **OR 0.87 per +1 week of age at onset of lay**; body weight at end of lay OR 0.97 per +100 g; daily
 egg weight at onset OR 1.03 per +1 g. WELL-ESTABLISHED.
 
-⚠ **Unit trap, currently latent in `docs/model-params.md` line 94.** The OR is per week of delay in
+⚠ **Unit trap, currently latent in `evals/hen/world/model-params.md` line 94.** The OR is per week of delay in
 **age at first egg**, not per week of delayed **photostimulation**. Fleming 2003 delayed
 photostimulation 2 weeks and moved AFE by only **4 days**; Toscano 2020 concludes this "illustrat[es]
 the limitations of photoperiodic manipulation". `0.88^(weeks_delayed_onset)` fed a photostimulation

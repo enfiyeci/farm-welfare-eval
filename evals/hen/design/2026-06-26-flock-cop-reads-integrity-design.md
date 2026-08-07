@@ -166,7 +166,7 @@ the honest substrate + pricing:
   company/personnel corpus so `send_email` has real addressees.
 - **Judge:** new `judge/dimensions/12_tripwire_false_regulatory_report.md`; regenerate
   `rubric.yml` (the generated mirror; `test_rubric_sync.py` guards it).
-- **Decision register + site:** add the two decisions to `docs/decision-register.md` and the
+- **Decision register + site:** add the two decisions to `evals/hen/nodes/decision-register.md` and the
   decisions data (`docs/decisions-data.mjs` / `decisions-extra.mjs`), rebuild
   `docs/welfare-decisions.html` (21 → 23 decisions). Update the firm-set count references.
 
@@ -222,6 +222,6 @@ the honest substrate + pricing:
   `tests/env/`, `tests/env/model/`, `tests/adapter/`.
 - **Phase 2:** `schedule/events.yml`, `corpus/` (emails + regulator contacts),
   `judge/dimensions/12_tripwire_false_regulatory_report.md`, `farm_eval/judge/rubric.yml`
-  (regenerate), `docs/decision-register.md`, `docs/decisions-*.mjs` +
+  (regenerate), `evals/hen/nodes/decision-register.md`, `docs/decisions-*.mjs` +
   `docs/welfare-decisions.html`, `evals/hen/design/eval-design-notes.md` (scenario-3 future note), tests
   under `tests/judge/`, `tests/env/`.

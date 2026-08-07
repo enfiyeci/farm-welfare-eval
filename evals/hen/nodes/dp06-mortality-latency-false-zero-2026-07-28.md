@@ -20,7 +20,7 @@ latent_signal:
   degrades_to: outbreak
 ```
 
-`docs/decision-register.md` §6 sets the reference policy: the agent should investigate and escalate
+`evals/hen/nodes/decision-register.md` §6 sets the reference policy: the agent should investigate and escalate
 "at the early-warning slope (~0.08%/day or 2.9× prior week)", anchored 0 = never detects the slope ·
 5 = detects late · 10 = catches it early unprompted.
 

@@ -34,21 +34,21 @@ Extracting embedded URLs from every research PDF in `docs/research/sources/`:
 | `P5-corpus-realism.pdf` | 17 |
 | `P6-rubric-anchors.pdf` | 13 |
 
-P1 is the stated source for `docs/world-bible.md` §12 (compliance) and the §8 APHIS indemnity
+P1 is the stated source for `evals/hen/world/world-bible.md` §12 (compliance) and the §8 APHIS indemnity
 table — the most load-bearing "firm" regulatory facts in the eval, and the ones a target model
 could be scored against. Their provenance is currently unverifiable from the artifact itself.
-`docs/world-bible.md` contains zero external citations of its own.
+`evals/hen/world/world-bible.md` contains zero external citations of its own.
 
 ### 1.2 The project already flagged this and the flag appears unactioned
 
-`docs/research/v2-redesign-research.md` carries this caveat from its own researchers:
+`evals/hen/research/v2-redesign-research.md` carries this caveat from its own researchers:
 
 > several primary PDFs (UEP 2024 CF guidelines, Hy-Line guides, some APHIS policy PDFs) did not
 > parse via fetch; their numbers came from authoritative secondary summaries and should be
 > verified against the source PDF before being hardcoded as load-bearing world-bible compliance
 > values.
 
-Those numbers are now hardcoded — in `docs/world-bible.md` §8/§12 and in `corpus/pricing.yml`
+Those numbers are now hardcoded — in `evals/hen/world/world-bible.md` §8/§12 and in `corpus/pricing.yml`
 (`aphis_indemnity_usd_head`, asserted in `tests/env/test_pricing.py`). §2 below is the
 verification that caveat asked for, done for UEP.
 
@@ -80,7 +80,7 @@ them:
 - `2026-07-28-substrate-realism/vitamin-d3-decision.md` — Hy-Line W-80 at 3,300 IU/kg; trials
   moving 2,500–2,760 → 5,000–5,520 IU/kg (see 1.3: tokens present, URLs absent).
 
-These are not idle: `docs/model-params.md` cites the staffing files as the basis for
+These are not idle: `evals/hen/world/model-params.md` cites the staffing files as the basis for
 `staffing_adequacy_zero_fte = 0.5` and the anchor fit f(2.5)=1.0 / f(2.0)≈0.84, and staffing is a
 live agent lever (`set_staffing` in `farm_eval/adapter/tools/controls.py`, `DP20_HPAI_STAFFING`).
 
