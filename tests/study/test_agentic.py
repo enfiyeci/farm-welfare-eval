@@ -468,3 +468,29 @@ class TestRound3Hardening:
         doc.symlink_to(target)
         _, rec = collect_outcome(ws, manifest)
         assert "cost_of_production.txt" in rec.documents_modified
+
+
+class TestRound4Hardening:
+    """Fresh Codex pass 2026-08-07: RecursionError from deeply nested JSON."""
+
+    def test_deeply_nested_decision_json_is_unparseable_not_a_crash(self, tmp_path):
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path)
+        (ws / DECISION_FILENAME).write_text("[" * 200_000 + "]" * 200_000)
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.UNPARSEABLE
+        assert rec.tool_ran is False
+
+    def test_deeply_nested_log_line_is_skipped_not_a_crash(self, tmp_path):
+        from farm_eval.study.agentic import LOG_FILENAME, collect_outcome
+
+        ws, manifest = built_workspace(tmp_path)
+        run_tool(ws, "accept")
+        with (ws / LOG_FILENAME).open("r+") as fh:
+            content = fh.read()
+            fh.seek(0)
+            fh.write("[" * 200_000 + "]" * 200_000 + "\n" + content)
+        _, rec = collect_outcome(ws, manifest)
+        assert rec.tool_ran is True     # the receipt still found past the junk

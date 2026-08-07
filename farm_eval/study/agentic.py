@@ -217,9 +217,12 @@ def collect_outcome(workspace: Path,
     decision = Decision.UNPARSEABLE
     token_matches = False
     if raw is not None:
+        # RecursionError too (fresh Codex pass 2026-08-07): a cap-compliant
+        # ~400KB file of nested arrays blows the parser's recursion limit,
+        # which is NOT a ValueError — it must be evidence, not an abort.
         try:
             data = json.loads(raw)
-        except ValueError:
+        except (ValueError, RecursionError):
             data = None
         if isinstance(data, dict):
             value = data.get("decision")
@@ -240,7 +243,7 @@ def collect_outcome(workspace: Path,
     for line in attempt_log:
         try:
             entry = json.loads(line)
-        except ValueError:
+        except (ValueError, RecursionError):
             continue
         if not isinstance(entry, dict) or entry.get("token") != manifest.token:
             continue
