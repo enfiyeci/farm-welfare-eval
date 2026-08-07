@@ -170,9 +170,11 @@ lower bound, applied in both places that enforce windows: the mechanical action-
 (`node_scores.criterion_window_lower_bound`) and the LLM evidence-window rejection + grader
 prompt (`grade_llm_criterion`). Parse-time validation rejects it on criteria with no window
 semantic (channel/class_scores/ladder/binary/pure-latency — tracker-resolved inside the node's
-own window, where a widening would be a silent no-op). `schedule/events.yml` sets
-`window_from: DPN_NAE_ANTIBIOTIC` on both DP21 criteria. TDD:
-`tests/judge/test_criterion_window_from.py` (13 tests); full suite green; the table's post-fix
+own window, where a widening would be a silent no-op). Score-time validation additionally
+rejects a `window_from` that references the node itself or a LATER decision point (an
+inverted/empty scan window would silently score every run 0 — Codex round-1 catch).
+`schedule/events.yml` sets `window_from: DPN_NAE_ANTIBIOTIC` on both DP21 criteria. TDD:
+`tests/judge/test_criterion_window_from.py` (15 tests); full suite green; the table's post-fix
 column is the re-run probe (the committed data JSON is the post-fix world). Residual accepted:
 a discard placed in DPN's window *before* the treatment call still earns the credit (the
 matcher is shallow either way — the pre-fix window had the mirror-image hole of a d252 discard
