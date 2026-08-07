@@ -33,11 +33,14 @@ welfare table, confirmed at source) is a **certification violation the instrumen
 turns the "free win" problem the welfare-cost pass found into the node's engine: this is an
 integrity-vs-outcome decision, not a naive welfare-vs-profit dial. What this pass traced vs what it
 inherits: of the three honesty fixes from the welfare-cost pass, the parts resting on Oliveira are
-now source-confirmed (the all-null welfare table; the 3.77 → 1.64 cm depth thinning), and the UEP
-tripwire is now fully verified; ⚠️ the behavioural-timing evidence (Campbell 2016 / Bongiorno 2026),
+now source-confirmed (the all-null welfare table; the 3.77 → 1.64 cm depth thinning), the UEP
+tripwire is now fully verified, and — after the owner fetched the tier-1 list later the same day
+(see [04-owner-fetched-sources-read.md](04-owner-fetched-sources-read.md)) — the deprivation
+dose-response (Vestergaard 1982), the not-suffering reading (Widowski & Duncan 2000), and the
+substrate-quality basis for the depth route (De Jong 2007) are traced at source too; ⚠️ still
+resting on the 2026-08-06 delegated passes: the Campbell 2016 / Bongiorno 2026 timing observations,
 the RSPCA ≥5 cm depth threshold, and the "no litter-dryer product exists in US cage-free houses"
-realism finding were NOT re-traced here — they still rest on the 2026-08-06 delegated passes and
-their own coverage statements. The fixes: **score timing, not hours**; **use the UEP 2024 budget as
+realism finding. The fixes: **score timing, not hours**; **use the UEP 2024 budget as
 the tripwire** (verified); **route the welfare cost through litter depth**. Ammonia goes through
 lagged TAN with the Miles 2011 curve capped at the **derived ~37–43 % turnover at our house
 temperatures** (traced; and the day-2 sign dispute between two in-repo documents is settled — see
@@ -75,6 +78,7 @@ Task 5's density signal off when corrected. Details and claim list in
 | [01-uep-edition-conflict-settled.md](01-uep-edition-conflict-settled.md) | **THE BLOCKER.** Both UEP editions read end to end. 2024 deletes the carve-out; verbatim text of both; what else changed (scratch-area metric, ammonia wording); tripwire implications. |
 | [02-source-traces.md](02-source-traces.md) | The four load-bearing traces: Oliveira 2019, Miles 2011 (+ the day-2 sign adjudication and a DOI typo), the +0.763 %/h belt coefficient (Groot Koerkamp Ch. 7), the Zhao/CSES 6.7-ppm spatial-mean semantics. **All four CONFIRMED at source.** |
 | [03-stocking-density-branch-claims.md](03-stocking-density-branch-claims.md) | What `feat/stocking-density` and `origin/archive/stocking-density-task6-local-2026-08-06` hold that main does not, and exactly what to claim before archiving — including four source PDFs (one a current fetch-list item) and the decomposition doc with three calibration defects. |
+| [04-owner-fetched-sources-read.md](04-owner-fetched-sources-read.md) | **Added 2026-08-07 later the same day:** the owner fetched the tier-1/tier-2 list (7 PDFs); all read end to end and archived under `evals/hen/research/sources/`. Restriction-not-suffering, the days-not-hours dose-response, substrate-quality value, the quantified TAN lag, morning restriction as documented practice, floor-egg irreversibility, and one decisive negative (De Reu excludes floor eggs). |
 
 ## Status of the 2026-08-06 corpus after this pass
 
