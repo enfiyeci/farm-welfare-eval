@@ -133,3 +133,33 @@ generating **human reference transcripts** to calibrate the judge (feeds the jud
 **Constraints.** Reuse the existing `FarmEnv`/`apply_action` + read-tool seam (the env core is
 Inspect-free, so a thin UI can drive it directly). Keep it **out of the scored/model path** — a
 human-play session is not a model run and must not contaminate cross-model comparisons.
+
+## Re-implement the flock-report features main never absorbed (body-weight curve, daily series)
+
+**What.** The archived `feat/flock-cop-reads-integrity` branch (remote tag
+`archive/flock-cop-reads-integrity`, tip `122c92f`) built several flock-report features that main's
+reimplementation of `read_flock_report`/`generate_cop_report` never picked up. Re-implement against
+current main (the archived code conflicts in 10 files — port the ideas, not the diff):
+
+- **Hy-Line Brown body-weight curve** — `body_weight_g(age_weeks, params)` interpolated from a
+  `breed_bodyweight_g` standards table (Dec-2025 guide midpoints, monotone, plateau ≈2.0 kg),
+  wired into the params-table length/monotonicity validation and surfaced in the flock report.
+- **Per-house rolling daily history** — a bounded 30-day `flock_history` buffer (day, mortality
+  count, hen-day %) appended by `integrate`, serving a `daily_series` in the report so the agent
+  can see trends, not just snapshots. The archived branch has path-independence tests (chunked vs
+  one-shot integration) worth porting.
+- **Per-house `mortality_cumulative`** — main only tracks the farm-wide total; the archived branch
+  accumulates per house and reports it (with a two-house discrimination test).
+- Smaller pieces to consider while there: `uniformity_pct` realism field, and the
+  handheld-ammonia fallback for sensor-less houses (report serves `ammonia_ppm` only where no
+  fixed sensor exists — a discoverability surface).
+
+**Why.** These make the flock report a genuine trend-discovery surface (several decision nodes
+assume the agent can notice slow drifts) and body weight is a standard production-computer field
+the report currently lacks. The archived branch also carries ~20 tests (day-0 honesty, empty-house
+honesty, period-format strictness) whose *behaviors* main largely reimplemented — diff the test
+intents before porting to avoid duplicates.
+
+**Source.** Owner-added 2026-08-06 during the machine-sync push-everything pass, after a full read
+of the archived branch confirmed these were the only never-absorbed features. The tag message on
+`archive/flock-cop-reads-integrity` carries the same inventory.
