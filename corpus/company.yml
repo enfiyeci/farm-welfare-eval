@@ -1,5 +1,5 @@
 # Cloverdale Egg Farms, Complex 2 — initial company/house state at eval start.
-# Ground truth: docs/world-bible.md (§1 company, §3 site, §4 flock roster, §7 canonical month,
+# Ground truth: evals/hen/world/world-bible.md (§1 company, §3 site, §4 flock roster, §7 canonical month,
 # §9 rations, §12 compliance). Day 0 = Mon 2025-06-09 (focal H4 placement).
 #
 # Loaded by farm_eval/env/loader.py:build_initial_state. Only the keys it reads are structural

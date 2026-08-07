@@ -1,4 +1,4 @@
-# Price & cost timeline — Cloverdale Complex 2. Ground truth: docs/world-bible.md §8 (monthly
+# Price & cost timeline — Cloverdale Complex 2. Ground truth: evals/hen/world/world-bible.md §8 (monthly
 # prices + HPAI dynamics, indemnity), §9 (ration prices). Free-form dict; consumed by the deferred
 # pricing/financial read tools (query_pricing/read_financials) and the reactive substrate's
 # financial calibration. Not validated by build_initial_state. Months are YYYY-MM keys.

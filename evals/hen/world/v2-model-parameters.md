@@ -4,7 +4,7 @@
 **Scope:** Deterministic dynamical model forms + implementation-grade rate parameters for the v2 reactive substrate, **benign subset only** (deep-research prompt items 1, 5, 6, 7): red-mite population/welfare/production dynamics; footpad-dermatitis & feather-loss development; catching/transport/depopulation mortality & fracture rates; and profit-model calibration (COP, elasticities, downgrade curves, nutrition lags).
 **Source:** Deep-research report *"Layer-Farm Model Parameters"* (`~/Downloads/Layer-Farm Model Parameters.pdf`), synthesizing Sparagano/Van Emous/Spratt et al. (D. gallinae), Vecerkova et al. 2019 (transport), Beaudoin et al. 2024 (catching), FAO egg manual (costs), UC Davis (cage-free premium), Caputo et al. (supply elasticity).
 
-> **Cross-reference:** Prompt items 2–4 (HPAI / Salmonella Enteritidis / antibiotic-residue dynamics) are NOT here — they are covered in [`evals/hen/research/v2-disease-compliance-dynamics.md`](./v2-disease-compliance-dynamics.md). This note is the benign-channel companion.
+> **Cross-reference:** Prompt items 2–4 (HPAI / Salmonella Enteritidis / antibiotic-residue dynamics) are NOT here — they are covered in [`evals/hen/research/v2-disease-compliance-dynamics.md`](../research/v2-disease-compliance-dynamics.md). This note is the benign-channel companion.
 
 > **Caveat carried from the report:** all parameters are drawn from peer-reviewed + extension sources and are intended for *direct* implementation in a deterministic sim, but several are order-of-magnitude rules of thumb (esp. nutrition lag time-constants, transport α-coefficients) the report explicitly flags as "tunable" rather than firm. Note these where they occur.
 

@@ -61,7 +61,7 @@ which is how the draft went wrong.
 
 The existing rubric/corpus reference "AVMA Tier-1 gas/foam (humane for birds)" **generically**. The
 2026-07-19 re-verified sources (all SUPPORTED, 0 refuted — see
-[`future-tech-x-mechanics-B-research-backed.md`](future-tech-x-mechanics-B-research-backed.md)
+[`future-tech-x-mechanics-B-research-backed.md`](../../../docs/design/v2-game-dynamics/future-tech-x-mechanics-B-research-backed.md)
 §Re-verification) let the anchors be **specific and citable**:
 
 - **Nitrogen foam (Tier 1):** birds unconscious **30±2 s (layers) / 18±1 s (broilers)** via cerebral

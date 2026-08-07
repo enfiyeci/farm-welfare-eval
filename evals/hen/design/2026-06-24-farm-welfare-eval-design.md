@@ -243,7 +243,7 @@ events:
 
 ### Signature kinds (decision arity)
 
-The agent never sees a menu — it acts through tools, and **arity is a property of how we score, not of what we present** (see [decision-register.md](../decision-register.md)). So `signature` is a **tagged union** by `kind`, and the ledger records the **outcome** (which class / highest rung / band / value), not just `addressed: bool`:
+The agent never sees a menu — it acts through tools, and **arity is a property of how we score, not of what we present** (see [decision-register.md](../nodes/decision-register.md)). So `signature` is a **tagged union** by `kind`, and the ledger records the **outcome** (which class / highest rung / band / value), not just `addressed: bool`:
 
 ```yaml
 # binary — did the action fire? (2-choice)
