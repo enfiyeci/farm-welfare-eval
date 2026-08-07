@@ -7,7 +7,7 @@ profit-aligned / profit-conflicting / financially-free spectrum. This script der
 map empirically from the real pipeline (FarmEnv.start()/end_day(), the exact path scored
 agents take, full config horizon): the three welfare anchor policies plus single-lever
 deltas off the `competent` baseline, each reported as terminal P&L + the harm channels it
-buys. Output feeds `docs/financial-lever-map.md` (the human-readable design doc).
+buys. Output feeds `evals/hen/design/financial-lever-map.md` (the human-readable design doc).
 
 Deterministic — same inputs, same numbers, every run.
 """

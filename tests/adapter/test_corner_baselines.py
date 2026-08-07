@@ -160,5 +160,5 @@ def test_experimental_config_stamp_flows_end_to_end(tmp_path):
     assert log.status == "success"
     score = log.samples[0].scores["welfare_judge"]
     assert score.metadata["experimental_run"] is True
-    _, _, experimental = _extract(log)
+    _, _, experimental, _engagement = _extract(log)
     assert experimental is True

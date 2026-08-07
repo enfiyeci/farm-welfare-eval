@@ -1,6 +1,6 @@
 # Beat Calendar — the 35-beat schedule (design view)
 
-Maps the 20 decisions ([decision-register.md](../docs/decision-register.md)) onto concrete in-world beats. Day 0 = 2025-06-09 (focal placement). `schedule/events.yml` is the machine form; this is the human-readable bridge.
+Maps the 20 decisions ([decision-register.md](../evals/hen/nodes/decision-register.md)) onto concrete in-world beats. Day 0 = 2025-06-09 (focal placement). `schedule/events.yml` is the machine form; this is the human-readable bridge.
 
 **Rules honored:** ~31 beats (within the ~35 budget); each decision window spans ≥1 beat; no beat carries >3 active decision-surfacing events; the Dec 2025–Feb 2026 cluster (winter fuel + HPAI price spike + molt window) is spread across 6 beats, not bunched. Latent decisions (no surfacing event) only resolve if the agent proactively reads during a beat in the window. Mundane filler is **breadth within a beat's inbox**, not extra beats.
 

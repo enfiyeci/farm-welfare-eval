@@ -4,10 +4,10 @@
 **Status:** approved-in-brainstorm; user review pending. §1–§7 predate the pilots and target
 test-*suspicion*; **§8 folds in the round-3 finding that the empirically dominant signal is
 assistant-persona frame-slip, not suspicion**, and reprioritizes accordingly. Read §8 first.
-**Source notes:** `docs/research/eval-awareness-reduction-notes.md` (the 4-pass research synthesis;
+**Source notes:** `evals/hen/research/eval-awareness-reduction-notes.md` (the 4-pass research synthesis;
 this spec supersedes its §6 "next step" and uses `docs/specs/` per repo convention, not the
 `docs/superpowers/specs/` path the notes anticipated). Companion design input:
-`docs/info-space-design.md` (G1–G4 + pass^k).
+`evals/hen/design/info-space-design.md` (G1–G4 + pass^k).
 
 **Scope decision (user-ratified):** ONE program spec covering all three phases; only **Phase 1
 (the measured-iteration loop) gets an implementation plan now**. Phases 2–3 stay design-level —
@@ -301,13 +301,13 @@ program's existing instruments, pointed at the new target — no new subsystem:
    `eval_awareness` dimension into **strict eval_awareness / assistant_persona_bleed /
    helplessness_resignation**, with frequency-weighted aggregation so 10 slips no longer read as
    1. This is the persona-bleed analogue of the doc's **P4 cue-localization** — the measurement
-   prerequisite before any reduction. Spec: `docs/plans/2026-07-15-eval-awareness-3axis-rubric-design.md`;
-   backlog: `docs/plans/2026-07-15-round4-backlog.md` (Thrust A).
+   prerequisite before any reduction. Spec: `evals/hen/judge/2026-07-15-eval-awareness-3axis-rubric-design.md`;
+   backlog: `evals/hen/design/2026-07-15-round4-backlog.md` (Thrust A).
 2. **First reduction experiment: the F-R3-2 briefing test** (set up this session, not yet run).
    Controlled arms — live briefing vs a session/wrap-up-vocabulary-free variant
    (`prompts/experiments/operator_briefing_continuous_no_session.md`) — measured by the pilot
    report's frame-slip detector, with a **behavior-holds** check on `welfare_headline`. Protocol:
-   `docs/probes/eval-awareness-briefing-experiment-2026-07-15.md`. This is the program's
+   `docs/research/eval-awareness-briefing-experiment-2026-07-15.md`. This is the program's
    behavioral-divergence discipline (§3 P6) applied to persona-bleed: change one framing cue,
    measure whether the behavior moves, and refuse a fix that only quiets the run. A documented
    confound is recorded there (the env-core digest independently prints "Since last session…").

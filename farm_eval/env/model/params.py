@@ -31,8 +31,15 @@ class ModelParams(BaseModel):
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
     nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
 
-    # Hy-Line W-36 breed-standard targets (model-params.md §Breed-standard targets)
-    # Parallel lists keyed by age in weeks; used by layers/production.py
+    # Hy-Line Brown breed-standard targets (model-params.md §Breed-standard targets, "Hy-Line Brown
+    # Alternative Systems"; world-bible §2 names the same bird). The earlier "W-36" comment here —
+    # like the "W-80" some docs carried — was a stale LABEL on these very tables, not a different
+    # calibration: the numbers below are the model-params.md Brown table unchanged.
+    # Parallel lists keyed by age in weeks; used by layers/production.py.
+    # breed_label names the strain those tables are calibrated to. It is display metadata only —
+    # nothing in the model reads it — so that a viewer labelling the reference curve takes the
+    # name from the params that define the curve instead of hardcoding one of its own.
+    breed_label: str = "Hy-Line Brown"
     breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]
     breed_hdep: list[float] = [4.4, 71.0, 92.3, 95.2, 95.7, 94.0, 89.0, 84.2, 79.3, 74.4, 70.8]
     breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
@@ -74,7 +81,7 @@ class ModelParams(BaseModel):
     vent_fan_usd_bird_day: float = 0.0003           # fan electricity at vent=1.0; linear in vent (staged fans)
     heat_fuel_usd_bird_day_degc: float = 0.00003    # LP make-up-air heat per degC (setpoint-ambient) per unit vent, x lp_fuel_index
     # Cold-thermoregulation feed uplift (owner directive 2026-07-13; research
-    # docs/research/2026-07-13-financial-realism-web-sweep.md). Below the thermoneutral floor a
+    # evals/hen/research/2026-07-13-financial-realism-web-sweep.md). Below the thermoneutral floor a
     # laying hen eats more to stay warm: feed *= 1 + cold_feed_coeff * (floor - indoor_temp_c),
     # capped. Anchored to PMC10741227 (~+18% feed at indoor 12 degC vs thermoneutral). This makes
     # a low temperature setpoint pay for itself in feed, moving the profit-optimum up into the

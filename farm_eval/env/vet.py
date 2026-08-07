@@ -6,7 +6,7 @@ visit day (with no stale ack when the beat gap jumps the visit day). Runs BEFORE
 deliver_replies so the vet counts as an authored sender for tier-1 suppression — no
 same-wake-up double reply. Pure function of (state, corpus, day): no RNG, no LLM. Report
 bodies recommend and restate the vet's own guidance; they never assert the agent
-treated/complied (truthfulness rule — docs/plans/2026-07-14-round3-content-pass-design.md)."""
+treated/complied (truthfulness rule — evals/hen/design/2026-07-14-round3-content-pass-design.md)."""
 
 from __future__ import annotations
 

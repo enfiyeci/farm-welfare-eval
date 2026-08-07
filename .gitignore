@@ -9,6 +9,10 @@ venv/
 *.egg-info/
 .pytest_cache/
 
+# Spectator feed output (the default FARM_SPECTATOR_DIR target): run artifacts, like logs/.
+# Anchored with a leading slash so it can never match farm_eval/spectator/, the module itself.
+/spectator/
+
 # Generated, human-readable reference only — NOT consumed by the judge (the scorer reads
 # judge/dimensions/*.md, the source of truth). Regenerate on demand: node docs/build-rubric.mjs
 farm_eval/judge/rubric.yml
@@ -19,3 +23,14 @@ venv
 # Pilot Vertex config (real; the .example is tracked)
 scripts/pilot-vertex.env
 scripts/pilot-bedrock.env
+
+# Agent worktrees are local checkouts, not repository content.
+.claude/worktrees/
+.claude/settings.local.json
+
+# Owner working HTML + generated decks/guides — untracked twice already (8f87673),
+# re-added by the machine-transfer snapshot. Ignored so a blanket `add -A` cannot sweep them in.
+docs/design-styles.html
+docs/design-styles-2.html
+docs/meeting-questions.html
+docs/welfare-nodes.html

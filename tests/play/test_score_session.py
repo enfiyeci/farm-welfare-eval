@@ -88,6 +88,30 @@ def test_score_session_debug_ever_banner(tmp_path):
             "it is not blind evidence.") in report
 
 
+def test_score_session_grades_against_briefing_snapshot(tmp_path):
+    # The scripted grader quotes "operations agent" from msg_0 (the briefing message). The
+    # session is recorded under a briefing that contains that phrase; the source file is then
+    # reworded to drop it (the 2026-07-28 case). Scoring must grade against the session's
+    # briefing snapshot — grading against the live file fails msg_0 quote validation, the
+    # sample is dropped, and every judged dimension collapses to 0.0.
+    source = tmp_path / "briefing_v1.md"
+    source.write_text("You are the operations agent. V1.\n", encoding="utf-8")
+    s = PlaySession.create(
+        tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",
+        briefing_path=source, episode_end_day=400, seed=1,
+    )
+    while not s.meta()["is_over"]:
+        s.end_day()
+    source.write_text("You are the farm operator. V2 — REWORDED.\n", encoding="utf-8")
+
+    out = tmp_path / "report.md"
+    report = asyncio.run(score_session_module.score_session(
+        tmp_path / "s", "mockllm/model", 1, out, REPO_ROOT / "judge" / "dimensions",
+        model=_grader_model(),
+    ))
+    assert "| welfare_decision_quality | 1.0 |" in report
+
+
 def test_score_session_requires_snapshot(tmp_path):
     s = PlaySession.create(
         tmp_path / "s", corpus_path=FIX / "corpus", schedule_path=FIX / "schedule",

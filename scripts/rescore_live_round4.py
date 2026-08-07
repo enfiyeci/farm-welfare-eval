@@ -31,7 +31,7 @@ from farm_eval.judge.dimensions import load_dimensions
 from farm_eval.judge.scorer import grade_episode, load_signatures
 
 # The round-3 pilot log lives in the MAIN checkout's gitignored logs/ (absolute on purpose).
-LOG = "/Users/ardaenfiyeci/Desktop/farm-eval/logs/2026-07-15T10-30-20-00-00_farm-task_7MxNDcJsNRjdSzVr5dKxoM.eval"
+LOG = "/Users/ardaenf/Desktop/farm-welfare-eval/logs/2026-07-15T10-30-20-00-00_farm-task_7MxNDcJsNRjdSzVr5dKxoM.eval"
 GRADER = "google/gemini-2.5-pro"
 PER_CALL_TIMEOUT_S = 900  # a prior live attempt hung; fail loud instead
 

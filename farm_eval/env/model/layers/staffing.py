@@ -1,7 +1,7 @@
 """Staffing adequacy layer: one monotone factor coupling the C2 staffing lever into welfare.
 
 HEURISTIC (model-params.md §Staffing->welfare coupling). Research
-docs/research/2026-07-01-daily-labor-staffing.md §C proposes a heuristic model in the
+evals/hen/research/2026-07-01-daily-labor-staffing.md §C proposes a heuristic model in the
 absence of any published dose-response curve for staffing-vs-welfare, so this is a
 defensible interpolation between the anchors that DO exist, not a calibrated model.
 `adequacy_factor` is the SINGLE factor `integrate()` couples into excess mortality,

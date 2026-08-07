@@ -1,0 +1,5940 @@
+{
+ "_source": "https://pain-track.org/hens (embedded __NEXT_DATA__), retrieved 2026-08-04",
+ "_note": "Machine-readable Pain-Track parameter set behind Schuck-Paim & Alonso (eds) 2021, 'Quantifying Pain in Laying Hens'. 'resume' = expected time in hours per category for the AVERAGE FLOCK MEMBER (already prevalence-weighted). Awake hours only (16 h/day).",
+ "systems": {
+  "Furnished cages": {
+   "burdens": [
+    {
+     "name": "FC. Keel Bone Fractures",
+     "segment_names": [
+      "F1. Fracture",
+      "F1. Inflam (1)",
+      "F1. Inflam (2)",
+      "F1. Inflam (3)",
+      "F1. Subacute",
+      "F1. Chronic",
+      "F2. Fracture",
+      "F2. Inflam (1)",
+      "F2. Inflam (2)",
+      "F2. Inflam (3)",
+      "F2. Subacute",
+      "F2. Chronic",
+      "F3. Fracture",
+      "F3. Inflam (1)",
+      "F3. Inflam (2)",
+      "F3. Inflam (3)",
+      "F3. Subacute",
+      "F3. Chronic"
+     ],
+     "prevalence": {
+      "min": 0.3,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "hr"
+      },
+      {
+       "min": 0,
+       "max": 784,
+       "unit": "hr"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "hr"
+      },
+      {
+       "min": 0,
+       "max": 784,
+       "unit": "hr"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1344,
+       "unit": "hr"
+      },
+      {
+       "min": 784,
+       "max": 1904,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fractures",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 30,
+         "hurtful": 70,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 60,
+         "annoying": 40,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 25,
+         "annoying": 45,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 33,
+         "annoying": 58,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 36,
+         "annoying": 61,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 158.95,
+        "hurtful": 2248,
+        "annoying": 1811.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 103.3175,
+      "hurtful": 1461.2,
+      "annoying": 1177.54
+     }
+    },
+    {
+     "name": "FC. Skin wound",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.01,
+      "max": 0.1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 3
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 12,
+       "max": 28,
+       "unit": "hr"
+      },
+      {
+       "min": 112,
+       "max": 224,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Skin wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0437,
+        "hurtful": 47.7438,
+        "annoying": 140.4
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0048,
+      "hurtful": 5.2518,
+      "annoying": 15.444
+     }
+    },
+    {
+     "name": "FC. Skin wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0005,
+      "max": 0.01
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 16,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Skin wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 100,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 30,
+         "annoying": 70,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0437,
+        "hurtful": 116.1437,
+        "annoying": 196
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0002,
+      "hurtful": 0.6098,
+      "annoying": 1.029
+     }
+    },
+    {
+     "name": "FC. Vent wound",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.01,
+      "max": 0.04
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 5,
+         "hurtful": 70,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 38.1792,
+        "hurtful": 212,
+        "annoying": 70
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.9545,
+      "hurtful": 5.3,
+      "annoying": 1.75
+     }
+    },
+    {
+     "name": "FC. Vent wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0005,
+      "max": 0.004
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 448,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (infected)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 91.3792,
+        "hurtful": 251.2,
+        "annoying": 33.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.2056,
+      "hurtful": 0.5652,
+      "annoying": 0.0756
+     }
+    },
+    {
+     "name": "FC. Vent wound (fatal)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Sepsis (1st symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0.0003,
+      "max": 0.0024
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 48,
+       "max": 64,
+       "unit": "h"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "h"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "h"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 52.9792,
+        "hurtful": 28.85,
+        "annoying": 0.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.003,
+      "disabling": 0.0715,
+      "hurtful": 0.0389,
+      "annoying": 0.0008
+     }
+    },
+    {
+     "name": "FC. Fatal Cannibalistic Attack",
+     "segment_names": [
+      "Initial Pecks",
+      "Pecking Attack"
+     ],
+     "prevalence": {
+      "min": 0.0002,
+      "max": 0.0005
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.33,
+       "max": 4,
+       "unit": "min"
+      },
+      {
+       "min": 10,
+       "max": 20,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fatal Attack",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.075,
+        "disabling": 0.1217,
+        "hurtful": 0.0894,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0,
+      "disabling": 0.0,
+      "hurtful": 0.0,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "FC. Feather Removal",
+     "segment_names": [
+      "Pulling",
+      "Recovery",
+      "Inflammation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 525,
+      "max": 1575
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 5,
+       "unit": "s"
+      },
+      {
+       "min": 30,
+       "max": 105,
+       "unit": "s"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Feather Pluck",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0008,
+        "hurtful": 0.0132,
+        "annoying": 0.1723
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.7875,
+      "hurtful": 13.8687,
+      "annoying": 180.9062
+     }
+    },
+    {
+     "name": "FC. Acute Peritonitis (Fatal)",
+     "segment_names": [
+      "Infiltration of egg material",
+      "Inflammation",
+      "Sepsis (1st symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0.0045000000000000005,
+      "max": 0.024
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "h"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "h"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "h"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Bacterial Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 131.5,
+        "hurtful": 398.45,
+        "annoying": 74.3
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0321,
+      "disabling": 1.8739,
+      "hurtful": 5.6779,
+      "annoying": 1.0588
+     }
+    },
+    {
+     "name": "FC. Chronic Peritonitis",
+     "segment_names": [
+      "Infiltration of egg material",
+      "Acute episode",
+      "Chronic inflammation"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.08
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "h"
+      },
+      {
+       "min": 1344,
+       "max": 5376,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Chronic Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 1,
+         "hurtful": 20,
+         "annoying": 60,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 89.6,
+        "hurtful": 1120,
+        "annoying": 2090
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 4.48,
+      "hurtful": 56,
+      "annoying": 103.672
+     }
+    },
+    {
+     "name": "FC. Nest building deprivation",
+     "segment_names": [
+      "Nest search",
+      "Pre-oviposition sitting",
+      "Oviposition"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.23
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 25,
+       "max": 45,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Nest building",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.925,
+        "hurtful": 0.575,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 40.4688,
+      "hurtful": 25.1563,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "FC. Deprivation from Roosting at Height",
+     "segment_names": [
+      "Search for Site",
+      "Dark hours"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 6,
+       "max": 8,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Roosting Deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 50,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 15,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0.375,
+        "annoying": 1.425
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 131.25,
+      "annoying": 498.75
+     }
+    },
+    {
+     "name": "FC. Foraging Deprivation",
+     "segment_names": [
+      "Foraging deprivation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 4,
+       "max": 12,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Foraging deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 60,
+         "annoying": 40,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 4.8,
+        "annoying": 3.2
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 1680,
+      "annoying": 1120
+     }
+    },
+    {
+     "name": "FC. Dustbathing Deprivation",
+     "segment_names": [
+      "Dustbathing deprivation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 2.5,
+       "max": 7.5,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Dustbathing deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 5,
+         "annoying": 45,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0.25,
+        "annoying": 2.25
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 87.5,
+      "annoying": 787.5
+     }
+    },
+    {
+     "name": "FC. Movement Restriction",
+     "segment_names": [
+      "Movement restriction"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 10,
+       "max": 14,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Movement Restriction",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 60,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0,
+        "annoying": 7.2
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 0,
+      "annoying": 2520.0
+     }
+    },
+    {
+     "name": "FC. Depopulation & Transport: Fractures",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.15
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 2
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 15,
+       "max": 60,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fractures",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.0035,
+        "disabling": 19.6493,
+        "hurtful": 0,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0005,
+      "disabling": 2.9474,
+      "hurtful": 0,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "FC. Transport: Heat Stress, Exhaustion",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Heat, Exhaustion",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 10,
+         "annoying": 90,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 50,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 6.4103,
+        "hurtful": 10.2941,
+        "annoying": 5.8838
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 6.4103,
+      "hurtful": 10.2941,
+      "annoying": 5.8838
+     }
+    },
+    {
+     "name": "FC. Transport: Heat, Exhaustion (fatal)",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)"
+     ],
+     "prevalence": {
+      "min": 0.002,
+      "max": 0.02
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Exhaustion (fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 9,
+        "hurtful": 9.5,
+        "annoying": 2
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.099,
+      "hurtful": 0.1045,
+      "annoying": 0.022
+     }
+    },
+    {
+     "name": "FC. Depopulation & Transport: Fear",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fear",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 16.8722,
+        "hurtful": 5.775,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 16.8722,
+      "hurtful": 5.775,
+      "annoying": 0
+     }
+    }
+   ],
+   "total_avg_flock_member_hours": {
+    "excruciating": 0.036,
+    "disabling": 178.493,
+    "hurtful": 3488.592,
+    "annoying": 6413.632
+   }
+  },
+  "Aviary": {
+   "burdens": [
+    {
+     "name": "ST. Keel Bone Fractures",
+     "segment_names": [
+      "F1. Fracture",
+      "F1. Inflam (1)",
+      "F1. Inflam (2)",
+      "F1. Inflam (3)",
+      "F1. Subacute",
+      "F1. Chronic",
+      "F2. Fracture",
+      "F2. Inflam (1)",
+      "F2. Inflam (2)",
+      "F2. Inflam (3)",
+      "F2. Subacute",
+      "F2. Chronic",
+      "F3. Fracture",
+      "F3. Inflam (1)",
+      "F3. Inflam (2)",
+      "F3. Inflam (3)",
+      "F3. Subacute",
+      null,
+      "F3. Chronic"
+     ],
+     "prevalence": {
+      "min": 0.3,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "h"
+      },
+      {
+       "min": 0,
+       "max": 784,
+       "unit": "h"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "h"
+      },
+      {
+       "min": 0,
+       "max": 784,
+       "unit": "h"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "h"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 1344,
+       "unit": "h"
+      },
+      {
+       "min": 784,
+       "max": 1904,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Keel fracture",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 30,
+         "hurtful": 70,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 60,
+         "annoying": 40,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 25,
+         "annoying": 45,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 33,
+         "annoying": 58,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 36,
+         "annoying": 61,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 158.95,
+        "hurtful": 2248,
+        "annoying": 1811.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 103.3175,
+      "hurtful": 1461.2,
+      "annoying": 1177.54
+     }
+    },
+    {
+     "name": "ST. Skin wound",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.3
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 3
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "min"
+      },
+      {
+       "min": 12,
+       "max": 28,
+       "unit": "h"
+      },
+      {
+       "min": 112,
+       "max": 224,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Skin wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0354,
+        "hurtful": 47.7104,
+        "annoying": 140.4
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0124,
+      "hurtful": 16.6986,
+      "annoying": 49.14
+     }
+    },
+    {
+     "name": "ST. Skin wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0025,
+      "max": 0.03
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 16,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Wound (infected)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 100,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 30,
+         "annoying": 70,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0437,
+        "hurtful": 116.1437,
+        "annoying": 196
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0007,
+      "hurtful": 1.8873,
+      "annoying": 3.185
+     }
+    },
+    {
+     "name": "ST. Vent wound",
+     "segment_names": [
+      "Tissue Rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.15
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 5,
+         "hurtful": 70,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 38.1792,
+        "hurtful": 212,
+        "annoying": 70
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 3.8179,
+      "hurtful": 21.2,
+      "annoying": 7
+     }
+    },
+    {
+     "name": "ST. Vent wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0025,
+      "max": 0.015
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 448,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (infected)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 91.3792,
+        "hurtful": 251.2,
+        "annoying": 33.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.7996,
+      "hurtful": 2.198,
+      "annoying": 0.294
+     }
+    },
+    {
+     "name": "ST. Vent wound (fatal)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Sepsis (1st symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0.0003,
+      "max": 0.006999999999999999
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "s"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 48,
+       "max": 64,
+       "unit": "h"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "h"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "h"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 52.9792,
+        "hurtful": 28.85,
+        "annoying": 0.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0082,
+      "disabling": 0.1934,
+      "hurtful": 0.1053,
+      "annoying": 0.0022
+     }
+    },
+    {
+     "name": "ST. Fatal Cannibalistic Attack",
+     "segment_names": [
+      "Initial pecks",
+      "Pecking Attack"
+     ],
+     "prevalence": {
+      "min": 0.0006,
+      "max": 0.001
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.33,
+       "max": 4,
+       "unit": "min"
+      },
+      {
+       "min": 10,
+       "max": 20,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fatal attack",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.075,
+        "disabling": 0.1217,
+        "hurtful": 0.0894,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0001,
+      "disabling": 0.0,
+      "hurtful": 0.0001,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "ST. Feather Removal",
+     "segment_names": [
+      "Pulling",
+      "Recovery",
+      "Inflammation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 525,
+      "max": 1575
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 5,
+       "unit": "s"
+      },
+      {
+       "min": 30,
+       "max": 105,
+       "unit": "s"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Feather Pluck",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0008,
+        "hurtful": 0.0132,
+        "annoying": 0.1723
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.7875,
+      "hurtful": 13.8687,
+      "annoying": 180.9062
+     }
+    },
+    {
+     "name": "ST. Acute Peritonitis (fatal)",
+     "segment_names": [
+      "Infiltration of egg material",
+      "Inflammation",
+      "Sepsis (1st symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0.003,
+      "max": 0.024
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "h"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "h"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "h"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Bacterial Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 131.5,
+        "hurtful": 398.45,
+        "annoying": 74.3
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0304,
+      "disabling": 1.7752,
+      "hurtful": 5.3791,
+      "annoying": 1.003
+     }
+    },
+    {
+     "name": "ST. Chronic Peritonitis",
+     "segment_names": [
+      "Infiltration of egg material",
+      "Acute episode",
+      "Chronic inflammation"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.08
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "h"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "h"
+      },
+      {
+       "min": 1344,
+       "max": 5376,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Chronic Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 1,
+         "hurtful": 20,
+         "annoying": 60,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 89.6,
+        "hurtful": 1120,
+        "annoying": 2090
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 4.48,
+      "hurtful": 56,
+      "annoying": 104.5
+     }
+    },
+    {
+     "name": "ST. Nest Building Deprivation",
+     "segment_names": [
+      "Nest search",
+      "Pre-oviposition sitting",
+      "Oviposition"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.08
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 25,
+       "max": 45,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Nest-building",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.925,
+        "hurtful": 0.575,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 16.1875,
+      "hurtful": 10.0625,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "ST. Deprivation from Roosting at Height",
+     "segment_names": [
+      "Search for site",
+      "Dark hours"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.25
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 6,
+       "max": 8,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Roosting Deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 50,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 15,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0.375,
+        "annoying": 1.425
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 19.6875,
+      "annoying": 74.8125
+     }
+    },
+    {
+     "name": "ST. Foraging Deprivation",
+     "segment_names": [
+      "Foraging deprivation"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.2
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 4,
+       "max": 12,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Foraging deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 40,
+         "annoying": 60,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 3.2,
+        "annoying": 4.8
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 140,
+      "annoying": 210
+     }
+    },
+    {
+     "name": "ST. Dustbathing Deprivation",
+     "segment_names": [
+      "Dustbathing deprivation"
+     ],
+     "prevalence": {
+      "min": 0.1,
+      "max": 0.5
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 2.5,
+       "max": 7.5,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Dustbathing deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0,
+        "annoying": 2.5
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 0,
+      "annoying": 262.5
+     }
+    },
+    {
+     "name": "ST. Depopulation & Transport: Fractures",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.15
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 15,
+       "max": 60,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fractures",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.0022,
+        "disabling": 19.6256,
+        "hurtful": 0,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0002,
+      "disabling": 1.6682,
+      "hurtful": 0,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "ST. Transport: Heat Stress, Exhaustion",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Heat, Exhaustion",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 10,
+         "annoying": 90,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 50,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 6.4103,
+        "hurtful": 10.2941,
+        "annoying": 5.8838
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 6.4103,
+      "hurtful": 6.2441,
+      "annoying": 5.8838
+     }
+    },
+    {
+     "name": "ST. Transport: Heat, Exhaustion (fatal)",
+     "segment_names": [
+      "",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)"
+     ],
+     "prevalence": {
+      "min": 0.002,
+      "max": 0.02
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Exhaustion (fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 9,
+        "hurtful": 9.5,
+        "annoying": 2
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.099,
+      "hurtful": 0.0995,
+      "annoying": 0.022
+     }
+    },
+    {
+     "name": "ST. Transport & Depopulation: Fear",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "h"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "s"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "h"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fear",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 16.8722,
+        "hurtful": 5.775,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 16.8722,
+      "hurtful": 5.1,
+      "annoying": 0
+     }
+    }
+   ],
+   "total_avg_flock_member_hours": {
+    "excruciating": 0.039,
+    "disabling": 156.421,
+    "hurtful": 1759.731,
+    "annoying": 2076.789
+   }
+  },
+  "Convent. cages": {
+   "burdens": [
+    {
+     "name": "CC. Keel Bone Fractures",
+     "segment_names": [
+      "F1. Fracture",
+      "F1. Inflam (1)",
+      "F1. Inflam (2)",
+      "F1. Inflam (3)",
+      "F1. Subacute",
+      "F1. Chronic",
+      "F2. Fracture",
+      "F2. Inflam (1)",
+      "F2. Inflam (2)",
+      "F2. Inflam (3)",
+      "F2. Subacute",
+      "F2. Chronic",
+      "F3. Fracture",
+      "F3. Inflam (1)",
+      "F3. Inflam (2)",
+      "F3. Inflam (3)",
+      "F3. Subacute",
+      "F3. Chronic"
+     ],
+     "prevalence": {
+      "min": 0.2,
+      "max": 0.6
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "h"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "hr"
+      },
+      {
+       "min": 0,
+       "max": 784,
+       "unit": "h"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1008,
+       "unit": "hr"
+      },
+      {
+       "min": null,
+       "max": 784,
+       "unit": "hr"
+      },
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 16,
+       "max": 32,
+       "unit": "hr"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 1344,
+       "unit": "h"
+      },
+      {
+       "min": 784,
+       "max": 1904,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Keel fractures",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": null,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 30,
+         "hurtful": 70,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 60,
+         "annoying": 40,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 25,
+         "annoying": 45,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 33,
+         "annoying": 58,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 36,
+         "annoying": 61,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 158.95,
+        "hurtful": 2248,
+        "annoying": 1811.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 63.58,
+      "hurtful": 899.2,
+      "annoying": 724.64
+     }
+    },
+    {
+     "name": "CC. Skin wound",
+     "segment_names": [
+      "Tissue Rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.05,
+      "max": 0.15
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 3
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 12,
+       "max": 28,
+       "unit": "hr"
+      },
+      {
+       "min": 112,
+       "max": 224,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Skin wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 60,
+         "annoying": 40,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0437,
+        "hurtful": 47.7458,
+        "annoying": 140.4083
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0087,
+      "hurtful": 9.5492,
+      "annoying": 28.0817
+     }
+    },
+    {
+     "name": "CC. Skin wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0025,
+      "max": 0.015
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.5,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 16,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Wound (infected)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 100,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 30,
+         "annoying": 70,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0437,
+        "hurtful": 116.1437,
+        "annoying": 196
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.0004,
+      "hurtful": 1.0163,
+      "annoying": 1.715
+     }
+    },
+    {
+     "name": "CC. Vent wound",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.03,
+      "max": 0.08
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "sec"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 336,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 5,
+         "hurtful": 70,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 38.1792,
+        "hurtful": 212,
+        "annoying": 70
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 2.0999,
+      "hurtful": 11.66,
+      "annoying": 3.85
+     }
+    },
+    {
+     "name": "CC. Vent wound (infected)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Proliferation"
+     ],
+     "prevalence": {
+      "min": 0.0015,
+      "max": 0.008
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "sec"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 32,
+       "max": 48,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 448,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (infected)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 91.3792,
+        "hurtful": 251.2,
+        "annoying": 33.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.4341,
+      "hurtful": 1.1932,
+      "annoying": 0.1596
+     }
+    },
+    {
+     "name": "CC. Vent wound (fatal)",
+     "segment_names": [
+      "Tissue rupture",
+      "Coagulation",
+      "Inflammation",
+      "Sepsis (1st symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0,
+      "max": 0.0014000000000000002
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 15,
+       "max": 75,
+       "unit": "sec"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      },
+      {
+       "min": 48,
+       "max": 64,
+       "unit": "hr"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "hr"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "hr"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Vent wound (fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 52.9792,
+        "hurtful": 28.85,
+        "annoying": 0.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0016,
+      "disabling": 0.0371,
+      "hurtful": 0.0202,
+      "annoying": 0.0004
+     }
+    },
+    {
+     "name": "CC. Fatal Cannibalistic Attack",
+     "segment_names": [
+      "Initial pecks",
+      "Pecking Attack"
+     ],
+     "prevalence": {
+      "min": 0,
+      "max": 0.0002
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 0.33,
+       "max": 4,
+       "unit": "min"
+      },
+      {
+       "min": 10,
+       "max": 20,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fatal attack",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 60,
+         "hurtful": 40,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.075,
+        "disabling": 0.1217,
+        "hurtful": 0.0894,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0,
+      "disabling": 0.0,
+      "hurtful": 0.0,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "CC. Feather Removal",
+     "segment_names": [
+      "Pulling",
+      "Recovery",
+      "Inflammation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 525,
+      "max": 1575
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 5,
+       "unit": "sec"
+      },
+      {
+       "min": 30,
+       "max": 105,
+       "unit": "sec"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Feather Pluck",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 70,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 50,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.0008,
+        "hurtful": 0.0132,
+        "annoying": 0.1723
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.7875,
+      "hurtful": 13.8687,
+      "annoying": 180.9062
+     }
+    },
+    {
+     "name": "CC. Acute Peritonitis (Fatal)",
+     "segment_names": [
+      "Infiltration of egg material",
+      "Inflammation",
+      "Sepsis (first symptoms)",
+      "Severe sepsis",
+      "Septic shock"
+     ],
+     "prevalence": {
+      "min": 0.006,
+      "max": 0.032
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "hr"
+      },
+      {
+       "min": 12,
+       "max": 24,
+       "unit": "hr"
+      },
+      {
+       "min": 5,
+       "max": 10,
+       "unit": "hr"
+      },
+      {
+       "min": 2,
+       "max": 4,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Bacterial Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 70,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 90,
+         "hurtful": 10,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 30,
+         "disabling": 40,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 2.25,
+        "disabling": 131.5,
+        "hurtful": 398.45,
+        "annoying": 74.3
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0427,
+      "disabling": 2.4985,
+      "hurtful": 7.5705,
+      "annoying": 1.4117
+     }
+    },
+    {
+     "name": "CC. Chronic Peritonitis",
+     "segment_names": [
+      "Infiltration of Egg Material",
+      "Acute episode",
+      "Chronic Inflammation"
+     ],
+     "prevalence": {
+      "min": 0.02,
+      "max": 0.08
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 32,
+       "max": 112,
+       "unit": "hr"
+      },
+      {
+       "min": 224,
+       "max": 896,
+       "unit": "hr"
+      },
+      {
+       "min": 1344,
+       "max": 5376,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Chronic Peritonitis",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 25,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 10,
+         "hurtful": 80,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 1,
+         "hurtful": 20,
+         "annoying": 60,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 89.6,
+        "hurtful": 1120,
+        "annoying": 2090
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 4.48,
+      "hurtful": 56,
+      "annoying": 104.5
+     }
+    },
+    {
+     "name": "CC. Nest Building Deprivation",
+     "segment_names": [
+      "Nest search",
+      "Pre-oviposition sitting",
+      "Oviposition and sittin"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 25,
+       "max": 45,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 15,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Nest deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0.925,
+        "hurtful": 0.575,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 323.75,
+      "hurtful": 201.25,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "CC. Deprivation from Roosting at Height",
+     "segment_names": [
+      "Search ",
+      "Dark hours"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 30,
+       "max": 60,
+       "unit": "min"
+      },
+      {
+       "min": 6,
+       "max": 8,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Roosting High",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 5,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0.95,
+        "annoying": 0.85
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 332.5,
+      "annoying": 297.5
+     }
+    },
+    {
+     "name": "CC. Foraging Deprivation",
+     "segment_names": [
+      "Foraging Deprivation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 4,
+       "max": 12,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Foraging Deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 80,
+         "annoying": 20,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 6.4,
+        "annoying": 1.6
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 2240,
+      "annoying": 560
+     }
+    },
+    {
+     "name": "CC. Dustbathing deprivation",
+     "segment_names": [
+      "Dustbathing deprivation"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 150,
+       "max": 450,
+       "unit": "min"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Dustbathing deprivation",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 15,
+         "annoying": 35,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0.75,
+        "annoying": 1.75
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 262.5,
+      "annoying": 612.5
+     }
+    },
+    {
+     "name": "CC. Movement Restriction",
+     "segment_names": [
+      "Movement Restriction"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 280,
+      "max": 420
+     },
+     "durations": [
+      {
+       "min": 10,
+       "max": 14,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "CC. Movement Restriction",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 100,
+         "no_pain": 0,
+         "acute_or_chronic": "chronic"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 0,
+        "hurtful": 0,
+        "annoying": 12
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0,
+      "hurtful": 0,
+      "annoying": 4200
+     }
+    },
+    {
+     "name": "CC. Depopulation & Transport: Fractures",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 0.2,
+      "max": 0.35
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 3
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 12,
+       "unit": "hr"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 15,
+       "max": 60,
+       "unit": "sec"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Bone fracture",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 5,
+         "disabling": 95,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0.0035,
+        "disabling": 19.6493,
+        "hurtful": 0,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0.0019,
+      "disabling": 10.8071,
+      "hurtful": 0,
+      "annoying": 0
+     }
+    },
+    {
+     "name": "CC. Transport: Heat Stress, Exhaustion",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (I)",
+      "Transport (II)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Heat, Exhaustion",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 10,
+         "annoying": 90,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 50,
+         "annoying": 30,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 40,
+         "hurtful": 50,
+         "annoying": 10,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 50,
+         "hurtful": 50,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 6.4103,
+        "hurtful": 10.2941,
+        "annoying": 5.8838
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 6.4103,
+      "hurtful": 10.2941,
+      "annoying": 5.8838
+     }
+    },
+    {
+     "name": "CC. Transport: Heat, Exhaustion (Fatal)",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (1)",
+      "Transport (2)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 0.002,
+      "max": 0.02
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Exhaustion (Fatal)",
+       "kind": "physical",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": null
+        },
+        {
+         "excruciating": 0,
+         "disabling": 0,
+         "hurtful": 20,
+         "annoying": 80,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 20,
+         "hurtful": 80,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 9,
+        "hurtful": 9.5,
+        "annoying": 2
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 0.099,
+      "hurtful": 0.1045,
+      "annoying": 0.022
+     }
+    },
+    {
+     "name": "CC. Depopulation and Transport: Fear",
+     "segment_names": [
+      "Catching",
+      "Carrying",
+      "Crating",
+      "Waiting",
+      "Transport (1)",
+      "Transport (2)",
+      "Unloading",
+      "Crate removal",
+      "Lairage"
+     ],
+     "prevalence": {
+      "min": 1,
+      "max": 1
+     },
+     "occurrences": {
+      "min": 1,
+      "max": 1
+     },
+     "durations": [
+      {
+       "min": 1,
+       "max": 2,
+       "unit": "min"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 1,
+       "max": 4,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      },
+      {
+       "min": 3,
+       "max": 15,
+       "unit": "hr"
+      },
+      {
+       "min": 10,
+       "max": 30,
+       "unit": "min"
+      },
+      {
+       "min": 5,
+       "max": 30,
+       "unit": "sec"
+      },
+      {
+       "min": 0.5,
+       "max": 3,
+       "unit": "hr"
+      }
+     ],
+     "tracks": [
+      {
+       "name": "Fear",
+       "kind": "psychological",
+       "segments": [
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 80,
+         "hurtful": 20,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 100,
+         "hurtful": 0,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        },
+        {
+         "excruciating": 0,
+         "disabling": 70,
+         "hurtful": 30,
+         "annoying": 0,
+         "no_pain": 0,
+         "acute_or_chronic": "acute"
+        }
+       ],
+       "per_affected_hours": {
+        "excruciating": 0,
+        "disabling": 16.8722,
+        "hurtful": 5.775,
+        "annoying": 0
+       }
+      }
+     ],
+     "avg_flock_member_hours": {
+      "excruciating": 0,
+      "disabling": 16.8722,
+      "hurtful": 5.775,
+      "annoying": 0
+     }
+    }
+   ],
+   "total_avg_flock_member_hours": {
+    "excruciating": 0.046,
+    "disabling": 431.865,
+    "hurtful": 4052.502,
+    "annoying": 6721.17
+   }
+  }
+ },
+ "pain_level_definitions": {
+  "excruciating": "The last block marks the threshold of pain under which most people would choose taking their own life immediately rather than standing it. This is obviously the case of severe heat and burning, which when makes the victims even jump buildings. Other conditions have also been associated with suicide by sufferers even after short episodes, such as cluster headaches (often described as one of the most painful conditions known to humans). The most gruesome forms of torture observed throughout human history have been designed to inflict pain at this level in the victims. Behavioral patterns associated with pain experiences in this categories include loud screaming, involuntary shaking and extreme restlessness and pacing. Another indicator is the expression of behaviors individuals would strongly refrain from displaying (e.g. for being dangerous or embarrassing) but that may relieve or simply expresses the pain. The assignment of conditions to this level must be therefore done cautiously and economically (self-reporting at this level ought to be evaluated with special care).",
+  "disabling": "The division between the first two and the last two blocks marks a \u201cdisability threshold\u201d that, if crossed, prevents most forms of functioning or enjoyment (socialization, sex, work, or most forms of entertainment) as the direct result of pain. Symptoms are continuously distressing. Individuals affected by the conditions in this category often substantially reduce their activity levels, may change eating patterns and often refrain from moving. Acute episodes of several diseases (e.g. severe pneumonia, some types of cancer), as well as hemorrhagic ulcers, strong migraines, food poisoning symptoms, acute postoperative pain and recent fractures in the acute inflammatory phase are in this category. Pain at this level disrupts or prevents sleeping. Only strong pain medications can relieve it.",
+  "hurtful": "Pain experiences within this block include those that most would consider disruptive and disturbing. Although not entirely preventing individuals to function and conduct their usual daily activities, their ability to do so is impaired as the direct result of pain, and often associated with the desire to take painkillers or seek prompt treatment. Experiences in this category are associated with frequent complaints. The possibility to enjoy pleasant experiences is impaired, as is concentration and performance on mentally demanding tasks. Reduced alertness and attention to ongoing stimuli can be also present. Experiences in this category include stomach cramps, sinusitis and moderate headaches. The use of pain medications can relieve symptoms.",
+  "annoying": "Pain experiences within this block represent nuisances, discomfort and experiences often classified as mild pain. Here, the pain experience is not intense enough to disrupt the routine or daily activities of individuals, their possibility to enjoy pleasant (positive) experiences, or their ability to conduct mentally demanding tasks that require concentration. Sufferers do not think about this sensation most of the time, and when they do they can adapt to it. In this category are often conditions such as mild itch, thermal discomfort, and mild musculoskeletal or joint pain."
+ }
+}

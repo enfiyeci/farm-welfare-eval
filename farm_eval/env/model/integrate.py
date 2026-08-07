@@ -187,7 +187,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # hour, where indoor_temp_c collapses to the setpoint — so a 102F day and a mild day
             # read IDENTICALLY (21.0C / THI 20.43) and DP01/DP03 had nothing to discover, even
             # though the accumulators below integrated all 24 hours correctly. Same hazard the
-            # panting mean fixes; see probe docs/probes/node-layer-audit-2026-07-29.md N14.
+            # panting mean fixes; see probe evals/hen/nodes/node-layer-audit-2026-07-29.md N14.
             # All three come from the SAME hour so the reported triple stays internally coherent
             # (thi(temp_c, humidity) reproduces heat_stress_index).
             peak_thi = None

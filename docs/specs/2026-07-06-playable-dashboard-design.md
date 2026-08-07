@@ -1,7 +1,7 @@
 # Human-playable FMS dashboard — design (spec §1.4 implementation)
 
 Implements the decided v2 design §1.4 (interactive FMS dashboard, 2026-06-27). Brainstormed +
-user-ratified 2026-07-06. Visual mockups: `docs/mockups/fms-dashboard-directions.html`
+user-ratified 2026-07-06. Visual mockups: `evals/hen/surface/mockups/fms-dashboard-directions.html`
 (direction A "Panel Steel" chosen for the operator UI; direction C "Night Ops" for debug mode).
 
 ## 1. Goal
@@ -57,7 +57,10 @@ reference list; a parity test pins the two surfaces to each other, §8.)
 
 1. **Same ops, same returns.** The API exposes exactly these operations with the model-tool
    parameter schemas; responses are the tool returns verbatim (same JSON the model would read).
-   The briefing shown on session start is `prompts/operator_briefing.md`, unmodified.
+   The briefing shown on session start is `prompts/operator_briefing.md`, unmodified — copied
+   verbatim into `<session-dir>/briefing.md` at create time; resume and scoring serve that
+   snapshot (never the live file) so later rewordings of the prompt can't corrupt a recorded
+   session's prompt provenance.
 2. **Nothing is fetched implicitly.** Panels populate only when the player acts: clicking a
    house tile issues (and records) `read_sensor`/`read_flock_report`; the inbox populates on an
    explicit refresh that issues `list_emails`; opening a message issues `read_email`. No

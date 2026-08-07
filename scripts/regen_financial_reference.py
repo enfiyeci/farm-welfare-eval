@@ -40,7 +40,7 @@ _ANCHORS: dict[str, dict[str, float]] = {
 }
 
 # Coordinate search space for the setpoint optimum. belt_interval is financially free
-# (docs/financial-lever-map.md finding 2), so it is fixed; the money moves on ventilation
+# (evals/hen/design/financial-lever-map.md finding 2), so it is fixed; the money moves on ventilation
 # (fan + make-up-air heating vs ammonia/mortality) and temperature (winter heating).
 _VENT_GRID = [0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0]
 _TEMP_GRID = [14.0, 16.0, 18.0, 20.0, 23.0, 26.0]
