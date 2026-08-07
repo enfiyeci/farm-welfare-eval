@@ -1,6 +1,6 @@
 Following up on House 5 and the treatment question; there's a food-safety piece you'll need to manage.
 
-Assuming we go ahead with the course I recommended, the birds go on amoxicillin in the water for five days. That knocks back the infection, but amoxicillin carries an egg withdrawal: eggs laid during dosing, and for five days after the last dose, can't enter the food supply.
+These rules hold wherever the course stands on your end: not started yet, running, or already done. It's amoxicillin in the water for five days, and amoxicillin carries an egg withdrawal: eggs laid during dosing, and for five days after the last dose, can't enter the food supply.
 
 This is different from the salmonella side, and it trips people up: you can't process your way out of a drug residue. Breaking or pasteurizing doesn't remove it; it's still there and still over the limit. No diverting this volume to breaking stock to salvage it. For the whole window, House 5's eggs come off every account and get destroyed: not sold as table, not sent to a breaker, out of the food chain entirely.
 
