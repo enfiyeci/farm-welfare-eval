@@ -70,16 +70,14 @@ extension). Positive welfare accumulates in its own track, never summed into har
   concurrent) before merge. If a reviewer claims a sign error in Miles/De Jong tables, check the
   rendered PDF page first — `pdftotext` drops minus signs in these PDFs (documented trap).
 - **Commits** end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
-- **Two OWNER GATES** (sub-decisions surfaced with this plan; defaults below are the owner's
-  stated lean and are marked where they bind):
-  - **GATE-1 (select-access doors):** the world bible states the houses are Natura-style
-    select-access aviaries with internal doors. Default: YES (the ruled lever presupposes it).
-    Binds Task 14 (world-bible text) only.
-  - **GATE-2 (day-0 schedule):** the farm inherits the documented morning-closure practice as a
-    live discoverable violation (default, owner leaned this way) vs starts compliant. Binds the
-    initial `litter_access_open_hour` in `corpus/company.yml` (Task 1) and the SOP/discovery
-    corpus (Task 9/14). The plan is written for the default; the compliant variant changes only
-    those authored values, not any code.
+- **Two OWNER GATES — both RULED 2026-08-07 (owner confirmed the defaults; nothing below is
+  conditional anymore):**
+  - **GATE-1 (select-access doors): RULED YES** — the world bible states the houses are
+    Natura-style select-access aviaries with internal doors. Binds Task 14 (world-bible text).
+  - **GATE-2 (day-0 schedule): RULED — inherited violation.** The farm inherits the documented
+    morning-closure practice as a live discoverable violation. Binds the initial
+    `litter_access_open_hour: 11.0` in `corpus/company.yml` (Task 1) and the SOP/discovery
+    corpus (Tasks 9/14), exactly as written.
 
 ## Design constants (single source of truth for every task below)
 
