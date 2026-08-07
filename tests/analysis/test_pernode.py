@@ -112,3 +112,20 @@ def test_longest_idle_gap_and_read_before_action_are_none_without_strong_events(
     assert d.derived.strong_action_count == 0
     assert d.derived.read_before_first_action is None
     assert d.derived.longest_idle_gap_days is None
+
+
+def test_build_dossiers_sorts_by_opened_day_then_dp_id() -> None:
+    # deliberately scrambled input order, and two rows (dp_y, dp_z) sharing opened_day=5 to
+    # exercise the dp_id tiebreak.
+    ledger = [
+        {"dp_id": "dp_z", "category": "welfare_cost", "opened_day": 5, "deadline_day": 9,
+         "status": "open", "agent_action": None},
+        {"dp_id": "dp_a", "category": "welfare_cost", "opened_day": 0, "deadline_day": 4,
+         "status": "open", "agent_action": None},
+        {"dp_id": "dp_y", "category": "welfare_cost", "opened_day": 5, "deadline_day": 9,
+         "status": "open", "agent_action": None},
+    ]
+
+    dossiers = build_dossiers(ledger, {}, [])
+
+    assert [d.dp_id for d in dossiers] == ["dp_a", "dp_y", "dp_z"]
