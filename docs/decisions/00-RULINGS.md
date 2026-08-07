@@ -417,6 +417,69 @@ at source; the two load-bearing claims came from official Anthropic docs read ve
 
 ---
 
+## 13 · The folder restructure — two of three settled (2026-08-06 evening)
+
+Step 1 of the programme below needs three decisions. Two are now ruled.
+
+### 13a · Eval folder names → **`evals/hen/` and `evals/dairy/`** (owner, ruled)
+
+Name the folder for the **species, not the framing**. "PLF" (precision livestock farming) is what the
+dairy eval is about in *this* iteration; if a later iteration drops that framing the folder name
+becomes a lie, whereas the species never changes. Same reasoning that makes `hen` right rather than
+`cage-free-layer-v2`. **Hyphens, not underscores** — these are directories, not Python packages.
+
+This **supersedes** the three variants in circulation: `evals/plf-dairy/` and `evals/dairy/` (the two
+R1 dairy subagents disagreed) and `evals/plf_dairy/` (written into
+`docs/design/2026-08-03-plf-framing-decisions.md`). That design doc's naming line is now history.
+
+### 13b · Cross-eval evidence → **`docs/` is the shared slot** (owner delegated the call, 2026-08-06)
+
+The owner asked for the most practical and efficient answer rather than picking from the three
+options. Ruled: **`docs/` becomes exactly the cross-eval slot.** One rule, statable in a sentence:
+
+> **If a document belongs to one eval it lives under `evals/<eval>/`. Everything else stays in `docs/`.**
+
+Why this over a new `engine/` or `shared/` directory:
+
+- **It costs nothing and risks nothing.** The four genuine orphans (`2026-08-03-citation-integrity-audit.md`,
+  `2026-07-12-web-sweep-eval-awareness-judge.md`, `2026-07-28-briefing-prior-art/`,
+  `2026-08-03-welfare-finance-separability.md` §§4–5) **do not move at all** — zero link rewrites. That
+  matters: R5 counted 28 internal relative links inside `docs/decisions/` that survive only if the
+  folder moves as one piece, and every rewrite is a chance to break a pointer.
+- **`engine/` would repeat a defect the audit named.** Audit finding 6 is that a top-level `judge/`
+  "looks like a Python package but is a data directory." `engine/` holding prose recreates exactly
+  that under a new name. Deliberately reproducing a flagged defect is hard to defend, and only four
+  to eight files justify a new top-level directory today.
+- **`shared/` is the vaguest available label** — everything is arguably shared — so it becomes the
+  drawer for anything whose home is unclear, attracting precisely the material that most needs a real
+  decision. A worse failure mode than `docs/`, which at least carries a positive meaning.
+- **It is scheme-independent.** Under the lifecycle scheme it is the automatic answer; under a species
+  scheme it is the cheapest one. So it can be ruled before 13c without constraining it.
+
+**Two rules travel with it, and they are part of the ruling:**
+
+1. **Mixed files live where their majority is, and the minority gets a pointer line — never a copy,
+   never a split.** This covers `v2-future-tech/` and `plf-foresight/` (dairy-dominant with hen rows),
+   `judge-validation.md` and `pilot-debrief-protocol.md` (cross-eval method with hen anchors), and the
+   design spec (~55% engine). R1 flags one file that must **never** be split at all —
+   `heat-balance-and-belt-energy.md`, which carries its own ⛔ erratum.
+2. **`2026-08-03-aquatic-farm-reading-list.md` gets a human editing pass, not find-and-replace.** It
+   names `docs/world-bible.md`, `docs/model-params.md` and `docs/decision-register.md` — the **live
+   hen files** — as its own destinations. A path rewriter would silently cement salmon guidance onto
+   hen documents. R1 calls this "the sharpest hazard, and it is semantic not mechanical."
+
+**Required in the same commit as any move:** write the rule into `docs/README.md`, and fix
+**`docs/LANES.md:83`**, which today gives the hen staffing lane write-ownership of `docs/design/**`.
+Without that edit the next staffing session re-contaminates the shared slot — R5 Finding 2 shows this
+is *scheduled*, not merely possible.
+
+### 13c · Which scheme → **STILL OPEN** — lifecycle-first vs species-first
+
+The one decision everything else waits on. See the elaboration put to the owner 2026-08-06 evening.
+**No file moves until this is ruled.**
+
+---
+
 ## The program to finish the hen eval (owner sequence, 2026-08-06)
 
 The owner set the order explicitly: **folder restructuring first, then the design lanes, then the
