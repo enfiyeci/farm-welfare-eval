@@ -57,7 +57,7 @@ This handoff was written on one computer and is being picked up on another. Befo
      to rebuild or restyle it, you are starting from scratch. The available substitute is the
      `anthropic-skills:pdf` skill.
 6. **Absolute paths in the "What was done" section below are wrong.** They read
-   `/Users/ardaenfiyeci/Desktop/farm-eval/...`. That user and that directory **do not exist**; the origin
+   `...`. That user and that directory **do not exist**; the origin
    machine's checkout is `/Users/ardaenf/Desktop/farm-welfare-eval/`. Read every such path as repo-relative
    (`docs/research/...`, `docs/farm-eval-repo-audit.pdf`). The files themselves are real and committed —
    only the paths were fabricated.
@@ -79,7 +79,7 @@ commands in a checkout another agent is using, and never switch a shared checkou
 
 - **Deep dive on Rethink Priorities' farmed-aquatic-animal research, and the primary sources they cite,
   producing a reading list for an aquaculture version of this eval.** Output:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-aquatic-farm-reading-list.md`. **Verified**
+  `docs/research/2026-08-03-aquatic-farm-reading-list.md`. **Verified**
   — the file exists and is committed on this branch.
 - **Seven source PDFs were downloaded and five were read end to end** (both RP salmon reports, both RP AI-in-
   aquaculture reports, and the IMR Laksvel protocol); two RP shrimp reports were read in part. **Verified** —
@@ -89,7 +89,7 @@ commands in a checkout another agent is using, and never switch a shared checkou
   raised across rounds 1 and 2 and 1 in round 3; all accepted and fixed. **Verified** — findings JSON files
   were written and read; the mutation guard showed no unintended repo changes.
 - **Full repository structure audit**, delivered as a 16-page PDF:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/farm-eval-repo-audit.pdf`, built with the `pdf-design` skill
+  `docs/farm-eval-repo-audit.pdf`, built with the `pdf-design` skill
   (swiss preset). **Verified** — `build_pdf.py` exited 0 and the rendered pages were inspected visually.
 - **Two layout bugs found and fixed during the PDF build**, and appended to the skill's learnings file at
   `/Users/ardaenfiyeci/.claude/skills/pdf-design/LEARNINGS.md`. **Verified** — the file was written and the
@@ -101,7 +101,7 @@ commands in a checkout another agent is using, and never switch a shared checkou
   the existing `docs/` tree needs a lifecycle split before a third generation of material lands in it. "Done"
   for the immediate next step is: `docs/` reorganised so a reader can tell from the path alone whether a
   document is still true.
-- **First action:** read `/Users/ardaenfiyeci/Desktop/farm-eval/docs/farm-eval-repo-audit.pdf` section 07
+- **First action:** read `docs/farm-eval-repo-audit.pdf` section 07
   ("Proposed reorganization"), then ask the owner to confirm Move 1 before touching anything. Move 1 is
   mechanical, touches no code, and the test suite should be run after it regardless.
 
@@ -168,15 +168,15 @@ path on the new machine.
   `1c0380f`) and its parent `docs/aquatic-research-and-repo-audit` (the clean, reviewed subset at `3c79a88`,
   branched from `origin/main` at `7be85e3`)
 - Work carried in the transport commit that came from a worktree which does NOT travel
-  (`.claude/worktrees/finance-decision-map`): `docs/probes/financial-decision-map-2026-08-03.md`,
+  (`.claude/worktrees/finance-decision-map`): `evals/hen/design/financial-decision-map-2026-08-03.md`,
   `docs/probes/financial-decision-sweep.json`, `docs/research/2026-08-03-welfare-finance-separability.md`,
   `scripts/financial_decision_sweep.py`. On the origin machine these were uncommitted; they are now in git.
 - Concurrent work by another agent, already pushed, not part of this branch:
   `docs/design/2026-08-03-plf-eval-restructure-and-scoring-analysis.md` on `docs/substrate-realism-wave`
 - Remote: https://github.com/enfiyeci/farm-welfare-eval
 - Existing backlogs this work should not duplicate:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/cleanup-backlog.md` and
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/future-work.md`
+  `docs/cleanup-backlog.md` and
+  `docs/future-work.md`
 - RP's fish-welfare index (entry point to everything in the reading list):
   https://rethinkpriorities.org/cause-area/fish-welfare/
 - Access-request form for RP's gated *Strategies for helping farmed shrimp*: https://forms.gle/Nb4qhvCpUyM4ujJ46

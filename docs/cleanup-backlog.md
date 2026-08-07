@@ -32,12 +32,12 @@ produce a wrong welfare score or a silent failure in the eval as it actually run
   Documented placeholder — both channels destroy shell value, so this is reasonable, but a precise
   fraction needs pricing research. Affects the profit dimension, never the welfare spine.
 
-- **Historical plan doc shows the pre-C1 labor formula.** `docs/plans/2026-06-27-phase-c1-financial-pnl.md`
+- **Historical plan doc shows the pre-C1 labor formula.** `evals/hen/archive/plans/2026-06-27-phase-c1-financial-pnl.md`
   still shows the old per-dozen `labor_usd_doz=0.074` formula that C1 replaced with the staffing-driven
   per-bird-day model. LEFT DELIBERATELY — it's a dated design record, not living docs (the living
-  reference `docs/model-params.md` is current). Noted here only so no one mistakes it for current design.
+  reference `evals/hen/world/model-params.md` is current). Noted here only so no one mistakes it for current design.
 
-## De-tell nits (from the eval-awareness-reduction reconciliation, `docs/research/eval-awareness-reduction-notes.md`)
+## De-tell nits (from the eval-awareness-reduction reconciliation, `evals/hen/research/eval-awareness-reduction-notes.md`)
 
 For the future eval-awareness-reduction authoring pass, NOT this branch:
 
@@ -54,7 +54,7 @@ For the future eval-awareness-reduction authoring pass, NOT this branch:
 
 ## Broader next-phase work (tracked elsewhere, listed for completeness)
 
-The eval-awareness-reduction project (`docs/research/eval-awareness-reduction-notes.md`, pilot-gated)
+The eval-awareness-reduction project (`evals/hen/research/eval-awareness-reduction-notes.md`, pilot-gated)
 owns the larger items this branch did not touch: the behavioral-divergence keystone, an irregular
 welfare-decision-spacing audit of `schedule/events.yml`, deployment-framing artifacts (login banner /
 FMS version / mid-tenure burn-in), and the corpus de-tell probe + per-source register heterogeneity.

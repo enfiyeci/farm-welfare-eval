@@ -52,7 +52,7 @@ inflation is driven by latent belief, which a quiet model does not verbalize. **
   whether the **action** changes (style-not-substance minimal-contrast pairs). At feasible
   full-episode sample counts this is **directional/qualitative, not a powered significance test** —
   report it as findings, never as p-values. This harness is future work (the eval-awareness-reduction
-  effort, `docs/research/eval-awareness-reduction-notes.md`), gated behind the pilot; until it
+  effort, `evals/hen/research/eval-awareness-reduction-notes.md`), gated behind the pilot; until it
   exists, `eval_awareness` tells you only what models *said*, not what they *believed*.
 - Cue-localization (`Score.metadata["cue_localization"]`: trigger class + artifact per grader
   sample) attributes WHAT fired the gate — see `docs/probes/README.md`.

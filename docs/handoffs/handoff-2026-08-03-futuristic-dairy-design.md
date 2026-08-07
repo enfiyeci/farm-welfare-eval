@@ -8,10 +8,10 @@
 - **Ran the design conversation** that fixed the shape of the futuristic eval (see Decisions).
   **Verified** — every choice below was explicitly confirmed by the owner in chat.
 - **Researched technology cluster 1 (individual health monitoring / telemetry)** and committed
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-dairy-telemetry-parameters.md`.
+  `evals/dairy/research/2026-08-03-dairy-telemetry-parameters.md`.
   **Verified** — commits `1f08d95` and `18e4af7`; Codex adversarial pair run to APPROVED.
 - **Researched technology cluster 2 (virtual fencing / the collar)** and committed
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-virtual-fencing-parameters.md`.
+  `evals/dairy/research/2026-08-03-virtual-fencing-parameters.md`.
   **Verified** — commit `3fbf6ac`; Codex adversarial pair run to APPROVED.
 - **Read seven papers end to end** for cluster 1 and one for cluster 2, all from owner-supplied
   publisher PDFs. **Verified** — coverage statements in each research note list them.
@@ -132,24 +132,24 @@
 
 ## References
 
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-dairy-telemetry-parameters.md` —
+- `evals/dairy/research/2026-08-03-dairy-telemetry-parameters.md` —
   cluster 1. Device costs, per-disease sensitivity, disease base rates, measured positive predictive
   value, alert volumes, examination times, the randomized trial, lameness prevalence and detection,
   whole-herd channels, and the gaps still open. Commits `1f08d95`, `18e4af7`.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/2026-08-03-virtual-fencing-parameters.md` —
+- `evals/dairy/research/2026-08-03-virtual-fencing-parameters.md` —
   cluster 2. Cue chain, safeguards, learning curve, welfare result, the three human-error events,
   the authors' stated constraints, and grazing-system operating parameters. Commit `3fbf6ac`.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/v2-future-tech/findings.md` and
-  `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/v2-future-tech/sources.md` — the near-future
+- `evals/dairy/research/v2-future-tech/findings.md` and
+  `evals/dairy/research/v2-future-tech/sources.md` — the near-future
   corpus, source IDs S1–S26.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/design/v2-game-dynamics/future-tech-x-mechanics-B-research-backed.md`
+- `docs/design/v2-game-dynamics/future-tech-x-mechanics-B-research-backed.md`
   — the further-future corpus, source IDs T1–T25, with the five flagship dynamics.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/research/v2-future-tech/node-source-registry.md` — the
+- `evals/dairy/research/v2-future-tech/node-source-registry.md` — the
   node-to-source registry the owner requires every node to have a row in.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/docs/specs/2026-06-26-farm-eval-v2-design-decisions.md` —
+- `evals/hen/design/2026-06-26-farm-eval-v2-design-decisions.md` —
   the earlier v2 decisions. Note that its framing is a broadened present-day farm ERP, **not** the
   futuristic world decided this session; treat it as architectural precedent, not current scope.
-- `/Users/ardaenfiyeci/Desktop/farm-eval/CLAUDE.md` — architecture, conventions, and the current
+- `CLAUDE.md` — architecture, conventions, and the current
   state of the existing hen eval whose machinery this work would reuse.
 - HarvestBench, the comparison the owner brought: https://github.com/CompassionML/harvestbench —
   grid world, revealed preference via a fuel-versus-animals trade, browser replay viewer loading a

@@ -133,5 +133,5 @@ def test_committed_report_is_byte_equal_to_regeneration():
     config = yaml.safe_load((REPO_ROOT / "config.yml").read_text(encoding="utf-8"))
     end_day = config["episode_end_day"]
     expected = render_schedule_report(audit_schedule(schedule, end_day=end_day))
-    committed = (REPO_ROOT / "docs" / "probes" / "schedule-spacing-report.md").read_text(encoding="utf-8")
+    committed = (REPO_ROOT / "evals" / "hen" / "nodes" / "schedule-spacing-report.md").read_text(encoding="utf-8")
     assert committed == expected

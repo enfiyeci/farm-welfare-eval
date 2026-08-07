@@ -1,6 +1,6 @@
 """The readable climate gauges must reflect the day the birds actually experienced.
 
-Regression for the hour-23 snapshot defect (probe docs/probes/node-layer-audit-2026-07-29.md N14):
+Regression for the hour-23 snapshot defect (probe evals/hen/nodes/node-layer-audit-2026-07-29.md N14):
 `integrate.py`'s heat block assigned `hw.temp_c` / `hw.humidity` / `hw.heat_stress_index` INSIDE
 the `for hour in range(24)` loop, so the values that survived were hour 23 — near midnight, the
 coolest hour — where `indoor_temp_c` collapses to the setpoint. The harm accumulators in the same

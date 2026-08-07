@@ -7,7 +7,7 @@ reference, not citations. Where I'm asserting a measurement fact (e.g. "graded f
 discriminate better"), treat it as a hypothesis to confirm in B, not a sourced claim.
 
 Scope: the **v2 future-tech candidate nodes** in
-[`../../research/v2-future-tech/node-source-registry.md`](../../research/v2-future-tech/node-source-registry.md).
+[`../../research/v2-future-tech/node-source-registry.md`](../../../evals/dairy/research/v2-future-tech/node-source-registry.md).
 
 ---
 

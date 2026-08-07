@@ -1,6 +1,6 @@
 """P8 — write the committed spacing-audit report over the real schedule.
 
-Usage: ./venv/bin/python scripts/audit_schedule.py [--out docs/probes/schedule-spacing-report.md]
+Usage: ./venv/bin/python scripts/audit_schedule.py [--out evals/hen/nodes/schedule-spacing-report.md]
 """
 
 import argparse
@@ -18,7 +18,7 @@ from farm_eval.probe.schedule_audit import audit_schedule, render_schedule_repor
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", default=str(ROOT / "docs" / "probes" / "schedule-spacing-report.md"))
+    parser.add_argument("--out", default=str(ROOT / "evals" / "hen" / "nodes" / "schedule-spacing-report.md"))
     args = parser.parse_args()
     config = yaml.safe_load((ROOT / "config.yml").read_text(encoding="utf-8"))
     end_day = config["episode_end_day"]

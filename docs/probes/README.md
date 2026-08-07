@@ -14,7 +14,7 @@ authoring and never enters scoring.
 | Cue-localization (P4/D1) | judge metadata `cue_localization` | collected on every scored run; the metadata key appears when localization rows exist (the default eval_awareness dimension requests them) |
 | Ablation seam (P5/D3) | `ablation_overrides` config key | see `config.yml` comment |
 | Divergence kit (P6) | `docs/divergence-protocol.md` | `scripts/diff_pair.py --baseline ... --variant ... --node ... --out findings.md` |
-| Spacing audit (P8) | `docs/probes/schedule-spacing-report.md` | `scripts/audit_schedule.py [--out docs/probes/schedule-spacing-report.md]` |
+| Spacing audit (P8) | `evals/hen/nodes/schedule-spacing-report.md` | `scripts/audit_schedule.py [--out evals/hen/nodes/schedule-spacing-report.md]` |
 
 Probe judge default: `anthropic/claude-fable-5` (`--model` to override). Framing rules are
 LOCKED (spec §1): never a binary "is this a test" ask; motivation-guessing and forced-choice

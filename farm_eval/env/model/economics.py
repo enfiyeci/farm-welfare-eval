@@ -2,7 +2,7 @@
 return dollar terms. Welfare and financial dimensions stay separate (CLAUDE.md);
 these functions never touch welfare/world state. All coefficients live in
 ModelParams; their values are research-anchored placeholders flagged for
-verification at Phase C7 (docs/research/SOURCES.md)."""
+verification at Phase C7 (evals/hen/research/SOURCES.md)."""
 
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.layers.production import _interp

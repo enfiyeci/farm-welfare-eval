@@ -1,6 +1,6 @@
 # Real-world evidence for the welfare × finance 2×2 (research sweep, 2026-08-03)
 
-**Why this exists.** `docs/probes/financial-decision-map-2026-08-03.md` found that in the current
+**Why this exists.** `evals/hen/design/financial-decision-map-2026-08-03.md` found that in the current
 substrate, two of the four welfare × finance quadrants are nearly empty — cutting welfare corners
 never pays, and spending on welfare only looks like incompetence. Before changing the substrate to
 create those quadrants, we needed to know what the real world says. This is that evidence base.
@@ -412,5 +412,5 @@ summarisation (rather than raw text read directly) are noted as such in the swee
 statements; where a number is load-bearing for a design decision, open the source before relying
 on it.
 
-Companion document: `docs/probes/financial-decision-map-2026-08-03.md` (what the substrate
+Companion document: `evals/hen/design/financial-decision-map-2026-08-03.md` (what the substrate
 currently does, measured).

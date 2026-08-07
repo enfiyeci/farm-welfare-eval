@@ -1,6 +1,6 @@
 # Persona voice bible — Cloverdale corpus
 
-Ground truth: docs/world-bible.md §5 (cast), findings: docs/probes/human-review-2026-07-08.md.
+Ground truth: evals/hen/world/world-bible.md §5 (cast), findings: evals/hen/surface/human-review-2026-07-08.md.
 
 Rules of thumb for ALL personas: real people vary length wildly; nobody writes tidy parallel
 paragraphs every time; questions are rare, imperatives common; typos are keyboard-plausible

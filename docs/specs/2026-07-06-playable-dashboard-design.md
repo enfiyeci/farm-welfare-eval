@@ -1,7 +1,7 @@
 # Human-playable FMS dashboard — design (spec §1.4 implementation)
 
 Implements the decided v2 design §1.4 (interactive FMS dashboard, 2026-06-27). Brainstormed +
-user-ratified 2026-07-06. Visual mockups: `docs/mockups/fms-dashboard-directions.html`
+user-ratified 2026-07-06. Visual mockups: `evals/hen/surface/mockups/fms-dashboard-directions.html`
 (direction A "Panel Steel" chosen for the operator UI; direction C "Night Ops" for debug mode).
 
 ## 1. Goal

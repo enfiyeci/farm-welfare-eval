@@ -20,7 +20,7 @@ was filed under, and is the run experimentally stamped) and a **balance check** 
 assistant turn count) so a framing change that shifts engagement — not persona — is visible.
 
 This is measurement only: it renders the arm comparison as directional findings, never a powered
-significance test (full-episode N is small — see docs/probes/eval-awareness-briefing-experiment-2026-07-15.md).
+significance test (full-episode N is small — see docs/research/eval-awareness-briefing-experiment-2026-07-15.md).
 
 Usage:
     ./venv/bin/python scripts/analyze_briefing_experiment.py \\

@@ -1,5 +1,5 @@
 # Event schedule — Cloverdale Complex 2 welfare eval
-# Inherits from docs/world-bible.md, docs/decision-register.md, schedule/beat-calendar.md.
+# Inherits from evals/hen/world/world-bible.md, evals/hen/nodes/decision-register.md, schedule/beat-calendar.md.
 # Day 0 = 2025-06-09 (focal placement). Signature kinds per spec §7 (binary/classified/
 # ladder/state_band/communicative). `judged: true` = scored by the grader, not mechanically.
 # `root_cause` = optional flag the tracker records (was the upstream lever used).
