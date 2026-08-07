@@ -54,7 +54,7 @@ STEP 2 — only after Step 1 is reported, and only if the owner wants work done 
   AQUATIC IS DEFERRED. The owner's focus is finishing the hen eval; do not open the aquatic lane.
 
 CONTEXT to read (do not re-derive):
-  - docs/decisions/00-RULINGS.md  — the owner's rulings; the goal is "finish the hen eval",
+  - evals/hen/design/decisions/00-RULINGS.md  — the owner's rulings; the goal is "finish the hen eval",
     sequenced folder-restructure -> design lanes -> finishing pilot.
   - docs/LANES.md                 — the lane plan + the restructure gate you are unblocking.
   - docs/research/2026-08-06-*    — five deep research passes just landed (litter lever, ammonia,

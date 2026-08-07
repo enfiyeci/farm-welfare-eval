@@ -7,7 +7,7 @@ substrate at all? The owner asked for this reading as the opener of the session 
 
 Companion: `findings.md` (the six-chapter pass), the design spec
 `docs/specs/2026-08-04-welfare-currency-design.md`, the work ledger
-`docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`.
+`evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`.
 
 ---
 

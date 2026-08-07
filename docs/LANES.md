@@ -4,7 +4,7 @@ The index for running several Claude sessions on this repo at once. Open this in
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
 Last updated: 2026-08-06 (rewritten after the owner ruled on all eleven decision briefs — see
-`docs/decisions/00-RULINGS.md`).
+`evals/hen/design/decisions/00-RULINGS.md`).
 
 ## Session title convention
 
@@ -45,7 +45,7 @@ STATUS · topic · @folder
 pilot run of it. "Demo" = finished project, not a screenshot and not a replay.
 
 **Order (owner):** **(1) folder restructuring first → (2) the design lanes → (3) the finishing
-pilot.** Rulings and rationale in `docs/decisions/00-RULINGS.md` ("The program to finish the hen
+pilot.** Rulings and rationale in `evals/hen/design/decisions/00-RULINGS.md` ("The program to finish the hen
 eval").
 
 ### Step 1 — Folder restructuring (do FIRST; blocks the lanes)
@@ -134,7 +134,7 @@ is created. **Do NOT run before Step 2 lands** (owner: no fresh pilots until the
 **Before the first real pilot run, and after the final calibration wave**, the FY26 cost-target
 number (ruling 6) must be put to the owner and ruled. It edits `msg_0`, so runs either side of it
 cannot be pooled; deciding after a pilot means paying for a third pilot. Whichever lane schedules
-the pilot owns this check. Full statement in `docs/decisions/00-RULINGS.md` §6.
+the pilot owns this check. Full statement in `evals/hen/design/decisions/00-RULINGS.md` §6.
 
 ## Closing out
 
@@ -148,7 +148,7 @@ the pilot owns this check. Full statement in `docs/decisions/00-RULINGS.md` §6.
 
 ## Branches that are only history — ⚠️ THE PREVIOUS CLAIM HERE WAS WRONG
 
-The earlier version of this section, and `docs/decisions/README.md`, both said all four of
+The earlier version of this section, and `evals/hen/design/decisions/README.md`, both said all four of
 `feat/stocking-density`, `feat/stocking-density-task6`, `fix/model-params-finiteness` and
 `fix/reference-policy-h6` were "provably contained in `feat/litter-ammonia-recalib`, all pushed",
 with "nothing at risk and nothing to weigh". **Two of the four were neither.** Verified with
@@ -185,4 +185,4 @@ git worktree list && git branch -vv
 ```
 
 For dirty trees and unpushed work across every worktree at once, see the audit block in
-`docs/decisions/10-measured-answers.md`.
+`evals/hen/design/decisions/10-measured-answers.md`.

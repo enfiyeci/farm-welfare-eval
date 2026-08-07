@@ -57,4 +57,4 @@ source before authoring the tripwire.**
    the spatial-mean semantics. What still needs a ruling before regeneration is the **litter-age
    operating point** silently embedded in 2.169.
 
-Both are recorded in `docs/decisions/00-RULINGS.md`.
+Both are recorded in `evals/hen/design/decisions/00-RULINGS.md`.

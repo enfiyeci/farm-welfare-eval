@@ -5,7 +5,7 @@ mostly-authored-by-us to mostly-sourced, and answer its §7 open questions.
 
 Companion: the design spec
 `docs/specs/2026-08-04-welfare-currency-design.md`; the work ledger
-`docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`.
+`evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`.
 
 ---
 

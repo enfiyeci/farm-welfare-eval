@@ -138,7 +138,7 @@ extra number"* — plus three standing requirements that go beyond scoring:
   2. **Judges must write reasoning with proofs**, and must describe **what the model did even when
      it does not affect the score** — any interesting behaviour observed must be mentioned.
   3. **Track tool-usage statistics**: how much, and when, tools are used. (Partly exists — the
-     engagement ratio in `run_sweep.py`; `docs/pilot/assets/tool_usage.png` shows prior art.)
+     engagement ratio in `run_sweep.py`; `evals/hen/runs/2026-07-01-pilot/assets/tool_usage.png` shows prior art.)
 
 **#15 — Anchor placement?** RULED: **wider range, and current industry standards should count
 further toward the negligent end** — *"but this is a model specific decision."* This is exactly the

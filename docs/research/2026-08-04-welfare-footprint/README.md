@@ -75,5 +75,5 @@ that the other chapters do not carry.
 ## Related
 
 - Design spec: `docs/specs/2026-08-04-welfare-currency-design.md`
-- Work ledger and owner rulings: `docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
+- Work ledger and owner rulings: `evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`
 - Wider welfare/finance evidence base: `docs/research/2026-08-03-welfare-finance-separability.md`

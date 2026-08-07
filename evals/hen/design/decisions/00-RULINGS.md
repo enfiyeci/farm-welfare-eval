@@ -3,7 +3,7 @@
 Answered 2026-08-06. This file is the authoritative record of what was decided. Where a ruling
 changes what a brief recommends, **this file wins** and the brief is history.
 
-Read alongside `docs/decisions/README.md` (the index) and `docs/decisions/10-measured-answers.md`
+Read alongside `evals/hen/design/decisions/README.md` (the index) and `evals/hen/design/decisions/10-measured-answers.md`
 (the in-repo measurements). Briefs 01–09 keep their analysis; their "what to say to unblock" lines
 are superseded by the rulings below.
 
@@ -81,8 +81,8 @@ belt→ammonia route uses the sourced +0.763%/h.
 
 The pass that died on the API session limit was re-run after the reset. Both halves are in
 `docs/research/2026-08-06-litter-lever-and-ammonia/`
-([dose-response](../research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
-[welfare cost](../research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
+([dose-response](../../../docs/research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md),
+[welfare cost](../../../docs/research/2026-08-06-litter-lever-and-ammonia/litter-access-welfare-cost.md)).
 They were commissioned precisely because they "decide whether the lever is honest rather than merely
 convenient." **The answer is: not yet honest, in two independent ways.**
 
@@ -444,7 +444,7 @@ Why this over a new `engine/` or `shared/` directory:
 - **It costs nothing and risks nothing.** The four genuine orphans (`2026-08-03-citation-integrity-audit.md`,
   `2026-07-12-web-sweep-eval-awareness-judge.md`, `2026-07-28-briefing-prior-art/`,
   `2026-08-03-welfare-finance-separability.md` §§4–5) **do not move at all** — zero link rewrites. That
-  matters: R5 counted 28 internal relative links inside `docs/decisions/` that survive only if the
+  matters: R5 counted 28 internal relative links inside `evals/hen/design/decisions/` that survive only if the
   folder moves as one piece, and every rewrite is a chance to break a pointer.
 - **`engine/` would repeat a defect the audit named.** Audit finding 6 is that a top-level `judge/`
   "looks like a Python package but is a data directory." `engine/` holding prose recreates exactly

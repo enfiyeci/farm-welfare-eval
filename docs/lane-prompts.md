@@ -39,7 +39,7 @@ Verify that commit is fetchable before touching anything (git fetch && git cat-f
 Then create your own worktree and work only there:
   git worktree add ~/worktrees/fwe-staffing -b feat/staffing-design 261aa8b23
 
-READ FIRST: docs/decisions/00-RULINGS.md section 4 (staffing), section 5 (DP20), section 7
+READ FIRST: evals/hen/design/decisions/00-RULINGS.md section 4 (staffing), section 5 (DP20), section 7
 (financial floor), and docs/LANES.md. Do not re-derive what those already settle.
 
 THE RULING YOU ARE IMPLEMENTING. The owner REJECTED the current design, where the agent can set
@@ -89,7 +89,7 @@ Base commit: 261aa8b235e21522cba5810935925bbe450873b6
 Verify that commit is fetchable first. Then:
   git worktree add ~/worktrees/fwe-validation -b docs/validation-gate 261aa8b23
 
-READ FIRST: docs/decisions/00-RULINGS.md section 8 (which demo), docs/judge-validation.md,
+READ FIRST: evals/hen/design/decisions/00-RULINGS.md section 8 (which demo), docs/judge-validation.md,
 docs/expert-labeling-pack.md, docs/LANES.md.
 
 WHY THIS LANE MATTERS: it is the long pole for the eval's "result" claim, and it is the only work on
@@ -234,7 +234,7 @@ Base commit: 261aa8b235e21522cba5810935925bbe450873b6
 Verify the commit is fetchable first.
 
 READ: docs/research/2026-08-06-litter-lever-and-ammonia/README.md and
-docs/decisions/00-RULINGS.md sections 1 and 2. Do not re-derive them.
+evals/hen/design/decisions/00-RULINGS.md sections 1 and 2. Do not re-derive them.
 
 TWO OPEN QUESTIONS, both of which block the critical-path litter lane:
 
@@ -287,9 +287,9 @@ Base: current main AFTER the repo reorg has merged. Verify that before starting.
 
 DO NOT START until BOTH are true: (1) the repo reorg has merged, or you will be reorganised out from
 under yourself; (2) the owner has ruled the lever re-pick — litter drying versus litter access hours
-— in docs/decisions/00-RULINGS.md section 1.
+— in evals/hen/design/decisions/00-RULINGS.md section 1.
 
-READ FIRST: docs/decisions/00-RULINGS.md sections 1, 2 and 3; and every file in
+READ FIRST: evals/hen/design/decisions/00-RULINGS.md sections 1, 2 and 3; and every file in
 docs/research/2026-08-06-litter-lever-and-ammonia/ (README first). Those settle a great deal; do not
 re-derive them.
 
@@ -334,7 +334,7 @@ Base: current main AFTER the repo reorg has merged.
 
   git worktree add ~/worktrees/fwe-behaviour -b feat/behaviour-report <post-reorg-main-sha>
 
-READ FIRST: docs/decisions/00-RULINGS.md section 8, and docs/LANES.md.
+READ FIRST: evals/hen/design/decisions/00-RULINGS.md section 8, and docs/LANES.md.
 
 WHAT THE OWNER ASKED FOR: a detailed report of how the model actually BEHAVED, covering per-node
 behaviour, per-tool behaviour, AND interesting behaviour that belongs to no node at all.
@@ -369,7 +369,7 @@ Base: current main AFTER the repo reorg has merged.
 
   git worktree add ~/worktrees/fwe-node-triage -b feat/node-triage <post-reorg-main-sha>
 
-READ FIRST: docs/decisions/00-RULINGS.md sections 3 and 5, and docs/decisions/10-measured-answers.md.
+READ FIRST: evals/hen/design/decisions/00-RULINGS.md sections 3 and 5, and evals/hen/design/decisions/10-measured-answers.md.
 
 THE QUESTION: how many of the eval's scored nodes actually DISCRIMINATE — that is, do different
 model behaviours produce different scores? Known so far: DP18 is excluded (its metric was not

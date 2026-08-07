@@ -3,7 +3,7 @@
 **Written:** 2026-08-04 · **Status:** design, not built · **Owner ruling #17**, scope ruling: *"as
 an extra measurement to our nodes"* — additive, replaces nothing.
 
-Companion documents: the work ledger `docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`,
+Companion documents: the work ledger `evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`,
 the measured substrate baseline `docs/probes/financial-decision-map-2026-08-03.md`.
 
 ---
@@ -1257,7 +1257,7 @@ the code and is real:
 **Round 3** (verdict REVISE, one important finding, raised independently by both reviewers and
 verified real): the round-2 correction was applied to the spec but **not propagated to the ledger**,
 which still read "Suppression loses nothing here" — a claim the spec had just retracted. **Fixed**
-in `docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`.
+in `evals/hen/design/decisions/2026-08-04-welfare-currency-and-finance-ledger.md`.
 
 ⚠️ **This loop reached its three-round cap.** The round-3 item was a propagation of a correction
 already adjudicated in round 2, not a new or disputed finding, so it was applied rather than
