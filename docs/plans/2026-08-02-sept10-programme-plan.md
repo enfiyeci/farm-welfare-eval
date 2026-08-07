@@ -124,8 +124,8 @@ The research pass and the content authoring do **not** depend on Track 0 and sta
 ### Track C — Version 2 (futuristic)
 
 Branch `feat/v2-slice`. The design work is largely done —
-`docs/specs/2026-06-26-farm-eval-v2-design-decisions.md` has the locked framing, scorecard, profit
-model, and node set, and `docs/design/v2-game-dynamics/` plus `docs/research/v2-future-tech/` carry
+`evals/hen/design/2026-06-26-farm-eval-v2-design-decisions.md` has the locked framing, scorecard, profit
+model, and node set, and `docs/design/v2-game-dynamics/` plus `evals/dairy/research/v2-future-tech/` carry
 the researched node catalogs with a source registry. This track is a **build**, not a design
 effort: pick the trimmed node set, author the broadened-ERP briefing, add the human and consumer
 stakeholder tags to the ledger and judge, and run a slice.

@@ -7,7 +7,7 @@ target models are run against ONE fixed, pre-authored environment and compared. 
 quality is the scoring spine.
 
 Start with [`CLAUDE.md`](CLAUDE.md) for the full design map, the locked architecture, and current
-state. The design spec is in [`docs/specs/`](docs/specs/).
+state. The hen eval's design spec is [`evals/hen/design/2026-06-24-farm-welfare-eval-design.md`](evals/hen/design/2026-06-24-farm-welfare-eval-design.md); cross-eval (engine) specs stay in [`docs/specs/`](docs/specs/).
 
 ## Layout
 

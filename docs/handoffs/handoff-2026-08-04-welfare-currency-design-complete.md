@@ -1,7 +1,7 @@
 # Handoff: welfare currency Step 1 — design COMPLETE, four owner rulings, ready to build
 > Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed, `040f6b9`) · Status: active
 >
-> **Supersedes** `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-step1-sources-read.md`
+> **Supersedes** `.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-step1-sources-read.md`
 > (its first action, reading Ch. 5 and Ch. 6, is done). Treat that file and
 > `handoff-2026-08-04-welfare-currency-step1.md` in the same folder as **stale**.
 
@@ -13,7 +13,7 @@
   the published aviary feather burden (0.8 / 13.9 / 180.9 h) at every printed digit.
 - **Chapters 5 and 6 read end to end** (text; ⚠️ figures not inspected as images), PDFs archived,
   written up. **Verified** — committed `51d497a`; the write-up is
-  `docs/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`.
+  `evals/hen/research/2026-08-04-welfare-footprint/findings-ch05-ch06.md`.
 - **Owner ruled both chapters' channels IN.** Six new rows in spec §5.5 (dustbathing, foraging,
   nest, roosting deprivation; fatal and chronic egg peritonitis). **Verified** — committed `5c5d0b8`.
 - **Owner reframed the headline** from absolute cumulative pain to the **change attributable to the
@@ -31,7 +31,7 @@
 ## Goal for next session
 
 - Step 1 (the welfare currency) is **designed and reviewed but NOT built**. The whole thing lives
-  in `docs/specs/2026-08-04-welfare-currency-design.md`; nothing under `farm_eval/` has changed.
+  in `evals/hen/design/2026-08-04-welfare-currency-design.md`; nothing under `farm_eval/` has changed.
   "Done" for the next increment is a working `farm_eval/env/model/pain.py` plus the mortality
   ledger, with every existing golden fixture byte-identical (acceptance criterion 1).
 - **First action:** ask the owner whether to start implementing, or to take one of the open
@@ -75,7 +75,7 @@
   run — never count one as APPROVED.**
 - **The Bash tool's working directory silently reverts to the main checkout between calls.** A
   `git push` issued without an absolute path pushed the wrong branch (see Open questions). Always
-  use `git -C /Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map`.
+  use `git -C .claude/worktrees/finance-decision-map`.
 - **Owner working-style corrections still in force:** no research until its section comes up in the
   agreed order; plain-language explanations with tradeoffs rather than option chips; every source
   as a clickable link; deliverable files referenced by full path on every mention.
@@ -104,15 +104,15 @@
 ## References
 
 - **The design spec — the thing to implement:**
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/specs/2026-08-04-welfare-currency-design.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/design/2026-08-04-welfare-currency-design.md`
   — §1.1 the reframing ruling and what it costs · §5.2.1 the mortality ledger · §5.5 the mapping
   table including the six new rows · **§5.5.1 ¶1–¶16 the implementation traps, which is the section
   that will actually save the implementer** · §5.7 the three attribution tiers · §6 acceptance
   criteria · §7 the answered/parked questions · §8.4–§8.6 this session's review record.
 - **Work ledger, all owner rulings and the decision order:**
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
 - **Source corpus (start at the README):**
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/research/2026-08-04-welfare-footprint/README.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/research/2026-08-04-welfare-footprint/README.md`
   · `findings.md` — the six-chapter pass · `findings-ch05-ch06.md` — the second pass, the Ch. 5/6
   Pain-Tracks and what each addition costs · `pain-track-parameters.json` — the machine-readable
   parameter set · `sources/` — eight chapter PDFs.
@@ -139,7 +139,7 @@
 - ⚠️ `feat/stocking-density-task6` belongs to another session. Do not touch it. It is blocked, and
   its ammonia recalibration collides with ruling #9 — coordinate before editing that layer.
 - Programme deadline context (Sept 10, four deliverables, V1 must be publishable):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
 
 ## Load these skills next
 

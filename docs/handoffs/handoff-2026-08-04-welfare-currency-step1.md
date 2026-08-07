@@ -88,16 +88,16 @@
 ## References
 
 - Work ledger, all 26 rulings and the decision order:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
 - Welfare-currency design spec (the thing being implemented):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/specs/2026-08-04-welfare-currency-design.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/design/2026-08-04-welfare-currency-design.md`
 - Measured substrate baseline, 105 policies:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/probes/financial-decision-map-2026-08-03.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/design/financial-decision-map-2026-08-03.md`
 - Its regenerable script and data:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/scripts/financial_decision_sweep.py`,
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/probes/financial-decision-sweep.json`
+  `.claude/worktrees/finance-decision-map/scripts/financial_decision_sweep.py`,
+  `.claude/worktrees/finance-decision-map/docs/probes/financial-decision-sweep.json`
 - Real-world evidence base (welfare economics, molt/depop, house parameters, welfare-index methods):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/research/2026-08-03-welfare-finance-separability.md`
+  `.claude/worktrees/finance-decision-map/docs/research/2026-08-03-welfare-finance-separability.md`
 - The source to read first: https://welfarefootprint.org/book-laying-hens/
 - Owner-supplied framing post: https://www.animalask.org/post/modelling-the-outcomes-of-animal-welfare-interventions-one-possible-approach-to-the-trade-offs-betw
 - Sources that defeated retrieval this session, do not burn time re-trying blindly: the 2025 OSF
@@ -105,7 +105,7 @@
   paper https://www.nature.com/articles/s43016-025-01213-z (paywalled).
 - Branch `worktree-finance-decision-map`, pushed. Commits `4a30708`, `c35a34e`, `0d558b1`.
 - Programme deadline context (Sept 10, four deliverables, V1 must be publishable):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
 
 ## Load these skills next
 

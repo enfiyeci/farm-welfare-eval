@@ -1,10 +1,10 @@
 # Handoff: welfare currency Step 1 done — sources read, mapping table sourced, three rulings recorded
 > Written: 2026-08-04 · Branch: `worktree-finance-decision-map` (pushed, `5e5b5fa`) · Status: stale
 >
-> **SUPERSEDED** by `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-design-complete.md`
+> **SUPERSEDED** by `.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-design-complete.md`
 > — its first action (read Ch. 5 and Ch. 6) is complete and four further owner rulings have landed since.
 >
-> **Supersedes** `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-step1.md`,
+> **Supersedes** `.claude/worktrees/finance-decision-map/docs/handoffs/handoff-2026-08-04-welfare-currency-step1.md`,
 > whose "first action" (read the four free chapters) is now complete. Treat that file as stale.
 
 ## What was done this session
@@ -43,7 +43,7 @@
   opener. They are the two largest published aviary burdens we do **not** model, so the point is to
   decide whether they should enter the substrate at all — not to map them onto existing channels.
   Archive them alongside the other six in
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/research/2026-08-04-welfare-footprint/sources/`.
+  `.claude/worktrees/finance-decision-map/evals/hen/research/2026-08-04-welfare-footprint/sources/`.
 
 ## Decisions made
 
@@ -116,19 +116,19 @@
 ## References
 
 - Design spec (the thing being implemented):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/specs/2026-08-04-welfare-currency-design.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/design/2026-08-04-welfare-currency-design.md`
   — §5.5 is the mapping table, §5.5.1 the implementation traps, §7 the answered questions, §8.1–8.3
   the full review record.
 - Work ledger, all 26 owner rulings and the decision order:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-04-welfare-currency-and-finance-ledger.md`
 - **Source corpus written this session** (start at its README):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/research/2026-08-04-welfare-footprint/README.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/research/2026-08-04-welfare-footprint/README.md`
   · `findings.md` in the same folder carries the coverage statement, the anchor set, the §4.1
   platform-versus-print divergences, and the per-channel sourcing verdicts
   · `pain-track-parameters.json` is the machine-readable parameter set
   · `sources/` holds the six chapter PDFs.
 - Measured substrate baseline, 105 policies:
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/probes/financial-decision-map-2026-08-03.md`
+  `.claude/worktrees/finance-decision-map/evals/hen/design/financial-decision-map-2026-08-03.md`
 - Book, all nine chapters free: <https://welfarefootprint.org/book-laying-hens/>
 - Parameter platform: <https://pain-track.org/hens>
 - Red mite evidence, read in full: Temple et al. 2020, <https://doi.org/10.1371/journal.pone.0241608>
@@ -140,7 +140,7 @@
 - Commits this session: `674cadd` (source reading), `12ac82e` (death + worker rulings), `5e5b5fa`
   (keel option (b)). Branch pushed and in sync with `origin/worktree-finance-decision-map`.
 - Programme deadline context (Sept 10, four deliverables, V1 must be publishable):
-  `/Users/ardaenfiyeci/Desktop/farm-eval/.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
+  `.claude/worktrees/finance-decision-map/docs/plans/2026-08-02-sept10-programme-plan.md`
 - ⚠️ `feat/stocking-density-task6` belongs to another session. Do not touch it. Its ammonia
   recalibration collides with ruling #9 — coordinate before editing that layer at Step 3.
 
