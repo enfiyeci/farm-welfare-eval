@@ -17,6 +17,16 @@ class PainParams(BaseModel):
     awake_hours_per_day: float = 16.0
     awake_hour_start: int = 5          # hourly channels accrue on hours [start, start+16)
 
+    # --- Heat (spec §5.5): SHAPE SOURCED, THRESHOLDS OURS ---
+    # Ch. 7 Pain-Track 7.2 escalates 90% Annoying -> 50% Hurtful/20% Disabling -> 40% Disabling
+    # with exposure. That is TRANSPORT, harsher than a house, so it bounds the intensity from
+    # above; what it establishes is that WFP takes sustained heat stress to Disabling. The THI
+    # edges below are ours. heat_thi_mild aligns with ModelParams.heat_danger_thi (27.5) and
+    # heat_thi_severe with the acute-mortality onset (30.0); a test pins both alignments so the
+    # two parameter sets cannot drift apart.
+    heat_thi_mild: float = 27.5      # [mild, severe) -> Annoying, whole house
+    heat_thi_severe: float = 30.0    # [severe, inf)  -> panting share Disabling, rest Hurtful
+
     @model_validator(mode="after")
     def _validate_awake_window(self):
         if not (0.0 < self.awake_hours_per_day <= 24.0):

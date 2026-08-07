@@ -28,6 +28,7 @@ from farm_eval.env.model.layers import (
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
+from farm_eval.env.model import pain
 
 
 # Fixed cause order — baseline, heat, hpai, staffing. Load-bearing: it is the tie-break order
@@ -251,6 +252,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 day_heat_mort += heat.heat_mortality_frac(thi_val, hours_over_30, params)
                 # Accumulate heat-stress hours above the danger threshold (27.5, NOT panting 28.5)
                 acc.accrue_heat(state.welfare.harm, thi_val, 1.0, params.heat_danger_thi)
+                if pain.is_awake_hour(hour, params.pain):
+                    acc.accrue_pain(state.welfare, hid, "heat", pain.heat_pain(
+                        thi_val, heat.panting_fraction(thi_val), birds, 1.0, params.pain,
+                    ))
             # DAILY MEAN, not the hour-23 snapshot (Codex re-review 2026-07-12): a flock that
             # pants through a hot afternoon but cools by midnight must still carry that stress
             # into tomorrow's downgrade term and today's flock-report observation.

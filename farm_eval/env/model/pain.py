@@ -63,3 +63,36 @@ class PainDelta(BaseModel):
 
 
 ZERO = PainDelta()
+
+
+def is_awake_hour(hour: int, pp) -> bool:
+    """True if `hour` lies in the awake window [awake_hour_start, +awake_hours_per_day).
+
+    Wraps past midnight, so a window that starts late in the day still yields a contiguous
+    16 hours. Hourly channels accrue only inside it (spec §2.1.1 convention 1).
+    """
+    span = int(round(pp.awake_hours_per_day))
+    return any((pp.awake_hour_start + k) % 24 == hour for k in range(span))
+
+
+def heat_pain(thi: float, panting_fraction: float, birds: int, hours: float, pp) -> PainDelta:
+    """Bird-hours of heat pain for one hourly house-step.
+
+    PROVENANCE: SHAPE SOURCED, THRESHOLDS OURS (spec §5.5).
+
+    Bands are MUTUALLY EXCLUSIVE and the population split at the severe band sums to exactly
+    100% (spec §5.5.1 ¶6): below `heat_thi_mild` nothing; in the mild band the whole house is
+    Annoying and panting is ignored; at or above `heat_thi_severe` the panting share is
+    Disabling and the remainder Hurtful. No bird is ever counted in two categories.
+    """
+    if not (0.0 <= panting_fraction <= 1.0):
+        raise ValueError(f"panting_fraction must be in [0, 1], got {panting_fraction}")
+    bird_hours = birds * hours
+    if bird_hours <= 0.0 or thi < pp.heat_thi_mild:
+        return ZERO
+    if thi < pp.heat_thi_severe:
+        return PainDelta.of(annoying=bird_hours)
+    return PainDelta.of(
+        disabling=bird_hours * panting_fraction,
+        hurtful=bird_hours * (1.0 - panting_fraction),
+    )
