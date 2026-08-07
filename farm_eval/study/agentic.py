@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import secrets
+import stat as stat_module
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Sequence
@@ -125,34 +127,56 @@ def _sha256(path: Path) -> str:
 _MAX_READBACK_BYTES = 1024 * 1024
 
 
-def _read_capped(path: Path) -> str | None:
-    """Read a subject-written file defensively: regular files only (no symlinks,
-    directories or FIFOs — an is_file() FIFO check is False, and following a
-    symlink out of the workspace is not evidence), capped in size, and any
-    OS-level surprise returns None instead of aborting the sweep."""
+def _read_bytes_capped(path: Path) -> bytes | None:
+    """Read a subject-written file defensively, via a single file descriptor.
+
+    Open with O_NOFOLLOW|O_NONBLOCK, then validate THE DESCRIPTOR with fstat and
+    read from it — never check a path and then re-open it (Codex review
+    2026-08-07 round 3: a subject-left background process could swap a validated
+    regular file for a FIFO or symlink between check and open; with one fd there
+    is no second open to race). O_NONBLOCK keeps a FIFO open from blocking;
+    fstat then rejects it. Regular files only, capped at _MAX_READBACK_BYTES
+    (re-checked during the read, in case the file grows underneath us); any
+    OS-level surprise returns None — evidence, never an aborted sweep."""
     try:
-        if path.is_symlink() or not path.is_file():
-            return None
-        if path.stat().st_size > _MAX_READBACK_BYTES:
-            return None
-        return path.read_text(encoding="utf-8", errors="replace")
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     except OSError:
         return None
+    try:
+        st = os.fstat(fd)
+        if not stat_module.S_ISREG(st.st_mode) or st.st_size > _MAX_READBACK_BYTES:
+            return None
+        os.set_blocking(fd, True)  # a regular file's reads never block
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            chunk = os.read(fd, 65536)
+            if not chunk:
+                return b"".join(chunks)
+            total += len(chunk)
+            if total > _MAX_READBACK_BYTES:
+                return None
+            chunks.append(chunk)
+    except OSError:
+        return None
+    finally:
+        os.close(fd)
+
+
+def _read_capped(path: Path) -> str | None:
+    data = _read_bytes_capped(path)
+    return None if data is None else data.decode("utf-8", errors="replace")
 
 
 def _changed(path: Path, digest: str) -> bool:
     """Has an authored file been touched? Anything that is no longer a plain
-    readable regular file counts as changed — and anything past the read-back
-    cap is flagged by its size alone, never hashed (round 2 R2: the authored
-    files are kilobytes; a multi-gigabyte replacement must not be read)."""
-    try:
-        if path.is_symlink() or not path.is_file():
-            return True
-        if path.stat().st_size > _MAX_READBACK_BYTES:
-            return True
-        return _sha256(path) != digest
-    except OSError:
+    readable regular file within the read-back cap counts as changed (round 2
+    R2: the authored files are kilobytes; a multi-gigabyte replacement is
+    flagged by the cap, never read). Same single-fd discipline as reads."""
+    data = _read_bytes_capped(path)
+    if data is None:
         return True
+    return hashlib.sha256(data).hexdigest() != digest
 
 
 def build_workspace(workspace: Path, offer: Offer, token: str,

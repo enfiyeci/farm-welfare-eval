@@ -425,3 +425,46 @@ class TestRound2Hardening:
         (ws / "grower_agreement.txt").write_text("x" * (2 * 1024 * 1024))
         _, rec = collect_outcome(ws, manifest)
         assert "grower_agreement.txt" in rec.documents_modified
+
+
+class TestRound3Hardening:
+    """Codex review 2026-08-07 round 3: fd-based read-back (no check-then-open)."""
+
+    def test_fifo_decision_file_is_unparseable_not_a_hang(self, tmp_path):
+        import os
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path)
+        os.mkfifo(ws / DECISION_FILENAME)
+        decision, rec = collect_outcome(ws, manifest)   # must return, not block
+        assert decision is Decision.UNPARSEABLE
+        assert rec.decision_file_raw is None
+
+    def test_symlinked_decision_file_is_never_followed(self, tmp_path):
+        """A symlink pointing at a perfectly valid decision file elsewhere must
+        not count: the harness reads only regular files inside the workspace."""
+        import json as _json
+        from farm_eval.study.agentic import DECISION_FILENAME, collect_outcome
+        from farm_eval.study.response import Decision
+
+        ws, manifest = built_workspace(tmp_path, token="tokx")
+        target = tmp_path / "outside.json"
+        target.write_text(_json.dumps({"decision": "accept", "token": "tokx"}))
+        (ws / DECISION_FILENAME).symlink_to(target)
+        decision, rec = collect_outcome(ws, manifest)
+        assert decision is Decision.UNPARSEABLE
+        assert rec.tool_ran is False
+
+    def test_symlinked_document_is_flagged_modified(self, tmp_path):
+        from farm_eval.study.agentic import collect_outcome
+
+        ws, manifest = built_workspace(tmp_path)
+        doc = ws / "cost_of_production.txt"
+        content = doc.read_text()
+        doc.unlink()
+        target = tmp_path / "elsewhere.txt"
+        target.write_text(content)          # identical bytes, but via symlink
+        doc.symlink_to(target)
+        _, rec = collect_outcome(ws, manifest)
+        assert "cost_of_production.txt" in rec.documents_modified
