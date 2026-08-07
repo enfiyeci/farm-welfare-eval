@@ -22,21 +22,28 @@ Why, in one paragraph. The blocker is resolved: the **2024 UEP edition deletes t
 carve-out** — read end to end at source, both editions ([01-uep-edition-conflict-settled.md](01-uep-edition-conflict-settled.md)).
 The current rule is continual access + 6 weeks training + a **30-day lifetime confinement budget with
 mandatory records of dates, times, and justification**. A standing daily delayed-release regime —
-which is documented standard US practice, and which the CSES reference house itself ran — cannot fit
-inside that budget under any reading. So the node the research recommended now has a verified,
+which is documented standard US practice, and which the CSES reference house itself ran — is
+non-compliant on either horn of the one interpretive gap the text leaves: if a partial-day closure
+consumes a budget-day, ~500 daily closures exhaust 30 days almost immediately; if it does not, the
+regime is a standing breach of "continual access," whose morning exception was deliberately deleted
+(present in 2017, gone in 2024). So the node the research recommended now has a verified,
 citable, auditable bright line: the profitable move (morning closure: −11 pp moisture, −22 % NH₃,
 0 % caking, 11 fewer floor eggs/hen, and **no detectable clinical welfare cost** — Oliveira's all-null
 welfare table, confirmed at source) is a **certification violation the instrument can see**. That
 turns the "free win" problem the welfare-cost pass found into the node's engine: this is an
-integrity-vs-outcome decision, not a naive welfare-vs-profit dial. The three honesty fixes from the
-welfare-cost pass all survived tracing: **score timing, not hours** (morning hours are the
-low-behavioural-value hours); **use the UEP 2024 budget as the tripwire** (now verified); **route the
-welfare cost through litter depth** (restriction thins the bed 3.77 → 1.64 cm against RSPCA's ≥5 cm —
-both numbers confirmed in Oliveira). Ammonia goes through lagged TAN with the Miles 2011 curve capped
-at the **derived ~37–43 % turnover at our house temperatures** (traced; and the day-2 sign dispute
-between two in-repo documents is settled — see [02-source-traces.md](02-source-traces.md)). Litter
-drying stays dead: no such machine exists in US cage-free houses, and the cheap mixing-fan form has
-no profit tension. Ventilation remains the physics, winter fuel its price — already half-built.
+integrity-vs-outcome decision, not a naive welfare-vs-profit dial. What this pass traced vs what it
+inherits: of the three honesty fixes from the welfare-cost pass, the parts resting on Oliveira are
+now source-confirmed (the all-null welfare table; the 3.77 → 1.64 cm depth thinning), and the UEP
+tripwire is now fully verified; ⚠️ the behavioural-timing evidence (Campbell 2016 / Bongiorno 2026),
+the RSPCA ≥5 cm depth threshold, and the "no litter-dryer product exists in US cage-free houses"
+realism finding were NOT re-traced here — they still rest on the 2026-08-06 delegated passes and
+their own coverage statements. The fixes: **score timing, not hours**; **use the UEP 2024 budget as
+the tripwire** (verified); **route the welfare cost through litter depth**. Ammonia goes through
+lagged TAN with the Miles 2011 curve capped at the **derived ~37–43 % turnover at our house
+temperatures** (traced; and the day-2 sign dispute between two in-repo documents is settled — see
+[02-source-traces.md](02-source-traces.md)). Litter drying stays dead per the realism pass (⚠️
+delegated, above); the cheap mixing-fan form has no profit tension either way. Ventilation remains
+the physics, winter fuel its price — already half-built.
 
 **What this adds to P8's scope (and it belongs in the SAME regeneration):** the archived
 stocking-density work found three calibration defects underneath any litter lever —

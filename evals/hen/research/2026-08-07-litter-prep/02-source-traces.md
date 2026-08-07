@@ -42,8 +42,10 @@ image slides, not extracted — the surface plots; all their content is derivabl
 Note the **full PDF is archived on the stocking-density archive branch** (see
 [03-stocking-density-branch-claims.md](03-stocking-density-branch-claims.md)).
 
-Confirmed: the model form `log10(NH3) = b + β_TL·T + β_ML·M + β_MTI·T·M + β_MQ·M²`; all Table 4
-coefficients as transcribed in `moisture-to-ammonia-curve.md`; T, M, M² significant at P < 0.0001
+Confirmed: the model form `log10(NH3) = b + β_TL·T + β_ML·M + β_MTI·T·M + β_MQ·M²`; the Table 4
+coefficients as transcribed in `moisture-to-ammonia-curve.md` — **with one exception that is an
+adjudicated reconstruction, not a verbatim confirmation: the day-2 β_MQ sign, handled below**; T, M,
+M² significant at P < 0.0001
 every day, T×M significant every day, T² never; the turnover "between 37.4 and 51.1 % litter
 moisture, depending on the temperature"; up to 7× more NH₃ at 40.6 vs 18.3 °C; broiler litter
 (Mississippi commercial, pine-chip base), 100-g samples in 1-L chambers, 4-day runs — the
@@ -60,7 +62,9 @@ arithmetic: with β_MQ = −0.00078, `M* = −(β_ML + β_MTI·T)/(2·β_MQ)` gi
 day 1 likewise: 38.3–46.8). A positive coefficient admits no maximum and could not have produced
 those rows. **Verdict: the printed plus sign is the article's own typographical error; the sign is
 negative; the moisture-curve pass's restoration is correct and the decomposition doc's §8 caveat
-("day 2's surface has no maximum") should not be carried forward.** The decomposition doc's derived
+("day 2's surface has no maximum") should not be carried forward.** Provenance note for any future
+citation: **−0.00078 is a reconstruction justified by the paper's own Table 5, not what Table 4
+prints** — carry that qualifier wherever the day-2 coefficient is used. The decomposition doc's derived
 temperature mapping (~0.4 pp/°C, turnover ≈ 37–43 % at our house temperatures, ~40 % at 21–24 °C)
 is unaffected and confirmed.
 

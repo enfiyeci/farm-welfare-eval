@@ -7,13 +7,18 @@ branch.
 
 ## Branch topology (verified with git, not assumed)
 
-- `origin/feat/stocking-density` (~41 commits off `origin/main`) and
-  `origin/archive/stocking-density-task6-local-2026-08-06` (64 commits off `origin/main`) are
-  **rebased twins for most of their length** — same work, different SHAs.
-- The archive branch is the **superset**: it carries everything on `feat/stocking-density` plus the
-  final 2026-08-03 session — nine commits (`fe22189` → `bf87cc4`) containing the calibration-defect
-  research, the obtained source PDFs, and the recalibration-wave plan. **Everything load-bearing
-  below is absent from `main`** (checked file-by-file against the post-reorg tree).
+- `origin/feat/stocking-density` (~55 commits off `origin/main`) and
+  `origin/archive/stocking-density-task6-local-2026-08-06` (~95 commits off `origin/main`) are
+  **rebased twins for most of their length** — same work, different SHAs. **The archive branch is
+  NOT a git-ancestry superset** (`git merge-base --is-ancestor origin/feat/stocking-density
+  origin/archive/stocking-density-task6-local-2026-08-06` exits 1 — checked 2026-08-07).
+- It **is a content superset**: `git cherry origin/archive/stocking-density-task6-local-2026-08-06
+  origin/feat/stocking-density origin/main` reports **zero** feat-side commits without a
+  patch-equivalent on the archive branch (checked 2026-08-07). On top of that shared content the
+  archive branch carries the final 2026-08-03 session — nine commits (`fe22189` → `bf87cc4`)
+  containing the calibration-defect research, the obtained source PDFs, and the recalibration-wave
+  plan. **Everything load-bearing below is absent from `main`** (checked file-by-file against the
+  post-reorg tree).
 - Coverage statement for this mining pass: I read **in full** the nine archive-only commit messages,
   the handoff `docs/handoffs/2026-08-03-task6-blocked-three-calibration-defects.md`, and the
   research doc `docs/research/2026-08-03-nh3-moisture-decomposition.md` (all 474 lines). ⚠️ I did
@@ -133,9 +138,12 @@ git checkout origin/archive/stocking-density-task6-local-2026-08-06 -- \
 ```
 
 then move each into its post-reorg home (`evals/hen/research/…`, dated-folder convention, README
-per save-protocol rule 4) in the same commit. After the claim, both branches are safe to archive
-**as refs** (they are already on origin; per the standing rule, do not delete them until the claim
-has merged to main).
+per save-protocol rule 4) in the same commit. After the claim, both branches stay **as refs on
+origin — archive means keep-the-ref, never delete**. The content-superset relation above is a
+patch-equivalence measurement, not an ancestry proof, so the safe posture from
+`docs/LANES.md` ("do not delete either branch on the assumption that another branch absorbs it")
+still governs; deletion of either ref should wait for its own explicit owner ruling, after the
+claim has merged to main.
 
 What is deliberately NOT claimed: the DP22/DP23 signature work, the grader-facts/deadline-snapshot
 judge work, and the Task 3/5 model code. Those are superseded by, in conflict with, or pending the
