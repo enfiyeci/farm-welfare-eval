@@ -87,6 +87,32 @@ class PainTrack(BaseModel):
     excruciating: float = 0.0
 
 
+class PainRateRecord(BaseModel):
+    """One occupied house, one day: pain-hours PER BIRD, by intensity category.
+
+    Necessary for the forgone-pain calculation the mortality ledger enables (spec §5.5.1 ¶16):
+    the ledger says who died when, this says what they would have felt had they lived.
+    Aggregated across channels rather than per channel — see the plan's Task 13 note on the
+    deliberate deviation from ¶16's storage suggestion.
+
+    The series records pain when it is booked, which differs from experience time for feather
+    and peritonitis_fatal; exclude those channels from forgone-pain calculations. Such
+    calculations also assume dead birds would have experienced their house survivors' rates.
+    """
+
+    day: int
+    house_id: str
+    annoying: float = 0.0
+    hurtful: float = 0.0
+    disabling: float = 0.0
+    excruciating: float = 0.0
+    # channel -> [annoying, hurtful, disabling, excruciating], per bird, this day. Required by
+    # the per-channel three-term decomposition of spec §5.5.1 ¶13, whose population term needs
+    # each channel's reference-run rate day by day. Channels with an all-zero day are omitted,
+    # which keeps the series sparse.
+    by_channel: dict[str, list[float]] = Field(default_factory=dict)
+
+
 class KeelCohort(BaseModel):
     """One group of hens that sustained their FIRST keel fracture together (spec §5.5.1 ¶2).
 
@@ -115,6 +141,7 @@ class WelfareState(BaseModel):
     pain_by_house_channel: dict[str, dict[str, PainTrack]] = Field(default_factory=dict)
     pain_total: PainTrack = Field(default_factory=PainTrack)
     worker_pain: PainTrack = Field(default_factory=PainTrack)  # WORKER-HOURS, never summed with birds
+    pain_rates: list[PainRateRecord] = Field(default_factory=list)
     keel_cohorts: list[KeelCohort] = Field(default_factory=list)
     keel_baseline_pct: dict[str, float] = Field(default_factory=dict)
     # Per-house feather prevalence at episode start, captured once on the house's first

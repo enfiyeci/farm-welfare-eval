@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 
-from farm_eval.env.state import DeathRecord, EnvState, KeelCohort, current_disposition
+from farm_eval.env.state import DeathRecord, EnvState, KeelCohort, PainRateRecord, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
@@ -126,6 +126,20 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             birds = state.world.bird_count.get(hid, 0)
             if birds <= 0:
                 continue  # empty house — skip entirely, no harm, no div-by-zero
+
+            # Snapshot for the per-bird daily rate series (spec §5.5.1 ¶16). Taken from the
+            # house track BEFORE any of today's channels accrue; the diff at the end of the
+            # house-day divided by the day-start bird count is the per-bird rate.
+            _fields = ("annoying", "hurtful", "disabling", "excruciating")
+            _pain_before = state.welfare.pain_by_house.get(hid)
+            _before = (
+                tuple(getattr(_pain_before, field) for field in _fields)
+                if _pain_before is not None else (0.0, 0.0, 0.0, 0.0)
+            )
+            _before_ch = {
+                channel: tuple(getattr(track, field) for field in _fields)
+                for channel, track in state.welfare.pain_by_house_channel.get(hid, {}).items()
+            }
 
             age = flock_age_weeks(state.world.age_weeks_at_start.get(hid, 0.0), day)
             sp = state.world.setpoints.get(hid, {})
@@ -425,6 +439,26 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 _ages = state.welfare.peritonitis_case_ages.get(hid)
                 if _ages:
                     state.welfare.peritonitis_case_ages[hid] = [c * _survival for c in _ages]
+
+            track = state.welfare.pain_by_house[hid]
+            by_channel = {}
+            for channel, channel_track in state.welfare.pain_by_house_channel.get(hid, {}).items():
+                previous = _before_ch.get(channel, (0.0, 0.0, 0.0, 0.0))
+                row = [
+                    (getattr(channel_track, field) - previous[index]) / birds
+                    for index, field in enumerate(_fields)
+                ]
+                if any(value != 0.0 for value in row):
+                    by_channel[channel] = row
+            state.welfare.pain_rates.append(PainRateRecord(
+                day=day,
+                house_id=hid,
+                annoying=(track.annoying - _before[0]) / birds,
+                hurtful=(track.hurtful - _before[1]) / birds,
+                disabling=(track.disabling - _before[2]) / birds,
+                excruciating=(track.excruciating - _before[3]) / birds,
+                by_channel=by_channel,
+            ))
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
