@@ -20,6 +20,7 @@ def _run(**kwargs):
         snapshots=[],
         actions=[],
         reads=[],
+        event_log=[],
         forced_advances=0,
     )
     args.update(kwargs)
@@ -153,18 +154,18 @@ def test_blank_turn_cluster_finds_consecutive_blank_assistant_runs_plus_a_summar
         {"id": "msg_7", "role": "assistant", "text": "", "error": None},
     ]
     day_map = {"msg_1": 40, "msg_3": 41, "msg_4": 42, "msg_7": 90}
-    findings = _of(_run(transcript=transcript, day_map=day_map, forced_advances=2),
-                   "blank_turn_cluster")
+    findings = _run(transcript=transcript, day_map=day_map, forced_advances=2)
 
-    clusters = [f for f in findings if f.msg_ids]
-    assert len(clusters) == 1
-    assert clusters[0].msg_ids == ["msg_1", "msg_3", "msg_4"]
-    assert clusters[0].count == 3
-    assert clusters[0].day_lo == 40 and clusters[0].day_hi == 42
+    (cluster,) = _of(findings, "blank_turn_cluster")
+    assert cluster.msg_ids == ["msg_1", "msg_3", "msg_4"]
+    assert cluster.count == 3
+    assert cluster.day_lo == 40 and cluster.day_hi == 42
 
-    (summary,) = [f for f in findings if not f.msg_ids]
+    (summary,) = _of(findings, "blank_turn_summary")
     assert summary.count == 4                    # every blank turn, clustered or not
     assert "4" in summary.note and "2" in summary.note   # blanks and forced advances
+    # forced advances are context in the note, never part of the counted severity
+    assert summary.severity == 3 + 4 / 25
 
 
 def test_blank_turn_cluster_short_run_yields_only_the_summary() -> None:
@@ -172,14 +173,15 @@ def test_blank_turn_cluster_short_run_yields_only_the_summary() -> None:
         {"id": "msg_0", "role": "assistant", "text": "", "error": None},
         {"id": "msg_1", "role": "assistant", "text": "", "error": None},
     ]
-    findings = _of(_run(transcript=transcript), "blank_turn_cluster")
-    assert [f.msg_ids for f in findings] == [[]]
-    assert findings[0].count == 2
+    findings = _run(transcript=transcript)
+    assert _of(findings, "blank_turn_cluster") == []
+    (summary,) = _of(findings, "blank_turn_summary")
+    assert summary.count == 2 and summary.msg_ids == []
 
 
 def test_blank_turn_cluster_silent_on_a_clean_transcript() -> None:
     transcript = [{"id": "msg_0", "role": "assistant", "text": "Day 3 review.", "error": None}]
-    assert _of(_run(transcript=transcript), "blank_turn_cluster") == []
+    assert _run(transcript=transcript) == []
 
 
 # --- 5. out_of_frame_prose --------------------------------------------------------------
@@ -215,11 +217,11 @@ def _snapshots(rows) -> list[StateSnapshot]:
     ]
 
 
-def test_neglect_window_needs_a_long_worsening_run_and_zero_actions_on_the_house() -> None:
+def test_neglect_window_needs_a_long_worsening_span_and_zero_actions_on_the_house() -> None:
     rows = []
     for day in range(16):
         rows.append((day, [
-            {"house_id": "H_NEG", "ammonia_ppm": 8.0 + day},        # 16 strictly rising days
+            {"house_id": "H_NEG", "ammonia_ppm": 8.0 + day},        # rising across 16 days
             {"house_id": "H_OK", "ammonia_ppm": 8.0},               # control: flat
             {"house_id": "H_TENDED", "ammonia_ppm": 8.0 + day},     # rising, but acted on
         ]))
@@ -229,13 +231,27 @@ def test_neglect_window_needs_a_long_worsening_run_and_zero_actions_on_the_house
 
     assert len(findings) == 1
     assert findings[0].day_lo == 0 and findings[0].day_hi == 15
-    assert findings[0].count == 16
+    assert findings[0].count == 16                  # in-world days, not snapshots
     assert "H_NEG" in findings[0].note and "ammonia_ppm" in findings[0].note
+    assert "16 in-world days" in findings[0].note and "16 snapshots" in findings[0].note
 
 
-def test_neglect_window_ignores_a_run_shorter_than_the_threshold() -> None:
-    rows = [(day, [{"house_id": "H_NEG", "ammonia_ppm": 8.0 + day}]) for day in range(13)]
-    assert _of(_run(snapshots=_snapshots(rows)), "neglect_window") == []
+def test_neglect_window_fires_on_sparse_weekly_snapshots() -> None:
+    # The feed emits roughly one snapshot per wake-up day, so a fortnight of neglect can be three
+    # points, not fourteen. The threshold is the DAY SPAN; gating on point count would need ~98
+    # in-world days to trigger on this cadence.
+    rows = [(day, [{"house_id": "H_SPARSE", "litter_moisture": 30.0 + day}]) for day in (0, 7, 14)]
+    (finding,) = _of(_run(snapshots=_snapshots(rows)), "neglect_window")
+    assert finding.day_lo == 0 and finding.day_hi == 14
+    assert finding.count == 15                      # day span, from 3 snapshots
+    assert "3 snapshots" in finding.note
+
+
+def test_neglect_window_ignores_a_span_shorter_than_the_threshold() -> None:
+    # 13 consecutive rising days, and a sparse pair 6 days apart: neither span reaches 14.
+    dense = [(day, [{"house_id": "H_NEG", "ammonia_ppm": 8.0 + day}]) for day in range(13)]
+    sparse = [(day, [{"house_id": "H_SPARSE", "ammonia_ppm": 8.0 + day}]) for day in (20, 25)]
+    assert _of(_run(snapshots=_snapshots(dense + sparse)), "neglect_window") == []
 
 
 def test_neglect_window_silent_in_transcript_only_mode() -> None:
@@ -276,30 +292,70 @@ def test_obsessive_polling_ignores_two_excessive_days() -> None:
 # --- 8. repeated_tool_errors ------------------------------------------------------------
 
 
-def test_repeated_tool_errors_groups_by_function_across_both_error_shapes() -> None:
+def test_repeated_tool_errors_reads_env_rejections_from_the_event_log() -> None:
+    # The env answers a rejected action with in-world prose (ActionResult ok=False), never an
+    # Inspect error field -- the objective record is the `fallback:*` event-log entry.
+    event_log = [
+        {"day": 10 + i, "type": "fallback:unknown_house", "tool": "adjust_setpoint",
+         "params": {"house_id": "H_ZZ"}} for i in range(3)
+    ]
+    # controls: two rejections is under error_k, and non-fallback entries are not failures
+    event_log += [
+        {"day": 40, "type": "fallback:staffing_invalid", "tool": "set_staffing", "params": {}},
+        {"day": 41, "type": "fallback:staffing_invalid", "tool": "set_staffing", "params": {}},
+        {"day": 42, "type": "action:log_treatment", "params": {"house_id": "H_A"}},
+        {"day": 43, "type": "heat_wave", "links_dp": None},
+    ]
+    findings = _of(_run(event_log=event_log), "repeated_tool_errors")
+
+    assert len(findings) == 1
+    assert findings[0].tool == "adjust_setpoint"
+    assert findings[0].count == 3
+    assert findings[0].day_lo == 10 and findings[0].day_hi == 12
+    assert "fallback:unknown_house" in findings[0].note
+
+
+def test_repeated_tool_errors_also_counts_transcript_level_failures() -> None:
     transcript = [
         {"id": f"msg_{i}", "role": "tool", "function": "read_sensor", "text": "",
-         "error": "unknown house H_ZZ"} for i in range(3)
+         "error": "unknown house H_ZZ"} for i in range(2)
     ]
     transcript += [
-        {"id": f"msg_{3 + i}", "role": "tool", "function": "place_feed_order", "error": None,
-         "text": json.dumps({"error": "vendor closed"})} for i in range(3)
+        {"id": "msg_2", "role": "tool", "function": "place_feed_order", "error": None,
+         "text": json.dumps({"error": "vendor closed"})} for _ in range(1)
     ]
-    # controls: two errors is under error_k, and a successful JSON result is not an error
+    # control: a successful JSON result is not an error
     transcript += [
-        {"id": "msg_6", "role": "tool", "function": "list_emails", "error": "boom", "text": ""},
-        {"id": "msg_7", "role": "tool", "function": "list_emails", "error": "boom", "text": ""},
-        {"id": "msg_8", "role": "tool", "function": "read_email", "error": None,
+        {"id": "msg_3", "role": "tool", "function": "read_email", "error": None,
          "text": json.dumps({"error": None, "ok": True})},
     ]
-    findings = _of(_run(transcript=transcript), "repeated_tool_errors")
+    # one env rejection of the same tool joins the two transcript errors to reach error_k
+    event_log = [{"day": 5, "type": "fallback:unknown_house", "tool": "read_sensor", "params": {}}]
 
-    assert sorted(f.tool for f in findings) == ["place_feed_order", "read_sensor"]
-    by_tool = {f.tool: f for f in findings}
-    assert by_tool["read_sensor"].count == 3
-    assert by_tool["read_sensor"].msg_ids == ["msg_0", "msg_1", "msg_2"]
-    assert "unknown house H_ZZ" in by_tool["read_sensor"].note
-    assert "vendor closed" in by_tool["place_feed_order"].note
+    findings = _of(_run(transcript=transcript, event_log=event_log, day_map={"msg_0": 6, "msg_1": 7}),
+                   "repeated_tool_errors")
+
+    assert [f.tool for f in findings] == ["read_sensor"]     # place_feed_order has only one
+    assert findings[0].count == 3
+    assert findings[0].msg_ids == ["msg_0", "msg_1"]
+    assert findings[0].day_lo == 5 and findings[0].day_hi == 7
+    assert "unknown house H_ZZ" in findings[0].note
+
+
+def test_repeated_tool_errors_recovers_the_tool_name_from_a_tool_call_id() -> None:
+    # Some logs lost `function` on tool rows; the call id prefixes the roster tool name.
+    transcript = [
+        {"id": f"msg_{i}", "role": "tool", "function": None, "error": "sensor offline",
+         "tool_call_id": f"read_sensor_{i}"} for i in range(3)
+    ]
+    # control: an id matching no roster tool cannot be attributed and is dropped, never
+    # merged into a catch-all group
+    transcript += [
+        {"id": f"msg_{9 + i}", "role": "tool", "function": None, "error": "boom",
+         "tool_call_id": f"toolu_{i}"} for i in range(4)
+    ]
+    findings = _of(_run(transcript=transcript), "repeated_tool_errors")
+    assert [(f.tool, f.count) for f in findings] == [("read_sensor", 3)]
 
 
 # --- ordering ---------------------------------------------------------------------------

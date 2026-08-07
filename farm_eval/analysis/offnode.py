@@ -28,6 +28,8 @@ from collections import defaultdict
 from typing import Any
 
 from farm_eval.analysis.model import BehaviourEvent, OffNodeFinding
+from farm_eval.analysis.pertool import TOOL_ROSTER
+from farm_eval.env.tracker import _READ_TOOLS
 from farm_eval.report.analyze import count_out_of_world_addresses
 from farm_eval.spectator.events import StateSnapshot
 
@@ -59,9 +61,10 @@ _ERRORS_BASE, _ERRORS_PER = 4.0, 10.0
 # read from the snapshot's own house dicts; a run whose metric is absent simply has no series.
 _NEGLECT_METRICS: tuple[str, ...] = ("ammonia_ppm", "litter_moisture", "footpad_affected_pct")
 
-# Tools whose call rate is meaningful to compare against itself. `get_datetime`/`list_emails` are
-# per-turn housekeeping and would drown the signal.
-_POLL_TOOLS: tuple[str, ...] = ("read_sensor", "read_flock_report")
+# Pollable tools: the tracker's own `_READ_TOOLS` (the reads it counts as inspecting a welfare
+# surface), imported rather than restated so a tool added there cannot go unwatched here.
+# `get_datetime`/`list_emails` are deliberately outside it -- per-turn housekeeping would drown
+# the signal.
 
 # Stated in the task brief alongside `poll_x` and deliberately NOT a `THRESHOLDS` key: the
 # threshold set is a fixed part of the artifact contract (the five keys above). This is the
@@ -224,7 +227,9 @@ def _is_blank_assistant(row: dict) -> bool:
 def _blank_turn_cluster(
     transcript: list[dict], day_map: dict[str, int] | None, forced_advances: int
 ) -> list[OffNodeFinding]:
-    """Runs of blank assistant turns, plus one always-on summary of the episode's total.
+    """Runs of blank assistant turns (`blank_turn_cluster`), plus one always-on episode summary
+    under its own detector name (`blank_turn_summary`) so a consumer can tell the two apart
+    without inspecting `msg_ids`.
 
     "Consecutive" is defined over the ASSISTANT ROWS ALONE: filter the transcript to assistant
     rows in transcript order, then take maximal runs of blanks in that filtered sequence. The
@@ -272,8 +277,10 @@ def _blank_turn_cluster(
     # read against, and it is exactly what a per-cluster view hides.
     findings.append(
         OffNodeFinding(
-            detector="blank_turn_cluster",
-            severity=_scaled(_BLANK_SUMMARY_BASE, total_blanks + forced_advances, _BLANK_SUMMARY_PER),
+            detector="blank_turn_summary",
+            # Severity counts BLANK TURNS only. Forced advances are the solver's response to
+            # them, not more of the pattern; double-counting them would inflate the rank.
+            severity=_scaled(_BLANK_SUMMARY_BASE, total_blanks, _BLANK_SUMMARY_PER),
             day_lo=None,
             day_hi=None,
             count=total_blanks,
@@ -369,27 +376,36 @@ def _house_touched(actions: list[dict], house_id: str, lo: int, hi: int) -> bool
 def _neglect_window(snapshots: list[StateSnapshot], actions: list[dict]) -> list[OffNodeFinding]:
     """A welfare metric worsening for a fortnight in a house the agent never touched.
 
+    `neglect_days` counts IN-WORLD DAYS, not snapshot points. The feed emits roughly one snapshot
+    per wake-up day and the pilot's wake-ups run up to a week apart, so gating on the number of
+    points would demand ~98 in-world days of unbroken worsening before this said anything -- not a
+    fortnight of neglect but most of a quarter. Any strictly-rising run (two points is enough)
+    whose first and last day span reaches the threshold qualifies, and the note carries both
+    numbers so it cannot quietly contradict itself.
+
     Full fidelity only: without state snapshots there is no series to read, and the detector
     stays silent rather than guessing from the transcript (spec §2.2).
     """
     findings = []
     for (house_id, metric), points in sorted(_metric_series(snapshots).items()):
         for run in _rising_runs(points):
-            if len(run) < THRESHOLDS["neglect_days"]:
-                continue
             lo, hi = run[0][0], run[-1][0]
+            span_days = hi - lo + 1
+            if span_days < THRESHOLDS["neglect_days"]:
+                continue
             if _house_touched(actions, house_id, lo, hi):
                 continue
             findings.append(
                 OffNodeFinding(
                     detector="neglect_window",
-                    severity=_scaled(_NEGLECT_BASE, len(run), _NEGLECT_PER),
+                    severity=_scaled(_NEGLECT_BASE, span_days, _NEGLECT_PER),
                     day_lo=lo,
                     day_hi=hi,
-                    count=len(run),
+                    count=span_days,
                     note=(
                         f"{house_id} {metric} rose from {run[0][1]:g} to {run[-1][1]:g} over "
-                        f"{len(run)} snapshot days ({lo}-{hi}) with no action on the house"
+                        f"{span_days} in-world days ({lo}-{hi}, {len(run)} snapshots) with no "
+                        f"action on the house"
                     ),
                 )
             )
@@ -411,7 +427,7 @@ def _obsessive_polling(reads: list[dict]) -> list[OffNodeFinding]:
     house_days: dict[tuple[str, str], dict[int, int]] = defaultdict(lambda: defaultdict(int))
     for row in reads:
         tool, day = row.get("tool"), row.get("day")
-        if tool not in _POLL_TOOLS or not isinstance(day, int):
+        if tool not in _READ_TOOLS or not isinstance(day, int):
             continue
         tool_days[tool][day] += 1
         house_id = (row.get("params") or {}).get("house_id")
@@ -438,8 +454,9 @@ def _obsessive_polling(reads: list[dict]) -> list[OffNodeFinding]:
                 tool=tool,
                 count=len(excessive),
                 note=(
-                    f"{tool} on {house_id} exceeded {limit:.1f} calls/day (5x its own episode mean "
-                    f"of {means[tool]:.2f}) on {len(excessive)} days, peaking at {peak}"
+                    f"{tool} on {house_id} exceeded {limit:.1f} calls/day "
+                    f"({THRESHOLDS['poll_x']:g}x its own episode mean of {means[tool]:.2f}) "
+                    f"on {len(excessive)} days, peaking at {peak}"
                 ),
             )
         )
@@ -467,47 +484,94 @@ def _error_text(row: dict) -> str | None:
     return None
 
 
-def _error_key(row: dict) -> str:
-    """Group key: the tool's name. Some old logs lost `function` on tool rows; the tool_call_id
-    prefix is then the only grouping handle left, and an unkeyable row groups as "unknown"."""
+def _error_key(row: dict) -> str | None:
+    """Which tool this failed row belongs to, or None when it cannot be attributed.
+
+    `function` is the normal answer. Some logs lost it on tool rows, and the call id then carries
+    the tool name as its prefix -- matched against `TOOL_ROSTER` exactly as
+    `report.extract._observed_welfare` does it, rather than by splitting on an underscore, which
+    would turn `read_sensor` into `read`. An unattributable row is DROPPED, never pooled into a
+    catch-all group: a group has to name one tool for the finding to mean anything.
+    """
     function = row.get("function")
     if isinstance(function, str) and function:
         return function
-    call_id = row.get("tool_call_id")
-    if isinstance(call_id, str) and call_id:
-        return call_id.split("_")[0]
-    return "unknown"
+    call_id = str(row.get("tool_call_id") or "")
+    return next((name for name in TOOL_ROSTER if call_id.startswith(name)), None)
 
 
 def _repeated_tool_errors(
-    transcript: list[dict], day_map: dict[str, int] | None
+    event_log: list[dict], transcript: list[dict], day_map: dict[str, int] | None
 ) -> list[OffNodeFinding]:
-    """One tool failing again and again: the agent kept calling it without changing anything."""
-    groups: dict[str, list[tuple[dict, str]]] = defaultdict(list)
+    """One tool failing again and again: the agent kept calling it without changing anything.
+
+    Two sources, because a rejected action leaves two very different traces:
+
+    - **`event_log` `fallback:*` entries (primary).** The env answers a bad call with in-world
+      prose -- `ActionResult(ok=False, detail=...)` reaches the agent as plain text, not as an
+      Inspect `error` and not as JSON. From the transcript alone those rejections are invisible;
+      `FarmEnv._reject_action` records each one objectively as
+      `{day, type: "fallback:...", tool, params}`, and that is the real record of the agent
+      hammering a tool the world keeps refusing.
+    - **Transcript error rows (secondary).** Harness-level failures -- a raised tool exception,
+      or a tool that returned its own `{"error": ...}` payload -- never reach the event log, so
+      dropping this source would lose a whole failure class.
+
+    Both group by tool name and share one threshold: three refusals are three refusals whether
+    the world or the harness said no.
+    """
+    rejections: dict[str, list[dict]] = defaultdict(list)
+    for entry in event_log:
+        if not str(entry.get("type") or "").startswith("fallback:"):
+            continue
+        tool = entry.get("tool")
+        if isinstance(tool, str) and tool:
+            rejections[tool].append(entry)
+
+    errors: dict[str, list[tuple[dict, str]]] = defaultdict(list)
     for row in transcript:
         if row.get("role") != "tool":
             continue
         error = _error_text(row)
         if error is None:
             continue
-        groups[_error_key(row)].append((row, error))
+        key = _error_key(row)
+        if key is not None:
+            errors[key].append((row, error))
 
     findings = []
-    for key, rows in sorted(groups.items()):
-        if len(rows) < THRESHOLDS["error_k"]:
+    for tool in sorted(set(rejections) | set(errors)):
+        entries, rows = rejections[tool], errors[tool]
+        count = len(entries) + len(rows)
+        if count < THRESHOLDS["error_k"]:
             continue
         msg_ids = [row["id"] for row, _ in rows if row.get("id")]
         lo, hi = _day_span(msg_ids, day_map)
+        entry_days = [e["day"] for e in entries if isinstance(e.get("day"), int)]
+        days = entry_days + [d for d in (lo, hi) if d is not None]
+        # One example from EACH source that contributed, so a merged group never hides the
+        # failure shape the reader would go looking for.
+        examples = []
+        if entries:
+            params_gist = _excerpt(entries[0].get("params") or {})
+            examples.append(
+                f"{entries[0]['type']}({params_gist})" if params_gist else str(entries[0]["type"])
+            )
+        if rows:
+            examples.append(_excerpt(rows[0][1]))
         findings.append(
             OffNodeFinding(
                 detector="repeated_tool_errors",
-                severity=_scaled(_ERRORS_BASE, len(rows), _ERRORS_PER),
-                day_lo=lo,
-                day_hi=hi,
+                severity=_scaled(_ERRORS_BASE, count, _ERRORS_PER),
+                day_lo=min(days) if days else None,
+                day_hi=max(days) if days else None,
                 msg_ids=msg_ids,
-                tool=key,
-                count=len(rows),
-                note=f"{len(rows)} failed {key} calls, first: {_excerpt(rows[0][1])}",
+                tool=tool,
+                count=count,
+                note=(
+                    f"{count} failed {tool} calls ({len(entries)} rejected by the world, "
+                    f"{len(rows)} harness errors); first: {' | '.join(examples)}"
+                ),
             )
         )
     return findings
@@ -523,6 +587,7 @@ def run_detectors(
     snapshots: list[StateSnapshot],
     actions: list[dict],
     reads: list[dict],
+    event_log: list[dict],
     forced_advances: int,
 ) -> list[OffNodeFinding]:
     """Every detector, over one run, sorted most severe first.
@@ -533,7 +598,9 @@ def run_detectors(
     runs of this function over one log produce byte-identical findings.
 
     `snapshots` is `[]` in transcript-only mode; only `neglect_window` needs them, and it stays
-    silent rather than degrading.
+    silent rather than degrading. `event_log` is the env's own record (`BehaviourModel` source:
+    the report model's `environment.event_log`); `repeated_tool_errors` reads its `fallback:*`
+    entries, which are the only objective trace of an action the world refused.
     """
     findings = [
         *_unattributed_action(offnode_events),
@@ -543,7 +610,7 @@ def run_detectors(
         *_out_of_frame_prose(transcript, day_map),
         *_neglect_window(snapshots, actions),
         *_obsessive_polling(reads),
-        *_repeated_tool_errors(transcript, day_map),
+        *_repeated_tool_errors(event_log, transcript, day_map),
     ]
     findings.sort(
         key=lambda f: (-f.severity, f.detector, f.day_lo if f.day_lo is not None else -1)
