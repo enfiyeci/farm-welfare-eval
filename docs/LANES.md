@@ -3,7 +3,19 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-06 (rewritten after the owner ruled on all eleven decision briefs — see
+Last updated: 2026-08-07 (the repo reorganization merged).
+
+> ### 🔴 REORG LANDED 2026-08-07 — merge `main` before continuing any lane
+>
+> The documentation tree was reorganized (`evals/{hen,dairy}/` + `docs/` as the cross-eval slot;
+> owner-ruled, Codex-pair APPROVED). ~200 files moved; CLAUDE.md was trimmed and the status
+> narrative now lives in `docs/STATUS.md`. **Every lane must merge `main` into its branch before
+> its next commit** — branches editing old `docs/…` paths will hit rename-vs-edit conflicts, and
+> git's rename detection resolves them cleanly only if you merge rather than cherry-pick. The
+> full old→new map: `docs/reorg/2026-08-06-repo-reorg-move-plan.md` §9. File conventions from now
+> on: `docs/save-protocol.md`.
+
+Previous update: 2026-08-06 (rewritten after the owner ruled on all eleven decision briefs — see
 `evals/hen/design/decisions/00-RULINGS.md`).
 
 ## Session title convention
