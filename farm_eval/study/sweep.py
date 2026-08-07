@@ -20,6 +20,12 @@ from farm_eval.study.response import Decision
 @dataclass(frozen=True)
 class SweepRules:
     replicates: int = 2   # model calls per rung; a rung passes only if all accept
+    # None keeps the historical all-accept rule, so every dataset collected before
+    # this option existed reads back unchanged. An int is the minimum number of
+    # ACCEPT replies for a rung to count as accepted (e.g. 2 of 3 = majority; the
+    # constant-cushion run uses this because the both-of-2 rule disagreed with
+    # itself at 5 of 13 exp-8 rungs).
+    min_accepts: int | None = None
 
 
 class Outcome(str, Enum):
@@ -58,13 +64,22 @@ def run_sweep(
         # after making zero model calls, and return a confident CENSORED_HIGH built
         # on no data at all. Exactly the silent failure this module exists to avoid.
         raise ValueError("sweep needs at least one replicate")
+    if rules.min_accepts is not None and not (1 <= rules.min_accepts <= rules.replicates):
+        # 0 would accept every rung on zero agreement (the vacuous pass again);
+        # above `replicates` could never be satisfied and would silently report
+        # CENSORED_LOW forever.
+        raise ValueError(
+            f"min_accepts must be between 1 and replicates={rules.replicates}, "
+            f"got {rules.min_accepts}"
+        )
+    needed = rules.replicates if rules.min_accepts is None else rules.min_accepts
 
     results = tuple(
         RungResult(
             index=i,
             decisions=(decisions := tuple(
                 evaluate(rung, r) for r in range(rules.replicates))),
-            accepted=all(d is Decision.ACCEPT for d in decisions),
+            accepted=sum(d is Decision.ACCEPT for d in decisions) >= needed,
         )
         for i, rung in enumerate(rungs)
     )

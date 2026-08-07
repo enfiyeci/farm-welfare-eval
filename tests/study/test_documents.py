@@ -222,3 +222,100 @@ def test_parse_survival_projections_rejects_a_single_occurrence():
     occurrence) must fail loudly rather than silently mis-parse."""
     with pytest.raises(ValueError, match="exactly twice"):
         parse_survival_projections("projected survival to collection 95.0%\n")
+
+
+# --- the epistemic documents (2026-08-06 spec §3) -------------------------------
+
+
+def test_sensitivity_rows_reconcile_with_the_pnl():
+    """B2: the sensitivity block performs the exact computation refusing replies
+    perform — proposed profit at survival = projection −2/−4/−6 points — so every
+    printed figure must be recomputable from the P&L: revenue moves by
+    n1 * Δpp * 0.01 * rate, and costs are fixed at placement."""
+    from farm_eval.study.economics import Arm, pnl_pair
+    from farm_eval.study.params import PER_ANIMAL_VALUE_USD
+    offer = _offer(band=StandardBand.BEYOND)
+    text = render_cost_report(offer, arm=Arm.DERIVED, sensitivity=True)
+    rate = PER_ANIMAL_VALUE_USD[(offer.cell.economics, offer.cell.species)]
+    _, proposed = pnl_pair(offer)
+    for pts in (2.0, 4.0, 6.0):
+        expected = proposed.profit - offer.n1 * pts * 0.01 * rate
+        assert f"${expected:,.0f}" in text, f"row at -{pts} pts missing or wrong"
+
+
+def test_sensitivity_states_the_break_even_shortfall():
+    """The one-sentence version of the model's own refusal arithmetic: how far
+    survival can fall before the proposal returns less than staying put."""
+    from farm_eval.study.economics import Arm, survival_cushion_pp
+    offer = _offer(band=StandardBand.BEYOND)
+    text = render_cost_report(offer, arm=Arm.DERIVED, sensitivity=True)
+    assert f"{survival_cushion_pp(offer):.1f} points" in text
+
+
+def test_sensitivity_respects_arm_b_adjustment():
+    """Under FIXED_TARGET the proposed column is adjusted; the sensitivity rows
+    must start from the adjusted profit or the block contradicts the P&L above it."""
+    from farm_eval.study.economics import Arm, pnl_pair, solve_line_adjustment
+    from farm_eval.study.params import PER_ANIMAL_VALUE_USD
+    offer = _offer(band=StandardBand.BEYOND)
+    adj = solve_line_adjustment(offer, 0.08)
+    text = render_cost_report(offer, arm=Arm.FIXED_TARGET, target_gain=0.08,
+                              sensitivity=True)
+    rate = PER_ANIMAL_VALUE_USD[(offer.cell.economics, offer.cell.species)]
+    _, proposed = pnl_pair(offer, adj)
+    expected = proposed.profit - offer.n1 * 2.0 * 0.01 * rate
+    assert f"${expected:,.0f}" in text
+
+
+def test_sensitivity_requires_a_checkable_pnl():
+    """A sensitivity block under the assert-only finance note would reference
+    workings the reader cannot see."""
+    with pytest.raises(ValueError, match="sensitivity"):
+        render_cost_report(_offer(), sensitivity=True)
+
+
+def test_sensitivity_defaults_off_so_earlier_datasets_reproduce():
+    from farm_eval.study.economics import Arm
+    offer = _offer()
+    with_flag = render_cost_report(offer, arm=Arm.DERIVED, sensitivity=False)
+    without = render_cost_report(offer, arm=Arm.DERIVED)
+    assert with_flag == without
+    assert "SENSITIVITY" not in without
+
+
+def test_benchmark_line_appears_and_the_parser_still_works():
+    """B1: the sister-unit line must not repeat the survival-projection marker,
+    which the parser requires to appear exactly twice."""
+    offer = _offer()
+    text = render_production_projection(offer, benchmark=True)
+    assert "three cycles" in text
+    assert "0.4 points" in text
+    before, after = parse_survival_projections(text)
+    assert before == pytest.approx(offer.survival_pct_before)
+    assert after == pytest.approx(offer.survival_pct_after)
+
+
+def test_benchmark_defaults_off_so_earlier_datasets_reproduce():
+    offer = _offer()
+    assert render_production_projection(offer) == render_production_projection(
+        offer, benchmark=False)
+    assert "sister unit" not in render_production_projection(offer)
+
+
+def test_epistemic_documents_carry_no_welfare_vocabulary():
+    from farm_eval.study.economics import Arm
+    for species in Species:
+        offer = _offer(species, band=StandardBand.BEYOND)
+        text = render_cost_report(offer, arm=Arm.DERIVED, sensitivity=True)
+        text += render_production_projection(offer, benchmark=True)
+        assert find_welfare_vocabulary(text) == []
+
+
+def test_prompt_threads_the_epistemic_docs_flag():
+    from farm_eval.study.economics import Arm
+    from farm_eval.study.prompt import build_p1_prompt
+    offer = _offer()
+    plain = build_p1_prompt(offer, arm=Arm.DERIVED)
+    epistemic = build_p1_prompt(offer, arm=Arm.DERIVED, epistemic_docs=True)
+    assert "SENSITIVITY" not in plain and "sister unit" not in plain
+    assert "SENSITIVITY" in epistemic and "sister unit" in epistemic

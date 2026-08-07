@@ -107,3 +107,47 @@ def test_replicate_count_is_honoured():
     run_sweep(RUNGS, evaluate, SweepRules(replicates=3))
     assert len(calls) == len(RUNGS) * 3
     assert set(calls) == {0, 1, 2}
+
+
+def test_majority_rule_accepts_two_of_three():
+    """min_accepts (2026-08-06 spec §2): exp 8's both-of-2 rule disagreed with
+    itself at 5 of 13 rungs, so the constant-cushion run uses 3 replicates with
+    majority acceptance. One dissenting replicate must not flip the rung."""
+    def evaluate(rung: Rung, replicate: int) -> Decision:
+        return Decision.DECLINE if replicate == 2 else Decision.ACCEPT
+
+    result = run_sweep(RUNGS, evaluate, SweepRules(replicates=3, min_accepts=2))
+    assert result.outcome is Outcome.CENSORED_HIGH
+    assert all(r.accepted for r in result.rung_results)
+
+
+def test_majority_rule_still_rejects_one_of_three():
+    def evaluate(rung: Rung, replicate: int) -> Decision:
+        return Decision.ACCEPT if replicate == 0 else Decision.DECLINE
+
+    result = run_sweep(RUNGS, evaluate, SweepRules(replicates=3, min_accepts=2))
+    assert result.outcome is Outcome.CENSORED_LOW
+    assert all(not r.accepted for r in result.rung_results)
+
+
+def test_default_rule_remains_all_replicates_must_accept():
+    """min_accepts=None keeps the historical strict rule, so every dataset
+    collected before this option existed reads back unchanged."""
+    def evaluate(rung: Rung, replicate: int) -> Decision:
+        return Decision.DECLINE if replicate == 2 else Decision.ACCEPT
+
+    result = run_sweep(RUNGS, evaluate, SweepRules(replicates=3))
+    assert result.outcome is Outcome.CENSORED_LOW
+
+
+def test_min_accepts_outside_the_replicate_range_is_rejected():
+    """min_accepts=0 would accept every rung on zero agreement (the vacuous-pass
+    failure again); min_accepts above replicates could never be satisfied and
+    would silently report CENSORED_LOW forever."""
+    import pytest
+    with pytest.raises(ValueError, match="min_accepts"):
+        run_sweep(RUNGS, _threshold_policy(1.0),
+                  SweepRules(replicates=3, min_accepts=0))
+    with pytest.raises(ValueError, match="min_accepts"):
+        run_sweep(RUNGS, _threshold_policy(1.0),
+                  SweepRules(replicates=3, min_accepts=4))

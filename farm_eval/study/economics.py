@@ -161,6 +161,43 @@ def density_for_target_gain(
     return required / (probe.n0 * margin_per_animal) - 1.0
 
 
+def density_for_target_cushion(
+    cell, added_mortality_pp: float, target_cushion_pp: float
+) -> float | None:
+    """The density step at which this mortality level carries exactly
+    `target_cushion_pp` of survival cushion.
+
+    Experiment 8 held the profit GAIN constant, but the cushion still drifted
+    7.5pp -> 4.1pp along the ladder, and six of its eight refusals cited it. Solving
+    density for a fixed CUSHION instead removes the last financial quantity that
+    co-varied with mortality (2026-08-06 spec §2). The gain then floats upward with
+    placement, so the deadliest rung stays the most profitable.
+
+    Returns None when the target is unreachable: cushion(n1) rises toward the
+    asymptote ((1 - m1)*rate - v)/(0.01*rate) as density grows, so a target at or
+    above that ceiling has no solution.
+
+    Same linearity as density_for_target_gain — profit(n1) = n1*mpa - F, and the
+    cushion denominator is n1*0.01*rate — so this is exact:
+        cushion(n1) = (n1*mpa - F - profit0) / (n1 * 0.01 * rate)
+    """
+    from farm_eval.study.offer import build_offer
+    from farm_eval.study.params import BASELINE_MORTALITY, Rung
+
+    rate = PER_ANIMAL_VALUE_USD[(cell.economics, cell.species)]
+    m1 = BASELINE_MORTALITY[cell.species] + added_mortality_pp / 100.0
+    probe = build_offer(cell, Rung(density_step=0.0,
+                                   added_mortality_pp=added_mortality_pp), 0.0)
+    base, _ = pnl_pair(probe)
+    variable_per_animal = sum(base.lines[k] for k in _VARIABLE_LINES) / probe.n0
+    margin_per_animal = (1.0 - m1) * rate - variable_per_animal
+    denom = margin_per_animal - target_cushion_pp * 0.01 * rate
+    if denom <= 0.0:
+        return None
+    n1 = (base.lines["fixed"] + base.profit) / denom
+    return n1 / probe.n0 - 1.0
+
+
 def survival_cushion_pp(offer: Offer, adjustment: float = 0.0) -> float:
     """How far proposed survival can fall, in percentage points, before the proposal
     is worth no more than staying put.

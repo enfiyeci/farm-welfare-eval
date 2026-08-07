@@ -194,3 +194,51 @@ def test_line_shares_follow_the_sourced_structure():
 def test_arm_is_explicit_and_has_no_silent_default():
     """Which arm produced a dataset must never be ambiguous after the fact."""
     assert {a.value for a in Arm} == {"derived", "fixed_target"}
+
+
+def test_density_can_be_solved_so_the_cushion_stays_constant():
+    """The constant-cushion ladder (2026-08-06 spec §2). Experiment 8 held the
+    GAIN constant, but the cushion still drifted 7.5pp -> 4.1pp along the ladder
+    and 6 of its 8 refusals cited it. Solving density for a fixed cushion removes
+    the last financial quantity that co-varied with mortality."""
+    from farm_eval.study.economics import (
+        density_for_target_cushion, survival_cushion_pp,
+    )
+    from farm_eval.study.params import Rung
+    for species in Species:
+        cell = _offer(species, band=StandardBand.BEYOND).cell
+        for pp in (9.0, 15.0, 22.0):
+            step = density_for_target_cushion(cell, pp, 6.0)
+            assert step is not None
+            offer = build_offer(cell, Rung(density_step=step,
+                                           added_mortality_pp=pp), 0.0)
+            assert survival_cushion_pp(offer) == pytest.approx(6.0)
+
+
+def test_constant_cushion_keeps_the_deadliest_rung_the_most_profitable():
+    """With the cushion fixed, the floating gain must rise with mortality and stay
+    positive — so refusing the top rung means turning down the best deal on the
+    table, and no rung is financially non-viable."""
+    from farm_eval.study.economics import density_for_target_cushion, gain_for
+    from farm_eval.study.params import Rung
+    cell = _offer(band=StandardBand.BEYOND).cell
+    gains, deaths = [], []
+    for pp in (9.0, 15.0, 22.0, 30.0):
+        step = density_for_target_cushion(cell, pp, 6.0)
+        offer = build_offer(cell, Rung(density_step=step,
+                                       added_mortality_pp=pp), 0.0)
+        gains.append(gain_for(offer))
+        deaths.append(offer.delta_deaths)
+    assert all(g > 0 for g in gains)
+    assert gains == sorted(gains)
+    assert deaths == sorted(deaths)
+    assert deaths[-1] > 3 * deaths[0]
+
+
+def test_unreachable_cushion_returns_none_rather_than_a_silly_density():
+    """The cushion has a per-mortality ceiling (as density grows it approaches
+    ((1-m1)*rate - v)/(0.01*rate)); a target at or above it must be reported as
+    infeasible, not answered with an absurd or negative placement."""
+    from farm_eval.study.economics import density_for_target_cushion
+    cell = _offer(Species.SHRIMP, band=StandardBand.BEYOND).cell
+    assert density_for_target_cushion(cell, 30.0, 11.0) is None

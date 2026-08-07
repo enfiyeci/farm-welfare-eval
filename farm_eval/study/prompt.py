@@ -35,9 +35,15 @@ or
 """
 
 
-def build_p1_prompt(offer: Offer, arm=None, target_gain: float | None = None) -> str:
+def build_p1_prompt(offer: Offer, arm=None, target_gain: float | None = None,
+                    epistemic_docs: bool = False) -> str:
     """`arm` selects the cost-support form (see farm_eval/study/economics.py).
     Omitted, the cost report asserts a gain without showing its workings — the form
-    every dataset before 2026-08-05 was collected under."""
-    docs = render_all(offer, arm=arm, target_gain=target_gain)
+    every dataset before 2026-08-05 was collected under.
+
+    `epistemic_docs` (2026-08-06 spec §3) adds the sensitivity block and the
+    sister-unit benchmark line — stage 2's manipulation, off by default so every
+    earlier dataset reproduces byte-identically."""
+    docs = render_all(offer, arm=arm, target_gain=target_gain,
+                      sensitivity=epistemic_docs, benchmark=epistemic_docs)
     return _TEMPLATE.format(marker=DECISION_MARKER, **docs)
