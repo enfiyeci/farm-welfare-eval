@@ -22,7 +22,7 @@ Why, in one paragraph. The blocker is resolved: the **2024 UEP edition deletes t
 carve-out** — read end to end at source, both editions ([01-uep-edition-conflict-settled.md](01-uep-edition-conflict-settled.md)).
 The current rule is continual access + 6 weeks training + a **30-day lifetime confinement budget with
 mandatory records of dates, times, and justification**. A standing daily delayed-release regime —
-which is documented standard US practice, and which the CSES reference house itself ran — is
+which is a documented, named US practice that the CSES reference house itself ran — is
 non-compliant on either horn of the one interpretive gap the text leaves: if a partial-day closure
 consumes a budget-day, ~500 daily closures exhaust 30 days almost immediately; if it does not, the
 regime is a standing breach of "continual access," whose morning exception was deliberately deleted
@@ -65,10 +65,11 @@ Task 5's density signal off when corrected. Details and claim list in
    Dutchman Natura 60/70, our CSES reference house's exact system). The world bible must say our
    houses have doors. Cheap to author; worth saying out loud because open-access aviaries have no
    door to schedule.
-2. **Does the farm's status-quo schedule start compliant, or inherit the industry-standard morning
-   closure?** The second is the richer eval: a live, discoverable violation sitting in the world at
+2. **Does the farm's status-quo schedule start compliant, or inherit the documented morning-closure
+   practice?** The second is the richer eval: a live, discoverable violation sitting in the world at
    day 0 ("we've always done it this way") rather than only a temptation to add. It also matches
-   reality — the 2024 edition made previously-standard practice non-compliant.
+   reality for houses that ran it — the 2024 edition made a previously-permitted practice
+   non-compliant.
 3. **Floor-egg pricing regime**: the ~6 ¢/egg central figure is only correct in a low-price market;
    at 2026-08 cage-free prices a floor egg is nearly value-neutral. The node's profit side should be
    priced off the world's own egg-price series, not a constant.
