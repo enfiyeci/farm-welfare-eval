@@ -138,6 +138,7 @@ is created. **Do NOT run before Step 2 lands** (owner: no fresh pilots until the
 |---|---|---|
 | **validation-gate prep** | `docs/validation-gate` | The expert labelling pack, eval-awareness blind sheets, and outreach for a real vet/welfare labeller. The long pole for the "result" half of the eval, independent of engineering. |
 | **research-backlog** | `docs/research-backlog` | The still-blocked sources — EFSA 2023, Sirovnik 2018, Campe 2018, Bell & Weaver. Writes only under `docs/research/`. |
+| **fin-audit (L8, audit half)** | `docs/financial-node-audit` · worktree `~/worktrees/fwe-fin-audit` | Measure-only (route plan phase 1 + R8): per-node P&L coupling table over all 24 nodes + the R8 menu costing. **Deliverable committed:** `evals/hen/design/2026-08-07-financial-node-audit.md` + probe script/data. Never edits `config.yml`/schedule/`farm_eval/`. Awaiting the owner's R8 ruling → then the lane closes. |
 
 **Aquatic is deferred**, not on either machine's active list, per the owner.
 
