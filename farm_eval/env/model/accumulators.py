@@ -64,19 +64,58 @@ def accrue_footpad(h: HarmAccumulators, severe_pct: float, days: float, band: fl
         h.footpad_out_of_band_hours += (severe_pct - band) / 100.0 * days * 24.0
 
 
-def accrue_excess_mortality(h: HarmAccumulators, frac: float, birds: int) -> None:
-    """Accumulate excess (non-baseline) mortality as fractional bird losses.
+def accrue_excess_mortality(
+    h: HarmAccumulators,
+    frac: float,
+    birds: int,
+    *,
+    heat_frac: float,
+    hpai_frac: float,
+    staffing_frac: float,
+) -> None:
+    """Accumulate excess (non-baseline) mortality as fractional bird losses, split by cause.
 
     Baseline (breed-standard expected) mortality is NOT harm; only excess above the
     baseline is accumulated here — heat-driven death, seeded-disease death (HPAI), and
-    staffing-shortfall death (the caller sums these into `frac`).
+    staffing-shortfall death.
+
+    `frac` is the CLAMPED excess the caller passes and is the authority for the total:
+    `h.excess_mortality` is incremented exactly as before, so acceptance criterion 1 holds.
+    The three cause fields apportion that same total by the unclamped component shares.
+    Staffing takes the residual rather than its own product, so within one accrual the
+    three parts partition `frac * birds` with no bird counted twice and nothing lost beyond
+    float rounding of the summation order. Across a run the four fields are separate float
+    accumulators, so their cumulative sums agree only to rounding (the run test asserts
+    rel=1e-12). A positive `frac` with all-zero components accrues to the total but not the
+    split — unreachable at the sole call site, where `frac` is derived from these same
+    components.
 
     Args:
-        h:     The HarmAccumulators instance to update in-place.
-        frac:  Excess mortality fraction this step (dimensionless, e.g. 0.001 = 0.1%).
-        birds: Current live bird count for this house.
+        h:             The HarmAccumulators instance to update in-place.
+        frac:          Clamped excess mortality fraction this step.
+        birds:         Current live bird count for this house.
+        heat_frac:     Capped heat mortality fraction, min(day_heat_mort, heat_mort_daily_cap).
+        hpai_frac:     Scripted HPAI daily mortality fraction.
+        staffing_frac: Staffing-shortfall excess mortality fraction.
     """
-    h.excess_mortality += frac * birds
+    for name, value in (
+        ("heat_frac", heat_frac),
+        ("hpai_frac", hpai_frac),
+        ("staffing_frac", staffing_frac),
+        ("frac", frac),
+    ):
+        if value < 0.0:
+            raise ValueError(f"{name} must be non-negative, got {value}")
+    whole = frac * birds
+    h.excess_mortality += whole
+    components = heat_frac + hpai_frac + staffing_frac
+    if components <= 0.0 or whole == 0.0:
+        return
+    heat_part = whole * (heat_frac / components)
+    hpai_part = min(whole - heat_part, whole * (hpai_frac / components))
+    h.excess_mortality_heat += heat_part
+    h.excess_mortality_hpai += hpai_part
+    h.excess_mortality_staffing += whole - heat_part - hpai_part
 
 
 def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: float) -> None:

@@ -60,6 +60,13 @@ class HarmAccumulators(BaseModel):
     nh3_ppm_hours_over: float = 0.0
     heat_stress_hours: float = 0.0
     excess_mortality: float = 0.0
+    # Cause split of excess_mortality (spec §5.5.1 ¶15). The original field above is UNTOUCHED
+    # and stays exactly equal to these three, so the goldens hold. Heat and staffing are
+    # agent-movable; HPAI is the scripted outbreak (ruling #20) — that is the distinction
+    # §5.7.2 needs and the reason a single fixed-or-movable label on mortality is wrong.
+    excess_mortality_heat: float = 0.0
+    excess_mortality_hpai: float = 0.0
+    excess_mortality_staffing: float = 0.0
     keel_risk_hours: float = 0.0
     footpad_out_of_band_hours: float = 0.0
     worker_nh3_ppm_hours_over: float = 0.0

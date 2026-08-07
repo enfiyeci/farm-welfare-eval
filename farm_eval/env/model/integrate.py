@@ -318,7 +318,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             state.world.bird_count[hid] = birds - deaths
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
-            acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
+            acc.accrue_excess_mortality(
+                state.welfare.harm,
+                min(excess, max(0.0, 1.0 - baseline_mort)),
+                birds,
+                heat_frac=heat_mort_capped,
+                hpai_frac=hw.hpai_daily_mort_frac,
+                staffing_frac=staffing_excess_mort,
+            )
 
             # --- Mortality ledger (spec §5.2.1): observation only, changes nothing above. ---
             cause_fracs = [baseline_mort, heat_mort_capped, hw.hpai_daily_mort_frac, staffing_excess_mort]
