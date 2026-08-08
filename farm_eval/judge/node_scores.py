@@ -320,6 +320,11 @@ def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> floa
 
     if scoring.cap is not None:
         cap = scoring.cap
+        # Reads the RAW mechanical tripwire flag BY DESIGN — the grader's records exemption
+        # (`Signature.tripwire_unless`) clears only the reported id list in
+        # `farm_eval.judge.scorer.ledger_tripwires`, never this flag. `Signature`'s validator
+        # forbids the ambiguous combination upstream, so a tripwire cap/floor and the exemption
+        # can never appear on the same node.
         cap_hits = (cap.when == "tripwire" and entry.tripwire) or (entry.outcome == cap.when)
         if cap_hits:
             return cap.score

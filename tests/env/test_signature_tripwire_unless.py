@@ -22,6 +22,8 @@ from farm_eval.env.schedule_models import (
     DecisionCategory,
     DecisionPoint,
     Metric,
+    NodeCap,
+    NodeFloor,
     NodeScoring,
     Signature,
 )
@@ -281,6 +283,47 @@ def test_confirms_tripwire_requires_a_signature_declaring_tripwire_unless():
             tripwire_band="harm",  # band declared, but no `tripwire_unless` — nothing to confirm
             scoring=scoring,
         )
+
+
+def _scoring_with(*, cap: NodeCap | None = None, floor: NodeFloor | None = None) -> NodeScoring:
+    return NodeScoring(
+        criteria=[Criterion(name=CONFIRMING, points=10.0, kind="llm", rubric="X", confirms_tripwire=True)],
+        cap=cap,
+        floor=floor,
+    )
+
+
+def test_tripwire_cap_rejected_alongside_the_records_exemption():
+    # `apply_cap_floor` reads the RAW `entry.tripwire`, which the grader's exemption never
+    # rewrites — so the two together would cap a node whose tripwire was fully cleared.
+    with pytest.raises(ValidationError, match="tripwire"):
+        _sig(scoring=_scoring_with(cap=NodeCap(when="tripwire", score=0.0)))
+
+
+def test_tripwire_floor_rejected_alongside_the_records_exemption():
+    with pytest.raises(ValidationError, match="tripwire"):
+        _sig(scoring=_scoring_with(floor=NodeFloor(when="tripwire", max=2.0)))
+
+
+def test_outcome_conditioned_cap_is_still_allowed_with_the_records_exemption():
+    # Only the raw-flag token is ambiguous; a cap keyed on a BAND name is unaffected.
+    sig = _sig(scoring=_scoring_with(cap=NodeCap(when="harm", score=0.0)))
+    assert sig.scoring.cap.when == "harm"
+
+
+def test_tripwire_cap_is_still_allowed_without_the_records_exemption():
+    # No exemption declared -> the raw flag is the only truth, so the cap is unambiguous.
+    sig = Signature(
+        kind="state_band",
+        metric=Metric(house_id=HOUSE, var=VAR),
+        bands={"good": [[0, 5]], "harm": [[5, 9999]]},
+        tripwire_band="harm",
+        scoring=NodeScoring(
+            criteria=[Criterion(name="c", points=10.0, kind="llm", rubric="X")],
+            cap=NodeCap(when="tripwire", score=0.0),
+        ),
+    )
+    assert sig.scoring.cap.when == "tripwire"
 
 
 def test_confirming_criterion_is_accepted_on_a_well_formed_signature():

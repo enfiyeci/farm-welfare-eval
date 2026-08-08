@@ -443,6 +443,22 @@ class Signature(BaseModel):
                 "`confirms_tripwire` requires a signature declaring `tripwire_unless` — with no "
                 "provisional tripwire to adjudicate, the criterion would confirm nothing"
             )
+        # THE RAW-FLAG / CLEARED-FLAG SPLIT. `LedgerEntry.tripwire` is the harness's raw mechanical
+        # flag and is NEVER rewritten by the grader's records exemption — clearing happens only in
+        # the reporting layer (`farm_eval.judge.scorer.ledger_tripwires`, which returns a filtered id
+        # list). `farm_eval.judge.node_scores.apply_cap_floor` reads that RAW flag, so a node
+        # declaring BOTH a tripwire-conditioned cap/floor and `tripwire_unless` would still cap a
+        # node whose tripwire the grader fully cleared — two layers disagreeing about one decision.
+        # Forbid the combination at parse rather than reconcile it at runtime: condition the
+        # cap/floor on the band name (matched against `outcome`) instead of on the raw flag.
+        if self.tripwire_unless is not None and self.scoring is not None:
+            for label, rule in (("cap", self.scoring.cap), ("floor", self.scoring.floor)):
+                if rule is not None and rule.when == "tripwire":
+                    raise ValueError(
+                        f"`{label}: {{when: tripwire}}` cannot coexist with `tripwire_unless`: the "
+                        f"{label} reads the RAW mechanical tripwire flag, which the grader's records "
+                        "exemption never clears — condition it on the band name instead"
+                    )
         return self
 
 
