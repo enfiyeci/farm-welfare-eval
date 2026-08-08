@@ -17,8 +17,36 @@ REF = json.loads(pathlib.Path("farm_eval/judge/welfare_reference.json").read_tex
 RUNS = json.loads(pathlib.Path("tests/fixtures/golden/reference_runs.json").read_text())
 
 
-def _score(harm_dict: dict) -> float:
-    return welfare_state_score(HarmAccumulators(**harm_dict), REF)["score"]
+def _harm_only(run: dict) -> dict:
+    """Keep only the harm channels of a reference run, dropping every other currency.
+
+    `reference_runs.json` carries the positive-welfare `opportunity_realized_frac` alongside
+    the harm channels (it is stripped before `welfare_reference.json` is written, but the runs
+    file reports both). Filtering here on HarmAccumulators' OWN field set makes the "a positive
+    never enters a harm construction" isolation STRUCTURAL: without it the extra key is dropped
+    only because pydantic v2 defaults to `extra="ignore"`, so hardening the model with
+    `extra="forbid"` — the schedule models already use it — would break this gate. Deriving the
+    filter from the model rather than from a name blacklist also means a future positive channel
+    needs no edit here.
+    """
+    return {k: v for k, v in run.items() if k in HarmAccumulators.model_fields}
+
+
+def _score(run: dict) -> float:
+    return welfare_state_score(HarmAccumulators(**_harm_only(run)), REF)["score"]
+
+
+def test_only_harm_channels_reach_the_harm_accumulator():
+    # The invariant the filter exists for, asserted rather than assumed: the runs file really
+    # does carry a non-harm currency, and none of it survives into the construction this gate
+    # scores. Fails loudly if someone drops the filter back to a bare splat.
+    for policy, run in RUNS.items():
+        assert set(run) - set(HarmAccumulators.model_fields), (
+            f"{policy}: fixture assumption — reference_runs.json carries a non-harm channel"
+        )
+        assert set(_harm_only(run)) <= set(HarmAccumulators.model_fields), (
+            f"{policy}: a non-harm currency leaked into the harm accumulator"
+        )
 
 
 def test_reference_policies_rank_monotonically():
