@@ -54,6 +54,8 @@ re-deriving those means re-parsing `StoreEvent`s, duplicating the translator).
 
 ### 2.1 · The transcript join (Codex F1 — the day↔msg_N bridge is built, not assumed)
 
+> **As built, layer 2 of this section was superseded — see §7 round 5 (a).**
+
 The feed and the report model do **not** share an assistant-message id namespace today:
 `AssistantText.msg_id` is the provider message id (`spectator/translate.py`), while `msg_N` is
 positional (`report/extract.py:_transcript`). Only tool-call ids are shared
@@ -140,7 +142,8 @@ Each stage is a pure function over typed inputs; only `reader.py` touches a mode
      several overlapping nodes.
    Windows come from the report model's ledger; the run's enabled-node spine comes from the
    recorded task config (same contract as the spectator), so a window that never opened is
-   reported as such rather than silently absent.
+   reported as such rather than silently absent. **The spine was missing until the final review
+   — see §7 round 5 (d).**
 3. **`pernode.py`** — one `NodeDossier` per enabled node: window + ledger facts (status,
    outcome, tripwire, latency, `inspected`, `root_cause_used`) + judge facts (node score,
    variance, per-criterion evidence with accepted/discarded flags) + the **in-window
@@ -292,3 +295,24 @@ This round-4 fix follows Codex's own prescribed remedy verbatim ("the design mus
 that report extraction computes/stores the guarded map while it has raw messages") and is
 the final state the owner's approval read rules on. All ten round-1/2 findings are
 verified-resolved by Codex re-reads; R3-F1's fix was verified by round 4.
+
+### Round 5 (final whole-branch review) — where the build deviates from this design
+
+Rounds 1–4 above revised the design *before* it was built. This round records the reverse: the
+places where the finished code does **not** match what this document specifies, so a reader who
+trusts §2–§3 as a description of the artifact is not misled. Two of the four are dropped features
+recorded as dropped rather than quietly missing; one is a superseded mechanism; one is a gap the
+review closed.
+
+| # | Design says | As built | Why |
+|---|---|---|---|
+| a | §2.1 layer 2: **anchor interpolation** gives every message a bounded day range `[day(anchor_before), day(anchor_after)]` when the provider-id join misses | **Superseded by the guarded day map.** Round 4 moved day derivation into `report/extract.py`, which computes the judge's reconciled `msg_N → day` map from raw messages. Events carry an **exact day stamp or `None`** — never an interpolated range. `BehaviourEvent` keeps `day_lo`/`day_hi` (they are equal or both `None`), and `build._link_msg_ids` matches a call to a message only on exact identity | Once the day map is guarded against the run's recorded final `day_index`, an interpolated range adds a second, weaker day source that can disagree with the authoritative one. The build's standing rule is **"a link is a bonus, never a guess"**: links are deliberately partial, and an unlinked event says so rather than carrying a plausible range. `_link_email_msg_ids` is the one place a second matching tier exists, and it is confined to one tool whose identity is fully carried by the fields compared (recipient + subject + day) |
+| b | §3.3: dossier derived facts include **"behaviour continuing after the deadline (late care)"** | **Not built.** `DossierDerived` carries `strong_action_count`, `read_before_first_action` and `longest_idle_gap_days` only | Uncomputable as designed. §3.2's attribution is **window-bounded** — an event is only considered for a node when its day falls in `[opened_day, deadline_day]` — so an event after the deadline is never attributed to that node at all and there is nothing for a "late care" fact to count. Building it would mean a second, unbounded attribution pass with its own strength rules, which is a design change rather than a derived field. Post-deadline behaviour is not lost: it appears in the off-node layer, which is where an unclaimed act belongs |
+| c | §3.4: `ToolProfile` arg distributions cover **"houses touched, setpoint metric/value ranges, recipients for `send_email`"** | **Narrowed to houses only** (`ToolProfile.houses`) | Metric/value ranges and recipient tallies are per-tool schemas in a table whose every other column is tool-agnostic, and both are already legible where they matter: setpoint arguments appear in full in the per-node dossiers' event summaries, and recipients in the `unattributed_email` findings' notes. A second, tool-shaped schema on the profile row bought duplication rather than a new fact |
+| d | §3.2: the run's **enabled-node spine** comes from the recorded task config, so a window that never opened is reported as such | **Now built** (this round). `build_dossiers` takes the schedule's decision points plus the config's `enabled_nodes` and emits a `status="never_opened"` dossier for every enabled node with no ledger row; the report renders those as a one-line card note rather than a full behaviour block | Until this round the dossier list was driven by the **ledger** alone, so a node whose window never opened had no row and vanished from the report — indistinguishable from a node that was not in the run. `enabled_nodes` absent/null means every scheduled node is enabled, the same distinction `spectator.extract.started_env` draws from the same key; a node the run **disabled** still gets no dossier, since reporting it would invent an omission |
+
+One further limitation is worth stating even though it is not a deviation: `send_email` action rows
+never satisfy §2.1's exact-argument link, because the adapter records optional parameters (`cc`,
+`in_reply_to`) the model never passed. Measured on the 2026-07-12 pilot: 0 of 44 `send_email`
+actions link that way. Email pointers therefore come from `_link_email_msg_ids`'s second tier,
+which claims the transcript's `send_email` call directly on recipient + subject + day.
