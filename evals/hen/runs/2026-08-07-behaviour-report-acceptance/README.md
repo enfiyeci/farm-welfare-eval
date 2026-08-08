@@ -1,4 +1,4 @@
-# 2026-08-08 behaviour-report acceptance run
+# 2026-08-07 behaviour-report acceptance run
 
 Eval: hen
 
@@ -14,7 +14,7 @@ the artifacts produced by running the finished CLI over the **saved 2026-07-12 G
 
 The pass/fail write-up — the four independently-measured checks, runtime and peak memory, and the
 deviations found — is the sibling document
-`evals/hen/runs/2026-08-08-behaviour-report-verification.md`. Read that first; these two files are
+`evals/hen/runs/2026-08-07-behaviour-report-verification.md`. Read that first; these two files are
 the evidence it cites.
 
 Nothing here is an input to the eval or the judge. The analysis stack is read-only over a finished
