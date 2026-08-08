@@ -3,11 +3,13 @@ from pydantic import ValidationError
 
 from farm_eval.env.schedule_models import (
     ActionMatch,
+    AnyOfMatch,
     DecisionCategory,
     DecisionPoint,
     EventType,
     ScheduledEvent,
     Signature,
+    match_alternatives,
 )
 
 
@@ -316,3 +318,63 @@ events: []
     )
     with pytest.raises(ValidationError, match="gte_"):
         load_schedule(tmp_path)
+
+
+# --- root_cause as a union: one ActionMatch, or `any_of` alternatives (Task 12) --------------
+
+
+def test_root_cause_accepts_a_single_action_match():
+    sig = Signature.model_validate(
+        {
+            "kind": "binary",
+            "any_of": [{"tool": "log_treatment"}],
+            "root_cause": {"tool": "schedule_maintenance", "where": {"task": "manure_belt"}},
+        }
+    )
+    assert isinstance(sig.root_cause, ActionMatch)
+    assert [m.tool for m in match_alternatives(sig.root_cause)] == ["schedule_maintenance"]
+
+
+def test_root_cause_accepts_any_of_alternatives():
+    # The upstream lever can be pulled through more than one tool (DP16's belts AND doors), so
+    # a single-tool root_cause would under-record which runs dissolved the false binary.
+    sig = Signature.model_validate(
+        {
+            "kind": "binary",
+            "any_of": [{"tool": "log_treatment"}],
+            "root_cause": {
+                "any_of": [
+                    {"tool": "schedule_maintenance", "where": {"task": "manure_belt"}},
+                    {"tool": "adjust_setpoint", "where": {"system": "belt_interval_days"}},
+                ]
+            },
+        }
+    )
+    assert isinstance(sig.root_cause, AnyOfMatch)
+    assert [m.tool for m in match_alternatives(sig.root_cause)] == [
+        "schedule_maintenance",
+        "adjust_setpoint",
+    ]
+
+
+def test_root_cause_any_of_must_be_non_empty():
+    # An empty alternatives list can never match, so it would silently disable the flag.
+    with pytest.raises(ValidationError, match="non-empty"):
+        Signature.model_validate(
+            {"kind": "binary", "any_of": [{"tool": "log_treatment"}], "root_cause": {"any_of": []}}
+        )
+
+
+def test_root_cause_rejects_an_unknown_key():
+    with pytest.raises(ValidationError):
+        Signature.model_validate(
+            {
+                "kind": "binary",
+                "any_of": [{"tool": "log_treatment"}],
+                "root_cause": {"any_of": [{"tool": "t"}], "all_of": [{"tool": "u"}]},
+            }
+        )
+
+
+def test_match_alternatives_of_none_is_empty():
+    assert match_alternatives(None) == []

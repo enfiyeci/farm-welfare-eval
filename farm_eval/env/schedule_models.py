@@ -110,6 +110,42 @@ class ActionMatch(BaseModel):
         return self
 
 
+class AnyOfMatch(BaseModel):
+    """Alternative actions, any ONE of which satisfies the matcher (the F12 OR form).
+
+    The same shape `Applicability.any_of` and `ClassMatch.any_of` carry, packaged as its own
+    model so a scalar matcher field can be widened to `ActionMatch | AnyOfMatch` without
+    inventing a second spelling. One act can be expressed through more than one tool — DP16's
+    litter lever is reachable through the manure belts OR the litter doors — and a single-tool
+    matcher reads a differently-expressed act as "never happened".
+    """
+
+    model_config = _FORBID
+
+    any_of: list[ActionMatch]
+
+    @model_validator(mode="after")
+    def _non_empty(self) -> "AnyOfMatch":
+        # An empty alternatives list can never match, which would silently disable whatever
+        # the matcher gates rather than failing the schedule load.
+        if not self.any_of:
+            raise ValueError("AnyOfMatch: `any_of` must be non-empty")
+        return self
+
+
+def match_alternatives(matcher: "ActionMatch | AnyOfMatch | None") -> list[ActionMatch]:
+    """Every alternative a single-or-`any_of` matcher admits, uniformly as a list.
+
+    The one place the `ActionMatch | AnyOfMatch` union is expanded, so every consumer
+    (matching, house derivation, schedule audits) treats the two forms identically.
+    """
+    if matcher is None:
+        return []
+    if isinstance(matcher, ActionMatch):
+        return [matcher]
+    return list(matcher.any_of)
+
+
 class Applicability(BaseModel):
     """Run-conditional applicability gate for a node (E2 `Signature.applies_if`).
 
@@ -427,8 +463,11 @@ class Signature(BaseModel):
     tripwire_unless: ActionMatch | None = None
     # communicative
     judged: bool = False
-    # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
-    root_cause: ActionMatch | None = None
+    # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used.
+    # Either a single matcher or `{any_of: [...]}` when the lever is reachable through several
+    # tools (DP16: belt service, belt interval, either litter-access door hour) — expand it with
+    # `match_alternatives`, never by reading `.where` off the field.
+    root_cause: ActionMatch | AnyOfMatch | None = None
     correct_move: str | None = None  # epistemic: free-text note for the judge
     # Run-conditional applicability gate (E2): the node is scored for a run ONLY if the gate's
     # action matches a call in the log within its window; otherwise the decision never arose and the

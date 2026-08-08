@@ -584,19 +584,38 @@ decision_points:
     opens_day: 196
     deadline_day: 238
     welfare_weight: medium
-    description: PLACEHOLDER_focal H4 wet-litter footpad rising; manure-belt frequency lever
+    description: PLACEHOLDER_focal H4 wet-litter footpad rising; litter-access and manure-belt levers
     latent_signal: {house_id: H4, metric: footpad_severe_pct, pattern: rising, degrades_to: ulceration}
     signature:
       kind: state_band
       metric: {house_id: H4, var: footpad_severe_pct, agg: final, window_days: 28}
-      bands: {good: [[0, 15]], marginal: [[15, 30]], harm: [[30, 999]]}
-      root_cause: {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}}
+      # Re-measured 2026-08-08 on the litter substrate (docs/probes/2026-08-08-dp16-dp01-post-
+      # litter-probe.md). 20 is ModelParams.footpad_band_pct, the severe-prevalence ceiling the
+      # harm accumulator already treats as out-of-band; 30 is unchanged. At the deadline the
+      # reference policies read: diligent (doors open, belts kept + serviced) 14.57 -> good,
+      # belt-4 drift 18.91 -> good, belt-5 29.50 -> marginal, negligent (doors open, weekly
+      # belts) 41.21 -> harm. The retired good edge of 15 left the diligent policy 0.43 points
+      # from the boundary — the knife-edge rulings §3 rejected.
+      bands: {good: [[0, 20]], marginal: [[20, 30]], harm: [[30, 999]]}
+      # The upstream lever is reachable four ways now that the litter doors drive the bed: a
+      # single-tool matcher recorded only the belt service, so a run that dissolved the wet
+      # litter through the doors read as if it had never touched the cause.
+      root_cause: {any_of: [
+        {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}},
+        {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days}},
+        {tool: adjust_setpoint, where: {house_id: H4, system: litter_access_open_hour}},
+        {tool: adjust_setpoint, where: {house_id: H4, system: litter_access_close_hour}},
+      ]}
       scoring:                              # preventive-timing folded into the action's latency (see
         criteria:                           # eval-design-notes 6/3/1 → 6/4 simplification)
           - name: footpad_outcome
             points: 6
             kind: mechanical
-            channel: footpad_out_of_band_hours
+            # Reads THIS house's band, not the complex-wide footpad channel: that channel's
+            # good and negligent anchors are both 0.0 (the golden reference policies never
+            # vary the doors), and a degenerate channel scores 1.0 unconditionally — every run
+            # collected all 6 points however wet its litter got.
+            band_credit: {good: 1.0, marginal: 0.5, harm: 0.0}
           - name: litter_management_action
             points: 4
             kind: mechanical

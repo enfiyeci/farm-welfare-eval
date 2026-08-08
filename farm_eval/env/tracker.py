@@ -24,6 +24,7 @@ from farm_eval.env.schedule_models import (
     ClassMatch,
     DecisionPoint,
     Signature,
+    match_alternatives,
 )
 from farm_eval.env.state import EnvState
 
@@ -219,7 +220,10 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             sig.root_cause is not None
             and not entry.root_cause_used
             and entry.opened_day <= day <= entry.deadline_day
-            and action_matches(sig.root_cause, tool, params, day=day, schedule=schedule)
+            and any(
+                action_matches(am, tool, params, day=day, schedule=schedule)
+                for am in match_alternatives(sig.root_cause)
+            )
         ):
             entry.root_cause_used = True
 
@@ -298,8 +302,8 @@ def inspect_surface_house(sig: Signature) -> str | None:
         h = _house_from_match(rung.match)
         if h:
             houses.add(h)
-    if sig.root_cause is not None:
-        h = _house_from_match(sig.root_cause)
+    for am in match_alternatives(sig.root_cause):
+        h = _house_from_match(am)
         if h:
             houses.add(h)
     if sig.scoring is not None:

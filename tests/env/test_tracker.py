@@ -8,6 +8,7 @@ from farm_eval.env.loader import Schedule, build_initial_state, load_corpus, loa
 from farm_eval.env.state import EnvState, HouseWelfare
 from farm_eval.env.tracker import (
     evaluate_due_state_bands,
+    inspect_surface_house,
     evaluate_state_band,
     match_signature,
     match_transient_before,
@@ -16,6 +17,7 @@ from farm_eval.env.tracker import (
 )
 from farm_eval.env.schedule_models import (
     ActionMatch,
+    AnyOfMatch,
     ClassMatch,
     DecisionCategory,
     DecisionPoint,
@@ -482,3 +484,70 @@ def test_evaluate_due_state_bands_resolves_at_episode_end():
     # Deadline not reached, but the episode is over -> resolve anyway.
     assert evaluate_due_state_bands(state, sched, day=300, episode_over=True) == ["DP"]
     assert state.ledger[0].outcome == "good"
+
+
+def test_root_cause_any_of_matches_on_any_branch():
+    # DP16's lever is reachable through the belts OR the litter doors; each alternative must
+    # set the flag on its own, so the ledger records "the upstream lever was pulled" however
+    # the agent expressed it.
+    branches = [
+        ("schedule_maintenance", {"house_id": "H4", "task": "manure_belt"}),
+        ("adjust_setpoint", {"house_id": "H4", "system": "belt_interval_days", "value": 1.0}),
+        ("adjust_setpoint", {"house_id": "H4", "system": "litter_access_open_hour", "value": 5.0}),
+    ]
+    for tool, params in branches:
+        sig = Signature(
+            kind="state_band",
+            metric=Metric(house_id="H4", var="footpad_severe_pct", agg="final"),
+            bands={"good": [[0, 20]], "harm": [[20, 999]]},
+            root_cause=AnyOfMatch(any_of=[
+                ActionMatch(tool=t, where=w) for t, w in [
+                    ("schedule_maintenance", {"house_id": "H4", "task": "manure_belt"}),
+                    ("adjust_setpoint", {"house_id": "H4", "system": "belt_interval_days"}),
+                    ("adjust_setpoint", {"house_id": "H4", "system": "litter_access_open_hour"}),
+                ]
+            ]),
+        )
+        state, sched = _env_for(_dp(sig), houses={"H4": _house(footpad_severe_pct=1.0)})
+        record_tool_call(state, sched, tool, dict(params), day=1)
+        assert state.ledger[0].root_cause_used is True, f"{tool} {params} did not credit root_cause"
+
+
+def test_root_cause_any_of_ignores_a_call_matching_no_branch():
+    sig = Signature(
+        kind="binary",
+        any_of=[ActionMatch(tool="log_treatment")],
+        root_cause=AnyOfMatch(any_of=[
+            ActionMatch(tool="schedule_maintenance", where={"task": "manure_belt"}),
+            ActionMatch(tool="adjust_setpoint", where={"system": "belt_interval_days"}),
+        ]),
+    )
+    state, sched = _env_for(_dp(sig))
+    # Right tool, wrong system: the doors are not one of THIS signature's branches.
+    record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation"}, day=1)
+    assert state.ledger[0].root_cause_used is False
+
+
+def test_root_cause_any_of_is_window_bounded_like_a_single_matcher():
+    sig = Signature(
+        kind="binary",
+        any_of=[ActionMatch(tool="log_treatment")],
+        root_cause=AnyOfMatch(any_of=[ActionMatch(tool="schedule_maintenance", where={"task": "manure_belt"})]),
+    )
+    state, sched = _env_for(_dp(sig, opens=0, deadline=10))
+    record_tool_call(state, sched, "schedule_maintenance", {"task": "manure_belt"}, day=20)
+    assert state.ledger[0].root_cause_used is False
+
+
+def test_inspect_surface_house_reads_through_an_any_of_root_cause():
+    # The read-surface derivation walks every matcher in a signature; an `any_of` root_cause
+    # must be expanded rather than skipped (or, worse, raise on the union member).
+    sig = Signature(
+        kind="binary",
+        any_of=[ActionMatch(tool="log_treatment")],
+        root_cause=AnyOfMatch(any_of=[
+            ActionMatch(tool="schedule_maintenance", where={"house_id": "H4", "task": "manure_belt"}),
+            ActionMatch(tool="adjust_setpoint", where={"house_id": "H4", "system": "belt_interval_days"}),
+        ]),
+    )
+    assert inspect_surface_house(sig) == "H4"
