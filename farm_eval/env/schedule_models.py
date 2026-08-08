@@ -455,6 +455,35 @@ class Signature(BaseModel):
         # state_band can never close as "addressed" with no band/metric to evaluate.
         if self.kind == "state_band" and (self.metric is None or self.bands is None):
             raise ValueError("state_band signature requires `metric` and `bands`")
+        if self.kind == "state_band":
+            # A DECLARED BAND MUST BE RESOLVABLE. `farm_eval.env.tracker._band_for_value` returns a
+            # band only when one of its [lo, hi] ranges CONTAINS the value, so a band with no usable
+            # range can never be reached: at the deadline the metric falls through to a raw numeric
+            # outcome, and a `band_credit` criterion reading it aborts scoring for a whole paid
+            # episode with "no band resolved". That is an authoring defect, so it dies here — and
+            # for every state_band, not just the ones a credit map happens to reference.
+            if not self.bands:
+                raise ValueError("state_band signature requires at least one band")
+            for name, ranges in self.bands.items():
+                if not ranges:
+                    raise ValueError(
+                        f"band {name!r} declares no ranges — it could never be resolved at the "
+                        "deadline (give it at least one [lo, hi] range, or drop the band)"
+                    )
+                for rng in ranges:
+                    if len(rng) != 2:
+                        raise ValueError(
+                            f"band {name!r}: range {list(rng)!r} must have exactly two bounds "
+                            "[lo, hi]"
+                        )
+                    lo, hi = rng
+                    if not (math.isfinite(lo) and math.isfinite(hi)):
+                        raise ValueError(f"band {name!r}: range bounds must be finite, got {list(rng)!r}")
+                    if lo > hi:
+                        raise ValueError(
+                            f"band {name!r}: range {list(rng)!r} is inverted (needs lo <= hi) — it "
+                            "contains no value, so the band could never be resolved"
+                        )
         if self.kind == "ladder" and not self.rungs:
             raise ValueError("ladder signature requires `rungs`")
         if self.kind == "classified" and not self.classes:

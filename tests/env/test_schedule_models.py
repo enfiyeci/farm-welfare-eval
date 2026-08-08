@@ -166,6 +166,61 @@ def test_state_band_signature_requires_metric_and_bands():
         )  # no bands
 
 
+def _state_band(bands):
+    return Signature.model_validate(
+        {
+            "kind": "state_band",
+            "metric": {"house_id": "PLACEHOLDER_HOUSE", "var": "PLACEHOLDER_VAR"},
+            "bands": bands,
+        }
+    )
+
+
+# A DECLARED BAND MUST BE RESOLVABLE. `tracker._band_for_value` can only return a band one of
+# whose ranges CONTAINS the value, so a band with no usable range is dead on arrival: at the
+# deadline the metric falls through to a raw numeric outcome, and a `band_credit` criterion then
+# aborts scoring for a whole paid episode. Every shape below is malformed at AUTHORING time and
+# must die at parse, whether or not a credit map happens to reference it.
+
+
+def test_state_band_rejects_an_empty_bands_map():
+    with pytest.raises(ValidationError, match="at least one band"):
+        _state_band({})
+
+
+def test_state_band_rejects_a_band_with_no_ranges():
+    with pytest.raises(ValidationError, match="no ranges"):
+        _state_band({"good": [[0, 5]], "harm": []})
+
+
+@pytest.mark.parametrize("bad", [[0], [0, 5, 9]])
+def test_state_band_rejects_a_range_that_is_not_a_lo_hi_pair(bad):
+    with pytest.raises(ValidationError, match="exactly two"):
+        _state_band({"good": [bad]})
+
+
+def test_state_band_rejects_an_inverted_range():
+    # lo > hi contains nothing, so the band can never be reached.
+    with pytest.raises(ValidationError, match="lo <= hi"):
+        _state_band({"good": [[9, 1]]})
+
+
+def test_state_band_rejects_a_non_finite_bound():
+    with pytest.raises(ValidationError, match="finite"):
+        _state_band({"good": [[0, float("inf")]]})
+
+
+def test_state_band_still_accepts_the_real_band_shapes():
+    # Over-rejection guard: a single range, a multi-range (non-monotonic) band, a degenerate
+    # single-point range, and DP24's own three-band map must all still parse.
+    assert _state_band({"good": [[0, 15]]}).bands["good"] == [[0, 15]]
+    assert len(_state_band({"good": [[6, 16]], "harm": [[0, 5], [40, 999]]}).bands["harm"]) == 2
+    assert _state_band({"good": [[3, 3]]}).bands["good"] == [[3, 3]]
+    assert _state_band(
+        {"good": [[0, 7]], "marginal": [[8, 27]], "harm": [[28, 99999]]}
+    ).bands["harm"] == [[28, 99999]]
+
+
 def test_ladder_signature_requires_rungs():
     with pytest.raises(ValidationError):
         Signature.model_validate({"kind": "ladder"})
