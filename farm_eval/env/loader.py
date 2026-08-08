@@ -193,6 +193,12 @@ def validate_reply_refs(corpus: Corpus) -> None:
 
 
 def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
+    # Deferred, like the pricing import below: the model package imports state, and the
+    # floor-egg freeze needs both the layer and its coefficients.
+    from farm_eval.env.model.params import ModelParams
+    from farm_eval.env.model.layers import floor_eggs
+
+    params = ModelParams()
     company = corpus.company
     welfare = WelfareState()
     world = WorldState()
@@ -205,6 +211,28 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world.bird_count[hid] = int(house["bird_count"])
         world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))
         world.placement_day[hid] = -int(round((float(house.get("age_wk_at_start", 0.0)) - 17.0) * 7))
+        # Floor-egg training is resolved AT LOAD for any flock placed before day 0: its
+        # 6-week window closed before the episode started, so the agent never had a chance
+        # to influence it and the base is already frozen when it takes over. Which value it
+        # froze at is not authored per house — it is DERIVED from the schedule those houses
+        # are running at day 0, on the assumption that the inherited schedule is the one
+        # they were trained under. Under the inherited 11:00-21:00 doors that is a fully
+        # morning-closed window (closure share 1.0) and so the trained base. A house placed
+        # on or after day 0 keeps the -1.0 sentinel and trains inside the episode, where
+        # integrate() counts its window day by day.
+        if world.placement_day[hid] < 0:
+            sp = world.setpoints[hid]
+            lighting_hours = float(sp.get("lighting_hours", 16.0))
+            inherited_morning_closed = floor_eggs.morning_closed(
+                float(sp.get("litter_access_open_hour", params.lights_on_hour)),
+                float(sp.get("litter_access_close_hour", params.lights_on_hour + lighting_hours)),
+                params.lights_on_hour,
+                lighting_hours,
+                params,
+            )
+            welfare.houses[hid].floor_egg_frac_base = floor_eggs.training_base_frac(
+                1.0 if inherited_morning_closed else 0.0, params
+            )
     state = EnvState(
         day_index=0,
         start_date=company["start_date"],

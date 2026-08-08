@@ -23,7 +23,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, staffing,
-    access,
+    access, floor_eggs,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -88,6 +88,50 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             vent = sp.get("ventilation", params.nh3_vent_baseline)
             setpoint_c = sp.get("temperature", 21.0)
 
+            # --- Litter-door schedule (read once; both the floor-egg block below and the
+            # litter water balance further down consume it). Absent an authored schedule the
+            # doors default to the whole lit window (open with the lights, shut with them),
+            # the same fallback convention ModelParams.lights_on_hour documents.
+            lighting_hours = sp.get("lighting_hours", 16.0)
+            door_open_h = sp.get("litter_access_open_hour", params.lights_on_hour)
+            door_close_h = sp.get("litter_access_close_hour", params.lights_on_hour + lighting_hours)
+
+            # --- Floor eggs (daily), BEFORE the P&L block reads floor_egg_frac. ---
+            # Two channels, and only one of them is reversible. TODAY's closure discounts
+            # today's rate; the flock's BASE was settled in its first six weeks and is frozen
+            # for the rest of the cycle (layers/floor_eggs.py). Houses placed before day 0 had
+            # their base resolved at load, so this block only ever runs for a flock whose
+            # training window falls inside the episode.
+            morning_closed_today = floor_eggs.morning_closed(
+                door_open_h, door_close_h, params.lights_on_hour, lighting_hours, params
+            )
+            if hw.floor_egg_frac_base < 0.0:
+                placed = state.world.placement_day.get(hid, 0)
+                last_training_day = placed + params.floor_egg_training_window_days - 1
+                if placed <= day <= last_training_day:
+                    hw.floor_egg_training_days += 1.0
+                    if morning_closed_today:
+                        hw.floor_egg_training_closed_days += 1.0
+                if day >= last_training_day:
+                    # The freeze. `>=` rather than `==` so a house that was empty (and so
+                    # skipped) for part of its window still resolves on the first day it is
+                    # observed past the window, instead of carrying the sentinel forever.
+                    observed = hw.floor_egg_training_days
+                    closure_share = (
+                        hw.floor_egg_training_closed_days / observed if observed > 0.0 else 0.0
+                    )
+                    hw.floor_egg_frac_base = floor_eggs.training_base_frac(closure_share, params)
+            # An unresolved flock is one that has not learned the nest boxes yet, so it lays
+            # at the untrained base until its window closes.
+            floor_egg_base = (
+                hw.floor_egg_frac_base
+                if hw.floor_egg_frac_base >= 0.0
+                else params.floor_egg_base_untrained
+            )
+            hw.floor_egg_frac = floor_eggs.daily_floor_frac(
+                floor_egg_base, morning_closed_today, params
+            )
+
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
@@ -123,10 +167,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
                 + params.stress_mite_coeff
                 * max(0.0, hw.red_mite_index - params.stress_mite_threshold),
             )
+            # Floor eggs are the third downgrade channel and the only one whose size was
+            # settled months ago: `floor_egg_frac` of the day's eggs are laid on the litter,
+            # and `floor_egg_downgrade_frac` of each one's value is lost. It enters the SAME
+            # sum, so the loss rides the shell-vs-breaker split in revenue_step and moves
+            # with the world's egg-price series — no cents constant anywhere.
             dgrade_frac = min(
                 1.0,
                 economics.downgrade_frac(age, stress, params)
-                + staffing_u * params.staffing_floor_egg_max_frac,
+                + staffing_u * params.staffing_floor_egg_max_frac
+                + hw.floor_egg_frac * params.floor_egg_downgrade_frac,
             )
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
@@ -170,13 +220,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # The door schedule is read through the house's ACTUAL photoperiod — never a
             # hardcoded 16 h: H4 runs a 12-h pullet step-up, and charging the litter node for
             # a correct lighting program would make the diligent target unreachable
-            # (layers/access.py). Absent an authored schedule the doors default to the whole
-            # lit window (open with the lights, shut with them), the same fallback convention
-            # ModelParams.lights_on_hour documents for the open hour.
-            lighting_hours = sp.get("lighting_hours", 16.0)
+            # (layers/access.py). The schedule itself was resolved once at the top of this
+            # house's block, so the floor-egg and litter channels can never read different
+            # doors on the same day.
             floor_share = access.floor_manure_share(
-                sp.get("litter_access_open_hour", params.lights_on_hour),
-                sp.get("litter_access_close_hour", params.lights_on_hour + lighting_hours),
+                door_open_h,
+                door_close_h,
                 params.lights_on_hour,
                 lighting_hours,
                 params,

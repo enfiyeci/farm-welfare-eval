@@ -468,6 +468,47 @@ class ModelParams(BaseModel):
     w_opp_hourly: list[float] = [.005, .005, .005, .005, .01, .03,   # 05-11
                                  .09, .13, .12, .11, .10, .10,      # 11-17
                                  .09, .08, .07, .05]                # 17-21
+    # --- Floor eggs (layers/floor_eggs.py) ----------------------------------------------
+    # A pullet learns WHERE to lay in her first weeks in the laying house, and what she learns
+    # then is what she does for the rest of the cycle. That gives this lever a shape no other
+    # lever in the model has: a schedule set in the first six weeks is still being paid for a
+    # year later, and no later correction undoes it.
+    #
+    # floor_egg_morning_end_hour: the end of the morning lay window (clock hour). Hen
+    # oviposition is concentrated in the hours after lights-on, so a door that opens at or
+    # after this hour keeps the birds off the litter through the whole lay peak — that is what
+    # "morning closed" means to this layer, and it is read off the door schedule
+    # (layers/access.open_lit_hours), never hardcoded per house.
+    floor_egg_morning_end_hour: float = 11.0
+    # floor_egg_training_window_days: the training window, [placement_day, +42 d). Six weeks
+    # post-placement is the industry training period; the base freezes on its LAST day and is
+    # never recomputed. AUTHORED irreversibility: Campbell 2023 conclusion 11 is a review +
+    # producer-consensus statement that early floor-laying habits persist, NOT a controlled
+    # measurement of a decay rate — so the model takes the strong form (no decay at all)
+    # rather than inventing an unmeasured relaxation constant.
+    floor_egg_training_window_days: int = 42
+    # floor_egg_base_untrained / floor_egg_base_trained: the two ends of the lifetime base, as
+    # a fraction of eggs laid on the litter floor. Both AUTHORED to measured anchors: Oliveira
+    # et al. 2019 floor-laid ~3.7 % of hen-days with litter access through training vs
+    # pre-laying-area ~0.4 % with the morning closed off; Campbell 2023 reports a 1-15 %
+    # producer range, which brackets both. `training_base_frac` interpolates linearly between
+    # them on the share of training days with the morning closed — an AUTHORED shape, since no
+    # published dose-response on PARTIAL training exists.
+    floor_egg_base_untrained: float = 0.04
+    floor_egg_base_trained: float = 0.005
+    # floor_egg_closure_relief: multiplier on TODAY's rate when the morning is closed today.
+    # A standing closure suppresses floor laying even in a badly trained flock — Oliveira's
+    # 12.6 % vs 1.4 % contrast is the relief anchor (ratio 0.111). AUTHORED at 0.15, slightly
+    # above that ratio: management can hide a training failure but never quite erase it, so a
+    # relieved untrained flock (0.006) stays worse than a trained one (0.005). This is the
+    # lever's second, REVERSIBLE channel — deliberately distinct from the frozen base above.
+    floor_egg_closure_relief: float = 0.15
+    # floor_egg_downgrade_frac: share of a floor egg's value lost. AUTHORED: floor eggs are
+    # dirty/cracked at far higher rates and get diverted or downgraded rather than sold as
+    # shell eggs, but no published per-egg loss fraction exists. Wired as an addend to the
+    # existing downgrade sum in integrate(), so the value lost rides the shell-vs-breaker split
+    # and moves with `state.market.egg_price_usd_doz` — there is no cents constant anywhere.
+    floor_egg_downgrade_frac: float = 0.45
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed

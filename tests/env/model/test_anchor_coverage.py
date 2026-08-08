@@ -43,6 +43,14 @@ ANCHORS = {
         "test_belt_regime_stays_inside_the_groot_koerkamp_band",
     "litter water flow peaks at 22 wk (GK ch. 8)":
         "test_water_rel_peaks_at_22_weeks_and_collapses_by_30",
+    "floor-egg untrained base ~3.7% of hen-days (Oliveira 2019 FLA)":
+        "test_training_never_closed_gives_the_untrained_base",
+    "floor-egg trained base ~0.4% (Oliveira 2019 PLA)":
+        "test_training_closed_throughout_gives_the_trained_base",
+    "floor-egg standing-closure relief 12.6->1.4 (Oliveira 2019)":
+        "test_standing_closure_relief_is_the_configured_ratio",
+    "floor-egg base frozen at 6 wk and never retrained (Campbell 2023 concl. 11)":
+        "test_the_frozen_base_never_moves_again_however_the_doors_change",
 }
 
 

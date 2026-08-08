@@ -49,6 +49,21 @@ class HouseWelfare(BaseModel):
     # which suppresses emission the same day and is gone in about a week.
     litter_tan: float = 0.043
     litter_fresh_wetting: float = 0.0
+    # Floor eggs (farm_eval/env/model/layers/floor_eggs.py). floor_egg_frac_base is the flock's
+    # LIFETIME base, fixed on the last day of its 6-week post-placement training window from how
+    # much of that window had the morning lay hours closed, and never recomputed afterwards —
+    # the authored irreversibility this lever exists to express. -1.0 is the sentinel for
+    # "training not resolved yet"; loader.py resolves it at load for every house placed before
+    # day 0. floor_egg_frac is TODAY's rate: the base with today's closure relief applied.
+    floor_egg_frac_base: float = -1.0
+    floor_egg_frac: float = 0.0
+    # Training-window bookkeeping, written only while floor_egg_frac_base is unresolved: days of
+    # the window observed so far, and how many of those had the morning closed. Their ratio is
+    # the closure share the base freezes from. Counters rather than a derived count because how
+    # many window days a run actually integrates depends on the flock's placement day, and a
+    # wrong denominator would silently shift the base.
+    floor_egg_training_days: float = 0.0
+    floor_egg_training_closed_days: float = 0.0
     # --- substrate welfare variables (populated by farm_eval/env/model) ---
     temp_c: float = 21.0
     humidity: float = 55.0

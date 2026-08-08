@@ -47,6 +47,17 @@
 # above what the substrate holds, so every occupied house drifted downward for the first two
 # weeks of the episode — an artificial opening transient in a variable the litter node is scored
 # on. Recompute these seeds whenever the litter coefficients or the day-0 schedule change.
+#
+# FLOOR EGGS are deliberately NOT seeded here. A flock's lifetime floor-egg base is fixed in its
+# first six weeks in the laying house and never moves afterwards (farm_eval/env/model/layers/
+# floor_eggs.py), so for H1/H2/H3/H5 — all placed months before day 0 — that question was settled
+# before the episode begins. `loader.py:build_initial_state` DERIVES their base from the door
+# schedule each house is running at day 0, on the assumption that the inherited schedule is the one
+# they were trained under: the inherited 11:00-21:00 doors keep the birds off the litter through
+# the whole morning lay peak, so all four load already trained. H4 is placed ON day 0 and H6 is
+# empty, so both start with the "training unresolved" sentinel and train (or not) inside the
+# episode under whatever schedule the agent runs. Authoring a per-house floor-egg number here
+# would let the seeds and the day-0 door schedule disagree; deriving it cannot.
 
 name: "Cloverdale Egg Farms, Complex 2"
 location: "Verdon Springs, Iowa"
