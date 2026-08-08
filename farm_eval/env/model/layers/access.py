@@ -12,6 +12,12 @@ about one schedule, and they are deliberately different currencies:
   * ``access_hours``          — the plain count of usable hours, for reporting and for
     the UEP daily-litter-access requirement.
 
+A fourth function, ``substrate_quality``, asks about the litter rather than the schedule:
+how much of the offered opportunity the BED can actually deliver.  It lives here because it
+is only ever used to discount ``opportunity_available`` — realized opportunity is the
+product of the two, and an open door onto a caked, thin, sodden floor is not the good it
+appears.
+
 The asymmetry between the first two is the point.  Hen floor deposition is morning-heavy
 while dustbathing/foraging initiation is near-zero before ~11:00 and peaks early
 afternoon, so the inherited "doors open at 11:00" schedule buys roughly half the floor
@@ -159,6 +165,57 @@ def opportunity_available(
     return _renormalized_share(
         open_h, close_h, lights_on, lighting_hours, params.w_opp_hourly
     )
+
+
+def substrate_quality(
+    moisture: float,
+    depth_cm: float,
+    caked_pct: float,
+    params: ModelParams,
+) -> float:
+    """Return how much of the offered opportunity the LITTER ITSELF can deliver, in [0, 1].
+
+    ``opportunity_available`` prices the door; this prices what is behind it.  The two are
+    multiplied to get realized opportunity, which is the whole point: a schedule that scores
+    1.0 on the door lever still delivers little when the bed is a thin caked mat.  Sourced
+    DIRECTION (De Jong: the welfare value of litter access is substrate-dependent and
+    collapses on poor substrate); the multiplicative form and its coefficients are AUTHORED
+    (see the ModelParams ``opp_*`` block, including the depth reference's delegated-source
+    caveat).
+
+    Three independent limiters multiply:
+
+      * depth   — linear up to ``opp_depth_ref_cm``, flat at 1.0 above it,
+      * caking  — the caked share of the floor is simply unusable,
+      * moisture— 1.0 inside ``opp_moisture_good``, decaying linearly to
+        ``opp_moisture_min_q`` at ``opp_moisture_decay_pp`` points outside either edge and
+        holding that floor beyond.
+
+    Args:
+        moisture:   Litter moisture (%).
+        depth_cm:   Litter bed depth (cm).
+        caked_pct:  Share of the litter surface that is caked (0-100 %).
+        params:     Calibrated model parameters.
+
+    Returns:
+        The quality multiplier in [0, 1]; 1.0 for a friable bed at or above reference depth
+        with no caking.
+    """
+    q_depth = min(1.0, max(0.0, depth_cm) / params.opp_depth_ref_cm)
+    q_caked = min(1.0, max(0.0, 1.0 - max(0.0, caked_pct) / 100.0))
+
+    low, high = params.opp_moisture_good
+    if moisture < low:
+        excess = low - moisture
+    elif moisture > high:
+        excess = moisture - high
+    else:
+        excess = 0.0
+    floor = params.opp_moisture_min_q
+    reach = min(1.0, excess / params.opp_moisture_decay_pp)
+    q_moisture = 1.0 - (1.0 - floor) * reach
+
+    return q_depth * q_caked * q_moisture
 
 
 def access_hours(

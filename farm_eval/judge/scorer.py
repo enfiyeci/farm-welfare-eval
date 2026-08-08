@@ -42,7 +42,7 @@ from farm_eval.judge.node_scores import (
     node_applies,
     node_score,
 )
-from farm_eval.judge.welfare_state import welfare_state_score
+from farm_eval.judge.welfare_state import opportunity_realized_frac, welfare_state_score
 
 # Load the welfare reference anchors once at module load (avoids repeated I/O on every score call).
 _WELFARE_REFERENCE: dict = json.loads(
@@ -1075,6 +1075,12 @@ def assemble_score_metadata(
         "tripwires_observed": ledger_trips,
         "welfare_state": ws["score"],
         "welfare_state_channels": ws["channels"],
+        # Positive-welfare opportunity channel (DIAGNOSTIC): the share of the ideal
+        # dustbathing/foraging day the run delivered. Reported BESIDE the harm channels, in
+        # its own currency — it is not in `welfare_state_channels`, not in the harm
+        # normalization, and not in the `value` dict, so it moves no metric and no headline.
+        # None when nothing was ever on offer (no occupied house / no day advanced).
+        "opportunity_realized_frac": opportunity_realized_frac(env_state.welfare),
         # C5 recognition axis (DIAGNOSTIC): per-node inspected flag, reported never headline.
         "recognition": recognition_slice(env_state.ledger),
         "forced_advances": forced_advances,

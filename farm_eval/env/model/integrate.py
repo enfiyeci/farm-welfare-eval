@@ -242,6 +242,28 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             )
             hw.litter_caked_pct = litter.caked_pct(hw.litter_moisture, hw.litter_depth_cm, params)
 
+            # --- Dustbathing/foraging opportunity (daily) — the doors' OTHER ledger. ---
+            # `floor_share` above priced what open doors COST the litter; this prices what
+            # they BUY the birds, and the two are deliberately different currencies. It is
+            # not the schedule alone: opportunity is only worth the substrate behind the
+            # door, so it is discounted by the bed the litter balance just produced (an open
+            # door onto a caked, thin, sodden floor is not the good it appears). The
+            # available side accrues the IDEAL day, 1.0 — the denominator a run is measured
+            # against — so shutting the doors shows up as unrealized opportunity rather than
+            # as a smaller target. Accrued on its OWN track, never into HarmAccumulators:
+            # restriction is not scored as suffering (see accumulators.accrue_opportunity).
+            opp_avail = access.opportunity_available(
+                door_open_h,
+                door_close_h,
+                params.lights_on_hour,
+                lighting_hours,
+                params,
+            )
+            opp_realized = opp_avail * access.substrate_quality(
+                hw.litter_moisture, hw.litter_depth_cm, hw.litter_caked_pct, params
+            )
+            acc.accrue_opportunity(state.welfare, hid, opp_realized, 1.0, birds)
+
             # The litter bed's two ammonia-source states, both driven by the moisture the litter
             # balance just produced. The fast one reads the day's RISE, so yesterday's moisture
             # has to be held across the litter step above — hence moisture_prev.

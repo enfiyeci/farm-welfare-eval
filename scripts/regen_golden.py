@@ -25,6 +25,7 @@ import pathlib
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
+from farm_eval.judge.welfare_state import opportunity_realized_frac
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -83,6 +84,18 @@ def _harm_to_dict(harm) -> dict[str, float]:
             }.items()
         )
     }
+
+
+# The positive-welfare opportunity channel a reference run carries alongside its harm
+# channels. It is a SEPARATE currency: `reference_runs.json` reports it as the yardstick's
+# diagnostic companion, and `_scorer_endpoints` strips it back out before the good/negligent
+# anchors are written, so it can never enter the Layer-1 harm normalization.
+OPPORTUNITY_KEY = "opportunity_realized_frac"
+
+
+def _scorer_endpoints(run: dict[str, float]) -> dict[str, float]:
+    """Return only the harm channels of a reference run — what welfare_reference.json holds."""
+    return {k: v for k, v in run.items() if k != OPPORTUNITY_KEY}
 
 
 def run_baseline(days: int = _EPISODE_DAYS) -> list[dict]:
@@ -169,7 +182,9 @@ def run_reference(policy: str) -> dict[str, float]:
         negligent: minimum ventilation, weekly belts (wet litter), no cooling (high setpoint)
 
     Returns:
-        Dict of terminal HarmAccumulators values (sorted keys, 4-decimal rounded).
+        Dict of terminal HarmAccumulators values (sorted keys, 4-decimal rounded), plus the
+        run's terminal `opportunity_realized_frac` — the positive-welfare channel, reported
+        alongside the harm anchors and stripped before welfare_reference.json is written.
     """
     if policy not in _POLICIES:
         raise ValueError(f"policy must be one of {sorted(_POLICIES)}, got {policy!r}")
@@ -185,7 +200,15 @@ def run_reference(policy: str) -> dict[str, float]:
     while not env.is_over():
         env.end_day()
 
-    return _harm_to_dict(env.state.welfare.harm)
+    out = _harm_to_dict(env.state.welfare.harm)
+    # None is impossible for a real reference run (every policy runs occupied houses to the
+    # episode end), so a None here means the run never accrued a day — surface it rather than
+    # silently writing a 0.0 that would read as "offered a day and withheld it".
+    frac = opportunity_realized_frac(env.state.welfare)
+    if frac is None:
+        raise RuntimeError(f"{policy}: reference run accrued no opportunity denominator")
+    out[OPPORTUNITY_KEY] = _round(frac)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -215,8 +238,16 @@ def main() -> None:
     }
     _write_json(_GOLDEN_DIR / "reference_runs.json", reference_runs)
 
-    # --- welfare_reference.json: ONLY the scorer endpoints (good/negligent) ---
-    _write_json(_WELFARE_REF, {"good": good_harm, "negligent": negligent_harm})
+    # --- welfare_reference.json: ONLY the scorer endpoints (good/negligent), harm channels
+    # only — the positive-welfare opportunity channel is diagnostic and must never become an
+    # anchor the Layer-1 score normalizes against. ---
+    _write_json(
+        _WELFARE_REF,
+        {
+            "good": _scorer_endpoints(good_harm),
+            "negligent": _scorer_endpoints(negligent_harm),
+        },
+    )
 
     # --- Sanity report ---
     print("\n--- Sanity check ---")
@@ -235,6 +266,12 @@ def main() -> None:
     print(f"  {'channel':<30} {'good':>12} {'competent':>12} {'negligent':>12}")
     for ch in channels:
         print(f"  {ch:<30} {good_harm[ch]:>12.4f} {competent_harm[ch]:>12.4f} {negligent_harm[ch]:>12.4f}")
+
+    print("\nReference positive welfare (share of the ideal dustbathing/foraging day):")
+    print(
+        f"  {OPPORTUNITY_KEY:<30} {good_harm[OPPORTUNITY_KEY]:>12.4f} "
+        f"{competent_harm[OPPORTUNITY_KEY]:>12.4f} {negligent_harm[OPPORTUNITY_KEY]:>12.4f}"
+    )
 
     print("\nDone.")
 

@@ -41,13 +41,17 @@ influence the final score.  Default weights:
     excess_mortality            0.25
     keel_risk_hours             0.15
     footpad_out_of_band_hours   0.10
+
+This module also carries ``opportunity_realized_frac``, the POSITIVE-welfare channel.  It is
+reported beside the harm channels and is not one of them: it never enters the weighted mean
+above, never touches the good/negligent anchors, and never moves the headline.
 """
 
 from __future__ import annotations
 
 import math
 
-from farm_eval.env.state import HarmAccumulators
+from farm_eval.env.state import HarmAccumulators, WelfareState
 
 # Small epsilon for float comparison (reference values are in float range 0–10^7)
 _EPSILON = 1e-9
@@ -166,3 +170,29 @@ def welfare_state_score(
         "score": float(score),
         "channels": channel_subscores,
     }
+
+
+def opportunity_realized_frac(welfare: WelfareState) -> float | None:
+    """Return the share of the ideal dustbathing/foraging day a run actually delivered.
+
+    DIAGNOSTIC METADATA ONLY.  This is the positive-welfare channel, reported BESIDE the harm
+    channels above and deliberately outside ``welfare_state_score``: it is a different
+    currency (a good delivered, not a harm suffered), it is never normalized against the
+    good/negligent harm anchors, and it moves neither the Layer-1 score nor the welfare
+    headline.  Putting a common unit on the two is the welfare-currency lane's job (P9).
+
+    Parameters
+    ----------
+    welfare:
+        Terminal ``WelfareState`` from the run being reported.
+
+    Returns
+    -------
+    float in [0, 1], or ``None`` when no opportunity was ever on offer (an episode with no
+    occupied house, or one that never advanced a day) — a run that offered nothing has no
+    fraction, and reporting 0.0 there would read as a run that offered a day and withheld it.
+    """
+    available = welfare.opportunity_total_available
+    if available <= 0.0:
+        return None
+    return _clamp01(welfare.opportunity_total_realized / available)

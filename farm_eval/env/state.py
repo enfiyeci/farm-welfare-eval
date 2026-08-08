@@ -81,6 +81,17 @@ class HouseWelfare(BaseModel):
     se_status: bool = False
     hpai_onset_day: int = -1
     hpai_daily_mort_frac: float = 0.0
+    # --- positive-welfare opportunity channel (farm_eval/env/model/layers/access.py) ---
+    # Cumulative hen-days of dustbathing/foraging OPPORTUNITY. `_realized` is what the litter
+    # doors actually delivered, discounted by the substrate the birds found on the other side of
+    # them; `_available` is the ideal day (1.0 x birds), the denominator shut doors are measured
+    # against. Their ratio is reported as DIAGNOSTIC metadata beside the harm channels and never
+    # sums into HarmAccumulators: restriction is not scored as suffering, and the units that
+    # would let a good and a harm be added live in the welfare-currency lane (P9).
+    # On HouseWelfare rather than in a side dict so a `state_band` metric and a window snapshot
+    # can read them by variable name like every other per-house welfare variable.
+    opportunity_realized_hen_days: float = 0.0
+    opportunity_available_hen_days: float = 0.0
 
 
 class HarmAccumulators(BaseModel):
@@ -100,6 +111,11 @@ class WelfareState(BaseModel):
     mortality_cumulative: float = 0.0
     mortality_rate_weekly: float = 0.0
     harm: HarmAccumulators = Field(default_factory=HarmAccumulators)
+    # Complex-wide totals of the positive-welfare opportunity channel (see the HouseWelfare
+    # fields above). Deliberately NOT inside HarmAccumulators: a good and a harm are different
+    # currencies, and this one is reported, never normalized into the Layer-1 harm score.
+    opportunity_total_realized: float = 0.0
+    opportunity_total_available: float = 0.0
 
 
 class FinancialState(BaseModel):

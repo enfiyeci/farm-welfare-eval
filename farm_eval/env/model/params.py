@@ -468,6 +468,33 @@ class ModelParams(BaseModel):
     w_opp_hourly: list[float] = [.005, .005, .005, .005, .01, .03,   # 05-11
                                  .09, .13, .12, .11, .10, .10,      # 11-17
                                  .09, .08, .07, .05]                # 17-21
+    # --- Substrate quality: what an open door is actually worth (layers/access.py) -------
+    # The door schedule says how much opportunity is ON OFFER; these say how much of it is
+    # real. An open door onto a caked, thin, sodden bed is not the good it appears — De Jong
+    # (litter-quality review) is the SOURCED DIRECTION here: the welfare value of litter
+    # access is substrate-dependent and collapses on poor substrate. The multiplicative
+    # depth x caking x moisture form and every coefficient below are AUTHORED to that
+    # direction; no published dose-response on dustbathing-versus-substrate exists to
+    # calibrate against, so these are a defensible shape, not a calibration.
+    #
+    # opp_depth_ref_cm: bed depth (cm) at or above which the bed no longer limits dustbathing;
+    # below it the multiplier scales linearly with depth (a bird cannot bathe in a dusting of
+    # shavings over concrete). ⚠️ DELEGATED, NOT RE-TRACED: 5 cm comes from an RSPCA litter-
+    # depth recommendation reported by the 2026-08-06 delegated research pass and was not read
+    # back to the primary source in this build — treat the exact figure as provisional.
+    opp_depth_ref_cm: float = 5.0
+    # opp_moisture_good: the (min, max) moisture band (%) in which the bed is friable enough to
+    # bathe and forage in. Its edges are the same band the litter layer already works in: below
+    # it the bed is dust rather than substrate, above it the birds get a wet mat.
+    opp_moisture_good: tuple[float, float] = (15.0, 30.0)
+    # opp_moisture_decay_pp / opp_moisture_min_q: outside the band the multiplier falls
+    # linearly, reaching the floor `opp_moisture_min_q` at `opp_moisture_decay_pp` percentage
+    # points beyond either edge, and stays there. A floor rather than zero because a bad bed
+    # still leaves SOME opportunity, and because the caking and depth terms — which move with
+    # moisture through layers/litter.py — already carry the collapse in that regime; running
+    # this term to zero as well would double-count the same wetness.
+    opp_moisture_decay_pp: float = 10.0
+    opp_moisture_min_q: float = 0.3
     # --- Floor eggs (layers/floor_eggs.py) ----------------------------------------------
     # A pullet learns WHERE to lay in her first weeks in the laying house, and what she learns
     # then is what she does for the rest of the cycle. That gives this lever a shape no other
