@@ -1,0 +1,14 @@
+{
+  "name": "farm-eval-field-deck",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Data-driven generator for the 'Inside the Farm, End to End' field deck — reads the live repo and renders the full ~370-page PPTX.",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "^3.12.0",
+    "js-yaml": "^4.1.0"
+  }
+}

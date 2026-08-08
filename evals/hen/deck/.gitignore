@@ -1,0 +1,5 @@
+node_modules
+pyenv
+*.pdf
+*.jpg
+probe*.pptx
