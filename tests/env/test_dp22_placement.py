@@ -25,13 +25,14 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pydantic import ValidationError
 
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.ledger import LedgerStatus
 from farm_eval.env.loader import load_schedule
 from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.model.layers import density
-from farm_eval.env.model.params import ModelParams
+from farm_eval.env.model.params import DEFAULT_PLACEMENT_SETPOINTS, ModelParams
 from farm_eval.env.schedule_models import match_alternatives
 from farm_eval.env.tracker import _band_for_value
 
@@ -175,7 +176,16 @@ def test_an_empty_genetics_spec_is_dropped_from_the_record():
         {"house_id": HOUSE, "bird_count": 0},               # a placement of nothing
         {"house_id": HOUSE, "bird_count": -5},
         {"house_id": HOUSE, "bird_count": float("inf")},
+        {"house_id": HOUSE, "bird_count": float("nan")},
         {"house_id": HOUSE, "bird_count": 200_001},         # past pullet_order_max_birds
+        # THE EPISODE-KILLER (Codex round 2, F1). A fractional count used to pass the `> 0`
+        # test and then be truncated to 0 by int() on the way into the log; the placement
+        # handler raises on a recorded zero, so `end_day` died on day 266 and the episode could
+        # not advance. It is rejected at the boundary now — nothing invalid is ever recorded.
+        {"house_id": HOUSE, "bird_count": 0.5},
+        {"house_id": HOUSE, "bird_count": 0.999},
+        {"house_id": HOUSE, "bird_count": 125_000.5},
+        {"house_id": HOUSE, "bird_count": -0.5},
     ],
 )
 def test_a_nonsense_pullet_order_is_rejected_without_crediting_anything(params):
@@ -187,10 +197,74 @@ def test_a_nonsense_pullet_order_is_rejected_without_crediting_anything(params):
     assert [r for r in env.state.actions if r.tool == "place_pullet_order"] == []
 
 
+def test_a_fractional_count_is_rejected_as_a_count_not_rounded_into_one():
+    # The rejection has to SAY it is about whole birds. Rounding silently would hand the agent
+    # a different flock than it asked for; truncating is what created the episode-killer.
+    env = _env()
+    result = env.apply_action("place_pullet_order", {"house_id": HOUSE, "bird_count": 125_000.5})
+    assert result.ok is False
+    assert "whole birds" in result.detail
+
+
+def test_an_integral_float_is_accepted_as_the_integer_it_equals():
+    # DECISION: accepted. Tool-call JSON and the play page's number input both deliver counts as
+    # floats, so refusing 125000.0 would punish plumbing rather than judgment — the same reason
+    # `place_feed_order` accepts a numeric quantity in whatever numeric shape it arrives. What is
+    # recorded is a real int, so the placement handler and any `where` matcher see one.
+    env = _env()
+    assert env.apply_action("place_pullet_order", {"house_id": HOUSE, "bird_count": 125_000.0}).ok
+    recorded = env.state.actions[-1].params["bird_count"]
+    assert recorded == 125_000
+    assert isinstance(recorded, int) and not isinstance(recorded, bool)
+
+
+def test_no_rejected_order_can_ever_reach_the_placement():
+    # The end-to-end version of F1: whatever the agent throws at the tool, day 266 still
+    # advances and the house is placed at the standing default. A recorded-but-invalid count
+    # would raise inside `end_day` and freeze the episode.
+    env = _env()
+    for bad in (0.5, 0, -5, "lots", 200_001, float("inf")):
+        assert env.apply_action("place_pullet_order", {"house_id": HOUSE, "bird_count": bad}).ok is False
+    _advance_to(env, PLACEMENT_DAY)
+    assert env.state.world.bird_count[HOUSE] == DEFAULT_COUNT
+
+
 def test_the_order_ceiling_is_the_params_ceiling():
     env = _env()
     ceiling = int(env.params.pullet_order_max_birds)
     assert env.apply_action("place_pullet_order", {"house_id": HOUSE, "bird_count": ceiling}).ok
+
+
+def test_a_partial_placement_profile_is_rejected_at_config_time():
+    # F2: the profile IS the operating state the placed house runs, and the event dict-updates
+    # it onto the turnaround setpoints — so a PARTIAL override would leave the flock on
+    # turnaround lighting, feed and temperature. That is the cold-dark-house failure the full
+    # transition exists to prevent, so a patch-shaped profile dies at construction.
+    with pytest.raises(ValidationError, match="COMPLETE operating profile"):
+        ModelParams(placement_setpoints={"ventilation": 2.0})
+
+
+def test_a_placement_profile_naming_an_unknown_system_is_rejected():
+    full = dict(DEFAULT_PLACEMENT_SETPOINTS)
+    full["ventilaton"] = 1.0                       # typo'd system, complete set otherwise
+    with pytest.raises(ValidationError, match="unexpected"):
+        ModelParams(placement_setpoints=full)
+
+
+def test_a_complete_placement_profile_override_is_accepted():
+    full = dict(DEFAULT_PLACEMENT_SETPOINTS) | {"ventilation": 2.0}
+    assert ModelParams(placement_setpoints=full).placement_setpoints["ventilation"] == 2.0
+
+
+def test_the_shipped_profile_covers_every_setpoint_the_other_houses_run():
+    # The completeness rule is only worth anything if the required set really is the operating
+    # profile: every system a day-0 occupied house is authored with must be in it.
+    import yaml
+
+    company = yaml.safe_load((ROOT / "corpus" / "company.yml").read_text(encoding="utf-8"))
+    occupied = [h for h in company["houses"] if int(h["bird_count"]) > 0]
+    for house in occupied:
+        assert set(house["setpoints"]) <= set(DEFAULT_PLACEMENT_SETPOINTS), house["id"]
 
 
 # --- the placement transition ----------------------------------------------------------------

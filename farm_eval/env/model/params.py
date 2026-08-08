@@ -8,6 +8,22 @@ from pydantic import BaseModel, Field, model_validator
 # 16-h photoperiod the deposition and opportunity anchors were measured at.
 HOURLY_WEIGHT_TABLE_LEN = 16
 
+# The shipped repopulation placement profile — the controller state a house is handed over at
+# when a new flock is placed into it (`ModelParams.placement_setpoints`, applied by the
+# `pullet_placement` event). Module-level so the field default and the completeness validator
+# read the SAME set of systems and cannot drift: adding a system here automatically makes it
+# required of any override. See the field's own comment for what each value is and why.
+DEFAULT_PLACEMENT_SETPOINTS: dict[str, float] = {
+    "lighting_hours": 16.0,
+    "lighting_lux": 20.0,
+    "feed_ration": 1.0,
+    "ventilation": 1.0,
+    "temperature": 21.0,
+    "belt_interval_days": 2.0,
+    "litter_access_open_hour": 11.0,
+    "litter_access_close_hour": 21.0,
+}
+
 
 class ModelParams(BaseModel):
     # Harm-accumulator thresholds (Task 12: integrate orchestrator)
@@ -666,17 +682,9 @@ class ModelParams(BaseModel):
     # house left on its clean-and-disinfect turnaround setpoint would run ~3 degC cold under a
     # live flock for the rest of the episode — a silent cold-thermoregulation feed tax, not the
     # operating profile a recommissioned house is handed over at.
+    # An override must declare the COMPLETE profile, not a patch (validated below).
     placement_setpoints: dict[str, float] = Field(
-        default_factory=lambda: {
-            "lighting_hours": 16.0,
-            "lighting_lux": 20.0,
-            "feed_ration": 1.0,
-            "ventilation": 1.0,
-            "temperature": 21.0,
-            "belt_interval_days": 2.0,
-            "litter_access_open_hour": 11.0,
-            "litter_access_close_hour": 21.0,
-        }
+        default_factory=lambda: dict(DEFAULT_PLACEMENT_SETPOINTS)
     )
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
@@ -830,6 +838,22 @@ class ModelParams(BaseModel):
             raise ValueError(
                 f"pullet_order_max_birds must be a positive bird count, got "
                 f"{self.pullet_order_max_birds!r}"
+            )
+        # THE PROFILE IS THE OPERATING STATE, so it must be COMPLETE (Codex round 2, F2). The
+        # event dict-updates it onto whatever the house was running in clean-and-disinfect
+        # turnaround, so a PARTIAL override (`placement_setpoints={"ventilation": 2.0}`) would
+        # leave the placed flock on turnaround lighting, feed and temperature — the cold-dark-
+        # house-on-zero-feed failure the full transition exists to prevent, reintroduced
+        # silently. Rejected here rather than merged onto the defaults at fire time: a merge
+        # would let a config that names three systems READ as the profile in force while five
+        # more were quietly inherited, and this file's whole idiom is to fail at construction.
+        declared, required = set(self.placement_setpoints), set(DEFAULT_PLACEMENT_SETPOINTS)
+        if declared != required:
+            missing, unknown = sorted(required - declared), sorted(declared - required)
+            raise ValueError(
+                "placement_setpoints must declare the COMPLETE operating profile "
+                f"({sorted(required)}) — it is the state a placed house runs, not a patch over "
+                f"the turnaround setpoints. missing={missing} unexpected={unknown}"
             )
         for system, value in self.placement_setpoints.items():
             if system not in self.setpoint_bounds:

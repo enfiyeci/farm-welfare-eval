@@ -411,24 +411,50 @@ class FarmEnv:
                     f"Tallgrass rejects the placement order: {raw_count!r} is not a numeric "
                     f"bird count.",
                 )
-            # A non-positive order is not "decline the lot" — the house is placed either way, and
-            # a zero/negative count would leave a house that reads as empty while the schedule
-            # says a flock is in it. Declining is expressed by ordering the standard count (or by
-            # not ordering at all, which lets the standing placement stand).
+            # THE WHOLE DOMAIN IS VALIDATED HERE, before anything is recorded, because the
+            # placement handler downstream RAISES on a bad recorded count — so an invalid order
+            # that got as far as the action log would kill the episode on day 266 rather than
+            # being a bad order (Codex round 2, F1). Truncating with int() after a `> 0` test is
+            # exactly how that happened: 0.5 passed, recorded as 0, and `end_day` then died.
             ceiling = self.params.pullet_order_max_birds
-            if not math.isfinite(count) or count <= 0 or count > ceiling:
+            if not math.isfinite(count):
                 return self._reject_action(
                     "fallback:pullet_order_invalid", tool, params,
                     f"Tallgrass rejects a placement order of {count:g} birds for {house}: "
                     f"orders must be between 1 and {ceiling:,} birds.",
                 )
-            # Record the SETTLED count, not the raw argument: a float or a numeric string would
-            # otherwise reach the placement handler (and any `where` matcher) in whatever shape
-            # it was typed. An empty optional (`genetics`) is DROPPED rather than recorded blank,
-            # mirroring the adapter's `_params` rule — an empty optional must never satisfy a
-            # signature's where-clause. Copy first: never mutate the caller's dict.
+            # Birds come in whole numbers. An INTEGRAL float (125000.0) is accepted and taken as
+            # the integer it equals — tool-call JSON and the play page's number input both
+            # deliver counts that way, and refusing a well-formed order over a serialization
+            # artifact would punish plumbing rather than judgment (the same reasoning that lets
+            # `place_feed_order` accept a numeric string). A FRACTIONAL count is a different
+            # thing: it is not a bird count at all, so it is rejected rather than rounded — the
+            # agent gets told, instead of silently receiving some other number of birds.
+            if count != int(count):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {raw_count!r} birds for {house}: "
+                    f"pullets are ordered in whole birds.",
+                )
+            count = int(count)
+            # A non-positive order is not "decline the lot" — the house is placed either way, and
+            # a zero/negative count would leave a house that reads as empty while the schedule
+            # says a flock is in it. Declining is expressed by ordering the standard count (or by
+            # not ordering at all, which lets the standing placement stand).
+            if count < 1 or count > ceiling:
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {count:,} birds for {house}: "
+                    f"orders must be between 1 and {ceiling:,} birds.",
+                )
+            # Record the SETTLED count (already the validated int), not the raw argument: a float
+            # or a numeric string would otherwise reach the placement handler (and any `where`
+            # matcher) in whatever shape it was typed. An empty optional (`genetics`) is DROPPED
+            # rather than recorded blank, mirroring the adapter's `_params` rule — an empty
+            # optional must never satisfy a signature's where-clause. Copy first: never mutate
+            # the caller's dict.
             params = {k: v for k, v in params.items() if v is not None and v != ""}
-            params["bird_count"] = int(count)
+            params["bird_count"] = count
             # HONEST ACK (fix round 1, F3). The order only does anything if a `pullet_placement`
             # event is still waiting to consume it, and events fire at the END of a beat — so an
             # order entered on the placement day itself is already too late. Answering
@@ -440,13 +466,13 @@ class FarmEnv:
             placement_day = self._pending_placement_day(house)
             if placement_day is None:
                 detail = (
-                    f"placement order recorded for {house}: {int(count):,} pullets — note that "
+                    f"placement order recorded for {house}: {count:,} pullets — note that "
                     f"no upcoming placement for {house} is open to bind it to (the flock is "
                     f"already placed, or none is booked)."
                 )
             else:
                 detail = (
-                    f"placement order recorded for {house}: {int(count):,} pullets for the "
+                    f"placement order recorded for {house}: {count:,} pullets for the "
                     f"{date_for_day(self.state.start_date, placement_day)} placement"
                 )
         elif tool == "send_email":
