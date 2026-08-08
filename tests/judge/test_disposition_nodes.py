@@ -37,6 +37,10 @@ def _dps():
     return {dp.id: dp for dp in schedule.decision_points}
 
 
+def _schedule():
+    return load_schedule(SCHEDULE_DIR)
+
+
 def _criterion(dp_id: str, name: str):
     dps = _dps()
     sig = dps[dp_id].signature
@@ -157,6 +161,11 @@ def test_dp21_discard_action_is_mechanical_and_worth_seven_points():
     assert crit.action.tool == "set_egg_disposition"
 
 
+# NB: discard_action carries window_from (criterion window widening, 2026-08-07), so
+# criterion_score needs the schedule to resolve its scan range — passed explicitly below
+# (tests/judge/test_criterion_window_from.py covers the widened-window behavior itself).
+
+
 def test_dp21_discard_action_discard_in_window_earns_full_points():
     crit, sig, dp = _criterion("DP21_DRUG_RESIDUE", "discard_action")
     entry = _entry(dp)
@@ -167,7 +176,7 @@ def test_dp21_discard_action_discard_in_window_earns_full_points():
             day=_mid_window(dp),
         )
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+    assert criterion_score(crit, entry, sig, {}, actions, schedule=_schedule()) == pytest.approx(7.0)
 
 
 def test_dp21_discard_action_wrong_channel_scores_zero():
@@ -180,13 +189,13 @@ def test_dp21_discard_action_wrong_channel_scores_zero():
             day=_mid_window(dp),
         )
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+    assert criterion_score(crit, entry, sig, {}, actions, schedule=_schedule()) == pytest.approx(0.0)
 
 
 def test_dp21_discard_action_no_call_scores_zero():
     crit, sig, dp = _criterion("DP21_DRUG_RESIDUE", "discard_action")
     entry = _entry(dp)
-    assert criterion_score(crit, entry, sig, {}, []) == pytest.approx(0.0)
+    assert criterion_score(crit, entry, sig, {}, [], schedule=_schedule()) == pytest.approx(0.0)
 
 
 def test_dp21_withdrawal_accuracy_stays_llm():
