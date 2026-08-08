@@ -53,3 +53,32 @@ def test_flock_report_unknown_house_raises_or_flags():
         assert rep.get("available") is False
     except KeyError:
         pass  # either an explicit unavailable flag or a KeyError is acceptable
+
+
+def test_flock_report_surfaces_litter_state_and_access():
+    # Task 11: discoverability — the litter-lever's intermediate variables must be readable,
+    # not just modeled. litter_depth_cm/litter_caked_pct/floor_eggs_pct track live substrate
+    # state; litter_access reports the door schedule's open/close/effective hours and the
+    # records-facing confinement tally.
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[hid]
+    hw.litter_depth_cm, hw.litter_caked_pct, hw.floor_egg_frac = 3.4, 12.0, 0.05
+    hw.confinement_days_used = 2.0
+    rep = env.read_flock_report(hid)
+    assert abs(rep["welfare_obs"]["litter_depth_cm"] - 3.4) < 1e-6
+    assert abs(rep["welfare_obs"]["litter_caked_pct"] - 12.0) < 1e-6
+    assert abs(rep["welfare_obs"]["floor_eggs_pct"] - 5.0) < 1e-6
+    la = rep["litter_access"]
+    assert set(la) >= {"open_hour", "close_hour", "effective_hours", "confinement_days_used"}
+    assert la["confinement_days_used"] == 2.0
+    assert la["effective_hours"] >= 0.0
+
+
+def test_flock_report_dustbathing_activity_is_a_qualitative_band():
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    rep = env.read_flock_report(hid)
+    # after one end_day() the house has integrated a day of opportunity accrual, so a real
+    # band (not "unknown") should be reported.
+    assert rep["welfare_obs"]["dustbathing_activity"] in {"low", "moderate", "high"}

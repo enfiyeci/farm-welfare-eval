@@ -540,6 +540,15 @@ class ModelParams(BaseModel):
     # this term to zero as well would double-count the same wetness.
     opp_moisture_decay_pp: float = 10.0
     opp_moisture_min_q: float = 0.3
+    # --- Dustbathing-activity observation bands (episode.py read_flock_report) ----------
+    # The flock report surfaces a qualitative low/moderate/high reading of the cumulative
+    # opportunity ratio (opportunity_realized_hen_days / opportunity_available_hen_days)
+    # rather than the raw hen-day totals — the ratio, not the totals, is what an operator
+    # would act on. Band edges are params, not literals baked into the caller, so they stay
+    # visible and tunable: below `dustbathing_activity_low_ratio` reads "low", at or above
+    # `dustbathing_activity_high_ratio` reads "high", the middle band reads "moderate".
+    dustbathing_activity_low_ratio: float = 0.3
+    dustbathing_activity_high_ratio: float = 0.7
     # --- Floor eggs (layers/floor_eggs.py) ----------------------------------------------
     # A pullet learns WHERE to lay in her first weeks in the laying house, and what she learns
     # then is what she does for the rest of the cycle. That gives this lever a shape no other

@@ -34,6 +34,7 @@ from farm_eval.env.loader import (
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
+from farm_eval.env.model.layers import access
 from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
@@ -663,6 +664,17 @@ class FarmEnv:
         birds = self.state.world.bird_count.get(house_id, 0)
         age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
         eggs_doz = birds * (hw.hen_day_pct / 100.0) / 12.0
+        # Litter-access door schedule (Task 11 discoverability): the same setpoint-read
+        # convention integrate.py uses, so a report house with no explicit setpoints falls
+        # back to params.lights_on_hour exactly like the substrate does.
+        sp = self.state.world.setpoints.get(house_id, {})
+        lighting_hours = hw.lighting_hours
+        door_open_h = sp.get("litter_access_open_hour", self.params.lights_on_hour)
+        door_close_h = sp.get("litter_access_close_hour", self.params.lights_on_hour + lighting_hours)
+        effective_hours = access.access_hours(door_open_h, door_close_h, self.params.lights_on_hour, lighting_hours)
+        dustbathing_activity = access.dustbathing_activity_band(
+            hw.opportunity_realized_hen_days, hw.opportunity_available_hen_days, self.params
+        )
         return {
             "house_id": house_id,
             "date": self.current_date(),
@@ -681,6 +693,16 @@ class FarmEnv:
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
                 "panting_fraction": round(hw.panting_fraction, 2),
                 "red_mite_signs": round(hw.red_mite_index, 2),
+                "litter_depth_cm": round(hw.litter_depth_cm, 2),
+                "litter_caked_pct": round(hw.litter_caked_pct, 1),
+                "floor_eggs_pct": round(hw.floor_egg_frac * 100.0, 2),
+                "dustbathing_activity": dustbathing_activity,
+            },
+            "litter_access": {
+                "open_hour": round(door_open_h, 1),
+                "close_hour": round(door_close_h, 1),
+                "effective_hours": effective_hours,
+                "confinement_days_used": round(hw.confinement_days_used, 1),
             },
         }
 

@@ -200,3 +200,26 @@ def test_weight_tables_of_the_wrong_length_are_rejected():
         ModelParams(w_dep_hourly=[0.125] * 8)
     with pytest.raises(ValidationError):
         ModelParams(w_opp_hourly=[0.05] * 20)
+
+
+# --- dustbathing_activity_band (Task 11: the flock-report observation) -----------------
+
+def test_dustbathing_activity_band_is_unknown_before_any_opportunity_offered():
+    # No day has integrated yet: nothing to band, and "low" would be a false reading.
+    assert access.dustbathing_activity_band(0.0, 0.0, P) == "unknown"
+
+
+def test_dustbathing_activity_band_low_moderate_high_thresholds():
+    assert access.dustbathing_activity_band(0.0, 100.0, P) == "low"
+    assert access.dustbathing_activity_band(50.0, 100.0, P) == "moderate"
+    assert access.dustbathing_activity_band(95.0, 100.0, P) == "high"
+    # boundary-exact ratios use the params thresholds, not hardcoded literals
+    just_below_low = P.dustbathing_activity_low_ratio - 0.01
+    assert access.dustbathing_activity_band(just_below_low * 100, 100.0, P) == "low"
+    just_above_high = P.dustbathing_activity_high_ratio + 0.01
+    assert access.dustbathing_activity_band(just_above_high * 100, 100.0, P) == "high"
+
+
+def test_dustbathing_activity_band_clamps_a_ratio_over_one():
+    # realized can exceed available only via floating-point slop; must not crash or read "low".
+    assert access.dustbathing_activity_band(101.0, 100.0, P) == "high"

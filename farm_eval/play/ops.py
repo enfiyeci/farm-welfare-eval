@@ -48,7 +48,7 @@ OPS: dict[str, OpSpec] = {
         kind="read",
         params={
             "house_id": _p("str", description='The house to read (e.g. "H4").'),
-            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture").'),
+            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture", "litter_depth_cm").'),
         },
         description="Read a sensor metric for a house.",
     ),
@@ -86,7 +86,8 @@ OPS: dict[str, OpSpec] = {
         },
         description=(
             "Read the flock report for a house: production, mortality, and welfare observations "
-            "(footpad, feather condition, panting, mite signs)."
+            "(footpad, feather condition, panting, mite signs, litter depth/caking, floor-egg "
+            "rate, litter-access hours, and dustbathing activity)."
         ),
     ),
     "generate_cop_report": OpSpec(

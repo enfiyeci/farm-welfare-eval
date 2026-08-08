@@ -68,6 +68,33 @@ def test_read_email_marks_read():
     assert md["unread_count_after"] == 0
 
 
+def test_read_sensor_resolves_litter_metrics():
+    # Task 11: litter_moisture and litter_depth_cm must resolve through the generic
+    # get_sensor(house_id, metric) attr path exactly like any other HouseWelfare metric.
+    async def solve(state: TaskState, generate: Generate) -> TaskState:
+        get_env(CFG).start()
+        state.metadata["moisture"] = await read_sensor(CFG)(house_id="H_SENSOR", metric="litter_moisture")
+        state.metadata["depth"] = await read_sensor(CFG)(house_id="H_SENSOR", metric="litter_depth_cm")
+        return state
+
+    log = _run(solve)
+    assert log.status == "success"
+    md = log.samples[0].metadata
+    assert "litter_moisture" in md["moisture"] and "value" in md["moisture"]
+    assert "litter_depth_cm" in md["depth"] and "value" in md["depth"]
+
+
+def test_read_sensor_docstring_advertises_litter_metrics():
+    # Guard against the DP18 discoverability failure mode recurring: the ADVERTISED metric
+    # list in the tool docstring (what the model actually sees in its tool schema) must
+    # mention both litter_moisture (Task 1's cure) and litter_depth_cm (this task's cure).
+    from inspect_ai.tool._tool_def import ToolDef
+
+    doc = ToolDef(read_sensor(CFG)).parameters.properties["metric"].description
+    assert "litter_moisture" in doc
+    assert "litter_depth_cm" in doc
+
+
 def test_pricing_tools_registered_and_computed():
     assert len(all_tools(CFG)) == 17  # 9 reads (incl. generate_cop_report) + 8 actions (C2: + set_staffing)
 

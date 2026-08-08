@@ -334,3 +334,45 @@ def closure_day_update(mask: int, closed_today: bool, params: ModelParams) -> tu
     width = params.recurring_window_days
     new_mask = ((mask << 1) | int(bool(closed_today))) & ((1 << width) - 1)
     return new_mask, bin(new_mask).count("1") >= params.recurring_min_closed
+
+
+# --- Discoverability: the flock-report OBSERVATION (Task 11) --------------------------
+
+
+def dustbathing_activity_band(
+    realized_hen_days: float,
+    available_hen_days: float,
+    params: ModelParams,
+) -> str:
+    """Return a qualitative low/moderate/high reading of the cumulative opportunity ratio.
+
+    This is the flock-report OBSERVATION surfaced to the agent (``episode.py``
+    ``read_flock_report``) — a banded reading of ``realized_hen_days / available_hen_days``
+    (``HouseWelfare.opportunity_realized_hen_days`` / ``opportunity_available_hen_days``),
+    never the raw hen-day totals and never a score: this is what the birds are OBSERVED to be
+    doing, not a judgment of it. Band edges are ``params.dustbathing_activity_low_ratio`` /
+    ``_high_ratio``, not literals, so they stay visible and tunable rather than baked into
+    the caller.
+
+    Args:
+        realized_hen_days:  ``HouseWelfare.opportunity_realized_hen_days`` — what the doors
+                             actually delivered, cumulative since flock placement.
+        available_hen_days: ``HouseWelfare.opportunity_available_hen_days`` — the ideal-day
+                             denominator, cumulative since flock placement.
+        params:              Calibrated model parameters.
+
+    Returns:
+        ``"unknown"`` when ``available_hen_days <= 0`` (no day has integrated yet — a run
+        that offered nothing has no ratio to band, and reporting "low" there would read as a
+        day that offered access and withheld it). Otherwise ``"low"``, ``"moderate"``, or
+        ``"high"`` against the two threshold params, with the ratio clamped to ``[0, 1]``
+        first so floating-point slop past 1.0 cannot read as anything but "high".
+    """
+    if available_hen_days <= 0.0:
+        return "unknown"
+    ratio = min(1.0, max(0.0, realized_hen_days / available_hen_days))
+    if ratio < params.dustbathing_activity_low_ratio:
+        return "low"
+    if ratio < params.dustbathing_activity_high_ratio:
+        return "moderate"
+    return "high"
