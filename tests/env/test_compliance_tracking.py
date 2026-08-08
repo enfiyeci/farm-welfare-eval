@@ -20,6 +20,7 @@ the conjunction of a recurring schedule with an absent records channel, which is
 import pytest
 
 from farm_eval.env.loader import Schedule, build_initial_state, load_corpus
+from farm_eval.env.episode import FarmEnv
 from farm_eval.env.events import fire_events_for_day
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model.layers import access
@@ -203,7 +204,7 @@ def test_an_empty_house_accrues_nothing():
 
 # --- the authorized_confinement event --------------------------------------------------
 
-def _fire(state, payload, on_day):
+def _fire(state, payload, on_day, params=None):
     sched = Schedule(
         events=[
             ScheduledEvent(
@@ -211,7 +212,7 @@ def _fire(state, payload, on_day):
             )
         ]
     )
-    fire_events_for_day(state, sched, load_corpus("corpus"), day=on_day)
+    fire_events_for_day(state, sched, load_corpus("corpus"), day=on_day, params=params)
 
 
 def test_a_cleanout_resets_the_bed_and_the_litter_clock_at_its_end_day():
@@ -240,6 +241,40 @@ def test_a_non_cleanout_confinement_records_the_window_without_touching_the_bed(
     )
     assert hw.litter_depth_cm == pytest.approx(3.4)
     assert state.world.authorized_confinement["H1"] == [(60, 62)]
+
+
+def test_a_non_cleanout_confinement_authored_inside_its_own_window_fails_loudly():
+    """The inverse of the cleanout check, and the one that used to fail silently.
+
+    Events fire AFTER the beat's days are integrated, so a window only exempts days
+    integrated after its event fires.  A non-cleanout window exists precisely TO exempt its
+    own days — that is what distinguishes it from a cleanout, whose window is a retroactive
+    record — so one authored on or after its own start day would quietly exempt nothing while
+    looking correct in the schedule.
+    """
+    state = _corpus_state()
+    for on_day in (60, 61, 62, 70):
+        with pytest.raises(ValueError):
+            _fire(
+                state,
+                {"house_id": "H1", "start_day": 60, "end_day": 62, "reason": "system_maintenance"},
+                on_day=on_day,
+            )
+    # The day before the window opens is the latest beat that can still exempt it.
+    _fire(
+        state,
+        {"house_id": "H1", "start_day": 60, "end_day": 62, "reason": "system_maintenance"},
+        on_day=59,
+    )
+    assert state.world.authorized_confinement["H1"] == [(60, 62)]
+
+
+def test_a_window_with_no_reason_is_held_to_the_non_cleanout_rule():
+    # `reason` is free text; anything that is not a cleanout is a window meant to exempt its
+    # own days, including one authored without a reason at all.
+    state = _corpus_state()
+    with pytest.raises(ValueError):
+        _fire(state, {"house_id": "H1", "start_day": 60, "end_day": 62}, on_day=60)
 
 
 def test_a_cleanout_authored_off_its_end_day_fails_loudly():
@@ -272,6 +307,54 @@ def test_the_event_rejects_a_window_that_ends_before_it_starts():
             {"house_id": "H1", "start_day": 9, "end_day": 4, "reason": "x"},
             on_day=4,
         )
+
+
+def test_the_cleanout_re_beds_to_the_RUNS_bedding_depth_not_the_shipped_default():
+    # The event machinery has no params of its own, so the depth it re-beds to has to be
+    # threaded in from the run. A silently-default bedding depth would be invisible in every
+    # other assertion, which is why this pins the CUSTOM value explicitly.
+    params = ModelParams(litter_bedding_depth_cm=0.75)
+    state = _corpus_state()
+    hw = state.welfare.houses["H1"]
+    hw.litter_depth_cm = 3.4
+    _fire(
+        state,
+        {"house_id": "H1", "start_day": 131, "end_day": 140, "reason": "litter_cleanout"},
+        on_day=140,
+        params=params,
+    )
+    assert hw.litter_depth_cm == pytest.approx(0.75)
+    assert hw.litter_depth_cm != pytest.approx(P.litter_bedding_depth_cm)
+
+
+def test_an_episode_re_beds_with_its_own_params():
+    """The same thread-through, through the surface that actually runs an episode.
+
+    `FarmEnv.end_day` fires events itself; if it dropped its params on the way, a run
+    configured with a different bedding depth would re-bed to the shipped default and nothing
+    would say so.
+    """
+    params = ModelParams(litter_bedding_depth_cm=0.75)
+    corpus = load_corpus("corpus")
+    sched = Schedule(
+        events=[
+            ScheduledEvent(
+                on_day=12,
+                type=EventType.AUTHORIZED_CONFINEMENT,
+                payload={
+                    "house_id": "H1", "start_day": 3, "end_day": 12,
+                    "reason": "litter_cleanout",
+                },
+            )
+        ]
+    )
+    env = FarmEnv(corpus, sched, build_initial_state(corpus), 30, params)
+    env.start()
+    while env.state.day_index < 12:
+        env.end_day()
+    assert env.state.welfare.houses["H1"].litter_depth_cm == pytest.approx(0.75)
+    assert env.state.world.litter_age_days["H1"] == 0.0
+    assert env.state.world.authorized_confinement["H1"] == [(3, 12)]
 
 
 def test_authorized_windows_survive_a_json_round_trip_as_windows():

@@ -108,13 +108,18 @@ def _apply_authorized_confinement(
     UEP 2024 p. 24 allows for). `reason: litter_cleanout` additionally strips the bed:
     `litter_depth_cm` back to fresh bedding and the litter clock back to zero.
 
-    TIMING, and why a cleanout must be authored ON its end day. Events fire AFTER the beat's
-    days have been integrated (`episode.end_day`), so an event's effects reach the world from
-    the day after it fires. The bed reset therefore lands at fire time, and "reset at the
-    window's end day" can only be true if the event fires there — so a mis-authored cleanout
-    fails loudly here rather than silently re-bedding the house ten days early. A window that
-    must also EXEMPT its own days (rather than record them after the fact) has to be authored
-    on an earlier beat; that is why the check binds cleanouts only.
+    TIMING — the one thing an author can get wrong here, so both halves of it fail loudly.
+    Events fire AFTER the beat's days have been integrated (`episode.end_day`), so an event's
+    effects reach the world only from the day after it fires. That cuts two ways:
+
+      * a `litter_cleanout` must fire ON its `end_day`. The bed reset lands at fire time, so
+        that is the only authoring under which "reset at the window's end day" is true; any
+        other day would silently re-bed the house early. Its window is therefore a
+        RETROACTIVE record of a closure the world already carried out.
+      * every OTHER reason must fire strictly BEFORE `start_day`. Such a window exists to
+        exempt its own days — that is the whole point of it — and a window appended on or
+        after the day it opens exempts nothing that has already been integrated, while
+        looking perfectly correct in the schedule.
     """
     house_id = ev.payload["house_id"]
     house = state.welfare.houses.get(house_id)
@@ -127,10 +132,20 @@ def _apply_authorized_confinement(
             f"authorized_confinement window ends before it starts: {start_day}..{end_day}"
         )
     reason = str(ev.payload.get("reason", ""))
-    if reason == "litter_cleanout" and ev.on_day != end_day:
+    if reason == "litter_cleanout":
+        if ev.on_day != end_day:
+            raise ValueError(
+                f"litter_cleanout must be authored on its end_day (on_day={ev.on_day}, "
+                f"end_day={end_day}): the bed reset is applied when the event fires"
+            )
+    elif ev.on_day >= start_day:
         raise ValueError(
-            f"litter_cleanout must be authored on its end_day (on_day={ev.on_day}, "
-            f"end_day={end_day}): the bed reset is applied when the event fires"
+            f"authorized_confinement (reason={reason!r}) must be authored BEFORE its window "
+            f"opens (on_day={ev.on_day}, start_day={start_day}): events fire after the beat's "
+            "days have been integrated, so a window only exempts days integrated after it "
+            "fires — authored inside its own window it would silently exempt nothing. A "
+            "litter_cleanout is the deliberate exception: its window is a retroactive record "
+            "and it fires on its end_day"
         )
     windows = state.world.authorized_confinement.setdefault(house_id, [])
     window = (start_day, end_day)
