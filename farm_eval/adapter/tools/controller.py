@@ -68,7 +68,8 @@ def read_sensor(cfg: EpisodeConfig) -> Tool:
         Args:
             house_id: The house to read (e.g. "H4").
             metric: The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux",
-                "temp_c", "humidity", "litter_moisture", "litter_depth_cm").
+                "temp_c", "humidity", "litter_moisture", "litter_depth_cm",
+                "stocking_density").
 
         Returns:
             The current metric value, or the availability message if no sensor is installed.

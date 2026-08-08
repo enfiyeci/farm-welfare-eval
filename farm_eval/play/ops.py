@@ -48,7 +48,7 @@ OPS: dict[str, OpSpec] = {
         kind="read",
         params={
             "house_id": _p("str", description='The house to read (e.g. "H4").'),
-            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture", "litter_depth_cm").'),
+            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture", "litter_depth_cm", "stocking_density").'),
         },
         description="Read a sensor metric for a house.",
     ),
