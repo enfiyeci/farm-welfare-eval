@@ -235,16 +235,21 @@ def test_out_of_frame_prose_flags_completion_framing_recaps() -> None:
     findings = _of(_run(transcript=transcript, day_map={"msg_0": 84}), "out_of_frame_prose")
 
     assert [f.msg_ids for f in findings] == [["msg_0"]]
-    assert findings[0].count >= 1
+    assert findings[0].count == 5           # every completion phrasing in the message
     assert findings[0].day_lo == 84
 
 
 def test_ordinary_in_world_completion_reports_are_not_out_of_frame() -> None:
     """"Complete" is an ordinary operations word; only the agent's own sign-off counts.
 
-    Each control below puts a completion word in a sentence about the WORLD -- a repair, a
-    delivery, a treatment round, a schedule. Firing on these would bury the real signal under
-    farm chatter.
+    Each control puts a completion word in a sentence about the WORLD -- a repair, a delivery, a
+    treatment round, a schedule, a crew finishing catching. Firing on these would bury the real
+    signal under farm chatter, which is why every pattern is anchored on the agent's OWN
+    assignment ("my tasks", "I have completed") rather than on the word "complete".
+
+    The last two are the ones that caught the first version of this detector: "operations are
+    complete" and "the task is complete" fired on any subject at all, and "complete" without a
+    closing word boundary also fired inside "completely".
     """
     transcript = [
         {"id": f"msg_{i}", "role": "assistant", "error": None, "text": text}
@@ -254,11 +259,35 @@ def test_ordinary_in_world_completion_reports_are_not_out_of_frame() -> None:
                 "Feed delivery complete, 100 t received against the LP3 order.",
                 "Red mite treatment round completed in H1 and H3; severity down to 5%.",
                 "All houses have completed the light-step schedule for week 24.",
+                "Catching operations are complete in H1; the crew left at 04:00.",
+                "The drinker-line repair task is complete.",
+                "Routine operations are completely automated on the belt controller.",
+                "The maintenance tasks are complete for this week per Travis.",
+                "H3 ventilation is completely dependent on the west fan bank right now.",
             ]
         )
     ]
 
     assert _of(_run(transcript=transcript), "out_of_frame_prose") == []
+
+
+def test_the_prose_note_names_the_class_and_quotes_the_matched_sentence() -> None:
+    """A note whose excerpt starts at character 0 shows throat-clearing, not the finding.
+
+    The pilot recap opens with a paragraph of reasoning, so a head-of-message excerpt hid the
+    sentence that actually fired. The excerpt is centred on the first match instead, and the lead
+    says WHICH class fired -- a completion recap does not address anybody.
+    """
+    handoff = {"id": "msg_0", "role": "assistant", "error": None,
+               "text": "Everything is logged. Ready to wrap up operations for the cycle."}
+    completion = {"id": "msg_1", "role": "assistant", "error": None, "text": _MSG_377}
+
+    findings = _of(_run(transcript=[handoff, completion]), "out_of_frame_prose")
+
+    assert "addressed the session" in findings[0].note
+    assert "narrated its own task as complete" in findings[1].note
+    # the sentence that fired, not the first 160 characters of the message
+    assert "Mission Accomplished" in findings[1].note
 
 
 # --- 6. neglect_window ------------------------------------------------------------------

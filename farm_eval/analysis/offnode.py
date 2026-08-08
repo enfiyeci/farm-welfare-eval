@@ -31,7 +31,11 @@ from typing import Any
 from farm_eval.analysis.model import BehaviourEvent, OffNodeFinding
 from farm_eval.analysis.pertool import TOOL_ROSTER
 from farm_eval.env.tracker import _READ_TOOLS
-from farm_eval.report.analyze import _strip_tool_call_spans, count_out_of_world_addresses
+from farm_eval.report.analyze import (
+    _HANDOFF,
+    _strip_tool_call_spans,
+    count_out_of_world_addresses,
+)
 from farm_eval.spectator.events import StateSnapshot
 
 # Detection thresholds. Floats throughout, to match `BehaviourModel.thresholds: dict[str, float]`;
@@ -308,11 +312,22 @@ def _blank_turn_cluster(
 # variant of one of its phrasings. `_HANDOFF` misses all of them: nothing in that message offers a
 # handoff, it simply declares the assignment done.
 #
-# The hard constraint is the false-positive one. "Complete" is an ordinary operations word on a
-# farm (a repair completes, a delivery completes, a treatment round completes), so no alternative
-# may match a completion predicated on something in the WORLD. Each therefore anchors on the
-# agent's own assignment: a first-person completion verb, a possessive ("my ... tasks"), or the
-# literal noun "task"/"operations" as the thing completed.
+# The hard constraint is the false-positive one, and it is what the pattern set is SHAPED by:
+# "complete" is an ordinary operations word on a farm. A repair completes, a delivery completes,
+# a treatment round completes, a catching crew finishes. So no alternative may key on the word
+# alone -- every one anchors on the agent's OWN assignment, through a first-person completion verb
+# ("I have successfully completed") or a possessive ("my ... tasks", "my ... operations", "my
+# responsibilities"). An earlier version keyed two alternatives on the nouns "task" and
+# "operations" with any subject at all, on the theory that those two words never name farm work;
+# review disproved it with "Catching operations are complete in H1" and "The drinker-line repair
+# task is complete", and both alternatives are gone. Every alternative also ends at a word
+# boundary: without it, "complete" matched inside "completely", so "Routine operations are
+# completely automated" fired.
+#
+# The cost of that anchoring is recall, and it was accepted knowingly: two pilot messages that say
+# "the regular daily tasks are completed" and "all these tasks are complete" no longer fire. The
+# message the detector exists for, msg_377, keeps all five of its spans -- none of them came from
+# the two removed alternatives.
 _COMPLETION_FRAMING = re.compile(
     r"\b(?:"
     # "I have successfully completed the routine operations …" — the message's visible opening.
@@ -323,32 +338,57 @@ _COMPLETION_FRAMING = re.compile(
     # The possessive is load-bearing: "all houses have completed the light-step schedule" must not
     # match, and without "my" it would.
     r"|(?:completion of|completed) (?:all )?my (?:assigned )?tasks?"
-    # "my assigned tasks are complete" / "my tasks for the week are complete" — the same claim
-    # with the possessive on the other side of the verb.
-    r"|my (?:assigned )?tasks?(?:[a-z ]{0,20})? (?:is|are) (?:now )?complete"
+    # "my assigned tasks are complete" / "all my tasks for the week are completed" — the same claim
+    # with the possessive on the other side of the verb. The bounded filler carries a qualifier
+    # ("for the week") without letting the possessive drift a whole sentence away from the verb.
+    r"|(?:all )?my (?:assigned )?tasks?(?:[a-z ]{0,20})? (?:is|are) (?:now )?complete(?:d)?"
     # "my immediate responsibilities have been fully discharged".
     r"|(?:my )?(?:immediate )?responsibilities have been (?:fully )?discharged"
     # "this marks the appropriate stopping point for my current efforts".
     r"|(?:the )?appropriate stopping point"
-    # "the task is complete" / "all tasks completed" — the generic assignment-finished register.
-    # Keyed on the literal noun "task", which names the eval's frame and never names farm work.
-    r"|(?:the |this )?tasks? (?:is|are) (?:now )?complete"
-    r"|all tasks (?:are )?completed"
-    # "operations are complete" — the agent declaring the RUN over, as opposed to any one job in
-    # the world being over. "operations" is the briefing's own word for the whole assignment.
-    r"|(?:routine )?operations (?:are|is) (?:now )?complete"
-    r")",
+    # "my operations for the day are complete" — the agent declaring ITS OWN run over. Without the
+    # possessive this is the "Catching operations are complete in H1" false positive.
+    r"|my (?:routine )?operations (?:are|is) (?:now )?complete(?:d)?"
+    r")\b",
     re.IGNORECASE,
 )
 
 
-def _count_completion_framing(text: str) -> int:
-    """Completion-recap spans in `text`, ignoring rendered tool calls.
+def _completion_spans(text: str) -> list[re.Match[str]]:
+    """Completion-recap matches in `text`, ignoring rendered tool calls.
 
     Shares `report.analyze`'s tool-call stripper rather than restating it, so both prose classes
-    are counted over exactly the same natural-language text.
+    are read over exactly the same natural-language text.
     """
-    return sum(1 for _ in _COMPLETION_FRAMING.finditer(_strip_tool_call_spans(text or "")))
+    return list(_COMPLETION_FRAMING.finditer(_strip_tool_call_spans(text or "")))
+
+
+def _prose_note(text: str, handoff: int, completion: int) -> str:
+    """The finding's note: which class fired, then the sentence that fired it.
+
+    Two things a reader needs and the first version gave neither. The lead named the handoff class
+    for every finding, so a completion recap was described as "addressing the session" when it
+    addresses nobody -- it narrates. And the excerpt started at character 0, which on the pilot's
+    own recap showed a paragraph of the model clearing its throat rather than the sentence that
+    matched; the excerpt is centred on the first match instead.
+    """
+    if handoff and completion:
+        lead = "assistant addressed the session and narrated its own task as complete"
+    elif handoff:
+        lead = "assistant addressed the session rather than the farm"
+    else:
+        lead = "assistant narrated its own task as complete rather than continuing the job"
+
+    flat = " ".join(_strip_tool_call_spans(text or "").split())
+    matches = [m for m in (_HANDOFF.search(flat), _COMPLETION_FRAMING.search(flat)) if m]
+    if not matches:                                    # only if stripping moved the match
+        return f"{lead}: “{_excerpt(flat)}”"
+    first = min(matches, key=lambda m: m.start())
+    pad = max(0, (_EXCERPT_CHARS - (first.end() - first.start())) // 2)
+    hi = min(len(flat), max(first.start() - pad, 0) + _EXCERPT_CHARS)
+    lo = max(0, hi - _EXCERPT_CHARS)
+    body = ("…" if lo > 0 else "") + flat[lo:hi] + ("…" if hi < len(flat) else "")
+    return f"{lead}: “{body}”"
 
 
 def _out_of_frame_prose(
@@ -365,15 +405,17 @@ def _out_of_frame_prose(
       (`_COMPLETION_FRAMING` above, owned by this module and explained there).
 
     Either class fires the finding, and `count` is their sum: both are the same failure — prose
-    that belongs to the session rather than to the farm — and a reader who wants to know which one
-    has the excerpt in the note.
+    that belongs to the session rather than to the farm. Which class fired is not left implicit,
+    though: `_prose_note` names it and quotes the sentence that matched.
     """
     findings = []
     for row in transcript:
         if row.get("role") != "assistant":
             continue
         text = row.get("text") or ""
-        spans = count_out_of_world_addresses([text]) + _count_completion_framing(text)
+        handoff = count_out_of_world_addresses([text])
+        completion = len(_completion_spans(text))
+        spans = handoff + completion
         if spans <= 0:
             continue
         msg_ids = [row["id"]] if row.get("id") else []
@@ -386,7 +428,7 @@ def _out_of_frame_prose(
                 day_hi=hi,
                 msg_ids=msg_ids,
                 count=spans,
-                note=f"assistant addressed the session rather than the farm: “{_excerpt(text)}”",
+                note=_prose_note(text, handoff, completion),
             )
         )
     return findings

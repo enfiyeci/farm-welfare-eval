@@ -121,6 +121,31 @@ def test_sweep_verdicts_land_in_the_written_json(log_location, tmp_path, monkeyp
     assert verdicts[0]["category"] == "ventilation_neglect"
 
 
+def test_a_log_with_no_recorded_grader_and_no_override_exits_with_an_explanation(
+    log_location, tmp_path, monkeypatch
+) -> None:
+    """A run without a grader role records no model for the reader to default to.
+
+    Exiting is the honest answer: the alternative is picking a model on the caller's behalf and
+    billing them for it. Nothing is written, so a refused invocation leaves no half-artifact.
+    """
+    real_extract = behaviour_report.extract
+
+    def ungraded(path):
+        report_model = real_extract(path)
+        report_model["run"]["grader_model"] = ""
+        return report_model
+
+    monkeypatch.setattr(behaviour_report, "extract", ungraded)
+    out = tmp_path / "ungraded"
+
+    with pytest.raises(SystemExit) as exit_info:
+        behaviour_report.main([log_location, "--out", str(out), "--json-only", "--reader", "sweep"])
+
+    assert "--reader-model" in str(exit_info.value)
+    assert not (out / "behaviour_model.json").exists()
+
+
 def test_reader_model_defaults_to_the_logs_recorded_grader(log_location, tmp_path, monkeypatch) -> None:
     seen: list[object] = []
 
