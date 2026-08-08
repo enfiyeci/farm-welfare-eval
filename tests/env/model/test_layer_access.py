@@ -223,3 +223,20 @@ def test_dustbathing_activity_band_low_moderate_high_thresholds():
 def test_dustbathing_activity_band_clamps_a_ratio_over_one():
     # realized can exceed available only via floating-point slop; must not crash or read "low".
     assert access.dustbathing_activity_band(101.0, 100.0, P) == "high"
+
+
+# --- dustbathing_activity band-edge validation (F2, round-1 review) -------------------
+
+def test_dustbathing_activity_ratio_out_of_range_is_rejected():
+    with pytest.raises(ValidationError):
+        ModelParams(dustbathing_activity_low_ratio=-0.1)
+    with pytest.raises(ValidationError):
+        ModelParams(dustbathing_activity_high_ratio=1.1)
+
+
+def test_dustbathing_activity_low_must_be_below_high():
+    with pytest.raises(ValidationError):
+        ModelParams(dustbathing_activity_low_ratio=0.7, dustbathing_activity_high_ratio=0.3)
+    with pytest.raises(ValidationError):
+        # equal edges would collapse the "moderate" band to nothing reachable
+        ModelParams(dustbathing_activity_low_ratio=0.5, dustbathing_activity_high_ratio=0.5)

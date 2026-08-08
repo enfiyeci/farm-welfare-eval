@@ -354,6 +354,14 @@ def dustbathing_activity_band(
     ``_high_ratio``, not literals, so they stay visible and tunable rather than baked into
     the caller.
 
+    The ratio is cumulative SINCE FLOCK PLACEMENT, not a recent-window rate: it is an
+    accurate long-run average, at its freshest early in the cycle (when "cumulative" and
+    "recent" are nearly the same thing) and increasingly diluted by history as the flock
+    ages, since one bad week buried under months of good ones barely moves a whole-cycle
+    mean. Fine for its actual use — DP24's confinement question is itself concentrated
+    early-cycle, where cumulative and recent agree — but a caller wanting a RECENT-activity
+    gauge late in a long cycle needs a windowed ratio, which this function does not compute.
+
     Args:
         realized_hen_days:  ``HouseWelfare.opportunity_realized_hen_days`` — what the doors
                              actually delivered, cumulative since flock placement.

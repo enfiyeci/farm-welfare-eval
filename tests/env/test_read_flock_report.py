@@ -3,6 +3,7 @@ from pathlib import Path
 from farm_eval.env.episode import FarmEnv
 
 FIX = Path(__file__).parent.parent / "fixtures"
+REPO = Path(__file__).parents[2]
 
 
 def _env():
@@ -82,3 +83,28 @@ def test_flock_report_dustbathing_activity_is_a_qualitative_band():
     # after one end_day() the house has integrated a day of opportunity accrual, so a real
     # band (not "unknown") should be reported.
     assert rep["welfare_obs"]["dustbathing_activity"] in {"low", "moderate", "high"}
+
+
+def test_flock_report_empty_house_reads_unknown_with_no_crash():
+    # F1 (round-1 review): H6 in the REAL corpus is the empty, mid-C&D-turnaround house
+    # (bird_count 0, lighting_hours 0.0) — integrate.py skips it entirely (integrate.py:83
+    # "empty house -- skip entirely, no harm, no div-by-zero"), so its opportunity
+    # accumulators never move off 0.0/0.0. This is exactly the F8/DP18 failure class (a
+    # metric that reads as real but is a false zero from a house nothing ever populates) —
+    # pin that read_flock_report handles it as an honest "unknown" rather than crashing or
+    # printing a misleading "low".
+    env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    env.end_day()
+    rep = env.read_flock_report("H6")
+    assert rep["house_id"] == "H6"
+    assert rep["mortality"]["birds_alive"] == 0
+    wo = rep["welfare_obs"]
+    assert wo["dustbathing_activity"] == "unknown"
+    # no crash, no division: every new field is a finite, sane number
+    for k in ("litter_depth_cm", "litter_caked_pct", "floor_eggs_pct"):
+        assert isinstance(wo[k], (int, float))
+    assert wo["floor_eggs_pct"] == 0.0  # no flock, no floor eggs
+    la = rep["litter_access"]
+    assert la["effective_hours"] == 0.0  # lighting_hours 0.0 -> no lit window to access
+    assert la["confinement_days_used"] == 0.0

@@ -751,3 +751,19 @@ class ModelParams(BaseModel):
                     f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"
                 )
         return self
+
+    @model_validator(mode="after")
+    def _validate_dustbathing_activity_bands(self):
+        # The two band edges are read as low < moderate < high by
+        # layers/access.dustbathing_activity_band; a ratio outside [0, 1] or an inverted pair
+        # would either be unreachable or silently collapse the middle band, so both fail here.
+        low, high = self.dustbathing_activity_low_ratio, self.dustbathing_activity_high_ratio
+        for name, val in (("dustbathing_activity_low_ratio", low), ("dustbathing_activity_high_ratio", high)):
+            if not (0.0 <= val <= 1.0):
+                raise ValueError(f"{name} must be in [0.0, 1.0], got {val}")
+        if not (low < high):
+            raise ValueError(
+                f"dustbathing_activity_low_ratio must be < dustbathing_activity_high_ratio, "
+                f"got {low} >= {high}"
+            )
+        return self
