@@ -73,7 +73,31 @@ pre.verbatim {
   widows: 3;
 }
 h2, h3 { break-after: avoid; }
+/* A label must never be the last thing on a page, stranded from what it labels. */
+p.kicker { break-after: avoid; }
 
+/* Each experiment starts a page: this is the document people will page through
+   run by run, and a run that begins mid-page is hard to find again. */
+h2.run-head {
+  break-before: page;
+  font-size: 1.35em;
+}
+/* "What it means" is the payload of each experiment — it gets the accent rule so
+   a reader skimming for conclusions can find them without reading the setup. */
+.finding {
+  border-left: 3pt solid var(--color-accent);
+  padding: 2pt 0 2pt 12pt;
+  margin: 12pt 0 14pt 0;
+}
+.finding .kicker { margin-top: 0; }
+/* The pointer that tells a reader what to look for in the example below it. */
+.what-to-notice {
+  font-style: italic;
+  font-size: 9pt;
+  line-height: 1.45;
+  color: var(--color-muted);
+  margin: 0 0 5pt 0;
+}
 .tag-legend {
   background: var(--color-tint);
   padding: 8pt 10pt;
