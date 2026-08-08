@@ -36,17 +36,25 @@ def test_cooling_during_heatwave_cuts_heat_hours():
 
 def test_belt_frequency_drives_litter_moisture_footpad_and_ammonia():
     # Litter moisture is now belt-driven, so footpad is an AGENT-CONTROLLABLE lever via
-    # belt_interval_days: frequent belts keep litter dry (no footpad), infrequent belts
-    # wet it up (footpad accrues). Ammonia rides the same lever (wetter litter + more
+    # belt_interval_days: frequent belts keep litter drier than infrequent belts, and the
+    # wetter house develops more lesions. Ammonia rides the same lever (wetter litter + more
     # manure accumulation → more NH3). Run long enough for the litter to relax to its
     # belt equilibrium and footpad to develop on the wet house.
-    fast = _run({"H4": {"belt_interval_days": 1}}, days=120)
-    slow = _run({"H4": {"belt_interval_days": 7}}, days=120)
+    #
+    # H4's real, authored stocking (Task 7: density loads the litter through the corrected
+    # 23.0 hens/m2 reference) is 19.1 hens/m2 -- density_factor ~0.83, BELOW the reference --
+    # so under H4's inherited 11:00-21:00 door schedule the water-peak transient no longer
+    # clears the 30% footpad threshold on either arm (it now peaks at ~29.9% on the slow arm,
+    # a hair under). The door override below is not part of what this test means to exercise;
+    # it only restores enough litter access, on BOTH arms equally, for the belt lever's own
+    # effect on footpad to be legible again.
+    fast = _run({"H4": {"belt_interval_days": 1, "litter_access_open_hour": 9.0}}, days=120)
+    slow = _run({"H4": {"belt_interval_days": 7, "litter_access_open_hour": 9.0}}, days=120)
     f = fast.welfare.houses["H4"]
     s = slow.welfare.houses["H4"]
     # Frequent belts → drier litter than infrequent belts.
     assert f.litter_moisture < s.litter_moisture
-    # Dry (frequent-belt) house stays footpad-free; wet (infrequent-belt) house develops lesions.
+    # Frequent belts → measurably less footpad than infrequent belts.
     fp_fast = f.footpad_mild_pct + f.footpad_severe_pct
     fp_slow = s.footpad_mild_pct + s.footpad_severe_pct
     assert fp_fast < fp_slow

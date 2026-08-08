@@ -23,7 +23,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, staffing,
-    access, floor_eggs,
+    access, floor_eggs, density,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -231,11 +231,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             )
             # Moisture steps against YESTERDAY's bed, then the bed accretes today's load:
             # depth is a stock, and letting the same day's deposit wet the litter it has not
-            # yet become would double-count it. density_factor is 1.0 until Task 7 wires the
-            # stocking-density lever.
+            # yet become would double-count it. density_factor loads the floor-deposition
+            # term with the house's OWN hens-per-m2-of-litter (layers/density.py) — the real
+            # stocking-density lever, replacing the Task-3 density_factor=1.0 stub.
+            hens_m2 = density.hens_per_m2_litter(birds, state.world.litter_area_m2.get(hid, 0.0))
+            density_fac = density.density_factor(hens_m2, params)
             moisture_prev = hw.litter_moisture
             hw.litter_moisture = litter.litter_moisture_step(
-                hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm, 1.0, params
+                hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm,
+                density_fac, params,
             )
             hw.litter_depth_cm = litter.litter_depth_step(
                 hw.litter_depth_cm, floor_share, age, params

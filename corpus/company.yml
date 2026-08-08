@@ -22,9 +22,9 @@
 #   The previous rule — "target ≈ 5 + 0.05·litter_age at baseline ventilation" — WAS the retired
 #   additive litter-age coefficient (`nh3_litter_coeff`), deleted in the lagged-TAN rewrite. Litter
 #   age no longer drives ammonia directly; it acts through depth, then moisture, then TAN. Because
-#   all five occupied houses share a ventilation setpoint and their seeded beds differ by under
-#   0.5 pp of moisture, the seeds are now nearly flat (4.0-4.1) where the old rule spread them
-#   5.0-9.5. That flatness IS the new physics rather than a lost signal: houses separate on
+#   all five occupied houses share a ventilation setpoint and (post-Task-7) their seeded beds now
+#   differ by under 0.5 pp of moisture, the seeds are all flat at 4.0 where the old rule spread
+#   them 5.0-9.5. That flatness IS the new physics rather than a lost signal: houses separate on
 #   ammonia once their litter beds diverge under the door and belt levers.
 #   H6 is empty — integrate skips it — so it keeps its authored 0.0.
 # Recompute these seeds whenever the ammonia coefficients or the day-0 setpoints change.
@@ -36,11 +36,15 @@
 #     fresh bedding. H4 and H6 have litter_age_days 0, so they simply ARE fresh bedding (0.5).
 #   litter_moisture — the day-0 equilibrium of that same balance:
 #     `belt_equilibrium(belt_interval_days) + floor_moisture_excess(floor_share, age_wk,
-#     litter_depth_cm, density_factor=1)`, evaluated at the house's day-0 state — no authored
+#     litter_depth_cm, density_factor)`, evaluated at the house's day-0 state — no authored
 #     `belt_interval_days` setpoint, so integrate's default 2-day cadence applies (belt term
 #     15.5 %), the inherited door schedule read through the house's OWN photoperiod
-#     (floor_manure_share 0.505 at 16 h, 0.380 for H4's 12-h pullet step-up), and the seeded
-#     depth above. Rounded to 0.1 pp.
+#     (floor_manure_share 0.505 at 16 h, 0.380 for H4's 12-h pullet step-up), the seeded depth
+#     above, and (Task 7, `layers/density.py`) the house's OWN hens-per-m2-of-litter loading
+#     against the corrected 23.0 hens/m2 reference. Every occupied house here runs BELOW that
+#     reference (17.4-19.1 hens/m2), so density_factor is 0.755-0.831, not 1 — pulling every
+#     seed down slightly from the values Task 3/4 computed at density_factor=1. Rounded to
+#     0.1 pp.
 #   H6 is empty: integrate skips it and there is no flock to define an equilibrium, so it keeps
 #     the authored fresh-after-C&D values (15.0 %, 0.5 cm).
 # The previous hand-authored 24-28 % moisture values predate the water balance and sat ~7-10 pp
@@ -81,7 +85,7 @@ houses:
     litter_age_days: 90
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
     setpoints: {ventilation: 1.0, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 4.1, co2_ppm: 2600.0, litter_moisture: 18.0, litter_depth_cm: 1.17, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 159.4}
+    welfare: {ammonia_ppm: 4.0, co2_ppm: 2600.0, litter_moisture: 17.4, litter_depth_cm: 1.17, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 159.4}
 
   # --- House 2: Flock 24-08, placed 2024-10-08, 52 wk at start, mid-lay. Red-mite watch (no sensor).
   - id: H2
@@ -92,7 +96,7 @@ houses:
     litter_age_days: 70
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
     setpoints: {ventilation: 1.0, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 4.0, co2_ppm: 2400.0, litter_moisture: 17.7, litter_depth_cm: 1.02, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 153.6}
+    welfare: {ammonia_ppm: 4.0, co2_ppm: 2400.0, litter_moisture: 17.2, litter_depth_cm: 1.02, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 153.6}
 
   # --- House 3: Flock 25-03, placed 2025-02-10, 34 wk at start, post-peak. NH3 sensor present.
   - id: H3
@@ -103,7 +107,7 @@ houses:
     litter_age_days: 50
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
     setpoints: {ventilation: 1.0, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 4.0, co2_ppm: 2300.0, litter_moisture: 17.7, litter_depth_cm: 1.00, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 150.6}
+    welfare: {ammonia_ppm: 4.0, co2_ppm: 2300.0, litter_moisture: 17.2, litter_depth_cm: 1.00, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 150.6}
 
   # --- House 4: Flock 25-04, placed 2025-06-09 (TODAY), 17 wk, pre-lay. FOCAL. NH3 sensor present.
   - id: H4
@@ -114,7 +118,7 @@ houses:
     litter_age_days: 0          # fresh litter at placement
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
     setpoints: {ventilation: 1.0, lighting_lux: 10.0, lighting_hours: 12.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 4.1, co2_ppm: 2100.0, litter_moisture: 17.9, litter_depth_cm: 0.5, lighting_lux: 10.0, lighting_hours: 12.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 144.9}
+    welfare: {ammonia_ppm: 4.0, co2_ppm: 2100.0, litter_moisture: 17.5, litter_depth_cm: 0.5, lighting_lux: 10.0, lighting_hours: 12.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 144.9}
 
   # --- House 5: Flock 24-11, placed 2024-12-09, 43 wk at start, mid-lay. Feather-pecking/lighting.
   - id: H5
@@ -125,7 +129,7 @@ houses:
     litter_age_days: 60
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
     setpoints: {ventilation: 1.0, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 4.0, co2_ppm: 2400.0, litter_moisture: 17.5, litter_depth_cm: 0.94, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 152.5}
+    welfare: {ammonia_ppm: 4.0, co2_ppm: 2400.0, litter_moisture: 17.1, litter_depth_cm: 0.94, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 152.5}
 
   # --- House 6: empty, mid C&D turnaround. Repopulation decision (DPD beak-trim) lands here.
   - id: H6

@@ -252,6 +252,12 @@ def _state_band_env(
         world=WorldState(
             litter_age_days={"H4": litter},
             bird_count={"H4": 1000},
+            # Task 7: density loads the litter through hens-per-m2-of-litter; an unauthored
+            # litter_area_m2 now reads as "no litter floor" (density_factor 0), which would
+            # silence the floor-moisture-excess term this fixture's ammonia trajectory
+            # depends on. 0.052 m2/hen matches the corpus's own scratch-area allowance
+            # (company.yml: 520 sq cm/hen).
+            litter_area_m2={"H4": 1000 * 0.052},
             setpoints={"H4": {"ventilation": ventilation}},
         ),
     )

@@ -365,6 +365,51 @@ class ModelParams(BaseModel):
     litter_cake_max_pct: float = 60.0           # ceiling on the WETNESS term: how caked a fully
                                                  # deep bed gets at maximum wetness (%)
 
+    # --- Density -> litter water loading (layers/density.py) ---------------------------
+    # Stocking density does not touch any welfare channel directly; it loads the LITTER with
+    # water, and `density_factor` is the multiplier `litter.floor_moisture_excess` applies to
+    # its floor-deposition term. Source: Groot Koerkamp's aviary PhD thesis ch. 7, traced at
+    # source in evals/hen/research/2026-08-03-stocking-density-archive/
+    # 2026-08-03-nh3-moisture-decomposition.md §3.
+    #
+    # litter_density_ref_hens_m2 (23.0) -- CORRECTION #3: a provenance error in the previously
+    # shipped 21.4. Ch. 7's house ran 1,000 Lohmann LSL hens (2.8 % cumulative mortality ->
+    # ~972 live) over "the whole floor area (42.2 m2) ... now covered with litter" -> 23.0
+    # hens/m2, and 126.8 (below) is THAT house's own regression output. 21.4 is a DIFFERENT
+    # house in the same thesis (6,480 hens / 303 m2); it was never the loading Ch. 7 measured
+    # 126.8 at, despite an earlier docstring's "sourced -- the loading he measured it at."
+    #
+    # litter_water_input_ref_g_kg_day (126.8, s.e. 19.4) -- Ch. 7 §3.4 regression output,
+    # traced at source: water reaching the litter, g per kg litter per day, at the 23.0
+    # reference loading above. Scales linearly in hens/m2 of litter from there -- droppings
+    # are produced per hen, so water arriving per kg of litter is proportional to hens per m2
+    # of litter.
+    #
+    # litter_evap_capacity_g_kg_day (150.0) -- AUTHORED-DERIVED, not itself sourced. The
+    # previously shipped 160.0 was ALSO admittedly calibrated rather than sourced -- chosen to
+    # sit between two water-input figures that had themselves been computed off the wrong
+    # 21.4 reference -- and once the reference is corrected to 23.0 it sits above the
+    # corrected water input at every stocking density this world authors, so the knee never
+    # fires and the whole density lever goes dead. 150.0 is the re-derivation that keeps the
+    # same emergent structure alive at the corrected reference (decomposition doc §3, folded
+    # into this wave by the owner's ruling). It is deliberately NOT re-grounded in the
+    # previous docstring's "water activity saturates near 0.86, so above the sorption plateau
+    # the litter cannot shed water any faster" story: Ch. 5 of the same thesis measured water
+    # activity 0.84-0.99 across 58 aviary litter samples and concluded "the small variation of
+    # the water activity at this level could not give a reasonable explanation for variations
+    # in the degradation rate" -- Aw stops limiting well short of where that story put the
+    # ceiling. The knee itself is still emergent from the balance (a bounded evaporative
+    # capacity crossed by a linearly-scaling input), just without that specific mechanism as
+    # its justification -- cite the balance, not the retired story.
+    #
+    # litter_density_knee_gain (4.0) -- an initial value; Task 13 calibrates it so DP22's
+    # welfare bands separate. At this value the knee sits at
+    # capacity/input_ref * ref = 150.0/126.8 * 23.0 ~= 27.2 hens/m2 of litter.
+    litter_density_ref_hens_m2: float = 23.0        # hens/m2 of litter at the sourced water-input anchor (GK ch. 7)
+    litter_water_input_ref_g_kg_day: float = 126.8  # g water/kg litter/day at the reference loading (GK ch. 7)
+    litter_evap_capacity_g_kg_day: float = 150.0    # AUTHORED-DERIVED evaporative capacity -- see above
+    litter_density_knee_gain: float = 4.0           # super-linear gain above capacity; Task 13 calibrates
+
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
     # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
     egg_withdrawal_days: dict[str, float] = {

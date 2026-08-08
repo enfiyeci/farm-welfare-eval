@@ -97,6 +97,14 @@ def _state(fte, shift_hours=None, birds=100_000, age_wk=30.0, belt_interval_days
     state.world.bird_count["H1"] = birds
     state.world.age_weeks_at_start["H1"] = age_wk
     state.world.litter_age_days["H1"] = 0.0
+    # Task 7: density loads the litter through hens-per-m2-of-litter, so a fixture that
+    # never authors litter_area_m2 reads as "no litter floor" and the density factor (and
+    # therefore the whole floor-moisture-excess term below) goes to 0 -- a stronger silence
+    # than this suite intends. 0.052 m2/hen is the corpus's own scratch-area allowance
+    # (company.yml: "125k-hen nameplate x 520 sq cm/hen"), scaled to whatever `birds` this
+    # fixture is given so the belt/footpad couplings below stay comparable across the birds
+    # override used elsewhere in this file.
+    state.world.litter_area_m2["H1"] = birds * 0.052
     state.world.setpoints["H1"] = {"belt_interval_days": belt_interval_days}
     state.market.egg_price_usd_doz = 2.0
     state.market.layer_ration_usd_ton = 300.0
@@ -208,7 +216,11 @@ def test_degradation_at_1_5_fte_raises_footpad_and_ammonia_after_enough_days():
     from farm_eval.env.model.integrate import integrate
 
     p = ModelParams()
-    days = 120  # enough for litter moisture to relax toward its (stretched) equilibrium
+    # Task 7 (real density_factor at H1's authored ratio, ~0.83 of the corrected reference)
+    # slows the bed's approach to its stretched equilibrium enough that 120 days no longer
+    # clears the footpad onset on the half-staffed arm; 200 does, with the full-staffed arm
+    # still short of it.
+    days = 200
     full_state = _state(fte=p.staffing_adequacy_full_fte, belt_interval_days=3)
     half_state = _state(fte=1.5, belt_interval_days=3)
 
