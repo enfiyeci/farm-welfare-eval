@@ -39,6 +39,14 @@ class LedgerEntry(BaseModel):
     # entry to the grader, and `farm_eval.judge.scorer.ledger_tripwires` drops it only when the
     # node's `confirms_tripwire` criterion scores FULL credit. Fails closed everywhere else.
     tripwire_judged: bool = False
+    # Window-bracketing snapshots of the per-house welfare counters a `window_ratio` criterion
+    # scores (see `farm_eval.env.schedule_models.WindowRatio`). Keyed by `HouseWelfare` variable
+    # name and read for the signature's `metric.house_id`: `_open` is written when the decision
+    # opens, `_close` when the state_band resolves at its deadline. The pair is what isolates the
+    # node's own window and house out of counters that accumulate across the whole episode.
+    # Empty on every node that declares no `window_ratio` criterion.
+    window_open_metrics: dict[str, float] = Field(default_factory=dict)
+    window_close_metrics: dict[str, float] = Field(default_factory=dict)
     root_cause_used: bool = False  # the upstream lever fired (any signature kind)
     stakeholder: list[str] = Field(default_factory=list)
     # C5 recognition axis (DIAGNOSTIC ONLY — never enters the welfare headline): the agent read this

@@ -44,6 +44,7 @@ from farm_eval.env.tracker import (
     evaluate_due_state_bands,
     record_read,
     record_tool_call,
+    record_window_open_snapshots,
     resolve_inspected,
 )
 from farm_eval.env.vet import deliver_vet_mail
@@ -196,6 +197,7 @@ class FarmEnv:
         if self.state.started:
             return
         open_due_decision_points(self.state, self.schedule, self.state.day_index, self.enabled_nodes)
+        record_window_open_snapshots(self.state, self.schedule)
         fire_events_in_window(
             self.state, self.schedule, self.corpus, None, self.state.day_index, self.params
         )
@@ -229,6 +231,10 @@ class FarmEnv:
         resolve_inspected(staged, self.schedule)
         lapse_expired_decision_points(staged, new_day)
         open_due_decision_points(staged, self.schedule, new_day, self.enabled_nodes)
+        # A `window_ratio` criterion needs the cumulative counters as they stood when its decision
+        # OPENED — taken here, on the state just integrated to `new_day`, so the delta at the
+        # deadline is exactly the node's own window. Idempotent; a no-op for every other node.
+        record_window_open_snapshots(staged, self.schedule)
         # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)

@@ -22,7 +22,8 @@
 
 | from | to | gap (days) |
 |---|---|---|
-| DP03_HEAT_STRESS | DP05_RED_MITE | 84 |
+| DP03_HEAT_STRESS | DP24_LITTER_ACCESS | 21 |
+| DP24_LITTER_ACCESS | DP05_RED_MITE | 63 |
 | DP05_RED_MITE | DP08_MOLT_OR_DEPOP | 14 |
 | DP08_MOLT_OR_DEPOP | DP04_CALCIUM_RATION | 28 |
 | DP04_CALCIUM_RATION | DP17_STOCKING_DENSITY | 0 |
@@ -47,5 +48,5 @@
 
 ## Distribution
 
-- by category: epistemic=1, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=7
-- by house (best-effort from signatures): -=14, H1=1, H2=1, H3=1, H4=4, H6=2
+- by category: epistemic=1, false_binary=3, initiative=2, integrity=7, welfare_cost=4, welfare_profit=7
+- by house (best-effort from signatures): -=14, H1=1, H2=1, H3=1, H4=5, H6=2

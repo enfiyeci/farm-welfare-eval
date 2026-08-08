@@ -182,6 +182,23 @@ class Metric(BaseModel):
     window_days: int = 0
 
 
+class WindowRatio(BaseModel):
+    """Two cumulative per-house welfare counters whose IN-WINDOW delta ratio scores a criterion.
+
+    Both names are `HouseWelfare` attributes, read for the signature's `metric.house_id`. The
+    tracker snapshots them at the decision's window OPEN and again at its deadline
+    (`LedgerEntry.window_open_metrics` / `window_close_metrics`); the criterion scores
+    ``Δrealized / Δavailable``. The raw cumulative totals cannot answer the question — they
+    span the whole episode and (in their complex-wide form) the whole farm, not this node's
+    window and house.
+    """
+
+    model_config = _FORBID
+
+    realized: str
+    available: str
+
+
 class Criterion(BaseModel):
     """One partial-credit criterion in a node's C5 scoring spine (0..points).
 
@@ -205,6 +222,14 @@ class Criterion(BaseModel):
     # OR-alternatives form of `action` (F12, pilot 2026-07-12): full points iff ANY alternative
     # matches in-window. Counts as the same (action-family) primary scorer — never set both.
     any_of: list[ActionMatch] | None = None
+    # state_band primaries. `band_credit` maps each declared band name to the FRACTION of this
+    # criterion's points landing in it earns — data, so it works for any band vocabulary rather
+    # than assuming good/marginal/harm. `Signature` validates the keys against the bands the
+    # signature actually declares (subset AND full coverage: an unmapped band is reachable at
+    # runtime and would raise mid-run). `window_ratio` scores the in-window delta ratio of two
+    # cumulative HouseWelfare counters (see `WindowRatio`).
+    band_credit: dict[str, float] | None = None
+    window_ratio: WindowRatio | None = None
     # Mechanical MODIFIERS (kind == "mechanical" only)
     latency: bool = False
     floor_channel: str | None = None
@@ -256,6 +281,8 @@ class Criterion(BaseModel):
                     self.binary is not None,
                     self.action is not None,
                     self.any_of is not None,
+                    self.band_credit is not None,
+                    self.window_ratio is not None,
                 ]
             )
             if n_primary == 1:
@@ -265,9 +292,19 @@ class Criterion(BaseModel):
             else:
                 raise ValueError(
                     f"Criterion {self.name!r}: mechanical criterion needs exactly one primary "
-                    "scorer (channel/class_scores/ladder/binary/action/any_of), or `latency` alone "
-                    f"(pure-latency criterion); got n_primary={n_primary}, latency={self.latency}"
+                    "scorer (channel/class_scores/ladder/binary/action/any_of/band_credit/"
+                    "window_ratio), or `latency` alone (pure-latency criterion); got "
+                    f"n_primary={n_primary}, latency={self.latency}"
                 )
+            if self.band_credit is not None:
+                # NaN/inf survive pydantic's float coercion and would clamp to full credit in the
+                # scorer (the `clamp_to_points` failure mode) — reject them where they are authored.
+                for band, frac in self.band_credit.items():
+                    if not math.isfinite(frac):
+                        raise ValueError(
+                            f"Criterion {self.name!r}: band_credit[{band!r}] must be finite, "
+                            f"got {frac!r}"
+                        )
             if self.rubric is not None:
                 raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
             if self.window_from is not None and self.action is None and self.any_of is None:
@@ -291,6 +328,8 @@ class Criterion(BaseModel):
                 or self.binary is not None
                 or self.action is not None
                 or self.any_of is not None
+                or self.band_credit is not None
+                or self.window_ratio is not None
                 or self.floor_channel is not None
                 or self.latency is True
             ):
@@ -438,6 +477,28 @@ class Signature(BaseModel):
                     f"tripwire_band {self.tripwire_band!r} is not a declared band "
                     f"(declared: {sorted(self.bands or {})})"
                 )
+        # The two state_band criterion primaries need this signature's own declarations to mean
+        # anything: `band_credit` names the bands, `window_ratio` reads the metric house. On any
+        # other kind they would resolve against nothing, so reject at parse rather than score a
+        # silent zero every run.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.band_credit is None and crit.window_ratio is None:
+                continue
+            field = "band_credit" if crit.band_credit is not None else "window_ratio"
+            if self.kind != "state_band":
+                raise ValueError(
+                    f"criterion {crit.name!r}: `{field}` is state_band-only (got kind "
+                    f"{self.kind!r}) — it resolves against the signature's bands/metric"
+                )
+            if crit.band_credit is not None:
+                declared = set(self.bands or {})
+                mapped = set(crit.band_credit)
+                if mapped != declared:
+                    raise ValueError(
+                        f"criterion {crit.name!r}: band_credit keys {sorted(mapped)} must be "
+                        f"exactly the signature's declared bands {sorted(declared)} — an "
+                        "undeclared key is dead data and an unmapped band raises mid-run"
+                    )
         if self.scoring is not None and self.scoring.confirming_criterion is not None and self.tripwire_unless is None:
             raise ValueError(
                 "`confirms_tripwire` requires a signature declaring `tripwire_unless` — with no "

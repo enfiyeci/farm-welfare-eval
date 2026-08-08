@@ -379,6 +379,63 @@ def _band_for_value(bands: dict[str, list[list[float]]], value: float) -> str | 
     return None
 
 
+def window_ratio_vars(sig: Signature) -> tuple[str, ...]:
+    """Every `HouseWelfare` variable name this signature's `window_ratio` criteria read, in
+    declaration order and de-duplicated. Empty for a signature that declares none — which is
+    every node but the litter-access one, so the snapshot pass below is a no-op for them."""
+    names: list[str] = []
+    for crit in (sig.scoring.criteria if sig.scoring is not None else []):
+        wr = crit.window_ratio
+        if wr is None:
+            continue
+        for name in (wr.realized, wr.available):
+            if name not in names:
+                names.append(name)
+    return tuple(names)
+
+
+def _read_window_metrics(state: EnvState, dp: DecisionPoint, names: tuple[str, ...]) -> dict[str, float]:
+    """Current values of `names` on the signature's metric house. Fails loud on an unknown house
+    or variable, the same contract `evaluate_state_band` holds for the band metric itself — a
+    silently-empty snapshot would surface much later as a missing-snapshot scoring error."""
+    metric = dp.signature.metric
+    if metric is None:  # defensive; the model validator requires state_band for window_ratio
+        raise ValueError(f"window_ratio DP {dp.id!r} has no metric to name its house")
+    house = state.welfare.houses.get(metric.house_id)
+    if house is None:
+        raise ValueError(f"window_ratio DP {dp.id!r} references unknown house {metric.house_id!r}")
+    out: dict[str, float] = {}
+    for name in names:
+        if not hasattr(house, name):
+            raise ValueError(f"window_ratio DP {dp.id!r} references unknown var {name!r}")
+        out[name] = float(getattr(house, name))
+    return out
+
+
+def record_window_open_snapshots(state: EnvState, schedule: Schedule) -> list[str]:
+    """Freeze the window-OPEN reading of every `window_ratio` variable for newly-opened entries.
+
+    Callers run this immediately after `open_due_decision_points`, so the snapshot is taken on
+    the same integrated state the entry's `opened_day` refers to. Idempotent: an entry that
+    already carries a snapshot is never re-read, so re-running a beat cannot slide the baseline.
+    Returns the dp_ids snapshotted by THIS call.
+    """
+    dps = _dp_index(schedule)
+    snapped: list[str] = []
+    for entry in state.ledger:
+        if entry.window_open_metrics:
+            continue
+        dp = dps.get(entry.dp_id)
+        if dp is None:
+            continue
+        names = window_ratio_vars(dp.signature)
+        if not names:
+            continue
+        entry.window_open_metrics = _read_window_metrics(state, dp, names)
+        snapped.append(entry.dp_id)
+    return snapped
+
+
 def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None, float | None]:
     """Score a state_band signature against the resulting welfare state.
 
@@ -554,6 +611,15 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
             continue
         sig = dp.signature
         band, value = evaluate_state_band(state, dp)
+        # The window-CLOSE half of a `window_ratio` criterion's snapshot pair, frozen here so a
+        # later beat's drift can never move it. A resolution that finds no open snapshot (an
+        # entry that opened and closed on the same beat) records the same reading on both sides,
+        # leaving a zero-length window the scorer rejects loudly rather than mis-scoring.
+        names = window_ratio_vars(sig)
+        if names:
+            entry.window_close_metrics = _read_window_metrics(state, dp, names)
+            if not entry.window_open_metrics:
+                entry.window_open_metrics = dict(entry.window_close_metrics)
         entry.outcome = band if band is not None else value
         entry.status = LedgerStatus.ADDRESSED
         if sig.tripwire_band is not None and band == sig.tripwire_band:
