@@ -327,6 +327,13 @@ RUNS: list[tuple[str, dict | None, list]] = [
     # never loads the litter either — the perverse-incentive check.
     ("CONFINER: doors shut @d42 + belt 7", {"belt_interval_days": 7.0},
      _door_acts(TRAINING_ENDS, DOORS_SHUT, FOCAL)),
+    # --- in-window management through the OTHER branches of the lever. The scored action
+    #     criterion carries the same four shapes as root_cause, so a run that manages the
+    #     litter through the doors or the belt setpoint earns its points and its latency. ---
+    ("DOORS-ONLY @d196: doors opened at the window open, nothing else", None,
+     _door_acts(196, DOORS_FULL, FOCAL)),
+    ("BELT-SETPOINT-ONLY @d196: belt to daily at the window open, no service call", None,
+     [(196, "adjust_setpoint", {"house_id": FOCAL, "system": "belt_interval_days", "value": 1.0})]),
     # --- resolution of the door-open middle: where does the belt lever bite? -------------
     ("doors full (5-21 @d42) · belt 3", {"belt_interval_days": 3.0},
      _door_acts(TRAINING_ENDS, DOORS_FULL, FOCAL)),

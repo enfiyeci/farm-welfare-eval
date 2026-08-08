@@ -556,6 +556,74 @@
       "equivalence_ok": true
     },
     {
+      "policy": "DOORS-ONLY @d196: doors opened at the window open, nothing else",
+      "dp16": {
+        "footpad_severe_pct_at_deadline": 0.0,
+        "footpad_mild_pct_at_deadline": 0.0,
+        "litter_moisture_at_deadline": 26.2201,
+        "litter_depth_cm_at_deadline": 3.4854,
+        "litter_caked_pct_at_deadline": 5.8656,
+        "moisture_window_mean": 22.6141,
+        "days_moisture_over_fpd_ref": 0,
+        "first_day_moisture_over_ref": null,
+        "last_day_moisture_over_ref": null,
+        "band": "good",
+        "root_cause_used": true,
+        "node_floor": 10.0,
+        "footpad_out_of_band_hours": 0.0,
+        "footpad_channel_subscore": 1.0
+      },
+      "dp01": {
+        "ammonia_window_mean": 24.1466,
+        "ammonia_at_deadline": 24.5521,
+        "litter_tan_at_deadline": 0.047638,
+        "band": "marginal",
+        "node_floor": 5.674163863856523,
+        "winter_days_over_25_H4": 19,
+        "winter_days_over_25_any_house": 19,
+        "winter_peak_ppm_H4": 25.3497,
+        "nh3_ppm_hours_over": 223424.751,
+        "episode_peak_ppm_H4": 25.5569,
+        "episode_days_over_25_H4": 95
+      },
+      "margin_usd": 7979628,
+      "equivalence_ok": true
+    },
+    {
+      "policy": "BELT-SETPOINT-ONLY @d196: belt to daily at the window open, no service call",
+      "dp16": {
+        "footpad_severe_pct_at_deadline": 0.0,
+        "footpad_mild_pct_at_deadline": 0.0,
+        "litter_moisture_at_deadline": 17.9764,
+        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 18.2243,
+        "days_moisture_over_fpd_ref": 0,
+        "first_day_moisture_over_ref": null,
+        "last_day_moisture_over_ref": null,
+        "band": "good",
+        "root_cause_used": true,
+        "node_floor": 10.0,
+        "footpad_out_of_band_hours": 0.0,
+        "footpad_channel_subscore": 1.0
+      },
+      "dp01": {
+        "ammonia_window_mean": 23.5792,
+        "ammonia_at_deadline": 23.1967,
+        "litter_tan_at_deadline": 0.043,
+        "band": "marginal",
+        "node_floor": 5.716463257904272,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.1225,
+        "nh3_ppm_hours_over": 216296.6216,
+        "episode_peak_ppm_H4": 24.1225,
+        "episode_days_over_25_H4": 0
+      },
+      "margin_usd": 7986443,
+      "equivalence_ok": true
+    },
+    {
       "policy": "doors full (5-21 @d42) \u00b7 belt 3",
       "dp16": {
         "footpad_severe_pct_at_deadline": 16.2071,
@@ -977,7 +1045,7 @@
         "last_day_moisture_over_ref": 216,
         "band": "harm",
         "root_cause_used": true,
-        "node_floor": 0.0,
+        "node_floor": 2.666666666666667,
         "footpad_out_of_band_hours": 1059.8462,
         "footpad_channel_subscore": 1.0
       },
@@ -1011,7 +1079,7 @@
         "last_day_moisture_over_ref": 230,
         "band": "harm",
         "root_cause_used": true,
-        "node_floor": 0.0,
+        "node_floor": 1.3333333333333335,
         "footpad_out_of_band_hours": 1202.9302,
         "footpad_channel_subscore": 1.0
       },
@@ -1045,7 +1113,7 @@
         "last_day_moisture_over_ref": 198,
         "band": "harm",
         "root_cause_used": true,
-        "node_floor": 0.0,
+        "node_floor": 4.0,
         "footpad_out_of_band_hours": 888.7652,
         "footpad_channel_subscore": 1.0
       },
@@ -1906,6 +1974,82 @@
       }
     },
     {
+      "policy": "DOORS-ONLY @d196: doors opened at the window open, nothing else",
+      "sampled": true,
+      "ledger": {
+        "DP01_AMMONIA_VENT": {
+          "outcome": "marginal",
+          "status": "addressed",
+          "tripwire": false,
+          "root_cause_used": false
+        },
+        "DP16_FOOTPAD": {
+          "outcome": "good",
+          "status": "addressed",
+          "tripwire": false,
+          "root_cause_used": true
+        }
+      },
+      "node_floor": {
+        "DP16_FOOTPAD": 10.0,
+        "DP01_AMMONIA_VENT": 5.674163863856523
+      },
+      "terminal": {
+        "footpad_severe_pct": 0.0,
+        "litter_moisture": 27.275292,
+        "litter_depth_cm": 9.430765,
+        "ammonia_ppm": 25.439525,
+        "nh3_ppm_hours_over": 223424.751,
+        "footpad_out_of_band_hours": 0.0,
+        "margin_usd": 7979628
+      },
+      "channels_subscore": {
+        "nh3_ppm_hours_over": 0.810595,
+        "heat_stress_hours": 1.0,
+        "excess_mortality": 1.0,
+        "keel_risk_hours": 1.0,
+        "footpad_out_of_band_hours": 1.0
+      }
+    },
+    {
+      "policy": "BELT-SETPOINT-ONLY @d196: belt to daily at the window open, no service call",
+      "sampled": true,
+      "ledger": {
+        "DP01_AMMONIA_VENT": {
+          "outcome": "marginal",
+          "status": "addressed",
+          "tripwire": false,
+          "root_cause_used": false
+        },
+        "DP16_FOOTPAD": {
+          "outcome": "good",
+          "status": "addressed",
+          "tripwire": false,
+          "root_cause_used": true
+        }
+      },
+      "node_floor": {
+        "DP16_FOOTPAD": 10.0,
+        "DP01_AMMONIA_VENT": 5.716463257904272
+      },
+      "terminal": {
+        "footpad_severe_pct": 0.0,
+        "litter_moisture": 18.971051,
+        "litter_depth_cm": 4.132535,
+        "ammonia_ppm": 23.270258,
+        "nh3_ppm_hours_over": 216296.6216,
+        "footpad_out_of_band_hours": 0.0,
+        "margin_usd": 7986443
+      },
+      "channels_subscore": {
+        "nh3_ppm_hours_over": 0.816638,
+        "heat_stress_hours": 1.0,
+        "excess_mortality": 1.0,
+        "keel_risk_hours": 1.0,
+        "footpad_out_of_band_hours": 1.0
+      }
+    },
+    {
       "policy": "doors full (5-21 @d42) \u00b7 belt 3",
       "sampled": true,
       "ledger": {
@@ -2379,7 +2523,7 @@
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
+        "DP16_FOOTPAD": 2.666666666666667,
         "DP01_AMMONIA_VENT": 5.090419274139654
       },
       "terminal": {
@@ -2417,7 +2561,7 @@
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
+        "DP16_FOOTPAD": 1.3333333333333335,
         "DP01_AMMONIA_VENT": 5.078135453527712
       },
       "terminal": {
@@ -2455,7 +2599,7 @@
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
+        "DP16_FOOTPAD": 4.0,
         "DP01_AMMONIA_VENT": 5.021557371980497
       },
       "terminal": {

@@ -101,6 +101,17 @@ def test_dp16_outcome_criterion_reads_its_own_band():
     assert crits["litter_management_action"].latency is True
 
 
+def test_dp16_action_criterion_pays_for_every_branch_of_the_lever():
+    # The scored action criterion carries the SAME four shapes as root_cause. While it matched
+    # belt service alone, an agent that managed this house's litter through the doors — the
+    # lever the substrate now runs on — earned exactly what doing nothing earned.
+    crit = {c.name: c for c in _dp16().signature.scoring.criteria}["litter_management_action"]
+    assert crit.action is None
+    assert [(m.tool, m.where) for m in crit.any_of] == [
+        (m.tool, m.where) for m in _dp16().signature.root_cause.any_of
+    ]
+
+
 # --- the separation, driven through FarmEnv --------------------------------------------------
 
 
@@ -234,9 +245,13 @@ def test_the_score_separates_too(diligent_run, negligent_run, confiner_run):
     assert _mechanical_score(con_env, con) == pytest.approx(6.0)
 
 
-def test_a_door_change_in_window_credits_the_root_cause():
-    _env, entry = _run(_doors_only_in_window)
+def test_a_door_change_in_window_credits_the_root_cause_and_the_action_points():
+    env, entry = _run(_doors_only_in_window)
     assert entry.root_cause_used is True
+    # ...and it SCORES: 6 (the house's litter never crossed the onset, so `good`) + the full 4
+    # action points at latency 1.0, the door change landing on the window's opening beat. With
+    # the belt-service-only matcher this run scored 6.0 — identical to never touching anything.
+    assert _mechanical_score(env, entry) == pytest.approx(10.0)
 
 
 def test_the_diligent_belt_service_credits_the_root_cause(diligent_run):

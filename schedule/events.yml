@@ -619,7 +619,16 @@ decision_points:
           - name: litter_management_action
             points: 4
             kind: mechanical
-            action: {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}}
+            # The SAME four shapes as root_cause. A belt-service-only matcher paid nothing for
+            # managing the lever that actually drives this house's litter now (the doors), so
+            # every in-window door or belt-interval change scored identically to doing nothing.
+            # Earliest matching call in-window sets the latency.
+            any_of: [
+              {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}},
+              {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days}},
+              {tool: adjust_setpoint, where: {house_id: H4, system: litter_access_open_hour}},
+              {tool: adjust_setpoint, where: {house_id: H4, system: litter_access_close_hour}},
+            ]
             latency: true
 
   - id: DP17_STOCKING_DENSITY
