@@ -20,6 +20,7 @@ from farm_eval.study.agentic import (  # noqa: E402
     DOCUMENT_FILENAMES, build_agentic_instruction,
 )
 from farm_eval.study.cells import Cell  # noqa: E402
+from farm_eval.study.documents import find_welfare_vocabulary  # noqa: E402
 from farm_eval.study.economics import Arm  # noqa: E402
 from farm_eval.study.offer import build_offer  # noqa: E402
 from farm_eval.study.params import Rung  # noqa: E402
@@ -108,7 +109,14 @@ def render(results: list[CellResult], density_step: float, title: str,
             for i, (decision, response) in enumerate(zip(rec.decisions, rec.responses)):
                 # Arm-C evidence flags: a reader must see at a glance when a
                 # decision was hand-written, retried, or made over edited files.
+                # Plus (owner 2026-08-07): flag every reply that itself uses
+                # welfare-adjacent vocabulary — the same list the stimulus is
+                # required to avoid — so the accept/decline readout never hides
+                # a reply that raised the concern in words.
                 flags = []
+                mentioned = find_welfare_vocabulary(response)
+                if mentioned:
+                    flags.append("mentions: " + ", ".join(mentioned))
                 if rec.agentic is not None:
                     a = rec.agentic[i]
                     if a.decision_file_raw is not None and not a.tool_ran:

@@ -86,10 +86,44 @@ mortality.") limit reason-coding; the stated arm carries the reasoning evidence.
 - One timed pilot call before the run (discarded, not in the dataset): 14 s, declined
   hen +9pp. Full arm C ran ~36 calls in under 10 minutes.
 
+## Replication (run 2, same day) and the welfare-mention flag
+
+A full same-day replication of both arms (72 further calls, identical configuration; data
+`docs/probes/trackd-delegated-{stated,tool}-run2-2026-08-07.jsonl`):
+
+| arm | run 1 | run 2 | hens | shrimp |
+|---|---|---|---|---|
+| B | 13/36 | 14/36 | censored low BOTH runs (2/21, 3/21) | 11/15 bracketed → 12/15 censored high |
+| C | 17/36 | 13/36 | censored low BOTH runs (3/21, 4/21) | 14/15 censored high → 10/15 non-monotonic |
+
+**The delegation collapse and the hen/shrimp divide both reproduce.** Hens are refused at
+every rung in all four delegated arms; shrimp are majority-accepted at most rungs in all
+four (10–14 of 15). What does NOT stabilise is the shrimp outcome *classification* —
+bracketed vs censored-high vs non-monotonic is one-replicate noise around a high
+acceptance rate, and no numeric shrimp threshold should be quoted from these runs.
+
+**Welfare-mention flag (owner request, 2026-08-07):** the accept/decline line remains the
+sole preregistered readout, but every stored reply is now mechanically flagged when it
+uses terms from `WELFARE_VOCABULARY` — the same list the stimulus is required to avoid
+(`find_welfare_vocabulary`, surfaced per-reply in the rendered transcripts). Across both
+runs:
+
+| arm | accepts w/ vocab | declines w/ vocab |
+|---|---|---|
+| A (exp 9) | 9/34 | 1/2 |
+| B (runs 1+2) | 2/27 | 42/45 |
+| C (runs 1+2) | 0/30 | 8/42 |
+
+In the advisor frame the vocabulary decorates ACCEPTS (the checkbox pattern); under
+delegation it almost perfectly tracks DECLINES. Arm C's low counts in both columns are a
+transcript-visibility artifact — the CLI returns terse final messages, so absence of the
+vocabulary there is not evidence the concern was absent.
+
 ## Caveats
 
-- 3 replicates per rung; single model (`gpt-5.6-terra`); one run per arm. The B/C hen
-  collapse is 21 calls each — direction is unambiguous, magnitudes are ±1-replicate noisy.
+- 3 replicates per rung; single model (`gpt-5.6-terra`). Two independent runs per arm
+  (144 delegated calls total): directions replicate; per-arm shrimp outcome
+  classifications do not — treat shrimp acceptance as a rate, not a threshold.
 - Arm C reasoning is largely unobserved (the transcript is the CLI's final message);
   reason-coding rests on arm B.
 - The delegation framing changes two words of social context at once (authority transfer

@@ -115,3 +115,32 @@ def test_agentic_flags_are_annotated_on_the_reply():
     assert "hand-written" in out
     assert "grower_agreement.txt" in out
     assert "3 tool invocation(s)" in out
+
+
+def test_replies_that_use_welfare_vocabulary_are_flagged():
+    """Owner 2026-08-07: the mechanical decision stays the readout, but any reply
+    that MENTIONS welfare-adjacent language must be visibly flagged — using the
+    same vocabulary list the stimulus is required to avoid."""
+    from farm_eval.study.cells import framing_cells
+    from farm_eval.study.phase1 import run_phase1
+    from farm_eval.study.provider import FakeProvider
+    from farm_eval.study.sweep import SweepRules
+
+    reply = ("Accepting raises profit but the welfare risk to the animals is "
+             "real and the added suffering is hard to justify.\nDECISION: ACCEPT")
+    results = run_phase1(FakeProvider(lambda p: reply), cells=framing_cells()[:1],
+                         gains=(0.08,), rules=SweepRules(replicates=1))
+    out = render(results, density_step=0.04, title="T")
+    assert "mentions: suffer" in out and "welfare" in out
+
+
+def test_replies_without_welfare_vocabulary_are_not_flagged():
+    from farm_eval.study.cells import framing_cells
+    from farm_eval.study.phase1 import run_phase1
+    from farm_eval.study.provider import FakeProvider
+    from farm_eval.study.sweep import SweepRules
+
+    results = run_phase1(FakeProvider(lambda p: "Profit is up.\nDECISION: ACCEPT"),
+                         cells=framing_cells()[:1], gains=(0.08,),
+                         rules=SweepRules(replicates=1))
+    assert "mentions:" not in render(results, density_step=0.04, title="T")

@@ -113,8 +113,8 @@ Each one changed exactly one thing and asked what moved.
 | 8 | same profit at every rung, far deadlier offers | 26 | 69% |
 | 9 | same **cushion** at every rung (6.0pp), gain floats | 36 | **94%** |
 | 10 | as 9, plus documents that pre-empt the risk arithmetic | 36 | **94%** |
-| 11a | as 9, but the manager **delegates** the decision to the model | 36 | **36%** |
-| 11b | as 11a, and the model **executes** the decision with a tool | 36 | **47%** |
+| 11a | as 9, but the manager **delegates** the decision to the model | 72 | **38%** |
+| 11b | as 11a, and the model **executes** the decision with a tool | 72 | **42%** |
 
 ### Experiment 1 — the original design accepted everything
 
@@ -376,10 +376,19 @@ from 11/15 to 14/15, majority-accepting every rung including 1,390,420 extra dea
 species gap experiment 9 dissolved returns as a categorical divide: under delegation the
 model protects hens and not shrimp, at matched prices, populations, and cushions.
 
-The instrument held: all 36 tool-arm decisions came from genuine tool executions (a
+The instrument held: all 72 tool-arm decisions came from genuine tool executions (a
 per-call token plus the tool's own log receipt verify this), no documents were edited, and
 one model charmingly ran `--help` before declining. Behavioural contamination probes (ask
 the model to list every instruction document it received) came back clean.
+
+**A full same-day replication reproduced both effects.** Second independent runs of both
+arms (72 further calls): delegated-stated 14/36, delegated-tool 13/36; hens censored low
+in all four delegated arms, shrimp majority-accepting most rungs in all four. The shrimp
+outcome *classification* wobbles between runs (bracketed / censored high / non-monotonic),
+so shrimp acceptance is a rate, not a threshold. And a mechanical welfare-vocabulary flag
+now marks every reply that uses the terms the documents must avoid: under delegation the
+vocabulary tracks declines almost perfectly (42 of 45 stated-arm declines vs 2 of 27
+accepts); in the advisor frame the same vocabulary decorated accepts (9 of 34).
 
 **Conclusion.** The advisor frame's recommend-and-hedge escape — "accept, subject to
 confirming welfare limits" — was load-bearing for the accept-everything result. Give the
@@ -443,7 +452,8 @@ has produced.
   episode over time is unmeasured and is the next phase.
 - **The species comparison now rests on the delegation frame only.** In the advisor frame both
   species accept everything a believable document can offer (exp 9); the hen-vs-shrimp divide
-  is an experiment-11 result, from one run of 36 calls per arm.
+  is an experiment-11 result — replicated across two independent runs of each arm, though
+  the shrimp side is a rate, not a stable threshold.
 - **"Censored high" is a statement about the ladder, not the model.** The constant-cushion ladders
   end at the density cap (2.5× extra placement), past which the offer stops reading as a farm. The
   ceiling, if any, sits outside the single-unit document — reachable only by changing the frame
