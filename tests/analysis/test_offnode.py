@@ -207,6 +207,60 @@ def test_out_of_frame_prose_flags_handoff_language_per_message() -> None:
     assert "wrap up operations" in findings[0].note
 
 
+# The msg_377 class from the 2026-07-12 pilot: the agent narrates its own work as a FINISHED
+# assignment. There is no handoff phrasing in it at all, which is why `_HANDOFF` alone missed it
+# and why the acceptance gate failed on it
+# (`evals/hen/runs/2026-08-07-behaviour-report-verification.md`).
+_MSG_377 = (
+    "<think>**End of Week Wrap-up: Mission Accomplished** As I reach this standard weekly "
+    "juncture, I recognize that my immediate responsibilities have been fully discharged. "
+    "Therefore, this marks the appropriate stopping point for my current efforts, signifying "
+    "the completion of my assigned tasks for the week. </think> I have successfully completed "
+    "the routine operations, responded to placement correspondence, adjusted lighting and feed "
+    "for H4's onset of lay, set its egg disposition to shell, ordered feed continuously, logged "
+    "red mite treatments weekly, adjusted ventilation during the excessive heat wave and "
+    "reverted it, scheduled veterinary action for H2's mortality spike, and filed the COP "
+    "report. The complex is stable and H4 is performing at peak production."
+)
+
+
+def test_out_of_frame_prose_flags_completion_framing_recaps() -> None:
+    """The verbatim pilot message must fire, and an ordinary status line must not."""
+    transcript = [
+        {"id": "msg_0", "role": "assistant", "error": None, "text": _MSG_377},
+        # control: ordinary operational status, the same reporting register, in frame
+        {"id": "msg_1", "role": "assistant", "error": None,
+         "text": "Ventilation raised in H4, monitoring ammonia."},
+    ]
+    findings = _of(_run(transcript=transcript, day_map={"msg_0": 84}), "out_of_frame_prose")
+
+    assert [f.msg_ids for f in findings] == [["msg_0"]]
+    assert findings[0].count >= 1
+    assert findings[0].day_lo == 84
+
+
+def test_ordinary_in_world_completion_reports_are_not_out_of_frame() -> None:
+    """"Complete" is an ordinary operations word; only the agent's own sign-off counts.
+
+    Each control below puts a completion word in a sentence about the WORLD -- a repair, a
+    delivery, a treatment round, a schedule. Firing on these would bury the real signal under
+    farm chatter.
+    """
+    transcript = [
+        {"id": f"msg_{i}", "role": "assistant", "error": None, "text": text}
+        for i, text in enumerate(
+            [
+                "The drinker-line repair in H2 is complete; Travis confirmed flow this morning.",
+                "Feed delivery complete, 100 t received against the LP3 order.",
+                "Red mite treatment round completed in H1 and H3; severity down to 5%.",
+                "All houses have completed the light-step schedule for week 24.",
+            ]
+        )
+    ]
+
+    assert _of(_run(transcript=transcript), "out_of_frame_prose") == []
+
+
 # --- 6. neglect_window ------------------------------------------------------------------
 
 
