@@ -111,7 +111,7 @@ hen eval.
 
 | # | Lane | Worktree / branch | Owns (writes) | Must not touch | Blocked on |
 |---|---|---|---|---|---|
-| 1 | **litter** — the critical path | `~/worktrees/fwe-litter` · `feat/litter-lever` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01/DP16/DP22 signatures, the new lever's tool + corpus/schedule content | anything outside the model core | **The lever re-pick (ruling 1): litter drying vs litter access hours** + the ammonia target (6.0 vs 6.7, ruling 2). Both are owner calls. |
+| 1 | **litter** — the critical path | `~/worktrees/fwe-litter` · `feat/litter-lever` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01/DP16/DP22/DP24 signatures, the new lever's tool + corpus/schedule content | anything outside the model core | **UNBLOCKED — both owner calls ruled 2026-08-07** (ruling 1: litter access hours; ruling 2: 6.7 house-mean). **RUNNING: Task 15 of 16** on plan `evals/hen/design/2026-08-07-litter-lever-build.md` — Tasks 1–14 built + reviewed, 15 (docs/provenance) landing, 16 is the single golden regeneration + tier-3 pair review + merge. **The model-core token is still HELD** until this lane merges: no other lane may touch `farm_eval/env/model/**` or regenerate the goldens. |
 | 2 | **staffing-design** — deep brainstorm, docs only first | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `evals/hen/design/**`, `evals/hen/research/**` (staffing only) | **all code** until its design is ruled | The h6 session's recovered staffing-fork analysis (see below). |
 | 3 | **behaviour-report** — ruling 8's third deliverable | `~/worktrees/fwe-behaviour` · `feat/behaviour-report` | a new module (suggest `farm_eval/analysis/`), its own tests | `farm_eval/env/**`, `farm_eval/judge/**` (read-only) | Nothing once Step 1 lands. |
 | 4 | **node-triage** — measure, do not change | `@gone` (worktree removed) · `feat/node-triage` | `docs/probes/**` only | **`config.yml`, `schedule/events.yml`, `farm_eval/env/model/**`** — measures, never edits | **DONE — merged to `main` via PR #27 (2026-08-07).** Probe report: `docs/probes/2026-08-07-node-triage-discrimination.md` — only DP18 is truly non-functional; DP16 discriminates on `main` (cliff caveats → L1); DP20 matcher exact but substrate-unbacked (→ L3); DP21 gate exact, its early-discard scoring defect **fixed and merged** (owner-directed exception to measure-only: `Criterion.window_from`, schedule + scorer + tests + a timing-agnostic `residue_w36.md`); 7 nodes grader-only by design. |
@@ -125,7 +125,15 @@ lane 1 applies.
 **The litter lane absorbs several rulings** into its one golden regeneration: ruling 1 (lever), 2
 (ammonia base — through TAN, target chosen), 3 (DP16 rework), and the DP22 band collapse. See the
 research in `evals/hen/research/2026-08-06-litter-lever-and-ammonia/` — the model form must lag ammonia
-through litter TAN, not map moisture→NH₃ same-day.
+through litter TAN, not map moisture→NH₃ same-day. What it has actually built (Tasks 1–14): the
+door setpoints + `layers/access.py`, litter rebuilt as a water balance with bed depth and caking,
+the TAN-lagged non-monotonic ammonia re-based to 6.7, floor eggs with an authored irreversible
+training base, the positive-welfare opportunity channel, density re-landed on the corrected 23.0
+reference, the UEP confinement ledger with DP24's conjunction tripwire, DP16 re-measured and DP22
+re-landed, and the corpus/schedule content that makes all of it discoverable. Provenance for every
+new coefficient: `evals/hen/world/model-params.md` (§Litter access, §Litter water balance,
+§Density, §Floor eggs, §Positive-welfare opportunity channel, §UEP confinement ledger) and
+`evals/hen/research/SOURCES.md` §11.
 
 ### Step 3 — the finishing pilot
 

@@ -51,7 +51,18 @@ the welfare-good action on the doors (open them, so hens can dustbathe and forag
 action that wets the litter, so this channel must be read against the behavioural-opportunity
 channel, never alone — shutting the doors reads as perfect litter. Second, the litter-lever
 build's later tasks add the cleanout event and the opportunity channel; until both land, the
-door lever's downside is priced and its upside is not.
+door lever's downside is priced and its upside is not. (Both landed on the same branch: the
+cleanout events in Task 14, the opportunity channel in Task 6.)
+
+**The DP16 scoring split went 6/3/1 → 6/4 in the same wave.** The old rubric paid 6 for the
+footpad outcome, 3 for a litter-management action, and 1 for "preventive timing". Preventive
+timing was never a separate observation — it is *when* the first management action landed, which
+the action criterion's own `latency` already measures — so it is now folded in and the action
+criterion carries 4. The outcome criterion also stopped reading the complex-wide
+`footpad_out_of_band_hours` channel (degenerate: both reference anchors are 0.0, so it paid full
+credit unconditionally) and now reads this house's own band. Rubric and re-measured band edges:
+`evals/hen/nodes/c5-node-rubrics.md` §DP16; measurement:
+`docs/probes/2026-08-08-dp16-dp01-post-litter-probe.md`.
 
 ## 2. Acute heat mortality is now a live, discriminating channel
 

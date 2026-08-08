@@ -67,12 +67,16 @@ class ModelParams(BaseModel):
     # within-house spatial structure and no published bird-level-to-exhaust ratio is robust
     # enough to correct with (within-house CV 16 +/- 10 %), so no correction factor is applied.
     #
-    # nh3_litter_share: the fraction of the base emission that is litter-sourced, i.e. how far
-    # the litter term can move ammonia.  Calibrated on Oliveira et al. 2019's full-versus-
-    # part-access contrast (17.2 vs 13.5 ppm, the part-time arm 21.5 % lower) with each arm
-    # carrying its own bed.  The remainder is belt-sourced and rides f_MAT.
+    # nh3_litter_share: a DEVIATION GAIN, not a share -- despite the name.  It multiplies
+    # (litter_term - 1), i.e. how far the bed has moved FROM the calibration state, not a
+    # fraction of the emission: at the operating point litter_term is exactly 1.0 and the litter
+    # adds nothing on top of belt_mult, because the litter's contribution AT that state is
+    # already inside nh3_target_base.  Reading 0.34 as "34 % of this house's ammonia is
+    # litter-sourced" is wrong (corrected 2026-08-08; model-params.md, the Ammonia section).
+    # Calibrated on Oliveira et al. 2019's full-versus-part-access contrast (17.2 vs 13.5 ppm,
+    # the part-time arm 21.5 % lower) with each arm carrying its own bed.
     nh3_target_base: float = 3.37       # ppm at the CSES operating point documented above
-    nh3_litter_share: float = 0.34      # litter-sourced fraction of the base emission
+    nh3_litter_share: float = 0.34      # gain on the litter term's departure from calibration
     nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
     nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C

@@ -320,7 +320,13 @@ so all three bands are reachable in one lever's normal range.
   (should an untouched H4 run at 24 ppm all winter?), not a band question, and it is the same
   question Task 4's review flagged. If the answer is "the baseline should sit lower", the fix
   is `nh3_target_base`, not the band edge.
-- **The litter doors move DP01 across its edge.** Opening H4's doors takes the window mean from
+- **The litter doors move DP01 across its edge.** ⚠️ **CLOSED BY v2 — v1-only, do not carry this
+  forward.** On the authored world (with the cleanouts) the same act moves the window mean
+  23.95 → **24.18, i.e. +0.23 ppm**, both readings marginal, winter days 0 → 0: the cleanouts
+  absorb the extra litter load and this cross-node tension essentially disappears. See
+  §MEASUREMENT v2 → "DP01 — re-checked on the authored world", drift consequence 1. The v1
+  measurement is preserved below.
+  Opening H4's doors takes the window mean from
   24.13 to 25.59 and the winter days over 25 ppm from 0 to 90 — the DP24-compliant act flips
   DP01's band from marginal to harm. The band flip is loud; the **score** impact is not
   (DP01's outcome criterion reads the smoothly-normalized NH₃ channel, so the node floor moves

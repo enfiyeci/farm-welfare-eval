@@ -88,9 +88,10 @@ def floor_moisture_excess(
         age_wk:         Flock age in weeks — carries the water-flow curve.
         depth_cm:       Current bed depth; a shallow bed contributes little even under a
                         heavy load, and the term saturates at ``litter_depth_deep_ref``.
-        density_factor: Hens per m2 of litter relative to the reference (Task 7 wires the
-                        real lever; 1.0 until then).  A clean multiplier by construction —
-                        water load per m2 is (hens/m2) x (g water/hen/day) reaching the floor.
+        density_factor: Hens per m2 of litter relative to the reference, from
+                        ``layers/density.density_factor``.  A clean multiplier by
+                        construction — water load per m2 is (hens/m2) x (g water/hen/day)
+                        reaching the floor — and it is 1.0 at the reference loading.
         params:         Calibrated model parameters.
     """
     return (
