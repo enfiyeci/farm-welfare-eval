@@ -193,13 +193,23 @@ def validate_reply_refs(corpus: Corpus) -> None:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 
 
-def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
+def build_initial_state(
+    corpus: Corpus, seed: int = 0, params: "ModelParams | None" = None
+) -> EnvState:
+    # `params` is the run's OWN coefficients, not a fresh default set. Day 0 is loaded here and
+    # integrated elsewhere, and both have to speak the same rules: this function freezes the
+    # floor-egg base of every pre-placed flock and seeds the day-0 training counters, so a run
+    # that overrides a floor-egg coefficient and got a default `ModelParams()` here would
+    # initialize under one calibration and then integrate under another (Codex tier-3 straight
+    # review, S2). `None` builds the defaults, which is what every caller that has no params of
+    # its own wants.
+    #
     # Deferred, like the pricing import below: the model package imports state, and the
     # floor-egg freeze needs both the layer and its coefficients.
     from farm_eval.env.model.params import ModelParams
     from farm_eval.env.model.layers import floor_eggs
 
-    params = ModelParams()
+    params = params if params is not None else ModelParams()
     company = corpus.company
     welfare = WelfareState()
     world = WorldState()

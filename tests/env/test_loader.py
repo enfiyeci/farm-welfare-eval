@@ -112,6 +112,33 @@ def test_an_occupied_house_with_authored_litter_area_m2_loads_fine():
     assert state.world.litter_area_m2["H_TEST"] == 52.0
 
 
+def test_the_initial_state_is_built_under_the_run_s_own_params():
+    """A run that overrides a coefficient must LOAD under it, not only integrate under it.
+
+    `build_initial_state` freezes day-0 state that reads `ModelParams` — the floor-egg base of
+    every pre-placed flock, and the day-0 training counters. It used to construct a default
+    `ModelParams()` of its own, while `FarmEnv.from_paths` applied the caller's overrides only
+    afterwards: a custom-params run initialized under one set of rules and then integrated under
+    another (Codex tier-3 straight review, S2). The default path is unchanged — `params=None`
+    still builds the defaults.
+    """
+    from farm_eval.env.episode import FarmEnv
+    from farm_eval.env.model import ModelParams
+
+    custom = ModelParams(floor_egg_base_trained=0.01)
+    env = FarmEnv.from_paths(
+        REPO / "corpus", REPO / "schedule", episode_end_day=1, params=custom
+    )
+    # H1 was placed before day 0 under the inherited morning closure, so its base is frozen at
+    # load to the TRAINED anchor — the coefficient this run overrode.
+    assert env.state.welfare.houses["H1"].floor_egg_frac_base == pytest.approx(0.01)
+
+    default_env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", episode_end_day=1)
+    assert default_env.state.welfare.houses["H1"].floor_egg_frac_base == pytest.approx(
+        ModelParams().floor_egg_base_trained
+    )
+
+
 def test_load_corpus_keys_documents_by_path_relative_to_documents_dir(tmp_path):
     # The authored schedule references body_refs as subpaths (e.g. "emails/placement_d0.md").
     # load_corpus must walk documents/ recursively and key each file by its path relative to

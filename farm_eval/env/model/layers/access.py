@@ -298,9 +298,20 @@ def is_closed_day(
     hours, exactly as ``floor_eggs.morning_closed`` reads its boundary off the setpoint
     (Codex fix round 1, F2).
 
-    A house with the lights off (``lighting_hours`` 0) has no lit window to lose and is never
-    a closure day; in practice such a house is empty and the integrator skips it anyway.
+    Below ``params.closure_photoperiod_floor_h`` the house is a closure day BY DEFINITION,
+    whatever the doors say: a house run that dark is confining its birds by darkness, and the
+    span comparison alone cannot see it. Measuring access against the house's own lit window is
+    what makes a correct pullet step-up compliant, and it is also what an agent can turn against
+    the ledger — at a 1-hour photoperiod the whole lit window fits inside ``closure_epsilon_h``,
+    so doors that never overlap the lights at all read as a full-access day (Codex tier-3
+    adversarial finding A1; the rationale and the numbers are in the ModelParams block).
+
+    A house with the lights off (``lighting_hours`` 0) is therefore a closure day too rather
+    than the exemption it used to be; in practice such a house is empty and the integrator skips
+    it before ever asking (``integrate.py``: ``birds <= 0`` continues).
     """
+    if lighting_hours < params.closure_photoperiod_floor_h:
+        return True
     return open_lit_span_h(open_h, close_h, lights_on, lighting_hours) < (
         lit_span_h(lights_on, lighting_hours) - params.closure_epsilon_h
     )

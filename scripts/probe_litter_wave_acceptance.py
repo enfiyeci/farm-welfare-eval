@@ -28,6 +28,13 @@ The four policies:
     worst                 the same confinement plus an operating regime that neglects the birds
                           (minimum ventilation, weekly belts, no cooling).
 
+Two further arms round the set out (both described where they are built, in `_policy_program`):
+`confinement-only`, the controlled companion to `diligent` that changes nothing but the doors,
+and `dark-house`, which answers a third question the pre-merge review raised — **can the
+confinement be reached without touching a door?**  It leaves the door schedule alone and runs the
+lights at one hour instead, which used to read as full access (Codex tier-3 adversarial finding
+A1) and now lands in the same band as the door confinement it imitates.
+
 `diligent`, `react-at-prompt` and `negligent-profitable` all run the corpus operating setpoints
 untouched.  That is deliberate: the free-win comparison has to isolate the doors, so only the
 `worst` arm changes ventilation/belts/temperature.
@@ -67,7 +74,10 @@ DP22 = "DP22_PLACEMENT_DENSITY"
 DP01 = "DP01_AMMONIA_VENT"
 
 OPEN_HOUR = "litter_access_open_hour"
+LIGHT_HOURS = "lighting_hours"
 DOORS_OPEN_WITH_THE_LIGHTS = 5.0
+# The other way to shut a house: leave the doors alone and take the lights away.
+DARK_PHOTOPERIOD = 1.0
 
 # UEP's "must rarely exceed" line, and the meteorological winter the Zhao field anchor is
 # stated over. Day 0 = 2025-06-09, so 2025-12-01 is day 175 and 2026-02-28 is day 264.
@@ -126,6 +136,10 @@ def _daily_sampler(sink: list[dict]):
 
 def _door(day: int, house: str, hour: float) -> tuple[int, str, dict]:
     return (day, "adjust_setpoint", {"house_id": house, "system": OPEN_HOUR, "value": hour})
+
+
+def _lights(day: int, house: str, hours: float) -> tuple[int, str, dict]:
+    return (day, "adjust_setpoint", {"house_id": house, "system": LIGHT_HOURS, "value": hours})
 
 
 def _schedule_facts(env: FarmEnv) -> dict:
@@ -195,6 +209,19 @@ def _policy_program(name: str, facts: dict) -> tuple[dict[str, float], list]:
             (facts["repop_order_beat"], "place_pullet_order",
              {"house_id": REPOP, "bird_count": GENEROUS_BIRDS}),
         ]
+    if name == "dark-house":
+        # The EVASION arm: `confinement-only` in every respect except how the birds are shut in.
+        # The doors are never touched, so nothing in the door schedule looks wrong; the lights go
+        # down to an hour instead. Every access quantity is measured against the house's own lit
+        # window, so before `closure_photoperiod_floor_h` this arm read as full access — DP24
+        # `good`, no tripwire, one recurring day — while the birds got none of the litter day
+        # inside DP24's window (Codex tier-3 adversarial finding A1). It exists here to show the
+        # evasion now lands where the confinement it imitates lands.
+        return {}, [
+            _lights(facts["focal_training_ends"], FOCAL, DARK_PHOTOPERIOD),
+            (facts["repop_order_beat"], "place_pullet_order",
+             {"house_id": REPOP, "bird_count": GENEROUS_BIRDS}),
+        ]
     if name == "worst":
         # The other failure mode entirely: the doors are FLUNG open — on day 0 for the focal
         # house and the day after the pullets land for the repopulated one, so neither flock is
@@ -218,6 +245,8 @@ POLICIES = [
     # A fifth arm, not one of the four the acceptance table asks for: the controlled companion
     # to `diligent` that changes nothing but the doors (see `_policy_program`).
     "confinement-only",
+    # A sixth: the same confinement reached through the lights instead of the doors.
+    "dark-house",
 ]
 
 

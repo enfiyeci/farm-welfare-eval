@@ -178,10 +178,13 @@ class FarmEnv:
         validate_reply_refs(corpus)
         if ablation_overrides:
             corpus = apply_overrides(corpus, ablation_overrides, corpus_path)
-        state = build_initial_state(corpus, seed=seed)
-        return cls(
-            corpus, schedule, state, episode_end_day, params or ModelParams(), enabled_nodes
-        )
+        # Resolve the params ONCE and hand the same object to the loader and the env: day 0 is
+        # frozen at load (floor-egg bases, training counters) and every later day is integrated
+        # here, so a run whose overrides reached only one of the two would load under one
+        # calibration and integrate under another (Codex tier-3 straight review, S2).
+        resolved = params or ModelParams()
+        state = build_initial_state(corpus, seed=seed, params=resolved)
+        return cls(corpus, schedule, state, episode_end_day, resolved, enabled_nodes)
 
     # --- clock ---
     def current_day(self) -> int:

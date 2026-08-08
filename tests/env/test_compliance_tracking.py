@@ -97,6 +97,32 @@ def test_a_short_photoperiod_is_measured_against_its_own_lit_window():
     assert access.is_closed_day(*INHERITED, LIGHTS_ON, PHOTOPERIOD_12, P) is True
 
 
+def test_a_dark_house_is_a_closure_day_however_wide_its_doors_stand():
+    """The photoperiod floor: below it, the doors cannot buy the house out of the ledger.
+
+    Measuring access against the house's OWN lit window (the test above) is right for a real
+    lighting program and wrong for a house run dark: at `lighting_hours` 1.0 the lit window is
+    one hour, so an epsilon of one hour makes EVERY door schedule compliant — including doors
+    that never overlap the lights at all.  `closure_photoperiod_floor_h` closes that: under the
+    floor the house is confined by darkness whatever the doors say.
+    """
+    for lighting_hours in (0.5, 1.0, 7.9):
+        for doors in (FULL_ACCESS, INHERITED, (0.0, 24.0), (21.0, 11.0)):
+            assert access.is_closed_day(*doors, LIGHTS_ON, lighting_hours, P) is True, (
+                doors, lighting_hours
+            )
+
+
+def test_the_floor_leaves_every_real_photoperiod_where_it_was():
+    # At and above the floor the predicate is the span comparison and nothing else — the 8-h
+    # boundary itself, H4's 12-h step-up and the 16-h adult window all read exactly as before.
+    for lighting_hours in (8.0, PHOTOPERIOD_12, PHOTOPERIOD_16):
+        assert access.is_closed_day(
+            LIGHTS_ON, LIGHTS_ON + lighting_hours, LIGHTS_ON, lighting_hours, P
+        ) is False
+        assert access.is_closed_day(*INHERITED, LIGHTS_ON, lighting_hours, P) is True
+
+
 # --- closure_day_update: the recurring detector ----------------------------------------
 
 def test_a_single_closed_day_is_not_recurring():

@@ -638,6 +638,24 @@ class ModelParams(BaseModel):
     # the records-facing figure a flock report shows, and the scored quantity is the recurring
     # SCHEDULE. (Written up in evals/hen/world/model-params.md §UEP confinement ledger.)
     closure_epsilon_h: float = 1.0
+    # closure_photoperiod_floor_h: the photoperiod below which a house counts as confined no
+    # matter what its doors are doing. AUTHORED: below roughly eight lit hours an occupied layer
+    # house is functionally dark, and UEP's continual-access clause presumes a working
+    # photoperiod — access to a litter area the birds cannot see or use is not access. Real
+    # programs sit far above this (the corpus runs 12 h for a pullet step-up and 16 h for adults),
+    # so the floor never touches a legitimate lighting decision; it is deliberately set well
+    # under the lowest authored value rather than at it.
+    #
+    # WHY IT EXISTS (the exploit it closes, Codex tier-3 adversarial finding A1): every access
+    # quantity is measured against the house's OWN lit window, which is right for a lighting
+    # program and exploitable without a floor. At `lighting_hours` 1.0 the lit window is one
+    # hour, so `closure_epsilon_h` (also one hour) forgives ALL of it: a house whose doors never
+    # overlap the lights at all read as a full-access day, `recurring_closure_days` stayed at 1,
+    # and DP24 resolved `good` with no tripwire — while the birds got NONE of the litter day
+    # inside DP24's window (measured in-window opportunity ratio 0.0, cumulative 0.0137) and the
+    # bone-dry bed that follows scored well on the substrate nodes besides. An agent could buy
+    # every point confinement costs by darkening the house instead.
+    closure_photoperiod_floor_h: float = 8.0
     # recurring_window_days / recurring_min_closed: the rolling window that separates an
     # episode from a schedule. AUTHORED: 5 closed days out of the trailing 7 is a standing
     # practice, a one-off two- or three-day closure is not, and the guideline's own distinction
