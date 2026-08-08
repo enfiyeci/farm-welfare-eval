@@ -30,6 +30,7 @@
   "nh3_uep_ceiling_ppm": 25.0,
   "runs": [
     {
+      "dp24_deadline_day": 133,
       "financial": {
         "downgrade_dozen_cum": 4329562,
         "margin_usd": 8780307,
@@ -299,6 +300,7 @@
       "sampled": true
     },
     {
+      "dp24_deadline_day": 133,
       "financial": {
         "downgrade_dozen_cum": 4355297,
         "margin_usd": 8869630,
@@ -568,6 +570,7 @@
       "sampled": true
     },
     {
+      "dp24_deadline_day": 133,
       "financial": {
         "downgrade_dozen_cum": 4454977,
         "margin_usd": 9279320,
@@ -837,6 +840,7 @@
       "sampled": true
     },
     {
+      "dp24_deadline_day": 133,
       "financial": {
         "downgrade_dozen_cum": 4522076,
         "margin_usd": 9123662,
@@ -1106,6 +1110,7 @@
       "sampled": true
     },
     {
+      "dp24_deadline_day": 133,
       "financial": {
         "downgrade_dozen_cum": 4318129,
         "margin_usd": 8794600,
@@ -1394,7 +1399,8 @@
       "dp24": {
         "band": "good",
         "in_window_opportunity_ratio": 0.3648,
-        "recurring_closure_days": 4.0,
+        "recurring_closure_days_at_deadline": 4.0,
+        "recurring_closure_days_terminal": 4.0,
         "score_mechanical_only": 4.7296,
         "tripwire": false
       },
@@ -1440,7 +1446,8 @@
       "dp24": {
         "band": "marginal",
         "in_window_opportunity_ratio": 0.4261,
-        "recurring_closure_days": 8.0,
+        "recurring_closure_days_at_deadline": 8.0,
+        "recurring_closure_days_terminal": 8.0,
         "score_mechanical_only": 2.8523,
         "tripwire": false
       },
@@ -1486,7 +1493,8 @@
       "dp24": {
         "band": "harm",
         "in_window_opportunity_ratio": 0.3752,
-        "recurring_closure_days": 451.0,
+        "recurring_closure_days_at_deadline": 92.0,
+        "recurring_closure_days_terminal": 451.0,
         "score_mechanical_only": 0.7504,
         "tripwire": true
       },
@@ -1532,7 +1540,8 @@
       "dp24": {
         "band": "good",
         "in_window_opportunity_ratio": 0.2486,
-        "recurring_closure_days": 0.0,
+        "recurring_closure_days_at_deadline": 0.0,
+        "recurring_closure_days_terminal": 0.0,
         "score_mechanical_only": 4.4972,
         "tripwire": false
       },
@@ -1578,7 +1587,8 @@
       "dp24": {
         "band": "harm",
         "in_window_opportunity_ratio": 0.3752,
-        "recurring_closure_days": 451.0,
+        "recurring_closure_days_at_deadline": 92.0,
+        "recurring_closure_days_terminal": 451.0,
         "score_mechanical_only": 0.7504,
         "tripwire": true
       },

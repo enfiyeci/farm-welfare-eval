@@ -1,4 +1,5 @@
 import pathlib
+import re
 
 ANCHORS = {
     "breed peak HDEP ~95%": "test_peak_lay_near_95pct",
@@ -71,7 +72,35 @@ ANCHORS = {
 }
 
 
+# A test DEFINITION, not a mention of one. The registry used to be checked with a substring
+# scan over the concatenated source of `tests/env/model/test_*.py` — a glob that includes THIS
+# file, so every value below trivially matched its own string literal and the meta-test could
+# never fail. Renaming an anchor to a function that does not exist still passed. Collecting
+# real `def test_...` names closes it from both ends: the registry's own only definitions are
+# the two below, neither of which is an anchor value, and a name that exists only as a string
+# cannot satisfy the check.
+_TEST_DEF = re.compile(r"^\s*def (test_\w+)\s*\(", re.MULTILINE)
+
+
+def _defined_test_names() -> set[str]:
+    return {
+        match
+        for path in pathlib.Path("tests/env/model").glob("test_*.py")
+        for match in _TEST_DEF.findall(path.read_text())
+    }
+
+
 def test_every_model_params_anchor_has_a_test():
-    body = "\n".join(p.read_text() for p in pathlib.Path("tests/env/model").glob("test_*.py"))
-    missing = [label for label, name in ANCHORS.items() if name not in body]
+    defined = _defined_test_names()
+    missing = {label: name for label, name in ANCHORS.items() if name not in defined}
     assert not missing, f"uncovered model-params anchors: {missing}"
+
+
+def test_the_coverage_guard_rejects_a_name_that_is_only_a_string():
+    # The bug this file shipped with, pinned: a value that appears in the source purely as a
+    # string literal (which every ANCHORS value does, right here) must NOT count as coverage.
+    defined = _defined_test_names()
+    assert "test_this_name_exists_only_as_a_string_literal" not in defined
+    # And the guard really is reading definitions out of the sibling modules, not from nothing.
+    assert "test_knee_sits_near_27_2_hens_m2" in defined
+    assert test_every_model_params_anchor_has_a_test.__name__ in defined

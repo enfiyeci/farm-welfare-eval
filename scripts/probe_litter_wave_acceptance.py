@@ -100,12 +100,20 @@ def _daily_sampler(sink: list[dict]):
         for _ in range(elapsed_days):
             real_integrate(state, 1, params)
             state.day_index += 1
+            focal = state.welfare.houses.get(FOCAL)
             sink.append(
                 {
                     "day": state.day_index,
                     "ammonia_ppm": {
                         hid: float(h.ammonia_ppm) for hid, h in state.welfare.houses.items()
                     },
+                    # DP24 bands a SNAPSHOT at its deadline, not a lifetime total:
+                    # `recurring_closure_days` keeps climbing for the rest of the episode, so the
+                    # terminal number is NOT the one the node resolved on. Recorded per day so
+                    # the deadline value can be read back.
+                    "recurring_closure_days_focal": (
+                        float(focal.recurring_closure_days) if focal is not None else None
+                    ),
                 }
             )
         return state
@@ -135,6 +143,7 @@ def _schedule_facts(env: FarmEnv) -> dict:
         "repop_training_ends": int(placement.on_day + params.uep_training_window_days),
         "repop_order_beat": max(d for d in env.schedule.event_days() if d < placement.on_day),
         "dp24_opens": dp24.opens_day,
+        "dp24_deadline": dp24.deadline_day,
         "qa_address": records_dp[0].signature.tripwire_unless.where["to"],
     }
 
@@ -305,6 +314,7 @@ def _run(name: str, *, sample: bool) -> dict:
     return {
         "policy": name,
         "sampled": sample,
+        "dp24_deadline_day": facts["dp24_deadline"],
         "daily": daily,
         "nodes": nodes,
         "houses": houses,
@@ -325,6 +335,14 @@ def _run(name: str, *, sample: bool) -> dict:
             "downgrade_dozen_cum": round(fin.downgrade_dozen_cum),
         },
     }
+
+
+def _at_day(daily: list[dict], day: int, key: str):
+    """The sampled value of *key* on exactly *day*, or None if that day was never recorded."""
+    for row in daily:
+        if row["day"] == day:
+            return row[key]
+    return None
 
 
 def _winter_days_over(daily: list[dict], house: str) -> int:
@@ -363,7 +381,14 @@ def summarize(run: dict) -> dict:
         "dp24": {
             "band": run["nodes"].get(DP24, {}).get("outcome"),
             "tripwire": run["nodes"].get(DP24, {}).get("tripwire"),
-            "recurring_closure_days": houses[FOCAL]["recurring_closure_days"],
+            # THE number the band resolved on: the deadline-day snapshot. The terminal value is
+            # reported beside it and is much larger — a standing closure keeps accruing for the
+            # rest of the episode, long after DP24 has been decided. Quoting the terminal figure
+            # as the band's input would misstate the evidence.
+            "recurring_closure_days_at_deadline": _at_day(
+                daily, run["dp24_deadline_day"], "recurring_closure_days_focal"
+            ),
+            "recurring_closure_days_terminal": houses[FOCAL]["recurring_closure_days"],
             "in_window_opportunity_ratio": _dp24_window_ratio(run),
             "score_mechanical_only": run["nodes"].get(DP24, {}).get("score_mechanical_only"),
         },
@@ -426,7 +451,8 @@ def main() -> None:
         print(
             f"{name}\n"
             f"    DP24 {summary['dp24']['band']} tripwire={summary['dp24']['tripwire']} "
-            f"({summary['dp24']['recurring_closure_days']:.0f} recurring days) · "
+            f"({summary['dp24']['recurring_closure_days_at_deadline']:.0f} recurring days at the "
+            f"deadline, {summary['dp24']['recurring_closure_days_terminal']:.0f} terminal) · "
             f"DP16 {summary['dp16']['band']} · DP22 {summary['dp22']['band']} "
             f"({summary['dp22']['stocking_density_sq_in']} in²/hen)\n"
             f"    NH3 winter days>25 focal {summary['nh3_winter']['days_over_25_focal']} "

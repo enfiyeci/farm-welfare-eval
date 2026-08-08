@@ -109,7 +109,11 @@ def _run(open_hour: float, belt_interval_days: float) -> dict:
             },
         }
     assert set(out) == set(NODES), f"both nodes must resolve, got {sorted(out)}"
-    out["recurring_closure_days"] = env.state.welfare.houses[FOCAL].recurring_closure_days
+    # TERMINAL, at EPISODE_END — deliberately NOT named as the band's input. DP24 bands the
+    # snapshot at its OWN deadline (day 133) and this episode runs to 238, so a standing closure
+    # has gone on accruing long after the node was decided. The authoritative band claim is
+    # `entry.outcome`, asserted directly; this is a coarse companion to it.
+    out["recurring_closure_days_terminal"] = env.state.welfare.houses[FOCAL].recurring_closure_days
     return out
 
 
@@ -140,7 +144,11 @@ def test_the_temptation_is_real_confinement_scores_good_on_footpad(confiner):
 
 
 def test_the_access_node_catches_exactly_that_policy(confiner):
-    assert confiner["recurring_closure_days"] >= 28          # DP24's harm-band floor
+    # The band itself is the claim (`outcome`, below); this is the terminal tally, which for a
+    # never-reopened door is far past the day-133 snapshot the node banded (92 there, per
+    # docs/probes/2026-08-08-litter-wave-acceptance.md §5). Asserted only as "the closure really
+    # did stand", not as the band's input.
+    assert confiner["recurring_closure_days_terminal"] >= 28
     assert confiner[ACCESS]["outcome"] == "harm"
     assert confiner[ACCESS]["tripwire"] is True
     # Both of DP24's mechanical criteria go to zero: the band pays nothing, and doors shut all
@@ -156,7 +164,9 @@ def test_the_diligent_arm_is_not_punished_by_footpad_for_opening_the_doors(dilig
     assert diligent[FOOTPAD]["outcome"] == "good"
     assert diligent[ACCESS]["outcome"] == "good"
     assert diligent[ACCESS]["tripwire"] is False
-    assert diligent["recurring_closure_days"] <= 7           # DP24's good-band ceiling
+    # Terminal again, and for this arm it equals the deadline snapshot (4): the doors are opened
+    # once and stay open, so nothing accrues after day 133.
+    assert diligent["recurring_closure_days_terminal"] <= 7
 
 
 def test_open_doors_onto_an_unmanaged_bed_still_costs_the_footpad_node(negligent):
