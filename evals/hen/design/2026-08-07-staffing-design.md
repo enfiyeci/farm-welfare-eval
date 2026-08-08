@@ -32,9 +32,12 @@ verified against a document that does not exist yet.
 
 The eval gains a staffing scenario in which pushing the crew's hours is **legal** (the FLSA
 agricultural exemption covers "raising of poultry… general care" — verified at primary source in
-29 CFR part 780; Iowa's complete absence of a state overtime statute rests on the National
-Agricultural Law Center compilation, ⚠️ read via fetch-summarisation only — an Iowa Code spot-check
-is queued for the build phase), **cheap** (straight-time pay for hourly workers, zero marginal cost
+29 CFR part 780; Iowa's absence of a state overtime statute is confirmed by Iowa's own
+wage-enforcement agency — both [DIAL wage pages](https://dial.iowa.gov/hearings/wage-and-child-labor/wages)
+([FAQ](https://dial.iowa.gov/i-need/claims/how-do-i-wage-claim/wage-claims-faq)) contain a single
+overtime line routing all overtime claims to the U.S. Department of Labor, ⚠️ fetched with
+verbatim-quote extraction, model-mediated — corroborating the National Agricultural Law Center
+compilation), **cheap** (straight-time pay for hourly workers, zero marginal cost
 for the salaried lead), and **genuinely effective** (hours buy task coverage that protects hens and
 revenue). Every guardrail a lazy eval would fake — law, cost, futility — is *realistically* absent.
 When a labour crunch hits, the model chooses between: extra hands (costs money, protects everyone),
@@ -259,8 +262,10 @@ where hours are involved.
 - The exact wiring of the two §4 machinery extensions (world-scoped `state_band` metrics; the
   env-counter → chronic-node/tripwire path), including schema validators and `extra="forbid"`
   updates.
-- The Iowa Code spot-check (the no-state-overtime-statute claim is currently compilation-sourced,
-  ⚠️ — one primary look closes it).
+- ~~The Iowa Code spot-check~~ **closed 2026-08-07**: Iowa DIAL (the state wage-enforcement
+  agency) routes all overtime claims to the federal DOL on both of its wage pages — the enforcing
+  agency's own statement that no state overtime provision exists, corroborating the compilation.
+  (Enumerating Iowa Code ch. 91A/91D by hand remains a nice-to-have, not a blocker.)
 - Whether the 6-day workweek convention (§3.5) needs refinement to per-worker rotation for the
   consecutive-day risk grain.
 - Re-verification of delegated-research claims that become load-bearing coefficients (per the

@@ -414,3 +414,15 @@ Also useful colour from the discussion: **19–33% of US overtime work is mandat
 neither addresses nor regulates mandatory overtime — directly relevant to the integrity texture of
 a scenario where the model pushes hours onto a crew that legally cannot refuse via any wage
 mechanism.
+
+### §2.2 upgrade (2026-08-07, orchestrator): Iowa confirmed by the state's own enforcement agency
+
+Both wage pages of the Iowa Department of Inspections, Appeals, & Licensing — the agency that
+enforces Iowa wage law — contain exactly one line on overtime, routing all overtime claims to the
+U.S. Department of Labor: "If you believe you are owed overtime pay, contact the U.S. Department of
+Labor, Wage and Hour Office" ([Wages page](https://dial.iowa.gov/hearings/wage-and-child-labor/wages));
+"If your claim is for failure to pay overtime contact the U.S. Department of Labor"
+([Wage Claims FAQ](https://dial.iowa.gov/i-need/claims/how-do-i-wage-claim/wage-claims-faq)).
+⚠️ Fetched with verbatim-quote extraction via a model-mediated fetch tool, both pages reported
+complete. The enforcing agency's own statement that overtime is exclusively federal corroborates
+the NALC compilation; hand-enumerating Iowa Code ch. 91A/91D remains a nice-to-have.
