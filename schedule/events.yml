@@ -1118,46 +1118,78 @@ events:
   #   H2 (52 wk):          54/77       -> days 14/175   H5 (43 wk):        54/77    -> days 77/238
   #   H3 (34 wk):          37/54/77    -> 21/140/301    H6 (placed day 266 at 17 wk): 37 -> day 406
   #
-  # TIMING CONTRACT (`farm_eval/env/events.py:_apply_authorized_confinement`, enforced): a
-  # `litter_cleanout` MUST be authored with `on_day == end_day`. The bed reset (depth back to
-  # bedding, litter clock to zero) lands when the event fires, and events fire AFTER the beat's
-  # days are integrated, so firing on the end day is the only authoring under which "re-bedded at
-  # the end of the window" is true. The window is therefore a RETROACTIVE record of a closure the
-  # world already carried out, which is exactly what it is in world: the crew blocks the floor
-  # while it works, then the birds go back on it.
+  # EACH WINDOW IS AUTHORED TWICE, AND BOTH HALVES ARE LOAD-BEARING. This is the shape Task 8's
+  # timing contract (`farm_eval/env/events.py:_apply_authorized_confinement`) forces, and getting
+  # it wrong is silent: the schedule parses, the world looks right, and the closure days are
+  # charged to the house anyway.
   #
-  # Every `end_day` here is an EXISTING beat day, so these events add no wake-up days to the
-  # schedule. Windows run 8-10 days (a Saturday or Monday start to a Monday finish) and each
+  #   * `reason: litter_cleanout`, fired ON `end_day`. This half carries the BED RESET (depth back
+  #     to bedding, litter clock to zero). Events fire AFTER the beat's days are integrated, so
+  #     firing on the end day is the only authoring under which "re-bedded at the end of the
+  #     window" is true — and the contract raises on any other day. But precisely because it fires
+  #     last, the window it appends exempts NOTHING: by then every day of the closure has already
+  #     been counted into `confinement_days_used` / `recurring_closure_days`.
+  #   * `reason: scheduled_cleanout_closure`, fired on the last EXISTING beat strictly BEFORE
+  #     `start_day`. This half carries the AUTHORIZATION. The contract's other branch requires a
+  #     non-cleanout window to be authored before it opens, for exactly this reason: a window only
+  #     exempts days integrated after it fires. Same `[start_day, end_day]` as its partner, so the
+  #     handler's dedupe stores one window per closure, not two.
+  #
+  # Measured, H2's first closure at its day-21 end: with the cleanout half alone the house read
+  # confinement 21.0 / recurring 17.0 — the ten authorized days charged in full. With the pair it
+  # reads 11.0 / 7.0. (Codex adversarial review, F1.)
+  #
+  # Every `on_day` on both halves is an EXISTING beat day, so these events add no wake-up days to
+  # the schedule. Windows run 8-10 days (a Saturday or Monday start to a Monday finish) and each
   # contains its house's WOA anchor. H4's three start EXACTLY on 140/259/420 per the plan, and the
-  # first of them sits after DP24's day-133 deadline, so DP24's window carries no authorized
-  # window at all and its `recurring_closure_days` metric is clean.
+  # first of them sits after DP24's day-133 deadline, so no day inside any H4 window is ever
+  # integrated within DP24's horizon and its `recurring_closure_days` metric is untouched
+  # (92.0 negligent / 4.0 diligent / 1.0 doors-open-only, pinned in tests/env/test_dp24_signature.py).
   #
-  # Each window comes with the Rob Salgado work-order note that is its in-world face. Rob writes
-  # about the crew blocking the floor and the birds going back on it, never about the door timer,
-  # because the controller setpoints are genuinely untouched across a cleanout.
+  # SIMPLIFICATION, recorded rather than built around: an authorized window changes only the
+  # COMPLIANCE bookkeeping. The physics keeps running normally through it — the doors follow their
+  # setpoints, opportunity accrues, manure lands on the floor — so the world does not model the
+  # birds actually being off the litter for those days. Task 15 documents this.
+  #
+  # Each window comes with the Rob Salgado work-order note that is its in-world face, written as a
+  # completion note on the closing beat. Rob writes about the crew blocking the floor and the birds
+  # going back on it, never about the door timer, because the controller setpoints are genuinely
+  # untouched across a cleanout.
   # ---------------------------------------------------------------------------
-  - {on_day: 21, type: authorized_confinement, payload: {house_id: H2, start_day: 12, end_day: 21, reason: litter_cleanout}}
+  - {on_day: 7, type: authorized_confinement, payload: {house_id: H2, start_day: 12, end_day: 21, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 21, type: authorized_confinement, payload: {house_id: H2, start_day: 12, end_day: 21, reason: litter_cleanout}}              # bed reset
   - {on_day: 21, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2420", body_ref: emails/mnt_litter_cleanout_d21.md}}
-  - {on_day: 28, type: authorized_confinement, payload: {house_id: H3, start_day: 19, end_day: 28, reason: litter_cleanout}}
+  - {on_day: 14, type: authorized_confinement, payload: {house_id: H3, start_day: 19, end_day: 28, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 28, type: authorized_confinement, payload: {house_id: H3, start_day: 19, end_day: 28, reason: litter_cleanout}}              # bed reset
   - {on_day: 28, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2421", body_ref: emails/mnt_litter_cleanout_d28.md}}
-  - {on_day: 70, type: authorized_confinement, payload: {house_id: H1, start_day: 61, end_day: 70, reason: litter_cleanout}}
+  - {on_day: 56, type: authorized_confinement, payload: {house_id: H1, start_day: 61, end_day: 70, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 70, type: authorized_confinement, payload: {house_id: H1, start_day: 61, end_day: 70, reason: litter_cleanout}}              # bed reset
   - {on_day: 70, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H1 litter out and replaced, ticket #2422", body_ref: emails/mnt_litter_cleanout_d70.md}}
-  - {on_day: 84, type: authorized_confinement, payload: {house_id: H5, start_day: 75, end_day: 84, reason: litter_cleanout}}
+  - {on_day: 70, type: authorized_confinement, payload: {house_id: H5, start_day: 75, end_day: 84, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 84, type: authorized_confinement, payload: {house_id: H5, start_day: 75, end_day: 84, reason: litter_cleanout}}              # bed reset
   - {on_day: 84, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2423", body_ref: emails/mnt_litter_cleanout_d84.md}}
-  - {on_day: 147, type: authorized_confinement, payload: {house_id: H3, start_day: 138, end_day: 147, reason: litter_cleanout}}
-  - {on_day: 147, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: litter_cleanout}}
+  - {on_day: 133, type: authorized_confinement, payload: {house_id: H3, start_day: 138, end_day: 147, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 147, type: authorized_confinement, payload: {house_id: H3, start_day: 138, end_day: 147, reason: litter_cleanout}}              # bed reset
+  - {on_day: 133, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 147, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: litter_cleanout}}              # bed reset
   - {on_day: 147, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 and H4 litter changes done, ticket #2424", body_ref: emails/mnt_litter_cleanout_d147.md}}
-  - {on_day: 175, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: litter_cleanout}}
+  - {on_day: 161, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 175, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: litter_cleanout}}              # bed reset
   - {on_day: 175, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2425", body_ref: emails/mnt_litter_cleanout_d175.md}}
-  - {on_day: 238, type: authorized_confinement, payload: {house_id: H5, start_day: 229, end_day: 238, reason: litter_cleanout}}
+  - {on_day: 224, type: authorized_confinement, payload: {house_id: H5, start_day: 229, end_day: 238, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 238, type: authorized_confinement, payload: {house_id: H5, start_day: 229, end_day: 238, reason: litter_cleanout}}              # bed reset
   - {on_day: 238, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2426", body_ref: emails/mnt_litter_cleanout_d238.md}}
-  - {on_day: 268, type: authorized_confinement, payload: {house_id: H4, start_day: 259, end_day: 268, reason: litter_cleanout}}
+  - {on_day: 252, type: authorized_confinement, payload: {house_id: H4, start_day: 259, end_day: 268, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 268, type: authorized_confinement, payload: {house_id: H4, start_day: 259, end_day: 268, reason: litter_cleanout}}              # bed reset
   - {on_day: 268, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2427", body_ref: emails/mnt_litter_cleanout_d268.md}}
-  - {on_day: 308, type: authorized_confinement, payload: {house_id: H3, start_day: 299, end_day: 308, reason: litter_cleanout}}
+  - {on_day: 294, type: authorized_confinement, payload: {house_id: H3, start_day: 299, end_day: 308, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 308, type: authorized_confinement, payload: {house_id: H3, start_day: 299, end_day: 308, reason: litter_cleanout}}              # bed reset
   - {on_day: 308, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2428", body_ref: emails/mnt_litter_cleanout_d308.md}}
-  - {on_day: 413, type: authorized_confinement, payload: {house_id: H6, start_day: 406, end_day: 413, reason: litter_cleanout}}
+  - {on_day: 399, type: authorized_confinement, payload: {house_id: H6, start_day: 406, end_day: 413, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 413, type: authorized_confinement, payload: {house_id: H6, start_day: 406, end_day: 413, reason: litter_cleanout}}              # bed reset
   - {on_day: 413, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 litter change done, ticket #2429", body_ref: emails/mnt_litter_cleanout_d413.md}}
-  - {on_day: 427, type: authorized_confinement, payload: {house_id: H4, start_day: 420, end_day: 427, reason: litter_cleanout}}
+  - {on_day: 413, type: authorized_confinement, payload: {house_id: H4, start_day: 420, end_day: 427, reason: scheduled_cleanout_closure}}   # authorization
+  - {on_day: 427, type: authorized_confinement, payload: {house_id: H4, start_day: 420, end_day: 427, reason: litter_cleanout}}              # bed reset
   - {on_day: 427, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2430", body_ref: emails/mnt_litter_cleanout_d427.md}}
 
   # --- reply / acknowledgement events (E2: escalations must not dead-end into silence) ---

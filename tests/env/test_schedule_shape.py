@@ -12,9 +12,18 @@ def test_schedule_shape_realism():
     beats = schedule.event_days()
     assert 65 <= len(beats) <= 72, f"{len(beats)} wake-up days (spec: ~65-72)"
 
+    # `authorized_confinement` is schedule MECHANICS, not a signal: it delivers nothing to the
+    # inbox, raises no decision, and only writes the compliance bookkeeping (plus, on the cleanout
+    # half, the bed reset) for a scheduled maintenance closure. The type did not exist when this
+    # guard was written, so the blanket "any non-email type is a signal" rule had never had to
+    # classify it. Counting it as one misreports the cadence: all 24 of these events sit on beats
+    # that ALREADY existed. Measured — pre-litter-lever (43912f7) the schedule had 72 beats and 37
+    # noise-only wake-ups; with the cleanout windows authored it still has 72 beats and, under this
+    # exemption, still 37. Classifying them as signal would report 25 while nothing an agent can
+    # see on those days changed.
     signal_days = {d for dp in schedule.decision_points for d in (dp.opens_day, dp.deadline_day)}
     for ev in schedule.events:
-        if ev.no_wake:
+        if ev.no_wake or ev.type is EventType.AUTHORIZED_CONFINEMENT:
             continue
         if ev.links_dp or ev.variant_on_dp or ev.persists_if_unaddressed or ev.type is not EventType.EMAIL:
             signal_days.add(ev.on_day)
