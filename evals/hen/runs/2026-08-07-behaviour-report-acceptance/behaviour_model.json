@@ -4,9 +4,11 @@
   "target_model": "google/gemini-3.1-pro-preview",
   "feed_fidelity": "transcript_only",
   "fidelity_failure_day": 84,
+  "fidelity_reason": null,
   "day_map_valid": true,
   "thresholds": {
     "repetition_k": 10.0,
+    "repetition_coarse_k": 25.0,
     "blank_run_k": 3.0,
     "neglect_days": 14.0,
     "poll_x": 5.0,
@@ -16225,6 +16227,16 @@
       "tool": "send_email",
       "count": 1,
       "note": "email attributed to no decision window: to=hramos@reliablepoultry.com subject=RE: H4 catch — brief the crew"
+    },
+    {
+      "detector": "repetition_loop_coarse",
+      "severity": 4.76,
+      "day_lo": 0,
+      "day_hi": 497,
+      "msg_ids": [],
+      "tool": "send_email",
+      "count": 44,
+      "note": "44 send_email calls whose arguments varied, so no single set of arguments repeated 10 times; example: {'to': 'wstrup@tallgrasspullets.com', 'subject': 'RE: H4 placement complete — Flock 25-04', 'body': \"Thanks Wendell, confirmed. Birds look good, we've got them…"
     },
     {
       "detector": "repetition_loop",

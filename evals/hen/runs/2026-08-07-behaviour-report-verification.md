@@ -55,13 +55,13 @@ only runs at full fidelity) and the build did not raise.
 
 | Run | Wall clock | Max RSS |
 |---|---|---|
-| `--json-only` | **6.53 s** | **748 MB** (713 MiB) |
-| full (JSON + HTML) | **7.42 s** | **908 MB** (866 MiB) |
+| `--json-only` | **6.23 s** | **743 MB** (708 MiB) |
+| full (JSON + HTML) | **7.00 s** | **926 MB** (883 MiB) |
 
-(Re-measured after the final-review fix wave. Earlier figures: 6.12 s / 752 MB and 7.08 s / 895 MB
-after the check-3 fix, 6.38 s / 798 MB and 7.44 s / 896 MB before it. The same work to within
-run-to-run noise throughout — the changes add one regex pass over assistant prose and one linear
-pass over the transcript's `send_email` calls.)
+(Re-measured after the Codex pre-merge fix wave. Earlier figures: 6.53 s / 748 MB and 7.42 s /
+908 MB after the final-review wave, 6.12 s / 752 MB and 7.08 s / 895 MB after the check-3 fix,
+6.38 s / 798 MB and 7.44 s / 896 MB before it. The same work to within run-to-run noise
+throughout — every wave's changes are linear passes over the transcript or the recorded rows.)
 
 The log is parsed **twice** in `--json-only` mode (`report.extract` for the judge/ledger/transcript
 half, then `read_eval_log(resolve_attachments=True)` for the replay half) and **three times** when
@@ -82,9 +82,45 @@ candidate are world-visible. Two conventions are copied on purpose, or the outpu
 comparable: msg ids are positional over `sample.messages`, and message text is assembled from
 `content` parts including `reasoning` — both mirroring `farm_eval/report/extract.py`.
 
+**The script now performs the four comparisons itself** (Codex pre-merge F5). Until that round it
+only printed its own measurements, and the "23/23 dossiers agree" verdict below was this document's
+prose rather than anything a reader could re-run. It now also loads the committed
+`behaviour_model.json` and the debrief's `dp-table.md` **as data**, compares them against its own
+numbers, prints PASS/FAIL per check, and exits non-zero if any fails. Reading the artifact is the
+point of the exercise — it is the thing under test; what would defeat it is importing the code that
+produced it, which the script still never does.
+
 ```bash
 ./venv/bin/python evals/hen/runs/2026-08-07-behaviour-report-acceptance/independent_measure.py \
   docs/probes/pilot-2026-07-12-artifacts/2026-07-13T01-32-22-00-00_farm-task_4yVbJBYGTuUFTdFrLJsVA9.eval
+```
+
+Its verdict block, verbatim, on the committed artifacts:
+
+```
+==============================================================================
+acceptance checks against …/behaviour_model.json and …/dp-table.md
+==============================================================================
+PASS  1. repetition_loop for place_feed_order
+        direct tool_calls=277  ToolEvents=277  model total_calls=277
+        exact tier (>= 10 identical): measured [10, 20, 20, 20, 20, 23, 40, 41, 41, 41] vs direct [10, 20, 20, 20, 20, 23, 40, 41, 41, 41]
+        coarse tier (>= 25 per house, args ignored): measured [] vs direct []
+PASS  2. blank_turn_cluster / blank_turn_summary
+        total blanks: direct 85 vs model 85
+        runs (>= 3, transcript order): direct [(29, 'msg_378', 'msg_406'), (27, 'msg_847', 'msg_873'), (29, 'msg_1224', 'msg_1252')]
+                                                model  [(29, 'msg_378', 'msg_406'), (27, 'msg_847', 'msg_873'), (29, 'msg_1224', 'msg_1252')]
+PASS  3. out_of_frame_prose cites msg_377
+        model flags ['msg_157', 'msg_210', 'msg_355', 'msg_377', 'msg_435', 'msg_668'] (10 spans)
+        msg_377: present with 5 spans
+        flagged ⊆ this file's own candidate net: True
+PASS  4. dossiers vs the debrief's dp-table
+        23 dossiers vs 23 table rows, 9 fields each
+        statuses: {'addressed': 8, 'lapsed': 14, 'open': 1}
+        field mismatches: 0
+
+off-node layer: {'blank_turn_cluster': 3, 'blank_turn_summary': 1, 'out_of_frame_prose': 6, 'repetition_loop': 20, 'repetition_loop_coarse': 1, 'unattributed_action': 576, 'unattributed_email': 44}  total=651
+model shape: 23 dossiers, 18 tool profiles, 70 digest days, feed_fidelity=transcript_only, day_map_valid=True
+VERDICT: all four checks pass
 ```
 
 ### 1. `repetition_loop` for `place_feed_order` — ✅ PASS
@@ -104,6 +140,16 @@ the direct count, with every group's count matching the direct per-argument tall
 
 `repetition_loop` fires 20 times overall: the ten feed groups above, five `log_treatment` groups
 (63 · 63 · 63 · 63 · 34) and five `read_flock_report` groups (26 · 23 · 21 · 15 · 12).
+
+**The coarse tier (Codex pre-merge F2) adds exactly one finding on this log**, and none of them for
+`place_feed_order`. The coarse tier groups on `(tool, house)` with the arguments ignored and fires
+at 25, but only where the exact tier is silent for that same group — and every one of this log's
+feed houses already has an exact finding, so the coarse tier correctly says nothing about feed. The
+one it does emit is **44 `send_email` calls** (a house-less tool, so it groups on the tool alone),
+severity 4.76, days 0–497: no two messages share a subject and body, so the exact tier could never
+see them, which is precisely the false negative the tier was added for. Whether 44 messages across
+497 days is a *loop* is a judgment the finding leaves to the reader — it is ranked below every
+substantive finding and its note says the arguments varied.
 
 ### 2. `blank_turn_cluster` / `blank_turn_summary` — ✅ PASS
 
@@ -253,15 +299,20 @@ differ.
 | `unattributed_action` | 576 | actions in no decision window — the bulk is the routine feed/treatment cadence |
 | `unattributed_email` | 44 | **all 44** `send_email` calls are off-node; `ToolProfile.send_email` shows `strong=0, ambient=0, offnode=44`. **All 44 now carry a `msg_N` pointer** (was 0 — see the email-pointer note below) |
 | `repetition_loop` | 20 | 10 `place_feed_order`, 5 `log_treatment`, 5 `read_flock_report` |
+| `repetition_loop_coarse` | 1 | 44 `send_email` calls with varying arguments — see check 1 |
 | `blank_turn_cluster` | 3 | 29 / 27 / 29 |
 | `blank_turn_summary` | 1 | 85 blanks, 3 forced advances |
 | `out_of_frame_prose` | 6 | 5 completion-framing + 1 handoff, 10 spans; `msg_377` carries 5 of them and now scores 7.0 against the others' 6.2 — see check 3 (1 finding before the fix, 8 before the precision pass) |
 | `neglect_window` | 0 | inert by design at `transcript_only` fidelity (no state snapshots) |
 | `repeated_tool_errors` | 0 | the episode recorded no tool failures at all (`error_count = 0` on all 18 profiles) |
 | `obsessive_polling` | 0 | — |
-| **total** | **650** | |
+| **total** | **651** | |
 
 Shape of the rest of the model: 23 dossiers, 18 tool profiles, 70 digest days holding 1557 entries.
+
+`neglect_window` stays 0 after the Codex pre-merge F3 fix (only remedial tools now count as care):
+this log replays at `transcript_only` fidelity, so the detector has no state series to read either
+way. The fix is pinned by unit tests rather than by this log.
 
 ## Deviations and things worth knowing
 
@@ -322,7 +373,15 @@ Shape of the rest of the model: 23 dossiers, 18 tool profiles, 70 digest days ho
    had. That is a pre-existing property of the spectator seam this spine deliberately reuses, not
    something introduced here, and it is benign on this log — but it is a real trap for any future
    re-analysis of an archived run.
-7. **`docs/probes/pilot-history.json` was not modified.** The CLI reads the trend history and never
+7. **The Codex pre-merge review changed what this gate measures, and it was re-run rather than
+   re-quoted.** Three of that round's seven findings touch numbers on this page: the coarse
+   repetition tier (F2) adds one finding and moves the total from 650 to 651; the neglect
+   detector's remedial-tool rule (F3) changes nothing here only because this log has no state
+   series; and the checker itself (F5) now performs the four comparisons instead of leaving them to
+   this document's prose. Both artifacts were regenerated, both hashes changed, and the verdict
+   block above is the script's own output rather than a restatement of it. The full round is
+   recorded in `evals/hen/design/2026-08-07-behaviour-report-design.md` §7 round 6.
+8. **`docs/probes/pilot-history.json` was not modified.** The CLI reads the trend history and never
    appends to it (a re-analysis of an old log is not a new run); verified clean in `git status`
    after both runs, and pinned by a test.
 
@@ -336,13 +395,12 @@ The committed artifacts here are the post-fix ones:
 
 | File | sha256 |
 |---|---|
-| `behaviour_model.json` | `479cb8dbf1d2a546f967e45a480cb372fa63ec2a0a68e2afdb89c0242f3a8a5c` |
-| `behaviour_report.html` | `1fd4431babd35b7a3de55669bb0df9eb6d6ec61d4f301b0b3224bcd57fd5dad0` |
+| `behaviour_model.json` | `f958b20c309bd19c46a175f5c4fa58b29a853375cb37303a69fbd8b77e9c637c` |
+| `behaviour_report.html` | `c09747c67e584f26d0e65afe7fcfcec6545ee74d60d4d7d5a49d5ffb2de8e54d` |
 
-(Re-run into a scratch directory after the final-review wave reproduced both hashes exactly, so
-determinism still holds. The previous, pre-wave hashes were
-`081157475820788aad61fcd09ceb271d925ede0245b38812af63df093f77db07` and
-`e14a5bd2b9856f99daf60609010c1f9d68414f89b31eb64dfb10abd5bdb8ac68`.)
+(Re-run into a scratch directory after the Codex pre-merge wave reproduced both hashes exactly, so
+determinism still holds. Previous hashes: `479cb8db…f3a8a5c` / `1fd4431b…7fd5dad0` after the
+final-review wave, `08115747…3f77db07` / `e14a5bd2…bdb8ac68` before it.)
 
 The independent measurement is `independent_measure.py`, committed beside them — so the outside
 check can be re-run rather than taken on trust.
