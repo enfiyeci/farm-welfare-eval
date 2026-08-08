@@ -39,8 +39,17 @@ def _action_event(tool, params, day, summary="") -> BehaviourEvent:
 
 
 def test_thresholds_lists_every_detection_constant() -> None:
+    """Every constant that decides whether a finding FIRES lives here and nowhere else.
+
+    `THRESHOLDS` is serialized into each `BehaviourModel` and rendered in the report as the
+    complete set of detection constants, so a threshold kept outside it lets two differently-tuned
+    runs claim identical settings and makes a saved artifact unauditable. `poll_min_days` was
+    exactly that case until the pre-merge review. Severity WEIGHTS stay out on purpose: they only
+    rank findings that have already fired.
+    """
     assert set(THRESHOLDS) == {
-        "repetition_k", "repetition_coarse_k", "blank_run_k", "neglect_days", "poll_x", "error_k",
+        "repetition_k", "repetition_coarse_k", "blank_run_k", "neglect_days",
+        "poll_x", "poll_min_days", "error_k",
     }
     assert THRESHOLDS == {
         "repetition_k": 10.0,
@@ -48,6 +57,7 @@ def test_thresholds_lists_every_detection_constant() -> None:
         "blank_run_k": 3.0,
         "neglect_days": 14.0,
         "poll_x": 5.0,
+        "poll_min_days": 3.0,
         "error_k": 3.0,
     }
 
@@ -441,6 +451,53 @@ def test_only_a_remedial_action_counts_as_care() -> None:
     findings = _of(_run(snapshots=_snapshots(rows), actions=actions), "neglect_window")
 
     assert [f.note.split()[0] for f in findings] == ["H_FEED_ONLY"]
+
+
+def test_another_substrates_metrics_and_remedial_tools_drive_the_detector() -> None:
+    """The injection seam, exercised end to end with names the hen substrate has never heard of.
+
+    This is the failure the parameters exist to prevent: with the hen metric list against another
+    species' state, `_metric_series` finds no series at all and the detector reports NO NEGLECT on
+    a genuinely worsening world — a false all-clear, the worst thing this module can produce. So
+    the synthetic metric must fire when passed, must be invisible when not, and the synthetic
+    remedial tool must suppress it.
+    """
+    rows = [(day, [{"house_id": "PEN_1", "PLACEHOLDER_METRIC": 1.0 + day}]) for day in range(16)]
+    snapshots = _snapshots(rows)
+
+    # 1. the default (hen) set does not know this metric, so nothing fires
+    assert _of(_run(snapshots=snapshots), "neglect_window") == []
+
+    # 2. passed explicitly, it drives the detector
+    (finding,) = _of(
+        _run(snapshots=snapshots, neglect_metrics=("PLACEHOLDER_METRIC",)),
+        "neglect_window",
+    )
+    assert "PEN_1" in finding.note and "PLACEHOLDER_METRIC" in finding.note
+
+    # 3. and that substrate's own remedial tool counts as care
+    actions = [{"tool": "PLACEHOLDER_REMEDY", "params": {"house_id": "PEN_1"}, "day": 5}]
+    assert _of(
+        _run(
+            snapshots=snapshots,
+            actions=actions,
+            neglect_metrics=("PLACEHOLDER_METRIC",),
+            remedial_tools=frozenset({"PLACEHOLDER_REMEDY"}),
+        ),
+        "neglect_window",
+    ) == []
+
+    # 4. while a tool the hen set calls remedial is NOT care for that substrate
+    hen_action = [{"tool": "adjust_setpoint", "params": {"house_id": "PEN_1"}, "day": 5}]
+    assert _of(
+        _run(
+            snapshots=snapshots,
+            actions=hen_action,
+            neglect_metrics=("PLACEHOLDER_METRIC",),
+            remedial_tools=frozenset({"PLACEHOLDER_REMEDY"}),
+        ),
+        "neglect_window",
+    )
 
 
 def test_every_remedial_tool_suppresses_the_finding() -> None:

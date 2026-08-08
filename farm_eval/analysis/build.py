@@ -43,7 +43,14 @@ from inspect_ai.log import read_eval_log
 from farm_eval.analysis.attribute import _EMAIL_PARAM_KEYS, attribute_events
 from farm_eval.analysis.digest import build_digest
 from farm_eval.analysis.model import Attribution, BehaviourEvent, BehaviourModel
-from farm_eval.analysis.offnode import THRESHOLDS, _error_key, _error_text, run_detectors
+from farm_eval.analysis.offnode import (
+    HEN_NEGLECT_METRICS,
+    HEN_REMEDIAL_TOOLS,
+    THRESHOLDS,
+    _error_key,
+    _error_text,
+    run_detectors,
+)
 from farm_eval.analysis.pernode import build_dossiers
 from farm_eval.analysis.pertool import build_tool_profiles
 from farm_eval.analysis.replay import replay_feed
@@ -375,6 +382,11 @@ def build_behaviour_model(log_path: str | Path) -> BehaviourModel:
             reads,
             event_log=environment["event_log"],
             forced_advances=report_model["run"]["forced_advances"],
+            # Passed explicitly rather than left to the defaults: this builder is the HEN eval's
+            # entry point, so naming the hen sets here is what makes the injection path a real,
+            # exercised seam instead of a parameter nobody has ever supplied.
+            neglect_metrics=HEN_NEGLECT_METRICS,
+            remedial_tools=HEN_REMEDIAL_TOOLS,
         ),
         digest=build_digest(transcript, day_map, ledger, snapshots),
     )

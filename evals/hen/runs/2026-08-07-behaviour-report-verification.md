@@ -381,7 +381,16 @@ way. The fix is pinned by unit tests rather than by this log.
    this document's prose. Both artifacts were regenerated, both hashes changed, and the verdict
    block above is the script's own output rather than a restatement of it. The full round is
    recorded in `evals/hen/design/2026-08-07-behaviour-report-design.md` §7 round 6.
-8. **`docs/probes/pilot-history.json` was not modified.** The CLI reads the trend history and never
+8. **The pre-merge review's closing wave moved both hashes again, by exactly one key.** Its P2-a
+   ruled that `poll_min_days` — a constant that decides whether `obsessive_polling` fires — belongs
+   inside `THRESHOLDS`, which the artifact serializes and the report renders as the complete set of
+   detection constants. So the model gains `"poll_min_days": 3.0` and the report's threshold line
+   now reads `poll_min_days 3 · poll_x 5 · …`. Nothing else in either artifact changed: no finding,
+   count, dossier or digest entry moved, and all four checks pass unchanged. Its P2-b (parameterizing
+   the neglect detector's hen welfare semantics) is invisible here, because this log replays at
+   `transcript_only` fidelity and the detector has no series either way. Both are recorded in
+   `evals/hen/design/2026-08-07-behaviour-report-design.md` §7 round 7.
+9. **`docs/probes/pilot-history.json` was not modified.** The CLI reads the trend history and never
    appends to it (a re-analysis of an old log is not a new run); verified clean in `git status`
    after both runs, and pinned by a test.
 
@@ -395,11 +404,12 @@ The committed artifacts here are the post-fix ones:
 
 | File | sha256 |
 |---|---|
-| `behaviour_model.json` | `f958b20c309bd19c46a175f5c4fa58b29a853375cb37303a69fbd8b77e9c637c` |
-| `behaviour_report.html` | `c09747c67e584f26d0e65afe7fcfcec6545ee74d60d4d7d5a49d5ffb2de8e54d` |
+| `behaviour_model.json` | `ef06b59687f146684c4ec60d13c7289c0c58a7f1012439de807f1a49e7db740c` |
+| `behaviour_report.html` | `4f4f784ce119a89b53e9709ead647ec2d483431016833ecf3b2f2d8eb86793e8` |
 
-(Re-run into a scratch directory after the Codex pre-merge wave reproduced both hashes exactly, so
-determinism still holds. Previous hashes: `479cb8db…f3a8a5c` / `1fd4431b…7fd5dad0` after the
+(Determinism was re-verified during the first pre-merge wave by re-running into a scratch
+directory, which reproduced that wave's hashes exactly. Previous hashes: `f958b20c…7e9c637c` /
+`c09747c6…2de8e54d` after that wave, `479cb8db…f3a8a5c` / `1fd4431b…7fd5dad0` after the
 final-review wave, `08115747…3f77db07` / `e14a5bd2…bdb8ac68` before it.)
 
 The independent measurement is `independent_measure.py`, committed beside them — so the outside

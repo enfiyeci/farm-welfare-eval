@@ -332,6 +332,28 @@ Artifacts regenerated once after the wave: the analysis golden (`fidelity_reason
 `repetition_coarse_k` are the only diff on the fixture episode) and the acceptance artifacts. The
 re-measured gate is in `evals/hen/runs/2026-08-07-behaviour-report-verification.md`.
 
+### Round 7 (Codex pre-merge pair, re-verify) — the closing wave
+
+The adversarial pass returned **APPROVED with zero findings** on the round-6 fixes. The straight
+pass left two P2s, both accepted.
+
+| # | Finding | Fix |
+|---|---|---|
+| P2-a | `_POLL_MIN_DAYS` was a **detection** threshold living outside `THRESHOLDS`. That dict is serialized into every `BehaviourModel` and rendered in the HTML as the complete set of detection constants, so two differently-tuned runs could claim identical thresholds and a saved artifact could not be audited or reproduced | `poll_min_days: 3.0` is now a `THRESHOLDS` key and `_obsessive_polling` reads it from there. This **supersedes the Task-8 adjudication** that kept it out: that rested on the build brief pinning the dict at five keys, and the artifact's honesty outranks a spent brief constraint. Severity weights stay out — they rank findings that already fired, they do not decide firing |
+| P2-b | `_NEGLECT_METRICS` and `_REMEDIAL_TOOLS` hardcoded hen welfare semantics into a module the planned dairy eval will reuse, against the repo's "no farm content in logic" rule — and the failure mode is silent: hen metric names against a dairy state find no series, so `neglect_window` would report **no neglect on a genuinely worsening world** | Both are now optional parameters of `run_detectors` (`neglect_metrics` / `remedial_tools`), defaulting to the hen sets, which live in ONE named place (`HEN_NEGLECT_METRICS`, `HEN_REMEDIAL_TOOLS`) under a comment saying they are the hen substrate's and that another species passes its own. `build.py` passes them **explicitly**, so the injection path is exercised rather than theoretical, and `test_another_substrates_metrics_and_remedial_tools_drive_the_detector` drives the detector with a synthetic metric and a synthetic remedial tool |
+
+**Named as future work, deliberately not built here.** The full "load it from `corpus/` and
+`schedule/`" form the repo rule really asks for needs a **schedule slot for welfare-metric
+semantics** — which state fields mean "worse", and which action tools count as remediating them —
+and no such slot exists in `schedule/events.yml` or the loader today. Inventing a config schema for
+a single consumer would be the speculative-abstraction failure the project's simplicity rule warns
+about; parameterizing is the proportionate step, and that slot is the design work owed to whichever
+eval next needs a non-hen substrate.
+
+Artifacts regenerated once more, and both **did** change — by exactly the one added key. The golden
+and the acceptance model gain `"poll_min_days": 3.0`, and the report's threshold line now reads
+`poll_min_days 3 · poll_x 5 · …`, which is P2-a's whole point made visible in the artifact.
+
 One further limitation is worth stating even though it is not a deviation: `send_email` action rows
 never satisfy §2.1's exact-argument link, because the adapter records optional parameters (`cc`,
 `in_reply_to`) the model never passed. Measured on the 2026-07-12 pilot: 0 of 44 `send_email`

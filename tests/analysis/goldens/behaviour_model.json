@@ -265,6 +265,7 @@
     "blank_run_k": 3.0,
     "error_k": 3.0,
     "neglect_days": 14.0,
+    "poll_min_days": 3.0,
     "poll_x": 5.0,
     "repetition_coarse_k": 25.0,
     "repetition_k": 10.0
