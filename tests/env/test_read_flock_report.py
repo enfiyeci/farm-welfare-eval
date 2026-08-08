@@ -108,3 +108,27 @@ def test_flock_report_empty_house_reads_unknown_with_no_crash():
     la = rep["litter_access"]
     assert la["effective_hours"] == 0.0  # lighting_hours 0.0 -> no lit window to access
     assert la["confinement_days_used"] == 0.0
+
+
+def test_flock_report_effective_hours_tracks_the_live_lighting_hours_setpoint():
+    # F1 (round-2 Codex adversarial review of the whole Task 11 diff): effective_hours must
+    # be computed from the LIVE world.setpoints["lighting_hours"] the physics substrate
+    # actually integrates against (integrate.py:95 `sp.get("lighting_hours", 16.0)`), never
+    # from HouseWelfare.lighting_hours — a load-time mirror `adjust_setpoint` never writes
+    # back to, so it would silently go stale the moment an operator changes the photoperiod
+    # mid-episode and the report would show an access figure the world no longer runs.
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    before = env.read_flock_report(hid)
+    assert before["litter_access"]["effective_hours"] == 16.0  # fixture's authored 16-h day
+
+    result = env.apply_action(
+        "adjust_setpoint", {"house_id": hid, "system": "lighting_hours", "value": 12.0}
+    )
+    assert result.ok
+    env.end_day()  # advance a day so the substrate integrates under the new photoperiod
+
+    after = env.read_flock_report(hid)
+    # the stale HouseWelfare mirror would still read 16.0 here; the live setpoint reads 12.0
+    assert after["litter_access"]["effective_hours"] == 12.0
+    assert env.state.welfare.houses[hid].lighting_hours == 16.0  # the mirror IS stale, confirmed

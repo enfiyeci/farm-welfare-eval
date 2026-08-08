@@ -665,10 +665,14 @@ class FarmEnv:
         age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
         eggs_doz = birds * (hw.hen_day_pct / 100.0) / 12.0
         # Litter-access door schedule (Task 11 discoverability): the same setpoint-read
-        # convention integrate.py uses, so a report house with no explicit setpoints falls
-        # back to params.lights_on_hour exactly like the substrate does.
+        # convention integrate.py uses (integrate.py:95-97), so a report house with no
+        # explicit setpoints falls back exactly like the substrate does. lighting_hours in
+        # particular MUST come from the live setpoint, not HouseWelfare.lighting_hours — that
+        # field is a load-time mirror adjust_setpoint never updates, so it goes stale the
+        # moment an operator changes the photoperiod mid-episode (round-2 Codex review
+        # finding: the report would then show an access figure the physics does not run).
         sp = self.state.world.setpoints.get(house_id, {})
-        lighting_hours = hw.lighting_hours
+        lighting_hours = sp.get("lighting_hours", 16.0)
         door_open_h = sp.get("litter_access_open_hour", self.params.lights_on_hour)
         door_close_h = sp.get("litter_access_close_hour", self.params.lights_on_hour + lighting_hours)
         effective_hours = access.access_hours(door_open_h, door_close_h, self.params.lights_on_hour, lighting_hours)
