@@ -61,7 +61,8 @@ class HouseWelfare(BaseModel):
     # the window observed so far, and how many of those had the morning closed. Their ratio is
     # the closure share the base freezes from. Counters rather than a derived count because how
     # many window days a run actually integrates depends on the flock's placement day, and a
-    # wrong denominator would silently shift the base.
+    # wrong denominator would silently shift the base. For a flock placed ON day 0 the loader
+    # seeds them with day 0 itself, which integrate() starts one day too late to see.
     floor_egg_training_days: float = 0.0
     floor_egg_training_closed_days: float = 0.0
     # --- substrate welfare variables (populated by farm_eval/env/model) ---

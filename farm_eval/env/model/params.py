@@ -477,12 +477,15 @@ class ModelParams(BaseModel):
     # floor_egg_morning_end_hour: the end of the morning lay window (clock hour). Hen
     # oviposition is concentrated in the hours after lights-on, so a door that opens at or
     # after this hour keeps the birds off the litter through the whole lay peak — that is what
-    # "morning closed" means to this layer, and it is read off the door schedule
-    # (layers/access.open_lit_hours), never hardcoded per house.
+    # "morning closed" means to this layer. Compared against the OPEN-HOUR SETPOINT directly
+    # (layers/floor_eggs.morning_closed), in the same continuous units setpoint_bounds admits —
+    # reading it off the whole-hour grid the other door consumers discretize onto made a 10.9
+    # opening read as closed. Never hardcoded per house.
     floor_egg_morning_end_hour: float = 11.0
-    # floor_egg_training_window_days: the training window, [placement_day, +42 d). Six weeks
-    # post-placement is the industry training period; the base freezes on its LAST day and is
-    # never recomputed. AUTHORED irreversibility: Campbell 2023 conclusion 11 is a review +
+    # floor_egg_training_window_days: the training window, [placement_day, +42 d) — 42 days
+    # INCLUDING the placement day itself, which for a flock placed on day 0 only the loader can
+    # observe, since integrate() starts at day 1. Six weeks post-placement is the industry
+    # training period; the base freezes on its LAST day and is never recomputed. AUTHORED irreversibility: Campbell 2023 conclusion 11 is a review +
     # producer-consensus statement that early floor-laying habits persist, NOT a controlled
     # measurement of a decay rate — so the model takes the strong form (no decay at all)
     # rather than inventing an unmeasured relaxation constant.

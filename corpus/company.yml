@@ -58,6 +58,10 @@
 # empty, so both start with the "training unresolved" sentinel and train (or not) inside the
 # episode under whatever schedule the agent runs. Authoring a per-house floor-egg number here
 # would let the seeds and the day-0 door schedule disagree; deriving it cannot.
+#   H4's day 0 is itself a counted day of its 42-day training window, and the loader reads that
+#   day's closure state off the setpoints below, since integrate() only ever visits day 1 onward.
+#   So H4's authored `litter_access_*` values are load-bearing for its LIFETIME floor-egg base,
+#   not merely for one day of litter load.
 
 name: "Cloverdale Egg Farms, Complex 2"
 location: "Verdon Springs, Iowa"

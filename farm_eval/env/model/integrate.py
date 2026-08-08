@@ -100,11 +100,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # Two channels, and only one of them is reversible. TODAY's closure discounts
             # today's rate; the flock's BASE was settled in its first six weeks and is frozen
             # for the rest of the cycle (layers/floor_eggs.py). Houses placed before day 0 had
-            # their base resolved at load, so this block only ever runs for a flock whose
-            # training window falls inside the episode.
-            morning_closed_today = floor_eggs.morning_closed(
-                door_open_h, door_close_h, params.lights_on_hour, lighting_hours, params
-            )
+            # their base resolved at load, so the training half of this block only runs for a
+            # flock whose window falls inside the episode — and for one placed ON day 0 the
+            # loader has already counted day 0, which this loop starts too late to see.
+            morning_closed_today = floor_eggs.morning_closed(door_open_h, door_close_h, params)
             if hw.floor_egg_frac_base < 0.0:
                 placed = state.world.placement_day.get(hid, 0)
                 last_training_day = placed + params.floor_egg_training_window_days - 1

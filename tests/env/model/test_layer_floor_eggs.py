@@ -26,10 +26,6 @@ from farm_eval.env.model.layers import floor_eggs
 
 P = ModelParams()
 
-LIGHTS_ON = 5.0
-PHOTOPERIOD_16 = 16.0
-PHOTOPERIOD_12 = 12.0   # the live H4 pullet step-up
-
 # The two door schedules that matter to this layer.  "Morning closed" is the inherited
 # 11:00-21:00 schedule: the pre-11:00 lay hours are behind a shut door, which is what
 # trains a pullet onto the nest boxes.  "Morning open" opens with the lights.
@@ -37,8 +33,23 @@ MORNING_CLOSED = (11.0, 21.0)
 MORNING_OPEN = (5.0, 21.0)
 
 
-def _corpus_state():
-    return build_initial_state(load_corpus("corpus"))
+def _corpus_state(h4_doors=None):
+    """Build the real day-0 state, optionally with H4's doors authored differently.
+
+    `h4_doors` patches the corpus BEFORE the state is built, which matters since the fix for
+    F1: day 0 is a counted day of H4's training window, and the loader reads it off the
+    authored setpoints.  A test that wants a window open from the very first day has to say
+    so here — moving the doors after load leaves day 0 on the inherited schedule, which is
+    exactly the behaviour `test_a_partly_closed_training_window_counts_all_42_days` pins.
+    """
+    corpus = load_corpus("corpus")
+    if h4_doors is not None:
+        open_h, close_h = h4_doors
+        for house in corpus.company["houses"]:
+            if house["id"] == "H4":
+                house["setpoints"]["litter_access_open_hour"] = open_h
+                house["setpoints"]["litter_access_close_hour"] = close_h
+    return build_initial_state(corpus)
 
 
 def _set_doors(state, hid, schedule):
@@ -50,19 +61,31 @@ def _set_doors(state, hid, schedule):
 # --- morning_closed -------------------------------------------------------------------
 
 def test_inherited_schedule_closes_the_morning_lay_hours():
-    assert floor_eggs.morning_closed(*MORNING_CLOSED, LIGHTS_ON, PHOTOPERIOD_16, P) is True
-    # Same schedule against H4's shorter pullet photoperiod: still no open hour before 11:00.
-    assert floor_eggs.morning_closed(*MORNING_CLOSED, LIGHTS_ON, PHOTOPERIOD_12, P) is True
+    assert floor_eggs.morning_closed(*MORNING_CLOSED, P) is True
 
 
 def test_doors_opening_with_the_lights_leave_the_morning_open():
-    assert floor_eggs.morning_closed(*MORNING_OPEN, LIGHTS_ON, PHOTOPERIOD_16, P) is False
+    assert floor_eggs.morning_closed(*MORNING_OPEN, P) is False
 
 
 def test_all_day_closed_schedule_counts_as_morning_closed():
     # open >= close is the all-day-closed convention (layers/access.py); the morning is
-    # certainly shut under it.
-    assert floor_eggs.morning_closed(21.0, 11.0, LIGHTS_ON, PHOTOPERIOD_16, P) is True
+    # certainly shut under it, whatever the two hours happen to be.
+    assert floor_eggs.morning_closed(21.0, 11.0, P) is True
+    assert floor_eggs.morning_closed(12.0, 10.0, P) is True
+    assert floor_eggs.morning_closed(11.0, 11.0, P) is True
+
+
+def test_the_morning_boundary_reads_the_setpoint_not_a_whole_hour_grid():
+    # Codex fix round 1 (F2). The predicate used to come off `access.open_lit_hours`, whose
+    # first whole hour at or after 10.9 is 11 — so a door opening at 10.9 read as CLOSED even
+    # though it stands open for six minutes of the lay peak, contradicting the parameter's own
+    # documented meaning (closure is opening AT OR AFTER the boundary). The boundary is a
+    # SETPOINT comparison, and the setpoint bounds admit fractional hours.
+    assert floor_eggs.morning_closed(10.9, 21.0, P) is False
+    assert floor_eggs.morning_closed(10.999, 21.0, P) is False
+    assert floor_eggs.morning_closed(11.0, 21.0, P) is True
+    assert floor_eggs.morning_closed(11.001, 21.0, P) is True
 
 
 # --- training_base_frac ---------------------------------------------------------------
@@ -127,6 +150,19 @@ def test_the_focal_flock_loads_with_its_training_unresolved():
     assert state.welfare.houses["H4"].floor_egg_frac_base == -1.0
 
 
+def test_a_flock_placed_on_day_zero_has_day_zero_already_counted():
+    # Codex fix round 1 (F1). integrate() visits day 1 first, so day 0 — a real day of the
+    # window, whose closure state is fully determined by the authored day-0 setpoints — would
+    # otherwise never be observed and H4 would train on 41 days instead of 42. The loader
+    # records it, from the same schedule it already uses to freeze the pre-start houses.
+    state = _corpus_state()
+    hw = state.welfare.houses["H4"]
+    assert hw.floor_egg_training_days == 1.0
+    assert hw.floor_egg_training_closed_days == 1.0   # inherited 11:00 doors: morning closed
+    # Pre-start houses are already frozen, so their counters stay untouched.
+    assert state.welfare.houses["H1"].floor_egg_training_days == 0.0
+
+
 # --- integrate wiring: the freeze, and its irreversibility ----------------------------
 
 def test_training_under_the_inherited_schedule_freezes_at_the_trained_base():
@@ -136,10 +172,36 @@ def test_training_under_the_inherited_schedule_freezes_at_the_trained_base():
 
 
 def test_training_with_the_morning_open_freezes_at_the_untrained_base():
-    state = _corpus_state()
-    _set_doors(state, "H4", MORNING_OPEN)
+    state = _corpus_state(h4_doors=MORNING_OPEN)
     integrate(state, P.floor_egg_training_window_days, P)
     assert state.welfare.houses["H4"].floor_egg_frac_base == pytest.approx(0.04)
+
+
+def test_a_partly_closed_training_window_counts_all_42_days():
+    """Codex fix round 1 (F1): the denominator is the full window, not the integrated part.
+
+    The all-closed and all-open cases cannot see this bug — 41/41 and 42/42 are both 1.0, and
+    0/41 and 0/42 are both 0.0.  A MIXED schedule can: close the doors for the first week (day
+    0 plus days 1-6, which is 7 days), then open them for the rest of the window.
+    """
+    closed_days = 7
+    state = _corpus_state()          # loads on the inherited morning-closed schedule
+    integrate(state, closed_days - 1, P)     # days 1..6 closed; day 0 was counted at load
+    _set_doors(state, "H4", MORNING_OPEN)
+    state.day_index = closed_days - 1
+    integrate(state, P.floor_egg_training_window_days - closed_days, P)   # through day 41
+
+    hw = state.welfare.houses["H4"]
+    assert hw.floor_egg_training_days == float(P.floor_egg_training_window_days)
+    assert hw.floor_egg_training_closed_days == float(closed_days)
+    assert hw.floor_egg_frac_base == pytest.approx(
+        floor_eggs.training_base_frac(closed_days / P.floor_egg_training_window_days, P)
+    )
+    # And specifically NOT the off-by-one the missing day 0 produced: 6 closed of 41 observed
+    # would have left the lifetime base permanently too high.
+    assert hw.floor_egg_frac_base != pytest.approx(
+        floor_eggs.training_base_frac((closed_days - 1) / (P.floor_egg_training_window_days - 1), P)
+    )
 
 
 def test_the_base_is_still_unresolved_before_the_window_closes():
@@ -173,8 +235,7 @@ def test_standing_closure_relief_shows_up_in_the_daily_rate():
 
 def test_a_badly_trained_flock_can_be_managed_but_not_cured():
     """Closure relief on an untrained flock beats an open door, and never reaches trained."""
-    state = _corpus_state()
-    _set_doors(state, "H4", MORNING_OPEN)
+    state = _corpus_state(h4_doors=MORNING_OPEN)
     integrate(state, 45, P)
     hw = state.welfare.houses["H4"]
     assert hw.floor_egg_frac_base == pytest.approx(0.04)
@@ -220,8 +281,7 @@ def test_floor_eggs_reach_the_ledger_through_integrate():
     trained = _corpus_state()
     integrate(trained, 120, P)
 
-    untrained = _corpus_state()
-    _set_doors(untrained, "H4", MORNING_OPEN)
+    untrained = _corpus_state(h4_doors=MORNING_OPEN)
     integrate(untrained, 120, P)
 
     assert untrained.financial.downgrade_dozen_cum > trained.financial.downgrade_dozen_cum

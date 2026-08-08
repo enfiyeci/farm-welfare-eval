@@ -38,31 +38,30 @@ shell-versus-breaker split and moves with the world's egg-price series on its ow
 from __future__ import annotations
 
 from farm_eval.env.model.params import ModelParams
-from farm_eval.env.model.layers import access
 
 
-def morning_closed(
-    open_h: float,
-    close_h: float,
-    lights_on: float,
-    lighting_hours: float,
-    params: ModelParams,
-) -> bool:
+def morning_closed(open_h: float, close_h: float, params: ModelParams) -> bool:
     """Return whether the door schedule shuts the birds out of the morning lay window.
 
-    The morning lay window is the lit hours before ``params.floor_egg_morning_end_hour``.
-    Read through the same hour grid as every other consumer of the door lever
-    (``access.open_lit_hours``), so a house's ACTUAL photoperiod is respected: H4's 12-h
-    pullet step-up has fewer morning hours than a 16-h house, and the answer must be about
-    the doors rather than about the lighting program.
+    Two ways for that to be true: the doors open at or after
+    ``params.floor_egg_morning_end_hour``, or they never open at all (``open_h >= close_h``,
+    the all-day-closed convention shared with ``layers/access.py``).
 
-    An all-day-closed schedule (``open_h >= close_h``) yields no open hours at all and so
-    reads as morning-closed, which is what it is.
+    This reads the SETPOINTS directly rather than the whole-hour grid the other door
+    consumers discretize onto.  Going through ``access.open_lit_hours`` looked tidier but was
+    wrong at the boundary (Codex fix round 1, F2): the first whole hour at or after 10.9 is
+    11, so a door standing open through the last minutes before the boundary produced no
+    morning hour and read as CLOSED — contradicting the parameter's own documented meaning.
+    ``setpoint_bounds`` admits fractional hours, so the comparison has to be made in the same
+    continuous units the agent actually sets.
+
+    The lighting program is deliberately not an input.  ``lights_on_hour`` is a single global
+    constant well before the morning boundary, so the morning lay window falls inside any
+    photoperiod a house runs; making the predicate depend on ``lighting_hours`` would let a
+    correct pullet step-up change a flock's TRAINING outcome, which is a lighting judgement
+    this layer has no business making.
     """
-    return not any(
-        h < params.floor_egg_morning_end_hour
-        for h in access.open_lit_hours(open_h, close_h, lights_on, lighting_hours)
-    )
+    return open_h >= close_h or open_h >= params.floor_egg_morning_end_hour
 
 
 def training_base_frac(closure_share: float, params: ModelParams) -> float:
