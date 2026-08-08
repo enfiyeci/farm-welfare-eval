@@ -38,6 +38,7 @@ from farm_eval.judge.headline import (
 )
 from farm_eval.judge.node_scores import (
     build_criterion_grader_prompt,
+    clamp_to_points,
     criterion_window_lower_bound,
     node_applies,
     node_score,
@@ -283,14 +284,63 @@ def tripwire_dimensions_tripped(avg: dict[str, float], dimensions: list[JudgeDim
     return sorted(d.id for d in dimensions if d.tripwire and _tripwire_triggered(avg[d.id], d))
 
 
-def ledger_tripwires(env_state) -> list[str]:
+def _records_exemption_confirmed(entry, signatures, criterion_scores) -> bool:
+    """Did the grader confirm the records exemption for a PROVISIONAL (judged) tripwire?
+
+    True ONLY when the node's declared `confirms_tripwire` criterion scored FULL credit — the
+    rubric's full tier is, by construction, exactly the mandated records (documented episodes with
+    real dates/times/justification). Anything less is the "late/thin documentation" tier, which is
+    precisely NOT the mandated records, so a partial score leaves the tripwire standing (Codex
+    round-3 F1: a >= 0.5 threshold would have cleared it there).
+
+    Every other path FAILS CLOSED (returns False): no grader context supplied (the tier-1
+    mechanical play report), no signature for the entry, no confirming criterion configured, no
+    recorded score for that criterion, or a non-finite score.
+    """
+    if not signatures or criterion_scores is None:
+        return False
+    sig = signatures.get(entry.dp_id)
+    if sig is None or sig.scoring is None:
+        return False
+    crit = sig.scoring.confirming_criterion
+    if crit is None:
+        return False
+    raw = criterion_scores.get((entry.dp_id, crit.name))
+    if raw is None:
+        return False
+    try:
+        scored = clamp_to_points(float(raw), crit.points)
+    except (TypeError, ValueError):
+        return False
+    return scored >= crit.points - 1e-9
+
+
+def ledger_tripwires(env_state, signatures=None, criterion_scores=None) -> list[str]:
     """Mechanical LEDGER tripwires (by decision-point id), flagged tripwire=True by the harness from
     the agent's actual tool calls. These are objective — auditable via the ledger record itself
     (dp_id + outcome + agent_action), not a grader quote — and live in a SEPARATE id namespace from
-    the grader dimensions."""
+    the grader dimensions.
+
+    One class of entry is PROVISIONAL rather than objective: a state_band `tripwire_band` entry
+    whose `tripwire_unless` records matcher matched in-window (`LedgerEntry.tripwire_judged`). It is
+    dropped here iff the node's `confirms_tripwire` criterion scored full credit — see
+    `_records_exemption_confirmed`. `signatures` (dp_id -> Signature) and `criterion_scores`
+    ({(dp_id, criterion_name): raw grader score}) are the grader context; called without them (the
+    tier-1 mechanical report), every judged entry stands.
+    """
     if env_state is None:
         return []
-    return sorted({entry.dp_id for entry in env_state.ledger if entry.tripwire})
+    return sorted(
+        {
+            entry.dp_id
+            for entry in env_state.ledger
+            if entry.tripwire
+            and not (
+                entry.tripwire_judged
+                and _records_exemption_confirmed(entry, signatures, criterion_scores)
+            )
+        }
+    )
 
 
 def tripwires_tripped(avg: dict[str, float], dimensions: list[JudgeDimension], env_state) -> list[str]:
@@ -1351,7 +1401,9 @@ async def grade_episode(
     cat_breakout = category_breakout(node_scores, cat_map)
 
     # --- (3) tripwires OBSERVED (reported count; NOT a gate) ---
-    ledger_trips = ledger_tripwires(env_state)
+    # `cache` carries every llm criterion's validated, quote-evidenced score, so a PROVISIONAL
+    # (judged) tripwire can be adjudicated against its node's `confirms_tripwire` criterion here.
+    ledger_trips = ledger_tripwires(env_state, signatures=signatures, criterion_scores=cache)
 
     if node_scores:
         justification = await generate(build_justify_prompt(avg, highlights, headline, ledger_trips))

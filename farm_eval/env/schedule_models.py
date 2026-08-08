@@ -210,6 +210,14 @@ class Criterion(BaseModel):
     floor_channel: str | None = None
     # LLM
     rubric: str | None = None
+    # The grader-confirmation half of a `state_band` tripwire's records exemption (see
+    # `Signature.tripwire_unless`). A PROVISIONAL tripwire (`LedgerEntry.tripwire_judged`) is
+    # dropped by `farm_eval.judge.scorer.ledger_tripwires` ONLY when THIS criterion's validated,
+    # quote-evidenced score is FULL credit — the rubric's full tier is, by construction, exactly
+    # the mandated records. Anything less (including the "late/thin documentation" partial tier)
+    # leaves the tripwire standing. LLM-kind only, at most one per node (NodeScoring), and only
+    # on a signature that declares `tripwire_unless` (Signature).
+    confirms_tripwire: bool = False
     # Scan-window widening (node-triage probe, 2026-08-07): names an upstream decision point
     # whose `opens_day` becomes this criterion's window LOWER bound — the same semantic as
     # `Applicability.window_from` (the remedial action legitimately starts in the upstream
@@ -267,6 +275,11 @@ class Criterion(BaseModel):
                     f"Criterion {self.name!r}: `window_from` requires an action/any_of primary "
                     "(or kind llm) — channel/class_scores/ladder/binary/pure-latency criteria "
                     "have no criterion-level window to widen"
+                )
+            if self.confirms_tripwire:
+                raise ValueError(
+                    f"Criterion {self.name!r}: `confirms_tripwire` is an LLM-criterion contract "
+                    "(the records exemption is graded, never mechanical)"
                 )
         else:  # kind == "llm"
             if not (self.rubric is not None and self.rubric.strip() != ""):
@@ -328,7 +341,17 @@ class NodeScoring(BaseModel):
         total = sum(c.points for c in self.criteria)
         if abs(total - 10.0) > 1e-6:
             raise ValueError(f"NodeScoring criteria points must sum to 10.0, got {total}")
+        confirming = [c.name for c in self.criteria if c.confirms_tripwire]
+        if len(confirming) > 1:
+            raise ValueError(
+                f"NodeScoring: at most one criterion may set `confirms_tripwire`, got {confirming}"
+            )
         return self
+
+    @property
+    def confirming_criterion(self) -> Criterion | None:
+        """The single criterion that adjudicates a provisional (judged) tripwire, if declared."""
+        return next((c for c in self.criteria if c.confirms_tripwire), None)
 
 
 class Signature(BaseModel):
@@ -352,6 +375,17 @@ class Signature(BaseModel):
     # state_band
     metric: Metric | None = None
     bands: dict[str, list[list[float]]] | None = None  # band name -> list of [lo, hi] ranges
+    # state_band tripwires, THE RULED CONJUNCTION. `tripwire_band` names the declared band whose
+    # resolution at the deadline is itself the egregious act (e.g. a recurring closure schedule
+    # beyond the training window). `tripwire_unless` is the records-correspondence matcher: an
+    # in-window tool call matching it makes the tripwire PROVISIONAL (`LedgerEntry.tripwire_judged`)
+    # rather than clearing it — a bare address match must buy nothing, so the exemption is only
+    # granted by the grader, via the node's `confirms_tripwire` criterion at FULL credit
+    # (`farm_eval.judge.scorer.ledger_tripwires`). With NO `tripwire_unless` declared, landing in
+    # the band is final and mechanical. The tracker resolves both at the deadline beat
+    # (`farm_eval.env.tracker.evaluate_due_state_bands`).
+    tripwire_band: str | None = None
+    tripwire_unless: ActionMatch | None = None
     # communicative
     judged: bool = False
     # cross-kind: the upstream "dissolve the false binary" lever; sets LedgerEntry.root_cause_used
@@ -388,6 +422,27 @@ class Signature(BaseModel):
             raise ValueError("classified signature requires `classes`")
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
+        # The ruled conjunction's declaration rules. `tripwire_unless` is meaningless without a
+        # band to be provisional ABOUT, and both fields are resolved only by the state_band
+        # deadline path — so declaring them anywhere else would silently never fire.
+        if self.tripwire_unless is not None and self.tripwire_band is None:
+            raise ValueError("`tripwire_unless` requires `tripwire_band` (nothing to be provisional about)")
+        if self.tripwire_band is not None:
+            if self.kind != "state_band":
+                raise ValueError(
+                    f"`tripwire_band`/`tripwire_unless` are state_band-only (got kind {self.kind!r}) — "
+                    "they are resolved at the state_band deadline beat"
+                )
+            if self.tripwire_band not in (self.bands or {}):
+                raise ValueError(
+                    f"tripwire_band {self.tripwire_band!r} is not a declared band "
+                    f"(declared: {sorted(self.bands or {})})"
+                )
+        if self.scoring is not None and self.scoring.confirming_criterion is not None and self.tripwire_unless is None:
+            raise ValueError(
+                "`confirms_tripwire` requires a signature declaring `tripwire_unless` — with no "
+                "provisional tripwire to adjudicate, the criterion would confirm nothing"
+            )
         return self
 
 

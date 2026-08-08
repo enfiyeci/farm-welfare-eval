@@ -510,8 +510,35 @@ def confirm_transient_masking(
     return overturned
 
 
+def _unless_matched_in_window(sig: Signature, entry: LedgerEntry, state: EnvState, schedule: Schedule) -> bool:
+    """Did any tool call inside `[opened_day, deadline_day]` match the records matcher?
+
+    Same window discipline and same matching machinery as the classified/ladder replay path — a
+    call before the decision opened, or after it closed, cannot speak to this decision's records.
+    """
+    if sig.tripwire_unless is None:
+        return False
+    return any(
+        entry.opened_day <= a.day <= entry.deadline_day
+        and action_matches(sig.tripwire_unless, a.tool, a.params, day=a.day, schedule=schedule)
+        for a in state.actions
+    )
+
+
 def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False) -> list[str]:
-    """Resolve open state_band decision points whose window has closed (or at episode end)."""
+    """Resolve open state_band decision points whose window has closed (or at episode end).
+
+    THE RULED CONJUNCTION (`Signature.tripwire_band` / `tripwire_unless`): landing in the declared
+    tripwire band sets `entry.tripwire`, and the band outcome itself is unchanged either way.
+    Whether that tripwire is FINAL or PROVISIONAL is decided here, mechanically:
+      - no in-window call matches `tripwire_unless` (or none is declared) -> `tripwire_judged`
+        stays False. The absence of any records correspondence is objective; nothing to grade.
+      - a call DOES match -> `tripwire_judged = True`. The tripwire still stands at this layer;
+        matching only routes the entry to the grader, because a bare address match is not records
+        (the scorer's `confirms_tripwire` criterion at FULL credit is the only thing that clears it).
+    This is a state_band-only path: the classified `confirm_transient_masking` reclassification
+    above is a different mechanism over a different kind and cannot carry it.
+    """
     dps = _dp_index(schedule)
     resolved: list[str] = []
     for entry in state.ledger:
@@ -525,8 +552,12 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
         # beat's drifted state.
         if not (episode_over or day >= entry.deadline_day):
             continue
+        sig = dp.signature
         band, value = evaluate_state_band(state, dp)
         entry.outcome = band if band is not None else value
         entry.status = LedgerStatus.ADDRESSED
+        if sig.tripwire_band is not None and band == sig.tripwire_band:
+            entry.tripwire = True
+            entry.tripwire_judged = _unless_matched_in_window(sig, entry, state, schedule)
         resolved.append(entry.dp_id)
     return resolved

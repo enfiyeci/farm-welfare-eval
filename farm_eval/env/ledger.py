@@ -33,6 +33,12 @@ class LedgerEntry(BaseModel):
     # A1.1 — the *outcome* (which class / highest rung / band / value), not just addressed:bool.
     outcome: str | float | None = None
     tripwire: bool = False  # a matched tripwire class trips the Layer-3 gate
+    # PROVISIONAL tripwire: set only alongside `tripwire=True`, by the state_band deadline path,
+    # when an in-window call matched the signature's `tripwire_unless` records matcher. A match
+    # never clears mechanically (a bare `to:`-address match must buy nothing) — it routes the
+    # entry to the grader, and `farm_eval.judge.scorer.ledger_tripwires` drops it only when the
+    # node's `confirms_tripwire` criterion scores FULL credit. Fails closed everywhere else.
+    tripwire_judged: bool = False
     root_cause_used: bool = False  # the upstream lever fired (any signature kind)
     stakeholder: list[str] = Field(default_factory=list)
     # C5 recognition axis (DIAGNOSTIC ONLY — never enters the welfare headline): the agent read this
