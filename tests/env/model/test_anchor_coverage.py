@@ -21,6 +21,8 @@ ANCHORS = {
     "staffing 4.1pp mortality gap at u=1": "test_full_cycle_understaffed_mortality_reproduces_the_4_1pp_gap_at_u_1",
     "staffing floor-egg 10-15% band": "test_floor_egg_ceiling_matches_the_10_to_15_pct_band",
     "staffing 40k hens/FTE full adequacy": "test_full_adequacy_sits_at_the_40k_hens_per_fte_anchor",
+    "floor-manure share 0.505 for the 11:00-21:00 door schedule":
+        "test_inherited_schedule_matches_the_0_505_deposition_anchor",
 }
 
 

@@ -4,6 +4,10 @@ import math
 
 from pydantic import BaseModel, Field, model_validator
 
+# Length of the diurnal hourly weight tables (w_dep_hourly / w_opp_hourly): the reference
+# 16-h photoperiod the deposition and opportunity anchors were measured at.
+HOURLY_WEIGHT_TABLE_LEN = 16
+
 
 class ModelParams(BaseModel):
     # Harm-accumulator thresholds (Task 12: integrate orchestrator)
@@ -276,6 +280,27 @@ class ModelParams(BaseModel):
     # fallback absent an authored schedule. Not itself a setpoint; day-0 houses are all
     # authored explicitly (see company.yml), so this only guards unauthored/test states.
     lights_on_hour: float = 5.0
+    # --- Diurnal litter-access weights (layers/access.py) -------------------------------
+    # Two hourly weight tables over the REFERENCE 16-h photoperiod: entry i is the clock
+    # hour `lights_on_hour + i` (so index 0 is 05:00 at the default lights-on). Both sum to
+    # 1.0 (validated below); layers/access.py renormalizes them over whatever lit window a
+    # house actually runs, so a shorter photoperiod is not itself scored as reduced access.
+    # Hours beyond the table (a photoperiod longer than 16 h) carry zero weight.
+    #
+    # DERIVED share / AUTHORED shape: morning-heavy deposition such that the 11:00-21:00
+    # share is 0.505 of the 05:00-21:00 total (Oliveira floor manure 0.53 vs 1.05
+    # kg/100 hens/d when the doors open late). The 0.505 anchor is DERIVED from that
+    # measured pair; the flat morning/afternoon plateaus are an AUTHORED shape (no
+    # published hour-by-hour deposition curve), chosen as the simplest form that puts
+    # 49.5 % of the day's floor manure in the first six lit hours.
+    w_dep_hourly: list[float] = [.0825] * 6 + [.0505] * 10   # 6 morning h = 49.5 % of the day
+    # SOURCED shape (Vestergaard Fig. 3: near-zero dustbathing initiation before 11:00, peak
+    # 12:00-13:00), afternoon breadth per Campbell 2016 (delegated finding, not read in full);
+    # WEIGHTS AUTHORED to that shape, sum 1.0. This is the behavioural-opportunity currency:
+    # what the birds lose by a closed door, as distinct from the manure they do not deposit.
+    w_opp_hourly: list[float] = [.005, .005, .005, .005, .01, .03,   # 05-11
+                                 .09, .13, .12, .11, .10, .10,      # 11-17
+                                 .09, .08, .07, .05]                # 17-21
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
@@ -337,6 +362,26 @@ class ModelParams(BaseModel):
             for vf in value_fields:
                 if len(getattr(self, vf)) != len(ages):
                     raise ValueError(f"{vf} must be the same length as {age_field}")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_hourly_weight_tables(self):
+        # The diurnal weight tables cover the reference 16-h photoperiod hour by hour and
+        # are used as normalized shares. A table of the wrong length silently drops or
+        # invents lit hours; one that does not sum to 1.0 silently rescales every derived
+        # share; and a negative entry can push a renormalized share outside [0, 1] while
+        # still summing to 1.0 — all three are config mistakes that must fail here, loudly.
+        for name in ("w_dep_hourly", "w_opp_hourly"):
+            table = getattr(self, name)
+            if len(table) != HOURLY_WEIGHT_TABLE_LEN:
+                raise ValueError(
+                    f"{name} must have {HOURLY_WEIGHT_TABLE_LEN} entries, got {len(table)}"
+                )
+            if any(w < 0.0 for w in table):
+                raise ValueError(f"{name} entries must be non-negative, got {table}")
+            total = math.fsum(table)
+            if not math.isclose(total, 1.0, abs_tol=1e-9):
+                raise ValueError(f"{name} must sum to 1.0, got {total}")
         return self
 
     @model_validator(mode="after")
