@@ -51,6 +51,52 @@ def test_build_initial_state_from_corpus():
     assert state.world.setpoints["H_SENSOR"]["ventilation"] == 1.0
 
 
+def _house(bird_count, litter_area_m2=None):
+    house = {
+        "id": "H_TEST",
+        "bird_count": bird_count,
+        "welfare": {
+            "ammonia_ppm": 4.0, "co2_ppm": 2000.0, "litter_moisture": 17.0,
+            "lighting_lux": 10.0, "lighting_hours": 16.0, "heat_stress_index": 0.0,
+            "stocking_density": 1.0,
+        },
+    }
+    if litter_area_m2 is not None:
+        house["litter_area_m2"] = litter_area_m2
+    return house
+
+
+def test_an_occupied_house_without_litter_area_m2_fails_loudly():
+    # Task 7 (feat/litter-lever review round 1): a missing litter_area_m2 used to silently
+    # read as hens_per_m2_litter=0 -> density_factor=0 -> the whole floor_moisture_excess
+    # term goes dark for that house, with no error. That is a corpus-authoring mistake, not
+    # a valid state, so it must fail at the load boundary.
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000)]})
+    with pytest.raises(ValueError, match="H_TEST") as exc_info:
+        build_initial_state(corpus)
+    assert "litter_area_m2" in str(exc_info.value)
+
+
+def test_an_occupied_house_with_non_positive_litter_area_m2_fails_loudly():
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=0.0)]})
+    with pytest.raises(ValueError, match="H_TEST"):
+        build_initial_state(corpus)
+
+
+def test_an_empty_house_without_litter_area_m2_is_fine():
+    # bird_count=0: there is no flock to load the litter, so the guard does not apply and
+    # the field keeps its benign 0.0 default (matching H6's real authored convention).
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(0)]})
+    state = build_initial_state(corpus)
+    assert state.world.litter_area_m2["H_TEST"] == 0.0
+
+
+def test_an_occupied_house_with_authored_litter_area_m2_loads_fine():
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=52.0)]})
+    state = build_initial_state(corpus)
+    assert state.world.litter_area_m2["H_TEST"] == 52.0
+
+
 def test_load_corpus_keys_documents_by_path_relative_to_documents_dir(tmp_path):
     # The authored schedule references body_refs as subpaths (e.g. "emails/placement_d0.md").
     # load_corpus must walk documents/ recursively and key each file by its path relative to

@@ -207,8 +207,24 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         welfare.houses[hid] = HouseWelfare.model_validate(house["welfare"])
         world.setpoints[hid] = dict(house.get("setpoints", {}))
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
-        world.litter_area_m2[hid] = float(house.get("litter_area_m2", 0.0))
-        world.bird_count[hid] = int(house["bird_count"])
+        litter_area = float(house.get("litter_area_m2", 0.0))
+        birds = int(house["bird_count"])
+        # An OCCUPIED house with no (or non-positive) litter_area_m2 is a corpus-authoring
+        # mistake, not a valid "no litter floor" state: layers/density.py reads a missing area
+        # as hens_per_m2_litter=0, which zeroes density_factor and therefore the WHOLE
+        # floor_moisture_excess term in litter.litter_moisture_step -- silently, with no error,
+        # for every occupied house that omits this field. Fail loud at the load boundary
+        # instead (an EMPTY house, birds<=0, has no litter dynamics to speak of and may keep
+        # the benign 0.0 default).
+        if birds > 0 and litter_area <= 0.0:
+            raise ValueError(
+                f"house {hid!r} has bird_count={birds} (occupied) but no positive "
+                "litter_area_m2 authored -- this is required for an occupied house "
+                "(it drives layers/density.py's floor-moisture-excess term); "
+                "author corpus company.yml's litter_area_m2 for this house"
+            )
+        world.litter_area_m2[hid] = litter_area
+        world.bird_count[hid] = birds
         world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))
         world.placement_day[hid] = -int(round((float(house.get("age_wk_at_start", 0.0)) - 17.0) * 7))
         # Floor eggs: day 0 is a real day of the world and the loader is the only place that
