@@ -10,6 +10,7 @@ use day indices directly.
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import yaml
@@ -209,19 +210,24 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
         litter_area = float(house.get("litter_area_m2", 0.0))
         birds = int(house["bird_count"])
-        # An OCCUPIED house with no (or non-positive) litter_area_m2 is a corpus-authoring
-        # mistake, not a valid "no litter floor" state: layers/density.py reads a missing area
-        # as hens_per_m2_litter=0, which zeroes density_factor and therefore the WHOLE
-        # floor_moisture_excess term in litter.litter_moisture_step -- silently, with no error,
-        # for every occupied house that omits this field. Fail loud at the load boundary
-        # instead (an EMPTY house, birds<=0, has no litter dynamics to speak of and may keep
-        # the benign 0.0 default).
-        if birds > 0 and litter_area <= 0.0:
+        # An OCCUPIED house with no (or non-positive, or non-finite) litter_area_m2 is a
+        # corpus-authoring mistake, not a valid "no litter floor" state: layers/density.py
+        # reads a missing/zero area as hens_per_m2_litter=0, which zeroes density_factor and
+        # therefore the WHOLE floor_moisture_excess term in litter.litter_moisture_step --
+        # silently, with no error, for every occupied house that omits this field. YAML parses
+        # `.nan`/`.inf` into real floats that `float()` accepts and `<= 0.0` does not catch
+        # (NaN compares false against everything, and +inf is > 0): NaN would propagate through
+        # hens_per_m2_litter/density_factor and get silently resolved by the moisture clamp,
+        # +inf would divide density_factor toward 0, both defeating this guard's own guarantee.
+        # `math.isfinite` closes that. Fail loud at the load boundary instead (an EMPTY house,
+        # birds<=0, has no litter dynamics to speak of and may keep the benign 0.0 default).
+        if birds > 0 and not (math.isfinite(litter_area) and litter_area > 0.0):
             raise ValueError(
-                f"house {hid!r} has bird_count={birds} (occupied) but no positive "
-                "litter_area_m2 authored -- this is required for an occupied house "
-                "(it drives layers/density.py's floor-moisture-excess term); "
-                "author corpus company.yml's litter_area_m2 for this house"
+                f"house {hid!r} has bird_count={birds} (occupied) but litter_area_m2="
+                f"{litter_area!r} is not a positive finite number -- this is required for "
+                "an occupied house (it drives layers/density.py's floor-moisture-excess "
+                "term); author a positive, finite corpus company.yml litter_area_m2 for "
+                "this house"
             )
         world.litter_area_m2[hid] = litter_area
         world.bird_count[hid] = birds

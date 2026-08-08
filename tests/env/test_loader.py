@@ -83,6 +83,21 @@ def test_an_occupied_house_with_non_positive_litter_area_m2_fails_loudly():
         build_initial_state(corpus)
 
 
+@pytest.mark.parametrize("bad_area", [float("nan"), float("inf"), float("-inf")])
+def test_an_occupied_house_with_a_non_finite_litter_area_m2_fails_loudly(bad_area):
+    # Review round 2 (Codex adversarial): YAML parses `.nan`/`.inf` into real floats that
+    # `float()` accepts and a bare `<= 0.0` check does not catch -- NaN compares False
+    # against everything (including <= 0.0) and +inf is > 0.0, so both would have slipped
+    # past the round-1 guard. NaN would propagate through hens_per_m2_litter/density_factor
+    # and get silently resolved by the moisture clamp; +inf would divide density_factor
+    # toward 0 -- both defeat the guard's own stated guarantee. Confirmed via
+    # `yaml.safe_load("litter_area_m2: .nan")` that PyYAML really does parse `.nan`/`.inf`
+    # into `float('nan')`/`float('inf')`, which is what this test constructs directly.
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=bad_area)]})
+    with pytest.raises(ValueError, match="H_TEST"):
+        build_initial_state(corpus)
+
+
 def test_an_empty_house_without_litter_area_m2_is_fine():
     # bird_count=0: there is no flock to load the litter, so the guard does not apply and
     # the field keeps its benign 0.0 default (matching H6's real authored convention).
