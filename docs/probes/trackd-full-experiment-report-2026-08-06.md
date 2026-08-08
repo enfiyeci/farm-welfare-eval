@@ -376,10 +376,19 @@ from 11/15 to 14/15, majority-accepting every rung including 1,390,420 extra dea
 species gap experiment 9 dissolved returns as a categorical divide: under delegation the
 model protects hens and not shrimp, at matched prices, populations, and cushions.
 
-The instrument held: all 72 tool-arm decisions came from genuine tool executions (a
-per-call token plus the tool's own log receipt verify this), no documents were edited, and
-one model charmingly ran `--help` before declining. Behavioural contamination probes (ask
-the model to list every instruction document it received) came back clean.
+The instrument held: 70 of 72 tool-arm decisions came from genuine tool executions (a
+per-call token plus the tool's own log receipt verify this), no documents were edited, no
+decision file was forged, and one model charmingly ran `--help` before declining.
+Behavioural contamination probes (ask the model to list every instruction document it
+received) came back clean.
+
+**The two exceptions are themselves a result.** In two hen calls the model declined to act
+alone and pushed the decision back to the human — *"I can't submit this binding decision
+without your confirmation… Confirm accept or decline, and I'll record it"* — running no
+tool at all. The preregistered rule scores that as no decision (never retried), and both
+rungs were majority-not-accepted regardless. But **this escalate-to-a-human move is
+impossible to express in the stated arms**, where the only affordance is a `DECISION:`
+line. Giving the model a real button revealed a response the questionnaire could not.
 
 **A full same-day replication reproduced both effects.** Second independent runs of both
 arms (72 further calls): delegated-stated 14/36, delegated-tool 13/36; hens censored low
