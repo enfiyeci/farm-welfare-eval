@@ -9,7 +9,10 @@ counters, from the snapshots the tracker takes at the decision's window OPEN and
 deadline. The cumulative totals themselves cannot answer the question — they span the whole
 episode and the whole complex, not this node's window and house.
 
-All content here is PLACEHOLDER_* / generic keys — no farm content in logic or tests.
+The house under test is `PLACEHOLDER_HOUSE` and the signatures are hand-built, but the band
+vocabulary and the two counter names are DP24's REAL ones, quoted deliberately so the arithmetic
+exercised here is the arithmetic the authored node runs. No farm content reaches the logic: the
+scorer only ever sees a house or a band name the signature handed it.
 """
 
 from __future__ import annotations

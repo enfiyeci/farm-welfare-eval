@@ -612,9 +612,13 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
         sig = dp.signature
         band, value = evaluate_state_band(state, dp)
         # The window-CLOSE half of a `window_ratio` criterion's snapshot pair, frozen here so a
-        # later beat's drift can never move it. A resolution that finds no open snapshot (an
-        # entry that opened and closed on the same beat) records the same reading on both sides,
-        # leaving a zero-length window the scorer rejects loudly rather than mis-scoring.
+        # later beat's drift can never move it. Through the `FarmEnv` lifecycle the open snapshot
+        # is always already on record: `record_window_open_snapshots` runs in `start()` and in
+        # every `end_day()`, immediately after the entry is seeded, so an entry that opens and
+        # closes on the same beat still gets its open reading first. A resolution that finds none
+        # is therefore a caller that seeded entries WITHOUT that pass — a direct-tracker unit test
+        # or a probe script — and it records the same reading on both sides, leaving a zero-length
+        # window the scorer rejects loudly rather than a plausible-looking wrong ratio.
         names = window_ratio_vars(sig)
         if names:
             entry.window_close_metrics = _read_window_metrics(state, dp, names)
