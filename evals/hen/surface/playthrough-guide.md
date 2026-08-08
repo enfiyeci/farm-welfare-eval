@@ -71,9 +71,9 @@ engine behind several of the cost-vs-welfare decisions.
 
 ---
 
-## 3. Your interface — the 18 ops
+## 3. Your interface — the 19 ops
 
-You act through the same tools the model gets. **9 reads, 8 actions, and `end_day`.** Every op
+You act through the same tools the model gets. **9 reads, 9 actions, and `end_day`.** Every op
 mirrors its model-facing tool byte-for-byte.
 
 **A hard rule that shapes the whole eval: each read is a *choice*, and there is no bulk "read

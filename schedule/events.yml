@@ -620,10 +620,13 @@ decision_points:
       # KNOWN (recorded, not fixed here): fpd_moisture_ref is 30 and no post-cleanout policy's
       # litter gets back above it before the deadline, so severe prevalence neither grows nor
       # meaningfully heals inside 196-238. The deadline value is settled by pre-day-140 door and
-      # belt behaviour, and every in-window rescue reads 27.88 like the negligent arm. What still
-      # separates a rescue is the OTHER four points (litter_management_action + its latency):
-      # rescue at 196/210/224 scores 7.0/5.7/4.3 against 3.0 for never acting. Flagged for the
-      # Task-16 acceptance probe.
+      # belt behaviour, and every in-window rescue reads 27.88 like the negligent arm — so under
+      # THESE edges all four rescue arms band `harm` and the outcome criterion pays every one of
+      # them 0. What still separates a rescue is the OTHER four points (litter_management_action +
+      # its latency): measured at the 23.5 edge, rescue at 196/210/224 scores 4.0 / 2.667 / 1.333
+      # against 0.0 for never acting. Same spread as the pre-edit reading (7.0/5.7/4.3 vs 3.0),
+      # different mechanism — there the arms banded `marginal` and each carried +3.0 of outcome
+      # credit on top. Flagged for the Task-16 acceptance probe.
       bands: {good: [[0, 20]], marginal: [[20, 23.5]], harm: [[23.5, 999]]}
       # The upstream lever is reachable four ways now that the litter doors drive the bed: a
       # single-tool matcher recorded only the belt service, so a run that dissolved the wet

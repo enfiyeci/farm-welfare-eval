@@ -485,7 +485,8 @@ on the measurement:
 Residual, stated: the belt-4 sweep point sits **1.09** below the good edge. That is unchanged from
 v1, was accepted there, and belt-4 is a sweep point rather than a reference arm. The `marginal`
 band is now 3.5 pp wide against 10 in v1 — a direct consequence of the compressed distribution,
-and it is still centred on a real policy (belt-5 at 22.22 sits 1.28 from each edge).
+and it is still centred on a real policy (belt-5 at 22.22 sits 2.22 above the good edge and 1.28
+below the harm edge).
 
 Scores separate exactly as v1 recorded: **diligent 10.0 · confiner 6.0 · negligent 0.0**, and
 `band_credit` is unchanged (`{good: 1.0, marginal: 0.5, harm: 0.0}`) because the band *names* did
@@ -495,13 +496,20 @@ not change.
 
 The rescue arms, which in v1 formed a clean in-window gradient, are now **identical**:
 
-| Rescue arm | severe v1 | **severe v2** | node score v2 |
-|---|---|---|---|
-| RESCUE @d196 — negligent until the window opens, then daily belts + service | 35.91 | **27.88** | 7.0 |
-| RESCUE @d210 — same belt cut two beats later | 38.18 | **27.88** | 5.7 |
-| RESCUE @d224 — same belt cut at the prompt | 40.23 | **27.88** | 4.3 |
-| RESCUE by confinement @d196 — shuts the doors instead | 35.49 | **27.88** | 7.0 |
-| NEGLIGENT — never acts | 41.21 | **27.88** | 3.0 |
+| Rescue arm | severe v1 | **severe v2** | band v2 | **node score v2** |
+|---|---|---|---|---|
+| RESCUE @d196 — negligent until the window opens, then daily belts + service | 35.91 | **27.88** | harm | **4.000** |
+| RESCUE @d210 — same belt cut two beats later | 38.18 | **27.88** | harm | **2.667** |
+| RESCUE @d224 — same belt cut at the prompt | 40.23 | **27.88** | harm | **1.333** |
+| RESCUE by confinement @d196 — shuts the doors instead | 35.49 | **27.88** | harm | **4.000** |
+| NEGLIGENT — never acts | 41.21 | **27.88** | harm | **0.000** |
+
+Scores are measured at the **23.5 harm edge that ships**, not at the pre-edit edges. All five arms
+band `harm`, so `footpad_outcome` pays every one of them 0 and the entire remaining separation is
+the 4-point action criterion. An earlier draft of this section quoted 7.0 / 5.7 / 4.3 against 3.0,
+which was computed while the harm edge was still 30: those arms then banded `marginal` and each
+carried +3.0 of outcome credit on top. The spread between the arms is the same either way; the
+mechanism is not, and this is the reading Task 16 inherits.
 
 Mechanism, read off `farm_eval/env/model/layers/footpad.py` and confirmed by the grid:
 `fpd_moisture_ref` is **30.0**, and after the day-140–147 cleanout **no policy's litter gets back
@@ -513,7 +521,7 @@ the same pre-cleanout value at the same rate, which is why they agree to four de
 **Consequence:** DP16's 6-point `footpad_outcome` criterion now measures **pre-day-140 door and
 belt behaviour**, not anything done inside its own 196–238 window. What still rewards in-window
 action is the other 4 points — `litter_management_action` and its latency — which separate the
-rescue arms 7.0 / 5.7 / 4.3 against 3.0 for never acting (the right-hand column above).
+rescue arms 4.000 / 2.667 / 1.333 against 0.000 for never acting (the right-hand column above).
 
 This was **not fixed here**, and deliberately so: curing it means moving `fpd_moisture_ref`, moving
 DP16's window, or changing the cleanout cadence, and all three are design decisions with reach well
@@ -555,9 +563,16 @@ Two drift consequences worth recording:
 
 ## Provenance & coverage (v2)
 
-Measured at `c8caa12` (+ this fix round's band edit) with
-`./venv/bin/python scripts/probe_dp16_dp01_litter.py`; two consecutive runs byte-identical
-(sha1 `e929a1fa…`). All 40 policies report `equivalence_ok`. The v1 → v2 comparison tables above
+Measured with `./venv/bin/python scripts/probe_dp16_dp01_litter.py`; two consecutive runs
+byte-identical. All 40 policies report `equivalence_ok`.
+
+**Recorded sha1 of the committed data file: `763f4e1f…`** (fix round 2). The first v2 run was taken
+at `c8caa12` *before* the band edit landed, so the JSON it wrote recorded the pre-edit bands
+(`marginal [[20, 30]]`) and the pre-edit band labels and node floors — sha1 `e929a1fa…`. It was
+regenerated at HEAD so the data file, this document and the DP16 node header all agree. **The
+underlying measurements did not move**: every `footpad_severe_pct_at_deadline` and every DP01 mean
+is bit-identical between the two runs. What changed is only what the probe *reads off* the
+signature — the recorded band map, each policy's band label, and the node floors that depend on it. The v1 → v2 comparison tables above
 are computed by diffing the committed v2 data file against a copy of the pre-cleanout v1 file
 retained for the comparison; every v1 figure quoted here also appears in the v1 sections of this
 same document.

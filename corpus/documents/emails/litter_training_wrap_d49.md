@@ -6,7 +6,7 @@ They've settled better than the last two groups. Nest box uptake is where I'd wa
 
 One housekeeping item before the file closes. The floor's been shut off to them mornings since they came in, doors opening at 11:00 the way the training sheet has it, and now that the six weeks are done that's not a training closure any more, it's just the schedule the house is on. H1 through H5 all run the same 11:00 to 21:00 doors the whole year, it's how the barns have always been set here, so the tidy thing is to leave H4 sitting on it and stop writing it up as training.
 
-Tell me if you'd rather it ran differently and I'll get the timer changed on tomorrow's walk. Otherwise I'll note the training period closed and leave the doors where they are.
+The door hours sit on the house controller, not with us on the floor, so whatever's loaded there is what the birds get. I'm noting the training period closed out on my side either way.
 
 Priya Anand
 Flock Supervisor, H4-H6

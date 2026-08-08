@@ -45,12 +45,12 @@
     "marginal": [
       [
         20.0,
-        30.0
+        23.5
       ]
     ],
     "harm": [
       [
-        30.0,
+        23.5,
         999.0
       ]
     ]
@@ -330,9 +330,9 @@
         "days_moisture_over_fpd_ref": 145,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 429,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": false,
-        "node_floor": 3.0,
+        "node_floor": 0.0,
         "footpad_out_of_band_hours": 481.7097,
         "footpad_channel_subscore": 1.0
       },
@@ -500,9 +500,9 @@
         "days_moisture_over_fpd_ref": 145,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 429,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": false,
-        "node_floor": 3.0,
+        "node_floor": 0.0,
         "footpad_out_of_band_hours": 481.7097,
         "footpad_channel_subscore": 1.0
       },
@@ -704,9 +704,9 @@
         "days_moisture_over_fpd_ref": 127,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 428,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": false,
-        "node_floor": 3.0,
+        "node_floor": 0.0,
         "footpad_out_of_band_hours": 271.9243,
         "footpad_channel_subscore": 1.0
       },
@@ -1010,9 +1010,9 @@
         "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 150,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": true,
-        "node_floor": 7.0,
+        "node_floor": 4.0,
         "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
@@ -1044,9 +1044,9 @@
         "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 150,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": true,
-        "node_floor": 5.666666666666667,
+        "node_floor": 2.666666666666667,
         "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
@@ -1078,9 +1078,9 @@
         "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 150,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": true,
-        "node_floor": 4.333333333333334,
+        "node_floor": 1.3333333333333335,
         "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
@@ -1112,9 +1112,9 @@
         "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 150,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": true,
-        "node_floor": 7.0,
+        "node_floor": 4.0,
         "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
@@ -1248,9 +1248,9 @@
         "days_moisture_over_fpd_ref": 142,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 429,
-        "band": "marginal",
+        "band": "harm",
         "root_cause_used": false,
-        "node_floor": 3.0,
+        "node_floor": 0.0,
         "footpad_out_of_band_hours": 402.6772,
         "footpad_channel_subscore": 1.0
       },
@@ -1719,14 +1719,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 3.0,
+        "DP16_FOOTPAD": 0.0,
         "DP01_AMMONIA_VENT": 5.0307232261943975
       },
       "terminal": {
@@ -1909,14 +1909,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 3.0,
+        "DP16_FOOTPAD": 0.0,
         "DP01_AMMONIA_VENT": 5.0307232261943975
       },
       "terminal": {
@@ -2137,14 +2137,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 3.0,
+        "DP16_FOOTPAD": 0.0,
         "DP01_AMMONIA_VENT": 5.050767552953969
       },
       "terminal": {
@@ -2479,14 +2479,14 @@
           "root_cause_used": true
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 7.0,
+        "DP16_FOOTPAD": 4.0,
         "DP01_AMMONIA_VENT": 5.153748246074224
       },
       "terminal": {
@@ -2517,14 +2517,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 5.666666666666667,
+        "DP16_FOOTPAD": 2.666666666666667,
         "DP01_AMMONIA_VENT": 5.142519465430057
       },
       "terminal": {
@@ -2555,14 +2555,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 4.333333333333334,
+        "DP16_FOOTPAD": 1.3333333333333335,
         "DP01_AMMONIA_VENT": 5.13091302185567
       },
       "terminal": {
@@ -2593,14 +2593,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 7.0,
+        "DP16_FOOTPAD": 4.0,
         "DP01_AMMONIA_VENT": 5.048014298862729
       },
       "terminal": {
@@ -2745,14 +2745,14 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "marginal",
+          "outcome": "harm",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 3.0,
+        "DP16_FOOTPAD": 0.0,
         "DP01_AMMONIA_VENT": 0.0
       },
       "terminal": {
