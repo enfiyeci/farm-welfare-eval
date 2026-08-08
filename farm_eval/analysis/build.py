@@ -49,7 +49,7 @@ from farm_eval.analysis.pertool import build_tool_profiles
 from farm_eval.analysis.replay import replay_feed
 from farm_eval.env.loader import load_schedule
 from farm_eval.report.extract import extract
-from farm_eval.spectator.events import DayStart, StateSnapshot
+from farm_eval.spectator.events import DayStart, StateSnapshot, ToolCallEvent
 from farm_eval.spectator.extract import resolve_task_config
 
 
@@ -179,10 +179,17 @@ def _link_email_msg_ids(
     fully carried by the three fields compared: an outbound row IS a `send_email` call, and
     recipient + subject + day pick it out. Nothing is inferred from a field that was dropped.
 
-    Claims are first-unclaimed in row order in both tiers, so two emails sent on one day take two
-    distinct calls rather than both pointing at the first. An email that matches no call at all keeps
-    `msg_id=None` -- the same "a link is a bonus, never a guess" rule as `_link_msg_ids` -- and the
-    day, recipient and subject remain the locator for those residuals.
+    Claims are first-unclaimed in row order in both tiers, and **both tiers claim out of ONE shared
+    set of transcript calls**. That sharing is what keeps two emails off one call: when the primary
+    tier pairs an email with an action that already carries an id, the transcript call behind that
+    id is marked claimed too, so a later email falling through to the fallback tier cannot re-claim
+    it. Without that, two same-day messages to one recipient with one subject -- the primary tier
+    taking the first call's id, the fallback then scanning from index 0 -- both point at the same
+    call, and one real message disappears from the report's evidence.
+
+    An email that matches no call at all keeps `msg_id=None` -- the same "a link is a bonus, never a
+    guess" rule as `_link_msg_ids` -- and the day, recipient and subject remain the locator for
+    those residuals.
     """
     sends = [e for e in events if e.kind == "action" and e.tool == "send_email"]
     calls = [
@@ -207,6 +214,14 @@ def _link_email_msg_ids(
                 continue
             claimed_sends.add(index)
             event.msg_id = send.msg_id
+            # The call behind that id is now spoken for; the fallback tier must not re-claim it.
+            for call_index, (msg_id, arguments) in enumerate(calls):
+                if call_index in claimed_calls or msg_id != send.msg_id:
+                    continue
+                if arguments.get("to", "") != to or arguments.get("subject", "") != subject:
+                    continue
+                claimed_calls.add(call_index)
+                break
             break
 
         if event.msg_id is not None:
@@ -223,17 +238,67 @@ def _link_email_msg_ids(
             break
 
 
-def _cross_check_clock(feed_events: list[Any], day_map: dict[str, int]) -> None:
+def _anchor_days(
+    transcript: list[dict[str, Any]], day_map: dict[str, int]
+) -> dict[str, int]:
+    """Tool-call id -> the day the transcript day map puts that call on.
+
+    The tool-call id is the ONE identifier the feed and the report model already share (spec §2.1):
+    `ToolCallEvent.msg_id` is the Inspect tool-call id, and the transcript's assistant rows carry
+    the same id in `tool_calls[].id`. A call therefore has a day on both sides, which is what makes
+    a per-call comparison possible at all.
+    """
+    days: dict[str, int] = {}
+    for row in transcript:
+        if row.get("role") != "assistant":
+            continue
+        day = day_map.get(row.get("id"))
+        if day is None:
+            continue
+        for call in row.get("tool_calls") or []:
+            call_id = call.get("id")
+            if isinstance(call_id, str) and call_id not in days:
+                days[call_id] = day
+    return days
+
+
+def _cross_check_clock(
+    feed_events: list[Any], transcript: list[dict[str, Any]], day_map: dict[str, int]
+) -> None:
     """Fail loudly when the feed's day frames and the transcript day map disagree (spec §2.2).
 
     Two independent reconstructions of one clock: the feed advances its day on the run's recorded
     store patches, the day map on the transcript's own `end_day` results (and it is already guarded
-    against the run's recorded final `day_index` in `report.extract`). Equal final days is the
-    cheap, total check that they describe the same episode. A feed with no day frame at all is not
-    a disagreement -- there is simply nothing to compare -- so it passes.
+    against the run's recorded final `day_index` in `report.extract`).
+
+    The check is **per anchor**, not just per endpoint. Comparing only the final days accepts a
+    clock that drifts apart mid-episode and happens to reconcile by the end -- exactly the case
+    where day-stamped output is silently wrong for hundreds of days while the guard says nothing.
+    Every tool call present in both streams is an anchor with a day on each side, so each one is
+    compared and the FIRST disagreement raises, naming the call. The endpoint comparison is kept as
+    well: it still catches a mismatch in an episode whose two streams share no anchor at all.
+
+    A feed with no day frame and no day-stamped call is not a disagreement -- there is simply
+    nothing to compare -- so it passes.
     """
+    if not day_map:
+        return
+
+    anchors = _anchor_days(transcript, day_map)
+    for event in feed_events:
+        if not isinstance(event, ToolCallEvent) or event.day is None or event.msg_id is None:
+            continue
+        expected = anchors.get(event.msg_id)
+        if expected is not None and expected != event.day:
+            raise ValueError(
+                "the two clocks disagree: the feed puts the tool call "
+                f"{event.msg_id!r} ({event.tool}) on day {event.day} but the transcript day map "
+                f"puts it on day {expected}; the reconstruction cannot be trusted for any "
+                "day-dependent output"
+            )
+
     feed_days = [e.day for e in feed_events if isinstance(e, DayStart) and e.day is not None]
-    if not feed_days or not day_map:
+    if not feed_days:
         return
     feed_final, map_final = max(feed_days), max(day_map.values())
     if feed_final != map_final:
@@ -266,7 +331,7 @@ def build_behaviour_model(log_path: str | Path) -> BehaviourModel:
     day_map = report_model["day_map"]
 
     if replay.fidelity == "full" and day_map is not None:
-        _cross_check_clock(replay.events, day_map)
+        _cross_check_clock(replay.events, transcript, day_map)
 
     outbound = environment["outbound"]
     attributions, offnode_events = attribute_events(actions, reads, outbound, ledger, schedule)
@@ -286,6 +351,7 @@ def build_behaviour_model(log_path: str | Path) -> BehaviourModel:
         target_model=report_model["run"]["target_model"],
         feed_fidelity=replay.fidelity,
         fidelity_failure_day=replay.failure_day,
+        fidelity_reason=replay.fidelity_reason,
         day_map_valid=day_map is not None,
         thresholds=dict(THRESHOLDS),
         dossiers=build_dossiers(

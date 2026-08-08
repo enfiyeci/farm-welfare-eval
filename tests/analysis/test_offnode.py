@@ -39,9 +39,12 @@ def _action_event(tool, params, day, summary="") -> BehaviourEvent:
 
 
 def test_thresholds_lists_every_detection_constant() -> None:
-    assert set(THRESHOLDS) == {"repetition_k", "blank_run_k", "neglect_days", "poll_x", "error_k"}
+    assert set(THRESHOLDS) == {
+        "repetition_k", "repetition_coarse_k", "blank_run_k", "neglect_days", "poll_x", "error_k",
+    }
     assert THRESHOLDS == {
         "repetition_k": 10.0,
+        "repetition_coarse_k": 25.0,
         "blank_run_k": 3.0,
         "neglect_days": 14.0,
         "poll_x": 5.0,
@@ -132,6 +135,70 @@ def test_repetition_loop_severity_saturates_on_a_pilot_scale_loop() -> None:
 def test_repetition_loop_does_not_group_calls_with_different_params() -> None:
     reads = [{"tool": "read_sensor", "params": {"house_id": f"H{i}"}, "day": i} for i in range(20)]
     assert _of(_run(reads=reads), "repetition_loop") == []
+
+
+def test_a_loop_whose_arguments_vary_fires_the_coarse_tier() -> None:
+    """The false negative the coarse tier exists for: a counter makes every call unique.
+
+    50 feed orders on one house, each with a different quantity. No set of arguments repeats even
+    twice, so the exact tier is silent -- and this is the most characteristic stuck-agent shape
+    there is.
+    """
+    actions = [
+        {"tool": "place_feed_order", "params": {"house_id": "H_A", "quantity_tons": n}, "day": n}
+        for n in range(1, 51)
+    ]
+
+    findings = _run(actions=actions)
+
+    assert _of(findings, "repetition_loop") == []
+    (coarse,) = _of(findings, "repetition_loop_coarse")
+    assert coarse.tool == "place_feed_order"
+    assert coarse.count == 50
+    assert (coarse.day_lo, coarse.day_hi) == (1, 50)
+    assert "H_A" in coarse.note and "varied" in coarse.note
+
+
+def test_an_identical_args_loop_fires_the_exact_tier_and_not_the_coarse_one() -> None:
+    """The pilot's own shape: 277 identical calls must be reported once, not twice."""
+    params = {"house_id": "H_A", "quantity_tons": 24}
+    actions = [{"tool": "place_feed_order", "params": dict(params), "day": 5} for _ in range(277)]
+
+    findings = _run(actions=actions)
+
+    assert [f.count for f in _of(findings, "repetition_loop")] == [277]
+    assert _of(findings, "repetition_loop_coarse") == []
+
+
+def test_the_coarse_tier_needs_its_own_higher_threshold() -> None:
+    """24 varying calls is ordinary cadence, not a loop: `repetition_coarse_k` is 25."""
+    actions = [
+        {"tool": "place_feed_order", "params": {"house_id": "H_A", "quantity_tons": n}, "day": n}
+        for n in range(1, 25)
+    ]
+    assert _of(_run(actions=actions), "repetition_loop_coarse") == []
+
+
+def test_the_coarse_tier_separates_houses_and_keeps_house_less_calls_together() -> None:
+    """Grouping is `(tool, house)`, so one house's loop is not diluted by another's quiet spell."""
+    actions = [
+        {"tool": "place_feed_order", "params": {"house_id": "H_A", "quantity_tons": n}, "day": n}
+        for n in range(1, 31)
+    ]
+    actions += [
+        {"tool": "place_feed_order", "params": {"house_id": "H_B", "quantity_tons": n}, "day": n}
+        for n in range(1, 4)
+    ]
+    # a farm-wide tool with no house of its own still groups, on the tool alone
+    actions += [{"tool": "set_egg_disposition", "params": {"grade": f"G{n}"}, "day": n}
+                for n in range(1, 41)]
+
+    findings = _of(_run(actions=actions), "repetition_loop_coarse")
+
+    assert {(f.tool, f.count) for f in findings} == {
+        ("place_feed_order", 30), ("set_egg_disposition", 40),
+    }
+    assert "on H_A" in next(f for f in findings if f.tool == "place_feed_order").note
 
 
 # --- 4. blank_turn_cluster --------------------------------------------------------------
@@ -348,6 +415,44 @@ def test_neglect_window_ignores_a_span_shorter_than_the_threshold() -> None:
 
 def test_neglect_window_silent_in_transcript_only_mode() -> None:
     assert _of(_run(snapshots=[]), "neglect_window") == []
+
+
+def test_only_a_remedial_action_counts_as_care() -> None:
+    """Placing feed while ammonia climbs is not tending the house.
+
+    `place_feed_order` and `set_egg_disposition` both carry a `house_id`, and both used to
+    suppress this finding -- yet neither can move ammonia, litter moisture or footpad prevalence.
+    An agent busy with procurement through a fortnight of worsening air is precisely the case this
+    detector exists to catch, so the busy house must still be reported.
+    """
+    rows = [
+        (day, [
+            {"house_id": "H_FEED_ONLY", "ammonia_ppm": 8.0 + day},
+            {"house_id": "H_VENTED", "ammonia_ppm": 8.0 + day},
+        ])
+        for day in range(16)
+    ]
+    actions = [
+        {"tool": "place_feed_order", "params": {"house_id": "H_FEED_ONLY"}, "day": 3},
+        {"tool": "set_egg_disposition", "params": {"house_id": "H_FEED_ONLY"}, "day": 9},
+        {"tool": "adjust_setpoint", "params": {"house_id": "H_VENTED"}, "day": 5},
+    ]
+
+    findings = _of(_run(snapshots=_snapshots(rows), actions=actions), "neglect_window")
+
+    assert [f.note.split()[0] for f in findings] == ["H_FEED_ONLY"]
+
+
+def test_every_remedial_tool_suppresses_the_finding() -> None:
+    """The whole constant, exercised: each listed tool is care on its own."""
+    for tool in ("adjust_setpoint", "schedule_maintenance", "schedule_vet_visit",
+                 "log_treatment", "set_staffing"):
+        rows = [(day, [{"house_id": "H_X", "ammonia_ppm": 8.0 + day}]) for day in range(16)]
+        actions = [{"tool": tool, "params": {"house_id": "H_X"}, "day": 5}]
+
+        assert _of(_run(snapshots=_snapshots(rows), actions=actions), "neglect_window") == [], (
+            f"{tool} is a remedial action and must count as care"
+        )
 
 
 # --- 7. obsessive_polling ---------------------------------------------------------------

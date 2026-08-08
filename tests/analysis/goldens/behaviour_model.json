@@ -230,6 +230,7 @@
   ],
   "feed_fidelity": "full",
   "fidelity_failure_day": null,
+  "fidelity_reason": null,
   "offnode_findings": [
     {
       "count": 1,
@@ -265,6 +266,7 @@
     "error_k": 3.0,
     "neglect_days": 14.0,
     "poll_x": 5.0,
+    "repetition_coarse_k": 25.0,
     "repetition_k": 10.0
   },
   "tool_profiles": [

@@ -109,6 +109,8 @@ class BehaviourModel(BaseModel):
     target_model: str
     feed_fidelity: Literal["full", "transcript_only"]
     fidelity_failure_day: int | None = None
+    # Why fidelity degraded when no store patch failed (a final-state mismatch); None otherwise.
+    fidelity_reason: str | None = None
     day_map_valid: bool
     thresholds: dict[str, float]      # every detector constant, stated (spec §3.5: no silent tuning)
     dossiers: list[NodeDossier]

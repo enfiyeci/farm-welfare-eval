@@ -269,11 +269,14 @@ def _pertool_fragment(model: BehaviourModel) -> str:
 
 def _fidelity_banner(model: BehaviourModel) -> str:
     if model.feed_fidelity == "transcript_only":
-        failure = (
-            f" The state feed stopped on day {model.fidelity_failure_day}."
-            if model.fidelity_failure_day is not None
-            else " The state feed was unusable from the start."
-        )
+        # A final-state mismatch is a different failure from a feed that stopped, and naming the
+        # wrong one sends the reader looking in the wrong place, so a recorded reason wins.
+        if model.fidelity_reason:
+            failure = f" {model.fidelity_reason}"
+        elif model.fidelity_failure_day is not None:
+            failure = f" The state feed stopped on day {model.fidelity_failure_day}."
+        else:
+            failure = " The state feed was unusable from the start."
         text = (
             f"Feed fidelity: transcript_only.{failure} This analysis was rebuilt from the "
             "transcript alone, so environment state snapshots are unavailable: the neglect-window "

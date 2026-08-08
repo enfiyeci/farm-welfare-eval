@@ -19,6 +19,7 @@ import pytest
 
 from farm_eval.analysis import build as build_module
 from farm_eval.analysis.build import (
+    _cross_check_clock,
     _errors_by_tool,
     _events_in_row_order,
     _link_email_msg_ids,
@@ -27,6 +28,7 @@ from farm_eval.analysis.build import (
 )
 from farm_eval.analysis.model import Attribution, BehaviourEvent
 from farm_eval.analysis.offnode import THRESHOLDS
+from farm_eval.spectator.events import DayStart, ToolCallEvent
 from scripts.regen_behaviour_golden import (
     GOLDEN_PATH,
     PLACEHOLDER_SHA256,
@@ -288,6 +290,23 @@ def test_two_same_day_emails_claim_two_distinct_transcript_calls_in_order() -> N
     assert (email_a.msg_id, email_b.msg_id) == ("msg_9", "msg_11")
 
 
+def test_the_two_tiers_never_claim_the_same_transcript_call() -> None:
+    """One shared claimed set: an email linked by the primary tier retires its call.
+
+    Both emails have the same recipient, subject and day, and both transcript calls therefore
+    match either of them. The first links through its paired action (which already carries
+    `msg_9`); without the shared claim set the second falls through to the fallback tier, scans
+    from index 0 and takes `msg_9` as well, so one real message vanishes from the evidence.
+    """
+    send = _send("vet@x.test", "H2", 12, msg_id="msg_9")      # only the FIRST action linked
+    email_a, email_b = _email("vet@x.test", "H2", 12), _email("vet@x.test", "H2", 12)
+    transcript = [_send_call("msg_9", "vet@x.test", "H2"), _send_call("msg_11", "vet@x.test", "H2")]
+
+    _link_email_msg_ids([send, email_a, email_b], transcript, {"msg_9": 12, "msg_11": 12})
+
+    assert (email_a.msg_id, email_b.msg_id) == ("msg_9", "msg_11")
+
+
 def test_an_email_matching_no_call_at_all_keeps_no_msg_id() -> None:
     """A link is a bonus, never a guess: neither tier matches, so the residual stays pointer-less."""
     send = _send("vet@x.test", "H2", 12)
@@ -330,6 +349,57 @@ def test_outbound_emails_in_the_built_model_carry_their_pointer(model) -> None:
 
 
 # --- the two-clock cross-check (spec §2.2) --------------------------------------------
+
+
+def _feed_call(msg_id: str, day: int, tool: str = "read_sensor"):
+    return ToolCallEvent(seq=0, day=day, tool=tool, args={}, msg_id=msg_id)
+
+
+def _anchor_row(msg_id: str, call_id: str) -> dict:
+    return {
+        "id": msg_id,
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [{"id": call_id, "function": "read_sensor", "arguments": {}}],
+    }
+
+
+def test_a_clock_that_drifts_mid_episode_and_reconciles_at_the_end_fails_loudly() -> None:
+    """The endpoint check alone accepts this, and it is the case that matters.
+
+    The two clocks agree on the last day, so a final-day comparison passes -- while every day
+    stamp in the middle of the episode is wrong. Each shared tool call is an anchor with a day on
+    both sides, so the disagreement is visible call by call.
+    """
+    transcript = [_anchor_row("msg_1", "c1"), _anchor_row("msg_5", "c2"), _anchor_row("msg_9", "c3")]
+    day_map = {"msg_1": 3, "msg_5": 40, "msg_9": 90}         # the feed's day 20 became 40
+    feed = [
+        _feed_call("c1", 3), _feed_call("c2", 20), _feed_call("c3", 90),
+        DayStart(seq=9, day=90, date="2025-09-07", season="summer"),
+    ]
+
+    with pytest.raises(ValueError, match="clock") as error:
+        _cross_check_clock(feed, transcript, day_map)
+
+    assert "'c2'" in str(error.value) and "20" in str(error.value) and "40" in str(error.value)
+
+
+def test_agreeing_anchors_and_endpoints_pass() -> None:
+    transcript = [_anchor_row("msg_1", "c1"), _anchor_row("msg_5", "c2")]
+    feed = [
+        _feed_call("c1", 3), _feed_call("c2", 20),
+        DayStart(seq=9, day=20, date="2025-06-29", season="summer"),
+    ]
+
+    _cross_check_clock(feed, transcript, {"msg_1": 3, "msg_5": 20})
+
+
+def test_the_endpoint_check_still_runs_when_no_anchor_is_shared() -> None:
+    """A feed whose calls join nothing still has its last day frame compared."""
+    feed = [DayStart(seq=1, day=90, date="2025-09-07", season="summer")]
+
+    with pytest.raises(ValueError, match="last day frame"):
+        _cross_check_clock(feed, [], {"msg_1": 3})
 
 
 def test_a_day_map_that_disagrees_with_the_feed_clock_fails_loudly(episode, monkeypatch) -> None:
