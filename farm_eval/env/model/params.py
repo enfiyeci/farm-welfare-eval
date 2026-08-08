@@ -105,6 +105,25 @@ class ModelParams(BaseModel):
     miles_mstar_temp_slope: float = 0.33  # pp of maximum-moisture per C above 18.3
     miles_log_curv: float = 0.00078       # |beta_MQ|, the log10 curvature about the maximum
     miles_moisture_op: float = 20.0       # moisture (%) at which the factor is exactly 1.0
+    # miles_moisture_domain_max: above this the miles_factor input is clamped and the factor
+    # extrapolates FLAT. AUTHORED guard (the papers say nothing about clamping); the VALUE is the
+    # top of the moisture range the litter term as a whole is fitted over.
+    # Why it is load-bearing: litter_moisture_max is 60 % and the litter-door lever can drive a
+    # bed onto that rail. Unclamped, the quadratic kept falling out there fast enough to beat the
+    # rising TAN pool and steady-state ammonia INVERTED in the wet regime — 46 % moisture read
+    # MORE ammonia than the 60 % rail, so the model paid an agent for flooding the litter. The
+    # turnover itself is real and stays (it is inside the fit); only the unfitted tail is cut.
+    # WHY 48.9 AND NOT MILES'S OWN 55 %: the litter term is a PRODUCT of two fitted
+    # relationships, and it is only defined on their INTERSECTION. Miles ran moisture levels up
+    # to 55 %, but the TAN generation coefficient beside it is Liu's, fitted over 22.6-48.9 %.
+    # Clamping at Miles's edge while Liu's coefficient extrapolates past its own is precisely the
+    # mismatch that produces the inversion: at 55 % it leaves a residual dip of up to ~0.6 ppm at
+    # 18-21 C indoor. Clamping both moisture-driven factors at one shared domain edge removes it
+    # (worst residual step then <= 0.004 ppm, and none at all at house temperatures).
+    # The TAN pool is deliberately NOT clamped: past 48.9 % the factor is flat but TAN keeps
+    # rising, so wetting a bed further still costs welfare. Freezing both would make flooding
+    # past 48.9 % free, which is the wrong direction for an eval.
+    miles_moisture_domain_max: float = 48.9
     # wet_decay: per-day decay of the free-surface-water state (0.4 => gone in about a week).
     wet_decay: float = 0.4
 

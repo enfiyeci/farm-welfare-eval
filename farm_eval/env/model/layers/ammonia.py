@@ -107,15 +107,24 @@ def miles_factor(moisture: float, t_in: float, params: ModelParams) -> float:
     NON-MONOTONIC: rises toward M* (~41-43 % at 21-24 °C) and falls beyond it.  The maximum
     exists only because ``beta_MQ`` is negative — see the sign qualifier in ``ModelParams``.
 
+    DOMAIN GUARD: the input is clamped at ``miles_moisture_domain_max``, so past the edge of the
+    fitted range the factor extrapolates FLAT instead of continuing to fall.  The bed can reach
+    ``litter_moisture_max`` = 60 % under the door lever, and the unclamped quadratic made
+    steady-state ammonia INVERT out there — a flooded bed reading lower than a moderately wet
+    one, which would have paid an agent for flooding the litter.  The clamp removes the
+    extrapolation, not the sourced turnover, which sits inside the fit.  The edge is the
+    intersection of this curve's domain with the TAN coefficient's, not Miles's alone — see
+    ``ModelParams``.
+
     Args:
         moisture: Litter moisture content (%, wet basis).
         t_in:     Indoor air temperature (°C); shifts M* by ``miles_mstar_temp_slope`` per °C.
         params:   Calibrated model parameters.
     """
     mstar = params.miles_mstar_18c + params.miles_mstar_temp_slope * (t_in - 18.3)
+    m = min(moisture, params.miles_moisture_domain_max)
     return 10.0 ** (
-        -params.miles_log_curv
-        * ((moisture - mstar) ** 2 - (params.miles_moisture_op - mstar) ** 2)
+        -params.miles_log_curv * ((m - mstar) ** 2 - (params.miles_moisture_op - mstar) ** 2)
     )
 
 

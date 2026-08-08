@@ -248,6 +248,55 @@ def test_more_frequent_belts_lower_ammonia():
 
 
 # ------------------------------------------------------------------------------------------
+# The wet regime: no inversion past the fitted domain (review round 1, F1)
+# ------------------------------------------------------------------------------------------
+def _fixed_moisture_equilibrium(
+    moisture: float,
+    *,
+    t_in: float = CSES_INDOOR_C,
+    belt_days: float = CSES_BELT_DAYS,
+    ventilation: float = 1.0,
+    ambient_c: float = MILD_AMBIENT_C,
+    params: ModelParams = P,
+) -> float:
+    """Steady-state ppm for a bed HELD at one moisture (TAN settled, no fresh wetting).
+
+    Deliberately not the co-simulated ``_equilibrium``: this probe asks what the LAYER does at a
+    given wetness, independent of whether the litter balance can park a bed there.
+    """
+    tan, ppm = params.tan_frac_base, 5.0
+    for _ in range(600):
+        tan = ammonia.tan_step(tan, moisture, params)
+        ppm = ammonia.ammonia_step(
+            ppm, tan, moisture, 0.0, t_in, ventilation, ambient_c, belt_days, params
+        )
+    return ppm
+
+
+def test_a_flooded_bed_never_reads_less_ammonia_than_a_merely_wet_one():
+    """The litter term is fitted to 48.9 % moisture; the bed reaches the 60 % rail.
+
+    Extrapolated past the fit the quadratic kept falling fast enough to beat the rising TAN
+    pool, and steady-state ammonia INVERTED — 46 % moisture read MORE ammonia than the 60 %
+    rail, so an agent who flooded the litter was paid for it in the welfare signal.  The domain
+    clamp on ``miles_factor`` is what removes that, and this is the test that catches it.
+    """
+    assert _fixed_moisture_equilibrium(60.0) >= _fixed_moisture_equilibrium(46.0)
+
+    # And nowhere across the reachable wet range does ammonia fall materially as litter wets.
+    # Measured worst step across this sweep: 0.0126 ppm at 18 C indoor, 0.0029 at 21 C, and
+    # EXACTLY ZERO at 26.7 and 30 C — the last of the turnover, just under the clamp edge. The
+    # tolerance names that measurement; it is not headroom for an unexamined dip.
+    for t_in in (18.0, 21.0, CSES_INDOOR_C, 30.0):
+        previous = None
+        for tenths in range(300, 601, 5):
+            ppm = _fixed_moisture_equilibrium(tenths / 10.0, t_in=t_in)
+            if previous is not None:
+                assert ppm >= previous - 0.02, f"ammonia inverts at {tenths / 10.0} % (t_in={t_in})"
+            previous = ppm
+
+
+# ------------------------------------------------------------------------------------------
 # The Miles regression itself
 # ------------------------------------------------------------------------------------------
 def test_miles_factor_reproduces_the_published_dose_response():
@@ -255,9 +304,14 @@ def test_miles_factor_reproduces_the_published_dose_response():
     # Corroborated independently by the USDA-ARS GRACEnet factsheet (1.4x at 25 %, 1.8x at 30 %).
     # Tolerance 0.02, not 0.01: the params carry the paper's coefficients rounded to three
     # significant figures, which costs ~0.01 at the far wet end of the table.
-    expected = {15: 0.65, 20: 1.00, 25: 1.41, 30: 1.81, 35: 2.14, 40: 2.30, 45: 2.26, 50: 2.03}
+    # The published table's 50 % row (2.03) is deliberately NOT checked: the model clamps its
+    # moisture input at miles_moisture_domain_max = 48.9 % and so does not follow the curve above
+    # that, on purpose (see ModelParams). The rows below the clamp still pin the regression
+    # including its turnover — 2.30 at 40 % falling to 2.26 at 45 %.
+    expected = {15: 0.65, 20: 1.00, 25: 1.41, 30: 1.81, 35: 2.14, 40: 2.30, 45: 2.26}
     for moisture, factor in expected.items():
         assert ammonia.miles_factor(float(moisture), 22.0, P) == pytest.approx(factor, abs=0.02)
+    assert max(expected) < P.miles_moisture_domain_max
 
 
 def test_miles_factor_turns_over_at_a_temperature_shifted_maximum():
