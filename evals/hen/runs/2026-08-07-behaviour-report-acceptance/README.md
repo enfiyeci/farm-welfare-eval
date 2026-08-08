@@ -11,7 +11,7 @@ the artifacts produced by running the finished CLI over the **saved 2026-07-12 G
 |---|---|
 | `behaviour_model.json` | the behaviour model the CLI built from that log (reader OFF — no grader tokens were spent) |
 | `behaviour_report.html` | the full pilot report rendered with the behaviour sections wired in |
-| `independent_measure.py` | the outside check — counts the same facts straight from the log, importing nothing from `farm_eval/analysis`, so a bug in the analysis stack cannot make both agree |
+| `independent_measure.py` | the outside check — counts the same facts straight from the log, importing nothing from `farm_eval/analysis`, so a bug in the analysis stack cannot make both agree. It also **runs the four acceptance comparisons itself** against `behaviour_model.json` and the debrief's `dp-table.md`, printing PASS/FAIL and exiting non-zero on any failure |
 
 The pass/fail write-up — the four independently-measured checks, runtime and peak memory, and the
 deviations found — is the sibling document

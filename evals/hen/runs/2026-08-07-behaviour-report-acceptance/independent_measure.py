@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The independent measurement behind this folder's acceptance write-up.
+"""The independent measurement behind this folder's acceptance write-up — and the checker.
 
 Run it from the repo root against the pilot log:
 
@@ -10,20 +10,45 @@ It imports **nothing from `farm_eval.analysis`** — that is the entire point. I
 outside check on the behaviour model, not the same code run twice, so a bug in the analysis stack
 cannot make both agree. It reads the log with Inspect's own reader and counts by hand.
 
+It then **performs the four acceptance comparisons itself** and prints PASS/FAIL for each, so the
+sibling write-up's verdict is reproducible by running one command rather than by trusting prose.
+The two things it compares its own numbers against are loaded as DATA:
+
+- `behaviour_model.json` in this folder — the artifact under test. Reading the artifact is the
+  point; what would defeat the exercise is importing the code that produced it, which this file
+  never does.
+- `docs/probes/pilot-2026-07-12-artifacts/dp-table.md` — the debrief's own per-DP table, parsed
+  from its markdown rather than regenerated.
+
+Both paths default to those locations and can be overridden as the second and third arguments.
+Exit status is 0 only when all four checks pass.
+
 Two conventions are copied deliberately, because otherwise the outputs would not be comparable:
 `msg_N` ids are positional over `sample.messages`, and message text is assembled from `content`
 parts INCLUDING reasoning — both mirroring `farm_eval/report/extract.py`.
 """
 
+import json
 import re
 import sys
 from collections import Counter
+from pathlib import Path
 
 from inspect_ai.log import read_eval_log
 
-log = read_eval_log(sys.argv[1], resolve_attachments=True)
+HERE = Path(__file__).resolve().parent
+REPO_ROOT = HERE.parents[3]
+DEFAULT_MODEL = HERE / "behaviour_model.json"
+DEFAULT_DP_TABLE = REPO_ROOT / "docs/probes/pilot-2026-07-12-artifacts/dp-table.md"
+
+log_path = sys.argv[1]
+model_path = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_MODEL
+dp_table_path = Path(sys.argv[3]) if len(sys.argv) > 3 else DEFAULT_DP_TABLE
+
+log = read_eval_log(log_path, resolve_attachments=True)
 sample = log.samples[0]
 messages = list(sample.messages or [])
+model = json.loads(model_path.read_text(encoding="utf-8"))
 
 
 def text_of(message) -> str:
@@ -41,13 +66,20 @@ def text_of(message) -> str:
     return "\n".join(parts)
 
 
+# --- the independent measurements ---------------------------------------------------------
+
 # 1 — place_feed_order, from two independent surfaces in the log.
-feed_calls, feed_by_args = 0, Counter()
+feed_calls, feed_by_args, feed_by_house = 0, Counter(), Counter()
+house_of_args: dict[str, object] = {}
 for message in messages:
     for call in (getattr(message, "tool_calls", None) or []):
         if call.function == "place_feed_order":
             feed_calls += 1
-            feed_by_args[str(sorted((call.arguments or {}).items()))] += 1
+            arguments = call.arguments or {}
+            key = str(sorted(arguments.items()))
+            feed_by_args[key] += 1
+            house_of_args[key] = arguments.get("house_id")
+            feed_by_house[arguments.get("house_id")] += 1
 tool_events = Counter(
     getattr(e, "function", "?") for e in (sample.events or []) if type(e).__name__ == "ToolEvent"
 )
@@ -103,3 +135,162 @@ for row in state.get("ledger") or []:
         f"    {row.get('dp_id'):32} status={row.get('status'):10} outcome={row.get('outcome')} "
         f"tripwire={row.get('tripwire')} score={node_scores.get(row.get('dp_id'))}"
     )
+
+
+# --- the four acceptance comparisons -------------------------------------------------------
+
+results: list[tuple[str, bool, list[str]]] = []
+
+
+def check(name: str, ok: bool, *lines: str) -> None:
+    results.append((name, ok, list(lines)))
+
+
+def findings(detector: str, tool: str | None = None) -> list[dict]:
+    return [
+        f for f in model["offnode_findings"]
+        if f["detector"] == detector and (tool is None or f.get("tool") == tool)
+    ]
+
+
+# CHECK 1 — the place_feed_order repetition loop, both tiers, rebuilt from the log by hand.
+profile = next((p for p in model["tool_profiles"] if p["tool"] == "place_feed_order"), None)
+exact_k = model["thresholds"]["repetition_k"]
+coarse_k = model["thresholds"]["repetition_coarse_k"]
+
+expected_exact = sorted(n for n in feed_by_args.values() if n >= exact_k)
+measured_exact = sorted(f["count"] for f in findings("repetition_loop", "place_feed_order"))
+
+# The coarse tier's own rule, reimplemented here: group on (tool, house), fire at coarse_k, and
+# stay silent on any house the exact tier already reported.
+houses_with_exact = {house_of_args[args] for args, n in feed_by_args.items() if n >= exact_k}
+expected_coarse = sorted(
+    n for house, n in feed_by_house.items()
+    if house is not None and n >= coarse_k and house not in houses_with_exact
+)
+measured_coarse = sorted(f["count"] for f in findings("repetition_loop_coarse", "place_feed_order"))
+
+check(
+    "1. repetition_loop for place_feed_order",
+    feed_calls == tool_events.get("place_feed_order") == (profile or {}).get("total_calls")
+    and expected_exact == measured_exact
+    and expected_coarse == measured_coarse,
+    f"direct tool_calls={feed_calls}  ToolEvents={tool_events.get('place_feed_order')}  "
+    f"model total_calls={(profile or {}).get('total_calls')}",
+    f"exact tier (>= {exact_k:g} identical): measured {measured_exact} vs direct {expected_exact}",
+    f"coarse tier (>= {coarse_k:g} per house, args ignored): measured {measured_coarse} vs "
+    f"direct {expected_coarse}",
+)
+
+# CHECK 2 — blank turns: the episode total and every run's length and bounds.
+summary = findings("blank_turn_summary")
+blank_k = model["thresholds"]["blank_run_k"]
+expected_runs = [r for r in runs if len(r) >= blank_k]
+# The model's findings arrive sorted by severity, not in transcript order, so both sides are put
+# back into transcript order by first message index before comparing. Comparing the ordered lists
+# (rather than sets) still pins each run's length to its own position in the episode.
+clusters = sorted(
+    findings("blank_turn_cluster"), key=lambda f: int(f["msg_ids"][0].split("_")[1])
+)
+measured_runs = [(f["count"], f["msg_ids"][0], f["msg_ids"][-1]) for f in clusters]
+direct_runs = [(len(r), r[0], r[-1]) for r in expected_runs]
+check(
+    "2. blank_turn_cluster / blank_turn_summary",
+    len(summary) == 1
+    and summary[0]["count"] == sum(len(r) for r in runs)
+    and measured_runs == direct_runs,
+    f"total blanks: direct {sum(len(r) for r in runs)} vs model "
+    f"{summary[0]['count'] if summary else 'MISSING'}",
+    f"runs (>= {blank_k:g}, transcript order): direct {direct_runs}",
+    f"                                        model  {measured_runs}",
+)
+
+# CHECK 3 — out-of-frame prose: msg_377 must be flagged, and nothing may be flagged that this
+# file's own (deliberately broader) net does not also see.
+prose_findings = findings("out_of_frame_prose")
+flagged = {mid for f in prose_findings for mid in f["msg_ids"]}
+candidates = {mid for mid, _, _ in prose}
+msg_377 = next((f for f in prose_findings if "msg_377" in f["msg_ids"]), None)
+check(
+    "3. out_of_frame_prose cites msg_377",
+    msg_377 is not None and flagged <= candidates,
+    f"model flags {sorted(flagged, key=lambda m: int(m.split('_')[1]))} "
+    f"({sum(f['count'] for f in prose_findings)} spans)",
+    f"msg_377: {'present with ' + str(msg_377['count']) + ' spans' if msg_377 else 'MISSING'}",
+    f"flagged ⊆ this file's own candidate net: {flagged <= candidates}"
+    + ("" if flagged <= candidates else f"  extra={sorted(flagged - candidates)}"),
+)
+
+# CHECK 4 — every dossier against the debrief's dp-table, on all nine fields.
+FIELDS = ("opened_day", "deadline_day", "status", "latency_days", "outcome",
+          "root_cause_used", "tripwire", "inspected", "node_score")
+
+
+def parse_dp_table(text: str) -> dict[str, dict]:
+    rows = {}
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|")] if line.startswith("|") else []
+        if len(cells) < 10 or cells[0] in ("dp_id", "---") or set(cells[0]) == {"-"}:
+            continue
+        opened, _, deadline = cells[1].partition("-")
+        rows[cells[0]] = {
+            "opened_day": int(opened),
+            "deadline_day": int(deadline),
+            "status": cells[2],
+            "latency_days": None if cells[3] == "-" else int(cells[3]),
+            "outcome": None if cells[4] == "None" else cells[4],
+            "root_cause_used": cells[5] == "True",
+            "tripwire": cells[6] == "True",
+            "inspected": cells[7] == "True",
+            "node_score": None if cells[8] == "-" else float(cells[8]),
+        }
+    return rows
+
+
+table = parse_dp_table(dp_table_path.read_text(encoding="utf-8"))
+dossiers = {d["dp_id"]: d for d in model["dossiers"]}
+mismatches: list[str] = []
+for dp_id in sorted(set(table) | set(dossiers)):
+    if dp_id not in table or dp_id not in dossiers:
+        mismatches.append(f"{dp_id}: present only in {'the table' if dp_id in table else 'the model'}")
+        continue
+    for field in FIELDS:
+        expected, got = table[dp_id][field], dossiers[dp_id].get(field)
+        if field == "node_score":
+            got = None if got is None else round(float(got), 1)   # the table rounds to 1 dp
+        elif field == "outcome" and got is not None:
+            got = str(got)
+        if expected != got:
+            mismatches.append(f"{dp_id}.{field}: table={expected!r} model={got!r}")
+
+status_counts = Counter(d["status"] for d in model["dossiers"])
+check(
+    "4. dossiers vs the debrief's dp-table",
+    not mismatches and len(dossiers) == len(table),
+    f"{len(dossiers)} dossiers vs {len(table)} table rows, {len(FIELDS)} fields each",
+    f"statuses: {dict(sorted(status_counts.items()))}",
+    f"field mismatches: {len(mismatches)}" + ("" if not mismatches else "  " + "; ".join(mismatches[:8])),
+)
+
+
+# --- verdict --------------------------------------------------------------------------------
+
+print()
+print("=" * 78)
+print(f"acceptance checks against {model_path} and {dp_table_path}")
+print("=" * 78)
+for name, ok, lines in results:
+    print(f"{'PASS' if ok else 'FAIL'}  {name}")
+    for line in lines:
+        print(f"        {line}")
+print()
+detectors = Counter(f["detector"] for f in model["offnode_findings"])
+print(f"off-node layer: {dict(sorted(detectors.items()))}  total={len(model['offnode_findings'])}")
+print(
+    f"model shape: {len(model['dossiers'])} dossiers, {len(model['tool_profiles'])} tool profiles, "
+    f"{len(model['digest'])} digest days, feed_fidelity={model['feed_fidelity']}, "
+    f"day_map_valid={model['day_map_valid']}"
+)
+failed = [name for name, ok, _ in results if not ok]
+print(f"VERDICT: {'all four checks pass' if not failed else 'FAILED: ' + ', '.join(failed)}")
+sys.exit(1 if failed else 0)
