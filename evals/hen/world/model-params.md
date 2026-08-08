@@ -263,8 +263,32 @@ is better", and it is why the rubric scores TIMING rather than hours.
 ## Litter water balance, depth, caking
 
 `layers/litter.py`. Moisture is not a free input; it relaxes (~10-day time constant) toward
-`belt_equilibrium(belt_days) + floor_moisture_excess(share, age, depth, density)`. Two agent
-levers, two time constants — belts move moisture within days, doors move it over months via the bed.
+`belt_equilibrium(belt_days) + floor_moisture_excess(share, age, depth, density)`.
+
+**Two agent levers, and the doors act on TWO timescales — get this right before choosing a probe
+horizon.** Both levers enter the same equilibrium and are then relaxed at the same
+`litter_moisture_relax = 0.1`/day, so the *fast* channel is identical for the two:
+
+- **Belts.** `belt_days` moves `belt_equilibrium` the moment it is set; moisture closes on the new
+  equilibrium over ~10 days. That is the belts' whole effect, and its range is small by
+  construction (14.5–20.5 %).
+- **Doors, channel 1 — days.** `floor_share` enters `floor_moisture_excess` **directly**, so a door
+  change moves the equilibrium the same day and moisture relaxes toward it on the **same ~10-day
+  constant** a belt change gets. Doors are not a slow lever on this channel.
+- **Doors, channel 2 — weeks to months.** `litter_depth_step` accretes bed depth every day by
+  `litter_depth_accretion_cm_day · floor_share^litter_depth_share_exp · water_rel(age_wk)`, and
+  depth then **scales** the excess term through
+  `min(depth/litter_depth_deep_ref, 1)^litter_depth_exp`. So the door schedule also builds the
+  stock that decides how much its own share is worth, and that stock moves over months.
+  **Depth has no decay term**: closing the doors stops the bed growing, it does not shrink it —
+  only a cleanout event removes litter.
+
+The practical consequence for calibration and probes: a run that changes the doors and measures a
+few weeks later sees only channel 1, which is small on a shallow bed. Oliveira's 31.3-vs-20.3 %
+contrast is a **channel-2** result and needs months of bed history to appear. Task 13 hit the
+corner case head-on — seven days after a placement onto fresh 0.5 cm bedding the compliant and
+tight density arms differ by only ~0.17 pp, precisely because bed saturation is still ~0.15 and is
+suppressing the whole floor term.
 
 ```
 belt_equilibrium(d)   = min(14.5 + 1.0*(d - 1), 20.5)                       # NARROW, bounded

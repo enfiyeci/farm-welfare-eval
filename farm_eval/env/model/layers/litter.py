@@ -6,7 +6,10 @@ between what dries the bed and what wets it, and BOTH sides are agent-reachable.
 
     moisture -> belt_equilibrium(belt_days) + floor_moisture_excess(share, age, depth, ...)
 
-The two terms are deliberately very different in size and in speed.
+The two terms are deliberately very different in SIZE.  They are not different in speed: both
+enter the same equilibrium and are relaxed at the same ``litter_moisture_relax``, so a door
+change moves moisture over the same ~10 days a belt change does.  What is slow is the DEPTH
+stock the door schedule builds, which scales the floor term (below).
 
   * ``belt_equilibrium`` — the manure-belt lever (``adjust_setpoint(belt_interval_days=...)``).
     NARROW: 14.5 % at daily belts rising to a 20.5 % cap.  Groot Koerkamp ch. 7 measures the
