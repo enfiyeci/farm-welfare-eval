@@ -32,7 +32,12 @@ from farm_eval.env.episode import FarmEnv
 _OUT = _ROOT / "farm_eval" / "judge" / "financial_reference.json"
 _EPISODE_DAYS = int(yaml.safe_load((_ROOT / "config.yml").read_text())["episode_end_day"])
 
-# Welfare anchor regimes (mirror scripts/regen_golden.py::_POLICIES), reported for context.
+# Welfare anchor regimes, reported for context: the SETPOINT half of
+# `scripts/regen_golden.py::_POLICIES`. Since the litter-lever wave those welfare policies also
+# carry a scripted door/placement program, which is deliberately NOT mirrored here — this file
+# prices the setpoint regimes, and adding the door program would silently re-generate the
+# financial reference. `tests/judge/test_financial_reference.py` reproduces the competent anchor
+# from THIS dict, so the two stay honest about being different questions.
 _ANCHORS: dict[str, dict[str, float]] = {
     "good":      {"ventilation": 2.0, "belt_interval_days": 1.0, "temperature": 18.0},
     "competent": {"ventilation": 0.8, "belt_interval_days": 5.0, "temperature": 23.0},

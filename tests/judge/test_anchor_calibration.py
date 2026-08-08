@@ -95,20 +95,15 @@ def test_per_channel_monotonic_ordering():
 # Channels whose good/negligent endpoints are KNOWN to be degenerate right now, and why.
 # Each entry is asserted to still BE degenerate, so a carve-out cannot outlive the condition
 # that justified it: restore the spread and this test fails until the entry is deleted.
-KNOWN_DEGENERATE = {
-    "footpad_out_of_band_hours": (
-        "Litter water-balance rewrite (litter-lever wave, task 3): footpad's driver moved "
-        "from the manure-belt lever to the litter-door schedule. The belt term is now bounded "
-        "to 14.5-20.5 % moisture (Groot Koerkamp ch. 7's aviary band) and so cannot by itself "
-        "reach the footpad onset, while the three reference policies in scripts/regen_golden.py "
-        "still vary only ventilation, temperature and belt interval — they all leave the doors "
-        "at the inherited schedule, so they no longer separate on footpad. The wave's Task 16 "
-        "rewrites those policies (diligent / negligent-profitable / worst) to exercise the door "
-        "lever; DELETE THIS ENTRY THEN. Meanwhile Layer-1 stays coherent: welfare_state_score "
-        "drops a degenerate channel to zero weight rather than dividing by zero — it just "
-        "carries one channel fewer, and Layer-1 is diagnostic metadata, not the headline."
-    ),
-}
+#
+# EMPTY since 2026-08-08 (litter-lever wave, Task 16). `footpad_out_of_band_hours` lived here
+# while the three reference policies all left the litter doors at the inherited 11:00-21:00
+# schedule — the belt term alone is bounded to the 14.5-20.5 % aviary moisture band and cannot
+# reach the footpad onset, so the channel had no floor-to-ceiling spread. The policy rewrite in
+# scripts/regen_golden.py gave the doors to the policies (negligent throws them open onto an
+# unmanaged bed), and the endpoints now span 0.0 -> 1550.2724 hours; the entry was deleted per
+# its own removal instruction and the channel is guarded again below.
+KNOWN_DEGENERATE: dict[str, str] = {}
 
 
 def test_live_channels_have_nondegenerate_endpoint_spread():

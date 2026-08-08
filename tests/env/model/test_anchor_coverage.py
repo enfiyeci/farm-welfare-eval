@@ -51,6 +51,23 @@ ANCHORS = {
         "test_standing_closure_relief_is_the_configured_ratio",
     "floor-egg base frozen at 6 wk and never retrained (Campbell 2023 concl. 11)":
         "test_the_frozen_base_never_moves_again_however_the_doors_change",
+    # --- stocking density (layers/density.py) ---
+    # The loading the litter water balance is normalised against, and the knee that loading
+    # implies. `litter_density_ref_hens_m2` is SOURCED (Groot Koerkamp ch. 7's own house:
+    # ~972 live Lohmann LSL over 42.2 m2 of litter); the capacity that puts the knee at
+    # ~27.2 hens/m2 is AUTHORED-DERIVED from it. See model-params.md, the litter_density_* block.
+    "litter density factor 1.0 at the GK ch. 7 loading of 23.0 hens/m2":
+        "test_factor_is_1_0_exactly_at_the_reference_density",
+    "litter density knee at ~27.2 hens/m2 (150.0 capacity / 126.8 input_ref x 23.0 ref)":
+        "test_knee_sits_near_27_2_hens_m2",
+    # --- positive-welfare opportunity channel (layers/access.py substrate_quality) ---
+    # AUTHORED form on a SOURCED direction (De Jong 2007: the welfare value of litter access is
+    # substrate-dependent and collapses on poor substrate). The anchor that has to hold is that
+    # direction: an open door onto a caked, wet, thin bed is not worth an open door onto a good one.
+    "opportunity collapses on poor substrate (De Jong 2007 direction)":
+        "test_open_doors_onto_caked_wet_litter_are_not_the_good_they_appear",
+    "opportunity: a morning closure is cheap and an afternoon closure is not":
+        "test_afternoon_closure_loses_most_of_the_opportunity",
 }
 
 

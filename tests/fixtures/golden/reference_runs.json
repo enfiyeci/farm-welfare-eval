@@ -4,23 +4,23 @@
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 75.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 473545.6166,
-    "opportunity_realized_frac": 0.2719
+    "nh3_ppm_hours_over": 497531.1423,
+    "opportunity_realized_frac": 0.2699
   },
   "good": {
     "excess_mortality": 116412.31,
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 0.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 17115.4417,
-    "opportunity_realized_frac": 0.2721
+    "nh3_ppm_hours_over": 0.0,
+    "opportunity_realized_frac": 0.3178
   },
   "negligent": {
     "excess_mortality": 124133.0444,
-    "footpad_out_of_band_hours": 0.0,
+    "footpad_out_of_band_hours": 1550.2724,
     "heat_stress_hours": 325.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 1178958.5957,
-    "opportunity_realized_frac": 0.2712
+    "nh3_ppm_hours_over": 1312289.1109,
+    "opportunity_realized_frac": 0.2761
   }
 }
