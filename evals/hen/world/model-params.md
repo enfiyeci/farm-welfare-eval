@@ -41,7 +41,7 @@ E_total = E_ref * exp(0.0076*(RI_h - RI_ref))     # +0.76% per hour of manure-re
                 * exp(0.0032*(LWC - LWC_ref))      # +0.32% per +1 g/kg litter water
                 * exp(1.03*(v_litter - v_ref))     # +103% per +1 m/s air velocity over litter
 ```
-Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.05, 1.39, 1.89}` (≈ `exp(0.20*(d-1) + 0.03*(d-1)^2)`).
+Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.26, 1.68, 2.39}` = `exp(0.20*(d-1) + 0.03*(d-1)^2)` (recomputed 2026-08-08 from the shipped `layers/ammonia.py:_belt_multiplier`; the previously printed `{1.00, 1.05, 1.39, 1.89}` did not reproduce the formula beside it). Frozen at the 4-day value beyond four days — see `nh3_fmat_cap_days` below.
 Litter TAN generation: **+4%/°C, +4% per 0.1 pH, +4% per 10 g/kg water.**
 
 **The litter source is a LAGGED TAN pool, not a same-day moisture map (litter-lever wave).** The
