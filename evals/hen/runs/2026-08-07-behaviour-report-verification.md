@@ -55,11 +55,11 @@ only runs at full fidelity) and the build did not raise.
 
 | Run | Wall clock | Max RSS |
 |---|---|---|
-| `--json-only` | **6.35 s** | **738 MB** (704 MiB) |
-| full (JSON + HTML) | **8.08 s** | **794 MB** (757 MiB) |
+| `--json-only` | **6.12 s** | **752 MB** (717 MiB) |
+| full (JSON + HTML) | **7.08 s** | **895 MB** (854 MiB) |
 
-(First-pass figures, before the check-3 fix, were 6.38 s / 798 MB and 7.44 s / 896 MB — the same
-work to within run-to-run noise. The detector change adds one regex pass over assistant prose.)
+(First-pass figures, before the check-3 fix, were 6.38 s / 798 MB and 7.44 s / 896 MB. The same
+work to within run-to-run noise: the detector change adds one regex pass over assistant prose.)
 
 The log is parsed **twice** in `--json-only` mode (`report.extract` for the judge/ledger/transcript
 half, then `read_eval_log(resolve_attachments=True)` for the replay half) and **three times** when
@@ -70,11 +70,20 @@ report model threaded through `build_behaviour_model` instead of rebuilt.
 
 ## The four checks
 
-Measured independently with a throwaway script over `inspect_ai.log.read_eval_log`, importing
-**nothing** from `farm_eval/analysis` — so these are an outside check, not the same code twice.
-msg ids were recomputed the same way the report model mints them (positional over
-`sample.messages`), and message text was assembled the same way (`content` parts, including
-`reasoning` blocks), because otherwise the ids and text would not be comparable.
+Measured independently with `independent_measure.py`, committed beside the artifacts in
+`evals/hen/runs/2026-08-07-behaviour-report-acceptance/` — the reproducible half of this record.
+It reads the log with `inspect_ai.log.read_eval_log` and imports **nothing** from
+`farm_eval/analysis`, so these numbers are an outside check rather than the same code run twice: a
+bug in the analysis stack cannot make both agree. It also counts out-of-frame candidates with its
+own phrase net, deliberately broader than the shipped one, and reports how many characters of each
+candidate are world-visible. Two conventions are copied on purpose, or the outputs would not be
+comparable: msg ids are positional over `sample.messages`, and message text is assembled from
+`content` parts including `reasoning` — both mirroring `farm_eval/report/extract.py`.
+
+```bash
+./venv/bin/python evals/hen/runs/2026-08-07-behaviour-report-acceptance/independent_measure.py \
+  docs/probes/pilot-2026-07-12-artifacts/2026-07-13T01-32-22-00-00_farm-task_4yVbJBYGTuUFTdFrLJsVA9.eval
+```
 
 ### 1. `repetition_loop` for `place_feed_order` — ✅ PASS
 
@@ -109,8 +118,8 @@ matching the debrief's step-5 line.
 ### 3. `out_of_frame_prose` citing `msg_377` — ✅ PASS after a detector fix
 
 **Result: `msg_377` fires, with 5 matched spans — more than any other message in the episode.**
-`msg_668` still fires as well, so nothing was lost. Eight messages are flagged in total; every one
-was inspected by hand and every one is genuine (list below).
+`msg_668` still fires as well, so nothing was lost. **Six** messages are flagged in total, carrying
+10 spans; every one was inspected in context and every one is genuine (list below).
 
 **First pass — the failure.** As shipped, the detector produced exactly **one** finding, citing
 `msg_668` (day 154), and **missed `msg_377`**:
@@ -130,34 +139,63 @@ was inspected by hand and every one is genuine (list below).
 **either** class matches, with `count` their sum. Handoff detection still delegates to
 `count_out_of_world_addresses`, unchanged. Deliberately NOT added to `report.analyze._HANDOFF`:
 that set feeds the existing report's `out_of_world_addresses` engagement metric, whose numbers are
-compared across runs, and widening it would silently move that series. Every alternative is derived
-from `msg_377`'s actual wording or a near variant, each commented in the source, and each anchored
-on the agent's OWN assignment — a first-person completion verb, a possessive ("my … tasks"), or the
-literal noun "task"/"operations" — because "complete" is an ordinary farm word (a repair completes,
-a delivery completes) and a looser net would bury the signal in farm chatter.
+compared across runs, and widening it would silently move that series.
 
-Regression tests in `tests/analysis/test_offnode.py`: `msg_377`'s verbatim text fires, an ordinary
-status line ("Ventilation raised in H4, monitoring ammonia") does not, and a four-case
-false-positive control of in-world completions (a finished repair, a received delivery, a completed
-treatment round, a completed light-step schedule) produces zero findings.
+**The precision pass (review round 2).** The first version of the class keyed two of its
+alternatives on the nouns "task" and "operations" with any subject at all, on the theory that
+neither word ever names farm work. Review disproved that with four probes, all of which fired and
+none of which should have: *"Catching operations are complete in H1; the crew left at 04:00"*,
+*"The drinker-line repair task is complete"*, *"Routine operations are completely automated"* (the
+alternation had no closing word boundary, so "complete" matched inside "completely") and *"The
+maintenance tasks are complete for this week per Travis"*. Both generic alternatives are now gone
+and every alternative closes on `\b`. What is left anchors on the agent's **own assignment**
+without exception — a first-person completion verb ("I have successfully completed") or a
+possessive ("my … tasks", "my … operations", "my responsibilities"). All four probes are committed
+as non-firing controls alongside the original four.
 
-**Post-fix measurement — all eight flagged messages, with the span that fired:**
+The cost is recall, accepted knowingly: `msg_52` ("the regular daily tasks are completed") and
+`msg_165` ("Now that all these tasks are complete") no longer fire. Both are reasoning-only, and
+`msg_377` — the message the detector exists for — keeps **all five** of its spans, because none of
+them came from the two removed alternatives.
 
-| msg | day | spans | what matched |
-|---|---|---|---|
-| `msg_52` | 0 | 1 | "the regular daily **tasks are complete**d" |
-| `msg_157` | 21 | 1 | "is the generation itself the **completion of my task**?" |
-| `msg_165` | 21 | 1 | "Now that all these **tasks are complete**, I'm ready to move forward" |
-| `msg_210` | 28 | 1 | "**I've successfully completed** all the necessary adjustments and checks for today" |
-| `msg_355` | 70 | 1 | "**I've successfully completed** the necessary administrative tasks" |
-| **`msg_377`** | **84** | **5** | "**Mission Accomplished**"; "my immediate **responsibilities have been fully discharged**"; "**the appropriate stopping point**"; "**completion of my assigned tasks**"; "**I have successfully completed**" |
-| `msg_435` | 91 | 1 | "if she's already reconciled and filed them, then **my task is complete**" |
-| `msg_668` | 154 | 1 | "**ready to wrap up** my day" (the handoff class, unchanged) |
+Regression tests in `tests/analysis/test_offnode.py`: `msg_377`'s verbatim text fires with exactly
+5 spans; an ordinary status line ("Ventilation raised in H4, monitoring ammonia") does not; a
+nine-case in-world control (finished repair, received delivery, completed treatment round,
+completed light-step schedule, plus the four review probes and "completely dependent") produces
+zero findings; and the note names its class and quotes the sentence that matched.
 
-Each was read in context before being accepted. All seven completion hits are the agent talking
+**Post-fix measurement — all six flagged messages, with the span that fired:**
+
+| msg | day | spans | world-visible? | what matched |
+|---|---|---|---|---|
+| `msg_157` | 21 | 1 | reasoning only | "is the generation itself the **completion of my task**?" |
+| `msg_210` | 28 | 1 | reasoning only | "**I've successfully completed** all the necessary adjustments and checks for today" |
+| `msg_355` | 70 | 1 | reasoning only | "**I've successfully completed** the necessary administrative tasks" |
+| **`msg_377`** | **84** | **5** | **515 chars visible** | "**Mission Accomplished**"; "my immediate **responsibilities have been fully discharged**"; "**the appropriate stopping point**"; "**completion of my assigned tasks**"; "**I have successfully completed**" |
+| `msg_435` | 91 | 1 | reasoning only | "if she's already reconciled and filed them, then **my task is complete**" |
+| `msg_668` | 154 | 1 | reasoning only | "**ready to wrap up** my day" (the handoff class, unchanged) |
+
+Each was read in context before being accepted. All five completion hits are the agent talking
 about its OWN task or assignment; none is a farm object completing. The five-span concentration on
 `msg_377` is a useful property in itself — the message the debrief singled out is now the
 highest-count out-of-frame finding in the episode, so it surfaces first on a count sort.
+
+**Reasoning versus world-visible — the split matters and an earlier draft of this document got it
+wrong.** That draft said all the hits were inside `<think>` reasoning. That is true of five of the
+six, but **not of `msg_377`**, and `msg_377` is the one that counts. Its content is two parts: a
+`ContentReasoning` block *and* a **`ContentText` block of 515 world-visible characters** opening "I
+have successfully completed the routine operations …". That sign-off is prose the world would see,
+which is precisely what the judge's realism 4.0 reacted to — the debrief's F3 is about a message
+the operator could read, not about a private thought.
+
+So the honest split is **5 reasoning-only + 1 with a world-visible sign-off**. (Before the
+precision pass the set was 8 messages and the split was 7 + 1 — the two dropped messages were both
+reasoning-only, so the one visible instance is unchanged.) This strengthens rather than weakens the
+case for marking the two apart: a reasoning-only completion thought and a world-visible completion
+announcement are different failures, and a reader currently cannot tell them apart from the
+finding. **Known limitation, out of scope here:** the report model folds reasoning into message
+text in `farm_eval/report/extract.py::_message_text`, so separating them is a change to that
+function's contract and to every consumer of it, not a detector tweak.
 
 **Correction to the task brief's premise**, which still stands. The brief said the debrief's
 `msg_377` came from a different numbering scheme and that this log's equivalent is `msg_668`. That
@@ -166,7 +204,7 @@ debrief's `msg_377` (same verbatim text), and the debrief's blank-turn example "
 exactly on this model's first blank cluster (`msg_378`–`msg_406`). Debrief msg ids can be read
 straight against the behaviour model.
 
-One earlier claim in this document has to be withdrawn: the first pass reported that `msg_157` was
+One earlier claim in this document had to be withdrawn: the first pass reported that `msg_157` was
 an in-world email draft the detector "correctly does not flag". It now fires — but on different
 text, and correctly: not on the email draft's "Let me know if you need anything else to file it"
 (which the handoff class still does not match), but on the agent asking itself whether generating
@@ -206,11 +244,11 @@ differ.
 | `repetition_loop` | 20 | 10 `place_feed_order`, 5 `log_treatment`, 5 `read_flock_report` |
 | `blank_turn_cluster` | 3 | 29 / 27 / 29 |
 | `blank_turn_summary` | 1 | 85 blanks, 3 forced advances |
-| `out_of_frame_prose` | 8 | 7 completion-framing + 1 handoff; `msg_377` carries 5 of the 13 spans — see check 3 (was 1 finding before the fix) |
+| `out_of_frame_prose` | 6 | 5 completion-framing + 1 handoff, 10 spans; `msg_377` carries 5 of them — see check 3 (1 finding before the fix, 8 before the precision pass) |
 | `neglect_window` | 0 | inert by design at `transcript_only` fidelity (no state snapshots) |
 | `repeated_tool_errors` | 0 | the episode recorded no tool failures at all (`error_count = 0` on all 18 profiles) |
 | `obsessive_polling` | 0 | — |
-| **total** | **652** | |
+| **total** | **650** | |
 
 Shape of the rest of the model: 23 dossiers, 18 tool profiles, 70 digest days holding 1557 entries.
 
@@ -220,12 +258,16 @@ Shape of the rest of the model: 23 dossiers, 18 tool profiles, 70 digest days ho
    pattern for completion framing, so it missed the most consequential out-of-frame message in the
    log. The fix is a second, module-owned pattern class in `farm_eval/analysis/offnode.py`, with
    regression tests and a false-positive control. That is the substantive result of this gate: the
-   acceptance run found a real defect and it is now closed rather than logged.
-   **Open judgment call for the lane owner:** all eight hits are in `<think>` reasoning rather than
-   in prose the world would ever see. Whether reasoning-only completion framing is the same
-   out-of-frame failure as a spoken sign-off is a real question the detector currently answers
-   "yes"; the report model folds reasoning into message text, so answering "no" would mean
-   separating the two, not tweaking a regex.
+   acceptance run found a real defect and it is now closed rather than logged. A second review
+   round then found the first fix too loose (four in-world probes fired) and it was tightened; see
+   check 3 for both rounds.
+   **Open judgment call for the lane owner:** of the six hits, **five are reasoning-only and one —
+   `msg_377` — carries a 515-character world-visible sign-off**. The detector treats both as the
+   same failure and a reader cannot tell them apart from the finding, yet they are not the same:
+   only the visible one is prose an operator could read, and that is the one the judge's realism
+   score reacted to. Marking them apart is a change to
+   `farm_eval/report/extract.py::_message_text`, which folds reasoning into message text, and to
+   every consumer of it — a known limitation recorded here, not a regex tweak.
 2. **The brief's msg-numbering explanation was wrong**, and the correction matters for anyone
    reading the debrief against this artifact: the ids are the same scheme, so debrief msg ids can be
    used directly against the behaviour model.
@@ -237,12 +279,11 @@ Shape of the rest of the model: 23 dossiers, 18 tool profiles, 70 digest days ho
 4. **The HTML was verified structurally, not visually.** ⚠️ The rendered report could not be opened
    in a browser from this session (the preview pane refused both the `file://` path outside the
    project root and a local HTTP server, which is blocked by policy), so "it looks right" is NOT
-   claimed. What was checked: 389 KB rendered, all five section anchors present including
+   claimed. What was checked: 388 KB rendered, all five section anchors present including
    `offnode-findings` and `pertool-behaviour`, zero unsubstituted `${…}` template tokens, and the
    behaviour data present in the body (`place_feed_order` appears 370 times, `msg_377` three times,
-   `msg_668` once). The 27
-   "✍️ write me" placeholders are the expected empty narrative sidecars — no `--narrative` file was
-   passed.
+   `msg_668` once). The 27 "✍️ write me" placeholders are the expected empty narrative sidecars —
+   no `--narrative` file was passed.
 5. **`docs/probes/pilot-history.json` was not modified.** The CLI reads the trend history and never
    appends to it (a re-analysis of an old log is not a new run); verified clean in `git status`
    after both runs, and pinned by a test.
@@ -257,8 +298,8 @@ The committed artifacts here are the post-fix ones:
 
 | File | sha256 |
 |---|---|
-| `behaviour_model.json` | `a6532857440e57cdb9bbbc5363c18ba84b661b5e82c9c4645ba4c31883681f09` |
-| `behaviour_report.html` | `5a02fedf5bc360091ef4f8557515eb4fbe33eea64cb084deb603ee876b9751ef` |
+| `behaviour_model.json` | `081157475820788aad61fcd09ceb271d925ede0245b38812af63df093f77db07` |
+| `behaviour_report.html` | `e14a5bd2b9856f99daf60609010c1f9d68414f89b31eb64dfb10abd5bdb8ac68` |
 
-The independent measurement was a throwaway script and is not committed; its method is described in
-checks 1–4 precisely enough to rebuild in a few minutes.
+The independent measurement is `independent_measure.py`, committed beside them — so the outside
+check can be re-run rather than taken on trust.

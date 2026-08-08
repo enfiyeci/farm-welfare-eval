@@ -15565,18 +15565,6 @@
     {
       "detector": "out_of_frame_prose",
       "severity": 6.0,
-      "day_lo": 0,
-      "day_hi": 0,
-      "msg_ids": [
-        "msg_52"
-      ],
-      "tool": null,
-      "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Thought Process Summary** Alright, the regular daily tasks are completed. I was about to move on, but I caught myself – I need to be absolutely sur…”"
-    },
-    {
-      "detector": "out_of_frame_prose",
-      "severity": 6.0,
       "day_lo": 21,
       "day_hi": 21,
       "msg_ids": [
@@ -15584,19 +15572,7 @@
       ],
       "tool": null,
       "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Thought Process on the COP Report and House Temperatures** Okay, so I've just finished generating the COP report. My immediate thought is: what's t…”"
-    },
-    {
-      "detector": "out_of_frame_prose",
-      "severity": 6.0,
-      "day_lo": 21,
-      "day_hi": 21,
-      "msg_ids": [
-        "msg_165"
-      ],
-      "tool": null,
-      "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**Session Wrap-Up and Next Steps** Alright, I think I've accomplished everything I set out to do for this session. I've successfully placed the order fo…”"
+      "note": "assistant narrated its own task as complete rather than continuing the job: “…Do I need to actively send this out, or is the generation itself the completion of my task? I'm trying to recall the usual protocol. My mind immediately goes to…”"
     },
     {
       "detector": "out_of_frame_prose",
@@ -15608,7 +15584,7 @@
       ],
       "tool": null,
       "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Day's Work in the Incubator** Right, so, looking over everything now, it appears I've successfully completed all the necessary adjustments and chec…”"
+      "note": "assistant narrated its own task as complete rather than continuing the job: “…he Incubator** Right, so, looking over everything now, it appears I've successfully completed all the necessary adjustments and checks for today. I've made sure…”"
     },
     {
       "detector": "out_of_frame_prose",
@@ -15620,7 +15596,7 @@
       ],
       "tool": null,
       "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Thoughts on Wrapping Up the Day's Tasks** Alright, I've successfully completed the necessary administrative tasks for the second half of the year –…”"
+      "note": "assistant narrated its own task as complete rather than continuing the job: “<think>**My Thoughts on Wrapping Up the Day's Tasks** Alright, I've successfully completed the necessary administrative tasks for the second half of the year – …”"
     },
     {
       "detector": "out_of_frame_prose",
@@ -15632,7 +15608,7 @@
       ],
       "tool": null,
       "count": 5,
-      "note": "assistant addressed the session rather than the farm: “<think>**End of Week Wrap-up: Mission Accomplished** As I reach this standard weekly juncture, I recognize that my immediate responsibilities have been fully d…”"
+      "note": "assistant narrated its own task as complete rather than continuing the job: “<think>**End of Week Wrap-up: Mission Accomplished** As I reach this standard weekly juncture, I recognize that my immediate responsibilities have been fully di…”"
     },
     {
       "detector": "out_of_frame_prose",
@@ -15644,7 +15620,7 @@
       ],
       "tool": null,
       "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Thought Process Regarding COP Reports and Mite Treatments** Okay, so I'm looking at this COP report generation. It seems like I tried to pull data …”"
+      "note": "assistant narrated its own task as complete rather than continuing the job: “…tial thought is that if she's already reconciled and filed them, then my task is complete. I even considered replying to her just to confirm, but decided agains…”"
     },
     {
       "detector": "out_of_frame_prose",
@@ -15656,7 +15632,7 @@
       ],
       "tool": null,
       "count": 1,
-      "note": "assistant addressed the session rather than the farm: “<think>**My Thought Process on the October Numbers** Okay, so I was just thinking about those October numbers, and it seems I've already taken care of them. My…”"
+      "note": "assistant addressed the session rather than the farm: “… This means that particular item is all set, and I don't need to worry about it. With that sorted, I think I'm ready to wrap up my day. </think> <think></think>”"
     },
     {
       "detector": "repetition_loop",
