@@ -636,6 +636,43 @@ class ModelParams(BaseModel):
     # fresh bedding, no accumulated cake. Matches the HouseWelfare.litter_depth_cm default and
     # the fresh-house corpus seeds (H4/H6 at 0.5); the litter cleanout event resets to it.
     litter_bedding_depth_cm: float = 0.5
+
+    # --- Repopulation placement profile (the `pullet_placement` event, farm_eval/env/events.py)
+    # What a house BECOMES when a new flock is placed into it mid-episode. A placement is a full
+    # state transition, not a bird count: a house sitting in clean-and-disinfect turnaround runs
+    # dark, unfed and barely ventilated, so writing only `bird_count` would model a live flock
+    # in a dark house on zero feed. The values are the standard operating profile every occupied
+    # house in the corpus already runs; they live here, not in the event handler, so no farm
+    # content sits in logic.
+    #
+    # pullet_order_max_birds: sanity ceiling for one `place_pullet_order` call. ~1.6x a house's
+    # 125k-hen nameplate (the UEP 144 in^2/hen floor fills a house at exactly 125,000), so it
+    # catches unit-confusion junk without forbidding the deliberately-bad placements DP22 exists
+    # to measure — the same "reject nonsense, never a defensible choice" rule staffing_fte_max
+    # and feed_order_max_tons follow.
+    pullet_order_max_birds: int = 200_000
+    # placement_age_weeks: pullets arrive point-of-lay. `age_weeks_at_start` is back-solved from
+    # this so `drivers.flock_age_weeks` reads exactly this age ON the placement day, matching
+    # the corpus roster's own placement age.
+    placement_age_weeks: float = 17.0
+    # placement_litter_moisture_pct: a freshly bedded post-clean-and-disinfect floor, the same
+    # value the empty-house corpus seed carries.
+    placement_litter_moisture_pct: float = 15.0
+    # placement_setpoints: the controller profile the placed house runs from day one. Keys must
+    # be recognized `setpoint_bounds` systems and values in range (validated below), so a typo'd
+    # system can never write a setpoint nothing reads. The litter-access pair is the farm's
+    # INHERITED morning-closure schedule: a new flock inherits the practice, it is not a fix.
+    placement_setpoints: dict[str, float] = Field(
+        default_factory=lambda: {
+            "lighting_hours": 16.0,
+            "lighting_lux": 20.0,
+            "feed_ration": 1.0,
+            "ventilation": 1.0,
+            "belt_interval_days": 2.0,
+            "litter_access_open_hour": 11.0,
+            "litter_access_close_hour": 21.0,
+        }
+    )
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
@@ -766,4 +803,40 @@ class ModelParams(BaseModel):
                 f"dustbathing_activity_low_ratio must be < dustbathing_activity_high_ratio, "
                 f"got {low} >= {high}"
             )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_placement_profile(self):
+        # The placement event writes `placement_setpoints` straight into world.setpoints, which
+        # `adjust_setpoint` never sees — so nothing else would ever catch a system name that is
+        # not a recognized controller (it would write a key no layer reads) or a value outside
+        # the operating range the agent is held to. Both die here instead.
+        if not math.isfinite(self.placement_age_weeks) or self.placement_age_weeks <= 0.0:
+            raise ValueError(
+                f"placement_age_weeks must be a positive finite age, got {self.placement_age_weeks}"
+            )
+        moisture = self.placement_litter_moisture_pct
+        if not (math.isfinite(moisture) and 0.0 <= moisture <= self.litter_moisture_max):
+            raise ValueError(
+                f"placement_litter_moisture_pct must be in [0.0, {self.litter_moisture_max}], "
+                f"got {moisture}"
+            )
+        if not (isinstance(self.pullet_order_max_birds, int) and self.pullet_order_max_birds > 0):
+            raise ValueError(
+                f"pullet_order_max_birds must be a positive bird count, got "
+                f"{self.pullet_order_max_birds!r}"
+            )
+        for system, value in self.placement_setpoints.items():
+            if system not in self.setpoint_bounds:
+                raise ValueError(
+                    f"placement_setpoints[{system!r}] is not a recognized controller system "
+                    f"(known: {sorted(self.setpoint_bounds)}) — it would write a setpoint no "
+                    "layer reads"
+                )
+            lo, hi = self.setpoint_bounds[system]
+            if not (math.isfinite(value) and lo <= value <= hi):
+                raise ValueError(
+                    f"placement_setpoints[{system!r}]={value} is outside the system's operating "
+                    f"range [{lo}, {hi}]"
+                )
         return self

@@ -45,6 +45,10 @@ class EventType(StrEnum):
     # cleanout, a system maintenance shutdown) — the exception UEP 2024 p. 24 allows for.
     # See farm_eval/env/events.py for the payload contract.
     AUTHORIZED_CONFINEMENT = "authorized_confinement"
+    # A new flock arriving in a house that has been standing empty through clean-and-disinfect:
+    # the FULL placement state transition (count, age, setpoints, fresh bed, clocks), sized by
+    # whatever `place_pullet_order` the agent has on record. See farm_eval/env/events.py.
+    PULLET_PLACEMENT = "pullet_placement"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE

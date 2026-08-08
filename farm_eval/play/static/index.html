@@ -453,8 +453,8 @@
           if (pspec.default === true) input.checked = true;
           field.appendChild(input);
           field.appendChild(label);
-        } else if (pspec.type === "float") {
-          input = el("input", { type: "number", step: "any", id: inputId });
+        } else if (pspec.type === "float" || pspec.type === "int") {
+          input = el("input", { type: "number", step: pspec.type === "int" ? "1" : "any", id: inputId });
           if (pspec.default !== null && pspec.default !== undefined) input.value = pspec.default;
           field.appendChild(label);
           field.appendChild(input);
@@ -485,7 +485,7 @@
         Object.keys(fieldInputs).forEach(function (pname) {
           var f = fieldInputs[pname];
           if (f.type === "bool") params[pname] = f.input.checked;
-          else if (f.type === "float") params[pname] = f.input.value === "" ? 0 : Number(f.input.value);
+          else if (f.type === "float" || f.type === "int") params[pname] = f.input.value === "" ? 0 : Number(f.input.value);
           else params[pname] = f.input.value;
         });
         runOp(name, params);

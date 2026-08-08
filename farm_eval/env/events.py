@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
@@ -156,6 +158,142 @@ def _apply_authorized_confinement(
         state.world.litter_age_days[house_id] = 0.0
 
 
+def _latest_pullet_order(state: EnvState, house_id: str, as_of_day: int) -> int | None:
+    """The bird count of the most recent `place_pullet_order` for `house_id`, or None.
+
+    Derived from the action log rather than a state field, so the log stays the single source of
+    truth (the pattern `state.current_disposition` follows). Later orders supersede earlier ones;
+    among same-day orders the LAST-RECORDED wins, which is call order.
+    """
+    count: int | None = None
+    for record in state.actions:
+        if record.tool != "place_pullet_order" or record.day > as_of_day:
+            continue
+        if record.params.get("house_id") != house_id:
+            continue
+        raw = record.params.get("bird_count")
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"place_pullet_order record for {house_id!r} on day {record.day} carries a "
+                f"non-integer bird_count {raw!r} — apply_action validates it, so a state this "
+                "shape was hand-built"
+            ) from None
+        if value <= 0:
+            raise ValueError(
+                f"place_pullet_order record for {house_id!r} on day {record.day} carries a "
+                f"non-positive bird_count {value!r}"
+            )
+        count = value
+    return count
+
+
+def _house_area_sq_in(corpus: Corpus) -> float:
+    """The house's physical usable floor area (sq in), the denominator of stocking density.
+
+    Read from the SAME corpus key `farm_eval/env/audit.py` uses, so a placement and the UEP
+    audit can never disagree about a house's sq in/hen.
+    """
+    thresholds = corpus.company.get("audit_thresholds") or {}
+    if "house_area_sq_in" not in thresholds:
+        raise ValueError(
+            "pullet_placement needs corpus company.yml audit_thresholds.house_area_sq_in — the "
+            "physical floor area stocking density (sq in/hen) is measured against"
+        )
+    area = float(thresholds["house_area_sq_in"])
+    if not (math.isfinite(area) and area > 0.0):
+        raise ValueError(f"audit_thresholds.house_area_sq_in must be positive and finite, got {area!r}")
+    return area
+
+
+def _apply_pullet_placement(
+    state: EnvState, ev: ScheduledEvent, corpus: Corpus, params: ModelParams
+) -> None:
+    """Place a new flock into a house — the FULL state transition, not a bird count.
+
+    Payload: `{house_id, default_count}`. The size is the latest `place_pullet_order` on record
+    for the house (the agent's lever), falling back to `default_count` — the world's own standing
+    order, which is what an agent that never touches the decision gets.
+
+    Everything else is the placement profile in `ModelParams` (`placement_*`), because writing
+    only the count would model a live flock in a house still set up for clean-and-disinfect
+    turnaround: dark, unfed, barely ventilated, and carrying whatever bed the last flock left.
+    So the transition also writes:
+
+      * `age_weeks_at_start` BACK-SOLVED from `placement_age_weeks`. `drivers.flock_age_weeks`
+        computes `age_at_start + day/7`, so subtracting `on_day/7` here is what makes the flock
+        read exactly point-of-lay age ON its placement day instead of inheriting the episode
+        clock (a house placed on day 266 would otherwise be a 38-week-old flock).
+      * the operating setpoints, including the farm's INHERITED litter-access schedule — a new
+        flock inherits the practice, it is not a fix for it.
+      * a fresh bed (bedding depth, post-clean-and-disinfect moisture, TAN at its base, no
+        caking, no wetting) and a clean footpad state, since this is a different flock on a
+        different floor.
+      * `floor_egg_frac_base` back to the "training unresolved" sentinel with its counters
+        zeroed: this flock's lifetime floor-egg base is settled INSIDE the episode, under
+        whatever door schedule the agent runs through its first six weeks.
+      * `litter_age_days` and `placement_day`, which arm the litter clock, the UEP
+        post-placement training exemption and the floor-egg training window.
+      * `stocking_density`, recomputed from the house's physical area over the placed count.
+        (Hens per m2 of LITTER — the loading the water balance reads — needs no write: it is
+        derived per day from `bird_count` over `litter_area_m2` in `layers/density.py`.)
+
+    Day accounting: events fire AFTER the beat's days have been integrated, so the flock's first
+    integrated day is `on_day + 1`. Its training window therefore observes `on_day+1 ..
+    on_day+window-1` — one day short of the nominal window, and deliberately not seeded the way
+    `loader.build_initial_state` seeds a day-0 flock: there, day 0 is a real day of the world
+    that `integrate` simply starts too late to visit, whereas here `on_day` was genuinely
+    integrated as an EMPTY house before the birds arrived.
+    """
+    house_id = ev.payload["house_id"]
+    house = state.welfare.houses.get(house_id)
+    if house is None:
+        raise ValueError(f"pullet_placement references unknown house_id: {house_id!r}")
+    default_count = int(ev.payload["default_count"])
+    if default_count <= 0:
+        raise ValueError(
+            f"pullet_placement for {house_id!r} declares default_count={default_count} — a "
+            "placement of no birds is not a placement"
+        )
+    birds = _latest_pullet_order(state, house_id, ev.on_day)
+    if birds is None:
+        birds = default_count
+
+    world = state.world
+    # The SECOND door into "this house is occupied", so it needs the same guard the first one
+    # has. `loader.build_initial_state` requires a positive finite `litter_area_m2` of every
+    # occupied house and deliberately lets an EMPTY one keep 0.0 — which is exactly the house a
+    # placement fills. Without this check, filling such a house would make
+    # `layers/density.hens_per_m2_litter` return 0, zeroing `density_factor` and with it the
+    # entire floor-moisture-excess term, silently and for the rest of the episode.
+    litter_area = world.litter_area_m2.get(house_id, 0.0)
+    if not (math.isfinite(litter_area) and litter_area > 0.0):
+        raise ValueError(
+            f"pullet_placement would occupy house {house_id!r}, whose litter_area_m2 is "
+            f"{litter_area!r} — an occupied house needs a positive, finite litter floor area "
+            "(it drives layers/density.py's floor-moisture-excess term); author it in corpus "
+            "company.yml"
+        )
+    world.bird_count[house_id] = birds
+    world.age_weeks_at_start[house_id] = params.placement_age_weeks - ev.on_day / 7.0
+    world.placement_day[house_id] = ev.on_day
+    world.litter_age_days[house_id] = 0.0
+    world.setpoints.setdefault(house_id, {}).update(params.placement_setpoints)
+
+    house.litter_depth_cm = params.litter_bedding_depth_cm
+    house.litter_moisture = params.placement_litter_moisture_pct
+    house.litter_tan = params.tan_frac_base
+    house.litter_fresh_wetting = 0.0
+    house.litter_caked_pct = 0.0
+    house.footpad_mild_pct = 0.0
+    house.footpad_severe_pct = 0.0
+    house.floor_egg_frac_base = -1.0
+    house.floor_egg_training_days = 0.0
+    house.floor_egg_training_closed_days = 0.0
+    house.stocking_density = _house_area_sq_in(corpus) / birds
+
+
 def fire_events_in_window(
     state: EnvState,
     schedule: Schedule,
@@ -222,6 +360,12 @@ def fire_events_in_window(
             # Same generic fallback the pricing_shift branch keeps: a confinement event that
             # also carries email fields (the maintenance note that is the closure's in-world
             # face) still surfaces its message instead of being silently dropped.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.PULLET_PLACEMENT:
+            _apply_pullet_placement(state, ev, corpus, params)
+            # Same generic fallback the other state-changing branches keep: a placement that
+            # also carries email fields (the supplier's delivery note) still surfaces it.
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.PRICING_SHIFT:

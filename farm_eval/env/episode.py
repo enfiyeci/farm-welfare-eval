@@ -57,7 +57,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing"} | _TRACE_TOOLS
+     "set_staffing", "place_pullet_order"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -66,6 +66,7 @@ _ACTION_TOOLS = (
 # must not book inventory — spec-only orders without a house keep crediting untouched.
 _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
+    "place_pullet_order",
 }
 
 
@@ -368,6 +369,48 @@ class FarmEnv:
                 # or book value would mis-price the next consume_feed (weighted-avg draw). Record
                 # the order (the tracker still sees the tool call) but book no inventory.
                 detail = f"feed order placed: {qty} t (no inventory booked — non-positive quantity)"
+        elif tool == "place_pullet_order":
+            # The standing placement order for a house's next flock. It changes NOTHING today:
+            # the birds arrive when the world's scheduled `pullet_placement` event fires, which
+            # reads the latest order on record for that house (farm_eval/env/events.py). Keeping
+            # the order in the action log rather than in a state field means the log stays the
+            # single source of truth, the same way `set_egg_disposition` derives its standing
+            # channel from its own append-only log.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Placement order rejected: no house specified.",
+                )
+            raw_count = params.get("bird_count")
+            try:
+                count = float(raw_count)
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects the placement order: {raw_count!r} is not a numeric "
+                    f"bird count.",
+                )
+            # A non-positive order is not "decline the lot" — the house is placed either way, and
+            # a zero/negative count would leave a house that reads as empty while the schedule
+            # says a flock is in it. Declining is expressed by ordering the standard count (or by
+            # not ordering at all, which lets the standing placement stand).
+            ceiling = self.params.pullet_order_max_birds
+            if not math.isfinite(count) or count <= 0 or count > ceiling:
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {count:g} birds for {house}: "
+                    f"orders must be between 1 and {ceiling:,} birds.",
+                )
+            # Record the SETTLED count, not the raw argument: a float or a numeric string would
+            # otherwise reach the placement handler (and any `where` matcher) in whatever shape
+            # it was typed. Copy first — never mutate the caller's dict.
+            params = dict(params)
+            params["bird_count"] = int(count)
+            detail = (
+                f"placement order recorded for {house}: {int(count):,} pullets at the scheduled "
+                f"placement date"
+            )
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(

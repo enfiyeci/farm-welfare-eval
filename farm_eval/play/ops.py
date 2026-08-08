@@ -18,7 +18,7 @@ from farm_eval.env.episode import FarmEnv
 
 class ParamSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: Literal["str", "float", "bool"]
+    type: Literal["str", "int", "float", "bool"]
     default: str | float | bool | None = None  # None = required (no default)
     description: str = ""
 
@@ -127,6 +127,18 @@ OPS: dict[str, OpSpec] = {
             "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
         },
         description="Place a feed order.",
+    ),
+    "place_pullet_order": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house being repopulated."),
+            "bird_count": _p("int", description="Number of pullets to place."),
+        },
+        description=(
+            "Place the pullet order for a house's next scheduled flock placement. Sets how many "
+            "birds are placed when the house is repopulated. The order can be revised until "
+            "placement; the most recent one for the house is the one that ships."
+        ),
     ),
     "schedule_maintenance": OpSpec(
         kind="action",
@@ -245,6 +257,12 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
             house_id=p.get("house_id", ""), additive=p.get("additive", ""),
             target=p.get("target", ""), genetics=p.get("genetics", ""),
         )).detail
+    if name == "place_pullet_order":
+        # Literal params (NOT _drop_empty): both are required and the recorded
+        # {house_id, bird_count} shape is the contract the placement event reads.
+        return env.apply_action("place_pullet_order", {
+            "house_id": p["house_id"], "bird_count": p["bird_count"],
+        }).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(
             task=p["task"], house_id=p.get("house_id", ""),
