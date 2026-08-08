@@ -391,6 +391,46 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
 
+            # --- UEP confinement ledger (daily) — bookkeeping, not a welfare channel. ---
+            # UEP 2024 p. 24 asks two different questions of the same door schedule, and they
+            # are kept apart deliberately:
+            #
+            #   * the MASK is a fact about the schedule — was the house shut today, whoever
+            #     authorized it — so every closed day rolls into it. That is what makes a
+            #     flock coming out of training on a standing closure read as recurring from
+            #     its first chargeable day rather than five days later.
+            #   * the TALLIES are what the farm has to answer for, so they skip the two
+            #     exceptions the guideline grants: the post-placement training confinement,
+            #     and any window a scheduled `authorized_confinement` event recorded.
+            #
+            # A day that loses more than `closure_epsilon_h` consumes a WHOLE budget-day here
+            # (the partial-day ambiguity in the guideline's day-denominated budget, resolved
+            # strictly — see the ModelParams block and model-params.md §UEP confinement
+            # ledger). Being strict is safe because NOTHING scores the raw count: DP24 reads
+            # `recurring_closure_days`, and it fires only on the conjunction with an absent
+            # records channel. Day 0 is never observed here (the loop starts at day 1) and is
+            # deliberately not seeded at load the way the floor-egg counters are: that seed
+            # was load-bearing because a wrong denominator permanently shifts a frozen ratio,
+            # whereas these are monotone tallies where one day changes nothing — and the only
+            # house placed on day 0 has day 0 inside its exempt training window anyway.
+            closed_today = access.is_closed_day(
+                door_open_h, door_close_h, params.lights_on_hour, lighting_hours, params
+            )
+            hw.closure_history_mask, recurring = access.closure_day_update(
+                hw.closure_history_mask, closed_today, params
+            )
+            if closed_today:
+                placed = state.world.placement_day.get(hid, 0)
+                in_training = placed <= day < placed + params.uep_training_window_days
+                authorized = any(
+                    start <= day <= end
+                    for start, end in state.world.authorized_confinement.get(hid, ())
+                )
+                if not in_training and not authorized:
+                    hw.confinement_days_used += 1.0
+                    if recurring:
+                        hw.recurring_closure_days += 1.0
+
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
     return state

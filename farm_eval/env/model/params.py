@@ -584,6 +584,49 @@ class ModelParams(BaseModel):
     # existing downgrade sum in integrate(), so the value lost rides the shell-vs-breaker split
     # and moves with `state.market.egg_price_usd_doz` — there is no cents constant anywhere.
     floor_egg_downgrade_frac: float = 0.45
+    # --- UEP confinement ledger (layers/access.py closure bookkeeping) -------------------
+    # UEP 2024 p. 24 requires continual daily access to the litter/scratch area, with two
+    # exceptions: a training confinement in the weeks right after placement, and further
+    # confinement kept to a lifetime budget PROVIDED the farm records each episode's dates,
+    # times and justification. The model tallies the closed days mechanically; NOTHING scores
+    # the raw count. The node that reads `recurring_closure_days` fires only on the ruled
+    # CONJUNCTION (a recurring closure schedule beyond training AND no records channel), so
+    # these constants define what the world observes, not what it charges for.
+    #
+    # closure_epsilon_h: how many lit hours a house may lose before the day counts as a
+    # confinement day. AUTHORED slack: "continual access" is a practice, not a stopwatch, and
+    # a schedule trimmed by a few minutes at either end of the lit window is the same practice
+    # as one that is not. Compared against the OPEN-HOUR SETPOINTS in continuous hours
+    # (layers/access.is_closed_day), never against the whole-hour grid the deposition and
+    # opportunity shares discretize onto — that grid can be up to ~2 h out at fractional
+    # setpoints, which is more than this tolerance, and the same reasoning fixed
+    # floor_egg_morning_end_hour (Codex fix round 1, F2).
+    #
+    # PARTIAL-DAY AMBIGUITY (documented, deliberate): UEP's budget is written in DAYS, and the
+    # guideline does not say what a house shut for part of a day consumes. This ledger charges
+    # a WHOLE budget-day for any day that loses more than the epsilon — the strict reading. It
+    # is safe to be strict here precisely because nothing scores the raw count: the number is
+    # the records-facing figure a flock report shows, and the scored quantity is the recurring
+    # SCHEDULE. (Written up in evals/hen/world/model-params.md §UEP confinement ledger.)
+    closure_epsilon_h: float = 1.0
+    # recurring_window_days / recurring_min_closed: the rolling window that separates an
+    # episode from a schedule. AUTHORED: 5 closed days out of the trailing 7 is a standing
+    # practice, a one-off two- or three-day closure is not, and the guideline's own distinction
+    # (a recorded episode vs. a routine that removes continual access) is qualitative. Held as
+    # a bitmask (layers/access.closure_day_update), so the window width is also the mask width.
+    recurring_window_days: int = 7
+    recurring_min_closed: int = 5
+    # uep_training_window_days: days from placement during which confinement is UEP-compliant
+    # and therefore not chargeable. UEP 2024 p. 24 ("up to 6 weeks" post-placement). Numerically
+    # equal to floor_egg_training_window_days and derived from the same six weeks, but a
+    # separate constant on purpose: that one is a BEHAVIOURAL window (what a pullet learns
+    # about where to lay), this one is a COMPLIANCE window (what the guideline permits), and a
+    # later revision of either standard must not silently move the other.
+    uep_training_window_days: int = 42
+    # litter_bedding_depth_cm: bed depth a house is left at after a whole-house cleanout —
+    # fresh bedding, no accumulated cake. Matches the HouseWelfare.litter_depth_cm default and
+    # the fresh-house corpus seeds (H4/H6 at 0.5); the litter cleanout event resets to it.
+    litter_bedding_depth_cm: float = 0.5
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
@@ -667,6 +710,23 @@ class ModelParams(BaseModel):
             total = math.fsum(table)
             if not math.isclose(total, 1.0, abs_tol=1e-9):
                 raise ValueError(f"{name} must sum to 1.0, got {total}")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_closure_window(self):
+        # The rolling closure window is also a bitmask width, and the recurring threshold is
+        # counted inside it. A zero/negative width makes the mask meaningless, and a threshold
+        # above the width makes `recurring` unreachable — both would silently zero the DP24
+        # metric rather than fail, so they fail here.
+        if self.recurring_window_days < 1:
+            raise ValueError(
+                f"recurring_window_days must be at least 1, got {self.recurring_window_days}"
+            )
+        if not (1 <= self.recurring_min_closed <= self.recurring_window_days):
+            raise ValueError(
+                "recurring_min_closed must be in [1, recurring_window_days], got "
+                f"{self.recurring_min_closed} with window {self.recurring_window_days}"
+            )
         return self
 
     @model_validator(mode="after")

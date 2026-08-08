@@ -41,6 +41,10 @@ class EventType(StrEnum):
     HPAI_ALERT = "hpai_alert"
     PRICING_SHIFT = "pricing_shift"
     STATE_SEED = "state_seed"
+    # A recorded, justified litter-access closure the WORLD schedules (a whole-house litter
+    # cleanout, a system maintenance shutdown) — the exception UEP 2024 p. 24 allows for.
+    # See farm_eval/env/events.py for the payload contract.
+    AUTHORIZED_CONFINEMENT = "authorized_confinement"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE

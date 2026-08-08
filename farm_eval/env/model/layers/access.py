@@ -12,6 +12,11 @@ about one schedule, and they are deliberately different currencies:
   * ``access_hours``          — the plain count of usable hours, for reporting and for
     the UEP daily-litter-access requirement.
 
+A last group (``lit_span_h`` / ``open_lit_span_h`` / ``is_closed_day`` / ``closure_day_update``)
+asks the UEP question instead of a welfare one: did the house lose its daily litter access
+today, and is it losing it as a matter of routine.  Those read the door setpoints in
+continuous hours rather than off the whole-hour grid — see ``is_closed_day``.
+
 A fourth function, ``substrate_quality``, asks about the litter rather than the schedule:
 how much of the offered opportunity the BED can actually deliver.  It lives here because it
 is only ever used to discount ``opportunity_available`` — realized opportunity is the
@@ -227,6 +232,105 @@ def access_hours(
     """Return how many whole clock hours are both door-open and lit.
 
     The same discretization as ``open_lit_hours`` (and therefore as the two shares), so a
-    caller can compare hours against weighted shares without a grid mismatch.
+    caller can compare hours against weighted shares without a grid mismatch.  This is the
+    REPORTING quantity; the compliance predicate below deliberately does not use it (see
+    ``is_closed_day``).
     """
     return float(len(open_lit_hours(open_h, close_h, lights_on, lighting_hours)))
+
+
+# --- UEP confinement bookkeeping -------------------------------------------------------
+#
+# Two questions the guideline asks that the three quantities above cannot answer: was the
+# house shut today, and is it shut as a matter of ROUTINE.  Both are asked of the door
+# setpoints in continuous hours, not of the whole-hour grid, for the reason spelled out in
+# ``is_closed_day``.
+
+
+def lit_span_h(lights_on: float, lighting_hours: float) -> float:
+    """Return the length of the lit window in continuous hours, truncated at midnight.
+
+    The denominator every access question is asked against: a house running a short
+    photoperiod is not thereby confining its birds (a correct pullet step-up must not read as
+    a welfare failure), so full access is full access at any photoperiod.  The truncation
+    mirrors ``_lit_hours``: a lit window running past 24:00 is cut there rather than wrapped.
+    """
+    return max(0.0, min(lights_on + lighting_hours, float(HOURS_PER_DAY)) - lights_on)
+
+
+def open_lit_span_h(
+    open_h: float,
+    close_h: float,
+    lights_on: float,
+    lighting_hours: float,
+) -> float:
+    """Return the continuous hours the doors stand open INSIDE the lit window.
+
+    The overlap of ``[open_h, close_h)`` with the lit window, in the same fractional units
+    ``setpoint_bounds`` admits.  ``open_h >= close_h`` is the all-day-closed convention and
+    returns 0.0.
+    """
+    if open_h >= close_h:
+        return 0.0
+    start = max(open_h, lights_on)
+    end = min(close_h, lights_on + lighting_hours, float(HOURS_PER_DAY))
+    return max(0.0, end - start)
+
+
+def is_closed_day(
+    open_h: float,
+    close_h: float,
+    lights_on: float,
+    lighting_hours: float,
+    params: ModelParams,
+) -> bool:
+    """Return whether today counts as a litter-access confinement day.
+
+    True when the doors deliver less than the lit window minus ``params.closure_epsilon_h``
+    — an hour of slack, because "continual access" is a practice rather than a stopwatch and
+    a schedule trimmed at the edges is the same practice as one that is not.
+
+    Read off the SETPOINTS, not off ``access_hours``.  That grid counts whole lit-and-open
+    clock hours, and at fractional setpoints it can be nearly two hours out in either
+    direction — a door open 05:59-20:01 loses two real hours of a 16-hour window yet occupies
+    15 whole hours, and would read as compliant against a 1-hour tolerance.  Since the
+    discretization error exceeds the tolerance, the comparison has to be made in continuous
+    hours, exactly as ``floor_eggs.morning_closed`` reads its boundary off the setpoint
+    (Codex fix round 1, F2).
+
+    A house with the lights off (``lighting_hours`` 0) has no lit window to lose and is never
+    a closure day; in practice such a house is empty and the integrator skips it anyway.
+    """
+    return open_lit_span_h(open_h, close_h, lights_on, lighting_hours) < (
+        lit_span_h(lights_on, lighting_hours) - params.closure_epsilon_h
+    )
+
+
+def closure_day_update(mask: int, closed_today: bool, params: ModelParams) -> tuple[int, bool]:
+    """Roll the closure-history bitmask forward one day.
+
+    Args:
+        mask:         Yesterday's history, bit 0 = yesterday, widened left to
+                      ``params.recurring_window_days`` bits.
+        closed_today: Whether today was a confinement day (``is_closed_day``).
+        params:       Calibrated model parameters.
+
+    Returns:
+        ``(new_mask, recurring)`` — the shifted mask with today in bit 0 and anything older
+        than the window dropped, and whether at least ``params.recurring_min_closed`` of the
+        trailing ``params.recurring_window_days`` days were closed.
+
+    A bitmask rather than a list of days: it is a fixed-width integer, so it serializes into
+    the episode store as a plain int, cannot grow without bound over a 17-month episode, and
+    makes the rolling window exact instead of approximate.
+
+    The mask records the SCHEDULE — every closed day goes in, including training-window and
+    authorized ones.  The question it answers is "is this house shut as a matter of routine",
+    which is a fact about the door schedule regardless of who authorized it; the exemptions
+    belong to the CHARGEABLE tally in ``integrate``, which is a different question.  That
+    split is what makes a flock leaving its training window on a standing closure count from
+    its first chargeable day rather than five days later.
+    """
+    width = params.recurring_window_days
+    new_mask = ((mask << 1) | int(bool(closed_today))) & ((1 << width) - 1)
+    return new_mask, bin(new_mask).count("1") >= params.recurring_min_closed

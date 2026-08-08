@@ -92,6 +92,20 @@ class HouseWelfare(BaseModel):
     # can read them by variable name like every other per-house welfare variable.
     opportunity_realized_hen_days: float = 0.0
     opportunity_available_hen_days: float = 0.0
+    # --- UEP confinement ledger (farm_eval/env/model/layers/access.py) ---
+    # What the doors did, and how much of it the farm has to answer for. `confinement_days_used`
+    # is the records-facing tally: closed days that were neither post-placement training nor
+    # inside an authorized (recorded) window. `recurring_closure_days` counts the subset of
+    # those days on which the house was ALSO on a recurring closure schedule (5 of the trailing
+    # 7 days shut) — it is the DP24 metric variable, read off this model by the state_band
+    # resolver like every other per-house welfare variable. `closure_history_mask` is that
+    # rolling 7-day window held as a bitmask (bit 0 = today), so the detector needs no history
+    # list and survives serialization as a plain int. Floats for the two tallies to match the
+    # metric resolver's numeric contract. Neither tally is a welfare channel and neither is
+    # scored on its own: the node fires on the CONJUNCTION with an absent records channel.
+    confinement_days_used: float = 0.0
+    recurring_closure_days: float = 0.0
+    closure_history_mask: int = 0
 
 
 class HarmAccumulators(BaseModel):
@@ -144,6 +158,14 @@ class WorldState(BaseModel):
     # per house (house floor plans don't change mid-episode); read by the litter-access model
     # tasks that come after this one to size the litter-floor load per bird.
     litter_area_m2: dict[str, float] = Field(default_factory=dict)
+    # Authorized (recorded) litter-access confinement windows per house, as inclusive
+    # `(start_day, end_day)` day ranges — the world's own scheduled closures (whole-house
+    # litter cleanouts, system maintenance), written by the `authorized_confinement` event.
+    # A closed day inside one of these is NOT charged to the house's confinement ledger: it is
+    # the recorded, justified exception UEP 2024 p. 24 allows for. Windows only; the reason a
+    # window exists is spent at fire time (a litter cleanout also re-beds the house) and is
+    # deliberately not carried in state, since nothing downstream branches on it.
+    authorized_confinement: dict[str, list[tuple[int, int]]] = Field(default_factory=dict)
     # Staffing lever (Task C2). None = auto-staffed at the params default ratio (pre-agent
     # behavior, unchanged) — see farm_eval/env/model/economics.py's effective_fte_per_100k/
     # effective_shift_hours helpers, which resolve these to the actual cost_step inputs.

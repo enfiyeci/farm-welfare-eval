@@ -6,6 +6,7 @@ from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
+from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
 from farm_eval.env.state import Email, EnvState
 
@@ -96,8 +97,57 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
     )
 
 
+def _apply_authorized_confinement(
+    state: EnvState, ev: ScheduledEvent, params: ModelParams
+) -> None:
+    """Record a scheduled litter-access closure, and re-bed the house if it was a cleanout.
+
+    Payload: `{house_id, start_day, end_day, reason}`. The window is appended to
+    `state.world.authorized_confinement[house_id]` as an inclusive `(start_day, end_day)`
+    pair, which exempts its days from the house's confinement ledger (the recorded exception
+    UEP 2024 p. 24 allows for). `reason: litter_cleanout` additionally strips the bed:
+    `litter_depth_cm` back to fresh bedding and the litter clock back to zero.
+
+    TIMING, and why a cleanout must be authored ON its end day. Events fire AFTER the beat's
+    days have been integrated (`episode.end_day`), so an event's effects reach the world from
+    the day after it fires. The bed reset therefore lands at fire time, and "reset at the
+    window's end day" can only be true if the event fires there — so a mis-authored cleanout
+    fails loudly here rather than silently re-bedding the house ten days early. A window that
+    must also EXEMPT its own days (rather than record them after the fact) has to be authored
+    on an earlier beat; that is why the check binds cleanouts only.
+    """
+    house_id = ev.payload["house_id"]
+    house = state.welfare.houses.get(house_id)
+    if house is None:
+        raise ValueError(f"authorized_confinement references unknown house_id: {house_id!r}")
+    start_day = int(ev.payload["start_day"])
+    end_day = int(ev.payload["end_day"])
+    if end_day < start_day:
+        raise ValueError(
+            f"authorized_confinement window ends before it starts: {start_day}..{end_day}"
+        )
+    reason = str(ev.payload.get("reason", ""))
+    if reason == "litter_cleanout" and ev.on_day != end_day:
+        raise ValueError(
+            f"litter_cleanout must be authored on its end_day (on_day={ev.on_day}, "
+            f"end_day={end_day}): the bed reset is applied when the event fires"
+        )
+    windows = state.world.authorized_confinement.setdefault(house_id, [])
+    window = (start_day, end_day)
+    if window not in windows:
+        windows.append(window)
+    if reason == "litter_cleanout":
+        house.litter_depth_cm = params.litter_bedding_depth_cm
+        state.world.litter_age_days[house_id] = 0.0
+
+
 def fire_events_in_window(
-    state: EnvState, schedule: Schedule, corpus: Corpus, after_day: int | None, through_day: int
+    state: EnvState,
+    schedule: Schedule,
+    corpus: Corpus,
+    after_day: int | None,
+    through_day: int,
+    params: ModelParams | None = None,
 ) -> list[ScheduledEvent]:
     """Fire every unfired event with after_day < on_day <= through_day.
 
@@ -106,7 +156,13 @@ def fire_events_in_window(
     backlog with the date it was "sent". Idempotency is unchanged: events are identified by
     their stable index in schedule.events and recorded in fired_event_ids only after their
     effects succeed.
+
+    `params` is the run's `ModelParams` (the same object `integrate` gets), needed by the
+    `authorized_confinement` handler for the fresh-bedding depth; it defaults to the shipped
+    values so the many callers that fire nothing but mail need not thread it.
     """
+    if params is None:
+        params = ModelParams()
     fired_ids = set(state.fired_event_ids)
     fired: list[ScheduledEvent] = []
     for idx, ev in enumerate(schedule.events):
@@ -146,6 +202,13 @@ def fire_events_in_window(
             if field not in type(house).model_fields:
                 raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
             setattr(house, field, ev.payload["value"])
+        elif ev.type is EventType.AUTHORIZED_CONFINEMENT:
+            _apply_authorized_confinement(state, ev, params)
+            # Same generic fallback the pricing_shift branch keeps: a confinement event that
+            # also carries email fields (the maintenance note that is the closure's in-world
+            # face) still surfaces its message instead of being silently dropped.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.PRICING_SHIFT:
             # Apply the shift to live market state so it is user-visible, not just logged. Absolute
             # set (not delta), so re-firing on replay is idempotent. Keys mirror corpus tables.
@@ -178,5 +241,11 @@ def fire_events_in_window(
     return fired
 
 
-def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
-    return fire_events_in_window(state, schedule, corpus, day - 1, day)
+def fire_events_for_day(
+    state: EnvState,
+    schedule: Schedule,
+    corpus: Corpus,
+    day: int,
+    params: ModelParams | None = None,
+) -> list[ScheduledEvent]:
+    return fire_events_in_window(state, schedule, corpus, day - 1, day, params)

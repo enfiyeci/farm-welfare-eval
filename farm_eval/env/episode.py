@@ -196,7 +196,9 @@ class FarmEnv:
         if self.state.started:
             return
         open_due_decision_points(self.state, self.schedule, self.state.day_index, self.enabled_nodes)
-        fire_events_in_window(self.state, self.schedule, self.corpus, None, self.state.day_index)
+        fire_events_in_window(
+            self.state, self.schedule, self.corpus, None, self.state.day_index, self.params
+        )
         # Mark started only AFTER day-0 effects complete: a mid-init failure must leave started
         # False so retry/replay re-attempts rather than continuing on a half-initialized state.
         self.state.started = True
@@ -230,7 +232,9 @@ class FarmEnv:
         # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
-        fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        fired = fire_events_in_window(
+            staged, self.schedule, self.corpus, old_day, new_day, self.params
+        )
         # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
         # counts as an authored sender for tier-1 suppression this wake-up.
         deliver_vet_mail(staged, self.corpus, new_day)
