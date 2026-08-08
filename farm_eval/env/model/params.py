@@ -281,8 +281,10 @@ class ModelParams(BaseModel):
     # authored explicitly (see company.yml), so this only guards unauthored/test states.
     lights_on_hour: float = 5.0
     # --- Diurnal litter-access weights (layers/access.py) -------------------------------
-    # Two hourly weight tables over the REFERENCE 16-h photoperiod: entry i is the clock
-    # hour `lights_on_hour + i` (so index 0 is 05:00 at the default lights-on). Both sum to
+    # Two hourly weight tables over the REFERENCE 16-h photoperiod: entry i is the i-th
+    # whole lit hour, clock hour `ceil(lights_on_hour) + i` (index 0 is 05:00 at the default
+    # lights-on; the ceil keeps the table aligned to the lit window if a house ever runs a
+    # fractional lights-on hour — see layers/access.py). Both sum to
     # 1.0 (validated below); layers/access.py renormalizes them over whatever lit window a
     # house actually runs, so a shorter photoperiod is not itself scored as reduced access.
     # Hours beyond the table (a photoperiod longer than 16 h) carry zero weight.

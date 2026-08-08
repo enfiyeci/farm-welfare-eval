@@ -32,11 +32,19 @@ short photoperiod is itself a welfare cost is a separate question that belongs t
 welfare-currency lane (P9), not here.
 
 Hours are whole clock hours.  An hour ``h`` counts as open when ``open_h <= h < close_h``
-and as lit when it falls in ``[lights_on, lights_on + lighting_hours)``.  By convention
-``open_h >= close_h`` means the doors stay shut all day (a degenerate but valid schedule,
-matching the setpoint bounds in ModelParams), and every function returns 0/empty for it.
+and as lit when ``lights_on <= h < lights_on + lighting_hours``.  That condition holds for
+a FRACTIONAL lights-on too: the hour grid starts at ``ceil(lights_on)``, the first whole
+clock hour at or after the lights come on, so a 05:30 lights-on makes 06:00 the first lit
+hour rather than an unlit 05:00.  Weight-table entry ``i`` is correspondingly the i-th
+whole lit hour, ``ceil(lights_on) + i`` — the table indexes POSITION IN THE LIT WINDOW, so
+a shifted lights-on shifts the whole diurnal pattern with it instead of misaligning it.
+By convention ``open_h >= close_h`` means the doors stay shut all day (a degenerate but
+valid schedule, matching the setpoint bounds in ModelParams), and every function returns
+0/empty for it.
 """
 from __future__ import annotations
+
+import math
 
 from farm_eval.env.model.params import ModelParams
 
@@ -55,41 +63,47 @@ def open_lit_hours(
         open_h:         Door open hour (clock hour, 0-24).
         close_h:        Door close hour (clock hour, 0-24).  ``open_h >= close_h`` means
                         the doors stay closed all day.
-        lights_on:      Lights-on clock hour for the house.
+        lights_on:      Lights-on clock hour for the house.  May be fractional; the grid
+                        aligns to ``ceil(lights_on)`` so every returned hour really is lit.
         lighting_hours: The house's photoperiod in hours (its ACTUAL setpoint, never a
                         hardcoded 16).
 
     Returns:
-        Ascending list of whole clock hours in [0, 24).  A lit window running past
-        midnight is truncated at 24:00 rather than wrapped — no lighting program in this
-        world does that, and wrapping would make the open/close comparison ambiguous.
+        Ascending list of whole clock hours in [0, 24), each satisfying both
+        ``lights_on <= h < lights_on + lighting_hours`` and ``open_h <= h < close_h``.
+        A lit window running past midnight is truncated at 24:00 rather than wrapped — no
+        lighting program in this world does that, and wrapping would make the open/close
+        comparison ambiguous.
     """
     if open_h >= close_h:
         return []
-    start = int(lights_on)
-    end = start + int(lighting_hours)
-    return [
-        h
-        for h in range(start, end)
-        if 0 <= h < HOURS_PER_DAY and open_h <= h < close_h
-    ]
+    return [h for h in _lit_hours(lights_on, lighting_hours) if open_h <= h < close_h]
+
+
+def _grid_start(lights_on: float) -> int:
+    """Return the first whole clock hour at or after lights-on.
+
+    The single origin for both the lit-hour grid and the weight-table index, so the two
+    can never drift apart when ``lights_on`` is fractional.
+    """
+    return math.ceil(lights_on)
 
 
 def _lit_hours(lights_on: float, lighting_hours: float) -> list[int]:
     """Return every lit clock hour, ignoring the doors (the denominator's window)."""
-    start = int(lights_on)
-    end = start + int(lighting_hours)
-    return [h for h in range(start, end) if 0 <= h < HOURS_PER_DAY]
+    end = math.ceil(lights_on + lighting_hours)
+    return [h for h in range(_grid_start(lights_on), end) if 0 <= h < HOURS_PER_DAY]
 
 
 def _weighted(hours: list[int], lights_on: float, table: list[float]) -> float:
     """Sum an hourly weight table over ``hours``.
 
-    Entry ``i`` of the table is the clock hour ``lights_on + i``.  Hours outside the
-    table (a photoperiod longer than the reference 16 h) carry zero weight, which keeps
-    a renormalized share well-defined instead of raising on an unusual setpoint.
+    Entry ``i`` of the table is the i-th whole lit hour, ``ceil(lights_on) + i``.  Hours
+    outside the table (a photoperiod longer than the reference 16 h) carry zero weight,
+    which keeps a renormalized share well-defined instead of raising on an unusual
+    setpoint.
     """
-    start = int(lights_on)
+    start = _grid_start(lights_on)
     return sum(table[h - start] for h in hours if 0 <= h - start < len(table))
 
 

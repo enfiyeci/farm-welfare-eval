@@ -51,6 +51,36 @@ def test_open_ge_close_means_closed_all_day():
         assert access.opportunity_available(open_h, close_h, LIGHTS_ON, PHOTOPERIOD_16, P) == 0.0
 
 
+def test_fractional_lights_on_aligns_the_grid_to_the_lit_interval():
+    # Codex round-1 (Important): truncating lights_on put an UNLIT 05:00 in a window that
+    # only starts at 05:30. The grid now starts at ceil(lights_on), so every returned hour
+    # genuinely satisfies lights_on <= h < lights_on + lighting_hours.
+    assert access.open_lit_hours(0.0, 24.0, 5.5, 1.0) == [6]
+    assert access.open_lit_hours(0.0, 24.0, 5.5, PHOTOPERIOD_16) == list(range(6, 22))
+    assert access.access_hours(0.0, 24.0, 5.5, 1.0) == 1.0
+    for lights_on, lighting_hours in ((5.5, 1.0), (5.5, 16.0), (5.1, 12.0), (5.9, 12.0)):
+        for h in access.open_lit_hours(0.0, 24.0, lights_on, lighting_hours):
+            assert lights_on <= h < lights_on + lighting_hours
+
+
+def test_a_lit_window_running_past_midnight_is_truncated_not_wrapped():
+    # The finding's second case: an 18:30 lights-on must not count the dark 18:00 hour,
+    # and the tail past midnight is dropped rather than wrapped round to 00:00.
+    assert access.open_lit_hours(0.0, 24.0, 18.5, 6.0) == [19, 20, 21, 22, 23]
+
+
+def test_fractional_lights_on_keeps_the_weight_table_aligned():
+    # The table indexes POSITION in the lit window, so a half-hour-later lights-on shifts
+    # the whole diurnal pattern with it: full access still reads 1.0, and the inherited
+    # schedule shifted by the same half hour still lands on the 0.505 deposition anchor.
+    assert access.floor_manure_share(0.0, 24.0, 5.5, PHOTOPERIOD_16, P) == pytest.approx(1.0)
+    assert access.opportunity_available(0.0, 24.0, 5.5, PHOTOPERIOD_16, P) == pytest.approx(1.0)
+    assert access.floor_manure_share(11.5, 21.5, 5.5, PHOTOPERIOD_16, P) == pytest.approx(
+        0.505, abs=0.01
+    )
+    assert access.opportunity_available(11.5, 21.5, 5.5, PHOTOPERIOD_16, P) >= 0.90
+
+
 # --- access_hours ---------------------------------------------------------------------
 
 def test_access_hours_counts_open_and_lit_hours_only():
