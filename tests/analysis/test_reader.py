@@ -10,6 +10,8 @@ What is pinned:
     (`quote_unverified is False`);
   - a garbage reply yields ZERO verdicts and no exception (fail-soft: the reader is diagnostic);
   - a fabricated quote is KEPT but flagged `quote_unverified is True` (never dropped);
+  - the flag's two chosen semantics: a verdict with NO quotes stays unflagged (verified by
+    vacuity), and a candidate with no ids in scope still validates via the whole-transcript path;
   - sweep mode batches consecutive digest days up to `CHUNK_CHARS` and starts a new chunk rather
     than overflowing, with one `days:lo-hi` target per chunk.
 """
@@ -123,6 +125,43 @@ def test_candidates_garbage_reply_yields_zero_verdicts_and_does_not_raise():
     )
 
     assert verdicts == []
+
+
+def test_a_verdict_with_no_quotes_at_all_is_not_flagged_unverified():
+    """The flag means "a citation this verdict made does not exist" -- an uncited verdict makes
+    none, so it stays unflagged (verified by vacuity) rather than flagged for lacking evidence.
+
+    Pinned because both readings are defensible and the choice is invisible from the field name:
+    a later change that flagged quote-less verdicts would silently redefine what the report's
+    "Quote unverified" note tells a reader.
+    """
+    reply = json.dumps(
+        [{"interestingness": 4, "category": "cadence", "note": "Nothing cited.", "quotes": []}]
+    )
+    verdicts = _run(_model(offnode_findings=[_finding()], digest=_digest_days()), _reader(reply))
+
+    assert len(verdicts) == 1
+    assert verdicts[0].quotes == []
+    assert verdicts[0].quote_unverified is False
+
+
+def test_a_candidate_with_no_in_scope_ids_still_validates_via_the_whole_transcript():
+    """Ids in scope are a preference, not a fence.
+
+    A finding with no `msg_ids` (a `repetition_loop` counts recorded calls, not messages) gives
+    the validator nothing to prefer, so `_quote_verified` falls through to `_check_quote`'s strict
+    whole-transcript content resolution. A real quote from a message the finding never named must
+    therefore still verify: the diagnostic question is "is this text in this log", not "is it in
+    these messages".
+    """
+    verdicts = _run(
+        _model(offnode_findings=[_finding(msg_ids=[])], digest=_digest_days()),
+        _reader(_reply(_REAL_QUOTE)),
+    )
+
+    assert len(verdicts) == 1
+    assert verdicts[0].quotes == [_REAL_QUOTE]
+    assert verdicts[0].quote_unverified is False
 
 
 def test_candidates_fabricated_quote_is_kept_but_flagged_unverified():

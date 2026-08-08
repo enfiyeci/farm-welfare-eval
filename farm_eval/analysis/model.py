@@ -78,7 +78,7 @@ class OffNodeFinding(BaseModel):
 
 class DigestEntry(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    kind: str                         # "assistant" | "reasoning" | "tool" | "email_in" | "email_out"
+    kind: str                         # "assistant" | "tool" | "user" (digest.py's three row kinds)
     msg_id: str | None = None
     text: str
 

@@ -24,6 +24,20 @@ Three properties are load-bearing:
 - **Quotes are checked, never trusted.** Every quote goes through the judge's own `_check_quote`;
   a verdict with a quote that resolves to no message is KEPT and flagged `quote_unverified=True`,
   because a hallucinated citation next to a real observation is itself worth seeing.
+
+The flag's exact semantics are a choice, so they are stated rather than left to be inferred from
+the code:
+
+- **Any quote failing sets the flag.** `quote_unverified` is `True` when AT LEAST ONE of the
+  verdict's quotes resolves to nothing -- it is not a per-quote field and it is not "all failed".
+  A verdict with one real quote and one invented one is not half-sound; the invention is the thing
+  worth surfacing, and a flag that only fired when every quote failed would hide it.
+- **Zero quotes leaves the flag unset.** A verdict that cites nothing is `quote_unverified=False`
+  -- verified by vacuity, since there was no citation to check. That is deliberate: the flag means
+  "a citation this verdict made does not exist", which is a specific accusation, and a
+  quote-less verdict makes no citation to be wrong about. It does NOT mean "this verdict is
+  corroborated", and no consumer should read it that way; an uncited verdict is simply an opinion
+  with no evidence attached, which the report already renders as such.
 """
 
 from __future__ import annotations

@@ -19,8 +19,9 @@ import pytest
 
 from farm_eval.analysis import build as build_module
 from farm_eval.analysis.build import (
-    _call_events_in_row_order,
     _errors_by_tool,
+    _events_in_row_order,
+    _link_email_msg_ids,
     _link_msg_ids,
     build_behaviour_model,
 )
@@ -150,10 +151,27 @@ def test_row_order_recovers_every_call_event_exactly_once() -> None:
         Attribution(event=read, dp_id="DP_A", strength="strong"),
     ]
 
-    ordered = _call_events_in_row_order(actions, reads, attributions, [lone])
+    ordered = _events_in_row_order(actions, reads, [], attributions, [lone])
 
     assert [e.kind for e in ordered] == ["action", "action", "read"]
     assert {id(e) for e in ordered} == {id(shared), id(lone), id(read)}
+
+
+def test_row_order_recovers_outbound_email_events_after_the_calls() -> None:
+    """Email events join the same ordered list, so the email link can traverse it.
+
+    The key is rebuilt from the outbound ROW using `attribute._EMAIL_PARAM_KEYS`, which is why the
+    row here carries a `body` the event never keeps: a key built from the whole row would miss.
+    """
+    outbound = [{"id": "m1", "to": "vet@x.test", "subject": "H2", "body": "…", "day": 4}]
+    email = BehaviourEvent(
+        kind="email_sent", day_lo=4, day_hi=4, tool="send_email",
+        params={"id": "m1", "to": "vet@x.test", "subject": "H2"},
+    )
+
+    ordered = _events_in_row_order([], [], outbound, [], [email])
+
+    assert [id(e) for e in ordered] == [id(email)]
 
 
 def test_two_identical_calls_on_one_day_claim_two_distinct_messages_in_order() -> None:
@@ -194,6 +212,121 @@ def test_without_a_trusted_clock_the_day_is_not_required_to_agree() -> None:
     _link_msg_ids([event], transcript, None)
 
     assert event.msg_id == "msg_1"
+
+
+# --- the email msg_N link, one hop later (spec §2.1) ----------------------------------
+
+
+def _send(to: str, subject: str, day: int, msg_id: str | None = None) -> BehaviourEvent:
+    return BehaviourEvent(
+        kind="action", day_lo=day, day_hi=day, tool="send_email", msg_id=msg_id,
+        params={"to": to, "subject": subject, "body": "…"},
+    )
+
+
+def _email(to: str, subject: str, day: int) -> BehaviourEvent:
+    return BehaviourEvent(
+        kind="email_sent", day_lo=day, day_hi=day, tool="send_email",
+        params={"to": to, "subject": subject},
+    )
+
+
+def _send_call(msg_id: str, to: str, subject: str) -> dict:
+    return {
+        "id": msg_id,
+        "role": "assistant",
+        "text": "",
+        "tool_calls": [
+            {"id": "c", "function": "send_email",
+             "arguments": {"to": to, "subject": subject, "body": "…"}},
+        ],
+    }
+
+
+def test_an_email_inherits_the_msg_id_of_the_call_that_sent_it() -> None:
+    send = _send("vet@x.test", "H2 mortality", 12, msg_id="msg_9")
+    email = _email("vet@x.test", "H2 mortality", 12)
+
+    _link_email_msg_ids([send, email], [], None)
+
+    assert email.msg_id == "msg_9"
+
+
+def test_two_same_day_emails_claim_two_distinct_actions_in_order() -> None:
+    """Row order decides, so two messages sent on one day do not both point at the first call."""
+    first = _send("vet@x.test", "H2", 12, msg_id="msg_9")
+    second = _send("vet@x.test", "H2", 12, msg_id="msg_11")
+    email_a, email_b = _email("vet@x.test", "H2", 12), _email("vet@x.test", "H2", 12)
+
+    _link_email_msg_ids([first, second, email_a, email_b], [], None)
+
+    assert (email_a.msg_id, email_b.msg_id) == ("msg_9", "msg_11")
+
+
+def test_an_email_whose_action_never_linked_falls_back_to_the_transcript() -> None:
+    """The tier that actually carries a real run's mail.
+
+    `_link_msg_ids` leaves every `send_email` action unlinked -- the adapter records `cc` and
+    `in_reply_to` that the model never passed, so its exact argument equality can never hold --
+    which is why the primary pairing alone hands every email a `None`.
+    """
+    send = _send("vet@x.test", "H2", 12)                      # msg_id stayed None
+    email = _email("vet@x.test", "H2", 12)
+    transcript = [_send_call("msg_9", "vet@x.test", "H2")]
+
+    _link_email_msg_ids([send, email], transcript, {"msg_9": 12})
+
+    assert email.msg_id == "msg_9"
+
+
+def test_two_same_day_emails_claim_two_distinct_transcript_calls_in_order() -> None:
+    email_a, email_b = _email("vet@x.test", "H2", 12), _email("vet@x.test", "H2", 12)
+    transcript = [_send_call("msg_9", "vet@x.test", "H2"), _send_call("msg_11", "vet@x.test", "H2")]
+
+    _link_email_msg_ids([email_a, email_b], transcript, {"msg_9": 12, "msg_11": 12})
+
+    assert (email_a.msg_id, email_b.msg_id) == ("msg_9", "msg_11")
+
+
+def test_an_email_matching_no_call_at_all_keeps_no_msg_id() -> None:
+    """A link is a bonus, never a guess: neither tier matches, so the residual stays pointer-less."""
+    send = _send("vet@x.test", "H2", 12)
+    email = _email("vet@x.test", "H2", 12)
+    transcript = [_send_call("msg_9", "mgr@x.test", "COP")]   # a different message entirely
+
+    _link_email_msg_ids([send, email], transcript, {"msg_9": 12})
+
+    assert email.msg_id is None
+
+
+def test_the_transcript_fallback_respects_a_trusted_clock() -> None:
+    email = _email("vet@x.test", "H2", 12)
+    transcript = [_send_call("msg_9", "vet@x.test", "H2")]
+
+    _link_email_msg_ids([email], transcript, {"msg_9": 4})
+
+    assert email.msg_id is None
+
+
+def test_an_email_is_not_paired_with_an_action_on_another_day() -> None:
+    send = _send("vet@x.test", "H2", 11, msg_id="msg_9")
+    email = _email("vet@x.test", "H2", 12)
+
+    _link_email_msg_ids([send, email], [], None)
+
+    assert email.msg_id is None
+
+
+def test_outbound_emails_in_the_built_model_carry_their_pointer(model) -> None:
+    """End to end on the scripted episode: its one `send_email` produces a linked email event."""
+    emails = [
+        event
+        for dossier in model.dossiers
+        for event in [*dossier.strong, *dossier.ambient]
+        if event.kind == "email_sent"
+    ]
+    assert emails, "the scripted episode sends one email"
+    assert all(e.msg_id is not None and e.msg_id.startswith("msg_") for e in emails)
 
 
 # --- the two-clock cross-check (spec §2.2) --------------------------------------------

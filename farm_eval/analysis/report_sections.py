@@ -38,16 +38,17 @@ from farm_eval.analysis.model import (
 )
 from farm_eval.report import charts
 
-# Detectors whose findings can never carry a `msg_N` pointer: the adapter records outbound mail
-# without the transcript message id that produced it (spec §2.1 asymmetry, known limitation), so
-# the day, recipient and subject in the note ARE the locator. Stated in the section rather than
-# left as an unexplained blank column.
+# Detectors whose findings carry a `msg_N` pointer only SOMETIMES: an outbound mail row has no
+# message id of its own, and reaches the transcript namespace through the `send_email` call that
+# sent it (`build._link_email_msg_ids`). When that call itself did not link, the residual finding
+# has no pointer -- explained in the section rather than left as an unexplained blank column.
 _NO_MSG_ID_DETECTORS = frozenset({"unattributed_email"})
 
 _EMAIL_LIMITATION = (
-    "Email findings never carry a message-id pointer: the harness records outbound mail without "
-    "the transcript message id that produced it, so the day, recipient and subject below are the "
-    "locator. This is a known limitation of the recorded log, not a missing detection."
+    "Email findings reach the message-id namespace indirectly: the harness records outbound mail "
+    "without a message id, so each one is paired with the send_email call that sent it and "
+    "inherits that call's id. A residual whose call could not be matched to a transcript tool "
+    "call carries no pointer, and for those the day, recipient and subject below are the locator."
 )
 
 # Detectors that count the environment's own records -- recorded calls, state snapshots, episode
@@ -137,7 +138,25 @@ def _event_item(event: BehaviourEvent) -> str:
 
 def _dossier_block(dossier: NodeDossier) -> str:
     """One node's observed behaviour: the derived facts, the strong events in full, the ambient
-    ones collapsed behind their count."""
+    ones collapsed behind their count.
+
+    A `never_opened` node gets a ONE-LINE note instead of the full block. It has no ledger row, no
+    attributions and no score, so every field the block renders would read as a measured zero --
+    "0 strong actions · read before first action: no" says the agent ignored a window that in fact
+    never existed in this run.
+    """
+    if dossier.status == "never_opened":
+        return (
+            f'<div data-behaviour-node="{_esc(dossier.dp_id)}" data-never-opened="1">'
+            f"<p><strong>Observed behaviour:</strong> "
+            + _esc(
+                f"this node was enabled for the run but its window never opened, so there is "
+                f"nothing to observe. Its authored window was days {dossier.opened_day}–"
+                f"{dossier.deadline_day} ({dossier.category}); the episode produced no ledger "
+                "entry, no attributed events and no judge score for it."
+            )
+            + "</p></div>"
+        )
     derived = dossier.derived
     facts = " · ".join(
         [

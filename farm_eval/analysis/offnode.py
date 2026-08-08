@@ -54,7 +54,12 @@ _SEVERITY_CAP = 10.0
 _ACTION_BASE = 5.0
 _ACTION_HOUSE_BONUS = 2.0        # an unattributed action that touches a house changed a flock's day
 _EMAIL_BASE = 5.0
-_PROSE_SEVERITY = 6.0
+# Prose severity scales with how many out-of-frame spans one message carries, like every sibling
+# detector: a message that steps outside the frame five times is a stronger instance than one that
+# does it once, and a flat score buried the pilot's msg_377 among five single-span hits. `per = 5`
+# puts a five-span message at 7.0 and a single-span one at 6.2, so the concentrated instance leads
+# its group under the default severity sort.
+_PROSE_SEVERITY, _PROSE_PER = 6.0, 5.0
 _REPETITION_BASE, _REPETITION_PER = 3.0, 25.0
 _CLUSTER_BASE, _CLUSTER_PER = 4.0, 5.0
 _BLANK_SUMMARY_BASE, _BLANK_SUMMARY_PER = 3.0, 25.0
@@ -315,9 +320,20 @@ def _blank_turn_cluster(
 # The hard constraint is the false-positive one, and it is what the pattern set is SHAPED by:
 # "complete" is an ordinary operations word on a farm. A repair completes, a delivery completes,
 # a treatment round completes, a catching crew finishes. So no alternative may key on the word
-# alone -- every one anchors on the agent's OWN assignment, through a first-person completion verb
+# alone -- each one anchors on the agent's OWN assignment, through a first-person completion verb
 # ("I have successfully completed") or a possessive ("my ... tasks", "my ... operations", "my
-# responsibilities"). An earlier version keyed two alternatives on the nouns "task" and
+# responsibilities").
+#
+# TWO alternatives are deliberate exceptions to that anchoring rule, and they are kept knowingly:
+# `mission accomplished` and `(the )?appropriate stopping point`. Both are subject-less, so neither
+# names whose work is finished. They stay because they are two of msg_377's five spans -- the
+# concentration that makes the acceptance gate's message the highest-count out-of-frame finding in
+# the episode -- and because neither phrase plausibly describes farm work: nobody logs a completed
+# drinker repair as a mission accomplished, and "the appropriate stopping point" is deliberation
+# language, not operations language. The collision risk in world prose is low enough to trade for
+# the span coverage; every OTHER alternative still carries the anchor.
+#
+# An earlier version keyed two alternatives on the nouns "task" and
 # "operations" with any subject at all, on the theory that those two words never name farm work;
 # review disproved it with "Catching operations are complete in H1" and "The drinker-line repair
 # task is complete", and both alternatives are gone. Every alternative also ends at a word
@@ -423,7 +439,7 @@ def _out_of_frame_prose(
         findings.append(
             OffNodeFinding(
                 detector="out_of_frame_prose",
-                severity=_PROSE_SEVERITY,
+                severity=_scaled(_PROSE_SEVERITY, spans, _PROSE_PER),
                 day_lo=lo,
                 day_hi=hi,
                 msg_ids=msg_ids,

@@ -9,7 +9,9 @@ because only the orchestrator holds both streams at once:
   `msg_N`. `_link_msg_ids` bridges them by matching each event to a transcript tool call with the
   same function, the same arguments and (when the clock is trusted) the same day. It is a
   **bonus, never a guess**: an event that cannot be matched keeps `msg_id=None` rather than
-  borrowing a plausible neighbour's id.
+  borrowing a plausible neighbour's id. Outbound EMAIL events reach the same namespace one hop
+  later, through `_link_email_msg_ids`: an email row is written by the `send_email` action that
+  sent it, so the email inherits that action's id once the action itself has one.
 - **The two-clock cross-check** (spec §2.2). In full fidelity the feed's day frames and the report
   model's guarded day map are two independent reconstructions of the same clock. If they disagree,
   the reconstruction cannot be trusted for anything day-dependent, so the build fails loudly
@@ -38,7 +40,7 @@ from typing import Any
 
 from inspect_ai.log import read_eval_log
 
-from farm_eval.analysis.attribute import attribute_events
+from farm_eval.analysis.attribute import _EMAIL_PARAM_KEYS, attribute_events
 from farm_eval.analysis.digest import build_digest
 from farm_eval.analysis.model import Attribution, BehaviourEvent, BehaviourModel
 from farm_eval.analysis.offnode import THRESHOLDS, _error_key, _error_text, run_detectors
@@ -73,34 +75,41 @@ def _event_key(kind: str, tool: Any, day: Any, params: dict) -> tuple:
     return (kind, tool, day, json.dumps(params, sort_keys=True, default=str))
 
 
-def _call_events_in_row_order(
+def _events_in_row_order(
     actions: list[dict],
     reads: list[dict],
+    outbound: list[dict],
     attributions: list[Attribution],
     offnode: list[BehaviourEvent],
 ) -> list[BehaviourEvent]:
-    """Every action/read event exactly once, in the order its source row was recorded.
+    """Every action/read/email event exactly once, in the order its source row was recorded.
 
     `attribute_events` returns its events split across `attributions` (grouped by decision window,
     one shared object per call) and `offnode` (the complement), so neither list alone is the
-    episode's call order -- and the link below must run in call order, or two identical calls would
+    episode's call order -- and the links below must run in call order, or two identical calls would
     take each other's message ids. Events are pooled by content and drawn back out by walking the
-    `actions` then `reads` rows: events with the same content key are interchangeable, so this
-    reproduces the construction order without reaching into the attribution stage's internals.
+    `actions`, then `reads`, then `outbound` rows: events with the same content key are
+    interchangeable, so this reproduces the construction order without reaching into the attribution
+    stage's internals. The email key is built from the row exactly as `attribute._email_event` builds
+    the event's params, which is why that key set is imported rather than restated here.
     """
     pool: dict[tuple, deque[BehaviourEvent]] = defaultdict(deque)
     seen: set[int] = set()
     for event in [a.event for a in attributions] + list(offnode):
-        if event.kind not in ("action", "read") or id(event) in seen:
+        if event.kind not in ("action", "read", "email_sent") or id(event) in seen:
             continue
         seen.add(id(event))
         pool[_event_key(event.kind, event.tool, event.day_lo, event.params)].append(event)
 
     ordered: list[BehaviourEvent] = []
-    for kind, rows in (("action", actions), ("read", reads)):
+    for kind, rows in (("action", actions), ("read", reads), ("email_sent", outbound)):
         for row in rows:
-            key = _event_key(kind, row.get("tool"), row.get("day"), dict(row.get("params") or {}))
-            queue = pool.get(key)
+            if kind == "email_sent":
+                tool = "send_email"
+                params = {k: row[k] for k in _EMAIL_PARAM_KEYS if k in row}
+            else:
+                tool, params = row.get("tool"), dict(row.get("params") or {})
+            queue = pool.get(_event_key(kind, tool, row.get("day"), params))
             if queue:
                 ordered.append(queue.popleft())
     return ordered
@@ -138,6 +147,78 @@ def _link_msg_ids(
             if day_map is not None and day_map.get(msg_id) != event.day_lo:
                 continue
             claimed.add(index)
+            event.msg_id = msg_id
+            break
+
+
+def _link_email_msg_ids(
+    events: list[BehaviourEvent],
+    transcript: list[dict[str, Any]],
+    day_map: dict[str, int] | None,
+) -> None:
+    """Give each outbound email the `msg_N` of the `send_email` call that sent it.
+
+    The env records an outbound message in `EnvState.outbound` and the tool call in its action rows;
+    the two are the same act seen from two sides, so the pair is the `send_email` action on the same
+    day with the same recipient and subject -- the same rule `attribute._sending_calls` already uses
+    to decide the email's attribution strength. `_link_msg_ids` has run by now, so a paired action
+    that matched a transcript tool call carries its id and the email inherits it.
+
+    **The fallback exists because that primary path yields nothing on a real run.** `_link_msg_ids`
+    requires EXACT argument equality, and the `send_email` adapter tool writes its optional
+    parameters into the recorded row (`cc: ""`, `in_reply_to: None`) that the model never passed --
+    so no `send_email` action row equals its own call's arguments, and every email would inherit a
+    `None` (measured: 0 of 44 on the 2026-07-12 pilot log, 0 of 1 on the fixture episode). When the
+    paired action has no id, the email therefore claims a transcript `send_email` call directly:
+    first unclaimed, `to` AND `subject` equal, and the same day when the clock is trusted.
+
+    That targeted rule is safe where the general "arguments are a subset of params" rule is NOT.
+    Widening `_link_msg_ids` would loosen matching for EVERY tool, including ones whose distinctness
+    lives entirely in the arguments a subset rule drops -- two `adjust_setpoint` calls differing only
+    in `value` would become interchangeable. Here the match is confined to one tool whose identity is
+    fully carried by the three fields compared: an outbound row IS a `send_email` call, and
+    recipient + subject + day pick it out. Nothing is inferred from a field that was dropped.
+
+    Claims are first-unclaimed in row order in both tiers, so two emails sent on one day take two
+    distinct calls rather than both pointing at the first. An email that matches no call at all keeps
+    `msg_id=None` -- the same "a link is a bonus, never a guess" rule as `_link_msg_ids` -- and the
+    day, recipient and subject remain the locator for those residuals.
+    """
+    sends = [e for e in events if e.kind == "action" and e.tool == "send_email"]
+    calls = [
+        (row.get("id"), call.get("arguments") or {})
+        for row in transcript
+        if row.get("role") == "assistant"
+        for call in (row.get("tool_calls") or [])
+        if call.get("function") == "send_email"
+    ]
+    claimed_sends: set[int] = set()
+    claimed_calls: set[int] = set()
+
+    for event in events:
+        if event.kind != "email_sent":
+            continue
+        to, subject = event.params.get("to", ""), event.params.get("subject", "")
+
+        for index, send in enumerate(sends):
+            if index in claimed_sends or send.day_lo != event.day_lo:
+                continue
+            if send.params.get("to", "") != to or send.params.get("subject", "") != subject:
+                continue
+            claimed_sends.add(index)
+            event.msg_id = send.msg_id
+            break
+
+        if event.msg_id is not None:
+            continue
+        for index, (msg_id, arguments) in enumerate(calls):
+            if index in claimed_calls:
+                continue
+            if arguments.get("to", "") != to or arguments.get("subject", "") != subject:
+                continue
+            if day_map is not None and day_map.get(msg_id) != event.day_lo:
+                continue
+            claimed_calls.add(index)
             event.msg_id = msg_id
             break
 
@@ -187,12 +268,11 @@ def build_behaviour_model(log_path: str | Path) -> BehaviourModel:
     if replay.fidelity == "full" and day_map is not None:
         _cross_check_clock(replay.events, day_map)
 
-    attributions, offnode_events = attribute_events(
-        actions, reads, environment["outbound"], ledger, schedule
-    )
-    _link_msg_ids(
-        _call_events_in_row_order(actions, reads, attributions, offnode_events), transcript, day_map
-    )
+    outbound = environment["outbound"]
+    attributions, offnode_events = attribute_events(actions, reads, outbound, ledger, schedule)
+    ordered = _events_in_row_order(actions, reads, outbound, attributions, offnode_events)
+    _link_msg_ids(ordered, transcript, day_map)
+    _link_email_msg_ids(ordered, transcript, day_map)
 
     # Stale-day snapshots must not feed the neglect detector or the digest's deltas (spec §2.2).
     snapshots: list[StateSnapshot] = (
@@ -208,7 +288,15 @@ def build_behaviour_model(log_path: str | Path) -> BehaviourModel:
         fidelity_failure_day=replay.failure_day,
         day_map_valid=day_map is not None,
         thresholds=dict(THRESHOLDS),
-        dossiers=build_dossiers(ledger, report_model["judge"]["node_scores"], attributions),
+        dossiers=build_dossiers(
+            ledger,
+            report_model["judge"]["node_scores"],
+            attributions,
+            schedule.decision_points,
+            # Key absent / null = every node enabled; the same distinction
+            # `spectator.extract.started_env` draws from the same recorded config.
+            tuple(config["enabled_nodes"]) if config.get("enabled_nodes") is not None else None,
+        ),
         tool_profiles=build_tool_profiles(
             actions, reads, attributions, replay.events, _errors_by_tool(transcript)
         ),

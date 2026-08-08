@@ -172,7 +172,7 @@
           "day_hi": 0,
           "day_lo": 0,
           "kind": "email_sent",
-          "msg_id": null,
+          "msg_id": "msg_14",
           "params": {
             "cc": "",
             "id": "out-0-0",
@@ -248,7 +248,9 @@
       "day_hi": 0,
       "day_lo": 0,
       "detector": "unattributed_email",
-      "msg_ids": [],
+      "msg_ids": [
+        "msg_14"
+      ],
       "note": "email attributed to no decision window: to=PLACEHOLDER_recipient@example.test subject=PLACEHOLDER_SUBJECT",
       "severity": 5.0,
       "tool": "send_email"

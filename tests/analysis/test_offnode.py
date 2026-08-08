@@ -203,6 +203,7 @@ def test_out_of_frame_prose_flags_handoff_language_per_message() -> None:
     assert len(findings) == 1
     assert findings[0].msg_ids == ["msg_0"]
     assert findings[0].count == 2          # two distinct handoff spans in the one message
+    assert findings[0].severity == 6.0 + 2 / 5
     assert findings[0].day_lo == 300
     assert "wrap up operations" in findings[0].note
 
@@ -237,6 +238,9 @@ def test_out_of_frame_prose_flags_completion_framing_recaps() -> None:
     assert [f.msg_ids for f in findings] == [["msg_0"]]
     assert findings[0].count == 5           # every completion phrasing in the message
     assert findings[0].day_lo == 84
+    # Severity scales with span count like every sibling detector (base 6.0, per 5.0), so the
+    # episode's most concentrated out-of-frame message leads its group under the default sort.
+    assert findings[0].severity == 7.0
 
 
 def test_ordinary_in_world_completion_reports_are_not_out_of_frame() -> None:
@@ -284,10 +288,15 @@ def test_the_prose_note_names_the_class_and_quotes_the_matched_sentence() -> Non
 
     findings = _of(_run(transcript=[handoff, completion]), "out_of_frame_prose")
 
-    assert "addressed the session" in findings[0].note
-    assert "narrated its own task as complete" in findings[1].note
+    # Findings are selected by their message, never by position: severity scales with span count,
+    # so the five-span completion recap outranks the single-span handoff and the two swap places
+    # in the severity-sorted list. Both class notes are asserted.
+    by_msg = {finding.msg_ids[0]: finding for finding in findings}
+    assert set(by_msg) == {"msg_0", "msg_1"}
+    assert "addressed the session" in by_msg["msg_0"].note
+    assert "narrated its own task as complete" in by_msg["msg_1"].note
     # the sentence that fired, not the first 160 characters of the message
-    assert "Mission Accomplished" in findings[1].note
+    assert "Mission Accomplished" in by_msg["msg_1"].note
 
 
 # --- 6. neglect_window ------------------------------------------------------------------
