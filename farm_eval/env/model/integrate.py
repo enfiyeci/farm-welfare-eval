@@ -23,6 +23,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, staffing,
+    access,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -160,11 +161,37 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # degrade through the already-calibrated physics below.
             belt_days_eff = belt_days * (1.0 + staffing_u * params.staffing_belt_lag_max)
 
-            # --- Litter moisture (daily): relax toward the belt-frequency-driven
-            # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
-            # (lower belt_days) dries the litter, making footpad + the ammonia moisture
-            # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
-            hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days_eff, params)
+            # --- Litter water balance (daily), BEFORE ammonia/footpad read it. ---
+            # Two agent-reachable levers feed it. The manure belts set a narrow equilibrium
+            # (drier the more often they run); the litter doors set how much of the day's
+            # manure lands on the floor at all, and that load builds the BED, which is what
+            # carries the large moisture contrasts (layers/litter.py).
+            #
+            # The door schedule is read through the house's ACTUAL photoperiod — never a
+            # hardcoded 16 h: H4 runs a 12-h pullet step-up, and charging the litter node for
+            # a correct lighting program would make the diligent target unreachable
+            # (layers/access.py). Absent an authored schedule the doors default to the whole
+            # lit window (open with the lights, shut with them), the same fallback convention
+            # ModelParams.lights_on_hour documents for the open hour.
+            lighting_hours = sp.get("lighting_hours", 16.0)
+            floor_share = access.floor_manure_share(
+                sp.get("litter_access_open_hour", params.lights_on_hour),
+                sp.get("litter_access_close_hour", params.lights_on_hour + lighting_hours),
+                params.lights_on_hour,
+                lighting_hours,
+                params,
+            )
+            # Moisture steps against YESTERDAY's bed, then the bed accretes today's load:
+            # depth is a stock, and letting the same day's deposit wet the litter it has not
+            # yet become would double-count it. density_factor is 1.0 until Task 7 wires the
+            # stocking-density lever.
+            hw.litter_moisture = litter.litter_moisture_step(
+                hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm, 1.0, params
+            )
+            hw.litter_depth_cm = litter.litter_depth_step(
+                hw.litter_depth_cm, floor_share, age, params
+            )
+            hw.litter_caked_pct = litter.caked_pct(hw.litter_moisture, hw.litter_depth_cm, params)
 
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,

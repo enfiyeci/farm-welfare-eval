@@ -184,21 +184,82 @@ class ModelParams(BaseModel):
     fpd_age_ref: float = 30.0
     fpd_age_factor_max: float = 3.0
 
-    # Litter-moisture dynamics (model-params.md §FPD — litter-moisture/belt coupling)
-    # Litter moisture relaxes toward a belt-frequency-driven equilibrium, making footpad
-    # dermatitis an AGENT-REACHABLE welfare lever: the agent sets belt_interval_days via
-    # adjust_setpoint, and more-frequent manure-belt removal dries the litter. This reuses
-    # the manure-belt lever the decision register names as the ammonia root cause (Decision
-    # #1) rather than exposing litter moisture as a separate, un-controllable input.
-    #   moisture_eq = clamp(belt_floor + belt_slope*(belt_days-1), belt_floor, moisture_max)
-    # Calibrated so daily belts (belt_days=1) → 15 % (dry, below fpd_moisture_ref) and
-    # weekly belts (belt_days=7) → 45 % (wet, footpad-active), matching the good/negligent
-    # reference yardstick. Relaxation is gradual (litter dries/wets over ~1–2 weeks) so a
-    # mid-cycle belt change shows up over days, not instantly.
-    litter_moisture_belt_floor: float = 15.0   # equilibrium moisture (%) at daily belt removal
-    litter_moisture_belt_slope: float = 5.0     # extra % per additional belt-interval day
-    litter_moisture_max: float = 60.0           # cap on belt-driven equilibrium moisture (%)
+    # --- Litter as a WATER BALANCE (layers/litter.py) ------------------------------------
+    # Research: evals/hen/research/2026-08-06-litter-lever-and-ammonia/
+    # litter-access-dose-response.md and evals/hen/research/2026-08-07-litter-prep/.
+    #
+    # Litter moisture relaxes toward `belt_equilibrium(belt_days) + floor_moisture_excess(...)`:
+    # a NARROW belt-frequency term plus a floor-manure source term that the litter-door
+    # schedule drives through accumulated bed depth. Two agent-reachable levers, two time
+    # constants — belts move moisture within days, doors move it over weeks via the bed.
+    #
+    # INHERITED CALIBRATION CORRECTION #1. The previous curve put weekly belts at 45 %
+    # moisture (floor=15, slope=5). That is a FLOOR-HOUSING number: Groot Koerkamp ch. 7
+    # measures the whole belt-frequency span of an aviary litter bed inside ~14.4-20.6 %, and
+    # every aviary anchor in the corpus (Zhao 14.6 %, Oliveira 20.3/31.3 %, GK 14.4-20.1 %)
+    # sits in or just above that band. The belt term is now floor 14.5 + 1.0/day, capped at
+    # 20.5; the large moisture contrasts belong to the ACCESS lever, where Oliveira measured
+    # them.
+    #
+    # CALIBRATION (deterministic; the driver lives in tests/env/model/test_layer_litter.py
+    # `_trajectory`). Oliveira et al. 2019, Poult. Sci. 98:1664-1677: one house, 32
+    # interleaved sections, hens transferred at 17 wk, whole-house litter removals at 37/38
+    # and 54/55 WOA (BOTH arms reset — the measured depth pair is depth since the ~54-WOA
+    # removal), final sampling at 76 WOA, belt interval 3.5 d, lights 05:00-21:00. The
+    # part-access arm is the 11:00-21:00 door schedule, floor_manure_share 0.505.
+    #
+    #   quantity        anchor (full / part)         model (full / part)   tuned coefficient
+    #   moisture        31.3+/-1.5 / 20.3+/-1.5 %    31.30 / 20.32 %       litter_floor_moist_coeff (full)
+    #                                                                      litter_depth_exp (part)
+    #   bed depth        3.77+/-0.5 / 1.64+/-0.4 cm   3.77 /  1.64 cm      litter_depth_accretion_cm_day (full)
+    #                                                                      litter_depth_share_exp (part)
+    #   caked share     33+/-8 % / 0 %               32.8 /  0.0 %         none (litter_cake_* are sourced)
+    #
+    # litter_water_age_wk / litter_water_g_day: GK ch. 8 water flow to the litter, g/hen/day,
+    #   peaking ~45 at 22 wk and collapsing to ~7 by 30 wk — a ~6x behavioural swing, LARGER
+    #   than the full-vs-part access effect. layers/litter.py normalizes it to the 22-wk peak.
+    # litter_floor_moist_coeff: pp of moisture added at floor_share=1, the 22-wk water peak,
+    #   a saturated bed and density_factor=1. Tuned to the 31.3 % full-access anchor. It is a
+    #   PEAK-referenced coefficient: at 76 wk the age term is 7/45, so the excess it produces
+    #   at the anchor is ~15.1 pp, not ~97. At the 22-wk peak with a saturated bed and the
+    #   doors open all day the term DOES exceed litter_moisture_max and the rail binds —
+    #   early-lay wet litter under unmanaged full access is the intended behaviour, and the
+    #   rail (not the coefficient) is what bounds it.
+    # litter_depth_exp: how sharply a shallow bed stops contributing water. Tuned to the
+    #   20.3 % part-access anchor given that arm's 1.64 cm bed; it lands at 0.95, i.e.
+    #   essentially linear in bed saturation — the DEPTH pair, not this exponent, is what
+    #   carries the part-access moisture anchor.
+    # litter_depth_deep_ref: the depth at which the bed is "fully wet-capable" — Oliveira's
+    #   measured full-access depth, reused as the caking reference so both terms saturate
+    #   together.
+    # litter_depth_accretion_cm_day: cm/day added at floor_share=1 and the 22-wk water peak.
+    #   Tuned to the 3.77 cm full-access anchor over the 54->76 WOA window.
+    # litter_depth_share_exp: AUTHORED exponent on the share term, anchored to the measured
+    #   pair. A LINEAR share term cannot reach it — share 0.505 would force a depth ratio of
+    #   0.505 (~2.15 cm) against the measured 1.64/3.77 = 0.435 (Codex plan-review F7).
+    # litter_moisture_relax: unchanged 0.1/day (~10-day time constant), inside the 1.5-3-day
+    #   fast constant plus the sampling coarseness of the field data.
+    # litter_moisture_max: physical rail, not a calibration target (Kang 2016 measured 67.5 %
+    #   in a real house).
+    litter_moisture_belt_floor: float = 14.5   # equilibrium moisture (%) at daily belt removal
+    litter_moisture_belt_slope: float = 1.0     # extra % per additional belt-interval day
+    litter_moisture_belt_cap: float = 20.5      # cap on the BELT term (GK ch. 7 aviary band)
+    litter_moisture_max: float = 60.0           # physical rail on litter moisture (%)
     litter_moisture_relax: float = 0.1          # per-day relaxation rate toward equilibrium
+    litter_water_age_wk: list[float] = [18, 22, 26, 30, 100]
+    litter_water_g_day: list[float] = [20, 45, 20, 7, 7]   # GK ch. 8, g water/hen/day to litter
+    litter_floor_moist_coeff: float = 97.17     # pp of moisture at share=1, 22-wk peak, deep bed
+    litter_depth_exp: float = 0.95              # bed-saturation roll-off on the floor source term
+    litter_depth_deep_ref: float = 3.77         # cm at which the bed saturates (Oliveira full access)
+    litter_depth_accretion_cm_day: float = 0.1365   # cm/day at share=1 and the 22-wk water peak
+    litter_depth_share_exp: float = 1.54        # AUTHORED convexity on the share term (F7)
+    # Caking: Oliveira attributes it to DEPTH ("the thicker litter being more difficult to be
+    # dried by the ventilation air"), and it only appears on wet litter — so it is a product
+    # of excess wetness and bed saturation, zero on either factor alone. 33.1 % caked at
+    # 31.3 % moisture / 3.77 cm; 0 % at 20.3 % / 1.64 cm.
+    litter_cake_coeff: float = 5.2              # % caked per pp of moisture above the reference
+    litter_cake_moisture_ref: float = 25.0      # moisture (%) below which litter does not cake
+    litter_cake_max_pct: float = 60.0           # cap on the caked share (%)
 
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
     # Keyed by antibiotic name; 0 means no withdrawal period for eggs.
@@ -334,13 +395,14 @@ class ModelParams(BaseModel):
     # belt_days * (1 + staffing_belt_lag_max) = 4x the agent's set interval (research §C:
     # understaffing slows manure removal, raising ammonia and foot problems). The raw
     # setpoint the agent set is untouched; only the crew's actual cadence lags.
-    # Calibrated to 3.0 (not 2.0) so footpad activates at the plan's 1.5-FTE anchor even at
-    # the DEFAULT belt interval (2 d): u=0.5 -> eff 5 d -> litter equilibrium 35 % (>
-    # fpd_moisture_ref=30). At 2.0 the default belt hit eff 4 d -> equilibrium exactly 30
-    # and footpad never fired at the anchor (the belt-lag dead zone). The daily-belt corner
-    # (belt=1, u=1 -> eff 4 d -> equilibrium exactly 30) deliberately stays footpad-inert:
-    # daily belt runs keep litter dry even short-staffed; mortality/floor-eggs/ammonia still
-    # respond there.
+    # Calibrated to 3.0 (not 2.0) against the RETIRED belt-moisture curve, where u=0.5 at the
+    # default 2-d belt reached eff 5 d -> equilibrium 35 % and so crossed fpd_moisture_ref=30.
+    # That threshold rationale no longer holds: the belt term is now bounded to 14.5-20.5 %
+    # (see the litter block above), so belt lag alone can never carry litter across the footpad
+    # onset — it shifts moisture within the band, and the litter-door schedule sets where in
+    # relation to the onset the house is sitting. The VALUE is left at 3.0 (a 4x effective-belt
+    # stretch at zero staffing is defensible on its own terms, and re-tuning the staffing lever
+    # is not part of the litter rewrite), but it is no longer anchored to a footpad threshold.
     staffing_belt_lag_max: float = 3.0
 
     @model_validator(mode="after")
@@ -352,6 +414,7 @@ class ModelParams(BaseModel):
         tables = {
             "breed_age_wk": ["breed_hdep", "breed_cummort", "breed_feed_g", "breed_water_ml"],
             "keel_age_wk": ["keel_pct"],
+            "litter_water_age_wk": ["litter_water_g_day"],
             "feather_age_wk": ["feather_pct"],
             "downgrade_age_wk": ["downgrade_frac_pct"],
         }

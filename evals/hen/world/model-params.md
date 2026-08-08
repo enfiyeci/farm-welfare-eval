@@ -105,11 +105,21 @@ dMildFPD/dt   = alpha_exposure - beta_progress*MildFPD + gamma_heal*SevereFPD
 dSevereFPD/dt = beta_progress*MildFPD - gamma_heal*SevereFPD
 # alpha_exposure rises with wet litter, density, perch pressure, age
 ```
-**Litter-moisture / belt coupling (agent lever).** Litter moisture is not a free input; it
-relaxes (~10-day time constant) toward a manure-belt-frequency equilibrium so footpad is
-agent-controllable via `belt_interval_days` (the lever the register names for Decision #1):
-`moisture_eq = clamp(15 + 5*(belt_days-1), 15, 60)` → daily belts ≈15 % (dry, footpad-free),
-weekly belts ≈45 % (wet, footpad-active). See `layers/litter.py`, `eval-design-notes.md §1`.
+**Litter water balance (two agent levers).** Litter moisture is not a free input; it relaxes
+(~10-day time constant) toward `belt_equilibrium(belt_days) + floor_moisture_excess(...)`. The
+belt term is NARROW — `min(14.5 + 1.0*(belt_days-1), 20.5)` — because Groot Koerkamp ch. 7 puts
+the whole belt-frequency span of an aviary litter bed inside ~14.4–20.6 %; the earlier
+`clamp(15 + 5*(belt_days-1), 15, 60)` reaching ≈45 % at weekly belts was a floor-housing number
+(inherited calibration correction #1). The LARGE moisture contrasts come from the litter-door
+schedule through `access.floor_manure_share`, mediated by accumulated bed depth: Oliveira et al.
+2019 measured 31.3 % moisture / 3.77 cm / 33 % caked under all-day access against
+20.3 % / 1.64 cm / 0 % under a 10-hour schedule in the same house, and the gap had vanished
+after a cleanout (P = 0.57). Flock age scales both terms (GK ch. 8: water flow to the litter
+peaks ~45 g/hen/day at 22 wk, ~7 by 30 wk). Consequence for footpad: the belt lever alone can no
+longer cross `fpd_moisture_ref`; where a house sits relative to the footpad onset is set by the
+door schedule. Coefficients, the anchor table and the deterministic calibration trajectory: the
+litter block in `ModelParams`, `layers/litter.py`, `tests/env/model/test_layer_litter.py`, and
+`evals/hen/research/2026-08-06-litter-lever-and-ammonia/litter-access-dose-response.md`.
 
 ## Feather damage / pecking (mid→late-lay acceleration)
 

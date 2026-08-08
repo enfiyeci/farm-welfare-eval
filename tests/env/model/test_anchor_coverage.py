@@ -23,6 +23,16 @@ ANCHORS = {
     "staffing 40k hens/FTE full adequacy": "test_full_adequacy_sits_at_the_40k_hens_per_fte_anchor",
     "floor-manure share 0.505 for the 11:00-21:00 door schedule":
         "test_inherited_schedule_matches_the_0_505_deposition_anchor",
+    "litter moisture 31.3 full access / 20.3 part access":
+        "test_full_access_moisture_matches_the_31_3_anchor",
+    "litter depth 3.77 full access / 1.64 part access":
+        "test_full_access_depth_matches_the_3_77_anchor",
+    "litter caking 33% full access / 0% part access":
+        "test_full_access_caking_matches_the_33_pct_anchor",
+    "belt-regime moisture band 14.4-20.6 (GK ch. 7)":
+        "test_belt_regime_stays_inside_the_groot_koerkamp_band",
+    "litter water flow peaks at 22 wk (GK ch. 8)":
+        "test_water_rel_peaks_at_22_weeks_and_collapses_by_30",
 }
 
 

@@ -36,6 +36,12 @@ class HouseWelfare(BaseModel):
     heat_stress_index: float
     water_access_ok: bool = True
     stocking_density: float
+    # Bed depth (cm) and caked surface share (%) — the SLOW half of the litter water balance
+    # (farm_eval/env/model/layers/litter.py). Depth accumulates from the floor-manure load the
+    # litter doors admit and falls only on a cleanout; caking is the depth x wetness product.
+    # Defaults are fresh bedding; corpus/company.yml seeds each house at its accumulated depth.
+    litter_depth_cm: float = 0.5
+    litter_caked_pct: float = 0.0
     # --- substrate welfare variables (populated by farm_eval/env/model) ---
     temp_c: float = 21.0
     humidity: float = 55.0

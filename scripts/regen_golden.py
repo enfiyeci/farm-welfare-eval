@@ -152,8 +152,9 @@ def run_reference(policy: str) -> dict[str, float]:
 
     Policies are static per-house setpoint regimes applied once before the run, over the
     agent-controllable levers (ventilation, temperature, belt_interval_days). Litter moisture
-    is NOT set directly: it relaxes to its belt-frequency equilibrium (daily belts -> dry ~15%,
-    weekly belts -> wet ~45%), so footpad is reproducible from the belt lever alone.
+    is NOT set directly: it relaxes toward a bounded belt-frequency term (14.5-20.5%) PLUS the
+    floor-manure load the litter doors admit, so these policies separate on litter only through
+    the belt lever they set, over the inherited door schedule they all leave alone.
 
     The run is driven through FarmEnv.start()/end_day() (the same path scored models take), so
     the anchors reflect whatever the substrate actually does — including scheduled welfare events.
