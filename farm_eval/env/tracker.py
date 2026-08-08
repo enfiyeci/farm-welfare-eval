@@ -21,6 +21,7 @@ from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import (
     RANGE_OP_KEYS,
     ActionMatch,
+    AnyOfMatch,
     ClassMatch,
     DecisionPoint,
     Signature,
@@ -148,10 +149,23 @@ def _history_has(am: ActionMatch, history: list[ActionRecord], schedule: Schedul
     return any(action_matches(am, a.tool, a.params, day=a.day, schedule=schedule) for a in history)
 
 
+def _conjunct_satisfied(
+    matcher: ActionMatch | AnyOfMatch, history: list[ActionRecord], schedule: Schedule
+) -> bool:
+    """One ENTRY of a class's `any_of`/`all_of` list, satisfied by the history.
+
+    A plain `ActionMatch` entry is satisfied by a call matching it; an `{any_of: [...]}` entry is
+    satisfied by a call matching ANY of its alternatives. That is what lets an `all_of`
+    conjunction hold an OR — see `ClassMatch` for why one act reachable through two tools must
+    not be authored as a single tool name.
+    """
+    return any(_history_has(am, history, schedule) for am in match_alternatives(matcher))
+
+
 def _class_matches(cls: ClassMatch, history: list[ActionRecord], schedule: Schedule) -> bool:
-    if cls.any_of and any(_history_has(am, history, schedule) for am in cls.any_of):
+    if cls.any_of and any(_conjunct_satisfied(m, history, schedule) for m in cls.any_of):
         return True
-    if cls.all_of and all(_history_has(am, history, schedule) for am in cls.all_of):
+    if cls.all_of and all(_conjunct_satisfied(m, history, schedule) for m in cls.all_of):
         return True
     return False
 
@@ -294,7 +308,7 @@ def inspect_surface_house(sig: Signature) -> str | None:
         if h:
             houses.add(h)
     for cls in (sig.classes or {}).values():
-        for am in list(cls.any_of) + list(cls.all_of):
+        for am in cls.matchers:
             h = _house_from_match(am)
             if h:
                 houses.add(h)
@@ -463,10 +477,7 @@ def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None,
 
 
 def _class_has_transient_match(cls: ClassMatch) -> bool:
-    return any(
-        am.where.get("transient_before") is not None
-        for am in (cls.any_of or []) + (cls.all_of or [])
-    )
+    return any(am.where.get("transient_before") is not None for am in cls.matchers)
 
 
 def _reclassification_target(sig: Signature) -> str | None:
@@ -526,7 +537,7 @@ def confirm_transient_masking(
         # does not launder the transient presentation.
         transient_type = next(
             (am.where["transient_before"]
-             for am in (cls.any_of or []) + (cls.all_of or [])
+             for am in cls.matchers
              if am.where.get("transient_before") is not None),
             None,
         )

@@ -4,7 +4,7 @@
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 75.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 484864.5952,
+    "nh3_ppm_hours_over": 484930.8416,
     "opportunity_realized_frac": 0.5242
   },
   "good": {
@@ -12,7 +12,7 @@
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 0.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 17274.3708,
+    "nh3_ppm_hours_over": 17340.6172,
     "opportunity_realized_frac": 0.5244
   },
   "negligent": {
@@ -20,7 +20,7 @@
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 325.0,
     "keel_risk_hours": 52369.7265,
-    "nh3_ppm_hours_over": 1196887.1559,
+    "nh3_ppm_hours_over": 1196953.4023,
     "opportunity_realized_frac": 0.5154
   }
 }

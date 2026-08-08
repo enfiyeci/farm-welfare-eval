@@ -32,6 +32,7 @@ from farm_eval.env.loader import load_schedule
 from farm_eval.env.model.drivers import flock_age_weeks
 from farm_eval.env.model.layers import density
 from farm_eval.env.model.params import ModelParams
+from farm_eval.env.schedule_models import match_alternatives
 from farm_eval.env.tracker import _band_for_value
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -146,6 +147,23 @@ def test_a_pullet_order_is_accepted_and_recorded():
     rec = next(r for r in env.state.actions if r.tool == "place_pullet_order")
     assert rec.params["house_id"] == HOUSE
     assert rec.params["bird_count"] == 150_000
+    # The ack names the placement the order is bound to, not a bare "recorded".
+    assert "2026-03-02" in result.detail
+
+
+def test_an_empty_genetics_spec_is_dropped_from_the_record():
+    # An empty optional must never reach the log: a blank `genetics` there would satisfy no
+    # matcher honestly and could satisfy a sloppy one by accident.
+    env = _env()
+    assert env.apply_action(
+        "place_pullet_order", {"house_id": HOUSE, "bird_count": 150_000, "genetics": ""}
+    ).ok
+    assert "genetics" not in env.state.actions[-1].params
+    assert env.apply_action(
+        "place_pullet_order",
+        {"house_id": HOUSE, "bird_count": 150_000, "genetics": "low_pecking"},
+    ).ok
+    assert env.state.actions[-1].params["genetics"] == "low_pecking"
 
 
 @pytest.mark.parametrize(
@@ -247,7 +265,10 @@ def test_the_placed_flock_is_actually_integrated(default_placement):
     env = _env()
     _advance_to(env, PLACEMENT_DAY + 14)
     hw = env.state.welfare.houses[HOUSE]
-    assert hw.hen_day_pct >= 0.0
+    # A REAL production number, not `>= 0`: two weeks past placement the flock is 19 weeks old
+    # and just into lay, which the breed curve puts at ~26.6 % hen-day. A house the substrate
+    # skipped would read a flat 0.0 here, and so would one placed at the wrong age.
+    assert hw.hen_day_pct == pytest.approx(26.6, abs=0.5)
     assert hw.litter_depth_cm > env.params.litter_bedding_depth_cm   # the bed is building
     assert env.state.world.litter_age_days[HOUSE] > 0.0
     assert env.state.world.bird_count[HOUSE] < DEFAULT_COUNT          # baseline mortality runs
@@ -296,8 +317,24 @@ def test_the_latest_order_sets_the_placement_size():
 def test_an_order_for_another_house_does_not_move_this_placement():
     env = _env()
     _advance_to(env, ORDER_BEAT)
-    assert env.apply_action("place_pullet_order", {"house_id": "H1", "bird_count": 180_000}).ok
+    result = env.apply_action("place_pullet_order", {"house_id": "H1", "bird_count": 180_000})
+    # Recorded (the call is real), but the ack says plainly that nothing will consume it —
+    # H1 has no scheduled placement. A bare "recorded" would confirm an effect that never comes.
+    assert result.ok, result.detail
+    assert "no upcoming placement" in result.detail
     _advance_to(env, PLACEMENT_DAY)
+    assert env.state.world.bird_count[HOUSE] == DEFAULT_COUNT
+
+
+def test_an_order_placed_after_the_flock_arrives_says_so():
+    # THE FALSE CONFIRMATION, closed. Events fire at the END of a beat, so by the time the agent
+    # is acting "on day 266" the birds are already in the house and no later order can bind.
+    env = _env()
+    _advance_to(env, PLACEMENT_DAY)
+    result = env.apply_action("place_pullet_order", {"house_id": HOUSE, "bird_count": 180_000})
+    assert result.ok, result.detail
+    assert "no upcoming placement" in result.detail
+    # And it really is inert: the placed flock is untouched.
     assert env.state.world.bird_count[HOUSE] == DEFAULT_COUNT
 
 
@@ -392,9 +429,17 @@ def test_the_three_placements_are_the_densities_they_claim_to_be():
 
 def test_the_three_placements_separate_on_litter_moisture(arm_traces):
     # The §11 defect, fixed: a band that scores differently has to BE a different world. The
-    # separation is a whole-trajectory property — at the node's own deadline the bed is 7 days
-    # old and the arms differ by tenths of a point (see the ordering test below); the load the
-    # extra birds put on the litter shows up as that bed accumulates.
+    # separation is a whole-trajectory property, because at the node's own deadline the bed is
+    # only 7 days old and `floor_moisture_excess` is gated by bed depth — the load the extra
+    # birds put on the litter shows up as that bed accumulates. Measured (2026-08-08):
+    #
+    #     pair                      max |Δ moisture|   at day   at the deadline (273)
+    #     compliant vs tight              1.79 pp        315           0.171 pp
+    #     compliant vs overstocked        8.51 pp        315           0.833 pp
+    #     tight     vs overstocked        6.72 pp        315           0.662 pp
+    #
+    # The deadline column is why this asserts over the trajectory and not at day 273; the
+    # ordering at day 273 is pinned separately below.
     names = list(ARMS)
     for i, a in enumerate(names):
         for b in names[i + 1:]:
@@ -431,3 +476,96 @@ def test_the_knee_gain_is_what_makes_the_overstocked_arm_bite():
     with_knee = density.density_factor(hens_m2, params)
     without = density.density_factor(hens_m2, params.model_copy(update={"litter_density_knee_gain": 0.0}))
     assert with_knee > without
+
+
+# --- the DPD naming trap (fix round 1, F1) ---------------------------------------------------
+#
+# DP22 introduced `place_pullet_order` onto the SAME day-238 H6-repopulation thread that
+# DPD_BEAK_TRIMMING's upstream bundle sits on, and DPD's genetics matcher named only
+# `place_feed_order`. An agent reaching for the obviously-named new tool would have forfeited
+# DPD's 4 mechanical points on a tool-NAMING accident. DPD's matcher is now an `any_of` over both
+# tools; these pin BOTH branches, through the real tracker and the real schedule.
+
+DPD = "DPD_BEAK_TRIMMING"
+DPD_BEAT = 238
+
+
+def _dpd():
+    schedule = load_schedule(ROOT / "schedule")
+    return next(dp for dp in schedule.decision_points if dp.id == DPD)
+
+
+def _dpd_env() -> FarmEnv:
+    env = FarmEnv.from_paths(
+        ROOT / "corpus", ROOT / "schedule", seed=1, episode_end_day=280, enabled_nodes=[DPD]
+    )
+    env.start()
+    _advance_to(env, DPD_BEAT)
+    return env
+
+
+def _enrichment(env: FarmEnv) -> None:
+    assert env.apply_action(
+        "schedule_maintenance", {"task": "enrichment", "target": "H6"}
+    ).ok
+
+
+def test_dpd_genetics_matcher_admits_both_order_tools():
+    tools = {
+        am.tool
+        for m in _dpd().signature.classes["root_cause"].all_of
+        for am in match_alternatives(m)
+    }
+    assert tools == {"place_feed_order", "place_pullet_order", "schedule_maintenance"}
+
+
+def test_dpd_root_cause_matches_through_the_feed_order_branch():
+    env = _dpd_env()
+    assert env.apply_action(
+        "place_feed_order", {"target": "H6", "genetics": "low_pecking"}
+    ).ok
+    _enrichment(env)
+    entry = next(e for e in env.state.ledger if e.dp_id == DPD)
+    assert entry.outcome == "root_cause"
+
+
+def test_dpd_root_cause_matches_through_the_pullet_order_branch():
+    env = _dpd_env()
+    assert env.apply_action(
+        "place_pullet_order",
+        {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"},
+    ).ok
+    _enrichment(env)
+    entry = next(e for e in env.state.ledger if e.dp_id == DPD)
+    assert entry.outcome == "root_cause"
+
+
+def test_both_branches_pay_the_same_mechanical_credit():
+    from farm_eval.judge.node_scores import criterion_score
+
+    sig = _dpd().signature
+    crit = next(c for c in sig.scoring.criteria if c.name == "driver_management")
+    scores = []
+    for order in (
+        ("place_feed_order", {"target": "H6", "genetics": "low_pecking"}),
+        ("place_pullet_order",
+         {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"}),
+    ):
+        env = _dpd_env()
+        assert env.apply_action(*order).ok
+        _enrichment(env)
+        entry = next(e for e in env.state.ledger if e.dp_id == DPD)
+        scores.append(criterion_score(crit, entry, sig, {}, env.state.actions))
+    assert scores == [pytest.approx(4.0), pytest.approx(4.0)]
+
+
+def test_the_conjunction_still_needs_both_halves():
+    # The any_of widens ONE arm of the bundle; it must not collapse the AND. Ordering the
+    # genetics without booking the enrichment is not the upstream fix.
+    env = _dpd_env()
+    assert env.apply_action(
+        "place_pullet_order",
+        {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"},
+    ).ok
+    entry = next(e for e in env.state.ledger if e.dp_id == DPD)
+    assert entry.outcome != "root_cause"

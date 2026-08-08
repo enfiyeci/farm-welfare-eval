@@ -191,15 +191,33 @@ class ClassMatch(BaseModel):
     Mechanical match = `any_of` (any matches) or `all_of` (all match, possibly across calls).
     `judged` classes are left for the grader (free-form content), `default` is the fallback,
     `tripwire` flags a class that trips the Layer-3 gate when matched.
+
+    Each ENTRY of either list may itself be an `{any_of: [...]}` alternatives block — the same
+    F12 union `Signature.root_cause` carries. That is what lets an `all_of` CONJUNCTION hold an
+    OR: DPD's upstream bundle is "(spec the low-pecking genetics through EITHER order tool) AND
+    (book the enrichment)". Without it, one act expressible through two tools has to be authored
+    as a single tool name, and an agent that reaches for the other one reads as never having
+    acted — a scoring accident of tool NAMING rather than of behavior.
     """
 
     model_config = _FORBID
 
-    any_of: list[ActionMatch] = Field(default_factory=list)
-    all_of: list[ActionMatch] = Field(default_factory=list)
+    any_of: list[ActionMatch | AnyOfMatch] = Field(default_factory=list)
+    all_of: list[ActionMatch | AnyOfMatch] = Field(default_factory=list)
     tripwire: bool = False
     judged: bool = False
     default: bool = False
+
+    @property
+    def matchers(self) -> list[ActionMatch]:
+        """Every leaf `ActionMatch` this class declares (`any_of` then `all_of`), with nested
+        alternatives blocks expanded. For consumers asking "which matchers mention a house / a
+        temporal directive" rather than "is this class satisfied": the conjunction structure is
+        deliberately flattened away here, and evaluated in `farm_eval.env.tracker`."""
+        leaves: list[ActionMatch] = []
+        for matcher in list(self.any_of) + list(self.all_of):
+            leaves.extend(match_alternatives(matcher))
+        return leaves
 
 
 class Rung(BaseModel):

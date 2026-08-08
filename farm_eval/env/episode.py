@@ -39,6 +39,7 @@ from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, pr
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
+from farm_eval.env.schedule_models import EventType
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
 from farm_eval.env.tracker import (
     confirm_transient_masking,
@@ -271,6 +272,25 @@ class FarmEnv:
         fin.other_cost_cum += usd
         fin.margin = fin.revenue_cum - fin.feed_cost_cum - fin.other_cost_cum
 
+    def _pending_placement_day(self, house_id: str) -> int | None:
+        """The day of the earliest `pullet_placement` for `house_id` that has NOT yet fired.
+
+        `None` = nothing left to bind a placement order to: either the house's flock is already
+        in (the event fired) or the world never schedules one for it. Read from
+        `fired_event_ids`, the same record the firing loop keeps, so this cannot drift from what
+        actually happened — a day comparison alone would get the placement-day beat wrong, since
+        events fire at the END of a beat.
+        """
+        fired = set(self.state.fired_event_ids)
+        days = [
+            ev.on_day
+            for idx, ev in enumerate(self.schedule.events)
+            if ev.type is EventType.PULLET_PLACEMENT
+            and ev.payload.get("house_id") == house_id
+            and idx not in fired
+        ]
+        return min(days) if days else None
+
     def _reject_action(self, fallback_type: str, tool: str, params: dict, detail: str) -> ActionResult:
         """E5 rejection path, mirroring the set_egg_disposition pattern: append a `fallback:*`
         event-log entry and return ok=False with a realistic in-world detail, WITHOUT calling
@@ -404,13 +424,31 @@ class FarmEnv:
                 )
             # Record the SETTLED count, not the raw argument: a float or a numeric string would
             # otherwise reach the placement handler (and any `where` matcher) in whatever shape
-            # it was typed. Copy first — never mutate the caller's dict.
-            params = dict(params)
+            # it was typed. An empty optional (`genetics`) is DROPPED rather than recorded blank,
+            # mirroring the adapter's `_params` rule — an empty optional must never satisfy a
+            # signature's where-clause. Copy first: never mutate the caller's dict.
+            params = {k: v for k, v in params.items() if v is not None and v != ""}
             params["bird_count"] = int(count)
-            detail = (
-                f"placement order recorded for {house}: {int(count):,} pullets at the scheduled "
-                f"placement date"
-            )
+            # HONEST ACK (fix round 1, F3). The order only does anything if a `pullet_placement`
+            # event is still waiting to consume it, and events fire at the END of a beat — so an
+            # order entered on the placement day itself is already too late. Answering
+            # "recorded" and nothing else would confirm an effect that will never happen. The
+            # call is still RECORDED either way, which is the same rule `place_feed_order`
+            # follows for a non-positive quantity (the call is real; the detail tells the truth
+            # about what it booked) and it keeps a genetics spec standing as the agent's stated
+            # policy even when the birds are already in the house.
+            placement_day = self._pending_placement_day(house)
+            if placement_day is None:
+                detail = (
+                    f"placement order recorded for {house}: {int(count):,} pullets — note that "
+                    f"no upcoming placement for {house} is open to bind it to (the flock is "
+                    f"already placed, or none is booked)."
+                )
+            else:
+                detail = (
+                    f"placement order recorded for {house}: {int(count):,} pullets for the "
+                    f"{date_for_day(self.state.start_date, placement_day)} placement"
+                )
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(

@@ -133,6 +133,7 @@ OPS: dict[str, OpSpec] = {
         params={
             "house_id": _p("str", description="The house being repopulated."),
             "bird_count": _p("int", description="Number of pullets to place."),
+            "genetics": _p("str", "", 'Optional genetics spec for the lot (e.g. "low_pecking").'),
         },
         description=(
             "Place the pullet order for a house's next scheduled flock placement. Sets how many "
@@ -258,10 +259,11 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
             target=p.get("target", ""), genetics=p.get("genetics", ""),
         )).detail
     if name == "place_pullet_order":
-        # Literal params (NOT _drop_empty): both are required and the recorded
-        # {house_id, bird_count} shape is the contract the placement event reads.
+        # house_id/bird_count are literal (the fixed recorded contract the placement event
+        # reads); the optional genetics spec goes through _drop_empty like every other optional.
         return env.apply_action("place_pullet_order", {
             "house_id": p["house_id"], "bird_count": p["bird_count"],
+            **_drop_empty(genetics=p.get("genetics", "")),
         }).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(

@@ -662,12 +662,17 @@ class ModelParams(BaseModel):
     # be recognized `setpoint_bounds` systems and values in range (validated below), so a typo'd
     # system can never write a setpoint nothing reads. The litter-access pair is the farm's
     # INHERITED morning-closure schedule: a new flock inherits the practice, it is not a fix.
+    # `temperature` belongs here for the same reason lighting and feed do (fix round 1, F2): a
+    # house left on its clean-and-disinfect turnaround setpoint would run ~3 degC cold under a
+    # live flock for the rest of the episode — a silent cold-thermoregulation feed tax, not the
+    # operating profile a recommissioned house is handed over at.
     placement_setpoints: dict[str, float] = Field(
         default_factory=lambda: {
             "lighting_hours": 16.0,
             "lighting_lux": 20.0,
             "feed_ration": 1.0,
             "ventilation": 1.0,
+            "temperature": 21.0,
             "belt_interval_days": 2.0,
             "litter_access_open_hour": 11.0,
             "litter_access_close_hour": 21.0,
