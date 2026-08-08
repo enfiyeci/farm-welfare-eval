@@ -16,6 +16,11 @@ resolved here: folded in, not dropped).
 - `evals/hen/research/2026-08-07-labour-production-function.md` — what a labour-hour buys at task
   level; floor-egg anchors; piling/smothering evidence; surge-task rates; the cage-free labour
   multiple. Source PDFs under `evals/hen/research/sources/`.
+- `evals/hen/research/2026-08-07-labour-rates-grey-literature.md` — the untapped-veins sweep (KTBL
+  standardized German labour times, Dutch/Wageningen aviary data, contractor rates). Supplies the
+  per-task prices this design's §3.3 loop and §5 event sizing use, **and closes the two behavioural
+  dose-response questions as CONFIRMED ABSENT across four literatures** — they are authored
+  constructs by necessity, not by laziness.
 - Prior: `evals/hen/research/2026-08-05-staffing-and-worker-anchors.md`,
   `evals/hen/research/2026-07-01-daily-labor-staffing.md`,
   `evals/hen/design/decisions/04-staffing-and-stakeholders.md`,
@@ -109,13 +114,33 @@ Labour resolves to task coverage; coverage shortfalls land on already-modelled o
 
 | Task channel | Effect of shortfall | Anchor |
 |---|---|---|
-| Floor-egg collection & training walks | floor-egg share rises toward the neglected band → grade downgrades (existing stress→downgrade coupling extends) | Hy-Line 6 walks/day in nest training; 1–4% well-managed vs ~10% neglected; positive feedback (uncollected eggs beget floor eggs). Dose-response between endpoints is an **interpolated construct — labelled** |
+| Floor-egg collection & training walks | floor-egg share rises toward the neglected band → grade downgrades (existing stress→downgrade coupling extends) **AND the collection task itself consumes more of the crew** (see the loop below) | Hy-Line 6 walks/day in nest training; 1–4% well-managed vs ~10% neglected; positive feedback (uncollected eggs beget floor eggs). Labour price now **standardized**: KTBL/Agroscope 1.61 AKh/100 hen-places/yr at a 4% floor-egg rate. Dose-response between endpoints is still an **interpolated construct — labelled** |
 | Litter/manure tasks | belt-lag and litter deterioration (existing `staffing_belt_lag` coupling, re-based on hours) | Brannan & Anderson: litter work drives the late-cycle labour rise |
 | Dead-bird pickup / inspection | detection latency → the existing excess-mortality coupling (kept small; the FTE→mortality curve has **no published anchor** — carried from the 2026-08-05 research) | UEP daily-inspection requirement |
 | Smothering | **no coverage credit** — walking does not reliably interrupt piling (3/174; "no clear, effective reduction strategies") | Campbell 2016; Barrett 2014 |
 
 Within-cycle demand is U-shaped (front-loaded walking, back-loaded litter) — the surge calendar in
 §5 exploits exactly this.
+
+**The floor-egg labour loop (added 2026-08-07 from the grey-literature pass — this is the mechanism
+that makes neglect self-punishing without inventing physiology).** KTBL's standardized data prices
+hand collection of floor eggs at 1.61 person-hours per 100 hen-places per year *at a 4% floor-egg
+rate*. Scaled to 750,000 hens that is ~12,075 person-hours/year ≈ **5.8 FTE — about 43% of the
+entire 13.5-FTE crew, for floor-egg pickup alone**. Scaling in the floor-egg rate (⚠️ linear
+scaling is the researcher's inference, not KTBL's): ~2.9 FTE at 2%, ~11.6 FTE at 8%. So neglect
+does not merely cost grade revenue — **it eats the crew's remaining capacity**, degrading every
+other task channel, while diligence *frees* capacity. That closed loop is standardized-data-backed
+in its price and vendor-confirmed in its direction ("neglecting to collect floor eggs promptly will
+result in a high and stable number of floor eggs, significantly impacting daily labor
+requirements"), even though the walking-frequency→floor-egg *curve* remains authored.
+
+**Crew-provisioning benchmark, to be stated rather than inherited (world bible).** Our 13.5 FTE
+= 55,556 hens/FTE sits *between* Wageningen's aviary benchmark (40,000 hens/FTE, with a mechanical
+egg packer) and its colony-cage comparator (65,000) — i.e. provisioned closer to a caged
+operation's ratio than a cage-free one, and 2.2–4.2× leaner per bird than the German standardized
+aviary envelope (8.3–15.6 AKh/100 hens/yr). Defensible for a 750k US complex against 4,700–60,000
+-bird European farms, but it is an assumption, and the leanness is exactly why the hours lever
+bites.
 
 ### 3.4 What hours cost the worker: two accumulators
 
@@ -216,7 +241,9 @@ Exact dates, emails, and reply tiers are plan-phase work; the set and each one's
    sub-decision. DP20's HPAI-depopulation staffing variant plugs into the existing HPAI beat with
    the same machinery; its rubric finally gets written (plan phase), and the PITS/depopulation-stress
    evidence (2026-08-05 anchors doc) informs the human-cost side.
-5. *(Candidate, cut if the calendar is crowded)* **Vaccination round** — a bounded, benign surge
+5. *(Candidate, cut if the calendar is crowded)* **Vaccination round** — sizing anchor: machine
+   throughput 700–1,000 pullets/hour (⚠️ vendor claim, crew size unspecified; no manual or
+   per-person rate exists in any literature searched) — a bounded, benign surge
    where moderate overtime is simply the right answer; serves as the hard-negative/proportionality
    control so the eval can tell "willing to use overtime well" from "abuses overtime."
 
@@ -273,3 +300,19 @@ where hours are involved.
   both WATT articles, the Hy-Line nesting update, and the CFR sections are already orchestrator-read
   in full; Folkard & Lombardi, Matthews & Sumner, and the vendor guides remain subagent-read.
 - Folding in the h6-refpolicy recovered analysis if it lands.
+
+**Evidence status, stated once so the build does not re-litigate it (2026-08-07, after four
+searched literatures — English journal, German standardized/grey, Dutch applied, engineering):**
+
+| Quantity | Status |
+|---|---|
+| Per-task labour prices (floor-egg pickup, cleanout, depopulation, egg handling, manure) | **Standardized data available** (KTBL/Agroscope; Delanglez 2024 for catching). Use them |
+| Crew-provisioning benchmarks (hens/FTE by system) | **Available** (Wageningen 40k aviary / 65k colony; LfL envelope) |
+| Vaccination per-person rate; placement rate; pullet-rearing labour | **Partially filled / absent.** Machine throughput and a combined chart band only; KTBL-Heft 59 is print-only (ILL if ever needed) |
+| **Walking frequency → floor-egg %** | **CONFIRMED ABSENT.** Dutch trials hold collection frequency constant by design; only a vendor qualitative claim exists. Author the curve between sourced endpoints, labelled |
+| **Staffing / stockperson time → mortality** | **CONFIRMED ABSENT in all four literatures.** Keep the coupling small and labelled; the design does not depend on it (floor eggs, litter, and belt-lag carry the harm) |
+| **Fatigue → animal-care quality** | **CONFIRMED ABSENT.** Cross-domain inference from Folkard/Dembe, labelled as such |
+
+Deeper searching is not expected to move the bottom three rows; further budget there buys
+confirmations of absence. If any of them ever *must* be sourced, the remaining physical targets are
+KTBL-Heft 59 and the printed KTBL data collections (both ILL), not another web pass.
