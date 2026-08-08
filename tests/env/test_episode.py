@@ -275,9 +275,12 @@ def test_state_band_resolves_to_band_at_window_close():
 
 
 def test_state_band_records_deadline_band_not_next_beat():
-    # litter 380 -> ammonia ~24 (marginal) at the day-40 deadline; by the next beat the model
-    # drifts it into harm. The deadline band must be the one recorded.
-    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0)
+    # RE-ANCHORED to the lagged-TAN ammonia layer: litter AGE is no longer an ammonia input
+    # (age acts through the bed — depth, then moisture, then TAN), so the old `litter=380`
+    # fixture, which bought 7.6 ppm from the retired per-day age coefficient, now buys nothing.
+    # The marginal band is placed by the lever that still sets it: ventilation 0.6 lands the
+    # day-40 state at ~21 ppm, inside [15, 25), where 0.5 would have crossed into harm.
+    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=0.0, ventilation=0.6)
     env.start()
 
     env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal)

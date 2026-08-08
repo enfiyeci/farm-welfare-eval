@@ -42,6 +42,13 @@ class HouseWelfare(BaseModel):
     # Defaults are fresh bedding; corpus/company.yml seeds each house at its accumulated depth.
     litter_depth_cm: float = 0.5
     litter_caked_pct: float = 0.0
+    # The two ammonia-source states of the litter bed (farm_eval/env/model/layers/ammonia.py).
+    # litter_tan is the SLOW microbial-nitrogen pool moisture feeds over one to two weeks; it
+    # defaults to ModelParams.tan_frac_base, the value a bed at or below the reference moisture
+    # sits at. litter_fresh_wetting is the FAST free-surface-water state a wetting event creates,
+    # which suppresses emission the same day and is gone in about a week.
+    litter_tan: float = 0.043
+    litter_fresh_wetting: float = 0.0
     # --- substrate welfare variables (populated by farm_eval/env/model) ---
     temp_c: float = 21.0
     humidity: float = 55.0

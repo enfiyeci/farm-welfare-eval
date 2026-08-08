@@ -21,19 +21,92 @@ class ModelParams(BaseModel):
     heat_danger_thi: float = 27.5          # THI threshold for heat-stress accumulation (NOT panting/mortality)
     footpad_band_pct: float = 20.0         # acceptable severe footpad prevalence ceiling (%)
 
-    # Ammonia two-source layer constants (model-params.md §Ammonia)
-    # Calibrated to: aviary mean ~6.7 ppm at baseline vent + mild temp;
-    # winter low-temp (ambient_c=-8) equilibrium >25 ppm; direction tests pass.
-    nh3_target_base: float = 4.2        # baseline floor ppm (belt_days=2, no litter age/moisture effect)
-    nh3_litter_coeff: float = 0.02      # ppm per litter-age day (litter TAN generation)
-    nh3_moisture_coeff: float = 0.06    # ppm per % above reference moisture (25 %)
+    # --- Ammonia: a lagged TAN pool with the Miles non-monotonic moisture turnover -----------
+    # (model-params.md §Ammonia; layers/ammonia.py; tests/env/model/test_layer_ammonia.py)
+    #
+    # THE OPERATING POINT nh3_target_base IS TUNED AT — written down, because the constant it
+    # replaces was not.  The retired nh3_target_base=4.2 was tuned at belt_days=2, a cadence the
+    # source house never ran, and a proposed re-base to 2.169 turned out to embed an unstated
+    # ~67 days of litter age (the "2.169 lesson";
+    # evals/hen/research/2026-08-06-litter-lever-and-ammonia/ammonia-calibration-verification.md).
+    # The replacement point is the CSES aviary house's own configuration, every element sourced:
+    #   * manure belts every 3.5 days ("Belt: every 3 to 4 d" / "twice per week", Zhao et al.
+    #     2015 housing-characteristics paper Table 1),
+    #   * PART-TIME litter access on the inherited 11:00-21:00 door schedule — floor-manure
+    #     share 0.505 at a 16-h photoperiod (layers/access.py), which is what CSES ran and what
+    #     Part I names as a reason its numbers sit below European aviaries,
+    #   * the litter state that schedule settles at on the Oliveira trajectory (~20.3 % moisture,
+    #     a bed at base TAN, no fresh wetting) — CO-SIMULATED in the anchor test, never assumed,
+    #   * indoor 26.7 C (the house's measured mean), ventilation 1.0 (= baseline, no clearing),
+    #     ambient above the 5 C cold-fan threshold.
+    # Equilibrium there is the measured 6.7 ppm (Part I: 6.7 +/- 5.9 ppm over 546 valid days).
+    #
+    # WHAT THE SCALAR MEANS — a stated limitation, not a calibration error.  ammonia_ppm is the
+    # house-representative SPATIAL-MEAN concentration: the same 3-location mean CSES reports and
+    # the quantity the UEP 25 ppm ceiling has historically been judged against.  ONE SCALAR
+    # CANNOT SERVE BOTH the hen threshold and the worker threshold.  Measured bird-level values
+    # at mid-house run ~0.89x this value in cold weather and end-wall exhaust ~1.15x (Part I
+    # Table 6: Mid 6.5, End 7.8, Hen 6.0), and within an aviary the vertical structure runs the
+    # other way again (Bordignon 2025: litter floor highest).  The model does not resolve
+    # within-house spatial structure and no published bird-level-to-exhaust ratio is robust
+    # enough to correct with (within-house CV 16 +/- 10 %), so no correction factor is applied.
+    #
+    # nh3_litter_share: the fraction of the base emission that is litter-sourced, i.e. how far
+    # the litter term can move ammonia.  Calibrated on Oliveira et al. 2019's full-versus-
+    # part-access contrast (17.2 vs 13.5 ppm, the part-time arm 21.5 % lower) with each arm
+    # carrying its own bed.  The remainder is belt-sourced and rides f_MAT.
+    nh3_target_base: float = 3.37       # ppm at the CSES operating point documented above
+    nh3_litter_share: float = 0.34      # litter-sourced fraction of the base emission
     nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
     nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C
     nh3_relax: float = 0.25             # first-order relaxation rate toward target ppm per step
     nh3_fmat_linear: float = 0.20       # f_MAT linear coeff (Wageningen, model-params.md §Ammonia)
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff
-    nh3_moisture_ref: float = 25.0      # litter-moisture reference (% above which moisture adds NH3)
+    # nh3_fmat_cap_days: f_MAT is frozen at its 4-day value beyond four days (Mendes plateau;
+    # inherited calibration correction #2). Unbounded, exp(0.20d + 0.03d^2) put weekly belts at
+    # 35+ ppm — a number off the LITTER-ONLY row of Zhao's Appendix A1 (9.2-47.4 ppm), a
+    # different housing system. The belt+litter aviary rail at weekly belts is Hinz 2010's
+    # 2.2-18.5 ppm.
+    nh3_fmat_cap_days: float = 4.0
+    # nh3_wet_suppress_coeff: the same-day dissolution suppression, litter_term scaled by
+    # 1/(1 + coeff * fresh_wetting). SOURCED EFFECT, AUTHORED FORM: Liu et al. measured a
+    # wetting drop the same day (102 -> 6 ppm, ~94 %); the hyperbolic form and the coefficient
+    # are ours, set so a 24-pp one-day wetting reproduces that ~94 % (the model's stated floor
+    # is 80 %). Slow bed accretion carries a small standing suppression as a side effect — a few
+    # percent at the calibration point, absorbed by nh3_target_base.
+    nh3_wet_suppress_coeff: float = 0.65
+    # --- The lagged TAN pool (Liu et al. 2009) ---
+    # At FIXED nitrogen, adding water slightly LOWERS instantaneous ammonia (-1.9 % per 10 %
+    # more moisture, against +10 % for TAN itself): the real moisture->ammonia link runs through
+    # microbial nitrogen generation and is lagged by one to two weeks. So moisture feeds a pool
+    # and the emission reads the pool, never moisture directly.
+    #   tan_frac_base           litter TAN at/below the reference moisture (Liu: 4.3 %)
+    #   tan_moisture_ref        the moisture that base was measured at (22.6 %)
+    #   tan_gen_moisture_coeff  Liu 4.3 % -> 11.4 % over 22.6 -> 48.9 % moisture = 0.0027/pp
+    #   tan_relax               0.12/day ~ an 8-day time constant, inside Liu's 5 d-2 wk order
+    tan_frac_base: float = 0.043
+    tan_moisture_ref: float = 22.6
+    tan_gen_moisture_coeff: float = 0.0027
+    tan_relax: float = 0.12
+    # --- The Miles non-monotonic moisture factor (Miles, Rowe & Cathcart 2011) ---
+    # log10(NH3) = b + beta_TL*T + beta_ML*M + beta_MTI*T*M + beta_MQ*M^2, rewritten around its
+    # own maximum M* = -(beta_ML + beta_MTI*T)/(2*beta_MQ) and normalized to 1.0 at
+    # miles_moisture_op. miles_mstar_18c/miles_mstar_temp_slope/miles_log_curv are the paper's
+    # day-2 column rounded to three significant figures (exactly: 40.35 %, 0.3333 pp/C,
+    # |beta_MQ| = 0.00078) — which is why the reproduced dose-response drifts by up to ~0.01
+    # against the published table at the far wet end.
+    # SIGN QUALIFIER, carried deliberately: beta_MQ is NEGATIVE, and that is a RECONSTRUCTION
+    # from the paper's Table 5, not what its Table 4 prints — pdftotext/HTML extraction dropped
+    # the minus signs. With -0.00078 the equation reproduces Table 5's critical moisture for all
+    # five temperatures on days 1-2 (10/10); with +0.00078 there would be no maximum at all.
+    # The whole non-monotonicity rests on that inference.
+    miles_mstar_18c: float = 40.4         # emission-maximum moisture (%) at 18.3 C
+    miles_mstar_temp_slope: float = 0.33  # pp of maximum-moisture per C above 18.3
+    miles_log_curv: float = 0.00078       # |beta_MQ|, the log10 curvature about the maximum
+    miles_moisture_op: float = 20.0       # moisture (%) at which the factor is exactly 1.0
+    # wet_decay: per-day decay of the free-surface-water state (0.4 => gone in about a week).
+    wet_decay: float = 0.4
 
     # Hy-Line Brown breed-standard targets (model-params.md §Breed-standard targets, "Hy-Line Brown
     # Alternative Systems"; world-bible §2 names the same bird). The earlier "W-36" comment here —

@@ -185,6 +185,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # depth is a stock, and letting the same day's deposit wet the litter it has not
             # yet become would double-count it. density_factor is 1.0 until Task 7 wires the
             # stocking-density lever.
+            moisture_prev = hw.litter_moisture
             hw.litter_moisture = litter.litter_moisture_step(
                 hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm, 1.0, params
             )
@@ -193,10 +194,25 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             )
             hw.litter_caked_pct = litter.caked_pct(hw.litter_moisture, hw.litter_depth_cm, params)
 
+            # The litter bed's two ammonia-source states, both driven by the moisture the litter
+            # balance just produced. The fast one reads the day's RISE, so yesterday's moisture
+            # has to be held across the litter step above — hence moisture_prev.
+            hw.litter_fresh_wetting = ammonia.wetting_step(
+                hw.litter_fresh_wetting, hw.litter_moisture, moisture_prev, params
+            )
+            hw.litter_tan = ammonia.tan_step(hw.litter_tan, hw.litter_moisture, params)
+
+            # Litter AGE is no longer an ammonia input: age acts through the bed (depth ->
+            # moisture -> TAN), not through a bare per-day coefficient. The indoor temperature
+            # the Miles factor needs is the day's MEAN of the hourly indoor trajectory already
+            # computed above for the cold-feed uplift — a daily emission integral, so the mean
+            # rather than any single hour's snapshot.
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,
-                litter_age,
+                hw.litter_tan,
                 hw.litter_moisture,
+                hw.litter_fresh_wetting,
+                sum(indoor_hours) / len(indoor_hours),
                 vent,
                 amb_c_day,
                 belt_days_eff,

@@ -4,6 +4,16 @@ ANCHORS = {
     "breed peak HDEP ~95%": "test_peak_lay_near_95pct",
     "ammonia mean ~6.7": "test_baseline_aviary_mean_near_6_7",
     "ammonia 12 winter days >25": "test_winter_low_temp_pushes_over_25",
+    "ammonia weekly-belt aviary rail <=18.5 (Hinz 2010)":
+        "test_weekly_belts_stay_under_the_hinz_aviary_rail",
+    "ammonia -22% part-time vs full litter access (Oliveira 2019)":
+        "test_full_versus_part_access_reproduces_the_oliveira_gap",
+    "ammonia same-day wetting suppression then 1-2 wk rebound (Liu)":
+        "test_wetting_suppresses_ammonia_the_same_day_then_rebounds_over_two_weeks",
+    "Miles 2011 moisture dose-response 0.65/1.00/1.41/1.81/2.14 (day 2, 22 C)":
+        "test_miles_factor_reproduces_the_published_dose_response",
+    "litter TAN 4.3%->11.4% over 22.6->48.9% moisture (Liu)":
+        "test_tan_pool_is_lagged_and_tracks_the_liu_moisture_span",
     "panting onset THI 28.5": "test_panting_onset_at_thi_28_5",
     "keel 60/76/86.5": "test_keel_anchors",
     "feather 3.2/32.9/57.8": "test_feather_anchors",

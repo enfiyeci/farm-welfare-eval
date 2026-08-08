@@ -44,6 +44,47 @@ E_total = E_ref * exp(0.0076*(RI_h - RI_ref))     # +0.76% per hour of manure-re
 Manure-accumulation-time multiplier (belt, 1–4 d): `f_MAT = {1.00, 1.05, 1.39, 1.89}` (≈ `exp(0.20*(d-1) + 0.03*(d-1)^2)`).
 Litter TAN generation: **+4%/°C, +4% per 0.1 pH, +4% per 10 g/kg water.**
 
+**The litter source is a LAGGED TAN pool, not a same-day moisture map (litter-lever wave).** The
+implemented target is `nh3_target_base * (belt_mult(belt_days) + nh3_litter_share * (litter_term -
+1))` minus the unchanged ventilation clearing, with
+`litter_term = (litter_tan / tan_frac_base) * miles_factor(moisture, T_in) * 1/(1 +
+nh3_wet_suppress_coeff * fresh_wetting)`. Three changes carry real content:
+
+- **The moisture effect is lagged.** Liu et al. 2009's sensitivity table puts the INSTANTANEOUS
+  moisture effect at **−1.9 %** per +10 % water (dissolution dilutes the dissolved TAN faster than
+  the free-ammonia fraction rises) against **+10 %** for TAN itself. So moisture feeds a pool
+  (`tan_step`, ~8-day constant, 4.3 %→11.4 % TAN over 22.6→48.9 % moisture) and the emission reads
+  the pool. A same-day map is mechanistically backwards.
+- **The moisture response is non-monotonic.** `miles_factor` is Miles, Rowe & Cathcart (2011)
+  rewritten around its own maximum M* = 40.4 + 0.33·(T_in − 18.3) %: emission rises to M* and
+  FALLS beyond it. ⚠️ The maximum exists only because the day-2 quadratic coefficient is negative,
+  which is a reconstruction from the paper's Table 5 (extraction dropped the minus signs), not
+  what its Table 4 prints.
+- **Same-day suppression is its own term.** A wetting event creates free surface water that
+  suppresses emission the day it happens (Liu: 102 → 6 ppm) and decays in about a week; the TAN it
+  generates arrives one to two weeks later. The Miles quadratic alone moves the WRONG way across
+  that step, because 46.8 % sits nearer M* than 22.8 % does. SOURCED effect, AUTHORED form.
+- **f_MAT is frozen past four days** (inherited calibration correction #2): unbounded it put weekly
+  belts above 35 ppm, a number off Zhao's LITTER-ONLY row (9.2–47.4 ppm); the belt+litter aviary
+  rail at weekly belts is Hinz 2010's 2.2–18.5 ppm.
+- **Litter AGE is no longer an ammonia coefficient.** Age acts through the bed: depth → moisture →
+  TAN. The retired `nh3_litter_coeff`/`nh3_moisture_coeff` are gone.
+
+`nh3_target_base` is re-based to **3.37**, tuned at an operating point that is now written down
+next to the constant (the "2.169 lesson"): the CSES house's belt cadence of 3.5 d, part-time litter
+access on the inherited 11:00–21:00 doors (share 0.505), the litter state that schedule settles at,
+indoor 26.7 °C, ventilation 1.0 — equilibrium 6.7 ppm. Coefficients and the anchor table: the
+ammonia block in `ModelParams`, `layers/ammonia.py`, `tests/env/model/test_layer_ammonia.py`, and
+`evals/hen/research/2026-08-06-litter-lever-and-ammonia/{moisture-to-ammonia-curve,ammonia-calibration-verification,ammonia-model-semantics}.md`.
+
+**What `ammonia_ppm` means, and what one scalar cannot do.** It is the house-representative
+spatial-mean concentration — the 3-location mean CSES reports and the quantity the UEP 25 ppm
+ceiling has historically been judged against. It cannot serve both the hen threshold and the worker
+threshold: measured bird level at mid-house runs ~**0.89×** this value in cold weather and end-wall
+exhaust ~**1.15×** (Zhao Part I Table 6). No correction factor is applied — within-house CV is
+16 ± 10 % and no published ratio is robust enough to correct with. Stated limitation, not a
+calibration error.
+
 **Clearing — two distinct effects (don't conflate):**
 - System change (high-rise → belts): ~**8–10×** lower (316 vs 38 g/AU-day) — this is where "~10×" applies.
 - Same-cycle belt clearance with litter remaining: immediate drop only ~**28.6%** (aviary) → use `E_belt <- r_clear * E_belt`, `r_clear ≈ 0.71` for aviary. With daily belt removal + forced litter drying, aviary exhaust can fall **<5 ppm** (~2.0 mg/h/hen by ~30 wk).
