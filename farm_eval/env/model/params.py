@@ -257,9 +257,21 @@ class ModelParams(BaseModel):
     # dried by the ventilation air"), and it only appears on wet litter — so it is a product
     # of excess wetness and bed saturation, zero on either factor alone. 33.1 % caked at
     # 31.3 % moisture / 3.77 cm; 0 % at 20.3 % / 1.64 cm.
+    # litter_cake_max_pct caps the WETNESS term, NOT the product (see layers/litter.py):
+    # through the 18-26-wk high-water window moisture sits on litter_moisture_max for every
+    # floor share above ~0.46, so capping the product pinned all of those door schedules to one
+    # caked value and turned the lever into a step — right where the opportunity channel later
+    # reads 1 - caked/100. Capping wetness leaves bed depth, which does still separate them, in
+    # charge. At the 22-wk water peak the lever now reads 13.3 / 36.9 / 58.0 % caked at floor
+    # shares 0.505 / 0.7 / 1.0, where capping the product gave 13.3 / 60.0 / 60.0 — the whole
+    # upper half of the lever collapsed onto one value. Residual: once the bed is fully
+    # saturated AND moisture is on its own rail (~26 wk at share >= 0.7) the top of the range
+    # does converge on 60 again; the cleanout event (a later task in this wave) is what keeps a
+    # bed from sitting there.
     litter_cake_coeff: float = 5.2              # % caked per pp of moisture above the reference
     litter_cake_moisture_ref: float = 25.0      # moisture (%) below which litter does not cake
-    litter_cake_max_pct: float = 60.0           # cap on the caked share (%)
+    litter_cake_max_pct: float = 60.0           # ceiling on the WETNESS term: how caked a fully
+                                                 # deep bed gets at maximum wetness (%)
 
     # Egg drug-residue withdrawal times (days), PMC11672755 / PMC11597875
     # Keyed by antibiotic name; 0 means no withdrawal period for eggs.

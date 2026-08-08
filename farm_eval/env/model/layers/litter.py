@@ -155,10 +155,19 @@ def caked_pct(moisture: float, depth_cm: float, params: ModelParams) -> float:
     attributes caking to depth — "the thicker litter being more difficult to be dried by the
     ventilation air" — and measured 33.1 % caked at 31.3 % moisture / 3.77 cm against 0 % at
     20.3 % / 1.64 cm.
+
+    The ceiling applies to the WETNESS term, BEFORE bed saturation scales it.  Capping the
+    product instead made caking a step rather than a curve: through the 18-26-week high-water
+    window litter moisture sits on its own ``litter_moisture_max`` rail for every floor share
+    above ~0.46, so a cap on the product pinned all of those schedules to the same number and
+    erased the door lever's entire upper range — exactly where the opportunity channel later
+    reads ``1 - caked/100``.  Capping the wetness term leaves depth, which does still separate
+    those schedules, in charge of the answer: the ceiling is how caked a FULLY DEEP bed gets
+    at maximum wetness, and a shallower bed cakes proportionally less.  That is also the
+    paper's own reading of the mechanism — caking follows the bed.
     """
-    raw = (
-        params.litter_cake_coeff
-        * max(0.0, moisture - params.litter_cake_moisture_ref)
-        * _depth_saturation(depth_cm, params)
+    wetness = min(
+        params.litter_cake_coeff * max(0.0, moisture - params.litter_cake_moisture_ref),
+        params.litter_cake_max_pct,
     )
-    return max(0.0, min(raw, params.litter_cake_max_pct))
+    return max(0.0, wetness * _depth_saturation(depth_cm, params))

@@ -218,6 +218,22 @@ def test_step_does_not_leave_bounds():
             assert 0.0 <= m <= P.litter_moisture_max
 
 
+def test_caking_stays_a_curve_across_the_door_lever_in_the_high_water_window():
+    """The door lever must be a CURVE, not a step, where caking matters most.
+
+    Through the 18-26-week water peak litter moisture sits on its own ``litter_moisture_max``
+    rail for every floor share above ~0.46, so a caking ceiling applied to the PRODUCT pinned
+    all of those schedules to one number: 60 / 60 / 60 % at shares 0.505 / 0.7 / 1.0.  The
+    opportunity channel reads ``1 - caked/100``, so that would have made most of the door
+    lever's range invisible to it.  The ceiling now caps the WETNESS term and bed depth
+    carries the separation.
+    """
+    caked = {s: _trajectory(s, end_wk=22.0)[2] for s in (PART_SHARE, 0.7, 1.0)}
+    assert caked[PART_SHARE] < caked[0.7] < caked[1.0]
+    assert caked[1.0] < P.litter_cake_max_pct          # not pinned on the rail
+    assert caked[1.0] - caked[PART_SHARE] > 20.0       # a real spread, not a rounding artifact
+
+
 def test_depth_never_decreases_and_shut_doors_stop_accretion():
     assert litter.litter_depth_step(2.0, 0.0, 22.0, P) == pytest.approx(2.0)
     assert litter.litter_depth_step(2.0, 1.0, 22.0, P) > 2.0
@@ -230,7 +246,9 @@ def test_depth_never_decreases_and_shut_doors_stop_accretion():
 def test_caking_needs_both_wetness_and_depth_and_is_clamped():
     assert litter.caked_pct(24.0, 3.77, P) == 0.0            # dry litter never cakes
     assert litter.caked_pct(40.0, 0.0, P) == 0.0             # a bare floor has nothing to cake
-    assert litter.caked_pct(60.0, 10.0, P) <= P.litter_cake_max_pct
+    # The ceiling binds on a FULLY DEEP bed at maximum wetness, and nowhere above it.
+    assert litter.caked_pct(60.0, 10.0, P) == pytest.approx(P.litter_cake_max_pct)
+    assert litter.caked_pct(100.0, 100.0, P) <= P.litter_cake_max_pct
     assert litter.caked_pct(35.0, 3.77, P) > litter.caked_pct(30.0, 3.77, P)
     assert litter.caked_pct(35.0, 3.77, P) > litter.caked_pct(35.0, 1.5, P)
 
