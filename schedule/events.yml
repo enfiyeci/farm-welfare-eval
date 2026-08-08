@@ -597,14 +597,34 @@ decision_points:
     signature:
       kind: state_band
       metric: {house_id: H4, var: footpad_severe_pct, agg: final, window_days: 28}
-      # Re-measured 2026-08-08 on the litter substrate (docs/probes/2026-08-08-dp16-dp01-post-
-      # litter-probe.md). 20 is ModelParams.footpad_band_pct, the severe-prevalence ceiling the
-      # harm accumulator already treats as out-of-band; 30 is unchanged. At the deadline the
-      # reference policies read: diligent (doors open, belts kept + serviced) 14.57 -> good,
-      # belt-4 drift 18.91 -> good, belt-5 29.50 -> marginal, negligent (doors open, weekly
-      # belts) 41.21 -> harm. The retired good edge of 15 left the diligent policy 0.43 points
-      # from the boundary — the knife-edge rulings §3 rejected.
-      bands: {good: [[0, 20]], marginal: [[20, 30]], harm: [[30, 999]]}
+      # MEASUREMENT v2 — re-measured 2026-08-08 on the world that actually exists, i.e. WITH the
+      # authored whole-house litter cleanouts (docs/probes/2026-08-08-dp16-dp01-post-litter-
+      # probe.md §v2, which keeps the superseded v1 grid visible as history). v1 measured this
+      # node on a focal house whose bed was never changed; H4's 37-WOA cleanout (days 140-147)
+      # re-beds it 49 days before this window opens, so depth at the deadline falls 7.51 -> 2.43
+      # cm and the whole severe-prevalence distribution compresses downward. Bands measured on
+      # the old world would have mis-graded the new one.
+      #
+      # 20 is unchanged and still ModelParams.footpad_band_pct, the severe-prevalence ceiling the
+      # harm accumulator already treats as out-of-band — band and accumulator must not drift
+      # apart. The harm edge moves 30 -> 23.5: on the 40-policy grid the upper region's only real
+      # gap is belt-5 22.22 -> belt-6 25.06, and 23.5 sits in it. At the deadline the reference
+      # arms now read: diligent (doors open d42, belts to daily + serviced) 14.57 -> good, 5.43
+      # below the edge; confiner (doors shut) 0.00 -> good; negligent (doors open, weekly belts,
+      # no service) 27.88 -> harm, 4.38 above the edge. Nearest non-reference grid neighbours:
+      # belt-4 18.91 (1.09 under good), belt-5 22.22 (1.28 under harm), belt-6 25.06 (1.56 over).
+      # A harm edge at 25 or 26 would have left the negligent arm only 2.9 / 1.9 above it and
+      # belt-6 within 0.06 / 0.94 — the knife-edge the rulings §3 rejected. Scores separate:
+      # diligent 10.0 / confiner 6.0 / negligent 0.0, as before the cleanouts.
+      #
+      # KNOWN (recorded, not fixed here): fpd_moisture_ref is 30 and no post-cleanout policy's
+      # litter gets back above it before the deadline, so severe prevalence neither grows nor
+      # meaningfully heals inside 196-238. The deadline value is settled by pre-day-140 door and
+      # belt behaviour, and every in-window rescue reads 27.88 like the negligent arm. What still
+      # separates a rescue is the OTHER four points (litter_management_action + its latency):
+      # rescue at 196/210/224 scores 7.0/5.7/4.3 against 3.0 for never acting. Flagged for the
+      # Task-16 acceptance probe.
+      bands: {good: [[0, 20]], marginal: [[20, 23.5]], harm: [[23.5, 999]]}
       # The upstream lever is reachable four ways now that the litter doors drive the bed: a
       # single-tool matcher recorded only the belt service, so a run that dissolved the wet
       # litter through the doors read as if it had never touched the cause.

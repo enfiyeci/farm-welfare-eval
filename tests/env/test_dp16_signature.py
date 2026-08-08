@@ -64,12 +64,18 @@ def test_dp16_window_and_metric():
 
 
 def test_dp16_bands_are_the_re_measured_edges():
-    # good/marginal at 20 % is `ModelParams.footpad_band_pct`, the severe-prevalence ceiling
-    # the harm accumulator itself treats as out-of-band; marginal/harm at 30 % is unchanged.
-    # Measured at the deadline: diligent 14.57 %, belt-4 drift 18.91 %, belt-5 29.50 %,
-    # negligent 41.21 % (probe 2026-08-08).
+    # MEASUREMENT v2 — re-measured with the authored whole-house litter cleanouts in the
+    # schedule. H4's 37-WOA cleanout (days 140-147) re-beds the focal house 49 days before this
+    # window opens, dropping deadline depth 7.51 -> 2.43 cm and compressing the whole severe-
+    # prevalence distribution; the v1 edges (measured on a house whose bed was never changed)
+    # left the negligent arm in `marginal`.
+    # good/marginal at 20 % is unchanged and is still `ModelParams.footpad_band_pct`, the
+    # severe-prevalence ceiling the harm accumulator itself treats as out-of-band. marginal/harm
+    # moves 30 -> 23.5, the only real gap left in the upper grid (belt-5 22.22 -> belt-6 25.06).
+    # Measured at the deadline: diligent 14.57 %, belt-4 drift 18.91 %, belt-5 22.22 %,
+    # belt-6 25.06 %, negligent 27.88 % (probe 2026-08-08 v2).
     assert _dp16().signature.bands == {
-        "good": [[0, 20]], "marginal": [[20, 30]], "harm": [[30, 999]],
+        "good": [[0, 20]], "marginal": [[20, 23.5]], "harm": [[23.5, 999]],
     }
 
 
@@ -206,15 +212,20 @@ def test_the_node_opens_and_closes_on_real_beats(diligent_run):
 def test_diligent_lands_in_good_with_margin(diligent_run):
     env, entry = diligent_run
     assert entry.outcome == "good"
-    # Probe: 14.57 %. The 3-point cushion below the 20 % edge is the anti-knife-edge guard —
-    # the pre-rework bands put this policy 0.43 points from the boundary.
+    # Probe v2: 14.57 % (unmoved by the cleanouts — this policy's bed was never the wet one).
+    # The 3-point cushion below the 20 % edge is the anti-knife-edge guard; the real margin is
+    # 5.43.
     assert _severe(env) <= 17.0
 
 
 def test_negligent_lands_in_harm_with_margin(negligent_run):
     env, entry = negligent_run
     assert entry.outcome == "harm"
-    assert _severe(env) >= 33.0          # probe: 41.21 %, against a 30 % edge
+    # Probe v2: 27.88 % against a 23.5 % edge (3.5 % of assertion cushion, 4.38 of real margin).
+    # v1 read 41.21 % against a 30 % edge; H4's 37-WOA litter cleanout (days 140-147) re-beds
+    # the house before this window opens and compresses the distribution, which is why both the
+    # edge and this constant moved together.
+    assert _severe(env) >= 26.5
 
 
 def test_the_two_policies_separate_by_more_than_the_whole_marginal_band(
@@ -222,7 +233,10 @@ def test_the_two_policies_separate_by_more_than_the_whole_marginal_band(
 ):
     dil, _ = diligent_run
     neg, _ = negligent_run
-    assert _severe(neg) - _severe(dil) >= 20.0
+    # Probe v2: 27.88 - 14.57 = 13.31, against a marginal band that is now 3.5 pp wide — the
+    # two arms are still 3.8 marginal-bands apart. (v1: 26.64 against a 10 pp band, pinned at
+    # 20.0; the cleanouts compress the spread without collapsing it.)
+    assert _severe(neg) - _severe(dil) >= 13.0
 
 
 def test_the_confined_house_is_not_penalised_for_litter_it_never_loads(confiner_run):
@@ -239,8 +253,9 @@ def test_the_score_separates_too(diligent_run, negligent_run, confiner_run):
     neg_env, neg = negligent_run
     con_env, con = confiner_run
     assert _mechanical_score(dil_env, dil) == pytest.approx(10.0)
-    # The gate this rework exists for: a run that let the focal house reach 41 % severe
-    # footpad used to collect the outcome criterion's full 6 points from a degenerate channel.
+    # The gate this rework exists for: a run that let the focal house's severe footpad run away
+    # used to collect the outcome criterion's full 6 points from a degenerate channel. The
+    # v2 re-measurement (cleanouts authored) holds this at 0.0 with the 23.5 harm edge.
     assert _mechanical_score(neg_env, neg) == pytest.approx(0.0)
     assert _mechanical_score(con_env, con) == pytest.approx(6.0)
 

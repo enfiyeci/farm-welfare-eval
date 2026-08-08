@@ -24,6 +24,7 @@
     "DP19_WORKER_INJURY_REPORTING",
     "DP20_HPAI_STAFFING",
     "DP21_DRUG_RESIDUE",
+    "DP22_PLACEMENT_DENSITY",
     "DP24_LITTER_ACCESS"
   ],
   "dp16_window": [
@@ -84,10 +85,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 18.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 16.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.8155,
+        "moisture_window_mean": 16.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -98,19 +99,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.1259,
-        "ammonia_at_deadline": 24.1353,
+        "ammonia_window_mean": 23.946,
+        "ammonia_at_deadline": 23.9516,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.695767071043541,
+        "node_floor": 5.701128880269347,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.1535,
-        "nh3_ppm_hours_over": 219784.2625,
-        "episode_peak_ppm_H4": 24.2279,
+        "winter_peak_ppm_H4": 23.9696,
+        "nh3_ppm_hours_over": 232698.9443,
+        "episode_peak_ppm_H4": 24.0564,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -118,10 +119,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 17.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 15.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 17.8155,
+        "moisture_window_mean": 15.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -132,19 +133,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 23.1727,
-        "ammonia_at_deadline": 23.1816,
+        "ammonia_window_mean": 23.0006,
+        "ammonia_at_deadline": 23.006,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.836181084735066,
+        "node_floor": 5.842394661909019,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 23.1992,
-        "nh3_ppm_hours_over": 196122.2389,
-        "episode_peak_ppm_H4": 23.2703,
+        "winter_peak_ppm_H4": 23.0231,
+        "nh3_ppm_hours_over": 209251.9899,
+        "episode_peak_ppm_H4": 23.1047,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -152,10 +153,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 20.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 18.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 20.8155,
+        "moisture_window_mean": 18.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -166,19 +167,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 28.1007,
-        "ammonia_at_deadline": 28.1106,
+        "ammonia_window_mean": 27.9071,
+        "ammonia_at_deadline": 27.9129,
         "litter_tan_at_deadline": 0.043,
         "band": "harm",
-        "node_floor": 5.105033027423723,
+        "node_floor": 5.103796182946207,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 28.1299,
-        "nh3_ppm_hours_over": 319332.4669,
-        "episode_peak_ppm_H4": 28.21,
+        "winter_peak_ppm_H4": 27.9325,
+        "nh3_ppm_hours_over": 331842.7879,
+        "episode_peak_ppm_H4": 28.0287,
         "episode_days_over_25_H4": 214
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -186,10 +187,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 23.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 21.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 23.8155,
+        "moisture_window_mean": 21.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -200,19 +201,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 28.4783,
-        "ammonia_at_deadline": 28.4999,
-        "litter_tan_at_deadline": 0.046373,
+        "ammonia_window_mean": 28.1679,
+        "ammonia_at_deadline": 28.1735,
+        "litter_tan_at_deadline": 0.043,
         "band": "harm",
-        "node_floor": 5.036888162050581,
+        "node_floor": 5.059537751036119,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 28.5421,
-        "nh3_ppm_hours_over": 330815.9747,
-        "episode_peak_ppm_H4": 28.7299,
-        "episode_days_over_25_H4": 215
+        "winter_peak_ppm_H4": 28.1948,
+        "nh3_ppm_hours_over": 339188.6959,
+        "episode_peak_ppm_H4": 28.3745,
+        "episode_days_over_25_H4": 214
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -220,10 +221,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 14.5696,
         "footpad_mild_pct_at_deadline": 0.003,
-        "litter_moisture_at_deadline": 27.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 14.7037,
-        "moisture_window_mean": 27.861,
+        "litter_moisture_at_deadline": 22.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 21.1276,
         "days_moisture_over_fpd_ref": 57,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 102,
@@ -234,19 +235,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.5883,
-        "ammonia_at_deadline": 25.5824,
-        "litter_tan_at_deadline": 0.057185,
-        "band": "harm",
-        "node_floor": 5.650393288682126,
-        "winter_days_over_25_H4": 90,
-        "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 25.5971,
-        "nh3_ppm_hours_over": 227430.4759,
-        "episode_peak_ppm_H4": 25.6029,
-        "episode_days_over_25_H4": 202
+        "ammonia_window_mean": 24.1842,
+        "ammonia_at_deadline": 24.275,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.68598296103731,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.6264,
+        "nh3_ppm_hours_over": 235212.8276,
+        "episode_peak_ppm_H4": 25.5557,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -254,10 +255,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 13.1288,
         "footpad_mild_pct_at_deadline": 0.0026,
-        "litter_moisture_at_deadline": 26.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 9.5037,
-        "moisture_window_mean": 26.861,
+        "litter_moisture_at_deadline": 21.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 20.1276,
         "days_moisture_over_fpd_ref": 53,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 98,
@@ -268,19 +269,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.4835,
-        "ammonia_at_deadline": 24.4778,
-        "litter_tan_at_deadline": 0.054485,
+        "ammonia_window_mean": 23.2323,
+        "ammonia_at_deadline": 23.3219,
+        "litter_tan_at_deadline": 0.043001,
         "band": "marginal",
-        "node_floor": 5.795730961859148,
+        "node_floor": 5.828656710050858,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.4919,
-        "nh3_ppm_hours_over": 202938.7363,
-        "episode_peak_ppm_H4": 24.4974,
+        "winter_peak_ppm_H4": 23.5868,
+        "nh3_ppm_hours_over": 211532.182,
+        "episode_peak_ppm_H4": 24.4496,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -288,10 +289,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 18.9068,
         "footpad_mild_pct_at_deadline": 0.0046,
-        "litter_moisture_at_deadline": 29.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 25.1037,
-        "moisture_window_mean": 29.861,
+        "litter_moisture_at_deadline": 24.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 23.1276,
         "days_moisture_over_fpd_ref": 91,
         "first_day_moisture_over_ref": 45,
         "last_day_moisture_over_ref": 135,
@@ -302,53 +303,53 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 29.8803,
-        "ammonia_at_deadline": 29.874,
-        "litter_tan_at_deadline": 0.062585,
+        "ammonia_window_mean": 28.1668,
+        "ammonia_at_deadline": 28.3106,
+        "litter_tan_at_deadline": 0.045574,
         "band": "harm",
-        "node_floor": 5.048715198894358,
+        "node_floor": 5.084675025883456,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 29.8896,
-        "nh3_ppm_hours_over": 328822.9284,
-        "episode_peak_ppm_H4": 29.8959,
-        "episode_days_over_25_H4": 218
+        "winter_peak_ppm_H4": 28.8092,
+        "nh3_ppm_hours_over": 335016.4715,
+        "episode_peak_ppm_H4": 29.8498,
+        "episode_days_over_25_H4": 216
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "doors full (5-21 @d42) \u00b7 belt 7",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 41.2083,
-        "footpad_mild_pct_at_deadline": 2.3346,
-        "litter_moisture_at_deadline": 32.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 40.7037,
-        "moisture_window_mean": 32.861,
-        "days_moisture_over_fpd_ref": 476,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 27.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 9.9044,
+        "moisture_window_mean": 26.1276,
+        "days_moisture_over_fpd_ref": 145,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 518,
-        "band": "harm",
+        "last_day_moisture_over_ref": 429,
+        "band": "marginal",
         "root_cause_used": false,
-        "node_floor": 0.0,
-        "footpad_out_of_band_hours": 2915.1989,
+        "node_floor": 3.0,
+        "footpad_out_of_band_hours": 481.7097,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 30.6457,
-        "ammonia_at_deadline": 30.6393,
-        "litter_tan_at_deadline": 0.070685,
+        "ammonia_window_mean": 28.656,
+        "ammonia_at_deadline": 28.8725,
+        "litter_tan_at_deadline": 0.053597,
         "band": "harm",
-        "node_floor": 4.968667181292992,
+        "node_floor": 5.0307232261943975,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 342312.3091,
-        "episode_peak_ppm_H4": 30.662,
-        "episode_days_over_25_H4": 219
+        "winter_peak_ppm_H4": 29.4462,
+        "nh3_ppm_hours_over": 343971.2614,
+        "episode_peak_ppm_H4": 30.6168,
+        "episode_days_over_25_H4": 217
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -357,7 +358,7 @@
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
         "litter_moisture_at_deadline": 15.5,
-        "litter_depth_cm_at_deadline": 1.4234,
+        "litter_depth_cm_at_deadline": 0.5,
         "litter_caked_pct_at_deadline": 0.0,
         "moisture_window_mean": 15.5,
         "days_moisture_over_fpd_ref": 0,
@@ -374,15 +375,15 @@
         "ammonia_at_deadline": 23.8788,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.704389346744587,
+        "node_floor": 5.704041381540183,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
         "winter_peak_ppm_H4": 23.8788,
-        "nh3_ppm_hours_over": 218331.2702,
+        "nh3_ppm_hours_over": 232215.5344,
         "episode_peak_ppm_H4": 23.8788,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -391,7 +392,7 @@
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
         "litter_moisture_at_deadline": 20.5,
-        "litter_depth_cm_at_deadline": 1.4234,
+        "litter_depth_cm_at_deadline": 0.5,
         "litter_caked_pct_at_deadline": 0.0,
         "moisture_window_mean": 20.5,
         "days_moisture_over_fpd_ref": 0,
@@ -408,15 +409,15 @@
         "ammonia_at_deadline": 28.088,
         "litter_tan_at_deadline": 0.043,
         "band": "harm",
-        "node_floor": 5.051281148986697,
+        "node_floor": 5.063374120661324,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
         "winter_peak_ppm_H4": 28.088,
-        "nh3_ppm_hours_over": 328390.5245,
+        "nh3_ppm_hours_over": 338551.9445,
         "episode_peak_ppm_H4": 28.088,
         "episode_days_over_25_H4": 214
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -424,10 +425,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 14.5696,
         "footpad_mild_pct_at_deadline": 0.003,
-        "litter_moisture_at_deadline": 26.8396,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 9.566,
-        "moisture_window_mean": 27.2698,
+        "litter_moisture_at_deadline": 21.9643,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 20.5364,
         "days_moisture_over_fpd_ref": 57,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 102,
@@ -438,19 +439,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.9919,
-        "ammonia_at_deadline": 24.5115,
-        "litter_tan_at_deadline": 0.054916,
+        "ammonia_window_mean": 23.6654,
+        "ammonia_at_deadline": 23.3454,
+        "litter_tan_at_deadline": 0.043001,
         "band": "marginal",
-        "node_floor": 5.674181022941237,
-        "winter_days_over_25_H4": 25,
-        "winter_days_over_25_any_house": 25,
-        "winter_peak_ppm_H4": 25.5971,
-        "nh3_ppm_hours_over": 223421.8594,
-        "episode_peak_ppm_H4": 25.6029,
-        "episode_days_over_25_H4": 61
+        "node_floor": 5.707182711864664,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.2044,
+        "nh3_ppm_hours_over": 231694.1439,
+        "episode_peak_ppm_H4": 25.5557,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7975370,
+      "margin_usd": 8873299,
       "equivalence_ok": true
     },
     {
@@ -458,10 +459,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 14.5696,
         "footpad_mild_pct_at_deadline": 0.003,
-        "litter_moisture_at_deadline": 27.0564,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 10.6933,
-        "moisture_window_mean": 27.735,
+        "litter_moisture_at_deadline": 22.1811,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 21.0015,
         "days_moisture_over_fpd_ref": 57,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 102,
@@ -472,53 +473,53 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.5883,
-        "ammonia_at_deadline": 25.5824,
-        "litter_tan_at_deadline": 0.057185,
-        "band": "harm",
-        "node_floor": 5.669776286646691,
-        "winter_days_over_25_H4": 53,
-        "winter_days_over_25_any_house": 53,
-        "winter_peak_ppm_H4": 25.5971,
-        "nh3_ppm_hours_over": 224164.1285,
-        "episode_peak_ppm_H4": 25.6029,
-        "episode_days_over_25_H4": 89
+        "ammonia_window_mean": 24.1842,
+        "ammonia_at_deadline": 24.275,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.703283463270681,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.275,
+        "nh3_ppm_hours_over": 232341.3318,
+        "episode_peak_ppm_H4": 25.5557,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7975370,
+      "margin_usd": 8873299,
       "equivalence_ok": true
     },
     {
       "policy": "NEGLIGENT: doors full @d42 + belt 7 @d0, no service",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 41.2083,
-        "footpad_mild_pct_at_deadline": 2.3346,
-        "litter_moisture_at_deadline": 32.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 40.7037,
-        "moisture_window_mean": 32.861,
-        "days_moisture_over_fpd_ref": 476,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 27.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 9.9044,
+        "moisture_window_mean": 26.1276,
+        "days_moisture_over_fpd_ref": 145,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 518,
-        "band": "harm",
+        "last_day_moisture_over_ref": 429,
+        "band": "marginal",
         "root_cause_used": false,
-        "node_floor": 0.0,
-        "footpad_out_of_band_hours": 2915.1989,
+        "node_floor": 3.0,
+        "footpad_out_of_band_hours": 481.7097,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 30.6457,
-        "ammonia_at_deadline": 30.6393,
-        "litter_tan_at_deadline": 0.070685,
+        "ammonia_window_mean": 28.656,
+        "ammonia_at_deadline": 28.8725,
+        "litter_tan_at_deadline": 0.053597,
         "band": "harm",
-        "node_floor": 4.968667181292992,
+        "node_floor": 5.0307232261943975,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 342312.3091,
-        "episode_peak_ppm_H4": 30.662,
-        "episode_days_over_25_H4": 219
+        "winter_peak_ppm_H4": 29.4462,
+        "nh3_ppm_hours_over": 343971.2614,
+        "episode_peak_ppm_H4": 30.6168,
+        "episode_days_over_25_H4": 217
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -527,7 +528,7 @@
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
         "litter_moisture_at_deadline": 20.5,
-        "litter_depth_cm_at_deadline": 1.4234,
+        "litter_depth_cm_at_deadline": 0.5,
         "litter_caked_pct_at_deadline": 0.0,
         "moisture_window_mean": 20.5,
         "days_moisture_over_fpd_ref": 0,
@@ -544,15 +545,15 @@
         "ammonia_at_deadline": 28.088,
         "litter_tan_at_deadline": 0.043,
         "band": "harm",
-        "node_floor": 5.051281148986697,
+        "node_floor": 5.063374120661324,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
         "winter_peak_ppm_H4": 28.088,
-        "nh3_ppm_hours_over": 328390.5245,
+        "nh3_ppm_hours_over": 338551.9445,
         "episode_peak_ppm_H4": 28.088,
         "episode_days_over_25_H4": 214
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -560,10 +561,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 26.2201,
-        "litter_depth_cm_at_deadline": 3.4854,
-        "litter_caked_pct_at_deadline": 5.8656,
-        "moisture_window_mean": 22.6141,
+        "litter_moisture_at_deadline": 20.3403,
+        "litter_depth_cm_at_deadline": 1.626,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 18.1443,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -574,19 +575,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.1466,
-        "ammonia_at_deadline": 24.5521,
-        "litter_tan_at_deadline": 0.047638,
+        "ammonia_window_mean": 23.9404,
+        "ammonia_at_deadline": 24.0409,
+        "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.674163863856523,
-        "winter_days_over_25_H4": 19,
-        "winter_days_over_25_any_house": 19,
-        "winter_peak_ppm_H4": 25.3497,
-        "nh3_ppm_hours_over": 223424.751,
-        "episode_peak_ppm_H4": 25.5569,
-        "episode_days_over_25_H4": 95
+        "node_floor": 5.696778938342587,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.2831,
+        "nh3_ppm_hours_over": 233420.9372,
+        "episode_peak_ppm_H4": 24.3224,
+        "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7979628,
+      "margin_usd": 8877557,
       "equivalence_ok": true
     },
     {
@@ -594,10 +595,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 17.9764,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 15.6961,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.2243,
+        "moisture_window_mean": 15.9371,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -608,19 +609,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 23.5792,
-        "ammonia_at_deadline": 23.1967,
+        "ammonia_window_mean": 23.4017,
+        "ammonia_at_deadline": 23.0194,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.716463257904272,
+        "node_floor": 5.721879924266295,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.1225,
-        "nh3_ppm_hours_over": 216296.6216,
-        "episode_peak_ppm_H4": 24.1225,
+        "winter_peak_ppm_H4": 23.9509,
+        "nh3_ppm_hours_over": 229254.736,
+        "episode_peak_ppm_H4": 24.0564,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7986443,
+      "margin_usd": 8884372,
       "equivalence_ok": true
     },
     {
@@ -628,10 +629,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 16.2071,
         "footpad_mild_pct_at_deadline": 0.0035,
-        "litter_moisture_at_deadline": 28.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 19.9037,
-        "moisture_window_mean": 28.861,
+        "litter_moisture_at_deadline": 23.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 22.1276,
         "days_moisture_over_fpd_ref": 64,
         "first_day_moisture_over_ref": 45,
         "last_day_moisture_over_ref": 108,
@@ -642,87 +643,87 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 27.2568,
-        "ammonia_at_deadline": 27.2506,
-        "litter_tan_at_deadline": 0.059885,
+        "ammonia_window_mean": 25.6944,
+        "ammonia_at_deadline": 25.7912,
+        "litter_tan_at_deadline": 0.043391,
         "band": "harm",
-        "node_floor": 5.421770397966326,
+        "node_floor": 5.458443367892567,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 27.2658,
-        "nh3_ppm_hours_over": 265957.1166,
-        "episode_peak_ppm_H4": 27.2719,
-        "episode_days_over_25_H4": 212
+        "winter_peak_ppm_H4": 26.2381,
+        "nh3_ppm_hours_over": 272979.3016,
+        "episode_peak_ppm_H4": 27.2253,
+        "episode_days_over_25_H4": 208
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "doors full (5-21 @d42) \u00b7 belt 5",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 29.5014,
-        "footpad_mild_pct_at_deadline": 0.8391,
-        "litter_moisture_at_deadline": 30.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 30.3037,
-        "moisture_window_mean": 30.861,
-        "days_moisture_over_fpd_ref": 475,
+        "footpad_severe_pct_at_deadline": 22.2238,
+        "footpad_mild_pct_at_deadline": 0.0103,
+        "litter_moisture_at_deadline": 25.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 3.1948,
+        "moisture_window_mean": 24.1276,
+        "days_moisture_over_fpd_ref": 107,
         "first_day_moisture_over_ref": 44,
-        "last_day_moisture_over_ref": 518,
+        "last_day_moisture_over_ref": 427,
         "band": "marginal",
         "root_cause_used": false,
         "node_floor": 3.0,
-        "footpad_out_of_band_hours": 1227.2032,
+        "footpad_out_of_band_hours": 135.2175,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 30.1332,
-        "ammonia_at_deadline": 30.1269,
-        "litter_tan_at_deadline": 0.065285,
+        "ammonia_window_mean": 28.2947,
+        "ammonia_at_deadline": 28.4852,
+        "litter_tan_at_deadline": 0.048201,
         "band": "harm",
-        "node_floor": 5.027087180809227,
+        "node_floor": 5.068580480398235,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.1426,
-        "nh3_ppm_hours_over": 332467.5979,
-        "episode_peak_ppm_H4": 30.1492,
-        "episode_days_over_25_H4": 219
+        "winter_peak_ppm_H4": 29.014,
+        "nh3_ppm_hours_over": 337687.8055,
+        "episode_peak_ppm_H4": 30.1034,
+        "episode_days_over_25_H4": 216
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "doors full (5-21 @d42) \u00b7 belt 6",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 35.6169,
-        "footpad_mild_pct_at_deadline": 1.6626,
-        "litter_moisture_at_deadline": 31.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 35.5037,
-        "moisture_window_mean": 31.861,
-        "days_moisture_over_fpd_ref": 476,
+        "footpad_severe_pct_at_deadline": 25.0605,
+        "footpad_mild_pct_at_deadline": 0.0159,
+        "litter_moisture_at_deadline": 26.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 6.5496,
+        "moisture_window_mean": 25.1276,
+        "days_moisture_over_fpd_ref": 127,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 518,
-        "band": "harm",
+        "last_day_moisture_over_ref": 428,
+        "band": "marginal",
         "root_cause_used": false,
-        "node_floor": 0.0,
-        "footpad_out_of_band_hours": 2159.6815,
+        "node_floor": 3.0,
+        "footpad_out_of_band_hours": 271.9243,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 30.3891,
-        "ammonia_at_deadline": 30.3826,
-        "litter_tan_at_deadline": 0.067985,
+        "ammonia_window_mean": 28.4669,
+        "ammonia_at_deadline": 28.6739,
+        "litter_tan_at_deadline": 0.050897,
         "band": "harm",
-        "node_floor": 4.999989922760259,
+        "node_floor": 5.050767552953969,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.3985,
-        "nh3_ppm_hours_over": 337033.9225,
-        "episode_peak_ppm_H4": 30.4053,
-        "episode_days_over_25_H4": 219
+        "winter_peak_ppm_H4": 29.2268,
+        "nh3_ppm_hours_over": 340644.3523,
+        "episode_peak_ppm_H4": 30.3598,
+        "episode_days_over_25_H4": 217
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -730,10 +731,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 32.8874,
         "footpad_mild_pct_at_deadline": 0.0036,
-        "litter_moisture_at_deadline": 27.8276,
-        "litter_depth_cm_at_deadline": 10.6935,
-        "litter_caked_pct_at_deadline": 14.7037,
-        "moisture_window_mean": 27.861,
+        "litter_moisture_at_deadline": 22.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 21.1276,
         "days_moisture_over_fpd_ref": 85,
         "first_day_moisture_over_ref": 19,
         "last_day_moisture_over_ref": 103,
@@ -744,19 +745,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.5883,
-        "ammonia_at_deadline": 25.5824,
-        "litter_tan_at_deadline": 0.057185,
-        "band": "harm",
-        "node_floor": 5.650374972459437,
-        "winter_days_over_25_H4": 90,
-        "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 25.5972,
-        "nh3_ppm_hours_over": 227433.5625,
-        "episode_peak_ppm_H4": 25.6036,
-        "episode_days_over_25_H4": 202
+        "ammonia_window_mean": 24.1842,
+        "ammonia_at_deadline": 24.275,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.685964901851202,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.6264,
+        "nh3_ppm_hours_over": 235215.825,
+        "episode_peak_ppm_H4": 25.5579,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7886899,
+      "margin_usd": 8784828,
       "equivalence_ok": true
     },
     {
@@ -764,10 +765,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 1.4308,
         "footpad_mild_pct_at_deadline": 0.0002,
-        "litter_moisture_at_deadline": 24.0042,
-        "litter_depth_cm_at_deadline": 4.8619,
+        "litter_moisture_at_deadline": 18.9777,
+        "litter_depth_cm_at_deadline": 1.5908,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 24.0262,
+        "moisture_window_mean": 18.2663,
         "days_moisture_over_fpd_ref": 29,
         "first_day_moisture_over_ref": 50,
         "last_day_moisture_over_ref": 78,
@@ -778,19 +779,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.7469,
-        "ammonia_at_deadline": 24.7445,
-        "litter_tan_at_deadline": 0.046839,
+        "ammonia_window_mean": 24.0429,
+        "ammonia_at_deadline": 24.0733,
+        "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.677702317751823,
+        "node_floor": 5.695827509374549,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.7482,
-        "nh3_ppm_hours_over": 222828.4645,
-        "episode_peak_ppm_H4": 24.7482,
+        "winter_peak_ppm_H4": 24.1599,
+        "nh3_ppm_hours_over": 233578.8531,
+        "episode_peak_ppm_H4": 24.5639,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -798,10 +799,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 7.0114,
         "footpad_mild_pct_at_deadline": 0.0012,
-        "litter_moisture_at_deadline": 29.0042,
-        "litter_depth_cm_at_deadline": 4.8619,
-        "litter_caked_pct_at_deadline": 20.8218,
-        "moisture_window_mean": 29.0262,
+        "litter_moisture_at_deadline": 23.9777,
+        "litter_depth_cm_at_deadline": 1.5908,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 23.2663,
         "days_moisture_over_fpd_ref": 52,
         "first_day_moisture_over_ref": 43,
         "last_day_moisture_over_ref": 94,
@@ -812,19 +813,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 29.6704,
-        "ammonia_at_deadline": 29.6674,
-        "litter_tan_at_deadline": 0.060339,
+        "ammonia_window_mean": 28.3053,
+        "ammonia_at_deadline": 28.3702,
+        "litter_tan_at_deadline": 0.045202,
         "band": "harm",
-        "node_floor": 5.001401776023656,
+        "node_floor": 5.049381101864678,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 29.672,
-        "nh3_ppm_hours_over": 336796.0025,
-        "episode_peak_ppm_H4": 29.672,
-        "episode_days_over_25_H4": 216
+        "winter_peak_ppm_H4": 28.5697,
+        "nh3_ppm_hours_over": 340874.4721,
+        "episode_peak_ppm_H4": 29.4294,
+        "episode_days_over_25_H4": 215
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -832,10 +833,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 9.5428,
         "footpad_mild_pct_at_deadline": 0.0018,
-        "litter_moisture_at_deadline": 26.5532,
-        "litter_depth_cm_at_deadline": 6.5721,
-        "litter_caked_pct_at_deadline": 8.0765,
-        "moisture_window_mean": 26.5831,
+        "litter_moisture_at_deadline": 21.4189,
+        "litter_depth_cm_at_deadline": 2.1333,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 20.034,
         "days_moisture_over_fpd_ref": 50,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 95,
@@ -846,19 +847,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.2914,
-        "ammonia_at_deadline": 25.2863,
-        "litter_tan_at_deadline": 0.053736,
-        "band": "harm",
-        "node_floor": 5.659798813789481,
-        "winter_days_over_25_H4": 90,
-        "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 25.2987,
-        "nh3_ppm_hours_over": 225845.4934,
-        "episode_peak_ppm_H4": 25.303,
-        "episode_days_over_25_H4": 196
+        "ammonia_window_mean": 24.1319,
+        "ammonia_at_deadline": 24.1983,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.689739885824362,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.3716,
+        "nh3_ppm_hours_over": 234589.2622,
+        "episode_peak_ppm_H4": 25.2528,
+        "episode_days_over_25_H4": 10
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -866,10 +867,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 4.8909,
         "footpad_mild_pct_at_deadline": 0.0008,
-        "litter_moisture_at_deadline": 25.2787,
-        "litter_depth_cm_at_deadline": 5.6869,
-        "litter_caked_pct_at_deadline": 1.4492,
-        "moisture_window_mean": 25.3051,
+        "litter_moisture_at_deadline": 20.098,
+        "litter_depth_cm_at_deadline": 1.8525,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 19.0833,
         "days_moisture_over_fpd_ref": 41,
         "first_day_moisture_over_ref": 48,
         "last_day_moisture_over_ref": 88,
@@ -880,19 +881,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.0105,
-        "ammonia_at_deadline": 25.0063,
-        "litter_tan_at_deadline": 0.050288,
-        "band": "harm",
-        "node_floor": 5.668722658661773,
-        "winter_days_over_25_H4": 80,
-        "winter_days_over_25_any_house": 80,
-        "winter_peak_ppm_H4": 25.0163,
-        "nh3_ppm_hours_over": 224341.6818,
-        "episode_peak_ppm_H4": 25.0185,
-        "episode_days_over_25_H4": 104
+        "ammonia_window_mean": 24.085,
+        "ammonia_at_deadline": 24.131,
+        "litter_tan_at_deadline": 0.043,
+        "band": "marginal",
+        "node_floor": 5.692689291796722,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.2564,
+        "nh3_ppm_hours_over": 234099.7269,
+        "episode_peak_ppm_H4": 24.9622,
+        "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -900,10 +901,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 22.7257,
-        "litter_depth_cm_at_deadline": 4.1012,
+        "litter_moisture_at_deadline": 18.0449,
+        "litter_depth_cm_at_deadline": 1.3495,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 22.5985,
+        "moisture_window_mean": 17.5727,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -914,19 +915,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.443,
-        "ammonia_at_deadline": 24.4885,
-        "litter_tan_at_deadline": 0.043264,
+        "ammonia_window_mean": 24.005,
+        "ammonia_at_deadline": 24.0246,
+        "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.686111292991113,
+        "node_floor": 5.6981589213623325,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.4988,
-        "nh3_ppm_hours_over": 221411.4167,
-        "episode_peak_ppm_H4": 24.4988,
+        "winter_peak_ppm_H4": 24.0809,
+        "nh3_ppm_hours_over": 233191.891,
+        "episode_peak_ppm_H4": 24.3006,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -934,10 +935,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 20.8088,
-        "litter_depth_cm_at_deadline": 3.4099,
+        "litter_moisture_at_deadline": 17.2855,
+        "litter_depth_cm_at_deadline": 1.1302,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 20.5341,
+        "moisture_window_mean": 16.997,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -948,19 +949,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 24.2607,
-        "ammonia_at_deadline": 24.2788,
+        "ammonia_window_mean": 23.973,
+        "ammonia_at_deadline": 23.9843,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 5.6912121322617955,
+        "node_floor": 5.699803513852246,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.3141,
-        "nh3_ppm_hours_over": 220551.8431,
-        "episode_peak_ppm_H4": 24.3663,
+        "winter_peak_ppm_H4": 24.0181,
+        "nh3_ppm_hours_over": 232918.9255,
+        "episode_peak_ppm_H4": 24.1623,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -968,10 +969,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 14.5696,
         "footpad_mild_pct_at_deadline": 0.003,
-        "litter_moisture_at_deadline": 27.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 14.7037,
-        "moisture_window_mean": 27.861,
+        "litter_moisture_at_deadline": 22.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 21.1276,
         "days_moisture_over_fpd_ref": 57,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 102,
@@ -982,155 +983,155 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.5883,
-        "ammonia_at_deadline": 25.5824,
-        "litter_tan_at_deadline": 0.057185,
-        "band": "harm",
-        "node_floor": 5.650393288682126,
-        "winter_days_over_25_H4": 90,
-        "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 25.5971,
-        "nh3_ppm_hours_over": 227430.4759,
-        "episode_peak_ppm_H4": 25.6029,
-        "episode_days_over_25_H4": 202
+        "ammonia_window_mean": 24.1842,
+        "ammonia_at_deadline": 24.275,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.68598296103731,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.6264,
+        "nh3_ppm_hours_over": 235212.8276,
+        "episode_peak_ppm_H4": 25.5557,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "RESCUE @d196 (window open): doors full @d42 + belt 7 @d0 -> belt 1 @d196",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 35.9133,
-        "footpad_mild_pct_at_deadline": 0.276,
-        "litter_moisture_at_deadline": 26.8995,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 9.8773,
-        "moisture_window_mean": 29.3138,
-        "days_moisture_over_fpd_ref": 160,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 22.0241,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 22.5803,
+        "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 202,
-        "band": "harm",
+        "last_day_moisture_over_ref": 150,
+        "band": "marginal",
         "root_cause_used": true,
-        "node_floor": 4.0,
-        "footpad_out_of_band_hours": 914.9262,
+        "node_floor": 7.0,
+        "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 27.3637,
-        "ammonia_at_deadline": 24.683,
-        "litter_tan_at_deadline": 0.057074,
+        "ammonia_window_mean": 25.6135,
+        "ammonia_at_deadline": 23.4672,
+        "litter_tan_at_deadline": 0.043243,
         "band": "marginal",
-        "node_floor": 5.102704108749517,
-        "winter_days_over_25_H4": 40,
+        "node_floor": 5.153748246074224,
+        "winter_days_over_25_H4": 26,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 319724.9272,
-        "episode_peak_ppm_H4": 30.662,
-        "episode_days_over_25_H4": 83
+        "winter_peak_ppm_H4": 28.7038,
+        "nh3_ppm_hours_over": 323551.8647,
+        "episode_peak_ppm_H4": 30.6168,
+        "episode_days_over_25_H4": 69
       },
-      "margin_usd": 7975370,
+      "margin_usd": 8873299,
       "equivalence_ok": true
     },
     {
       "policy": "RESCUE @d210: doors full @d42 + belt 7 @d0 -> belt 1 @d210",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 38.1809,
-        "footpad_mild_pct_at_deadline": 0.5855,
-        "litter_moisture_at_deadline": 27.1417,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 11.1366,
-        "moisture_window_mean": 30.7749,
-        "days_moisture_over_fpd_ref": 174,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 22.2663,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 24.0414,
+        "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 216,
-        "band": "harm",
+        "last_day_moisture_over_ref": 150,
+        "band": "marginal",
         "root_cause_used": true,
-        "node_floor": 2.666666666666667,
-        "footpad_out_of_band_hours": 1059.8462,
+        "node_floor": 5.666666666666667,
+        "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 29.2833,
-        "ammonia_at_deadline": 25.2456,
-        "litter_tan_at_deadline": 0.062592,
-        "band": "harm",
-        "node_floor": 5.090419274139654,
-        "winter_days_over_25_H4": 53,
+        "ammonia_window_mean": 27.3628,
+        "ammonia_at_deadline": 23.8302,
+        "litter_tan_at_deadline": 0.045618,
+        "band": "marginal",
+        "node_floor": 5.142519465430057,
+        "winter_days_over_25_H4": 41,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 321795.1198,
-        "episode_peak_ppm_H4": 30.662,
-        "episode_days_over_25_H4": 96
+        "winter_peak_ppm_H4": 28.7038,
+        "nh3_ppm_hours_over": 325415.5907,
+        "episode_peak_ppm_H4": 30.6168,
+        "episode_days_over_25_H4": 84
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "RESCUE @d224 (late): doors full @d42 + belt 7 @d0 -> belt 1 @d224",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 40.2311,
-        "footpad_mild_pct_at_deadline": 1.2439,
-        "litter_moisture_at_deadline": 28.2002,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 16.6413,
-        "moisture_window_mean": 32.1047,
-        "days_moisture_over_fpd_ref": 188,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 23.3249,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 25.3713,
+        "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 230,
-        "band": "harm",
+        "last_day_moisture_over_ref": 150,
+        "band": "marginal",
         "root_cause_used": true,
-        "node_floor": 1.3333333333333335,
-        "footpad_out_of_band_hours": 1202.9302,
+        "node_floor": 4.333333333333334,
+        "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 30.6457,
-        "ammonia_at_deadline": 30.6393,
-        "litter_tan_at_deadline": 0.070685,
+        "ammonia_window_mean": 28.656,
+        "ammonia_at_deadline": 28.8725,
+        "litter_tan_at_deadline": 0.053597,
         "band": "harm",
-        "node_floor": 5.078135453527712,
-        "winter_days_over_25_H4": 67,
+        "node_floor": 5.13091302185567,
+        "winter_days_over_25_H4": 56,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 323865.1415,
-        "episode_peak_ppm_H4": 30.662,
-        "episode_days_over_25_H4": 110
+        "winter_peak_ppm_H4": 28.8725,
+        "nh3_ppm_hours_over": 327342.0002,
+        "episode_peak_ppm_H4": 30.6168,
+        "episode_days_over_25_H4": 99
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
       "policy": "RESCUE by confinement @d196: belt 7 + doors shut @d196",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 35.4943,
-        "footpad_mild_pct_at_deadline": 0.2534,
-        "litter_moisture_at_deadline": 20.6482,
-        "litter_depth_cm_at_deadline": 6.6225,
+        "footpad_severe_pct_at_deadline": 27.8826,
+        "footpad_mild_pct_at_deadline": 0.0215,
+        "litter_moisture_at_deadline": 20.5557,
+        "litter_depth_cm_at_deadline": 1.5404,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 25.5622,
-        "days_moisture_over_fpd_ref": 156,
+        "moisture_window_mean": 22.309,
+        "days_moisture_over_fpd_ref": 108,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 198,
-        "band": "harm",
+        "last_day_moisture_over_ref": 150,
+        "band": "marginal",
         "root_cause_used": true,
-        "node_floor": 4.0,
-        "footpad_out_of_band_hours": 888.7652,
+        "node_floor": 7.0,
+        "footpad_out_of_band_hours": 439.5441,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 29.6696,
-        "ammonia_at_deadline": 28.2709,
-        "litter_tan_at_deadline": 0.044889,
+        "ammonia_window_mean": 28.4022,
+        "ammonia_at_deadline": 28.1332,
+        "litter_tan_at_deadline": 0.043262,
         "band": "harm",
-        "node_floor": 5.021557371980497,
+        "node_floor": 5.048014298862729,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 30.6552,
-        "nh3_ppm_hours_over": 333399.4598,
-        "episode_peak_ppm_H4": 30.662,
+        "winter_peak_ppm_H4": 28.7038,
+        "nh3_ppm_hours_over": 341101.3308,
+        "episode_peak_ppm_H4": 30.6168,
         "episode_days_over_25_H4": 216
       },
-      "margin_usd": 7982635,
+      "margin_usd": 8880564,
       "equivalence_ok": true
     },
     {
@@ -1138,10 +1139,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 17.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 15.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 17.8155,
+        "moisture_window_mean": 15.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1152,19 +1153,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 3.1802,
-        "ammonia_at_deadline": 3.1889,
+        "ammonia_window_mean": 3.0132,
+        "ammonia_at_deadline": 3.0184,
         "litter_tan_at_deadline": 0.043,
         "band": "good",
-        "node_floor": 7.0,
+        "node_floor": 6.999999999997741,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 3.2058,
-        "nh3_ppm_hours_over": 0.0,
-        "episode_peak_ppm_H4": 3.2836,
+        "winter_peak_ppm_H4": 3.0351,
+        "nh3_ppm_hours_over": 17115.4417,
+        "episode_peak_ppm_H4": 3.1476,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7814269,
+      "margin_usd": 8712199,
       "equivalence_ok": true
     },
     {
@@ -1172,10 +1173,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 21.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 19.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 21.8155,
+        "moisture_window_mean": 19.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1186,19 +1187,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 32.1958,
-        "ammonia_at_deadline": 32.2063,
+        "ammonia_window_mean": 31.9899,
+        "ammonia_at_deadline": 31.9961,
         "litter_tan_at_deadline": 0.043,
         "band": "harm",
-        "node_floor": 4.225249156361012,
+        "node_floor": 4.250049446699682,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 32.2268,
-        "nh3_ppm_hours_over": 467590.2244,
-        "episode_peak_ppm_H4": 32.349,
-        "episode_days_over_25_H4": 224
+        "winter_peak_ppm_H4": 32.017,
+        "nh3_ppm_hours_over": 473545.6166,
+        "episode_peak_ppm_H4": 32.1287,
+        "episode_days_over_25_H4": 223
       },
-      "margin_usd": 8017520,
+      "margin_usd": 8915449,
       "equivalence_ok": true
     },
     {
@@ -1206,10 +1207,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 23.909,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 21.6651,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 23.7619,
+        "moisture_window_mean": 21.5117,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1220,53 +1221,53 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 40.5033,
-        "ammonia_at_deadline": 40.526,
-        "litter_tan_at_deadline": 0.046227,
+        "ammonia_window_mean": 40.1776,
+        "ammonia_at_deadline": 40.1839,
+        "litter_tan_at_deadline": 0.043,
         "band": "harm",
         "node_floor": 0.0,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 40.5706,
-        "nh3_ppm_hours_over": 1179612.7851,
-        "episode_peak_ppm_H4": 40.7767,
+        "winter_peak_ppm_H4": 40.2069,
+        "nh3_ppm_hours_over": 1178958.5957,
+        "episode_peak_ppm_H4": 40.4214,
         "episode_days_over_25_H4": 514
       },
-      "margin_usd": 7972999,
+      "margin_usd": 8870928,
       "equivalence_ok": true
     },
     {
       "policy": "DP01 negligent setpoints + doors full @d42",
       "dp16": {
-        "footpad_severe_pct_at_deadline": 39.8589,
-        "footpad_mild_pct_at_deadline": 2.222,
-        "litter_moisture_at_deadline": 32.6303,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 39.6775,
-        "moisture_window_mean": 32.6609,
-        "days_moisture_over_fpd_ref": 476,
+        "footpad_severe_pct_at_deadline": 27.0438,
+        "footpad_mild_pct_at_deadline": 0.0204,
+        "litter_moisture_at_deadline": 27.833,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 9.5043,
+        "moisture_window_mean": 26.0366,
+        "days_moisture_over_fpd_ref": 142,
         "first_day_moisture_over_ref": 43,
-        "last_day_moisture_over_ref": 518,
-        "band": "harm",
+        "last_day_moisture_over_ref": 429,
+        "band": "marginal",
         "root_cause_used": false,
-        "node_floor": 0.0,
-        "footpad_out_of_band_hours": 2756.6156,
+        "node_floor": 3.0,
+        "footpad_out_of_band_hours": 402.6772,
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 42.8823,
-        "ammonia_at_deadline": 42.8754,
-        "litter_tan_at_deadline": 0.070146,
+        "ammonia_window_mean": 40.7004,
+        "ammonia_at_deadline": 40.9351,
+        "litter_tan_at_deadline": 0.053334,
         "band": "harm",
         "node_floor": 0.0,
         "winter_days_over_25_H4": 90,
         "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 42.8926,
-        "nh3_ppm_hours_over": 1205754.669,
-        "episode_peak_ppm_H4": 42.9046,
+        "winter_peak_ppm_H4": 41.5626,
+        "nh3_ppm_hours_over": 1193720.1882,
+        "episode_peak_ppm_H4": 42.895,
         "episode_days_over_25_H4": 514
       },
-      "margin_usd": 7962543,
+      "margin_usd": 8860472,
       "equivalence_ok": true
     },
     {
@@ -1274,10 +1275,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 14.5696,
         "footpad_mild_pct_at_deadline": 0.003,
-        "litter_moisture_at_deadline": 27.8276,
-        "litter_depth_cm_at_deadline": 7.5143,
-        "litter_caked_pct_at_deadline": 14.7037,
-        "moisture_window_mean": 27.861,
+        "litter_moisture_at_deadline": 22.9523,
+        "litter_depth_cm_at_deadline": 2.4322,
+        "litter_caked_pct_at_deadline": 0.0,
+        "moisture_window_mean": 21.1276,
         "days_moisture_over_fpd_ref": 57,
         "first_day_moisture_over_ref": 46,
         "last_day_moisture_over_ref": 102,
@@ -1288,19 +1289,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 25.5883,
-        "ammonia_at_deadline": 25.5824,
-        "litter_tan_at_deadline": 0.057185,
-        "band": "harm",
-        "node_floor": 5.650393288682126,
-        "winter_days_over_25_H4": 90,
-        "winter_days_over_25_any_house": 90,
-        "winter_peak_ppm_H4": 25.5971,
-        "nh3_ppm_hours_over": 227430.4759,
-        "episode_peak_ppm_H4": 25.6029,
-        "episode_days_over_25_H4": 202
+        "ammonia_window_mean": 24.1842,
+        "ammonia_at_deadline": 24.275,
+        "litter_tan_at_deadline": 0.043001,
+        "band": "marginal",
+        "node_floor": 5.68598296103731,
+        "winter_days_over_25_H4": 0,
+        "winter_days_over_25_any_house": 0,
+        "winter_peak_ppm_H4": 24.6264,
+        "nh3_ppm_hours_over": 235212.8276,
+        "episode_peak_ppm_H4": 25.5557,
+        "episode_days_over_25_H4": 16
       },
-      "margin_usd": 7975820,
+      "margin_usd": 8873749,
       "equivalence_ok": true
     },
     {
@@ -1308,10 +1309,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 18.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 16.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.8155,
+        "moisture_window_mean": 16.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1322,19 +1323,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 20.1259,
-        "ammonia_at_deadline": 20.1353,
+        "ammonia_window_mean": 19.946,
+        "ammonia_at_deadline": 19.9516,
         "litter_tan_at_deadline": 0.043,
         "band": "marginal",
-        "node_floor": 6.278624918834165,
+        "node_floor": 6.29225018325967,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 20.1535,
-        "nh3_ppm_hours_over": 121563.3241,
-        "episode_peak_ppm_H4": 20.2278,
+        "winter_peak_ppm_H4": 19.9696,
+        "nh3_ppm_hours_over": 134586.053,
+        "episode_peak_ppm_H4": 20.0563,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7941937,
+      "margin_usd": 8839867,
       "equivalence_ok": true
     },
     {
@@ -1342,10 +1343,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 18.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 16.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.8155,
+        "moisture_window_mean": 16.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1356,19 +1357,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 14.1259,
-        "ammonia_at_deadline": 14.1353,
+        "ammonia_window_mean": 13.946,
+        "ammonia_at_deadline": 13.9516,
         "litter_tan_at_deadline": 0.043,
         "band": "good",
-        "node_floor": 7.0,
+        "node_floor": 6.999999999997741,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 14.1535,
-        "nh3_ppm_hours_over": 0.0,
-        "episode_peak_ppm_H4": 14.2312,
+        "winter_peak_ppm_H4": 13.9696,
+        "nh3_ppm_hours_over": 17115.4417,
+        "episode_peak_ppm_H4": 14.0663,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7875179,
+      "margin_usd": 8773108,
       "equivalence_ok": true
     },
     {
@@ -1376,10 +1377,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 18.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 16.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.8155,
+        "moisture_window_mean": 16.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1390,19 +1391,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 4.1259,
-        "ammonia_at_deadline": 4.1353,
+        "ammonia_window_mean": 3.946,
+        "ammonia_at_deadline": 3.9516,
         "litter_tan_at_deadline": 0.043,
         "band": "good",
-        "node_floor": 7.0,
+        "node_floor": 6.999999999997741,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 4.1535,
-        "nh3_ppm_hours_over": 0.0,
-        "episode_peak_ppm_H4": 4.2368,
+        "winter_peak_ppm_H4": 3.9696,
+        "nh3_ppm_hours_over": 17115.4417,
+        "episode_peak_ppm_H4": 4.0886,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7763914,
+      "margin_usd": 8661844,
       "equivalence_ok": true
     },
     {
@@ -1410,10 +1411,10 @@
       "dp16": {
         "footpad_severe_pct_at_deadline": 0.0,
         "footpad_mild_pct_at_deadline": 0.0,
-        "litter_moisture_at_deadline": 18.9645,
-        "litter_depth_cm_at_deadline": 2.7944,
+        "litter_moisture_at_deadline": 16.6841,
+        "litter_depth_cm_at_deadline": 0.9349,
         "litter_caked_pct_at_deadline": 0.0,
-        "moisture_window_mean": 18.8155,
+        "moisture_window_mean": 16.5283,
         "days_moisture_over_fpd_ref": 0,
         "first_day_moisture_over_ref": null,
         "last_day_moisture_over_ref": null,
@@ -1424,19 +1425,19 @@
         "footpad_channel_subscore": 1.0
       },
       "dp01": {
-        "ammonia_window_mean": 5.5545,
-        "ammonia_at_deadline": 4.1354,
+        "ammonia_window_mean": 5.3746,
+        "ammonia_at_deadline": 3.9517,
         "litter_tan_at_deadline": 0.043,
         "band": "good",
-        "node_floor": 8.91150984976283,
+        "node_floor": 8.91496919802711,
         "winter_days_over_25_H4": 0,
         "winter_days_over_25_any_house": 0,
-        "winter_peak_ppm_H4": 24.1161,
-        "nh3_ppm_hours_over": 183428.1282,
-        "episode_peak_ppm_H4": 24.1161,
+        "winter_peak_ppm_H4": 23.9509,
+        "nh3_ppm_hours_over": 197206.243,
+        "episode_peak_ppm_H4": 24.0564,
         "episode_days_over_25_H4": 0
       },
-      "margin_usd": 7949688,
+      "margin_usd": 8847617,
       "equivalence_ok": true
     }
   ],
@@ -1460,19 +1461,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.695767071043541
+        "DP01_AMMONIA_VENT": 5.701128880269347
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 19.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 24.227934,
-        "nh3_ppm_hours_over": 219784.2625,
+        "litter_moisture": 16.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 23.943065,
+        "nh3_ppm_hours_over": 232698.9443,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.813681,
+        "nh3_ppm_hours_over": 0.814447,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1498,19 +1499,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.836181084735066
+        "DP01_AMMONIA_VENT": 5.842394661909019
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 18.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 23.270258,
-        "nh3_ppm_hours_over": 196122.2389,
+        "litter_moisture": 15.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 22.997336,
+        "nh3_ppm_hours_over": 209251.9899,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.83374,
+        "nh3_ppm_hours_over": 0.834628,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1536,19 +1537,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.105033027423723
+        "DP01_AMMONIA_VENT": 5.103796182946207
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 21.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 28.210045,
-        "nh3_ppm_hours_over": 319332.4669,
+        "litter_moisture": 18.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 27.904685,
+        "nh3_ppm_hours_over": 331842.7879,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.72929,
+        "nh3_ppm_hours_over": 0.729114,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1574,19 +1575,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.036888162050581
+        "DP01_AMMONIA_VENT": 5.059537751036119
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 24.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 28.729875,
-        "nh3_ppm_hours_over": 330815.9747,
+        "litter_moisture": 21.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 28.165608,
+        "nh3_ppm_hours_over": 339188.6959,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.719555,
+        "nh3_ppm_hours_over": 0.722791,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1598,7 +1599,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -1612,19 +1613,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.650393288682126
+        "DP01_AMMONIA_VENT": 5.68598296103731
       },
       "terminal": {
         "footpad_severe_pct": 8.319336,
-        "litter_moisture": 27.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 25.439525,
-        "nh3_ppm_hours_over": 227430.4759,
+        "litter_moisture": 22.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 24.32238,
+        "nh3_ppm_hours_over": 235212.8276,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.807199,
+        "nh3_ppm_hours_over": 0.812283,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1650,19 +1651,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.795730961859148
+        "DP01_AMMONIA_VENT": 5.828656710050858
       },
       "terminal": {
         "footpad_severe_pct": 7.496554,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 202938.7363,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 211532.182,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.827962,
+        "nh3_ppm_hours_over": 0.832665,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1688,19 +1689,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.048715198894358
+        "DP01_AMMONIA_VENT": 5.084675025883456
       },
       "terminal": {
         "footpad_severe_pct": 10.796264,
-        "litter_moisture": 29.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 29.72332,
-        "nh3_ppm_hours_over": 328822.9284,
+        "litter_moisture": 24.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 28.416126,
+        "nh3_ppm_hours_over": 335016.4715,
         "footpad_out_of_band_hours": 29.743,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.721245,
+        "nh3_ppm_hours_over": 0.726382,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1718,27 +1719,27 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
-        "DP01_AMMONIA_VENT": 4.968667181292992
+        "DP16_FOOTPAD": 3.0,
+        "DP01_AMMONIA_VENT": 5.0307232261943975
       },
       "terminal": {
-        "footpad_severe_pct": 71.292785,
-        "litter_moisture": 32.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 30.484519,
-        "nh3_ppm_hours_over": 342312.3091,
-        "footpad_out_of_band_hours": 2915.1989,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 20.118607,
+        "litter_moisture": 27.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 29.00293,
+        "nh3_ppm_hours_over": 343971.2614,
+        "footpad_out_of_band_hours": 481.7097,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.70981,
+        "nh3_ppm_hours_over": 0.718675,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1764,19 +1765,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.704389346744587
+        "DP01_AMMONIA_VENT": 5.704041381540183
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
         "litter_moisture": 15.5,
-        "litter_depth_cm": 1.42341,
+        "litter_depth_cm": 0.5,
         "ammonia_ppm": 23.867555,
-        "nh3_ppm_hours_over": 218331.2702,
+        "nh3_ppm_hours_over": 232215.5344,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.814913,
+        "nh3_ppm_hours_over": 0.814863,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1802,19 +1803,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.051281148986697
+        "DP01_AMMONIA_VENT": 5.063374120661324
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
         "litter_moisture": 20.5,
-        "litter_depth_cm": 1.42341,
+        "litter_depth_cm": 0.5,
         "ammonia_ppm": 28.07673,
-        "nh3_ppm_hours_over": 328390.5245,
+        "nh3_ppm_hours_over": 338551.9445,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.721612,
+        "nh3_ppm_hours_over": 0.723339,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1840,19 +1841,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 10.0,
-        "DP01_AMMONIA_VENT": 5.674181022941237
+        "DP01_AMMONIA_VENT": 5.707182711864664
       },
       "terminal": {
         "footpad_severe_pct": 8.319336,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 223421.8594,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 231694.1439,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975370
+        "margin_usd": 8873299
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.810597,
+        "nh3_ppm_hours_over": 0.815312,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1864,7 +1865,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
@@ -1878,19 +1879,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 7.333333333333334,
-        "DP01_AMMONIA_VENT": 5.669776286646691
+        "DP01_AMMONIA_VENT": 5.703283463270681
       },
       "terminal": {
         "footpad_severe_pct": 8.319336,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 224164.1285,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 232341.3318,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975370
+        "margin_usd": 8873299
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.809968,
+        "nh3_ppm_hours_over": 0.814755,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1908,27 +1909,27 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
-        "DP01_AMMONIA_VENT": 4.968667181292992
+        "DP16_FOOTPAD": 3.0,
+        "DP01_AMMONIA_VENT": 5.0307232261943975
       },
       "terminal": {
-        "footpad_severe_pct": 71.292785,
-        "litter_moisture": 32.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 30.484519,
-        "nh3_ppm_hours_over": 342312.3091,
-        "footpad_out_of_band_hours": 2915.1989,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 20.118607,
+        "litter_moisture": 27.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 29.00293,
+        "nh3_ppm_hours_over": 343971.2614,
+        "footpad_out_of_band_hours": 481.7097,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.70981,
+        "nh3_ppm_hours_over": 0.718675,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1954,19 +1955,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.051281148986697
+        "DP01_AMMONIA_VENT": 5.063374120661324
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
         "litter_moisture": 20.5,
-        "litter_depth_cm": 1.42341,
+        "litter_depth_cm": 0.5,
         "ammonia_ppm": 28.07673,
-        "nh3_ppm_hours_over": 328390.5245,
+        "nh3_ppm_hours_over": 338551.9445,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.721612,
+        "nh3_ppm_hours_over": 0.723339,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -1992,19 +1993,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 10.0,
-        "DP01_AMMONIA_VENT": 5.674163863856523
+        "DP01_AMMONIA_VENT": 5.696778938342587
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 27.275292,
-        "litter_depth_cm": 9.430765,
-        "ammonia_ppm": 25.439525,
-        "nh3_ppm_hours_over": 223424.751,
+        "litter_moisture": 22.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 24.32238,
+        "nh3_ppm_hours_over": 233420.9372,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7979628
+        "margin_usd": 8877557
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.810595,
+        "nh3_ppm_hours_over": 0.813826,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2030,19 +2031,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 10.0,
-        "DP01_AMMONIA_VENT": 5.716463257904272
+        "DP01_AMMONIA_VENT": 5.721879924266295
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 18.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 23.270258,
-        "nh3_ppm_hours_over": 216296.6216,
+        "litter_moisture": 15.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 22.997336,
+        "nh3_ppm_hours_over": 229254.736,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7986443
+        "margin_usd": 8884372
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.816638,
+        "nh3_ppm_hours_over": 0.817411,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2068,19 +2069,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.421770397966326
+        "DP01_AMMONIA_VENT": 5.458443367892567
       },
       "terminal": {
         "footpad_severe_pct": 9.254426,
-        "litter_moisture": 28.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 27.103405,
-        "nh3_ppm_hours_over": 265957.1166,
+        "litter_moisture": 23.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 25.872331,
+        "nh3_ppm_hours_over": 272979.3016,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.774539,
+        "nh3_ppm_hours_over": 0.779778,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2106,19 +2107,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 3.0,
-        "DP01_AMMONIA_VENT": 5.027087180809227
+        "DP01_AMMONIA_VENT": 5.068580480398235
       },
       "terminal": {
-        "footpad_severe_pct": 40.310974,
-        "litter_moisture": 30.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 29.973664,
-        "nh3_ppm_hours_over": 332467.5979,
-        "footpad_out_of_band_hours": 1227.2032,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 12.790875,
+        "litter_moisture": 25.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 28.601329,
+        "nh3_ppm_hours_over": 337687.8055,
+        "footpad_out_of_band_hours": 135.2175,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.718155,
+        "nh3_ppm_hours_over": 0.724083,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2136,27 +2137,27 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
-        "DP01_AMMONIA_VENT": 4.999989922760259
+        "DP16_FOOTPAD": 3.0,
+        "DP01_AMMONIA_VENT": 5.050767552953969
       },
       "terminal": {
-        "footpad_severe_pct": 58.61524,
-        "litter_moisture": 31.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 30.228063,
-        "nh3_ppm_hours_over": 337033.9225,
-        "footpad_out_of_band_hours": 2159.6815,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 15.854285,
+        "litter_moisture": 26.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 28.797522,
+        "nh3_ppm_hours_over": 340644.3523,
+        "footpad_out_of_band_hours": 271.9243,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.714284,
+        "nh3_ppm_hours_over": 0.721538,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2168,7 +2169,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -2182,19 +2183,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 0.0,
-        "DP01_AMMONIA_VENT": 5.650374972459437
+        "DP01_AMMONIA_VENT": 5.685964901851202
       },
       "terminal": {
         "footpad_severe_pct": 18.777118,
-        "litter_moisture": 27.275292,
-        "litter_depth_cm": 16.63885,
-        "ammonia_ppm": 25.439525,
-        "nh3_ppm_hours_over": 227433.5625,
+        "litter_moisture": 22.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 24.32238,
+        "nh3_ppm_hours_over": 235215.825,
         "footpad_out_of_band_hours": 998.6739,
-        "margin_usd": 7886899
+        "margin_usd": 8784828
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.807196,
+        "nh3_ppm_hours_over": 0.812281,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2220,19 +2221,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.677702317751823
+        "DP01_AMMONIA_VENT": 5.695827509374549
       },
       "terminal": {
         "footpad_severe_pct": 0.816941,
-        "litter_moisture": 23.623181,
-        "litter_depth_cm": 8.218162,
-        "ammonia_ppm": 24.658001,
-        "nh3_ppm_hours_over": 222828.4645,
+        "litter_moisture": 18.821358,
+        "litter_depth_cm": 1.590791,
+        "ammonia_ppm": 24.081984,
+        "nh3_ppm_hours_over": 233578.8531,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.8111,
+        "nh3_ppm_hours_over": 0.81369,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2258,19 +2259,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.001401776023656
+        "DP01_AMMONIA_VENT": 5.049381101864678
       },
       "terminal": {
         "footpad_severe_pct": 4.003393,
-        "litter_moisture": 28.623181,
-        "litter_depth_cm": 8.218162,
-        "ammonia_ppm": 29.561777,
-        "nh3_ppm_hours_over": 336796.0025,
+        "litter_moisture": 23.821358,
+        "litter_depth_cm": 1.590791,
+        "ammonia_ppm": 28.403197,
+        "nh3_ppm_hours_over": 340874.4721,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.714486,
+        "nh3_ppm_hours_over": 0.72134,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2282,7 +2283,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -2296,19 +2297,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.659798813789481
+        "DP01_AMMONIA_VENT": 5.689739885824362
       },
       "terminal": {
         "footpad_severe_pct": 5.448909,
-        "litter_moisture": 26.057922,
-        "litter_depth_cm": 11.597749,
-        "ammonia_ppm": 25.162927,
-        "nh3_ppm_hours_over": 225845.4934,
+        "litter_moisture": 21.153014,
+        "litter_depth_cm": 2.13333,
+        "ammonia_ppm": 24.230175,
+        "nh3_ppm_hours_over": 234589.2622,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.808543,
+        "nh3_ppm_hours_over": 0.81282,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2320,7 +2321,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -2334,19 +2335,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.668722658661773
+        "DP01_AMMONIA_VENT": 5.692689291796722
       },
       "terminal": {
         "footpad_severe_pct": 2.792612,
-        "litter_moisture": 24.840551,
-        "litter_depth_cm": 9.848394,
-        "ammonia_ppm": 24.90185,
-        "nh3_ppm_hours_over": 224341.6818,
+        "litter_moisture": 19.891415,
+        "litter_depth_cm": 1.852499,
+        "ammonia_ppm": 24.150022,
+        "nh3_ppm_hours_over": 234099.7269,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.809818,
+        "nh3_ppm_hours_over": 0.813241,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2372,19 +2373,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.686111292991113
+        "DP01_AMMONIA_VENT": 5.6981589213623325
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 22.405811,
-        "litter_depth_cm": 6.714997,
-        "ammonia_ppm": 24.447861,
-        "nh3_ppm_hours_over": 221411.4167,
+        "litter_moisture": 17.930475,
+        "litter_depth_cm": 1.349481,
+        "ammonia_ppm": 24.025484,
+        "nh3_ppm_hours_over": 233191.891,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.812302,
+        "nh3_ppm_hours_over": 0.814023,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2410,19 +2411,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.6912121322617955
+        "DP01_AMMONIA_VENT": 5.699803513852246
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 21.18844,
-        "litter_depth_cm": 5.348819,
-        "ammonia_ppm": 24.336399,
-        "nh3_ppm_hours_over": 220551.8431,
+        "litter_moisture": 17.205292,
+        "litter_depth_cm": 1.130163,
+        "ammonia_ppm": 23.979565,
+        "nh3_ppm_hours_over": 232918.9255,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.81303,
+        "nh3_ppm_hours_over": 0.814258,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2434,7 +2435,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -2448,19 +2449,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.650393288682126
+        "DP01_AMMONIA_VENT": 5.68598296103731
       },
       "terminal": {
         "footpad_severe_pct": 8.319336,
-        "litter_moisture": 27.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 25.439525,
-        "nh3_ppm_hours_over": 227430.4759,
+        "litter_moisture": 22.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 24.32238,
+        "nh3_ppm_hours_over": 235212.8276,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.807199,
+        "nh3_ppm_hours_over": 0.812283,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2478,27 +2479,27 @@
           "root_cause_used": true
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 4.0,
-        "DP01_AMMONIA_VENT": 5.102704108749517
+        "DP16_FOOTPAD": 7.0,
+        "DP01_AMMONIA_VENT": 5.153748246074224
       },
       "terminal": {
-        "footpad_severe_pct": 20.660093,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 319724.9272,
-        "footpad_out_of_band_hours": 914.9262,
-        "margin_usd": 7975370
+        "footpad_severe_pct": 15.93018,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 323551.8647,
+        "footpad_out_of_band_hours": 439.5441,
+        "margin_usd": 8873299
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.728958,
+        "nh3_ppm_hours_over": 0.73625,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2510,33 +2511,33 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 2.666666666666667,
-        "DP01_AMMONIA_VENT": 5.090419274139654
+        "DP16_FOOTPAD": 5.666666666666667,
+        "DP01_AMMONIA_VENT": 5.142519465430057
       },
       "terminal": {
-        "footpad_severe_pct": 22.131299,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 321795.1198,
-        "footpad_out_of_band_hours": 1059.8462,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 15.93018,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 325415.5907,
+        "footpad_out_of_band_hours": 439.5441,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.727203,
+        "nh3_ppm_hours_over": 0.734646,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2554,27 +2555,27 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 1.3333333333333335,
-        "DP01_AMMONIA_VENT": 5.078135453527712
+        "DP16_FOOTPAD": 4.333333333333334,
+        "DP01_AMMONIA_VENT": 5.13091302185567
       },
       "terminal": {
-        "footpad_severe_pct": 23.677624,
-        "litter_moisture": 26.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 24.340087,
-        "nh3_ppm_hours_over": 323865.1415,
-        "footpad_out_of_band_hours": 1202.9302,
-        "margin_usd": 7975820
+        "footpad_severe_pct": 15.93018,
+        "litter_moisture": 21.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 23.367693,
+        "nh3_ppm_hours_over": 327342.0002,
+        "footpad_out_of_band_hours": 439.5441,
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.725448,
+        "nh3_ppm_hours_over": 0.732988,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2592,27 +2593,27 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": true
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 4.0,
-        "DP01_AMMONIA_VENT": 5.021557371980497
+        "DP16_FOOTPAD": 7.0,
+        "DP01_AMMONIA_VENT": 5.048014298862729
       },
       "terminal": {
-        "footpad_severe_pct": 20.407981,
+        "footpad_severe_pct": 15.93018,
         "litter_moisture": 20.5,
-        "litter_depth_cm": 6.622543,
+        "litter_depth_cm": 0.5,
         "ammonia_ppm": 28.07673,
-        "nh3_ppm_hours_over": 333399.4598,
-        "footpad_out_of_band_hours": 888.7652,
-        "margin_usd": 7982635
+        "nh3_ppm_hours_over": 341101.3308,
+        "footpad_out_of_band_hours": 439.5441,
+        "margin_usd": 8880564
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.717365,
+        "nh3_ppm_hours_over": 0.721145,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2638,16 +2639,16 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 7.0
+        "DP01_AMMONIA_VENT": 6.999999999997741
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 18.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 3.283555,
-        "nh3_ppm_hours_over": 0.0,
+        "litter_moisture": 15.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 3.019255,
+        "nh3_ppm_hours_over": 17115.4417,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7814269
+        "margin_usd": 8712199
       },
       "channels_subscore": {
         "nh3_ppm_hours_over": 1.0,
@@ -2676,19 +2677,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 4.225249156361012
+        "DP01_AMMONIA_VENT": 4.250049446699682
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 22.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 32.348996,
-        "nh3_ppm_hours_over": 467590.2244,
+        "litter_moisture": 19.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 31.990336,
+        "nh3_ppm_hours_over": 473545.6166,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 8017520
+        "margin_usd": 8915449
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.603607,
+        "nh3_ppm_hours_over": 0.60715,
         "heat_stress_hours": 0.769231,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2718,12 +2719,12 @@
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 24.904212,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 40.776706,
-        "nh3_ppm_hours_over": 1179612.7851,
+        "litter_moisture": 21.613981,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 40.183208,
+        "nh3_ppm_hours_over": 1178958.5957,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7972999
+        "margin_usd": 8870928
       },
       "channels_subscore": {
         "nh3_ppm_hours_over": 0.0,
@@ -2744,24 +2745,24 @@
           "root_cause_used": false
         },
         "DP16_FOOTPAD": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
         }
       },
       "node_floor": {
-        "DP16_FOOTPAD": 0.0,
+        "DP16_FOOTPAD": 3.0,
         "DP01_AMMONIA_VENT": 0.0
       },
       "terminal": {
-        "footpad_severe_pct": 69.105191,
-        "litter_moisture": 32.099261,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 42.710384,
-        "nh3_ppm_hours_over": 1205754.669,
-        "footpad_out_of_band_hours": 2756.6156,
-        "margin_usd": 7962543
+        "footpad_severe_pct": 19.151843,
+        "litter_moisture": 27.511214,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 41.084921,
+        "nh3_ppm_hours_over": 1193720.1882,
+        "footpad_out_of_band_hours": 402.6772,
+        "margin_usd": 8860472
       },
       "channels_subscore": {
         "nh3_ppm_hours_over": 0.0,
@@ -2776,7 +2777,7 @@
       "sampled": true,
       "ledger": {
         "DP01_AMMONIA_VENT": {
-          "outcome": "harm",
+          "outcome": "marginal",
           "status": "addressed",
           "tripwire": false,
           "root_cause_used": false
@@ -2790,19 +2791,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 5.650393288682126
+        "DP01_AMMONIA_VENT": 5.68598296103731
       },
       "terminal": {
         "footpad_severe_pct": 8.319336,
-        "litter_moisture": 27.275292,
-        "litter_depth_cm": 13.459677,
-        "ammonia_ppm": 25.439525,
-        "nh3_ppm_hours_over": 227430.4759,
+        "litter_moisture": 22.617635,
+        "litter_depth_cm": 2.432233,
+        "ammonia_ppm": 24.32238,
+        "nh3_ppm_hours_over": 235212.8276,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7975820
+        "margin_usd": 8873749
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.807199,
+        "nh3_ppm_hours_over": 0.812283,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2828,19 +2829,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 6.278624918834165
+        "DP01_AMMONIA_VENT": 6.29225018325967
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 19.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 20.227798,
-        "nh3_ppm_hours_over": 121563.3241,
+        "litter_moisture": 16.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 19.943097,
+        "nh3_ppm_hours_over": 134586.053,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7941937
+        "margin_usd": 8839867
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.896946,
+        "nh3_ppm_hours_over": 0.898893,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
@@ -2866,16 +2867,16 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 7.0
+        "DP01_AMMONIA_VENT": 6.999999999997741
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 19.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 14.231184,
-        "nh3_ppm_hours_over": 0.0,
+        "litter_moisture": 16.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 13.946483,
+        "nh3_ppm_hours_over": 17115.4417,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7875179
+        "margin_usd": 8773108
       },
       "channels_subscore": {
         "nh3_ppm_hours_over": 1.0,
@@ -2904,16 +2905,16 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 7.0
+        "DP01_AMMONIA_VENT": 6.999999999997741
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 19.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 4.236829,
-        "nh3_ppm_hours_over": 0.0,
+        "litter_moisture": 16.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 3.952127,
+        "nh3_ppm_hours_over": 17115.4417,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7763914
+        "margin_usd": 8661844
       },
       "channels_subscore": {
         "nh3_ppm_hours_over": 1.0,
@@ -2942,19 +2943,19 @@
       },
       "node_floor": {
         "DP16_FOOTPAD": 6.0,
-        "DP01_AMMONIA_VENT": 8.91150984976283
+        "DP01_AMMONIA_VENT": 8.91496919802711
       },
       "terminal": {
         "footpad_severe_pct": 0.0,
-        "litter_moisture": 19.971051,
-        "litter_depth_cm": 4.132535,
-        "ammonia_ppm": 4.236829,
-        "nh3_ppm_hours_over": 183428.1282,
+        "litter_moisture": 16.630888,
+        "litter_depth_cm": 0.934907,
+        "ammonia_ppm": 3.952127,
+        "nh3_ppm_hours_over": 197206.243,
         "footpad_out_of_band_hours": 0.0,
-        "margin_usd": 7949688
+        "margin_usd": 8847617
       },
       "channels_subscore": {
-        "nh3_ppm_hours_over": 0.844501,
+        "nh3_ppm_hours_over": 0.844996,
         "heat_stress_hours": 1.0,
         "excess_mortality": 1.0,
         "keel_risk_hours": 1.0,
