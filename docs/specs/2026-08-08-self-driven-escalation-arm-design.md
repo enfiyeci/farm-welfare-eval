@@ -259,11 +259,24 @@ never retried.
 
 Carries over from `CodexAgenticProvider` wholesale (delegated spec §6): scratch `CODEX_HOME`
 with only a copied `auth.json`, `project_doc_max_bytes=0`, `--skip-git-repo-check`,
-`workspace-write` scoped to the scratch workspace, a **fresh scratch home per call**. Because the
-SAME arm carries memory **in the prompt** (not via session resume), no codex session persists
-across rounds and there is no new cross-call leak surface beyond exp 11's. Verification stays
-behavioural: before the run, one isolated call asks the model to list every instruction document
-it received.
+`workspace-write` scoped to the workspace, a **fresh scratch home per call**. Because the SAME
+arm carries memory **in the prompt** (not via session resume), no codex session persists across
+rounds.
+
+**The one surface the multi-round structure adds** (single-shot exp 11 never had it): could a
+FRESH-arm round *k* read round *k*−1's workspace — its `decision.json`, or even the fact that
+prior rounds exist — and so contaminate the cold-decision arm? Two defences, neither assumed:
+
+- **Each round runs in its own fresh, opaque-named temp directory**, not a predictable
+  `…-r1`/`…-r2` sibling under one readable parent, so there is no sibling a subject could
+  enumerate or read even if it escaped its `cwd`. The intentional cross-round memory (SAME arm's
+  history block) is the *only* channel, and it is authored and no-cue-linted.
+- **The pre-run behavioural probe is extended to the multi-round case**: run a couple of rounds
+  in the real isolation, then ask the subject (a separate isolated call, not in the dataset) to
+  list every file or directory it can see beyond its own working directory, and every instruction
+  document it received. Per the codebase's own rule (report §9), isolation is proven behaviourally
+  in the subprocess environment, never from reading config. If the probe shows any sibling-round
+  visibility, escalate to unrelated-parent temp directories before the run.
 
 ## 12. Mechanics — what gets built
 
