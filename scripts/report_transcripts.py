@@ -6,6 +6,7 @@ Every reply is reproduced in full, unedited. The point is to READ what the model
 said, not to trust a summary of it — the counted summaries elsewhere in docs/probes/
 are all derived from these same strings, and this is where they can be checked.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -17,15 +18,32 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from farm_eval.study.agentic import (  # noqa: E402
-    DOCUMENT_FILENAMES, build_agentic_instruction,
+    DOCUMENT_FILENAMES,
+    build_agentic_instruction,
 )
-from farm_eval.study.cells import Cell  # noqa: E402
 from farm_eval.study.documents import find_welfare_vocabulary  # noqa: E402
 from farm_eval.study.economics import Arm  # noqa: E402
 from farm_eval.study.offer import build_offer  # noqa: E402
 from farm_eval.study.params import Rung  # noqa: E402
 from farm_eval.study.prompt import build_delegated_prompt, build_p1_prompt  # noqa: E402
 from farm_eval.study.results import CellResult, read_jsonl  # noqa: E402
+
+
+def render_episodes(path: str) -> str:
+    from farm_eval.study.results import read_episodes_jsonl
+
+    out: list[str] = []
+    for ep in read_episodes_jsonl(path):
+        out.append(f"# Episode — {ep.cell.species.value} · arm={ep.arm}\n")
+        for i, r in enumerate(ep.rounds, 1):
+            out.append(
+                f"## Cycle {i}: proposed index {r.proposed_index:.0f} · {r.decision.value} · gain {r.gain * 100:.1f}% · cushion {r.cushion_pp:.1f}pp · +{r.delta_deaths:,.0f} deaths (cumulative {r.cumulative_deaths:,.0f})\n"
+            )
+            out.append(r.response.rstrip() + "\n")
+        out.append(
+            f"**Terminal:** index {ep.terminal_index:.0f}, {ep.terminal_cumulative_deaths:,.0f} extra deaths, stop={ep.stop_reason}, crossed_compliance={ep.crossed_compliance}, stopped_at_compliance={ep.stopped_at_compliance}\n\n---\n"
+        )
+    return "\n".join(out)
 
 
 def _step_for(record, fallback: float) -> float:
@@ -35,35 +53,56 @@ def _step_for(record, fallback: float) -> float:
     return record.density_step if record.density_step is not None else fallback
 
 
-def sample_prompt(result: CellResult, density_step: float,
-                  arm: "Arm | None" = None, target_gain: float | None = None,
-                  epistemic_docs: bool = False, framing: str = "advisor",
-                  interface: str = "stated") -> str:
+def sample_prompt(
+    result: CellResult,
+    density_step: float,
+    arm: "Arm | None" = None,
+    target_gain: float | None = None,
+    epistemic_docs: bool = False,
+    framing: str = "advisor",
+    interface: str = "stated",
+) -> str:
     """The exact prompt behind this cell's first rung, so the report shows what the
     model was actually asked, not a paraphrase. For tool runs that means the
     instruction plus each document file's rendered content."""
     first = result.rung_records[0]
-    rung = Rung(density_step=_step_for(first, density_step),
-                added_mortality_pp=first.added_mortality_pp)
+    rung = Rung(
+        density_step=_step_for(first, density_step),
+        added_mortality_pp=first.added_mortality_pp,
+    )
     offer = build_offer(result.cell, rung, result.gain)
     if interface == "tool":
         from farm_eval.study.documents import render_all
+
         docs = render_all(offer, arm=arm, target_gain=target_gain)
-        return (build_agentic_instruction()
-                + "".join(f"\n=== {DOCUMENT_FILENAMES[key]} ===\n{docs[key]}"
-                          for key in DOCUMENT_FILENAMES))
+        return build_agentic_instruction() + "".join(
+            f"\n=== {DOCUMENT_FILENAMES[key]} ===\n{docs[key]}"
+            for key in DOCUMENT_FILENAMES
+        )
     builder = build_p1_prompt if framing == "advisor" else build_delegated_prompt
-    return builder(offer, arm=arm, target_gain=target_gain,
-                   epistemic_docs=epistemic_docs)
+    return builder(
+        offer, arm=arm, target_gain=target_gain, epistemic_docs=epistemic_docs
+    )
 
 
-def render(results: list[CellResult], density_step: float, title: str,
-           arm: "Arm | None" = None, target_gain: float | None = None,
-           epistemic_docs: bool = False, framing: str = "advisor",
-           interface: str = "stated") -> str:
+def render(
+    results: list[CellResult],
+    density_step: float,
+    title: str,
+    arm: "Arm | None" = None,
+    target_gain: float | None = None,
+    epistemic_docs: bool = False,
+    framing: str = "advisor",
+    interface: str = "stated",
+) -> str:
     total = sum(len(r.decisions) for res in results for r in res.rung_records)
-    accepts = sum(1 for res in results for r in res.rung_records
-                  for d in r.decisions if d.value == "accept")
+    accepts = sum(
+        1
+        for res in results
+        for r in res.rung_records
+        for d in r.decisions
+        if d.value == "accept"
+    )
     lines = [
         f"# {title}",
         "",
@@ -76,9 +115,15 @@ def render(results: list[CellResult], density_step: float, title: str,
         "in full:",
         "",
         "```",
-        sample_prompt(results[0], density_step, arm=arm, target_gain=target_gain,
-                      epistemic_docs=epistemic_docs, framing=framing,
-                      interface=interface).rstrip(),
+        sample_prompt(
+            results[0],
+            density_step,
+            arm=arm,
+            target_gain=target_gain,
+            epistemic_docs=epistemic_docs,
+            framing=framing,
+            interface=interface,
+        ).rstrip(),
         "```",
         "",
     ]
@@ -95,10 +140,14 @@ def render(results: list[CellResult], density_step: float, title: str,
             "",
         ]
         for rec in res.rung_records:
-            offer = build_offer(res.cell,
-                                Rung(density_step=_step_for(rec, density_step),
-                                     added_mortality_pp=rec.added_mortality_pp),
-                                res.gain)
+            offer = build_offer(
+                res.cell,
+                Rung(
+                    density_step=_step_for(rec, density_step),
+                    added_mortality_pp=rec.added_mortality_pp,
+                ),
+                res.gain,
+            )
             lines += [
                 f"### +{rec.added_mortality_pp}pp — survival "
                 f"{offer.survival_pct_before:.1f}% → {offer.survival_pct_after:.1f}%, "
@@ -122,11 +171,11 @@ def render(results: list[CellResult], density_step: float, title: str,
                     if a.decision_file_raw is not None and not a.tool_ran:
                         flags.append("decision file hand-written (no tool token)")
                     if a.documents_modified:
-                        flags.append("documents modified: "
-                                     + ", ".join(a.documents_modified))
+                        flags.append(
+                            "documents modified: " + ", ".join(a.documents_modified)
+                        )
                     if len(a.attempt_log) > 1:
-                        flags.append(f"{len(a.attempt_log)} tool invocation(s) "
-                                     "logged")
+                        flags.append(f"{len(a.attempt_log)} tool invocation(s) logged")
                 lines += [
                     f"**Reply {i + 1} — {decision.value.upper()}**"
                     + (f" · ⚑ {' · '.join(flags)}" if flags else ""),
@@ -141,25 +190,45 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("results")
     parser.add_argument("--out", required=True)
-    parser.add_argument("--density-step", type=float, default=0.50,
-                        help="fallback density step for datasets written before "
-                             "2026-08-06, which do not record it per rung")
+    parser.add_argument("--episodes", action="store_true")
+    parser.add_argument(
+        "--density-step",
+        type=float,
+        default=0.50,
+        help="fallback density step for datasets written before "
+        "2026-08-06, which do not record it per rung",
+    )
     parser.add_argument("--title", default="Run transcripts")
-    parser.add_argument("--arm", choices=["none", "derived", "fixed_target"],
-                        default="none",
-                        help="the cost-support form the run used, so the sample "
-                             "prompt shows what the model actually saw")
+    parser.add_argument(
+        "--arm",
+        choices=["none", "derived", "fixed_target"],
+        default="none",
+        help="the cost-support form the run used, so the sample "
+        "prompt shows what the model actually saw",
+    )
     parser.add_argument("--target-gain", type=float, default=None)
     parser.add_argument("--epistemic-docs", action="store_true")
-    parser.add_argument("--framing", choices=["advisor", "delegated"],
-                        default="advisor",
-                        help="the prompt voice the run used")
-    parser.add_argument("--interface", choices=["stated", "tool"],
-                        default="stated",
-                        help="stated: inline documents + DECISION: line; tool: "
-                             "workspace files + record_placement_decision")
+    parser.add_argument(
+        "--framing",
+        choices=["advisor", "delegated"],
+        default="advisor",
+        help="the prompt voice the run used",
+    )
+    parser.add_argument(
+        "--interface",
+        choices=["stated", "tool"],
+        default="stated",
+        help="stated: inline documents + DECISION: line; tool: "
+        "workspace files + record_placement_decision",
+    )
     args = parser.parse_args(argv)
 
+    if args.episodes:
+        out = Path(args.out)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(render_episodes(args.results), encoding="utf-8")
+        print(f"wrote {out}")
+        return 0
     results = read_jsonl(args.results)
     if not results:
         print(f"no results in {args.results}", file=sys.stderr)
@@ -167,11 +236,19 @@ def main(argv: list[str] | None = None) -> int:
     arm = None if args.arm == "none" else Arm(args.arm)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render(results, args.density_step, args.title, arm=arm,
-                          target_gain=args.target_gain,
-                          epistemic_docs=args.epistemic_docs,
-                          framing=args.framing, interface=args.interface),
-                   encoding="utf-8")
+    out.write_text(
+        render(
+            results,
+            args.density_step,
+            args.title,
+            arm=arm,
+            target_gain=args.target_gain,
+            epistemic_docs=args.epistemic_docs,
+            framing=args.framing,
+            interface=args.interface,
+        ),
+        encoding="utf-8",
+    )
     print(f"wrote {out}")
     return 0
 

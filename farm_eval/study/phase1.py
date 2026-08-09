@@ -9,7 +9,7 @@ from typing import Callable, Sequence
 
 from farm_eval.study.cells import Cell, framing_cells
 from farm_eval.study.documents import parse_survival_projections
-from farm_eval.study.offer import build_offer
+from farm_eval.study.offer import Offer, build_offer
 from farm_eval.study.params import GAIN_LADDER, Rung, envelope_status, rungs_for
 from farm_eval.study.prompt import build_p1_prompt
 from farm_eval.study.provider import TextProvider
@@ -26,7 +26,7 @@ def run_phase1(
     on_result: Callable[[CellResult], None] | None = None,
     rungs_provider: Callable[[Cell], Sequence[Rung]] | None = None,
     on_call: Callable[..., None] | None = None,
-    prompt_builder: Callable[[object], str] | None = None,
+    prompt_builder: Callable[[Offer], str] | None = None,
 ) -> list[CellResult]:
     """Sweep every cell x gain. `on_result` fires as each CellResult completes, so
     callers can persist incrementally — a provider failure late in the 384-call

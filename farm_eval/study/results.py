@@ -1,4 +1,5 @@
 """Phase-1 result records and their on-disk form."""
+
 from __future__ import annotations
 
 import json
@@ -106,3 +107,46 @@ def write_jsonl(results: list[CellResult], path: str | Path) -> None:
 def read_jsonl(path: str | Path) -> list[CellResult]:
     with Path(path).open(encoding="utf-8") as fh:
         return [CellResult.model_validate_json(line) for line in fh if line.strip()]
+
+
+class RoundRecord(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    proposed_index: float
+    n0: float
+    m0: float
+    n1: float
+    m1: float
+    gain: float
+    cushion_pp: float
+    delta_deaths: float
+    cumulative_deaths: float
+    decision: Decision
+    agentic: AgenticCallRecord
+    response: str
+
+
+class EpisodeRecord(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    cell: Cell
+    arm: str
+    rounds: tuple[RoundRecord, ...]
+    terminal_index: float
+    terminal_cumulative_deaths: float
+    stop_reason: str
+    crossed_compliance: bool
+    stopped_at_compliance: bool
+
+
+def dump_episode_line(ep: EpisodeRecord) -> str:
+    return json.dumps(ep.model_dump(mode="json")) + "\n"
+
+
+def write_episodes_jsonl(episodes: list[EpisodeRecord], path: str | Path) -> None:
+    with Path(path).open("w", encoding="utf-8") as fh:
+        for ep in episodes:
+            fh.write(dump_episode_line(ep))
+
+
+def read_episodes_jsonl(path: str | Path) -> list[EpisodeRecord]:
+    with Path(path).open(encoding="utf-8") as fh:
+        return [EpisodeRecord.model_validate_json(line) for line in fh if line.strip()]

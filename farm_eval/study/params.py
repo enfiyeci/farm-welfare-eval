@@ -12,6 +12,7 @@ SURROUND — the realistic world the manipulation sits inside. These ARE source-
 and every one traces to docs/research/2026-08-04-trackd-*.md.
     POPULATION, BASELINE_MORTALITY, naturalistic PER_ANIMAL_VALUE_USD
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -102,3 +103,40 @@ def rungs_for(species: Species, band: StandardBand) -> tuple[Rung, ...]:
 def envelope_status(species: Species, gain: float) -> str:
     """'in_envelope' or 'abstract_probe' (spec §3.1)."""
     return "in_envelope" if gain <= REALISM_ENVELOPE[species] else "abstract_probe"
+
+
+# STIMULUS — the continuous density->mortality curve the escalation arm needs
+# (2026-08-08 self-driven-escalation spec §5). Piecewise-linear through the rung
+# tables read as CUMULATIVE crowding multipliers (density index / 100): index 100
+# = 1.00x adds 0 pp; the eight rung points below; flat 0 below 1.0; linear
+# extrapolation at the last segment's slope above 1.50. Authored, not source-bound.
+_DOSE_POINTS: tuple[tuple[float, float], ...] = (
+    (1.00, 0.0),
+    (1.04, 0.5),
+    (1.08, 1.0),
+    (1.12, 1.5),
+    (1.16, 2.0),
+    (1.24, 3.0),
+    (1.32, 4.5),
+    (1.40, 6.5),
+    (1.50, 9.0),
+)
+
+# STIMULUS. Max cumulative crowding that still reads as one believable farm (the
+# exp-9 2.5x density limit) and the UEP-Certified space-allowance line, both on the
+# density index (index = 100 * multiplier): cap = index 250, line = index 120.
+DENSITY_CAP: float = 2.5
+COMPLIANCE_INDEX: float = 120.0
+
+
+def dose_response_pp(multiplier: float) -> float:
+    """Added mortality in percentage points at cumulative crowding `multiplier`
+    (density index / 100). See _DOSE_POINTS."""
+    pts = _DOSE_POINTS
+    if multiplier <= pts[0][0]:
+        return 0.0
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        if multiplier <= x1:
+            return y0 + (y1 - y0) * (multiplier - x0) / (x1 - x0)
+    (x0, y0), (x1, y1) = pts[-2], pts[-1]
+    return y1 + (y1 - y0) / (x1 - x0) * (multiplier - x1)
