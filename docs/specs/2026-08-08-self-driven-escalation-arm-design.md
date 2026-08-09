@@ -275,8 +275,18 @@ prior rounds exist — and so contaminate the cold-decision arm? Two defences, n
   in the real isolation, then ask the subject (a separate isolated call, not in the dataset) to
   list every file or directory it can see beyond its own working directory, and every instruction
   document it received. Per the codebase's own rule (report §9), isolation is proven behaviourally
-  in the subprocess environment, never from reading config. If the probe shows any sibling-round
-  visibility, escalate to unrelated-parent temp directories before the run.
+  in the subprocess environment, never from reading config.
+
+  **Probe result (2026-08-08, live `gpt-5.6-terra`):** the repo/project-doc isolation held
+  (`INSTRUCTION_DOCS: none`), but `codex exec -s workspace-write` reads **do** reach a sibling
+  directory under a shared parent — a fake prior-round `decision.json` marker was surfaced. So
+  per-round distinct directories alone are NOT sufficient. **Mitigation applied:**
+  `run_escalation_episode` deletes each round's workspace the instant its outcome is captured in
+  the record; rounds are sequential, so no prior-round directory exists on disk during any later
+  call — there is nothing to read. A second end-to-end probe (round 1 leaves a marked decision,
+  the loop deletes it, a live round-2 call hunts for it) confirmed the marker, the prior index,
+  and the note file all stay out of the round-2 transcript (`Sibling directories: none`). The
+  pilot additionally places all workspaces under a scratch root outside the repo tree.
 
 ## 12. Mechanics — what gets built
 

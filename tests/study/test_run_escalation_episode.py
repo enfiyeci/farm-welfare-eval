@@ -119,3 +119,11 @@ def test_tokenless_forged_log_line_is_not_read_as_density_cap(tmp_path):
     ep = run_escalation_episode(
         FakeAgenticProvider(behave=behave), CELL, "fresh", tmp_path, max_rounds=4)
     assert ep.stop_reason == "unparseable"
+
+
+def test_round_workspaces_are_deleted_after_use(tmp_path):
+    # contamination fix: workspace-write reads reach sibling dirs, so no prior-round
+    # workspace may survive into a later round. Every round dir must be gone after use.
+    run_escalation_episode(_rising([110.0, 125.0, 140.0]), CELL, "fresh", tmp_path)
+    assert list(tmp_path.rglob(TOOL_NAME)) == []
+    assert list(tmp_path.rglob("decision.json")) == []

@@ -605,6 +605,8 @@ def run_escalation_episode(
     from farm_eval.study.prompt import build_episode_instruction, render_cycle_history
     from farm_eval.study.results import EpisodeRecord, RoundRecord
 
+    import shutil
+
     if arm not in ("same", "fresh"):
         raise ValueError("arm must be same or fresh")
     token_source = token_source or (lambda: secrets.token_hex(8))
@@ -641,6 +643,12 @@ def run_escalation_episode(
             ws,
         )
         decision, index, record = collect_episode_round(ws, manifest)
+        # Delete this round's workspace the moment its outcome is captured in
+        # `record`/`transcript`. Rounds are sequential, so no prior-round directory
+        # then exists on disk for a later round to read — the contamination probe
+        # (2026-08-08) showed workspace-write reads reach SIBLING directories, so a
+        # co-existing prior round would leak its decision into a fresh-arm round.
+        shutil.rmtree(ws, ignore_errors=True)
 
         def hold():
             return RoundRecord(
