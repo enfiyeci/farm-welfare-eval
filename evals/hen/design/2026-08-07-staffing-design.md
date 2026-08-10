@@ -449,3 +449,82 @@ deadline and the irreversibility. **Green et al. 2000** (*Vet Rec* 147:233–238
 holds the only other positive inspection odds ratio, and would strengthen §3.3b's citation base
 without changing its direction. Everything else in the bottom rows is genuine literature absence;
 further web passes buy confirmations, not numbers.
+
+---
+
+## 9. Sources behind the rulings — every load-bearing citation, with links
+
+Every claim this design rests on, traceable without opening the research files. **✅ = read end to
+end by the orchestrator** (PDF filed under `evals/hen/research/sources/` where fetched);
+**◐ = read in substantial part, gap stated in the research doc**; **⚠️ = abstract-only or
+unreachable, and flagged wherever the claim appears.**
+
+### The legal and economic setting (§1, §3.6)
+
+| Claim | Source | Status |
+|---|---|---|
+| Barn caretakers are exempt from federal overtime ("raising of poultry… general care") | [29 CFR part 780, 2024 edition (govinfo XML)](https://www.govinfo.gov/content/pkg/CFR-2024-title29-vol3/xml/CFR-2024-title29-vol3-part780.xml); [§780.400](https://www.ecfr.gov/current/title-29/section-780.400) | ✅ subparts A–B and all cited sections |
+| Iowa has no state overtime provision; all overtime claims route to federal DOL | [Iowa DIAL, Wages](https://dial.iowa.gov/hearings/wage-and-child-labor/wages) · [Wage Claims FAQ](https://dial.iowa.gov/i-need/claims/how-do-i-wage-claim/wage-claims-faq) · corroborating [National Agricultural Law Center compilation](https://nationalaglawcenter.org/state-compilations/agpay/overtime/) | ◐ agency pages fetched with verbatim-quote extraction |
+| Wage and hours vintage (livestock $18.15/h; ~40–41 h/wk all-hired; last edition before discontinuance) | [USDA NASS *Farm Labor*, 21 May 2025](https://www.nass.usda.gov/Publications/Todays_Reports/reports/fmla0525.pdf); [NASS discontinuation notice](https://www.nass.usda.gov/Newsroom/Notices/2025/08-28-2025.php) | ✅ report; ◐ notice |
+| H-2A cannot cover year-round layer work (the gap that makes the off-books offer plausible) | [USCIS PM-602-0200, 17 June 2026](https://www.uscis.gov/sites/default/files/document/policy-alerts/PM-602-0200-H2APetitionsForDairying-20260617.pdf) | ✅ |
+| Line caretakers ~49 h/wk, managers 58–65 h/wk (the realistic schedule) | [McClenahan & Milligan, Cornell A.R.M.E. 98-03 (1998)](https://ecommons.cornell.edu/server/api/core/bitstreams/47339eb1-9af8-444b-b0a3-afe7166f1ef5/content) | ◐ |
+
+### Worker harm — the fatigue curves (§3.4, §3.3a point 4)
+
+| Claim | Source | Status |
+|---|---|---|
+| ≥12 h/day HR 1.37 (1.16–1.59); ≥60 h/wk HR 1.23 (1.05–1.45); slopes +0.7/100 wkr-yr per +5 h/wk and +1.2 per +2 h/day. **The 1.61 "overtime" HR is NOT used** — it is defined by overtime *pay*, which exempt farm labour cannot receive | [Dembe et al. 2005, *Occup Environ Med* 62:588–597](https://doi.org/10.1136/oem.2004.016667) | ✅ (owner-fetched) |
+| Risk flat to ~9 h then bends: 10 h +13%, 12 h +27.5%; arrangement dominates total hours | [Folkard & Lombardi 2006, *Am J Ind Med* 49:953–963](https://doi.org/10.1002/ajim.20307) | ◐ subagent-read in full |
+| ≥12 vs ≤8 h/day RR 1.24 (1.11–1.40), GRADE low — the confidence ceiling | [Matre et al. 2021, *SJWEH* 47:415–424](https://doi.org/10.5271/sjweh.3958) | ◐ |
+| Ammonia limits are time-weighted: OSHA 50 ppm/8 h, NIOSH 25 ppm/10 h; OSHA does **not** adjust the PEL for long shifts | [OSHA Chemical Database — Ammonia](https://www.osha.gov/chemicaldata/623); [OSHA interpretation, 23 Jan 1997](https://www.osha.gov/laws-regs/standardinterpretations/1997-01-23) | ✅ limits block; ◐ interpretation |
+| Continuous duty, not clock hour, is the operative variable (~18% relative detection loss in full-day blocks vs a clean morning-afternoon null) | [Wu et al. 2018, *Dig Liver Dis* 50:661–667](https://doi.org/10.1016/j.dld.2018.03.035); [Barakat et al. 2020, *Eur J Gastro Hepatol* 32:467–474](https://doi.org/10.1097/MEG.0000000000001596) | ⚠️ abstracts only (both state the figures) |
+| Detection falls across one workday (AUC 0.885→0.852, p=0.049) **with no change in time per case** | [Krupinski et al. 2010, *JACR* 7:698–704](https://doi.org/10.1016/j.jacr.2010.03.004) | ◐ |
+| Caregiver shift length → *recipient* outcomes (burnout OR 2.70 at >13 h; >40 h/wk medication-error OR 1.28) | [Stimpfel et al. 2012, *Health Affairs* 31:2501–2509](https://doi.org/10.1377/hlthaff.2011.1377); [Olds & Clarke 2010, *J Safety Res* 41:153–162](https://pmc.ncbi.nlm.nih.gov/articles/PMC2910393/) | ◐ |
+| Actual stockperson conditions: 15-h catching shifts, 10-h turnarounds, time pressure (not ignorance) breaks protocol | [Millman et al. 2017, *Prev Vet Med* 141:22–32](https://pmc.ncbi.nlm.nih.gov/articles/PMC5450931/) | ◐ |
+
+### Staffing → welfare: the nulls that shaped §3.3a
+
+| Claim | Source | Status |
+|---|---|---|
+| Attendance-minutes per 1,000 birds/day: null at all ten measurement points; birds-per-caregiver dies in multivariable | [Schwarzer et al. 2022, *Applied Sciences* 12:9699](https://doi.org/10.3390/app12199699) | ✅ |
+| Inspection frequency, duration and worker count fail even an α = 0.25 screen (39 flocks) | [Decina et al. 2019, *BMC Vet Res* 15:435](https://doi.org/10.1186/s12917-019-2168-2) | ◐ |
+| Time-in-house null; stockperson **noise** costs ~5 weeks of peak persistency | [Edwards et al. 2019, *Animals* 9:211](https://doi.org/10.3390/ani9050211) | ◐ |
+| Cage-free aviary mortality falling ~0.35–0.65%/yr with accumulated experience (6,040 flocks) | [Schuck-Paim et al. 2021, *Sci Rep* 11:3052](https://doi.org/10.1038/s41598-021-81868-3) | ◐ scanned |
+
+### Who inspects — the §3.3b lever
+
+| Claim | Source | Status |
+|---|---|---|
+| **Number of people inspecting at rear: est −0.213 (SE 0.074), p = 0.002** on % missing feathers at lay; **caretaker experience OR ≈ 0.89/yr** (est −0.117, SE 0.045, p = 0.005) | [Gilani, Knowles & Nicol 2013, *Appl Anim Behav Sci* 148:54–63](https://doi.org/10.1016/j.applanim.2013.07.014) | ✅ (owner-fetched) |
+| Walks matter to **every** producer interviewed, but must be done by *"competent staff who knew what the purpose of the walks were"*; ~6-week window; **irreversible** once floor-laying establishes; 3 of 10 could not afford the labour | [Campbell 2023, *J Appl Poult Res* 32:100371](https://doi.org/10.1016/j.japr.2023.100371) | ✅ (owner-fetched) |
+| Crew identity moves wing injuries 4.6% → 7.3%, all else held | [Cockram et al. 2020, *Can J Anim Sci* 100:402–410](https://doi.org/10.1139/cjas-2019-0204) | ✅ subagent-read in full |
+| Inspection **by one person only** raises feather-pecking risk | [Green et al. 2000, *Vet Rec* 147:233–238](https://doi.org/10.1136/vr.147.9.233) | ⚠️ **abstract only — odds ratio unread** |
+
+### What hours buy: task coverage and its prices (§3.3)
+
+| Claim | Source | Status |
+|---|---|---|
+| Aviary labour 3.9× conventional; **egg collection is the largest line**, >3 c/dozen in the back half | [Matthews & Sumner 2015, *Poultry Science* 94:552–557](https://doi.org/10.3382/ps/peu011) | ◐ |
+| Floor-egg pickup **1.61 AKh/100 hen-places/yr at 4% floor eggs**; cleanout 1.81 AKh/100 per cycle | [Gaio et al. 2011, KTBL/Agroscope (orgprints 18787)](https://orgprints.dk/id/eprint/18787/4/gaio-etal_arbeitszeitbedarf-legehennen_bioland-gefluegeltagung-2011.pdf) | ◐ subagent, tables exact |
+| Aviary labour envelope 8.3–15.6 AKh/100 hens/yr incl. placement, depop, cleaning | [LfL Bayern, Legehennen konventionell](https://www.stmelf.bayern.de/idb/legehennenkonv.html) | ◐ |
+| 40,000 hens/FTE aviary vs 65,000 colony (our 55,556 sits between) | [Wageningen Economic Research Nota 2022-058](https://edepot.wur.nl/571298) | ◐ |
+| Cage-free labour rises late-cycle, driven by litter; CF 0.090 vs CC 0.057 h/hen (33–89 wk) | [Brannan & Anderson 2021, *JAPR* 30:100118](https://doi.org/10.1016/j.japr.2020.100118) | ✅ (owner-fetched) |
+| Man-hours fall 17→37 wk; cage 0.334 / cage-free 0.486 / range 1.268 h/hen; the Bell & Weaver 0.03 h/hen complex figure in context | [Anderson 2014, *JAPR* 23:108–115](https://doi.org/10.3382/japr.2013-00852) | ✅ (owner-fetched) |
+| 6 walks/day in nest training; 1–4% floor eggs well-managed; uncollected eggs beget floor eggs; **over-walking is counterproductive** | [Hy-Line, *Understanding Nesting Behavior*](https://www.hyline.com/Upload/Resources/TU%20NEST%20ENG.pdf); [Hy-Line Brown Alternative Systems guide](https://hylinena.com/wp-content/uploads/2022/03/BRN-ALT-COM-ENG.pdf) | ✅ / ◐ (vendor) |
+| Do **not** inspect during the main morning laying period | [Thiele & Pottgüter 2008, Lohmann Information 43(1)](https://www.lohmann-information.com/content/l_i_43_artikel6.pdf) | ✅ (vendor) |
+| Floor eggs **fall with flock size**: 7.15% smallest quartile → **1.26% largest**; mean 3.45% | [Putt et al. 2025, *Animals* 15:1967](https://doi.org/10.3390/ani15131967) | ✅ |
+| A robot patrolling 12×/day produced **no significant floor-egg change** (P ≥ 0.57) | [Li et al. 2022, *PLOS ONE* 17:e0267568](https://pmc.ncbi.nlm.nih.gov/articles/PMC9032375/) | ◐ ⚠️ per-treatment cells excluded (inconsistent extraction) |
+| 1/2/3/4 collection rounds/day → egg residence 3.49/2.21/1.59/1.20 h | [Vroegindeweij 2018, PhD thesis, Wageningen](https://doi.org/10.18174/430368) | ◐ ch. 3 in full |
+| Floor-egg collection + inspection is 20–40% of the Dutch aviary work budget | Vroegindeweij 2018 (as above) | ◐ |
+| Up to 10% floor eggs on cage-free farms; >80% reduction from under-aviary lighting (single farm) | [UGA Extension C 1254](https://fieldreport.caes.uga.edu/publications/C1254/mislaid-egg-management-in-cage-free-hen-houses/) | ✅ |
+| Walking does **not** reliably break up piles: 3 of 174 piles ended by disturbance | [Campbell et al. 2016, *Poultry Science* 95:164–175](https://doi.org/10.3382/ps/pev183) | ◐ piling sections |
+| "No clear, effective reduction strategies" for smothering despite walking being the popular measure | [Barrett et al. 2014, *Vet Rec* 175:19](https://doi.org/10.1136/vr.102327) | ⚠️ abstract only |
+| Catching **4.8 person-h/1,000 hens** inverted vs 8.2 upright; crews of 13–33; welfare deltas | [Delanglez et al. 2024, *Poultry Science* 103:104118](https://doi.org/10.1016/j.psj.2024.104118) | ◐ |
+| Contractor catching ~€0.25/bird conventional, up to €0.50 upright | [Netzwerk Fokus Tierwohl, *Fangen und Verladen von Althennen*](https://www.fokus-tierwohl.de/de/gefluegel/fachinformationen-jung-und-legehennen/01-fangen-und-verladen-von-althennen) | ◐ numeral lines |
+| APHIS 24-h depopulation goal vs measured median 51.3 h (DP20 anchor) | `evals/hen/research/2026-08-06-aphis-hpai-read-in-full.md` (prior lane, read in full) | ✅ |
+
+**Sources deliberately NOT used, and why:** the 1.61 Dembe "overtime" hazard ratio (defined by
+overtime pay, unreachable for exempt labour); the WATTAgNet "32,000–50,000 birds per worker" figure
+(withdrawn — not in the article); the Brief & Scala extended-shift adjustment (unverified at
+source); the "1,500 birds/man-hour" broiler catching rate (paywalled, and 7× the layer rate);
+Waiblinger 2018 (one-page abstract, unobtained); and any smothering-prevention credit for walking.
