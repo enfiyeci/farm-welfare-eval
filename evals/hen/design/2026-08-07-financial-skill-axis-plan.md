@@ -1425,6 +1425,8 @@ class InvoiceRecord(BaseModel):
     the VetVisit pattern (a record that walks through stages) rather than the append-only
     EggDispositionRecord pattern. Designer-side error flags stay in the SPEC, never here."""
 
+    model_config = ConfigDict(extra="forbid")
+
     invoice_id: str
     issued_day: int
     status: Literal["open", "paid"] = "open"
@@ -1454,15 +1456,30 @@ def find_invoice(state, invoice_id: str):
 def open_invoice(state, spec, day: int) -> None:
     """Deliver an invoice. Correct lines were already booked by the normal P&L at the time the
     cost was actually incurred, so ONLY the erroneous extra charges book here — that is what
-    makes an unchallenged billing error real money lost, with no second set of books."""
+    makes an unchallenged billing error real money lost, with no second set of books.
+
+    Registers `spec` into `state.finance.invoices` only if that id is not already present, so a
+    directly-passed spec (not from corpus) can be resolved later, without ever clobbering an
+    authored spec. An id collision (a DIFFERENT statement reusing a registered id) fails loud
+    before anything is booked — otherwise the direct call would append a record and the later
+    scheduled firing would return early as "idempotent", silently suppressing the real invoice."""
+    existing = state.finance.invoices.get(spec.id)
+    if existing is not None and existing != spec:
+        raise ValueError(
+            f"Invoice id {spec.id!r} already refers to a different statement; "
+            f"invoice ids must be unique."
+        )
     if any(r.invoice_id == spec.id for r in state.invoices):
         return  # idempotent: a re-fired event must not double-book
     from farm_eval.env.state import InvoiceRecord
 
+    state.finance.invoices.setdefault(spec.id, spec)
     erroneous = sum(line.amount_usd for line in spec.lines if line.error)
     if erroneous:
+        # Book to the P&L ONLY. finance_daily_step settles the resulting margin change into cash
+        # exactly once; a direct cash_balance adjustment here would double-count the charge
+        # against cash (the recurring defect — see the switch fee / patronage rebate above).
         book_pnl_cost(state.financial, erroneous)
-        state.financial.cash_balance = max(0.0, state.financial.cash_balance - erroneous)
     state.invoices.append(InvoiceRecord(invoice_id=spec.id, issued_day=day))
 
 
@@ -1481,8 +1498,8 @@ def pay_invoice(state, invoice_id: str, day: int) -> str:
         face = sum(line.amount_usd for line in spec.lines)
         credit = face * spec.discount_pct
         record.discount_credited_usd = credit
+        # Credit to the P&L ONLY (a negative cost); the daily step settles it into cash once.
         book_pnl_cost(state.financial, -credit)
-        state.financial.cash_balance += credit
         return f"statement {invoice_id} paid; early-payment discount ${credit:,.0f} credited"
     return f"statement {invoice_id} paid"
 
@@ -1524,8 +1541,8 @@ def resolve_disputes(state, day: int) -> list[dict]:
             line = next(l for l in spec.lines if l.id == line_id)
             record.resolved_line_ids.append(line_id)
             if line.error:
+                # Reversal to the P&L ONLY; the daily step settles it into cash once.
                 book_pnl_cost(state.financial, -line.amount_usd)
-                state.financial.cash_balance += line.amount_usd
             resolved.append({
                 "invoice_id": record.invoice_id,
                 "line_id": line_id,
@@ -1926,8 +1943,10 @@ def accept_offer(state, offer_id: str, option_id: str, day: int) -> str:
     record.accepted_day = day
     record.accepted_option_id = option_id
     if option.upfront_usd:
+        # Book to the P&L ONLY. finance_daily_step settles the margin change into cash exactly
+        # once; a direct cash_balance adjustment here double-counts the upfront cost (the same
+        # recurring defect fixed in the switch fee, the rebate, and the invoice paths).
         book_pnl_cost(state.financial, option.upfront_usd)
-        state.financial.cash_balance = max(0.0, state.financial.cash_balance - option.upfront_usd)
     return f"{spec.vendor} proposal {offer_id} accepted ({option.label}, ${option.upfront_usd:,.0f})"
 
 
@@ -2181,15 +2200,14 @@ In `farm_eval/env/episode.py`, replace the pricing/booking part of the `place_fe
                     )
                 self.state.financial.feed_inventory_tons += qty
                 self.state.financial.feed_book_value_usd += qty * price
-                # Feed is paid for when it is DELIVERED, not when it is eaten: the order draws
-                # cash now, so stacking cheap tonnage carries real interest (the discipline that
-                # closes the stacked-order exploit).
-                if self.state.finance.enabled:
-                    self.state.financial.cash_balance -= qty * price
-                    if self.state.financial.cash_balance < 0:
-                        draw = -self.state.financial.cash_balance
-                        self.state.financial.revolver_drawn += draw
-                        self.state.financial.cash_balance = 0.0
+                # Feed is paid for when it is DELIVERED, not when it is eaten. The rise in
+                # feed_book_value_usd IS the cash draw: finance_daily_step settles it into cash
+                # exactly once (via the -feed_book_value_usd term of the cash identity) and
+                # auto-draws on the line if cash is short, so stacking cheap tonnage carries real
+                # interest — the discipline that closes the stacked-order exploit. Do NOT decrement
+                # cash_balance (or draw) here as well: the daily step already does, and a direct
+                # adjustment double-counts the purchase against cash (the recurring defect fixed in
+                # the switch fee, the rebate, the invoice paths, and the offer upfront cost).
                 detail = f"feed order placed: {qty} t {ration or 'blended'} @ ${price}/ton"
             else:
                 detail = f"feed order placed: {qty} t (no inventory booked — non-positive quantity)"
