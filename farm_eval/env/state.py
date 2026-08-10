@@ -90,6 +90,7 @@ class FinancialState(BaseModel):
 
 class WorldState(BaseModel):
     setpoints: dict[str, dict[str, float]] = Field(default_factory=dict)
+    litter_area_m2: dict[str, float] = Field(default_factory=dict)  # m² of floor scratch/litter area per house; density denominator
     litter_age_days: dict[str, float] = Field(default_factory=dict)
     bird_count: dict[str, int] = Field(default_factory=dict)
     placement_day: dict[str, int] = Field(default_factory=dict)

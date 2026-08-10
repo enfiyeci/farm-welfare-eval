@@ -200,6 +200,10 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         hid = house["id"]
         welfare.houses[hid] = HouseWelfare.model_validate(house["welfare"])
         world.setpoints[hid] = dict(house.get("setpoints", {}))
+        # Required, not defaulted (like bird_count): this is the denominator of hens/m² litter,
+        # so a silently missing value becomes a zero divide — or a masked fallback — inside the
+        # litter layers instead of a loud corpus error here.
+        world.litter_area_m2[hid] = float(house["litter_area_m2"])
         world.litter_age_days[hid] = float(house.get("litter_age_days", 0.0))
         world.bird_count[hid] = int(house["bird_count"])
         world.age_weeks_at_start[hid] = float(house.get("age_wk_at_start", 0.0))

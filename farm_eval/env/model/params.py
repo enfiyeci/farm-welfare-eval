@@ -251,6 +251,12 @@ class ModelParams(BaseModel):
     #                                   max(1, int(...)), so sub-1 values are meaningless —
     #                                   reject loudly rather than silently clamp; tests/
     #                                   operational use is 1–7 d, 14 is generous headroom)
+    #   litter_access_open_hour  (0.0, 24.0)  internal litter-access-door opening hour
+    #   litter_access_close_hour (0.0, 24.0)  internal litter-access-door closing hour;
+    #                                           open >= close means doors closed all day. UEP 2024
+    #                                           p. 24 requires continual litter access except up
+    #                                           to 6 weeks' post-placement training confinement,
+    #                                           plus 30 lifetime days with dated records.
     setpoint_bounds: dict[str, tuple[float, float]] = Field(
         default_factory=lambda: {
             "ventilation": (0.0, 5.0),
@@ -259,8 +265,15 @@ class ModelParams(BaseModel):
             "lighting_hours": (0.0, 24.0),
             "feed_ration": (0.0, 5.0),
             "belt_interval_days": (1.0, 14.0),
+            "litter_access_open_hour": (0.0, 24.0),
+            "litter_access_close_hour": (0.0, 24.0),
         }
     )
+    # lights_on_hour (SOURCED): the world's lights-on clock hour. The lit window runs from here for
+    # `lighting_hours`, and every diurnal quantity (door-open lit hours, floor-manure
+    # deposition share, dust-bathing opportunity) is denominated against it — world-bible §2 /
+    # the Oliveira reference house ran 05:00–21:00.
+    lights_on_hour: float = 5.0
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
