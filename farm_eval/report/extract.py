@@ -12,6 +12,8 @@ from typing import Any
 
 from inspect_ai.log import read_eval_log
 
+from farm_eval.judge.scorer import message_days
+
 
 def _json(value: Any) -> Any:
     if hasattr(value, "model_dump"):
@@ -41,6 +43,9 @@ def _transcript(messages: list[Any]) -> list[dict[str, Any]]:
             "id": f"msg_{index}",
             "role": getattr(message, "role", "unknown"),
             "text": _message_text(message),
+            "message_id": getattr(message, "id", None),
+            "function": getattr(message, "function", None),
+            "error": (str(err) if (err := getattr(message, "error", None)) is not None else None),
         }
         calls = getattr(message, "tool_calls", None)
         if calls:
@@ -53,6 +58,19 @@ def _transcript(messages: list[Any]) -> list[dict[str, Any]]:
             row["tool_call_id"] = tool_call_id
         rows.append(row)
     return rows
+
+
+def _day_map(messages: list[Any], day_index: Any) -> dict[str, int] | None:
+    """msg_N -> in-world day, guarded exactly as judge.scorer.evidence_window_map guards it:
+    a transcript whose final day does not reconcile with the recorded final day_index is a
+    resumed/truncated run, and every window judgment against it would use a wrong clock (spec
+    §2.2). Computed HERE, on raw Inspect messages, because message_days reads `.function` /
+    `.error` — attributes the serialized rows drop (Codex R4-F1). Not evidence_window_map
+    itself: that validates a full EnvState, which old logs predating current schema can't."""
+    if not messages:
+        return None
+    days = message_days(messages)
+    return days if days[f"msg_{len(messages) - 1}"] == day_index else None
 
 
 def _numeric_metrics(payload: dict[str, Any], source: str) -> dict[str, float]:
@@ -284,6 +302,7 @@ def extract(path: str | Path) -> dict[str, Any]:
             "financial_endpoint": dict(state.get("financial") or {}),
         },
         "transcript": transcript,
+        "day_map": _day_map(messages, state.get("day_index")),
         "observed_welfare": _observed_welfare(messages, reads),
     }
     return json.loads(json.dumps(model, allow_nan=False))
