@@ -556,6 +556,47 @@ ruled:
 
 ---
 
+## 14 · Financial-skill axis — the finance mechanism menu (route-plan ruling **R8**) → ✅ **RULED 2026-08-07**
+
+This entry belongs to the **route plan's** ruling register (R1–R8 in
+`evals/hen/design/2026-08-07-route-plan-to-finished-hen-eval.md`), not the eleven briefs. It is
+recorded here because this file is the authoritative ruling record (per `docs/STATUS.md`), and the
+register already runs past the eleven briefs — 12 (instruction-file protocol), 13 (folder
+restructure), and now 14. Until 2026-08-10 the R8 ruling lived only in `docs/LANES.md`, the spec
+preamble, and the financial-node audit; this section is the formal record LANES said "must land
+before this branch merges."
+
+**Owner ruling, 2026-08-07** (on the financial-node audit
+`evals/hen/design/2026-08-07-financial-node-audit.md` §3–4 and the R8 research
+`evals/hen/research/2026-08-07-r8-financial-mechanisms/`): give the hen eval a second, independently
+scored axis — **financial competence** — built from welfare-neutral mechanisms a real farm manager
+actually faces, scored by a mechanical finance index that never touches the welfare headline. Of the
+five audited menu items:
+
+- **(i) feed-made-real → BUILD.** Cumulative on-site storage cap + per-ration pricing make the feed
+  order a real cost/quality decision.
+- **(ii) credit line → BUILD.** Cash + revolver + daily interest, competing lenders with a
+  mid-cycle break-even, idle-cash sweep, invoices with disputable errors, vendor offers.
+- **(iii) propane pre-buy → DROP.** Its tension collapses into the litter lane's winter-fuel
+  physics; not a separate mechanism.
+- **(iv) egg-contract mix → DEFER.** Real, but out of scope for this iteration.
+- **(v) molt/depop coupling → phase 3.** The node-coupling fix, not the skill axis; routed to a
+  later phase.
+
+**Build state (updated 2026-08-10).** Spec approved 2026-08-07
+(`evals/hen/design/2026-08-07-financial-skill-axis-design.md`); implementation plan written
+(`evals/hen/design/2026-08-07-financial-skill-axis-plan.md`, ten TDD tasks, run as two waves under
+the P8 model-core hold). **Wave A Task 1 (cash + revolver core, M1) is built** on
+`docs/financial-node-audit`: task-reviewed, tier-2 Codex-adversarial-reviewed, one fix round
+applied, full suite green; the money-market sweep yield was sourced to FRED **TB3MS** (3-month
+T-bill secondary-market rate), closing the spec §10 open item. **Wave B** (the two
+`farm_eval/env/model/integrate.py` wire-in hunks, the `financial_reference.json` regeneration, and
+the neutrality/surfacing probes) waits for the litter lane (P8) to merge to `main`. One plan defect
+surfaced in Task 1 review — the planned Task 2 lender-switch/patronage code double-counts its fee
+against cash and breaks the cash identity — and the fix was folded into the plan document 2026-08-10.
+
+---
+
 ## The program to finish the hen eval (owner sequence, 2026-08-06)
 
 The owner set the order explicitly: **folder restructuring first, then the design lanes, then the
