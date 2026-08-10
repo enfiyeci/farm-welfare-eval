@@ -138,3 +138,81 @@ These are real negatives, reported as such:
 **Blocked routes, for the record:** MDPI blocks command-line fetches (worked around via the browser, legitimately). ScienceDirect served a CAPTCHA, not attempted. CORE's search returned 403; Warwick's repository search returned no response. No ResearchGate author copies or routes of uncertain legality were used.
 
 **Justification for PARTIALLY FILLED:** one peer-reviewed study (Schwarzer et al. 2022) delivers exactly the requested quantity — stockperson attendance-minutes per 1,000 birds per day and birds-per-caregiver, regressed against a scored welfare outcome on 16 commercial aviary farms, with reportable effect sizes — and a second (Decina et al. 2019) delivers a clean, well-specified negative on inspection frequency, duration and worker count. But no source reachable reports a confidence interval on any stockperson effect, no source links staffing to mortality, and the single most on-target finding — Green et al. 2000's elevated feather-pecking risk when one person inspects the flock — remains behind a paywall with its odds ratio unread.
+
+---
+
+## Addendum — Gilani et al. 2013 obtained and read in full (2026-08-07, orchestrator)
+
+The owner fetched the paper the prior pass could not reach. It is **the strongest quantified
+human-factor result in this whole corpus**, and it upgrades §6's point 2 from "signal" to "effect
+size."
+
+**[Gilani A-M, Knowles TG, Nicol CJ (2013). The effect of rearing environment on feather pecking in
+young and adult laying hens. *Applied Animal Behaviour Science* 148:54–63.](https://doi.org/10.1016/j.applanim.2013.07.014)**
+Source PDF: `sources/gilani-2013-rearing-factors-feather-pecking.pdf`. **Read end to end by the
+orchestrator** (10 pp., all seven model tables).
+
+**Design.** Longitudinal, 34 flocks from 29 rearing farms in England, Wales and Scotland, visited at
+~1, 8, 16 weeks (rear) and ~35 weeks (lay) — 133 farm visits, 2009–2011. 180 candidate variables;
+multilevel models in MLwiN (visits within flocks within farms). Mean rearing flock 6,548
+(282–38,822). 12 of 34 flocks beak-trimmed.
+
+**Finding 1 — number of people inspecting (Table 6, bottom).** Outcome: percentage of the flock with
+missing feathers **at lay (35 wk)**, arcsine-square-root transformed.
+
+| Variable | Mean (range) | Estimate (SE) | P | N |
+|---|---|---|---|---|
+| **Number of people inspecting at rear** | **2.2 (1–6)** | **−0.213 (0.074)** | **0.002** | 32 |
+| Average sound level at 16 wk (dB) | 58.3 (32–66) | +0.021 (0.008) | 0.004 | 32 |
+| Age (days) | 254.9 | +0.009 (0.003) | 0.001 | 32 |
+| Feather pecking started at 16 wk: No (ref = Yes) | — | −0.457 (0.138) | 0.0005 | 27 |
+| Constant | — | 1.162 (0.135) | <0.0001 | 32 |
+
+⚠️ **Back-transformation is the orchestrator's arithmetic, not the paper's.** Taking a flock where
+pecking had NOT started by 16 wk (1.162 − 0.457 = 0.705 rad) at otherwise mean values, and moving
+only the inspector count from its 2.2 mean:
+
+| People inspecting at rear | Predicted % of flock with missing feathers at lay |
+|---|---|
+| 1 | ~67% |
+| 2 | ~46% |
+| 3 | ~26% |
+| 4 | ~10% |
+
+Sanity check on the transformation: the model's own constant implies ~84% for a
+pecking-already-started flock and ~42% for one where it had not, against a study-wide mean of 49%
+across 27 "no" and 5 "yes" flocks — consistent. **Going from one inspector to three is associated
+with missing-feather prevalence falling from roughly two-thirds of the flock to about a quarter.**
+Observational, n = 32 flocks, single study — but this is the largest human-factor effect anywhere
+in the corpus, and it concerns **how many people look**, not how long anyone stays.
+
+**Finding 2 — caretaker experience (Table 4).** Outcome: probability of severe feather pecking
+during rear (binary logistic, N = 99 visits).
+
+| Variable | Mean (range) | Estimate (SE) | P |
+|---|---|---|---|
+| **Experience of chicks' main caretaker (years)** | **11.9 (0–40)** | **−0.117 (0.045)** | **0.005** |
+| Light (h/day) | 14.8 (9.8–24) | −0.267 (0.088) | 0.001 |
+| Foraging (% of observed birds) | 18.1 | −0.125 (0.040) | 0.0009 |
+| Lowest ceiling height (m) | 2.0 | −1.706 (0.728) | 0.009 |
+| Number of diet changes at rear | 1.7 (1–3) | +4.131 (1.196) | 0.0003 |
+
+⚠️ Orchestrator's arithmetic: **OR ≈ 0.89 per additional year of caretaker experience**
+(exp(−0.117)); 95% CI on the estimate −0.205 to −0.029 → **OR 0.82 to 0.97 per year**. A caretaker
+with 10 years' experience versus a novice: **OR ≈ 0.31**, a ~69% reduction in the odds of severe
+feather pecking. (Note the same table's diet-change term: the paper states the probability of SFP
+"decreased 64 times when flocks were subjected to one less diet change" — context for how large the
+non-human effects in this model are.)
+
+**Finding 3 — the authors' own reading, verbatim:** *"The percentage of birds with missing feathers
+at 35 weeks further decreased when more people inspected the birds during rear. For adult laying
+hens, Green et al. (2000) also found that feather pecking increased when the birds were inspected by
+one person only. These effects might be inter-related. Two people are likely to know more than one
+and therefore problems would be spotted and fixed earlier than when only one person looks after the
+birds. Habituating the birds to several people should also make them less susceptible to stress."*
+
+**Net effect on §6:** point 2 ("the positive signals are about *who* and *how*, not *how long*") is
+now carried by a quantified, peer-reviewed, multi-farm effect rather than by an unread abstract. It
+does **not** disturb the null results on attendance time — Gilani measured neither hours nor
+staffing ratio. The two findings are compatible and jointly say: **more independent, more
+experienced observers matter; more minutes from the same person do not.**
