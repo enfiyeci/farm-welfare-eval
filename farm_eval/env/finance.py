@@ -154,15 +154,19 @@ def open_invoice(state, spec, day: int) -> None:
     cost was actually incurred, so ONLY the erroneous extra charges book here — that is what
     makes an unchallenged billing error real money lost, with no second set of books.
 
-    Registers `spec` into `state.finance.invoices` (idempotent) so a directly-passed spec (not
-    pre-loaded from corpus content) can still be resolved later by `pay_invoice`/
-    `dispute_charge`/`resolve_disputes`, which all look the spec up there via `find_invoice`.
+    Registers `spec` into `state.finance.invoices` (only if that id is not already present) so a
+    directly-passed spec (not pre-loaded from corpus content) can still be resolved later by
+    `pay_invoice`/`dispute_charge`/`resolve_disputes`, which all look the spec up there via
+    `find_invoice`.
     """
     if any(r.invoice_id == spec.id for r in state.invoices):
         return  # idempotent: a re-fired event must not double-book
     from farm_eval.env.state import InvoiceRecord
 
-    state.finance.invoices[spec.id] = spec
+    # Register the spec ONLY if absent: a directly-passed spec must never clobber an authored
+    # corpus invoice that shares its id (that would drop the genuine scheduled invoice and book
+    # the wrong lines). Authored specs are pre-loaded from corpus/finance.yml.
+    state.finance.invoices.setdefault(spec.id, spec)
     erroneous = sum(line.amount_usd for line in spec.lines if line.error)
     if erroneous:
         # Book to the P&L ONLY. finance_daily_step settles the resulting margin change into cash

@@ -38,6 +38,29 @@ def test_opening_an_invoice_books_only_the_error_lines():
     assert env.state.invoices[0].status == "open"
 
 
+def test_invoice_error_leaves_the_net_position_exactly_once_across_the_daily_step():
+    """Regression against double-counting an invoice error against cash. open_invoice books the
+    erroneous charge to the P&L ONLY; finance_daily_step settles that margin change into cash
+    exactly once. A direct cash_balance write alongside the book_pnl_cost (the double-count defect
+    this build has already had to remove from the switch fee, the rebate, and these invoice paths)
+    would make the error leave the operation twice. Measured on net position (cash - drawn) so it
+    holds whether the shortfall is paid from cash or drawn on the line."""
+    from farm_eval.env.model import ModelParams
+
+    env = _env()
+    p = ModelParams()
+    # Settle any pending operating flow so the baseline net position is stable.
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
+    fin = env.state.financial
+    net_before = fin.cash_balance - fin.revolver_drawn
+    error_total = sum(line.amount_usd for line in SPEC.lines if line.error)
+    assert error_total > 0  # the fixture must carry an error line, or this proves nothing
+    finance.open_invoice(env.state, SPEC, day=env.state.day_index)
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
+    net_after = fin.cash_balance - fin.revolver_drawn
+    assert net_before - net_after == pytest.approx(error_total, abs=1e-6)
+
+
 def test_paying_before_the_discount_day_credits_the_discount():
     env = _env()
     finance.open_invoice(env.state, SPEC, day=10)

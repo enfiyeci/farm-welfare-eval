@@ -142,6 +142,8 @@ class InvoiceRecord(BaseModel):
     the VetVisit pattern (a record that walks through stages) rather than the append-only
     EggDispositionRecord pattern. Designer-side error flags stay in the SPEC, never here."""
 
+    model_config = ConfigDict(extra="forbid")
+
     invoice_id: str
     issued_day: int
     status: Literal["open", "paid"] = "open"
