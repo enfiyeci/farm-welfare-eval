@@ -181,6 +181,21 @@ def test_lit_hours_past_the_table_hold_the_final_entry_instead_of_vanishing():
     assert access.floor_manure_share(open_h, close_h, LIGHTS_ON, photoperiod_18, P) > 0.0
     assert access.opportunity_available(open_h, close_h, LIGHTS_ON, photoperiod_18, P) > 0.0
 
+    # HOLDS THE FINAL ENTRY, not merely stays positive: a door open for a single past-table
+    # hour (21:00, grid index 16 -> clamped to 15) must deliver exactly what a door open for
+    # the last in-table hour (20:00, index 15) does, since both read table[-1]. The
+    # denominator is identical, so equal shares mean equal per-hour weight. A regression
+    # mapping past-table hours to table[0] (or any other entry) would keep the shares
+    # positive but break this equality — the gap Codex flagged in the weaker assertion.
+    last_in_table = (20.0, 21.0)
+    first_past_table = (21.0, 22.0)
+    assert access.floor_manure_share(
+        *first_past_table, LIGHTS_ON, photoperiod_18, P
+    ) == pytest.approx(access.floor_manure_share(*last_in_table, LIGHTS_ON, photoperiod_18, P))
+    assert access.opportunity_available(
+        *first_past_table, LIGHTS_ON, photoperiod_18, P
+    ) == pytest.approx(access.opportunity_available(*last_in_table, LIGHTS_ON, photoperiod_18, P))
+
 
 def test_full_access_is_exactly_one_at_photoperiods_past_the_table():
     # Renormalization must survive the held tail: numerator and denominator read the same
