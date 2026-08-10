@@ -41,10 +41,18 @@ lenders:
     switch_fee_usd: 0             # [invented] no switch fee on this line
     patronage_rebate_frac: 0.0    # [invented] no patronage on this line
 
-# Money-market sweep yield. [invented] — ILLUSTRATIVE placeholder values pending one
-# primary-source pull (spec §10 open item); NOT yet sourced. The validator in
-# farm_eval/env/finance.py asserts it never exceeds the cheapest lender rate.
+# Money-market sweep yield (annual decimals, carried forward like the lender series above).
+# [sourced] FRED series TB3MS "3-Month Treasury Bill Secondary Market Rate, Discount Basis"
+# (Board of Governors of the Federal Reserve System, H.15), monthly averages, retrieved
+# 2026-08-10 for the in-world window. Used as the money-market-sweep benchmark: money-market
+# fund net yields track just below the 3-month T-bill, so this is a slightly conservative
+# (never-understated) proxy. Monthly values read at source: 2025-06 4.23, 2025-09 3.92,
+# 2025-12 3.59, 2026-03 3.61, 2026-06 3.66 (percent). The validator in
+# farm_eval/env/finance.py asserts it never exceeds the cheapest lender rate (7.08%) — it does
+# not, so repay-before-sweep stays the correct move on every in-world day.
 money_market_yield:
-  "2025-06": 0.0435
-  "2025-12": 0.0447
-  "2026-06": 0.0431
+  "2025-06": 0.0423
+  "2025-09": 0.0392
+  "2025-12": 0.0359
+  "2026-03": 0.0361
+  "2026-06": 0.0366
