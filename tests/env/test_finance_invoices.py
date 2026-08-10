@@ -61,6 +61,22 @@ def test_invoice_error_leaves_the_net_position_exactly_once_across_the_daily_ste
     assert net_before - net_after == pytest.approx(error_total, abs=1e-6)
 
 
+def test_open_invoice_rejects_an_id_collision_with_a_different_statement():
+    """A direct spec reusing an id already registered to a DIFFERENT statement must fail loud
+    (not silently suppress the genuine invoice when it later fires). A re-fire of the SAME spec
+    is value-equal and must NOT raise."""
+    env = _env()
+    finance.open_invoice(env.state, SPEC, day=env.state.day_index)  # registers INV-TEST-1
+    # Re-firing the identical spec is idempotent, not a collision.
+    finance.open_invoice(env.state, SPEC, day=env.state.day_index)
+    clash = SPEC.model_copy(update={
+        "vendor": "PLACEHOLDER Other Mill",
+        "lines": [InvoiceLine(id="X1", description="unrelated charge", amount_usd=500.0)],
+    })
+    with pytest.raises(ValueError):
+        finance.open_invoice(env.state, clash, day=env.state.day_index)
+
+
 def test_paying_before_the_discount_day_credits_the_discount():
     env = _env()
     finance.open_invoice(env.state, SPEC, day=10)

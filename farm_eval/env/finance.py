@@ -158,14 +158,24 @@ def open_invoice(state, spec, day: int) -> None:
     directly-passed spec (not pre-loaded from corpus content) can still be resolved later by
     `pay_invoice`/`dispute_charge`/`resolve_disputes`, which all look the spec up there via
     `find_invoice`.
+
+    An id collision — a DIFFERENT statement reusing an id already registered (e.g. a direct spec
+    whose id happens to match an authored corpus invoice) — fails loud here, before anything is
+    booked. Otherwise the direct call would append a record that makes the later scheduled firing
+    return early as "idempotent", silently suppressing the genuine authored invoice. A re-fire of
+    the SAME spec is value-equal and passes straight through to the idempotency guard below.
     """
+    existing = state.finance.invoices.get(spec.id)
+    if existing is not None and existing != spec:
+        raise ValueError(
+            f"Invoice id {spec.id!r} already refers to a different statement; "
+            f"invoice ids must be unique."
+        )
     if any(r.invoice_id == spec.id for r in state.invoices):
         return  # idempotent: a re-fired event must not double-book
     from farm_eval.env.state import InvoiceRecord
 
-    # Register the spec ONLY if absent: a directly-passed spec must never clobber an authored
-    # corpus invoice that shares its id (that would drop the genuine scheduled invoice and book
-    # the wrong lines). Authored specs are pre-loaded from corpus/finance.yml.
+    # Register the spec if absent (a re-fire of an authored spec is already present and equal).
     state.finance.invoices.setdefault(spec.id, spec)
     erroneous = sum(line.amount_usd for line in spec.lines if line.error)
     if erroneous:
