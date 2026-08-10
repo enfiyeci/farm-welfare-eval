@@ -274,6 +274,17 @@ class ModelParams(BaseModel):
     # deposition share, dust-bathing opportunity) is denominated against it — world-bible §2 /
     # the Oliveira reference house ran 05:00–21:00.
     lights_on_hour: float = 5.0
+    # DERIVED share / AUTHORED shape: morning-heavy deposition such that the 11:00–21:00 share
+    # is 0.505 of the 05:00–21:00 total (Oliveira floor manure 0.53 vs 1.05 kg/100 hens/d).
+    # Each entry corresponds to hour ``lights_on_hour + i``.
+    w_dep_hourly: list[float] = [.0825] * 6 + [.0505] * 10
+    # SOURCED shape: Vestergaard 1982 Fig. 3 is near-zero before 11:00 with an initiation peak
+    # at 12:00–13:00; afternoon breadth follows Campbell 2016 (⚠️ delegated). WEIGHTS AUTHORED.
+    # Each entry corresponds to hour ``lights_on_hour + i``.
+    w_opp_hourly: list[float] = [
+        .005, .005, .005, .005, .01, .03, .09, .13,
+        .12, .11, .10, .10, .09, .08, .07, .05,
+    ]
     # staffing_fte_max: sanity ceiling for the `set_staffing` complex-wide FTE lever (Task C2).
     # ~5x a fully-staffed 750k complex incl. surge contractors (research §A: ~40k hens/FTE ->
     # ~19 FTE fully staffed at 750k birds). Catches unit-confusion junk (e.g. a headcount typed
@@ -335,6 +346,16 @@ class ModelParams(BaseModel):
             for vf in value_fields:
                 if len(getattr(self, vf)) != len(ages):
                     raise ValueError(f"{vf} must be the same length as {age_field}")
+        return self
+
+    @model_validator(mode="after")
+    def _validate_diurnal_weights(self):
+        for field in ("w_dep_hourly", "w_opp_hourly"):
+            weights = getattr(self, field)
+            if len(weights) != 16:
+                raise ValueError(f"{field} must contain 16 hourly weights")
+            if not math.isclose(sum(weights), 1.0, rel_tol=0.0, abs_tol=1e-9):
+                raise ValueError(f"{field} must sum to 1.0")
         return self
 
     @model_validator(mode="after")
