@@ -722,6 +722,29 @@ def test_switching_lender_books_the_switch_fee_and_records_the_day():
     assert env.state.lender.switch_days == [env.state.day_index]
 
 
+def test_switch_fee_leaves_the_net_position_exactly_once_across_the_daily_step():
+    """Regression against double-counting the switch fee. select_lender books the fee to the P&L
+    ONLY; finance_daily_step settles that margin change into cash exactly once. If select_lender
+    also adjusted cash directly, the next daily step would re-settle the same margin drop and the
+    fee would leave the operation twice — breaking the cash identity. Measured on net position
+    (cash - drawn) so it holds whether the fee is paid from cash or drawn on the line."""
+    from farm_eval.env.model import ModelParams
+
+    env = _env()
+    p = ModelParams()
+    # Settle any pending operating flow so the baseline net position is stable.
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
+    fin = env.state.financial
+    net_before = fin.cash_balance - fin.revolver_drawn
+    target = next(lid for lid in env.state.finance.lenders if lid != env.state.lender.active_lender_id)
+    fee = env.state.finance.lenders[env.state.lender.active_lender_id].switch_fee_usd
+    assert fee > 0  # the default (outgoing) lender charges a switch fee, or this proves nothing
+    env.apply_action("set_financing", {"action": "select_lender", "lender_id": target})
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
+    net_after = fin.cash_balance - fin.revolver_drawn
+    assert net_before - net_after == pytest.approx(fee, abs=1e-6)
+
+
 def test_switching_to_an_unknown_lender_is_rejected_in_world():
     env = _env()
     before = env.state.lender.active_lender_id
@@ -821,8 +844,11 @@ def select_lender(state, lender_id: str, day: int) -> str:
     state.lender.switch_days.append(day)
     if fee:
         state.lender.switch_fees_cum += fee
+        # Book the fee to the P&L ONLY. finance_daily_step settles the resulting margin change
+        # into cash exactly once (drawing on the line if cash is short). Do NOT also subtract the
+        # fee from cash_balance here: the next daily step re-settles the margin drop, so a direct
+        # adjustment double-counts the fee against cash and breaks the load-bearing cash identity.
         book_pnl_cost(state.financial, fee)
-        state.financial.cash_balance = max(0.0, state.financial.cash_balance - fee)
     incoming = state.finance.lenders[lender_id]
     rate = annual_rate_for_day(incoming, state.start_date, day)
     return f"operating line moved to {incoming.name} at {rate * 100:.2f}% (switch fee ${fee:,.0f})"
@@ -854,8 +880,10 @@ def apply_patronage_rebate(state) -> float:
     if credited <= 0:
         return 0.0
     state.lender.patronage_rebate_cum += credited
+    # Credit the rebate to the P&L ONLY (a negative cost). finance_daily_step settles it into cash
+    # exactly once; adding it to cash_balance here as well would credit the rebate twice and break
+    # the cash identity (same double-count as the switch fee above).
     book_pnl_cost(state.financial, -credited)
-    state.financial.cash_balance += credited
     return credited
 ```
 
