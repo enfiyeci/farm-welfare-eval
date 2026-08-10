@@ -93,3 +93,60 @@ def finance_daily_step(state, params, finance_cfg: FinanceConfig, day: int) -> N
         draw = -fin.cash_balance
         fin.revolver_drawn += draw
         fin.cash_balance = 0.0
+
+
+def select_lender(state, lender_id: str, day: int) -> str:
+    """Switch the operating line to `lender_id`, booking the OUTGOING lender's switch fee at the
+    moment of the switch. Raises ValueError on an unknown id or a no-op re-selection — the caller
+    turns that into an in-world rejection."""
+    if lender_id not in state.finance.lenders:
+        raise ValueError(f"No operating line is available from {lender_id!r}.")
+    if lender_id == state.lender.active_lender_id:
+        raise ValueError(f"The operating line is already with {lender_id!r}.")
+    outgoing = active_lender(state)
+    fee = outgoing.switch_fee_usd if outgoing is not None else 0.0
+    state.lender.active_lender_id = lender_id
+    state.lender.switch_days.append(day)
+    if fee:
+        state.lender.switch_fees_cum += fee
+        # Book the fee to the P&L ONLY. finance_daily_step settles the resulting margin change
+        # into cash exactly once (drawing on the line if cash is short). Do NOT also subtract the
+        # fee from cash_balance here: the next daily step re-settles the margin drop, so a direct
+        # adjustment double-counts the fee against cash and breaks the load-bearing cash identity.
+        book_pnl_cost(state.financial, fee)
+    incoming = state.finance.lenders[lender_id]
+    rate = annual_rate_for_day(incoming, state.start_date, day)
+    return f"operating line moved to {incoming.name} at {rate * 100:.2f}% (switch fee ${fee:,.0f})"
+
+
+def repay(state, amount: float) -> str:
+    """Pay down the drawn balance from cash on hand. Clamped to both cash and the balance — an
+    over-large request pays what it can rather than failing, the way a real payment does. Raises
+    ValueError on a non-positive / non-finite amount."""
+    import math
+
+    if not math.isfinite(amount) or amount <= 0:
+        raise ValueError("Repayment amount must be a positive number of dollars.")
+    fin = state.financial
+    paid = min(amount, fin.cash_balance, fin.revolver_drawn)
+    fin.cash_balance -= paid
+    fin.revolver_drawn -= paid
+    return f"paid down ${paid:,.0f}; line balance now ${fin.revolver_drawn:,.0f}"
+
+
+def apply_patronage_rebate(state) -> float:
+    """Credit the active lender's year-end patronage rebate as a share of interest paid to date,
+    net of any rebate already credited. Returns the dollars credited (0.0 if none apply)."""
+    lender = active_lender(state)
+    if lender is None or not lender.patronage_rebate_frac:
+        return 0.0
+    earned = state.financial.interest_paid_cum * lender.patronage_rebate_frac
+    credited = earned - state.lender.patronage_rebate_cum
+    if credited <= 0:
+        return 0.0
+    state.lender.patronage_rebate_cum += credited
+    # Credit the rebate to the P&L ONLY (a negative cost). finance_daily_step settles it into cash
+    # exactly once; adding it to cash_balance here as well would credit the rebate twice and break
+    # the cash identity (same double-count as the switch fee above).
+    book_pnl_cost(state.financial, -credited)
+    return credited

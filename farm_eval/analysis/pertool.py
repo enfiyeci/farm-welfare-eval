@@ -1,7 +1,7 @@
 """Per-tool behaviour profiles (design §3.4): one row per roster tool, aggregating call counts,
 timing, house coverage, feed-sourced cost/error, and the strong/ambient/off-node partition.
 
-`TOOL_ROSTER` is the 17 `all_tools()` registry names plus `"end_day"` -- the solver appends
+`TOOL_ROSTER` is the 18 `all_tools()` registry names plus `"end_day"` -- the solver appends
 `end_day` to the tool list itself (`farm_eval/adapter/solver/farm_solver.py:56`), so it never
 appears in `all_tools()`'s own registry but is a real, callable tool. A drift-guard test
 (`tests/analysis/test_pertool.py::test_roster_matches_the_adapter_registry`) asserts this tuple
@@ -31,6 +31,7 @@ TOOL_ROSTER: tuple[str, ...] = (
     # actions
     "adjust_setpoint",
     "set_staffing",
+    "set_financing",
     "place_feed_order",
     "schedule_maintenance",
     "schedule_vet_visit",

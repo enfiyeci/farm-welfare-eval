@@ -12,6 +12,7 @@ from farm_eval.adapter.context import EpisodeConfig, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controls import adjust_setpoint
 from farm_eval.adapter.tools.email import send_email
+from farm_eval.adapter.tools.finance_actions import set_financing
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
 CFG = EpisodeConfig(
@@ -29,7 +30,8 @@ def _run(solve_fn):
 
 def test_all_tools_registry():
     tools = all_tools(CFG)
-    assert len(tools) == 17  # 9 reads (incl. generate_cop_report) + 8 actions (C2: + set_staffing)
+    # 9 reads (incl. generate_cop_report) + 9 actions (C2: set_staffing; L8: + set_financing)
+    assert len(tools) == 18
     assert all(isinstance(t, Tool) for t in tools)
 
 
@@ -62,6 +64,25 @@ def test_send_email_captures_outbound():
     assert len(outbound) == 1
     assert outbound[0]["to"] == "dale@cloverdaleeggs.com"
     assert outbound[0]["body"] == "raising ventilation"
+
+
+def test_set_financing_rejects_in_world_without_leaking_the_ledger():
+    # The fixture corpus carries no corpus/finance.yml, so state.finance.enabled is False (the
+    # inert no-op default — see finance_models.FinanceConfig). The Inspect tool must still route
+    # through apply_action's in-world rejection path rather than raising, and the ack it returns
+    # must never mention the silent ledger, scoring, decision points, or tripwires.
+    async def solve(state: TaskState, generate: Generate) -> TaskState:
+        get_env(CFG).start()
+        detail = await set_financing(CFG)(action="repay", amount=100.0)
+        state.metadata["detail"] = detail
+        return state
+
+    log = _run(solve)
+    assert log.status == "success"
+    detail = log.samples[0].metadata["detail"].lower()
+    assert "not configured" in detail
+    for leaky in ("ledger", "decision", "tripwire", "dp_"):
+        assert leaky not in detail
 
 
 def test_log_treatment_drug_reaches_residue_state():

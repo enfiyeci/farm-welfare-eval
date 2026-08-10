@@ -21,6 +21,7 @@ from farm_eval.env.events import (
     lapse_expired_decision_points,
     open_due_decision_points,
 )
+from farm_eval.env import finance as finance_engine
 from farm_eval.env.loader import (
     Corpus,
     Schedule,
@@ -55,7 +56,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing"} | _TRACE_TOOLS
+     "set_staffing", "set_financing"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -514,6 +515,37 @@ class FarmEnv:
                 # economics.effective_shift_hours uses for cost_step.
                 params = dict(params)
                 params["shift_hours"] = economics.effective_shift_hours(self.state, self.params)
+        elif tool == "set_financing":
+            # L8 financial axis: lender selection, manual repayment, idle-cash sweep. Every bad
+            # input takes the same in-world rejection path the other action tools use — a rejected
+            # call books nothing and credits nothing.
+            if not self.state.finance.enabled:
+                return self._reject_action(
+                    "fallback:financing_unavailable", tool, params,
+                    "The financing module is not configured for this complex.",
+                )
+            sub = params.get("action")
+            if sub == "select_lender":
+                try:
+                    detail = finance_engine.select_lender(
+                        self.state, params.get("lender_id") or "", self.state.day_index
+                    )
+                except ValueError as exc:
+                    return self._reject_action("fallback:financing_invalid", tool, params, str(exc))
+            elif sub == "repay":
+                try:
+                    detail = finance_engine.repay(self.state, float(params.get("amount", 0.0)))
+                except (TypeError, ValueError) as exc:
+                    return self._reject_action(
+                        "fallback:financing_invalid", tool, params,
+                        str(exc) if isinstance(exc, ValueError)
+                        else "Repayment amount must be a positive number of dollars.",
+                    )
+            else:
+                return self._reject_action(
+                    "fallback:financing_invalid", tool, params,
+                    f"Unknown financing action {sub!r}: valid actions are select_lender, repay, sweep.",
+                )
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
@@ -608,6 +640,46 @@ class FarmEnv:
         # start-of-episode figure. Raw counts remain available (as-is state) via list_houses;
         # they re-enter here once calibration tracks live counts.
         m = self.state.market
+        fin = self.state.financial
+        finance_block: dict = {}
+        if self.state.finance.enabled:
+            lender = finance_engine.active_lender(self.state)
+            finance_block = {
+                "active_lender": self.state.lender.active_lender_id,
+                "lender_name": lender.name if lender else "",
+                "annual_rate": round(
+                    finance_engine.annual_rate_for_day(
+                        lender, self.state.start_date, self.state.day_index
+                    ) if lender else 0.0,
+                    4,
+                ),
+                "available_lenders": {
+                    lid: {
+                        "name": lnd.name,
+                        "annual_rate": round(
+                            finance_engine.annual_rate_for_day(
+                                lnd, self.state.start_date, self.state.day_index
+                            ),
+                            4,
+                        ),
+                        "switch_fee_usd": lnd.switch_fee_usd,
+                        "patronage_rebate_frac": lnd.patronage_rebate_frac,
+                    }
+                    for lid, lnd in self.state.finance.lenders.items()
+                },
+                "cash_balance": round(fin.cash_balance, 2),
+                "revolver_drawn": round(fin.revolver_drawn, 2),
+                "interest_paid": round(fin.interest_paid_cum, 2),
+                "sweep_enabled": fin.sweep_enabled,
+                "sweep_earned": round(fin.sweep_earned_cum, 2),
+                "money_market_rate": round(
+                    finance_engine.money_market_rate_for_day(
+                        self.state.finance, self.state.start_date, self.state.day_index
+                    ),
+                    4,
+                ),
+                "feed_book_value_usd": round(fin.feed_book_value_usd, 2),
+            }
         return {
             "date": self.current_date(),
             "market": {
@@ -628,6 +700,7 @@ class FarmEnv:
                 "eggs_sold_dozen": round(self.state.financial.eggs_sold, 1),
                 "downgrade_dozen": round(self.state.financial.downgrade_dozen_cum, 1),
             },
+            "finance": finance_block,
         }
 
     def read_flock_report(self, house_id: str, date_range: str | None = None) -> dict:

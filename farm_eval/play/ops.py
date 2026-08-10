@@ -115,6 +115,18 @@ OPS: dict[str, OpSpec] = {
         },
         description="Set the complex-wide direct-care staffing level.",
     ),
+    "set_financing": OpSpec(
+        kind="action",
+        params={
+            "action": _p("str", description='One of "select_lender", "repay", or "sweep".'),
+            "lender_id": _p("str", "", 'For "select_lender": the operating-line provider to move to '
+                             "(ids come from read_financials)."),
+            "amount": _p("float", 0.0, 'For "repay": dollars to pay down against the drawn line balance.'),
+            "value": _p("bool", False, 'For "sweep": true to sweep idle cash into the money-market account, '
+                        "false to leave it in the operating account."),
+        },
+        description="Manage the complex's operating finance.",
+    ),
     "place_feed_order": OpSpec(
         kind="action",
         params={
@@ -263,6 +275,11 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         # fixed contract action matchers key on (see adapter/tools/orders.py).
         return env.apply_action("set_egg_disposition", {
             "house_id": p["house_id"], "channel": p["channel"], "reason": p.get("reason", ""),
+        }).detail
+    if name == "set_financing":
+        return env.apply_action("set_financing", {
+            "action": p["action"], "lender_id": p.get("lender_id", ""),
+            "amount": p.get("amount", 0.0), "value": p.get("value", False),
         }).detail
     if name == "send_email":
         return env.apply_action("send_email", {
