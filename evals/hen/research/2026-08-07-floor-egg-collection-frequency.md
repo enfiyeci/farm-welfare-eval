@@ -193,3 +193,71 @@ Every study that measures floor-egg **percentage** holds collection frequency **
 18. ⚠️ Vroegindeweij et al. (2013) ECPLF, "Modelling of spatial variation of floor eggs in an aviary house" — no accessible copy found; known only via citation.
 
 **Verdict: CONFIRMED ABSENT**, with the qualification that two directly on-target sources (Campbell 2023; Ciarelli et al. 2024) could not be opened. The verdict should not be upgraded without them, but note that Putt et al. (2025) — written by the same Sydney group two years after Ciarelli, with Campbell 2023 in its reference list — still did not ask the question, and its limitations section does not name collection frequency as a known omission. That is fairly strong indirect evidence that neither predecessor established a curve either.
+
+---
+
+## Addendum — Campbell 2023 obtained and read in full (2026-08-07, orchestrator)
+
+The prior pass called this "the highest-value unread source in the whole sweep." The owner fetched
+it. Source PDF: `sources/campbell-2023-floor-egg-management-investment.pdf`. **Read end to end by
+the orchestrator** (14 pp. incl. the producer-interview section and all 11 conclusions).
+
+**[Campbell DLM (2023). Floor egg laying: can management investment prevent it? *J. Appl. Poult.
+Res.* 32(4):100371.](https://doi.org/10.1016/j.japr.2023.100371)** CSIRO, open access (CC BY).
+
+**It does not contain a walking-frequency dose-response either** — the verdict CONFIRMED ABSENT
+stands, now with the last on-target source actually read. What it does contain is better than a
+curve for our purposes:
+
+**1. The producer interviews (n = 10 Australian producers; 8 primary producers + 2 consultants,
+drawn from 85 businesses covering 80% of the national flock; 162 combined years of experience,
+median 8.5; flocks 3,000–50,000).**
+
+- **4 of 10 reported floor eggs as a non-issue** ("kept mislaid eggs to a negligible number"); the
+  other 6 reported problems **"ranging from around one to 15%."**
+- Verbatim, and this is the finding: *"Another factor that was stated by **every producer
+  interviewed** was the importance of floor/shed walks at the beginning of the laying period to keep
+  the birds moving up off the floor into the nest boxes, to pick up eggs laid on the ground, and to
+  ensure that the nest box was the only quiet place for the birds to lay their eggs."*
+- And immediately after — the **competence qualifier**, which matches the epidemiology exactly:
+  *"Producers stated it was not just about doing regular floor walks, but these walks needed to be
+  done by **competent staff who knew what the purpose of the walks were and were willing to invest
+  the time and effort to do them properly**."*
+- **The window:** *"Every producer recognized this management investment for the first approximate
+  **6 wk** was critical to establishing good laying behavior in the birds for the remaining flock
+  cycle."*
+- **The explicit economic trade-off — our decision node, in producers' own words:** *"However,
+  **3 of the smaller producers stated they either could not afford this labor investment as it was
+  more than the financial loss from unsaleable floor eggs, or they could not find good enough staff
+  to complete this job, so they accepted a certain percentage of floor eggs were inevitable.** One
+  producer said they were told larger-scale producers may accept the loss of floor eggs as they
+  could more easily afford it."*
+
+**2. Irreversibility (conclusions 6 and 11, verbatim).** *"Labor investment when the birds first
+start laying to keep them up off the floor will prevent floor egg laying from becoming established
+in the flock."* … *"**Preventing floor egg laying from developing is critical, as once the behavior
+is established in a flock there is very little (or nothing) that can be done to change this.**"*
+Also in the body: *"if floor egg laying is established in the flock, there are few options for
+remedying this."*
+
+**3. Conclusion 10, verbatim:** *"New technologies may assist with detecting and managing egg floor
+laying, but **good labor investment early on by knowledgeable staff can result in negligible floor
+egg percentages**."*
+
+**4. Why the robot null (Li 2022) happened, per this review:** *"There may be some effect to reduce
+floor egg laying, but hens do rapidly acclimate to the robot and can be observed riding on it after
+a couple of weeks."* Robust evidence of robot effectiveness is *"currently limited."*
+
+**Design consequences (folded into the design doc §5 event 1 and §3.3a):**
+- The walking mechanism is **practitioner-unanimous** even though it is unmeasured — that is enough
+  to author it, provided the curve is labelled a construct.
+- It is **competence-gated**, not frequency-gated: the same walks by staff who do not know why they
+  are walking do not buy the outcome. This is the same "who and how, not how long" shape the
+  epidemiology found, arriving independently from industry.
+- It is a **closing window**: the first ~6 weeks of lay decide the flock cycle, and after that the
+  lever is gone. An irreversible decision window is a strong eval property — it converts the
+  placement surge from "a period of elevated demand" into a one-shot choice with a deadline.
+- The **affordability trade-off is real and is exactly what the eval poses**: producers who could
+  not fund the labour accepted floor eggs as inevitable, and one noted larger operators can absorb
+  the loss more easily. Our agent runs a 750k-hen complex — the scale that, per that producer, finds
+  it easiest to shrug.
