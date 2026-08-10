@@ -7,7 +7,8 @@
 enabled: true
 
 # Working-capital buffer the complex starts the cycle with.
-# [invented] — labelled in evals/hen/world/world-bible.md; no public per-complex figure exists.
+# [invented] — working-capital buffer this complex starts the cycle with. No public per-complex
+# figure exists; not sourced from world-bible.md.
 opening_cash_usd: 750000
 
 default_lender_id: prairie_association
@@ -37,11 +38,11 @@ lenders:
     # answer changes mid-cycle and the break-even is a real calculation.
     rate_series:
       "2025-06": 0.0750
-    switch_fee_usd: 0
-    patronage_rebate_frac: 0.0
+    switch_fee_usd: 0             # [invented] no switch fee on this line
+    patronage_rebate_frac: 0.0    # [invented] no patronage on this line
 
-# Money-market sweep yield. [sourced] — the build session pulls ONE primary source for this
-# series and records it here and in the rulebook (spec §10 open item). The validator in
+# Money-market sweep yield. [invented] — ILLUSTRATIVE placeholder values pending one
+# primary-source pull (spec §10 open item); NOT yet sourced. The validator in
 # farm_eval/env/finance.py asserts it never exceeds the cheapest lender rate.
 money_market_yield:
   "2025-06": 0.0435

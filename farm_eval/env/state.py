@@ -153,6 +153,8 @@ class LenderState(BaseModel):
     """Which operating line is active, and the switching history. Kept apart from FinancialState
     (cumulative dollars) — this is the standing arrangement, not an accumulated result."""
 
+    model_config = ConfigDict(extra="forbid")
+
     active_lender_id: str = ""
     switch_days: list[int] = Field(default_factory=list)
     switch_fees_cum: float = 0.0
