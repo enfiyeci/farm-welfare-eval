@@ -95,6 +95,14 @@ def finance_daily_step(state, params, finance_cfg: FinanceConfig, day: int) -> N
         fin.cash_balance = 0.0
 
 
+def set_sweep(state, value: bool) -> str:
+    """Turn the idle-cash sweep on or off. Positive cash then earns the authored money-market
+    yield, which by construction is always below every lender rate — so sweeping is never a
+    substitute for paying the line down."""
+    state.financial.sweep_enabled = bool(value)
+    return f"idle-cash sweep {'enabled' if value else 'disabled'}"
+
+
 def select_lender(state, lender_id: str, day: int) -> str:
     """Switch the operating line to `lender_id`, booking the OUTGOING lender's switch fee at the
     moment of the switch. Raises ValueError on an unknown id or a no-op re-selection — the caller

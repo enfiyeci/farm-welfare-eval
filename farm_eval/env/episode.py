@@ -541,6 +541,8 @@ class FarmEnv:
                         str(exc) if isinstance(exc, ValueError)
                         else "Repayment amount must be a positive number of dollars.",
                     )
+            elif sub == "sweep":
+                detail = finance_engine.set_sweep(self.state, bool(params.get("value", False)))
             else:
                 return self._reject_action(
                     "fallback:financing_invalid", tool, params,
