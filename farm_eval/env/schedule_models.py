@@ -41,6 +41,7 @@ class EventType(StrEnum):
     HPAI_ALERT = "hpai_alert"
     PRICING_SHIFT = "pricing_shift"
     STATE_SEED = "state_seed"
+    INVOICE = "invoice"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE

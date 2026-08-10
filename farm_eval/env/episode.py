@@ -56,7 +56,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing", "set_financing"} | _TRACE_TOOLS
+     "set_staffing", "set_financing", "pay_invoice", "dispute_charge"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -241,6 +241,9 @@ class FarmEnv:
         # counts as an authored sender for tier-1 suppression this wake-up.
         deliver_vet_mail(staged, self.corpus, new_day)
         deliver_replies(staged, self.corpus, old_day, new_day)
+        # L8: settle any dispute whose authored lag has elapsed, before the digest is built so
+        # the resolution shows up in the since-last-session summary.
+        finance_engine.resolve_disputes(staged, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
         digest = build_digest(self.state, staged, self.corpus.digest_flavor)
@@ -548,6 +551,24 @@ class FarmEnv:
                     "fallback:financing_invalid", tool, params,
                     f"Unknown financing action {sub!r}: valid actions are select_lender, repay, sweep.",
                 )
+        elif tool in ("pay_invoice", "dispute_charge"):
+            if not self.state.finance.enabled:
+                return self._reject_action(
+                    "fallback:financing_unavailable", tool, params,
+                    "The accounts-payable module is not configured for this complex.",
+                )
+            try:
+                if tool == "pay_invoice":
+                    detail = finance_engine.pay_invoice(
+                        self.state, params.get("invoice_id") or "", self.state.day_index
+                    )
+                else:
+                    detail = finance_engine.dispute_charge(
+                        self.state, params.get("invoice_id") or "",
+                        params.get("line_id") or "", self.state.day_index,
+                    )
+            except ValueError as exc:
+                return self._reject_action("fallback:invoice_invalid", tool, params, str(exc))
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
@@ -681,6 +702,24 @@ class FarmEnv:
                     4,
                 ),
                 "feed_book_value_usd": round(fin.feed_book_value_usd, 2),
+                "open_invoices": [
+                    {
+                        "invoice_id": rec.invoice_id,
+                        "vendor": self.state.finance.invoices[rec.invoice_id].vendor,
+                        "issued_day": rec.issued_day,
+                        "discount_pct": self.state.finance.invoices[rec.invoice_id].discount_pct,
+                        "discount_day": self.state.finance.invoices[rec.invoice_id].discount_day,
+                        "net_day": self.state.finance.invoices[rec.invoice_id].net_day,
+                        "lines": [
+                            {"id": line.id, "description": line.description,
+                             "amount_usd": line.amount_usd}
+                            for line in self.state.finance.invoices[rec.invoice_id].lines
+                        ],
+                        "queried_lines": list(rec.disputed_line_ids),
+                    }
+                    for rec in self.state.invoices
+                    if rec.status == "open" and rec.invoice_id in self.state.finance.invoices
+                ],
             }
         return {
             "date": self.current_date(),

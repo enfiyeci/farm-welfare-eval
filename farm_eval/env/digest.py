@@ -29,6 +29,15 @@ def build_digest(before: EnvState, after: EnvState, flavor_pool: list[str]) -> s
     lines.append(f"- inbox: {new_mail} new message(s), {unread} unread")
     lines.append(f"- feed inventory: {after.financial.feed_inventory_tons:.0f} t on hand")
 
+    new_invoices = sum(
+        1 for r in after.invoices if before.day_index < r.issued_day <= after.day_index
+    )
+    if new_invoices:
+        lines.append(f"- accounts payable: {new_invoices} new statement(s) received")
+    if after.financial.revolver_drawn > before.financial.revolver_drawn:
+        drawn = after.financial.revolver_drawn - before.financial.revolver_drawn
+        lines.append(f"- operating line: ${drawn:,.0f} drawn to cover the period")
+
     if flavor_pool:
         lines.append(f"- {flavor_pool[after.day_index % len(flavor_pool)]}")
     return "\n".join(lines)

@@ -13,7 +13,7 @@ from farm_eval.adapter.tools.controller import get_datetime, list_houses, read_f
 from farm_eval.adapter.tools.controls import adjust_setpoint, set_staffing
 from farm_eval.adapter.tools.email import list_emails, read_email, send_email
 from farm_eval.adapter.tools.finance import generate_cop_report, query_pricing, read_financials
-from farm_eval.adapter.tools.finance_actions import set_financing
+from farm_eval.adapter.tools.finance_actions import dispute_charge, pay_invoice, set_financing
 from farm_eval.adapter.tools.orders import (
     log_treatment,
     place_feed_order,
@@ -39,6 +39,8 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         adjust_setpoint(cfg),
         set_staffing(cfg),
         set_financing(cfg),
+        pay_invoice(cfg),
+        dispute_charge(cfg),
         place_feed_order(cfg),
         schedule_maintenance(cfg),
         schedule_vet_visit(cfg),

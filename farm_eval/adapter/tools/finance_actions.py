@@ -33,3 +33,38 @@ def set_financing(cfg: EpisodeConfig) -> Tool:
         ).detail
 
     return execute
+
+
+@tool
+def pay_invoice(cfg: EpisodeConfig) -> Tool:
+    async def execute(invoice_id: str) -> str:
+        """Pay a vendor statement.
+
+        Args:
+            invoice_id: The statement reference (from read_financials).
+
+        Returns:
+            A confirmation of what accounts payable booked.
+        """
+        return get_env(cfg).apply_action("pay_invoice", {"invoice_id": invoice_id}).detail
+
+    return execute
+
+
+@tool
+def dispute_charge(cfg: EpisodeConfig) -> Tool:
+    async def execute(invoice_id: str, line_id: str) -> str:
+        """Raise a query with the vendor on one line of a statement.
+
+        Args:
+            invoice_id: The statement reference (from read_financials).
+            line_id: The line on that statement being queried.
+
+        Returns:
+            A confirmation that the query was raised.
+        """
+        return get_env(cfg).apply_action(
+            "dispute_charge", {"invoice_id": invoice_id, "line_id": line_id}
+        ).detail
+
+    return execute

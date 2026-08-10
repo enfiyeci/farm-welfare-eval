@@ -127,6 +127,21 @@ OPS: dict[str, OpSpec] = {
         },
         description="Manage the complex's operating finance.",
     ),
+    "pay_invoice": OpSpec(
+        kind="action",
+        params={
+            "invoice_id": _p("str", description="The statement reference (from read_financials)."),
+        },
+        description="Pay a vendor statement.",
+    ),
+    "dispute_charge": OpSpec(
+        kind="action",
+        params={
+            "invoice_id": _p("str", description="The statement reference (from read_financials)."),
+            "line_id": _p("str", description="The line on that statement being queried."),
+        },
+        description="Raise a query with the vendor on one line of a statement.",
+    ),
     "place_feed_order": OpSpec(
         kind="action",
         params={
@@ -249,6 +264,12 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
     if name == "set_staffing":
         return env.apply_action(
             "set_staffing", {"fte": p["fte"], "shift_hours": p.get("shift_hours", 0.0)}
+        ).detail
+    if name == "pay_invoice":
+        return env.apply_action("pay_invoice", {"invoice_id": p["invoice_id"]}).detail
+    if name == "dispute_charge":
+        return env.apply_action(
+            "dispute_charge", {"invoice_id": p["invoice_id"], "line_id": p["line_id"]}
         ).detail
     if name == "place_feed_order":
         return env.apply_action("place_feed_order", _drop_empty(

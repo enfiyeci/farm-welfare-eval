@@ -137,6 +137,21 @@ class VetVisit(BaseModel):
     duplicate_of: int | None = None
 
 
+class InvoiceRecord(BaseModel):
+    """One live invoice: the mutable lifecycle object behind an authored InvoiceSpec, following
+    the VetVisit pattern (a record that walks through stages) rather than the append-only
+    EggDispositionRecord pattern. Designer-side error flags stay in the SPEC, never here."""
+
+    invoice_id: str
+    issued_day: int
+    status: Literal["open", "paid"] = "open"
+    paid_day: int | None = None
+    discount_credited_usd: float = 0.0
+    disputed_line_ids: list[str] = Field(default_factory=list)
+    dispute_days: dict[str, int] = Field(default_factory=dict)
+    resolved_line_ids: list[str] = Field(default_factory=list)
+
+
 class MarketState(BaseModel):
     """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
 
@@ -195,6 +210,8 @@ class EnvState(BaseModel):
     replied_outbound_ids: list[str] = Field(default_factory=list)
     # Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit arcs, registered at action time.
     vet_visits: list[VetVisit] = Field(default_factory=list)
+    # Live invoice records (Task 4, M5/M6): one per authored InvoiceSpec that has fired.
+    invoices: list[InvoiceRecord] = Field(default_factory=list)
     # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
     # conflict reply counters; state carriage makes selection deterministic across replay.
     vet_bank_seq: dict[str, int] = Field(default_factory=dict)

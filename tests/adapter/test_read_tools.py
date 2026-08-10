@@ -69,7 +69,9 @@ def test_read_email_marks_read():
 
 
 def test_pricing_tools_registered_and_computed():
-    assert len(all_tools(CFG)) == 18  # 9 reads (incl. generate_cop_report) + 9 actions (C2: set_staffing; L8: + set_financing)
+    # 9 reads (incl. generate_cop_report) + 11 actions (C2: set_staffing; L8: + set_financing,
+    # pay_invoice, dispute_charge)
+    assert len(all_tools(CFG)) == 20
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(CFG).start()

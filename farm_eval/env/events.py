@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
+from farm_eval.env import finance as finance_engine
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
@@ -164,6 +165,16 @@ def fire_events_in_window(
             # Audit morning (round-3): capture what the auditor SEES today — the findings
             # letter composes from this snapshot, never from delivery-day state.
             capture_audit_snapshot(state, corpus)
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.INVOICE:
+            # Deliver an authored statement: open the invoice record (booking only its erroneous
+            # extra charges) and surface the covering email so it is discoverable in-world.
+            invoice_id = ev.payload["invoice_id"]
+            spec = state.finance.invoices.get(invoice_id)
+            if spec is None:
+                raise ValueError(f"invoice event references unknown invoice_id: {invoice_id!r}")
+            finance_engine.open_invoice(state, spec, ev.on_day)
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:

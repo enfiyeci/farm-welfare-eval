@@ -142,6 +142,106 @@ def repay(state, amount: float) -> str:
     return f"paid down ${paid:,.0f}; line balance now ${fin.revolver_drawn:,.0f}"
 
 
+def find_invoice(state, invoice_id: str):
+    """(record, spec) for a live invoice, or (None, None)."""
+    record = next((r for r in state.invoices if r.invoice_id == invoice_id), None)
+    spec = state.finance.invoices.get(invoice_id)
+    return record, spec
+
+
+def open_invoice(state, spec, day: int) -> None:
+    """Deliver an invoice. Correct lines were already booked by the normal P&L at the time the
+    cost was actually incurred, so ONLY the erroneous extra charges book here — that is what
+    makes an unchallenged billing error real money lost, with no second set of books.
+
+    Registers `spec` into `state.finance.invoices` (idempotent) so a directly-passed spec (not
+    pre-loaded from corpus content) can still be resolved later by `pay_invoice`/
+    `dispute_charge`/`resolve_disputes`, which all look the spec up there via `find_invoice`.
+    """
+    if any(r.invoice_id == spec.id for r in state.invoices):
+        return  # idempotent: a re-fired event must not double-book
+    from farm_eval.env.state import InvoiceRecord
+
+    state.finance.invoices[spec.id] = spec
+    erroneous = sum(line.amount_usd for line in spec.lines if line.error)
+    if erroneous:
+        # Book to the P&L ONLY. finance_daily_step settles the resulting margin change into cash
+        # exactly once; a direct cash_balance adjustment here would double-count the charge
+        # against cash (same defect fixed for the switch fee / patronage rebate above).
+        book_pnl_cost(state.financial, erroneous)
+    state.invoices.append(InvoiceRecord(invoice_id=spec.id, issued_day=day))
+
+
+def pay_invoice(state, invoice_id: str, day: int) -> str:
+    """Pay a statement. Paying on or before the discount day credits the authored early-payment
+    discount on the full invoice face; paying later simply closes it (the base cost was already
+    booked). Idempotent by rejection: a second call raises."""
+    record, spec = find_invoice(state, invoice_id)
+    if record is None or spec is None:
+        raise ValueError(f"No open statement with reference {invoice_id!r}.")
+    if record.status == "paid":
+        raise ValueError(f"Statement {invoice_id} was already paid on day {record.paid_day}.")
+    record.status = "paid"
+    record.paid_day = day
+    if spec.discount_pct and day <= spec.discount_day:
+        face = sum(line.amount_usd for line in spec.lines)
+        credit = face * spec.discount_pct
+        record.discount_credited_usd = credit
+        # Credit to the P&L ONLY (a negative cost) — see the cash-identity note in open_invoice.
+        book_pnl_cost(state.financial, -credit)
+        return f"statement {invoice_id} paid; early-payment discount ${credit:,.0f} credited"
+    return f"statement {invoice_id} paid"
+
+
+def dispute_charge(state, invoice_id: str, line_id: str, day: int) -> str:
+    """Open a dispute on one billed line. Resolution arrives on a later day (see
+    `resolve_disputes`), which is what makes the dispute window a real deadline."""
+    record, spec = find_invoice(state, invoice_id)
+    if record is None or spec is None:
+        raise ValueError(f"No statement with reference {invoice_id!r}.")
+    if not any(line.id == line_id for line in spec.lines):
+        raise ValueError(f"Statement {invoice_id} has no line {line_id!r}.")
+    if line_id in record.disputed_line_ids:
+        raise ValueError(f"Line {line_id} on {invoice_id} is already under query.")
+    if spec.dispute_deadline_day and day > spec.dispute_deadline_day:
+        raise ValueError(
+            f"The query window on statement {invoice_id} closed; the vendor's terms allow "
+            f"queries up to day {spec.dispute_deadline_day}."
+        )
+    record.disputed_line_ids.append(line_id)
+    record.dispute_days[line_id] = day
+    return f"query raised on {invoice_id} line {line_id}; the vendor will respond"
+
+
+def resolve_disputes(state, day: int) -> list[dict]:
+    """Settle every dispute whose authored lag has elapsed. An upheld query (the line really was
+    an error) reverses its charge; a rejected query costs nothing but is recorded, so the index
+    can count it as a false alarm. Returns one dict per newly-resolved line."""
+    resolved: list[dict] = []
+    for record in state.invoices:
+        spec = state.finance.invoices.get(record.invoice_id)
+        if spec is None:
+            continue
+        for line_id in list(record.disputed_line_ids):
+            if line_id in record.resolved_line_ids:
+                continue
+            if day < record.dispute_days.get(line_id, 0) + spec.dispute_lag_days:
+                continue
+            line = next(l for l in spec.lines if l.id == line_id)
+            record.resolved_line_ids.append(line_id)
+            if line.error:
+                # Reversal to the P&L ONLY — see the cash-identity note in open_invoice.
+                book_pnl_cost(state.financial, -line.amount_usd)
+            resolved.append({
+                "invoice_id": record.invoice_id,
+                "line_id": line_id,
+                "upheld": line.error,
+                "amount_usd": line.amount_usd if line.error else 0.0,
+                "day": day,
+            })
+    return resolved
+
+
 def apply_patronage_rebate(state) -> float:
     """Credit the active lender's year-end patronage rebate as a share of interest paid to date,
     net of any rebate already credited. Returns the dollars credited (0.0 if none apply)."""
