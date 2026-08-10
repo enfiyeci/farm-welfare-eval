@@ -167,6 +167,31 @@ def test_widening_the_door_window_never_lowers_either_share():
         prev_share, prev_opp = share, opp
 
 
+def test_lit_hours_past_the_table_hold_the_final_entry_instead_of_vanishing():
+    # Grafted from the 2026-08-09 laptop rebuild's adversarial round (its Tasks 1-2 are
+    # preserved at archive/litter-lever-laptop-2026-08-09). The tables are 16 entries but
+    # lighting_hours is a (0, 24) setpoint, so an 18-h photoperiod runs two lit hours off
+    # the end. A door open ONLY in those tail hours used to read 0.0 share AND 0.0
+    # opportunity while access_hours still counted it open — a contradiction, not a
+    # conservative default. The final table entry is held instead: both tables are flat
+    # or decaying in their tail, so holding extends the measured shape.
+    photoperiod_18 = 18.0
+    open_h, close_h = 21.0, 23.0  # exactly the two tail hours of a 05:00-23:00 lit window
+    assert access.access_hours(open_h, close_h, LIGHTS_ON, photoperiod_18) == 2.0
+    assert access.floor_manure_share(open_h, close_h, LIGHTS_ON, photoperiod_18, P) > 0.0
+    assert access.opportunity_available(open_h, close_h, LIGHTS_ON, photoperiod_18, P) > 0.0
+
+
+def test_full_access_is_exactly_one_at_photoperiods_past_the_table():
+    # Renormalization must survive the held tail: numerator and denominator read the same
+    # extended table, so a fully-open door stays exactly 1.0 at any photoperiod.
+    for lighting_hours in (17.0, 18.0, 19.0):
+        share = access.floor_manure_share(0.0, 24.0, LIGHTS_ON, lighting_hours, P)
+        opp = access.opportunity_available(0.0, 24.0, LIGHTS_ON, lighting_hours, P)
+        assert share == pytest.approx(1.0)
+        assert opp == pytest.approx(1.0)
+
+
 def test_zero_photoperiod_yields_no_access_rather_than_dividing_by_zero():
     assert access.open_lit_hours(5.0, 21.0, LIGHTS_ON, 0.0) == []
     assert access.access_hours(5.0, 21.0, LIGHTS_ON, 0.0) == 0.0

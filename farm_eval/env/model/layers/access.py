@@ -109,13 +109,19 @@ def _lit_hours(lights_on: float, lighting_hours: float) -> list[int]:
 def _weighted(hours: list[int], lights_on: float, table: list[float]) -> float:
     """Sum an hourly weight table over ``hours``.
 
-    Entry ``i`` of the table is the i-th whole lit hour, ``ceil(lights_on) + i``.  Hours
-    outside the table (a photoperiod longer than the reference 16 h) carry zero weight,
-    which keeps a renormalized share well-defined instead of raising on an unusual
-    setpoint.
+    Entry ``i`` of the table is the i-th whole lit hour, ``ceil(lights_on) + i``.  Lit
+    hours past the table's end (a photoperiod longer than the reference 16 h) HOLD the
+    final entry rather than carrying zero weight: both tables are flat or decaying in
+    their tail, so holding the last value extends the measured shape instead of inventing
+    a new one.  Zero-weighting those hours made a door open only in them read as zero
+    share AND zero opportunity while ``access_hours`` still counted it open — a
+    contradiction, not a conservative default (adversarial finding from the 2026-08-09
+    laptop rebuild, preserved at ``archive/litter-lever-laptop-2026-08-09``; grafted
+    2026-08-10).  Renormalization is unaffected: numerator and denominator read the same
+    extended table, so full access stays exactly 1.0 at any photoperiod.
     """
     start = _grid_start(lights_on)
-    return sum(table[h - start] for h in hours if 0 <= h - start < len(table))
+    return sum(table[min(h - start, len(table) - 1)] for h in hours if h - start >= 0)
 
 
 def _renormalized_share(
