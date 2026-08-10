@@ -50,11 +50,35 @@ Every task's requirements implicitly include this section.
   `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`
 - **Evidence tags.** Every authored dollar magnitude in `corpus/finance.yml` carries a YAML comment
   tagging it `[sourced]`, `[derived]`, or `[invented]`, with the source named for the first two.
-- **Serialization (LANES one-owner rule).** Tasks 1 and 6 edit `farm_eval/env/model/integrate.py` and
-  `farm_eval/env/model/params.py`, which the **litter lane (L1/P8)** owns. Do not start Task 1 until
-  P8's model-core work has merged to `main` and this branch has merged `main`. Check
-  `docs/LANES.md` first. Tasks touching the model core are limited to exactly two edits, both
-  specified below, to keep the merge surface minimal.
+- **Serialization (LANES one-owner rule).** The **litter lane (L1/P8)** owns
+  `farm_eval/env/model/**` and the reference regenerations. This build touches that surface in
+  exactly **two hunks**, both in `farm_eval/env/model/integrate.py` (Task 1 Step 8, Task 5 Step 6),
+  and `params.py` not at all. Those two hunks plus the reference regeneration are deferred to
+  Wave B — see the sequencing section below. Check `docs/LANES.md` before starting Wave B.
+
+### Build sequencing under the P8 hold (owner-approved 2026-08-07)
+
+P8 (the litter lane) holds the model-core token, and as of 2026-08-07 it has landed **no code** —
+`feat/litter-lever` is six docs-only commits ahead of `main`, and all 16 of its build tasks are
+unstarted. Rather than idle behind it, this build runs in two waves:
+
+**Wave A — now (Tasks 1–9), touching nothing P8 owns.** Every step is buildable except the three
+listed below. `feed_storage_cap_tons` deliberately lives in `corpus/finance.yml`, NOT in
+`params.py`: the on-site bin capacity of *this* complex is farm content, and the project rule is
+that farm content never lives in logic. That removes `params.py` from the build surface entirely.
+
+**Wave B — the wire-in, after P8 merges to `main`.** Exactly two hunks in
+`farm_eval/env/model/integrate.py`, plus the work that cannot run without them:
+
+| Deferred item | Where | Why it must wait |
+|---|---|---|
+| The `finance_daily_step` call | Task 1, Step 8 | The one `integrate.py` edit that makes the engine run in a real episode. Task 1's own tests call the function directly and pass without it. |
+| The `params_with_offer_effects` day-params line | Task 5, Step 6 | The second `integrate.py` edit. `offer_cost_multiplier` is fully tested without it. |
+| Reference regeneration + scorer threading | Task 9, Steps 5–6 | Regenerating `financial_reference.json` before interest reaches the P&L would produce numbers that move again at wire-in. Task 9's index code and tests use synthetic references and pass now. |
+| The whole neutrality + surfacing wave | Task 10 | Its full-episode probes assert that each mechanism moves money, which only happens once the engine is wired. |
+
+Wave B is one short session: merge `main`, add the two hunks, run Task 9 Steps 5–6 and all of
+Task 10, then the tier-3 pre-merge pair.
 
 ### The cash identity (load-bearing; every task must preserve it)
 
@@ -83,7 +107,7 @@ task re-runs that test.
 | `farm_eval/env/state.py` | `FinancialState` gains 6 cash/financing fields; new `LenderState`; `EnvState` gains `finance`, `lender`, `invoices`, `offers`. | T1, T4, T5 |
 | `farm_eval/env/loader.py` | Loads `corpus/finance.yml` into `Corpus.finance`; `build_initial_state` seeds `EnvState.finance` + opening cash + default lender. | T1 |
 | `farm_eval/env/model/integrate.py` | **One edit:** call `finance_daily_step` at the end of each simulated day. | T1 |
-| `farm_eval/env/model/params.py` | **One edit:** add `feed_storage_cap_tons`. | T6 |
+| `farm_eval/env/model/params.py` | **Not touched.** The storage cap lives in `corpus/finance.yml` instead — see Task 6. | — |
 | `farm_eval/env/episode.py` | `apply_action` gains four finance action branches; `read_financials` gains a finance block; `place_feed_order` gains the cumulative storage cap and per-ration pricing. | T2–T6 |
 | `farm_eval/env/schedule_models.py` | `EventType` gains `INVOICE` and `VENDOR_OFFER`. | T4, T5 |
 | `farm_eval/env/events.py` | Firing handlers for the two new event types. | T4, T5 |
@@ -316,6 +340,10 @@ class FinanceConfig(BaseModel):
     default_lender_id: str = ""
     lenders: dict[str, Lender] = Field(default_factory=dict)
     money_market_yield: dict[str, float] = Field(default_factory=dict)
+    # Cumulative on-site feed storage across the complex (Task 6). Corpus content, not a
+    # ModelParams field: the bin capacity of THIS complex is farm content. 0.0 = uncapped,
+    # so a corpus without the key behaves exactly as the world did before Task 6.
+    feed_storage_cap_tons: float = 0.0
 ```
 
 - [ ] **Step 4: Extend `farm_eval/env/state.py`**
@@ -568,7 +596,10 @@ call:
         state.financial.cash_balance = state.finance.opening_cash_usd
 ```
 
-- [ ] **Step 8: Add the one `integrate.py` call site**
+- [ ] **Step 8: Add the one `integrate.py` call site — ⏸ DEFERRED TO WAVE B**
+
+Do **not** apply this step while P8 holds the model-core token. Task 1's tests call
+`finance_daily_step` directly and pass without it. Apply it verbatim after P8 merges.
 
 In `farm_eval/env/model/integrate.py`, add to the imports:
 
@@ -1888,7 +1919,11 @@ def offer_cost_multiplier(state, effect_key: str) -> float:
     return multiplier
 ```
 
-- [ ] **Step 6: Apply the multipliers in the P&L**
+- [ ] **Step 6: Apply the multipliers in the P&L — ⏸ PARTLY DEFERRED TO WAVE B**
+
+The `params_with_offer_effects` helper and its use in `episode.apply_action`'s `_TRACE_TOOLS` fee
+lookup are built NOW (both are outside the model core, and the task's tests cover them). The
+`integrate.py` edit below waits for Wave B.
 
 In `farm_eval/env/model/integrate.py`, inside the house loop, replace the `economics.cost_step(...)`
 call's `params` argument with an offer-adjusted copy built once per day, immediately after the
@@ -1954,14 +1989,21 @@ git commit -m "feat(finance): vendor offers, packaging tiers, welfare-inert effe
 
 **Files:**
 - Modify: `corpus/pricing.yml` (widen `layer_ration_usd_ton`; per-ration monthly table)
-- Modify: `farm_eval/env/model/params.py` (**one edit:** `feed_storage_cap_tons`)
+- Modify: `corpus/finance.yml` (`feed_storage_cap_tons`), `farm_eval/env/finance_models.py`
 - Modify: `farm_eval/env/episode.py` (`place_feed_order`: cumulative cap, per-ration price, cash draw)
 - Test: `tests/env/test_feed_procurement.py`
 
 **Interfaces:**
 - Consumes: `finance.book_pnl_cost` (Task 1).
-- Produces: `params.feed_storage_cap_tons: float`;
+- Produces: `FinanceConfig.feed_storage_cap_tons: float`;
   `corpus/pricing.yml: ration_prices_monthly_usd_ton: dict[str, dict[str, float]]`.
+
+**Why the cap is corpus content, not a `ModelParams` field.** The spec put it in `params.py`, but
+the on-site bin capacity of *this* complex is farm content, and the standing project rule is that
+farm content never lives in logic. Putting it in `corpus/finance.yml` is both more correct and
+removes `params.py` from this build's surface entirely, so Task 6 no longer collides with the
+litter lane. `feed_order_max_tons` (the per-ORDER sanity ceiling, a generic guard) stays in
+`ModelParams` where it already is.
 
 **Authoring decision for the build session (spec §10 open item):** the widened path stays inside the
 sourced ISU EIC Midwest band ($229–308/ton intra-year), keeps the existing monthly key set, and keeps
@@ -2004,7 +2046,7 @@ def test_a_single_order_over_per_order_capacity_is_still_rejected():
 
 def test_cumulative_inventory_cannot_exceed_the_storage_cap():
     env = _env()
-    cap = env.params.feed_storage_cap_tons
+    cap = env.state.finance.feed_storage_cap_tons
     chunk = min(env.params.feed_order_max_tons, cap)
     booked = 0.0
     while booked + chunk <= cap:
@@ -2056,17 +2098,20 @@ def test_a_feed_order_draws_cash_at_order_time():
 Run: `./venv/bin/python -m pytest tests/env/test_feed_procurement.py -q`
 Expected: FAIL — `AttributeError: 'ModelParams' object has no attribute 'feed_storage_cap_tons'`.
 
-- [ ] **Step 3: Add the params field**
+- [ ] **Step 3: Author the storage cap in `corpus/finance.yml`**
 
-In `farm_eval/env/model/params.py`, beside `feed_order_max_tons`:
+Add to `corpus/finance.yml` (the `FinanceConfig` field was declared in Task 1):
 
-```python
-    # Cumulative on-site feed storage across the complex (M8). Cal-Maine's 10-K documents ~41 days
-    # of ingredient storage; at this complex's consumption that is ~2,000-3,500 t. This is a
-    # CUMULATIVE cap (feed_order_max_tons is per-order), so stacking cheap orders is bounded by
-    # real bin capacity, and the carrying cost of what does fit is charged through the revolver.
-    feed_storage_cap_tons: float = 3000.0
+```yaml
+# Cumulative on-site feed storage across the complex (M8). [derived] Cal-Maine's 10-K documents
+# ~41 days of ingredient storage; at this complex's consumption that is ~2,000-3,500 t. This is a
+# CUMULATIVE cap (ModelParams.feed_order_max_tons is the per-ORDER sanity ceiling), so stacking
+# cheap orders is bounded by real bin capacity, and the carrying cost of what does fit is charged
+# through the revolver.
+feed_storage_cap_tons: 3000
 ```
+
+Nothing in `farm_eval/env/model/` is touched by this task.
 
 - [ ] **Step 4: Widen the price path and add the per-ration monthly table**
 
@@ -2098,7 +2143,7 @@ In `farm_eval/env/episode.py`, replace the pricing/booking part of the `place_fe
             ration = params.get("ration") or ""
             price = self._ration_price(ration)
             if qty > 0.0:
-                cap = self.params.feed_storage_cap_tons
+                cap = self.state.finance.feed_storage_cap_tons or float("inf")
                 if self.state.financial.feed_inventory_tons + qty > cap:
                     room = max(0.0, cap - self.state.financial.feed_inventory_tons)
                     return self._reject_action(
@@ -2150,7 +2195,7 @@ Expected: PASS except the known `financial_reference` drift held for Task 9.
 - [ ] **Step 7: Commit**
 
 ```bash
-git add corpus/pricing.yml farm_eval/env/model/params.py farm_eval/env/episode.py tests/env/test_feed_procurement.py
+git add corpus/pricing.yml corpus/finance.yml farm_eval/env/finance_models.py farm_eval/env/episode.py tests/env/test_feed_procurement.py
 git commit -m "feat(finance): feed made real — widened ration path, storage cap, per-ration pricing (M8)"
 ```
 
@@ -2843,7 +2888,12 @@ It computes and writes `farm_eval/judge/finance_reference.json`:
 - `cash_hygiene.optimal_repay_events` / `optimal_sweep_days`: the counts that minimum-interest
   policy actually used.
 
-- [ ] **Step 5: Regenerate both references and pin determinism**
+- [ ] **Step 5: Regenerate both references and pin determinism — ⏸ DEFERRED TO WAVE B**
+
+Regenerating before the Wave-B wire-in would bake in numbers that move again the moment interest
+reaches the P&L. Build the script in Step 4 and leave it unrun; `tests/judge/test_finance_index.py`
+uses synthetic references and passes now. Until then `tests/judge/test_financial_reference.py` is
+unaffected too, because without the wire-in the margin has not moved.
 
 ```bash
 ./venv/bin/python scripts/regen_financial_reference.py
@@ -2854,7 +2904,10 @@ Then run each a second time and confirm `git diff` is empty — the determinism 
 requires. Update `tests/judge/test_financial_reference.py`'s expected numbers to the newly generated
 values; the Task 1 drift is resolved here and nowhere else.
 
-- [ ] **Step 6: Attach the index to score metadata only**
+- [ ] **Step 6: Attach the index to score metadata only — ⏸ DEFERRED TO WAVE B**
+
+Threading references the regeneration has not produced yet would be threading placeholders. Apply
+this step verbatim in Wave B, immediately after Step 5.
 
 In `farm_eval/judge/scorer.py`'s `grade_episode`, after the metadata dict is assembled:
 
@@ -2903,7 +2956,12 @@ git commit -m "feat(finance): the mechanical finance index and its regenerated r
 
 ---
 
-## Task 10: Welfare-neutrality proofs and surfacing
+## Task 10: Welfare-neutrality proofs and surfacing — ⏸ ENTIRELY WAVE B
+
+Every probe here drives a full episode and asserts that each mechanism moves money while moving no
+welfare number. Without the Wave-B `integrate.py` wire-in the engine never runs inside an episode,
+so these tests would fail on the "the mechanism is inert" assertion for the wrong reason. Run this
+task whole, after Wave B's two hunks and Task 9's Steps 5–6.
 
 The acceptance gate. Every mechanism is swept across its full policy range and proven not to move a
 single welfare number, and the index is surfaced everywhere the welfare headline already is.
@@ -3121,7 +3179,16 @@ identically at definition and call site. `InvoiceRecord.disputed_line_ids` is th
 `dispute_charge`, `resolve_disputes`, `read_financials`, and `finance_index.reconciliation`.
 `OfferSpec.quality` is read only by the index and never by a read tool.
 
-**One deliberate deviation from the spec, flagged.** Spec §2 describes the new state records as
+**Two deliberate deviations from the spec, both flagged.**
+
+*The feed storage cap moved from `params.py` to `corpus/finance.yml`* (spec §3 M8 named `params.py`).
+The on-site bin capacity of this complex is farm content, and the project rule is that farm content
+never lives in logic — so the corpus is the more correct home regardless of scheduling. It also
+removes `params.py` from this build's surface entirely, cutting the litter-lane collision from three
+hunks to two. `ModelParams.feed_order_max_tons` — the generic per-ORDER sanity ceiling — stays where
+it is.
+
+*The invoice and offer records are mutable, not append-only.* Spec §2 describes the new state records as
 "append-only, like `EggDispositionRecord`". `InvoiceRecord` and `OfferRecord` are instead **mutable
 lifecycle records following the `VetVisit` pattern** (`stage`/`status` walking through states), which
 is the closer existing precedent for an object that opens, is acted on, and closes. The append-only
