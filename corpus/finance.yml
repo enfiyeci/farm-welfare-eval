@@ -1,0 +1,49 @@
+# Financial-skill axis content (L8). Ground truth + evidence:
+# evals/hen/design/2026-08-07-financial-node-audit.md §3(ii) and
+# evals/hen/research/2026-08-07-r8-financial-mechanisms/01-credit-line.md.
+# Every dollar magnitude is tagged [sourced] / [derived] / [invented].
+# Rates are ANNUAL decimals on monthly YYYY-MM keys, carried forward like corpus/pricing.yml.
+
+enabled: true
+
+# Working-capital buffer the complex starts the cycle with.
+# [invented] — labelled in evals/hen/world/world-bible.md; no public per-complex figure exists.
+opening_cash_usd: 750000
+
+default_lender_id: prairie_association
+
+lenders:
+  prairie_association:
+    id: prairie_association
+    name: "PLACEHOLDER Prairie Farm Credit Association"
+    kind: association
+    # [sourced] Chicago Fed 7th District operating-loan survey: 7.73% at 2025:Q1 drifting to
+    # 7.08% at 2026:Q1 — exactly our in-world window; 80%+ of these loans float.
+    rate_series:
+      "2025-06": 0.0773
+      "2025-09": 0.0757
+      "2025-12": 0.0733
+      "2026-03": 0.0708
+      "2026-06": 0.0708
+    switch_fee_usd: 2500          # [invented] origination/closing on a switched line
+    patronage_rebate_frac: 0.12   # [invented] year-end patronage as a share of interest paid
+
+  midland_bank:
+    id: midland_bank
+    name: "PLACEHOLDER Midland Commercial Bank"
+    kind: bank
+    # [derived] flat commercial rate inside the KC Fed operating-loan range; deliberately set
+    # ABOVE the association's late-window rate and BELOW its early-window rate, so the right
+    # answer changes mid-cycle and the break-even is a real calculation.
+    rate_series:
+      "2025-06": 0.0750
+    switch_fee_usd: 0
+    patronage_rebate_frac: 0.0
+
+# Money-market sweep yield. [sourced] — the build session pulls ONE primary source for this
+# series and records it here and in the rulebook (spec §10 open item). The validator in
+# farm_eval/env/finance.py asserts it never exceeds the cheapest lender rate.
+money_market_yield:
+  "2025-06": 0.0435
+  "2025-12": 0.0447
+  "2026-06": 0.0431

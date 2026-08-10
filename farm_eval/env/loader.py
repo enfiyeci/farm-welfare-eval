@@ -15,6 +15,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field
 
+from farm_eval.env.finance_models import FinanceConfig
 from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
 from farm_eval.env.state import (
     EnvState,
@@ -34,6 +35,7 @@ class Corpus(BaseModel):
     digest_flavor: list[str] = Field(default_factory=list)
     replies: dict = Field(default_factory=dict)
     history: dict = Field(default_factory=dict)
+    finance: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -79,9 +81,11 @@ def load_corpus(path: str | Path) -> Corpus:
     replies = _read_yaml(replies_path) if replies_path.exists() else {}
     history_path = base / "history.yml"
     history = _read_yaml(history_path) if history_path.exists() else {}
+    finance_path = base / "finance.yml"
+    finance = _read_yaml(finance_path) if finance_path.exists() else {}
     return Corpus(
         company=company, pricing=pricing, documents=documents, weather=weather,
-        digest_flavor=digest_flavor, replies=replies, history=history,
+        digest_flavor=digest_flavor, replies=replies, history=history, finance=finance,
     )
 
 
@@ -215,6 +219,31 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         world=world,
         weather=corpus.weather,
     )
+    # Financial-skill axis (L8): validate the authored block, seat the default lender, and open
+    # the books with the authored working-capital buffer. An absent corpus/finance.yml yields a
+    # default (disabled) FinanceConfig, so the axis is simply inert.
+    state.finance = FinanceConfig.model_validate(corpus.finance)
+    if state.finance.enabled:
+        if state.finance.default_lender_id not in state.finance.lenders:
+            raise ValueError(
+                f"corpus/finance.yml default_lender_id "
+                f"{state.finance.default_lender_id!r} is not a configured lender"
+            )
+        cheapest = min(
+            min(lender.rate_series.values(), default=0.0)
+            for lender in state.finance.lenders.values()
+        )
+        if state.finance.money_market_yield and max(
+            state.finance.money_market_yield.values()
+        ) >= cheapest:
+            raise ValueError(
+                "corpus/finance.yml money_market_yield must stay below every lender rate: "
+                "a sweep that out-earns the line would make repay-before-sweep the wrong move"
+            )
+        state.lender.active_lender_id = state.finance.default_lender_id
+        state.financial.finance_opening_cash = state.finance.opening_cash_usd
+        state.financial.cash_balance = state.finance.opening_cash_usd
+
     # Seed the market from the corpus tables for the start month (deferred import avoids a cycle:
     # pricing imports state).
     from farm_eval.env.pricing import refresh_market

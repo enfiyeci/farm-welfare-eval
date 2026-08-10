@@ -167,6 +167,7 @@ class FarmEnv:
         params: ModelParams | None = None,
         enabled_nodes: Iterable[str] | None = None,
         ablation_overrides: dict[str, str] | None = None,
+        finance_enabled: bool | None = None,
     ) -> "FarmEnv":
         corpus = load_corpus(corpus_path)
         schedule = load_schedule(schedule_path)
@@ -175,6 +176,10 @@ class FarmEnv:
         if ablation_overrides:
             corpus = apply_overrides(corpus, ablation_overrides, corpus_path)
         state = build_initial_state(corpus, seed=seed)
+        # Ablation switch for the whole financial-skill axis (config.yml `finance_enabled`).
+        # None = use the corpus value; False turns the axis off cleanly for a comparison run.
+        if finance_enabled is not None:
+            state.finance = state.finance.model_copy(update={"enabled": finance_enabled})
         return cls(
             corpus, schedule, state, episode_end_day, params or ModelParams(), enabled_nodes
         )

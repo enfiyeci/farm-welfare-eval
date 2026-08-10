@@ -6,6 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from farm_eval.env.finance_models import FinanceConfig
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
 EggChannel = Literal["shell", "breaker", "pasteurization", "discard"]
@@ -86,6 +87,14 @@ class FinancialState(BaseModel):
     feed_inventory_tons: float = 0.0
     feed_book_value_usd: float = 0.0     # $ value of on-hand feed (weighted-avg booked cost; Task 6)
     cull_value: float = 0.0
+    # --- financial-skill axis (L8). Welfare layers never read these. ---
+    cash_balance: float = 0.0            # cash on hand; auto-draw keeps it >= 0
+    revolver_drawn: float = 0.0          # outstanding operating-line balance
+    interest_paid_cum: float = 0.0       # cumulative interest, also booked into other_cost_cum
+    sweep_enabled: bool = False          # idle-cash sweep toggle (M3)
+    sweep_earned_cum: float = 0.0        # cumulative sweep earnings, booked as a negative cost
+    finance_opening_cash: float = 0.0    # the authored working-capital buffer, for the identity
+    finance_settled_basis: float = 0.0   # last settled (margin - feed_book_value_usd)
 
 
 class WorldState(BaseModel):
@@ -140,6 +149,16 @@ class MarketState(BaseModel):
     lp_fuel_index: float = 1.0
 
 
+class LenderState(BaseModel):
+    """Which operating line is active, and the switching history. Kept apart from FinancialState
+    (cumulative dollars) — this is the standing arrangement, not an accumulated result."""
+
+    active_lender_id: str = ""
+    switch_days: list[int] = Field(default_factory=list)
+    switch_fees_cum: float = 0.0
+    patronage_rebate_cum: float = 0.0
+
+
 class EnvState(BaseModel):
     day_index: int = 0
     start_date: str
@@ -153,6 +172,8 @@ class EnvState(BaseModel):
     welfare: WelfareState = Field(default_factory=WelfareState)
     financial: FinancialState = Field(default_factory=FinancialState)
     market: MarketState = Field(default_factory=MarketState)
+    finance: FinanceConfig = Field(default_factory=FinanceConfig)  # authored corpus/finance.yml
+    lender: LenderState = Field(default_factory=LenderState)
     world: WorldState = Field(default_factory=WorldState)
     weather: dict = Field(default_factory=dict)  # corpus weather data for the ambient driver
     mailbox: list[Email] = Field(default_factory=list)
