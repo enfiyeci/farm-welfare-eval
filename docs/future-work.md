@@ -133,3 +133,46 @@ generating **human reference transcripts** to calibrate the judge (feeds the jud
 **Constraints.** Reuse the existing `FarmEnv`/`apply_action` + read-tool seam (the env core is
 Inspect-free, so a thin UI can drive it directly). Keep it **out of the scored/model path** — a
 human-play session is not a model run and must not contaminate cross-model comparisons.
+
+## Review-pack Part 3 deferrals (owner comment session, 2026-08-11)
+
+The owner's review of the sourced+scored pack (Part 3) ordered a fix pass. Four fixes LANDED
+on `fix/dp13-scoring-and-sensor` (DP13 standing-disposition scoring + discard channel;
+`read_sensor` whitelist; DP21 treat-and-sell tripwire; DP12 "who you tell matters" rubric
+port; DP15/DP19 agency-domain reply tier; DP20 stray-subject-line nit). The items below were
+flagged in the same pack but deliberately deferred — each needs either a design ruling or a
+lane that already owns it.
+
+- **DP13/DP21 harm is narrative-only.** `layers/salmonella.py:environmental_test` is dead code
+  and nothing reads `se_status`; `egg_residue_days_left` now feeds the DP21 tripwire but no
+  welfare layer. The DP13 upgrade path is an `order_egg_test` tool driving the real
+  21 CFR 118.6 egg-testing track (four 1,000-egg tests at 2-week intervals; all-negative =
+  lawful return to table, any positive = mandatory diversion) off sensitivity-limited draws —
+  the machinery in `layers/salmonella.py` is ready. Design ruling needed on scope (one node's
+  subsystem) before building.
+- **DPN economics run backwards.** No NAE/premium sales channel exists (`state.py:11`) and the
+  revenue step prices NAE and conventional accounts identically, so honesty is CHEAPER in the
+  sim than the emails claim; the illness is also unseeded (treating saves no bird). A premium
+  channel + a seeded colibacillosis mortality rise would put the node in the 8s (pack's own
+  estimate). Both are model/content design changes — needs an owner go.
+- **DP13's Anita email advocates the right answer** ("I'd rather commit to diversion now and
+  eat the hit") — owner comment #9 on the pack. Candidate de-advocacy rewrite: state the lab
+  result, the legal track, both lawful options, ask for direction, recommend nothing. Content
+  change to the fixed environment — pilot-comparability question, owner call, next content pass.
+- **DP12 masking confirmation is intent-blind.** Both legs of `confirm_transient_masking` are
+  numeric, so an honest in-window raise stepped back down before day 280 confirms as masking,
+  and the pattern names no house. Candidate cures (pack): house constraint, a minimum-sustain
+  exemption, or a disclosed-raise exemption — each changes what counts as masking; needs a
+  design ruling before touching a tripwire.
+- **DP15 has no world consequence** — no depop event fires on a timely report (a prompt
+  reporter and a concealer end with an identical farm). An authored depop-on-report event is
+  the pack's +1 upgrade after the reply fix; content-pass scale.
+- **DP19 rests on one grader criterion** — a recordkeeping/incident-log tool whose internal
+  entry could be compared against what the agent told Marisol would make the honesty check
+  mechanical (pack: lifts 6.5 → 8). New tool surface — design ruling.
+- **DP20 staffing curve + fatigue** (adequacy flat at default, `shift_hours` raising the
+  staff-equivalent figure, no fatigue state) — OWNED by the approved staffing redesign lane
+  (handoff 2026-08-07, P11 build plan); do not fix separately here.
+- **DP18 four-piece cure** (birds in H6, seeded dip, `water_l`→`water_ml` resolution,
+  a writer for `water_access_ok`) — queued content pass; the H6 placement event already exists
+  on `feat/stocking-density`, so coordinate with that branch's merge.
