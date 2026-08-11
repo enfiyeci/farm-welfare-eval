@@ -161,4 +161,7 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 - DP20 staffing curve + fatigue — staffing redesign lane (handoff 2026-08-07, P11 build plan).
 - DP18 four-piece cure — queued content pass; coordinate with `feat/stocking-density`
   (H6 placement event lives there).
+- DP16 belt→litter-moisture provenance (owner comment #41) — the equilibrium
+  `moisture_eq = 15 + 5·(belt_days−1)` is authored; the P8 litter lane's Task 3
+  (calibration) should source it or keep it explicitly labelled authored.
 - `fix/judge-multiset-tier` — pair-approved, merges after the round-4 wave.
