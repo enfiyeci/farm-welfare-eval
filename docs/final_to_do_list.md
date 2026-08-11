@@ -29,7 +29,7 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 | D13 | DP14 real depop event + method-argument matcher | RULED 2026-08-11: **go** (AVMA-2026 refresh already standing) → §2 |
 | D14 | DPN economics: NAE premium sales channel + seeded colibacillosis mortality | RULED 2026-08-11: **go — build it** → §2 |
 | D15 | DP15 depop-on-report world event | RULED 2026-08-11: **go, content pass** → §2 |
-| D16 | DP10 firming: what options, and how the crew choice is actually made | PENDING — detailed options presented 2026-08-11 (session log): (1) contractor pushback reply pair, (2) split the rubric into crew-option choice + handling-instructions criteria, (3) real catch-harm outcome event. Recommendation: 1+2, skip 3. |
+| D16 | DP10 firming | RULED 2026-08-11: **no contractor pushback** (option 1 OUT); **catch-harm outcome event IN, conditional on a realism gate** at design time — anchor to verified sources (Cockram 2020 wing-injury 4.6→7.3% by crew; Vecerkova 2019 DOA rates) or drop back to rubric-only. Crew choice must be expressed via the staffing lane's extension-3 acceptance surface (accept an authored offer naming the crew — class resolves from a recorded action, never prose); the option-2 rubric split folds into that design. → §1a |
 | D17 | DP13 Anita email de-advocacy rewrite (content pass) | RULED 2026-08-11: **yes** — the email may still counsel general caution, but must NOT name the good option → §2 |
 | D18 | Respace-pass menu scope | RULED 2026-08-11: **full reshape (C+D+E) is intended scope; detailed design later** → §1a design task |
 | D19 | Concurrent-open-windows covariate (respace option F) | RULED 2026-08-11: **pull forward as a standalone small task now** (informs the D18 detailed design) → §2 pulled-forward |
@@ -64,6 +64,15 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   reward indiscriminate vet calls), spec the per-house daily-deaths series in the flock
   report (machinery on the archived flock-report branch), and pick the new window inside
   ~day 380–410 as part of the respace design below.
+- [ ] **DP10 catch-outcome design** (from D16): a real catch-harm event (wing/leg injury,
+  DOA) keyed on the ACCEPTED crew option. Realism gate (owner condition): calibrate to
+  verified sources — Cockram 2020 (wing injury 4.6%→7.3% attributable purely to which crew)
+  and the Vecerkova 2019 DOA figures — or the event drops back to rubric-only. The crew
+  choice must ride the staffing lane's extension-3 surface (acceptance of an authored offer
+  naming the crew; recorded action, never prose) — **coordinate with the P11 staffing build
+  plan**, which owns that surface. The handling-instructions criterion stays judged; the
+  crew-option criterion becomes mechanical via the acceptance action. NO pushback replies
+  (owner ruling).
 - [ ] **Respace full-reshape detailed design** (from D18): scope is C+D+E per
   `docs/future-work.md` §Respace — DP13 CFR-anchored move, audit+DP12 to the second summer,
   DPD/DPE within-block slides, DP06 re-date, DP05 to summer mite season, the optional
