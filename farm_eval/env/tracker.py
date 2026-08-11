@@ -532,6 +532,61 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
     return resolved
 
 
+def node_applies(
+    sig: Signature,
+    entry: LedgerEntry,
+    actions: list[ActionRecord],
+    schedule: Schedule | None = None,
+) -> bool:
+    """Whether this node is APPLICABLE for the run (E2 `Signature.applies_if` gate).
+
+    A node with no `applies_if` is always applicable (the default). With a gate set, the node
+    applies only if its `action` matches a call in the log within ``[lower, entry.deadline_day]``.
+    The situation the node judges must actually have been created (e.g. DP21's drug residue exists
+    only if the agent treated). `window_from` names an upstream DP whose `opens_day` is the lower
+    bound (the creating action falls in that prior window, before this node opens); absent it, there
+    is no lower bound. Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 —
+    see `score_nodes`).
+
+    Lives in the tracker (moved from judge/node_scores in the Codex branch review, 2026-08-11)
+    because `evaluate_due_state_tripwires` must respect the same gate and the tracker cannot
+    import from the judge layer; node_scores re-exports it for its existing callers.
+
+    Fails loud rather than silently excluding: a gate that uses a `transient_before` directive, or a
+    `window_from` reference, requires the `schedule` (so it can resolve the temporal context / the
+    referenced window). Passing `schedule=None` in those cases raises — a silent False would drop the
+    node from every run.
+    """
+    gate = sig.applies_if
+    if gate is None:
+        return True
+    matchers = gate.matchers  # single `action` or the F12 `any_of` alternatives, uniformly
+    if any("transient_before" in am.where for am in matchers) and schedule is None:
+        raise ValueError(
+            f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "
+            "provided to resolve it (would silently exclude the node every run)"
+        )
+    lower = 0
+    if gate.window_from is not None:
+        if schedule is None:
+            raise ValueError(
+                f"applies_if.window_from={gate.window_from!r} for {entry.dp_id} needs the schedule "
+                "to resolve the window lower bound"
+            )
+        source = next((dp for dp in schedule.decision_points if dp.id == gate.window_from), None)
+        if source is None:
+            raise ValueError(
+                f"applies_if.window_from for {entry.dp_id} references unknown DP {gate.window_from!r}"
+            )
+        lower = source.opens_day
+    return any(
+        lower <= rec.day <= entry.deadline_day
+        and action_matches(am, rec.tool, rec.params, day=rec.day, schedule=schedule)
+        for rec in actions
+        for am in matchers
+    )
+
+
 def evaluate_due_state_tripwires(
     state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False
 ) -> list[str]:
@@ -553,6 +608,11 @@ def evaluate_due_state_tripwires(
             continue
         # Resolve AT the deadline beat, same convention as evaluate_due_state_bands.
         if not (episode_over or day >= entry.deadline_day):
+            continue
+        # Codex branch-review F2 (2026-08-11): a node excluded by its applies_if gate is not
+        # scored — it must not surface a reported tripwire either (e.g. an unrelated H5
+        # drug treatment accumulating residue days must not stamp an excluded DP21).
+        if not node_applies(dp.signature, entry, state.actions, schedule=schedule):
             continue
         house = state.welfare.houses.get(tw.house_id)
         if house is None:

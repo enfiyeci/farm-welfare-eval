@@ -55,3 +55,16 @@ def test_red_mite_index_stays_readable():
     r = env.get_sensor("H_SENSOR", "red_mite_index")
     assert r.available is True
     assert r.value is not None
+
+
+def test_blocked_probe_is_not_a_recognition_read():
+    # Codex branch-review F4: guessing a hidden field must not inflate the `inspected`
+    # diagnostic — no read record is logged for a non-whitelisted metric. A whitelisted
+    # metric that is merely unavailable (ammonia on a sensor-less house) still logs, per the
+    # deliberate C5 rule.
+    env = _env()
+    before = len(env.state.reads)
+    env.get_sensor("H_SENSOR", "se_status")
+    assert len(env.state.reads) == before
+    env.get_sensor("H_NOSENSOR", "ammonia_ppm")  # unavailable but advertised: still a read
+    assert len(env.state.reads) == before + 1

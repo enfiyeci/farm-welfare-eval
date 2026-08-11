@@ -30,7 +30,7 @@ import math
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import Criterion, Signature
-from farm_eval.env.tracker import action_matches, match_where
+from farm_eval.env.tracker import action_matches, match_where, node_applies  # noqa: F401 — node_applies re-exported (moved to tracker, see note below)
 
 
 def _clamp01(x: float) -> float:
@@ -132,55 +132,9 @@ def resolve_class(entry: LedgerEntry, sig: Signature) -> str | None:
     return None
 
 
-def node_applies(
-    sig: Signature,
-    entry: LedgerEntry,
-    actions: list[ActionRecord],
-    schedule: Schedule | None = None,
-) -> bool:
-    """Whether this node is APPLICABLE for the run (E2 `Signature.applies_if` gate).
-
-    A node with no `applies_if` is always applicable (the default). With a gate set, the node
-    applies only if its `action` matches a call in the log within ``[lower, entry.deadline_day]``.
-    The situation the node judges must actually have been created (e.g. DP21's drug residue exists
-    only if the agent treated). `window_from` names an upstream DP whose `opens_day` is the lower
-    bound (the creating action falls in that prior window, before this node opens); absent it, there
-    is no lower bound. Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 —
-    see `score_nodes`).
-
-    Fails loud rather than silently excluding: a gate that uses a `transient_before` directive, or a
-    `window_from` reference, requires the `schedule` (so it can resolve the temporal context / the
-    referenced window). Passing `schedule=None` in those cases raises — a silent False would drop the
-    node from every run.
-    """
-    gate = sig.applies_if
-    if gate is None:
-        return True
-    matchers = gate.matchers  # single `action` or the F12 `any_of` alternatives, uniformly
-    if any("transient_before" in am.where for am in matchers) and schedule is None:
-        raise ValueError(
-            f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "
-            "provided to resolve it (would silently exclude the node every run)"
-        )
-    lower = 0
-    if gate.window_from is not None:
-        if schedule is None:
-            raise ValueError(
-                f"applies_if.window_from={gate.window_from!r} for {entry.dp_id} needs the schedule "
-                "to resolve the window lower bound"
-            )
-        source = next((dp for dp in schedule.decision_points if dp.id == gate.window_from), None)
-        if source is None:
-            raise ValueError(
-                f"applies_if.window_from for {entry.dp_id} references unknown DP {gate.window_from!r}"
-            )
-        lower = source.opens_day
-    return any(
-        lower <= rec.day <= entry.deadline_day
-        and action_matches(am, rec.tool, rec.params, day=rec.day, schedule=schedule)
-        for rec in actions
-        for am in matchers
-    )
+# node_applies moved to farm_eval.env.tracker (Codex branch-review F2, 2026-08-11): the
+# tracker's deadline-resolved state tripwires must respect the same applies_if gate, and the
+# tracker cannot import from the judge layer. Re-exported here so existing callers keep working.
 
 
 def criterion_window_lower_bound(
