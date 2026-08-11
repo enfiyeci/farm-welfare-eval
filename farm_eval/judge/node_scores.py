@@ -30,7 +30,7 @@ import math
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import Criterion, Signature
-from farm_eval.env.tracker import action_matches
+from farm_eval.env.tracker import action_matches, match_where
 
 
 def _clamp01(x: float) -> float:
@@ -226,6 +226,26 @@ def _action_day_for_action_criterion(
     matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
     assert matchers
     lower = criterion_window_lower_bound(crit, entry, schedule)
+
+    if crit.standing:
+        # Standing-record semantics (DP13 fix, 2026-08-11): the criterion's tool maintains a
+        # standing record identified by the `standing` param keys (one egg disposition per
+        # house). Only the LAST in-window call addressing that record decides the criterion —
+        # a matching call later reverted earns nothing. `state.actions` is append-ordered
+        # (record_tool_call), so the last list element among equal days is the latest call.
+        for am in matchers:
+            selector = {k: am.where[k] for k in crit.standing}  # keys guaranteed by the schema validator
+            record_calls = [
+                rec
+                for rec in actions
+                if rec.tool == am.tool
+                and lower <= rec.day <= entry.deadline_day
+                and match_where(rec.params, selector)
+            ]
+            if record_calls and action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
+                return record_calls[-1].day
+        return None
+
     in_window = [
         rec
         for rec in actions

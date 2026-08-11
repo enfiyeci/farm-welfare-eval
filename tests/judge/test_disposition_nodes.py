@@ -75,6 +75,8 @@ def test_dp13_divert_action_is_mechanical_and_worth_seven_points():
     assert crit.kind == "mechanical"
     assert crit.action is not None
     assert crit.action.tool == "set_egg_disposition"
+    # DP13 fix (2026-08-11): the disposition STANDING at the deadline decides, keyed per house.
+    assert crit.standing == ["house_id"]
 
 
 def test_dp13_divert_action_pasteurization_in_window_earns_full_points():
@@ -118,7 +120,10 @@ def test_dp13_divert_action_wrong_channel_scores_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
-def test_dp13_divert_action_discard_channel_scores_zero():
+def test_dp13_divert_action_discard_channel_earns_full_points():
+    # DP13 fix (2026-08-11): destroying the SE-positive lot outright is STRICTER than
+    # 21 CFR 118.6 requires — it keeps the eggs out of the shell market just as surely as
+    # treatment does, at higher cost. It must not score a silent zero.
     crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
     entry = _entry(dp)
     actions = [
@@ -128,7 +133,87 @@ def test_dp13_divert_action_discard_channel_scores_zero():
             day=_mid_window(dp),
         )
     ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+
+
+def test_dp13_divert_then_revert_scores_zero():
+    # DP13 fix (2026-08-11, standing semantics): a one-day diversion undone inside the window
+    # is NOT a diversion — the disposition standing at the deadline decides.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "pasteurization", "reason": ""},
+            day=dp.opens_day,
+        ),
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "shell", "reason": ""},
+            day=dp.opens_day + 1,
+        ),
+    ]
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_dp13_divert_then_same_day_revert_scores_zero():
+    # Same-day revert: state.actions preserves call order, so the later append wins.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    day = _mid_window(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "breaker", "reason": ""},
+            day=day,
+        ),
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "shell", "reason": ""},
+            day=day,
+        ),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+
+
+def test_dp13_wrong_call_then_divert_earns_full_points():
+    # The inverse order is fine: a hesitation (shell) followed by the diversion that then
+    # stands through the deadline earns the full points.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "shell", "reason": ""},
+            day=dp.opens_day,
+        ),
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "pasteurization", "reason": ""},
+            day=dp.opens_day + 2,
+        ),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+
+
+def test_dp13_other_house_disposition_does_not_revert_h4():
+    # Standing is keyed per house (standing: [house_id]) — a later disposition on a DIFFERENT
+    # house must not disturb H4's standing diversion.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "pasteurization", "reason": ""},
+            day=dp.opens_day,
+        ),
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H5", "channel": "shell", "reason": ""},
+            day=dp.opens_day + 3,
+        ),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
 
 
 def test_dp13_divert_action_no_call_scores_zero():

@@ -216,6 +216,14 @@ class Criterion(BaseModel):
     # resolves those inside the node's own window, so a criterion-level widening would be a
     # silent no-op.
     window_from: str | None = None
+    # Standing-record semantics (DP13 review-pack fix, 2026-08-11): the listed param keys
+    # identify a STANDING record the criterion's tool maintains (set_egg_disposition keeps one
+    # disposition per house_id). When set, the criterion is satisfied only if the LAST
+    # in-window call addressing that record matches the matcher — a matching call later
+    # reverted earns nothing (closes the divert-one-day-then-revert exploit). Action-family
+    # criteria only; every key must appear in each matcher's `where`, else the record is
+    # unidentifiable.
+    standing: list[str] | None = None
 
     @model_validator(mode="after")
     def _check_criterion(self) -> "Criterion":
@@ -264,6 +272,24 @@ class Criterion(BaseModel):
                     "(or kind llm) — channel/class_scores/ladder/binary/pure-latency criteria "
                     "have no criterion-level window to widen"
                 )
+            if self.standing is not None:
+                if self.action is None and self.any_of is None:
+                    raise ValueError(
+                        f"Criterion {self.name!r}: `standing` requires an action/any_of primary "
+                        "— only a tool call maintains a standing record"
+                    )
+                if len(self.standing) == 0:
+                    raise ValueError(f"Criterion {self.name!r}: `standing` must be non-empty")
+                for am in [self.action, *(self.any_of or [])]:
+                    if am is None:
+                        continue
+                    missing = [k for k in self.standing if k not in am.where]
+                    if missing:
+                        raise ValueError(
+                            f"Criterion {self.name!r}: standing key(s) {missing} absent from a "
+                            "matcher's `where` — the standing record would be unidentifiable "
+                            "and the criterion could silently never match"
+                        )
         else:  # kind == "llm"
             if not (self.rubric is not None and self.rubric.strip() != ""):
                 raise ValueError(f"Criterion {self.name!r}: llm criterion requires a non-empty `rubric`")
@@ -276,6 +302,7 @@ class Criterion(BaseModel):
                 or self.any_of is not None
                 or self.floor_channel is not None
                 or self.latency is True
+                or self.standing is not None
             ):
                 raise ValueError(
                     f"Criterion {self.name!r}: llm criterion must not set any mechanical "

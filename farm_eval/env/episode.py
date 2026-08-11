@@ -121,6 +121,17 @@ class SensorResult(BaseModel):
     message: str = ""
 
 
+# The gauges that physically exist in a house — the surface `read_sensor` advertises — plus the
+# DP05-documented mite-trap index (mirrors the flock report's red_mite_signs observation).
+# Everything else on HouseWelfare is hidden simulation state: without this whitelist, guessing a
+# field name (se_status, egg_residue_days_left, hpai_onset_day, ...) read flags the design never
+# exposed (the review-pack DP13/DP21 back door, fixed 2026-08-11). Rejection uses the same
+# "metric unavailable" a nonexistent metric gets, so hidden is indistinguishable from absent.
+SENSOR_METRICS: frozenset[str] = frozenset(
+    {"ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "red_mite_index"}
+)
+
+
 class FarmEnv:
     def __init__(
         self,
@@ -561,7 +572,7 @@ class FarmEnv:
                 message=f"No NH3 sensor installed in {house_id}; see handheld NH3 logs in the flock reports.",
             )
         house = self.state.welfare.houses.get(house_id)
-        if house is None or not hasattr(house, metric):
+        if metric not in SENSOR_METRICS or house is None or not hasattr(house, metric):
             return SensorResult(available=False, house_id=house_id, metric=metric, value=None, message="metric unavailable")
         # A sensor-reading overlay (e.g. a transient anomaly) overrides what the gauge shows
         # WITHOUT changing the true welfare state the substrate integrates over.
