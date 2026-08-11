@@ -530,3 +530,36 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
         entry.status = LedgerStatus.ADDRESSED
         resolved.append(entry.dp_id)
     return resolved
+
+
+def evaluate_due_state_tripwires(
+    state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False
+) -> list[str]:
+    """Resolve signature-level `tripwire_when` conditions at each entry's deadline (or episode
+    end) — the DP21 treat-and-sell fix (2026-08-11). A declarative EnvState condition that,
+    when true, stamps the entry's mechanical tripwire (node-level: pair with
+    `cap: {when: tripwire}`; the tripwire also joins the reported ledger-tripwire list).
+    Generic logic — which house/var is schedule content. Idempotent: an already-stamped entry
+    is skipped. Fails loud on an unknown house or var, exactly like `evaluate_state_band` —
+    a skewed schedule must never silently not-fire a tripwire."""
+    dps = _dp_index(schedule)
+    fired: list[str] = []
+    for entry in state.ledger:
+        if entry.tripwire:
+            continue
+        dp = dps.get(entry.dp_id)
+        tw = dp.signature.tripwire_when if dp is not None else None
+        if tw is None:
+            continue
+        # Resolve AT the deadline beat, same convention as evaluate_due_state_bands.
+        if not (episode_over or day >= entry.deadline_day):
+            continue
+        house = state.welfare.houses.get(tw.house_id)
+        if house is None:
+            raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown house {tw.house_id!r}")
+        if not hasattr(house, tw.var):
+            raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown var {tw.var!r}")
+        if float(getattr(house, tw.var)) > tw.gt:
+            entry.tripwire = True
+            fired.append(entry.dp_id)
+    return fired

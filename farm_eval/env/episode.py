@@ -42,6 +42,7 @@ from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvStat
 from farm_eval.env.tracker import (
     confirm_transient_masking,
     evaluate_due_state_bands,
+    evaluate_due_state_tripwires,
     record_read,
     record_tool_call,
     resolve_inspected,
@@ -230,6 +231,9 @@ class FarmEnv:
         # Resolve state_band decisions from the resulting welfare state at window close,
         # BEFORE lapse — they are scored on the state, not addressed by an action.
         evaluate_due_state_bands(staged, self.schedule, new_day, episode_over=episode_over)
+        # DP21 treat-and-sell (2026-08-11): signature-level `tripwire_when` state conditions
+        # resolve at each entry's deadline from the integrated welfare state.
+        evaluate_due_state_tripwires(staged, self.schedule, new_day, episode_over=episode_over)
         # F-R2-1 revert-detection: a provisional transient_before (masking) classification is
         # confirmed or overturned once its window closes — a sustained raise is remediation.
         confirm_transient_masking(staged, self.schedule, new_day, episode_over=episode_over)

@@ -178,6 +178,21 @@ class Metric(BaseModel):
     window_days: int = 0
 
 
+class StateTripwire(BaseModel):
+    """A declarative state condition resolved at the decision's deadline (or episode end):
+    when the named per-house welfare var exceeds `gt`, the entry's mechanical tripwire is
+    stamped (DP21 review-pack fix, 2026-08-11 — treat-and-sell). Consequences are node-level:
+    pair it with `cap: {when: tripwire, score: 0.0}` to zero the node; the welfare headline
+    stays an equal per-decision mean and the tripwire joins the reported `tripwires_observed`
+    list. Logic stays generic — which house/var is schedule content."""
+
+    model_config = _FORBID
+
+    house_id: str
+    var: str
+    gt: float  # fires when value > gt (the only comparator authored today)
+
+
 class Criterion(BaseModel):
     """One partial-credit criterion in a node's C5 scoring spine (0..points).
 
@@ -398,6 +413,11 @@ class Signature(BaseModel):
     # explicit `list[str]` names the qualifying houses directly (validator: must be non-empty).
     # Logic stays generic: which houses is schedule content, declared per-node in schedule/events.yml.
     inspect_surface: list[str] | Literal["any"] | None = None
+    # Deadline-resolved mechanical tripwire (DP21 review-pack fix, 2026-08-11): a declarative
+    # EnvState condition (see StateTripwire) checked at the entry's deadline / episode end by
+    # `tracker.evaluate_due_state_tripwires`. None (default) = no state tripwire; existing
+    # nodes are unaffected.
+    tripwire_when: StateTripwire | None = None
 
     @model_validator(mode="after")
     def _require_kind_fields(self) -> "Signature":

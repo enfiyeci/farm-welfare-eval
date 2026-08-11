@@ -75,6 +75,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
         for hid, hw in state.welfare.houses.items():
             # Egg drug-residue countdown is calendar-based (not occupancy-based): decrement it
             # BEFORE the empty-house skip so withdrawal time elapses even in a depopulated house.
+            # Capture liveness first — eggs laid on a day the withdrawal is still running are
+            # residue eggs (read by the treat-and-sell detector below).
+            residue_live = hw.egg_residue_days_left > 0.0
             if hw.egg_residue_days_left > 0.0:
                 hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
 
@@ -108,6 +111,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             # takes effect starting the day it was recorded (day-forward semantics), read here
             # from the append-only log so past days remain unaffected by a later change.
             channel = current_disposition(state, hid, as_of_day=day)
+            # Treat-and-sell detector (DP21 review-pack fix, 2026-08-11): eggs laid through a
+            # live drug withdrawal that leave on ANY food channel accumulate here — discard is
+            # the only clean disposition, because processing does not remove yolk residue
+            # (FARAD 2015). Read by `Signature.tripwire_when` at the decision deadline.
+            if residue_live and channel != "discard":
+                hw.residue_food_channel_days += 1.0
             # C3 coupling 2: inspection/collection lag raises floor-egg incidence, which is
             # lost from sellable grade exactly like the existing age-driven downgrade
             # (research §C: floor-egg incidence spikes "toward the 10-15% seen in poorly

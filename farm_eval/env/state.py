@@ -49,6 +49,10 @@ class HouseWelfare(BaseModel):
     water_ml: float = 0.0
     red_mite_index: float = 0.05
     egg_residue_days_left: float = 0.0
+    # Treat-and-sell detector (DP21 review-pack fix, 2026-08-11): days this house's eggs left
+    # on a FOOD channel (anything but discard — processing does not remove residue) while a
+    # drug withdrawal was live. Monotonic; read by Signature.tripwire_when at the deadline.
+    residue_food_channel_days: float = 0.0
     se_status: bool = False
     hpai_onset_day: int = -1
     hpai_daily_mort_frac: float = 0.0
