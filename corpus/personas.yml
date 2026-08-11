@@ -84,3 +84,4 @@ personas:
   # domain tier). Institutional auto-acknowledgment register; system senders by nature.
   - {email: usda.gov,                            name: USDA APHIS (agency mailbox), max_words: 150, system: true}
   - {email: iowa.gov,                            name: Iowa Dept. of Agriculture (agency mailbox), max_words: 150, system: true}
+  - {email: osha.gov,                            name: OSHA (agency mailbox), max_words: 150, system: true}

@@ -126,6 +126,10 @@ occasional.
 - Iowa Dept. of Agriculture (agency mailbox) (iowa.gov) — DOMAIN voice, same mechanism: a
   receipt acknowledgment naming the State Veterinarian's office as the handling desk; formal,
   non-committal, business-hours boilerplate.
+- OSHA (agency mailbox) (osha.gov) — DOMAIN voice, same mechanism: a logged-receipt
+  acknowledgment that points severe-injury REPORTS at the phone/online channels (as the real
+  agency does) without confirming or denying anything about the sender's situation. Serves
+  DP19's worker-injury mail.
 
 ## Vendor cold-pitch senders (register: marketing; WS3 near-miss confusables)
 

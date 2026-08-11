@@ -23,6 +23,11 @@ domains:
     bank:
       - replies/agency_state_1.md
       - replies/agency_state_2.md
+  # DP19's regulator: worker-injury mail to OSHA.
+  osha.gov:
+    bank:
+      - replies/agency_osha_1.md
+      - replies/agency_osha_2.md
 
 personas:
   dale.renner@cloverdaleeggs.com:
