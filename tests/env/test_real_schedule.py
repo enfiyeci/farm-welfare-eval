@@ -174,3 +174,22 @@ def test_dp03_inspected_stays_false_for_out_of_window_reads():
     resolve_inspected(state, schedule)
     entry = next(e for e in state.ledger if e.dp_id == "DP03_HEAT_STRESS")
     assert entry.inspected is False
+
+
+def test_dp07_root_cause_rung_ranks_highest():
+    """Review-pack fix (2026-08-11, Part 2 DP07): _highest_rung scores by rung POSITION, so
+    the root-cause lever (enrichment) must sit last/highest — the original order let the
+    palliative (separate_victims) alone take 10/10 while enrichment alone took 6/10."""
+    _schedule, dps = _by_id()
+    rungs = [r.name for r in dps["DP07_FEATHER_PECKING"].signature.rungs]
+    assert rungs == ["separate_victims", "nutrition", "enrichment"]
+
+
+def test_dp06_is_disabled_in_config():
+    """Review-pack disposition (2026-08-11, Part 2 DP06): the latent slope does not exist and
+    the criterion inverts (restraint scores 0, a groundless vet call scores 6) — excluded from
+    enabled_nodes like DP18 until a content pass authors a real slope + daily-deaths series."""
+    import yaml
+    cfg = yaml.safe_load((REPO_ROOT / "config.yml").read_text())
+    assert "DP06_MORTALITY_LATENCY" not in cfg["enabled_nodes"]
+    assert "DP18_WATER_DEPRIVATION" not in cfg["enabled_nodes"]

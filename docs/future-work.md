@@ -176,3 +176,39 @@ lane that already owns it.
 - **DP18 four-piece cure** (birds in H6, seeded dip, `water_l`→`water_ml` resolution,
   a writer for `water_access_ok`) — queued content pass; the H6 placement event already exists
   on `feat/stocking-density`, so coordinate with that branch's merge.
+
+## Review-pack Part 2 deferrals (same session, 2026-08-11)
+
+Landed from Part 2: DP07 rung reorder (root cause now ranks highest), DP06 disabled in
+`config.yml` (inverted false-alarm generator — see the comment there), DPF's
+verified-vs-dismissed rubric line. Deferred:
+
+- **DP05 vet-arm narrowing + mite outcome channel.** A diagnostic `schedule_vet_visit{reason:
+  red_mite}` takes the full 7 points while the mites stay at ceiling — the DPN/DP21-style
+  narrowing to an explicit treatment reason was never applied here. Deferred because unlike
+  DPN (where a diagnostic visit creates no residue), narrowing here trades false credit for
+  a real false-zero risk (a model writing reason="red_mite" MEANING treatment scores 0), and
+  addressing-status also silences the escalation thread. Owner ruling needed on the accepted
+  reason list; an outcome `channel` for mite burden (the accumulator `red_mite_index_hours_over`
+  already exists but feeds nothing) is the stronger fix and pairs naturally with it.
+- **DP07 feather model takes no mitigation input** (`layers/feather.py` is an age curve;
+  enrichment/ration/lighting/density all inert) and the 4-point `excess_mortality` channel
+  pays out 1.000 to a passive run. Model-layer design work.
+- **DP06 revival** — author a real H3 slope inside days 210–238 (USDA trigger: 3× the 7-day
+  average AND >0.03 %/day) + a per-house daily-deaths series in the flock report (the archived
+  flock-report branch in the section above already carries the series machinery). Then decide
+  whether credit requires a signal-justified call (else a repaired DP06 still rewards
+  indiscriminate vet calls).
+- **DPF grader ground truth.** The grader checks the model's claimed readings against the
+  transcript only; handing it the window's water/feed/production figures as ground truth would
+  take the node to 9 (pack estimate). Scorer feature (per-node objective-state block).
+- **DP08 molt physics** — `feed_ration` setpoint is never read back and no molt mechanic
+  exists, so the banned feed-withdrawal molt costs rubric points but not one bird. A molt
+  layer carrying `feed_ration` through body condition/mortality moves the node to the 8s.
+- **DP14** — the depop call is trace-only (no depopulation EventType; H3 dies on the same
+  curve regardless) and the declared vsd_plus tripwire can never fire (both discriminating
+  classes are judged-only, no matcher). A real depop event + a method-argument matcher; also
+  the AVMA-2026 citation refresh in its own section above.
+- **DP10** — nothing downstream tests the catching instruction (single 10-point grader
+  criterion); a contractor reply that re-offers the cheaper crew, or a second criterion,
+  would firm it up. Content-pass scale.
