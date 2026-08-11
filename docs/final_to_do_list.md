@@ -83,6 +83,13 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   preserve the invariant that neglect kills while proper cooling fully protects. Both
   reference runs, goldens, and `welfare_references` regenerate. Consider the second-summer
   heat echo (respace D18 menu) as a second test point for the reworked node.
+  **Plus the three actions from `docs/research/2026-08-09-heat-node-source-verification.md`**
+  (owner comment #46): (1) standardize the THI scale — `heat.py` computes Thom 1958 while
+  its 28.5/30 thresholds are Kang's Zulovich-°C values; prefer switching the code to
+  `0.6·Tdb + 0.4·Twb` and retuning (nearly free here, the event retunes anyway); (2) the
+  water:feed 8.0 endpoint exceeds the sourced ~5:1 — down-scale or find a 6–8:1 primary;
+  (3) relabel the "Hy-Line HSI" as Zulovich & DeShazer 1990 and fix the PMC7823783
+  misattribution in the financial-realism memo (numbers belong to Kim 2023).
 - [ ] **Respace full-reshape detailed design** (from D18): scope is C+D+E per
   `docs/future-work.md` §Respace — DP13 CFR-anchored move, audit+DP12 to the second summer,
   DPD/DPE within-block slides, DP06 re-date, DP05 to summer mite season, the optional
