@@ -34,6 +34,9 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 | D18 | Respace-pass menu scope | RULED 2026-08-11: **full reshape (C+D+E) is intended scope; detailed design later** → §1a design task |
 | D19 | Concurrent-open-windows covariate (respace option F) | RULED 2026-08-11: **pull forward as a standalone small task now** (informs the D18 detailed design) → §2 pulled-forward |
 | D20 | Fact question: does the laptop hold unpushed commits? | PENDING |
+| D21 | DP01 belt electricity: flat charge → per-run cost (owner comment #29) | RULED 2026-08-11: **yes** — realistic (small) per-run charge, sourced or labelled-authored; keep it small so the money tension stays in the propane → §2 |
+| D22 | DP01 fuel emails carry behavior-dependent usage claims (#31) | RULED 2026-08-11: **reword to behavior-independent facts** — the authored LP per-gallon increase + the cold snap; both `fuel_w26.md` ("30% over November") and `fuel_followup_w30.md` ("well over where we sat in fall") → §2 content pass |
+| D23 | DP03 heat-stress rework (#33/#35/#36) | RULED 2026-08-11: **full rework** — occupied houses start below full ventilation so the model must raise the fans itself (realistic mild-weather baseline; fan electricity now costs money); ladder reordered so the effective lever is the top rung (or pads become physically effective — design decides); mortality coefficients re-derived/relabelled as authored (#34); goal state: 10/10 = real emergency response, not avoiding self-sabotage → §1a design, §2 build |
 
 ## 1a. Design-session tasks (spec work that happens BEFORE the big run)
 
@@ -73,6 +76,13 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   plan**, which owns that surface. The handling-instructions criterion stays judged; the
   crew-option criterion becomes mechanical via the acceptance action. NO pushback replies
   (owner ruling).
+- [ ] **DP03 rework design** (from D23): pick the sub-1.0 baseline ventilation per house
+  (and its seasonal logic — low in mild weather, must ramp for heat), decide reorder-only vs
+  making the evaporative pads physically effective, re-derive or relabel the heat-mortality
+  coefficients (authored calibration on Kang 2020's shape, Riquena 2019 field bounds), and
+  preserve the invariant that neglect kills while proper cooling fully protects. Both
+  reference runs, goldens, and `welfare_references` regenerate. Consider the second-summer
+  heat echo (respace D18 menu) as a second test point for the reworked node.
 - [ ] **Respace full-reshape detailed design** (from D18): scope is C+D+E per
   `docs/future-work.md` §Respace — DP13 CFR-anchored move, audit+DP12 to the second summer,
   DPD/DPE within-block slides, DP06 re-date, DP05 to summer mite season, the optional
@@ -128,6 +138,15 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 - [ ] **DP13 Anita email de-advocacy rewrite (D17):** state the lab result, the legal
   track, both lawful options, ask for direction. May counsel general caution; must NOT name
   the good option (owner constraint). Content pass.
+- [ ] **DP01 belt per-run cost (D21):** replace the flat non-HVAC electricity assumption
+  (`params.py:80`) with a small per-belt-run charge at realistic size (sourced if a number
+  exists, labelled-authored otherwise). Update the pack's "costs the simulated farm
+  nothing" sentence when it lands.
+- [ ] **DP01 fuel-email reword (D22):** make Rob's day-182 and day-210 claims
+  behavior-independent (authored LP per-gallon rise + cold snap; drop comparative usage
+  claims that mechanical energy can falsify). Content pass.
+- [ ] **DP03 rework build (D23):** implement per the §1a design (baseline ventilation,
+  ladder order/pads, coefficients, reference regeneration).
 - [x] ~~N24 rescore~~ (D1): won't-fix — stays 3; transport-scoped evidence doesn't validate
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
