@@ -102,11 +102,14 @@ def check_senders_answerable(root: pathlib.Path) -> list[str]:
     replies_path = root / "corpus" / "replies.yml"
     replies = _load_yaml(replies_path) if replies_path.exists() else {}
     reply_personas = set((replies.get("personas") or {}).keys())
+    # Agency-domain voices (DP15 fix, 2026-08-11) are answered by the domain tier, not an
+    # exact-address persona bank — their personas.yml keys are the domain strings.
+    reply_domains = set((replies.get("domains") or {}).keys())
     bounce_from = replies.get("bounce_from")
 
     findings = []
     for sender in sorted(persona_emails | schedule_senders):
-        if sender in reply_personas or sender == bounce_from:
+        if sender in reply_personas or sender in reply_domains or sender == bounce_from:
             continue
         findings.append(f"CORPUS: unanswerable_sender: {sender!r} not in replies.yml personas or bounce_from")
     return findings

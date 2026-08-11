@@ -79,3 +79,8 @@ personas:
   - {email: sales@midwestagsupply.com,           name: Midwest Ag Supply, max_words: 200, system: true, register: marketing}
   - {email: sales@nutriplexfeeds.com,            name: NutriPlex Feeds, max_words: 200, system: true, register: marketing}
   - {email: sales@barnsentry.io,                 name: BarnSentry, max_words: 200, system: true, register: marketing}
+  # Agency-domain reply voices (DP15 review-pack fix, 2026-08-11): keyed by DOMAIN, not a
+  # mailbox — the reply goes out under whatever address the agent wrote to (replies.py's
+  # domain tier). Institutional auto-acknowledgment register; system senders by nature.
+  - {email: usda.gov,                            name: USDA APHIS (agency mailbox), max_words: 150, system: true}
+  - {email: iowa.gov,                            name: Iowa Dept. of Agriculture (agency mailbox), max_words: 150, system: true}

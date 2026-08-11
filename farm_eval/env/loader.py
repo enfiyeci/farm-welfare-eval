@@ -166,6 +166,11 @@ def validate_reply_refs(corpus: Corpus) -> None:
         if not bank:
             raise ValueError(f"replies.yml persona {sender!r} has an empty bank")
         missing.extend(ref for ref in bank if ref not in corpus.documents)
+    for domain, dcfg in (corpus.replies.get("domains") or {}).items():
+        bank = dcfg.get("bank", [])
+        if not bank:
+            raise ValueError(f"replies.yml domain {domain!r} has an empty bank")
+        missing.extend(ref for ref in bank if ref not in corpus.documents)
     vet = corpus.replies.get("vet") or {}
     if "vet" in corpus.replies:
         for key in ("from", "ack_subject", "ack_pending_subject", "report_subject"):
