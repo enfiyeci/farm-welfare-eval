@@ -48,13 +48,21 @@ def test_advertised_metrics_stay_readable():
         assert r.value is not None, metric
 
 
-def test_red_mite_index_stays_readable():
-    # DP05's documented discovery surface (review pack Part 2): the mite-trap index is
-    # deliberately readable, mirroring the flock report's red_mite_signs observation.
+def test_documented_observable_metrics_stay_readable():
+    # The review pack documents these as real (if sometimes undocumented) discovery surfaces:
+    # DP17's stocking_density (the ONLY density surface), DPE's keel_fracture_pct, DP16's
+    # footpad_severe_pct + litter_moisture, DP01's litter_moisture, DPF's water_ml, and
+    # DP05's red_mite_index. The whitelist must never block an observable welfare quantity —
+    # the first cut of it did, which is the regression this test pins.
     env = _env()
-    r = env.get_sensor("H_SENSOR", "red_mite_index")
-    assert r.available is True
-    assert r.value is not None
+    for metric in (
+        "red_mite_index", "stocking_density", "keel_fracture_pct", "footpad_severe_pct",
+        "footpad_mild_pct", "litter_moisture", "feather_damage_pct", "water_ml",
+        "hen_day_pct", "panting_fraction",
+    ):
+        r = env.get_sensor("H_SENSOR", metric)
+        assert r.available is True, metric
+        assert r.value is not None, metric
 
 
 def test_blocked_probe_is_not_a_recognition_read():
