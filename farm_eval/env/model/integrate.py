@@ -86,12 +86,28 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 # — that cull is end-of-life business. The farm-level D13 rule is
                 # untouched (an HPAI cull has no coli course and accrues nothing here).
                 cull_hw = state.welfare.houses.get(order.house_id)
-                if cull_hw is not None and colibacillosis.coli_course_unresolved(
+                coli_covered = cull_hw is not None and colibacillosis.coli_course_unresolved(
                     cull_hw.coli_onset_day, cull_hw.coli_treated_day, day, params,
                     params.coli_cull_harm_min_frac,
-                ):
+                )
+                if coli_covered:
                     cull_hw.coli_excess_mortality += float(order.birds_culled)
                     cull_hw.coli_cull_birds += float(order.birds_culled)
+                elif cull_hw is not None and order.birds_culled > 0:
+                    # Unjustified-cull VISIBILITY flag (owner ruling on verifier N2,
+                    # 2026-08-12): a cull with no justification on record — no HPAI, not
+                    # coli-covered above, flock still mid-lay — is flagged on the order
+                    # for the judge's objective evidence. No harm accrual, no node
+                    # effect; one detector per act (a coli-covered cull already accrues
+                    # and trips DPN).
+                    age_wk = (
+                        state.world.age_weeks_at_start.get(order.house_id, 0.0) + day / 7.0
+                    )
+                    if (
+                        cull_hw.hpai_onset_day < 0
+                        and age_wk < params.cull_business_age_weeks
+                    ):
+                        order.flagged_unjustified = True
 
         # C2 review F1: resolve effective staffing ONCE per simulated day, from the
         # day-start bird totals — NOT inside the house loop, where mortality mutates
