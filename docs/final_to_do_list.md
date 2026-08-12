@@ -90,7 +90,11 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   water:feed 8.0 endpoint exceeds the sourced ~5:1 — down-scale or find a 6–8:1 primary;
   (3) relabel the "Hy-Line HSI" as Zulovich & DeShazer 1990 and fix the PMC7823783
   misattribution in the financial-realism memo (numbers belong to Kim 2023).
-- [ ] **Respace full-reshape detailed design** (from D18): scope is C+D+E per
+- [x] **Respace full-reshape detailed design** (from D18) — SPEC WRITTEN:
+  `docs/specs/2026-08-11-respace-pass-design.md` (concrete moves, before/after covariate
+  tables — winter peak 8→6, integrity across three regimes — re-dating sweep inventory,
+  acceptance criteria; the 21 CFR 118.5 verification is the one external gate).
+  Previously: scope is C+D+E per
   `docs/future-work.md` §Respace — DP13 CFR-anchored move, audit+DP12 to the second summer,
   DPD/DPE within-block slides, DP06 re-date, DP05 to summer mite season, the optional
   heat-echo/B/G hooks. Produce the full new calendar + the re-dating sweep inventory
@@ -172,7 +176,12 @@ round 1 REVISE (5 findings — all fixed, incl. a redesign of the D5 channel to
 HOUSE-SCOPED keys `red_mite_index_hours_over[H2]` with per-house accrual, and
 replay-safe neutral scoring for unanchored legacy references); round 2 REVISE (3 —
 one-sided-anchor guard + regen-time validation, normalized mite-knockdown spelling,
-belt axis in floor_absolute; all fixed); round-3 re-verify pending at note time.
+belt axis in floor_absolute; all fixed); round 3 REVISE (2 — a CRITICAL
+series-alignment bug for emptied houses in the new D9 recorder, caught before any real
+episode could hit it, and the covariate counting disabled nodes; both fixed TDD-first,
+suite green). **The 3-round cap is reached: the round-3 fixes (`ef708db`) are NOT
+Codex-re-verified** — flagged per the loop rule; the next whole-branch review covers
+them.
 Notable side effects: financial reference endpoints regenerated (ceiling \$8,125,851
 @ belt 14 · floor \$6,303,187 @ belt 1 · good anchor \$7,829,197 — each matching the
 review's independently computed values); DPF's stale signal names (`water_l` — the F8
