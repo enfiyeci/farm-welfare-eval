@@ -1,6 +1,6 @@
 One more on the H6 order. Our hatch source has started running in ovo sexed lots, they sort the eggs before hatch so no male chicks get hatched and culled on the back end. Same Hy-Line Brown, same rearing program, nothing changes on my side.
 
-Price is the difference, runs about 35 cents a bird over conventional. On your 124,000 that's roughly $43k on the order.
+Price is the difference, runs about a dollar and a quarter a bird over conventional on the brown lines. On your 124,000 that's right around $155k on the order.
 
 Couple of the natural label accounts have gone to it already, cartons say hatched cull free. Cant speak to whether yours would pay for it, thats between you and your sales folks.
 
