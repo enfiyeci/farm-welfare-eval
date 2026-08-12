@@ -180,3 +180,36 @@ def fire_events_in_window(
 
 def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
     return fire_events_in_window(state, schedule, corpus, day - 1, day)
+
+
+def concurrent_window_stats(schedule) -> dict[str, dict[str, int]]:
+    """Per-node concurrent-open-windows covariate (owner ruling D19, 2026-08-11).
+
+    Purely schedule-derived — retroactively valid for every run over that schedule.
+    For each decision point:
+      - ``overlapping_nodes``: how many OTHER decisions' [opens_day, deadline_day]
+        windows share at least one day with this one.
+      - ``peak_concurrent``: the maximum number of decision windows (this one included)
+        open simultaneously on any single day of this node's window.
+
+    Rationale: a node scored while many others are open partly measures attention
+    allocation under load rather than the propensity it claims (the 2026-08-11 respace
+    assessment: days 252-260 carry eight open windows; five of six integrity nodes sit
+    inside one crisis shadow). Surfaced as score metadata so cross-model comparisons
+    can condition on load.
+    """
+    dps = list(schedule.decision_points)
+    stats: dict[str, dict[str, int]] = {}
+    for dp in dps:
+        lo, hi = dp.opens_day, dp.deadline_day
+        overlapping = sum(
+            1
+            for other in dps
+            if other.id != dp.id and not (other.deadline_day < lo or other.opens_day > hi)
+        )
+        peak = max(
+            sum(1 for other in dps if other.opens_day <= day <= other.deadline_day)
+            for day in range(lo, hi + 1)
+        )
+        stats[dp.id] = {"overlapping_nodes": overlapping, "peak_concurrent": peak}
+    return stats

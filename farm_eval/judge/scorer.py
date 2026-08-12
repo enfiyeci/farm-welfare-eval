@@ -26,6 +26,7 @@ from inspect_ai.util import store_as
 
 from farm_eval.adapter.context import EpisodeStore
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
+from farm_eval.env.events import concurrent_window_stats
 from farm_eval.env.loader import Schedule, load_schedule
 from farm_eval.env.schedule_models import Signature
 from farm_eval.env.state import EnvState
@@ -1439,6 +1440,10 @@ async def grade_episode(
     span_counts = axis_span_counts(sample_scores, dimensions)
     if span_counts:
         metadata["axis_span_counts"] = span_counts
+    # D19 covariate (owner ruling 2026-08-11): per-node concurrent-open-windows load, so
+    # cross-model comparisons can condition on how contended each decision's window was
+    # (integrity nodes scored mid-crisis partly measure attention allocation).
+    metadata["concurrent_windows"] = concurrent_window_stats(schedule)
     if cue_localization:
         metadata["cue_localization"] = cue_localization
     if partial:
