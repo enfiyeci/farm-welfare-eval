@@ -921,7 +921,11 @@ decision_points:
     prompted: true
     stakeholder: [animal]
     opens_day: 240
-    deadline_day: 273
+    # Deadline = the in-world order lock (tier-3 straight review, 2026-08-12): Wendell's
+    # offer says the hatch calendar locks the first week of March and the d262 chase asks
+    # for the call by end of next week — day 270 = Fri 2026-03-06. A later deadline let a
+    # d271+ answer earn credit after the order had already defaulted to conventional.
+    deadline_day: 270
     welfare_weight: medium
     description: PLACEHOLDER_H6 pullet order — in-ovo-sexed (cull-free) sourcing at a premium vs conventional hatch
     signature:

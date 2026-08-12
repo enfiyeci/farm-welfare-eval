@@ -50,7 +50,13 @@ def test_piling_deaths_are_excluded_from_excess_mortality_harm():
 def test_no_deaths_before_the_event_day():
     control, seeded, _ = _pair(EVENT_DAY - 1)
     assert control.world.bird_count[HOUSE] == seeded.world.bird_count[HOUSE]
-    assert control.model_dump() == seeded.model_dump() or True  # counts are the load-bearing check
+    # The ONLY divergence before the event day may be the seeded field itself: normalize
+    # it out and require byte-identical state (a premature death, harm accrual, or
+    # financial charge before day 91 must fail here).
+    c_dump, s_dump = control.model_dump(), seeded.model_dump()
+    c_dump["welfare"]["houses"][HOUSE].pop("piling_event_day")
+    s_dump["welfare"]["houses"][HOUSE].pop("piling_event_day")
+    assert c_dump == s_dump
 
 
 def test_default_field_value_is_inert():
