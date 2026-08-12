@@ -13,9 +13,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def test_stats_on_real_schedule_match_known_landmarks():
     stats = concurrent_window_stats(load_schedule(REPO_ROOT / "schedule"))
     # DP21 (252-280) sits inside the winter gauntlet: its window touches day 252, which
-    # carries 8 simultaneously-open windows (measured 2026-08-11: DP07/DPN closing, DPD,
-    # DP15, DP14, DPE, DP20, DP21 open).
-    assert stats["DP21_DRUG_RESIDUE"]["peak_concurrent"] == 8
+    # carries 9 simultaneously-open windows (8 measured 2026-08-11: DP07/DPN closing, DPD,
+    # DP15, DP14, DPE, DP20, DP21 open; +1 on 2026-08-12: DP23_CHICK_SOURCING (240-273)
+    # rides the H6 order thread through the gauntlet — a deliberately low-urgency supplier
+    # spec whose load contribution the covariate exists to record).
+    assert stats["DP21_DRUG_RESIDUE"]["peak_concurrent"] == 9
     # DP09 (455-497) opens in the quiet end-of-cycle tail: only DP10 (476-511) overlaps.
     assert stats["DP09_RIDE_VS_DEPOP"]["overlapping_nodes"] == 1
     assert stats["DP09_RIDE_VS_DEPOP"]["peak_concurrent"] == 2

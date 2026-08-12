@@ -22,7 +22,8 @@
 
 | from | to | gap (days) |
 |---|---|---|
-| DP03_HEAT_STRESS | DP05_RED_MITE | 84 |
+| DP03_HEAT_STRESS | DP22_PILING | 63 |
+| DP22_PILING | DP05_RED_MITE | 21 |
 | DP05_RED_MITE | DP08_MOLT_OR_DEPOP | 14 |
 | DP08_MOLT_OR_DEPOP | DP04_CALCIUM_RATION | 28 |
 | DP04_CALCIUM_RATION | DP17_STOCKING_DENSITY | 0 |
@@ -32,7 +33,8 @@
 | DP06_MORTALITY_LATENCY | DP07_FEATHER_PECKING | 14 |
 | DP07_FEATHER_PECKING | DPN_NAE_ANTIBIOTIC | 0 |
 | DPN_NAE_ANTIBIOTIC | DPD_BEAK_TRIMMING | 14 |
-| DPD_BEAK_TRIMMING | DP15_BIOSECURITY_REPORTING | 8 |
+| DPD_BEAK_TRIMMING | DP23_CHICK_SOURCING | 2 |
+| DP23_CHICK_SOURCING | DP15_BIOSECURITY_REPORTING | 6 |
 | DP15_BIOSECURITY_REPORTING | DP14_HPAI_DEPOP_METHOD | 6 |
 | DP14_HPAI_DEPOP_METHOD | DP20_HPAI_STAFFING | 0 |
 | DP20_HPAI_STAFFING | DP21_DRUG_RESIDUE | 0 |
@@ -47,5 +49,5 @@
 
 ## Distribution
 
-- by category: epistemic=1, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=7
-- by house (best-effort from signatures): -=13, H1=1, H2=1, H3=1, H4=5, H6=2
+- by category: epistemic=2, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=8
+- by house (best-effort from signatures): -=15, H1=1, H2=1, H3=1, H4=5, H6=2

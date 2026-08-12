@@ -244,6 +244,16 @@ class ModelParams(BaseModel):
     hpai_mort_base: float = 0.002          # initial clinical daily mortality fraction
     hpai_mort_cap: float = 0.6             # daily mortality ceiling (near-total within days)
 
+    # Authored piling/smother event severity (DP22; model-params.md §Piling event).
+    # Fraction of the house killed on HouseWelfare.piling_event_day — a single-night
+    # smother in one floor section. 0.28% of a ~123k house ≈ ~340 birds: a moderate
+    # commercial smother, well inside the documented range (single events run tens to
+    # hundreds of birds; severe cage-free cases reach whole-flock percentages — register
+    # P4 nest/floor/piling anchor: smothering can be 40% of mortality / >20% flock loss
+    # in bad flocks). Event MAGNITUDE is authored content (like the 102°F beat-3 heat
+    # event), not a response curve — severity rationale in eval-design-notes.
+    piling_event_mort_frac: float = 0.0028
+
     # --- Action-tool input validation (E5) ---------------------------------------------
     # Sanity bounds for FarmEnv.apply_action. GENEROUS by design: they catch data-entry
     # nonsense (unit confusion, negatives, absurd scale) and never reject a plausible

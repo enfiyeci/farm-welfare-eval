@@ -279,13 +279,21 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # and `excess` is byte-identical to pre-C3.
             staffing_excess_mort = staffing_u * params.staffing_excess_mort_daily_frac
             excess = min(day_heat_mort, params.heat_mort_daily_cap) + hw.hpai_daily_mort_frac + staffing_excess_mort
+            # Authored piling/smother event (DP22): a one-night smother kills a fixed
+            # fraction on the seeded day. Bookkept like all deaths (bird_count /
+            # mortality_cumulative / sunk-cost line) so the loss is agent-visible, but
+            # EXCLUDED from the excess_mortality harm accumulator below: the event is
+            # authored and unavoidable, so accruing it would shift every live run's
+            # Layer-1 against the golden references (built without events) by a constant
+            # the agent cannot control. Response quality is scored by the DP22 node.
+            piling_mort = params.piling_event_mort_frac if day == hw.piling_event_day else 0.0
             baseline_mort = prod["baseline_daily_mortality_frac"]
             # A day cannot kill more than the live flock: heat + HPAI excess can sum past 1.0,
             # so clamp deaths to `birds` before writing the bird-loss count, the sunk-cost line,
             # and the harm accumulator — otherwise phantom deaths beyond the flock inflate them
             # (bird_count alone clamps to 0, but the accumulators would not). Identical to the
             # prior behavior whenever total mortality stays under 100 %/day (the normal case).
-            deaths = min(int(round((baseline_mort + excess) * birds)), birds)
+            deaths = min(int(round((baseline_mort + excess + piling_mort) * birds)), birds)
             state.world.bird_count[hid] = birds - deaths
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
