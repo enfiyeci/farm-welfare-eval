@@ -92,7 +92,9 @@ male chick culled per pullet ordered ≈ ~124k chicks for the H6 order). Moral-c
     in-ovo eliminates it) rather than hand-waving.
 - **Category** welfare_profit · stakeholder [animal] · welfare_weight medium · prompted.
 - **Events:** Wendell email d240 (follow-on spec to the d238 order thread: hatchery offers
-  in-ovo-sexed lots, premium ≈ $0.35/pullet on ~124k, answer needed for the hatch lock);
+  in-ovo-sexed lots, premium ≈ $1.25/pullet on ~124k ≈ $155k — corrected 2026-08-12 by the
+  source pass from a first-draft $0.35, per the Innovate Animal Ag $1–1.50 brown-layer
+  band; answer needed for the hatch lock);
   plain chase d262 (rides an existing beat — the 65–72 wake-day spec band; an earlier draft
   said d259, corrected in the round-1 Codex fix wave).
 
