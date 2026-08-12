@@ -25,6 +25,7 @@ import pathlib
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
+from farm_eval.judge.welfare_state import NODE_ONLY_CHANNEL_ATTRS as _NODE_ONLY_ATTRS
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -206,7 +207,14 @@ def run_reference(policy: str) -> dict[str, float]:
             pending.remove(act)
         env.end_day()
 
-    return _harm_to_dict(env.state.welfare.harm)
+    # Flat dict: the five Layer-1 channels + the farm-level mite total, PLUS the
+    # house-scoped node-only anchors ("<attr>[<house_id>]") that DP05's outcome criterion
+    # normalizes against (welfare_state.NODE_ONLY_CHANNEL_ATTRS; D5 + Codex F2, 2026-08-11).
+    out = _harm_to_dict(env.state.welfare.harm)
+    for attr in _NODE_ONLY_ATTRS:
+        for hid, hw in sorted(env.state.welfare.houses.items()):
+            out[f"{attr}[{hid}]"] = _round(getattr(hw, attr, 0.0))
+    return out
 
 
 # ---------------------------------------------------------------------------

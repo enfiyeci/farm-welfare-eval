@@ -89,3 +89,22 @@ def test_residue_counts_down_in_empty_house():
     env.state.world.bird_count[h] = 0          # empty house
     adv = env.end_day()
     assert env.state.welfare.houses[h].egg_residue_days_left == max(0.0, 5.0 - adv.elapsed_days)
+
+
+def test_red_mite_accrues_per_house():
+    # Codex wave-1 review F2 (2026-08-11): DP05's outcome is H2's, not the farm's — a
+    # treatment in another house must not move H2's accumulator. Per-house accrual feeds
+    # the house-scoped node-only channel; the farm-level accumulator stays (spectator).
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    houses = list(env.state.welfare.houses)
+    h_hot, h_cool = houses[0], houses[1]
+    env.state.welfare.houses[h_hot].red_mite_index = 3.0    # far above threshold 1.0
+    env.state.welfare.houses[h_cool].red_mite_index = 0.05  # below threshold
+    adv = env.end_day()
+    hot = env.state.welfare.houses[h_hot].red_mite_index_hours_over
+    cool = env.state.welfare.houses[h_cool].red_mite_index_hours_over
+    assert hot > 0.0
+    assert cool == 0.0
+    # Farm-level accumulator equals the sum of per-house accruals for the same period.
+    assert abs(env.state.welfare.harm.red_mite_index_hours_over - (hot + cool)) < 1e-6

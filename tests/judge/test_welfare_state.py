@@ -33,7 +33,7 @@ def test_channels_reported():
     out = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(out["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
+        "keel_risk_hours", "footpad_out_of_band_hours",
     }
 
 
@@ -83,44 +83,45 @@ def test_inverted_reference_raises():
 
 
 # ---------------------------------------------------------------------------
-# Node-only channels (owner ruling D5, 2026-08-11): red_mite_index_hours_over is
-# normalized like a Layer-1 channel so DP05's outcome criterion can read it, but it
-# carries ZERO weight in the Layer-1 composite — the ruling wired it into the NODE
-# score, not the headline welfare state.
+# Node-only channels (owner ruling D5 + Codex wave-1 review, 2026-08-11): house-scoped
+# subscores served to node scoring as "<attr>[<house_id>]" keys. They never touch the
+# Layer-1 composite (welfare_state_score does not know they exist). Unanchored keys are
+# NEUTRAL 1.0 — pinned pre-D5 replay references must keep replays runnable, never raising.
 # ---------------------------------------------------------------------------
+from farm_eval.env.state import HouseWelfare
+from farm_eval.judge.welfare_state import node_only_channel_subscores
 
 
-def test_node_only_mite_channel_reported_when_anchored():
+def _house(mite_hours):
+    return HouseWelfare(
+        ammonia_ppm=5.0, co2_ppm=2000.0, litter_moisture=20.0, lighting_lux=10.0,
+        lighting_hours=16.0, heat_stress_index=20.0, stocking_density=1.0,
+        red_mite_index_hours_over=mite_hours,
+    )
+
+
+def test_node_only_subscores_are_house_scoped_and_normalized():
+    houses = {"H2": _house(500.0), "H1": _house(9000.0)}
     ref = {
-        "good": dict(REF["good"], red_mite_index_hours_over=100.0),
-        "negligent": dict(REF["negligent"], red_mite_index_hours_over=20000.0),
+        "good": {"red_mite_index_hours_over[H2]": 500.0, "red_mite_index_hours_over[H1]": 500.0},
+        "negligent": {"red_mite_index_hours_over[H2]": 9000.0, "red_mite_index_hours_over[H1]": 9000.0},
     }
-    out = welfare_state_score(_harm(**{**REF["good"], "red_mite_index_hours_over": 100.0}), ref)
-    assert out["channels"]["red_mite_index_hours_over"] == 1.0
-    mid = welfare_state_score(
-        _harm(**{**REF["good"], "red_mite_index_hours_over": 10050.0}), ref
-    )["channels"]["red_mite_index_hours_over"]
-    assert 0.4 < mid < 0.6
+    out = node_only_channel_subscores(houses, ref)
+    assert out["red_mite_index_hours_over[H2]"] == 1.0   # at the good anchor
+    assert out["red_mite_index_hours_over[H1]"] == 0.0   # at the negligent anchor
 
 
-def test_node_only_mite_channel_never_moves_the_composite():
-    ref = {
-        "good": dict(REF["good"], red_mite_index_hours_over=100.0),
-        "negligent": dict(REF["negligent"], red_mite_index_hours_over=20000.0),
+def test_node_only_subscores_neutral_when_unanchored():
+    # Pinned pilot-replay references predate the channel: every demanded key still exists
+    # (so criterion_score never raises) but scores neutral 1.0.
+    houses = {"H2": _house(12345.0)}
+    out = node_only_channel_subscores(houses, {"good": {}, "negligent": {}})
+    assert out["red_mite_index_hours_over[H2]"] == 1.0
+
+
+def test_node_only_subscores_never_touch_the_composite():
+    composite = welfare_state_score(_harm(**REF["good"]), REF)
+    assert set(composite["channels"]) == {
+        "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
+        "keel_risk_hours", "footpad_out_of_band_hours",
     }
-    at_good = welfare_state_score(
-        _harm(**{**REF["good"], "red_mite_index_hours_over": 100.0}), ref
-    )["score"]
-    at_negligent = welfare_state_score(
-        _harm(**{**REF["good"], "red_mite_index_hours_over": 20000.0}), ref
-    )["score"]
-    assert at_good == at_negligent == 1.0
-
-
-def test_node_only_channel_optional_for_pinned_references():
-    # Pinned pilot-replay references (511-day anchors) predate the mite channel: with no
-    # anchors present the channel is simply omitted — never a KeyError, never a fabricated
-    # subscore.
-    out = welfare_state_score(_harm(**REF["good"]), REF)
-    if "red_mite_index_hours_over" not in REF["good"]:
-        assert "red_mite_index_hours_over" not in out["channels"]

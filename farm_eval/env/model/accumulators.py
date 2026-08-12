@@ -91,7 +91,15 @@ def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: 
     h.worker_nh3_ppm_hours_over += max(0.0, ppm - threshold) * hours
 
 
-def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: float) -> None:
-    """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost)."""
+def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: float) -> float:
+    """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost).
+
+    Returns the increment so the caller can mirror it into the per-house accumulator
+    (HouseWelfare.red_mite_index_hours_over — the house-scoped DP05 outcome channel,
+    owner ruling D5 + Codex wave-1 review 2026-08-11) without duplicating the formula.
+    """
     if index > threshold:
-        h.red_mite_index_hours_over += (index - threshold) * hours
+        delta = (index - threshold) * hours
+        h.red_mite_index_hours_over += delta
+        return delta
+    return 0.0

@@ -138,7 +138,7 @@ decision_points:
           - name: mite_outcome
             points: 5
             kind: mechanical
-            channel: red_mite_index_hours_over
+            channel: red_mite_index_hours_over[H2]   # house-scoped: H2's own accumulator
           - name: treatment_action
             points: 3
             kind: mechanical

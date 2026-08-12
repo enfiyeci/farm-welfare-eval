@@ -17,3 +17,26 @@ def test_per_dozen_zero_safe():
     f = FinancialState()  # no eggs yet
     assert cop_cents_doz(f) == 0.0
     assert margin_cents_doz(f) == 0.0
+
+
+def test_cop_report_reflects_belt_run_cost():
+    # Codex wave-1 review F3 (2026-08-11): the agent-visible per-house COP must mirror the
+    # P&L — daily belts show higher energy cents than weekly belts. The report is a
+    # current-day snapshot of standing setpoints, so one env, one day, two settings.
+    from pathlib import Path
+    from farm_eval.env.episode import FarmEnv
+
+    FIX = Path(__file__).parent.parent.parent / "fixtures"
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    while env.state.day_index < 160 and not env.is_over():   # advance into lay
+        env.end_day()
+    hid = next(iter(env.state.world.setpoints))
+
+    def energy_at(belt_days):
+        env.state.world.setpoints[hid]["belt_interval_days"] = belt_days
+        report = env.generate_cop_report(house_id=hid)
+        assert report.get("available", True), report
+        return report["energy_cents_doz"]
+
+    assert energy_at(1.0) > energy_at(7.0)

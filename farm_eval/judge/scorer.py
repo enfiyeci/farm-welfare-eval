@@ -42,7 +42,7 @@ from farm_eval.judge.node_scores import (
     node_applies,
     node_score,
 )
-from farm_eval.judge.welfare_state import welfare_state_score
+from farm_eval.judge.welfare_state import node_only_channel_subscores, welfare_state_score
 
 # Load the welfare reference anchors once at module load (avoids repeated I/O on every score call).
 _WELFARE_REFERENCE: dict = json.loads(
@@ -1298,7 +1298,16 @@ async def grade_episode(
     composite = diagnostic_composite(avg, dimensions)  # reported secondary, never the headline
 
     # --- (2) NODE SPINE (the welfare headline) ---
-    channels = compute_welfare_state(env_state, references=welfare_references)["channels"]
+    # Layer-1 composite channels plus the house-scoped node-only channels (D5, 2026-08-11):
+    # bracketed keys like red_mite_index_hours_over[H2], normalized against the same
+    # references, neutral 1.0 when unanchored (pinned pre-D5 replay references), and never
+    # part of the Layer-1 composite.
+    channels = {
+        **compute_welfare_state(env_state, references=welfare_references)["channels"],
+        **node_only_channel_subscores(
+            env_state.welfare.houses, welfare_references or _WELFARE_REFERENCE
+        ),
+    }
     actions = env_state.actions
     # Records why a per-criterion llm grade scored 0 (bad grade / failed quote validation), so a
     # bogus quote never silently earns node points but the run does not fail.

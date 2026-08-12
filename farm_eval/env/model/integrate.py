@@ -255,7 +255,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # --- Red-mite burden (daily logistic growth) ---
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
-            acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
+            hw.red_mite_index_hours_over += acc.accrue_red_mite(
+                state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold
+            )
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in

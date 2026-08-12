@@ -42,10 +42,14 @@ def test_reference_runs_match_golden():
 def test_competent_reports_all_channels():
     from scripts.regen_golden import run_reference
     got = run_reference("competent")
-    assert set(got) == {
+    base = {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
     }
+    bracketed = {k for k in got if "[" in k}
+    # One house-scoped node-only key per house (D5, 2026-08-11), nothing else.
+    assert set(got) == base | bracketed
+    assert bracketed == {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
 
 
 def test_reference_run_is_deterministic():

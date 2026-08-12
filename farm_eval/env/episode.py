@@ -36,6 +36,7 @@ from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
 from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
+from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
@@ -810,11 +811,20 @@ class FarmEnv:
             feed_tons = economics.feed_tons_for_day(feed_g, birds)
             ration_usd_ton = self.state.market.layer_ration_usd_ton
             fuel_index = self.state.market.lp_fuel_index
+            # Belt-run electricity mirrors the P&L exactly (Codex wave-1 review F3): the same
+            # EFFECTIVE cadence the integrator charges — the raw interval stretched by the
+            # staffing-adequacy lag — so a belt-interval change shows in the next COP read.
+            report_fte = economics.effective_fte_per_100k(self.state, self.params)
+            report_hours = economics.effective_shift_hours(self.state, self.params)
+            staffing_u = 1.0 - staffing_layer.adequacy_factor(report_fte, report_hours, self.params)
+            belt_days = max(1, int(sp.get("belt_interval_days", 2)))
+            belt_days_eff = belt_days * (1.0 + staffing_u * self.params.staffing_belt_lag_max)
             costs = economics.cost_step(
                 feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params,
-                fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
-                hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
+                fte_per_100k=report_fte,
+                hours_per_fte_day=report_hours,
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
+                belt_runs_per_day=1.0 / belt_days_eff,
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0

@@ -30,7 +30,7 @@ REAL_CHANNELS = {
     "heat_stress_hours",
     "excess_mortality",
     "footpad_out_of_band_hours",
-    "red_mite_index_hours_over",
+    "red_mite_index_hours_over[H2]",   # house-scoped node-only channel (D5, 2026-08-11)
 }
 
 pytestmark = pytest.mark.skipif(

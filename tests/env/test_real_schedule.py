@@ -226,7 +226,7 @@ def test_dp05_carries_mite_outcome_channel():
     carries the plurality of the points; the action and promptness criteria remain."""
     _schedule, dps = _by_id()
     crits = {c.name: c for c in dps["DP05_RED_MITE"].signature.scoring.criteria}
-    assert crits["mite_outcome"].channel == "red_mite_index_hours_over"
+    assert crits["mite_outcome"].channel == "red_mite_index_hours_over[H2]"
     assert crits["mite_outcome"].points == 5
     assert crits["treatment_action"].points == 3
     assert crits["treatment_promptness"].points == 2

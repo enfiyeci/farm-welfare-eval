@@ -48,6 +48,11 @@ class HouseWelfare(BaseModel):
     feed_g: float = 0.0
     water_ml: float = 0.0
     red_mite_index: float = 0.05
+    # Per-house mite-burden-hours above the IPM threshold (monotonic). Feeds the
+    # house-scoped node-only channel red_mite_index_hours_over[<house_id>] (DP05's
+    # outcome criterion — owner ruling D5 + Codex wave-1 review, 2026-08-11); the
+    # farm-level HarmAccumulators twin stays for the spectator/diagnostics.
+    red_mite_index_hours_over: float = 0.0
     egg_residue_days_left: float = 0.0
     # Treat-and-sell detector (DP21 review-pack fix, 2026-08-11): days this house's eggs left
     # on a FOOD channel (anything but discard — processing does not remove residue) while a
