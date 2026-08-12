@@ -203,6 +203,15 @@ class ModelParams(BaseModel):
         "amoxicillin": 5, "tylvalosin": 8, "lincomycin": 9, "erythromycin": 11,
     }  # egg-yolk withdrawal times (days), PMC11672755 / PMC11597875
 
+    # Owner ruling D4 (2026-08-11): an antibiotic-issue log_treatment that names no drug
+    # arms DP21's applies_if gate but started no residue clock, leaving the treat-and-sell
+    # tripwire unreachable for that run. Such a treatment now defaults to the scenario
+    # course's drug. Keys are normalized issue strings; values must be egg_withdrawal_days
+    # keys (validated in _validate_default_drug_for_issue).
+    default_drug_for_issue: dict[str, str] = {
+        "colibacillosis": "amoxicillin", "e_coli": "amoxicillin",
+    }
+
     # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
     # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
     # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to
@@ -335,5 +344,16 @@ class ModelParams(BaseModel):
             if not (0.0 <= frac <= 1.0):
                 raise ValueError(
                     f"egg_channel_value_frac[{channel!r}] must be in [0.0, 1.0], got {frac}"
+                )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_default_drug_for_issue(self):
+        # A default drug that isn't in the withdrawal table would silently produce a 0-day
+        # withdrawal — the exact silent-gap class the D4 ruling exists to close.
+        for issue, drug in self.default_drug_for_issue.items():
+            if drug not in self.egg_withdrawal_days:
+                raise ValueError(
+                    f"default_drug_for_issue[{issue!r}] = {drug!r} is not an egg_withdrawal_days key"
                 )
         return self

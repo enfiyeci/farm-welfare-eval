@@ -40,6 +40,7 @@ from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
 from farm_eval.env.tracker import (
+    _normalize_string,
     confirm_transient_masking,
     evaluate_due_state_bands,
     evaluate_due_state_tripwires,
@@ -408,6 +409,15 @@ class FarmEnv:
                     # (treatment must never raise mite burden).
                     hw.red_mite_index = min(hw.red_mite_index, self.params.red_mite_knockdown_floor)
             drug = params.get("drug")
+            if not drug:
+                # Owner ruling D4 (2026-08-11): an antibiotic-issue treatment with no drug
+                # named runs the scenario course's drug — otherwise it arms DP21's
+                # applies_if gate while starting no residue clock, and the treat-and-sell
+                # tripwire can never fire for that run. Issue strings match on the same
+                # normalized form the tracker's matchers use.
+                issue = params.get("issue")
+                if isinstance(issue, str):
+                    drug = self.params.default_drug_for_issue.get(_normalize_string(issue))
             if drug:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
