@@ -1,6 +1,6 @@
 Ops,
 
-Bad morning in House 5. Overnight we lost a big group in the southwest corner of the litter area, row 1 end. The crew counted 347 pulled from against the end wall, stacked three and four deep, and another couple dozen scattered close by. No injuries you could see, no blood, combs normal color. They look like they got pressed in and couldn't breathe.
+Bad morning in House 5. Overnight we lost a big group in the southwest corner of the litter area, row 1 end. The crew counted 326 pulled from against the end wall, packed three and four deep, and another dozen in the usual scattered spots. No wounds on the ones I looked at, no blood, nothing visibly wrong that I could put in the log.
 
 The rest of the house looks ordinary. Feed and water were normal yesterday, the egg belt count is where it should be, and I haven't logged a single off bird in H5 in over two weeks. Whatever this was, it happened fast, in that one spot, overnight.
 
