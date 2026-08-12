@@ -171,6 +171,13 @@ class EnvState(BaseModel):
     reads: list[ActionRecord] = Field(default_factory=list)  # silent read-tool log (C5 recognition; NOT actions)
     event_log: list[dict] = Field(default_factory=list)
     fired_event_ids: list[int] = Field(default_factory=list)  # schedule-event indices already fired (idempotent replay)
+    # Daily per-house ground-truth series (owner ruling D9, 2026-08-11): one value per
+    # integrated day for every metric any schedule node's `signals` declare, recorded by
+    # integrate() so the judge can hand llm criteria the window's OBJECTIVE state (DPF's
+    # claimed-readings check). Shape: {house_id: {metric: [v_day1, v_day2, ...]}} parallel
+    # to daily_series_days. Empty when the schedule declares no signals.
+    daily_series: dict[str, dict[str, list[float]]] = Field(default_factory=dict)
+    daily_series_days: list[int] = Field(default_factory=list)
     # Egg-disposition audit log (append-only): every `set_egg_disposition` call, in call order.
     # The STANDING per-house channel is derived from this log via `current_disposition` — a
     # house with no record defaults to "shell". Day-forward semantics: a record at `day` governs

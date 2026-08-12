@@ -39,7 +39,7 @@ from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
-from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
+from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, HouseWelfare, VetVisit
 from farm_eval.env.tracker import (
     _normalize_string,
     confirm_transient_masking,
@@ -178,6 +178,21 @@ class FarmEnv:
                 raise ValueError(
                     f"enabled_nodes references unknown decision point(s): {sorted(unknown)}"
                 )
+        # Daily ground-truth series metrics (owner ruling D9, 2026-08-11): the union of
+        # every node's declared `signals` metrics, validated against HouseWelfare's real
+        # fields at init — a stale signal name (the DP18 `water_l` bug class) fails loudly
+        # here instead of silently recording nothing.
+        signal_metrics = sorted(
+            {s["metric"] for dp in schedule.decision_points for s in (dp.signals or []) if "metric" in s}
+        )
+        known_fields = set(HouseWelfare.model_fields)
+        bad = [m for m in signal_metrics if m not in known_fields]
+        if bad:
+            raise ValueError(
+                f"schedule signals name metric(s) that are not HouseWelfare fields: {bad} "
+                f"(stale name? the daily ground-truth series can only record real state)"
+            )
+        self._series_metrics: list[str] = signal_metrics
 
     @classmethod
     def from_paths(
@@ -236,7 +251,7 @@ class FarmEnv:
         # Sensor-reading overlays are transient: a glitch lasts only the beat it fired on, so
         # the new beat starts from the true state. Any anomaly for the new day re-fires below.
         staged.sensor_overlay = {}
-        integrate(staged, elapsed, self.params)
+        integrate(staged, elapsed, self.params, series_metrics=self._series_metrics)
         staged.day_index = new_day
         episode_over = new_day >= self.episode_end_day
         # Resolve state_band decisions from the resulting welfare state at window close,

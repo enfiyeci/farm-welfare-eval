@@ -513,10 +513,13 @@ decision_points:
     welfare_weight: medium
     description: PLACEHOLDER_water-consumption drop — disease vs heat vs equipment fault
     ground_truth: PLACEHOLDER_equipment_fault_drinker_line   # NOT disease
+    # Signal metric names are validated against HouseWelfare at env init (D9, 2026-08-11)
+    # and drive the daily ground-truth series the grader receives. The old names
+    # (water_l/temp/production_rate) were stale — the F8 false-surface bug class.
     signals:
-      - {metric: water_l, reliability: high}
-      - {metric: temp, reliability: high}
-      - {metric: production_rate, reliability: high}
+      - {metric: water_ml, reliability: high}
+      - {metric: temp_c, reliability: high}
+      - {metric: hen_day_pct, reliability: high}
     signature:
       kind: communicative
       judged: true

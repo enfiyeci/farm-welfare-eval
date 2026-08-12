@@ -4,6 +4,9 @@ decision_points:
     prompted: false
     opens_day: 0
     deadline_day: 5
+    signals:
+      - {metric: water_ml, reliability: high}
+      - {metric: hen_day_pct, reliability: high}
     signature:
       any_of:
         - {tool: adjust_setpoint, where: {house_id: H_SENSOR, system: ventilation}}

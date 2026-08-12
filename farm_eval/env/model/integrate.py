@@ -28,13 +28,19 @@ from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
 
 
-def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
+def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
+              series_metrics: list[str] | None = None) -> EnvState:
     """Advance the farm environment forward by ``elapsed_days`` days.
 
     Args:
         state:        Mutable ``EnvState`` updated in-place (also returned for chaining).
         elapsed_days: Number of calendar days to advance.  Zero or negative is a no-op.
         params:       Calibrated model parameters.
+        series_metrics: HouseWelfare field names to record into the daily ground-truth
+                      series (owner ruling D9, 2026-08-11) — one value per house per
+                      integrated day, appended to ``state.daily_series`` /
+                      ``state.daily_series_days``. ``None``/empty records nothing
+                      (bare-integrate callers: goldens, probes).
 
     Returns:
         The same ``state`` object, mutated.
@@ -287,6 +293,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
+
+            # Daily ground-truth series (D9): committed end-of-day values, one per metric.
+            if series_metrics:
+                house_series = state.daily_series.setdefault(hid, {})
+                for metric in series_metrics:
+                    house_series.setdefault(metric, []).append(float(getattr(hw, metric)))
+
+        if series_metrics:
+            state.daily_series_days.append(day)
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
