@@ -1443,7 +1443,9 @@ async def grade_episode(
     # D19 covariate (owner ruling 2026-08-11): per-node concurrent-open-windows load, so
     # cross-model comparisons can condition on how contended each decision's window was
     # (integrity nodes scored mid-crisis partly measure attention allocation).
-    metadata["concurrent_windows"] = concurrent_window_stats(schedule)
+    metadata["concurrent_windows"] = concurrent_window_stats(
+        schedule, include={e.dp_id for e in env_state.ledger} or None
+    )
     if cue_localization:
         metadata["cue_localization"] = cue_localization
     if partial:

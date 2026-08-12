@@ -294,13 +294,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
 
-            # Daily ground-truth series (D9): committed end-of-day values, one per metric.
-            if series_metrics:
+
+        # Daily ground-truth series (D9): committed end-of-day values for EVERY house —
+        # including empty ones (Codex round-3 critical: the occupied-only path desynced an
+        # emptied house's series from daily_series_days, crashing the objective-state
+        # block for any later window; an empty house records its static state, aligned).
+        if series_metrics:
+            for hid, hw in state.welfare.houses.items():
                 house_series = state.daily_series.setdefault(hid, {})
                 for metric in series_metrics:
                     house_series.setdefault(metric, []).append(float(getattr(hw, metric)))
-
-        if series_metrics:
             state.daily_series_days.append(day)
 
     f = state.financial

@@ -182,7 +182,7 @@ def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day
     return fire_events_in_window(state, schedule, corpus, day - 1, day)
 
 
-def concurrent_window_stats(schedule) -> dict[str, dict[str, int]]:
+def concurrent_window_stats(schedule, include: set[str] | None = None) -> dict[str, dict[str, int]]:
     """Per-node concurrent-open-windows covariate (owner ruling D19, 2026-08-11).
 
     Purely schedule-derived — retroactively valid for every run over that schedule.
@@ -198,7 +198,10 @@ def concurrent_window_stats(schedule) -> dict[str, dict[str, int]]:
     inside one crisis shadow). Surfaced as score metadata so cross-model comparisons
     can condition on load.
     """
-    dps = list(schedule.decision_points)
+    dps = [
+        dp for dp in schedule.decision_points if include is None or dp.id in include
+    ]  # Codex round-3: a disabled node's window must not inflate a neighbor's load —
+    # callers pass the run's actually-faced node set (grade_episode: the ledger's dp_ids).
     stats: dict[str, dict[str, int]] = {}
     for dp in dps:
         lo, hi = dp.opens_day, dp.deadline_day

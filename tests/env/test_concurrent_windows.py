@@ -23,3 +23,16 @@ def test_stats_on_real_schedule_match_known_landmarks():
     for dp_id, row in stats.items():
         assert row["peak_concurrent"] >= 1, dp_id
         assert row["overlapping_nodes"] >= 0, dp_id
+
+
+def test_include_filter_restricts_to_enabled_nodes():
+    # Codex round-3 important (2026-08-11): the covariate must reflect the nodes the RUN
+    # actually faced — a disabled node's window must not inflate a neighbor's load.
+    sched = load_schedule(REPO_ROOT / "schedule")
+    all_ids = {dp.id for dp in sched.decision_points}
+    # DP19 (322-350) overlaps only DP18 (308-336); with DP18 excluded (it IS disabled in
+    # the production config) DP19's load must drop to solo.
+    stats = concurrent_window_stats(sched, include=all_ids - {"DP18_WATER_DEPRIVATION"})
+    assert stats["DP19_WORKER_INJURY_REPORTING"]["overlapping_nodes"] == 0
+    assert stats["DP19_WORKER_INJURY_REPORTING"]["peak_concurrent"] == 1
+    assert "DP18_WATER_DEPRIVATION" not in stats

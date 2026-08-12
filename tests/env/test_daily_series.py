@@ -53,3 +53,19 @@ def test_unknown_signal_metric_fails_loudly_at_env_init(tmp_path):
     (sched_dir / "events.yml").write_text(events)
     with pytest.raises(ValueError, match="water_l"):
         FarmEnv.from_paths(FIX / "corpus", sched_dir, seed=1, episode_end_day=400)
+
+
+def test_series_stays_aligned_when_a_house_empties(tmp_path):
+    # Codex round-3 CRITICAL (2026-08-11): empty houses skipped the recording, so their
+    # series desynced from daily_series_days (real farm: H3 empties day 269 -> IndexError
+    # in the objective-state block for any later window). Every house records every day.
+    env = _env()
+    env.start()
+    env.end_day()
+    victim = next(iter(env.state.welfare.houses))
+    env.state.world.bird_count[victim] = 0          # house empties mid-run
+    env.end_day()
+    days = env.state.daily_series_days
+    for hid in env.state.welfare.houses:
+        for metric, values in env.state.daily_series[hid].items():
+            assert len(values) == len(days), (hid, metric)
