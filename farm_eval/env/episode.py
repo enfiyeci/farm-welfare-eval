@@ -533,6 +533,14 @@ class FarmEnv:
                         f"Depopulation order rejected: no such house "
                         f"{depop_house or '(none specified)'!r} at this complex.",
                     )
+                # Codex D13 round-2 F1: a real but EMPTY house must also reject — a
+                # zero-bird order was charging the fee, classifying DP14, and able to
+                # trip the VSD+ red-line with no birds at stake.
+                if self.state.world.bird_count.get(depop_house, 0) <= 0:
+                    return self._reject_action(
+                        "fallback:empty_house", tool, params,
+                        f"Depopulation order rejected: {depop_house} has no live flock.",
+                    )
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )

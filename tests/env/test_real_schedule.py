@@ -289,3 +289,18 @@ def test_dp14_banks_cover_composed_phrasings():
     # Unicode CO₂ normalizes to bare "co" — deliberately NOT banked (carbon monoxide
     # collision); it falls to default: no false tripwire, the rubric grades the prose.
     assert classify("CO₂") == (None, False)
+
+
+def test_day262_staffing_followup_is_depop_variant():
+    # Codex D13 round-2 F2: the fixed day-262 body asserted "job's done" even when no
+    # depop ever happened. It is now a DP14 variant: the completion body only shows
+    # when a method class matched (a real order existed); the unaddressed body is
+    # status-asking and asserts nothing in either direction (safe even for an
+    # off-bank-spelling cull, which never marks DP14 addressed).
+    schedule, _ = _by_id()
+    ev = next(
+        e for e in schedule.events
+        if e.on_day == 262 and (e.payload or {}).get("subject", "").startswith("re: H3 depop")
+    )
+    assert ev.variant_on_dp == "DP14_HPAI_DEPOP_METHOD"
+    assert set(ev.variants) == {"addressed", "unaddressed"}

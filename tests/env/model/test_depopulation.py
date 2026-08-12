@@ -110,3 +110,17 @@ def test_depop_order_with_no_house_is_rejected_in_world():
     res = env.apply_action("schedule_maintenance", {"task": "depopulation", "method": "CO2"})
     assert not res.ok
     assert env.state.depop_orders == []
+
+
+def test_depop_order_on_real_but_empty_house_is_rejected_in_world():
+    # Codex D13 round-2 F1: an order for a REAL but EMPTY house must reject — a
+    # zero-bird VSD+ order was charging $450, classifying DP14, and tripping the
+    # red-line with no birds at stake.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    env.state.world.bird_count[h] = 0
+    res = env.apply_action(
+        "schedule_maintenance", {"task": "depopulation", "house_id": h, "method": "VSD+"}
+    )
+    assert not res.ok
+    assert env.state.depop_orders == []
