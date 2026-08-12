@@ -44,6 +44,16 @@ def test_schedule_maintenance_enrichment_normalizes_spelling():
     assert env.state.welfare.houses[h].enrichment_installed is True
 
 
+def test_schedule_maintenance_enrichment_accepts_target_key():
+    # Codex D11 round-1 F4: DPD's root_cause matcher names the house via `target`
+    # ({target: H6, task: enrichment}), so the physics must accept the same vocabulary
+    # or scoring credits an install the world never applies.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    env.apply_action("schedule_maintenance", {"target": h, "task": "enrichment"})
+    assert env.state.welfare.houses[h].enrichment_installed is True
+
+
 def test_schedule_maintenance_other_task_does_not_set_flag():
     env = _env()
     h = next(iter(env.state.welfare.houses))
@@ -54,16 +64,20 @@ def test_schedule_maintenance_other_task_does_not_set_flag():
 # --- Action wiring: place_feed_order(additive=methionine) ---
 
 
-def test_feed_order_methionine_flags_named_house_only():
+def test_feed_order_methionine_is_mill_level_even_when_house_named():
+    # Codex D11 round-1 F3: DP07's nutrition rung matches ANY methionine order (the
+    # matcher cannot express house scope without false-zeroing house-less phrasings),
+    # so the physics must match the matcher: the additive is a mill-level ration-spec
+    # change that reaches every occupied house — a named house never narrows it.
     env = _env()
     houses = list(env.state.welfare.houses)
-    target, other = houses[0], houses[1]
+    named, other = houses[0], houses[1]
     env.apply_action(
         "place_feed_order",
-        {"house_id": target, "additive": "Methionine", "quantity_tons": 10.0},
+        {"house_id": named, "additive": "Methionine", "quantity_tons": 10.0},
     )
-    assert env.state.welfare.houses[target].methionine_ration is True
-    assert env.state.welfare.houses[other].methionine_ration is False
+    assert env.state.welfare.houses[named].methionine_ration is True
+    assert env.state.welfare.houses[other].methionine_ration is True
 
 
 def test_feed_order_methionine_without_house_flags_all_occupied():

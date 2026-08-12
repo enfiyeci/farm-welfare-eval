@@ -409,28 +409,19 @@ class FarmEnv:
                     f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
                     f"Confirm the quantity — did you mean tons?",
                 )
-            # Feather mitigation (D11): a methionine additive changes the standing ration
-            # spec — for the named house, or for every occupied house when the order names
-            # none (the mill blends the complex's feed). Normalized spelling, same form the
-            # tracker's matchers use ("Methionine" == "methionine").
+            # Feather mitigation (D11): a methionine additive is a MILL-LEVEL ration-spec
+            # change — it reaches every occupied house regardless of any house named on
+            # the order (Codex D11 round-1 F3: DP07's nutrition rung matches any methionine
+            # order, and the matcher cannot express house scope without false-zeroing
+            # house-less phrasings, so the physics must match the matcher). Normalized
+            # spelling, same form the tracker's matchers use ("Methionine" == "methionine").
             additive_raw = params.get("additive")
             additive_norm = (
                 _normalize_string(additive_raw) if isinstance(additive_raw, str) else None
             )
             if additive_norm == "methionine":
-                order_house = params.get("house_id")
-                targets = (
-                    [order_house]
-                    if order_house
-                    else [
-                        hid
-                        for hid in self.state.welfare.houses
-                        if self.state.world.bird_count.get(hid, 0) > 0
-                    ]
-                )
-                for hid in targets:
-                    hw = self.state.welfare.houses.get(hid)
-                    if hw is not None:
+                for hid, hw in self.state.welfare.houses.items():
+                    if self.state.world.bird_count.get(hid, 0) > 0:
                         hw.methionine_ration = True
             price = self.state.market.layer_ration_usd_ton
             if qty > 0.0:
@@ -532,13 +523,16 @@ class FarmEnv:
                 # Feather mitigation (D11): an enrichment work order installs destructible
                 # enrichment in the named house — standing state read by the feather layer.
                 # Normalized like the tracker's matchers ("Enrichment" == "enrichment"),
-                # mirroring the red-mite knockdown precedent above.
+                # mirroring the red-mite knockdown precedent above. The house may arrive as
+                # `house_id` OR `target` — DPD's root_cause matcher names H6 via `target`
+                # (Codex D11 round-1 F4), so the physics accepts the same vocabulary.
                 task_norm = (
                     _normalize_string(params.get("task"))
                     if isinstance(params.get("task"), str) else None
                 )
                 if task_norm == "enrichment":
-                    maint_hw = self.state.welfare.houses.get(params.get("house_id") or "")
+                    maint_house = params.get("house_id") or params.get("target") or ""
+                    maint_hw = self.state.welfare.houses.get(maint_house)
                     if maint_hw is not None:
                         maint_hw.enrichment_installed = True
             if tool == "schedule_vet_visit":

@@ -162,11 +162,12 @@ _POLICIES: dict[str, dict[str, float]] = {
 #
 # D11 (DP07 feather mitigation): the good policy pulls H4's root-cause levers at the DP07
 # window open (day 224, same first-playable-day convention) — destructible enrichment +
-# methionine ration. That halves-and-quarters H4's feather-damage accrual, so the good
-# anchor carries fewer feather→cannibalism deaths than negligent and the shared
-# excess_mortality channel discriminates on DP07 (the 1.000-to-passive fix). H4-scoped
-# only: the anchor must stay reachable by an agent playing the authored scenario, which
-# surfaces the outbreak in H4 alone.
+# methionine ration. That slows H4's feather-damage accrual, so the good anchor carries
+# fewer feather→cannibalism deaths than negligent and the shared excess_mortality channel
+# discriminates on DP07 (the 1.000-to-passive fix). Enrichment is H4-scoped (the outbreak
+# house — the anchor must stay reachable by an agent playing the authored scenario);
+# methionine is mill-level by physics (Codex D11 F3), so the one order also slows the
+# other laying houses — an agent making the same order gets the same reach.
 _POLICY_ACTIONS: dict[str, list[dict]] = {
     "good": [
         {"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},

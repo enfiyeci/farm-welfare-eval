@@ -69,12 +69,16 @@ def feather_step(
 ) -> float:
     """Advance feather damage one day: the anchor curve's local slope times *multiplier*.
 
-    The base increment is the curve's own day-over-day rise, so at multiplier 1.0 the
-    steps telescope to the anchor curve exactly.  Never decreases (damage is
-    irreversible within a cycle) and clamps to 100.
+    *age_weeks* is the flock age at the END of the day being integrated (what the
+    integrator's ``flock_age_weeks(start, day)`` returns), so the increment covers
+    ``[age_weeks - 1 day, age_weeks]`` — a backward difference.  A forward difference
+    would accrue the FOLLOWING day's slope and put a 30.0-wk flock above the curve's
+    zero anchor (Codex D11 round-1 F5).  At multiplier 1.0 the steps telescope to the
+    anchor curve exactly.  Never decreases (damage is irreversible within a cycle)
+    and clamps to 100.
     """
-    r0 = feather_damage_pct(age_weeks + 1.0 / 7.0, params) - feather_damage_pct(
-        age_weeks, params
+    r0 = feather_damage_pct(age_weeks, params) - feather_damage_pct(
+        age_weeks - 1.0 / 7.0, params
     )
     new = current_pct + max(0.0, r0) * multiplier
     return min(100.0, max(current_pct, new))

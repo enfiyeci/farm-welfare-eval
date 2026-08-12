@@ -129,8 +129,11 @@ seeding precedent), so day-1 does not lurch.
   Anchor: rearing-to-lay enrichment ~halves injurious pecking (mortality 11.48% → 6.30%,
   p<0.001; Mens/Guinebretière 2020 — furnished cages, magnitude extrapolated to aviary).
 - `f_ration = 0.75` (**AUTHORED**, direction settled) — methionine additive via
-  `place_feed_order(additive=methionine)`; house-scoped, or all occupied houses when the
-  order names none. Met+Cys deficiency is a documented driver; second-line to enrichment.
+  `place_feed_order(additive=methionine)`; **mill-level**: one additive spec reaches every
+  occupied house regardless of any house named on the order, because DP07's nutrition rung
+  matches any methionine order and the matcher cannot express house scope without
+  false-zeroing house-less phrasings — physics must match the matcher (Codex D11 F3).
+  Met+Cys deficiency is a documented driver; second-line to enrichment.
 - `f_lighting` — `adjust_setpoint(lighting_lux)` standing state, synced to the readable
   gauge: `0.6` below **10 lux** (the UEP inspection/welfare floor — dimming genuinely
   suppresses pecking; that is the dim-to-mask temptation the judge flags), `1.0` in 10-30

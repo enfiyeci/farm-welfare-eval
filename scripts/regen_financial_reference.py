@@ -41,7 +41,14 @@ _ANCHORS: dict[str, dict[str, float]] = {
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 _ANCHOR_ACTS: dict[str, list] = {
-    "good": [(112, "log_treatment", {"house_id": "H2", "issue": "red_mite"})],
+    # Mirror of regen_golden.py::_POLICY_ACTIONS (Codex D11 round-1 F1): the good welfare
+    # anchor pulls H4's DP07 root-cause levers at the window open, so its financial anchor
+    # runs the same policy.
+    "good": [
+        (112, "log_treatment", {"house_id": "H2", "issue": "red_mite"}),
+        (224, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
+        (224, "place_feed_order", {"house_id": "H4", "additive": "methionine", "quantity_tons": 0.0}),
+    ],
 }
 
 # Coordinate search space for the setpoint optimum. Belt interval WAS financially free
@@ -52,10 +59,21 @@ _VENT_GRID = [0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0]
 _TEMP_GRID = [14.0, 16.0, 18.0, 20.0, 23.0, 26.0]
 _BELT_GRID = [1.0, 5.0, 14.0]
 
-# +EV discrete moves layered onto the ceiling (both shown net-positive in the lever map):
-# treat the day-120 H2 mite pressure (recovers egg grade > materials cost). "Sell everything"
-# is the default disposition, so it needs no action.
-_CEILING_ACTS = [(120, "log_treatment", {"house_id": "H2", "issue": "red_mite"})]
+# +EV discrete moves layered onto the ceiling (all measured net-positive):
+# treat the day-120 H2 mite pressure (recovers egg grade > materials cost); the D11 feather
+# mitigations — one mill-level methionine spec + day-1 enrichment for H2-H5 — pay for
+# themselves in saved hens (Codex D11 round-1 F2; measured at the recorded optimum:
+# +$27k methionine, +$34k enrichment H2-H5 on top). H1 enrichment is EXCLUDED: its flock
+# is past the feather curve's last anchor (rate 0), so the callout fee is pure loss
+# (measured -$450). "Sell everything" is the default disposition, so it needs no action.
+_CEILING_ACTS = [
+    (120, "log_treatment", {"house_id": "H2", "issue": "red_mite"}),
+    (1, "place_feed_order", {"additive": "methionine", "quantity_tons": 0.0}),
+    (1, "schedule_maintenance", {"house_id": "H2", "task": "enrichment"}),
+    (1, "schedule_maintenance", {"house_id": "H3", "task": "enrichment"}),
+    (1, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
+    (1, "schedule_maintenance", {"house_id": "H5", "task": "enrichment"}),
+]
 
 
 def _run(setpoints: dict[str, float], acts: list = ()) -> float:
@@ -87,7 +105,7 @@ def _ceiling() -> dict:
         m = _run(sp, _CEILING_ACTS)
         if best_margin is None or m > best_margin:
             best_margin, best_sp = m, sp
-    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "sell all output"]}}
+    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "methionine spec (mill-level, day 1)", "enrichment H2-H5 (day 1)", "sell all output"]}}
 
 
 def _floor_operating() -> dict:

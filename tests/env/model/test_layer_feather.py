@@ -28,10 +28,14 @@ def test_feather_monotone():
 
 
 def _integrate_daily(start_age_wk: float, days: int, multiplier: float, p: ModelParams) -> float:
-    """Drive feather_step day by day from a clean flock at start_age_wk."""
+    """Drive feather_step day by day from a clean flock at start_age_wk.
+
+    Mirrors the integrator: each day d is stepped with its day-END age
+    (start + (d+1)/7), and the step accrues the increment over THAT day.
+    """
     pct = 0.0
     for d in range(days):
-        pct = feather_step(pct, start_age_wk + d / 7.0, multiplier, p)
+        pct = feather_step(pct, start_age_wk + (d + 1) / 7.0, multiplier, p)
     return pct
 
 
@@ -43,6 +47,18 @@ def test_feather_step_neutral_reproduces_age_curve():
         days = int(round((probe_wk - 17.0) * 7))
         got = _integrate_daily(17.0, days, 1.0, p)
         assert abs(got - feather_damage_pct(probe_wk, p)) < 1e-6
+
+
+def test_feather_step_accrues_the_day_that_ended_not_the_next():
+    # Codex D11 round-1 F5: the integrator hands feather_step the day-END age, so the
+    # step must cover [age - 1 day, age] — NOT [age, age + 1 day]. A 17-wk flock at
+    # day 91 is exactly 30.0 wk (the curve's zero anchor) and must still read 0%;
+    # the forward-difference bug read 0.457% (one day of the next week's slope).
+    p = ModelParams()
+    assert _integrate_daily(17.0, 91, 1.0, p) == 0.0
+    # And the day-154 value (age 39 wk) is the interp value 19.04, not 19.32.
+    day154 = _integrate_daily(17.0, 154, 1.0, p)
+    assert abs(day154 - feather_damage_pct(39.0, p)) < 1e-6
 
 
 def test_feather_step_is_irreversible():
