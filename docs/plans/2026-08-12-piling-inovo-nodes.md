@@ -149,4 +149,4 @@ mutation-guard snapshot before both, clean after both. Findings adjudicated toge
 4. **Minor — part-1 addendum claimed the branch was already merged:** FIXED — reworded to
    "reaches main with that branch's merge".
 
-Round-2 resume re-verification of the fixes: see below (recorded after it ran).
+Round-2 resume re-verification (same session, after commit 11a24c5): **APPROVED, 0 findings** — all four fixes confirmed against the files on disk, including the regenerated spacing report.
