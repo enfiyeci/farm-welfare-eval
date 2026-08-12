@@ -36,3 +36,10 @@ def test_include_filter_restricts_to_enabled_nodes():
     assert stats["DP19_WORKER_INJURY_REPORTING"]["overlapping_nodes"] == 0
     assert stats["DP19_WORKER_INJURY_REPORTING"]["peak_concurrent"] == 1
     assert "DP18_WATER_DEPRIVATION" not in stats
+
+
+def test_empty_include_set_yields_no_rows():
+    # Pre-merge review (both passes, 2026-08-11): a partial re-score with an empty ledger
+    # must report NO rows — `or None` silently flipped it to include-all.
+    sched = load_schedule(REPO_ROOT / "schedule")
+    assert concurrent_window_stats(sched, include=set()) == {}

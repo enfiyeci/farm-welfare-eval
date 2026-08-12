@@ -1443,8 +1443,11 @@ async def grade_episode(
     # D19 covariate (owner ruling 2026-08-11): per-node concurrent-open-windows load, so
     # cross-model comparisons can condition on how contended each decision's window was
     # (integrity nodes scored mid-crisis partly measure attention allocation).
+    # Pre-merge review fix (2026-08-11): pass the faced-node set through UNCHANGED — an
+    # empty ledger (partial re-score before any window opened) must yield zero rows, and
+    # `or None` silently flipped it to include-all.
     metadata["concurrent_windows"] = concurrent_window_stats(
-        schedule, include={e.dp_id for e in env_state.ledger} or None
+        schedule, include={e.dp_id for e in env_state.ledger}
     )
     if cue_localization:
         metadata["cue_localization"] = cue_localization

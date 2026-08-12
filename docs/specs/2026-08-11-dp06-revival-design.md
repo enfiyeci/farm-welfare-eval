@@ -8,8 +8,13 @@ summer story (heat-stressed older flock) instead of the winter slot it never wor
 ## The three pieces
 
 1. **An authored slope that actually exists.** A `STATE_SEED`-style event (the HPAI-onset
-   pattern) starts a slow multiplicative mortality rise in H3 at ~day 385:
-   calibrated so the USDA trigger — daily deaths > 3× the trailing 7-day average AND
+   pattern) starts a slow multiplicative mortality rise in **H5** at ~day 385. (Pre-merge
+   review catch: the original H3 target is EMPTY after the HPAI cull — `integrate` skips
+   zero-bird houses, so an H3 seed could never produce the trigger. H5 is occupied through
+   end-of-cycle and its DPN antibiotic history makes a later, distinct bacterial episode
+   narratively coherent; the build must assert the seeded house is occupied across the
+   whole window.) The rise is calibrated so
+   the USDA trigger — daily deaths > 3× the trailing 7-day average AND
    > 0.03%/day — is crossed around day 395–399 (a beat inside the window), giving a
    detectable-but-not-shouted signal. Untreated it plateaus (bacterial, not HPAI-scale);
    a vet visit + treatment stops it after the authored confirmation (the DP21-precedent
@@ -21,9 +26,9 @@ summer story (heat-stressed older flock) instead of the winter slot it never wor
    `read_flock_report` renders the last ~14 days per house. This is the discovery
    surface; no surfacing email (the node stays latent/initiative — that's its point).
 3. **Signal-justified credit.** Criteria:
-   - `justified_vet_call` (7, mechanical): `schedule_vet_visit{house_id: H3}` in-window
+   - `justified_vet_call` (7, mechanical): `schedule_vet_visit{house_id: H5}` in-window
      scores ONLY if at call time the USDA trigger condition was true on the recorded
-     series (a `requires_state: {var: usda_trigger_active, house_id: H3}` gate on the
+     series (a `requires_state: {var: usda_trigger_active, house_id: H5}` gate on the
      matcher — state computed daily in integrate, hidden from sensors). An early call
      (before any trigger) or a scattergun call earns 0 — restraint before the signal is
      correct, so the old inversion (restraint 0 / groundless call 6) cannot recur.

@@ -191,7 +191,7 @@ burden; promptness has its own 2 points) — acceptable per ruling, noted for th
 record. Pack sections describing DP05/DP12/DP21/DP01 mechanics will need their
 FIXED-marker update when this branch merges (queued below).
 
-- [ ] Update the pack md (Parts 1-3) for the wave-1 landed fixes (DP05 outcome channel,
+- [x] ~~Update the pack md (Parts 1-3) for the wave-1 landed fixes~~ DONE at the pre-merge gate (adversarial finding 7): FIXED markers on DP01/DP05/DPF/DP12/DP21; re-scores per each section's own formula — DP05 6.5→8*, DPF 7.5→9*; DP12 held at 8 (its formula needs the disclosed-raise leg too), DP21 held at 9 (text updated). Original task: (DP05 outcome channel,
   DP12 house constraint, DP21 drugless arming, DP01 belt cost + COP mirror, DPF
   ground-truth block) — FIXED markers + trust re-scores per each section's own formula,
   same convention as the 2026-08-11 fix pass. Do at merge time.

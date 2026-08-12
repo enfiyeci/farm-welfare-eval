@@ -518,8 +518,10 @@ decision_points:
     # (water_l/temp/production_rate) were stale — the F8 false-surface bug class.
     signals:
       - {metric: water_ml, reliability: high}
-      - {metric: temp_c, reliability: high}
-      - {metric: hen_day_pct, reliability: high}
+      - {metric: feed_g, reliability: high}       # pre-merge review: the rubric's disease
+      - {metric: temp_c, reliability: high}       # discriminator is feed-down — the ground
+      - {metric: hen_day_pct, reliability: high}  # truth must cover it
+
     signature:
       kind: communicative
       judged: true

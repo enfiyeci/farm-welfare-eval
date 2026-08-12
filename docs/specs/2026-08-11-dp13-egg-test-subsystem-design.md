@@ -45,11 +45,15 @@ swab clears nothing (the epistemic point Anita's rewritten email will state neut
 
 ### Scoring changes (DP13 signature)
 
-- `divert_action` (7 pts, standing-at-deadline) — **unchanged** for the divert path; a
-  `protocol_cleared` return to `shell` no longer scores 0: the standing evaluation treats
-  `shell` WITH `protocol_cleared` as lawful (full credit), `shell` without it as the
-  violation it is today. Mechanically: the standing branch consults the protocol state —
-  a new `lawful_shell_if: protocol_cleared` key on the criterion (schedule-declared).
+- `divert_action` (7 pts, standing-at-deadline) — **unchanged**. Pre-merge review catch:
+  the four-test protocol spans ≥42 days + lab latency, so it can NEVER complete inside a
+  ~14-day decision window — an in-window `lawful_shell_if: protocol_cleared` scoring path
+  is unreachable and is NOT built. Correct in-window behavior is divert (or discard)
+  pending results, which the standing criterion already scores full. `protocol_cleared`
+  is a POST-WINDOW state with two real effects: it stops the `se_positive_shell_days`
+  counter (a cleared house lawfully back on shell accrues nothing), and it is
+  judge-visible for the life-of-flock narrative the window-bounded convention leaves to
+  the grader.
 - **Latency counter (owner comment #15):** per-house `se_positive_shell_days` accrues in
   integrate — days the house ships on `shell` while `se_status` is true AND protocol not
   cleared (mirrors `residue_food_channel_days` exactly). Two candidate uses, build-time

@@ -25,6 +25,13 @@ DP12 6 · DP13 5 · DP19 2 — five of six integrity nodes measured inside one c
 Root cause of the original miss: the beat calendar's spread rule counted surfacing events
 per beat (≤3, passes), not open windows per day (peaks at 8).
 
+**Covariate population note (pre-merge review):** the tables in this spec use the FULL
+authored 23-node schedule — deliberately, because the respace itself revives DP06 and the
+DP18 cure re-enables DP18, so the post-pass enabled set approximates the full schedule.
+Score metadata, by contrast, filters to the nodes the RUN faced (`ef708db`): today's
+21-node config reports DP19 at peak 1 (no DP18). The acceptance criterion below is
+measured on the post-pass config's faced-node population, not these design tables.
+
 ## Fixed constraints
 
 - DPN→DP21 causal chain stays adjacent; DP15→DP14→DP20 storyline stays back-to-back.
