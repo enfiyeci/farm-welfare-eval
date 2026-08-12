@@ -77,8 +77,16 @@ class ModelParams(BaseModel):
     # temperature setpoints move the P&L, replacing the old flat energy_usd_bird_day=0.0007.
     # Calibrated so a typical operating point (winter vent 0.5 / dT 20degC; summer vent ~1.0)
     # brackets the old flat rate — the authored COP archives stay plausible.
-    energy_base_usd_bird_day: float = 0.0004        # non-HVAC electricity: lights, belts, egg collection
+    energy_base_usd_bird_day: float = 0.0004        # non-HVAC electricity: lights, egg collection (belt runs are their own line below)
     vent_fan_usd_bird_day: float = 0.0003           # fan electricity at vent=1.0; linear in vent (staged fans)
+    # Belt-run electricity (owner ruling D21, 2026-08-11): each manure-belt run books a small
+    # per-house charge instead of hiding inside the flat base line, so a daily belt schedule
+    # costs real (small) money vs weekly. AUTHORED size, labelled: a large aviary's belt
+    # drives total roughly 10-20 kW running 0.5-1 h per removal ≈ 5-20 kWh ≈ $0.6-2.4 at
+    # ~$0.12/kWh; mid-range chosen. Deliberately small next to winter propane (~$90+/day on
+    # a 119k house) — the DP01 money tension stays in the fuel (guarded by
+    # test_belt_cost_stays_small_next_to_winter_propane).
+    belt_run_usd_house: float = 1.5                 # per belt run, per house
     heat_fuel_usd_bird_day_degc: float = 0.00003    # LP make-up-air heat per degC (setpoint-ambient) per unit vent, x lp_fuel_index
     # Cold-thermoregulation feed uplift (owner directive 2026-07-13; research
     # evals/hen/research/2026-07-13-financial-realism-web-sweep.md). Below the thermoneutral floor a
