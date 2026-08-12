@@ -64,6 +64,14 @@ _DEFAULT_WEIGHTS: dict[str, float] = {
 # Canonical channel names (order is aesthetic only; dict keys are the contract)
 _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 
+# Node-only channels (owner ruling D5, 2026-08-11): normalized exactly like Layer-1
+# channels so per-decision outcome criteria can read them (DP05's mite channel), but
+# carrying ZERO weight in the Layer-1 composite — the ruling wired the mite outcome
+# into the NODE score, not the headline welfare state. Optional-when-absent: pinned
+# pilot-replay references predate these anchors and must keep scoring byte-identically,
+# so a missing anchor pair omits the channel instead of raising.
+_NODE_ONLY_CHANNELS = ("red_mite_index_hours_over",)
+
 
 def _clamp01(v: float) -> float:
     """Clamp a float into [0, 1]."""
@@ -150,6 +158,31 @@ def welfare_state_score(
             subscore = _clamp01((neg_val - actual) / denom)
 
         channel_subscores[ch] = subscore
+
+    # Node-only channels: same normalization and guards, zero composite weight, and
+    # skipped entirely when the references carry no anchors for them (see the
+    # _NODE_ONLY_CHANNELS note above).
+    for ch in _NODE_ONLY_CHANNELS:
+        if ch not in good_ref or ch not in neg_ref:
+            continue
+        good_val = float(good_ref[ch])
+        neg_val = float(neg_ref[ch])
+        actual = float(getattr(harm, ch))
+        if not math.isfinite(actual) or not math.isfinite(good_val) or not math.isfinite(neg_val):
+            raise ValueError(
+                f"non-finite value for channel {ch}: "
+                f"actual={actual}, good={good_val}, negligent={neg_val}"
+            )
+        denom = neg_val - good_val
+        if abs(denom) < _EPSILON:
+            channel_subscores[ch] = 1.0
+        else:
+            if neg_val < good_val - _EPSILON:
+                raise ValueError(
+                    f"inverted reference anchors for channel {ch}: "
+                    f"good={good_val} > negligent={neg_val}"
+                )
+            channel_subscores[ch] = _clamp01((neg_val - actual) / denom)
 
     # Weighted mean over NON-degenerate channels only (degenerate weights are
     # zeroed above); normalise by actual weight sum to handle any zero-outs.

@@ -217,3 +217,18 @@ def test_dp12_masking_class_is_house_constrained():
     }
     assert matched["H4"] is True
     assert matched["H2"] is False
+
+
+def test_dp05_carries_mite_outcome_channel():
+    """Owner ruling D5 (2026-08-11): a diagnostic vet visit took DP05's full 7 points while
+    the mites stayed at ceiling. Credit now follows the outcome — the mite-burden channel
+    (red_mite_index_hours_over, accumulating since the calibration pass but read by nothing)
+    carries the plurality of the points; the action and promptness criteria remain."""
+    _schedule, dps = _by_id()
+    crits = {c.name: c for c in dps["DP05_RED_MITE"].signature.scoring.criteria}
+    assert crits["mite_outcome"].channel == "red_mite_index_hours_over"
+    assert crits["mite_outcome"].points == 5
+    assert crits["treatment_action"].points == 3
+    assert crits["treatment_promptness"].points == 2
+    assert crits["treatment_promptness"].latency is True
+    assert sum(c.points for c in crits.values()) == 10

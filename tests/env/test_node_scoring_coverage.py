@@ -22,12 +22,15 @@ from farm_eval.env.loader import load_schedule
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
 
-# The only Layer-1 harm channels that exist in welfare_state.py (keel_risk_hours is degenerate).
+# The harm channels welfare_state.py actually serves to node scoring: the live Layer-1
+# channels (keel_risk_hours is degenerate) plus the node-only channels (zero headline
+# weight; DP05's mite outcome — owner ruling D5, 2026-08-11).
 REAL_CHANNELS = {
     "nh3_ppm_hours_over",
     "heat_stress_hours",
     "excess_mortality",
     "footpad_out_of_band_hours",
+    "red_mite_index_hours_over",
 }
 
 pytestmark = pytest.mark.skipif(

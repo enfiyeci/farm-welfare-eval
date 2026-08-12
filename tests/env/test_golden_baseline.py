@@ -44,7 +44,7 @@ def test_competent_reports_all_channels():
     got = run_reference("competent")
     assert set(got) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
     }
 
 

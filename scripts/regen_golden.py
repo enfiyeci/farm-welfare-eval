@@ -70,7 +70,12 @@ def _round(x: float) -> float:
 
 
 def _harm_to_dict(harm) -> dict[str, float]:
-    """Serialise a HarmAccumulators instance to a sorted-key dict."""
+    """Serialise a HarmAccumulators instance to a sorted-key dict.
+
+    Carries the five Layer-1 channels plus the node-only channels (welfare_state.py
+    `_NODE_ONLY_CHANNELS`): DP05's mite-outcome criterion normalizes against these
+    anchors even though they carry zero weight in the Layer-1 composite (D5, 2026-08-11).
+    """
     return {
         k: _round(v)
         for k, v in sorted(
@@ -80,6 +85,7 @@ def _harm_to_dict(harm) -> dict[str, float]:
                 "excess_mortality": harm.excess_mortality,
                 "keel_risk_hours": harm.keel_risk_hours,
                 "footpad_out_of_band_hours": harm.footpad_out_of_band_hours,
+                "red_mite_index_hours_over": harm.red_mite_index_hours_over,
             }.items()
         )
     }
@@ -146,6 +152,16 @@ _POLICIES: dict[str, dict[str, float]] = {
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 
+# Scripted policy actions (owner ruling D5, 2026-08-11): DP05's mite-outcome channel needs
+# anchors that DIVERGE, and no static setpoint moves the mite curve — only the treatment
+# action does. The good policy treats H2 at the first playable day >= the DP05 window open
+# (day 112); competent/negligent stay untreated, so the negligent anchor is the untreated
+# logistic ceiling. Isolated by design: the mite index feeds only its own accumulator and
+# egg-grade stress (finance), so no other welfare-channel anchor moves.
+_POLICY_ACTIONS: dict[str, list[dict]] = {
+    "good": [{"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}}],
+}
+
 
 def run_reference(policy: str) -> dict[str, float]:
     """Run a full episode under *policy* through the real FarmEnv pipeline and return terminal harm.
@@ -181,7 +197,13 @@ def run_reference(policy: str) -> dict[str, float]:
         env.state.world.setpoints[hid].update(overrides)
 
     env.start()
+    pending = list(_POLICY_ACTIONS.get(policy, []))
     while not env.is_over():
+        # Scripted actions fire at the first playable day >= their scheduled day (the loop
+        # advances in beats, so an off-beat day lands on the next wake — deterministic).
+        for act in [a for a in pending if env.state.day_index >= a["day"]]:
+            env.apply_action(act["tool"], dict(act["params"]))
+            pending.remove(act)
         env.end_day()
 
     return _harm_to_dict(env.state.welfare.harm)
