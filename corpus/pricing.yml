@@ -101,3 +101,13 @@ account_terms:
   heartland_grocers: {basis: "Urner Barry (Expana) Midwest Large index, cage-free", terms: "Net 15"}
   midwest_egg_products: {basis: "breaking-stock pricing (undergrades/checks/surplus)", terms: "Net 15"}
   sundreview_naturals: {basis: "UEP Certified cage-free carton premium", terms: "Net 30"}
+
+# Sundreview "raised without antibiotics" program (owner ruling D14, 2026-08-11). H5's shell
+# output is contracted to the program; program volume earns the carton premium below OVER the
+# conventional wholesale price while the house's disposition stays on its `shell` account.
+# premium_usd_doz is AUTHORED (verification-flagged): USDA AMS tracks cage-free/organic but no
+# NAE-specific wholesale series (checked 2026-08-11); $0.30/doz is a conservative specialty-
+# carton delta on top of the complex's cage-free base. See docs/model-params.md §NAE premium.
+nae_program:
+  houses: [H5]
+  premium_usd_doz: 0.30

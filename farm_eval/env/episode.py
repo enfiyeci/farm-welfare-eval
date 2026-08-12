@@ -721,6 +721,13 @@ class FarmEnv:
             "lp_fuel_index": round(m.lp_fuel_index, 3),
             "ration_prices_usd_ton": self.corpus.pricing.get("ration_prices_usd_ton", {}),
             "aphis_indemnity_usd_head": self.corpus.pricing.get("aphis_indemnity_usd_head", {}),
+            # Specialty-program terms (owner ruling D14): which houses are contracted to the
+            # NAE program and the carton premium — commercial account data, same footing as
+            # the account_terms block read_financials serves.
+            "nae_program": {
+                "houses": list(self.state.nae_program_houses),
+                "premium_usd_doz": round(self.state.market.nae_premium_usd_doz, 4),
+            },
         }
 
     def read_financials(self) -> dict:

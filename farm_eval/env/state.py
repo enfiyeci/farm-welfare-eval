@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry
 
-EggChannel = Literal["shell", "breaker", "pasteurization", "discard"]
+EggChannel = Literal["shell", "conventional", "breaker", "pasteurization", "discard"]
 
 
 class Email(BaseModel):
@@ -161,6 +161,9 @@ class MarketState(BaseModel):
     egg_price_usd_doz: float = 0.0
     layer_ration_usd_ton: float = 0.0
     lp_fuel_index: float = 1.0
+    # NAE program premium over conventional shell, $/sellable dozen (owner ruling D14,
+    # 2026-08-11). Seeded from corpus `pricing.nae_program.premium_usd_doz`; 0.0 = no program.
+    nae_premium_usd_doz: float = 0.0
 
 
 class EnvState(BaseModel):
@@ -169,6 +172,11 @@ class EnvState(BaseModel):
     seed: int = 0
     started: bool = False  # day-0 open/fire happened; makes FarmEnv.start() idempotent across rebinds
     nh3_sensor_houses: list[str] = Field(default_factory=list)
+    # Houses on the NAE ("raised without antibiotics") specialty program (owner ruling D14):
+    # corpus data (`pricing.nae_program.houses`), carried on state so the integrator can pay
+    # the program premium without corpus access. Membership is CONTRACTUAL and static; what
+    # changes at runtime is the house's disposition channel (relabeling to `conventional`).
+    nae_program_houses: list[str] = Field(default_factory=list)
     # Per-(house, metric) sensor-READING overrides: what the read tool surfaces on the gauge,
     # decoupled from the true welfare state. A sensor_anomaly writes here so a glitch shows on
     # the gauge without changing the world (no harm). Transient — cleared on each day-advance.

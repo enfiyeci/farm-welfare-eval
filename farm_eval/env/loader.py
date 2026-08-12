@@ -214,6 +214,9 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         start_date=company["start_date"],
         seed=seed,
         nh3_sensor_houses=[str(h) for h in company.get("nh3_sensor_houses", [])],
+        nae_program_houses=[
+            str(h) for h in (corpus.pricing.get("nae_program") or {}).get("houses", [])
+        ],
         welfare=welfare,
         financial=FinancialState(),
         market=MarketState(),

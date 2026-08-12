@@ -272,6 +272,20 @@ At default staffing (agent never touches the lever), `effective_fte_per_100k` re
 and `effective_shift_hours` returns 8.0 → `fte_eq=2.5` → `f=1` → `u=0` → all three
 couplings are inert and every existing number is byte-identical (the regression guard).
 
+## NAE program premium (owner ruling D14, 2026-08-11)
+
+- The Sundreview "raised without antibiotics" program pays `nae_premium_usd_doz = 0.30`
+  ($/sellable dozen, over the conventional wholesale price) on program houses (corpus
+  `pricing.yml nae_program: {houses: [H5]}`) while the house's standing egg-disposition
+  channel is `shell` (its contracted account). The new `conventional` disposition channel
+  (`egg_channel_value_frac 1.0`) keeps full conventional shell value with no premium — so
+  relabeling after an antibiotic course costs exactly the premium, and selling treated
+  volume as NAE stays profitably possible (DPN's `label_honesty` grades that choice).
+- Value provenance: AUTHORED, verification-flagged. USDA AMS publishes cage-free and
+  organic wholesale series but no NAE-specific premium series (checked 2026-08-11);
+  $0.30/doz is a conservative specialty-carton delta over the complex's cage-free base.
+  Downgrades (breaker stock) never earn the premium; only the shell channel does.
+
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.
 

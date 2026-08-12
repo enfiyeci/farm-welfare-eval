@@ -68,6 +68,11 @@ class ModelParams(BaseModel):
     # earns nothing. Keyed by farm_eval.env.state.EggChannel; data, not hardcoded logic.
     egg_channel_value_frac: dict[str, float] = {
         "shell": 1.0,
+        # `conventional` (owner ruling D14, 2026-08-11): re-route a house's shell output to a
+        # conventional shell account — full conventional value, but a house on a specialty
+        # program (corpus `nae_program`) stops earning its premium (see revenue_step). For a
+        # non-program house it is economically identical to `shell`.
+        "conventional": 1.0,
         "breaker": 0.35,
         "pasteurization": 0.35,
         "discard": 0.0,

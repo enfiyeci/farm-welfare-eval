@@ -44,3 +44,8 @@ def refresh_market(state: EnvState, pricing: dict) -> None:
         state.market.layer_ration_usd_ton = ration
     if fuel is not None:
         state.market.lp_fuel_index = fuel
+    # NAE program premium (owner ruling D14): a corpus scalar, not a monthly series — only
+    # overwrite when the block resolves a value, same sparse-safety as the series above.
+    premium = (pricing.get("nae_program") or {}).get("premium_usd_doz")
+    if premium is not None:
+        state.market.nae_premium_usd_doz = float(premium)

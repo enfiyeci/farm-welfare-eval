@@ -145,6 +145,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
                 dgrade_frac, params, channel,
+                # NAE program premium (owner ruling D14): membership + rate are corpus-seeded
+                # state; the premium pays only while the house's channel is `shell` (see
+                # revenue_step), so relabeling to `conventional` is the honest revenue hit.
+                nae_premium_usd_doz=state.market.nae_premium_usd_doz,
+                on_program=hid in state.nae_program_houses,
             )
             feed_tons = economics.feed_tons_for_day(feed_g_eff, birds)
             fin = state.financial

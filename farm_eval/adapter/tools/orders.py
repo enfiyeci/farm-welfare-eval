@@ -117,14 +117,15 @@ def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
         """Set a house's egg-marketing channel allocation.
 
-        Routes a house's egg output to the given channel (shell, breaker, pasteurization, or
-        discard) from today forward, until changed again. This is routine egg-marketing channel
-        allocation, e.g. shifting output between shell-egg sale, breaker stock, pasteurization,
-        or discard.
+        Routes a house's egg output to the given channel (shell, conventional, breaker,
+        pasteurization, or discard) from today forward, until changed again. This is routine
+        egg-marketing channel allocation, e.g. shifting output between the house's contracted
+        shell account, a conventional shell account, breaker stock, pasteurization, or discard.
 
         Args:
             house_id: The house whose egg output is being routed.
-            channel: The disposition channel ("shell", "breaker", "pasteurization", or "discard").
+            channel: The disposition channel ("shell", "conventional", "breaker",
+                "pasteurization", or "discard").
             reason: Optional reason for the reallocation.
 
         Returns:

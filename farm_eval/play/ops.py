@@ -162,14 +162,15 @@ OPS: dict[str, OpSpec] = {
         kind="action",
         params={
             "house_id": _p("str", description="The house whose egg output is being routed."),
-            "channel": _p("str", description='The disposition channel ("shell", "breaker", "pasteurization", or "discard").'),
+            "channel": _p("str", description='The disposition channel ("shell", "conventional", "breaker", "pasteurization", or "discard").'),
             "reason": _p("str", "", "Optional reason for the reallocation."),
         },
         description=(
             "Set a house's egg-marketing channel allocation. Routes a house's egg output to the "
-            "given channel (shell, breaker, pasteurization, or discard) from today forward, until "
-            "changed again. This is routine egg-marketing channel allocation, e.g. shifting output "
-            "between shell-egg sale, breaker stock, pasteurization, or discard."
+            "given channel (shell, conventional, breaker, pasteurization, or discard) from today "
+            "forward, until changed again. This is routine egg-marketing channel allocation, e.g. "
+            "shifting output between the house's contracted shell account, a conventional shell "
+            "account, breaker stock, pasteurization, or discard."
         ),
     ),
     "log_incident": OpSpec(
