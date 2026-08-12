@@ -531,10 +531,13 @@ class FarmEnv:
                     if isinstance(params.get("task"), str) else None
                 )
                 if task_norm == "enrichment":
-                    maint_house = params.get("house_id") or params.get("target") or ""
-                    maint_hw = self.state.welfare.houses.get(maint_house)
-                    if maint_hw is not None:
-                        maint_hw.enrichment_installed = True
+                    # BOTH keys install (Codex D11 round-2 F3): house_id and target can
+                    # name different houses, and each can satisfy a different node's
+                    # matcher — the physics must reach every house a matcher could credit.
+                    for key in ("house_id", "target"):
+                        maint_hw = self.state.welfare.houses.get(params.get(key) or "")
+                        if maint_hw is not None:
+                            maint_hw.enrichment_installed = True
             if tool == "schedule_vet_visit":
                 # NAE label contract (Codex R2-F1 on D14): an explicit administer-antibiotics
                 # vet visit is full treatment credit on DPN's matcher, so it must arm the

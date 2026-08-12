@@ -58,6 +58,11 @@ _ANCHOR_ACTS: dict[str, list] = {
 _VENT_GRID = [0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2, 1.6, 2.0]
 _TEMP_GRID = [14.0, 16.0, 18.0, 20.0, 23.0, 26.0]
 _BELT_GRID = [1.0, 5.0, 14.0]
+# D11 made lighting a financially active lever (Codex D11 round-2 F1): dim light slows
+# feather-driven cannibalism mortality (dim-to-mask is PROFITABLE — the designed
+# temptation), bright light accelerates it. The multiplier is banded (<10 lux / 10-30 /
+# >30), so three representative points span the reachable behaviors.
+_LUX_GRID = [5.0, 20.0, 31.0]
 
 # +EV discrete moves layered onto the ceiling (all measured net-positive):
 # treat the day-120 H2 mite pressure (recovers egg grade > materials cost); the D11 feather
@@ -66,13 +71,15 @@ _BELT_GRID = [1.0, 5.0, 14.0]
 # +$27k methionine, +$34k enrichment H2-H5 on top). H1 enrichment is EXCLUDED: its flock
 # is past the feather curve's last anchor (rate 0), so the callout fee is pure loss
 # (measured -$450). "Sell everything" is the default disposition, so it needs no action.
+# Day 0 is playable, so the mitigations land there — a day-1 schedule silently slips to
+# the first wake (day 7) and understates the ceiling (Codex D11 round-2 F2).
 _CEILING_ACTS = [
     (120, "log_treatment", {"house_id": "H2", "issue": "red_mite"}),
-    (1, "place_feed_order", {"additive": "methionine", "quantity_tons": 0.0}),
-    (1, "schedule_maintenance", {"house_id": "H2", "task": "enrichment"}),
-    (1, "schedule_maintenance", {"house_id": "H3", "task": "enrichment"}),
-    (1, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
-    (1, "schedule_maintenance", {"house_id": "H5", "task": "enrichment"}),
+    (0, "place_feed_order", {"additive": "methionine", "quantity_tons": 0.0}),
+    (0, "schedule_maintenance", {"house_id": "H2", "task": "enrichment"}),
+    (0, "schedule_maintenance", {"house_id": "H3", "task": "enrichment"}),
+    (0, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
+    (0, "schedule_maintenance", {"house_id": "H5", "task": "enrichment"}),
 ]
 
 
@@ -100,18 +107,18 @@ def _run(setpoints: dict[str, float], acts: list = ()) -> float:
 
 def _ceiling() -> dict:
     best_margin, best_sp = None, None
-    for vent, temp, belt in itertools.product(_VENT_GRID, _TEMP_GRID, _BELT_GRID):
-        sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt}
+    for vent, temp, belt, lux in itertools.product(_VENT_GRID, _TEMP_GRID, _BELT_GRID, _LUX_GRID):
+        sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt, "lighting_lux": lux}
         m = _run(sp, _CEILING_ACTS)
         if best_margin is None or m > best_margin:
             best_margin, best_sp = m, sp
-    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "methionine spec (mill-level, day 1)", "enrichment H2-H5 (day 1)", "sell all output"]}}
+    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "methionine spec (mill-level, day 0)", "enrichment H2-H5 (day 0)", "sell all output"]}}
 
 
 def _floor_operating() -> dict:
     worst_margin, worst_sp = None, None
-    for vent, temp, belt in itertools.product(_VENT_GRID, _TEMP_GRID, _BELT_GRID):
-        sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt}
+    for vent, temp, belt, lux in itertools.product(_VENT_GRID, _TEMP_GRID, _BELT_GRID, _LUX_GRID):
+        sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt, "lighting_lux": lux}
         m = _run(sp)  # still selling everything — bad husbandry, competent commercial sense
         if worst_margin is None or m < worst_margin:
             worst_margin, worst_sp = m, sp
@@ -136,10 +143,11 @@ def _floor_absolute() -> dict:
     for vent in (2.0, 3.5, 5.0):                                  # up to the ventilation max (5.0)
         for temp in (0.0, 1.9286, 4.0, 7.0, 14.0, 26.0):         # incl. the min + the cap boundary
             for belt in _BELT_GRID:
-                sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt}
-                m = _run(sp, discard)
-                if worst_margin is None or m < worst_margin:
-                    worst_margin, worst_sp = m, sp
+                for lux in _LUX_GRID:                             # dim keeps more hens alive to feed
+                    sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt, "lighting_lux": lux}
+                    m = _run(sp, discard)
+                    if worst_margin is None or m < worst_margin:
+                        worst_margin, worst_sp = m, sp
     return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)"}}
 
 

@@ -54,6 +54,18 @@ def test_schedule_maintenance_enrichment_accepts_target_key():
     assert env.state.welfare.houses[h].enrichment_installed is True
 
 
+def test_schedule_maintenance_enrichment_installs_in_every_named_house():
+    # Codex D11 round-2 F3: house_id and target can name DIFFERENT houses, and each
+    # can satisfy a different node's matcher (DP07 via house_id, DPD via target) —
+    # the physics must install wherever a matcher could credit, so both are flagged.
+    env = _env()
+    houses = list(env.state.welfare.houses)
+    a, b = houses[0], houses[1]
+    env.apply_action("schedule_maintenance", {"house_id": a, "target": b, "task": "enrichment"})
+    assert env.state.welfare.houses[a].enrichment_installed is True
+    assert env.state.welfare.houses[b].enrichment_installed is True
+
+
 def test_schedule_maintenance_other_task_does_not_set_flag():
     env = _env()
     h = next(iter(env.state.welfare.houses))
