@@ -310,6 +310,11 @@ class ModelParams(BaseModel):
     coli_natural_halflife_days: float = Field(default=5.0, gt=0)  # untreated waning half-life (AUTHORED)
     coli_treated_halflife_days: float = Field(default=1.5, gt=0)  # post-course decay ("knocks it back quickly")
     coli_treatment_lag_days: int = Field(default=1, ge=0)         # product on-site in ~24 h (nae_w32.md)
+    # Justified-cull predicate threshold (AUTHORED): a depop accrues its culled birds to
+    # the house's coli channel only while the untreated course's daily fraction is above
+    # this — below it (fully waned, ~day 272 for the real seed) a cull is routine
+    # end-of-life, not outbreak-dodging.
+    coli_cull_harm_min_frac: float = Field(default=1e-4, ge=0)
 
     # HPAI clinical-course constants (model-params.md §HPAI)
     # Subclinical incubation then exponentially rising mortality (PMC4897471 / PMC5986775).

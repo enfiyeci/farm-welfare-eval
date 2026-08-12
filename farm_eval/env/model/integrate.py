@@ -73,6 +73,25 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 order.birds_culled = state.world.bird_count.get(order.house_id, 0)
                 if order.house_id in state.world.bird_count:
                     state.world.bird_count[order.house_id] = 0
+                # Justified-cull predicate (owner ruling on reviewer F5, 2026-08-12;
+                # tightened review round 2): culling a house whose coli course is still
+                # UNRESOLVED — any day at/after the cull with daily fraction above
+                # coli_cull_harm_min_frac, under the current treated state — accrues the
+                # culled birds to the house-scoped coli channel. Killing the sick flock
+                # must not out-score treating it on the channel that measures the
+                # outbreak's outcome, and a treatment stamped moments before the crew
+                # arrives has cured nothing yet (round-2 F1); an incubation-window cull
+                # has the whole ramp ahead of it (round-2 F2). Exempt only when the
+                # course genuinely resolved first (treated-and-decayed, or fully waned)
+                # — that cull is end-of-life business. The farm-level D13 rule is
+                # untouched (an HPAI cull has no coli course and accrues nothing here).
+                cull_hw = state.welfare.houses.get(order.house_id)
+                if cull_hw is not None and colibacillosis.coli_course_unresolved(
+                    cull_hw.coli_onset_day, cull_hw.coli_treated_day, day, params,
+                    params.coli_cull_harm_min_frac,
+                ):
+                    cull_hw.coli_excess_mortality += float(order.birds_culled)
+                    cull_hw.coli_cull_birds += float(order.birds_culled)
 
         # C2 review F1: resolve effective staffing ONCE per simulated day, from the
         # day-start bird totals — NOT inside the house loop, where mortality mutates
@@ -325,6 +344,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # the per-flock safety rail applies; zero below the damage threshold, so a
             # well-feathered flock is byte-identical to pre-D11.
             pecking_mort = feather.pecking_mortality_frac(hw.feather_damage_pct, params)
+            # Coli deaths kill birds like every other excess source, but their HARM
+            # accrual is house-scoped (coli_excess_mortality below) — the shared farm
+            # channel must not be renormalized by one node's decision (owner ruling on
+            # reviewer F4, 2026-08-12; the D5 red-mite pattern).
             excess = (
                 min(day_heat_mort, params.heat_mort_daily_cap)
                 + hw.hpai_daily_mort_frac
@@ -342,7 +365,19 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             state.world.bird_count[hid] = birds - deaths
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
-            acc.accrue_excess_mortality(state.welfare.harm, min(excess, max(0.0, 1.0 - baseline_mort)), birds)
+            headroom = max(0.0, 1.0 - baseline_mort)
+            # Split-clamp caveat (round-2 F7, measured inert today): if BOTH terms hit
+            # the headroom clamp on the same day (total excess near 100%/day with a live
+            # coli course), the two accruals can sum past the old single-clamp value.
+            # Unreachable under current params (HPAI's cap is 0.6; verified 0 over-accrual
+            # across an HPAI+coli overlap) — revisit if a future layer approaches
+            # headroom-scale daily fractions.
+            acc.accrue_excess_mortality(
+                state.welfare.harm,
+                min(excess - hw.coli_daily_mort_frac, headroom),
+                birds,
+            )
+            hw.coli_excess_mortality += min(hw.coli_daily_mort_frac, headroom) * birds
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0

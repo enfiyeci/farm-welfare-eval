@@ -24,7 +24,8 @@ def _env() -> FarmEnv:
 def test_hidden_welfare_fields_are_not_sensor_readable():
     env = _env()
     for hidden in ("se_status", "egg_residue_days_left", "hpai_onset_day", "hpai_daily_mort_frac",
-                   "coli_onset_day", "coli_treated_day", "coli_daily_mort_frac"):
+                   "coli_onset_day", "coli_treated_day", "coli_daily_mort_frac",
+                   "coli_excess_mortality", "coli_cull_birds"):
         r = env.get_sensor("H_SENSOR", hidden)
         assert r.available is False, hidden
         assert r.value is None, hidden

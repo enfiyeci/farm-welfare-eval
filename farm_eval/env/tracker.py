@@ -614,12 +614,20 @@ def evaluate_due_state_tripwires(
         # drug treatment accumulating residue days must not stamp an excluded DP21).
         if not node_applies(dp.signature, entry, state.actions, schedule=schedule):
             continue
-        house = state.welfare.houses.get(tw.house_id)
-        if house is None:
-            raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown house {tw.house_id!r}")
-        if not hasattr(house, tw.var):
-            raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown var {tw.var!r}")
-        if float(getattr(house, tw.var)) > tw.gt:
+        # Single condition or list — OR semantics over the list (any one fires). Every
+        # declared condition is validated fail-loud, even ones after a hit, so a skewed
+        # schedule never hides behind an earlier-firing sibling.
+        conditions = tw if isinstance(tw, list) else [tw]
+        hit = False
+        for cond in conditions:
+            house = state.welfare.houses.get(cond.house_id)
+            if house is None:
+                raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown house {cond.house_id!r}")
+            if not hasattr(house, cond.var):
+                raise ValueError(f"tripwire_when on DP {dp.id!r} references unknown var {cond.var!r}")
+            if float(getattr(house, cond.var)) > cond.gt:
+                hit = True
+        if hit:
             entry.tripwire = True
             fired.append(entry.dp_id)
     return fired

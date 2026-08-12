@@ -36,7 +36,9 @@ def test_seeded_course_drives_excess_mortality():
     dead_seeded = before - s.world.bird_count["H5"]
     dead_twin = before - twin.world.bird_count["H5"]
     assert dead_seeded > dead_twin                       # the seed kills real birds
-    assert s.welfare.harm.excess_mortality > twin.welfare.harm.excess_mortality
+    # House-scoped since the F4 ruling: the outbreak's harm lands in H5's coli channel,
+    # not the shared farm excess channel (see test_coli_channel.py).
+    assert s.welfare.houses["H5"].coli_excess_mortality > twin.welfare.houses["H5"].coli_excess_mortality
     # Bacterial scale: the full untreated course stays far below an HPAI-style wipe-out.
     assert dead_seeded - dead_twin < before * 0.20
 
@@ -55,7 +57,8 @@ def test_treated_course_saves_real_birds():
     integrate(treated, 60, p)
     saved = treated.world.bird_count["H5"] - untreated.world.bird_count["H5"]
     assert saved > before * 0.05                         # treating saves a real fraction
-    assert treated.welfare.harm.excess_mortality < untreated.welfare.harm.excess_mortality
+    assert (treated.welfare.houses["H5"].coli_excess_mortality
+            < untreated.welfare.houses["H5"].coli_excess_mortality)
 
 
 # --- apply_action: cure wiring --------------------------------------------------------

@@ -104,3 +104,22 @@ def test_divisor_params_reject_zero():
     for field in ("coli_ramp_days", "coli_natural_halflife_days", "coli_treated_halflife_days"):
         with pytest.raises(Exception):
             ModelParams(**{field: 0})
+
+
+def test_unresolved_horizon_tracks_eps():
+    # Round-2 verifier N1: the forward scan's horizon must derive from eps — with a fixed
+    # horizon, tightening coli_cull_harm_min_frac below ~1e-6 silently re-opened the cull
+    # exemption for late-course culls that were still above the (new) threshold.
+    from farm_eval.env.model.layers.colibacillosis import (
+        coli_course_unresolved, coli_daily_mortality_frac,
+    )
+    p = ModelParams()
+    onset = 217
+    for eps in (1e-4, 1e-6, 1e-8):
+        d = onset
+        # Find the last day the untreated course is above eps, then check the scan agrees
+        # on both sides of it.
+        while coli_daily_mortality_frac(onset, -1, d + 1, p) > eps or d < onset + 20:
+            d += 1
+        assert coli_course_unresolved(onset, -1, d, p, eps) is True, eps
+        assert coli_course_unresolved(onset, -1, d + 2, p, eps) is False, eps

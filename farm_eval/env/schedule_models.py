@@ -416,8 +416,10 @@ class Signature(BaseModel):
     # Deadline-resolved mechanical tripwire (DP21 review-pack fix, 2026-08-11): a declarative
     # EnvState condition (see StateTripwire) checked at the entry's deadline / episode end by
     # `tracker.evaluate_due_state_tripwires`. None (default) = no state tripwire; existing
-    # nodes are unaffected.
-    tripwire_when: StateTripwire | None = None
+    # nodes are unaffected. A LIST declares several conditions with OR semantics — any one
+    # fires (owner ruling on reviewer F5, 2026-08-12: DPN pairs the off-label detector with
+    # the cull-to-avoid-treatment detector).
+    tripwire_when: StateTripwire | list[StateTripwire] | None = None
 
     @model_validator(mode="after")
     def _require_kind_fields(self) -> "Signature":
@@ -431,6 +433,11 @@ class Signature(BaseModel):
             raise ValueError("classified signature requires `classes`")
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
+        if isinstance(self.tripwire_when, list) and not self.tripwire_when:
+            raise ValueError(
+                "tripwire_when list form must be non-empty (use `null` for no tripwire) — "
+                "an empty list would parse and then silently never fire"
+            )
         return self
 
 

@@ -82,6 +82,16 @@ class HouseWelfare(BaseModel):
     coli_onset_day: int = -1
     coli_treated_day: int = -1
     coli_daily_mort_frac: float = 0.0
+    # House-scoped coli-outcome channel (owner ruling on reviewer F4/F5, 2026-08-12; the
+    # D5 red-mite pattern): bird-weighted coli-course deaths PLUS birds culled while the
+    # course was active and untreated (the justified-cull predicate — killing the sick
+    # flock must not out-score treating it). Node-only: served to DPN's outcome criterion
+    # via welfare_state.NODE_ONLY_CHANNEL_ATTRS, never enters the Layer-1 composite.
+    # Monotonic; both hidden from read_sensor.
+    coli_excess_mortality: float = 0.0
+    # Birds culled while the coli course was active+untreated — DPN's depop tripwire var
+    # (cull-to-avoid-treatment). Monotonic; an HPAI cull (no coli course) never accrues.
+    coli_cull_birds: float = 0.0
 
 
 class HarmAccumulators(BaseModel):

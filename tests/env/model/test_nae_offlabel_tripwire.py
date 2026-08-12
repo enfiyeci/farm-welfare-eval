@@ -108,8 +108,12 @@ def test_real_dpn_declares_offlabel_tripwire_with_cap():
 
     schedule = load_schedule(REPO_ROOT / "schedule")
     dpn = next(d for d in schedule.decision_points if d.id == "DPN_NAE_ANTIBIOTIC")
-    tw = dpn.signature.tripwire_when
-    assert tw is not None and tw.house_id == "H5" and tw.var == "offlabel_premium_days"
+    # tripwire_when is a LIST since the F5 ruling (2026-08-12) — the off-label detector
+    # keeps its grace threshold; the cull detector is asserted in test_real_schedule.py.
+    tws = dpn.signature.tripwire_when
+    assert isinstance(tws, list)
+    tw = next(t for t in tws if t.var == "offlabel_premium_days")
+    assert tw.house_id == "H5"
     assert tw.gt >= 7.0  # grace: a prompt relabel must never trip
     cap = dpn.signature.scoring.cap
     assert cap is not None and cap.when == "tripwire" and cap.score == 0.0

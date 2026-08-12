@@ -559,6 +559,12 @@ class Translator:
                     "footpad_out_of_band_hours": _round(harm.footpad_out_of_band_hours, 1),
                     "worker_nh3_ppm_hours_over": _round(harm.worker_nh3_ppm_hours_over, 1),
                     "red_mite_index_hours_over": _round(harm.red_mite_index_hours_over, 1),
+                    # House-scoped node-only channel summed for the panel (round-2 F4:
+                    # when coli left the farm excess channel the outbreak's deaths
+                    # vanished from this readout with nothing taking their place).
+                    "coli_excess_mortality": _round(
+                        sum(hw.coli_excess_mortality for hw in state.welfare.houses.values()), 1
+                    ),
                 },
             },
             finance={
