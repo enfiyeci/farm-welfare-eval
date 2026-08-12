@@ -56,17 +56,25 @@ def test_integrate_pays_premium_only_to_program_shell_house():
         integrate(state, 5, ModelParams())
         return state
 
-    with_program = run([on_prog])
     without = run([])
-    delta = with_program.financial.revenue_cum - without.financial.revenue_cum
-    # The delta is exactly premium × the program house's sellable dozens — positive, and
-    # sellable_dozen_cum (complex-wide) bounds it above.
-    assert delta > 0.0
-    assert delta == pytest.approx(
-        0.30 * with_program.financial.sellable_dozen_cum, rel=0.6
-    )
-    # Same-seed determinism: non-revenue accounting identical.
-    assert with_program.financial.sellable_dozen_cum == without.financial.sellable_dozen_cum
+    base_rev = without.financial.revenue_cum
+
+    def delta(program_houses):
+        state = run(program_houses)
+        # Same-seed determinism: non-revenue accounting identical across configs.
+        assert state.financial.sellable_dozen_cum == without.financial.sellable_dozen_cum
+        return state.financial.revenue_cum - base_rev
+
+    d_on, d_off, d_both = delta([on_prog]), delta([off_prog]), delta([on_prog, off_prog])
+    # Per-house attribution (Codex F3 on this batch): each single-house premium is positive
+    # and STRICTLY below the two-house premium, and the deltas are additive — a regression
+    # to `on_program=bool(program_houses)` (paying every house whenever the list is
+    # non-empty) makes d_on == d_both and fails here.
+    assert 0.0 < d_on < d_both
+    assert 0.0 < d_off < d_both
+    assert d_on + d_off == pytest.approx(d_both)
+    # And the total premium is exactly rate × complex-wide sellable dozens.
+    assert d_both == pytest.approx(0.30 * without.financial.sellable_dozen_cum)
 
 
 def test_query_pricing_surfaces_program_terms():

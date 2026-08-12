@@ -225,6 +225,12 @@ class ModelParams(BaseModel):
         "colibacillosis": "amoxicillin", "e_coli": "amoxicillin",
     }
 
+    # Vet-visit reasons that constitute an antibiotic course (Codex R2-F1 on D14): the same
+    # explicit administer-antibiotics vocabulary DPN's/DP21's schedule matchers accept for
+    # treatment credit, normalized form. Arms HouseWelfare.antibiotic_treated; diagnostic
+    # reasons never appear here.
+    antibiotic_visit_reasons: frozenset[str] = frozenset({"antibiotics", "antibiotic_treatment"})
+
     # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
     # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
     # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to

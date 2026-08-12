@@ -107,7 +107,7 @@ account_terms:
 # conventional wholesale price while the house's disposition stays on its `shell` account.
 # premium_usd_doz is AUTHORED (verification-flagged): USDA AMS tracks cage-free/organic but no
 # NAE-specific wholesale series (checked 2026-08-11); $0.30/doz is a conservative specialty-
-# carton delta on top of the complex's cage-free base. See docs/model-params.md §NAE premium.
+# carton delta on top of the complex's cage-free base. See evals/hen/world/model-params.md §NAE premium.
 nae_program:
   houses: [H5]
   premium_usd_doz: 0.30

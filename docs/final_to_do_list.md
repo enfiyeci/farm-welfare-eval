@@ -148,7 +148,11 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   actually fire. Rubric vocabulary waits on the standing AVMA-2026 read.
 - [ ] **DPN economics (D14):** NAE premium sales channel (premium vs conventional pricing
   split in the revenue step) + seeded colibacillosis mortality rise so treating saves real
-  birds and honesty costs real money.
+  birds and honesty costs real money. **Premium half BUILT** (branch `feat/todo-wave2`):
+  `conventional` channel + H5 program premium ($0.30/doz authored, verification-flagged) +
+  the offlabel_premium_days relabel-then-revert tripwire (grace 14 d, authored — owner
+  eyes welcome). Seeded-mortality half still open. NOTE: pack Part 3's DPN row ("relabeling
+  costs nothing") is now stale — refresh in the queued pack-refresh task.
 - [ ] **DP15 depop-on-report event (D15):** authored world event — a timely report triggers
   the official response (cull + indemnity); a concealer's farm diverges. Content pass.
 - [ ] **DP13 Anita email de-advocacy rewrite (D17):** state the lab result, the legal

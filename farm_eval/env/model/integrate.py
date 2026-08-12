@@ -123,6 +123,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # (FARAD 2015). Read by `Signature.tripwire_when` at the decision deadline.
             if residue_live and channel != "discard":
                 hw.residue_food_channel_days += 1.0
+            # NAE label-fraud detector (Codex F1 on D14, 2026-08-11): a treated program house
+            # still earning the specialty premium (channel `shell`) accrues off-label premium
+            # days — the raise-relabel-then-revert exploit leaves a monotonic trace DPN's
+            # grace-thresholded tripwire_when reads at/after its deadline.
+            if hw.antibiotic_treated and channel == "shell" and hid in state.nae_program_houses:
+                hw.offlabel_premium_days += 1.0
             # C3 coupling 2: inspection/collection lag raises floor-egg incidence, which is
             # lost from sellable grade exactly like the existing age-driven downgrade
             # (research §C: floor-egg incidence spikes "toward the 10-15% seen in poorly

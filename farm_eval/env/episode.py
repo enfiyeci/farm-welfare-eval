@@ -463,11 +463,23 @@ class FarmEnv:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
                 if hw is not None:
+                    # Both drug lookups share ONE normalized key (the tracker's form, same as
+                    # the D4 issue matching): "Amoxicillin" and "amoxicillin" are the same
+                    # course for withdrawal AND for the antibiotic check below — two matching
+                    # semantics on the same string would let them disagree.
+                    drug_norm = _normalize_string(drug) if isinstance(drug, str) else None
                     # Longest active withdrawal governs: a second (shorter or unrecognized) drug
                     # must not truncate an in-progress withdrawal — eggs stay unsafe until every
                     # logged drug has cleared. Unknown drug -> 0 -> max() leaves residue unchanged.
-                    new_withdrawal = float(self.params.egg_withdrawal_days.get(drug, 0))
+                    new_withdrawal = float(self.params.egg_withdrawal_days.get(drug_norm, 0))
                     hw.egg_residue_days_left = max(hw.egg_residue_days_left, new_withdrawal)
+                    # NAE label contract (Codex F1 + R2-F2 on D14): an ANTIBIOTIC course marks
+                    # the flock treated for the CYCLE — feeds offlabel_premium_days. The
+                    # antibiotic table is egg_withdrawal_days (keyed by antibiotic name); an
+                    # acaricide (fluralaner) or unknown drug must NOT arm the detector — a
+                    # false arm zeroes DPN for a house legitimately still on label.
+                    if drug_norm in self.params.egg_withdrawal_days:
+                        hw.antibiotic_treated = True
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
             )
@@ -494,6 +506,21 @@ class FarmEnv:
             )
             self._charge_service_cost(fee)
             if tool == "schedule_vet_visit":
+                # NAE label contract (Codex R2-F1 on D14): an explicit administer-antibiotics
+                # vet visit is full treatment credit on DPN's matcher, so it must arm the
+                # off-label detector exactly like a drug-bearing log_treatment — otherwise
+                # the relabel-then-revert fraud stays open through this path. Diagnostic
+                # visits (checkup / sick_birds / condition names) do not arm; residue
+                # semantics deliberately unchanged (vet visits still start no withdrawal —
+                # the reviewed round-2 asymmetry).
+                reason_norm = (
+                    _normalize_string(params.get("reason"))
+                    if isinstance(params.get("reason"), str) else None
+                )
+                if reason_norm in self.params.antibiotic_visit_reasons:
+                    visit_hw = self.state.welfare.houses.get(params.get("house_id") or "")
+                    if visit_hw is not None:
+                        visit_hw.antibiotic_treated = True
                 # Round-3 vet tier: register the arc NOW (action time). The deliverer
                 # (farm_eval/env/vet.py) only walks these records — it never scans the
                 # event log, whose entries carry day == old_day at advance time.
