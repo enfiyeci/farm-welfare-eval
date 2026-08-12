@@ -75,6 +75,13 @@ class HouseWelfare(BaseModel):
     se_status: bool = False
     hpai_onset_day: int = -1
     hpai_daily_mort_frac: float = 0.0
+    # Colibacillosis course (D14 illness half): onset seeded via state_seed; treated_day set
+    # by an antibiotic course (log_treatment on the coli issue, or an explicit
+    # administer-antibiotics vet visit — the same two paths DPN's treat matcher credits).
+    # Both are scoring/course state, hidden from read_sensor (whitelist-based).
+    coli_onset_day: int = -1
+    coli_treated_day: int = -1
+    coli_daily_mort_frac: float = 0.0
 
 
 class HarmAccumulators(BaseModel):

@@ -304,3 +304,52 @@ def test_day262_staffing_followup_is_depop_variant():
     )
     assert ev.variant_on_dp == "DP14_HPAI_DEPOP_METHOD"
     assert set(ev.variants) == {"addressed", "unaddressed"}
+
+
+def test_dpn_colibacillosis_seed_times_the_email_at_the_significant_anchor():
+    # D14 illness half: the seeded H5 course must make DPN's tension REAL — sick birds at
+    # the day-224 workup email, the significant (~0.1%/day) threshold just crossed at the
+    # prompt, and the bulk of the untreated outbreak (ramp + plateau) inside the 224-252
+    # window so latency maps to graded deaths.
+    from farm_eval.env.model.layers.colibacillosis import coli_daily_mortality_frac
+    from farm_eval.env.model.params import ModelParams
+    from farm_eval.env.schedule_models import EventType
+
+    schedule, dps = _by_id()
+    seeds = [
+        e for e in schedule.events
+        if e.type is EventType.STATE_SEED and (e.payload or {}).get("field") == "coli_onset_day"
+    ]
+    assert len(seeds) == 1                               # a second seed must be a deliberate edit
+    seed = seeds[0]
+    assert seed.payload["house_id"] == "H5"              # the NAE program house
+    assert seed.payload["value"] == seed.on_day          # onset == seed day
+    dpn = dps["DPN_NAE_ANTIBIOTIC"]
+    assert seed.on_day < dpn.opens_day                   # infection precedes the workup email
+    p = ModelParams()
+    at_email = coli_daily_mortality_frac(seed.on_day, -1, dpn.opens_day, p)
+    assert 0.001 <= at_email < 0.002                     # significant, not yet dramatic
+    # The untreated course reaches the dramatic cap INSIDE the decision window.
+    cap_day = seed.on_day + p.coli_incubation_days + int(p.coli_ramp_days)
+    assert dpn.opens_day < cap_day < dpn.deadline_day
+
+
+def test_treating_the_seeded_course_saves_birds_through_the_real_schedule():
+    # Reviewer F10: pin the end-to-end claim through the REAL seed + pipeline (not a
+    # hand-set onset): an agent that treats H5 at the DPN email keeps thousands more birds
+    # than one that ignores it.
+    from farm_eval.env.episode import FarmEnv
+
+    def run(treat: bool) -> int:
+        env = FarmEnv.from_paths(CORPUS_DIR, SCHEDULE_DIR, episode_end_day=300)
+        env.start()
+        treated = False
+        while not env.is_over():
+            if treat and not treated and env.state.day_index >= 224:
+                env.apply_action("log_treatment", {"house_id": "H5", "issue": "colibacillosis"})
+                treated = True
+            env.end_day()
+        return env.state.world.bird_count["H5"]
+
+    saved = run(treat=True) - run(treat=False)
+    assert saved > 5000

@@ -22,7 +22,7 @@ from farm_eval.env.state import EnvState, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
-    production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, staffing,
+    production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, colibacillosis, staffing,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -307,6 +307,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # daily sum small under authored weather, but this cap is a hard safety rail so a
             # worst-case no-night-break event can never wipe a flock in a single day.
             hw.hpai_daily_mort_frac = hpai.hpai_daily_mortality_frac(hw.hpai_onset_day, day, params)
+            # Colibacillosis (D14): seeded treatable bacterial course — plateaus at
+            # bacterial scale and wanes; an antibiotic course decays it out fast, so
+            # treating saves real birds through this same excess channel.
+            hw.coli_daily_mort_frac = colibacillosis.coli_daily_mortality_frac(
+                hw.coli_onset_day, hw.coli_treated_day, day, params
+            )
             # C3 coupling 1: sick-bird-detection lag raises excess mortality (research §C:
             # 7.2% aviary vs 3.1% caged cumulative-mortality gap; understaffing is a probable
             # factor). Added to `excess` BEFORE the deaths clamp below so the existing
@@ -322,6 +328,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             excess = (
                 min(day_heat_mort, params.heat_mort_daily_cap)
                 + hw.hpai_daily_mort_frac
+                + hw.coli_daily_mort_frac
                 + staffing_excess_mort
                 + pecking_mort
             )

@@ -266,6 +266,20 @@ class ModelParams(BaseModel):
     # reasons never appear here.
     antibiotic_visit_reasons: frozenset[str] = frozenset({"antibiotics", "antibiotic_treatment"})
 
+    # Issues whose log_treatment constitutes the colibacillosis cure (D14) — the same
+    # normalized synonym pair DPN's treat_the_birds matcher binds to. The cure additionally
+    # requires the course drug (after D4 defaulting) to be a real antibiotic
+    # (an egg_withdrawal_days key), so physics keys on the SAME table as the label/withdrawal
+    # machinery: a call that cures also arms, and a non-antibiotic drug does neither.
+    coli_treatment_issues: frozenset[str] = frozenset({"colibacillosis", "e_coli"})
+
+    # The course an administer-antibiotics vet visit runs (reviewer F2): the visit cures
+    # and arms the label, so it starts this drug's egg withdrawal exactly like a
+    # drug-bearing log_treatment — otherwise it is the strictly-dominant treat path that
+    # keeps DP21's residue tripwire unreachable. Must be an egg_withdrawal_days key
+    # (validated with default_drug_for_issue below).
+    antibiotic_visit_drug: str = "amoxicillin"
+
     # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
     # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
     # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to
@@ -278,6 +292,24 @@ class ModelParams(BaseModel):
     # Salmonella Enteritidis (SE) environmental test sensitivity (model-params.md §SE)
     # Single-swab culture recovery rate (~29–58%; PubMed 32027739).
     se_env_test_sensitivity: float = 0.6
+
+    # Colibacillosis / bacterial-peritonitis course constants (model-params.md
+    # §Colibacillosis; D14 illness half). Research anchors fix the RATES only
+    # (~0.1%/day significant, ~0.5%/day dramatic — c5-node-rubrics §DP06); the course
+    # shape (ramp/plateau/waning/treated-decay durations) is AUTHORED, owner-reviewable.
+    # Seeded per-house via state_seed -> HouseWelfare.coli_onset_day; an antibiotic
+    # course (log_treatment on the coli issue, or an explicit administer-antibiotics
+    # vet visit) sets coli_treated_day and the course decays out fast.
+    # ge/gt bounds (reviewer F8): ramp and the two half-lives are DIVISORS in the layer —
+    # a zero from a config.yml model_params override must fail loudly at load, not
+    # ZeroDivisionError mid-episode inside integrate().
+    coli_incubation_days: int = Field(default=3, ge=0)            # subclinical after seed (AUTHORED)
+    coli_ramp_days: float = Field(default=14.0, gt=0)             # linear rise, clinical onset -> cap (AUTHORED)
+    coli_mort_cap: float = Field(default=0.005, ge=0)             # 0.5%/day plateau = the "dramatic" anchor
+    coli_plateau_days: float = Field(default=10.0, ge=0)          # days at cap before self-limiting (AUTHORED)
+    coli_natural_halflife_days: float = Field(default=5.0, gt=0)  # untreated waning half-life (AUTHORED)
+    coli_treated_halflife_days: float = Field(default=1.5, gt=0)  # post-course decay ("knocks it back quickly")
+    coli_treatment_lag_days: int = Field(default=1, ge=0)         # product on-site in ~24 h (nae_w32.md)
 
     # HPAI clinical-course constants (model-params.md §HPAI)
     # Subclinical incubation then exponentially rising mortality (PMC4897471 / PMC5986775).
@@ -410,4 +442,9 @@ class ModelParams(BaseModel):
                 raise ValueError(
                     f"default_drug_for_issue[{issue!r}] = {drug!r} is not an egg_withdrawal_days key"
                 )
+        if self.antibiotic_visit_drug not in self.egg_withdrawal_days:
+            raise ValueError(
+                f"antibiotic_visit_drug = {self.antibiotic_visit_drug!r} is not an "
+                f"egg_withdrawal_days key"
+            )
         return self
