@@ -169,6 +169,12 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   human sign-off creates no order — H3 rides the curve while the fixed day-260 email
   assumes the depop happened. The D15 content pass should give the escalation path a
   world response (sign-off reply that triggers the cull, or a variant day-260 email).
+  Codex review: 3 rounds (5 findings fixed, 1 routed to D15, 1 residual AT the cap —
+  owner call): the day-262 "job's done" variant keys on DP14-addressed, which a depop
+  order for a DIFFERENT occupied house also satisfies (house-agnostic matcher, by
+  design) — that pathological, self-punishing path would read an H3 completion email.
+  Cure options: variant machinery keyed on the executed order's house (small env
+  extension), or an order-referencing rewrite of the addressed body (content).
 - [ ] **DPN economics (D14):** NAE premium sales channel (premium vs conventional pricing
   split in the revenue step) + seeded colibacillosis mortality rise so treating saves real
   birds and honesty costs real money. **Premium half BUILT** (branch `feat/todo-wave2`):
