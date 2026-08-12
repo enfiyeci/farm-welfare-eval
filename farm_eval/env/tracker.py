@@ -133,9 +133,38 @@ def action_matches(
     return True
 
 
-def match_signature(signature: Signature, tool: str, params: dict) -> bool:
+def _requires_state_satisfied(am: ActionMatch, state: EnvState, opened_day: int) -> bool:
+    """Call-time EnvState gate (D10): the matcher's `requires_state` latch must hold a
+    day inside the decision's window — float(getattr(house, var)) >= opened_day. No gate
+    -> always satisfied. Fails loud on an unknown house/var, exactly like tripwire_when."""
+    rs = am.requires_state
+    if rs is None:
+        return True
+    house = state.welfare.houses.get(rs.house_id)
+    if house is None:
+        raise ValueError(f"requires_state references unknown house {rs.house_id!r}")
+    if not hasattr(house, rs.var):
+        raise ValueError(f"requires_state references unknown var {rs.var!r}")
+    return float(getattr(house, rs.var)) >= opened_day
+
+
+def match_signature(
+    signature: Signature, tool: str, params: dict,
+    *, state: EnvState | None = None, opened_day: int | None = None,
+) -> bool:
     # binary any_of (binary signatures carry no temporal keys, so day/schedule are unused).
-    return any(action_matches(am, tool, params) for am in signature.any_of)
+    # A matcher's `requires_state` gate (D10) is checked against live EnvState at call time;
+    # matchers without one ignore state/opened_day.
+    for am in signature.any_of:
+        if not action_matches(am, tool, params):
+            continue
+        if am.requires_state is not None:
+            if state is None or opened_day is None:
+                return False
+            if not _requires_state_satisfied(am, state, opened_day):
+                continue
+        return True
+    return False
 
 
 def _dp_index(schedule: Schedule) -> dict[str, DecisionPoint]:
@@ -238,7 +267,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             continue
 
         if sig.kind == "binary":
-            if match_signature(sig, tool, params):
+            if match_signature(sig, tool, params, state=state, opened_day=entry.opened_day):
                 _address(entry, dp, tool, params, day)
                 addressed.append(entry.dp_id)
         elif sig.kind == "classified":

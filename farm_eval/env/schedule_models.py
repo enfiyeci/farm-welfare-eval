@@ -49,6 +49,24 @@ class EventType(StrEnum):
 RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 
 
+class RequiresState(BaseModel):
+    """A CALL-TIME EnvState gate on a matcher (D10 / DP06 signal-justified credit).
+
+    The matcher fires only when, at the moment the tool call is recorded, the named
+    per-house day-latch holds a day inside the decision's window:
+    ``float(getattr(house, var)) >= entry.opened_day``. The latch is a HouseWelfare
+    integer field that records the last day some signal condition held
+    (``usda_trigger_last_day``), so this reads as "a qualifying signal has occurred
+    on/after this decision opened". A -1 (never) or a stale earlier-arc epoch fails
+    the gate. See `farm_eval.env.tracker` for the evaluation and the placement rule
+    (binary any_of only)."""
+
+    model_config = _FORBID
+
+    house_id: str
+    var: str
+
+
 class ActionMatch(BaseModel):
     """One observable agent action that counts toward addressing a decision point.
 
@@ -74,6 +92,10 @@ class ActionMatch(BaseModel):
 
     tool: str
     where: dict[str, Any] = Field(default_factory=dict)
+    # Optional call-time EnvState gate (D10). Legal ONLY inside a binary signature's
+    # `any_of`; the Signature validator rejects it elsewhere (history-replay matchers
+    # evaluate against later state, where "state at call time" is not what getattr reads).
+    requires_state: RequiresState | None = None
 
     @model_validator(mode="after")
     def _check_range_specs(self) -> "ActionMatch":
@@ -438,7 +460,39 @@ class Signature(BaseModel):
                 "tripwire_when list form must be non-empty (use `null` for no tripwire) — "
                 "an empty list would parse and then silently never fire"
             )
+        # `requires_state` (D10) is a CALL-TIME gate: legal only on the binary primary
+        # matchers (`any_of`), which are evaluated against the current tool call. Every
+        # other matcher slot is re-evaluated from history against later state, so a gate
+        # there would read the wrong day and silently mis-score — reject it loudly.
+        binary_any_of = set(id(am) for am in self.any_of) if self.kind == "binary" else set()
+        for am in self._all_action_matches():
+            if am.requires_state is not None and id(am) not in binary_any_of:
+                raise ValueError(
+                    "requires_state is allowed only on a binary signature's `any_of` "
+                    "matchers (call-time evaluation); found it on another matcher slot"
+                )
         return self
+
+    def _all_action_matches(self) -> list["ActionMatch"]:
+        """Every ActionMatch reachable from this signature (for parse-time guards)."""
+        out: list[ActionMatch] = list(self.any_of)
+        if self.root_cause is not None:
+            out.append(self.root_cause)
+        if self.applies_if is not None:
+            out.extend(self.applies_if.matchers)
+        for cls in (self.classes or {}).values():
+            out.extend(cls.any_of)
+            out.extend(cls.all_of)
+        for rung in (self.rungs or []):
+            out.append(rung.match)
+        # Scoring-criterion matchers (reviewer #1, 2026-08-12): a criterion's action/any_of
+        # resolves via action_matches in node_scores.py, which never reads requires_state —
+        # a gate there would silently mis-score, so it must be caught by the same guard.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.action is not None:
+                out.append(crit.action)
+            out.extend(crit.any_of or [])
+        return out
 
 
 class DecisionPoint(BaseModel):

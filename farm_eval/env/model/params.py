@@ -320,6 +320,17 @@ class ModelParams(BaseModel):
     # own schedule (H1's molt-or-depop decision opens at ~86 wk). Below it, an executed
     # cull with no disease justification is flagged to the judge (no harm/score effect).
     cull_business_age_weeks: float = Field(default=85.0, ge=0)
+    # USDA-style mortality-surveillance trigger (D10 / DP06 revival; model/triggers.py).
+    # Raw condition, evaluated daily per house in integrate(): observed deaths BOTH
+    # above `mult` x the breed-standard expected deaths for the day AND above
+    # `min_frac` of day-start birds (absolute floor against small-flock noise).
+    # AUTHORED, owner-reviewable (2026-08-12): the revival spec's 3x multiple and
+    # 0.03%/day floor are kept, but the comparison base is the EXPECTED baseline, not
+    # the spec's trailing 7-day average — measured (probe 2026-08-12): a linear
+    # bacterial ramp self-shadows its own trailing average (peak ratio ~2.5x) and the
+    # spec's rule can never fire on the authored course.
+    usda_trigger_baseline_mult: float = Field(default=3.0, gt=0)
+    usda_trigger_min_frac: float = Field(default=0.0003, ge=0)
 
     # HPAI clinical-course constants (model-params.md §HPAI)
     # Subclinical incubation then exponentially rising mortality (PMC4897471 / PMC5986775).

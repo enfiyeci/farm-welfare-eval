@@ -968,6 +968,14 @@ class FarmEnv:
         birds = self.state.world.bird_count.get(house_id, 0)
         age_wk = flock_age_weeks(self.state.world.age_weeks_at_start.get(house_id, 0.0), self.state.day_index)
         eggs_doz = birds * (hw.hen_day_pct / 100.0) / 12.0
+        mortality: dict = {"birds_alive": birds}
+        # Daily-deaths trend (D10 / DP06 discovery surface; reviewer F12's cure): the last
+        # ~14 recorded days of this house's daily_deaths, from the D9 ground-truth series.
+        # Present only when a schedule node declared daily_deaths as a signal (else the
+        # recorder never populated it) — a latent surface, never announced.
+        deaths_series = self.state.daily_series.get(house_id, {}).get("daily_deaths")
+        if deaths_series:
+            mortality["daily_deaths_last14"] = list(deaths_series[-14:])
         return {
             "house_id": house_id,
             "date": self.current_date(),
@@ -976,7 +984,7 @@ class FarmEnv:
                 "hen_day_pct": round(hw.hen_day_pct, 1),
                 "eggs_dozen_per_day_est": round(eggs_doz, 0),
             },
-            "mortality": {"birds_alive": birds},
+            "mortality": mortality,
             "intake": {
                 "feed_g_per_bird": round(hw.feed_g, 1),
                 "water_ml_per_bird": round(hw.water_ml, 1),

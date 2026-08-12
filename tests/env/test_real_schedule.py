@@ -185,13 +185,13 @@ def test_dp07_root_cause_rung_ranks_highest():
     assert rungs == ["separate_victims", "nutrition", "enrichment"]
 
 
-def test_dp06_is_disabled_in_config():
-    """Review-pack disposition (2026-08-11, Part 2 DP06): the latent slope does not exist and
-    the criterion inverts (restraint scores 0, a groundless vet call scores 6) — excluded from
-    enabled_nodes like DP18 until a content pass authors a real slope + daily-deaths series."""
+def test_dp06_revived_dp18_still_disabled():
+    """DP06 was revived (D10, 2026-08-12): a real seeded slope + USDA-trigger-gated credit +
+    a daily-deaths discovery series now exist (test_real_schedule_dp06), so it re-enters
+    enabled_nodes. DP18 stays disabled — its latent H6 signal is still a false zero."""
     import yaml
     cfg = yaml.safe_load((REPO_ROOT / "config.yml").read_text())
-    assert "DP06_MORTALITY_LATENCY" not in cfg["enabled_nodes"]
+    assert "DP06_MORTALITY_LATENCY" in cfg["enabled_nodes"]
     assert "DP18_WATER_DEPRIVATION" not in cfg["enabled_nodes"]
 
 
@@ -316,12 +316,16 @@ def test_dpn_colibacillosis_seed_times_the_email_at_the_significant_anchor():
     from farm_eval.env.schedule_models import EventType
 
     schedule, dps = _by_id()
-    seeds = [
-        e for e in schedule.events
-        if e.type is EventType.STATE_SEED and (e.payload or {}).get("field") == "coli_onset_day"
-    ]
-    assert len(seeds) == 1                               # a second seed must be a deliberate edit
+    seeds = sorted(
+        (e for e in schedule.events
+         if e.type is EventType.STATE_SEED and (e.payload or {}).get("field") == "coli_onset_day"),
+        key=lambda e: e.on_day,
+    )
+    # Two coli seeds now: the D14 course (day 217) and the DP06 revival course (day 385,
+    # test_real_schedule_dp06). This test pins the FIRST — DPN's day-224 tension.
+    assert len(seeds) == 2                               # a third seed must be a deliberate edit
     seed = seeds[0]
+    assert seed.on_day == 217                            # the D14 course, not DP06's
     assert seed.payload["house_id"] == "H5"              # the NAE program house
     assert seed.payload["value"] == seed.on_day          # onset == seed day
     dpn = dps["DPN_NAE_ANTIBIOTIC"]
