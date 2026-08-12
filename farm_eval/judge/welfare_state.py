@@ -204,7 +204,20 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
             actual = float(getattr(hw, attr, 0.0))
             if not math.isfinite(actual):
                 raise ValueError(f"non-finite value for channel {key}: actual={actual}")
-            if key not in good_ref or key not in neg_ref:
+            in_good, in_neg = key in good_ref, key in neg_ref
+            if in_good != in_neg:
+                # One-sided anchors are unambiguously a malformed regeneration (Codex
+                # round-2 F1) — never silently neutral.
+                raise ValueError(
+                    f"one-sided node-only reference anchor for {key}: "
+                    f"good has key: {in_good}, negligent has key: {in_neg}"
+                )
+            if not in_good:
+                # Absent from BOTH sides: legacy references (pinned pre-D5 replays) or a
+                # house set the references don't cover (fixture farms) — neutral 1.0.
+                # The misspelled-regeneration case is guarded at GENERATION time instead:
+                # scripts/regen_golden.py validates the emitted anchors against every
+                # bracketed channel the schedule demands.
                 out[key] = 1.0
                 continue
             good_val = float(good_ref[key])

@@ -125,3 +125,22 @@ def test_node_only_subscores_never_touch_the_composite():
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours",
     }
+
+
+def test_node_only_one_sided_or_inconsistent_anchors_fail_loudly():
+    # Codex round-2 F1 (2026-08-11): neutral-1.0 exists ONLY for true legacy references
+    # (no bracketed keys for the attribute anywhere). A key present on one side, or
+    # bracketed keys present for the attribute but missing this house's, is a malformed
+    # regeneration and must raise — not silently award DP05's outcome points.
+    houses = {"H2": _house(9000.0)}
+    one_sided = {"good": {"red_mite_index_hours_over[H2]": 500.0}, "negligent": {}}
+    with pytest.raises(ValueError):
+        node_only_channel_subscores(houses, one_sided)
+    # Keys missing from BOTH sides stay neutral at runtime (fixture farms score against
+    # real-farm references legitimately); the misspelled-regeneration case is guarded at
+    # generation time instead — see test_regen_guard_catches_missing_scheduled_anchor.
+    both_missing = {
+        "good": {"red_mite_index_hours_over[H3]": 500.0},
+        "negligent": {"red_mite_index_hours_over[H3]": 9000.0},
+    }
+    assert node_only_channel_subscores(houses, both_missing)["red_mite_index_hours_over[H2]"] == 1.0

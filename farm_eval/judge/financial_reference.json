@@ -13,9 +13,9 @@
   },
   "episode_end_day": 518,
   "floor_absolute": {
-    "margin_usd": -26166782,
+    "margin_usd": -26169791,
     "policy": {
-      "belt_interval_days": 7.0,
+      "belt_interval_days": 1.0,
       "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)",
       "temperature": 1.9286,
       "ventilation": 5.0

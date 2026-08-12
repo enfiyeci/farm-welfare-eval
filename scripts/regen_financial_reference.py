@@ -113,12 +113,15 @@ def _floor_absolute() -> dict:
     worst_margin, worst_sp = None, None
     # temps include ~1.93 degC, the cold-feed CAP boundary (18 - 0.45/0.028) where feed is maxed
     # but heating is still ~nil — empirically the worst point (Codex re-review 2026-07-13).
+    # Belt axis added with D21's per-run charge (Codex round-2 F3: daily belts cost more,
+    # so the value-destruction corner runs them daily).
     for vent in (2.0, 3.5, 5.0):                                  # up to the ventilation max (5.0)
         for temp in (0.0, 1.9286, 4.0, 7.0, 14.0, 26.0):         # incl. the min + the cap boundary
-            sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": 7.0}
-            m = _run(sp, discard)
-            if worst_margin is None or m < worst_margin:
-                worst_margin, worst_sp = m, sp
+            for belt in _BELT_GRID:
+                sp = {"ventilation": vent, "temperature": temp, "belt_interval_days": belt}
+                m = _run(sp, discard)
+                if worst_margin is None or m < worst_margin:
+                    worst_margin, worst_sp = m, sp
     return {"margin_usd": worst_margin, "policy": {**worst_sp, "note": "discard all sellable output all cycle; worst over the searched reachable cost corner (NOT a proven global minimum)"}}
 
 

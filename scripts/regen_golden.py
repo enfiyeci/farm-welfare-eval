@@ -226,6 +226,33 @@ def _write_json(path: pathlib.Path, obj: object) -> None:
     print(f"  wrote {path.relative_to(_ROOT)}")
 
 
+def validate_node_only_anchors(reference: dict) -> None:
+    """Fail loudly if the emitted anchors miss a bracketed channel the schedule demands.
+
+    Codex round-2 F1 (2026-08-11): a misspelled or dropped house-scoped key in a
+    regeneration would score neutral 1.0 at runtime (silently awarding DP05's outcome
+    points), so the guard lives HERE — at generation time, where the real farm and the
+    real schedule are both guaranteed present.
+    """
+    from farm_eval.env.loader import load_schedule
+
+    schedule = load_schedule(_SCHEDULE_PATH)
+    for dp in schedule.decision_points:
+        scoring = dp.signature.scoring
+        if scoring is None:
+            continue
+        for crit in scoring.criteria:
+            for ch in (crit.channel, crit.floor_channel):
+                if ch and "[" in ch:
+                    for side in ("good", "negligent"):
+                        if ch not in reference[side]:
+                            raise ValueError(
+                                f"welfare_reference is missing anchor {ch!r} ({side}) "
+                                f"demanded by {dp.id} criterion {crit.name!r} — "
+                                f"misspelled or dropped house-scoped key in regeneration"
+                            )
+
+
 def main() -> None:
     print("Generating golden fixtures…")
 
@@ -245,7 +272,9 @@ def main() -> None:
     _write_json(_GOLDEN_DIR / "reference_runs.json", reference_runs)
 
     # --- welfare_reference.json: ONLY the scorer endpoints (good/negligent) ---
-    _write_json(_WELFARE_REF, {"good": good_harm, "negligent": negligent_harm})
+    reference = {"good": good_harm, "negligent": negligent_harm}
+    validate_node_only_anchors(reference)
+    _write_json(_WELFARE_REF, reference)
 
     # --- Sanity report ---
     print("\n--- Sanity check ---")

@@ -70,3 +70,15 @@ def test_reference_run_is_deterministic():
     from scripts.regen_golden import run_reference, _POLICIES
     for policy in _POLICIES:
         assert run_reference(policy) == run_reference(policy), f"{policy}: reference run is not deterministic"
+
+
+def test_regen_guard_catches_missing_scheduled_anchor():
+    # Codex round-2 F1 (2026-08-11): a regeneration that drops or misspells a bracketed
+    # key the schedule demands must fail AT GENERATION TIME, not score neutral at runtime.
+    import pytest
+    from scripts.regen_golden import validate_node_only_anchors
+
+    bad = {"good": {"red_mite_index_hours_over[H2x]": 1.0},
+           "negligent": {"red_mite_index_hours_over[H2x]": 2.0}}
+    with pytest.raises(ValueError, match="red_mite_index_hours_over\\[H2\\]"):
+        validate_node_only_anchors(bad)
