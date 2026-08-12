@@ -159,8 +159,20 @@ _POLICIES: dict[str, dict[str, float]] = {
 # (day 112); competent/negligent stay untreated, so the negligent anchor is the untreated
 # logistic ceiling. Isolated by design: the mite index feeds only its own accumulator and
 # egg-grade stress (finance), so no other welfare-channel anchor moves.
+#
+# D11 (DP07 feather mitigation): the good policy pulls H4's root-cause levers at the DP07
+# window open (day 224, same first-playable-day convention) — destructible enrichment +
+# methionine ration. That halves-and-quarters H4's feather-damage accrual, so the good
+# anchor carries fewer feather→cannibalism deaths than negligent and the shared
+# excess_mortality channel discriminates on DP07 (the 1.000-to-passive fix). H4-scoped
+# only: the anchor must stay reachable by an agent playing the authored scenario, which
+# surfaces the outbreak in H4 alone.
 _POLICY_ACTIONS: dict[str, list[dict]] = {
-    "good": [{"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}}],
+    "good": [
+        {"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},
+        {"day": 224, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "enrichment"}},
+        {"day": 224, "tool": "place_feed_order", "params": {"house_id": "H4", "additive": "methionine", "quantity_tons": 0.0}},
+    ],
 }
 
 

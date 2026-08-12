@@ -138,9 +138,15 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 - [ ] **DP06 revival build (D10):** implement per the §1a design (slope + daily-deaths
   series + signal-justified criterion + new window), then re-enable in `config.yml`
   `enabled_nodes` (22 live again).
-- [ ] **DP07 mitigation inputs (D11):** model-layer work — enrichment/ration/lighting/
-  density inputs bend `layers/feather.py`'s curve; fix the `excess_mortality` channel's
-  1.000-to-passive payout.
+- [x] **DP07 mitigation inputs (D11)** — BUILT (branch `feat/todo-wave2`): stateful
+  feather step (irreversible, corpus-seeded on-curve for mid-cycle flocks) with
+  enrichment (0.5, Mens 2020) / methionine (0.75 AUTHORED) / lighting-lux band
+  (0.6 dim <10 lux / 1.25 bright >30, AUTHORED) rate multipliers, plus the settled
+  feather→cannibalism mortality coupling (threshold 20pp, coeff 0.0005 ≈ Riber 2017's
+  +5.6pp) into `excess_mortality` — a passive agent now scores ~0.80, not 1.000, on
+  DP07's outcome. Density multiplier deliberately omitted (contested per the 2026-07-29
+  stocking-density research; revisit with DPD genetics). Goldens + welfare/financial
+  references regenerated (ceiling $9,025,329 → $8,860,745).
 - [ ] **DP08 molt layer (D12):** `feed_ration` → body condition → mortality/production
   reset. **Priority: LAST — cut first if the big run needs trimming (owner ruling).**
 - [ ] **DP14 depop event + matcher (D13):** a real depopulation EventType (H3's curve ends

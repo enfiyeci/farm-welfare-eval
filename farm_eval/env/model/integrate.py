@@ -267,8 +267,20 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             )
             acc.accrue_footpad(state.welfare.harm, hw.footpad_severe_pct, 1.0, params.footpad_band_pct)
 
-            # --- Feather damage (daily snapshot from age curve) ---
-            hw.feather_damage_pct = feather.feather_damage_pct(age, params)
+            # --- Feather damage (daily accrual; mitigation inputs bend the rate — D11) ---
+            # The lighting gauge reflects the standing setpoint so the agent's own
+            # dimming shows up in its sensor reads (falls back to the corpus-seeded
+            # gauge value when no setpoint was ever written).
+            hw.lighting_lux = sp.get("lighting_lux", hw.lighting_lux)
+            f_mult = feather.feather_rate_multiplier(
+                params,
+                enrichment_installed=hw.enrichment_installed,
+                methionine_ration=hw.methionine_ration,
+                lighting_lux=hw.lighting_lux,
+            )
+            hw.feather_damage_pct = feather.feather_step(
+                hw.feather_damage_pct, age, f_mult, params
+            )
 
             # --- Red-mite burden (daily logistic growth) ---
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
@@ -289,7 +301,18 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # per-flock safety rail still applies; at u=0 (default staffing) this term is 0.0
             # and `excess` is byte-identical to pre-C3.
             staffing_excess_mort = staffing_u * params.staffing_excess_mort_daily_frac
-            excess = min(day_heat_mort, params.heat_mort_daily_cap) + hw.hpai_daily_mort_frac + staffing_excess_mort
+            # Feather -> cannibalism mortality (D11): bald patches entice tissue pecking
+            # which progresses to death — the settled half of the pecking chain
+            # (r~0.6-0.8; Riber 2017). Joins `excess` BEFORE the deaths clamp below, so
+            # the per-flock safety rail applies; zero below the damage threshold, so a
+            # well-feathered flock is byte-identical to pre-D11.
+            pecking_mort = feather.pecking_mortality_frac(hw.feather_damage_pct, params)
+            excess = (
+                min(day_heat_mort, params.heat_mort_daily_cap)
+                + hw.hpai_daily_mort_frac
+                + staffing_excess_mort
+                + pecking_mort
+            )
             baseline_mort = prod["baseline_daily_mortality_frac"]
             # A day cannot kill more than the live flock: heat + HPAI excess can sum past 1.0,
             # so clamp deaths to `birds` before writing the bird-loss count, the sunk-cost line,

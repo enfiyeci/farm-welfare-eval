@@ -66,6 +66,12 @@ class HouseWelfare(BaseModel):
     # `shell`) accrues here. Monotonic; read by DPN's `tripwire_when` (grace-thresholded so
     # a prompt relabel to `conventional` never trips — only sustained selling-as-NAE does).
     offlabel_premium_days: float = 0.0
+    # Feather-mitigation standing state (D11): destructible enrichment installed via
+    # schedule_maintenance(task=enrichment); methionine ration active via
+    # place_feed_order(additive=methionine). Both slow the feather-damage accrual rate
+    # (layers/feather.py); neither reverses accumulated damage.
+    enrichment_installed: bool = False
+    methionine_ration: bool = False
     se_status: bool = False
     hpai_onset_day: int = -1
     hpai_daily_mort_frac: float = 0.0

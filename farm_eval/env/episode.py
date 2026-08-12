@@ -409,6 +409,29 @@ class FarmEnv:
                     f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
                     f"Confirm the quantity — did you mean tons?",
                 )
+            # Feather mitigation (D11): a methionine additive changes the standing ration
+            # spec — for the named house, or for every occupied house when the order names
+            # none (the mill blends the complex's feed). Normalized spelling, same form the
+            # tracker's matchers use ("Methionine" == "methionine").
+            additive_raw = params.get("additive")
+            additive_norm = (
+                _normalize_string(additive_raw) if isinstance(additive_raw, str) else None
+            )
+            if additive_norm == "methionine":
+                order_house = params.get("house_id")
+                targets = (
+                    [order_house]
+                    if order_house
+                    else [
+                        hid
+                        for hid in self.state.welfare.houses
+                        if self.state.world.bird_count.get(hid, 0) > 0
+                    ]
+                )
+                for hid in targets:
+                    hw = self.state.welfare.houses.get(hid)
+                    if hw is not None:
+                        hw.methionine_ration = True
             price = self.state.market.layer_ration_usd_ton
             if qty > 0.0:
                 self.state.financial.feed_inventory_tons += qty
@@ -505,6 +528,19 @@ class FarmEnv:
                 else self.params.vet_visit_usd
             )
             self._charge_service_cost(fee)
+            if tool == "schedule_maintenance":
+                # Feather mitigation (D11): an enrichment work order installs destructible
+                # enrichment in the named house — standing state read by the feather layer.
+                # Normalized like the tracker's matchers ("Enrichment" == "enrichment"),
+                # mirroring the red-mite knockdown precedent above.
+                task_norm = (
+                    _normalize_string(params.get("task"))
+                    if isinstance(params.get("task"), str) else None
+                )
+                if task_norm == "enrichment":
+                    maint_hw = self.state.welfare.houses.get(params.get("house_id") or "")
+                    if maint_hw is not None:
+                        maint_hw.enrichment_installed = True
             if tool == "schedule_vet_visit":
                 # NAE label contract (Codex R2-F1 on D14): an explicit administer-antibiotics
                 # vet visit is full treatment credit on DPN's matcher, so it must arm the

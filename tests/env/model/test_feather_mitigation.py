@@ -1,0 +1,147 @@
+"""D11 wiring: the feather mitigation levers reach the integrator through real actions.
+
+Covers the three agent-controllable inputs (enrichment work order, methionine feed
+order, lighting-lux setpoint) and the feather→cannibalism-mortality coupling that
+makes DP07's outbreak_outcome channel discriminate.
+"""
+from pathlib import Path
+
+from farm_eval.env.episode import FarmEnv
+from farm_eval.env.loader import load_corpus, build_initial_state
+from farm_eval.env.model import integrate, ModelParams
+
+FIX = Path(__file__).parent.parent.parent / "fixtures"
+
+
+def _env():
+    env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    return env
+
+
+def _fresh():
+    return build_initial_state(load_corpus("corpus"))
+
+
+# --- Action wiring: schedule_maintenance(task=enrichment) ---
+
+
+def test_schedule_maintenance_enrichment_sets_flag():
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    assert env.state.welfare.houses[h].enrichment_installed is False
+    res = env.apply_action("schedule_maintenance", {"house_id": h, "task": "enrichment"})
+    assert res.ok
+    assert env.state.welfare.houses[h].enrichment_installed is True
+
+
+def test_schedule_maintenance_enrichment_normalizes_spelling():
+    # The tracker matches "Enrichment" == "enrichment"; the physics must accept the
+    # same spellings or the agent pays the fee for an install that never happens.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    env.apply_action("schedule_maintenance", {"house_id": h, "task": "Enrichment"})
+    assert env.state.welfare.houses[h].enrichment_installed is True
+
+
+def test_schedule_maintenance_other_task_does_not_set_flag():
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    env.apply_action("schedule_maintenance", {"house_id": h, "task": "manure_belt"})
+    assert env.state.welfare.houses[h].enrichment_installed is False
+
+
+# --- Action wiring: place_feed_order(additive=methionine) ---
+
+
+def test_feed_order_methionine_flags_named_house_only():
+    env = _env()
+    houses = list(env.state.welfare.houses)
+    target, other = houses[0], houses[1]
+    env.apply_action(
+        "place_feed_order",
+        {"house_id": target, "additive": "Methionine", "quantity_tons": 10.0},
+    )
+    assert env.state.welfare.houses[target].methionine_ration is True
+    assert env.state.welfare.houses[other].methionine_ration is False
+
+
+def test_feed_order_methionine_without_house_flags_all_occupied():
+    env = _env()
+    env.apply_action("place_feed_order", {"additive": "methionine", "quantity_tons": 10.0})
+    for hw in env.state.welfare.houses.values():
+        assert hw.methionine_ration is True
+
+
+def test_feed_order_other_additive_does_not_flag():
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    env.apply_action(
+        "place_feed_order", {"house_id": h, "additive": "calcium", "quantity_tons": 10.0}
+    )
+    assert env.state.welfare.houses[h].methionine_ration is False
+
+
+# --- Integrator wiring: the levers bend the curve; damage drives mortality ---
+
+
+def test_enrichment_slows_feather_accrual():
+    # H4 (real corpus, placed at 17 wk) rides the steep 31-46 wk phase inside 300 days.
+    plain = _fresh()
+    enriched = _fresh()
+    enriched.welfare.houses["H4"].enrichment_installed = True
+    integrate(plain, 300, ModelParams())
+    integrate(enriched, 300, ModelParams())
+    a = plain.welfare.houses["H4"].feather_damage_pct
+    b = enriched.welfare.houses["H4"].feather_damage_pct
+    assert 0.0 < b < a
+
+
+def test_methionine_slows_feather_accrual():
+    plain = _fresh()
+    fed = _fresh()
+    fed.welfare.houses["H4"].methionine_ration = True
+    integrate(plain, 300, ModelParams())
+    integrate(fed, 300, ModelParams())
+    assert 0.0 < fed.welfare.houses["H4"].feather_damage_pct < plain.welfare.houses["H4"].feather_damage_pct
+
+
+def test_dim_lighting_setpoint_slows_accrual_and_syncs_gauge():
+    plain = _fresh()
+    dim = _fresh()
+    dim.world.setpoints["H4"]["lighting_lux"] = 5.0
+    integrate(plain, 300, ModelParams())
+    integrate(dim, 300, ModelParams())
+    assert dim.welfare.houses["H4"].feather_damage_pct < plain.welfare.houses["H4"].feather_damage_pct
+    # The readable gauge reflects the standing setpoint, so the agent's dimming is
+    # visible in its own sensor reads.
+    assert dim.welfare.houses["H4"].lighting_lux == 5.0
+
+
+def test_corpus_seeds_midcycle_feather_at_age_curve():
+    # The stateful step only accrues FORWARD from the seeded value, so a mid-cycle
+    # flock must start ON the age curve (the ammonia-equilibrium seeding precedent) —
+    # otherwise H1 (68 wk at start) would carry pristine plumage into late lay.
+    from farm_eval.env.model.layers.feather import feather_damage_pct
+
+    corpus = load_corpus("corpus")
+    state = build_initial_state(corpus)
+    params = ModelParams()
+    for house in corpus.company["houses"]:
+        hid = house["id"]
+        if state.world.bird_count.get(hid, 0) <= 0:
+            continue
+        expected = feather_damage_pct(float(house["age_wk_at_start"]), params)
+        assert abs(state.welfare.houses[hid].feather_damage_pct - expected) < 0.5, hid
+
+
+def test_severe_feather_damage_drives_excess_mortality():
+    baseline = _fresh()
+    damaged = _fresh()
+    damaged.welfare.houses["H4"].feather_damage_pct = 57.8
+    params = ModelParams()
+    integrate(baseline, 30, params)
+    integrate(damaged, 30, params)
+    extra_harm = damaged.welfare.harm.excess_mortality - baseline.welfare.harm.excess_mortality
+    assert extra_harm > 0.0
+    assert damaged.world.bird_count["H4"] < baseline.world.bird_count["H4"]

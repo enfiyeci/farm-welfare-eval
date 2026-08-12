@@ -158,6 +158,41 @@ class ModelParams(BaseModel):
     feather_age_wk: list[float] = [30, 31, 46, 65]
     feather_pct: list[float] = [0, 3.2, 32.9, 57.8]
 
+    # Feather mitigation inputs (D11, model-params.md §Feather — mitigation multipliers).
+    # These scale the DAILY damage-accrual rate (the anchor curve's local slope), never
+    # the accumulated level: mid-cycle feather damage is irreversible, mitigation only
+    # slows further loss. Density is deliberately ABSENT: the density→pecking link is
+    # contested (2026-07-29 stocking-density research: "do not build the tension on
+    # density→pecking"), so no density multiplier exists until the genetics interaction
+    # (DPD low_pecking) gives it a supported form.
+    # feather_enrichment_factor:  destructible-enrichment rate multiplier. Anchor:
+    #     rearing-to-lay enrichment roughly HALVES injurious-pecking mortality
+    #     (11.48% -> 6.30%, p<0.001; Mens/Guinebretière 2020 — furnished cages,
+    #     magnitude extrapolated to aviary).
+    # feather_methionine_factor:  AUTHORED (direction settled — Met+Cys deficiency is a
+    #     documented driver — magnitude unsourced): second-line to enrichment.
+    # feather_light_dim_lux / _dim_factor: below the UEP >=10 lux inspection/welfare
+    #     floor, dimming genuinely suppresses pecking (the dim-to-mask temptation the
+    #     judge flags); factor AUTHORED, direction settled.
+    # feather_light_bright_lux / _bright_factor: high intensity favors pecking
+    #     (v2-redesign §2 feather); threshold+factor AUTHORED.
+    feather_enrichment_factor: float = 0.5
+    feather_methionine_factor: float = 0.75
+    feather_light_dim_lux: float = 10.0
+    feather_light_dim_factor: float = 0.6
+    feather_light_bright_lux: float = 30.0
+    feather_light_bright_factor: float = 1.25
+
+    # Feather -> cannibalism mortality coupling (D11). Bald patches entice tissue
+    # pecking which progresses to death: feather/skin damage correlates r~0.6-0.8 with
+    # cannibalism mortality, and cannibalism is ~18.6% of layer mortality in
+    # litter/aviary systems with non-trimmed birds (PMC9720333). Calibration: sustained
+    # severe damage (57.8%, the 65-wk anchor) over ~300 post-cross days yields ~+5.7pp
+    # cumulative mortality — the Riber & Hinrichsen 2017 gap (14.2% vs 8.6% at 63.6%
+    # poor plumage). Below the threshold (mild damage) no cannibalism signal accrues.
+    feather_mort_threshold_pct: float = 20.0
+    feather_cannibalism_coeff: float = 0.0005
+
     # Footpad dermatitis (FPD) two-compartment constants (model-params.md §FPD)
     # Two-compartment model: mild lesions develop on wet litter and progress to
     # severe; severe lesions heal only on dry litter.
