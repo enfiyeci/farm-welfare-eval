@@ -81,7 +81,8 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
               hours_per_fte_day: float | None = None,
               vent: float | None = None,
               setpoint_c: float | None = None,
-              ambient_c: float | None = None) -> dict:
+              ambient_c: float | None = None,
+              belt_runs_per_day: float | None = None) -> dict:
     """Daily cost lines for one house. Feed priced at spot ration (booked-cost upgrade: Task 6).
 
     Labor is staffing-driven and per-bird-DAY (Task C1): it scales with headcount, not
@@ -106,6 +107,10 @@ def cost_step(feed_tons: float, ration_usd_ton: float, total_dozen: float,
         )
     feed_cost = feed_tons * ration_usd_ton
     energy_cost = bird_count * params.energy_base_usd_bird_day
+    if belt_runs_per_day is not None:
+        # Owner ruling D21 (2026-08-11): belt runs book a small per-run charge (see
+        # belt_run_usd_house) instead of hiding inside the flat base line.
+        energy_cost += params.belt_run_usd_house * max(0.0, belt_runs_per_day)
     if vent is not None:
         v = max(0.0, vent)
         energy_cost += bird_count * params.vent_fan_usd_bird_day * v

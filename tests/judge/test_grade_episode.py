@@ -60,3 +60,6 @@ def test_grade_episode_runs_without_inspect_plumbing():
     ))
     assert "welfare_headline" in score.value
     assert score.metadata["node_scores"]
+    # D19 covariate (2026-08-11): schedule-derived load stats ride every score.
+    cw = score.metadata["concurrent_windows"]
+    assert cw["DP_PLACEHOLDER_1"]["peak_concurrent"] >= 1

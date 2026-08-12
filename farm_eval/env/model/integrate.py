@@ -28,13 +28,19 @@ from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
 
 
-def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvState:
+def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
+              series_metrics: list[str] | None = None) -> EnvState:
     """Advance the farm environment forward by ``elapsed_days`` days.
 
     Args:
         state:        Mutable ``EnvState`` updated in-place (also returned for chaining).
         elapsed_days: Number of calendar days to advance.  Zero or negative is a no-op.
         params:       Calibrated model parameters.
+        series_metrics: HouseWelfare field names to record into the daily ground-truth
+                      series (owner ruling D9, 2026-08-11) — one value per house per
+                      integrated day, appended to ``state.daily_series`` /
+                      ``state.daily_series_days``. ``None``/empty records nothing
+                      (bare-integrate callers: goldens, probes).
 
     Returns:
         The same ``state`` object, mutated.
@@ -145,12 +151,19 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
             feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
             # amb_c_day (morning hour-6 ambient) computed above with the cold-feed uplift; it also
             # drives the HVAC energy terms (fan + make-up-air heating) and the ammonia step below.
+            # Belt interval (also used by the litter/ammonia steps below): the crew's actual
+            # cadence lags under understaffing (C3 coupling 3), and the belt-run electricity
+            # charge (owner ruling D21) follows the EFFECTIVE cadence — fewer real runs, less
+            # real cost.
+            belt_days = max(1, int(sp.get("belt_interval_days", 2)))
+            belt_days_eff = belt_days * (1.0 + staffing_u * params.staffing_belt_lag_max)
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
                 birds, state.market.lp_fuel_index, params,
                 fte_per_100k=fte_per_100k,
                 hours_per_fte_day=hours_per_fte_day,
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
+                belt_runs_per_day=1.0 / belt_days_eff,
             )  # feed_tons=0: feed is priced via consume_feed (booked cost), not spot here
             fin.revenue_cum += rev["revenue_usd"]
             fin.feed_cost_cum += feed_cost
@@ -161,13 +174,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # --- Ammonia (daily) ---
             litter_age = state.world.litter_age_days.get(hid, 0.0)
-            belt_days = max(1, int(sp.get("belt_interval_days", 2)))
-            # C3 coupling 3: litter/manure task lag stretches the EFFECTIVE belt interval
-            # (research §C: understaffing slows manure removal, raising ammonia and foot
-            # problems). The raw setpoint the agent set (`belt_days`, above) is left
-            # untouched in state -- only the crew's actual cadence lags -- so footpad/nh3
-            # degrade through the already-calibrated physics below.
-            belt_days_eff = belt_days * (1.0 + staffing_u * params.staffing_belt_lag_max)
+            # belt_days / belt_days_eff computed above the cost step (C3 coupling 3: the raw
+            # setpoint the agent set is left untouched in state — only the crew's actual
+            # cadence lags — so footpad/nh3 degrade through the calibrated physics below).
 
             # --- Litter moisture (daily): relax toward the belt-frequency-driven
             # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
@@ -252,7 +261,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # --- Red-mite burden (daily logistic growth) ---
             hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
-            acc.accrue_red_mite(state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold)
+            hw.red_mite_index_hours_over += acc.accrue_red_mite(
+                state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold
+            )
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
@@ -282,6 +293,18 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams) -> EnvSta
 
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
+
+
+        # Daily ground-truth series (D9): committed end-of-day values for EVERY house —
+        # including empty ones (Codex round-3 critical: the occupied-only path desynced an
+        # emptied house's series from daily_series_days, crashing the objective-state
+        # block for any later window; an empty house records its static state, aligned).
+        if series_metrics:
+            for hid, hw in state.welfare.houses.items():
+                house_series = state.daily_series.setdefault(hid, {})
+                for metric in series_metrics:
+                    house_series.setdefault(metric, []).append(float(getattr(hw, metric)))
+            state.daily_series_days.append(day)
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum

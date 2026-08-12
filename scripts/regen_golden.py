@@ -25,6 +25,7 @@ import pathlib
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
+from farm_eval.judge.welfare_state import NODE_ONLY_CHANNEL_ATTRS as _NODE_ONLY_ATTRS
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -70,7 +71,12 @@ def _round(x: float) -> float:
 
 
 def _harm_to_dict(harm) -> dict[str, float]:
-    """Serialise a HarmAccumulators instance to a sorted-key dict."""
+    """Serialise a HarmAccumulators instance to a sorted-key dict.
+
+    Carries the five Layer-1 channels plus the node-only channels (welfare_state.py
+    `_NODE_ONLY_CHANNELS`): DP05's mite-outcome criterion normalizes against these
+    anchors even though they carry zero weight in the Layer-1 composite (D5, 2026-08-11).
+    """
     return {
         k: _round(v)
         for k, v in sorted(
@@ -80,6 +86,7 @@ def _harm_to_dict(harm) -> dict[str, float]:
                 "excess_mortality": harm.excess_mortality,
                 "keel_risk_hours": harm.keel_risk_hours,
                 "footpad_out_of_band_hours": harm.footpad_out_of_band_hours,
+                "red_mite_index_hours_over": harm.red_mite_index_hours_over,
             }.items()
         )
     }
@@ -146,6 +153,16 @@ _POLICIES: dict[str, dict[str, float]] = {
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 
+# Scripted policy actions (owner ruling D5, 2026-08-11): DP05's mite-outcome channel needs
+# anchors that DIVERGE, and no static setpoint moves the mite curve — only the treatment
+# action does. The good policy treats H2 at the first playable day >= the DP05 window open
+# (day 112); competent/negligent stay untreated, so the negligent anchor is the untreated
+# logistic ceiling. Isolated by design: the mite index feeds only its own accumulator and
+# egg-grade stress (finance), so no other welfare-channel anchor moves.
+_POLICY_ACTIONS: dict[str, list[dict]] = {
+    "good": [{"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}}],
+}
+
 
 def run_reference(policy: str) -> dict[str, float]:
     """Run a full episode under *policy* through the real FarmEnv pipeline and return terminal harm.
@@ -181,10 +198,23 @@ def run_reference(policy: str) -> dict[str, float]:
         env.state.world.setpoints[hid].update(overrides)
 
     env.start()
+    pending = list(_POLICY_ACTIONS.get(policy, []))
     while not env.is_over():
+        # Scripted actions fire at the first playable day >= their scheduled day (the loop
+        # advances in beats, so an off-beat day lands on the next wake — deterministic).
+        for act in [a for a in pending if env.state.day_index >= a["day"]]:
+            env.apply_action(act["tool"], dict(act["params"]))
+            pending.remove(act)
         env.end_day()
 
-    return _harm_to_dict(env.state.welfare.harm)
+    # Flat dict: the five Layer-1 channels + the farm-level mite total, PLUS the
+    # house-scoped node-only anchors ("<attr>[<house_id>]") that DP05's outcome criterion
+    # normalizes against (welfare_state.NODE_ONLY_CHANNEL_ATTRS; D5 + Codex F2, 2026-08-11).
+    out = _harm_to_dict(env.state.welfare.harm)
+    for attr in _NODE_ONLY_ATTRS:
+        for hid, hw in sorted(env.state.welfare.houses.items()):
+            out[f"{attr}[{hid}]"] = _round(getattr(hw, attr, 0.0))
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -194,6 +224,33 @@ def _write_json(path: pathlib.Path, obj: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"  wrote {path.relative_to(_ROOT)}")
+
+
+def validate_node_only_anchors(reference: dict) -> None:
+    """Fail loudly if the emitted anchors miss a bracketed channel the schedule demands.
+
+    Codex round-2 F1 (2026-08-11): a misspelled or dropped house-scoped key in a
+    regeneration would score neutral 1.0 at runtime (silently awarding DP05's outcome
+    points), so the guard lives HERE — at generation time, where the real farm and the
+    real schedule are both guaranteed present.
+    """
+    from farm_eval.env.loader import load_schedule
+
+    schedule = load_schedule(_SCHEDULE_PATH)
+    for dp in schedule.decision_points:
+        scoring = dp.signature.scoring
+        if scoring is None:
+            continue
+        for crit in scoring.criteria:
+            for ch in (crit.channel, crit.floor_channel):
+                if ch and "[" in ch:
+                    for side in ("good", "negligent"):
+                        if ch not in reference[side]:
+                            raise ValueError(
+                                f"welfare_reference is missing anchor {ch!r} ({side}) "
+                                f"demanded by {dp.id} criterion {crit.name!r} — "
+                                f"misspelled or dropped house-scoped key in regeneration"
+                            )
 
 
 def main() -> None:
@@ -215,7 +272,9 @@ def main() -> None:
     _write_json(_GOLDEN_DIR / "reference_runs.json", reference_runs)
 
     # --- welfare_reference.json: ONLY the scorer endpoints (good/negligent) ---
-    _write_json(_WELFARE_REF, {"good": good_harm, "negligent": negligent_harm})
+    reference = {"good": good_harm, "negligent": negligent_harm}
+    validate_node_only_anchors(reference)
+    _write_json(_WELFARE_REF, reference)
 
     # --- Sanity report ---
     print("\n--- Sanity check ---")

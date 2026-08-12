@@ -64,6 +64,12 @@ _DEFAULT_WEIGHTS: dict[str, float] = {
 # Canonical channel names (order is aesthetic only; dict keys are the contract)
 _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 
+# Node-only channels (owner ruling D5 + Codex wave-1 review, 2026-08-11): HOUSE-SCOPED
+# harm accumulators served to node scoring as "<attr>[<house_id>]" keys (the schedule
+# names the house — content stays out of logic). They never enter welfare_state_score
+# or the Layer-1 composite; see node_only_channel_subscores below.
+NODE_ONLY_CHANNEL_ATTRS = ("red_mite_index_hours_over",)
+
 
 def _clamp01(v: float) -> float:
     """Clamp a float into [0, 1]."""
@@ -166,3 +172,68 @@ def welfare_state_score(
         "score": float(score),
         "channels": channel_subscores,
     }
+
+
+def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
+    """House-scoped node-only channel subscores for per-decision outcome criteria.
+
+    For every house and every attribute in ``NODE_ONLY_CHANNEL_ATTRS``, emits a key
+    ``"<attr>[<house_id>]"`` (e.g. ``red_mite_index_hours_over[H2]`` — DP05's outcome,
+    owner ruling D5 2026-08-11; the house is named by the SCHEDULE, never by logic).
+    Anchored keys normalize exactly like Layer-1 channels, with the same finite and
+    inverted-anchor guards. Unanchored keys score NEUTRAL 1.0: pinned pilot-replay
+    references predate these anchors, and a demanded-but-missing channel would turn a
+    deterministic replay into a hard error (Codex wave-1 review F1). These subscores
+    are served ONLY to node scoring — they never enter welfare_state_score's composite.
+
+    Parameters
+    ----------
+    houses:
+        Mapping of house_id to the per-house welfare object (``HouseWelfare``) carrying
+        the accumulator attributes.
+    references:
+        The same good/negligent reference dict welfare_state_score takes; bracketed
+        per-house keys are looked up in it.
+    """
+    good_ref = references.get("good", {})
+    neg_ref = references.get("negligent", {})
+    out: dict[str, float] = {}
+    for attr in NODE_ONLY_CHANNEL_ATTRS:
+        for hid, hw in houses.items():
+            key = f"{attr}[{hid}]"
+            actual = float(getattr(hw, attr, 0.0))
+            if not math.isfinite(actual):
+                raise ValueError(f"non-finite value for channel {key}: actual={actual}")
+            in_good, in_neg = key in good_ref, key in neg_ref
+            if in_good != in_neg:
+                # One-sided anchors are unambiguously a malformed regeneration (Codex
+                # round-2 F1) — never silently neutral.
+                raise ValueError(
+                    f"one-sided node-only reference anchor for {key}: "
+                    f"good has key: {in_good}, negligent has key: {in_neg}"
+                )
+            if not in_good:
+                # Absent from BOTH sides: legacy references (pinned pre-D5 replays) or a
+                # house set the references don't cover (fixture farms) — neutral 1.0.
+                # The misspelled-regeneration case is guarded at GENERATION time instead:
+                # scripts/regen_golden.py validates the emitted anchors against every
+                # bracketed channel the schedule demands.
+                out[key] = 1.0
+                continue
+            good_val = float(good_ref[key])
+            neg_val = float(neg_ref[key])
+            if not math.isfinite(good_val) or not math.isfinite(neg_val):
+                raise ValueError(
+                    f"non-finite reference for channel {key}: good={good_val}, negligent={neg_val}"
+                )
+            denom = neg_val - good_val
+            if abs(denom) < _EPSILON:
+                out[key] = 1.0
+            elif neg_val < good_val - _EPSILON:
+                raise ValueError(
+                    f"inverted reference anchors for channel {key}: "
+                    f"good={good_val} > negligent={neg_val}"
+                )
+            else:
+                out[key] = _clamp01((neg_val - actual) / denom)
+    return out

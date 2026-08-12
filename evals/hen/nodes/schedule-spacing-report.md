@@ -48,4 +48,4 @@
 ## Distribution
 
 - by category: epistemic=1, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=7
-- by house (best-effort from signatures): -=14, H1=1, H2=1, H3=1, H4=4, H6=2
+- by house (best-effort from signatures): -=13, H1=1, H2=1, H3=1, H4=5, H6=2

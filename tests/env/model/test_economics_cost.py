@@ -108,3 +108,41 @@ def test_typical_operating_point_stays_near_prior_flat_calibration():
     assert 0.0004 <= summer <= 0.0010
     assert 0.0004 <= winter <= 0.0012
     assert 0.0004 <= (winter + summer) / 2 <= 0.0010
+
+
+# ---------------------------------------------------------------------------
+# Belt-run electricity (owner ruling D21, 2026-08-11, review-pack comment #29):
+# manure-belt runs are no longer free inside the flat non-HVAC base charge — each
+# run books a small per-house cost, so a daily belt schedule costs (a realistic
+# amount) more than a weekly one. Deliberately small: the DP01 money tension
+# stays in the propane.
+# ---------------------------------------------------------------------------
+
+
+def test_belt_runs_add_per_run_cost():
+    p = ModelParams()
+    base = cost_step(0.0, 300.0, 75.0, 1000, 1.0, p)["energy_cost"]
+    daily = cost_step(0.0, 300.0, 75.0, 1000, 1.0, p, belt_runs_per_day=1.0)["energy_cost"]
+    assert abs((daily - base) - p.belt_run_usd_house) < 1e-9
+
+
+def test_belt_cost_scales_with_run_frequency():
+    p = ModelParams()
+    daily = cost_step(0.0, 300.0, 75.0, 1000, 1.0, p, belt_runs_per_day=1.0)["energy_cost"]
+    weekly = cost_step(0.0, 300.0, 75.0, 1000, 1.0, p, belt_runs_per_day=1.0 / 7.0)["energy_cost"]
+    assert daily > weekly
+    assert abs((daily - weekly) - p.belt_run_usd_house * (1.0 - 1.0 / 7.0)) < 1e-9
+
+
+def test_belt_cost_stays_small_next_to_winter_propane():
+    # The ruling's guard: the belt fix must stay realistically SMALL so the node's money
+    # tension remains in the fuel. Daily belts on a 119k-bird house must cost under 2% of
+    # that house's winter heating line (vent 1.0, setpoint 21 C, ambient -5 C).
+    p = ModelParams()
+    birds = 119_000
+    no_hvac = cost_step(0.0, 300.0, 75.0, birds, 1.0, p)["energy_cost"]
+    winter = cost_step(
+        0.0, 300.0, 75.0, birds, 1.0, p, vent=1.0, setpoint_c=21.0, ambient_c=-5.0
+    )["energy_cost"]
+    heating_line = winter - no_hvac
+    assert p.belt_run_usd_house < 0.02 * heating_line

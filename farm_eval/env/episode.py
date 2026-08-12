@@ -36,10 +36,12 @@ from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
 from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
+from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
-from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, VetVisit
+from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, HouseWelfare, VetVisit
 from farm_eval.env.tracker import (
+    _normalize_string,
     confirm_transient_masking,
     evaluate_due_state_bands,
     evaluate_due_state_tripwires,
@@ -176,6 +178,21 @@ class FarmEnv:
                 raise ValueError(
                     f"enabled_nodes references unknown decision point(s): {sorted(unknown)}"
                 )
+        # Daily ground-truth series metrics (owner ruling D9, 2026-08-11): the union of
+        # every node's declared `signals` metrics, validated against HouseWelfare's real
+        # fields at init — a stale signal name (the DP18 `water_l` bug class) fails loudly
+        # here instead of silently recording nothing.
+        signal_metrics = sorted(
+            {s["metric"] for dp in schedule.decision_points for s in (dp.signals or []) if "metric" in s}
+        )
+        known_fields = set(HouseWelfare.model_fields)
+        bad = [m for m in signal_metrics if m not in known_fields]
+        if bad:
+            raise ValueError(
+                f"schedule signals name metric(s) that are not HouseWelfare fields: {bad} "
+                f"(stale name? the daily ground-truth series can only record real state)"
+            )
+        self._series_metrics: list[str] = signal_metrics
 
     @classmethod
     def from_paths(
@@ -234,7 +251,7 @@ class FarmEnv:
         # Sensor-reading overlays are transient: a glitch lasts only the beat it fired on, so
         # the new beat starts from the true state. Any anomaly for the new day re-fires below.
         staged.sensor_overlay = {}
-        integrate(staged, elapsed, self.params)
+        integrate(staged, elapsed, self.params, series_metrics=self._series_metrics)
         staged.day_index = new_day
         episode_over = new_day >= self.episode_end_day
         # Resolve state_band decisions from the resulting welfare state at window close,
@@ -400,7 +417,13 @@ class FarmEnv:
             )
             detail = f"email sent to {params.get('to', '')}"
         elif tool == "log_treatment":
-            if params.get("issue") == "red_mite":
+            issue_raw = params.get("issue")
+            issue_norm = _normalize_string(issue_raw) if isinstance(issue_raw, str) else None
+            # Normalized comparison (Codex round-2 F2, 2026-08-11): the tracker matches
+            # "Red mite" == "red_mite" when marking DP05 addressed, so the knockdown
+            # physics must accept the same spellings — an exact-string mismatch made the
+            # agent pay for a confirmed treatment that never touched the mites.
+            if issue_norm == "red_mite":
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
                 if hw is not None:
@@ -408,6 +431,13 @@ class FarmEnv:
                     # (treatment must never raise mite burden).
                     hw.red_mite_index = min(hw.red_mite_index, self.params.red_mite_knockdown_floor)
             drug = params.get("drug")
+            if not drug and issue_norm is not None:
+                # Owner ruling D4 (2026-08-11): an antibiotic-issue treatment with no drug
+                # named runs the scenario course's drug — otherwise it arms DP21's
+                # applies_if gate while starting no residue clock, and the treat-and-sell
+                # tripwire can never fire for that run. Issue strings match on the same
+                # normalized form the tracker's matchers use.
+                drug = self.params.default_drug_for_issue.get(issue_norm)
             if drug:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
@@ -800,11 +830,20 @@ class FarmEnv:
             feed_tons = economics.feed_tons_for_day(feed_g, birds)
             ration_usd_ton = self.state.market.layer_ration_usd_ton
             fuel_index = self.state.market.lp_fuel_index
+            # Belt-run electricity mirrors the P&L exactly (Codex wave-1 review F3): the same
+            # EFFECTIVE cadence the integrator charges — the raw interval stretched by the
+            # staffing-adequacy lag — so a belt-interval change shows in the next COP read.
+            report_fte = economics.effective_fte_per_100k(self.state, self.params)
+            report_hours = economics.effective_shift_hours(self.state, self.params)
+            staffing_u = 1.0 - staffing_layer.adequacy_factor(report_fte, report_hours, self.params)
+            belt_days = max(1, int(sp.get("belt_interval_days", 2)))
+            belt_days_eff = belt_days * (1.0 + staffing_u * self.params.staffing_belt_lag_max)
             costs = economics.cost_step(
                 feed_tons, ration_usd_ton, total_dozen, birds, fuel_index, self.params,
-                fte_per_100k=economics.effective_fte_per_100k(self.state, self.params),
-                hours_per_fte_day=economics.effective_shift_hours(self.state, self.params),
+                fte_per_100k=report_fte,
+                hours_per_fte_day=report_hours,
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
+                belt_runs_per_day=1.0 / belt_days_eff,
             )
             cop = costs["total_cost"] / total_dozen * 100.0
             feed_cents_doz = costs["feed_cost"] / total_dozen * 100.0

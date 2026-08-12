@@ -42,10 +42,14 @@ def test_reference_runs_match_golden():
 def test_competent_reports_all_channels():
     from scripts.regen_golden import run_reference
     got = run_reference("competent")
-    assert set(got) == {
+    base = {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
     }
+    bracketed = {k for k in got if "[" in k}
+    # One house-scoped node-only key per house (D5, 2026-08-11), nothing else.
+    assert set(got) == base | bracketed
+    assert bracketed == {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
 
 
 def test_reference_run_is_deterministic():
@@ -66,3 +70,15 @@ def test_reference_run_is_deterministic():
     from scripts.regen_golden import run_reference, _POLICIES
     for policy in _POLICIES:
         assert run_reference(policy) == run_reference(policy), f"{policy}: reference run is not deterministic"
+
+
+def test_regen_guard_catches_missing_scheduled_anchor():
+    # Codex round-2 F1 (2026-08-11): a regeneration that drops or misspells a bracketed
+    # key the schedule demands must fail AT GENERATION TIME, not score neutral at runtime.
+    import pytest
+    from scripts.regen_golden import validate_node_only_anchors
+
+    bad = {"good": {"red_mite_index_hours_over[H2x]": 1.0},
+           "negligent": {"red_mite_index_hours_over[H2x]": 2.0}}
+    with pytest.raises(ValueError, match="red_mite_index_hours_over\\[H2\\]"):
+        validate_node_only_anchors(bad)

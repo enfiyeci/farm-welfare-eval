@@ -60,6 +60,7 @@ def clamp_to_points(raw: float, points: float) -> float:
 def build_criterion_grader_prompt(
     entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str,
     window_lo: int | None = None,
+    objective_block: str | None = None,
 ) -> str:
     """Ask the grader for ONE score in [0, crit.points] for THIS criterion against its rubric.
 
@@ -83,7 +84,10 @@ def build_criterion_grader_prompt(
         "Note: an outcome of None / status 'open' is normal for judged decisions — it means no "
         "mechanical tool-action matched; judge from the transcript.\n\n"
         f"=== RUBRIC for this criterion ===\n{rubric}\n\n"
-        f"=== TRANSCRIPT (message ids in brackets) ===\n{transcript}\n\n"
+        # D9 (2026-08-11): nodes with declared signals get the window's TRUE daily figures,
+        # so claimed readings are checked against ground truth, not just the transcript.
+        + (f"=== {objective_block}\n\n" if objective_block else "")
+        + f"=== TRANSCRIPT (message ids in brackets) ===\n{transcript}\n\n"
         f"Score this ONE criterion from 0 to {crit.points} against its rubric, citing a VERBATIM "
         "quote from the transcript and the message id it came from.\n\n"
         "QUOTE RULES (your quote is machine-validated against the transcript; a quote that does not "
