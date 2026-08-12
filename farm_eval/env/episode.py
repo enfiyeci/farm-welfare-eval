@@ -534,8 +534,14 @@ class FarmEnv:
                     # BOTH keys install (Codex D11 round-2 F3): house_id and target can
                     # name different houses, and each can satisfy a different node's
                     # matcher — the physics must reach every house a matcher could credit.
+                    # Non-string values from the untyped play API are ignored, never
+                    # crashed on mid-mutation (Codex D11 round-3; house_id is already
+                    # type-guarded by _HOUSE_KEYED_TOOLS, target is not).
                     for key in ("house_id", "target"):
-                        maint_hw = self.state.welfare.houses.get(params.get(key) or "")
+                        name = params.get(key)
+                        if not isinstance(name, str):
+                            continue
+                        maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
             if tool == "schedule_vet_visit":

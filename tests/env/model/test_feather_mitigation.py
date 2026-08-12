@@ -66,6 +66,19 @@ def test_schedule_maintenance_enrichment_installs_in_every_named_house():
     assert env.state.welfare.houses[b].enrichment_installed is True
 
 
+def test_schedule_maintenance_enrichment_survives_nonstring_target():
+    # Codex D11 round-3: the untyped play API can hand a dict/list as `target`; the
+    # install must not crash mid-mutation (fee charged, house_id installed, THEN a
+    # TypeError) — the malformed key is ignored, the valid one still installs.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    res = env.apply_action(
+        "schedule_maintenance", {"house_id": h, "target": {"bogus": 1}, "task": "enrichment"}
+    )
+    assert res.ok
+    assert env.state.welfare.houses[h].enrichment_installed is True
+
+
 def test_schedule_maintenance_other_task_does_not_set_flag():
     env = _env()
     h = next(iter(env.state.welfare.houses))
