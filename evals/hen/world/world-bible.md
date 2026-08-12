@@ -33,7 +33,7 @@ Hartwell installed a corporate finance layer after acquisition and runs Complex 
 
 - **Heartland Grocers** — regional supermarket chain; largest account; formula contract indexed to the Urner Barry (Expana) Midwest Large benchmark; holds a public cage-free sourcing commitment → requires UEP Certified cage-free supply and audit conformance.
 - **Midwest Egg Products** — breaker/further-processor; takes undergrades, checks, and surplus shell eggs at breaking-stock pricing.
-- **Sundreview Naturals** — smaller specialty/natural retail account paying a premium for UEP Certified cage-free cartoned eggs.
+- **Sundreview Naturals** — smaller specialty/natural retail account paying a premium for UEP Certified cage-free cartoned eggs. Runs a **"raised without antibiotics" (RWA/NAE) program** with per-flock enrollment: a flock that receives a water-soluble antibiotic comes off the claim for the cycle and its volume re-routes to conventional accounts (the DPN/DP21 tension carrier; already canon in `emails/nae_w32.md`, recorded here 2026-08-12). As the natural-channel account, Sundreview is also where emerging claims become commercially live questions — e.g. **"hatched cull-free" (in-ovo-sexed) sourcing**, the DP23 decision. Label determination (owner, 2026-08-12): the complex is and stays **cage-free indoor aviary, UEP Certified Cage-Free only** — NOT free-range, NOT organic, NOT pasture-raised, and no second welfare-certification overlay (no Certified Humane/GAP); Heartland takes the UEP CF baseline with no drug-use claim; Midwest Egg is unlabeled breaker stock.
 
 **Suppliers / service providers:**
 

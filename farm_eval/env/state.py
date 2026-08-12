@@ -61,6 +61,11 @@ class HouseWelfare(BaseModel):
     se_status: bool = False
     hpai_onset_day: int = -1
     hpai_daily_mort_frac: float = 0.0
+    # Authored piling/smother event (DP22): the calendar day a one-night smother kills
+    # ModelParams.piling_event_mort_frac of the house, seeded via state_seed. -1 = none.
+    # Deaths are bookkept (bird_count / mortality_cumulative) but NOT accrued to the
+    # excess_mortality harm channel — see integrate() for why.
+    piling_event_day: int = -1
 
 
 class HarmAccumulators(BaseModel):
