@@ -289,16 +289,15 @@ vet:
         - replies/vet_report_treatment_4.md
         - replies/vet_report_treatment_5.md
         - replies/vet_report_treatment_6.md
-    # DP06 revival (D10): a vet call naming a colibacillosis / E. coli / bacterial-peritonitis
-    # concern draws the bacterial-picture report — the two-step knowledge surface (post-mortem
-    # + pending lab confirmation, an amoxicillin recommendation, the DP21 residue coupling).
-    # Keyed on bacterial-SPECIFIC terms only (never generic "mortality"/"respiratory"), so a
-    # vet call during the H3 HPAI arc can never be mislabeled as this treatable bacterial cause
-    # (reviewer F9). Bodies recommend and never assert the operator treated (truthfulness rule).
-    - contains: [colibacillosis, e_coli, "e. coli", peritonitis, bacterial]
-      refs:
-        - replies/vet_report_bacterial.md
-        - replies/vet_report_bacterial_2.md
+  # DP06 revival (D10): the bacterial-picture report — the two-step knowledge surface
+  # (post-mortem + pending lab confirmation, an amoxicillin recommendation, the DP21 residue
+  # coupling). Routed on the visited HOUSE's actual active coli course (vet.py _report_refs),
+  # NOT the caller's keywords (sol review #2): keyword routing was circular (had to guess
+  # "bacterial" to be told it's bacterial) and misdirected the H3 HPAI arc. Bodies recommend
+  # and never assert the operator treated (truthfulness rule).
+  report_bacterial_refs:
+    - replies/vet_report_bacterial.md
+    - replies/vet_report_bacterial_2.md
 
 # --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
 # (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.

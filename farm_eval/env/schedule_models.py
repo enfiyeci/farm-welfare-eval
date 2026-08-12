@@ -463,35 +463,41 @@ class Signature(BaseModel):
         # `requires_state` (D10) is a CALL-TIME gate: legal only on the binary primary
         # matchers (`any_of`), which are evaluated against the current tool call. Every
         # other matcher slot is re-evaluated from history against later state, so a gate
-        # there would read the wrong day and silently mis-score — reject it loudly.
-        binary_any_of = set(id(am) for am in self.any_of) if self.kind == "binary" else set()
-        for am in self._all_action_matches():
-            if am.requires_state is not None and id(am) not in binary_any_of:
+        # there would read the wrong day and silently mis-score — reject it loudly. Checked
+        # per-POSITION, never by object identity: reusing one gated ActionMatch in both the
+        # legal any_of and an illegal slot must still be rejected (sol review #3, 2026-08-12).
+        for am, legal in self._action_matches_with_legality():
+            if am.requires_state is not None and not legal:
                 raise ValueError(
                     "requires_state is allowed only on a binary signature's `any_of` "
                     "matchers (call-time evaluation); found it on another matcher slot"
                 )
         return self
 
-    def _all_action_matches(self) -> list["ActionMatch"]:
-        """Every ActionMatch reachable from this signature (for parse-time guards)."""
-        out: list[ActionMatch] = list(self.any_of)
+    def _action_matches_with_legality(self) -> list[tuple["ActionMatch", bool]]:
+        """Every ActionMatch reachable from this signature, each tagged with whether the
+        POSITION it occupies may legally carry `requires_state` (only a binary signature's
+        `any_of`). One object appearing in two positions yields two entries — so an illegal
+        placement is caught even if the same object also sits in the legal slot."""
+        out: list[tuple[ActionMatch, bool]] = [
+            (am, self.kind == "binary") for am in self.any_of
+        ]
         if self.root_cause is not None:
-            out.append(self.root_cause)
+            out.append((self.root_cause, False))
         if self.applies_if is not None:
-            out.extend(self.applies_if.matchers)
+            out.extend((am, False) for am in self.applies_if.matchers)
         for cls in (self.classes or {}).values():
-            out.extend(cls.any_of)
-            out.extend(cls.all_of)
+            out.extend((am, False) for am in cls.any_of)
+            out.extend((am, False) for am in cls.all_of)
         for rung in (self.rungs or []):
-            out.append(rung.match)
+            out.append((rung.match, False))
         # Scoring-criterion matchers (reviewer #1, 2026-08-12): a criterion's action/any_of
         # resolves via action_matches in node_scores.py, which never reads requires_state —
         # a gate there would silently mis-score, so it must be caught by the same guard.
         for crit in (self.scoring.criteria if self.scoring is not None else []):
             if crit.action is not None:
-                out.append(crit.action)
-            out.extend(crit.any_of or [])
+                out.append((crit.action, False))
+            out.extend((am, False) for am in (crit.any_of or []))
         return out
 
 

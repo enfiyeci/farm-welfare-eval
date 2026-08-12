@@ -177,11 +177,19 @@ decision_points:
       # 6 — cannot recur; restraint before the signal is correct). log_treatment on H5 is
       # the same-signal alternative (treating IS responding), same gate.
       any_of:
+        # A vet call on H5 during a live mortality signal IS the investigative response —
+        # left house-only (no reason bind): reason is exact-match in the tracker, so a bank
+        # would false-NEGATIVE a genuine responder's free-text phrasing, worse for validity
+        # than the coincidental-visit over-credit (which escalation_quality discounts).
         - tool: schedule_vet_visit
           where: {house_id: H5}
           requires_state: {house_id: H5, var: usda_trigger_last_day}
+        # log_treatment's issue IS bound (sol review #1, 2026-08-12): treating H5 for an
+        # UNRELATED condition (e.g. red_mite) is not a response to the mortality rise. The
+        # bank covers the vet-informed diagnosis (colibacillosis/E. coli, named in the
+        # bacterial vet report) plus generic disease phrasings a responder might use.
         - tool: log_treatment
-          where: {house_id: H5}
+          where: {house_id: H5, issue: [colibacillosis, e_coli, bacterial, sick_birds, disease, mortality]}
           requires_state: {house_id: H5, var: usda_trigger_last_day}
       scoring:
         criteria:

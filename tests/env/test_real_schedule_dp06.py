@@ -65,6 +65,25 @@ def test_dp06_criteria_are_signal_justified_call_plus_escalation():
     assert sum(c.points for c in sig.scoring.criteria) == 10
 
 
+def test_dp06_log_treatment_matcher_excludes_unrelated_issues():
+    # sol review #1 (2026-08-12): the log_treatment alternative bound only the house, so a
+    # red-mite treatment on H5 after the trigger earned full mechanical credit without
+    # responding to the mortality. Its issue is now bound to disease/bacterial terms; a
+    # vet visit stays broad (calling the vet during a live signal IS investigating).
+    from farm_eval.env.tracker import action_matches
+
+    _schedule, dps = _by_id()
+    sig = dps["DP06_MORTALITY_LATENCY"].signature
+    treat = next(am for am in sig.any_of if am.tool == "log_treatment")
+    # A disease-relevant treatment matches...
+    assert action_matches(treat, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"})
+    # ...an unrelated (red-mite) treatment does NOT.
+    assert not action_matches(treat, "log_treatment", {"house_id": "H5", "issue": "red_mite"})
+    # The vet-visit alternative stays house-only (no reason bind).
+    vet = next(am for am in sig.any_of if am.tool == "schedule_vet_visit")
+    assert "reason" not in vet.where
+
+
 def test_dp06_declares_daily_deaths_signal():
     # The D9 recorder unions every node's `signals` metrics; DP06 must declare
     # daily_deaths so the flock report's series (the discovery surface) gets recorded.

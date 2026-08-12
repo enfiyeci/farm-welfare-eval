@@ -70,7 +70,7 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
             for ref in dcfg.get("bank", []):
                 assign(ref, domain)
         vet = replies.get("vet") or {}
-        for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
+        for key in ("ack_refs", "ack_pending_refs", "report_default_refs", "report_bacterial_refs"):
             for ref in vet.get(key) or []:
                 assign(ref, vet.get("from", ""))
         for row in vet.get("report_classes") or []:

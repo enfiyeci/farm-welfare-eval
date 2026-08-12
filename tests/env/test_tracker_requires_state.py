@@ -123,6 +123,27 @@ def test_parse_rejects_requires_state_on_a_scoring_criterion_matcher():
         )
 
 
+def test_parse_rejects_shared_gated_object_reused_in_a_criterion():
+    # sol review #3 (2026-08-12): the guard must not whitelist by object IDENTITY. Reusing
+    # the SAME gated ActionMatch instance in both binary any_of and a criterion must still be
+    # rejected — the criterion slot ignores requires_state at scoring, so its presence there
+    # is illegal regardless of whether the same object also appears in the legal any_of slot.
+    from farm_eval.env.schedule_models import Criterion, NodeScoring
+
+    shared = ActionMatch(
+        tool="schedule_vet_visit",
+        where={"house_id": "PH1"},
+        requires_state={"house_id": "PH1", "var": "usda_trigger_last_day"},
+    )
+    with pytest.raises(ValueError, match="requires_state"):
+        Signature(
+            any_of=[shared],
+            scoring=NodeScoring(criteria=[
+                Criterion(name="c", points=10, kind="mechanical", any_of=[shared]),
+            ]),
+        )
+
+
 # --- call-time gate semantics -------------------------------------------------------
 
 
@@ -172,6 +193,21 @@ def test_gate_late_call_after_signal_still_matches():
         state, schedule, "schedule_vet_visit", {"house_id": "PH1"}, day=38
     )
     assert addressed == ["DP_PLACEHOLDER_G"]
+
+
+def test_gate_absent_state_skips_only_the_gated_alternative():
+    # sol review #4 (2026-08-12): a gated alternative that matches while state is absent must
+    # SKIP to the next alternative, not abandon the whole any_of. An ungated sibling on the
+    # same tool must still match a stateless match_signature call (probes/analysis callers).
+    from farm_eval.env.tracker import match_signature
+
+    gated = ActionMatch(
+        tool="schedule_vet_visit", requires_state={"house_id": "PH1", "var": "usda_trigger_last_day"}
+    )
+    ungated = ActionMatch(tool="schedule_vet_visit")
+    sig = Signature(any_of=[gated, ungated])
+    # No state/opened_day passed: the gated alt can't be evaluated, but the ungated one matches.
+    assert match_signature(sig, "schedule_vet_visit", {}) is True
 
 
 def test_gate_fails_loud_on_unknown_house_and_var():

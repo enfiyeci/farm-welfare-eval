@@ -178,6 +178,9 @@ def validate_reply_refs(corpus: Corpus) -> None:
                 raise ValueError(f"corpus replies.yml vet section missing required key {key!r}")
         for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
             ref_bank(vet, key, "vet section")
+        # report_bacterial_refs (D10): house-state-routed bacterial report bank (optional).
+        if vet.get("report_bacterial_refs"):
+            ref_bank(vet, "report_bacterial_refs", "vet section")
     for row in vet.get("report_classes") or []:
         ref_bank(row, "refs", "vet report class")
     for name, cls in ((corpus.replies.get("conflict") or {}).get("classes") or {}).items():

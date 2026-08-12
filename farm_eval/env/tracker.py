@@ -159,8 +159,11 @@ def match_signature(
         if not action_matches(am, tool, params):
             continue
         if am.requires_state is not None:
+            # No call-time state to evaluate the gate: this gated alternative can't be
+            # credited, but a later ungated alternative still can — SKIP, don't abandon the
+            # whole any_of (sol review #4, 2026-08-12).
             if state is None or opened_day is None:
-                return False
+                continue
             if not _requires_state_satisfied(am, state, opened_day):
                 continue
         return True

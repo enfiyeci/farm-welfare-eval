@@ -307,7 +307,7 @@ class FarmEnv:
         fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
         # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
         # counts as an authored sender for tier-1 suppression this wake-up.
-        deliver_vet_mail(staged, self.corpus, new_day)
+        deliver_vet_mail(staged, self.corpus, new_day, self.params)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.

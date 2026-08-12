@@ -186,6 +186,28 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
     #3 report_classes ordering has no scoring effect, reviewer-confirmed). **Round-2 re-verify:
     APPROVED** — the fresh Opus reviewer confirmed #1 closed (all six ActionMatch-bearing
     signature slots now reached) and corrected #2's rationale (recorded accurately above).
+  - **Cross-model second review + fix wave (2026-08-12, commit after `564302d`):** the
+    "Codex bio-filter-blocked on coli" claim was STALE — a live `gpt-5.6-sol -s read-only`
+    review of the committed D10 diff completed cleanly and found **4 findings (2 that Opus
+    missed)**, all fixed TDD (suite 1833):
+    - **sol#2 (Important):** the bacterial vet report was keyword-routed — circular discovery
+      (had to guess "bacterial" to be told it's bacterial) AND unsafe (an H3 "rule out
+      bacterial" call during HPAI drew a colibacillosis "not reportable" report). Now routed on
+      the visited house's ACTUAL active coli course (`coli_daily_mort_frac > coli_cull_harm_min_frac`
+      in `vet.py`); the keyword `report_classes` bacterial entry became `report_bacterial_refs`
+      (loader/lint/consistency ref-collectors updated).
+    - **sol#1 (Important):** DP06's `log_treatment` alternative was house-only, so a red-mite
+      treatment on H5 post-trigger earned full credit — its `issue` is now bound to a
+      disease/bacterial bank. The `schedule_vet_visit` alternative stays house-only by design
+      (reason is exact-match in the tracker; a bank would false-NEGATIVE genuine free-text
+      responders, worse for validity — escalation_quality discounts a coincidental visit).
+      **Owner-flagged scope choice** (open for veto).
+    - **sol#3 (Important, narrow):** the requires_state parse guard whitelisted binary any_of by
+      `id()`, so reusing one gated object in both any_of and a criterion slipped through — now
+      checked per-POSITION, not identity.
+    - **sol#4 (Minor):** `match_signature` did `return False` for a gated matcher when state was
+      absent, abandoning the OR loop — now `continue` (a later ungated alternative still matches).
+    Standing decision recorded: Codex/sol IS the reviewer for coli content going forward.
 - [x] **DP07 mitigation inputs (D11)** — BUILT (branch `feat/todo-wave2`, 4 commits
   b991ddc..266865f, 3 Codex rounds — 9/9 findings fixed, cap reached with the last
   narrow fix Codex-unverified): stateful feather step (backward-difference, irreversible,
