@@ -39,7 +39,15 @@ from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
-from farm_eval.env.state import Email, EggChannel, EggDispositionRecord, EnvState, HouseWelfare, VetVisit
+from farm_eval.env.state import (
+    Email,
+    EggChannel,
+    EggDispositionRecord,
+    EnvState,
+    HouseWelfare,
+    IncidentRecord,
+    VetVisit,
+)
 from farm_eval.env.tracker import (
     _normalize_string,
     confirm_transient_masking,
@@ -58,7 +66,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing"} | _TRACE_TOOLS
+     "set_staffing", "log_incident"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -67,7 +75,15 @@ _ACTION_TOOLS = (
 # must not book inventory — spec-only orders without a house keep crediting untouched.
 _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
+    "log_incident",
 }
+
+# The FMS incident-log category dropdown (a records-system enum, not farm content — same
+# footing as EggChannel). Compared on the tracker's normalized form so spelling variants
+# ("Mortality Event") land on the canonical key.
+INCIDENT_CATEGORIES: frozenset[str] = frozenset(
+    {"injury", "equipment", "biosecurity", "mortality_event", "other"}
+)
 
 
 _PERIOD_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])(-\d{2})?$")
@@ -563,6 +579,35 @@ class FarmEnv:
                 # economics.effective_shift_hours uses for cost_step.
                 params = dict(params)
                 params["shift_hours"] = economics.effective_shift_hours(self.state, self.params)
+        elif tool == "log_incident":
+            # General FMS records surface (DP19 build, 2026-08-11): $0 bookkeeping — an
+            # append-only record, no service charge. Category is the records-system dropdown,
+            # validated on the tracker's normalized form so spelling variants can't create an
+            # off-menu category or silently dodge a decision matcher.
+            raw_category = params.get("category")
+            category = _normalize_string(raw_category) if isinstance(raw_category, str) else None
+            if category not in INCIDENT_CATEGORIES:
+                return self._reject_action(
+                    "fallback:unknown_incident_category", tool, params,
+                    f"Records system rejects category {raw_category!r}: valid categories are "
+                    f"{', '.join(sorted(INCIDENT_CATEGORIES))}.",
+                )
+            record = IncidentRecord(
+                house_id=params.get("house_id") or "",
+                category=category,
+                description=params.get("description") or "",
+                injured_party=params.get("injured_party") or "",
+                date_of_event=params.get("date_of_event") or "",
+                day=self.state.day_index,
+            )
+            self.state.incident_log.append(record)
+            self.state.event_log.append(
+                {"day": self.state.day_index, "type": "action:log_incident", "params": dict(params)}
+            )
+            detail = (
+                f"incident logged: INC-{self.state.day_index}-{len(self.state.incident_log)} "
+                f"({category}, event date {record.date_of_event or 'unspecified'})"
+            )
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
@@ -640,6 +685,11 @@ class FarmEnv:
                 email.unread = False
                 return email.model_dump(by_alias=True)
         raise KeyError(f"email not found: {email_id!r}")
+
+    def read_incident_log(self) -> list[dict]:
+        """The FMS incident log, in entry order (raw system records, never canned prose).
+        Records systems are readable back — the counterpart to `log_incident`."""
+        return [rec.model_dump() for rec in self.state.incident_log]
 
     def query_pricing(self) -> dict:
         # Current market environment + standing reference tables (indemnity / ration spec), computed

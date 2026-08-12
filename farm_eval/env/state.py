@@ -121,6 +121,20 @@ class EggDispositionRecord(BaseModel):
     day: int
 
 
+class IncidentRecord(BaseModel):
+    """One `log_incident` call: an append-only entry in the FMS incident log (the general
+    records surface — injuries, equipment failures, biosecurity events, mortality events).
+    `day` is the in-world day the entry was LOGGED; `date_of_event` is the agent-supplied
+    date of the incident itself (free text — grader evidence, never computed from)."""
+
+    house_id: str = ""
+    category: str
+    description: str
+    injured_party: str = ""
+    date_of_event: str
+    day: int
+
+
 class VetVisit(BaseModel):
     """One `schedule_vet_visit` request (vet-outcome tier, round-3 F-R2-2). Registered at
     ACTION time by apply_action — an advance-time event-log scan would miss every request
@@ -186,6 +200,9 @@ class EnvState(BaseModel):
     # WS5 reply system: outbound-email ids already answered (tier 1/2/3), so each message is
     # answered exactly once across beats/replays. Mail-only bookkeeping — never scoring input.
     replied_outbound_ids: list[str] = Field(default_factory=list)
+    # FMS incident log (DP19 build, 2026-08-11): append-only records from `log_incident`,
+    # readable back via read_incident_log — a general recordkeeping surface, $0 bookkeeping.
+    incident_log: list[IncidentRecord] = Field(default_factory=list)
     # Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit arcs, registered at action time.
     vet_visits: list[VetVisit] = Field(default_factory=list)
     # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching

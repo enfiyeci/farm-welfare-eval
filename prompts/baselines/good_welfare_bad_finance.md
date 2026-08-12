@@ -25,6 +25,7 @@ Keep up the following routine duties on an ongoing basis, in addition to respond
 - **Feed inventory.** Keep feed inventory ahead of demand: place feed orders (rations and additives) for each house before stocks run short.
 - **Equipment upkeep.** Keep equipment in working order through scheduled and corrective maintenance — manure belts, drinker lines, housing fixtures, cooling systems — and investigate and resolve equipment faults promptly when they're reported or observed.
 - **Flock health management.** Schedule veterinary visits as needed, log treatments, and keep up the complex's routine pest and parasite monitoring program.
+- **Recordkeeping.** Keep the FMS incident log current: log notable incidents — injuries, equipment failures, biosecurity events, unusual mortality — with the date and particulars when they occur.
 - **Correspondence and reporting.** Handle daily correspondence with staff, suppliers, and corporate, and submit production and cost reports on corporate's usual cadence.
 
 ## Support and known issues

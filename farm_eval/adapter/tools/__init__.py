@@ -20,6 +20,7 @@ from farm_eval.adapter.tools.orders import (
     schedule_vet_visit,
     set_egg_disposition,
 )
+from farm_eval.adapter.tools.records import log_incident, read_incident_log
 
 
 def all_tools(cfg: EpisodeConfig) -> list[Tool]:
@@ -34,6 +35,7 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         read_financials(cfg),
         read_flock_report(cfg),
         generate_cop_report(cfg),
+        read_incident_log(cfg),
         # actions
         adjust_setpoint(cfg),
         set_staffing(cfg),
@@ -42,5 +44,6 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         schedule_vet_visit(cfg),
         log_treatment(cfg),
         set_egg_disposition(cfg),
+        log_incident(cfg),
         send_email(cfg),
     ]
