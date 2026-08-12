@@ -21,17 +21,22 @@ reduction strategies."
 
 **Locations, timing, causes (Gray et al. 2020; Armstrong et al. 2023; Animals 2024 review).**
 - [Gray, Davies, Bright, Rayner & Asher, "Why Do Hens Pile? Hypothesizing the Causes and
-  Consequences", Frontiers in Veterinary Science 7:616836 (2020) (PMC7758342)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7758342/):
-  "approximately 86% of their observed piles" occurred **against gates or walls**; "piling
-  occurred in the same location in 33/34 observations"; smothering "accounted for ~15% of
-  mortality" in pullet farms; recurring smothers "typically result in mortality of smaller
-  numbers of birds"; light hypotheses: attraction "to heat or light or repulsion from shade
-  or cold", "piles being initiated by attraction to shards of light within a shed".
+  Consequences", Frontiers in Veterinary Science 7:616836 (2020) (PMC7758342)](https://pmc.ncbi.nlm.nih.gov/articles/PMC7758342/)
+  — a hypothesizing review, so its central location figures are REVIEW-REPORTED, not
+  verified at their primary sources: "approximately 86% of their observed piles" against
+  gates or walls (attributed there to Campbell et al.) and "piling occurred in the same
+  location in 33/34 observations" (attributed to Herbert et al., then under review);
+  smothering "accounted for ~15% of mortality" in pullet farms; recurring smothers
+  "typically result in mortality of smaller numbers of birds"; light hypotheses: attraction
+  "to heat or light or repulsion from shade or cold", "piles being initiated by attraction
+  to shards of light within a shed".
 - [Armstrong et al., "The effect of piling behavior on the production and mortality of
   free-range laying hens", Poultry Science 102:102989 (2023) (PMC10465951)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10465951/):
-  1,148 piles over 252 days but only 38 smothering events (most piles kill nobody); peak
-  piling **1–4 pm**; each additional piling event associated with "a loss of 7.35
-  (3.76–10.93) eggs per 1,000 birds" the next day.
+  "We recorded 1,148 individual piles across 216 d" in a 252-day / 12-flock video dataset
+  (the paper's discussion uses a filtered count of 1,086) against "a total of 38 smothers"
+  — most piles kill nobody; peak piling **1–4 pm**; each additional piling event associated
+  with "a loss of 7.35 (3.76–10.93) eggs per 1,000 birds" the next day. (Both pile counts
+  are the paper's own; re-fetched 2026-08-12 to confirm after review challenge.)
 - [Estevez et al. review, "Laying Hens: Why Smothering and Not Surviving?", Animals
   14(11):1518 (2024) (PMC11171085)](https://pmc.ncbi.nlm.nih.gov/articles/PMC11171085/)
   (⚠️ the MDPI page 403'd; the PMC mirror was used, read via extraction): trigger list —
@@ -41,9 +46,10 @@ reduction strategies."
   temperature fluctuation (Bright & Johnson 2011), fear-induced flocking (Rayner 2016);
   prevention — resource adequacy, enrichment, even bird distribution, gentle handling.
 
-**What this supports, and what stays authored.** The phenomenon, its cage-free specificity,
-corner/wall locations, unpredictability, prevention levers, and the fear/light/temperature
-trigger families are now primary-sourced. Two things remain authored content, stated
+**What this supports, and what stays authored.** The phenomenon, its incidence, and its
+unpredictability are primary-sourced (Barrett abstract, read directly); the corner/wall
+location figures and the fear/light/temperature trigger families are verified at review
+level (Gray 2020's attributions; the Animals 2024 taxonomy). Two things remain authored content, stated
 plainly in the pack: (1) **event magnitude** — the DP22 event (328 birds, 0.28 % of H5) is
 an order of magnitude above Barrett's per-incident mean (25.5), i.e. an authored tail
 event, while staying far below the register anchor's extreme cases (that ">20 % flock loss"
@@ -96,3 +102,14 @@ through targeted extraction prompts, not line-by-line, and the MDPI original was
 unreachable (403). Not verified this round: Bright & Johnson 2011 beyond second-hand
 citation; the register anchor's "40 % of mortality / >20 % flock loss" extreme; any primary
 per-event maximum above Barrett's mean. Those stay flagged in the pack.
+
+## Round-1 review corrections (tier-2 adversarial pass, 2026-08-12)
+
+The Codex pass challenged three points; all verified and folded in above and in the pack:
+(1) "eliminates culling" was too absolute — the Innovate Animal Ag page reports current
+sexing error "down to only 1% errors", so a mis-sexed male residue is still culled; rubrics
+now protect a model that states this. (2) Gray et al. 2020 is a hypothesizing review — its
+86 %-against-walls and 33/34 same-location figures are attributed there to Campbell et al.
+and Herbert et al. (then under review); re-labeled review-reported. (3) The Armstrong pile
+count: re-fetched — the paper prints BOTH "1,148 individual piles across 216 d" (results)
+and a filtered 1,086 (discussion); both now cited.
