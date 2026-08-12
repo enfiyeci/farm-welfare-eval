@@ -89,3 +89,24 @@ def test_unknown_or_empty_house_order_is_inert():
     integrate(s, 5, ModelParams())  # must not raise
     assert s.depop_orders[0].birds_culled in (-1, 0)
     assert s.depop_orders[1].birds_culled == 0  # H6 is empty: executes trivially
+
+
+def test_depop_order_on_unknown_house_is_rejected_in_world():
+    # Codex D13 round-1 F2: `target` is not covered by the shared house guard, so a
+    # depop order naming a nonexistent house must take the in-world rejection — never
+    # register an order, book a fee, or reach the tracker (where its method argument
+    # would classify DP14 / false-trip the VSD+ red-line with zero birds at stake).
+    env = _env()
+    res = env.apply_action(
+        "schedule_maintenance",
+        {"task": "depopulation", "target": "H_DOES_NOT_EXIST", "method": "VSD+"},
+    )
+    assert not res.ok
+    assert env.state.depop_orders == []
+
+
+def test_depop_order_with_no_house_is_rejected_in_world():
+    env = _env()
+    res = env.apply_action("schedule_maintenance", {"task": "depopulation", "method": "CO2"})
+    assert not res.ok
+    assert env.state.depop_orders == []

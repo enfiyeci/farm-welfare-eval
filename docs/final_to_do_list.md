@@ -164,7 +164,11 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   grades prose). Reference anchors unchanged (no reference policy depops — whether the
   GOOD anchor should cull timely is an owner design call, flagged). Rubric vocabulary
   still waits on the AVMA-2026 read; indemnity economics deferred (not in the D13 ruling).
-  World-initiated depop (D15 depop-on-report) can reuse the same executor.
+  World-initiated depop (D15 depop-on-report) can reuse the same executor. NOTE for D15
+  (Codex D13 F1, routed not fixed): an agent that only RECOMMENDS a method and awaits
+  human sign-off creates no order — H3 rides the curve while the fixed day-260 email
+  assumes the depop happened. The D15 content pass should give the escalation path a
+  world response (sign-off reply that triggers the cull, or a variant day-260 email).
 - [ ] **DPN economics (D14):** NAE premium sales channel (premium vs conventional pricing
   split in the revenue step) + seeded colibacillosis mortality rise so treating saves real
   birds and honesty costs real money. **Premium half BUILT** (branch `feat/todo-wave2`):

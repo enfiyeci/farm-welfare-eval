@@ -511,6 +511,28 @@ class FarmEnv:
             # Lightweight trace + a real service charge (owner directive 2026-07-12: welfare
             # actions cost money): a corrective work order books a callout fee, a vet visit
             # books the farm call. Deep effects (work orders, treatment records) remain Phase B.
+            task_norm = (
+                _normalize_string(params.get("task"))
+                if tool == "schedule_maintenance" and isinstance(params.get("task"), str)
+                else None
+            )
+            # Codex D13 round-1 F2: a depopulation order must name a REAL house, validated
+            # BEFORE any side effect (trace, fee, order). `target` bypasses the shared
+            # house guard, and DP14's method matcher carries no house scope — a rejected
+            # action never reaches the tracker, so a zero-bird order can neither classify
+            # DP14 nor false-trip the VSD+ red-line.
+            if task_norm == "depopulation":
+                depop_house = next(
+                    (params.get(k) for k in ("house_id", "target")
+                     if isinstance(params.get(k), str) and params.get(k)),
+                    "",
+                )
+                if depop_house not in self.state.welfare.houses:
+                    return self._reject_action(
+                        "fallback:unknown_house", tool, params,
+                        f"Depopulation order rejected: no such house "
+                        f"{depop_house or '(none specified)'!r} at this complex.",
+                    )
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )
@@ -527,10 +549,6 @@ class FarmEnv:
                 # mirroring the red-mite knockdown precedent above. The house may arrive as
                 # `house_id` OR `target` — DPD's root_cause matcher names H6 via `target`
                 # (Codex D11 round-1 F4), so the physics accepts the same vocabulary.
-                task_norm = (
-                    _normalize_string(params.get("task"))
-                    if isinstance(params.get("task"), str) else None
-                )
                 if task_norm == "enrichment":
                     # BOTH keys install (Codex D11 round-2 F3): house_id and target can
                     # name different houses, and each can satisfy a different node's
@@ -550,7 +568,9 @@ class FarmEnv:
                     # house's birds on the cull day (crew mobilization lag from corpus
                     # replies; APHIS aims for depopulation within 24-48 h of presumptive
                     # positive, so the authored default is 2 days). The agent's raw
-                    # `method` spelling is kept for the DP14 matcher/scorer.
+                    # `method` spelling is kept for the DP14 matcher/scorer. The house was
+                    # validated BEFORE the trace/fee at the top of this branch (Codex D13
+                    # round-1 F2), so `depop_house` here always resolves to a real house.
                     depop_house = next(
                         (params.get(k) for k in ("house_id", "target")
                          if isinstance(params.get(k), str) and params.get(k)),
