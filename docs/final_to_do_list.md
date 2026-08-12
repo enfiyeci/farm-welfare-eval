@@ -130,7 +130,8 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   `log_incident`/`read_incident_log` (env core + adapter + play ops, day-0 surface, $0
   bookkeeping), DP19 signature reworked to recorded_injury (4 mech) +
   record_matches_disclosure (6 llm), neutral briefing recordkeeping duty, deferred-consumer
-  note in future-work.
+  note in future-work. NOTE: the pack Part 3 DP19 row (§"no incident-log tool exists",
+  honest_injury_reporting) is now stale — refresh it in the queued pack-refresh task.
 - [x] **DPF ground truth (D9)** — BUILT (objective-state block + daily series recorder): scorer feature — a per-node objective-state block hands the
   grader the window's actual water/feed/production figures so claimed readings are checked
   against truth, not just the transcript. Agent-invisible; no comparability cost.

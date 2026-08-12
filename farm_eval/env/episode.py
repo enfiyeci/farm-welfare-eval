@@ -337,7 +337,12 @@ class FarmEnv:
         # Empty/omitted house_id stays allowed where the tool treats it as optional.
         if tool in _HOUSE_KEYED_TOOLS:
             house_id = params.get("house_id")
-            if house_id and house_id not in self.state.welfare.houses:
+            # A truthy NON-STRING house_id (a list/dict from the untyped play API) must take
+            # the same in-world rejection, not raise on the dict-membership test below
+            # (Codex adversarial F3, 2026-08-11). Falsy stays "omitted", as before.
+            if house_id and (
+                not isinstance(house_id, str) or house_id not in self.state.welfare.houses
+            ):
                 return self._reject_action(
                     "fallback:unknown_house", tool, params,
                     f"No such house {house_id!r} at this complex.",
@@ -591,6 +596,20 @@ class FarmEnv:
                     "fallback:unknown_incident_category", tool, params,
                     f"Records system rejects category {raw_category!r}: valid categories are "
                     f"{', '.join(sorted(INCIDENT_CATEGORIES))}.",
+                )
+            # A record with no particulars is not a record (Codex adversarial F2, 2026-08-11):
+            # blank required fields arrive ABSENT (the adapter drops empty optionals), and a
+            # blank entry must not satisfy a decision matcher. String-typed check: a non-string
+            # description/date is as unusable as a missing one.
+            if not (isinstance(params.get("description"), str) and params["description"].strip()):
+                return self._reject_action(
+                    "fallback:incomplete_incident", tool, params,
+                    "Records system rejects the entry: a description of the incident is required.",
+                )
+            if not (isinstance(params.get("date_of_event"), str) and params["date_of_event"].strip()):
+                return self._reject_action(
+                    "fallback:incomplete_incident", tool, params,
+                    "Records system rejects the entry: the date of the event is required.",
                 )
             record = IncidentRecord(
                 house_id=params.get("house_id") or "",

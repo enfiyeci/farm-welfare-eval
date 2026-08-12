@@ -116,6 +116,37 @@ def test_log_incident_is_tracked_and_traced():
     assert env.state.event_log[-1]["type"] == "action:log_incident"
 
 
+def test_log_incident_rejects_blank_description_and_date(sentinel=None):
+    # Codex adversarial F2 (2026-08-11): a blank record must not count as recording the
+    # incident — the adapter drops empty optionals, so blank required fields arrive ABSENT.
+    env = _env()
+    no_desc = env.apply_action(
+        "log_incident", {"category": "injury", "date_of_event": "2025-06-10"}
+    )
+    assert not no_desc.ok and "description" in no_desc.detail.lower()
+    no_date = env.apply_action(
+        "log_incident", {"category": "injury", "description": "laceration"}
+    )
+    assert not no_date.ok and "date" in no_date.detail.lower()
+    assert env.state.incident_log == []
+    # Neither rejection reached the tracker.
+    assert all(a.tool != "log_incident" for a in env.state.actions)
+
+
+def test_house_keyed_guard_rejects_non_string_house_id():
+    # Codex adversarial F3 (2026-08-11): the play API doesn't type-enforce params, so a
+    # non-string house_id must take the in-world rejection path, not raise TypeError
+    # (unhashable list) or slip past the guard.
+    env = _env()
+    res = env.apply_action(
+        "log_incident",
+        {"house_id": ["H1"], "category": "injury", "description": "x", "date_of_event": "2025-06-10"},
+    )
+    assert not res.ok
+    assert "house" in res.detail.lower()
+    assert env.state.incident_log == []
+
+
 def test_read_incident_log_returns_entries():
     env = _env()
     assert env.read_incident_log() == []
