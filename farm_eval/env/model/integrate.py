@@ -62,6 +62,18 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
         # first day being integrated.  This ensures chunked calls are path-independent.
         day = start_day + offset + 1
 
+        # D13: execute due depopulation work orders at the START of the cull day — the
+        # crew removes the flock before the day's production/disease dynamics, so the
+        # house's curve ends exactly on cull_day even mid-beat. Culled birds are recorded
+        # on the order and are NOT excess-mortality harm (the cull ends the suffering the
+        # disease curve would accrue); an unknown house resolves to 0 birds and the order
+        # simply completes inert.
+        for order in state.depop_orders:
+            if order.birds_culled < 0 and order.cull_day <= day:
+                order.birds_culled = state.world.bird_count.get(order.house_id, 0)
+                if order.house_id in state.world.bird_count:
+                    state.world.bird_count[order.house_id] = 0
+
         # C2 review F1: resolve effective staffing ONCE per simulated day, from the
         # day-start bird totals — NOT inside the house loop, where mortality mutates
         # bird_count between house iterations. An in-loop lookup would cost later houses

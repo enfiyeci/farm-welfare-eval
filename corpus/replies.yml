@@ -414,3 +414,10 @@ audit:
     - replies/audit_finding_space_4.md
     - replies/audit_finding_space_5.md
     - replies/audit_finding_space_6.md
+
+# Depopulation crew mobilization (D13): days between the agent's depopulation work order
+# and the cull crew arriving on site. AUTHORED at 2 — APHIS aims to depopulate within
+# 24-48 h of a presumptive positive. Read by episode.apply_action; integrate() executes
+# the cull day-accurately.
+depop:
+  crew_lag_days: 2

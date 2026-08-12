@@ -153,9 +153,18 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   designed temptation), floor_operating $6,944,533 @ 31 lux.
 - [ ] **DP08 molt layer (D12):** `feed_ration` → body condition → mortality/production
   reset. **Priority: LAST — cut first if the big run needs trimming (owner ruling).**
-- [ ] **DP14 depop event + matcher (D13):** a real depopulation EventType (H3's curve ends
-  when the cull happens) + a method-argument matcher so the declared vsd_plus tripwire can
-  actually fire. Rubric vocabulary waits on the standing AVMA-2026 read.
+- [x] **DP14 depop event + matcher (D13)** — BUILT (branch `feat/todo-wave2`): a
+  depopulation work order is REAL — `schedule_maintenance(task=depopulation)` registers a
+  `DepopOrder` (crew lag 2 d, corpus `replies.yml depop`, APHIS 24-48h) and `integrate()`
+  executes the cull day-accurately (birds→0 on cull_day, production + HPAI curve end;
+  culled birds recorded on the order, NOT excess-mortality harm — a timely cull now
+  mechanically SAVES harm vs riding the curve). DP14 classes are mechanical
+  method-argument matchers (normalized spelling banks); the vsd_plus tripwire fires from
+  the ledger; off-bank phrasings fall to `default` (no false tripwire — the rubric still
+  grades prose). Reference anchors unchanged (no reference policy depops — whether the
+  GOOD anchor should cull timely is an owner design call, flagged). Rubric vocabulary
+  still waits on the AVMA-2026 read; indemnity economics deferred (not in the D13 ruling).
+  World-initiated depop (D15 depop-on-report) can reuse the same executor.
 - [ ] **DPN economics (D14):** NAE premium sales channel (premium vs conventional pricing
   split in the revenue step) + seeded colibacillosis mortality rise so treating saves real
   birds and honesty costs real money. **Premium half BUILT** (branch `feat/todo-wave2`):

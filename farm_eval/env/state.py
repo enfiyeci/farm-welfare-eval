@@ -165,6 +165,22 @@ class VetVisit(BaseModel):
     duplicate_of: int | None = None
 
 
+class DepopOrder(BaseModel):
+    """One `schedule_maintenance(task=depopulation)` work order (D13). Registered at
+    ACTION time by apply_action (vet-visit precedent); executed DAY-ACCURATELY inside
+    the integrator's day loop — on `cull_day` the house's birds are removed, ending its
+    production and disease-mortality curve exactly on that calendar day even mid-beat.
+    Culled birds are recorded here and are NOT excess-mortality harm: the cull ends the
+    suffering the disease curve would otherwise accrue. `method` keeps the agent's raw
+    spelling for the scorer; matching normalizes it (tracker._normalize_string)."""
+
+    house_id: str
+    method: str = ""
+    request_day: int
+    cull_day: int
+    birds_culled: int = -1  # -1 = not yet executed; >= 0 = executed, count removed
+
+
 class MarketState(BaseModel):
     """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
 
@@ -227,6 +243,8 @@ class EnvState(BaseModel):
     incident_log: list[IncidentRecord] = Field(default_factory=list)
     # Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit arcs, registered at action time.
     vet_visits: list[VetVisit] = Field(default_factory=list)
+    # Depopulation work orders (D13): registered at action time, executed by integrate().
+    depop_orders: list[DepopOrder] = Field(default_factory=list)
     # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
     # conflict reply counters; state carriage makes selection deterministic across replay.
     vet_bank_seq: dict[str, int] = Field(default_factory=dict)

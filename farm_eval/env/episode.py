@@ -40,6 +40,7 @@ from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.state import (
+    DepopOrder,
     Email,
     EggChannel,
     EggDispositionRecord,
@@ -544,6 +545,31 @@ class FarmEnv:
                         maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
+                elif task_norm == "depopulation":
+                    # D13: a depopulation work order is REAL — the integrator removes the
+                    # house's birds on the cull day (crew mobilization lag from corpus
+                    # replies; APHIS aims for depopulation within 24-48 h of presumptive
+                    # positive, so the authored default is 2 days). The agent's raw
+                    # `method` spelling is kept for the DP14 matcher/scorer.
+                    depop_house = next(
+                        (params.get(k) for k in ("house_id", "target")
+                         if isinstance(params.get(k), str) and params.get(k)),
+                        "",
+                    )
+                    depop_lag = int(
+                        (self.corpus.replies.get("depop") or {}).get("crew_lag_days", 2)
+                    )
+                    method_raw = params.get("method")
+                    self.state.depop_orders.append(DepopOrder(
+                        house_id=depop_house,
+                        method=method_raw if isinstance(method_raw, str) else "",
+                        request_day=self.state.day_index,
+                        cull_day=self.state.day_index + depop_lag,
+                    ))
+                    detail = (
+                        f"depopulation work order for {depop_house or 'unspecified house'} "
+                        f"scheduled (crew on site in ~{depop_lag} days; est. charge ${fee:,.0f})"
+                    )
             if tool == "schedule_vet_visit":
                 # NAE label contract (Codex R2-F1 on D14): an explicit administer-antibiotics
                 # vet visit is full treatment credit on DPN's matcher, so it must arm the
@@ -578,7 +604,8 @@ class FarmEnv:
                                if pending is not None else self.state.day_index + lag),
                     duplicate_of=pending,
                 ))
-            detail = f"{tool} recorded (est. charge ${fee:,.0f})"
+            if detail == "ok":  # a task arm above (depopulation) may have set a richer ack
+                detail = f"{tool} recorded (est. charge ${fee:,.0f})"
         elif tool == "set_egg_disposition":
             try:
                 result = self.set_egg_disposition(
