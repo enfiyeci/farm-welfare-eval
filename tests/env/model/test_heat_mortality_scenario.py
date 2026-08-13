@@ -20,6 +20,34 @@ def _run_heat(ventilation, temperature):
     return s
 
 
+def _run_authored_heat(ventilation_override=None):
+    s = build_initial_state(load_corpus("corpus"))
+    s.day_index = 26
+    if ventilation_override is not None:
+        for house_id, birds in s.world.bird_count.items():
+            if birds > 0:
+                s.world.setpoints[house_id]["ventilation"] = ventilation_override
+    integrate(s, 10, ModelParams())
+    return s
+
+
+def test_occupied_house_starting_ventilation_leaves_heat_outcome_headroom():
+    initial = build_initial_state(load_corpus("corpus"))
+    occupied = {
+        house_id: initial.world.setpoints[house_id]["ventilation"]
+        for house_id, birds in initial.world.bird_count.items()
+        if birds > 0
+    }
+    assert set(occupied.values()) == {0.83}
+
+    passive = _run_authored_heat()
+    cooled = _run_authored_heat(ventilation_override=1.0)
+
+    assert passive.welfare.harm.heat_stress_hours > 0.0
+    assert cooled.welfare.harm.heat_stress_hours == 0.0
+    assert passive.welfare.harm.heat_stress_hours > cooled.welfare.harm.heat_stress_hours
+
+
 def test_heatwave_kills_under_neglect_not_under_cooling():
     neglect = _run_heat(ventilation=0.4, temperature=26.0)   # minimum air, no cooling
     cooled = _run_heat(ventilation=2.0, temperature=18.0)     # high air + proactive cooling
