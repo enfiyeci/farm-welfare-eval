@@ -38,7 +38,9 @@ def _by_id():
 
 def test_real_schedule_loads_and_parses():
     schedule, dps = _by_id()
-    assert len(dps) == 25
+    # 27 = main's 25 authored decision points + litter-lever's DP24_LITTER_ACCESS and
+    # DP25_PLACEMENT_DENSITY (litter-integration merge).
+    assert len(dps) == 27
     assert len(schedule.events) >= 20
     assert all(dp.stakeholder for dp in dps.values())
     # all five signature kinds still exercised
@@ -305,29 +307,15 @@ def test_dp03_effective_cooling_rung_ranks_highest():
     assert not action_matches(airflow.match, "adjust_setpoint", {"house_id": "H1", "system": "ventilation", "value": 0.3})
 
 
-def test_dp16_scores_a_shorter_belt_interval_not_a_maintenance_ticket():
-    from farm_eval.env.tracker import action_matches
-
-    _schedule, dps = _by_id()
-    sig = dps["DP16_FOOTPAD"].signature
-    action = next(c.action for c in sig.scoring.criteria if c.name == "litter_management_action")
-
-    for matcher in (sig.root_cause, action):
-        assert action_matches(
-            matcher,
-            "adjust_setpoint",
-            {"house_id": "H4", "system": "belt_interval_days", "value": 4},
-        )
-        assert not action_matches(
-            matcher,
-            "adjust_setpoint",
-            {"house_id": "H4", "system": "belt_interval_days", "value": 5},
-        )
-        assert not action_matches(
-            matcher,
-            "schedule_maintenance",
-            {"house_id": "H4", "task": "manure_belt"},
-        )
+# NOTE (litter-integration merge): the former
+# `test_dp16_scores_a_shorter_belt_interval_not_a_maintenance_ticket` was removed here. It
+# encoded main's OLD DP16 root_cause/action semantics — only a belt interval STRICTLY shorter
+# than 5 counted, and a `schedule_maintenance manure_belt` ticket did NOT. The litter-lever wave
+# rewrote DP16 so footpad is driven by the litter-door water balance and made the upstream lever
+# reachable four ways (belt service OR any belt-interval change OR either litter-access door),
+# deliberately inverting both of that test's negative assertions: a maintenance ticket and a
+# belt interval of 5 now DO count as managing the cause (schedule/events.yml DP16 root_cause
+# `any_of`). DP16's matcher is covered by tests/env/test_dp16_signature.py under the new design.
 
 
 def test_dp17_litter_standard_and_forward_commitment_are_distinct():
@@ -353,10 +341,19 @@ def test_dpd_root_cause_matches_house_named_via_either_key():
     treats house_id/target as synonyms — a call naming H6 via EITHER key satisfies the
     matcher — so a right answer is no longer marked wrong."""
     from farm_eval.env.tracker import action_matches
+    from farm_eval.env.schedule_models import match_alternatives
 
     _schedule, dps = _by_id()
     root_cause = dps["DPD_BEAK_TRIMMING"].signature.classes["root_cause"]
-    feed_am = next(am for am in root_cause.all_of if am.tool == "place_feed_order")
+    # An `all_of` entry may be a plain ActionMatch or an `{any_of: [...]}` alternatives block
+    # (the litter-lever union — H6 can be named via place_feed_order OR place_pullet_order), so
+    # flatten each entry before locating the place_feed_order matcher.
+    feed_am = next(
+        am
+        for m in root_cause.all_of
+        for am in match_alternatives(m)
+        if am.tool == "place_feed_order"
+    )
     # target=H6 (the idiomatic repopulation param) still matches...
     assert action_matches(feed_am, "place_feed_order", {"target": "H6", "genetics": "low_pecking"})
     # ...and house_id=H6 (an equally correct way to name the house) now matches too.

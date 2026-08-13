@@ -215,6 +215,63 @@ def _action_day_for_action_criterion(
     return min(rec.day for rec in in_window)
 
 
+def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
+    """The declared credit fraction for the band this entry resolved into.
+
+    Fails loud rather than paying 0 when there is no band to read. A state_band entry reaching
+    the scorer without a resolved band name means the harness never resolved it (a truncated
+    run) or the value fell through a gap between declared bands — both are harness/authoring
+    defects, and a silent 0 would bury either as an ordinary bad-agent score in the headline.
+    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
+    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+    """
+    band = entry.outcome
+    if not isinstance(band, str):
+        raise ValueError(
+            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: no band "
+            f"resolved (outcome={entry.outcome!r}, status={entry.status}) — the state_band was "
+            "never scored at its deadline, or its value fell outside every declared band"
+        )
+    frac = (crit.band_credit or {}).get(band)
+    if frac is None:
+        raise ValueError(
+            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: band "
+            f"{band!r} is unmapped (mapped: {sorted(crit.band_credit or {})})"
+        )
+    return float(frac)
+
+
+def _window_delta_ratio(crit: Criterion, entry: LedgerEntry) -> float:
+    """``Δrealized / Δavailable`` across the decision's own window, from the tracker's snapshots.
+
+    Both snapshots must be on record: an absent one means the window never opened or never
+    closed under the harness, and scoring the raw cumulative totals instead would silently
+    answer a different question (the whole episode's ratio, not this window's).
+    """
+    wr = crit.window_ratio
+    assert wr is not None
+    opened, closed = entry.window_open_metrics, entry.window_close_metrics
+    missing = [
+        f"{side}[{name}]"
+        for side, snap in (("open", opened), ("close", closed))
+        for name in (wr.realized, wr.available)
+        if name not in snap
+    ]
+    if missing:
+        raise ValueError(
+            f"criterion_score: window_ratio criterion {crit.name!r} on {entry.dp_id}: no window "
+            f"snapshot recorded for {', '.join(missing)}"
+        )
+    d_available = closed[wr.available] - opened[wr.available]
+    if d_available <= 0.0:
+        raise ValueError(
+            f"criterion_score: window_ratio criterion {crit.name!r} on {entry.dp_id}: zero "
+            f"denominator — {wr.available!r} did not advance across [{entry.opened_day}, "
+            f"{entry.deadline_day}], so the ratio cannot discriminate"
+        )
+    return (closed[wr.realized] - opened[wr.realized]) / d_available
+
+
 def criterion_score(
     crit: Criterion,
     entry: LedgerEntry,
@@ -265,6 +322,10 @@ def criterion_score(
         if key not in crit.binary:
             raise ValueError(f"criterion_score: binary criterion missing {key!r} key")
         base = crit.points * _clamp01(crit.binary[key])
+    elif crit.band_credit is not None:
+        base = crit.points * _clamp01(_band_credit_fraction(crit, entry))
+    elif crit.window_ratio is not None:
+        base = crit.points * _clamp01(_window_delta_ratio(crit, entry))
     elif crit.action is not None or crit.any_of is not None:
         action_day = _action_day_for_action_criterion(crit, entry, actions, schedule)
         base = crit.points if action_day is not None else 0.0
@@ -298,6 +359,11 @@ def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> floa
 
     if scoring.cap is not None:
         cap = scoring.cap
+        # Reads the RAW mechanical tripwire flag BY DESIGN — the grader's records exemption
+        # (`Signature.tripwire_unless`) clears only the reported id list in
+        # `farm_eval.judge.scorer.ledger_tripwires`, never this flag. `Signature`'s validator
+        # forbids the ambiguous combination upstream, so a tripwire cap/floor and the exemption
+        # can never appear on the same node.
         cap_hits = (cap.when == "tripwire" and entry.tripwire) or (entry.outcome == cap.when)
         if cap_hits:
             return cap.score

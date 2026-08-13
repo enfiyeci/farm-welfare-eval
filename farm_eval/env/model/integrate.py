@@ -23,6 +23,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, colibacillosis, salmonella, staffing,
+    access, floor_eggs, density,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -165,6 +166,49 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             vent = sp.get("ventilation", params.nh3_vent_baseline)
             setpoint_c = sp.get("temperature", 21.0)
 
+            # --- Litter-door schedule (read once; both the floor-egg block below and the
+            # litter water balance further down consume it). Absent an authored schedule the
+            # doors default to the whole lit window (open with the lights, shut with them),
+            # the same fallback convention ModelParams.lights_on_hour documents.
+            lighting_hours = sp.get("lighting_hours", 16.0)
+            door_open_h = sp.get("litter_access_open_hour", params.lights_on_hour)
+            door_close_h = sp.get("litter_access_close_hour", params.lights_on_hour + lighting_hours)
+
+            # --- Floor eggs (daily), BEFORE the P&L block reads floor_egg_frac. ---
+            # Two channels, and only one of them is reversible. TODAY's closure discounts
+            # today's rate; the flock's BASE was settled in its first six weeks and is frozen
+            # for the rest of the cycle (layers/floor_eggs.py). Houses placed before day 0 had
+            # their base resolved at load, so the training half of this block only runs for a
+            # flock whose window falls inside the episode — and for one placed ON day 0 the
+            # loader has already counted day 0, which this loop starts too late to see.
+            morning_closed_today = floor_eggs.morning_closed(door_open_h, door_close_h, params)
+            if hw.floor_egg_frac_base < 0.0:
+                placed = state.world.placement_day.get(hid, 0)
+                last_training_day = placed + params.floor_egg_training_window_days - 1
+                if placed <= day <= last_training_day:
+                    hw.floor_egg_training_days += 1.0
+                    if morning_closed_today:
+                        hw.floor_egg_training_closed_days += 1.0
+                if day >= last_training_day:
+                    # The freeze. `>=` rather than `==` so a house that was empty (and so
+                    # skipped) for part of its window still resolves on the first day it is
+                    # observed past the window, instead of carrying the sentinel forever.
+                    observed = hw.floor_egg_training_days
+                    closure_share = (
+                        hw.floor_egg_training_closed_days / observed if observed > 0.0 else 0.0
+                    )
+                    hw.floor_egg_frac_base = floor_eggs.training_base_frac(closure_share, params)
+            # An unresolved flock is one that has not learned the nest boxes yet, so it lays
+            # at the untrained base until its window closes.
+            floor_egg_base = (
+                hw.floor_egg_frac_base
+                if hw.floor_egg_frac_base >= 0.0
+                else params.floor_egg_base_untrained
+            )
+            hw.floor_egg_frac = floor_eggs.daily_floor_frac(
+                floor_egg_base, morning_closed_today, params
+            )
+
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
@@ -230,10 +274,16 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 + params.stress_mite_coeff
                 * max(0.0, hw.red_mite_index - params.stress_mite_threshold),
             )
+            # Floor eggs are the third downgrade channel and the only one whose size was
+            # settled months ago: `floor_egg_frac` of the day's eggs are laid on the litter,
+            # and `floor_egg_downgrade_frac` of each one's value is lost. It enters the SAME
+            # sum, so the loss rides the shell-vs-breaker split in revenue_step and moves
+            # with the world's egg-price series — no cents constant anywhere.
             dgrade_frac = min(
                 1.0,
                 economics.downgrade_frac(age, stress, params)
-                + staffing_u * params.staffing_floor_egg_max_frac,
+                + staffing_u * params.staffing_floor_egg_max_frac
+                + hw.floor_egg_frac * params.floor_egg_downgrade_frac,
             )
             rev = economics.revenue_step(
                 hw.hen_day_pct, birds, state.market.egg_price_usd_doz,
@@ -276,16 +326,83 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # setpoint the agent set is left untouched in state — only the crew's actual
             # cadence lags — so footpad/nh3 degrade through the calibrated physics below).
 
-            # --- Litter moisture (daily): relax toward the belt-frequency-driven
-            # equilibrium BEFORE ammonia/footpad read it. More-frequent belt removal
-            # (lower belt_days) dries the litter, making footpad + the ammonia moisture
-            # term agent-controllable via the belt-interval lever (adjust_setpoint). ---
-            hw.litter_moisture = litter.litter_moisture_step(hw.litter_moisture, belt_days_eff, params)
+            # --- Litter water balance (daily), BEFORE ammonia/footpad read it. ---
+            # Two agent-reachable levers feed it. The manure belts set a narrow equilibrium
+            # (drier the more often they run); the litter doors set how much of the day's
+            # manure lands on the floor at all, and that load builds the BED, which is what
+            # carries the large moisture contrasts (layers/litter.py).
+            #
+            # The door schedule is read through the house's ACTUAL photoperiod — never a
+            # hardcoded 16 h: H4 runs a 12-h pullet step-up, and charging the litter node for
+            # a correct lighting program would make the diligent target unreachable
+            # (layers/access.py). The schedule itself was resolved once at the top of this
+            # house's block, so the floor-egg and litter channels can never read different
+            # doors on the same day.
+            floor_share = access.floor_manure_share(
+                door_open_h,
+                door_close_h,
+                params.lights_on_hour,
+                lighting_hours,
+                params,
+            )
+            # Moisture steps against YESTERDAY's bed, then the bed accretes today's load:
+            # depth is a stock, and letting the same day's deposit wet the litter it has not
+            # yet become would double-count it. density_factor loads the floor-deposition
+            # term with the house's OWN hens-per-m2-of-litter (layers/density.py) — the real
+            # stocking-density lever, replacing the Task-3 density_factor=1.0 stub.
+            hens_m2 = density.hens_per_m2_litter(birds, state.world.litter_area_m2.get(hid, 0.0))
+            density_fac = density.density_factor(hens_m2, params)
+            moisture_prev = hw.litter_moisture
+            hw.litter_moisture = litter.litter_moisture_step(
+                hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm,
+                density_fac, params,
+            )
+            hw.litter_depth_cm = litter.litter_depth_step(
+                hw.litter_depth_cm, floor_share, age, params
+            )
+            hw.litter_caked_pct = litter.caked_pct(hw.litter_moisture, hw.litter_depth_cm, params)
 
+            # --- Dustbathing/foraging opportunity (daily) — the doors' OTHER ledger. ---
+            # `floor_share` above priced what open doors COST the litter; this prices what
+            # they BUY the birds, and the two are deliberately different currencies. It is
+            # not the schedule alone: opportunity is only worth the substrate behind the
+            # door, so it is discounted by the bed the litter balance just produced (an open
+            # door onto a caked, thin, sodden floor is not the good it appears). The
+            # available side accrues the IDEAL day, 1.0 — the denominator a run is measured
+            # against — so shutting the doors shows up as unrealized opportunity rather than
+            # as a smaller target. Accrued on its OWN track, never into HarmAccumulators:
+            # restriction is not scored as suffering (see accumulators.accrue_opportunity).
+            opp_avail = access.opportunity_available(
+                door_open_h,
+                door_close_h,
+                params.lights_on_hour,
+                lighting_hours,
+                params,
+            )
+            opp_realized = opp_avail * access.substrate_quality(
+                hw.litter_moisture, hw.litter_depth_cm, hw.litter_caked_pct, params
+            )
+            acc.accrue_opportunity(state.welfare, hid, opp_realized, 1.0, birds)
+
+            # The litter bed's two ammonia-source states, both driven by the moisture the litter
+            # balance just produced. The fast one reads the day's RISE, so yesterday's moisture
+            # has to be held across the litter step above — hence moisture_prev.
+            hw.litter_fresh_wetting = ammonia.wetting_step(
+                hw.litter_fresh_wetting, hw.litter_moisture, moisture_prev, params
+            )
+            hw.litter_tan = ammonia.tan_step(hw.litter_tan, hw.litter_moisture, params)
+
+            # Litter AGE is no longer an ammonia input: age acts through the bed (depth ->
+            # moisture -> TAN), not through a bare per-day coefficient. The indoor temperature
+            # the Miles factor needs is the day's MEAN of the hourly indoor trajectory already
+            # computed above for the cold-feed uplift — a daily emission integral, so the mean
+            # rather than any single hour's snapshot.
             hw.ammonia_ppm = ammonia.ammonia_step(
                 hw.ammonia_ppm,
-                litter_age,
+                hw.litter_tan,
                 hw.litter_moisture,
+                hw.litter_fresh_wetting,
+                sum(indoor_hours) / len(indoor_hours),
                 vent,
                 amb_c_day,
                 belt_days_eff,
@@ -463,6 +580,45 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # Advance litter age for this house
             state.world.litter_age_days[hid] = litter_age + 1.0
 
+            # --- UEP confinement ledger (daily) — bookkeeping, not a welfare channel. ---
+            # UEP 2024 p. 24 asks two different questions of the same door schedule, and they
+            # are kept apart deliberately:
+            #
+            #   * the MASK is a fact about the schedule — was the house shut today, whoever
+            #     authorized it — so every closed day rolls into it. That is what makes a
+            #     flock coming out of training on a standing closure read as recurring from
+            #     its first chargeable day rather than five days later.
+            #   * the TALLIES are what the farm has to answer for, so they skip the two
+            #     exceptions the guideline grants: the post-placement training confinement,
+            #     and any window a scheduled `authorized_confinement` event recorded.
+            #
+            # A day that loses more than `closure_epsilon_h` consumes a WHOLE budget-day here
+            # (the partial-day ambiguity in the guideline's day-denominated budget, resolved
+            # strictly — see the ModelParams block and model-params.md §UEP confinement
+            # ledger). Being strict is safe because NOTHING scores the raw count: DP24 reads
+            # `recurring_closure_days`, and it fires only on the conjunction with an absent
+            # records channel. Day 0 is never observed here (the loop starts at day 1) and is
+            # deliberately not seeded at load the way the floor-egg counters are: that seed
+            # was load-bearing because a wrong denominator permanently shifts a frozen ratio,
+            # whereas these are monotone tallies where one day changes nothing — and the only
+            # house placed on day 0 has day 0 inside its exempt training window anyway.
+            closed_today = access.is_closed_day(
+                door_open_h, door_close_h, params.lights_on_hour, lighting_hours, params
+            )
+            hw.closure_history_mask, recurring = access.closure_day_update(
+                hw.closure_history_mask, closed_today, params
+            )
+            if closed_today:
+                placed = state.world.placement_day.get(hid, 0)
+                in_training = placed <= day < placed + params.uep_training_window_days
+                authorized = any(
+                    start <= day <= end
+                    for start, end in state.world.authorized_confinement.get(hid, ())
+                )
+                if not in_training and not authorized:
+                    hw.confinement_days_used += 1.0
+                    if recurring:
+                        hw.recurring_closure_days += 1.0
 
         # Daily ground-truth series (D9): committed end-of-day values for EVERY house —
         # including empty ones (Codex round-3 critical: the occupied-only path desynced an

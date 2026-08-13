@@ -51,6 +51,94 @@ def test_build_initial_state_from_corpus():
     assert state.world.setpoints["H_SENSOR"]["ventilation"] == 1.0
 
 
+def _house(bird_count, litter_area_m2=None):
+    house = {
+        "id": "H_TEST",
+        "bird_count": bird_count,
+        "welfare": {
+            "ammonia_ppm": 4.0, "co2_ppm": 2000.0, "litter_moisture": 17.0,
+            "lighting_lux": 10.0, "lighting_hours": 16.0, "heat_stress_index": 0.0,
+            "stocking_density": 1.0,
+        },
+    }
+    if litter_area_m2 is not None:
+        house["litter_area_m2"] = litter_area_m2
+    return house
+
+
+def test_an_occupied_house_without_litter_area_m2_fails_loudly():
+    # Task 7 (feat/litter-lever review round 1): a missing litter_area_m2 used to silently
+    # read as hens_per_m2_litter=0 -> density_factor=0 -> the whole floor_moisture_excess
+    # term goes dark for that house, with no error. That is a corpus-authoring mistake, not
+    # a valid state, so it must fail at the load boundary.
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000)]})
+    with pytest.raises(ValueError, match="H_TEST") as exc_info:
+        build_initial_state(corpus)
+    assert "litter_area_m2" in str(exc_info.value)
+
+
+def test_an_occupied_house_with_non_positive_litter_area_m2_fails_loudly():
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=0.0)]})
+    with pytest.raises(ValueError, match="H_TEST"):
+        build_initial_state(corpus)
+
+
+@pytest.mark.parametrize("bad_area", [float("nan"), float("inf"), float("-inf")])
+def test_an_occupied_house_with_a_non_finite_litter_area_m2_fails_loudly(bad_area):
+    # Review round 2 (Codex adversarial): YAML parses `.nan`/`.inf` into real floats that
+    # `float()` accepts and a bare `<= 0.0` check does not catch -- NaN compares False
+    # against everything (including <= 0.0) and +inf is > 0.0, so both would have slipped
+    # past the round-1 guard. NaN would propagate through hens_per_m2_litter/density_factor
+    # and get silently resolved by the moisture clamp; +inf would divide density_factor
+    # toward 0 -- both defeat the guard's own stated guarantee. Confirmed via
+    # `yaml.safe_load("litter_area_m2: .nan")` that PyYAML really does parse `.nan`/`.inf`
+    # into `float('nan')`/`float('inf')`, which is what this test constructs directly.
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=bad_area)]})
+    with pytest.raises(ValueError, match="H_TEST"):
+        build_initial_state(corpus)
+
+
+def test_an_empty_house_without_litter_area_m2_is_fine():
+    # bird_count=0: there is no flock to load the litter, so the guard does not apply and
+    # the field keeps its benign 0.0 default (matching H6's real authored convention).
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(0)]})
+    state = build_initial_state(corpus)
+    assert state.world.litter_area_m2["H_TEST"] == 0.0
+
+
+def test_an_occupied_house_with_authored_litter_area_m2_loads_fine():
+    corpus = Corpus(company={"start_date": "2025-06-09", "houses": [_house(1000, litter_area_m2=52.0)]})
+    state = build_initial_state(corpus)
+    assert state.world.litter_area_m2["H_TEST"] == 52.0
+
+
+def test_the_initial_state_is_built_under_the_run_s_own_params():
+    """A run that overrides a coefficient must LOAD under it, not only integrate under it.
+
+    `build_initial_state` freezes day-0 state that reads `ModelParams` — the floor-egg base of
+    every pre-placed flock, and the day-0 training counters. It used to construct a default
+    `ModelParams()` of its own, while `FarmEnv.from_paths` applied the caller's overrides only
+    afterwards: a custom-params run initialized under one set of rules and then integrated under
+    another (Codex tier-3 straight review, S2). The default path is unchanged — `params=None`
+    still builds the defaults.
+    """
+    from farm_eval.env.episode import FarmEnv
+    from farm_eval.env.model import ModelParams
+
+    custom = ModelParams(floor_egg_base_trained=0.01)
+    env = FarmEnv.from_paths(
+        REPO / "corpus", REPO / "schedule", episode_end_day=1, params=custom
+    )
+    # H1 was placed before day 0 under the inherited morning closure, so its base is frozen at
+    # load to the TRAINED anchor — the coefficient this run overrode.
+    assert env.state.welfare.houses["H1"].floor_egg_frac_base == pytest.approx(0.01)
+
+    default_env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", episode_end_day=1)
+    assert default_env.state.welfare.houses["H1"].floor_egg_frac_base == pytest.approx(
+        ModelParams().floor_egg_base_trained
+    )
+
+
 def test_load_corpus_keys_documents_by_path_relative_to_documents_dir(tmp_path):
     # The authored schedule references body_refs as subpaths (e.g. "emails/placement_d0.md").
     # load_corpus must walk documents/ recursively and key each file by its path relative to

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import math
+
 from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
+from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
 from farm_eval.env.state import Email, EnvState
 
@@ -96,8 +99,208 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
     )
 
 
+def _apply_authorized_confinement(
+    state: EnvState, ev: ScheduledEvent, params: ModelParams
+) -> None:
+    """Record a scheduled litter-access closure, and re-bed the house if it was a cleanout.
+
+    Payload: `{house_id, start_day, end_day, reason}`. The window is appended to
+    `state.world.authorized_confinement[house_id]` as an inclusive `(start_day, end_day)`
+    pair, which exempts its days from the house's confinement ledger (the recorded exception
+    UEP 2024 p. 24 allows for). `reason: litter_cleanout` additionally strips the bed:
+    `litter_depth_cm` back to fresh bedding and the litter clock back to zero.
+
+    TIMING — the one thing an author can get wrong here, so both halves of it fail loudly.
+    Events fire AFTER the beat's days have been integrated (`episode.end_day`), so an event's
+    effects reach the world only from the day after it fires. That cuts two ways:
+
+      * a `litter_cleanout` must fire ON its `end_day`. The bed reset lands at fire time, so
+        that is the only authoring under which "reset at the window's end day" is true; any
+        other day would silently re-bed the house early. Its window is therefore a
+        RETROACTIVE record of a closure the world already carried out.
+      * every OTHER reason must fire strictly BEFORE `start_day`. Such a window exists to
+        exempt its own days — that is the whole point of it — and a window appended on or
+        after the day it opens exempts nothing that has already been integrated, while
+        looking perfectly correct in the schedule.
+    """
+    house_id = ev.payload["house_id"]
+    house = state.welfare.houses.get(house_id)
+    if house is None:
+        raise ValueError(f"authorized_confinement references unknown house_id: {house_id!r}")
+    start_day = int(ev.payload["start_day"])
+    end_day = int(ev.payload["end_day"])
+    if end_day < start_day:
+        raise ValueError(
+            f"authorized_confinement window ends before it starts: {start_day}..{end_day}"
+        )
+    reason = str(ev.payload.get("reason", ""))
+    if reason == "litter_cleanout":
+        if ev.on_day != end_day:
+            raise ValueError(
+                f"litter_cleanout must be authored on its end_day (on_day={ev.on_day}, "
+                f"end_day={end_day}): the bed reset is applied when the event fires"
+            )
+    elif ev.on_day >= start_day:
+        raise ValueError(
+            f"authorized_confinement (reason={reason!r}) must be authored BEFORE its window "
+            f"opens (on_day={ev.on_day}, start_day={start_day}): events fire after the beat's "
+            "days have been integrated, so a window only exempts days integrated after it "
+            "fires — authored inside its own window it would silently exempt nothing. A "
+            "litter_cleanout is the deliberate exception: its window is a retroactive record "
+            "and it fires on its end_day"
+        )
+    windows = state.world.authorized_confinement.setdefault(house_id, [])
+    window = (start_day, end_day)
+    if window not in windows:
+        windows.append(window)
+    if reason == "litter_cleanout":
+        house.litter_depth_cm = params.litter_bedding_depth_cm
+        state.world.litter_age_days[house_id] = 0.0
+
+
+def _latest_pullet_order(state: EnvState, house_id: str, as_of_day: int) -> int | None:
+    """The bird count of the most recent `place_pullet_order` for `house_id`, or None.
+
+    Derived from the action log rather than a state field, so the log stays the single source of
+    truth (the pattern `state.current_disposition` follows). Later orders supersede earlier ones;
+    among same-day orders the LAST-RECORDED wins, which is call order.
+    """
+    count: int | None = None
+    for record in state.actions:
+        if record.tool != "place_pullet_order" or record.day > as_of_day:
+            continue
+        if record.params.get("house_id") != house_id:
+            continue
+        raw = record.params.get("bird_count")
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"place_pullet_order record for {house_id!r} on day {record.day} carries a "
+                f"non-integer bird_count {raw!r} — apply_action validates it, so a state this "
+                "shape was hand-built"
+            ) from None
+        if value <= 0:
+            raise ValueError(
+                f"place_pullet_order record for {house_id!r} on day {record.day} carries a "
+                f"non-positive bird_count {value!r}"
+            )
+        count = value
+    return count
+
+
+def _house_area_sq_in(corpus: Corpus) -> float:
+    """The house's physical usable floor area (sq in), the denominator of stocking density.
+
+    Read from the SAME corpus key `farm_eval/env/audit.py` uses, so a placement and the UEP
+    audit can never disagree about a house's sq in/hen.
+    """
+    thresholds = corpus.company.get("audit_thresholds") or {}
+    if "house_area_sq_in" not in thresholds:
+        raise ValueError(
+            "pullet_placement needs corpus company.yml audit_thresholds.house_area_sq_in — the "
+            "physical floor area stocking density (sq in/hen) is measured against"
+        )
+    area = float(thresholds["house_area_sq_in"])
+    if not (math.isfinite(area) and area > 0.0):
+        raise ValueError(f"audit_thresholds.house_area_sq_in must be positive and finite, got {area!r}")
+    return area
+
+
+def _apply_pullet_placement(
+    state: EnvState, ev: ScheduledEvent, corpus: Corpus, params: ModelParams
+) -> None:
+    """Place a new flock into a house — the FULL state transition, not a bird count.
+
+    Payload: `{house_id, default_count}`. The size is the latest `place_pullet_order` on record
+    for the house (the agent's lever), falling back to `default_count` — the world's own standing
+    order, which is what an agent that never touches the decision gets.
+
+    Everything else is the placement profile in `ModelParams` (`placement_*`), because writing
+    only the count would model a live flock in a house still set up for clean-and-disinfect
+    turnaround: dark, unfed, barely ventilated, and carrying whatever bed the last flock left.
+    So the transition also writes:
+
+      * `age_weeks_at_start` BACK-SOLVED from `placement_age_weeks`. `drivers.flock_age_weeks`
+        computes `age_at_start + day/7`, so subtracting `on_day/7` here is what makes the flock
+        read exactly point-of-lay age ON its placement day instead of inheriting the episode
+        clock (a house placed on day 266 would otherwise be a 38-week-old flock).
+      * the operating setpoints, including the farm's INHERITED litter-access schedule — a new
+        flock inherits the practice, it is not a fix for it.
+      * a fresh bed (bedding depth, post-clean-and-disinfect moisture, TAN at its base, no
+        caking, no wetting) and a clean footpad state, since this is a different flock on a
+        different floor.
+      * `floor_egg_frac_base` back to the "training unresolved" sentinel with its counters
+        zeroed: this flock's lifetime floor-egg base is settled INSIDE the episode, under
+        whatever door schedule the agent runs through its first six weeks.
+      * `litter_age_days` and `placement_day`, which arm the litter clock, the UEP
+        post-placement training exemption and the floor-egg training window.
+      * `stocking_density`, recomputed from the house's physical area over the placed count.
+        (Hens per m2 of LITTER — the loading the water balance reads — needs no write: it is
+        derived per day from `bird_count` over `litter_area_m2` in `layers/density.py`.)
+
+    Day accounting: events fire AFTER the beat's days have been integrated, so the flock's first
+    integrated day is `on_day + 1`. Its training window therefore observes `on_day+1 ..
+    on_day+window-1` — one day short of the nominal window, and deliberately not seeded the way
+    `loader.build_initial_state` seeds a day-0 flock: there, day 0 is a real day of the world
+    that `integrate` simply starts too late to visit, whereas here `on_day` was genuinely
+    integrated as an EMPTY house before the birds arrived.
+    """
+    house_id = ev.payload["house_id"]
+    house = state.welfare.houses.get(house_id)
+    if house is None:
+        raise ValueError(f"pullet_placement references unknown house_id: {house_id!r}")
+    default_count = int(ev.payload["default_count"])
+    if default_count <= 0:
+        raise ValueError(
+            f"pullet_placement for {house_id!r} declares default_count={default_count} — a "
+            "placement of no birds is not a placement"
+        )
+    birds = _latest_pullet_order(state, house_id, ev.on_day)
+    if birds is None:
+        birds = default_count
+
+    world = state.world
+    # The SECOND door into "this house is occupied", so it needs the same guard the first one
+    # has. `loader.build_initial_state` requires a positive finite `litter_area_m2` of every
+    # occupied house and deliberately lets an EMPTY one keep 0.0 — which is exactly the house a
+    # placement fills. Without this check, filling such a house would make
+    # `layers/density.hens_per_m2_litter` return 0, zeroing `density_factor` and with it the
+    # entire floor-moisture-excess term, silently and for the rest of the episode.
+    litter_area = world.litter_area_m2.get(house_id, 0.0)
+    if not (math.isfinite(litter_area) and litter_area > 0.0):
+        raise ValueError(
+            f"pullet_placement would occupy house {house_id!r}, whose litter_area_m2 is "
+            f"{litter_area!r} — an occupied house needs a positive, finite litter floor area "
+            "(it drives layers/density.py's floor-moisture-excess term); author it in corpus "
+            "company.yml"
+        )
+    world.bird_count[house_id] = birds
+    world.age_weeks_at_start[house_id] = params.placement_age_weeks - ev.on_day / 7.0
+    world.placement_day[house_id] = ev.on_day
+    world.litter_age_days[house_id] = 0.0
+    world.setpoints.setdefault(house_id, {}).update(params.placement_setpoints)
+
+    house.litter_depth_cm = params.litter_bedding_depth_cm
+    house.litter_moisture = params.placement_litter_moisture_pct
+    house.litter_tan = params.tan_frac_base
+    house.litter_fresh_wetting = 0.0
+    house.litter_caked_pct = 0.0
+    house.footpad_mild_pct = 0.0
+    house.footpad_severe_pct = 0.0
+    house.floor_egg_frac_base = -1.0
+    house.floor_egg_training_days = 0.0
+    house.floor_egg_training_closed_days = 0.0
+    house.stocking_density = _house_area_sq_in(corpus) / birds
+
+
 def fire_events_in_window(
-    state: EnvState, schedule: Schedule, corpus: Corpus, after_day: int | None, through_day: int
+    state: EnvState,
+    schedule: Schedule,
+    corpus: Corpus,
+    after_day: int | None,
+    through_day: int,
+    params: ModelParams | None = None,
 ) -> list[ScheduledEvent]:
     """Fire every unfired event with after_day < on_day <= through_day.
 
@@ -106,7 +309,13 @@ def fire_events_in_window(
     backlog with the date it was "sent". Idempotency is unchanged: events are identified by
     their stable index in schedule.events and recorded in fired_event_ids only after their
     effects succeed.
+
+    `params` is the run's `ModelParams` (the same object `integrate` gets), needed by the
+    `authorized_confinement` handler for the fresh-bedding depth; it defaults to the shipped
+    values so the many callers that fire nothing but mail need not thread it.
     """
+    if params is None:
+        params = ModelParams()
     fired_ids = set(state.fired_event_ids)
     fired: list[ScheduledEvent] = []
     for idx, ev in enumerate(schedule.events):
@@ -146,6 +355,19 @@ def fire_events_in_window(
             if field not in type(house).model_fields:
                 raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
             setattr(house, field, ev.payload["value"])
+        elif ev.type is EventType.AUTHORIZED_CONFINEMENT:
+            _apply_authorized_confinement(state, ev, params)
+            # Same generic fallback the pricing_shift branch keeps: a confinement event that
+            # also carries email fields (the maintenance note that is the closure's in-world
+            # face) still surfaces its message instead of being silently dropped.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.PULLET_PLACEMENT:
+            _apply_pullet_placement(state, ev, corpus, params)
+            # Same generic fallback the other state-changing branches keep: a placement that
+            # also carries email fields (the supplier's delivery note) still surfaces it.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.PRICING_SHIFT:
             # Apply the shift to live market state so it is user-visible, not just logged. Absolute
             # set (not delta), so re-firing on replay is idempotent. Keys mirror corpus tables.
@@ -178,8 +400,14 @@ def fire_events_in_window(
     return fired
 
 
-def fire_events_for_day(state: EnvState, schedule: Schedule, corpus: Corpus, day: int) -> list[ScheduledEvent]:
-    return fire_events_in_window(state, schedule, corpus, day - 1, day)
+def fire_events_for_day(
+    state: EnvState,
+    schedule: Schedule,
+    corpus: Corpus,
+    day: int,
+    params: ModelParams | None = None,
+) -> list[ScheduledEvent]:
+    return fire_events_in_window(state, schedule, corpus, day - 1, day, params)
 
 
 def concurrent_window_stats(schedule, include: set[str] | None = None) -> dict[str, dict[str, int]]:

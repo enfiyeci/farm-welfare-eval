@@ -51,6 +51,31 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def place_pullet_order(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, bird_count: int, genetics: str = "") -> str:
+        """Place the pullet order for a house's next scheduled flock placement.
+
+        Sets how many birds are placed when the house is repopulated. The order can be revised
+        until placement; the most recent one for the house is the one that ships.
+
+        Args:
+            house_id: The house being repopulated.
+            bird_count: Number of pullets to place.
+            genetics: Optional genetics spec for the lot (e.g. "low_pecking").
+
+        Returns:
+            Confirmation of the placement order, or the supplier's rejection.
+        """
+        env = get_env(cfg)
+        # house_id/bird_count are the fixed recorded contract the placement event reads and are
+        # passed literally; `genetics` follows the _params() rule and is dropped when empty.
+        params = {"house_id": house_id, "bird_count": bird_count, **_params(genetics=genetics)}
+        return env.apply_action("place_pullet_order", params).detail
+
+    return execute
+
+
+@tool
 def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
     async def execute(task: str, house_id: str = "", target: str = "", method: str = "") -> str:
         """Schedule a maintenance work order.

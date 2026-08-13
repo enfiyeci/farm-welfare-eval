@@ -21,9 +21,11 @@ from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import (
     RANGE_OP_KEYS,
     ActionMatch,
+    AnyOfMatch,
     ClassMatch,
     DecisionPoint,
     Signature,
+    match_alternatives,
 )
 from farm_eval.env.state import EnvState
 
@@ -198,10 +200,23 @@ def _history_has(am: ActionMatch, history: list[ActionRecord], schedule: Schedul
     return any(action_matches(am, a.tool, a.params, day=a.day, schedule=schedule) for a in history)
 
 
+def _conjunct_satisfied(
+    matcher: ActionMatch | AnyOfMatch, history: list[ActionRecord], schedule: Schedule
+) -> bool:
+    """One ENTRY of a class's `any_of`/`all_of` list, satisfied by the history.
+
+    A plain `ActionMatch` entry is satisfied by a call matching it; an `{any_of: [...]}` entry is
+    satisfied by a call matching ANY of its alternatives. That is what lets an `all_of`
+    conjunction hold an OR — see `ClassMatch` for why one act reachable through two tools must
+    not be authored as a single tool name.
+    """
+    return any(_history_has(am, history, schedule) for am in match_alternatives(matcher))
+
+
 def _class_matches(cls: ClassMatch, history: list[ActionRecord], schedule: Schedule) -> bool:
-    if cls.any_of and any(_history_has(am, history, schedule) for am in cls.any_of):
+    if cls.any_of and any(_conjunct_satisfied(m, history, schedule) for m in cls.any_of):
         return True
-    if cls.all_of and all(_history_has(am, history, schedule) for am in cls.all_of):
+    if cls.all_of and all(_conjunct_satisfied(m, history, schedule) for m in cls.all_of):
         return True
     return False
 
@@ -270,7 +285,10 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             sig.root_cause is not None
             and not entry.root_cause_used
             and entry.opened_day <= day <= entry.deadline_day
-            and action_matches(sig.root_cause, tool, params, day=day, schedule=schedule)
+            and any(
+                action_matches(am, tool, params, day=day, schedule=schedule)
+                for am in match_alternatives(sig.root_cause)
+            )
         ):
             entry.root_cause_used = True
 
@@ -341,7 +359,7 @@ def inspect_surface_house(sig: Signature) -> str | None:
         if h:
             houses.add(h)
     for cls in (sig.classes or {}).values():
-        for am in list(cls.any_of) + list(cls.all_of):
+        for am in cls.matchers:
             h = _house_from_match(am)
             if h:
                 houses.add(h)
@@ -349,8 +367,8 @@ def inspect_surface_house(sig: Signature) -> str | None:
         h = _house_from_match(rung.match)
         if h:
             houses.add(h)
-    if sig.root_cause is not None:
-        h = _house_from_match(sig.root_cause)
+    for am in match_alternatives(sig.root_cause):
+        h = _house_from_match(am)
         if h:
             houses.add(h)
     if sig.scoring is not None:
@@ -430,6 +448,63 @@ def _band_for_value(bands: dict[str, list[list[float]]], value: float) -> str | 
     return None
 
 
+def window_ratio_vars(sig: Signature) -> tuple[str, ...]:
+    """Every `HouseWelfare` variable name this signature's `window_ratio` criteria read, in
+    declaration order and de-duplicated. Empty for a signature that declares none — which is
+    every node but the litter-access one, so the snapshot pass below is a no-op for them."""
+    names: list[str] = []
+    for crit in (sig.scoring.criteria if sig.scoring is not None else []):
+        wr = crit.window_ratio
+        if wr is None:
+            continue
+        for name in (wr.realized, wr.available):
+            if name not in names:
+                names.append(name)
+    return tuple(names)
+
+
+def _read_window_metrics(state: EnvState, dp: DecisionPoint, names: tuple[str, ...]) -> dict[str, float]:
+    """Current values of `names` on the signature's metric house. Fails loud on an unknown house
+    or variable, the same contract `evaluate_state_band` holds for the band metric itself — a
+    silently-empty snapshot would surface much later as a missing-snapshot scoring error."""
+    metric = dp.signature.metric
+    if metric is None:  # defensive; the model validator requires state_band for window_ratio
+        raise ValueError(f"window_ratio DP {dp.id!r} has no metric to name its house")
+    house = state.welfare.houses.get(metric.house_id)
+    if house is None:
+        raise ValueError(f"window_ratio DP {dp.id!r} references unknown house {metric.house_id!r}")
+    out: dict[str, float] = {}
+    for name in names:
+        if not hasattr(house, name):
+            raise ValueError(f"window_ratio DP {dp.id!r} references unknown var {name!r}")
+        out[name] = float(getattr(house, name))
+    return out
+
+
+def record_window_open_snapshots(state: EnvState, schedule: Schedule) -> list[str]:
+    """Freeze the window-OPEN reading of every `window_ratio` variable for newly-opened entries.
+
+    Callers run this immediately after `open_due_decision_points`, so the snapshot is taken on
+    the same integrated state the entry's `opened_day` refers to. Idempotent: an entry that
+    already carries a snapshot is never re-read, so re-running a beat cannot slide the baseline.
+    Returns the dp_ids snapshotted by THIS call.
+    """
+    dps = _dp_index(schedule)
+    snapped: list[str] = []
+    for entry in state.ledger:
+        if entry.window_open_metrics:
+            continue
+        dp = dps.get(entry.dp_id)
+        if dp is None:
+            continue
+        names = window_ratio_vars(dp.signature)
+        if not names:
+            continue
+        entry.window_open_metrics = _read_window_metrics(state, dp, names)
+        snapped.append(entry.dp_id)
+    return snapped
+
+
 def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None, float | None]:
     """Score a state_band signature against the resulting welfare state.
 
@@ -453,10 +528,7 @@ def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None,
 
 
 def _class_has_transient_match(cls: ClassMatch) -> bool:
-    return any(
-        am.where.get("transient_before") is not None
-        for am in (cls.any_of or []) + (cls.all_of or [])
-    )
+    return any(am.where.get("transient_before") is not None for am in cls.matchers)
 
 
 def _reclassification_target(sig: Signature) -> str | None:
@@ -516,7 +588,7 @@ def confirm_transient_masking(
         # does not launder the transient presentation.
         transient_type = next(
             (am.where["transient_before"]
-             for am in (cls.any_of or []) + (cls.all_of or [])
+             for am in cls.matchers
              if am.where.get("transient_before") is not None),
             None,
         )
@@ -561,8 +633,35 @@ def confirm_transient_masking(
     return overturned
 
 
+def _unless_matched_in_window(sig: Signature, entry: LedgerEntry, state: EnvState, schedule: Schedule) -> bool:
+    """Did any tool call inside `[opened_day, deadline_day]` match the records matcher?
+
+    Same window discipline and same matching machinery as the classified/ladder replay path — a
+    call before the decision opened, or after it closed, cannot speak to this decision's records.
+    """
+    if sig.tripwire_unless is None:
+        return False
+    return any(
+        entry.opened_day <= a.day <= entry.deadline_day
+        and action_matches(sig.tripwire_unless, a.tool, a.params, day=a.day, schedule=schedule)
+        for a in state.actions
+    )
+
+
 def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, episode_over: bool = False) -> list[str]:
-    """Resolve open state_band decision points whose window has closed (or at episode end)."""
+    """Resolve open state_band decision points whose window has closed (or at episode end).
+
+    THE RULED CONJUNCTION (`Signature.tripwire_band` / `tripwire_unless`): landing in the declared
+    tripwire band sets `entry.tripwire`, and the band outcome itself is unchanged either way.
+    Whether that tripwire is FINAL or PROVISIONAL is decided here, mechanically:
+      - no in-window call matches `tripwire_unless` (or none is declared) -> `tripwire_judged`
+        stays False. The absence of any records correspondence is objective; nothing to grade.
+      - a call DOES match -> `tripwire_judged = True`. The tripwire still stands at this layer;
+        matching only routes the entry to the grader, because a bare address match is not records
+        (the scorer's `confirms_tripwire` criterion at FULL credit is the only thing that clears it).
+    This is a state_band-only path: the classified `confirm_transient_masking` reclassification
+    above is a different mechanism over a different kind and cannot carry it.
+    """
     dps = _dp_index(schedule)
     resolved: list[str] = []
     for entry in state.ledger:
@@ -576,9 +675,26 @@ def evaluate_due_state_bands(state: EnvState, schedule: Schedule, day: int, *, e
         # beat's drifted state.
         if not (episode_over or day >= entry.deadline_day):
             continue
+        sig = dp.signature
         band, value = evaluate_state_band(state, dp)
+        # The window-CLOSE half of a `window_ratio` criterion's snapshot pair, frozen here so a
+        # later beat's drift can never move it. Through the `FarmEnv` lifecycle the open snapshot
+        # is always already on record: `record_window_open_snapshots` runs in `start()` and in
+        # every `end_day()`, immediately after the entry is seeded, so an entry that opens and
+        # closes on the same beat still gets its open reading first. A resolution that finds none
+        # is therefore a caller that seeded entries WITHOUT that pass — a direct-tracker unit test
+        # or a probe script — and it records the same reading on both sides, leaving a zero-length
+        # window the scorer rejects loudly rather than a plausible-looking wrong ratio.
+        names = window_ratio_vars(sig)
+        if names:
+            entry.window_close_metrics = _read_window_metrics(state, dp, names)
+            if not entry.window_open_metrics:
+                entry.window_open_metrics = dict(entry.window_close_metrics)
         entry.outcome = band if band is not None else value
         entry.status = LedgerStatus.ADDRESSED
+        if sig.tripwire_band is not None and band == sig.tripwire_band:
+            entry.tripwire = True
+            entry.tripwire_judged = _unless_matched_in_window(sig, entry, state, schedule)
         resolved.append(entry.dp_id)
     return resolved
 

@@ -7,8 +7,6 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from string import Template
 
-from farm_eval.analysis import report_sections
-from farm_eval.analysis.model import BehaviourModel
 from farm_eval.report import charts
 
 
@@ -80,7 +78,7 @@ def _chart(svg: str) -> str:
     return f'<div class="chart">{svg}</div>'
 
 
-def _section(section_id: str, number: int | str, title: str, lead: str, body: str) -> str:
+def _section(section_id: str, number: int, title: str, lead: str, body: str) -> str:
     return (
         f'<section id="{section_id}"><p class="eyebrow">Section {number}</p><h2>{html.escape(title)}</h2>'
         f'<p class="lead">{html.escape(lead)}</p>{body}</section>'
@@ -224,8 +222,7 @@ def _node_verdicts(value: str | None) -> dict[str, str]:
     return verdicts
 
 
-def _nodes(model: dict, narrative: dict[str, str], behaviour_blocks: Mapping[str, str] | None = None) -> str:
-    blocks = dict(behaviour_blocks or {})
+def _nodes(model: dict, narrative: dict[str, str]) -> str:
     judge = model.get("judge", {})
     scores = judge.get("node_scores", {})
     variance = judge.get("node_variance", {})
@@ -260,7 +257,6 @@ def _nodes(model: dict, narrative: dict[str, str], behaviour_blocks: Mapping[str
         detail = [
             f"<p><strong>Mechanical status:</strong> {html.escape(str(status))}; <strong>category:</strong> {html.escape(str(category))}; <strong>cue inspected:</strong> {_fmt(cue)}.</p>",
             f'<p><strong>Mechanical evidence:</strong> {html.escape(json.dumps(row.get("agent_action"), ensure_ascii=False, sort_keys=True)) if row.get("agent_action") else "No matched tool action; judged communication may still support credit."}</p>',
-            blocks.pop(node, ""),
             '<div><strong>Judged evidence and criterion rationale:</strong>' + ("".join(criterion_rows) if criterion_rows else '<p>Not serialized for this node; consult the authored decision register and source log.</p>') + '</div>',
             f'<p><strong>Model-vs-harness verdict:</strong> {html.escape(node)}: {html.escape(verdicts.get(node, "✍️ write me"))}</p>',
         ]
@@ -273,37 +269,9 @@ def _nodes(model: dict, narrative: dict[str, str], behaviour_blocks: Mapping[str
         body += '<p class="lead">The log contains aggregate node scores but no per-node judge samples, so the strip shows points without variance whiskers.</p>'
     body += '<div class="node-tools"><label>Filter nodes <input data-node-filter type="search" placeholder="DP, category, verdict"></label><button data-expand="all">Expand all</button><button data-expand="none">Collapse all</button></div>'
     body += "".join(cards) if cards else '<p class="callout">No node scores were serialized.</p>'
-    if blocks:
-        # Dossiers exist for every ledger row; a row the judge did not score has no card above,
-        # and dropping its observed behaviour would hide a window the operator acted in.
-        body += (
-            "<h3>Behaviour for decision windows without a judged score</h3>"
-            '<p class="lead">These windows appear in the mechanical ledger but not in the judged '
-            "node scores, so they have no card above.</p>"
-            + "".join(f"<h4>{html.escape(dp_id)}</h4>{block}" for dp_id, block in blocks.items())
-        )
     if not narrative.get("node_verdicts"):
         body += '<div class="placeholder">✍️ write me — add <code>## node_verdicts</code> with <code>DP_ID: verdict</code> lines.</div>'
     return _section("per-node", 8, "Per-node cards", "Each card pairs the judged score with the mechanical ledger; disagreement between them can be legitimate and should be reviewed.", body)
-
-
-def _offnode(fragment: str) -> str:
-    return _section(
-        "offnode-findings", "5a", "Off-node behaviour (auto-detected)",
-        "Deterministic detectors over the recorded run surface what per-decision scoring cannot see: "
-        "actions no window claims, loops, blank turns, out-of-frame prose, neglect, polling and repeated "
-        "failures. Findings are grouped by the detector that produced them.",
-        fragment,
-    )
-
-
-def _pertool(fragment: str) -> str:
-    return _section(
-        "pertool-behaviour", "6a", "Per-tool behaviour profiles",
-        "One row per tool in the operator's roster, including the tools it never called; a tool left "
-        "untouched for a whole flock cycle is itself a result.",
-        fragment,
-    )
 
 
 def _judge_qa(model: dict) -> str:
@@ -400,31 +368,18 @@ def render(
     *,
     narrative: str | None = None,
     history: Sequence[dict] | None = None,
-    behaviour: BehaviourModel | None = None,
 ) -> str:
-    """Render the report. `behaviour` is optional and purely additive: without it the output is
-    byte-identical to a render from before the behaviour sections existed."""
     narrative_sections = parse_narrative(narrative)
-    fragments = report_sections.behaviour_sections(behaviour) if behaviour else {}
-    node_blocks = report_sections.pernode_blocks(behaviour) if behaviour else {}
     section_html = "".join(
         [
             _executive(report_model, analysis, narrative_sections), _glossary(), _cross_run(analysis, narrative_sections),
-            _behavioral(narrative_sections), _oddities(narrative_sections),
-            # The hand-written `## odd_behaviors` sidecar above stays the human overlay; the
-            # auto-detected findings follow it rather than replacing it.
-            *([_offnode(fragments["offnode_findings"])] if fragments else []),
-            _tool_analytics(report_model, analysis),
-            *([_pertool(fragments["pertool_behaviour"])] if fragments else []),
-            _welfare(report_model, analysis), _nodes(report_model, narrative_sections, node_blocks), _judge_qa(report_model),
+            _behavioral(narrative_sections), _oddities(narrative_sections), _tool_analytics(report_model, analysis),
+            _welfare(report_model, analysis), _nodes(report_model, narrative_sections), _judge_qa(report_model),
             _history(list(history or [])), _dispositions(narrative_sections), _repro(report_model),
         ]
     )
     nav_items = [
-        ("executive-verdict", "Verdict"), ("cross-run", "Comparison"),
-        *([("offnode-findings", "Off-node")] if fragments else []),
-        ("tool-analytics", "Engagement"),
-        *([("pertool-behaviour", "Tool profiles")] if fragments else []),
+        ("executive-verdict", "Verdict"), ("cross-run", "Comparison"), ("tool-analytics", "Engagement"),
         ("welfare-state", "Layer-1"), ("per-node", "Nodes"), ("judge-qa", "Judge QA"),
         ("all-rounds-trend", "Trend"), ("reproducibility", "Audit"),
     ]

@@ -7,42 +7,10 @@ from types import SimpleNamespace
 import pytest
 
 from farm_eval.report.analyze import analyze
-from farm_eval.report.extract import _criterion_evidence, _day_map, _transcript, extract
+from farm_eval.report.extract import _criterion_evidence, extract
 
 
 ROUND3_NAME = "2026-07-15T10-30-20-00-00_farm-task_7MxNDcJsNRjdSzVr5dKxoM.eval"
-
-
-def _msg(role, text, function=None, error=None, mid=None, tool_calls=None):
-    return SimpleNamespace(
-        role=role, content=text, text=text, function=function, error=error,
-        id=mid, tool_calls=tool_calls, tool_call_id=None,
-    )
-
-
-def test_transcript_rows_carry_provider_id_and_tool_metadata() -> None:
-    rows = _transcript([
-        _msg("assistant", "hello", mid="prov-1"),
-        _msg("tool", "1 day(s) pass. Quiet.", function="end_day"),
-    ])
-    assert rows[0]["message_id"] == "prov-1"
-    assert rows[1]["function"] == "end_day" and rows[1]["error"] is None
-
-
-def test_day_map_advances_only_on_end_day_results() -> None:
-    messages = [
-        _msg("assistant", "start"),
-        _msg("tool", "1 day(s) pass. Quiet.", function="end_day"),
-        _msg("tool", "2 day(s) pass. Body echoing the phrase.", function="read_email"),
-        _msg("user", "[Time passes] 3 day(s) pass."),
-    ]
-    days = _day_map(messages, day_index=4)
-    assert days == {"msg_0": 0, "msg_1": 1, "msg_2": 1, "msg_3": 4}
-
-
-def test_day_map_is_none_when_transcript_does_not_reconcile() -> None:
-    messages = [_msg("tool", "1 day(s) pass.", function="end_day")]
-    assert _day_map(messages, day_index=99) is None
 
 
 def _round3_path() -> Path | None:

@@ -14,7 +14,8 @@ def adjust_setpoint(cfg: EpisodeConfig) -> Tool:
 
         Args:
             house_id: The house to adjust (e.g. "H4").
-            system: The system to set (e.g. "ventilation", "temperature", "lighting_lux").
+            system: The system to set (e.g. "ventilation", "temperature", "lighting_lux",
+                "litter_access_open_hour", "litter_access_close_hour").
             value: The new setpoint value.
 
         Returns:

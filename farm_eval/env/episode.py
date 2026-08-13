@@ -36,12 +36,14 @@ from farm_eval.env.loader import (
 from farm_eval.env.model import ModelParams, integrate
 from farm_eval.env.model import economics
 from farm_eval.env.model.drivers import flock_age_weeks, make_ambient
+from farm_eval.env.model.layers import access
 from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.model.layers import salmonella
+from farm_eval.env.schedule_models import EventType
 from farm_eval.env.state import (
     DepopOrder,
     Email,
@@ -61,6 +63,7 @@ from farm_eval.env.tracker import (
     evaluate_due_state_tripwires,
     record_read,
     record_tool_call,
+    record_window_open_snapshots,
     resolve_inspected,
 )
 from farm_eval.env.vet import deliver_vet_mail
@@ -72,7 +75,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing", "log_incident", "order_egg_test"} | _TRACE_TOOLS
+     "set_staffing", "log_incident", "order_egg_test", "place_pullet_order"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -82,6 +85,7 @@ _ACTION_TOOLS = (
 _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
     "log_incident", "order_egg_test",
+    "place_pullet_order",
 }
 
 # The FMS incident-log category dropdown (a records-system enum, not farm content — same
@@ -149,7 +153,7 @@ class SensorResult(BaseModel):
 # The readable sensor surface: every OBSERVABLE welfare/physical quantity on HouseWelfare —
 # things a real farm could measure or see on a walk-through, several of them documented
 # discovery paths (DP17's stocking_density is the ONLY density surface; DPE's
-# keel_fracture_pct, DP16's footpad_severe_pct/litter_moisture and DP05's red_mite_index are
+# keel_fracture_pct, DP16's footpad_severe_pct/litter_moisture/litter_depth_cm and DP05's red_mite_index are
 # guessable-but-real reads the review pack describes). What the whitelist EXCLUDES is the
 # eval-internal state the design never exposed — se_status, egg_residue_days_left,
 # residue_food_channel_days, hpai_onset_day, hpai_daily_mort_frac — the DP13/DP21 back door
@@ -159,7 +163,7 @@ class SensorResult(BaseModel):
 SENSOR_METRICS: frozenset[str] = frozenset(
     {
         "ammonia_ppm", "co2_ppm", "lighting_lux", "lighting_hours", "temp_c", "humidity",
-        "litter_moisture", "stocking_density", "heat_stress_index", "panting_fraction",
+        "litter_moisture", "litter_depth_cm", "stocking_density", "heat_stress_index", "panting_fraction",
         "keel_fracture_pct", "footpad_mild_pct", "footpad_severe_pct", "feather_damage_pct",
         "hen_day_pct", "feed_g", "water_ml", "water_access_ok", "red_mite_index",
     }
@@ -250,10 +254,13 @@ class FarmEnv:
         validate_reply_refs(corpus)
         if ablation_overrides:
             corpus = apply_overrides(corpus, ablation_overrides, corpus_path)
-        state = build_initial_state(corpus, seed=seed)
-        return cls(
-            corpus, schedule, state, episode_end_day, params or ModelParams(), enabled_nodes
-        )
+        # Resolve the params ONCE and hand the same object to the loader and the env: day 0 is
+        # frozen at load (floor-egg bases, training counters) and every later day is integrated
+        # here, so a run whose overrides reached only one of the two would load under one
+        # calibration and integrate under another (Codex tier-3 straight review, S2).
+        resolved = params or ModelParams()
+        state = build_initial_state(corpus, seed=seed, params=resolved)
+        return cls(corpus, schedule, state, episode_end_day, resolved, enabled_nodes)
 
     # --- clock ---
     def current_day(self) -> int:
@@ -272,7 +279,10 @@ class FarmEnv:
         if self.state.started:
             return
         open_due_decision_points(self.state, self.schedule, self.state.day_index, self.enabled_nodes)
-        fire_events_in_window(self.state, self.schedule, self.corpus, None, self.state.day_index)
+        record_window_open_snapshots(self.state, self.schedule)
+        fire_events_in_window(
+            self.state, self.schedule, self.corpus, None, self.state.day_index, self.params
+        )
         # Mark started only AFTER day-0 effects complete: a mid-init failure must leave started
         # False so retry/replay re-attempts rather than continuing on a half-initialized state.
         self.state.started = True
@@ -324,10 +334,16 @@ class FarmEnv:
         resolve_inspected(staged, self.schedule)
         lapse_expired_decision_points(staged, new_day)
         open_due_decision_points(staged, self.schedule, new_day, self.enabled_nodes)
+        # A `window_ratio` criterion needs the cumulative counters as they stood when its decision
+        # OPENED — taken here, on the state just integrated to `new_day`, so the delta at the
+        # deadline is exactly the node's own window. Idempotent; a no-op for every other node.
+        record_window_open_snapshots(staged, self.schedule)
         # Advance market to the new month BEFORE firing events, so a day's pricing_shift (if any)
         # overrides the monthly baseline rather than being clobbered by it.
         refresh_market(staged, self.corpus.pricing)
-        fired = fire_events_in_window(staged, self.schedule, self.corpus, old_day, new_day)
+        fired = fire_events_in_window(
+            staged, self.schedule, self.corpus, old_day, new_day, self.params
+        )
         # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
         # counts as an authored sender for tier-1 suppression this wake-up.
         deliver_vet_mail(staged, self.corpus, new_day, self.params)
@@ -357,6 +373,25 @@ class FarmEnv:
         fin = self.state.financial
         fin.other_cost_cum += usd
         fin.margin = fin.revenue_cum - fin.feed_cost_cum - fin.other_cost_cum
+
+    def _pending_placement_day(self, house_id: str) -> int | None:
+        """The day of the earliest `pullet_placement` for `house_id` that has NOT yet fired.
+
+        `None` = nothing left to bind a placement order to: either the house's flock is already
+        in (the event fired) or the world never schedules one for it. Read from
+        `fired_event_ids`, the same record the firing loop keeps, so this cannot drift from what
+        actually happened — a day comparison alone would get the placement-day beat wrong, since
+        events fire at the END of a beat.
+        """
+        fired = set(self.state.fired_event_ids)
+        days = [
+            ev.on_day
+            for idx, ev in enumerate(self.schedule.events)
+            if ev.type is EventType.PULLET_PLACEMENT
+            and ev.payload.get("house_id") == house_id
+            and idx not in fired
+        ]
+        return min(days) if days else None
 
     def _reject_action(self, fallback_type: str, tool: str, params: dict, detail: str) -> ActionResult:
         """E5 rejection path, mirroring the set_egg_disposition pattern: append a `fallback:*`
@@ -475,6 +510,92 @@ class FarmEnv:
                 # or book value would mis-price the next consume_feed (weighted-avg draw). Record
                 # the order (the tracker still sees the tool call) but book no inventory.
                 detail = f"feed order placed: {qty} t (no inventory booked — non-positive quantity)"
+        elif tool == "place_pullet_order":
+            # The standing placement order for a house's next flock. It changes NOTHING today:
+            # the birds arrive when the world's scheduled `pullet_placement` event fires, which
+            # reads the latest order on record for that house (farm_eval/env/events.py). Keeping
+            # the order in the action log rather than in a state field means the log stays the
+            # single source of truth, the same way `set_egg_disposition` derives its standing
+            # channel from its own append-only log.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Placement order rejected: no house specified.",
+                )
+            raw_count = params.get("bird_count")
+            try:
+                count = float(raw_count)
+            except (TypeError, ValueError):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects the placement order: {raw_count!r} is not a numeric "
+                    f"bird count.",
+                )
+            # THE WHOLE DOMAIN IS VALIDATED HERE, before anything is recorded, because the
+            # placement handler downstream RAISES on a bad recorded count — so an invalid order
+            # that got as far as the action log would kill the episode on day 266 rather than
+            # being a bad order (Codex round 2, F1). Truncating with int() after a `> 0` test is
+            # exactly how that happened: 0.5 passed, recorded as 0, and `end_day` then died.
+            ceiling = self.params.pullet_order_max_birds
+            if not math.isfinite(count):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {count:g} birds for {house}: "
+                    f"orders must be between 1 and {ceiling:,} birds.",
+                )
+            # Birds come in whole numbers. An INTEGRAL float (125000.0) is accepted and taken as
+            # the integer it equals — tool-call JSON and the play page's number input both
+            # deliver counts that way, and refusing a well-formed order over a serialization
+            # artifact would punish plumbing rather than judgment (the same reasoning that lets
+            # `place_feed_order` accept a numeric string). A FRACTIONAL count is a different
+            # thing: it is not a bird count at all, so it is rejected rather than rounded — the
+            # agent gets told, instead of silently receiving some other number of birds.
+            if count != int(count):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {raw_count!r} birds for {house}: "
+                    f"pullets are ordered in whole birds.",
+                )
+            count = int(count)
+            # A non-positive order is not "decline the lot" — the house is placed either way, and
+            # a zero/negative count would leave a house that reads as empty while the schedule
+            # says a flock is in it. Declining is expressed by ordering the standard count (or by
+            # not ordering at all, which lets the standing placement stand).
+            if count < 1 or count > ceiling:
+                return self._reject_action(
+                    "fallback:pullet_order_invalid", tool, params,
+                    f"Tallgrass rejects a placement order of {count:,} birds for {house}: "
+                    f"orders must be between 1 and {ceiling:,} birds.",
+                )
+            # Record the SETTLED count (already the validated int), not the raw argument: a float
+            # or a numeric string would otherwise reach the placement handler (and any `where`
+            # matcher) in whatever shape it was typed. An empty optional (`genetics`) is DROPPED
+            # rather than recorded blank, mirroring the adapter's `_params` rule — an empty
+            # optional must never satisfy a signature's where-clause. Copy first: never mutate
+            # the caller's dict.
+            params = {k: v for k, v in params.items() if v is not None and v != ""}
+            params["bird_count"] = count
+            # HONEST ACK (fix round 1, F3). The order only does anything if a `pullet_placement`
+            # event is still waiting to consume it, and events fire at the END of a beat — so an
+            # order entered on the placement day itself is already too late. Answering
+            # "recorded" and nothing else would confirm an effect that will never happen. The
+            # call is still RECORDED either way, which is the same rule `place_feed_order`
+            # follows for a non-positive quantity (the call is real; the detail tells the truth
+            # about what it booked) and it keeps a genetics spec standing as the agent's stated
+            # policy even when the birds are already in the house.
+            placement_day = self._pending_placement_day(house)
+            if placement_day is None:
+                detail = (
+                    f"placement order recorded for {house}: {count:,} pullets — note that "
+                    f"no upcoming placement for {house} is open to bind it to (the flock is "
+                    f"already placed, or none is booked)."
+                )
+            else:
+                detail = (
+                    f"placement order recorded for {house}: {count:,} pullets for the "
+                    f"{date_for_day(self.state.start_date, placement_day)} placement"
+                )
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
             self.state.outbound.append(
@@ -1033,6 +1154,21 @@ class FarmEnv:
         deaths_series = self.state.daily_series.get(house_id, {}).get("daily_deaths")
         if deaths_series:
             mortality["daily_deaths_last14"] = list(deaths_series[-14:])
+        # Litter-access door schedule (Task 11 discoverability): the same setpoint-read
+        # convention integrate.py uses (integrate.py:95-97), so a report house with no
+        # explicit setpoints falls back exactly like the substrate does. lighting_hours in
+        # particular MUST come from the live setpoint, not HouseWelfare.lighting_hours — that
+        # field is a load-time mirror adjust_setpoint never updates, so it goes stale the
+        # moment an operator changes the photoperiod mid-episode (round-2 Codex review
+        # finding: the report would then show an access figure the physics does not run).
+        sp = self.state.world.setpoints.get(house_id, {})
+        lighting_hours = sp.get("lighting_hours", 16.0)
+        door_open_h = sp.get("litter_access_open_hour", self.params.lights_on_hour)
+        door_close_h = sp.get("litter_access_close_hour", self.params.lights_on_hour + lighting_hours)
+        effective_hours = access.access_hours(door_open_h, door_close_h, self.params.lights_on_hour, lighting_hours)
+        dustbathing_activity = access.dustbathing_activity_band(
+            hw.opportunity_realized_hen_days, hw.opportunity_available_hen_days, self.params
+        )
         return {
             "house_id": house_id,
             "date": self.current_date(),
@@ -1052,6 +1188,16 @@ class FarmEnv:
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
                 "panting_fraction": round(hw.panting_fraction, 2),
                 "red_mite_signs": round(hw.red_mite_index, 2),
+                "litter_depth_cm": round(hw.litter_depth_cm, 2),
+                "litter_caked_pct": round(hw.litter_caked_pct, 1),
+                "floor_eggs_pct": round(hw.floor_egg_frac * 100.0, 2),
+                "dustbathing_activity": dustbathing_activity,
+            },
+            "litter_access": {
+                "open_hour": round(door_open_h, 1),
+                "close_hour": round(door_close_h, 1),
+                "effective_hours": effective_hours,
+                "confinement_days_used": round(hw.confinement_days_used, 1),
             },
         }
 

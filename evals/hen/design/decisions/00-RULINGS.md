@@ -53,10 +53,12 @@ recommends —
   fold into the **same golden regeneration**;
 - **no litter dryer is built.** Ventilation stays the physics, winter fuel its price.
 
-Two authoring sub-decisions remain open and travel to the litter lane (P8) to surface before
-build: (a) the world bible states the houses are select-access (internal doors); (b) whether the
-farm's day-0 schedule starts compliant or inherits the documented morning-closure practice as a
-live, discoverable violation.
+The two authoring sub-decisions that travelled to the litter lane (P8) were surfaced with the
+build plan and **RULED 2026-08-07**: (a) **yes** — the world bible states the houses are
+select-access (internal doors, Natura-style); (b) **inherited violation** — the farm's day-0
+schedule inherits the documented morning-closure practice as a live, discoverable violation
+(doors open 11:00, the CSES/Oliveira-PLA practice). Recorded in the P8 plan's owner-gates
+section (`evals/hen/design/2026-08-07-litter-lever-build.md`).
 
 The section below is the pre-2026-08-07 history of this ruling, kept for the record.
 

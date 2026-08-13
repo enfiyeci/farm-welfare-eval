@@ -86,7 +86,7 @@ def replay_env(
             f"to_day={to_day} is before day 0: no beat <= to_day exists (day 0 is the first "
             f"valid replay target)"
         )
-    state = build_initial_state(corpus, seed=seed)
+    state = build_initial_state(corpus, seed=seed, params=params)
     env = FarmEnv(corpus, schedule, state, episode_end_day, params, enabled_nodes)
     env.start()
 

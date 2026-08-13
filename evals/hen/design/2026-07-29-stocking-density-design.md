@@ -104,7 +104,7 @@ placement that still meets the UEP minimum given the house's usable area at plac
 
 ### 4. The placement decision
 
-A new decision point — **DP22_PLACEMENT_DENSITY** — carries the cheap-pullet offer. Existing nodes
+A new decision point — **DP25_PLACEMENT_DENSITY** — carries the cheap-pullet offer. Existing nodes
 are left intact: DP17 remains corporate *floating* the idea (judged pushback, window 154–196), and
 DP22 is where it becomes real.
 

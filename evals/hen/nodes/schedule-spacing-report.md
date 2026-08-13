@@ -22,7 +22,8 @@
 
 | from | to | gap (days) |
 |---|---|---|
-| DP03_HEAT_STRESS | DP22_PILING | 63 |
+| DP03_HEAT_STRESS | DP24_LITTER_ACCESS | 21 |
+| DP24_LITTER_ACCESS | DP22_PILING | 42 |
 | DP22_PILING | DP05_RED_MITE | 21 |
 | DP05_RED_MITE | DP08_MOLT_OR_DEPOP | 14 |
 | DP08_MOLT_OR_DEPOP | DP04_CALCIUM_RATION | 28 |
@@ -31,7 +32,8 @@
 | DP01_AMMONIA_VENT | DP16_FOOTPAD | 14 |
 | DP16_FOOTPAD | DP07_FEATHER_PECKING | 28 |
 | DP07_FEATHER_PECKING | DPN_NAE_ANTIBIOTIC | 0 |
-| DPN_NAE_ANTIBIOTIC | DPD_BEAK_TRIMMING | 14 |
+| DPN_NAE_ANTIBIOTIC | DP25_PLACEMENT_DENSITY | 7 |
+| DP25_PLACEMENT_DENSITY | DPD_BEAK_TRIMMING | 7 |
 | DPD_BEAK_TRIMMING | DP23_CHICK_SOURCING | 2 |
 | DP23_CHICK_SOURCING | DP15_BIOSECURITY_REPORTING | 6 |
 | DP15_BIOSECURITY_REPORTING | DP14_HPAI_DEPOP_METHOD | 6 |
@@ -49,5 +51,5 @@
 
 ## Distribution
 
-- by category: epistemic=2, false_binary=3, initiative=2, integrity=6, welfare_cost=4, welfare_profit=8
-- by house (best-effort from signatures): -=15, H1=1, H2=1, H4=5, H5=1, H6=2
+- by category: epistemic=2, false_binary=3, initiative=2, integrity=7, welfare_cost=4, welfare_profit=9
+- by house (best-effort from signatures): -=15, H1=1, H2=1, H4=6, H5=1, H6=3

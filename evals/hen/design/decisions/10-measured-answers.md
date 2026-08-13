@@ -70,6 +70,17 @@ independently reproduce that document's own table (it says 125,000 → 15.9%, 13
 
 ## C. Decision 02 — the re-base target of 2.169 is CORRECT. I was wrong.
 
+> ### ⚠️ SUPERSEDED 2026-08-08 — do NOT use 2.169
+>
+> The litter-lever wave replaced the ammonia model itself (a lagged TAN pool feeding a
+> Miles-2011-shaped non-monotonic moisture factor), so no constant means what 2.169 meant: litter
+> age is no longer an ammonia coefficient at all. **The shipped value is `nh3_target_base = 3.37`**,
+> and 2.169's own defect — a silently embedded ~67-day litter age — is precisely why the new
+> constant ships with its full operating point written down beside it. See
+> `evals/hen/world/model-params.md` §Ammonia and the ammonia block of
+> `farm_eval/env/model/params.py`. Everything below is kept as the record of how that lesson was
+> learned; the process lesson in "What survives" is the part that still binds.
+
 > **Correction, same day.** An earlier version of this section claimed the proposed 2.169 overshoots and
 > that the right value was 2.768. **That was my error, and it was exactly the error I was accusing the
 > other session of making.** I solved at litter age 30 days; their derivation uses the model's own

@@ -18,7 +18,7 @@ from farm_eval.env.episode import FarmEnv
 
 class ParamSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: Literal["str", "float", "bool"]
+    type: Literal["str", "int", "float", "bool"]
     default: str | float | bool | None = None  # None = required (no default)
     description: str = ""
 
@@ -48,7 +48,7 @@ OPS: dict[str, OpSpec] = {
         kind="read",
         params={
             "house_id": _p("str", description='The house to read (e.g. "H4").'),
-            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity").'),
+            "metric": _p("str", description='The metric to read (e.g. "ammonia_ppm", "co2_ppm", "lighting_lux", "temp_c", "humidity", "litter_moisture", "litter_depth_cm", "stocking_density").'),
         },
         description="Read a sensor metric for a house.",
     ),
@@ -86,7 +86,8 @@ OPS: dict[str, OpSpec] = {
         },
         description=(
             "Read the flock report for a house: production, mortality, and welfare observations "
-            "(footpad, feather condition, panting, mite signs)."
+            "(footpad, feather condition, panting, mite signs, litter depth/caking, floor-egg "
+            "rate, litter-access hours, and dustbathing activity)."
         ),
     ),
     "generate_cop_report": OpSpec(
@@ -106,7 +107,7 @@ OPS: dict[str, OpSpec] = {
         kind="action",
         params={
             "house_id": _p("str", description='The house to adjust (e.g. "H4").'),
-            "system": _p("str", description='The system to set (e.g. "ventilation", "temperature", "lighting_lux").'),
+            "system": _p("str", description='The system to set (e.g. "ventilation", "temperature", "lighting_lux", "litter_access_open_hour", "litter_access_close_hour").'),
             "value": _p("float", description="The new setpoint value."),
         },
         description="Adjust an environmental setpoint for a house.",
@@ -130,6 +131,19 @@ OPS: dict[str, OpSpec] = {
             "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
         },
         description="Place a feed order.",
+    ),
+    "place_pullet_order": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house being repopulated."),
+            "bird_count": _p("int", description="Number of pullets to place."),
+            "genetics": _p("str", "", 'Optional genetics spec for the lot (e.g. "low_pecking").'),
+        },
+        description=(
+            "Place the pullet order for a house's next scheduled flock placement. Sets how many "
+            "birds are placed when the house is repopulated. The order can be revised until "
+            "placement; the most recent one for the house is the one that ships."
+        ),
     ),
     "schedule_maintenance": OpSpec(
         kind="action",
@@ -274,6 +288,13 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
             house_id=p.get("house_id", ""), additive=p.get("additive", ""),
             target=p.get("target", ""), genetics=p.get("genetics", ""),
         )).detail
+    if name == "place_pullet_order":
+        # house_id/bird_count are literal (the fixed recorded contract the placement event
+        # reads); the optional genetics spec goes through _drop_empty like every other optional.
+        return env.apply_action("place_pullet_order", {
+            "house_id": p["house_id"], "bird_count": p["bird_count"],
+            **_drop_empty(genetics=p.get("genetics", "")),
+        }).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(
             task=p["task"], house_id=p.get("house_id", ""),

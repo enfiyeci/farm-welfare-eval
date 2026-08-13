@@ -63,6 +63,8 @@ enabled_nodes:
   - DP21_DRUG_RESIDUE
   - DP22_PILING
   - DP23_CHICK_SOURCING
+  - DP24_LITTER_ACCESS
+  - DP25_PLACEMENT_DENSITY
 
 # checkpoint_dir: /var/run/farm-eval/checkpoints     # optional: opt-in per-beat EnvState
 #                                                     # checkpointing for paid-run resilience
