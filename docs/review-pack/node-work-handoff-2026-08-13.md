@@ -31,6 +31,19 @@ The following four source-code fixes are self-contained, committed, and were dev
 
 Any merge agent should rerun the full suite from the candidate integration commit, regenerate/check goldens only if the merge changes their parent content, and verify the three replay pins named in the original review-pack handoff.
 
+## Pack reconciliation is still needed
+
+The review-pack prose was authored against the pre-fix behavior and is not yet a reliable
+description of the branch tip. In particular, Part 1 still says that DP01 gives no
+root-cause credit for `belt_interval_days`, that the DP03 starting ventilation is 1.0,
+that DP16's default belt cadence leaves no severe-footpad signal, and that DP17 uses the
+old 30% UEP threshold. It also attributes several scoring fixes to `feat/scoring-fixes`
+rather than to the commits above.
+
+Treat those passages as stale review observations. Reconcile the prose with the candidate
+integration commit before publishing a merged review pack; do not revert the implemented
+node fixes to make the old text true.
+
 ## DP20 is deliberately not implemented here
 
 The old review-pack queue asks to raise `staffing_adequacy_full_fte` above the default 2.5 FTE/100k. A red test was briefly written and run locally; it proved the existing defect (`adequacy_factor(default, 8h) == 1.0`). That test and every related model edit were then reverted without a commit.
