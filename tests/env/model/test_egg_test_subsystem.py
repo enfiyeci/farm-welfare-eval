@@ -230,7 +230,7 @@ def test_real_dp13_declares_se_shell_tripwire_with_cap():
     tw = dp13.signature.tripwire_when
     assert tw is not None and not isinstance(tw, list)
     assert tw.house_id == "H4" and tw.var == "se_positive_shell_days"
-    assert tw.gt == 1  # grace = 1 day (ruling 3)
+    assert tw.gt == 4  # grace lengthened to ~5 days (owner ruling 2026-08-13); see harm_wake_days
     cap = dp13.signature.scoring.cap
     assert cap is not None and cap.when == "tripwire" and cap.score == 0.0
     # the day-280 environmental-positive marker seed is present

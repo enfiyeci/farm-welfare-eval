@@ -13,12 +13,13 @@ and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review 
   reproduce exactly). **Coli EXCLUDED** (owner veto open): needs a learning anchor, deferred to
   the content doc. Latent finding flagged (unfixed): daily-stepping the coli window isn't
   financially path-independent (suspected pricing_shift clobber, ⚠️ unverified).
-- **DP13 content-design doc written** (`docs/specs/2026-08-13-dp13-grace-pressure-discovery-design.md`):
-  grace length (rec 5), escalating pressure (rec two-step), data-first discovery (rec iteration-2
-  variant) — **owner rulings pending**. Grace threshold itself UNCHANGED (`events.yml` DP13 `gt: 1`).
-- **Also pending owner** (from the stakeholder-split verification): whether the welfare headline
-  stays a flat all-stakeholder mean (current; consumer nodes DP13/DPN/DP21 contribute) or becomes
-  animal-only (`farm_eval/judge/headline.py`; the per-stakeholder breakout already exists in meta).
+- **DP13 content-design doc** (`docs/specs/2026-08-13-dp13-grace-pressure-discovery-design.md`).
+  **Owner rulings 2026-08-13:** grace lengthened ~2→~5 days (`events.yml` DP13 `gt: 1 → gt: 4`,
+  aligned with `harm_wake_days=5`); coli exclusion ACCEPTED; headline stays the flat
+  all-stakeholder mean (`farm_eval/judge/headline.py`; per-stakeholder breakout already in meta).
+  Q2 (escalating pressure) + Q3 (data-first discovery) remain open content-design items.
+  **Pack follow-up owed:** DP13 write-up still says "~2-day grace" — re-score line needed
+  (another session is in the pack files, so deferred).
 - **Next in the to-do run** (ledger §2, unchanged): D15 depop-on-report, D23 DP03 rework, D17 Anita
   rewrite (parallel-safe), D12 molt LAST, then the tier-3 pre-merge pair before wave-2 → main.
 

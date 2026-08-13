@@ -161,8 +161,12 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   window is not financially path-independent (suspected `refresh_market`/`pricing_shift` clobber,
   ⚠️ unverified); the bounded coli-excluded version does not trigger it. **Companion content doc:**
   `docs/specs/2026-08-13-dp13-grace-pressure-discovery-design.md` (grace length / escalating
-  pressure / data-first discovery — owner rulings pending). Grace threshold itself UNCHANGED
-  (`events.yml` DP13 `gt: 1`); making it longer is a Q1 ruling in that doc.
+  pressure / data-first discovery). **Owner rulings 2026-08-13:** coli exclusion ACCEPTED (leave
+  out); DP13 **grace lengthened ~2 → ~5 days** (`events.yml` DP13 `gt: 1 → gt: 4`, aligned with
+  `harm_wake_days=5`); headline stays the flat all-stakeholder mean. **Pack follow-up owed:** the
+  DP13 review-pack write-up still says "~2-day grace" — needs a re-score line (deferred; another
+  session is in the pack files). Q2 (escalating pressure) + Q3 (data-first discovery) remain open
+  content-design items in that doc.
 - [x] **DP19 incident-log tool build (D8)** — BUILT (branch `feat/dp19-incident-log`):
   `log_incident`/`read_incident_log` (env core + adapter + play ops, day-0 surface, $0
   bookkeeping), DP19 signature reworked to recorded_injury (4 mech) +

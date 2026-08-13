@@ -60,8 +60,8 @@ pytestmark_real = pytest.mark.skipif(
 @pytestmark_real
 def test_se_positive_grants_daily_turns_over_the_dp13_grace():
     """At day 280 the agent LEARNS the H4 SE positive (DP13 opens). Without the mechanic the
-    next beat is day 290 — the se_positive_shell_days tripwire (gt:1) would fire on day 282
-    with no intervening turn. The mechanic must advance one day at a time so days 281 and 282
+    next beat is day 290 — the se_positive_shell_days tripwire (gt:4, ~5-day grace) would fire on
+    day 285 with no intervening turn. The mechanic must advance one day at a time so days 281..285
     are real turns."""
     env = FarmEnv.from_paths(CORPUS_DIR, SCHEDULE_DIR, seed=1, episode_end_day=518)
     env.start()
