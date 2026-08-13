@@ -3,7 +3,24 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-07 (the repo reorganization merged).
+Last updated: 2026-08-13 (wave-2 merged to `main` + branch consolidation).
+
+> ### 🟢 CONSOLIDATION 2026-08-13 — wave-2 is on `main`; several lanes closed/archived
+>
+> The wave-2 build wave (DP13 egg-test + ~5-day grace + daily-wake, DP06 revival, DP22 piling,
+> D14 coli, D11 feather, DP19 incident log) **merged to `main`** (`c4f8e1c`). Also merged:
+> `feat/aquatic-outreach` (docs) and `fix/corpus-state-consistency` (corpus audit, validated vs
+> wave-2). **Archived** (unique work preserved on origin): `archive/field-deck-2026-08-13`,
+> `archive/litter-ammonia-recalib-2026-08-13`. **Deleted** (fully contained elsewhere):
+> `feat/stocking-density` (⊂ task6), `worktree-finance-decision-map` (⊂ welfare-currency).
+> The two now-merged wave-2 worktrees (`fwe-dp19`, `fwe-dp06`) were removed.
+> **Open lanes:** `feat/litter-lever` (COMPLETE — needs a rebase onto main; DP22/DP16 node-ID
+> collisions to resolve), `feat/welfare-currency` (9/14 tasks), `feat/pack-shrimp` (11/12
+> experiments — 12th-arm + location decision), `feat/stocking-density-task6` (BLOCKED on 4 owner
+> calibration decisions), `docs/financial-node-audit` (finance-expansion, active on the other
+> machine — do not touch). **Open owner ruling:** `DP22` node-ID now collides three ways
+> (main=piling, litter-lever & stocking-density=placement-density) — must be resolved before
+> litter-lever or stocking-density can land. Reviews use fresh Opus until Codex resets (~Sep 12).
 
 > ### 🔴 REORG LANDED 2026-08-07 — merge `main` before continuing any lane
 >
