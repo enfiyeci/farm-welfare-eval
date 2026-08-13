@@ -52,6 +52,25 @@ def pay_invoice(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def accept_offer(cfg: EpisodeConfig) -> Tool:
+    async def execute(offer_id: str, option: str) -> str:
+        """Accept a vendor offer option.
+
+        Args:
+            offer_id: The offer reference (from read_financials).
+            option: The option id on that offer.
+
+        Returns:
+            A confirmation of the vendor arrangement booked.
+        """
+        return get_env(cfg).apply_action(
+            "accept_offer", {"offer_id": offer_id, "option": option}
+        ).detail
+
+    return execute
+
+
+@tool
 def dispute_charge(cfg: EpisodeConfig) -> Tool:
     async def execute(invoice_id: str, line_id: str) -> str:
         """Raise a query with the vendor on one line of a statement.

@@ -42,6 +42,7 @@ class EventType(StrEnum):
     PRICING_SHIFT = "pricing_shift"
     STATE_SEED = "state_seed"
     INVOICE = "invoice"
+    VENDOR_OFFER = "vendor_offer"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE

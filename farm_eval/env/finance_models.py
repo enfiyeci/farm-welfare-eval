@@ -7,9 +7,22 @@ dropped (the same rule the schedule models follow). This module imports nothing 
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 _FORBID = ConfigDict(extra="forbid")
+
+# The ONLY cost coefficients a vendor offer may move. Every one of these is a pure cost line that
+# no welfare layer reads, which is what makes the whole offer mechanism provably welfare-neutral.
+# Widening this set requires a new neutrality probe (see the L8 plan, Task 10) — it is not a
+# routine edit.
+WELFARE_INERT_EFFECT_KEYS = frozenset({
+    "energy_base_usd_bird_day",   # non-HVAC electricity: lights, office, egg room
+    "other_var_usd_doz",          # packaging + supplies
+    "maintenance_callout_usd",    # service-contract price
+    "vet_visit_usd",              # service-contract price
+})
 
 
 class Lender(BaseModel):
@@ -57,6 +70,37 @@ class InvoiceSpec(BaseModel):
     lines: list[InvoiceLine] = Field(default_factory=list)
 
 
+class OfferOption(BaseModel):
+    model_config = _FORBID
+
+    id: str
+    label: str
+    upfront_usd: float = 0.0
+    effect_key: str
+    effect_multiplier: float = 1.0
+
+    @field_validator("effect_key")
+    @classmethod
+    def _welfare_inert(cls, key: str) -> str:
+        if key not in WELFARE_INERT_EFFECT_KEYS:
+            raise ValueError(
+                f"offer effect_key {key!r} is not welfare-inert; allowed keys are "
+                f"{sorted(WELFARE_INERT_EFFECT_KEYS)}"
+            )
+        return key
+
+
+class OfferSpec(BaseModel):
+    model_config = _FORBID
+
+    id: str
+    vendor: str
+    opens_day: int
+    expires_day: int
+    quality: Literal["good", "marginal", "bad", "scam"]
+    options: list[OfferOption] = Field(default_factory=list)
+
+
 class FinanceConfig(BaseModel):
     """The whole authored finance block. Default-constructed (every field empty, `enabled=False`)
     it is an inert no-op, so any state built without `corpus/finance.yml` behaves exactly as it
@@ -77,3 +121,4 @@ class FinanceConfig(BaseModel):
     # one up here to fire it; `finance.open_invoice` also registers a directly-passed spec here
     # (idempotent) so a later pay_invoice/dispute_charge can resolve it without a schedule event.
     invoices: dict[str, InvoiceSpec] = Field(default_factory=dict)
+    offers: dict[str, OfferSpec] = Field(default_factory=dict)

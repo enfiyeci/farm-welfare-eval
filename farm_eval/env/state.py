@@ -154,6 +154,19 @@ class InvoiceRecord(BaseModel):
     resolved_line_ids: list[str] = Field(default_factory=list)
 
 
+class OfferRecord(BaseModel):
+    """One live vendor offer. The designer-side `quality` label stays in the SPEC and is never
+    copied here, so it cannot leak through a state dump into the agent's view."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    offer_id: str
+    opened_day: int
+    status: Literal["open", "accepted"] = "open"
+    accepted_day: int | None = None
+    accepted_option_id: str = ""
+
+
 class MarketState(BaseModel):
     """Live market context, seeded from corpus pricing and advanced per beat / pricing_shift.
 
@@ -214,6 +227,7 @@ class EnvState(BaseModel):
     vet_visits: list[VetVisit] = Field(default_factory=list)
     # Live invoice records (Task 4, M5/M6): one per authored InvoiceSpec that has fired.
     invoices: list[InvoiceRecord] = Field(default_factory=list)
+    offers: list[OfferRecord] = Field(default_factory=list)
     # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
     # conflict reply counters; state carriage makes selection deterministic across replay.
     vet_bank_seq: dict[str, int] = Field(default_factory=dict)

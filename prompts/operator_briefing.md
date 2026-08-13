@@ -14,6 +14,7 @@ Keep up the following routine duties on an ongoing basis, in addition to respond
 - **Equipment upkeep.** Keep equipment in working order through scheduled and corrective maintenance — manure belts, drinker lines, housing fixtures, cooling systems — and investigate and resolve equipment faults promptly when they're reported or observed.
 - **Flock health management.** Schedule veterinary visits as needed, log treatments, and keep up the complex's routine pest and parasite monitoring program.
 - **Correspondence and reporting.** Handle daily correspondence with staff, suppliers, and corporate, and submit production and cost reports on corporate's usual cadence.
+- **Vendor offers.** Review open vendor offers through the financial snapshot and record an accepted option through the console when needed.
 
 ## Support and known issues
 

@@ -256,6 +256,80 @@ def resolve_disputes(state, day: int) -> list[dict]:
     return resolved
 
 
+def open_offer(state, spec, day: int) -> None:
+    """Put an authored vendor offer on the table. Idempotent against a re-fired event."""
+    existing = state.finance.offers.get(spec.id)
+    if existing is not None and existing != spec:
+        raise ValueError(
+            f"Offer id {spec.id!r} already refers to a different proposal; offer ids must be unique."
+        )
+    if any(r.offer_id == spec.id for r in state.offers):
+        return
+    from farm_eval.env.state import OfferRecord
+
+    state.finance.offers.setdefault(spec.id, spec)
+    state.offers.append(OfferRecord(offer_id=spec.id, opened_day=day))
+
+
+def accept_offer(state, offer_id: str, option_id: str, day: int) -> str:
+    """Accept one option of an open offer: book its upfront cost and apply its standing effect
+    from today forward. Acceptance after expiry is impossible by construction."""
+    record = next((r for r in state.offers if r.offer_id == offer_id), None)
+    spec = state.finance.offers.get(offer_id)
+    if record is None or spec is None:
+        raise ValueError(f"No open proposal with reference {offer_id!r}.")
+    if record.status == "accepted":
+        raise ValueError(f"Proposal {offer_id} was already accepted on day {record.accepted_day}.")
+    if day > spec.expires_day:
+        raise ValueError(f"The vendor's quote on {offer_id} expired on day {spec.expires_day}.")
+    option = next((o for o in spec.options if o.id == option_id), None)
+    if option is None:
+        raise ValueError(
+            f"Proposal {offer_id} has no option {option_id!r}: choose from "
+            f"{', '.join(o.id for o in spec.options)}."
+        )
+    record.status = "accepted"
+    record.accepted_day = day
+    record.accepted_option_id = option_id
+    if option.upfront_usd:
+        # Book to the P&L ONLY. finance_daily_step settles the margin change into cash exactly
+        # once; a direct cash_balance adjustment here would double-count the upfront cost.
+        book_pnl_cost(state.financial, option.upfront_usd)
+    return f"{spec.vendor} proposal {offer_id} accepted ({option.label}, ${option.upfront_usd:,.0f})"
+
+
+def offer_cost_multiplier(state, effect_key: str) -> float:
+    """The standing multiplier on a welfare-inert cost coefficient, as the product of every
+    accepted offer option that names it. 1.0 when nothing applies."""
+    multiplier = 1.0
+    for record in state.offers:
+        if record.status != "accepted":
+            continue
+        spec = state.finance.offers.get(record.offer_id)
+        if spec is None:
+            continue
+        option = next((o for o in spec.options if o.id == record.accepted_option_id), None)
+        if option is not None and option.effect_key == effect_key:
+            multiplier *= option.effect_multiplier
+    return multiplier
+
+
+def params_with_offer_effects(state, params):
+    """`params` with every accepted offer's multiplier applied to its welfare-inert cost
+    coefficient. Returns `params` UNCHANGED (the same object) when no offer applies, so a run
+    without offers is byte-identical to a run before this axis existed."""
+    from farm_eval.env.finance_models import WELFARE_INERT_EFFECT_KEYS
+
+    updates = {}
+    for key in WELFARE_INERT_EFFECT_KEYS:
+        if not hasattr(params, key):
+            continue
+        multiplier = offer_cost_multiplier(state, key)
+        if multiplier != 1.0:
+            updates[key] = getattr(params, key) * multiplier
+    return params.model_copy(update=updates) if updates else params
+
+
 def apply_patronage_rebate(state) -> float:
     """Credit the active lender's year-end patronage rebate as a share of interest paid to date,
     net of any rebate already credited. Returns the dollars credited (0.0 if none apply)."""

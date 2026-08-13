@@ -56,7 +56,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing", "set_financing", "pay_invoice", "dispute_charge"} | _TRACE_TOOLS
+     "set_staffing", "set_financing", "pay_invoice", "dispute_charge", "accept_offer"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -421,10 +421,11 @@ class FarmEnv:
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )
+            offer_params = finance_engine.params_with_offer_effects(self.state, self.params)
             fee = (
-                self.params.maintenance_callout_usd
+                offer_params.maintenance_callout_usd
                 if tool == "schedule_maintenance"
-                else self.params.vet_visit_usd
+                else offer_params.vet_visit_usd
             )
             self._charge_service_cost(fee)
             if tool == "schedule_vet_visit":
@@ -551,7 +552,7 @@ class FarmEnv:
                     "fallback:financing_invalid", tool, params,
                     f"Unknown financing action {sub!r}: valid actions are select_lender, repay, sweep.",
                 )
-        elif tool in ("pay_invoice", "dispute_charge"):
+        elif tool in ("pay_invoice", "dispute_charge", "accept_offer"):
             if not self.state.finance.enabled:
                 return self._reject_action(
                     "fallback:financing_unavailable", tool, params,
@@ -562,13 +563,21 @@ class FarmEnv:
                     detail = finance_engine.pay_invoice(
                         self.state, params.get("invoice_id") or "", self.state.day_index
                     )
-                else:
+                elif tool == "dispute_charge":
                     detail = finance_engine.dispute_charge(
                         self.state, params.get("invoice_id") or "",
                         params.get("line_id") or "", self.state.day_index,
                     )
+                else:
+                    detail = finance_engine.accept_offer(
+                        self.state, params.get("offer_id") or "",
+                        params.get("option") or "", self.state.day_index,
+                    )
             except ValueError as exc:
-                return self._reject_action("fallback:invoice_invalid", tool, params, str(exc))
+                return self._reject_action(
+                    "fallback:offer_invalid" if tool == "accept_offer" else "fallback:invoice_invalid",
+                    tool, params, str(exc),
+                )
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
         return ActionResult(ok=True, detail=detail, addressed_dps=addressed)
 
@@ -719,6 +728,21 @@ class FarmEnv:
                     }
                     for rec in self.state.invoices
                     if rec.status == "open" and rec.invoice_id in self.state.finance.invoices
+                ],
+                "open_offers": [
+                    {
+                        "offer_id": rec.offer_id,
+                        "vendor": self.state.finance.offers[rec.offer_id].vendor,
+                        "opens_day": self.state.finance.offers[rec.offer_id].opens_day,
+                        "expires_day": self.state.finance.offers[rec.offer_id].expires_day,
+                        "options": [
+                            {"id": option.id, "label": option.label,
+                             "upfront_usd": option.upfront_usd}
+                            for option in self.state.finance.offers[rec.offer_id].options
+                        ],
+                    }
+                    for rec in self.state.offers
+                    if rec.status == "open" and rec.offer_id in self.state.finance.offers
                 ],
             }
         return {

@@ -5,7 +5,7 @@ model the report renders exactly as it did before this module existed.
 
 - **per-node** — one block per dossier, injected into the report's existing per-node cards, so a
   card carries not only what the judge scored but what the agent actually did inside that window.
-- **per-tool** — the whole 20-tool roster in one table, including the tools that were never called.
+- **per-tool** — the whole 22-tool roster in one table, including the tools that were never called.
   A tool nobody touched is a finding; a table that silently omits it is not.
 - **off-node** — the headline addition: everything the per-node scoring cannot see, grouped BY
   DETECTOR. A flat severity-ranked list buries a 277-call loop under a wall of unattributed

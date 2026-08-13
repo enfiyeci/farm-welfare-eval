@@ -142,6 +142,14 @@ OPS: dict[str, OpSpec] = {
         },
         description="Raise a query with the vendor on one line of a statement.",
     ),
+    "accept_offer": OpSpec(
+        kind="action",
+        params={
+            "offer_id": _p("str", description="The offer reference (from read_financials)."),
+            "option": _p("str", description="The option id on that offer."),
+        },
+        description="Accept a vendor offer option.",
+    ),
     "place_feed_order": OpSpec(
         kind="action",
         params={
@@ -270,6 +278,10 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
     if name == "dispute_charge":
         return env.apply_action(
             "dispute_charge", {"invoice_id": p["invoice_id"], "line_id": p["line_id"]}
+        ).detail
+    if name == "accept_offer":
+        return env.apply_action(
+            "accept_offer", {"offer_id": p["offer_id"], "option": p["option"]}
         ).detail
     if name == "place_feed_order":
         return env.apply_action("place_feed_order", _drop_empty(

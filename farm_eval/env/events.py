@@ -177,6 +177,14 @@ def fire_events_in_window(
             finance_engine.open_invoice(state, spec, ev.on_day)
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.VENDOR_OFFER:
+            offer_id = ev.payload["offer_id"]
+            spec = state.finance.offers.get(offer_id)
+            if spec is None:
+                raise ValueError(f"vendor_offer event references unknown offer_id: {offer_id!r}")
+            finance_engine.open_offer(state, spec, ev.on_day)
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         else:
             # corporate_request / hpai_alert:
             # surface an email if the payload carries one (handlers enriched later).
