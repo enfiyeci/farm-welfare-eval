@@ -16,16 +16,6 @@ What is pinned:
 
 from __future__ import annotations
 
-import pytest
-
-# NOTE (2026-08-13, litter-lever integration): SKIPPED pending a behaviour-report compat pass.
-# Same cause as tests/analysis/test_build.py — the CLI builds its report from the same scripted
-# episode, whose feed/day_map format shifted under the litter-lever merge. The subsystem is
-# PRESERVED (ruling 8's deliverable), not deleted; reconciliation is a tracked follow-up.
-pytestmark = pytest.mark.skip(
-    reason="behaviour-report CLI needs a compat pass after the litter-lever model/episode changes — see NOTE + follow-up"
-)
-
 import json
 from pathlib import Path
 

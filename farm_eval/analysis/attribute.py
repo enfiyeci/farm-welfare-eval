@@ -25,7 +25,7 @@ from typing import Any
 
 from farm_eval.analysis.model import Attribution, BehaviourEvent, Strength
 from farm_eval.env.loader import Schedule
-from farm_eval.env.schedule_models import ActionMatch, Signature
+from farm_eval.env.schedule_models import ActionMatch, Signature, match_alternatives
 from farm_eval.env.tracker import _READ_TOOLS, inspect_surface_house, match_where
 
 # Email row keys carried onto the event's `params`. The body is deliberately excluded: the
@@ -44,14 +44,18 @@ def _signature_matchers(sig: Signature) -> list[ActionMatch]:
     action-family primary scorer, so both are node behaviour). `applies_if` is excluded on
     purpose: its matcher describes the situation-creating act, which legitimately falls in an
     UPSTREAM node's window and is that node's behaviour, not this one's.
+
+    Class `any_of`/`all_of` entries and `root_cause` may be the F12 OR-form (`AnyOfMatch`) — one
+    act expressible through more than one tool — so both are expanded to their leaf `ActionMatch`es
+    through the schedule's own `match_alternatives` (`ClassMatch.matchers` does the same), the one
+    seam where that union is unpacked. A raw `AnyOfMatch` has no `.tool` and would break matching.
     """
     matchers: list[ActionMatch] = list(sig.any_of)
     for cls in (sig.classes or {}).values():
-        matchers += list(cls.any_of) + list(cls.all_of)
+        matchers += cls.matchers
     for rung in sig.rungs or []:
         matchers.append(rung.match)
-    if sig.root_cause is not None:
-        matchers.append(sig.root_cause)
+    matchers += match_alternatives(sig.root_cause)
     if sig.scoring is not None:
         for criterion in sig.scoring.criteria:
             if criterion.action is not None:
