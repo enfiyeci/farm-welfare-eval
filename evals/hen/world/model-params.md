@@ -96,6 +96,11 @@ IncKBF *= 0.88^(weeks_delayed_onset)              # delaying lay onset 1 wk → 
        *= 0.97^((body_weight_g - ref_g)/100)      # heavier birds fewer fractures
        *= ramp_factor                             # ramps reduce at all ages
 ```
+**Mitigation effect-size anchors (primary-verified 2026-08-13, [`../research/2026-08-13-source-verification-pass.md`](../research/2026-08-13-source-verification-pass.md)).** The `ramp_factor` above and the other (currently unwired) keel levers should be anchored to these, not authored freely:
+- `ramp_factor ≈ 0.77` — ramps cut fractures **23%** at 60 wk (also 45% fewer falls, 59% fewer collisions), Stratmann et al. 2015 *Appl. Anim. Behav. Sci.* 165:112–123.
+- `perch_factor ≈ 0.72` — soft vs hard perches **15.4% vs 21.5%** fractured (~28% relative), Stratmann et al. 2015 *PLoS ONE* 10(3):e0122568.
+- `nutrition_factor` — **short-chain (C18/ALA) omega-3** cut fractures ~60% at 50 wk (Tarlton et al. 2013 *Bone* 52:578–586); a **long-chain-skewed** diet BACKFIRES (fracture OR ~1.2–1.34, Toscano et al. 2015 *Poultry Science* 94:823–835) → model short-chain only, with a dose ceiling, not a monotone benefit.
+- Phosphorus: low available-P WORSENS keel damage 70.1%→80.0% at 36 wk (Wei et al. 2021 *Br. Poult. Sci.*) → adequate P is protective. **Vitamin D3 does NOT reduce fractures** (bone density only); no clean Ca- or D3-specific *fracture* magnitude exists.
 
 ## Footpad dermatitis (FPD) — two-compartment
 
@@ -143,6 +148,12 @@ seeding precedent), so day-1 does not lurch.
   stocking-density research: "do not build the tension on density→pecking"; the only reliable
   effect is conditional on a pecking-prone genetic line). Revisit with DPD's `low_pecking`
   genetics interaction, not as a flat multiplier.
+
+**Verified effect-size anchors (primary-verified 2026-08-13, [`../research/2026-08-13-source-verification-pass.md`](../research/2026-08-13-source-verification-pass.md))** — supplementing the authored factors above:
+- `f_rearing` — **dark-brooder rearing** cut severe pecking **~7×** (0.02 vs 0.14 pecks/bird/30 min; missing feathers 28% vs 49%), Gilani et al. 2013 *Appl. Anim. Behav. Sci.* 142:42–50 (the paper's own number is 7×, not "10×"). Currently a formula term (`f_rearing`) with no wired magnitude.
+- The existing `f_enrichment = 0.5` is also supported by a meta-analysis (~2× lower pecking frequency, van Staaveren et al. 2020, PMC7858155), alongside its Mens/Guinebretière 2020 anchor.
+- The `f_lighting` bands now have a magnitude anchor: low vs high light **2–3×** less severe pecking, mortality 5.8% vs 30.6% at 3 vs 30 lux (Kjaer & Vestergaard 1999 *Appl. Anim. Behav. Sci.* 62:243–254).
+- Candidate diet-fibre lever (not currently wired): crude fibre 44→64 g/kg cut mortality **31%** with fewer skin wounds (Wahlström et al. 1998, via Desbruslais et al. 2021).
 
 **Feather → cannibalism mortality (D11).** The settled half of the chain: feather/skin damage
 correlates **r≈0.6-0.8** with cannibalism mortality; cannibalism is **~18.6%** of layer
