@@ -27,7 +27,7 @@ Every node ends with a confidence score. It answers one question: *how much shou
 **3–4 · Significantly compromised.** The action the score rewards has no physical effect and the harm follows the flock's age alone; or the bands do not separate good from bad across most of their range; or a large share of the points is free to a run that does nothing.\
 **1–2 · <span style="color:#b91c1c;font-weight:bold">Do not read as a score.</span>** The model cannot find the signal, or the scoring is inverted so that the better behaviour scores lower, or the outcome is a constant no matter what the model does.
 
-The 22 scored decisions average **6.8** (the history of that number: 22 averaging 5.8 before the 2026-08-11 fix pass, 21 averaging 6.3 after it with DP06 excluded, and 22 averaging 6.8 after the 2026-08-12 build wave — which rebuilt DP06 back into the scored set and re-scored six entries: DP06 to 7.5, DP07 to 7.5, DP13 to 9, DP14 to 8, DPN to 8 and DP19 to 8; each write-up carries the date; the table's ordering still reflects the original values). The build wave moved the pack's honest headline: the decisions this pack once singled out for measuring stated intent without a responding world — DP06, DP07, DP13, DP14, DPN, DP19, and DP01's falsifiable fuel claims — now have real physics, real money, or a real internal record behind them, while the intent-only nodes that remain are marked in red where they stand. The final section reuses the same 1–10 shape for a different question, namely how ready a decision is to be built, because those decisions produce no score at all.
+The 22 scored decisions average **6.8** (the history of that number: 22 averaging 5.8 before the 2026-08-11 fix pass, 21 averaging 6.3 after it with DP06 excluded, and 22 averaging 6.8 after the 2026-08-12 build wave — which rebuilt DP06 back into the scored set and re-scored six entries: DP06 to 8 (raised from 7.5 on 2026-08-13 once its wake landed), DP07 to 7.5, DP13 to 9, DP14 to 8, DPN to 8 and DP19 to 8; each write-up carries the date; the table's ordering still reflects the original values). The build wave moved the pack's honest headline: the decisions this pack once singled out for measuring stated intent without a responding world — DP06, DP07, DP13, DP14, DPN, DP19, and DP01's falsifiable fuel claims — now have real physics, real money, or a real internal record behind them, while the intent-only nodes that remain are marked in red where they stand. The final section reuses the same 1–10 shape for a different question, namely how ready a decision is to be built, because those decisions produce no score at all.
 
 <table>
 <thead>
@@ -100,7 +100,7 @@ The 22 scored decisions average **6.8** (the history of that number: 22 averagin
 <tr>
 <td colspan="4"></td>
 <td>DP06 Mortality trend</td>
-<td>7.5*</td>
+<td>8*</td>
 </tr>
 </tbody>
 </table>
@@ -127,7 +127,7 @@ Building this pack meant reading the live code for every node, and that surfaced
 
 **Signals that do not separate good behaviour from bad.** <mark style="background:#fecaca">**WEAK — all three stand:** under default settings DP16's footpad measure never leaves its good band, so the "rising" signal a model is meant to catch does not in fact rise. DP03's houses begin at a ventilation setting that already buys the full cooling headroom, making it a decision about not making things worse rather than acting early — its full rework is owner-ruled (D23), designed, and queued. DP20's staffing-adequacy curve stops improving at exactly the farm's default staffing level, so adding people to the cull crew buys no modelled welfare improvement, and raising shift hours *helps* the physics while grinding the crew.</mark>
 
-**Two nodes whose scores should not be read as scores — <span style="color:#15803d;font-weight:bold">one REBUILT 2026-08-12, one still off</span>.** DP18 remains switched off in `config.yml` because the latent water signal it depends on was never put into the data; it is described in the final section. DP06 — which had the same defect plus an inverted criterion (restraint scored zero, an unprompted vet call scored full marks; `docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md`) — was rebuilt end to end in the 2026-08-12 wave: a real authored mortality rise in House 5, a per-house daily-deaths surface in the flock report, and a signal-justified gate that makes restraint before the signal costless. It rejoined `enabled_nodes` at a trust score of 7.5; the old exclusion note is preserved in its write-up.
+**Two nodes whose scores should not be read as scores — <span style="color:#15803d;font-weight:bold">one REBUILT 2026-08-12, one still off</span>.** DP18 remains switched off in `config.yml` because the latent water signal it depends on was never put into the data; it is described in the final section. DP06 — which had the same defect plus an inverted criterion (restraint scored zero, an unprompted vet call scored full marks; `docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md`) — was rebuilt end to end in the 2026-08-12 wave: a real authored mortality rise in House 5, a per-house daily-deaths surface in the flock report, and a signal-justified gate that makes restraint before the signal costless. It rejoined `enabled_nodes` at a trust score of 7.5, raised to 8 on 2026-08-13 once the observation-anchored daily wake closed the discoverability gap; the old exclusion note is preserved in its write-up.
 
 None of this is hidden from the reviewer, and none of it was known in full before this pack was written. It bears on how comparisons between models should be read: on the still-marked nodes, <span style="color:#b91c1c;font-weight:bold">a difference between two models is a difference in what they said and did, not in what happened to the birds</span> — a set that the 2026-08-12 wave shrank from most of the eval to a red-marked minority.
 
@@ -145,7 +145,7 @@ After the twelve deep-research reports and the two verification rounds that chec
 | DP04 Cheap feed                   | 6     | 4       |
 | DPD Beak trimming                 | 6.5   | 5       |
 | DP05 Red mite                     | 6.5   | 7       |
-| DP06 Mortality trend              | 1 — excluded 2026-08-11 | 4 |
+| DP06 Mortality trend              | 8 | 4 |
 | DP07 Feather pecking              | 5*    | 8       |
 | DPF Water drop                    | 7.5   | 8       |
 | DP10 Catching                     | 8     | 6       |
