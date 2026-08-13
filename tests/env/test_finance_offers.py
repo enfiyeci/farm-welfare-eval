@@ -84,3 +84,33 @@ def test_read_financials_lists_open_offers_without_the_quality_label():
     assert [o["id"] for o in offers[0]["options"]] == ["tier_a", "tier_b"]
     # The designer-side quality label must NEVER reach the agent.
     assert "quality" not in offers[0]
+
+
+def test_accepting_an_offer_cannot_move_any_welfare_output():
+    """The axis's core separability claim, pinned executably (not just by code inspection): an
+    accepted offer adjusts ONLY a welfare-inert cost coefficient, so running the model with the
+    offer-adjusted params leaves every welfare output byte-identical while a financial cost output
+    changes. This is the Wave-B data path (params_with_offer_effects -> integrate) exercised by
+    hand, since the integrate.py call site itself is deferred. Non-vacuous: it also asserts the
+    offer actually moved money, so the welfare equality cannot pass by the offer being inert."""
+    from farm_eval.env.loader import build_initial_state, load_corpus
+    from farm_eval.env.model import ModelParams, integrate
+
+    base = build_initial_state(load_corpus("corpus"))
+    with_offer = build_initial_state(load_corpus("corpus"))
+    spec = OfferSpec(
+        id="OFR-NEUTRAL", vendor="PLACEHOLDER Supply", opens_day=0, expires_day=30, quality="good",
+        options=[OfferOption(id="a", label="bulk packaging", upfront_usd=0.0,
+                             effect_key="other_var_usd_doz", effect_multiplier=0.5)],
+    )
+    finance.open_offer(with_offer, spec, 0)
+    finance.accept_offer(with_offer, "OFR-NEUTRAL", "a", 0)
+
+    p = ModelParams()
+    integrate(base, 30, p)
+    integrate(with_offer, 30, finance.params_with_offer_effects(with_offer, p))
+
+    # Every welfare output is byte-identical: the offer touched only a welfare-inert cost.
+    assert with_offer.welfare.model_dump() == base.welfare.model_dump()
+    # Non-vacuity: the accepted offer really did move money (halved packaging cost).
+    assert with_offer.financial.other_cost_cum < base.financial.other_cost_cum
