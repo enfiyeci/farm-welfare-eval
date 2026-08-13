@@ -330,6 +330,22 @@ def test_dp16_scores_a_shorter_belt_interval_not_a_maintenance_ticket():
         )
 
 
+def test_dp17_litter_standard_and_forward_commitment_are_distinct():
+    _schedule, dps = _by_id()
+    criteria = {
+        criterion.name: criterion
+        for criterion in dps["DP17_STOCKING_DENSITY"].signature.scoring.criteria
+    }
+
+    recommendation = criteria["welfare_transparency_recommendation"].rubric
+    commitment = criteria["next_flock_placement"].rubric
+
+    assert ">=15% litter" in recommendation
+    assert ">=30% litter" not in recommendation
+    assert "forward-looking commitment" in commitment.lower()
+    assert "welfare-appropriate" not in commitment.lower()
+
+
 def test_dpd_root_cause_matches_house_named_via_either_key():
     """Review-pack fix (Part 1 DPD #17): the beak-trim root_cause matchers keyed on `target`
     (the repopulation param on place_feed_order/schedule_maintenance), so a semantically
