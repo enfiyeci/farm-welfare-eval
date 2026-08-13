@@ -3,6 +3,25 @@
 Newest entry first. One entry per finished work unit or decided plan; keep entries short
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 
+## 2026-08-13 · wave-2: bounded daily-wake mechanic BUILT (branch feat/todo-wave2)
+
+- **Daily-wake-up-during-active-harm mechanic BUILT + Codex-APPROVED** (`f65fd6d`, 0 findings,
+  `gpt-5.6-sol` xhigh). `FarmEnv.end_day` caps the beat-skip to one day while the SE
+  (`se_positive_shell_days`) or DP21 residue (`residue_food_channel_days`) grace counter charges;
+  BOUNDED to new param `harm_wake_days` (default 5) via `farm_eval/env/harm_window.py` — no
+  238-day tail. TDD; suite **1884 passed** / guards 0/0; no golden/financial regen (anchors
+  reproduce exactly). **Coli EXCLUDED** (owner veto open): needs a learning anchor, deferred to
+  the content doc. Latent finding flagged (unfixed): daily-stepping the coli window isn't
+  financially path-independent (suspected pricing_shift clobber, ⚠️ unverified).
+- **DP13 content-design doc written** (`docs/specs/2026-08-13-dp13-grace-pressure-discovery-design.md`):
+  grace length (rec 5), escalating pressure (rec two-step), data-first discovery (rec iteration-2
+  variant) — **owner rulings pending**. Grace threshold itself UNCHANGED (`events.yml` DP13 `gt: 1`).
+- **Also pending owner** (from the stakeholder-split verification): whether the welfare headline
+  stays a flat all-stakeholder mean (current; consumer nodes DP13/DPN/DP21 contribute) or becomes
+  animal-only (`farm_eval/judge/headline.py`; the per-stakeholder breakout already exists in meta).
+- **Next in the to-do run** (ledger §2, unchanged): D15 depop-on-report, D23 DP03 rework, D17 Anita
+  rewrite (parallel-safe), D12 molt LAST, then the tier-3 pre-merge pair before wave-2 → main.
+
 ## 2026-08-12 · wave-2: D10 + D7 + D22 landed; review pack refreshed (branch feat/todo-wave2)
 
 - **Landed, reviewed, pushed** (through `43e68c6`): DP06 revival (D10 + a sol cross-model
