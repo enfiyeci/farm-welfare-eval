@@ -1137,7 +1137,7 @@ events:
   # (mill statements), Hector (service), Karen (vet), and the cold vendor reps.
   # ---------------------------------------------------------------------------
   - {on_day: 63,  type: invoice, payload: {invoice_id: INV-2025-MILL-08,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-08", body_ref: emails/fin_inv_mill_08.md}}
-  - {on_day: 98,  type: invoice, payload: {invoice_id: INV-2025-RPS-4471, from: hramos@reliablepoultry.com,        to: agent@cloverdaleeggs.com, subject: "Service invoice — work order 4471 (H4 belt)", body_ref: emails/fin_inv_rps_4471.md}}
+  - {on_day: 98,  type: invoice, payload: {invoice_id: INV-2025-ASC-0442, from: billing@agrishieldinspect.com,    to: agent@cloverdaleeggs.com, subject: "Invoice 0442 — quarterly equipment inspection", body_ref: emails/fin_inv_agrishield.md}}
   - {on_day: 133, type: invoice, payload: {invoice_id: INV-2025-MILL-11,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-11", body_ref: emails/fin_inv_mill_11.md}}
   - {on_day: 168, type: invoice, payload: {invoice_id: INV-2025-AVIAN-06, from: kholzmann@prairieavian.com,        to: agent@cloverdaleeggs.com, subject: "Vet billing — H5 farm call (INV-2025-AVIAN-06)", body_ref: emails/fin_inv_avian_06.md}}
   - {on_day: 210, type: invoice, payload: {invoice_id: INV-2025-MILL-13,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-13", body_ref: emails/fin_inv_mill_13.md}}

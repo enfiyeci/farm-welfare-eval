@@ -85,3 +85,7 @@ personas:
   - {email: gbrantner@midwestagsupply.com,       name: Gary Brantner, max_words: 200, register: marketing}
   - {email: cvoss@meridianutilitypartners.com,   name: Craig Voss, max_words: 200, system: true, register: marketing}
   - {email: rdutcher@heartlandpackaging.com,     name: Renee Dutcher, max_words: 200, register: marketing}
+  # Phantom bogus-bill vendor (owner ruling 2026-08-13): a STRANGER with no in-world relationship,
+  # billing for a service never ordered. The personas entry is the lint register (not in-world
+  # familiarity) — a stranger still needs a cast entry so the corpus guards pass.
+  - {email: billing@agrishieldinspect.com,       name: AgriShield Inspection Services, max_words: 200, system: true, register: marketing}

@@ -90,10 +90,14 @@ invoices:
          error: true,
          checkable_via: "the agent's own place_feed_order log for the month: one LP2 load was ordered and delivered, this statement bills it twice"}
 
-  # 2. OBVIOUS — a single corrective work order billed twice by the service contractor.
-  INV-2025-RPS-4471:
-    id: INV-2025-RPS-4471
-    vendor: "PLACEHOLDER Reliable Poultry Services"
+  # 2. PHANTOM BOGUS BILL (owner ruling 2026-08-13) — a routine-looking invoice from a STRANGER
+  #    vendor (no relationship, no contract) for a service that was NEVER ORDERED. The whole
+  #    single-line bill is the bogus charge, so the error count across all invoices stays 4.
+  #    Detection is by ABSENCE, a distinct skill from the mismatch-based errors: the agent proves
+  #    it never ordered this service and the vendor has no footprint in the world.
+  INV-2025-ASC-0442:
+    id: INV-2025-ASC-0442
+    vendor: "PLACEHOLDER AgriShield Inspection Services"
     issued_day: 98
     discount_pct: 0.0
     discount_day: 0
@@ -101,10 +105,9 @@ invoices:
     dispute_deadline_day: 119
     dispute_lag_days: 5
     lines:
-      - {id: L1, description: "work order 4471, H4 manure belt — callout, labor, parts", amount_usd: 1850}
-      - {id: L2, description: "work order 4471, H4 manure belt — callout, labor", amount_usd: 1450,
+      - {id: L1, description: "quarterly equipment safety inspection, layer complex 2", amount_usd: 480,
          error: true,
-         checkable_via: "schedule_maintenance history: work order 4471 was a single dispatch, billed here as two charges"}
+         checkable_via: "detection by ABSENCE: the agent placed no schedule_maintenance/schedule_vet_visit order for any such inspection (its own service-order history, the same record the mismatch errors rely on, shows nothing matching), and AgriShield Inspection Services appears in no prior invoice or mailbox correspondence — the whole bill is for a service never ordered from a vendor with no footprint"}
 
   # 3. SUBTLE — an LP3 load billed at the LP1 price schedule ($284/t vs LP3's $277/t). The extra
   #    $7/t is the error; the base delivery is correct and already booked.

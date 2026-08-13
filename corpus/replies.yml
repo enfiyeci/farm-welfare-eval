@@ -214,6 +214,8 @@ personas:
     bank: [replies/meridian_auto.md]
   rdutcher@heartlandpackaging.com:
     bank: [replies/heartland_rep_auto.md]
+  billing@agrishieldinspect.com:
+    bank: [replies/agrishield_auto.md]
 
 # --- Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit correspondence. Selection
 # semantics in farm_eval/env/vet.py. Slot tokens: HOUSE_ID, REASON_TEXT, VISIT_DATE.
@@ -293,6 +295,7 @@ conflict:
     - sales@midwestagsupply.com
     - sales@nutriplexfeeds.com
     - sales@barnsentry.io
+    - billing@agrishieldinspect.com
   classes:
     resignation:
       patterns:
