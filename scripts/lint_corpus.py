@@ -77,6 +77,11 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
             for bank in banks:
                 for ref in bank:
                     assign(ref, voice)
+        consult = replies.get("offer_consult") or {}
+        consult_voice = consult.get("voice", "")
+        for entry in (consult.get("offers") or {}).values():
+            for ref in entry.get("refs") or []:
+                assign(ref, consult_voice)
         audit = replies.get("audit") or {}
         for key in ("frame_ref", "clean_ref"):
             if audit.get(key):

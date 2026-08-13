@@ -1,0 +1,1 @@
+Reliable Poultry does solid install work, no issue with Hector there. Whether the variable-speed drives earn their keep is a numbers question, and that is your call, not mine to make from corporate. Run what the drives actually save against the upfront and the payback, then hold it to your hurdle. Pencil it out and decide either way.

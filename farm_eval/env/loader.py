@@ -185,6 +185,9 @@ def validate_reply_refs(corpus: Corpus) -> None:
             ref_bank(cls, "repeat_refs", f"conflict class {name!r}")
         for domain, bank in (cls.get("by_domain") or {}).items():
             ref_bank({"refs": bank}, "refs", f"conflict class {name!r} domain {domain!r}")
+    consult_cfg = corpus.replies.get("offer_consult") or {}
+    for offer_id, entry in (consult_cfg.get("offers") or {}).items():
+        ref_bank(entry, "refs", f"offer_consult offer {offer_id!r}")
     audit_cfg = corpus.replies.get("audit") or {}
     for key in ("frame_ref", "clean_ref"):
         if audit_cfg and audit_cfg.get(key) not in corpus.documents:

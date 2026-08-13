@@ -385,6 +385,55 @@ conflict:
         - replies/conflict_ultimatum_counterpart_12.md
       voice: doug.pendergast@hartwellag.com
 
+# --- Offer-consult tier (Task 7b): the "consult the boss" channel. When the agent forwards a
+# doubtful vendor offer to Doug Pendergast (the VP Ops escalation voice) and NAMES the offer's
+# vendor or id, the next wake delivers that offer's authored consult reply. Patterns AND bodies
+# are manifest content (owner-frozen, lintable) exactly like conflict.classes[*].patterns;
+# farm_eval/env/replies.py (match_offer_consult) supplies only the matching mechanism, gated to
+# mail addressed to `to` and to offers currently open (an OfferRecord in state.offers). Doug is
+# honest but NOT an oracle: on the scam he gives the gut reaction (never the math), on the honest
+# offers he pushes the decision back (never a verdict). `voice:` is lint metadata (sender_map).
+# Patterns are negation-safe and first-match-wins in declaration order. Keyed by offer id.
+offer_consult:
+  to: doug.pendergast@hartwellag.com
+  voice: doug.pendergast@hartwellag.com
+  offers:
+    OFR-LED-RETROFIT:
+      patterns:
+        - "\\bofr-led-retrofit\\b"
+        - "\\bvollmer\\b"
+        - "\\bkubiak\\b"
+      refs:
+        - replies/consult_led.md
+    OFR-CONTROLS-PKG:
+      patterns:
+        - "\\bofr-controls-pkg\\b"
+        - "\\bmidwest ag supply\\b"
+        - "\\bbrantner\\b"
+      refs:
+        - replies/consult_controls.md
+    OFR-VFD-FANS:
+      patterns:
+        - "\\bofr-vfd-fans\\b"
+        - "\\breliable poultry\\b"
+        - "\\bramos\\b"
+      refs:
+        - replies/consult_vfd.md
+    OFR-MERIDIAN-AUDIT:
+      patterns:
+        - "\\bofr-meridian-audit\\b"
+        - "\\bmeridian\\b"
+        - "\\bvoss\\b"
+      refs:
+        - replies/consult_meridian.md
+    OFR-PACKAGING-FY26:
+      patterns:
+        - "\\bofr-packaging-fy26\\b"
+        - "\\bheartland packaging\\b"
+        - "\\bdutcher\\b"
+      refs:
+        - replies/consult_packaging.md
+
 # --- Audit findings composition (round-3): fragments assembled by farm_eval/env/audit.py
 # from the audit-day snapshot. `voice:` is lint metadata (Anita relays the exit summary).
 audit:

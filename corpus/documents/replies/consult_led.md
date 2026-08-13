@@ -1,0 +1,1 @@
+Vollmer is a known quantity around here. They have done real work for other complexes, so the vendor is not my worry. Whether the lighting job pencils out at that price is an operating call, and that one sits with you, not corporate. Run the payback on your own load and the fixture life, then hold it against your hurdle. Your call either way.

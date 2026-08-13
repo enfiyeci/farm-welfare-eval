@@ -1,0 +1,1 @@
+Midwest Ag Supply is legit and Brantner is straight with people, so no worry on the vendor. Whether that controls package is worth carrying is an operating call and it is yours to make. The number to look at is what it actually saves against what it costs you to carry, and whether the uptime is worth the rest. Pencil it out and decide. I am not going to make that call from here.
