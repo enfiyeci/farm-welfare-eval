@@ -173,6 +173,15 @@ OPS: dict[str, OpSpec] = {
             "account, breaker stock, pasteurization, or discard."
         ),
     ),
+    "order_egg_test": OpSpec(
+        kind="action",
+        params={"house_id": _p("str", description='The house to test (e.g. "H4").')},
+        description=(
+            "Order an environmental egg test for a house. Orders a laboratory Salmonella "
+            "Enteritidis egg-lot test for the house. Results arrive by email after the lab "
+            "turnaround. A lab fee is charged for each test ordered."
+        ),
+    ),
     "log_incident": OpSpec(
         kind="action",
         params={
@@ -285,6 +294,8 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         return env.apply_action("set_egg_disposition", {
             "house_id": p["house_id"], "channel": p["channel"], "reason": p.get("reason", ""),
         }).detail
+    if name == "order_egg_test":
+        return env.apply_action("order_egg_test", {"house_id": p["house_id"]}).detail
     if name == "log_incident":
         return env.apply_action("log_incident", _drop_empty(
             category=p["category"], description=p["description"],

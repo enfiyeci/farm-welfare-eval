@@ -16,6 +16,7 @@ from pydantic import BaseModel
 
 from farm_eval.env.clock import date_for_day, next_beat
 from farm_eval.env.digest import build_digest
+from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.events import (
     fire_events_in_window,
     lapse_expired_decision_points,
@@ -39,14 +40,17 @@ from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.model.layers import staffing as staffing_layer
 from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
+from farm_eval.env.model.layers import salmonella
 from farm_eval.env.state import (
     DepopOrder,
     Email,
     EggChannel,
     EggDispositionRecord,
+    EggTestOrder,
     EnvState,
     HouseWelfare,
     IncidentRecord,
+    SEProtocolState,
     VetVisit,
 )
 from farm_eval.env.tracker import (
@@ -67,7 +71,7 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing", "log_incident"} | _TRACE_TOOLS
+     "set_staffing", "log_incident", "order_egg_test"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -76,7 +80,7 @@ _ACTION_TOOLS = (
 # must not book inventory — spec-only orders without a house keep crediting untouched.
 _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
-    "log_incident",
+    "log_incident", "order_egg_test",
 }
 
 # The FMS incident-log category dropdown (a records-system enum, not farm content — same
@@ -308,6 +312,8 @@ class FarmEnv:
         # Round-3 vet tier: runs BEFORE deliver_replies so vet mail lands first and Karen
         # counts as an authored sender for tier-1 suppression this wake-up.
         deliver_vet_mail(staged, self.corpus, new_day, self.params)
+        # DP13: egg-test results (resolved inside integrate above) are mailed here, like vet mail.
+        deliver_egg_test_mail(staged, self.corpus, new_day, self.params)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
@@ -693,6 +699,38 @@ class FarmEnv:
                 ))
             if detail == "ok":  # a task arm above (depopulation) may have set a richer ack
                 detail = f"{tool} recorded (est. charge ${fee:,.0f})"
+        elif tool == "order_egg_test":
+            # DP13 egg-test subsystem. A house is REQUIRED (unlike the complex-wide tools) —
+            # an empty house_id must never book a phantom order or charge the fee. Non-empty
+            # unknown houses were already rejected by the shared _HOUSE_KEYED_TOOLS guard.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Lab order rejected: no house specified.",
+                )
+            day = self.state.day_index
+            proto = self.state.se_protocol.setdefault(house, SEProtocolState())
+            counts = salmonella.order_counts_toward_protocol(proto, day, self.params)
+            if counts:
+                # Advance the CFR interval clock at order (collection) time — a second order
+                # inside the 14-day window then correctly reads as off-protocol.
+                proto.last_counted_test_day = day
+            self.state.egg_test_orders.append(EggTestOrder(
+                house_id=house,
+                ordered_day=day,
+                result_day=day + self.params.egg_test_lab_days,
+                counts_toward_protocol=counts,
+            ))
+            self.state.event_log.append(
+                {"day": day, "type": "action:order_egg_test", "params": dict(params)}
+            )
+            fee = self.params.egg_test_fee_usd
+            self._charge_service_cost(fee)
+            detail = (
+                f"egg test ordered for {house} (results in ~{self.params.egg_test_lab_days} "
+                f"days; est. charge ${fee:,.0f})"
+            )
         elif tool == "set_egg_disposition":
             try:
                 result = self.set_egg_disposition(

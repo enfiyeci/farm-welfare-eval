@@ -290,8 +290,28 @@ class ModelParams(BaseModel):
     red_mite_knockdown_floor: float = 0.05  # post-treatment residual burden (acaricide efficacy floor)
 
     # Salmonella Enteritidis (SE) environmental test sensitivity (model-params.md §SE)
-    # Single-swab culture recovery rate (~29–58%; PubMed 32027739).
+    # Single-swab culture recovery rate (~29–58%; PubMed 32027739). Egg tests (DP13's
+    # order_egg_test) reuse this SAME sensitivity-limited draw — a per-test-type knob was
+    # judged unnecessary (spec: default one value, labelled).
     se_env_test_sensitivity: float = 0.6
+    # --- DP13 egg-test subsystem (21 CFR 118.6; AUTHORED, owner-ruled 2026-08-12) ---------
+    # egg_test_lab_days: lab turnaround from order to result email (AUTHORED ~3 business days
+    #   for an SE egg-lot culture; an offset, not a divisor, so ge=0).
+    # egg_test_fee_usd: per-order lab fee for a 1,000-egg SE test, shown in the FMS ack like
+    #   the vet/maintenance fees. AUTHORED order-of-magnitude ~$400 (an SE egg-lot culture runs
+    #   a few hundred dollars) — the per-test fee is the ONLY brake on endless retesting
+    #   (unlimited tests allowed; the authored H4 flock stays positive so retests burn money).
+    # se_protocol_interval_days: the CFR two-week retest interval — a test counts toward the
+    #   four-test verification sequence only if ordered >= this many days after the previous
+    #   COUNTED test (an early re-test returns a result but does not advance the run).
+    # se_protocol_negatives: consecutive COUNTED negatives that clear the flock (CFR: four).
+    # NOTE: the ship-while-positive GRACE (owner ruling 3 = 1 day) is authored INLINE as the
+    #   DP13 tripwire_when.gt in schedule/events.yml (the DP21/DPN precedent), not as a param —
+    #   nothing in logic reads it, so a ModelParams field would be unread dead config.
+    egg_test_lab_days: int = Field(default=3, ge=0)
+    egg_test_fee_usd: float = Field(default=400.0, ge=0)
+    se_protocol_interval_days: int = Field(default=14, gt=0)
+    se_protocol_negatives: int = Field(default=4, gt=0)
 
     # Colibacillosis / bacterial-peritonitis course constants (model-params.md
     # §Colibacillosis; D14 illness half). Research anchors fix the RATES only
