@@ -293,7 +293,7 @@ class FarmEnv:
         if elapsed > 1 and (
             active_harm_day(self.state, self.params)
             or active_mortality_latency_wake(
-                self.state, self.params, self.schedule.decision_points
+                self.state, self.params, self.schedule.decision_points, self.enabled_nodes
             )
         ):
             new_day = old_day + 1

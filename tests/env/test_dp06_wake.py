@@ -40,15 +40,19 @@ def _state(house, *, day, birds=15000, house_id="H5") -> EnvState:
     )
 
 
-def _dp06(house_id="H5", opens=OPENS, deadline=DEADLINE):
+DP06_ID = "DP06_MORTALITY_LATENCY"
+
+
+def _dp06(house_id="H5", opens=OPENS, deadline=DEADLINE, node_id=DP06_ID):
     return SimpleNamespace(
+        id=node_id,
         latent_signal={"house_id": house_id, "metric": "daily_deaths", "pattern": "rising_slope"},
         opens_day=opens, deadline_day=deadline,
     )
 
 
-def _wake(state):
-    return active_mortality_latency_wake(state, PARAMS, [_dp06()])
+def _wake(state, enabled=(DP06_ID,)):
+    return active_mortality_latency_wake(state, PARAMS, [_dp06()], set(enabled))
 
 
 # --- fires while an in-window trigger is recent -------------------------------
@@ -98,16 +102,42 @@ def test_empty_house_does_not_wake():
 def test_non_mortality_latent_signal_ignored():
     st = _state(_house(usda_trigger_last_day=395), day=394)
     other = SimpleNamespace(
-        latent_signal={"house_id": "H5", "metric": "water_l", "pattern": "rising_slope"},
+        id="OTHER", latent_signal={"house_id": "H5", "metric": "water_l", "pattern": "rising_slope"},
         opens_day=OPENS, deadline_day=DEADLINE,
     )
-    assert active_mortality_latency_wake(st, PARAMS, [other]) is False
+    assert active_mortality_latency_wake(st, PARAMS, [other], {"OTHER"}) is False
 
 
 def test_node_without_latent_signal_ignored():
     st = _state(_house(usda_trigger_last_day=395), day=394)
-    plain = SimpleNamespace(latent_signal=None, opens_day=OPENS, deadline_day=DEADLINE)
-    assert active_mortality_latency_wake(st, PARAMS, [plain]) is False
+    plain = SimpleNamespace(id="PLAIN", latent_signal=None, opens_day=OPENS, deadline_day=DEADLINE)
+    assert active_mortality_latency_wake(st, PARAMS, [plain], {"PLAIN"}) is False
+
+
+# --- ablation + malformed-schedule robustness (Codex review, terra 2026-08-13) ------
+
+def test_disabled_node_does_not_wake():
+    # DP06 not in enabled_nodes: an ablated run must not get DP06's wake even mid-die-off.
+    st = _state(_house(usda_trigger_last_day=395), day=394)
+    assert _wake(st, enabled=()) is False
+
+
+def test_none_enabled_nodes_means_all_enabled():
+    # enabled_nodes=None is the project convention for "all nodes on" — must not crash and
+    # must still wake (this is the default reference-run path; regression for the None guard).
+    st = _state(_house(usda_trigger_last_day=390), day=389)
+    assert active_mortality_latency_wake(st, PARAMS, [_dp06()], None) is True
+
+
+def test_unhashable_house_id_is_ignored_not_crash():
+    # A malformed schedule (house_id a list) must be skipped, not raise on bird_count.get().
+    st = _state(_house(usda_trigger_last_day=395), day=394)
+    bad = SimpleNamespace(
+        id=DP06_ID,
+        latent_signal={"house_id": ["H5"], "metric": "daily_deaths", "pattern": "rising_slope"},
+        opens_day=OPENS, deadline_day=DEADLINE,
+    )
+    assert active_mortality_latency_wake(st, PARAMS, [bad], {DP06_ID}) is False
 
 
 # --- real-schedule shape: daily turns across the H5 coli die-off -------------

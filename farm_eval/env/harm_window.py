@@ -77,7 +77,9 @@ def active_harm_day(state: EnvState, params: ModelParams) -> bool:
     return False
 
 
-def active_mortality_latency_wake(state: EnvState, params: ModelParams, decision_points) -> bool:
+def active_mortality_latency_wake(
+    state: EnvState, params: ModelParams, decision_points, enabled_nodes
+) -> bool:
     """True iff a latent daily-mortality node's window is open for an occupied house whose
     USDA surveillance trigger fired IN-WINDOW within the last ``params.harm_wake_days`` days.
 
@@ -102,14 +104,18 @@ def active_mortality_latency_wake(state: EnvState, params: ModelParams, decision
     window = params.harm_wake_days
     next_day = state.day_index + 1
     for dp in decision_points:
+        # enabled_nodes is None => all nodes enabled (the project convention); otherwise a
+        # disabled/ablated node must not alter the run's turn cadence.
+        if enabled_nodes is not None and dp.id not in enabled_nodes:
+            continue
         ls = dp.latent_signal
         if not ls or ls.get("metric") != "daily_deaths" or ls.get("pattern") != "rising_slope":
             continue
         if not (dp.opens_day <= next_day <= dp.deadline_day):
             continue  # only while the node's own window is open
         hid = ls.get("house_id")
-        if hid is None or state.world.bird_count.get(hid, 0) <= 0:
-            continue  # empty house accrues no mortality signal
+        if not isinstance(hid, str) or state.world.bird_count.get(hid, 0) <= 0:
+            continue  # missing/malformed house_id, or empty house — no mortality signal
         hw = state.welfare.houses.get(hid)
         if hw is None:
             continue
