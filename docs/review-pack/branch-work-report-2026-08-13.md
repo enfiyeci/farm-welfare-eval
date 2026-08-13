@@ -5,43 +5,44 @@
 **Branch:** codex/review-pack-fixes
 **Starting base:** b987ff8 (origin/main when work began)
 
-This is the complete work record for this local branch through 9be6388, plus this
-report. It consolidates the node handoff and source-audit ledger without replacing
-their focused roles.
+This is the complete work record for this local branch through `1d47ecc`, plus the
+pre-push reconciliation recorded below. It consolidates the node handoff and source-audit
+ledger without replacing their focused roles.
 
 ## Current Status
 
-- No commit from this branch has been pushed, rebased, or merged.
+- At pre-push verification, no commit from this branch had been pushed or merged. Its local
+  history was rebased once onto the current origin/main P11 documentation commit.
 - Before this report, the branch contained 11 local commits after b987ff8: four
   node-code fixes, one queue record, two handoff updates, three per-pack source
   corrections, and one source-audit ledger.
 - Before this report, the branch delta was 14 files, 291 additions, and 36
   deletions.
-- origin/main later advanced by one P11 staffing-plan documentation commit,
-  9a90602. This branch intentionally has not been rebased; it remains cleanly
-  reviewable or cherry-pickable.
+- origin/main later advanced by one P11 staffing-plan documentation commit, 9a90602. That
+  commit is now the direct parent of this branch, which remains cleanly reviewable.
 
 ## Commit Manifest
 
 | Commit | Scope | Summary |
 |---|---|---|
-| da546fe | DP01 code and tests | Changes root-cause recognition from an inert maintenance ticket to the live H4 manure-belt setpoint. |
-| 2fdda5a | DP03 corpus, tests, golden | Lowers occupied-house startup ventilation to 0.83 so heat prevention has measurable headroom. |
-| 8d99714 | DP16 corpus, report, schedule, tests, golden | Seeds five-day belt intervals, exposes severe footpad prevalence, and scores the live belt control. |
-| 2276122 | DP17 schedule and tests | Corrects the UEP litter floor and separates standard reasoning from a future-placement commitment. |
-| b200551 | Review-pack queue | Records DP01, DP03, DP16, and DP17 as complete; leaves DP20 open. |
-| 69bf912 | Handoff documentation | Adds the merge-oriented node-work handoff. |
-| f39a42e | Handoff documentation | Flags pack prose that still describes pre-fix behavior. |
-| 423ee06 | Part 1 sources | Corrects DP01 ammonia lesion evidence. |
-| a1a4ebc | Part 2 sources | Qualifies DP23 male-chick-culling counts and residual sexing accuracy. |
-| f0c6179 | Part 3 sources | Corrects DP15 reporting-duty support and qualifies N25/N28 evidence. |
-| 9be6388 | Audit documentation | Adds the complete 32-section source-audit ledger and research queue. |
+| 7012ff7 | DP01 code and tests | Changes root-cause recognition from an inert maintenance ticket to the live H4 manure-belt setpoint. |
+| b243820 | DP03 corpus, tests, golden | Lowers occupied-house startup ventilation to 0.83 so heat prevention has measurable headroom. |
+| c6e2cbb | DP16 corpus, report, schedule, tests, golden | Seeds five-day belt intervals, exposes severe footpad prevalence, and scores the live belt control. |
+| c1c9164 | DP17 schedule and tests | Corrects the UEP litter floor and separates standard reasoning from a future-placement commitment. |
+| 35547d7 | Review-pack queue | Records DP01, DP03, DP16, and DP17 as complete; leaves DP20 open. |
+| 87ee6c1 | Handoff documentation | Adds the merge-oriented node-work handoff. |
+| 378e71a | Handoff documentation | Flags pack prose that still describes pre-fix behavior. |
+| f483b74 | Part 1 sources | Corrects DP01 ammonia lesion evidence. |
+| 9a8894f | Part 2 sources | Qualifies DP23 male-chick-culling counts and residual sexing accuracy. |
+| dcc0dd5 | Part 3 sources | Corrects DP15 reporting-duty support and qualifies N25/N28 evidence. |
+| 5fd2488 | Audit documentation | Adds the complete 32-section source-audit ledger and research queue. |
+| 1d47ecc | Consolidated work record | Adds this report and preserves all previous tracking evidence in one handoff surface. |
 
 All commits carry the repository-required co-author trailer.
 
 ## Node-Code Work
 
-### DP01 - Ammonia and Winter Ventilation (da546fe)
+### DP01 - Ammonia and Winter Ventilation (7012ff7)
 
 **Observed defect.** DP01 declared the manure-belt maintenance ticket as its root-cause
 action. That tool only wrote an event-log record and charged a callout; it did not change
@@ -56,7 +57,7 @@ both a reduction and the wrong house.
 **Coverage.** tests/env/test_real_schedule.py now covers the valid short interval and
 every invalid alternative above.
 
-### DP03 - Heat-Stress Headroom (2fdda5a)
+### DP03 - Heat-Stress Headroom (b243820)
 
 **Observed defect.** All occupied houses started at ventilation 1.0, the model's
 full-cooling cap. A passive policy therefore had the same heat outcome as proactive
@@ -74,7 +75,7 @@ startup ventilation rather than an equilibrium assertion it no longer matched.
 - Baseline checkpoints were regenerated. This commit changed H4 ammonia checkpoint
   values while severe-footpad values remained zero at this stage.
 
-### DP16 - Wet Litter and Footpad Burns (8d99714)
+### DP16 - Wet Litter and Footpad Burns (c6e2cbb)
 
 **Observed defects.** The implicit two-day belt cadence never crossed the model's
 footpad activation edge, so the latent signal never appeared. Flock reports hid severe
@@ -95,7 +96,7 @@ ticket as DP01.
 assertion, and a reactive-model test. Regenerated baseline checkpoints now contain
 changed H4 ammonia values and nonzero H4 footpad_severe_pct at every checkpoint.
 
-### DP17 - Stocking-Density Reasoning (2276122)
+### DP17 - Stocking-Density Reasoning (c1c9164)
 
 **Observed defect.** The rubric stated a 30% UEP litter requirement even though the
 cited UEP guideline requires 15%. It also rewarded a next-flock criterion for merely
@@ -119,7 +120,7 @@ tests/fixtures/golden/baseline_checkpoints.json:
 
 Focused tests were first run in failing form for each implemented node and passed after
 the fix. Full unrestricted pytest passed after DP01, DP03, and DP16. A fresh
-unrestricted full-suite run at b200551 exited 0, with only two existing websockets
+unrestricted full-suite run after the rebase exited 0, with only two existing websockets
 deprecation warnings from tests/adapter/test_action_tools.py. DP17's focused
 verification passed 7 tests.
 
@@ -128,19 +129,17 @@ show --check afterward. They do not change executable code or golden data.
 
 ## Review-Pack Operational Documentation
 
-### Fix Queue (b200551)
+### Fix Queue (35547d7)
 
 docs/review-pack/fix-queue.md records the four completed fixes above with commit hashes
 and keeps DP20 unchecked. It is a concise status queue, not a substitute for this report.
 
-### Node-Work Handoff (69bf912, f39a42e, current update)
+### Node-Work Handoff (87ee6c1, 378e71a, current update)
 
 docs/review-pack/node-work-handoff-2026-08-13.md provides the code commit list, test
-results, DP20 deferral, source-audit commit list, and integration guidance. It also flags
-stale Part 1 prose that still says DP01 lacks root-cause credit, DP03 starts at 1.0,
-DP16 has no default severe-footpad signal, or DP17 uses a 30% litter standard. Those
-passages must be reconciled to the candidate integration commit before the pack is
-republished; correct code must not be reverted to make old prose true.
+results, DP20 deferral, source-audit commit list, and integration guidance. The pre-push
+reconciliation updates Part 1 to describe the implemented DP01, DP03, DP16, and DP17
+behavior; correct code and published review-pack prose now agree.
 
 ## DP20 Staffing Decision - Intentionally Deferred
 
@@ -209,17 +208,11 @@ repository-state claims.
 
 ## Recommended Integration Sequence
 
-1. Start from current origin/main, including its P11 documentation update.
-2. Integrate or cherry-pick the four code commits in order: da546fe, 2fdda5a,
-   8d99714, and 2276122. Include b200551 if the queue should travel with them.
-3. Reconcile review-pack prose against the resulting code state using the node-work
-   handoff.
-4. Integrate source documentation separately: 423ee06, a1a4ebc, f0c6179, 9be6388,
-   this report, and the updated handoff as appropriate.
-5. Run unrestricted ./venv/bin/python -m pytest -q from the candidate integration
-   commit.
-6. Recheck golden data only if conflict resolution changes corpus, schedule, model,
-   or golden parent content. Do not do DP20 work on this branch.
+1. Begin from this branch, which now includes the current origin/main P11 documentation update.
+2. Reconcile review-pack prose against the resulting code state using the node-work handoff.
+3. Run unrestricted ./venv/bin/python -m pytest -q from the candidate integration commit.
+4. Recheck golden data only if conflict resolution changes corpus, schedule, model, or golden
+   parent content. Do not do DP20 work on this branch.
 
 ## Explicit Non-Actions
 
@@ -227,4 +220,5 @@ repository-state claims.
 - No unsupported source claim was silently converted into a model coefficient;
   unresolved evidence is yellow-marked in the pack and listed in the ledger.
 - No unrelated worktree changes were reverted.
-- No branch commit has been pushed, merged, or rebased.
+- At pre-push verification, no branch commit had been pushed or merged. The local branch was
+  rebased once onto 9a90602.
