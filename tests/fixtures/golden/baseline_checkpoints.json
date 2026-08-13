@@ -1,9 +1,9 @@
 [
   {
     "H4": {
-      "ammonia_ppm": 12.8662,
+      "ammonia_ppm": 26.1717,
       "feather_damage_pct": 0.0,
-      "footpad_severe_pct": 0.0,
+      "footpad_severe_pct": 0.8433,
       "hen_day_pct": 81.65,
       "keel_fracture_pct": 0.0
     },
@@ -11,9 +11,9 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 14.0999,
+      "ammonia_ppm": 29.8178,
       "feather_damage_pct": 0.0,
-      "footpad_severe_pct": 0.0,
+      "footpad_severe_pct": 7.4478,
       "hen_day_pct": 95.6,
       "keel_fracture_pct": 60.0
     },
@@ -21,9 +21,9 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 32.4549,
+      "ammonia_ppm": 51.4468,
       "feather_damage_pct": 19.04,
-      "footpad_severe_pct": 0.0,
+      "footpad_severe_pct": 20.8527,
       "hen_day_pct": 94.17,
       "keel_fracture_pct": 76.0
     },
@@ -31,9 +31,9 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 34.224,
+      "ammonia_ppm": 56.4891,
       "feather_damage_pct": 36.8316,
-      "footpad_severe_pct": 0.0,
+      "footpad_severe_pct": 35.6955,
       "hen_day_pct": 91.75,
       "keel_fracture_pct": 86.5
     },
@@ -41,9 +41,9 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 21.6896,
+      "ammonia_ppm": 49.192,
       "feather_damage_pct": 57.8,
-      "footpad_severe_pct": 0.0,
+      "footpad_severe_pct": 58.4476,
       "hen_day_pct": 87.0,
       "keel_fracture_pct": 92.0
     },

@@ -55,6 +55,17 @@ def test_belt_frequency_drives_litter_moisture_footpad_and_ammonia():
     assert f.ammonia_ppm < s.ammonia_ppm
 
 
+def test_authored_occupied_house_belt_cadence_activates_dp16_signal():
+    state = build_initial_state(load_corpus("corpus"))
+    occupied = [house_id for house_id, birds in state.world.bird_count.items() if birds > 0]
+
+    assert occupied
+    assert all(state.world.setpoints[house_id]["belt_interval_days"] >= 5 for house_id in occupied)
+
+    integrate(state, 196, ModelParams())
+    assert state.welfare.houses["H4"].footpad_severe_pct > 0.0
+
+
 def test_heat_raises_water_intake():
     # water_ml is a last-hour snapshot of water_ml_base * water_multiplier(indoor temp).
     # Integrate so the run ENDS inside the day-28..32 heat event, and compare a poorly

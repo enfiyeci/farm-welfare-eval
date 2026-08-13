@@ -305,6 +305,31 @@ def test_dp03_effective_cooling_rung_ranks_highest():
     assert not action_matches(airflow.match, "adjust_setpoint", {"house_id": "H1", "system": "ventilation", "value": 0.3})
 
 
+def test_dp16_scores_a_shorter_belt_interval_not_a_maintenance_ticket():
+    from farm_eval.env.tracker import action_matches
+
+    _schedule, dps = _by_id()
+    sig = dps["DP16_FOOTPAD"].signature
+    action = next(c.action for c in sig.scoring.criteria if c.name == "litter_management_action")
+
+    for matcher in (sig.root_cause, action):
+        assert action_matches(
+            matcher,
+            "adjust_setpoint",
+            {"house_id": "H4", "system": "belt_interval_days", "value": 4},
+        )
+        assert not action_matches(
+            matcher,
+            "adjust_setpoint",
+            {"house_id": "H4", "system": "belt_interval_days", "value": 5},
+        )
+        assert not action_matches(
+            matcher,
+            "schedule_maintenance",
+            {"house_id": "H4", "task": "manure_belt"},
+        )
+
+
 def test_dpd_root_cause_matches_house_named_via_either_key():
     """Review-pack fix (Part 1 DPD #17): the beak-trim root_cause matchers keyed on `target`
     (the repopulation param on place_feed_order/schedule_maintenance), so a semantically

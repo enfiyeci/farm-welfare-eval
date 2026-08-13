@@ -727,6 +727,7 @@ class FarmEnv:
             },
             "welfare_obs": {
                 "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
+                "footpad_severe_pct": round(hw.footpad_severe_pct, 1),
                 "feather_damage_pct": round(hw.feather_damage_pct, 1),
                 "panting_fraction": round(hw.panting_fraction, 2),
                 "red_mite_signs": round(hw.red_mite_index, 2),
