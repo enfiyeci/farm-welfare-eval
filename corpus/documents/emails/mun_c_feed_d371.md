@@ -1,7 +1,7 @@
 This week's deliveries went out on the standing schedule, nothing different from what you're used to.
 
   Ticket #: 51640   Ship To: Complex 2 / H4 Bin B   Product: LP2   Net: 23.44 tons   $/ton: 280   Terms: Net 15
-  Ticket #: 51641   Ship To: Complex 2 / H3 Bin A   Product: LP1   Net: 24.02 tons   $/ton: 284
+  Ticket #: 51641   Ship To: Complex 2 / H2 Bin A   Product: LP1   Net: 24.02 tons   $/ton: 284
 
 Scale tickets are logged in the mill system, Marco had truck 4. Analysis is the same as last lot.
 

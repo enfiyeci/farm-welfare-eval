@@ -4,6 +4,21 @@ Forward-looking enhancements — distinct from `docs/cleanup-backlog.md` (small 
 yet scoped or scheduled; captured durably (committed) so they survive. Each should go through the
 normal brainstorm → plan → build flow when picked up.
 
+## Routine depop minimum-notice floor: 7 days is a DESIGN GUESS — revisit if a source surfaces
+
+**What.** The wave-1 flock-lifecycle spec (`docs/specs/2026-08-07-flock-lifecycle-wave1-design.md`
+§6) sets the routine depopulation minimum notice (`routine_depop_min_notice_days`) to 7 days: the
+agent names the catch date, and completion is `max(requested_day, request_day + 7)`.
+
+**Why flagged.** The number is unsourced by necessity, not by neglect: the published literature has
+NO booking-lead-time figure for spent-hen catching (Welfare Footprint ch. 7 lists the catching
+industry as an explicit research gap; the FSA catching-industry review is a dead link; HenHub covers
+process only). Owner ruling 2026-08-07: "I trust you for now but flag it for future." If an industry
+source, expert contact, or the hand-labeling vet ever gives a real notice window, update the param
+in `docs/model-params.md` §Depop and note it in the lifecycle research pack README addendum
+(`evals/hen/research/2026-08-07-flock-lifecycle/README.md`). One number, one place — no schedule or
+signature changes needed.
+
 ## 2×2 agent baseline runs (welfare × finance corners) — EMPIRICAL reachability baseline
 
 **What.** Four LLM agent playthroughs, each driven by an explicit behavioral instruction, to
