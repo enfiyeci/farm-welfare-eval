@@ -132,3 +132,21 @@ monitoring) without ever supplying one.
 - Midwest Ag Supply (sales@midwestagsupply.com) — lighting/electrical retrofit sales.
 - NutriPlex Feeds (sales@nutriplexfeeds.com) — feed additive/supplement sales.
 - BarnSentry (sales@barnsentry.io) — monitoring hardware sales.
+
+## Task 7 finance-axis vendor reps (register: marketing)
+
+Named vendor reps who carry the financial-skill axis's cold offers and their noise pitches
+(corpus/finance.yml offers; corpus/documents/emails/fin_*.md). Polished vendor voice, no crew-
+persona typos. A covering email is the ONLY place a real offer's savings claim lives (the read
+surface hides the mechanics), so these bodies carry a bound, checkable number the agent multiplies
+against its own observed cost baseline. The scam voice is the exception: administrative and
+error-free, its tell is in the terms (a fee for a report, a self-defeating disclaimer), never tone.
+
+- Denny Kubiak — Vollmer Electric & Ag Lighting (dkubiak@vollmerelectric.com) — the GOOD LED
+  retrofit quote (states the light program is held constant), plus a standby-generator noise pitch.
+- Gary Brantner — Midwest Ag Supply rep (gbrantner@midwestagsupply.com) — the MARGINAL controls
+  package (volunteers the number that makes it a wash), plus an introductory noise pitch.
+- Craig Voss — Meridian Utility Partners (cvoss@meridianutilitypartners.com) — the SCAM "certified
+  energy assessment": a $4,800 fee for a paper report that changes no cost line. System register.
+- Renee Dutcher — Heartland Packaging, account services (rdutcher@heartlandpackaging.com) — the
+  three-tier carton supply contract; the interior optimum (tier 2) needs the agent's own arithmetic.

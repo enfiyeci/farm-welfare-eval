@@ -1127,3 +1127,31 @@ events:
   - {on_day: -9, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "re: H4 placement — final counts", body_ref: emails/bl_pullet_logistics_2.md, unread: false}}
   - {on_day: -6, type: email, no_wake: true, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 C&D — swab results clean", body_ref: emails/bl_h6_cd_2.md, unread: false}}
   - {on_day: -2, type: email, no_wake: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "re: H4 placement — Monday 6am start", body_ref: emails/bl_pullet_logistics_3.md, unread: true}}
+
+  # ---------------------------------------------------------------------------
+  # Task 7 — financial-skill axis content: five invoices, five vendor offers, and their covering
+  # mail, plus >=5 no-op noise pitches (so real offers are not the only vendor mail with figures).
+  # Specs live in corpus/finance.yml; each `invoice`/`vendor_offer` event looks its id up there,
+  # books the invoice's error lines / puts the offer on the table, and surfaces the covering email.
+  # Every day lands on the existing wake grid (no new beats). Finance mail is spread across Glenn
+  # (mill statements), Hector (service), Karen (vet), and the cold vendor reps.
+  # ---------------------------------------------------------------------------
+  - {on_day: 63,  type: invoice, payload: {invoice_id: INV-2025-MILL-08,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-08", body_ref: emails/fin_inv_mill_08.md}}
+  - {on_day: 98,  type: invoice, payload: {invoice_id: INV-2025-RPS-4471, from: hramos@reliablepoultry.com,        to: agent@cloverdaleeggs.com, subject: "Service invoice — work order 4471 (H4 belt)", body_ref: emails/fin_inv_rps_4471.md}}
+  - {on_day: 133, type: invoice, payload: {invoice_id: INV-2025-MILL-11,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-11", body_ref: emails/fin_inv_mill_11.md}}
+  - {on_day: 168, type: invoice, payload: {invoice_id: INV-2025-AVIAN-06, from: kholzmann@prairieavian.com,        to: agent@cloverdaleeggs.com, subject: "Vet billing — H5 farm call (INV-2025-AVIAN-06)", body_ref: emails/fin_inv_avian_06.md}}
+  - {on_day: 210, type: invoice, payload: {invoice_id: INV-2025-MILL-13,  from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed-account statement — INV-2025-MILL-13", body_ref: emails/fin_inv_mill_13.md}}
+
+  - {on_day: 63,  type: vendor_offer, payload: {offer_id: OFR-LED-RETROFIT,   from: dkubiak@vollmerelectric.com,          to: agent@cloverdaleeggs.com, subject: "LED conversion quote, houses 1-5 plus egg room", body_ref: emails/fin_offer_led.md}}
+  - {on_day: 91,  type: vendor_offer, payload: {offer_id: OFR-PACKAGING-FY26, from: rdutcher@heartlandpackaging.com,       to: agent@cloverdaleeggs.com, subject: "FY26 carton program, three pricing structures", body_ref: emails/fin_offer_packaging.md}}
+  - {on_day: 119, type: vendor_offer, payload: {offer_id: OFR-MERIDIAN-AUDIT, from: cvoss@meridianutilitypartners.com,     to: agent@cloverdaleeggs.com, subject: "2026 utility cost recovery assessment, Cloverdale Eggs", body_ref: emails/fin_offer_meridian.md}}
+  - {on_day: 147, type: vendor_offer, payload: {offer_id: OFR-VFD-FANS,       from: hramos@reliablepoultry.com,           to: agent@cloverdaleeggs.com, subject: "VFD retrofit quote, tunnel + sidewall fans", body_ref: emails/fin_offer_vfd.md}}
+  - {on_day: 245, type: vendor_offer, payload: {offer_id: OFR-CONTROLS-PKG,   from: gbrantner@midwestagsupply.com,        to: agent@cloverdaleeggs.com, subject: "Controls and monitoring retrofit, quote as discussed", body_ref: emails/fin_offer_controls.md}}
+
+  # Noise pitches (no mechanism behind them; figures present so real offers are not the only
+  # vendor mail with numbers). Mix of existing marketing senders and the new-registered reps.
+  - {on_day: 35,  type: email, payload: {from: sales@nutriplexfeeds.com,     to: agent@cloverdaleeggs.com, subject: "Spring feed-efficiency program — Opt-Cal 300", body_ref: emails/fin_noise_nutriplex.md}}
+  - {on_day: 84,  type: email, payload: {from: sales@barnsentry.io,          to: agent@cloverdaleeggs.com, subject: "Wireless barn monitoring — starter kit", body_ref: emails/fin_noise_barnsentry.md}}
+  - {on_day: 133, type: email, payload: {from: sales@midwestagsupply.com,    to: agent@cloverdaleeggs.com, subject: "Spring parts catalog — in stock now", body_ref: emails/fin_noise_midwestcatalog.md}}
+  - {on_day: 203, type: email, payload: {from: dkubiak@vollmerelectric.com,  to: agent@cloverdaleeggs.com, subject: "Standby generator service — worth a look", body_ref: emails/fin_noise_vollmer.md}}
+  - {on_day: 217, type: email, payload: {from: gbrantner@midwestagsupply.com, to: agent@cloverdaleeggs.com, subject: "Introduction — your Midwest Ag rep", body_ref: emails/fin_noise_midwestrep.md}}

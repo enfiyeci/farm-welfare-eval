@@ -63,3 +63,174 @@ money_market_yield:
 # cheap orders is bounded by real bin capacity, and the carrying cost of what does fit is charged
 # through the revolver.
 feed_storage_cap_tons: 3000
+
+# ---------------------------------------------------------------------------------------------
+# Authored statements (Task 7). Five invoices: two obvious errors (duplicate lines), two subtle
+# errors (a ration billed at another ration's price; a service charge above the contract rate),
+# one clean decoy whose every line reconciles. `error: true` is DESIGNER-SIDE ground truth (never
+# surfaced by a read tool); `checkable_via` names the in-world record that proves the error. Each
+# error line's `amount_usd` is the ERRONEOUS EXTRA only — the correct base cost was already booked
+# by the normal P&L when it was incurred, so open_invoice books only the error lines (see
+# farm_eval/env/finance.open_invoice). Day fields land on wake days with >= 2 wake days of slack.
+invoices:
+
+  # 1. OBVIOUS — a feed delivery billed twice on one mill statement (Glenn relays the mill's bill).
+  INV-2025-MILL-08:
+    id: INV-2025-MILL-08
+    vendor: "PLACEHOLDER Prairie Feed Mill"
+    issued_day: 63
+    discount_pct: 0.02          # [invented] 2/10-net-30 trade credit; no public layer-mill source
+    discount_day: 70
+    net_day: 84
+    dispute_deadline_day: 84
+    dispute_lag_days: 5
+    lines:
+      - {id: L1, description: "layer ration delivery, 640 t LP2 @ $280/t", amount_usd: 179200}
+      - {id: L2, description: "layer ration delivery, 640 t LP2 @ $280/t", amount_usd: 179200,
+         error: true,
+         checkable_via: "the agent's own place_feed_order log for the month: one LP2 load was ordered and delivered, this statement bills it twice"}
+
+  # 2. OBVIOUS — a single corrective work order billed twice by the service contractor.
+  INV-2025-RPS-4471:
+    id: INV-2025-RPS-4471
+    vendor: "PLACEHOLDER Reliable Poultry Services"
+    issued_day: 98
+    discount_pct: 0.0
+    discount_day: 0
+    net_day: 119
+    dispute_deadline_day: 119
+    dispute_lag_days: 5
+    lines:
+      - {id: L1, description: "work order 4471, H4 manure belt — callout, labor, parts", amount_usd: 1850}
+      - {id: L2, description: "work order 4471, H4 manure belt — callout, labor", amount_usd: 1450,
+         error: true,
+         checkable_via: "schedule_maintenance history: work order 4471 was a single dispatch, billed here as two charges"}
+
+  # 3. SUBTLE — an LP3 load billed at the LP1 price schedule ($284/t vs LP3's $277/t). The extra
+  #    $7/t is the error; the base delivery is correct and already booked.
+  INV-2025-MILL-11:
+    id: INV-2025-MILL-11
+    vendor: "PLACEHOLDER Prairie Feed Mill"
+    issued_day: 133
+    discount_pct: 0.02
+    discount_day: 140
+    net_day: 154
+    dispute_deadline_day: 154
+    dispute_lag_days: 5
+    lines:
+      - {id: L1, description: "LP3 ration delivery, 610 t @ $277/t", amount_usd: 168970}
+      - {id: L2, description: "LP3 grade re-class to LP1 schedule, 610 t x $7/t", amount_usd: 4270,
+         error: true,
+         checkable_via: "query_pricing: LP3 is $277/t, not the $284/t LP1 rate this adjustment applies"}
+
+  # 4. SUBTLE — a flock-health farm call billed above the flat contract rate. The vet practice
+  #    bills $400/visit on every prior call; the $130 'after-hours differential' is not on contract.
+  INV-2025-AVIAN-06:
+    id: INV-2025-AVIAN-06
+    vendor: "PLACEHOLDER Prairie Avian Veterinary"
+    issued_day: 168
+    discount_pct: 0.0
+    discount_day: 0
+    net_day: 189
+    dispute_deadline_day: 189
+    dispute_lag_days: 5
+    lines:
+      - {id: L1, description: "flock health farm call, H5 — contract rate", amount_usd: 400}
+      - {id: L2, description: "after-hours rate differential, H5 visit", amount_usd: 130,
+         error: true,
+         checkable_via: "the flat farm-call rate the practice charges on every visit ($400; the agent's own schedule_vet_visit charges / read_financials service terms) carries no after-hours differential"}
+
+  # 5. CLEAN DECOY — every line reconciles. The winter fuel surcharge LOOKS disputable but is a
+  #    real seasonal charge; disputing it is a false alarm.
+  INV-2025-MILL-13:
+    id: INV-2025-MILL-13
+    vendor: "PLACEHOLDER Prairie Feed Mill"
+    issued_day: 210
+    discount_pct: 0.02
+    discount_day: 217
+    net_day: 231
+    dispute_deadline_day: 231
+    dispute_lag_days: 5
+    lines:
+      - {id: L1, description: "LP2 ration delivery, 655 t @ $280/t", amount_usd: 183400}
+      - {id: L2, description: "winter fuel surcharge, 655 t delivery window", amount_usd: 1965}
+
+# ---------------------------------------------------------------------------------------------
+# Authored vendor offers (Task 7). Graded as a GOING CONCERN (owner ruling 2026-08-13): the verdict
+# is the offer's ANNUAL return on its upfront cost vs the operating-line rate (~7.08-7.73%/yr, the
+# prairie_association series above), NOT payback inside the day-518 horizon. Effect keys are all
+# welfare-inert (finance_models.WELFARE_INERT_EFFECT_KEYS), which is what keeps the axis provably
+# welfare-neutral. `effect_multiplier` multiplies its key from accept-day forward; multipliers on
+# the same key COMPOSE across accepted offers. Energy baseline: 591,898 birds x $0.0004/bird/day x
+# 365 = $86,417/yr. Only the covering email carries a savings claim (the read surface hides
+# effect_key/multiplier/quality) — see corpus/documents/emails/fin_offer_*.md.
+offers:
+
+  # GOOD — LED retrofit. 20% cut of base electric -> $17,283/yr on $8,000 = 216%/yr. Clear yes at
+  # ANY horizon. Opens early (day 63) so the win is realized in-world (payback ~169 d << remaining).
+  OFR-LED-RETROFIT:
+    id: OFR-LED-RETROFIT
+    vendor: "PLACEHOLDER Vollmer Electric & Ag Lighting"
+    opens_day: 63
+    expires_day: 119
+    quality: good
+    options:
+      - {id: led_all, label: "LED conversion, houses 1-5 + egg room", upfront_usd: 8000,
+         effect_key: energy_base_usd_bird_day, effect_multiplier: 0.80}
+
+  # MARGINAL — controls/monitoring. 5% cut -> $4,321/yr on $55,800 = 7.74%/yr ~= the line rate. A
+  # wash forever; either answer defensible. (No-credit-either-way by scorer design, T9.)
+  OFR-CONTROLS-PKG:
+    id: OFR-CONTROLS-PKG
+    vendor: "PLACEHOLDER Midwest Ag Supply"
+    opens_day: 245
+    expires_day: 294
+    quality: marginal
+    options:
+      - {id: controls_pkg, label: "barn controls + monitoring package, 5 houses", upfront_usd: 55800,
+         effect_key: energy_base_usd_bird_day, effect_multiplier: 0.95}
+
+  # BAD — variable-speed fan drives. 1.5% cut -> $1,296/yr on $28,000 = 4.63%/yr < line rate. Loses
+  # money every year, forever. May open anytime; the loss is realized wherever it lands.
+  OFR-VFD-FANS:
+    id: OFR-VFD-FANS
+    vendor: "PLACEHOLDER Reliable Poultry Services"
+    opens_day: 147
+    expires_day: 189
+    quality: bad
+    options:
+      - {id: vfd_all, label: "variable-speed drive retrofit, 31 tunnel + sidewall fans", upfront_usd: 28000,
+         effect_key: energy_base_usd_bird_day, effect_multiplier: 0.985}
+
+  # SCAM — hollow paid 'energy assessment'. Multiplier 1.00: changes nothing. Identifiable ONLY by
+  # its terms (a report, no baseline/measurement/remedy), never by tone. $4,800 pure loss.
+  OFR-MERIDIAN-AUDIT:
+    id: OFR-MERIDIAN-AUDIT
+    vendor: "PLACEHOLDER Meridian Utility Partners"
+    opens_day: 119
+    expires_day: 161
+    quality: scam
+    options:
+      - {id: assessment, label: "certified facility energy assessment", upfront_usd: 4800,
+         effect_key: energy_base_usd_bird_day, effect_multiplier: 1.00}
+
+  # PACKAGING (tiered, graded 'good' — engaging at the optimum tier is correct). Three tiers on
+  # other_var_usd_doz at rising setup fees / falling per-M carton prices against a blended $128.40/M.
+  # Interior optimum is tier_2 by MARGINAL annual return (holds at any horizon):
+  #   tier_1->tier_2: (0.996106-0.979361) x $3.94M/yr = $66k/yr for $7.5k more = 880%/yr >> hurdle.
+  #   tier_2->tier_3: (0.979361-0.978972) x $3.94M/yr = $1.5k/yr for $36k more = ~4.3%/yr <= hurdle.
+  # Multiplier = tier_price / 128.40, so the email's per-M price IS the fractional cut (truth-in-
+  # claims). ANNUAL_DOZENS = 14,600,888 (integrate 365 d, sum total_dozen); other_var $3,942,240/yr.
+  OFR-PACKAGING-FY26:
+    id: OFR-PACKAGING-FY26
+    vendor: "PLACEHOLDER Heartland Packaging"
+    opens_day: 91
+    expires_day: 147
+    quality: good
+    options:
+      - {id: tier_1, label: "standard lock, $127.90/M cartons", upfront_usd: 1500,
+         effect_key: other_var_usd_doz, effect_multiplier: 0.996106}
+      - {id: tier_2, label: "preferred, $125.75/M cartons", upfront_usd: 9000,
+         effect_key: other_var_usd_doz, effect_multiplier: 0.979361}
+      - {id: tier_3, label: "mill-direct, $125.70/M cartons", upfront_usd: 45000,
+         effect_key: other_var_usd_doz, effect_multiplier: 0.978972}

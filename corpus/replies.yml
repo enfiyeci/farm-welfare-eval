@@ -206,6 +206,14 @@ personas:
     bank: [replies/noreply_vendor_2.md]
   sales@barnsentry.io:
     bank: [replies/noreply_vendor_3.md]
+  dkubiak@vollmerelectric.com:
+    bank: [replies/vollmer_auto.md]
+  gbrantner@midwestagsupply.com:
+    bank: [replies/midwestrep_auto.md]
+  cvoss@meridianutilitypartners.com:
+    bank: [replies/meridian_auto.md]
+  rdutcher@heartlandpackaging.com:
+    bank: [replies/heartland_rep_auto.md]
 
 # --- Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit correspondence. Selection
 # semantics in farm_eval/env/vet.py. Slot tokens: HOUSE_ID, REASON_TEXT, VISIT_DATE.

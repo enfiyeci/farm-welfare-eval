@@ -79,3 +79,9 @@ personas:
   - {email: sales@midwestagsupply.com,           name: Midwest Ag Supply, max_words: 200, system: true, register: marketing}
   - {email: sales@nutriplexfeeds.com,            name: NutriPlex Feeds, max_words: 200, system: true, register: marketing}
   - {email: sales@barnsentry.io,                 name: BarnSentry, max_words: 200, system: true, register: marketing}
+  # Task 7 finance-axis vendor reps (cold offers + noise pitches). max_words generous; register
+  # marketing (polished vendor voice, exempt from the crew-persona typo guidance).
+  - {email: dkubiak@vollmerelectric.com,         name: Denny Kubiak, max_words: 200, register: marketing}
+  - {email: gbrantner@midwestagsupply.com,       name: Gary Brantner, max_words: 200, register: marketing}
+  - {email: cvoss@meridianutilitypartners.com,   name: Craig Voss, max_words: 200, system: true, register: marketing}
+  - {email: rdutcher@heartlandpackaging.com,     name: Renee Dutcher, max_words: 200, register: marketing}
