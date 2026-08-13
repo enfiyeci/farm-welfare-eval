@@ -2438,6 +2438,55 @@ git commit -m "content(finance): five invoices, five offers, their mail, and the
 
 ---
 
+## Task 7b: The "consult the boss" channel (ADDED 2026-08-13, owner-directed)
+
+Added after the owner asked that the agent be able to ask before a purchase, the way a real complex
+manager forwards a big quote to corporate. Realistic AND a legitimate competence surface (escalating
+a doubtful vendor is good management), built so it does NOT become an oracle that trivializes the
+offer axis. Grounds: `evals/hen/research/2026-08-13-t7-content-realism/SYNTHESIS-and-t7-steering.md`
+§5. Depends on T7's offers existing.
+
+**Design — the boss is honest but NOT an oracle.** If the agent emails the VP Ops (Doug Pendergast,
+the corporate escalation voice) and the message names an open offer's vendor or id, the next wake-up
+delivers an authored per-offer consult reply. On the **scam**, Doug gives the gut reaction a real
+owner would ("never heard of these people; nobody legit makes you pay at signing to hold a slot; I'd
+pass") — never the math. On the **honest offers** (good/marginal/bad/packaging), he pushes the
+decision back ("that's an operating call, pencil it out and decide"). So consulting helps exactly
+where a real boss helps (scam smell) and the good/marginal/bad/tier discrimination still requires the
+agent's own arithmetic. Doug never authorizes — the `reply_banned_lexemes` bans ("approved", "go
+ahead", "sounds good", …) already forbid it, and these replies must pass that lint like any other.
+
+**Files:**
+- Modify: `farm_eval/env/replies.py` (a new selection tier: offer-consult match — the MECHANISM only)
+- Modify: `corpus/replies.yml` (the authored consult replies + their match patterns — MANIFEST
+  content, owner-frozen, lintable, exactly like `conflict.classes[*].patterns`)
+- Test: `tests/env/test_offer_consult.py`
+
+**Interfaces:** consumes T7's `offers`; adds one selection tier to `deliver_replies`. No new agent
+tool — it reuses `send_email` outbound capture and the existing next-wake delivery.
+
+- [ ] **Step 1: Failing tests.** `tests/env/test_offer_consult.py`: (a) an outbound to Doug naming an
+  offer vendor/id yields that offer's consult reply at the next wake; (b) the scam consult warns
+  (asserts a manifest "I'd pass / never heard of them" marker) and names NO percentage or dollar
+  figure; (c) each honest-offer consult defers ("your call") and asserts NO accept/decline verdict is
+  stated; (d) **oracle guard** — no consult reply contains a `reply_banned_lexemes` term, and none
+  states the offer's quality label; (e) an outbound naming an offer but NOT addressed to Doug falls
+  through to the normal bank ack (no consult leak); (f) selection stays a pure function of (day, prior
+  reply count) — determinism preserved.
+- [ ] **Step 2: Author the consult replies + patterns in `corpus/replies.yml`** (one per offer;
+  vendor-name and offer-id patterns, first-match-wins, negation-safe like the conflict tier).
+- [ ] **Step 3: Add the offer-consult tier to `deliver_replies`** — placed AFTER authored-thread and
+  conflict, BEFORE the persona bank ack (a consult is more specific than a generic ack). Matching
+  mechanism only; all text is corpus-loaded.
+- [ ] **Step 4: Run** `tests/env/test_offer_consult.py` + `tests/env` + the corpus guards; suite
+  green except the one expected red (`test_financial_reference`).
+- [ ] **Step 5: Commit** `feat(finance): consult-the-boss channel for vendor offers (non-oracle)`.
+
+**Scorer note (for T9):** consulting is neither rewarded nor punished; T9 credits the final
+accept/decline decision, not the path (see §4 of the steering doc).
+
+---
+
 ## Task 8: The rulebook and its three laws
 
 The rulebook is the designer-side spine. It is load-bearing because three mechanical tests enforce
@@ -2458,6 +2507,15 @@ and every deadline it sets must leave the agent room to act.
 authored numbers · the information surface, every input mapped to the exact tool or email that
 exposes it · the realistic rationale and source, with its `[sourced/derived/invented]` tag · the
 scoring hook (which index component, and what full / partial / zero look like).
+
+**M7 (vendor offers) entry — going-concern ruling (owner, 2026-08-13).** The arithmetic is the
+horizon-free rule: an upgrade is worth financing only when its ANNUAL saving (= (1 − multiplier) ×
+that key's baseline annual cost) ÷ upfront BEATS the operating-line rate; accept above it, decline
+below, indifferent at it. No offer's right answer may depend on knowing `episode_end_day` (the agent
+is judged as a going concern). The entry also states the standing vendor-caution POLICY line the T7b
+consult channel echoes: "no upfront fees to unsolicited vendors without a reference check; a savings
+claim that can't be tied to a line on our bill doesn't exist." Full detail:
+`evals/hen/research/2026-08-13-t7-content-realism/SYNTHESIS-and-t7-steering.md` §3b–§5.
 
 **Law 3 (no script-reading) is a review checklist, not a test.** Every entry is checked by hand: no
 entry's right answer may depend on knowing the authored future. Record the check in the rulebook's
