@@ -2,6 +2,16 @@
 
 Eval: hen
 
+> **Currency note (2026-08-13, verified against `main` @ `b987ff8`):** the plan's structural
+> assumptions still hold — `set_staffing` still takes `(fte, shift_hours)`, `DP20_HPAI_STAFFING`
+> still matches on `fte`, the `farm_eval/env/model/layers/` files are intact, the judge dimensions
+> are still 10, and the `class_scores` node-scoring path is unchanged — so every task below is still
+> applicable. But `main` has advanced since 2026-08-09 (DP22/DP23, inovo-piling, DP01/DP03 scoring
+> fixes), so **line-number citations have drifted**: e.g. DP20's `fte` matcher is now
+> `schedule/events.yml:782` (plan says ~724), and `config.yml` `enabled_nodes` is now **23** (plan
+> says 21). Pre-flight **PF-5**'s re-verification of every citation against current `main` is
+> mandatory before building — treat the plan's `file:line` references as approximate.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use
 > checkbox (`- [ ]`) syntax for tracking.
