@@ -13,6 +13,33 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-13 · claude · litter-lever wave LANDED on main (integration/litter-to-main → main, FF)
+
+- **What / decided:** Fast-forwarded the litter-lever wave onto `main` (origin/main now
+  `1c50f1b`): litter-access lever, water-balance litter + TAN-lag ammonia model,
+  `DP24_LITTER_ACCESS` (H4 recurring-closure-days state band) + `DP25_PLACEMENT_DENSITY`
+  (H6 stocking-density state band — the `DP22_PLACEMENT_DENSITY → DP25` rename per owner
+  Option 1; main keeps DP22_PILING/DP23_CHICK_SOURCING). **enabled_nodes is now 26** (main's
+  24 + DP24 + DP25; the "27" in the handoff/merge message was a miscount — verified no node
+  dropped). Pre-merge tier-3: a fresh Opus reviewer stood in (Codex out on its usage limit),
+  APPROVED, 0 Critical / 0 Important — it verified the ammonia physics against the model
+  (6.70 ppm at the CSES point, 10.8 day-0, 26.7–27.6 winter DP01 band) and that each
+  conflict resolution preserves both parents. Suite green on the FF tip: **2169 passed,
+  42 skipped, 0 failed**. Retired `feat/litter-lever` + `feat/stocking-density-task6`
+  (superseded) + `integration/litter-to-main`; removed the `fwe-litter` + `fwe-litter-integ`
+  worktrees.
+- **behaviour-report** (`farm_eval/analysis/`) was restored from main during the merge (the
+  raw merge dropped it as a modify/delete); its `build`/`cli` tests are module-SKIPPED on
+  main (episode/`day_map` format + tool-roster change) — a separate session owns the un-skip
+  follow-up (chip `task_2dd6abd1`), branching off this tip now that `day_map` is back via the
+  origin/main merge.
+- **Next action:** (1) DP24/DP25 full eight-part review-pack write-ups + trust scores +
+  folding into the 6.8 headline average are PENDING a pack pass (marked PENDING in part1).
+  (2) behaviour-report compat un-skip.
+- **Refs:** origin/main `1c50f1b`; `docs/review-pack/review-pack-v8-part1.md` (DP24/DP25
+  PENDING note, count → 26); `config.yml` enabled_nodes (26); `tests/analysis/test_{build,cli}.py`
+  skip NOTEs.
+
 ## 2026-08-13 · claude · wip-branch salvage: cross-tool infra + decision memos to main (branch docs/wip-tree-salvage)
 
 - **What / decided:** Retired `wip/2026-08-06-owner-html-snapshot` without information loss.
