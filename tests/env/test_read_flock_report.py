@@ -44,6 +44,7 @@ def test_flock_report_footpad_tracks_state():
     hw.footpad_mild_pct, hw.footpad_severe_pct = 10.0, 25.0
     rep = env.read_flock_report(hid)
     assert abs(rep["welfare_obs"]["footpad_affected_pct"] - 35.0) < 1e-6
+    assert abs(rep["welfare_obs"]["footpad_severe_pct"] - 25.0) < 1e-6
 
 
 def test_flock_report_unknown_house_raises_or_flags():
