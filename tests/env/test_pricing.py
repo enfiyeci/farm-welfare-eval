@@ -35,7 +35,7 @@ def test_build_initial_state_seeds_market_from_start_month():
     corpus = load_corpus(REPO / "corpus")
     state = build_initial_state(corpus)
     assert state.market.egg_price_usd_doz == 1.66           # Jun 2025
-    assert state.market.layer_ration_usd_ton == 281.0
+    assert state.market.layer_ration_usd_ton == 291.0        # Jun 2025, widened path (M8)
     assert state.market.lp_fuel_index == 1.0
 
 

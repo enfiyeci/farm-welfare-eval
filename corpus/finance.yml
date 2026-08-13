@@ -56,3 +56,10 @@ money_market_yield:
   "2025-12": 0.0359
   "2026-03": 0.0361
   "2026-06": 0.0366
+
+# Cumulative on-site feed storage across the complex (M8). [derived] Cal-Maine's 10-K documents
+# ~41 days of ingredient storage; at this complex's consumption that is ~2,000-3,500 t. This is a
+# CUMULATIVE cap (ModelParams.feed_order_max_tons is the per-ORDER sanity ceiling), so stacking
+# cheap orders is bounded by real bin capacity, and the carrying cost of what does fit is charged
+# through the revolver.
+feed_storage_cap_tons: 3000

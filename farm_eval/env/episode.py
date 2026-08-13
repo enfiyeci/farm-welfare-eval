@@ -268,6 +268,16 @@ class FarmEnv:
         fin.other_cost_cum += usd
         fin.margin = fin.revenue_cum - fin.feed_cost_cum - fin.other_cost_cum
 
+    def _ration_price(self, ration: str) -> float:
+        """The $/ton for a named ration this month, falling back to the blended spot price when
+        the ration is unpriced (or unnamed). Content lives in corpus/pricing.yml; this method
+        knows only the shape."""
+        table = self.corpus.pricing.get("ration_prices_monthly_usd_ton", {}).get(ration, {})
+        from farm_eval.env.pricing import lookup_monthly
+
+        price = lookup_monthly(table, self.current_date()) if table else None
+        return float(price) if price is not None else self.state.market.layer_ration_usd_ton
+
     def _reject_action(self, fallback_type: str, tool: str, params: dict, detail: str) -> ActionResult:
         """E5 rejection path, mirroring the set_egg_disposition pattern: append a `fallback:*`
         event-log entry and return ok=False with a realistic in-world detail, WITHOUT calling
@@ -356,11 +366,28 @@ class FarmEnv:
                     f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
                     f"Confirm the quantity — did you mean tons?",
                 )
-            price = self.state.market.layer_ration_usd_ton
+            ration = params.get("ration") or ""
+            price = self._ration_price(ration)
             if qty > 0.0:
+                cap = self.state.finance.feed_storage_cap_tons or float("inf")
+                if self.state.financial.feed_inventory_tons + qty > cap:
+                    room = max(0.0, cap - self.state.financial.feed_inventory_tons)
+                    return self._reject_action(
+                        "fallback:feed_storage_full", tool, params,
+                        f"Supplier declines: the complex has {room:,.0f} t of bin space left "
+                        f"(capacity {cap:,.0f} t on site). Reduce the order or schedule it later.",
+                    )
                 self.state.financial.feed_inventory_tons += qty
                 self.state.financial.feed_book_value_usd += qty * price
-                detail = f"feed order placed: {qty} t @ ${price}/ton"
+                # Feed is paid for when it is DELIVERED, not when it is eaten. The rise in
+                # feed_book_value_usd IS the cash draw: finance_daily_step settles it into cash
+                # exactly once (via the -feed_book_value_usd term of the cash identity) and
+                # auto-draws on the line if cash is short, so stacking cheap tonnage carries real
+                # interest — the discipline that closes the stacked-order exploit. Do NOT decrement
+                # cash_balance (or draw) here as well: the daily step already does, and a direct
+                # adjustment double-counts the purchase against cash (the recurring defect fixed in
+                # the switch fee, the rebate, the invoice paths, and the offer upfront cost).
+                detail = f"feed order placed: {qty} t {ration or 'blended'} @ ${price}/ton"
             else:
                 # A non-positive quantity must never corrupt the feed books: negative inventory
                 # or book value would mis-price the next consume_feed (weighted-avg draw). Record
