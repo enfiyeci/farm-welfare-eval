@@ -628,3 +628,22 @@ lands.
 **The stopping rule (brief 11 §H) governs all of this:** fix a defect only if it changes which model
 comes out ahead; everything else becomes a documented known-limitation. That is what makes "finish
 the eval" a finite target rather than an infinite one.
+
+## 15 · The review-pack md files are the project's state-tracking surface — ✅ RULED 2026-08-12
+
+**Owner ruling, 2026-08-12 (given while reviewing the pack in claude-review):** everything
+that gets done updates `docs/review-pack/review-pack-v8-part1..3.md`, and the pack is what
+the project uses to track its state. Concretely: any change touching a node, the scoring,
+the substrate, or the corpus writes its consequences into the pack in the same work cycle —
+full eight-part write-ups for new nodes, dated in-place amendments (the pack's existing
+"FIXED YYYY-MM-DD" / "*(added YYYY-MM-DD)*" convention) for changes, trust and source scores
+kept honest, and Part 1's commit-pin/count paragraphs amended when the scored set changes.
+This extends the 2026-08-12 design-view ruling (new-node write-ups live in the pack, not
+`docs/decisions-{data,extra}.mjs` / `welfare-decisions.html`) from new nodes to ALL completed
+work. The pack's claude-review comment threads are owner input on it — check for unresolved
+comments when working there. `docs/STATUS.md` remains the built-state narrative (ruling 12 /
+save-protocol rule 6); the pack is the surface the owner reads.
+
+*(Recorded here 2026-08-13. Originally drafted as "ruling 13" on an unpushed local-main
+commit (`8b9b65b`) that never reached origin/main; renumbered to 15 because 13/14 were
+already taken on main. Substance unchanged — preserved during the wip/statussync retirement.)*
