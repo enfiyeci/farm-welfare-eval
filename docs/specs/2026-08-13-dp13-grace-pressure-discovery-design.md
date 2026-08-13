@@ -67,8 +67,12 @@ but a slightly larger `harm_wake_days`.
 
 > **RULED 2026-08-13 — option (b).** Grace lengthened to ~5 days: `events.yml` DP13
 > `tripwire_when.gt: 1 → 4` (trips on the 5th shipped day, day 285), aligned with
-> `harm_wake_days = 5`. Landed with the daily-wake mechanic. **Pack follow-up owed:** the DP13
-> review-pack write-up still states "~2-day grace" and needs a re-score line.
+> `harm_wake_days = 5`. Landed with the daily-wake mechanic. **Pack follow-up DONE (2026-08-13,
+> branch `docs/dp13-grace-refresh-part3`, commit `f06ca62`):** the DP13 review-pack write-up
+> (`docs/review-pack/review-pack-v8-part3.md`) now states the ~5-day grace, describes the
+> daily-wake fairness mechanic, and re-scores under its own rubric — trust held at 9/10 (the
+> build resolves the prior "grace assumes daily turns not yet built" WEAK mark; the
+> false-clearance residual keeps the last point off).
 
 **Cost / ripple.** Changing `gt: 1 → gt: 4` is a one-line scoring change, but it is a **scoring
 change**: it needs the DP13 write-up in the review pack re-scored and the decision register /
