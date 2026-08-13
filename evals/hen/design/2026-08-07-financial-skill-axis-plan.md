@@ -2066,6 +2066,7 @@ Create `tests/env/test_feed_procurement.py`:
 """Task 6 (M8): feed made real — wider price path, cumulative storage cap, per-ration pricing."""
 import pytest
 
+from farm_eval.env import finance
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus
 from farm_eval.env.model import ModelParams
@@ -2130,12 +2131,26 @@ def test_an_unpriced_ration_falls_back_to_the_blended_spot_price():
     assert env.state.financial.feed_book_value_usd == pytest.approx(10 * spot)
 
 
-def test_a_feed_order_draws_cash_at_order_time():
+def test_a_feed_order_draws_cash_when_the_daily_step_settles():
+    """A feed order raises feed_book_value_usd immediately; finance_daily_step settles that rise
+    into cash exactly once (drawing on the line if cash is short), so ordering feed really does
+    cost cash — at the daily settlement, not a direct decrement at order time (which would
+    double-count against the settlement). Net position (cash - drawn) drops by exactly the order's
+    booked value, and the cash identity holds after settling. Non-vacuous: asserts the order
+    booked a positive value."""
     env = _env()
-    cash_before = env.state.financial.cash_balance
-    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": 500})
-    assert env.state.financial.cash_balance < cash_before
+    p = ModelParams()
+    # Settle a baseline so the net-position delta is attributable to the feed order alone.
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
     fin = env.state.financial
+    net_before = fin.cash_balance - fin.revolver_drawn
+    book_before = fin.feed_book_value_usd
+    env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": 500})
+    booked = fin.feed_book_value_usd - book_before
+    assert booked > 0
+    finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
+    net_after = fin.cash_balance - fin.revolver_drawn
+    assert net_before - net_after == pytest.approx(booked, abs=1e-6)
     identity = fin.finance_opening_cash + fin.margin - fin.feed_book_value_usd
     assert fin.cash_balance - fin.revolver_drawn == pytest.approx(identity, abs=1e-6)
 ```
