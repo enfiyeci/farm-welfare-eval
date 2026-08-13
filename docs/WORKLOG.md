@@ -13,6 +13,31 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
+
+- **What / decided:** Completed the behaviour-report un-skip follow-up (chip `task_2dd6abd1`) and
+  landed it FF on `main` (origin/main now `0c25d68`). Beyond the module-skips, the litter-lever
+  merge had reverted three report-side pieces the raw restore missed: `report/extract.py`'s whole
+  `day_map` feature (the `KeyError` source), `report/render.py`'s behaviour-HTML integration
+  (leaving `analysis/report_sections.py` orphaned), and it broke `analysis/attribute.py`'s matcher
+  walk on litter's new `AnyOfMatch` (F12 OR-form). Restored extract/render **verbatim** from
+  pre-litter `32842b3` (diff was only the reversion, nothing litter-specific clobbered); routed
+  `_signature_matchers` through the schedule's own `match_alternatives`; regenerated the behaviour
+  golden (adds only the `place_pullet_order` profile); un-skipped `tests/analysis/test_{build,cli}.py`.
+  Fresh-Opus tier-2 review APPROVED (Codex out on its usage limit). `tests/analysis` 149 passed /
+  0 skipped; full suite **2210 passed, 1 unrelated skip**.
+- **Acceptance folder** (`evals/hen/runs/2026-08-07-behaviour-report-acceptance/`, ruling 8):
+  DEFERRED, not restored (owner-ruled option a). The only pilot log is the pre-litter 2026-07-12
+  Gemini run, which contains none of DP24/DP25, so regenerating "acceptance evidence" from it now
+  would attest the tool on a run with none of the new nodes — not honest litter-era evidence — and
+  a verbatim restore would ship a false "re-running reproduces these artifacts" README. The
+  historical 2026-08-07 artifacts are preserved in git at `32842b3`.
+- **Next action:** produce real litter-era acceptance evidence (regenerate the folder + refresh its
+  `dp-table.md` to the built dossier set) when the first litter-era pilot is run.
+- **Refs:** origin/main `0c25d68`; `farm_eval/report/extract.py`, `farm_eval/report/render.py`;
+  `farm_eval/analysis/attribute.py`; `tests/analysis/test_{build,cli}.py` + behaviour golden;
+  historical acceptance folder at git `32842b3`; chip `task_2dd6abd1`.
+
 ## 2026-08-13 · claude · litter-lever wave LANDED on main (integration/litter-to-main → main, FF)
 
 - **What / decided:** Fast-forwarded the litter-lever wave onto `main` (origin/main now
