@@ -2,6 +2,32 @@
 
 Newest entry first. One entry per finished work unit or decided plan; keep entries short
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
+Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
+
+### Entry template (copy, fill in, put at the TOP)
+
+```
+## YYYY-MM-DD · <tool: codex|claude> · <short title> (branch <branch>)
+- **What / decided:** <1–3 sentences>
+- **Next action:** <the concrete next step, or "none">
+- **Refs:** <files / commit SHAs / spec paths>
+```
+
+## 2026-08-13 · claude · wip-branch salvage: cross-tool infra + decision memos to main (branch docs/wip-tree-salvage)
+
+- **What / decided:** Retired `wip/2026-08-06-owner-html-snapshot` without information loss.
+  Ported to main: `AGENTS.md` (Codex on-ramp, paths updated for the 2026-08 reorg) + the
+  `CLAUDE.md` shared-agent-state section + this WORKLOG's template; DP04 + DP06 owner
+  decision memos → `evals/hen/nodes/2026-08-13-dp0{4,6}-*.md`; the project overview →
+  `evals/hen/design/2026-08-13-project-overview.md`. Earlier the same day, the wip pack
+  sourcing (DP04/DPE/DP07/N28 + `docs/research/2026-08-13-source-verification-pass.md`)
+  merged via PR #33. Deliberately NOT ported (recorded verbatim in the salvage record):
+  the stale deck/fieldguide tweaks + rebuilt binaries, the owner HTML snapshots (owner:
+  redo later), `docs/reviewer-pack.md` (ruled dead).
+- **Next action:** owner decisions on the DP04 memo (options A″/A′/B/C) and the DP06
+  memo's Decision 2 (disease-shape honesty) are still open.
+- **Refs:** `docs/handoffs/2026-08-13-wip-owner-html-snapshot-salvage.md` (the full
+  disposition table), PR #33, PR #31.
 
 ## 2026-08-13 · wave-2: bounded daily-wake mechanic BUILT (branch feat/todo-wave2)
 
@@ -44,3 +70,12 @@ and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review 
   `docs/specs/2026-08-11-dp03-rework-design.md`); (4) D17 Anita rewrite (content-only,
   parallel-safe — a handoff can spin it to another agent); (5) D12 molt LAST. Then the
   tier-3 pre-merge review pair before wave-2 merges to main.
+
+## 2026-08-12 · claude · AGENTS.md + WORKLOG created as the shared cross-tool surface (branch wip/2026-08-06-owner-html-snapshot; landed on main 2026-08-13 via docs/wip-tree-salvage)
+
+- **What / decided:** Created `AGENTS.md` (Codex on-ramp → routes to `CLAUDE.md` + design
+  docs, flags the Claude-only outside-repo context, defines this worklog protocol) and the
+  first version of this WORKLOG, so a Codex instance reading the repo lands with the same
+  picture a Claude instance does. (Historical entry, preserved from the wip branch at
+  salvage time; the placement decision it flagged was resolved by landing both on main.)
+- **Refs:** `AGENTS.md`, `docs/WORKLOG.md`
