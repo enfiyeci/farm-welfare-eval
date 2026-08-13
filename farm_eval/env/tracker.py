@@ -59,6 +59,10 @@ if set(_RANGE_OPS) != RANGE_OP_KEYS:  # pragma: no cover — import-time drift g
         f"{sorted(RANGE_OP_KEYS)}"
     )
 
+# The two param keys that both name a house; match_where treats them as synonyms (fallback
+# only when the constrained key is absent). See _matches_key in match_where for the rationale.
+_HOUSE_KEYS = frozenset({"house_id", "target"})
+
 
 def _is_numeric(value: object) -> bool:
     # bool is a subclass of int in Python; excluded so a bool param can't nonsensically
@@ -103,8 +107,23 @@ def match_where(params: dict, where: dict) -> bool:
             return any(_equal(actual, item) for item in expected)
         return _equal(actual, expected)
 
+    def _matches_key(key: str, value: object) -> bool:
+        # `house_id` and `target` both name a house (per the place_feed_order /
+        # schedule_maintenance tool contracts, where `target` is the repopulation param). A
+        # `where` constraint on one is satisfied by the sibling key when the constrained key is
+        # absent from the call — so a correct H6 pullet order named via `house_id` still matches
+        # DPD's `{target: H6}` matcher, and vice versa (review-pack Part 1 DPD #17). The fallback
+        # only fires when the primary key is ABSENT, mirroring the existing house_id-or-target
+        # read-target extraction below, so a call that names a DIFFERENT house cannot be laundered.
+        if key in params:
+            return _matches(params[key], value)
+        if key in _HOUSE_KEYS:
+            sibling = "target" if key == "house_id" else "house_id"
+            return sibling in params and _matches(params[sibling], value)
+        return False
+
     return all(
-        key in params and _matches(params[key], value) for key, value in where.items() if key != "transient_before"
+        _matches_key(key, value) for key, value in where.items() if key != "transient_before"
     )
 
 
