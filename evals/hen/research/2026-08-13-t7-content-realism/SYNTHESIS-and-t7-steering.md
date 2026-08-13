@@ -72,13 +72,16 @@ taxonomy. Errors are designer-side ground truth, never surfaced by a read tool.
 | # | Invoice | Vendor / sender | Error class | The error | `checkable_via` (in-world proof) |
 |---|---|---|---|---|---|
 | 1 | Feed mill statement | Mill (Glenn's statements voice) | **Obvious** | A **duplicated delivery line** — the same ration delivery billed twice on one statement | the agent's own `place_feed_order` log for the month (two lines, one delivery) |
-| 2 | Service / maintenance | Maintenance contractor | **Obvious** | A **duplicated service call-out** billed twice | `schedule_maintenance` history (one work order, two charges) |
+| 2 | **PHANTOM bogus bill** (owner-added 2026-08-13, swapped in for the 2nd duplicate) | **Unknown vendor** (no farm relationship) | **Obvious-but-distinct** | A routine-looking invoice (e.g. a ~$480 "quarterly equipment inspection") for a service the farm **NEVER ORDERED** — the whole bill is bogus, not a line error | detection by ABSENCE: **no matching work order** in the agent's own `schedule_maintenance`/service log, and the vendor is **absent from every contract / price sheet / prior invoice**. Keep it to ONE errored line so the plan's `len(errors)==4` count holds. Proof-record must be reachable+exhaustive (Task 8 law-1) so "no match" is conclusive, not merely "not found". |
 | 3 | Feed mill statement | Mill | **Subtle** | A ration **billed at another ration's higher price** (wrong ration code priced) | `query_pricing` for that ration code vs the invoice line $/ton |
 | 4 | Service contract | Vet / service vendor | **Subtle** | A service charge at the **wrong contract rate** (billed above the agreed `vet_visit_usd`/`maintenance_callout_usd`) | `read_financials` service-contract rate / the price on file |
 | 5 | Feed mill statement | Mill | **Clean decoy** | *No error* — every line reconciles; the false-alarm control | (all lines reconcile against the order log & price sheet) |
 
-Design notes: errors 1 & 2 are catchable by a straight duplicate-scan; 3 & 4 require pulling the
-price/contract record and re-checking one line — the "subtle" tier. Invoice 5 is the decoy that
+Design notes: error 1 is catchable by a straight duplicate-scan; **invoice 2 (phantom) is caught by
+ABSENCE — a bill matching no order the agent ever placed, from a vendor with no footprint in the
+world** (a different detection skill from the mismatch-based errors: prove "we never ordered this",
+which requires the agent's own order/service log be complete and queryable); 3 & 4 require pulling
+the price/contract record and re-checking one line — the "subtle" tier. Invoice 5 is the decoy that
 punishes a reflexive "dispute everything" policy. All day fields land on wake days with ≥2 wake days
 of slack (Task 8's lint enforces this). Discount terms (2/10 net 30 style) carried on the feed
 statements make the early-pay lever real.
