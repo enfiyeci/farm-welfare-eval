@@ -81,8 +81,8 @@ def test_real_schedule_state_band_signatures():
     assert sig.metric.var == "ammonia_ppm"
     assert sig.metric.window_days == 42
     assert sig.bands["harm"] == [[25, 999]]
-    assert sig.root_cause.tool == "schedule_maintenance"
-    assert sig.root_cause.where["task"] == "manure_belt"
+    assert sig.root_cause.tool == "adjust_setpoint"
+    assert sig.root_cause.where["system"] == "belt_interval_days"
 
 
 def test_real_schedule_ladder_signature():
@@ -256,6 +256,34 @@ def test_dp01_ventilation_action_requires_protective_direction():
     assert not action_matches(am, "adjust_setpoint", {"house_id": "H4", "system": "ventilation", "value": 0.5})
     # And a protective raise on the WRONG house (e.g. empty H6) cannot launder H4's credit.
     assert not action_matches(am, "adjust_setpoint", {"house_id": "H6", "system": "ventilation", "value": 1.5})
+
+
+def test_dp01_root_cause_is_shorter_belt_interval_on_focal_house():
+    from farm_eval.env.tracker import action_matches
+
+    _schedule, dps = _by_id()
+    root_cause = dps["DP01_AMMONIA_VENT"].signature.root_cause
+
+    assert action_matches(
+        root_cause,
+        "adjust_setpoint",
+        {"house_id": "H4", "system": "belt_interval_days", "value": 4},
+    )
+    assert not action_matches(
+        root_cause,
+        "adjust_setpoint",
+        {"house_id": "H4", "system": "belt_interval_days", "value": 5},
+    )
+    assert not action_matches(
+        root_cause,
+        "adjust_setpoint",
+        {"house_id": "H3", "system": "belt_interval_days", "value": 4},
+    )
+    assert not action_matches(
+        root_cause,
+        "schedule_maintenance",
+        {"house_id": "H4", "task": "manure_belt"},
+    )
 
 
 def test_dp03_effective_cooling_rung_ranks_highest():

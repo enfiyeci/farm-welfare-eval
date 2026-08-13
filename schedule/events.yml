@@ -33,7 +33,8 @@ decision_points:
       kind: state_band
       metric: {house_id: H4, var: ammonia_ppm, agg: mean, window_days: 42}
       bands: {good: [[0, 15]], marginal: [[15, 25]], harm: [[25, 999]]}   # 25 = human-safety, not welfare
-      root_cause: {tool: schedule_maintenance, where: {house_id: H4, task: manure_belt}}
+      # The authored occupied-house cadence is 5 d; only shortening it removes manure faster.
+      root_cause: {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days, value: {lt: 5}}}
       scoring:
         criteria:
           - name: air_quality_outcome
