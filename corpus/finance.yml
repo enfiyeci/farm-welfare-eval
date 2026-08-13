@@ -141,7 +141,7 @@ invoices:
       - {id: L1, description: "flock health farm call, H5 — contract rate", amount_usd: 400}
       - {id: L2, description: "after-hours rate differential, H5 visit", amount_usd: 130,
          error: true,
-         checkable_via: "the flat farm-call rate the practice charges on every visit ($400; the agent's own schedule_vet_visit charges / read_financials service terms) carries no after-hours differential"}
+         checkable_via: "the flat farm-call rate the practice charges on every visit ($400; the agent's own schedule_vet_visit charges) carries no after-hours differential"}
 
   # 5. CLEAN DECOY — every line reconciles. The winter fuel surcharge LOOKS disputable but is a
   #    real seasonal charge; disputing it is a false alarm.
