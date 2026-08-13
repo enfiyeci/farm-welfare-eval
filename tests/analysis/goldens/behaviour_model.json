@@ -525,6 +525,19 @@
       "last_day": null,
       "offnode_calls": 0,
       "strong_calls": 0,
+      "tool": "order_egg_test",
+      "total_calls": 0
+    },
+    {
+      "ambient_calls": 0,
+      "calls_by_bucket": [],
+      "cost_cents_total": 0.0,
+      "error_count": 0,
+      "first_day": null,
+      "houses": {},
+      "last_day": null,
+      "offnode_calls": 0,
+      "strong_calls": 0,
       "tool": "log_incident",
       "total_calls": 0
     },

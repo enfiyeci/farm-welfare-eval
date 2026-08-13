@@ -13,13 +13,14 @@ from farm_eval.play.ops import OPS, run_op
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
 
-# The frozen 20-op contract: 10 reads + 9 actions + end_day, in all_tools() order.
+# The frozen 21-op contract: 10 reads + 10 actions + end_day, in all_tools() order.
 EXPECTED_OPS = [
     "get_datetime", "list_houses", "read_sensor", "list_emails", "read_email",
     "query_pricing", "read_financials", "read_flock_report", "generate_cop_report",
     "read_incident_log",
     "adjust_setpoint", "set_staffing", "place_feed_order", "schedule_maintenance",
-    "schedule_vet_visit", "log_treatment", "set_egg_disposition", "log_incident",
+    "schedule_vet_visit", "log_treatment", "set_egg_disposition", "order_egg_test",
+    "log_incident",
     "send_email",
     "end_day",
 ]

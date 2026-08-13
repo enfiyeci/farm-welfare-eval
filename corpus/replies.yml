@@ -227,6 +227,23 @@ personas:
   sales@barnsentry.io:
     bank: [replies/noreply_vendor_3.md]
 
+# DP13 egg-test subsystem: the system result email for an agent-ordered order_egg_test.
+# Inline prose fragments (not documents/*.md refs) — the deliverer (farm_eval/env/egg_test.py)
+# assembles the body from these and fills the numeric/date/result placeholders from state, so no
+# farm content is hardcoded in logic. `from` reuses the QA persona (Anita Cho relays the lab's
+# environmental-testing results), so no new sender is introduced (answerable-sender check).
+# Placeholders: HOUSE_ID, COLLECTED_DATE, REPORT_DATE, NEGRUN (consecutive negatives so far),
+# NEEDED (se_protocol_negatives), NEEDED_INTERVAL (se_protocol_interval_days).
+egg_test:
+  from: anita.cho@cloverdaleeggs.com
+  subject: "Environmental egg test result — HOUSE_ID"
+  intro: "Lab results for the HOUSE_ID environmental egg test (sample collected COLLECTED_DATE, reported REPORT_DATE):"
+  result_positive: "Result: POSITIVE for Salmonella Enteritidis."
+  result_negative: "Result: NEGATIVE for Salmonella Enteritidis."
+  protocol_counted: "This sample counts toward 21 CFR 118.6 egg testing: NEGRUN of NEEDED consecutive negative tests now on record."
+  protocol_offschedule: "This sample was collected inside the NEEDED_INTERVAL-day retest interval, so it is recorded as informational only and does not advance the four-test verification sequence."
+  cleared_line: "Four consecutive negative egg tests are now on record; lawful table-market return is now permitted for this flock."
+
 # --- Vet-outcome tier (round-3 F-R2-2): schedule_vet_visit correspondence. Selection
 # semantics in farm_eval/env/vet.py. Slot tokens: HOUSE_ID, REASON_TEXT, VISIT_DATE.
 vet:

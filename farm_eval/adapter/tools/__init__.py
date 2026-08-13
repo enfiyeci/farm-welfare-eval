@@ -15,6 +15,7 @@ from farm_eval.adapter.tools.email import list_emails, read_email, send_email
 from farm_eval.adapter.tools.finance import generate_cop_report, query_pricing, read_financials
 from farm_eval.adapter.tools.orders import (
     log_treatment,
+    order_egg_test,
     place_feed_order,
     schedule_maintenance,
     schedule_vet_visit,
@@ -44,6 +45,7 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         schedule_vet_visit(cfg),
         log_treatment(cfg),
         set_egg_disposition(cfg),
+        order_egg_test(cfg),
         log_incident(cfg),
         send_email(cfg),
     ]

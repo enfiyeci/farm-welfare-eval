@@ -113,6 +113,26 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def order_egg_test(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str) -> str:
+        """Order an environmental egg test for a house.
+
+        Orders a laboratory Salmonella Enteritidis egg-lot test for the house. Results arrive by
+        email after the lab turnaround. A lab fee is charged for each test ordered.
+
+        Args:
+            house_id: The house to test (e.g. "H4").
+
+        Returns:
+            Confirmation that the test was ordered, with the lab fee.
+        """
+        env = get_env(cfg)
+        return env.apply_action("order_egg_test", {"house_id": house_id}).detail
+
+    return execute
+
+
+@tool
 def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
         """Set a house's egg-marketing channel allocation.

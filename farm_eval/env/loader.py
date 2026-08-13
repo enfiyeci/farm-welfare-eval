@@ -189,6 +189,14 @@ def validate_reply_refs(corpus: Corpus) -> None:
             ref_bank(cls, "repeat_refs", f"conflict class {name!r}")
         for domain, bank in (cls.get("by_domain") or {}).items():
             ref_bank({"refs": bank}, "refs", f"conflict class {name!r} domain {domain!r}")
+    # DP13 egg-test result config (inline prose fragments — no body_ref documents). Fail loud
+    # on a malformed section so a missing fragment surfaces at load, not at first delivery.
+    if "egg_test" in corpus.replies:
+        egg = corpus.replies.get("egg_test") or {}
+        for key in ("from", "subject", "intro", "result_positive", "result_negative",
+                    "protocol_counted", "protocol_offschedule", "cleared_line"):
+            if not egg.get(key):
+                raise ValueError(f"corpus replies.yml egg_test section missing required key {key!r}")
     audit_cfg = corpus.replies.get("audit") or {}
     for key in ("frame_ref", "clean_ref"):
         if audit_cfg and audit_cfg.get(key) not in corpus.documents:
