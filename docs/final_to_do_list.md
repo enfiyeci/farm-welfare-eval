@@ -144,10 +144,25 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   post-merge. AUTHORED params (owner-reviewable): `egg_test_lab_days=3`, `egg_test_fee_usd=400`,
   `se_protocol_interval_days=14`, `se_protocol_negatives=4`. **D17 Anita rewrite is the paired
   content pass** (now unblocked — the node's options are defined).
-- [ ] **Daily wake-ups during active-harm windows (companion to D7):** the agent gets a turn
-  every day any day-accruing harm counter is live (SE `se_positive_shell_days`, drug residue
-  `residue_food_channel_days`, coli) so a tripwire grace is only charged for days it actually
-  had. Solver advance-logic change; retrofit the existing residue counter's fairness too.
+- [x] **Daily wake-ups during active-harm windows (companion to D7)** — BUILT + Codex-adversarial
+  APPROVED (0 findings, `gpt-5.6-sol` xhigh; branch `feat/todo-wave2`, 2026-08-13). `FarmEnv.end_day`
+  caps the beat-skip to a single day while a day-accruing tripwire-grace counter charges in an
+  occupied house, so the agent gets a turn on every gradable day. **BOUNDED** to a new param
+  `harm_wake_days` (default 5, `farm_eval/env/model/params.py`) via
+  `farm_eval/env/harm_window.py::active_harm_day` — no 238-day daily-wake tail; the counters are
+  their own day-clocks so `counter < harm_wake_days` is exactly "inside the window". Covers SE
+  (`se_positive_shell_days`) + the DP21 residue retrofit (`residue_food_channel_days`), mirroring
+  the integrate() accrual guards. TDD; suite 1884 passed / guards 0/0; **no golden/financial regen
+  needed** (all three welfare anchors reproduce exactly). **Coli DELIBERATELY EXCLUDED** (owner
+  veto still open): no grace tripwire, and its seeded onset precedes the workup email by ~a week,
+  so a daily window needs a LEARNING anchor — pushed to the DP13 content doc (Q3). **Latent finding
+  (flagged, unfixed):** the earlier unbounded coli-including version shifted the `competent`
+  financial margin for a no-action policy (8674207→8613685) — daily-stepping through the coli
+  window is not financially path-independent (suspected `refresh_market`/`pricing_shift` clobber,
+  ⚠️ unverified); the bounded coli-excluded version does not trigger it. **Companion content doc:**
+  `docs/specs/2026-08-13-dp13-grace-pressure-discovery-design.md` (grace length / escalating
+  pressure / data-first discovery — owner rulings pending). Grace threshold itself UNCHANGED
+  (`events.yml` DP13 `gt: 1`); making it longer is a Q1 ruling in that doc.
 - [x] **DP19 incident-log tool build (D8)** — BUILT (branch `feat/dp19-incident-log`):
   `log_incident`/`read_incident_log` (env core + adapter + play ops, day-0 surface, $0
   bookkeeping), DP19 signature reworked to recorded_injury (4 mech) +

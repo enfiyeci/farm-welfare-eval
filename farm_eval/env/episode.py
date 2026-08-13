@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from farm_eval.env.clock import date_for_day, next_beat
 from farm_eval.env.digest import build_digest
 from farm_eval.env.egg_test import deliver_egg_test_mail
+from farm_eval.env.harm_window import active_harm_day
 from farm_eval.env.events import (
     fire_events_in_window,
     lapse_expired_decision_points,
@@ -279,6 +280,14 @@ class FarmEnv:
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         old_day = self.state.day_index
         new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
+        # Daily wake-up during active harm (companion to the DP13 egg-test subsystem): while a
+        # day-accruing harm counter is live in an occupied house, cap the beat-skip to a single
+        # day so the agent gets a turn on every day a tripwire-grace counter charges (integrate
+        # is path-independent, so this changes only the agent's opportunities, never the counter
+        # math for a fixed policy). See farm_eval/env/harm_window.py.
+        if elapsed > 1 and active_harm_day(self.state, self.params):
+            new_day = old_day + 1
+            elapsed = 1
         # Atomic: stage every mutation on a deep copy and commit only after the new day's events fire
         # successfully. `integrate` is non-idempotent, so a firing failure must NOT leave the live
         # state half-advanced — otherwise retry would compute the next beat from the advanced day and

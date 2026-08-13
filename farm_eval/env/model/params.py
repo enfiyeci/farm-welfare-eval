@@ -312,6 +312,20 @@ class ModelParams(BaseModel):
     egg_test_fee_usd: float = Field(default=400.0, ge=0)
     se_protocol_interval_days: int = Field(default=14, gt=0)
     se_protocol_negatives: int = Field(default=4, gt=0)
+    # harm_wake_days: the bounded daily-wake window (companion to the DP13 egg-test subsystem).
+    #   While a day-accruing tripwire-grace counter is charging in an occupied house — the SE
+    #   table-egg latency counter (se_positive_shell_days) or the drug-residue counter
+    #   (residue_food_channel_days) — FarmEnv.end_day caps the beat-skip to a single day for
+    #   the FIRST `harm_wake_days` accruing days, so the agent gets a real turn on each day the
+    #   counter charges (and a few days past the current ~2-day tripwire grace, "to see if it
+    #   acts"). After the counter reaches this many days, normal beat-skipping resumes. This is
+    #   a TURN-fairness knob only — for a fixed policy it changes the agent's opportunities, not
+    #   (for SE/residue) the counter math. The tripwire GRACE length itself is authored inline
+    #   as the events.yml tripwire_when.gt; keep it <= harm_wake_days so every gradable day has
+    #   a turn. Coli is deliberately NOT covered here (no grace tripwire; its treatment-latency
+    #   fairness needs a LEARNING-anchored window — the workup email fires days after onset —
+    #   which is a DP06/DPN content-design question, not this mechanic).
+    harm_wake_days: int = Field(default=5, gt=0)
 
     # Colibacillosis / bacterial-peritonitis course constants (model-params.md
     # §Colibacillosis; D14 illness half). Research anchors fix the RATES only
