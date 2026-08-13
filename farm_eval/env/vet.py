@@ -23,7 +23,24 @@ def _fill(text: str, visit: VetVisit, state: EnvState) -> str:
     )
 
 
-def _report_refs(cfg: dict, reason: str) -> list[str]:
+def _report_refs(cfg: dict, reason: str, state: EnvState, house_id: str,
+                 day: int, params) -> list[str]:
+    """Pick the visit-report body bank. The BACTERIAL (colibacillosis) report is routed on
+    the visited house's ACTUAL disease state — an active coli course at report time — NOT on
+    the caller's reason keywords (sol review #2, 2026-08-12). Keyword routing was both
+    circular (the agent had to already name "bacterial" to be TOLD it was bacterial — but
+    discovering that is the point of the visit) and unsafe (an H3 "rule out bacterial" call
+    during the HPAI arc drew a colibacillosis "not reportable" report). Routing on truth
+    fixes both: the vet posts the birds and finds colibacillosis iff the house genuinely has
+    it, regardless of the words used, and an HPAI house (no coli course) never does.
+    Remaining classes (mite / treatment) stay keyword-routed."""
+    hw = state.welfare.houses.get(house_id) if params is not None else None
+    if (
+        hw is not None
+        and cfg.get("report_bacterial_refs")
+        and hw.coli_daily_mort_frac > params.coli_cull_harm_min_frac
+    ):
+        return cfg["report_bacterial_refs"]
     low = reason.lower()
     for row in cfg.get("report_classes") or []:
         if any(term in low for term in row.get("contains", [])):
@@ -31,7 +48,7 @@ def _report_refs(cfg: dict, reason: str) -> list[str]:
     return cfg["report_default_refs"]
 
 
-def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
+def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int, params=None) -> int:
     cfg = (corpus.replies or {}).get("vet")
     if not cfg:
         return 0
@@ -70,9 +87,9 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int) -> int:
                 _append(cfg["ack_refs"], cfg["ack_subject"], visit)
                 visit.stage = "acked"
             else:
-                _append(_report_refs(cfg, visit.reason), cfg["report_subject"], visit)
+                _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit)
                 visit.stage = "reported"
         if visit.stage == "acked" and through_day >= visit.visit_day:
-            _append(_report_refs(cfg, visit.reason), cfg["report_subject"], visit)
+            _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit)
             visit.stage = "reported"
     return delivered

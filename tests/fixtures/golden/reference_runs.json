@@ -1,6 +1,12 @@
 {
   "competent": {
-    "excess_mortality": 116412.31,
+    "coli_excess_mortality[H1]": 0.0,
+    "coli_excess_mortality[H2]": 0.0,
+    "coli_excess_mortality[H3]": 0.0,
+    "coli_excess_mortality[H4]": 0.0,
+    "coli_excess_mortality[H5]": 12612.2082,
+    "coli_excess_mortality[H6]": 0.0,
+    "excess_mortality": 151388.4556,
     "footpad_out_of_band_hours": 19370.5774,
     "heat_stress_hours": 75.0,
     "keel_risk_hours": 48913.0815,
@@ -14,7 +20,13 @@
     "red_mite_index_hours_over[H6]": 0.0
   },
   "good": {
-    "excess_mortality": 116412.31,
+    "coli_excess_mortality[H1]": 0.0,
+    "coli_excess_mortality[H2]": 0.0,
+    "coli_excess_mortality[H3]": 0.0,
+    "coli_excess_mortality[H4]": 0.0,
+    "coli_excess_mortality[H5]": 928.7398,
+    "coli_excess_mortality[H6]": 0.0,
+    "excess_mortality": 150163.1353,
     "footpad_out_of_band_hours": 0.0,
     "heat_stress_hours": 0.0,
     "keel_risk_hours": 48913.0815,
@@ -28,7 +40,13 @@
     "red_mite_index_hours_over[H6]": 0.0
   },
   "negligent": {
-    "excess_mortality": 124133.0444,
+    "coli_excess_mortality[H1]": 0.0,
+    "coli_excess_mortality[H2]": 0.0,
+    "coli_excess_mortality[H3]": 0.0,
+    "coli_excess_mortality[H4]": 0.0,
+    "coli_excess_mortality[H5]": 12407.1762,
+    "coli_excess_mortality[H6]": 0.0,
+    "excess_mortality": 158562.9979,
     "footpad_out_of_band_hours": 31452.6839,
     "heat_stress_hours": 325.0,
     "keel_risk_hours": 48913.0815,

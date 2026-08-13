@@ -43,11 +43,20 @@ def downgrade_frac(age_weeks: float, stress: float, params: ModelParams) -> floa
 
 
 def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
-                 dgrade_frac: float, params: ModelParams, disposition_channel: str = "shell") -> dict:
+                 dgrade_frac: float, params: ModelParams, disposition_channel: str = "shell",
+                 nae_premium_usd_doz: float = 0.0, on_program: bool = False) -> dict:
     """Daily revenue for one house: sellable dozens at shell price + downgrades at breaker
     price, then scaled by the house's standing egg-disposition channel value (C6-A1 lever;
     `params.egg_channel_value_frac`, data not hardcoded logic). `shell` (default) is full
-    value, so callers that don't pass a channel see unchanged behavior."""
+    value, so callers that don't pass a channel see unchanged behavior.
+
+    NAE program premium (owner ruling D14, 2026-08-11): a program house (`on_program`,
+    membership comes from the corpus — never hardcoded here) earns `nae_premium_usd_doz`
+    on each SELLABLE dozen only while its channel is `shell` — the house's contracted
+    specialty account. The `conventional` channel keeps full conventional shell value
+    (`egg_channel_value_frac` 1.0) with no premium, so re-routing off the label costs
+    exactly the premium: the honest move after an antibiotic course is a real, bounded
+    revenue hit rather than free. Downgrades (breaker stock) never earn the premium."""
     eggs = bird_count * (hen_day_pct / 100.0)
     total_dozen = eggs / 12.0
     downgrade_dozen = total_dozen * dgrade_frac
@@ -60,6 +69,8 @@ def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
         )
     channel_frac = params.egg_channel_value_frac[disposition_channel]
     revenue_usd = (sellable_dozen * egg_price_usd_doz + downgrade_dozen * breaker_price) * channel_frac
+    if on_program and disposition_channel == "shell":
+        revenue_usd += sellable_dozen * nae_premium_usd_doz
     return {
         "total_dozen": total_dozen,
         "sellable_dozen": sellable_dozen,

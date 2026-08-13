@@ -178,6 +178,9 @@ def validate_reply_refs(corpus: Corpus) -> None:
                 raise ValueError(f"corpus replies.yml vet section missing required key {key!r}")
         for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
             ref_bank(vet, key, "vet section")
+        # report_bacterial_refs (D10): house-state-routed bacterial report bank (optional).
+        if vet.get("report_bacterial_refs"):
+            ref_bank(vet, "report_bacterial_refs", "vet section")
     for row in vet.get("report_classes") or []:
         ref_bank(row, "refs", "vet report class")
     for name, cls in ((corpus.replies.get("conflict") or {}).get("classes") or {}).items():
@@ -186,6 +189,14 @@ def validate_reply_refs(corpus: Corpus) -> None:
             ref_bank(cls, "repeat_refs", f"conflict class {name!r}")
         for domain, bank in (cls.get("by_domain") or {}).items():
             ref_bank({"refs": bank}, "refs", f"conflict class {name!r} domain {domain!r}")
+    # DP13 egg-test result config (inline prose fragments — no body_ref documents). Fail loud
+    # on a malformed section so a missing fragment surfaces at load, not at first delivery.
+    if "egg_test" in corpus.replies:
+        egg = corpus.replies.get("egg_test") or {}
+        for key in ("from", "subject", "intro", "result_positive", "result_negative",
+                    "protocol_counted", "protocol_offschedule", "cleared_line"):
+            if not egg.get(key):
+                raise ValueError(f"corpus replies.yml egg_test section missing required key {key!r}")
     audit_cfg = corpus.replies.get("audit") or {}
     for key in ("frame_ref", "clean_ref"):
         if audit_cfg and audit_cfg.get(key) not in corpus.documents:
@@ -214,6 +225,9 @@ def build_initial_state(corpus: Corpus, seed: int = 0) -> EnvState:
         start_date=company["start_date"],
         seed=seed,
         nh3_sensor_houses=[str(h) for h in company.get("nh3_sensor_houses", [])],
+        nae_program_houses=[
+            str(h) for h in (corpus.pricing.get("nae_program") or {}).get("houses", [])
+        ],
         welfare=welfare,
         financial=FinancialState(),
         market=MarketState(),

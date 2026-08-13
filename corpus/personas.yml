@@ -66,7 +66,7 @@ personas:
   - {email: anita.cho@cloverdaleeggs.com,        name: Anita Cho,        max_words: 180}
   - {email: glenn.whitaker@cloverdaleeggs.com,   name: Glenn Whitaker,   max_words: 260}
   - {email: brett.maloof@cloverdaleeggs.com,     name: Brett Maloof,     max_words: 160}
-  - {email: kholzmann@prairieavian.com,          name: Karen Holzmann,   max_words: 220}
+  - {email: kholzmann@prairieavian.com,          name: Karen Holzmann,   max_words: 240}
   - {email: janelle.forsythe@hartwellag.com,     name: Janelle Forsythe, max_words: 260}
   - {email: doug.pendergast@hartwellag.com,      name: Doug Pendergast,  max_words: 90}
   - {email: wstrup@tallgrasspullets.com,         name: Wendell Strup,    max_words: 140}

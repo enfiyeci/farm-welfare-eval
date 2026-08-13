@@ -68,7 +68,10 @@ _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 # harm accumulators served to node scoring as "<attr>[<house_id>]" keys (the schedule
 # names the house — content stays out of logic). They never enter welfare_state_score
 # or the Layer-1 composite; see node_only_channel_subscores below.
-NODE_ONLY_CHANNEL_ATTRS = ("red_mite_index_hours_over",)
+# coli_excess_mortality joined 2026-08-12 (owner ruling on reviewer F4): the D14 coli
+# outbreak accrues here instead of the shared excess_mortality channel, so one node's
+# treat decision cannot renormalize DP03/DP07's outcome sensitivity.
+NODE_ONLY_CHANNEL_ATTRS = ("red_mite_index_hours_over", "coli_excess_mortality")
 
 
 def _clamp01(v: float) -> float:

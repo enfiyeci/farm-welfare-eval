@@ -47,9 +47,13 @@ def test_competent_reports_all_channels():
         "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
     }
     bracketed = {k for k in got if "[" in k}
-    # One house-scoped node-only key per house (D5, 2026-08-11), nothing else.
+    # One house-scoped node-only key per house per attr (D5 mite 2026-08-11; F4-ruling
+    # coli channel 2026-08-12), nothing else.
     assert set(got) == base | bracketed
-    assert bracketed == {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
+    assert bracketed == (
+        {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
+        | {f"coli_excess_mortality[H{i}]" for i in range(1, 7)}
+    )
 
 
 def test_reference_run_is_deterministic():

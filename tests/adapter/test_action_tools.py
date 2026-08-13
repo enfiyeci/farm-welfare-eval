@@ -29,7 +29,7 @@ def _run(solve_fn):
 
 def test_all_tools_registry():
     tools = all_tools(CFG)
-    assert len(tools) == 17  # 9 reads (incl. generate_cop_report) + 8 actions (C2: + set_staffing)
+    assert len(tools) == 20  # 10 reads (incl. read_incident_log) + 10 actions (DP13: + order_egg_test)
     assert all(isinstance(t, Tool) for t in tools)
 
 

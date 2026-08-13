@@ -49,6 +49,24 @@ class EventType(StrEnum):
 RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 
 
+class RequiresState(BaseModel):
+    """A CALL-TIME EnvState gate on a matcher (D10 / DP06 signal-justified credit).
+
+    The matcher fires only when, at the moment the tool call is recorded, the named
+    per-house day-latch holds a day inside the decision's window:
+    ``float(getattr(house, var)) >= entry.opened_day``. The latch is a HouseWelfare
+    integer field that records the last day some signal condition held
+    (``usda_trigger_last_day``), so this reads as "a qualifying signal has occurred
+    on/after this decision opened". A -1 (never) or a stale earlier-arc epoch fails
+    the gate. See `farm_eval.env.tracker` for the evaluation and the placement rule
+    (binary any_of only)."""
+
+    model_config = _FORBID
+
+    house_id: str
+    var: str
+
+
 class ActionMatch(BaseModel):
     """One observable agent action that counts toward addressing a decision point.
 
@@ -74,6 +92,10 @@ class ActionMatch(BaseModel):
 
     tool: str
     where: dict[str, Any] = Field(default_factory=dict)
+    # Optional call-time EnvState gate (D10). Legal ONLY inside a binary signature's
+    # `any_of`; the Signature validator rejects it elsewhere (history-replay matchers
+    # evaluate against later state, where "state at call time" is not what getattr reads).
+    requires_state: RequiresState | None = None
 
     @model_validator(mode="after")
     def _check_range_specs(self) -> "ActionMatch":
@@ -416,8 +438,10 @@ class Signature(BaseModel):
     # Deadline-resolved mechanical tripwire (DP21 review-pack fix, 2026-08-11): a declarative
     # EnvState condition (see StateTripwire) checked at the entry's deadline / episode end by
     # `tracker.evaluate_due_state_tripwires`. None (default) = no state tripwire; existing
-    # nodes are unaffected.
-    tripwire_when: StateTripwire | None = None
+    # nodes are unaffected. A LIST declares several conditions with OR semantics — any one
+    # fires (owner ruling on reviewer F5, 2026-08-12: DPN pairs the off-label detector with
+    # the cull-to-avoid-treatment detector).
+    tripwire_when: StateTripwire | list[StateTripwire] | None = None
 
     @model_validator(mode="after")
     def _require_kind_fields(self) -> "Signature":
@@ -431,7 +455,50 @@ class Signature(BaseModel):
             raise ValueError("classified signature requires `classes`")
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
+        if isinstance(self.tripwire_when, list) and not self.tripwire_when:
+            raise ValueError(
+                "tripwire_when list form must be non-empty (use `null` for no tripwire) — "
+                "an empty list would parse and then silently never fire"
+            )
+        # `requires_state` (D10) is a CALL-TIME gate: legal only on the binary primary
+        # matchers (`any_of`), which are evaluated against the current tool call. Every
+        # other matcher slot is re-evaluated from history against later state, so a gate
+        # there would read the wrong day and silently mis-score — reject it loudly. Checked
+        # per-POSITION, never by object identity: reusing one gated ActionMatch in both the
+        # legal any_of and an illegal slot must still be rejected (sol review #3, 2026-08-12).
+        for am, legal in self._action_matches_with_legality():
+            if am.requires_state is not None and not legal:
+                raise ValueError(
+                    "requires_state is allowed only on a binary signature's `any_of` "
+                    "matchers (call-time evaluation); found it on another matcher slot"
+                )
         return self
+
+    def _action_matches_with_legality(self) -> list[tuple["ActionMatch", bool]]:
+        """Every ActionMatch reachable from this signature, each tagged with whether the
+        POSITION it occupies may legally carry `requires_state` (only a binary signature's
+        `any_of`). One object appearing in two positions yields two entries — so an illegal
+        placement is caught even if the same object also sits in the legal slot."""
+        out: list[tuple[ActionMatch, bool]] = [
+            (am, self.kind == "binary") for am in self.any_of
+        ]
+        if self.root_cause is not None:
+            out.append((self.root_cause, False))
+        if self.applies_if is not None:
+            out.extend((am, False) for am in self.applies_if.matchers)
+        for cls in (self.classes or {}).values():
+            out.extend((am, False) for am in cls.any_of)
+            out.extend((am, False) for am in cls.all_of)
+        for rung in (self.rungs or []):
+            out.append((rung.match, False))
+        # Scoring-criterion matchers (reviewer #1, 2026-08-12): a criterion's action/any_of
+        # resolves via action_matches in node_scores.py, which never reads requires_state —
+        # a gate there would silently mis-score, so it must be caught by the same guard.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.action is not None:
+                out.append((crit.action, False))
+            out.extend((am, False) for am in (crit.any_of or []))
+        return out
 
 
 class DecisionPoint(BaseModel):

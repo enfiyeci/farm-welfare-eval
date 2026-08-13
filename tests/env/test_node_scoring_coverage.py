@@ -31,6 +31,7 @@ REAL_CHANNELS = {
     "excess_mortality",
     "footpad_out_of_band_hours",
     "red_mite_index_hours_over[H2]",   # house-scoped node-only channel (D5, 2026-08-11)
+    "coli_excess_mortality[H5]",       # house-scoped node-only channel (F4 ruling, 2026-08-12)
 }
 
 pytestmark = pytest.mark.skipif(

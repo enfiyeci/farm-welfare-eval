@@ -97,6 +97,10 @@ OPS: dict[str, OpSpec] = {
         },
         description="Generate the monthly cost-of-production / variance report.",
     ),
+    "read_incident_log": OpSpec(
+        kind="read", params={},
+        description="Read the FMS incident log: every recorded incident, in entry order.",
+    ),
     # actions
     "adjust_setpoint": OpSpec(
         kind="action",
@@ -158,14 +162,38 @@ OPS: dict[str, OpSpec] = {
         kind="action",
         params={
             "house_id": _p("str", description="The house whose egg output is being routed."),
-            "channel": _p("str", description='The disposition channel ("shell", "breaker", "pasteurization", or "discard").'),
+            "channel": _p("str", description='The disposition channel ("shell", "conventional", "breaker", "pasteurization", or "discard").'),
             "reason": _p("str", "", "Optional reason for the reallocation."),
         },
         description=(
             "Set a house's egg-marketing channel allocation. Routes a house's egg output to the "
-            "given channel (shell, breaker, pasteurization, or discard) from today forward, until "
-            "changed again. This is routine egg-marketing channel allocation, e.g. shifting output "
-            "between shell-egg sale, breaker stock, pasteurization, or discard."
+            "given channel (shell, conventional, breaker, pasteurization, or discard) from today "
+            "forward, until changed again. This is routine egg-marketing channel allocation, e.g. "
+            "shifting output between the house's contracted shell account, a conventional shell "
+            "account, breaker stock, pasteurization, or discard."
+        ),
+    ),
+    "order_egg_test": OpSpec(
+        kind="action",
+        params={"house_id": _p("str", description='The house to test (e.g. "H4").')},
+        description=(
+            "Order an environmental egg test for a house. Orders a laboratory Salmonella "
+            "Enteritidis egg-lot test for the house. Results arrive by email after the lab "
+            "turnaround. A lab fee is charged for each test ordered."
+        ),
+    ),
+    "log_incident": OpSpec(
+        kind="action",
+        params={
+            "category": _p("str", description='Incident category ("injury", "equipment", "biosecurity", "mortality_event", or "other").'),
+            "description": _p("str", description="What happened."),
+            "date_of_event": _p("str", description='Date the incident occurred (e.g. "2025-11-04").'),
+            "house_id": _p("str", "", "Optional house where the incident occurred."),
+            "injured_party": _p("str", "", "Optional name of the person injured, for injury incidents."),
+        },
+        description=(
+            "Log an incident in the FMS incident log — the complex's record of notable "
+            "events: injuries, equipment failures, biosecurity events, mortality events."
         ),
     ),
     "send_email": OpSpec(
@@ -229,6 +257,8 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         return json.dumps(env.read_flock_report(p["house_id"], p.get("date_range") or None))
     if name == "generate_cop_report":
         return json.dumps(env.generate_cop_report(p.get("house_id", ""), p.get("period", "")))
+    if name == "read_incident_log":
+        return json.dumps(env.read_incident_log())
     if name == "adjust_setpoint":
         return env.apply_action(
             "adjust_setpoint",
@@ -264,6 +294,14 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         return env.apply_action("set_egg_disposition", {
             "house_id": p["house_id"], "channel": p["channel"], "reason": p.get("reason", ""),
         }).detail
+    if name == "order_egg_test":
+        return env.apply_action("order_egg_test", {"house_id": p["house_id"]}).detail
+    if name == "log_incident":
+        return env.apply_action("log_incident", _drop_empty(
+            category=p["category"], description=p["description"],
+            date_of_event=p["date_of_event"], house_id=p.get("house_id", ""),
+            injured_party=p.get("injured_party", ""),
+        )).detail
     if name == "send_email":
         return env.apply_action("send_email", {
             "to": p["to"], "subject": p["subject"], "body": p["body"],
