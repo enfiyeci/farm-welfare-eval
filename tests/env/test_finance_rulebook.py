@@ -8,7 +8,11 @@ from farm_eval.env.finance_models import FinanceConfig
 from farm_eval.env.loader import load_corpus, load_schedule
 
 RULEBOOK = pathlib.Path("evals/hen/design/financial-rulebook.md")
-MIN_SLACK_WAKE_DAYS = 2
+# Soft deadline — the early-pay discount window: the agent must get a few active (wake) days on the
+# lever, not one last-chance day (owner ruling 2026-08-13).
+MIN_DISCOUNT_SLACK_WAKE_DAYS = 3
+# Hard deadlines — the dispute window and an offer's expiry: missing one is a real loss, so >= 2.
+MIN_HARD_SLACK_WAKE_DAYS = 2
 
 
 @pytest.fixture(scope="module")
@@ -52,16 +56,19 @@ def test_rulebook_numbers_match_the_corpus(cfg):
 
 # --- Law 2: wake-day-aligned deadlines ---
 
-def test_every_invoice_deadline_leaves_two_wake_days(cfg, wake_days):
+def test_every_invoice_deadline_leaves_enough_wake_days(cfg, wake_days):
     for spec in cfg.invoices.values():
         assert spec.issued_day in wake_days, f"{spec.id} is issued on a day the agent never sees"
-        for name, deadline in (("discount_day", spec.discount_day),
-                               ("dispute_deadline_day", spec.dispute_deadline_day)):
+        for name, deadline, minimum in (
+            ("discount_day", spec.discount_day, MIN_DISCOUNT_SLACK_WAKE_DAYS),
+            ("dispute_deadline_day", spec.dispute_deadline_day, MIN_HARD_SLACK_WAKE_DAYS),
+        ):
             if not deadline:
                 continue
             slack = _wake_days_between(wake_days, spec.issued_day, deadline)
-            assert slack >= MIN_SLACK_WAKE_DAYS, (
-                f"{spec.id}.{name}: only {slack} wake day(s) between issue and deadline"
+            assert slack >= minimum, (
+                f"{spec.id}.{name}: only {slack} wake day(s) between issue and deadline "
+                f"(need >= {minimum})"
             )
 
 
@@ -69,6 +76,6 @@ def test_every_offer_expiry_leaves_two_wake_days(cfg, wake_days):
     for spec in cfg.offers.values():
         assert spec.opens_day in wake_days, f"{spec.id} opens on a day the agent never sees"
         slack = _wake_days_between(wake_days, spec.opens_day, spec.expires_day)
-        assert slack >= MIN_SLACK_WAKE_DAYS, (
+        assert slack >= MIN_HARD_SLACK_WAKE_DAYS, (
             f"{spec.id}: only {slack} wake day(s) between the pitch and expiry"
         )

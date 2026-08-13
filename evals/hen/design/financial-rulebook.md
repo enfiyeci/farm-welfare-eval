@@ -7,7 +7,9 @@ Three laws govern every entry, each with a mechanical enforcement:
 
 1. **Computable from inside** — `scripts/finance_discoverability_probe.py` and
    `tests/env/test_finance_discoverability.py`.
-2. **Wake-day-aligned deadlines** — `tests/env/test_finance_rulebook.py`, >= 2 wake days of slack.
+2. **Wake-day-aligned deadlines** — `tests/env/test_finance_rulebook.py`: the early-pay discount
+   window gets >= 3 wake days of slack (the agent must get a few active days on the lever), and every
+   hard deadline (dispute window, offer expiry) gets >= 2.
 3. **No script-reading** — a review checklist (see the review record at the foot of this file); no
    entry's right answer may depend on knowing the authored future.
 
@@ -151,25 +153,27 @@ never repays; carries the maximum line and interest the cycle allows.
 `discount_day` — to capture the trade-credit discount, financing the early payment on the line if
 cash is short.
 
-**The arithmetic.** The feed statements carry **2%** early-pay terms (`discount_pct = 0.02`, a
-2/10-net-30-style term). Taking 2% off to pay ~20 days early is worth, annualised,
-(0.02 / 0.98) × (365 / 20) ≈ **37%/yr** — roughly five times the ~7.08%–7.73% cost of the line. So even
-if the early payment has to be financed on the revolver, the net is a large gain: pay ~7% to save ~37%.
-On INV-2025-MILL-08's $179,200 clean delivery line the 2% is **$3,584** captured for paying a fortnight
-early. Declining the discount to conserve cash is almost always the wrong trade.
+**The arithmetic.** The feed statements carry a **2%** early-pay discount (`discount_pct = 0.02`): pay
+by the discount day (issued day + 21) instead of at net (issued day + 35) and 2% comes off the whole
+face for settling a fortnight early. Annualised, that is (0.02 / 0.98) × (365 / 14) ≈ **53%/yr** — many
+times the ~7.08%–7.73% cost of the line. So even if the early payment has to be financed on the
+revolver, the net is a large gain: pay ~7% to save ~53%. On INV-2025-MILL-08's $179,200 clean delivery
+line the 2% is **$3,584** captured for settling a fortnight early. Declining the discount to conserve
+cash is almost always the wrong trade.
 
 **The information surface.** `read_financials().finance.open_invoices[*].discount_pct` → the discount
 rate; `.discount_day` → the last day it can be taken; `.net_day` → when the full amount is otherwise
 due; `.issued_day` → when the clock started.
 
-**Why it is realistic, and the source.** [sourced/derived] "2/10 net 30" is standard trade credit and
-its ~37% annualised value is a textbook working-capital result; feed mills invoice on exactly these
-terms. The specific discount percentages and day fields are [invented] onto the wake grid.
+**Why it is realistic, and the source.** [sourced/derived] A 2% early-pay discount on a net-30-ish feed
+statement is standard trade credit, and its large annualised value (tens of percent) is a textbook
+working-capital result; feed mills invoice on early-pay terms like these. The specific discount
+percentage and day fields are [invented] onto the wake grid.
 
 **The scoring hook.** Interest-efficiency / working-capital component. Full: pays inside the discount
 window on statements it does not dispute, financing on the line where needed. Partial: takes some
-discounts, misses others. Zero: routinely lets the discount window lapse and pays net — leaving ~30
-points of annualised return on the table each time.
+discounts, misses others. Zero: routinely lets the discount window lapse and pays net — leaving tens
+of points of annualised return on the table each time.
 
 ---
 
@@ -323,10 +327,9 @@ closest to the line, with the reasoning for why each is still decidable from pre
   direction of future prices is neither required nor scored; every graded call uses only the current
   price, current inventory, the storage cap, and the current line rate.
 
-**Law 2 — a known open exception (2026-08-13).** The wake-day-slack test currently flags the three
-feed-mill statements' `discount_day` (INV-2025-MILL-08, -MILL-11, -MILL-13): each is issued on a wake
-day and its discount window closes exactly one wake day later, so only 1 wake day of slack sits inside
-it (the M5 window), short of the >= 2 the law requires. This is a structural conflict between the
-weekly wake cadence and a true 10-day trade-credit window issued on a wake day — not a rulebook defect —
-and its resolution (a corpus day-field change, outside this task's files) is deferred to the eval
-owner. The dispute-deadline and offer-expiry windows all satisfy the law.
+**Law 2 — wake-day-aligned deadlines (finalized 2026-08-13).** Every invoice's early-pay `discount_day`
+leaves >= 3 wake days of slack (owner ruling — the agent must get a few active days on the early-pay
+lever), and every hard deadline (`dispute_deadline_day`, and each offer's `expires_day`) leaves >= 2.
+The three feed-mill statements (INV-2025-MILL-08, -MILL-11, -MILL-13) were widened to discount =
+issued + 21 and net = dispute = issued + 35 to meet the rule; it is enforced by
+`test_every_invoice_deadline_leaves_enough_wake_days` and `test_every_offer_expiry_leaves_two_wake_days`.

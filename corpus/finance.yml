@@ -71,7 +71,9 @@ feed_storage_cap_tons: 3000
 # surfaced by a read tool); `checkable_via` names the in-world record that proves the error. Each
 # error line's `amount_usd` is the ERRONEOUS EXTRA only — the correct base cost was already booked
 # by the normal P&L when it was incurred, so open_invoice books only the error lines (see
-# farm_eval/env/finance.open_invoice). Day fields land on wake days with >= 2 wake days of slack.
+# farm_eval/env/finance.open_invoice). Day fields land on the weekly wake grid: discount_day gets
+# >= 3 wake days of slack (owner ruling 2026-08-13 — the agent must get a few active days on the
+# early-pay lever), hard deadlines (dispute_deadline_day / net_day) get >= 2.
 invoices:
 
   # 1. OBVIOUS — a feed delivery billed twice on one mill statement (Glenn relays the mill's bill).
@@ -79,10 +81,12 @@ invoices:
     id: INV-2025-MILL-08
     vendor: "PLACEHOLDER Prairie Feed Mill"
     issued_day: 63
-    discount_pct: 0.02          # [invented] 2/10-net-30 trade credit; no public layer-mill source
-    discount_day: 70
-    net_day: 84
-    dispute_deadline_day: 84
+    discount_pct: 0.02          # [invented] 2% early-pay trade credit; discount at issued+21,
+                                # net at issued+35 (widened onto the wake grid, owner ruling
+                                # 2026-08-13); no public layer-mill source
+    discount_day: 84
+    net_day: 98
+    dispute_deadline_day: 98
     dispute_lag_days: 5
     lines:
       - {id: L1, description: "layer ration delivery, 640 t LP2 @ $280/t", amount_usd: 179200}
@@ -116,9 +120,9 @@ invoices:
     vendor: "PLACEHOLDER Prairie Feed Mill"
     issued_day: 133
     discount_pct: 0.02
-    discount_day: 140
-    net_day: 154
-    dispute_deadline_day: 154
+    discount_day: 154
+    net_day: 168
+    dispute_deadline_day: 168
     dispute_lag_days: 5
     lines:
       - {id: L1, description: "LP3 ration delivery, 610 t @ $277/t", amount_usd: 168970}
@@ -150,9 +154,9 @@ invoices:
     vendor: "PLACEHOLDER Prairie Feed Mill"
     issued_day: 210
     discount_pct: 0.02
-    discount_day: 217
-    net_day: 231
-    dispute_deadline_day: 231
+    discount_day: 231
+    net_day: 245
+    dispute_deadline_day: 245
     dispute_lag_days: 5
     lines:
       - {id: L1, description: "LP2 ration delivery, 655 t @ $280/t", amount_usd: 183400}
