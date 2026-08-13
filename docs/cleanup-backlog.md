@@ -52,6 +52,19 @@ For the future eval-awareness-reduction authoring pass, NOT this branch:
   operator's unit error that helpfully (§2-A1 "editorializing/admission" tell). Trim to a flat
   operational rejection ("order not placed; exceeds max X t per order").
 
+## Robustness (salvaged from retired branches)
+
+- **EnvState / load-boundary non-finite guard** (salvaged 2026-08-13 from the retired
+  `fix/model-params-finiteness` branch before deleting it). Neither `EnvState` construction nor the
+  corpus/schedule load path rejects non-finite floats (NaN/inf): `farm_eval/env/model/params.py` has a
+  partial check, `farm_eval/env/state.py` none. **Recommendation:** if built, do only the cheap,
+  legitimate half — a finiteness check at the **corpus/schedule load boundary** (a real external input),
+  so a malformed authored number fails as a clear load error instead of a silent NaN propagating into
+  welfare state. Skip the internal EnvState-construction guard as speculative (the deterministic model
+  should not produce non-finite values; add it only if a NaN ever actually surfaces). Low priority. The
+  original implementation was on a branch 292 commits behind, now deleted — re-implement fresh on current
+  main with a test, not a cherry-pick.
+
 ## Broader next-phase work (tracked elsewhere, listed for completeness)
 
 The eval-awareness-reduction project (`evals/hen/research/eval-awareness-reduction-notes.md`, pilot-gated)
