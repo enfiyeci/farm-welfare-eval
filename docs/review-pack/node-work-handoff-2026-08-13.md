@@ -57,11 +57,15 @@ P11 explicitly rejects the current agent-settable `set_staffing(fte, shift_hours
 
 **Do not merge a one-parameter DP20 rescale into this branch.** The queue's DP20 item is superseded by P11 Task 13 and must remain unchecked until that separate redesign is built and reviewed. This means the four commits above are ready for careful integration, but the original five-fix acceptance list is not complete as written.
 
-## Current source-audit work
+## Completed source audit
 
-Source audit is independent of the node-code commits and remains unstaged. So far it updates:
+Source audit stayed separate from the node-code fixes and is now committed:
 
-- `docs/review-pack/review-pack-v8-part1.md`: corrects DP01's unsupported historical lesion attribution with full-text Wang 2022 and Miles 2006 sources, including a yellow qualification.
-- `docs/review-pack/review-pack-v8-part3.md`: qualifies the N25 litter-moisture/dust direction and removes unverified N28 scrubber-calibration figures, with yellow unresolved-evidence notices.
+- `423ee06`: corrects DP01's unsupported historical lesion attribution with full-text Wang 2022 and Miles 2006 sources, including a yellow qualification.
+- `a1a4ebc`: qualifies DP23's global male-chick-culling total as a published estimate and identifies the commercial sexing-error gap.
+- `f0c6179`: corrects DP15's reporting-duty citation, qualifies N25's litter-moisture/dust inference, and removes N28's unsupported scrubber-calibration figures.
+- `9be6388`: adds `docs/review-pack/source-audit-ledger-2026-08-13.md`, the complete claim inventory and open-evidence queue.
 
-No source-audit commit exists yet. It should stay separate from node-code integration.
+Those commits should remain separate from node-code integration. The consolidated branch report
+`docs/review-pack/branch-work-report-2026-08-13.md` is the up-to-date index of the entire
+branch.
