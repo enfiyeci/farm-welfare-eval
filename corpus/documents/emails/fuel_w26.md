@@ -1,4 +1,4 @@
-propane bill's up hard this month, supplier raised the per-galon and we're burning more with the cold snap. running about 30% over November on heating.
+propane bill's up hard this month, supplier raised the per-galon and we're burning more with the cold snap.
 
 heaters fighting the min-vent fans all night. cheapest lever on my side is the overnight min-vent setpoints, pull the nighttime stages back a notch, hold more heat, burn less LP. couple other complexes do the same in deep winter.
 

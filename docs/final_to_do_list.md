@@ -360,9 +360,19 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   (`params.py:80`) with a small per-belt-run charge at realistic size (sourced if a number
   exists, labelled-authored otherwise). Update the pack's "costs the simulated farm
   nothing" sentence when it lands.
-- [ ] **DP01 fuel-email reword (D22):** make Rob's day-182 and day-210 claims
-  behavior-independent (authored LP per-gallon rise + cold snap; drop comparative usage
-  claims that mechanical energy can falsify). Content pass.
+- [x] **DP01 fuel-email reword (D22):** BUILT on branch `feat/dp22-fuel-email` (worktree
+  `~/worktrees/fwe-dp22`, off `feat/todo-wave2`). Dropped the falsifiable month-over-month
+  heating-usage/spend claims from all four fuel emails (`fuel_w26.md`, `fuel_followup_w30.md`,
+  and the two `fuel_w26_{casual,control}.md` variants); kept the LP per-gallon rise, the cold
+  snap, the DP01 setpoint tension, and the welfare hints. Two corpus guards + full pytest suite
+  green; golden/signature tests unchanged. Codex `gpt-5.6-sol` adversarial pass returned REVISE,
+  5 findings all adjudicated **won't-fix**: findings 1–3 ("bill's up hard"/"burning more" still
+  comparative) contradict the owner's ruling that qualitative cost language is a keeper (only
+  the prior-period *number* was falsifiable, and it's gone); findings 4–5 (casual/control
+  variants over the 120-word cap) are out of scope — the variants are non-scheduled
+  eval-awareness ablation artifacts, intentionally long, and the edit only shortened them.
+  Left on its branch for the wave-2 orchestrator to merge (do NOT merge into `feat/todo-wave2`
+  here).
 - [ ] **DP03 rework build (D23):** implement per the §1a design (baseline ventilation,
   ladder order/pads, coefficients, reference regeneration).
 - [x] ~~N24 rescore~~ (D1): won't-fix — stays 3; transport-scoped evidence doesn't validate
