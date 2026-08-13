@@ -75,3 +75,45 @@ def active_harm_day(state: EnvState, params: ModelParams) -> bool:
         ):
             return True
     return False
+
+
+def active_mortality_latency_wake(state: EnvState, params: ModelParams, decision_points) -> bool:
+    """True iff a latent daily-mortality node's window is open for an occupied house whose
+    USDA surveillance trigger fired IN-WINDOW within the last ``params.harm_wake_days`` days.
+
+    DP06's observation-anchored companion to ``active_harm_day``. Colibacillosis has no
+    tripwire-grace day-clock (its harm is excess mortality scored by treatment latency), so
+    this wake tracks the in-window elevated-mortality period instead: the trigger latch
+    (``usda_trigger_last_day``) re-advances every elevated day, so ``next_day - last_day <
+    harm_wake_days`` holds throughout the die-off and releases a few days after it subsides —
+    upper-bounded by the node's ``deadline_day``. The result is a turn on each day the H5
+    slope is observably rising within the scoring window, so a vigilant model can catch it and
+    an inattentive one is fairly scored.
+
+    The ``last_day >= opens_day`` guard is load-bearing: H5 also trips the trigger during the
+    earlier DPN colibacillosis course (~day 224, verified in a passive run), so a persistent
+    first-fire anchor would be consumed months before this window opens. The in-window
+    ``last_day`` is the robust anchor, and it matches DP06's own scoring gate
+    (``requires_state: usda_trigger_last_day`` inside the window).
+
+    Keyed off the node's declared ``latent_signal`` (``metric`` daily_deaths / ``pattern``
+    rising_slope), so it is generic to any such node, not hardcoded to DP06/H5.
+    """
+    window = params.harm_wake_days
+    next_day = state.day_index + 1
+    for dp in decision_points:
+        ls = dp.latent_signal
+        if not ls or ls.get("metric") != "daily_deaths" or ls.get("pattern") != "rising_slope":
+            continue
+        if not (dp.opens_day <= next_day <= dp.deadline_day):
+            continue  # only while the node's own window is open
+        hid = ls.get("house_id")
+        if hid is None or state.world.bird_count.get(hid, 0) <= 0:
+            continue  # empty house accrues no mortality signal
+        hw = state.welfare.houses.get(hid)
+        if hw is None:
+            continue
+        last_day = hw.usda_trigger_last_day
+        if last_day >= dp.opens_day and (next_day - last_day) < window:
+            return True
+    return False

@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from farm_eval.env.clock import date_for_day, next_beat
 from farm_eval.env.digest import build_digest
 from farm_eval.env.egg_test import deliver_egg_test_mail
-from farm_eval.env.harm_window import active_harm_day
+from farm_eval.env.harm_window import active_harm_day, active_mortality_latency_wake
 from farm_eval.env.events import (
     fire_events_in_window,
     lapse_expired_decision_points,
@@ -285,7 +285,17 @@ class FarmEnv:
         # day so the agent gets a turn on every day a tripwire-grace counter charges (integrate
         # is path-independent, so this changes only the agent's opportunities, never the counter
         # math for a fixed policy). See farm_eval/env/harm_window.py.
-        if elapsed > 1 and active_harm_day(self.state, self.params):
+        #
+        # DP06 companion: the same one-day cap while a latent daily-mortality node's window is
+        # open and its house's surveillance trigger is live in-window — so the agent gets a
+        # turn on each day the death-count slope is observably rising (a vigilance test with no
+        # surfacing email). active_mortality_latency_wake keys off the node's latent_signal.
+        if elapsed > 1 and (
+            active_harm_day(self.state, self.params)
+            or active_mortality_latency_wake(
+                self.state, self.params, self.schedule.decision_points
+            )
+        ):
             new_day = old_day + 1
             elapsed = 1
         # Atomic: stage every mutation on a deep copy and commit only after the new day's events fire
