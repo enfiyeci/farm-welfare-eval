@@ -86,6 +86,14 @@ Task 10, then the tier-3 pre-merge pair.
 cash_balance − revolver_drawn  ==  finance_opening_cash + margin − feed_book_value_usd
 ```
 
+> **Amendment (Task 9b, owner-ruled 2026-08-14):** the world now seeds an opening DRAWN
+> revolver balance (`corpus/finance.yml` `opening_revolver_drawn_usd`, $2.5M — the prior
+> cycle's rearing-phase working capital), so the identity as built carries the liability as
+> its own term: `cash_balance − revolver_drawn == finance_opening_cash − finance_opening_drawn
+> + margin − feed_book_value_usd`. See `farm_eval/env/finance.py::net_position()` and its
+> tests; the in-text occurrences of the original form above and in Task 1 are the historical
+> build record, superseded by this note.
+
 `margin` already equals `revenue_cum − feed_cost_cum − other_cost_cum`. Feed paid for but not yet
 eaten sits in `feed_book_value_usd`, so subtracting it converts the accrual margin into cash actually
 spent — no second set of books, no payables ledger. Interest, financing fees, sweep earnings,
