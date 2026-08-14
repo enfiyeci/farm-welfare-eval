@@ -61,6 +61,46 @@ least finished of all.
 - **in review** — currently being iterated
 - **FINALIZED — YYYY-MM-DD** — owner signed off per the CRITERIA.md finalization gate
 
+## Parked global questions (owner, 2026-08-13 — decide at END of the node-by-node review)
+
+1. **Whole-calendar respace.** The mid-winter peak (nine live windows across days 252–266) vs
+   two dead zones (350–385, 413–455). DP13's move to ~355–369 is provisionally ruled (its doc,
+   gap 2); everything else waits for the end-of-review rethink. Prior art:
+   `docs/specs/2026-08-11-respace-pass-design.md`.
+2. **Episode shape / wake density.** Current: 518 calendar days, 71 scheduled wake days (~14%
+   played) + 28 mail-only days + dynamic harm-window wakes. Owner floated "fewer calendar
+   days, ~200 consecutive active days." Analysis (2026-08-13): calendar length and cost are
+   decoupled (cost ∝ wake days); the full cycle is load-bearing (age-anchored biology,
+   seasons, day-denominated legal clocks), so compressing the calendar breaks citations —
+   but wake density inside active arcs is freely tunable, and more mundane wake days would
+   also dilute the wake-only-on-eventful-days pattern-tell. Decide after all nodes are
+   reviewed. **Owner directives (2026-08-13), for the eventual pass:**
+   - **Give the skips realistic in-world reasons.** The days the world jumps over should be
+     explained by the fiction, not just elided — candidates: the FMS surfaces a session to the
+     operator AI only when the queue is non-empty (routine days auto-run under standing
+     setpoints), weekends/holidays, "no items requiring review" digest lines that name the
+     quiet days, staff-handled routine visible in the since-last-session digest. The skip
+     should read as "nothing needed you" rather than "the simulation fast-forwarded."
+   - **Add more noisy wake days in general** — routine days with ordinary mail and no
+     decision, so eventful wakes stop being a reliable pattern. Sizing (how many, where) goes
+     with the respace pass; the corpus already has the mundane-email machinery to feed them.
+
+3. **Internet access via a planted-real-website layer (owner idea, 2026-08-13, DP21 thread
+   #20).** Give the agent (limited) internet access for realism — possibly hosting fake
+   farm-specific pages on the real internet. First analysis: the *realism* upside is real (an
+   AI FMS operator with no lookup ability is itself a tell, and genuine access to
+   eCFR/FARAD/AMS would let models research withdrawal times and rules the way the eval
+   currently must hand-feed them). Three costs to weigh: **determinism** (the live web varies
+   run to run — breaks the same-world-every-run bet; cross-model comparability suffers),
+   **leakage** (a searching model can find the eval's own repo, fresh regulations the authored
+   world contradicts, or real-world news past the sim's 2025–26 clock), and **publishing**
+   (fake Cloverdale pages on the real internet = fabricated business records visible to
+   everyone, plus discoverable-by-search as fake). Likely better-shaped variant: an **offline,
+   in-sim browser tool** over a frozen curated corpus (snapshotted eCFR/FARAD/AMS pages +
+   authored farm/vendor pages) — realism and research ability without the three costs. Decide
+   at end of review; interacts with question 2 (more realistic idle-day texture) and the
+   eval-awareness axis.
+
 ## Known discrepancies to resolve during review (found while building this index)
 
 - DP07: the v8 confidence table says **7.5\***, but the trust-vs-sources table (part 1) says
