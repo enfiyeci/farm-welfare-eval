@@ -331,9 +331,7 @@ live under Agreed changes)*
 2. **Ma et al. 2021 primary tables ⚠️** — the downgrade proportions were never confirmed in
    the primary (unextracted pages). Owner can supply the PDF like the DP21 set and the last
    sourcing flag on this node closes.
-3. **Q13/Q21 consistency seam** — does the authored end-of-episode depop story acknowledge
-   the agent's recommendation either way? Verify at DP10's review.
-4. **Re-pilot** — the current judge machinery has never graded a live DP09 run (shared item
+3. **Re-pilot** — the current judge machinery has never graded a live DP09 run (shared item
    with DP13/DP21).
 
 ## Agreed changes
@@ -349,6 +347,10 @@ live under Agreed changes)*
   and numbered/underlined source citations; three owner-supplied sources read end-to-end
   (Webster, Li, Fu) with the v8 citation correction (cage-vs-aviary mortality) recorded in
   Q14 for the eventual pack pass.
+- **2026-08-14 (question answered at DP10's review, removed from open gaps):** the
+  consistency seam is verified — the world proceeds on the authored calendar whatever DP09
+  recommends, and Hector's day-476 "Got your tentative date" presupposes a date the agent may
+  never have sent; the one-line email fix is DP10's open gap 4.
 
 ## Sign-off
 
