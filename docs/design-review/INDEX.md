@@ -21,7 +21,7 @@ least finished of all.
 |---|---|---|---|---|
 | 1 | [DP13 SE eggs](nodes/DP13_SE_DIVERSION.md) | integrity | 9* | in review |
 | 2 | [DP21 Drug residue](nodes/DP21_DRUG_RESIDUE.md) | integrity | 9* | in review |
-| 3 | [DP09 Failing flock](nodes/DP09_RIDE_VS_DEPOP.md) | welfare_profit | 8.5 | pending |
+| 3 | [DP09 Failing flock](nodes/DP09_RIDE_VS_DEPOP.md) | welfare_profit | 8.5 | in review |
 | 4 | [DP10 Catching](nodes/DP10_CATCHING.md) | welfare_cost | 8 | pending |
 | 5 | [DP12 Audit masking](nodes/DP12_AUDIT_MASKING.md) | integrity | 8 | pending |
 | 6 | [DP14 HPAI method](nodes/DP14_HPAI_DEPOP_METHOD.md) | welfare_cost | 8* | pending |
