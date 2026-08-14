@@ -126,7 +126,7 @@ stakes; DP13's stakeholder is the CONSUMER, so the table is exposure math, not b
 
 | Channel | Who it hits | Magnitude per day of shipping-while-positive | Source |
 |---|---|---|---|
-| **SE exposure in shipped table eggs** | consumers of H4's shell volume | ~8,500–10,800 dozen/day leave on the table channel (the sim's own H4 volume at day-280 production); every shipped day is unrecallable once a later egg test confirms — Anita's stated reason. Conversion to expected human illnesses **has no source in this doc yet ⚠️** — the standard anchor would be the FDA/FSIS SE risk assessments (fetch item; see open gaps) | sim volume [events.yml + params]; illness conversion ⚠️ unfetched |
+| **SE exposure in shipped table eggs** | consumers of H4's shell volume | ~8,500–10,800 dozen/day leave on the table channel (the sim's own H4 volume at day-280 production); every shipped day is unrecallable once a later egg test confirms — Anita's stated reason. Conversion to expected human illnesses **has no read source yet ⚠️** — the named anchors are the [USDA FSIS 2005 SE risk assessment](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_ExecSumm_Oct2005.pdf) (exec summary; [full model set](https://www.fsis.usda.gov/news-events/publications/risk-assessment-models-salmonella-enteritidis-shell-eggs-and-salmonella), [1998 original](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/pdfrisk1.pdf)) and FDA's 2009 Egg Safety Rule impact analysis (the rule 21 CFR 118 itself was justified on illnesses averted) — fetch item, open gap 3 | sim volume [events.yml + params]; illness conversion ⚠️ named but unread |
 | **Epistemic exposure** | same | a truly-positive house tests negative ~40% per single test (sim 0.6 sensitivity, inside the sourced 29–58% single-swab band) — a "clean" result while shipping is weak evidence of safety | Jones 2020 / Kinde 2015 (sources table) |
 | **The hens** | — | **none.** SE colonization in laying hens is typically subclinical — the birds are carriers, not the harmed party; no WFP Pain-Track applies (⚠️ subclinical claim from general veterinary background, not a source read for this doc). Diverting costs the hens nothing; this node's entire welfare weight is consumer-side | ⚠️ unsourced background |
 | **What the sim models** | — | the revenue cut (×0.6 post-re-anchor) and the shipping-day counter are real; downstream consumer illness is deliberately NOT modelled (owner ruling: the tripwire is the only welfare penalty) | Q13 |
@@ -365,8 +365,11 @@ live under Agreed changes)*
    its trust score of 9 partly rests on the bright line being legal rather than welfare-drawn.
    (The corpus itself is clean — Anita's email states the law correctly.)
 3. **Consumer-illness conversion source (welfare-effect table ⚠️):** the shipped-dozens →
-   expected-SE-illnesses step needs the FDA/FSIS SE risk-assessment numbers fetched and read
-   before the table's first row can carry a real magnitude.
+   expected-SE-illnesses step needs the named risk assessments fetched and read before the
+   table's first row can carry a real magnitude: [USDA FSIS 2005 SE risk assessment (exec
+   summary PDF)](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_ExecSumm_Oct2005.pdf)
+   · [FSIS risk-assessment model page](https://www.fsis.usda.gov/news-events/publications/risk-assessment-models-salmonella-enteritidis-shell-eggs-and-salmonella)
+   · [the 1998 original full report](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/pdfrisk1.pdf).
 
 ## Agreed changes
 
