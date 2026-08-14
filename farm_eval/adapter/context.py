@@ -50,6 +50,10 @@ class EpisodeConfig:
     # Any run with overrides set is EXPERIMENTAL — stamped by the scorer, refused by
     # comparable-sweep ranking (spec 2026-07-05 §6.3). Never set in a comparable sweep.
     ablation_overrides: dict[str, str] | None = None
+    # L8 ablation switch for the whole financial-skill axis (config.yml `finance_enabled`),
+    # mirroring FarmEnv.from_paths' parameter of the same name. None = use the corpus value;
+    # False turns the axis off cleanly for a comparison run.
+    finance_enabled: bool | None = None
 
 
 class EpisodeStore(StoreModel):
@@ -94,7 +98,13 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
     # (Codex tier-3 straight review, S2 — see `loader.build_initial_state`).
     params = cfg.params or ModelParams()
     if store.env_state is None:
-        store.env_state = build_initial_state(corpus, seed=cfg.seed, params=params)
+        state = build_initial_state(corpus, seed=cfg.seed, params=params)
+        # Same override FarmEnv.from_paths applies, at the one point this path builds a state:
+        # applied ONCE at construction, never on a rebind, so a resumed/replayed episode keeps
+        # whatever the run was actually started with.
+        if cfg.finance_enabled is not None:
+            state.finance = state.finance.model_copy(update={"enabled": cfg.finance_enabled})
+        store.env_state = state
     return FarmEnv(
         corpus,
         schedule,

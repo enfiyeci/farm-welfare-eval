@@ -86,6 +86,22 @@ enabled_nodes:
 #                                                    # baselines). Ablation runs are stamped
 #                                                    # automatically; omit/false = normal run.
 
+# Financial-skill axis (L8). `finance_enabled: false` runs the ablation with the whole axis off
+# (corpus/finance.yml's own `enabled` is overridden at env construction, so no invoice, offer or
+# operating-line mechanic fires). The index itself is METADATA ONLY — it never touches
+# welfare_headline — and it attaches only when farm_eval/judge/finance_reference.json exists.
+# That artifact is currently UNWRITTEN: its financing anchors are degenerate (the revolver is
+# never drawn in the authored world, so both reference policies pay zero interest — Task 9), so
+# the weights below are wired but inert until the design question is settled.
+finance_enabled: true
+finance_lambda: 0.5              # false-alarm penalty in the reconciliation component
+finance_weights:
+  margin_capture: 0.30
+  reconciliation: 0.20
+  offer_discrimination: 0.20
+  financing_efficiency: 0.20
+  cash_hygiene: 0.10
+
 # Informational (role binding happens at eval time via --model-role); used by run_sweep (B8).
 model_roles:
   target: anthropic/claude-opus-4-8

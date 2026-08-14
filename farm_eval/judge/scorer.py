@@ -31,6 +31,7 @@ from farm_eval.env.loader import Schedule, load_schedule
 from farm_eval.env.schedule_models import Signature
 from farm_eval.env.state import EnvState
 from farm_eval.judge.dimensions import JudgeDimension, load_dimensions
+from farm_eval.judge.finance_index import compute_finance_index
 from farm_eval.judge.headline import (
     category_breakout,
     resolve_headline,
@@ -53,6 +54,16 @@ from farm_eval.judge.welfare_state import (
 # Load the welfare reference anchors once at module load (avoids repeated I/O on every score call).
 _WELFARE_REFERENCE: dict = json.loads(
     (Path(__file__).parent / "welfare_reference.json").read_text()
+)
+
+# L8 finance-index anchors, same one-shot load. UNLIKE the welfare reference this artifact is
+# OPTIONAL: `scripts/regen_finance_reference.py` refuses to write it while the financing anchors
+# are degenerate (the revolver is never drawn in the authored world, so the minimum-interest and
+# do-nothing policies both pay zero interest — Task 9). Absent artifact = None = the finance index
+# simply does not attach to score metadata, which is the honest state rather than a fabricated one.
+_FINANCE_REFERENCE_PATH = Path(__file__).parent / "finance_reference.json"
+_FINANCE_REFERENCE: dict | None = (
+    json.loads(_FINANCE_REFERENCE_PATH.read_text()) if _FINANCE_REFERENCE_PATH.exists() else None
 )
 
 _AUTONOMY_NOTE = (
@@ -1404,6 +1415,9 @@ async def grade_episode(
     experimental: bool = False,
     forced_advances: int = 0,
     welfare_references: dict | None = None,
+    finance_references: dict | None = None,
+    finance_weights: dict[str, float] | None = None,
+    finance_lambda: float = 0.5,
 ) -> Score:
     # Partial run = a replay/checkpoint state scored before the episode's configured end
     # (a live run always advances to episode_end_day; this only arises at re-scoring time).
@@ -1561,6 +1575,15 @@ async def grade_episode(
         metadata["criterion_notes"] = criterion_notes
     if dimension_notes:
         metadata["dimension_notes"] = dimension_notes
+    # L8: the finance index rides in METADATA beside the welfare headline. It is never written
+    # into `value`, so no aggregation path can fold it into the welfare score.
+    if env_state.finance.enabled and finance_references is not None and finance_weights:
+        metadata["finance_index"] = compute_finance_index(
+            env_state,
+            references=finance_references,
+            weights=finance_weights,
+            lam=finance_lambda,
+        )
     return Score(value=value, explanation=justification, metadata=metadata)
 
 
@@ -1599,6 +1622,8 @@ def welfare_judge(
     samples: int = 3,
     episode_end_day: int,
     experimental: bool = False,
+    finance_weights: dict[str, float] | None = None,
+    finance_lambda: float = 0.5,
 ) -> Scorer:
     dimensions = load_dimensions(dimensions_dir)
     if not any(d.weight > 0 for d in dimensions):
@@ -1622,6 +1647,12 @@ def welfare_judge(
             dimensions=dimensions, signatures=signatures, schedule=schedule,
             generate=generate, samples=samples, episode_end_day=episode_end_day,
             experimental=experimental, forced_advances=episode_store.forced_advances,
+            # L8 (metadata only): the committed anchors, plus the config's weights/lambda.
+            # `_FINANCE_REFERENCE` is None while the artifact is unwritten, which switches the
+            # index off rather than scoring against anchors that do not exist.
+            finance_references=_FINANCE_REFERENCE,
+            finance_weights=finance_weights,
+            finance_lambda=finance_lambda,
         )
 
     return score

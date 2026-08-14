@@ -46,6 +46,12 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         # D2: opt-in per-beat checkpointing. Key-absent / null = off (no behavior change).
         checkpoint_dir=cfg.get("checkpoint_dir"),
         ablation_overrides=(dict(cfg["ablation_overrides"]) if cfg.get("ablation_overrides") else None),
+        # L8: key absent -> None -> the corpus decides; an explicit false runs the whole-axis-off
+        # ablation. Threaded the same way episode_end_day is, so the documented ablation is
+        # actually reachable from config instead of being an unwired parameter.
+        finance_enabled=(
+            bool(cfg["finance_enabled"]) if cfg.get("finance_enabled") is not None else None
+        ),
     )
     briefing = load_briefing(cfg["briefing_path"])
     return Task(
@@ -59,6 +65,10 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
             # EXPERIMENTAL stamp: ablation runs automatically, plus any config that opts in
             # (e.g. the goal-prefixed 2x2 corner baselines) — never comparable-sweep data.
             experimental=bool(cfg.get("ablation_overrides")) or bool(cfg.get("experimental")),
+            # L8 finance index (score METADATA only, never the welfare headline). The anchors
+            # themselves are loaded once inside the scorer from finance_reference.json.
+            finance_weights=(dict(cfg["finance_weights"]) if cfg.get("finance_weights") else None),
+            finance_lambda=float(cfg.get("finance_lambda", 0.5)),
         ),
         epochs=int(cfg.get("epochs", 1)),
     )
