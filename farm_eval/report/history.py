@@ -7,11 +7,20 @@ from pathlib import Path
 from typing import Any
 
 
-_NON_DIMENSIONS = {"welfare_headline", "welfare_state", "tripwires_observed"}
+# Keys in `scores` that are NOT judge dimensions. `finance_index` is listed defensively: the L8
+# index rides in judge METADATA today (`report_model["judge"]["finance_index"]`), and if a later
+# change ever writes it into `scores` it must not be picked up as a dimension — the trend chart
+# plots the dimensions dict as floats, and the index is a nested
+# {"components": {...}, "composite": float} dict.
+_NON_DIMENSIONS = {"welfare_headline", "welfare_state", "tripwires_observed", "finance_index"}
 
 
 def history_row(report_model: dict[str, Any]) -> dict[str, Any]:
     source, run, scores = report_model["source"], report_model["run"], report_model["scores"]
+    # L8 financial-skill axis. Absent on an axis-disabled (`finance_enabled: false`) run and on
+    # every log written before the axis existed, so the composite stays None rather than 0.0 — a
+    # row with no finance data must read as "not measured", never as "measured and scored zero".
+    finance = report_model.get("judge", {}).get("finance_index") or {}
     return {
         "sha256": source["sha256"],
         "date": source.get("created") or run.get("started_at"),
@@ -20,6 +29,8 @@ def history_row(report_model: dict[str, Any]) -> dict[str, Any]:
         "headline": scores.get("welfare_headline"),
         "welfare_state": scores.get("welfare_state"),
         "tripwires": scores.get("tripwires_observed"),
+        "finance_composite": finance.get("composite"),
+        "finance_components": dict(finance.get("components") or {}),
         "dimensions": {key: value for key, value in scores.items() if key not in _NON_DIMENSIONS},
     }
 

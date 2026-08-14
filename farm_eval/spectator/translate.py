@@ -46,6 +46,12 @@ plus direct `FinancialState` / `MarketState` fields). Deliberately OMITTED, neve
 `ModelParams` is therefore never loaded here: every field that would need it is exactly one of
 the omitted ones. (`RunMeta.breed_standard` is params-derived, but the caller builds `RunMeta`.)
 
+The L8 balance-sheet position (cash, drawn line, interest to date, active lender, open statements
+and open vendor offers) travels as its OWN `finance_snapshot` line, emitted beside every
+`state_snapshot` while `EnvState.finance.enabled` -- and not at all when the axis is off, so an
+ablation feed carries no finance lines rather than a panel full of zeros. It obeys the same rule:
+direct state fields only.
+
 ## Failure policy
 
 A shadow-store exception means the reconstruction is inconsistent, so every later snapshot would
@@ -79,6 +85,7 @@ from farm_eval.spectator.events import (
     EmailSent,
     EpisodeEnd,
     FeedEvent,
+    FinanceSnapshot,
     RunHealth,
     RunMeta,
     StateSnapshot,
@@ -110,18 +117,50 @@ _SEASONS = ("winter", "spring", "summer", "autumn")
 #: `_new(day=...)` default: stamp the event with the translator's current day.
 _CURRENT_DAY: Any = object()
 
-# The two FMS acknowledgement wordings that state a real service charge in DOLLARS:
-# "<tool> recorded (est. charge $450)" and "treatment logged (materials ~$1,860)"
-# (farm_eval/env/episode.py). Matching the charge PHRASE and not a bare "$" keeps a quoted unit
+# The FMS acknowledgement wordings that state a real charge in DOLLARS (farm_eval/env/episode.py
+# and farm_eval/env/finance.py). Matching the charge PHRASE and not a bare "$" keeps a quoted unit
 # price -- "feed order placed: 20.0 t @ $412.5/ton" -- from being read as money spent.
-_CHARGE_RE = re.compile(r"(?:est\. charge|materials)\s*~?\s*\$\s*([\d,]+(?:\.\d+)?)")
+#
+#   "<tool> recorded (est. charge $450)"                        schedule_maintenance / vet visit
+#   "egg test ordered for H_X (... est. charge $400)"           order_egg_test
+#   "treatment logged (materials ~$1,860)"                      log_treatment
+#   "operating line moved to <lender> at 7.50% (switch fee $2,500)"   set_financing/select_lender
+#
+# The switch fee needs its own alternative because its ack names the fee rather than using the
+# generic "est. charge" wording; it IS a booked P&L cost (`finance.select_lender` calls
+# `book_pnl_cost`), so leaving it unmatched would drop a real charge from the feed.
+_CHARGE_RE = re.compile(
+    r"(?:est\. charge|materials|switch fee)\s*~?\s*\$\s*([\d,]+(?:\.\d+)?)"
+)
 
-# The only tools whose ack can state a service charge: `log_treatment` and the `_TRACE_TOOLS` pair
+# `accept_offer` states its upfront cost as a bare trailing amount rather than a named charge:
+# "<vendor> proposal <id> accepted (<option label>, $1,500)" (farm_eval/env/finance.py). An option
+# LABEL may itself quote a unit price ("standard lock, $127.90/M cartons"), so this is anchored to
+# the end of the ack -- the last amount, immediately before the closing parenthesis, is the
+# upfront. Kept separate from _CHARGE_RE so no other tool's ack can be read by an anchor this loose.
+_OFFER_UPFRONT_RE = re.compile(r",\s*\$\s*([\d,]+(?:\.\d+)?)\s*\)\s*$")
+
+# The only tools whose ack can state a charge: `log_treatment`, the `_TRACE_TOOLS` pair,
+# `order_egg_test`, and the two financial actions that book a cost at call time
 # (farm_eval/env/episode.py). Scanning ONLY these keeps a read result that merely QUOTES the ack
 # wording from stamping a phantom cost -- `read_email` returns a corpus body verbatim, so an email
 # echoing "recorded (est. charge $450)" would otherwise bill the reading. If the env ever charges a
 # new tool, add it here or that tool's cost stops reaching the feed.
-_CHARGING_TOOLS = frozenset({"log_treatment", "schedule_maintenance", "schedule_vet_visit"})
+#
+# Deliberately ABSENT, and why -- these acks state a dollar amount that is not a charge:
+# - `pay_invoice` ("... early-payment discount $500 credited"): a CREDIT, booked as a NEGATIVE
+#   cost. `cost_cents` is money spent on the call; booking a discount as a positive charge would
+#   invert its sign, and the feed has no field for a credit.
+# - `set_financing` action=repay ("paid down $1,000,000; line balance now $1,500,000"): a
+#   balance-sheet transfer between cash and the drawn line. It books no P&L cost at all, and the
+#   position it moves is reported by `finance_snapshot` instead.
+# - `dispute_charge` and `set_financing` action=sweep state no dollar amount at all.
+# `set_financing` IS in the set, for its select_lender arm only: the repay/sweep acks above match
+# neither pattern, so listing the tool cannot pick them up.
+_CHARGING_TOOLS = frozenset({
+    "log_treatment", "schedule_maintenance", "schedule_vet_visit", "order_egg_test",
+    "set_financing", "accept_offer",
+})
 
 
 def _round(value: float | None, digits: int) -> float | None:
@@ -137,7 +176,8 @@ def _charge_cents(tool: str, result_text: str) -> float | None:
     """Cents charged by this action, read from the FMS ack; None when the ack states no charge."""
     if tool not in _CHARGING_TOOLS:
         return None
-    match = _CHARGE_RE.search(result_text)
+    pattern = _OFFER_UPFRONT_RE if tool == "accept_offer" else _CHARGE_RE
+    match = pattern.search(result_text.strip())
     if match is None:
         return None
     # Acks state dollars; the feed carries cents. Round away binary-float dust ($1,860 -> 186000.0).
@@ -239,7 +279,7 @@ class Translator:
         self._head_drained = False
         self._pending: list[FeedEvent] = [meta.model_copy(update={"seq": self._next_seq()})]
         self._pending += self._day_start(state)
-        self._pending.append(self._snapshot(state))
+        self._pending += self._snapshots(state)
         # The seeded mail and the decision windows `start()` already opened, announced through the
         # same two helpers the StoreEvent path uses -- so they are marked seen here and the first
         # store diff cannot re-announce them.
@@ -424,7 +464,7 @@ class Translator:
             self._blank_streak = 0
             out.append(self._new(DayEnd, day=self._day))
             self._day = state.day_index
-            out.append(self._snapshot(state))
+            out += self._snapshots(state)
             out += self._day_start(state)
         out += self._mail_events(state)
         out += self._ledger_events(state)
@@ -537,6 +577,63 @@ class Translator:
         high_c, rh_pct = ambient(state.day_index, _WEATHER_PEAK_HOUR)
         low_c, _ = ambient(state.day_index, _WEATHER_TROUGH_HOUR)
         return {"high_c": round(high_c, 1), "low_c": round(low_c, 1), "rh_pct": round(rh_pct, 1)}
+
+    def _snapshots(self, state: EnvState) -> list[FeedEvent]:
+        """The per-beat panel lines: the world snapshot, plus the finance one when the L8 axis is
+        on. Both emission points (the head frame and the day advance) go through this, so the two
+        panels can never drift apart -- and an axis-disabled run's feed is byte-identical to one
+        written before the finance panel existed."""
+        out: list[FeedEvent] = [self._snapshot(state)]
+        if state.finance.enabled:
+            out.append(self._finance_snapshot(state))
+        return out
+
+    def _finance_snapshot(self, state: EnvState) -> FeedEvent:
+        """The balance-sheet / accounts-payable position, read straight off the shadow `EnvState`.
+
+        Like `state_snapshot`, every value here is a direct state field -- no corpus access, no
+        `ModelParams`, nothing recomputed. The invoice and offer rows join the live records
+        (`EnvState.invoices` / `.offers`, which carry the lifecycle) to their authored specs
+        (`EnvState.finance.*`, which carry the vendor and terms); a record whose spec is missing
+        is skipped rather than rendered with invented fields.
+        """
+        financial, finance = state.financial, state.finance
+        lender = finance.lenders.get(state.lender.active_lender_id)
+        invoices = []
+        for record in state.invoices:
+            spec = finance.invoices.get(record.invoice_id)
+            if record.status != "open" or spec is None:
+                continue
+            invoices.append({
+                "invoice_id": record.invoice_id,
+                "vendor": spec.vendor,
+                "issued_day": record.issued_day,
+                "net_day": spec.net_day,
+                "amount_usd": _round(sum(line.amount_usd for line in spec.lines), 2),
+                "queried_lines": len(record.disputed_line_ids),
+            })
+        offers = []
+        for record in state.offers:
+            spec = finance.offers.get(record.offer_id)
+            if record.status != "open" or spec is None:
+                continue
+            offers.append({
+                "offer_id": record.offer_id,
+                "vendor": spec.vendor,
+                "expires_day": spec.expires_day,
+                "options": len(spec.options),
+            })
+        return self._new(
+            FinanceSnapshot,
+            day=state.day_index,
+            cash=_round(financial.cash_balance, 2),
+            drawn=_round(financial.revolver_drawn, 2),
+            interest_paid=_round(financial.interest_paid_cum, 2),
+            active_lender=state.lender.active_lender_id,
+            lender_name=lender.name if lender is not None else "",
+            open_invoices=invoices,
+            open_offers=offers,
+        )
 
     def _snapshot(self, state: EnvState) -> FeedEvent:
         financial = state.financial

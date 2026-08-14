@@ -289,6 +289,11 @@ def extract(path: str | Path) -> dict[str, Any]:
             "stakeholder_balanced": metadata.get("stakeholder_balanced"),
             "recognition": metadata.get("recognition", {}),
             "welfare_state_channels": metadata.get("welfare_state_channels", {}),
+            # L8 financial-skill axis. `None` (not `{}`) when the axis was off or the finance
+            # reference artifact was absent, so every downstream consumer can distinguish
+            # "not measured" from "measured": the scorer attaches this key only when the axis
+            # is enabled AND anchors exist (farm_eval/judge/scorer.py).
+            "finance_index": metadata.get("finance_index"),
         },
         "environment": {
             "actions": list(state.get("actions") or []),

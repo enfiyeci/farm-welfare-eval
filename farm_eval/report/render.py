@@ -87,6 +87,49 @@ def _section(section_id: str, number: int | str, title: str, lead: str, body: st
     )
 
 
+#: Plain-language labels for the five finance-index components (farm_eval/judge/finance_index.py).
+_FINANCE_COMPONENTS = [
+    ("margin_capture", "Terminal margin, normalized onto the reference floor–ceiling band."),
+    ("reconciliation", "True billing errors queried, less a penalty for querying clean lines."),
+    ("offer_discrimination", "Good vendor offers accepted and bad ones declined."),
+    ("financing_efficiency", "Interest paid against the deterministic minimum for this world."),
+    ("cash_hygiene", "Cash kept working rather than idle or needlessly borrowed."),
+]
+
+
+def _finance_index(model: dict) -> str:
+    """The L8 finance index: composite metric plus a per-component table.
+
+    Returns "" when the run carries no index — the axis-disabled (`finance_enabled: false`)
+    ablation and every log predating the axis. An absent index must render as nothing at all,
+    never as an empty table or a zero.
+    """
+    index = model.get("judge", {}).get("finance_index") or {}
+    composite = index.get("composite")
+    components = index.get("components") or {}
+    if composite is None and not components:
+        return ""
+    rows = "".join(
+        f"<tr><td>{html.escape(name.replace('_', ' '))}</td>"
+        f'<td data-value="{components[name]}">{_fmt(components[name])}</td>'
+        f"<td>{html.escape(note)}</td></tr>"
+        for name, note in _FINANCE_COMPONENTS if name in components
+    )
+    # Any component the rulebook gains later still shows up, rather than being silently dropped.
+    rows += "".join(
+        f"<tr><td>{html.escape(name.replace('_', ' '))}</td>"
+        f'<td data-value="{value}">{_fmt(value)}</td><td></td></tr>'
+        for name, value in sorted(components.items())
+        if name not in dict(_FINANCE_COMPONENTS)
+    )
+    table = (
+        "<h3>Finance index components</h3><table><thead><tr><th>Component</th>"
+        "<th>Score (0–1)</th><th>What it measures</th></tr></thead><tbody>"
+        + rows + "</tbody></table>"
+    ) if rows else ""
+    return table
+
+
 def _executive(model: dict, analysis: dict, narrative: dict[str, str]) -> str:
     scores = model.get("scores", {})
     nodes = model.get("judge", {}).get("node_scores", {})
@@ -98,15 +141,24 @@ def _executive(model: dict, analysis: dict, narrative: dict[str, str]) -> str:
     ) or '<span class="chip">Single-run report</span>'
     tripwires = scores.get("tripwires_observed", 0)
     verdict = "No tripwire gate fired." if not tripwires else f"{_fmt(tripwires, 0)} tripwire gate(s) fired."
+    # L8: the finance index sits BESIDE the welfare headline, never inside it. A run without the
+    # axis contributes no tile and no table (see `_finance_index`).
+    finance = model.get("judge", {}).get("finance_index") or {}
+    finance_tile = (
+        _metric("Finance index", finance.get("composite"), "0–1, separate axis")
+        if finance.get("composite") is not None else ""
+    )
     body = (
         '<div class="metric-grid">'
         + _metric("Welfare headline", scores.get("welfare_headline"), "0–10, node mean")
+        + finance_tile
         + _metric("Layer-1 state", scores.get("welfare_state"), "0–1 endpoint score")
         + _metric("Tripwires", tripwires, "lower is better")
         + _metric("Frame-slip addresses", analysis.get("out_of_world_address_count"), "strict session-handoff count")
         + "</div>"
         + f'<p class="callout">{html.escape(verdict)}</p><p>{deltas}</p>'
         + ("<h3>Top three score findings</h3><ol>" + "".join(f"<li>{html.escape(node)} — {_fmt(score)}</li>" for node, score in top) + "</ol>" if top else "")
+        + _finance_index(model)
         + '<h3>Human conclusion</h3>' + _narrative_html(narrative.get("executive_summary"))
     )
     return _section(
@@ -123,6 +175,7 @@ def _glossary() -> str:
         ("Layer-1", "The deterministic endpoint welfare-state score, separate from judged decision quality."),
         ("Eval-awareness", "A validity diagnostic for test suspicion or frame slips; it is not part of the welfare headline."),
         ("Mechanical ledger", "Harness-side action matching. A lapsed row can still receive judged credit for valid communication."),
+        ("Finance index", "A mechanical 0–1 score for financial skill, computed from the end-of-run world state alone. It is reported beside the welfare headline and can never move it."),
     ]
     body = '<div class="callout">Read the headline first, then use node cards and the audit appendix to test whether the summary is trustworthy.</div>'
     body += "<details><summary>Glossary</summary><dl>" + "".join(f"<dt><strong>{term}</strong></dt><dd>{definition}</dd>" for term, definition in terms) + "</dl></details>"

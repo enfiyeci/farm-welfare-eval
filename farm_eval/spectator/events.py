@@ -109,6 +109,29 @@ class StateSnapshot(FeedEventBase):
     finance: dict[str, Any]
 
 
+class FinanceSnapshot(FeedEventBase):
+    """The L8 financial-skill axis, as its own panel line beside `state_snapshot`.
+
+    Emitted ONLY while the axis is enabled (`EnvState.finance.enabled`), so an axis-disabled
+    ablation run and every feed written before the axis existed carry no lines of this kind and
+    the page shows no finance panel at all — an absent axis must never render as an empty table.
+
+    A separate event rather than more keys on `state_snapshot.finance` because the two answer
+    different questions: `state_snapshot.finance` is the operating P&L (cost of production,
+    margin per dozen, prices), this is the balance-sheet and accounts-payable position the
+    financial mechanisms actually move.
+    """
+
+    kind: Literal["finance_snapshot"] = "finance_snapshot"
+    cash: float | None = None
+    drawn: float | None = None
+    interest_paid: float | None = None
+    active_lender: str = ""
+    lender_name: str = ""
+    open_invoices: list[dict[str, Any]] = Field(default_factory=list)
+    open_offers: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class DecisionWindow(FeedEventBase):
     kind: Literal["decision_window"] = "decision_window"
     dp_id: str
@@ -149,6 +172,7 @@ FeedEvent = Annotated[
     | EmailRead
     | EmailSent
     | StateSnapshot
+    | FinanceSnapshot
     | DecisionWindow
     | DecisionResolved
     | RunHealth

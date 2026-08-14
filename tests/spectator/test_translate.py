@@ -38,6 +38,7 @@ from farm_eval.spectator.events import (
     EmailRead,
     EmailSent,
     EpisodeEnd,
+    FinanceSnapshot,
     RunHealth,
     RunMeta,
     StateSnapshot,
@@ -802,3 +803,193 @@ def test_ts_in_world_tracks_the_shadow_day():
     text = _of(t.handle(_model_event()), AssistantText)[0]
     assert text.day == 31
     assert text.ts_in_world == "2025-02-01"
+
+
+# --- L8 finance snapshot ----------------------------------------------------------------
+
+
+def _finance_state(**over):
+    """A finance-ENABLED state: one lender, one open statement, one open proposal.
+
+    Generic placeholder content only, like every other state in this module — the ids and vendor
+    names are PLACEHOLDER_*, so nothing here depends on `corpus/finance.yml`.
+    """
+    from farm_eval.env.finance_models import (
+        FinanceConfig,
+        InvoiceLine,
+        InvoiceSpec,
+        Lender,
+        OfferOption,
+        OfferSpec,
+    )
+    from farm_eval.env.state import FinancialState, InvoiceRecord, LenderState, OfferRecord
+
+    config = FinanceConfig(
+        enabled=True,
+        default_lender_id="PLACEHOLDER_LENDER",
+        lenders={"PLACEHOLDER_LENDER": Lender(
+            id="PLACEHOLDER_LENDER", name="PLACEHOLDER Lender Co", switch_fee_usd=2500.0,
+        )},
+        invoices={"INV_X": InvoiceSpec(
+            id="INV_X", vendor="PLACEHOLDER_VENDOR", issued_day=20, net_day=50,
+            lines=[InvoiceLine(id="L1", description="PLACEHOLDER", amount_usd=1000.0),
+                   InvoiceLine(id="L2", description="PLACEHOLDER", amount_usd=250.5, error=True)],
+        )},
+        offers={"OFF_X": OfferSpec(
+            id="OFF_X", vendor="PLACEHOLDER_SUPPLIER", opens_day=10, expires_day=60,
+            quality="good",
+            options=[OfferOption(id="opt_a", label="PLACEHOLDER", upfront_usd=1500.0,
+                                 effect_key="vet_visit_usd", effect_multiplier=0.9)],
+        )},
+    )
+    kwargs = dict(
+        finance=config,
+        lender=LenderState(active_lender_id="PLACEHOLDER_LENDER"),
+        financial=FinancialState(cash_balance=125000.0, revolver_drawn=2500000.0,
+                                 interest_paid_cum=48000.0),
+        invoices=[InvoiceRecord(invoice_id="INV_X", issued_day=20, disputed_line_ids=["L2"])],
+        offers=[OfferRecord(offer_id="OFF_X", opened_day=10)],
+        day_index=31,
+    )
+    kwargs.update(over)
+    return _state(**kwargs)
+
+
+def test_no_finance_snapshot_when_the_axis_is_disabled():
+    """The ablation contract: a `finance_enabled: false` run's feed must be exactly the feed it
+    was before the axis existed — no finance lines, so the page shows no credit panel."""
+    t = _translator()
+    out = t.handle(_store_event(_state(day_index=31)))
+    assert _of(out, StateSnapshot), "the world snapshot is still emitted"
+    assert _of(out, FinanceSnapshot) == []
+
+
+def test_finance_snapshot_rides_beside_every_state_snapshot():
+    t = _translator()
+    out = t.handle(_store_event(_finance_state()))
+    kinds = [type(e) for e in out]
+    assert kinds.index(StateSnapshot) + 1 == kinds.index(FinanceSnapshot)
+
+
+def test_the_head_frame_carries_the_finance_snapshot_too():
+    """Both emission points go through `_snapshots`; without the head frame the credit panel
+    would stay blank through the whole opening beat."""
+    t = Translator(meta=_meta(), initial_state=_finance_state(day_index=0).model_dump(mode="json"))
+    head = t.handle(_model_event())
+    assert [type(e) for e in head[:4]] == [RunMeta, DayStart, StateSnapshot, FinanceSnapshot]
+
+
+def test_finance_snapshot_carries_the_position_and_the_open_paperwork():
+    t = _translator()
+    snap = _of(t.handle(_store_event(_finance_state())), FinanceSnapshot)[0]
+    assert snap.day == 31
+    assert snap.cash == 125000.0
+    assert snap.drawn == 2500000.0
+    assert snap.interest_paid == 48000.0
+    assert snap.active_lender == "PLACEHOLDER_LENDER"
+    assert snap.lender_name == "PLACEHOLDER Lender Co"
+    assert snap.open_invoices == [{
+        "invoice_id": "INV_X", "vendor": "PLACEHOLDER_VENDOR", "issued_day": 20,
+        "net_day": 50, "amount_usd": 1250.5, "queried_lines": 1,
+    }]
+    assert snap.open_offers == [{
+        "offer_id": "OFF_X", "vendor": "PLACEHOLDER_SUPPLIER", "expires_day": 60, "options": 1,
+    }]
+    # The designer-side error flag and the offer's quality label are ground truth. They must not
+    # reach the feed even though the spectator is agent-invisible: the feed is a shared artifact.
+    dumped = snap.model_dump_json()
+    assert "error" not in dumped and "quality" not in dumped and "good" not in dumped
+
+
+def test_a_settled_statement_or_accepted_proposal_leaves_the_open_lists():
+    from farm_eval.env.state import InvoiceRecord, OfferRecord
+
+    t = _translator()
+    snap = _of(t.handle(_store_event(_finance_state(
+        invoices=[InvoiceRecord(invoice_id="INV_X", issued_day=20, status="paid", paid_day=30)],
+        offers=[OfferRecord(offer_id="OFF_X", opened_day=10, status="accepted", accepted_day=30,
+                            accepted_option_id="opt_a")],
+    ))), FinanceSnapshot)[0]
+    assert snap.open_invoices == [] and snap.open_offers == []
+
+
+def test_a_record_with_no_authored_spec_is_skipped_not_invented():
+    from farm_eval.env.state import InvoiceRecord
+
+    t = _translator()
+    snap = _of(t.handle(_store_event(_finance_state(
+        invoices=[InvoiceRecord(invoice_id="INV_MISSING", issued_day=20)],
+    ))), FinanceSnapshot)[0]
+    assert snap.open_invoices == []
+
+
+# --- L8 charging acks -------------------------------------------------------------------
+
+
+def test_egg_test_ack_is_a_charge():
+    t = _translator()
+    out = t.handle(_tool_event(
+        "order_egg_test", {"house_id": "H_X"},
+        result="egg test ordered for H_X (results in ~7 days; est. charge $400)",
+    ))
+    assert out[0].cost_cents == 40000
+
+
+def test_lender_switch_fee_is_a_charge():
+    t = _translator()
+    out = t.handle(_tool_event(
+        "set_financing", {"action": "select_lender", "lender_id": "PLACEHOLDER_LENDER"},
+        result="operating line moved to PLACEHOLDER Lender Co at 7.50% (switch fee $2,500)",
+    ))
+    assert out[0].cost_cents == 250000
+
+
+def test_an_offer_upfront_is_a_charge_even_when_the_label_quotes_a_unit_price():
+    """`accept_offer`'s ack names no charge phrase, so the amount is read from the END of the
+    ack. An option label may itself quote a unit price, which must not be mistaken for it."""
+    t = _translator()
+    out = t.handle(_tool_event(
+        "accept_offer", {"offer_id": "OFF_X", "option": "tier_1"},
+        result="PLACEHOLDER_SUPPLIER proposal OFF_X accepted (standard lock, $127.90/M cartons, $1,500)",
+    ))
+    assert out[0].cost_cents == 150000
+
+
+def test_a_repayment_is_not_a_charge():
+    """A repayment moves cash to the drawn line: a balance-sheet transfer that books no cost.
+    Reading it as money spent would double-count it against the run's P&L in the feed."""
+    t = _translator()
+    out = t.handle(_tool_event(
+        "set_financing", {"action": "repay", "amount": 1000000.0},
+        result="paid down $1,000,000; line balance now $1,500,000",
+    ))
+    assert out[0].cost_cents is None
+
+
+def test_an_early_payment_discount_is_not_a_charge():
+    """The discount is a CREDIT (booked as a negative cost). `cost_cents` is money spent, and
+    the feed has no field for a credit — so it must stay unset rather than flip sign."""
+    t = _translator()
+    out = t.handle(_tool_event(
+        "pay_invoice", {"invoice_id": "INV_X"},
+        result="statement INV_X paid; early-payment discount $500 credited",
+    ))
+    assert out[0].cost_cents is None
+
+
+def test_a_rejected_offer_acceptance_books_nothing():
+    t = _translator()
+    out = t.handle(_tool_event(
+        "accept_offer", {"offer_id": "OFF_X", "option": "opt_a"},
+        result="The vendor's quote on OFF_X expired on day 60.",
+    ))
+    assert out[0].cost_cents is None
+
+
+def test_a_dispute_states_no_dollar_amount():
+    t = _translator()
+    out = t.handle(_tool_event(
+        "dispute_charge", {"invoice_id": "INV_X", "line_id": "L2"},
+        result="query raised on INV_X line L2; the vendor will respond",
+    ))
+    assert out[0].cost_cents is None

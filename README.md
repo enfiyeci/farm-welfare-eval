@@ -49,6 +49,42 @@ print(summarize_sweep(results))   # welfare-headline-ranked comparison
 > **Before trusting cross-model welfare deltas**, validate the judge against human labels and report
 > Spearman ρ — see [`docs/judge-validation.md`](docs/judge-validation.md).
 
+## The financial-skill axis (L8)
+
+A second, **mechanical** measurement axis running alongside welfare: how well the agent manages the
+complex's money. It is scored from the terminal world state alone — no grader model — and reported
+**beside** the welfare headline, never inside it. The rulebook (one entry per move, with its three
+governing laws and their enforcing tests) is
+[`evals/hen/design/financial-rulebook.md`](evals/hen/design/financial-rulebook.md); the authored
+content — lenders, rates, statements, vendor proposals, the storage cap — is `corpus/finance.yml`.
+
+Four action tools carry it, alongside the existing `read_financials` (which serves every input the
+rulebook needs — proven by `scripts/finance_discoverability_probe.py`):
+
+| Tool | What it does |
+|---|---|
+| `set_financing` | Move the operating line to another lender, pay the drawn balance down, or turn the idle-cash sweep on and off. |
+| `pay_invoice` | Pay a vendor statement; paying inside the discount window earns the authored early-payment credit. |
+| `dispute_charge` | Raise a query on one billed line; the vendor answers a few days later. |
+| `accept_offer` | Accept one option of an open vendor proposal, booking its upfront cost and its standing effect. |
+
+**Every mechanism is welfare-neutral by construction**, and that is a permanent regression test, not
+a one-off check: `tests/env/test_finance_neutrality.py` sweeps each mechanism across its policy range
+over a full episode and asserts the run's welfare numbers come out byte-identical to a do-nothing run
+while the margin does not.
+
+**Ablation.** `finance_enabled: false` in `config.yml` turns the whole axis off — no statements, no
+proposals, no index — for a comparison run. The report and the spectator both render an axis-disabled
+run with no finance panel at all rather than a table of zeros.
+
+**Regenerating the anchors** (both drive the real `FarmEnv` pipeline over `config.yml`'s horizon;
+neither hand-fits a number):
+
+```bash
+./venv/bin/python scripts/regen_financial_reference.py   # profit ceiling/floor -> judge/financial_reference.json
+./venv/bin/python scripts/regen_finance_reference.py     # index anchors       -> judge/finance_reference.json
+```
+
 ## Play the farm (human dashboard)
 
 A local, keyless, deterministic way to play the episode yourself through **exactly the tool surface

@@ -185,6 +185,118 @@ def test_parity_covers_the_lines_the_comparator_drops(live_run, live_lines, tmp_
     assert live_kinds.get("run_health") == 1, "the run_health line is not under test after all"
 
 
+# --- (b2) parity with the L8 financial axis ON ----------------------------------------
+#
+# The three episodes above run the FIXTURE world, which authors no `finance.yml` -- so the axis is
+# off and their feeds carry no `finance_snapshot` lines at all. That is the ablation contract, but
+# it also means they cannot prove the finance panel's live and replay paths agree. This fourth
+# episode runs the REAL corpus (which does author the axis) over a short horizon with a single
+# mechanical-only decision node enabled, so it scores without any grader node calls and still
+# reaches day 63 -- the day the first statement and the first vendor proposal open, which is what
+# gives the snapshot's `open_invoices` / `open_offers` something real to carry.
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_FINANCE_CONFIG = {
+    "corpus_path": str(_REPO_ROOT / "corpus"),
+    "schedule_path": str(_REPO_ROOT / "schedule"),
+    "briefing_path": str(_REPO_ROOT / "prompts" / "operator_briefing.md"),
+    "dimensions_dir": str(_REPO_ROOT / "judge" / "dimensions"),
+    "episode_end_day": 70,
+    # Mechanical criteria only (ladder + latency + outcome channel), so node scoring needs no
+    # grader call -- the scripted grader then only serves the dimension pass and the justify.
+    "enabled_nodes": ["DP03_HEAT_STRESS"],
+    "seed": 1,
+    "epochs": 1,
+    "max_turns_per_day": 10,
+    "judge_samples": 1,
+}
+
+
+@pytest.fixture(scope="module")
+def finance_run(tmp_path_factory) -> tuple[object, Path]:
+    from inspect_ai import eval as inspect_eval
+    from inspect_ai.model import get_model
+
+    from farm_eval.farm_task import farm_task
+    from scripts.regen_spectator_golden import _grader_json, _tool_call
+
+    work = tmp_path_factory.mktemp("emitter-finance")
+    feed_dir = work / "spectator"
+    patch = pytest.MonkeyPatch()
+    patch.setenv(SPECTATOR_DIR_ENV, str(feed_dir))
+    try:
+        target = get_model("mockllm/model", custom_outputs=[
+            _tool_call("read_financials"),
+            _tool_call("set_financing", action="sweep", value=True),
+            # Spares: the beat grid decides how many advances the horizon needs, and a starved
+            # script would fail as a mockllm error rather than as the thing under test.
+            *[_tool_call("end_day") for _ in range(40)],
+        ])
+        grader = get_model("mockllm/model", custom_outputs=[
+            _grader_json(),
+            ModelOutput.from_content(model="mockllm/model", content="PLACEHOLDER_JUSTIFICATION."),
+        ])
+        log = inspect_eval(
+            farm_task(config=_FINANCE_CONFIG), model="mockllm/model",
+            model_roles={"target": target, "grader": grader},
+            display="none", log_dir=str(work / "logs"),
+        )[0]
+    finally:
+        patch.undo()
+    assert log.status == "success", f"finance parity episode failed: {log.error}"
+    return log, feed_dir
+
+
+@pytest.fixture(scope="module")
+def finance_feed(finance_run) -> Path:
+    _, feed_dir = finance_run
+    feeds = sorted(feed_dir.rglob(FEED_FILENAME))
+    assert len(feeds) == 1, f"expected one live feed, got {feeds}"
+    return feeds[0]
+
+
+def _finance_events(feed: Path):
+    return [parse_feed_line(line) for line in feed.read_text(encoding="utf-8").splitlines()]
+
+
+def test_the_live_and_replay_feeds_agree_with_the_finance_axis_on(
+    finance_run, finance_feed, tmp_path
+):
+    log, _ = finance_run
+    extracted = extract_feed(log.location, tmp_path / "extracted-finance")
+    assert len(extracted) == 1
+    assert_feeds_match(finance_feed, extracted[0])
+    assert normalize_feed_path(finance_feed) == normalize_feed_path(extracted[0])
+
+
+def test_the_finance_axis_run_emits_one_finance_snapshot_per_state_snapshot(finance_feed):
+    """The panel must never fall behind the world: both lines come out of one `_snapshots` call,
+    and this is what would catch them being split back apart."""
+    kinds = [e.kind for e in _finance_events(finance_feed)]
+    assert kinds.count("finance_snapshot") == kinds.count("state_snapshot") > 0
+    for index, kind in enumerate(kinds):
+        if kind == "state_snapshot":
+            assert kinds[index + 1] == "finance_snapshot"
+
+
+def test_the_finance_snapshot_carries_a_real_position_and_the_open_paperwork(finance_feed):
+    last = [e for e in _finance_events(finance_feed) if e.kind == "finance_snapshot"][-1]
+    assert last.drawn > 0 and last.active_lender
+    # Day 63 opens the first statement and the first vendor proposal; the horizon runs past it.
+    assert last.open_invoices and last.open_offers
+    assert set(last.open_invoices[0]) == {
+        "invoice_id", "vendor", "issued_day", "net_day", "amount_usd", "queried_lines"
+    }
+    assert set(last.open_offers[0]) == {"offer_id", "vendor", "expires_day", "options"}
+
+
+def test_the_fixture_episodes_carry_no_finance_lines(live_lines):
+    """The ablation contract, asserted on a real feed: the fixture world authors no finance
+    block, so its feed is byte-identical to one written before the axis existed."""
+    assert not any(json.loads(line)["kind"] == "finance_snapshot" for line in live_lines)
+
+
 # --- (c) isolation: a broken emitter changes nothing ----------------------------------
 
 

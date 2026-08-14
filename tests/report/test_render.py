@@ -71,3 +71,50 @@ def test_render_shows_fractional_judge_span_covariate(report_model: dict) -> Non
     report_model.setdefault("judge", {})["axis_span_counts"] = {"assistant_persona_bleed": 8.5}
     html = render(report_model, analyze(report_model), narrative=None, history=[])
     assert "Judge-validated persona-bleed spans (median/sample): <strong>8.5</strong>" in html
+
+
+# --- L8 finance index (Task 10) -------------------------------------------------------
+
+_FINANCE_INDEX = {
+    "components": {
+        "margin_capture": 0.62,
+        "reconciliation": 0.5,
+        "offer_discrimination": 0.75,
+        "financing_efficiency": 0.4,
+        "cash_hygiene": 0.9,
+    },
+    "composite": 0.634,
+}
+
+
+def test_render_shows_the_finance_index_beside_the_welfare_headline(report_model: dict) -> None:
+    report_model.setdefault("judge", {})["finance_index"] = _FINANCE_INDEX
+    html = render(report_model, analyze(report_model), narrative=None, history=[])
+    _Parser().feed(html)
+    assert "Finance index" in html and "0.63" in html
+    assert "Finance index components" in html
+    for component in _FINANCE_INDEX["components"]:
+        assert component.replace("_", " ") in html
+    # The welfare headline is still the lead metric; the index sits beside it, not inside it.
+    assert html.index("Welfare headline") < html.index("Finance index")
+
+
+def test_render_omits_the_finance_index_when_the_axis_is_disabled(report_model: dict) -> None:
+    """An axis-disabled run (`finance_enabled: false`) carries no index. It must render cleanly:
+    no crash, no empty table, no zero standing in for an unmeasured axis."""
+    report_model.setdefault("judge", {})["finance_index"] = None
+    html = render(report_model, analyze(report_model), narrative=None, history=[])
+    _Parser().feed(html)
+    assert "Finance index components" not in html
+    assert "margin capture" not in html
+    # The glossary still defines the term; the metric TILE is what must be absent.
+    assert "0–1, separate axis" not in html
+
+
+def test_render_finance_index_keeps_a_component_the_report_does_not_label(report_model: dict) -> None:
+    index = {"components": {**_FINANCE_INDEX["components"], "future_component": 0.25},
+             "composite": 0.6}
+    report_model.setdefault("judge", {})["finance_index"] = index
+    html = render(report_model, analyze(report_model), narrative=None, history=[])
+    _Parser().feed(html)
+    assert "future component" in html and "0.25" in html

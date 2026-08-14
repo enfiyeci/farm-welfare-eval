@@ -562,6 +562,11 @@
         <div class="g" id="gauges"></div>
         <div class="ph" style="border-top:1px solid var(--line)"><span class="pt">Finance</span></div>
         <div class="fin" id="fin"></div>
+        <!-- L8 financial-skill axis. Both the header and the rows are written by paintRail and
+             stay EMPTY when the feed carries no finance_snapshot line (the axis-disabled
+             ablation), so an unmeasured axis shows nothing rather than a panel of dashes. -->
+        <div id="finl8head"></div>
+        <div class="fin" id="finl8"></div>
       </div>
     </div>
   </div>
@@ -771,7 +776,7 @@ const feedQuery = () => "run=" + encodeURIComponent(S.run) + "&sample=" + encode
 function derive(n) {
   const D = {
     meta: null, dayStart: null, day: null, maxDay: null,
-    snap: null, snaps: [], mail: new Map(), focus: null,
+    snap: null, snaps: [], finsnap: null, mail: new Map(), focus: null,
     decisions: new Map(), health: null, healths: [], rows: [], ended: false,
     turns: 0, toolsToday: 0, sent: 0, unread: 0,
   };
@@ -821,6 +826,11 @@ function derive(n) {
       }
       case "state_snapshot":
         D.snap = e; D.snaps.push(e);
+        break;
+      // L8: present only while the financial-skill axis is enabled. `finsnap` stays null for an
+      // ablation feed, which is what keeps the credit panel off the page entirely.
+      case "finance_snapshot":
+        D.finsnap = e;
         break;
       case "decision_window":
         if (!D.decisions.has(e.dp_id)) {
@@ -1437,6 +1447,40 @@ function paintRail(D) {
     line("mortality cum.", fmtCount(totals.mortality_cumulative));
   }
   $("fin").innerHTML = f.join("");
+
+  // --- L8 credit & payables (finance_snapshot) ---------------------------------------
+  // Written only when the feed carries the axis. Both targets are cleared otherwise, so
+  // scrubbing back to a day before the first finance_snapshot removes the block again.
+  const fs = D.finsnap;
+  const l8 = [];
+  const l8line = function (l, v, cls) {
+    l8.push('<div class="row"><span>' + esc(l) + '</span><b class="' + (cls || "") + '">' + esc(v) + "</b></div>");
+  };
+  if (fs) {
+    l8line("cash", fmtMoney(fs.cash));
+    l8line("line drawn", fmtMoney(fs.drawn), num(fs.drawn) && fs.drawn > 0 ? "dn" : "");
+    l8line("interest paid", fmtMoney(fs.interest_paid));
+    l8line("lender", fs.lender_name || fs.active_lender || "—");
+    const inv = fs.open_invoices || [];
+    const off = fs.open_offers || [];
+    l8line("open statements", inv.length ? String(inv.length) : "none");
+    for (const row of inv) {
+      l8line("· " + (row.vendor || row.invoice_id) +
+             (num(row.net_day) ? " (net d" + row.net_day + ")" : ""),
+             fmtMoney(row.amount_usd) + (row.queried_lines ? " · " + row.queried_lines + " queried" : ""));
+    }
+    l8line("open proposals", off.length ? String(off.length) : "none");
+    for (const row of off) {
+      l8line("· " + (row.vendor || row.offer_id),
+             (num(row.options) ? row.options + " option" + (row.options === 1 ? "" : "s") : "—") +
+             (num(row.expires_day) ? " · expires d" + row.expires_day : ""));
+    }
+  }
+  $("finl8head").innerHTML = fs
+    ? '<div class="ph" style="border-top:1px solid var(--line)"><span class="pt">Credit &amp; payables</span>' +
+      '<span class="pm">' + esc(num(fs.day) ? "d" + fs.day : "") + "</span></div>"
+    : "";
+  $("finl8").innerHTML = l8.join("");
 }
 
 function paintDecisions(D) {
