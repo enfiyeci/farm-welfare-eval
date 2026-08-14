@@ -86,9 +86,11 @@ enabled_nodes:
 # (corpus/finance.yml's own `enabled` is overridden at env construction, so no invoice, offer or
 # operating-line mechanic fires). The index itself is METADATA ONLY — it never touches
 # welfare_headline — and it attaches only when farm_eval/judge/finance_reference.json exists.
-# That artifact is currently UNWRITTEN: its financing anchors are degenerate (the revolver is
-# never drawn in the authored world, so both reference policies pay zero interest — Task 9), so
-# the weights below are wired but inert until the design question is settled.
+# That artifact IS committed (Task 9b): the operating line opens already drawn, so the revolver
+# carries a balance from day 1 and the financing anchors genuinely separate — do-nothing
+# $259,484.93 against the minimum-interest policy's $26,726.25. Regenerate it with
+# scripts/regen_finance_reference.py, which exits 1 rather than writing degenerate anchors (it
+# refused for the whole of Task 9, when nothing ever drew and both policies paid zero interest).
 finance_enabled: true
 finance_lambda: 0.5              # false-alarm penalty in the reconciliation component
 finance_weights:

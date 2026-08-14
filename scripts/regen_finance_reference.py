@@ -19,12 +19,15 @@ Writes `farm_eval/judge/finance_reference.json`:
   policy actually used.
 
 REFUSES TO WRITE when the two financing anchors do not straddle
-(`do_nothing_interest_usd > minimum_interest_usd`). That is not defensive padding: it is the
-measured state of the authored world as of 2026-08-13 — the opening cash buffer is never exhausted,
-so the revolver is never drawn, so BOTH anchors are structurally zero interest and the only
-difference is a switch fee paid in the wrong direction. `financing_efficiency` raises on that input
-by design. Inventing a synthetic spread to get past it would silently fake the anchor, so the script
-prints every measured number and exits non-zero instead. See the Task 9 report.
+(`do_nothing_interest_usd > minimum_interest_usd`). That is not defensive padding: it is the world
+this eval actually had through Task 9 (2026-08-13). The opening cash buffer was never exhausted, so
+the revolver was never drawn, so BOTH anchors carried structurally zero interest and the only
+difference was a switch fee paid in the wrong direction — and `financing_efficiency` raises on that
+input by design. Task 9b cured it in content (`corpus/finance.yml opening_revolver_drawn_usd`: the
+operating line opens already drawn), and the anchors have separated since. The guard stays
+PERMANENTLY, because inventing a synthetic spread to get past it would silently fake the anchor: if
+a future content change re-inertifies the line, this script prints every measured number and exits
+non-zero rather than writing a false artifact. See the Task 9 and 9b reports.
 
 Deterministic: no wall-clock / no random. Same inputs -> same numbers.
 """

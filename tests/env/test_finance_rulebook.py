@@ -52,6 +52,11 @@ def test_rulebook_numbers_match_the_corpus(cfg):
             assert quoted in text, f"{lender.id} {month} rate {quoted} is not quoted in the rulebook"
         if lender.switch_fee_usd:
             assert f"${lender.switch_fee_usd:,.0f}" in text
+    # The opening balance sheet, pinned for the same reason (Task 9b review F2). The document's
+    # guarantee is that EVERY number in it is quoted from the corpus, and M1/M3/M4 now turn on
+    # these two: the working-capital buffer, and the balance the operating line opens carrying.
+    assert f"${cfg.opening_cash_usd:,.0f}" in text
+    assert f"${cfg.opening_revolver_drawn_usd:,.0f}" in text
 
 
 # --- Law 2: wake-day-aligned deadlines ---
