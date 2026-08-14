@@ -130,19 +130,28 @@ settlement email would change this — see Agreed changes).
 **No binding law governs how spent hens are caught on-farm.** Poultry are excluded from the
 Humane Methods of Slaughter Act; on-farm catching is regulated by no federal handling
 standard; state anti-cruelty statutes reach only egregious abuse and commonly exempt
-customary agricultural practice. What exists instead is the industry's own certification:
-<u>UEP's cage-free guidelines require birds to be "caught individually and held in a
-comfortable upright position with both hands" and "not … abused by being thrown, kicked,
-crushed, or otherwise mishandled"</u> [1] — the standard Cloverdale's own program (world
-bible §12) commits it to, and the source of the rubric's specific elements. So this node's
-line, like DP09's, is welfare-drawn (and certification-drawn), not law-drawn — the doc
-records that the sim claims nothing stronger.
+customary agricultural practice. What exists instead is the industry's own certification —
+and (**corrected 2026-08-14, guidelines read in full [1]**) its auditable rule is an
+either/or, not an upright mandate: <u>"Birds in cage-free systems must either be caught and
+held in a comfortable upright position with both hands, **or carried by both legs with no
+more than 3 birds in each hand**. Birds must not be carried solely by a single leg or wing,
+or by the head, neck, or tail"</u> (guideline 7), plus <u>"Birds must not be abused by being
+thrown, kicked, crushed, or otherwise mishandled"</u> (guideline 1). Upright-individual
+catching is the narrative "should… when possible" (p. 16), i.e. best practice above the
+floor. Consequences for this node: the rubric's element list (both-legs, ≤3/hand) IS the UEP
+compliance floor and "upright" is the above-floor tier; the true US standard practice —
+single-leg, multiple birds per hand [3] — sits BELOW the certification floor, so a
+Cloverdale crew running it would violate the farm's own program. Also relevant and now
+verified [1]: feed withdrawal max 18 h before catching (24 h if culled on-farm), water never
+withdrawn, crews must be trained and supervised, low/blue light, no hanging racks, visibly
+unfit birds euthanized rather than loaded. The node's line remains welfare-drawn
+(certification-floor-drawn at the bottom), not law-drawn.
 
 ## Sources
 
 | # | Source | What it grounds | Status |
 |---|---|---|---|
-| [1] | [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), §Handling, Catching, Transport | the upright/both-hands standard, the no-abuse line | v8 pass 2026-08-10; not re-read this session ⚠️ |
+| [1] | [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), §Handling, Catching, Transport (guidelines 1–14) | the either/or catching floor (upright-both-hands OR both-legs ≤3/hand; single-leg banned), the no-abuse line, feed-withdrawal 18/24 h + water-never rule, trained/supervised crews | **all 29 pages read in full 2026-08-14** (owner-supplied PDF) — corrects the v8-era "requires upright" paraphrase |
 | [2] | [Li et al. 2024, Animals 14:3655](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672575/) | late-lay keel damage 86–97%; fragility context | **read in full 2026-08-13** (owner-supplied PDF, DP09 pass) |
 | [3] | [Webster 2004, Poultry Science 83(2)](https://pubmed.ncbi.nlm.nih.gov/14979568/) §Bone Fracture / §Spent Hen Disposition | Gregory & Wilkins: 24% (13–41%) fresh breaks after catching; both-legs halves breakage; 31% after crate removal, 45% at shackling; 74% of in-transit deaths had broken wings/legs | **read in full 2026-08-13** (owner-supplied PDF, DP09 pass) — directly fills v8's "quantified injury rates remain thin" gap |
 | [4] | `model/params.py:166–174` keel/feather anchors | the readable 92% / 57.8% fragility | per v8; code not re-read ⚠️ |
