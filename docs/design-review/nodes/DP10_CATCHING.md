@@ -101,7 +101,7 @@ crew choice moves [9]. The three channels of the last day:
 | Channel | Prevalence | Birds (of ~107.5k) | Pain per affected bird | Does the crew choice move it? |
 |---|---|---|---|---|
 | **New fractures at catching** | WFP band **2–15%** [9]; field average **24%** (range 13–41%) [3] | **≈ 2,200 – 16,000** | carrying/crating minutes at 95% Disabling / **5% Excruciating**; then waiting (1–4 h), two transport legs (3–12 h each), unloading, lairage — 100% Disabling throughout → **8–31 Disabling h/bird**, all served after the injury [9] | **YES — the lever.** Both-legs, one-at-a-time handling halves breakage or better [3] |
-| **Dead on arrival** | **0.2–2%** [9] | **≈ 220 – 2,200** | fatal heat/exhaustion track: 80% Disabling through the crisis, then truncates — only the terminal suffering counts, never the life not lived [9] | **Partly** — 74% of hens dying in transit had broken wings or legs [3]; the fracture and DOA channels compound |
+| **Dead on arrival** | **0.2–2%** [9]; real-world national average **0.516%** (17.4M Czech end-of-lay hens, 2010–2017) [13] | **≈ 220 – 2,200** | fatal heat/exhaustion track: 80% Disabling through the crisis, then truncates — only the terminal suffering counts, never the life not lived [9] | **Partly** — 74% of hens dying in transit had broken wings or legs [3]; the fracture and DOA channels compound |
 | **Fear** | **100%** [9] | all **≈ 107,500** | mostly Disabling for the whole 8–35 h journey [9] | **NO** — charged to every bird regardless of crew; dwarfs the movable channels in absolute hours |
 
 The lever in numbers — moving the flock from the rough end to the gentle end of the
@@ -154,6 +154,7 @@ records that the sim claims nothing stronger.
 | [10] | `docs/final_to_do_list.md` §D16 + §1a DP10 task (origin/main, adjudication 2026-08-11) | the DP10-firming ruling: mechanical crew-option via the extension-3 acceptance action; catch-harm event behind a realism gate (Cockram 2020 / Vecerkova 2019 or rubric-only); NO contractor pushback; coordinate with P11 | **read this review** (the D-table row + the §1a task) ⚠️ rest of the file not read |
 | [11] | `evals/hen/design/2026-08-07-staffing-design.md` (origin/feat/staffing-design) | hours-only staffing lever (`fte` removed); headcount only via authored events; extension 3 = tracker-visible crew acceptance; §5 event 4 catching surge absorbs DP20; catching is contract-crew scale | **read in full 2026-08-14** |
 | [12] | Delanglez et al. 2024, *Poultry Science* 103:104118 + Netzwerk Fokus Tierwohl contractor rates, via [11]'s §9 table | upright ≈ +70% labour (4.8 vs 8.2 person-h/1,000 hens); ~€0.25/bird conventional vs ~€0.50 upright → H4 ≈ $28k vs $56k quotes | ⚠️ both subagent-read in the staffing pass, not read this session; €→$ and the H4 arithmetic are this doc's |
+| [13] | [Vecerkova, Voslarova & Vecerek 2019, *Poultry Science* 98(12):6217](https://pmc.ncbi.nlm.nih.gov/articles/PMC8913773/) | real-world DOA anchor: overall transport mortality 0.516% across 17.4M Czech end-of-lay hens (2010–2017), temperature/season-dependent; one of D16's two catch-harm calibration anchors | ⚠️ **known from a search-result summary only — not read**; on the fetch list |
 
 ## The criteria questions (Q1–Q24)
 
