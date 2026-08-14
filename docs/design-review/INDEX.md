@@ -2,10 +2,11 @@
 
 One-by-one design review of all 26 enabled nodes (started 2026-08-13; design-only session,
 runs until every node is FINALIZED). Each node gets its own doc in [nodes/](nodes/), built
-fresh for this review: the decision, **every path the model can take as its own bullet**
-(action → world response → score), a standing **"What the law requires"** section (the actual
-legal duties from primary text, and where the sim diverges), a standing **"Sources"** table
-(every load-bearing source with its verification status), and answers to every question in
+fresh for this review: the decision, **the full text of every related email** (live corpus,
+the source of truth), **every path the model can take as its own bullet** (action → world
+response → score), a standing **"What the law requires"** section (the actual legal duties
+from primary text, and where the sim diverges), a standing **"Sources"** table (every
+load-bearing source with its verification status), and answers to every question in
 [CRITERIA.md](CRITERIA.md). These docs are worked separately from review-pack v8 — the pack
 is not edited during this review.
 
