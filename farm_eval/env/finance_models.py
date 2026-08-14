@@ -110,6 +110,12 @@ class FinanceConfig(BaseModel):
 
     enabled: bool = False
     opening_cash_usd: float = 0.0
+    # The operating line's balance at the OPEN of the cycle (Task 9b): a complex does not enter a
+    # lay cycle with a clean line, it enters carrying the rearing phase's working capital. Without
+    # it the revolver is structurally inert — this world's operating cash flow is positive on 517
+    # of 518 days, so no opening CASH figure, down to and including zero, ever produces a draw.
+    # 0.0 = the line opens clear, so a corpus without the key behaves exactly as it did before.
+    opening_revolver_drawn_usd: float = 0.0
     default_lender_id: str = ""
     lenders: dict[str, Lender] = Field(default_factory=dict)
     money_market_yield: dict[str, float] = Field(default_factory=dict)

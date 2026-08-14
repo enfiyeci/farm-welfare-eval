@@ -27,12 +27,16 @@ def test_sweep_earns_the_authored_yield_on_idle_cash():
     fin.sweep_enabled = True
     fin.cash_balance = 365_000.0
     other_before = fin.other_cost_cum
+    interest_before = fin.interest_paid_cum
     finance.finance_daily_step(env.state, ModelParams(), env.state.finance, day=1)
     rate = finance.money_market_rate_for_day(env.state.finance, env.state.start_date, 1)
     expected = 365_000.0 * rate / 365.0
     assert fin.sweep_earned_cum == pytest.approx(expected)
-    # Earnings are booked as a NEGATIVE cost, so the margin improves.
-    assert fin.other_cost_cum == pytest.approx(other_before - expected)
+    # Earnings are booked as a NEGATIVE cost, so the margin improves. The same step books the
+    # day's interest on the line (already drawn at the open since Task 9b) as a POSITIVE cost into
+    # the same accumulator, so it is netted out here to keep this about the sweep alone.
+    interest = fin.interest_paid_cum - interest_before
+    assert fin.other_cost_cum - interest == pytest.approx(other_before - expected)
 
 
 def test_sweep_earns_nothing_while_disabled():

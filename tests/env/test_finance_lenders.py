@@ -38,13 +38,17 @@ def test_switch_fee_leaves_the_net_position_exactly_once_across_the_daily_step()
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
     fin = env.state.financial
     net_before = fin.cash_balance - fin.revolver_drawn
+    carry_before = fin.interest_paid_cum - fin.sweep_earned_cum
     target = next(lid for lid in env.state.finance.lenders if lid != env.state.lender.active_lender_id)
     fee = env.state.finance.lenders[env.state.lender.active_lender_id].switch_fee_usd
     assert fee > 0  # the default (outgoing) lender charges a switch fee, or this proves nothing
     env.apply_action("set_financing", {"action": "select_lender", "lender_id": target})
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
     net_after = fin.cash_balance - fin.revolver_drawn
-    assert net_before - net_after == pytest.approx(fee, abs=1e-6)
+    # The same step also carries the day's financing cost on the line, which since Task 9b opens
+    # already drawn. Net it out so this still measures the switch fee, exactly once.
+    carry = (fin.interest_paid_cum - fin.sweep_earned_cum) - carry_before
+    assert net_before - net_after - carry == pytest.approx(fee, abs=1e-6)
 
 
 def test_switching_to_an_unknown_lender_is_rejected_in_world():

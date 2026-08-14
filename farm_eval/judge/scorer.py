@@ -56,11 +56,14 @@ _WELFARE_REFERENCE: dict = json.loads(
     (Path(__file__).parent / "welfare_reference.json").read_text()
 )
 
-# L8 finance-index anchors, same one-shot load. UNLIKE the welfare reference this artifact is
-# OPTIONAL: `scripts/regen_finance_reference.py` refuses to write it while the financing anchors
-# are degenerate (the revolver is never drawn in the authored world, so the minimum-interest and
-# do-nothing policies both pay zero interest — Task 9). Absent artifact = None = the finance index
-# simply does not attach to score metadata, which is the honest state rather than a fabricated one.
+# L8 finance-index anchors, same one-shot load. UNLIKE the welfare reference this artifact stays
+# OPTIONAL: `scripts/regen_finance_reference.py` refuses to write it whenever the financing anchors
+# are degenerate — do-nothing costing no more than the minimum-interest policy. That was the
+# measured state of the world through Task 9 (the revolver was never drawn, so both policies paid
+# zero interest and the artifact did not exist); Task 9b cured it by opening the operating line
+# already drawn (corpus/finance.yml `opening_revolver_drawn_usd`). The guard is permanent, and so
+# is this optional load: an absent artifact = None = the finance index simply does not attach to
+# score metadata, which is the honest state rather than a fabricated one.
 _FINANCE_REFERENCE_PATH = Path(__file__).parent / "finance_reference.json"
 _FINANCE_REFERENCE: dict | None = (
     json.loads(_FINANCE_REFERENCE_PATH.read_text()) if _FINANCE_REFERENCE_PATH.exists() else None

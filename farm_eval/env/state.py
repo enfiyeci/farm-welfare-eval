@@ -231,6 +231,7 @@ class FinancialState(BaseModel):
     sweep_enabled: bool = False          # idle-cash sweep toggle (M3)
     sweep_earned_cum: float = 0.0        # cumulative sweep earnings, booked as a negative cost
     finance_opening_cash: float = 0.0    # the authored working-capital buffer, for the identity
+    finance_opening_drawn: float = 0.0   # the authored OPENING line balance, for the identity
     finance_settled_basis: float = 0.0   # last settled (margin - feed_book_value_usd)
 
 

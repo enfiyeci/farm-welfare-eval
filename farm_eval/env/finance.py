@@ -5,7 +5,14 @@ HarmAccumulators, HouseWelfare, or WorldState. Deterministic — no wall-clock, 
 
 The invariant every function preserves:
 
-    cash_balance - revolver_drawn == finance_opening_cash + margin - feed_book_value_usd
+    cash_balance - revolver_drawn
+        == finance_opening_cash - finance_opening_drawn + margin - feed_book_value_usd
+
+`finance_opening_cash - finance_opening_drawn` is the opening NET position: the authored
+working-capital buffer less the balance the operating line already carries into the cycle (Task 9b
+— the previous cycle's working capital, which is what makes the revolver a live cost from day 1
+rather than decorative). Both terms are 0.0 when the axis is disabled or the corpus omits the key,
+so the identity reduces to its pre-9b form.
 
 `margin` is the accrual result; `feed_book_value_usd` is feed paid for but not yet eaten, so
 subtracting it converts accrual into cash actually spent. Interest, fees, sweep earnings and
@@ -33,9 +40,10 @@ def book_pnl_cost(financial, usd: float) -> None:
 
 def net_position(financial) -> float:
     """The cash the operation has actually generated: accrual margin less feed bought but not
-    yet eaten, on top of the authored opening buffer."""
+    yet eaten, on top of the authored opening buffer and net of the opening line balance."""
     return (
         financial.finance_opening_cash
+        - financial.finance_opening_drawn
         + financial.margin
         - financial.feed_book_value_usd
     )

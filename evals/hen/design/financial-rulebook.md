@@ -17,7 +17,12 @@ Every number quoted here is quoted FROM `corpus/finance.yml` and pinned by the s
 `tests/env/test_finance_rulebook.py`, so this document cannot drift from what the world does.
 
 The complex starts the cycle with **$750,000** of working cash (`opening_cash_usd`, [invented]) and
-one operating line drawn as needed to buy feed. Two numbers set the backdrop for every entry below:
+its operating line **already drawn to $2,500,000** (`opening_revolver_drawn_usd`, [derived] — about
+132 days of feed at this complex's blended burn: the pullet rearing phase's working capital, carried
+on the line until lay revenue retires it). That opening balance is what makes M1, M3 and M4 live
+decisions rather than paperwork — with the line opening clear it is never drawn at all, because this
+world's operating cash flow is positive on 517 of its 518 days. Two numbers set the backdrop for
+every entry below:
 the **operating-line rate**, ~7.08%–7.73%/yr (the `prairie_association` series), which is the cost of
 every borrowed dollar and the hurdle every financing decision is measured against; and the
 complex-wide **non-HVAC electricity baseline**, **$236.76/day = $86,417/yr** (591,898 birds ×
@@ -28,14 +33,19 @@ $0.0004/bird/day × 365), which is the base the energy offers multiply.
 ## M1 — Cash and the revolver
 
 **The move.** Read the operating position and keep the drawn balance on the line as low as liquidity
-allows. Feed is bought daily and egg revenue is cyclical, so when cash runs short the revolver
-auto-draws; the agent's job is to recognise that a drawn line is a live ~7%/yr cost, not free money.
+allows. The line does not start clear: the cycle opens with **$2,500,000** on it, and it auto-draws
+further whenever feed pushes cash short. The agent's job is to recognise that a drawn line is a live
+~7%/yr cost from day 1, not free money — and that nothing retires it unless the agent acts, because
+the line auto-draws but never auto-repays.
 
 **The arithmetic.** A drawn dollar accrues at the active lender's rate: **7.73%** at the open of the
-cycle (2025-06), drifting to **7.08%** by 2026-03. The sweep yield never beats the line (M3), so
-every dollar of cash left idle above a prudent buffer while the revolver is drawn is a straight
-~7.08%–7.73%/yr leak. On a $100,000 idle balance carried a full quarter at 7.08% that is
-$100,000 × 0.0708 × (90/365) ≈ **$1,746** of avoidable interest.
+cycle (2025-06), drifting to **7.08%** by 2026-03. The opening $2,500,000 therefore costs
+$2,500,000 × 0.0773 ÷ 365 ≈ **$529 a day**, about **$16,100 a month**, from the first day of the
+cycle. Left untouched for the whole 518-day cycle that is the largest single financing number in the
+eval; retired promptly out of lay revenue it costs a small fraction of it. The sweep yield never
+beats the line (M3), so every dollar of cash left idle above a prudent buffer while the revolver is
+drawn is a straight ~7.08%–7.73%/yr leak. On a $100,000 idle balance carried a full quarter at 7.08%
+that is $100,000 × 0.0708 × (90/365) ≈ **$1,746** of avoidable interest.
 
 **The information surface.** `read_financials().finance.cash_balance` → cash on hand;
 `.revolver_drawn` → the drawn line balance; `.interest_paid` → cumulative interest booked;
@@ -44,7 +54,10 @@ $100,000 × 0.0708 × (90/365) ≈ **$1,746** of avoidable interest.
 **Why it is realistic, and the source.** [sourced/derived] The feed-financing working-capital gap
 filled by a floating operating line at ~8% is the central financial structure of a US layer complex
 (Chicago Fed 7th District operating-loan survey; egg revenue $0.21–$4.37/doz historically with no
-hedge). The $750k buffer itself is [invented] — no public per-complex figure exists.
+hedge). A complex does not enter a lay cycle with a clean line either: the rearing phase is months of
+feed and husbandry before the first sellable egg, and that working capital rides on the revolver —
+hence the $2,500,000 opening balance, [derived] as ~132 days of feed at this complex's measured
+blended burn. The $750k buffer itself is [invented] — no public per-complex figure exists.
 
 **The scoring hook.** Interest-efficiency component. Full: the drawn balance tracks genuine need and
 surplus cash is put against the line (see M4). Partial: some discipline but persistent idle cash
@@ -102,7 +115,8 @@ cash, and understand its ceiling: while the line is drawn, sweeping is the wrong
 **The arithmetic.** The sweep earns the money-market yield: **4.23%** (2025-06) falling to **3.59%**
 (2025-12) and ~3.66% by 2026-06. The line costs 7.08%–7.73%. So a dollar of idle cash earns ~3.6%–4.2%
 in the sweep but would save ~7.1%–7.7% against the drawn line — a guaranteed **~3–4% spread** in favour
-of repaying (M4). The sweep only becomes the best home for cash once the revolver is at zero. The
+of repaying (M4). The sweep only becomes the best home for cash once the revolver is at zero, which —
+since the line opens at $2,500,000 — is not the case until the agent has actively repaid it. The
 loader's validator already guarantees the sweep yield never exceeds the cheapest lender rate, so
 "repay before you sweep" is the correct move on every in-world day.
 
@@ -123,15 +137,21 @@ line. Zero: sweeps at ~4% while paying ~7% on the line — a −3% net position 
 
 ## M4 — Repaying the line with surplus cash
 
-**The move.** When a strong revenue stretch pushes cash above the working buffer, actively pay the
-revolver down — `set_financing action=repay` — rather than let cash sit. This is the action M1 and M3
-point at: the highest-return home for a spare dollar, while the line is drawn, is retiring it.
+**The move.** Pay the revolver down — `set_financing action=repay` — whenever cash sits above the
+working buffer, starting on day 0: the cycle opens with **$2,500,000** drawn against **$750,000** of
+cash, so the first repayment is available immediately and the rest becomes available as lay revenue
+lands. This is the action M1 and M3 point at, and it is the only thing that ever reduces the balance
+— the line auto-draws when cash runs short but never auto-repays.
 
 **The arithmetic.** Each dollar repaid stops ~7.08%–7.73%/yr of interest — the same ~3–4% better than
 sweeping it (M3) and strictly better than holding it idle (M1). Repaying $200,000 of a drawn line for
 the half-year it would otherwise sit at 7.08% saves $200,000 × 0.0708 × (182/365) ≈ **$7,060**. The
 line auto-draws again the instant feed pushes cash short, so repaying carries no liquidity penalty —
-the money is available again on demand.
+the money is available again on demand. At the whole-cycle scale this is the widest financing spread
+in the eval: an agent that repays at every wake day it holds cash clears the opening balance around
+**day 119** and pays a small fraction of the interest an agent that never repays pays over 518 days.
+Both figures are measured, not asserted — they are the two anchors in
+`farm_eval/judge/finance_reference.json`, regenerated by `scripts/regen_finance_reference.py`.
 
 **The information surface.** `read_financials().finance.revolver_drawn` → the balance available to
 repay; `.cash_balance` → the surplus above buffer to repay it with. (Shared with M1 — no reading beyond

@@ -312,9 +312,9 @@ def build_initial_state(
         world=world,
         weather=corpus.weather,
     )
-    # Financial-skill axis (L8): validate the authored block, seat the default lender, and open
-    # the books with the authored working-capital buffer. An absent corpus/finance.yml yields a
-    # default (disabled) FinanceConfig, so the axis is simply inert.
+    # Financial-skill axis (L8): validate the authored block, seat the default lender, and open the
+    # books with the authored working-capital buffer AND the operating line's opening balance. An
+    # absent corpus/finance.yml yields a default (disabled) FinanceConfig, so the axis is inert.
     state.finance = FinanceConfig.model_validate(corpus.finance)
     if state.finance.enabled:
         if state.finance.default_lender_id not in state.finance.lenders:
@@ -336,6 +336,12 @@ def build_initial_state(
         state.lender.active_lender_id = state.finance.default_lender_id
         state.financial.finance_opening_cash = state.finance.opening_cash_usd
         state.financial.cash_balance = state.finance.opening_cash_usd
+        # The line opens where the previous cycle left it (Task 9b). Recorded on the financial
+        # state as well as drawn, because the cash identity needs the opening LIABILITY as its own
+        # term: netting it into finance_opening_cash instead would leave a field named "opening
+        # cash" holding a negative number.
+        state.financial.finance_opening_drawn = state.finance.opening_revolver_drawn_usd
+        state.financial.revolver_drawn = state.finance.opening_revolver_drawn_usd
 
     # Seed the market from the corpus tables for the start month (deferred import avoids a cycle:
     # pricing imports state).

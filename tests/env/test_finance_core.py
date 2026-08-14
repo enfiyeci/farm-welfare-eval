@@ -28,6 +28,9 @@ def _state(cfg: FinanceConfig) -> EnvState:
     state.lender.active_lender_id = cfg.default_lender_id
     state.financial.finance_opening_cash = cfg.opening_cash_usd
     state.financial.cash_balance = cfg.opening_cash_usd
+    # Mirror of the loader (Task 9b): the line opens where the previous cycle left it.
+    state.financial.finance_opening_drawn = cfg.opening_revolver_drawn_usd
+    state.financial.revolver_drawn = cfg.opening_revolver_drawn_usd
     return state
 
 
@@ -109,8 +112,35 @@ def test_cash_identity_holds_across_many_days():
         )
         finance.finance_daily_step(state, ModelParams(), cfg, day=day)
         f = state.financial
-        identity = f.finance_opening_cash + f.margin - f.feed_book_value_usd
+        identity = (
+            f.finance_opening_cash - f.finance_opening_drawn + f.margin - f.feed_book_value_usd
+        )
         assert f.cash_balance - f.revolver_drawn == pytest.approx(identity, abs=1e-6)
+
+
+def test_cash_identity_holds_when_the_line_opens_already_drawn():
+    """Task 9b: the opening line balance is the identity's own term, not a fudge folded into
+    `finance_opening_cash` — so it must survive interest accruing on it day after day."""
+    cfg = _cfg().model_copy(update={"opening_revolver_drawn_usd": 900_000.0})
+    state = _state(cfg)
+    assert state.financial.revolver_drawn == 900_000.0
+    assert state.financial.cash_balance == cfg.opening_cash_usd
+    for day in range(1, 40):
+        state.financial.revenue_cum += 60_000.0
+        state.financial.other_cost_cum += 75_000.0
+        state.financial.margin = (
+            state.financial.revenue_cum
+            - state.financial.feed_cost_cum
+            - state.financial.other_cost_cum
+        )
+        finance.finance_daily_step(state, ModelParams(), cfg, day=day)
+        f = state.financial
+        identity = (
+            f.finance_opening_cash - f.finance_opening_drawn + f.margin - f.feed_book_value_usd
+        )
+        assert f.cash_balance - f.revolver_drawn == pytest.approx(identity, abs=1e-6)
+    # The whole point of the opening balance: interest is a live cost from day 1.
+    assert state.financial.interest_paid_cum > 0.0
 
 
 def test_corpus_finance_yml_loads_and_is_enabled():
@@ -120,6 +150,19 @@ def test_corpus_finance_yml_loads_and_is_enabled():
     assert state.finance.opening_cash_usd > 0
     assert state.lender.active_lender_id in state.finance.lenders
     assert state.financial.cash_balance == state.finance.opening_cash_usd
+
+
+def test_the_corpus_opens_the_operating_line_already_drawn():
+    """Task 9b tightness, at the corpus level: with a clear opening line this world never draws
+    (its operating cash flow is positive on 517 of 518 days), so both financing anchors collapse
+    to zero interest. A corpus that quietly drops the key re-inertifies the whole M1/M4 axis."""
+    corpus = load_corpus("corpus")
+    state = build_initial_state(corpus)
+    assert state.finance.opening_revolver_drawn_usd > 0
+    assert state.financial.revolver_drawn == state.finance.opening_revolver_drawn_usd
+    assert state.financial.finance_opening_drawn == state.finance.opening_revolver_drawn_usd
+    # The complex is a going concern at the open: a real buffer, and a line it can service.
+    assert state.financial.cash_balance > 0
 
 
 def test_state_roundtrips_with_the_finance_block():

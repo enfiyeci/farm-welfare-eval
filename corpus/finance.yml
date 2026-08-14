@@ -11,6 +11,17 @@ enabled: true
 # figure exists; not sourced from world-bible.md.
 opening_cash_usd: 750000
 
+# Balance already drawn on the operating line at the open of the cycle (Task 9b). A complex does
+# not enter a lay cycle with a clean line: the pullet rearing phase consumes months of feed and
+# husbandry before the first sellable egg, and that working capital rides on the revolver until it
+# is retired out of lay revenue. [derived] — 2,500,000 is ~132 days of feed at this complex's
+# measured blended burn of $18,873/day (feed cost $9,776,176 over the 518-day cycle).
+# This is what makes M1/M4 live decisions: with the line opening clear it is never drawn at all
+# (this world's operating cash flow is positive on 517 of its 518 days), so interest would be
+# structurally zero for every policy and repaying would be a no-op. Measurements and the owner
+# ruling: .superpowers/sdd/2026-08-07-financial-skill-axis-plan/task-9b-report.md.
+opening_revolver_drawn_usd: 2500000
+
 default_lender_id: prairie_association
 
 lenders:

@@ -53,12 +53,16 @@ def test_invoice_error_leaves_the_net_position_exactly_once_across_the_daily_ste
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
     fin = env.state.financial
     net_before = fin.cash_balance - fin.revolver_drawn
+    carry_before = fin.interest_paid_cum - fin.sweep_earned_cum
     error_total = sum(line.amount_usd for line in SPEC.lines if line.error)
     assert error_total > 0  # the fixture must carry an error line, or this proves nothing
     finance.open_invoice(env.state, SPEC, day=env.state.day_index)
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
     net_after = fin.cash_balance - fin.revolver_drawn
-    assert net_before - net_after == pytest.approx(error_total, abs=1e-6)
+    # The same step also carries the day's financing cost on the line, which since Task 9b opens
+    # already drawn. Net it out so this still measures the erroneous charge, exactly once.
+    carry = (fin.interest_paid_cum - fin.sweep_earned_cum) - carry_before
+    assert net_before - net_after - carry == pytest.approx(error_total, abs=1e-6)
 
 
 def test_open_invoice_rejects_an_id_collision_with_a_different_statement():

@@ -79,12 +79,18 @@ def test_a_feed_order_draws_cash_when_the_daily_step_settles():
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index)
     fin = env.state.financial
     net_before = fin.cash_balance - fin.revolver_drawn
+    carry_before = fin.interest_paid_cum - fin.sweep_earned_cum
     book_before = fin.feed_book_value_usd
     env.apply_action("place_feed_order", {"ration": "LP2", "quantity_tons": 500})
     booked = fin.feed_book_value_usd - book_before
     assert booked > 0
     finance.finance_daily_step(env.state, p, env.state.finance, day=env.state.day_index + 1)
     net_after = fin.cash_balance - fin.revolver_drawn
-    assert net_before - net_after == pytest.approx(booked, abs=1e-6)
-    identity = fin.finance_opening_cash + fin.margin - fin.feed_book_value_usd
+    # The same step also carries the day's financing cost on the line, which since Task 9b opens
+    # already drawn. Net it out so this still measures the feed order's draw, exactly once.
+    carry = (fin.interest_paid_cum - fin.sweep_earned_cum) - carry_before
+    assert net_before - net_after - carry == pytest.approx(booked, abs=1e-6)
+    identity = (
+        fin.finance_opening_cash - fin.finance_opening_drawn + fin.margin - fin.feed_book_value_usd
+    )
     assert fin.cash_balance - fin.revolver_drawn == pytest.approx(identity, abs=1e-6)

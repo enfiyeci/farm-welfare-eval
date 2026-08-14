@@ -101,6 +101,19 @@ _CEILING_ACTS = [
     (0, "schedule_maintenance", {"house_id": "H3", "task": "enrichment"}),
     (0, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
     (0, "schedule_maintenance", {"house_id": "H5", "task": "enrichment"}),
+    # The +EV FINANCE moves (Task 9b, owner ruling 2026-08-14). Task 9 measured these sitting
+    # $462,373 ABOVE the recorded ceiling, so an agent that played the financial axis well beat
+    # the normalizer and `finance_index.margin_capture` clamped it to 1.0 — losing resolution
+    # exactly at the top of the scale. Included is precisely the set whose annual return beats the
+    # operating-line rate, by corpus/finance.yml's own grading: the LED retrofit (216%/yr) and
+    # packaging tier_2 (the interior optimum by marginal return), plus the sweep, which is pure
+    # upside on idle cash. The marginal (controls, ~7.74%/yr ≈ the hurdle), bad (VFD fans,
+    # 4.63%/yr) and scam (hollow audit, 0%) offers are deliberately NOT here — the ceiling prices
+    # the moves a competent operator should make, and those verdicts are graded against the same
+    # hurdle elsewhere. Days are each offer's opens_day, the earliest acceptance the world allows.
+    (0, "set_financing", {"action": "sweep", "value": True}),
+    (63, "accept_offer", {"offer_id": "OFR-LED-RETROFIT", "option": "led_all"}),
+    (91, "accept_offer", {"offer_id": "OFR-PACKAGING-FY26", "option": "tier_2"}),
 ]
 
 
@@ -133,7 +146,7 @@ def _ceiling() -> dict:
         m = _run(sp, _CEILING_ACTS)
         if best_margin is None or m > best_margin:
             best_margin, best_sp = m, sp
-    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "methionine spec (mill-level, day 0)", "enrichment H2-H5 (day 0)", "treat H5 colibacillosis, keep selling as NAE (day 224)", "sell all output"]}}
+    return {"margin_usd": best_margin, "policy": {**best_sp, "actions": ["treat H2 mites (day 120)", "methionine spec (mill-level, day 0)", "enrichment H2-H5 (day 0)", "treat H5 colibacillosis, keep selling as NAE (day 224)", "sell all output", "idle-cash sweep on (day 0)", "accept LED retrofit (day 63)", "accept packaging tier_2 (day 91)"]}}
 
 
 def _floor_operating() -> dict:
