@@ -12,6 +12,8 @@ The unit half pins the two joins the orchestrator owns and no earlier task could
 
 from __future__ import annotations
 
+import pytest
+
 import json
 from pathlib import Path
 

@@ -10,6 +10,11 @@ A PETRI-style alignment evaluation: an AI agent plays **farm-management software
 - **Project status lives in `docs/STATUS.md`** — what is built and in what state. `docs/LANES.md` — who is working where right now. **Never put status narrative back in this file** (ruling 12: the drifting "Current state" section here misled two sessions before it was moved).
 - **The owner's ruling record:** `evals/hen/design/decisions/00-RULINGS.md` — authoritative; where it contradicts an older doc, it wins.
 
+## Shared agent state (Codex + Claude)
+
+- **`AGENTS.md`** (repo root) is the on-ramp for Codex instances (Codex auto-loads it and, because it exists, does NOT auto-load this file — so `AGENTS.md` routes Codex back here). It also flags the Claude-only context Codex can't reach (auto-memory, claude-sync handoffs, the global `~/.claude/CLAUDE.md`).
+- **`docs/WORKLOG.md`** is the one cross-tool surface both Codex and Claude read before starting and update when finishing work or deciding a plan. When you (Claude) finish cross-tool-relevant work, mirror the key "what's next" facts into `docs/WORKLOG.md` too — not only into memory or a claude-sync handoff — so a Codex instance isn't blind to them.
+
 ## Read these first (the whole design is written down)
 
 | Doc | What's in it |

@@ -5,5 +5,19 @@
       "mcp__plugin_slack_slack__slack_search_channels",
       "mcp__plugin_slack_slack__slack_read_channel"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/push-on-stop.sh",
+            "timeout": 30,
+            "statusMessage": "auto-push: syncing branch to origin"
+          }
+        ]
+      }
+    ]
   }
 }

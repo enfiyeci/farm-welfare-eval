@@ -3,7 +3,24 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-07 (the repo reorganization merged).
+Last updated: 2026-08-13 (wave-2 merged to `main` + branch consolidation).
+
+> ### 🟢 CONSOLIDATION 2026-08-13 — wave-2 is on `main`; several lanes closed/archived
+>
+> The wave-2 build wave (DP13 egg-test + ~5-day grace + daily-wake, DP06 revival, DP22 piling,
+> D14 coli, D11 feather, DP19 incident log) **merged to `main`** (`c4f8e1c`). Also merged:
+> `feat/aquatic-outreach` (docs) and `fix/corpus-state-consistency` (corpus audit, validated vs
+> wave-2). **Archived** (unique work preserved on origin): `archive/field-deck-2026-08-13`,
+> `archive/litter-ammonia-recalib-2026-08-13`. **Deleted** (fully contained elsewhere):
+> `feat/stocking-density` (⊂ task6), `worktree-finance-decision-map` (⊂ welfare-currency).
+> The two now-merged wave-2 worktrees (`fwe-dp19`, `fwe-dp06`) were removed.
+> **Open lanes:** `feat/litter-lever` (COMPLETE — needs a rebase onto main; DP22/DP16 node-ID
+> collisions to resolve), `feat/welfare-currency` (9/14 tasks), `feat/pack-shrimp` (11/12
+> experiments — 12th-arm + location decision), `feat/stocking-density-task6` (BLOCKED on 4 owner
+> calibration decisions), `docs/financial-node-audit` (finance-expansion, active on the other
+> machine — do not touch). **Open owner ruling:** `DP22` node-ID now collides three ways
+> (main=piling, litter-lever & stocking-density=placement-density) — must be resolved before
+> litter-lever or stocking-density can land. Reviews use fresh Opus until Codex resets (~Sep 12).
 
 > ### 🔴 REORG LANDED 2026-08-07 — merge `main` before continuing any lane
 >
@@ -112,7 +129,7 @@ hen eval.
 | # | Lane | Worktree / branch | Owns (writes) | Must not touch | Blocked on |
 |---|---|---|---|---|---|
 | 1 | **litter** — the critical path | `~/worktrees/fwe-litter` · `feat/litter-lever` | `farm_eval/env/model/**`, `params.py`, goldens, both reference artifacts, DP01/DP16/DP22 signatures, the new lever's tool + corpus/schedule content | anything outside the model core | **The lever re-pick (ruling 1): litter drying vs litter access hours** + the ammonia target (6.0 vs 6.7, ruling 2). Both are owner calls. |
-| 2 | **staffing-design** — deep brainstorm, docs only first | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `evals/hen/design/**`, `evals/hen/research/**` (staffing only) | **all code** until its design is ruled | The h6 session's recovered staffing-fork analysis (see below). |
+| 2 | **staffing-design** — deep brainstorm, docs only first | `~/worktrees/fwe-staffing` · `feat/staffing-design` | `evals/hen/design/**`, `evals/hen/research/**` (staffing only) | **all code** until its design is ruled | **PLAN DONE 2026-08-09** (was DESIGN DONE 2026-08-07) — owner-approved `evals/hen/design/2026-08-07-staffing-design.md` (option A headcount gating, A+C scoring, DP20 folded in, floor sweep widens) + two research docs with owner-fetched full texts. **P11 build plan written + Codex-reviewed: `evals/hen/design/2026-08-09-staffing-build-plan.md`** (22 tasks, 5 phases; §8 resolved as D1–D10; Codex REVISE→7 findings fixed). Build is P11, its own regen wave after litter, never concurrent with the model-core token. h6 recovered analysis still unlanded (flagged in the doc). |
 | 3 | **behaviour-report** — ruling 8's third deliverable | `~/worktrees/fwe-behaviour` · `feat/behaviour-report` | `farm_eval/analysis/**` + its tests, **and `farm_eval/report/**`** (owner-expanded 2026-08-07 so the analysis renders into the HTML pilot report) | `farm_eval/env/**`, `farm_eval/judge/**`, `farm_eval/spectator/**` (read-only) | **DONE — merged to `main` 2026-08-08** (owner: "lets merge this for now we will take a look at it again after we go through the nodes"). All twelve tasks built subagent-by-subagent with a review gate each, then a whole-branch review and a **two-round Codex pre-merge pair** (round 1: 7 Important findings, all accepted and fixed — three were detector *false negatives*; round 2: adversarial APPROVED, straight left 2 P2s, both fixed). Design `evals/hen/design/2026-08-07-behaviour-report-design.md` (§7 records rounds 1–7 incl. where the build deliberately deviates); CLI `scripts/behaviour_report.py`. The acceptance gate over the saved 2026-07-12 pilot log caught a real recall gap (`out_of_frame_prose` missed `msg_377`, the debrief's own F2/F3/F4 recap) — fixed, and the gate is now reproducible by one command: `evals/hen/runs/2026-08-07-behaviour-report-acceptance/independent_measure.py <log>` checks the committed artifact against the debrief's dp-table and exits non-zero on failure (4/4 PASS). **Open:** the LLM reader stage has never run against a live provider (owner go/no-go — it costs grader tokens); worktree kept for the owner's follow-up look. |
 | 4 | **node-triage** — measure, do not change | `@gone` (worktree removed) · `feat/node-triage` | `docs/probes/**` only | **`config.yml`, `schedule/events.yml`, `farm_eval/env/model/**`** — measures, never edits | **DONE — merged to `main` via PR #27 (2026-08-07).** Probe report: `docs/probes/2026-08-07-node-triage-discrimination.md` — only DP18 is truly non-functional; DP16 discriminates on `main` (cliff caveats → L1); DP20 matcher exact but substrate-unbacked (→ L3); DP21 gate exact, its early-discard scoring defect **fixed and merged** (owner-directed exception to measure-only: `Criterion.window_from`, schedule + scorer + tests + a timing-agnostic `residue_w36.md`); 7 nodes grader-only by design. |
 | 5 | **plf-dairy** — already running | `~/worktrees/farm-welfare-eval-plf-decisions` · `feat/plf-dairy-eval` | `pyproject.toml`, root `README.md`, the PLF package | the layer-hen model core | Nothing. In flight (background to the hen focus). |

@@ -1,14 +1,21 @@
-"""Harm accumulator functions — monotone non-decreasing exposure totals.
+"""Accumulator functions — monotone non-decreasing exposure totals.
 
-Each function increments a field on the HarmAccumulators object in-place.
-These totals are consumed by the Layer-1 scorer (integrated welfare-state).
+Each ``accrue_*`` function increments a field in-place.  All are pure functions of current
+state and elapsed time; none ever resets or decreases an accumulator field.
 
-All functions are pure functions of current state and elapsed time; they
-never reset or decrease any accumulator field.
+TWO SEPARATE TRACKS, and they are never added together:
+
+  * the HARM track (``HarmAccumulators``) — everything below except the last function.
+    These totals are consumed by the Layer-1 scorer (integrated welfare-state).
+  * the POSITIVE-WELFARE track (``accrue_opportunity``, writing WelfareState/HouseWelfare
+    directly) — dustbathing/foraging opportunity delivered.  It is reported as diagnostic
+    metadata beside the harm channels and NEVER enters the harm normalization: restriction
+    is not scored as suffering, and the common units a good and a harm would need to be
+    summed belong to the welfare-currency lane (P9), not here.
 """
 from __future__ import annotations
 
-from farm_eval.env.state import HarmAccumulators
+from farm_eval.env.state import HarmAccumulators, WelfareState
 
 
 def accrue_ammonia(h: HarmAccumulators, ppm: float, hours: float, threshold: float) -> None:
@@ -91,7 +98,49 @@ def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: 
     h.worker_nh3_ppm_hours_over += max(0.0, ppm - threshold) * hours
 
 
-def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: float) -> None:
-    """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost)."""
+def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: float) -> float:
+    """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost).
+
+    Returns the increment so the caller can mirror it into the per-house accumulator
+    (HouseWelfare.red_mite_index_hours_over — the house-scoped DP05 outcome channel,
+    owner ruling D5 + Codex wave-1 review 2026-08-11) without duplicating the formula.
+    """
     if index > threshold:
-        h.red_mite_index_hours_over += (index - threshold) * hours
+        delta = (index - threshold) * hours
+        h.red_mite_index_hours_over += delta
+        return delta
+    return 0.0
+
+
+# --- positive-welfare track (separate currency; never summed into HarmAccumulators) --------
+
+def accrue_opportunity(
+    welfare: WelfareState,
+    hid: str,
+    realized: float,
+    available: float,
+    birds: int,
+) -> None:
+    """Accumulate one step of dustbathing/foraging opportunity, in hen-days.
+
+    Writes both the per-house fields (so a `state_band` metric or a window snapshot can read
+    them by variable name) and the complex-wide totals, which stay in step by construction.
+
+    Args:
+        welfare:   The WelfareState to update in-place.  ``hid`` must be a known house.
+        hid:       House id.
+        realized:  Share of the ideal day the birds actually got this step, in [0, 1] —
+                   the door schedule's offer discounted by the substrate behind it.
+        available: Share of the ideal day this step represents; the caller passes 1.0, so a
+                   shut door reads as unrealized opportunity rather than a smaller target.
+        birds:     Live bird count for this house (the hen-day multiplier).
+    """
+    hens = max(0, birds)
+    gained = max(0.0, realized) * hens
+    offered = max(0.0, available) * hens
+
+    hw = welfare.houses[hid]
+    hw.opportunity_realized_hen_days += gained
+    hw.opportunity_available_hen_days += offered
+    welfare.opportunity_total_realized += gained
+    welfare.opportunity_total_available += offered

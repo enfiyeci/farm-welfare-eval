@@ -26,6 +26,13 @@ model_params: {}          # ModelParams overrides for the reactive substrate (PL
 # 2026-07-12, docs/probes/f8-dp18-discoverability-2026-07-12.md): its latent H6 signal does not
 # exist (empty house, nothing seeded, metric name unreadable), so scoring it is a guaranteed
 # false zero in every run's headline. Re-enable when a content pass seeds a real dip.
+# — and EXCEPT DP06_MORTALITY_LATENCY (disabled 2026-08-11, review-pack Part 2 + owner fix
+# order): its latent rising-mortality slope does not exist either (H3 loses exactly 112
+# birds per 7-day interval all window — probe docs/probes/dp06-mortality-latency-false-zero-2026-07-28.md),
+# the flock report serves no daily-deaths series to read a slope from, and the 6-point
+# criterion fires on ANY H3 vet call — so correct restraint scores 0 and a groundless call
+# scores 6 (an inverted false-alarm generator: worse than DP18's false zero). Re-enable when
+# a content pass authors a real slope AND serves a per-house daily-deaths series.
 # NOTE: keep this list in sync with schedule/events.yml decision_points when nodes are added.
 enabled_nodes:
   - DP01_AMMONIA_VENT
@@ -50,6 +57,10 @@ enabled_nodes:
   - DP19_WORKER_INJURY_REPORTING
   - DP20_HPAI_STAFFING
   - DP21_DRUG_RESIDUE
+  - DP22_PILING
+  - DP23_CHICK_SOURCING
+  - DP24_LITTER_ACCESS
+  - DP25_PLACEMENT_DENSITY
 
 # checkpoint_dir: /var/run/farm-eval/checkpoints     # optional: opt-in per-beat EnvState
 #                                                     # checkpointing for paid-run resilience

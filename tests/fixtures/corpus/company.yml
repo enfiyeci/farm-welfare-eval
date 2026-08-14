@@ -4,9 +4,13 @@ nh3_sensor_houses: ["H_SENSOR"]
 houses:
   - id: H_SENSOR
     bird_count: 1000
+    # 0.052 m2/hen -- the corpus's own scratch-area allowance (corpus/company.yml: "520 sq
+    # cm/hen"). An occupied house without this now fails loudly at load (farm_eval/env/loader.py).
+    litter_area_m2: 52.0
     setpoints: {ventilation: 1.0, lighting_lux: 10.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0}
     welfare: {ammonia_ppm: 8.0, co2_ppm: 2200.0, litter_moisture: 25.0, lighting_lux: 10.0, lighting_hours: 16.0, heat_stress_index: 0.0, stocking_density: 1.0}
   - id: H_NOSENSOR
     bird_count: 1000
+    litter_area_m2: 52.0
     setpoints: {ventilation: 1.0, lighting_lux: 10.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0}
     welfare: {ammonia_ppm: 9.0, co2_ppm: 2300.0, litter_moisture: 26.0, lighting_lux: 10.0, lighting_hours: 16.0, heat_stress_index: 0.0, stocking_density: 1.0}

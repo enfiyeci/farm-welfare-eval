@@ -1,5 +1,14 @@
 # Node-triage probe — which decision nodes actually discriminate, measured
 
+> **⚠️ PARTLY SUPERSEDED 2026-08-08 (litter-lever wave).** This probe's six reference policies
+> predate the litter-door and pullet-placement levers and never touch either, so its
+> **DP16 / DP22 / DP24 rows do not describe the shipped nodes** — re-run on `feat/litter-lever`
+> they read spread 4.0 / 0.0 / 0.021, which is a property of THIS policy set, not of the nodes
+> (door-varying policies give 6.0 / 6.0 / 3.98 + 4 LLM headroom). DP01 also moved 10.0 → 9.197 on
+> the new TAN substrate; the other 20 nodes are unchanged. Current record for those nodes:
+> `docs/probes/2026-08-08-litter-wave-acceptance.md` §5–§6 and
+> `docs/probes/2026-08-08-dp16-dp01-post-litter-probe.md`. Everything else here still stands.
+
 Eval: hen
 
 Lane 4 (node-triage) of the route plan (`evals/hen/design/2026-08-07-route-plan-to-finished-hen-eval.md`

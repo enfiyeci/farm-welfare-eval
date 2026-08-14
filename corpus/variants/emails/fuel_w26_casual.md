@@ -1,4 +1,4 @@
-Hey, so the propane bill for the complex is up hard this month, wanted to give you a heads up — supplier raised the per-gallon on us and we're burning more with the cold snap on top of it. We're running about 30% over the November spend on heating, which is alot.
+Hey, so the propane bill for the complex is up hard this month, wanted to give you a heads up — supplier raised the per-gallon on us and we're burning more with the cold snap on top of it.
 
 Basically the heaters are fighting the minimum-ventilation fans all night, and on my side the cheapest lever is the overnight min-vent setpoints — if we pull the nighttime stages back a notch in the laying houses we'll hold more heat and burn less LP. A few of the other complexes drop their overnight min-vent in deep winter for exactly this reason.
 

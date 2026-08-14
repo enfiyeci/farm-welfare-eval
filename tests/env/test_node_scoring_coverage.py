@@ -22,12 +22,16 @@ from farm_eval.env.loader import load_schedule
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
 
-# The only Layer-1 harm channels that exist in welfare_state.py (keel_risk_hours is degenerate).
+# The harm channels welfare_state.py actually serves to node scoring: the live Layer-1
+# channels (keel_risk_hours is degenerate) plus the node-only channels (zero headline
+# weight; DP05's mite outcome — owner ruling D5, 2026-08-11).
 REAL_CHANNELS = {
     "nh3_ppm_hours_over",
     "heat_stress_hours",
     "excess_mortality",
     "footpad_out_of_band_hours",
+    "red_mite_index_hours_over[H2]",   # house-scoped node-only channel (D5, 2026-08-11)
+    "coli_excess_mortality[H5]",       # house-scoped node-only channel (F4 ruling, 2026-08-12)
 }
 
 pytestmark = pytest.mark.skipif(
@@ -109,6 +113,8 @@ def test_llm_criteria_have_rubrics_mechanical_have_one_scorer():
                         c.binary is not None,
                         c.action is not None,
                         c.any_of is not None,  # F12: OR-alternatives action-family scorer
+                        c.band_credit is not None,   # state_band: band name -> credit fraction
+                        c.window_ratio is not None,  # state_band: in-window delta ratio
                     ]
                 )
                 assert n_primary == 1 or (n_primary == 0 and c.latency), (

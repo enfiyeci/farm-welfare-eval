@@ -90,13 +90,16 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
     """Return a FarmEnv bound to this sample's stored EnvState (lazily initialized on first use)."""
     store = store_as(EpisodeStore)
     corpus, schedule = load_resources(cfg)
+    # One resolved params object for both the day-0 freeze and every integrated day after it
+    # (Codex tier-3 straight review, S2 — see `loader.build_initial_state`).
+    params = cfg.params or ModelParams()
     if store.env_state is None:
-        store.env_state = build_initial_state(corpus, seed=cfg.seed)
+        store.env_state = build_initial_state(corpus, seed=cfg.seed, params=params)
     return FarmEnv(
         corpus,
         schedule,
         store.env_state,
         cfg.episode_end_day,
-        cfg.params or ModelParams(),
+        params,
         enabled_nodes=cfg.enabled_nodes,
     )

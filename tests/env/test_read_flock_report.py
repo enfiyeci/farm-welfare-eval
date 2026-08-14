@@ -3,6 +3,7 @@ from pathlib import Path
 from farm_eval.env.episode import FarmEnv
 
 FIX = Path(__file__).parent.parent / "fixtures"
+REPO = Path(__file__).parents[2]
 
 
 def _env():
@@ -44,6 +45,7 @@ def test_flock_report_footpad_tracks_state():
     hw.footpad_mild_pct, hw.footpad_severe_pct = 10.0, 25.0
     rep = env.read_flock_report(hid)
     assert abs(rep["welfare_obs"]["footpad_affected_pct"] - 35.0) < 1e-6
+    assert abs(rep["welfare_obs"]["footpad_severe_pct"] - 25.0) < 1e-6
 
 
 def test_flock_report_unknown_house_raises_or_flags():
@@ -53,3 +55,81 @@ def test_flock_report_unknown_house_raises_or_flags():
         assert rep.get("available") is False
     except KeyError:
         pass  # either an explicit unavailable flag or a KeyError is acceptable
+
+
+def test_flock_report_surfaces_litter_state_and_access():
+    # Task 11: discoverability — the litter-lever's intermediate variables must be readable,
+    # not just modeled. litter_depth_cm/litter_caked_pct/floor_eggs_pct track live substrate
+    # state; litter_access reports the door schedule's open/close/effective hours and the
+    # records-facing confinement tally.
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[hid]
+    hw.litter_depth_cm, hw.litter_caked_pct, hw.floor_egg_frac = 3.4, 12.0, 0.05
+    hw.confinement_days_used = 2.0
+    rep = env.read_flock_report(hid)
+    assert abs(rep["welfare_obs"]["litter_depth_cm"] - 3.4) < 1e-6
+    assert abs(rep["welfare_obs"]["litter_caked_pct"] - 12.0) < 1e-6
+    assert abs(rep["welfare_obs"]["floor_eggs_pct"] - 5.0) < 1e-6
+    la = rep["litter_access"]
+    assert set(la) >= {"open_hour", "close_hour", "effective_hours", "confinement_days_used"}
+    assert la["confinement_days_used"] == 2.0
+    assert la["effective_hours"] >= 0.0
+
+
+def test_flock_report_dustbathing_activity_is_a_qualitative_band():
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    rep = env.read_flock_report(hid)
+    # after one end_day() the house has integrated a day of opportunity accrual, so a real
+    # band (not "unknown") should be reported.
+    assert rep["welfare_obs"]["dustbathing_activity"] in {"low", "moderate", "high"}
+
+
+def test_flock_report_empty_house_reads_unknown_with_no_crash():
+    # F1 (round-1 review): H6 in the REAL corpus is the empty, mid-C&D-turnaround house
+    # (bird_count 0, lighting_hours 0.0) — integrate.py skips it entirely (integrate.py:83
+    # "empty house -- skip entirely, no harm, no div-by-zero"), so its opportunity
+    # accumulators never move off 0.0/0.0. This is exactly the F8/DP18 failure class (a
+    # metric that reads as real but is a false zero from a house nothing ever populates) —
+    # pin that read_flock_report handles it as an honest "unknown" rather than crashing or
+    # printing a misleading "low".
+    env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    env.end_day()
+    rep = env.read_flock_report("H6")
+    assert rep["house_id"] == "H6"
+    assert rep["mortality"]["birds_alive"] == 0
+    wo = rep["welfare_obs"]
+    assert wo["dustbathing_activity"] == "unknown"
+    # no crash, no division: every new field is a finite, sane number
+    for k in ("litter_depth_cm", "litter_caked_pct", "floor_eggs_pct"):
+        assert isinstance(wo[k], (int, float))
+    assert wo["floor_eggs_pct"] == 0.0  # no flock, no floor eggs
+    la = rep["litter_access"]
+    assert la["effective_hours"] == 0.0  # lighting_hours 0.0 -> no lit window to access
+    assert la["confinement_days_used"] == 0.0
+
+
+def test_flock_report_effective_hours_tracks_the_live_lighting_hours_setpoint():
+    # F1 (round-2 Codex adversarial review of the whole Task 11 diff): effective_hours must
+    # be computed from the LIVE world.setpoints["lighting_hours"] the physics substrate
+    # actually integrates against (integrate.py:95 `sp.get("lighting_hours", 16.0)`), never
+    # from HouseWelfare.lighting_hours — a load-time mirror `adjust_setpoint` never writes
+    # back to, so it would silently go stale the moment an operator changes the photoperiod
+    # mid-episode and the report would show an access figure the world no longer runs.
+    env = _env()
+    hid = next(iter(env.state.welfare.houses))
+    before = env.read_flock_report(hid)
+    assert before["litter_access"]["effective_hours"] == 16.0  # fixture's authored 16-h day
+
+    result = env.apply_action(
+        "adjust_setpoint", {"house_id": hid, "system": "lighting_hours", "value": 12.0}
+    )
+    assert result.ok
+    env.end_day()  # advance a day so the substrate integrates under the new photoperiod
+
+    after = env.read_flock_report(hid)
+    # the stale HouseWelfare mirror would still read 16.0 here; the live setpoint reads 12.0
+    assert after["litter_access"]["effective_hours"] == 12.0
+    assert env.state.welfare.houses[hid].lighting_hours == 16.0  # the mirror IS stale, confirmed

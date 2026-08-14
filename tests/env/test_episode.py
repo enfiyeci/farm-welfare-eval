@@ -252,6 +252,12 @@ def _state_band_env(
         world=WorldState(
             litter_age_days={"H4": litter},
             bird_count={"H4": 1000},
+            # Task 7: density loads the litter through hens-per-m2-of-litter; an unauthored
+            # litter_area_m2 now reads as "no litter floor" (density_factor 0), which would
+            # silence the floor-moisture-excess term this fixture's ammonia trajectory
+            # depends on. 0.052 m2/hen matches the corpus's own scratch-area allowance
+            # (company.yml: 520 sq cm/hen).
+            litter_area_m2={"H4": 1000 * 0.052},
             setpoints={"H4": {"ventilation": ventilation}},
         ),
     )
@@ -275,14 +281,29 @@ def test_state_band_resolves_to_band_at_window_close():
 
 
 def test_state_band_records_deadline_band_not_next_beat():
-    # litter 380 -> ammonia ~24 (marginal) at the day-40 deadline; by the next beat the model
-    # drifts it into harm. The deadline band must be the one recorded.
-    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=380.0)
+    # RE-ANCHORED TWICE. First for the lagged-TAN ammonia layer: litter AGE is no longer an
+    # ammonia input (age acts through the bed — depth, then moisture, then TAN), so the old
+    # `litter=380` fixture, which bought 7.6 ppm from the retired per-day age coefficient, now
+    # buys nothing. Then for review round 1 (F2): that first re-anchor at ventilation 0.6 left
+    # the deadline value (21.4 ppm) and every later value (23.4) inside the SAME marginal band,
+    # so the test passed whichever beat the resolver read — it had no power at all. At 0.55 the
+    # house is still climbing THROUGH the band edge, which is the only configuration that can
+    # catch a wrong-beat read: marginal at the day-40 deadline, harm from then on.
+    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=0.0, ventilation=0.55)
     env.start()
 
-    env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal)
+    env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal, 23.4 ppm)
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
+    assert entry.outcome == "marginal"
+
+    # THE POWER OF THE TEST: run the episode out and the house crosses into a DIFFERENT band
+    # (27.6 ppm — harm). A resolver reading any beat after the deadline would record "harm"; the
+    # recorded outcome must still be the deadline's.
+    while not env.is_over():
+        env.end_day()
+    assert env.state.welfare.houses["H4"].ammonia_ppm > 25.0
+    entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.outcome == "marginal"
 
 

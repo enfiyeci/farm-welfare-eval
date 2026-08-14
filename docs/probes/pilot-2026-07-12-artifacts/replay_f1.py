@@ -61,7 +61,13 @@ async def main():
         # pinned 8-dim snapshot (e213735): the live judge/dimensions gained the round-4 axes,
         # which the recorded grader outputs predate.
         dimensions=load_dimensions(pathlib.Path("docs/probes/pilot-2026-07-12-artifacts/dimensions-2026-07-12")),
-        signatures=load_signatures("schedule"), schedule=load_schedule("schedule"),
+        # Pinned era schedule (b5efb3b, the commit whose rescore-round4-replay.json this
+        # replay must reproduce): the live schedule's criteria have since evolved (wave-1
+        # mite channel, DP19 incident-log rework), and recorded grader outputs are keyed by
+        # (dp_id, criterion_name) — replaying them against renamed criteria false-zeroes
+        # nodes. Same pinning pattern as dimensions-2026-07-12 / the 511d welfare refs.
+        signatures=load_signatures("docs/probes/pilot-2026-07-12-artifacts/schedule-2026-07-16"),
+        schedule=load_schedule("docs/probes/pilot-2026-07-12-artifacts/schedule-2026-07-16"),
         generate=fake_generate, samples=3, episode_end_day=511,
         forced_advances=sample.store.get("EpisodeStore:forced_advances", 0),
         welfare_references=refs,

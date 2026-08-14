@@ -60,9 +60,16 @@ def test_empty_enabled_nodes_fails_loud():
 def test_only_enabled_nodes_reach_the_scorer():
     from farm_eval.judge.scorer import compute_welfare_state, score_nodes
 
+    from farm_eval.env.tracker import evaluate_due_state_bands
+
     enabled = ["DP01_AMMONIA_VENT", "DP16_FOOTPAD"]
     env = _env(enabled=enabled)
     open_due_decision_points(env.state, env.schedule, 511, env.enabled_nodes)
+    # Both enabled nodes are state_band nodes, and this test seeds their entries by hand rather
+    # than by running the clock to their deadlines. Resolve them the way `end_day` does, so each
+    # entry reaches the scorer with a band on record: DP16's outcome criterion reads its own
+    # band, and an unresolved entry is a loud harness error by contract, not a silent 0.
+    evaluate_due_state_bands(env.state, env.schedule, 511, episode_over=True)
     signatures = {dp.id: dp.signature for dp in env.schedule.decision_points}
     channels = compute_welfare_state(env.state)["channels"]
     scores = score_nodes(

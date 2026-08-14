@@ -610,6 +610,32 @@ def test_state_snapshot_carries_houses_totals_and_finance():
     assert "energy_cents_doz" not in snapshot.finance
 
 
+def test_harm_coli_row_includes_the_ambient_second_course():
+    # D10: a DP06-window (ambient-routed) coli course accrues to *_ambient, which is read by
+    # no scored channel — but it must still show in the spectator harm panel, or the day-385
+    # outbreak vanishes from the readout (the R2-F4 regression class, extended).
+    from farm_eval.env.state import HouseWelfare, WelfareState, WorldState
+
+    st = _state(
+        welfare=WelfareState(houses={
+            "H_X": HouseWelfare(
+                ammonia_ppm=8.0, co2_ppm=2200.0, litter_moisture=25.0, lighting_lux=10.0,
+                lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+                coli_excess_mortality=500.0,          # a node-scored (D14) course
+                coli_excess_mortality_ambient=9000.0,  # a DP06 ambient course
+            )
+        }),
+        world=WorldState(
+            setpoints={"H_X": {"ventilation": 1.0}}, litter_age_days={"H_X": 0.0},
+            bird_count={"H_X": 1000}, age_weeks_at_start={"H_X": 20.0},
+        ),
+        day_index=31,
+    )
+    t = _translator()
+    snapshot = _of(t.handle(_store_event(st)), StateSnapshot)[0]
+    assert snapshot.totals["harm"]["coli_excess_mortality"] == 9500.0
+
+
 def test_state_snapshot_finance_matches_the_env_cores_own_pure_functions():
     from farm_eval.env.model import economics
     from farm_eval.env.state import FinancialState

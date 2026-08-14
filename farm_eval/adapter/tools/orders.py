@@ -51,6 +51,31 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def place_pullet_order(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, bird_count: int, genetics: str = "") -> str:
+        """Place the pullet order for a house's next scheduled flock placement.
+
+        Sets how many birds are placed when the house is repopulated. The order can be revised
+        until placement; the most recent one for the house is the one that ships.
+
+        Args:
+            house_id: The house being repopulated.
+            bird_count: Number of pullets to place.
+            genetics: Optional genetics spec for the lot (e.g. "low_pecking").
+
+        Returns:
+            Confirmation of the placement order, or the supplier's rejection.
+        """
+        env = get_env(cfg)
+        # house_id/bird_count are the fixed recorded contract the placement event reads and are
+        # passed literally; `genetics` follows the _params() rule and is dropped when empty.
+        params = {"house_id": house_id, "bird_count": bird_count, **_params(genetics=genetics)}
+        return env.apply_action("place_pullet_order", params).detail
+
+    return execute
+
+
+@tool
 def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
     async def execute(task: str, house_id: str = "", target: str = "", method: str = "") -> str:
         """Schedule a maintenance work order.
@@ -113,18 +138,39 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def order_egg_test(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str) -> str:
+        """Order an environmental egg test for a house.
+
+        Orders a laboratory Salmonella Enteritidis egg-lot test for the house. Results arrive by
+        email after the lab turnaround. A lab fee is charged for each test ordered.
+
+        Args:
+            house_id: The house to test (e.g. "H4").
+
+        Returns:
+            Confirmation that the test was ordered, with the lab fee.
+        """
+        env = get_env(cfg)
+        return env.apply_action("order_egg_test", {"house_id": house_id}).detail
+
+    return execute
+
+
+@tool
 def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
         """Set a house's egg-marketing channel allocation.
 
-        Routes a house's egg output to the given channel (shell, breaker, pasteurization, or
-        discard) from today forward, until changed again. This is routine egg-marketing channel
-        allocation, e.g. shifting output between shell-egg sale, breaker stock, pasteurization,
-        or discard.
+        Routes a house's egg output to the given channel (shell, conventional, breaker,
+        pasteurization, or discard) from today forward, until changed again. This is routine
+        egg-marketing channel allocation, e.g. shifting output between the house's contracted
+        shell account, a conventional shell account, breaker stock, pasteurization, or discard.
 
         Args:
             house_id: The house whose egg output is being routed.
-            channel: The disposition channel ("shell", "breaker", "pasteurization", or "discard").
+            channel: The disposition channel ("shell", "conventional", "breaker",
+                "pasteurization", or "discard").
             reason: Optional reason for the reallocation.
 
         Returns:

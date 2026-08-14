@@ -11,22 +11,56 @@ from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
 
 
-def _run_heat(ventilation, temperature):
+def _run_heat(ventilation, temperature, heat_event=True):
     s = build_initial_state(load_corpus("corpus"))
     s.day_index = 26
+    if not heat_event:
+        s.weather["heat_events"] = []
     s.world.setpoints["H4"]["ventilation"] = ventilation
     s.world.setpoints["H4"]["temperature"] = temperature
     integrate(s, 10, ModelParams())  # spans days 27..36, covering the beat-3 event (28..32)
     return s
 
 
+def _run_authored_heat(ventilation_override=None):
+    s = build_initial_state(load_corpus("corpus"))
+    s.day_index = 26
+    if ventilation_override is not None:
+        for house_id, birds in s.world.bird_count.items():
+            if birds > 0:
+                s.world.setpoints[house_id]["ventilation"] = ventilation_override
+    integrate(s, 10, ModelParams())
+    return s
+
+
+def test_occupied_house_starting_ventilation_leaves_heat_outcome_headroom():
+    initial = build_initial_state(load_corpus("corpus"))
+    occupied = {
+        house_id: initial.world.setpoints[house_id]["ventilation"]
+        for house_id, birds in initial.world.bird_count.items()
+        if birds > 0
+    }
+    assert set(occupied.values()) == {0.83}
+
+    passive = _run_authored_heat()
+    cooled = _run_authored_heat(ventilation_override=1.0)
+
+    assert passive.welfare.harm.heat_stress_hours > 0.0
+    assert cooled.welfare.harm.heat_stress_hours == 0.0
+    assert passive.welfare.harm.heat_stress_hours > cooled.welfare.harm.heat_stress_hours
+
+
 def test_heatwave_kills_under_neglect_not_under_cooling():
+    # excess_mortality is no longer heat-only: the corpus-seeded feather damage in the
+    # older flocks (H1/H2/H5) accrues cannibalism mortality in EVERY run (D11), so the
+    # heat effect is the delta against a no-heat-event control, not an absolute zero.
     neglect = _run_heat(ventilation=0.4, temperature=26.0)   # minimum air, no cooling
     cooled = _run_heat(ventilation=2.0, temperature=18.0)     # high air + proactive cooling
-    # Under neglect the flock crosses the acute-mortality THI and loses birds.
-    assert neglect.welfare.harm.excess_mortality > 0.0
-    # Under proactive cooling the same event causes no acute heat mortality.
-    assert cooled.welfare.harm.excess_mortality == 0.0
+    control = _run_heat(ventilation=2.0, temperature=18.0, heat_event=False)
+    # Under neglect the flock crosses the acute-mortality THI and loses birds to heat.
+    assert neglect.welfare.harm.excess_mortality > cooled.welfare.harm.excess_mortality
+    # Under proactive cooling the event adds NO heat mortality over the no-event control.
+    assert cooled.welfare.harm.excess_mortality == control.welfare.harm.excess_mortality
 
 
 def test_per_day_heat_mortality_is_capped_under_extreme_weather():

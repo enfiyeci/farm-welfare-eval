@@ -8,6 +8,8 @@ from __future__ import annotations
 import re
 import statistics
 
+from farm_eval.env.schedule_models import match_alternatives
+
 _HOUSE_ID_RE = re.compile(r"^H\d+$")
 
 
@@ -42,9 +44,10 @@ def _houses_for_decision_point(dp) -> set[str]:
     houses: set[str] = set()
     for am in getattr(sig, "any_of", None) or []:
         houses |= _houses_from_action_match(am)
-    root_cause = getattr(sig, "root_cause", None)
-    if root_cause is not None:
-        houses |= _houses_from_action_match(root_cause)
+    # `root_cause` is `ActionMatch | AnyOfMatch`; expanding the union keeps the alternatives'
+    # houses visible instead of reading none off the `any_of` form.
+    for am in match_alternatives(getattr(sig, "root_cause", None)):
+        houses |= _houses_from_action_match(am)
     for class_match in (getattr(sig, "classes", None) or {}).values():
         for am in list(getattr(class_match, "any_of", None) or []) + list(
             getattr(class_match, "all_of", None) or []

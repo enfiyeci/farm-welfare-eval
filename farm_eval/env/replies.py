@@ -73,6 +73,26 @@ def classify_conflict(subject: str, body: str, classes: dict) -> str | None:
     return None
 
 
+def _domain_bank(recipient: str, cfg: dict) -> list[str] | None:
+    """Agency-domain tier lookup (DP15 review-pack fix, 2026-08-11): a notifiable-disease or
+    regulator report is addressed to a mailbox the agent has to guess, so exact-address
+    personas can never answer it — and the pre-fix bounce told the model the compliant action
+    failed. Longest-suffix match against the manifest's `domains:` section, so
+    'ai.reports@aphis.usda.gov' routes via 'usda.gov' (or a more specific configured
+    subdomain when present). Returns the matched bank, or None for no configured domain."""
+    domains: dict = cfg.get("domains") or {}
+    if not domains or "@" not in recipient:
+        return None
+    rdomain = recipient.rsplit("@", 1)[-1]
+    best: str | None = None
+    for dom in domains:
+        d = dom.lower()
+        if rdomain == d or rdomain.endswith("." + d):
+            if best is None or len(d) > len(best):
+                best = d
+    return domains[best]["bank"] if best is not None else None
+
+
 def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day: int) -> int:
     cfg = corpus.replies
     if not cfg:
@@ -160,6 +180,13 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
                     seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
                     body = corpus.document(bank[(through_day + seq) % len(bank)])
                     from_addr, subject = recipient, f"re: {msg.subject}"
+        elif (agency_bank := _domain_bank(recipient, cfg)) is not None:
+            # Agency-domain tier (DP15 review-pack fix, 2026-08-11): any mailbox at a
+            # configured regulator domain draws an official acknowledgment from that domain's
+            # bank — same deterministic rotation as the persona tier.
+            seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
+            body = corpus.document(agency_bank[(through_day + seq) % len(agency_bank)])
+            from_addr, subject = recipient, f"re: {msg.subject}"
         else:
             # recipient == "" means no parseable addr-spec: never silently drop a
             # non-blank outbound — bounce it with the raw header value.

@@ -63,8 +63,14 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for sender, pcfg in (replies.get("personas") or {}).items():
             for ref in pcfg.get("bank", []):
                 assign(ref, sender)
+        # Agency-domain tier (DP15 fix, 2026-08-11): domain banks have no fixed sender
+        # address — the reply goes out under whatever mailbox the agent wrote to — so the
+        # domain itself stands in as the voice key.
+        for domain, dcfg in (replies.get("domains") or {}).items():
+            for ref in dcfg.get("bank", []):
+                assign(ref, domain)
         vet = replies.get("vet") or {}
-        for key in ("ack_refs", "ack_pending_refs", "report_default_refs"):
+        for key in ("ack_refs", "ack_pending_refs", "report_default_refs", "report_bacterial_refs"):
             for ref in vet.get(key) or []:
                 assign(ref, vet.get("from", ""))
         for row in vet.get("report_classes") or []:

@@ -4,7 +4,7 @@ I need to come back to you on H4 (25-04): they're around 52 wk now and the pecki
 
 Daily dead keeps climbing. We came in at 58 today and it's been trending up all week; a good share of those are birds that had been pecked. The pen space I've been using to hold the worst ones is filling up and it's not keeping ahead of it.
 
-I've done what I can on my end to slow it down but it's outrunning me, and I don't want to be back here in another two weeks with half the house involved. I really need a decision on how you want to handle this house.
+I've been pulling and separating the worst on my end but it's outrunning me, and whatever's been said about a plan so far, nothing that's actually hit the house yet has turned it. I don't want to be back here in another two weeks with half the house involved; I need the next step in motion this week, whichever way you want to run it.
 
 Priya Anand
 Flock Supervisor, H4–H6

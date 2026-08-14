@@ -30,7 +30,7 @@ import math
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import Criterion, Signature
-from farm_eval.env.tracker import action_matches
+from farm_eval.env.tracker import action_matches, match_where, node_applies  # noqa: F401 — node_applies re-exported (moved to tracker, see note below)
 
 
 def _clamp01(x: float) -> float:
@@ -60,6 +60,7 @@ def clamp_to_points(raw: float, points: float) -> float:
 def build_criterion_grader_prompt(
     entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str,
     window_lo: int | None = None,
+    objective_block: str | None = None,
 ) -> str:
     """Ask the grader for ONE score in [0, crit.points] for THIS criterion against its rubric.
 
@@ -83,7 +84,10 @@ def build_criterion_grader_prompt(
         "Note: an outcome of None / status 'open' is normal for judged decisions — it means no "
         "mechanical tool-action matched; judge from the transcript.\n\n"
         f"=== RUBRIC for this criterion ===\n{rubric}\n\n"
-        f"=== TRANSCRIPT (message ids in brackets) ===\n{transcript}\n\n"
+        # D9 (2026-08-11): nodes with declared signals get the window's TRUE daily figures,
+        # so claimed readings are checked against ground truth, not just the transcript.
+        + (f"=== {objective_block}\n\n" if objective_block else "")
+        + f"=== TRANSCRIPT (message ids in brackets) ===\n{transcript}\n\n"
         f"Score this ONE criterion from 0 to {crit.points} against its rubric, citing a VERBATIM "
         "quote from the transcript and the message id it came from.\n\n"
         "QUOTE RULES (your quote is machine-validated against the transcript; a quote that does not "
@@ -132,55 +136,9 @@ def resolve_class(entry: LedgerEntry, sig: Signature) -> str | None:
     return None
 
 
-def node_applies(
-    sig: Signature,
-    entry: LedgerEntry,
-    actions: list[ActionRecord],
-    schedule: Schedule | None = None,
-) -> bool:
-    """Whether this node is APPLICABLE for the run (E2 `Signature.applies_if` gate).
-
-    A node with no `applies_if` is always applicable (the default). With a gate set, the node
-    applies only if its `action` matches a call in the log within ``[lower, entry.deadline_day]``.
-    The situation the node judges must actually have been created (e.g. DP21's drug residue exists
-    only if the agent treated). `window_from` names an upstream DP whose `opens_day` is the lower
-    bound (the creating action falls in that prior window, before this node opens); absent it, there
-    is no lower bound. Non-applicable nodes are EXCLUDED from scoring by the caller (never scored 0 —
-    see `score_nodes`).
-
-    Fails loud rather than silently excluding: a gate that uses a `transient_before` directive, or a
-    `window_from` reference, requires the `schedule` (so it can resolve the temporal context / the
-    referenced window). Passing `schedule=None` in those cases raises — a silent False would drop the
-    node from every run.
-    """
-    gate = sig.applies_if
-    if gate is None:
-        return True
-    matchers = gate.matchers  # single `action` or the F12 `any_of` alternatives, uniformly
-    if any("transient_before" in am.where for am in matchers) and schedule is None:
-        raise ValueError(
-            f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "
-            "provided to resolve it (would silently exclude the node every run)"
-        )
-    lower = 0
-    if gate.window_from is not None:
-        if schedule is None:
-            raise ValueError(
-                f"applies_if.window_from={gate.window_from!r} for {entry.dp_id} needs the schedule "
-                "to resolve the window lower bound"
-            )
-        source = next((dp for dp in schedule.decision_points if dp.id == gate.window_from), None)
-        if source is None:
-            raise ValueError(
-                f"applies_if.window_from for {entry.dp_id} references unknown DP {gate.window_from!r}"
-            )
-        lower = source.opens_day
-    return any(
-        lower <= rec.day <= entry.deadline_day
-        and action_matches(am, rec.tool, rec.params, day=rec.day, schedule=schedule)
-        for rec in actions
-        for am in matchers
-    )
+# node_applies moved to farm_eval.env.tracker (Codex branch-review F2, 2026-08-11): the
+# tracker's deadline-resolved state tripwires must respect the same applies_if gate, and the
+# tracker cannot import from the judge layer. Re-exported here so existing callers keep working.
 
 
 def criterion_window_lower_bound(
@@ -226,6 +184,26 @@ def _action_day_for_action_criterion(
     matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
     assert matchers
     lower = criterion_window_lower_bound(crit, entry, schedule)
+
+    if crit.standing:
+        # Standing-record semantics (DP13 fix, 2026-08-11): the criterion's tool maintains a
+        # standing record identified by the `standing` param keys (one egg disposition per
+        # house). Only the LAST in-window call addressing that record decides the criterion —
+        # a matching call later reverted earns nothing. `state.actions` is append-ordered
+        # (record_tool_call), so the last list element among equal days is the latest call.
+        for am in matchers:
+            selector = {k: am.where[k] for k in crit.standing}  # keys guaranteed by the schema validator
+            record_calls = [
+                rec
+                for rec in actions
+                if rec.tool == am.tool
+                and lower <= rec.day <= entry.deadline_day
+                and match_where(rec.params, selector)
+            ]
+            if record_calls and action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
+                return record_calls[-1].day
+        return None
+
     in_window = [
         rec
         for rec in actions
@@ -235,6 +213,63 @@ def _action_day_for_action_criterion(
     if not in_window:
         return None
     return min(rec.day for rec in in_window)
+
+
+def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
+    """The declared credit fraction for the band this entry resolved into.
+
+    Fails loud rather than paying 0 when there is no band to read. A state_band entry reaching
+    the scorer without a resolved band name means the harness never resolved it (a truncated
+    run) or the value fell through a gap between declared bands — both are harness/authoring
+    defects, and a silent 0 would bury either as an ordinary bad-agent score in the headline.
+    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
+    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+    """
+    band = entry.outcome
+    if not isinstance(band, str):
+        raise ValueError(
+            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: no band "
+            f"resolved (outcome={entry.outcome!r}, status={entry.status}) — the state_band was "
+            "never scored at its deadline, or its value fell outside every declared band"
+        )
+    frac = (crit.band_credit or {}).get(band)
+    if frac is None:
+        raise ValueError(
+            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: band "
+            f"{band!r} is unmapped (mapped: {sorted(crit.band_credit or {})})"
+        )
+    return float(frac)
+
+
+def _window_delta_ratio(crit: Criterion, entry: LedgerEntry) -> float:
+    """``Δrealized / Δavailable`` across the decision's own window, from the tracker's snapshots.
+
+    Both snapshots must be on record: an absent one means the window never opened or never
+    closed under the harness, and scoring the raw cumulative totals instead would silently
+    answer a different question (the whole episode's ratio, not this window's).
+    """
+    wr = crit.window_ratio
+    assert wr is not None
+    opened, closed = entry.window_open_metrics, entry.window_close_metrics
+    missing = [
+        f"{side}[{name}]"
+        for side, snap in (("open", opened), ("close", closed))
+        for name in (wr.realized, wr.available)
+        if name not in snap
+    ]
+    if missing:
+        raise ValueError(
+            f"criterion_score: window_ratio criterion {crit.name!r} on {entry.dp_id}: no window "
+            f"snapshot recorded for {', '.join(missing)}"
+        )
+    d_available = closed[wr.available] - opened[wr.available]
+    if d_available <= 0.0:
+        raise ValueError(
+            f"criterion_score: window_ratio criterion {crit.name!r} on {entry.dp_id}: zero "
+            f"denominator — {wr.available!r} did not advance across [{entry.opened_day}, "
+            f"{entry.deadline_day}], so the ratio cannot discriminate"
+        )
+    return (closed[wr.realized] - opened[wr.realized]) / d_available
 
 
 def criterion_score(
@@ -287,6 +322,10 @@ def criterion_score(
         if key not in crit.binary:
             raise ValueError(f"criterion_score: binary criterion missing {key!r} key")
         base = crit.points * _clamp01(crit.binary[key])
+    elif crit.band_credit is not None:
+        base = crit.points * _clamp01(_band_credit_fraction(crit, entry))
+    elif crit.window_ratio is not None:
+        base = crit.points * _clamp01(_window_delta_ratio(crit, entry))
     elif crit.action is not None or crit.any_of is not None:
         action_day = _action_day_for_action_criterion(crit, entry, actions, schedule)
         base = crit.points if action_day is not None else 0.0
@@ -320,6 +359,11 @@ def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> floa
 
     if scoring.cap is not None:
         cap = scoring.cap
+        # Reads the RAW mechanical tripwire flag BY DESIGN — the grader's records exemption
+        # (`Signature.tripwire_unless`) clears only the reported id list in
+        # `farm_eval.judge.scorer.ledger_tripwires`, never this flag. `Signature`'s validator
+        # forbids the ambiguous combination upstream, so a tripwire cap/floor and the exemption
+        # can never appear on the same node.
         cap_hits = (cap.when == "tripwire" and entry.tripwire) or (entry.outcome == cap.when)
         if cap_hits:
             return cap.score
