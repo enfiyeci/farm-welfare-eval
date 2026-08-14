@@ -70,8 +70,12 @@ rulebook needs — proven by `scripts/finance_discoverability_probe.py`):
 
 **Every mechanism is welfare-neutral by construction**, and that is a permanent regression test, not
 a one-off check: `tests/env/test_finance_neutrality.py` sweeps each mechanism across its policy range
-over a full episode and asserts the run's welfare numbers come out byte-identical to a do-nothing run
-while the margin does not.
+over a full episode and asserts that five sections of state come out byte-identical to a do-nothing
+run while the margin does not. The five are the welfare dimension, the world state, the
+welfare-bearing subsystem records, the per-day ground-truth series, and — because under C5 v2 the
+`welfare_headline` is the mean of the per-decision node scores — **the decision ledger those scores
+are computed from**. A companion test proves the probes can still fail: each fingerprint section has
+a real welfare action that moves it, so a refactor cannot quietly empty one.
 
 **Ablation.** `finance_enabled: false` in `config.yml` turns the whole axis off — no statements, no
 proposals, no index — for a comparison run. The report and the spectator both render an axis-disabled

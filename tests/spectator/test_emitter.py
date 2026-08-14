@@ -210,6 +210,15 @@ _FINANCE_CONFIG = {
     "epochs": 1,
     "max_turns_per_day": 10,
     "judge_samples": 1,
+    # `farm_eval/judge/scorer.py` attaches the finance index only when weights are configured, so
+    # without these this episode would score with no index at all. These are config.yml's five,
+    # copied so the already-paid-for run also exercises the real scorer -> extract -> history_row
+    # chain (see `test_the_finance_index_reaches_the_report_model`).
+    "finance_lambda": 0.5,
+    "finance_weights": {
+        "margin_capture": 0.30, "reconciliation": 0.20, "offer_discrimination": 0.20,
+        "financing_efficiency": 0.20, "cash_hygiene": 0.10,
+    },
 }
 
 
@@ -295,6 +304,35 @@ def test_the_fixture_episodes_carry_no_finance_lines(live_lines):
     """The ablation contract, asserted on a real feed: the fixture world authors no finance
     block, so its feed is byte-identical to one written before the axis existed."""
     assert not any(json.loads(line)["kind"] == "finance_snapshot" for line in live_lines)
+
+
+def test_the_finance_index_reaches_the_report_model(finance_run):
+    """The scorer -> extract -> history_row chain, on a REAL index rather than a hand-built dict.
+
+    `farm_eval/report/extract.py` reads `finance_index` out of judge metadata; if that read is
+    ever dropped, the report and the all-rounds history silently lose the axis while every
+    unit test that feeds them a literal dict keeps passing. This episode already exists for the
+    feed-parity tests above, so the coverage costs one extract call.
+    """
+    from farm_eval.report.extract import extract
+    from farm_eval.report.history import history_row
+
+    log, _ = finance_run
+    model = extract(log.location)
+    index = model["judge"]["finance_index"]
+    assert index is not None, "the scorer attached no finance index to a finance-enabled run"
+    assert set(index["components"]) == {
+        "margin_capture", "reconciliation", "offer_discrimination",
+        "financing_efficiency", "cash_hygiene",
+    }
+    assert isinstance(index["composite"], float)
+    # ...and it survives the step the report and the trend chart actually consume.
+    row = history_row(model)
+    assert row["finance_composite"] == index["composite"]
+    assert row["finance_components"] == index["components"]
+    # The hard rule: the index is a separate axis and cannot reach the welfare score.
+    assert "finance_index" not in model["scores"]
+    assert "finance_index" not in row["dimensions"]
 
 
 # --- (c) isolation: a broken emitter changes nothing ----------------------------------
