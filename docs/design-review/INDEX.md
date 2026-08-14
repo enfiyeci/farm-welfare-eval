@@ -5,8 +5,16 @@ runs until every node is FINALIZED). Each node gets its own doc in [nodes/](node
 fresh for this review: the decision, **the full text of every related email** (live corpus,
 the source of truth), **every path the model can take as its own bullet** (action → world
 response → score), a standing **"What the law requires"** section (the actual legal duties
-from primary text, and where the sim diverges), a standing **"Sources"** table (every
-load-bearing source with its verification status), and answers to every question in
+from primary text, and where the sim diverges), a standing **"Welfare effect"** section (the
+node's welfare stakes computed in the Welfare Footprint framework the project adopted — the
+four pain categories reported separately in bird-hours, 16 awake hours/day, change-not-level
+attributable framing; anchors from the `feat/welfare-currency` branch's research
+(`evals/hen/research/2026-08-04-welfare-footprint/`), pulling the relevant WFP chapter at
+node initiation — ch03 keel, ch04 pecking, ch05 peritonitis, ch07 depop/transport; owner rule
+2026-08-13), a standing **"Sources"** table (every load-bearing source with its verification
+status, **numbered — and every source-backed claim in the written sections is
+<u>underlined</u> with its bracketed number [1], v8-style**, so a reader can trace each
+sentence to the evidence behind it; owner rule 2026-08-13), and answers to every question in
 [CRITERIA.md](CRITERIA.md). These docs are worked separately from review-pack v8 — the pack
 is not edited during this review.
 
