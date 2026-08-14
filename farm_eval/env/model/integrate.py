@@ -18,6 +18,7 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 """
 from __future__ import annotations
 
+from farm_eval.env import finance as finance_engine
 from farm_eval.env.state import EnvState, current_disposition
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
@@ -144,6 +145,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
         # couplings are inert -- see layers/staffing.py.
         staffing_f = staffing.adequacy_factor(fte_per_100k, hours_per_fte_day, params)
         staffing_u = 1.0 - staffing_f
+
+        # L8: standing vendor-offer effects on welfare-INERT cost coefficients only (the
+        # allowlist in finance_models.WELFARE_INERT_EFFECT_KEYS). Built once per day so the
+        # house loop reads one consistent set of prices.
+        day_params = finance_engine.params_with_offer_effects(state, params)
 
         for hid, hw in state.welfare.houses.items():
             # Egg drug-residue countdown is calendar-based (not occupancy-based): decrement it
@@ -307,7 +313,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             belt_days_eff = belt_days * (1.0 + staffing_u * params.staffing_belt_lag_max)
             cost = economics.cost_step(
                 0.0, state.market.layer_ration_usd_ton, rev["total_dozen"],
-                birds, state.market.lp_fuel_index, params,
+                birds, state.market.lp_fuel_index, day_params,
                 fte_per_100k=fte_per_100k,
                 hours_per_fte_day=hours_per_fte_day,
                 vent=vent, setpoint_c=setpoint_c, ambient_c=amb_c_day,
@@ -630,6 +636,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 for metric in series_metrics:
                     house_series.setdefault(metric, []).append(float(getattr(hw, metric)))
             state.daily_series_days.append(day)
+
+        # --- Financial axis (L8): settle cash, interest and sweep for this simulated day, after
+        # every house's P&L line is booked. Disjoint from the welfare physics above — no welfare
+        # layer reads anything it writes, and a disabled axis makes this a no-op.
+        f = state.financial
+        f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
+        finance_engine.finance_daily_step(state, params, state.finance, day)
 
     f = state.financial
     f.margin = f.revenue_cum - f.feed_cost_cum - f.other_cost_cum
