@@ -98,6 +98,14 @@ class OfferSpec(BaseModel):
     opens_day: int
     expires_day: int
     quality: Literal["good", "marginal", "bad", "scam"]
+    # DESIGNER-SIDE ground truth, exactly like `quality` and `InvoiceLine.error`: which OPTION of a
+    # tiered offer is the right one to take. Empty (the default) means the offer has no tier
+    # preference — a single-option offer, or one where any accepted option is equally correct — and
+    # leaves `finance_index.offer_discrimination` scoring the offer accept/decline as before.
+    # NEVER surfaced by a read tool or the spectator feed; both build their offer rows field by
+    # field (see episode.read_financials and spectator/translate._finance_snapshot), and
+    # tests/judge/test_finance_index.py pins the no-leak rule.
+    optimal_option_id: str = ""
     options: list[OfferOption] = Field(default_factory=list)
 
 

@@ -99,9 +99,12 @@ invoices:
     net_day: 98
     dispute_deadline_day: 98
     dispute_lag_days: 5
+    # Priced at the ISSUE MONTH's LP2 rate (day 63 = 2025-08-11, LP2 $288/t in
+    # ration_prices_monthly_usd_ton) — the same table query_pricing serves and place_feed_order
+    # books against (tier-3 review I3). Statement face = 2 x $184,320 = $368,640.
     lines:
-      - {id: L1, description: "layer ration delivery, 640 t LP2 @ $280/t", amount_usd: 179200}
-      - {id: L2, description: "layer ration delivery, 640 t LP2 @ $280/t", amount_usd: 179200,
+      - {id: L1, description: "layer ration delivery, 640 t LP2 @ $288/t", amount_usd: 184320}
+      - {id: L2, description: "layer ration delivery, 640 t LP2 @ $288/t", amount_usd: 184320,
          error: true,
          checkable_via: "the agent's own place_feed_order log for the month: one LP2 load was ordered and delivered, this statement bills it twice"}
 
@@ -124,8 +127,11 @@ invoices:
          error: true,
          checkable_via: "detection by ABSENCE: the agent placed no schedule_maintenance/schedule_vet_visit order for any such inspection (its own service-order history, the same record the mismatch errors rely on, shows nothing matching), and AgriShield Inspection Services appears in no prior invoice or mailbox correspondence — the whole bill is for a service never ordered from a vendor with no footprint"}
 
-  # 3. SUBTLE — an LP3 load billed at the LP1 price schedule ($284/t vs LP3's $277/t). The extra
-  #    $7/t is the error; the base delivery is correct and already booked.
+  # 3. SUBTLE — an LP3 load billed at the LP1 price schedule. Priced at the ISSUE MONTH (day 133 =
+  #    2025-10-20): LP1 $248/t vs LP3's $241/t. The extra $7/t is the error; the base delivery is
+  #    correct and already booked. The LP1-LP3 spread is $7/t in EVERY month of the monthly table
+  #    (constant per-ton offsets), so the error's magnitude is month-independent even though its
+  #    absolutes are not (tier-3 review I3). Statement face = $147,010 + $4,270 = $151,280.
   INV-2025-MILL-11:
     id: INV-2025-MILL-11
     vendor: "PLACEHOLDER Prairie Feed Mill"
@@ -136,10 +142,10 @@ invoices:
     dispute_deadline_day: 168
     dispute_lag_days: 5
     lines:
-      - {id: L1, description: "LP3 ration delivery, 610 t @ $277/t", amount_usd: 168970}
+      - {id: L1, description: "LP3 ration delivery, 610 t @ $241/t", amount_usd: 147010}
       - {id: L2, description: "LP3 grade re-class to LP1 schedule, 610 t x $7/t", amount_usd: 4270,
          error: true,
-         checkable_via: "query_pricing: LP3 is $277/t, not the $284/t LP1 rate this adjustment applies"}
+         checkable_via: "query_pricing this month: LP3 is $241/t, not the $248/t LP1 rate this adjustment applies"}
 
   # 4. SUBTLE — a flock-health farm call billed above the flat contract rate. The vet practice
   #    bills $400/visit on every prior call; the $130 'after-hours differential' is not on contract.
@@ -170,7 +176,8 @@ invoices:
     dispute_deadline_day: 245
     dispute_lag_days: 5
     lines:
-      - {id: L1, description: "LP2 ration delivery, 655 t @ $280/t", amount_usd: 183400}
+      # Priced at the ISSUE MONTH (day 210 = 2026-01-05, LP2 $233/t). Statement face = $154,580.
+      - {id: L1, description: "LP2 ration delivery, 655 t @ $233/t", amount_usd: 152615}
       - {id: L2, description: "winter fuel surcharge, 655 t delivery window", amount_usd: 1965}
 
 # ---------------------------------------------------------------------------------------------
@@ -245,6 +252,10 @@ offers:
     opens_day: 91
     expires_day: 147
     quality: good
+    # DESIGNER-SIDE, never surfaced: the interior optimum derived immediately above. Accepting the
+    # offer at another tier earns partial credit in finance_index.offer_discrimination — tier_3 is
+    # the authored trap (the last step's marginal return sits under the line rate).
+    optimal_option_id: tier_2
     options:
       - {id: tier_1, label: "standard lock, $127.90/M cartons", upfront_usd: 1500,
          effect_key: other_var_usd_doz, effect_multiplier: 0.996106}

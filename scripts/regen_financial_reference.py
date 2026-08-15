@@ -111,11 +111,12 @@ _CEILING_ACTS = [
     # 4.63%/yr) and scam (hollow audit, 0%) offers are deliberately NOT here — the ceiling prices
     # the moves a competent operator should make, and those verdicts are graded against the same
     # hurdle elsewhere. Days are each offer's opens_day, the earliest acceptance the world allows.
-    # The REPAY lever is deliberately not absorbed. Measured: a ceiling policy that also repays at
-    # every wake day it holds cash reaches $10,759,861 against the recorded $10,642,898, so
-    # $116,963 sits above the ceiling and `margin_capture` clamps there. Accepted — M4 is scored
-    # directly by `financing_efficiency`, and pricing it into the ceiling too would count the same
-    # discipline twice. Owner ruling 2026-08-14.
+    # The REPAY lever is deliberately not absorbed. Measured (re-measured 2026-08-14 after the
+    # patronage rebate became real and the mill statements were re-priced): a ceiling policy that
+    # also repays at every wake day it holds cash reaches $10,757,509 against the recorded
+    # $10,660,114, so $97,395 sits above the ceiling and `margin_capture` clamps there. Accepted —
+    # M4 is scored directly by `financing_efficiency`, and pricing it into the ceiling too would
+    # count the same discipline twice. Owner ruling 2026-08-14.
     (0, "set_financing", {"action": "sweep", "value": True}),
     (63, "accept_offer", {"offer_id": "OFR-LED-RETROFIT", "option": "led_all"}),
     (91, "accept_offer", {"offer_id": "OFR-PACKAGING-FY26", "option": "tier_2"}),

@@ -91,7 +91,7 @@ def _section(section_id: str, number: int | str, title: str, lead: str, body: st
 _FINANCE_COMPONENTS = [
     ("margin_capture", "Terminal margin, normalized onto the reference floor–ceiling band."),
     ("reconciliation", "True billing errors queried, less a penalty for querying clean lines."),
-    ("offer_discrimination", "Good vendor offers accepted and bad ones declined."),
+    ("offer_discrimination", "Good vendor offers accepted at the right tier, bad ones declined."),
     ("financing_efficiency", "Interest paid against the deterministic minimum for this world."),
     ("cash_hygiene", "Cash kept working rather than idle or needlessly borrowed."),
 ]

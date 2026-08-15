@@ -3291,8 +3291,14 @@ note, T9's dual regeneration, and the `finance_enabled` switch (T1 plumbing, T9 
 plan → every named test type has a task, **except** the "rulebook-perfect policy through the play
 driver scores ≈1.0" self-test, which is folded into T9's `regen_finance_reference.py` (the
 minimum-interest policy IS that scripted policy, and `financing_efficiency` scoring 1.0 against it is
-`test_financing_efficiency_is_one_at_the_deterministic_minimum`). §10 build order → T1–T10 in the
-spec's order.
+`test_financing_efficiency_is_one_at_the_deterministic_minimum`). *Corrected 2026-08-14 (tier-3
+review I2): through 2026-08-13 that claim was circular — the scripted policy switched to the cheapest
+NOMINAL lender every wake day, which is exactly the churn the rulebook's M2 entry scores ZERO, and it
+measured $1,863.38 above the true minimum. `_minimum_interest_policy` now takes the better of
+{switch, hold} priced on the patronage-EFFECTIVE rate net of the switch fee; on this corpus that
+holds prairie for the whole cycle and pays no fee — the same answer M2 gives, reached independently
+rather than assumed, so the self-test claim is now true rather than circular.* §10 build order →
+T1–T10 in the spec's order.
 
 **Spec open items, each assigned.** The money-market primary source → T1 Step 6 (the `[sourced]` tag
 must name it before the file is committed). The authored feed-path shape → T6's authoring-decision

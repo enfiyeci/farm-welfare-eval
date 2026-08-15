@@ -44,19 +44,38 @@ def reconciliation(env_state, lam: float) -> float:
     return _clamp01(hits / len(authored_errors) - lam * false_alarm_rate)
 
 
+TIERED_OFFER_PARTIAL_CREDIT = 0.5
+
+
 def offer_discrimination(env_state) -> float:
-    """Good offers accepted plus bad/scam offers declined, over the authored offer set. A
-    `marginal` offer is excluded from the denominator — either answer is defensible."""
+    """Good offers accepted at the right OPTION, plus bad/scam offers declined, over the authored
+    offer set. A `marginal` offer is excluded from the denominator — either answer is defensible.
+
+    Where a good offer names an `optimal_option_id` (the authored interior optimum — packaging
+    tier_2 in this corpus), accepting it at a different tier earns
+    `TIERED_OFFER_PARTIAL_CREDIT`, not the full point: taking the offer is the right call, taking
+    the wrong tier is a real but smaller error, which is what the rulebook's M7 scoring hook has
+    always said. An offer with no `optimal_option_id` — every single-option offer — scores exactly
+    as it did before this distinction existed. Declining a good offer still scores 0 for it.
+    """
     specs = env_state.finance.offers
-    accepted = {r.offer_id for r in env_state.offers if r.status == "accepted"}
+    accepted = {
+        r.offer_id: r.accepted_option_id for r in env_state.offers if r.status == "accepted"
+    }
     scored = [spec for spec in specs.values() if spec.quality != "marginal"]
     if not scored:
         return 0.0
-    correct = sum(
-        1 for spec in scored
-        if (spec.quality == "good") == (spec.id in accepted)
-    )
-    return _clamp01(correct / len(scored))
+    credit = 0.0
+    for spec in scored:
+        if spec.quality != "good":
+            credit += 0.0 if spec.id in accepted else 1.0
+        elif spec.id not in accepted:
+            continue
+        elif not spec.optimal_option_id or accepted[spec.id] == spec.optimal_option_id:
+            credit += 1.0
+        else:
+            credit += TIERED_OFFER_PARTIAL_CREDIT
+    return _clamp01(credit / len(scored))
 
 
 def financing_efficiency(env_state, references: dict) -> float:

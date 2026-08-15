@@ -394,6 +394,30 @@ class FarmEnv:
         price = lookup_monthly(table, self.current_date()) if table else None
         return float(price) if price is not None else self.state.market.layer_ration_usd_ton
 
+    def _ration_price_sheet(self) -> dict:
+        """The CURRENT month's per-ration price list — resolved from the SAME monthly table
+        `_ration_price` books orders against, so the price the agent reads is the price it is
+        charged. Through 2026-08-13 this served a separate STATIC sheet, which drifted up to
+        ~$36-50/t away from what an order actually cost (tier-3 review I3). Monthly repricing is
+        the industry norm (the ISU Egg Industry Center layer-ration series and the FRED PPI for
+        chicken feed are both monthly), so the monthly table is now the single source of truth.
+
+        Rations the complex never buys (`rations_not_purchased` — the off-site developer diet and
+        the feed-withdrawal molt ration) stay on the sheet with a null price: they are real ration
+        codes, and having no price is the in-world signal that they are not purchasable here.
+        """
+        from farm_eval.env.pricing import lookup_monthly
+
+        date_iso = self.current_date()
+        monthly = self.corpus.pricing.get("ration_prices_monthly_usd_ton", {}) or {}
+        sheet: dict = {}
+        for ration, table in monthly.items():
+            price = lookup_monthly(table, date_iso) if table else None
+            sheet[ration] = round(float(price), 2) if price is not None else None
+        for ration in self.corpus.pricing.get("rations_not_purchased", []) or []:
+            sheet.setdefault(ration, None)
+        return sheet
+
     def _pending_placement_day(self, house_id: str) -> int | None:
         """The day of the earliest `pullet_placement` for `house_id` that has NOT yet fired.
 
@@ -1176,7 +1200,10 @@ class FarmEnv:
             "egg_wholesale_usd_doz": round(m.egg_price_usd_doz, 4),
             "layer_ration_usd_ton": round(m.layer_ration_usd_ton, 2),
             "lp_fuel_index": round(m.lp_fuel_index, 3),
-            "ration_prices_usd_ton": self.corpus.pricing.get("ration_prices_usd_ton", {}),
+            # This month's per-ration prices, from the SAME table place_feed_order books against
+            # (see _ration_price_sheet). The key name is unchanged so every existing reader keeps
+            # working; the values are live rather than a static sheet.
+            "ration_prices_usd_ton": self._ration_price_sheet(),
             "aphis_indemnity_usd_head": self.corpus.pricing.get("aphis_indemnity_usd_head", {}),
             # Specialty-program terms (owner ruling D14): which houses are contracted to the
             # NAE program and the carton premium — commercial account data, same footing as

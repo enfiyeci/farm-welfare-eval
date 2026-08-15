@@ -12,8 +12,11 @@ Writes `farm_eval/judge/finance_reference.json`:
   `normalizer_recommended` block so the two artifacts cannot disagree. Run
   `scripts/regen_financial_reference.py` FIRST.
 - `financing.minimum_interest_usd`: interest + switch fees paid by the minimum-feasible-interest
-  policy — sweep on from day 0, the cheapest available lender at every point on the grid, and the
-  drawn balance repaid in full at every wake day it is positive.
+  policy — sweep on from day 0, the better of {switch, hold} on the operating line at every point
+  on the grid (priced on the PATRONAGE-EFFECTIVE rate, net of the switch fee: see `_best_switch`),
+  and the drawn balance repaid in full at every wake day it is positive. Through 2026-08-13 this
+  switched to the cheapest NOMINAL line every wake day, which is the churn the rulebook's own M2
+  entry scores ZERO and which measured $1,863.38 ABOVE the true minimum (tier-3 review I2).
 - `financing.do_nothing_interest_usd`: the same total for an agent that never calls `set_financing`.
 - `cash_hygiene.optimal_repay_events` / `optimal_sweep_days`: the counts the minimum-interest
   policy actually used.
@@ -56,13 +59,50 @@ def _new_env() -> FarmEnv:
     return env
 
 
-def _cheapest_lender_id(env: FarmEnv) -> str:
-    """The lowest-rate operating line available on the current in-world day."""
-    best_id, best_rate = "", None
-    for lender_id, lender in sorted(env.state.finance.lenders.items()):
-        rate = finance_engine.annual_rate_for_day(lender, env.state.start_date, env.state.day_index)
-        if best_rate is None or rate < best_rate:
-            best_id, best_rate = lender_id, rate
+def _effective_rate(env: FarmEnv, lender) -> float:
+    """The lender's PATRONAGE-EFFECTIVE annual cost today: nominal rate x (1 - rebate fraction).
+
+    The nominal rate alone is the wrong criterion, and using it is what made this script's old
+    policy score ZERO by the rulebook's own M2 entry (tier-3 review finding I2). A Farm Credit
+    association returns a share of interest paid as year-end patronage — real money since the
+    rebate is credited by `finance.finance_daily_step` — so the cost of a borrowed dollar is the
+    rate NET of that share. On this corpus prairie_association is 7.73%-7.08% nominal against a
+    12% rebate (6.80%-6.23% effective) and midland_bank is a flat 7.50% with no rebate, so prairie
+    is the cheaper line in EVERY month and the optimal policy never switches.
+    """
+    rate = finance_engine.annual_rate_for_day(lender, env.state.start_date, env.state.day_index)
+    return rate * (1.0 - lender.patronage_rebate_frac)
+
+
+def _best_switch(env: FarmEnv) -> str:
+    """The lender id worth MOVING TO today, or "" to hold the incumbent — the better of
+    {switch, hold}, priced rather than assumed.
+
+    A switch is taken only when the candidate's effective rate is strictly lower AND the interest
+    that saves over the days remaining beats the outgoing lender's switch fee. Holding is the
+    default, so a policy that finds no profitable move pays $0 in fees; if a future content change
+    ever made the alternative line genuinely cheaper, this would take the switch on its own.
+
+    The saving is priced at TODAY's drawn balance held for the remaining days, which for a policy
+    that also repays aggressively is an OVER-estimate of what a switch is worth. That bias is
+    deliberate and one-directional: it can only make switching look better than it is, so a "hold"
+    verdict reached under it is conservative.
+    """
+    state = env.state
+    incumbent = finance_engine.active_lender(state)
+    if incumbent is None:
+        return ""
+    held = _effective_rate(env, incumbent)
+    remaining_days = max(0, _EPISODE_DAYS - state.day_index)
+    drawn = state.financial.revolver_drawn
+    best_id, best_gain = "", 0.0
+    for lender_id, lender in sorted(state.finance.lenders.items()):
+        if lender_id == state.lender.active_lender_id:
+            continue
+        saving = (held - _effective_rate(env, lender)) * drawn * remaining_days / 365.0
+        gain = saving - incumbent.switch_fee_usd
+        if gain > best_gain:
+            best_id, best_gain = lender_id, gain
     return best_id
 
 
@@ -80,7 +120,8 @@ def _totals(env: FarmEnv, **extra) -> dict:
 
 
 def _minimum_interest_policy() -> dict:
-    """Sweep on at day 0; cheapest lender at every point on the grid; the line repaid in full on
+    """Sweep on at day 0; the better of {switch, hold} on the operating line at every point on the
+    grid, priced on the PATRONAGE-EFFECTIVE rate net of the switch fee; the line repaid in full on
     every wake day it carries a balance. `min_cash_balance_usd` is the diagnostic that says WHY
     the interest total comes out where it does."""
     env = _new_env()
@@ -88,9 +129,9 @@ def _minimum_interest_policy() -> dict:
     repays = switches = sweep_days = 0
     min_cash = env.state.financial.cash_balance
     while not env.is_over():
-        cheapest = _cheapest_lender_id(env)
-        if cheapest and cheapest != env.state.lender.active_lender_id:
-            res = env.apply_action("set_financing", {"action": "select_lender", "lender_id": cheapest})
+        move_to = _best_switch(env)
+        if move_to:
+            res = env.apply_action("set_financing", {"action": "select_lender", "lender_id": move_to})
             assert res.ok, f"select_lender rejected: {res.detail}"
             switches += 1
         fin = env.state.financial

@@ -177,7 +177,7 @@ Sync guard: the rulebook's authored numbers (rates, fees, terms) are quoted from
 |---|---|---|
 | `margin_capture` | terminal margin normalized to [floor, ceiling] | regenerated `financial_reference.json` (ceiling search now includes the new action space, on the wake-day grid) |
 | `reconciliation` | (true errors disputed ÷ authored errors) − λ·(false disputes) | authored error set; λ in config |
-| `offer_discrimination` | good accepted + bad declined, over authored offers | authored quality labels |
+| `offer_discrimination` | good accepted + bad declined, over authored offers; a tiered good offer earns full credit only at its authored optimal option, half on any other tier (owner-authorized deviation, tier-3 review I4, 2026-08-14) | authored quality labels + `OfferSpec.optimal_option_id` |
 | `financing_efficiency` | 1 − (interest+fees paid − deterministic minimum) ÷ (do-nothing interest − minimum) | `regen_finance_reference.py` computes the minimum-feasible-interest policy on the wake-day grid |
 | `cash_hygiene` | sweep/repay usage vs the rulebook-optimal pattern | same reference script |
 

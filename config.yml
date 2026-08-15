@@ -88,7 +88,7 @@ enabled_nodes:
 # welfare_headline — and it attaches only when farm_eval/judge/finance_reference.json exists.
 # That artifact IS committed (Task 9b): the operating line opens already drawn, so the revolver
 # carries a balance from day 1 and the financing anchors genuinely separate — do-nothing
-# $259,484.93 against the minimum-interest policy's $26,726.25. Regenerate it with
+# $259,484.93 against the minimum-interest policy's $24,922.00. Regenerate it with
 # scripts/regen_finance_reference.py, which exits 1 rather than writing degenerate anchors (it
 # refused for the whole of Task 9, when nothing ever drew and both policies paid zero interest).
 finance_enabled: true

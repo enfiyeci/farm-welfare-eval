@@ -13,28 +13,28 @@
       "sweep_days": 0,
       "sweep_earned_usd": 0.0,
       "switch_fees_usd": 0.0,
-      "terminal_margin_usd": 9940555,
+      "terminal_margin_usd": 9957670,
       "terminal_revolver_drawn_usd": 2500000.0,
       "total_financing_cost_usd": 259484.93
     },
-    "minimum_interest_usd": 26726.25,
+    "minimum_interest_usd": 24922.0,
     "minimum_policy": {
-      "interest_paid_usd": 24226.25,
-      "lender_switches": 2,
+      "interest_paid_usd": 24922.0,
+      "lender_switches": 0,
       "min_cash_balance_usd": 0.0,
       "repay_events": 18,
       "sweep_days": 518,
-      "sweep_earned_usd": 237940.71,
-      "switch_fees_usd": 2500.0,
-      "terminal_margin_usd": 10411255,
+      "sweep_earned_usd": 237852.85,
+      "switch_fees_usd": 0.0,
+      "terminal_margin_usd": 10410842,
       "terminal_revolver_drawn_usd": 0.0,
-      "total_financing_cost_usd": 26726.25
+      "total_financing_cost_usd": 24922.0
     }
   },
   "generated_by": "scripts/regen_finance_reference.py",
   "margin": {
-    "ceiling_usd": 10642898,
-    "floor_usd": 8103478,
+    "ceiling_usd": 10660114,
+    "floor_usd": 8120593,
     "source": "financial_reference.json normalizer_recommended"
   },
   "note": "Reference anchors for farm_eval/judge/finance_index.py. The margin band is copied verbatim from financial_reference.json's normalizer_recommended block (ceiling = the profit ceiling, floor = the realistic operating floor) so the two artifacts cannot disagree; regenerate that one first. The financing anchors are measured by driving the real pipeline under two scripted policies.",

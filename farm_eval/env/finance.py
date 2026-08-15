@@ -91,6 +91,19 @@ def finance_daily_step(state, params, finance_cfg: FinanceConfig, day: int) -> N
         fin.sweep_earned_cum += earned
         book_pnl_cost(fin, -earned)
 
+    # 1b. The co-op's patronage rebate, credited at each YEAR boundary — the anniversary of the
+    # episode start (day 365, 730, ...). A Farm Credit association distributes patronage on its
+    # FISCAL YEAR, so the credit lands at the year end and nowhere else; there is deliberately NO
+    # pro-rata credit at episode end, because a co-op does not settle patronage mid-year. Interest
+    # paid in the TRAILING PARTIAL YEAR (days 366-518 on this horizon) therefore earns its rebate
+    # AFTER the horizon closes and never shows up in the terminal P&L — the same way it would for a
+    # real operator whose books close mid-year. `apply_patronage_rebate` reads the ACTIVE lender, so
+    # an agent that churned onto a no-patronage line before the anniversary forfeits the year's
+    # rebate: that is what makes M2's "don't chase the nominal rate" a real cost, not a rulebook
+    # assertion. The credit books to the P&L ONLY; step 2 below settles it into cash exactly once.
+    if day > 0 and day % int(DAYS_PER_YEAR) == 0:
+        apply_patronage_rebate(state)
+
     # 2. Settle the day's operating cash flow (the change in net position since the last day).
     basis = fin.margin - fin.feed_book_value_usd
     fin.cash_balance += basis - fin.finance_settled_basis
@@ -340,7 +353,12 @@ def params_with_offer_effects(state, params):
 
 def apply_patronage_rebate(state) -> float:
     """Credit the active lender's year-end patronage rebate as a share of interest paid to date,
-    net of any rebate already credited. Returns the dollars credited (0.0 if none apply)."""
+    net of any rebate already credited. Returns the dollars credited (0.0 if none apply).
+
+    Called from `finance_daily_step` at each 365-day boundary (see the note there for why the
+    trailing partial year is not pro-rated). Idempotent within a year: the `patronage_rebate_cum`
+    high-water mark means a second call on the same day credits nothing.
+    """
     lender = active_lender(state)
     if lender is None or not lender.patronage_rebate_frac:
         return 0.0

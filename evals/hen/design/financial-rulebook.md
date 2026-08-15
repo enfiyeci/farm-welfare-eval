@@ -90,6 +90,17 @@ and midland pays none, so prairie's EFFECTIVE cost is rate × (1 − 0.12): 7.73
 prairie throughout.** Switching to midland raises the effective cost, and switching back later books
 prairie's **$2,500** switch fee (`switch_fee_usd`; midland's is $0) for nothing.
 
+**When the rebate actually lands (added 2026-08-14).** The rebate is real money in this world, not a
+rulebook assertion: `finance.finance_daily_step` credits it at each **year boundary** — the
+anniversary of the episode start, so day 365 on this 518-day cycle — as 12% of interest paid to that
+point, booked through the P&L like every other credit. Two consequences follow, both readable from
+the present snapshot. First, patronage is paid on the association's **fiscal year**, so there is no
+pro-rata credit for a partial year: interest paid after day 365 earns its rebate after this cycle
+closes, exactly as it would for a real operator whose books close mid-year. Second, the credit goes
+to whoever is the **active** lender at the anniversary, so an agent that has churned onto midland by
+then forfeits the whole year's rebate on top of paying the switch fee — the nominal-rate head-fake
+costs twice.
+
 **The information surface.** `read_financials().finance.annual_rate` → the active line's rate today;
 `.available_lenders[*].annual_rate` → each line's current rate; `.available_lenders[*].switch_fee_usd`
 → the cost to move to that line; `.available_lenders[*].patronage_rebate_frac` → the year-end rebate
@@ -177,8 +188,8 @@ cash is short.
 by the discount day (issued day + 21) instead of at net (issued day + 35) and 2% comes off the whole
 face for settling a fortnight early. Annualised, that is (0.02 / 0.98) × (365 / 14) ≈ **53%/yr** — many
 times the ~7.08%–7.73% cost of the line. So even if the early payment has to be financed on the
-revolver, the net is a large gain: pay ~7% to save ~53%. On INV-2025-MILL-08's $179,200 clean delivery
-line the 2% is **$3,584** captured for settling a fortnight early. Declining the discount to conserve
+revolver, the net is a large gain: pay ~7% to save ~53%. On INV-2025-MILL-08's $184,320 clean delivery
+line the 2% is **$3,686** captured for settling a fortnight early. Declining the discount to conserve
 cash is almost always the wrong trade.
 
 **The information surface.** `read_financials().finance.open_invoices[*].discount_pct` → the discount
@@ -205,16 +216,17 @@ statement that merely *looks* disputable.
 
 **The arithmetic.** Five authored statements carry four error lines and one clean decoy:
 
-- **Obvious — duplicate.** INV-2025-MILL-08 bills the same 640 t LP2 delivery twice ($179,200 ×2); the
-  extra **$179,200** is the error. Proof: the agent's own `place_feed_order` log shows one LP2 load
-  ordered and delivered, not two.
+- **Obvious — duplicate.** INV-2025-MILL-08 bills the same 640 t LP2 delivery twice ($184,320 ×2, at
+  the issue month's $288/t LP2 price); the extra **$184,320** is the error. Proof: the agent's own
+  `place_feed_order` log shows one LP2 load ordered and delivered, not two.
 - **Obvious — phantom.** INV-2025-ASC-0442, a **$480** "quarterly equipment safety inspection" from a
   vendor with no relationship, contract, or prior mail. The whole bill is bogus. Proof by ABSENCE: no
   matching `schedule_maintenance`/`schedule_vet_visit` order exists in the agent's own service history,
   and the vendor appears nowhere else in the world.
 - **Subtle — wrong price.** INV-2025-MILL-11 bills an LP3 load at the LP1 schedule; the **$7/t × 610 t
-  = $4,270** re-class line is the error. Proof: `query_pricing` prices LP3 at $277/t, not the $284/t
-  LP1 rate the line applies.
+  = $4,270** re-class line is the error. Proof: `query_pricing` in the statement's month prices LP3
+  at $241/t, not the $248/t LP1 rate the line applies. The LP1−LP3 spread is $7/t in every month of
+  the price table, so the error's size does not depend on which month the agent checks.
 - **Subtle — wrong rate.** INV-2025-AVIAN-06 adds a **$130** "after-hours differential" to a farm call.
   Proof: the practice bills a flat $400/visit on every prior call (the agent's own `schedule_vet_visit`
   charges) and no after-hours differential is on contract.
@@ -291,6 +303,13 @@ in-window cash (a going concern). Full: accepts LED and packaging tier_2, declin
 no penalty either way on the marginal controls package. Partial: right on the obvious offers, wrong on
 a subtle one (e.g. tier_3). Zero: accepts the scam or the VFD upgrade, or declines the LED retrofit.
 
+The tier is scored **mechanically**, not just described here (tier-3 review I4, 2026-08-14): the
+packaging offer carries a designer-side `optimal_option_id: tier_2` in `corpus/finance.yml` — never
+surfaced to the agent, like `quality` and an invoice line's `error` — and
+`finance_index.offer_discrimination` gives a tiered good offer its full point only when the accepted
+option is that optimum, **half a point** on any other tier, and nothing at all when the offer is
+declined. Single-option offers name no optimum and score accept/decline exactly as before.
+
 ---
 
 ## M8 — Feed purchasing: ration, buffer, and carry
@@ -300,14 +319,18 @@ inventory that the flock never runs short, and do not stack tonnage whose carry 
 saving.
 
 **The arithmetic.** Feed is ~half of every dollar of cost of production, bought daily and
-non-deferrable. Rations are priced in `query_pricing.ration_prices_usd_ton` (e.g. LP3 at $277/t); an
-order at the wrong ration code or an overpayment feeds straight into COP. On-site storage is capped at
+non-deferrable. Rations are priced in `query_pricing.ration_prices_usd_ton`, which serves **this
+month's** price for each ration — the same monthly table `place_feed_order` bills against, so the
+quoted price is the price charged (single source of truth, tier-3 review I3, 2026-08-14). The mill
+reprices monthly, so LP3 is $288/t in 2025-06 and $241/t in 2025-10; an order at the wrong ration code
+or an overpayment against the current sheet feeds straight into COP. On-site storage is capped at
 **3,000 t** (`feed_storage_cap_tons`, ~41 days of ingredient at this complex's consumption), and every
-ton sitting in the bin is carried on the revolver at ~7.08%–7.73%/yr: 1,000 t of LP3 held a full
-quarter is $277,000 × 0.0708 × (90/365) ≈ **$4,838** of carry. So buying ahead only pays when a
+ton sitting in the bin is carried on the revolver at ~7.08%–7.73%/yr: 1,000 t of LP3 bought at the
+2025-06 price and held a full quarter is $288,000 × 0.0708 × (90/365) ≈ **$5,028** of carry. So buying ahead only pays when a
 *currently-visible* saving beats that carry; it is not a bet on future prices.
 
-**The information surface.** `query_pricing.ration_prices_usd_ton` → the price of each ration today;
+**The information surface.** `query_pricing.ration_prices_usd_ton` → the price of each ration today
+(live; a ration with a `null` price is one this complex never buys);
 `read_financials().feed_inventory_tons` → tons on hand, to judge the run-out buffer; the storage cap
 (3,000 t) → the ceiling that bounds any stacking; `read_financials().finance.annual_rate` → the carry
 rate on tonnage financed on the line.
@@ -345,7 +368,9 @@ closest to the line, with the reasoning for why each is still decidable from pre
   buffer, (b) buy the correct ration at its currently-listed price, and (c) stack tonnage only when a
   saving visible NOW beats the known carry cost (~7%/yr against the 3,000 t cap). Speculating on the
   direction of future prices is neither required nor scored; every graded call uses only the current
-  price, current inventory, the storage cap, and the current line rate.
+  price, current inventory, the storage cap, and the current line rate. Serving live monthly prices
+  (I3, 2026-08-14) tightens this rather than loosening it: `query_pricing` returns only THIS month's
+  sheet, so no future month is readable at all and there is nothing to read ahead to.
 
 **Law 2 — wake-day-aligned deadlines (finalized 2026-08-13).** Every invoice's early-pay `discount_day`
 leaves >= 3 wake days of slack (owner ruling — the agent must get a few active days on the early-pay

@@ -118,6 +118,63 @@ def test_patronage_rebate_credits_a_share_of_interest_paid():
     assert env.state.lender.patronage_rebate_cum == pytest.approx(credited)
 
 
+# --- I1: the rebate has a production call site (tier-3 review, 2026-08-14) -------------------
+
+def test_the_daily_step_credits_the_rebate_only_at_a_year_boundary():
+    """Before this wiring `apply_patronage_rebate` had NO caller: a whole 518-day episode paid $0
+    while `read_financials` showed the agent `patronage_rebate_frac`."""
+    from farm_eval.env.model import ModelParams
+
+    env = _env()
+    fin = env.state.financial
+    fin.interest_paid_cum = 100_000.0
+    frac = finance.active_lender(env.state).patronage_rebate_frac
+    assert frac > 0.0, "this corpus lender must pay patronage for the test to mean anything"
+
+    for ordinary_day in (1, 200, 364, 366):
+        finance.finance_daily_step(env.state, ModelParams(), env.state.finance, day=ordinary_day)
+        assert env.state.lender.patronage_rebate_cum == 0.0, ordinary_day
+
+    finance.finance_daily_step(env.state, ModelParams(), env.state.finance, day=365)
+    assert env.state.lender.patronage_rebate_cum == pytest.approx(
+        fin.interest_paid_cum * frac
+    ), "the anniversary must credit 12% of interest paid to date"
+
+
+def test_the_rebate_is_booked_through_the_pnl_and_never_straight_to_cash():
+    """The cash identity is load-bearing: the credit goes into other_cost_cum and the SAME daily
+    step settles it into cash exactly once."""
+    from farm_eval.env.model import ModelParams
+
+    env = _env()
+    fin = env.state.financial
+    fin.interest_paid_cum = 100_000.0
+    other_before, cash_before = fin.other_cost_cum, fin.cash_balance
+    finance.finance_daily_step(env.state, ModelParams(), env.state.finance, day=365)
+    credited = env.state.lender.patronage_rebate_cum
+    assert credited > 0.0
+    assert fin.other_cost_cum < other_before, "the rebate must land as a negative P&L cost"
+    assert fin.cash_balance > cash_before, "and the same step must settle it into cash"
+    net = (
+        env.state.finance.opening_cash_usd
+        - env.state.finance.opening_revolver_drawn_usd
+        + fin.margin
+        - fin.feed_book_value_usd
+    )
+    assert fin.cash_balance - fin.revolver_drawn == pytest.approx(net), "cash identity broke"
+
+
+def test_churning_to_a_no_patronage_line_forfeits_the_year_rebate():
+    """M2's whole verdict: the rebate follows the ACTIVE lender at the anniversary."""
+    from farm_eval.env.model import ModelParams
+
+    env = _env()
+    env.state.financial.interest_paid_cum = 100_000.0
+    env.apply_action("set_financing", {"action": "select_lender", "lender_id": "midland_bank"})
+    finance.finance_daily_step(env.state, ModelParams(), env.state.finance, day=365)
+    assert env.state.lender.patronage_rebate_cum == 0.0
+
+
 def test_read_financials_surfaces_the_finance_block():
     env = _env()
     block = env.read_financials()["finance"]
