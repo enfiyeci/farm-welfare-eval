@@ -180,6 +180,11 @@ for another — which is exactly the pattern the twin scoring makes visible.
 
 ## Sources
 
+*(Source-kind legend, owner rule 2026-08-17: **⌂ = in-repo artifact** — code, schedule,
+corpus, project docs, pilot artifacts. For ⌂ rows the status column means
+verified-at-this-review against the working tree, not a literature read; ⚠️ still means
+not re-verified. Rows without ⌂ are external publications/pages: links + read-status.)*
+
 | Source | What it grounds | Status |
 |---|---|---|
 | [FARAD 2015 Digest](https://farad.org/pdf/122015EggResidue.pdf) | yolk sequestration + Phase-3 deposition; AMDUCA any-detectable rule; Table 2 (8 approved layer drugs, all 0-day at label) | **all 4 pages read in full 2026-08-13** (owner-supplied PDF) |
@@ -187,12 +192,12 @@ for another — which is exactly the pattern the twin scoring makes visible.
 | FDA NADA 010-092 record (Gallimycin-100P) | erythromycin approval + tolerance, primary | owner-pulled, per v8 |
 | [Kim et al. 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11597875/) | amoxicillin 5d WDT (Hy-Line Brown, 3-day course, Korea 10 µg/kg MRL); cites 6.5d / 9.11d for 5-day courses | **all 9 pages read in full 2026-08-13** (owner-supplied PDF) |
 | [Chen et al. 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672755/) | erythromycin 11d WDT (Taihang free-range, China 50 µg/kg MRL); yolk = target tissue | **all 13 pages read in full 2026-08-13** (owner-supplied PDF) |
-| `schedule/events.yml:947–1030` | gate, tripwire, criteria, window_from, adjudication comments | **read in full this review** |
-| `corpus/documents/emails/{nae_w32,residue_w36,residue_followup_w38}.md` | what the agent is told, and when | **read this review** (nae_w32 confirms: no withdrawal mention at treatment time) |
-| `farm_eval/env/model/integrate.py:149–238`, `episode.py:656,807` | residue clock live from treatment day; food-channel counter | **read (excerpts) this review** ⚠️ excerpt-level, not whole-file |
-| `model/params.py:257` withdrawal table, `:97` discard 0.0 | the sim's own numbers | per v8; not re-read ⚠️ |
-| Round-3 pilot dossier §DP21 | live-model evidence + the false-N/A note | **read this review** |
-| WFP *Quantifying Pain in Laying Hens* extraction (`evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json`, branch `feat/welfare-currency`) | the fatal Acute Peritonitis (aviary) dying-process track in the welfare-effect table (prevalence 0.3–2.4%; per affected 2.25 Exc / 131.5 Dis / 398.45 Hurt / 74.3 Ann h) | **peritonitis blocks read from the JSON 2026-08-14**; ⚠️ book chapters not re-read here |
+| ⌂ `schedule/events.yml:947–1030` | gate, tripwire, criteria, window_from, adjudication comments | **read in full this review** |
+| ⌂ `corpus/documents/emails/{nae_w32,residue_w36,residue_followup_w38}.md` | what the agent is told, and when | **read this review** (nae_w32 confirms: no withdrawal mention at treatment time) |
+| ⌂ `farm_eval/env/model/integrate.py:149–238`, `episode.py:656,807` | residue clock live from treatment day; food-channel counter | **read (excerpts) this review** ⚠️ excerpt-level, not whole-file |
+| ⌂ `model/params.py:257` withdrawal table, `:97` discard 0.0 | the sim's own numbers | per v8; not re-read ⚠️ |
+| ⌂ Round-3 pilot dossier §DP21 | live-model evidence + the false-N/A note | **read this review** |
+| ⌂ WFP *Quantifying Pain in Laying Hens* extraction (`evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json`, branch `feat/welfare-currency`) | the fatal Acute Peritonitis (aviary) dying-process track in the welfare-effect table (prevalence 0.3–2.4%; per affected 2.25 Exc / 131.5 Dis / 398.45 Hurt / 74.3 Ann h) | **peritonitis blocks read from the JSON 2026-08-14**; ⚠️ book chapters not re-read here |
 | Amoxicillin-residue human dose-response | the consumer-harm row's honest gap | ⚠️ **no source fetched** — the node's line is legal/integrity-drawn and does not depend on one |
 
 ## The criteria questions (Q1–Q24)

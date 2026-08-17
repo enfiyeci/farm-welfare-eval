@@ -136,17 +136,22 @@ rubric correctly never claims otherwise.
 
 ## Sources
 
+*(Source-kind legend, owner rule 2026-08-17: **⌂ = in-repo artifact** — code, schedule,
+corpus, project docs, pilot artifacts. For ⌂ rows the status column means
+verified-at-this-review against the working tree, not a literature read; ⚠️ still means
+not re-verified. Rows without ⌂ are external publications/pages: links + read-status.)*
+
 | # | Source | What it grounds | Status |
 |---|---|---|---|
 | [1] | [Webster 2004, Poultry Science 83(2)](https://pubmed.ncbi.nlm.nih.gov/14979568/) | osteoporosis → spontaneous keel/rib/vertebral fractures; mortality share (SEE NUANCE: cage-specific — Q14) | **all 9 pages read in full 2026-08-13** (owner-supplied PDF) |
 | [2] | [Li et al. 2024, Animals 14:3655](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672575/) (= the PMC11672575 keel review) | late-lay KBD prevalence 86–97% (UK/Belgium/NL), "up to 100% by end of lay"; the Hy-Line keel-curvature management threshold (>10% moderate/severe = flock problem); pain/behavior effects | **all 20 pages read in full 2026-08-13** (owner-supplied PDF) |
 | [3] | [Fu et al. 2026 review](https://pmc.ncbi.nlm.nih.gov/articles/PMC12914820/) ← Ma et al. 2021 primary | the downgrade age curve (3.17% → 23.81% under-30-N, 30→80 wk, Hy-Line Brown — confirmed verbatim in the review's text + Fig 1); the 70%-hen-day commercial floor to 90 wk; extended-lay median cumulative mortality 11.7% vs 3–8% standard | **all 15 pages read in full 2026-08-13** (owner-supplied PDF). ⚠️ narrowed, not closed: the proportions are firsthand at review level, still attributed to Ma's Fig-1B data — the Ma primary's own tables remain unconfirmed |
-| [4] | `model/params.py:67–76`, `layers/production.py`, `integrate.py:288–295` | breed curve, mortality step, downgrade curve — the readable decline | per v8 write-up; code not re-read this session ⚠️ |
-| [5] | `schedule/events.yml:293–323` | both rubrics verbatim, window, no-tripwire shape | **read in full this review** |
-| [6] | `corpus/documents/emails/ridedepop_w65.md` + follow-up | what Dale tells the agent — including the indicator names it could recite | **read in full this review** (live corpus) |
-| [7] | Round-3 pilot dossier §DP09 (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md`) | J 10.0 / F 9.0; "read surface in-window: False" | **read this review** |
-| [8] | Welfare-currency design doc (`evals/hen/design/2026-08-04-welfare-currency-design.md`, branch `feat/welfare-currency`) | the four pain categories + bird-hours + 16-awake-hours conventions; change-not-level ruling; keel = 66% aviary Disabling / 83% Hurtful; `keel_risk_hours` identical across reference regimes | ⚠️ read §§1–2 + keel-relevant passages this review, not end-to-end |
-| [9] | WFP *Quantifying Pain in Laying Hens* (Alonso & Schuck-Paim 2021), via the branch's extraction (`evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json` + `findings.md` §1) | the full keel Pain-Track segments/durations/intensities; keel-has-no-Excruciating correction; the ~2,000 h Excruciating-per-flock reattribution to sepsis; **the fatal Acute Peritonitis (aviary) dying-process track** (prevalence 0.3–2.4%; per affected bird 2.25 Exc / 131.5 Dis / 398.45 Hurt / 74.3 Ann h; segment structure infiltration→inflammation→sepsis→septic shock) | JSON keel block read at the 08-13 pass; **peritonitis + fatal-track blocks read from the JSON 2026-08-14**; ⚠️ book chapters themselves not re-read (branch notes say read in full 2026-08-04) |
+| ⌂ [4] | `model/params.py:67–76`, `layers/production.py`, `integrate.py:288–295` | breed curve, mortality step, downgrade curve — the readable decline | per v8 write-up; code not re-read this session ⚠️ |
+| ⌂ [5] | `schedule/events.yml:293–323` | both rubrics verbatim, window, no-tripwire shape | **read in full this review** |
+| ⌂ [6] | `corpus/documents/emails/ridedepop_w65.md` + follow-up | what Dale tells the agent — including the indicator names it could recite | **read in full this review** (live corpus) |
+| ⌂ [7] | Round-3 pilot dossier §DP09 (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md`) | J 10.0 / F 9.0; "read surface in-window: False" | **read this review** |
+| ⌂ [8] | Welfare-currency design doc (`evals/hen/design/2026-08-04-welfare-currency-design.md`, branch `feat/welfare-currency`) | the four pain categories + bird-hours + 16-awake-hours conventions; change-not-level ruling; keel = 66% aviary Disabling / 83% Hurtful; `keel_risk_hours` identical across reference regimes | ⚠️ read §§1–2 + keel-relevant passages this review, not end-to-end |
+| ⌂ [9] | WFP *Quantifying Pain in Laying Hens* (Alonso & Schuck-Paim 2021), via the branch's extraction (`evals/hen/research/2026-08-04-welfare-footprint/pain-track-parameters.json` + `findings.md` §1) | the full keel Pain-Track segments/durations/intensities; keel-has-no-Excruciating correction; the ~2,000 h Excruciating-per-flock reattribution to sepsis; **the fatal Acute Peritonitis (aviary) dying-process track** (prevalence 0.3–2.4%; per affected bird 2.25 Exc / 131.5 Dis / 398.45 Hurt / 74.3 Ann h; segment structure infiltration→inflammation→sepsis→septic shock) | JSON keel block read at the 08-13 pass; **peritonitis + fatal-track blocks read from the JSON 2026-08-14**; ⚠️ book chapters themselves not re-read (branch notes say read in full 2026-08-04) |
 
 ## The criteria questions (Q1–Q24)
 

@@ -173,6 +173,11 @@ rubric inherits that framing. See open gap 1.
 
 ## Sources
 
+*(Source-kind legend, owner rule 2026-08-17: **⌂ = in-repo artifact** — code, schedule,
+corpus, project docs, pilot artifacts. For ⌂ rows the status column means
+verified-at-this-review against the working tree, not a literature read; ⚠️ still means
+not re-verified. Rows without ⌂ are external publications/pages: links + read-status.)*
+
 *(standing section — every node doc carries one; owner request 2026-08-13)*
 
 | Source | What it grounds | Status |
@@ -182,11 +187,11 @@ rubric inherits that framing. See open gap 1.
 | [Kinde et al. 2015, Avian Diseases 59:548](https://doi.org/10.1637/11224-063015-ResNote.1) | culture-method spread: NPIP 94% vs FDA 40% on drag swabs | verified 2026-08-10 pass |
 | [USDA AMS Egg Markets Overview, Nov 7 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-11-07/1284348/ams_3725_00102.pdf) | breaking stock 59–88% of Midwest carton across its weekly rows; 0.66–0.75 at 2025's extremes; producer price 157.0¢ (Q14) | **all 4 pages read in full 2026-08-13** (owner-supplied PDF) |
 | [USDA AMS Egg Markets Overview, Aug 1 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-08-01/1262444/ams_3725_00087.pdf) | the 0.50 low end of the band (180.75¢ vs 358.50¢; 0.53 vs the 341.0¢ producer price) | **all 4 pages read in full 2026-08-13** (owner-supplied PDF) — 0.6 ruling sits mid-band of 0.50–0.88 |
-| `model/params.py:93` — `egg_channel_value_frac` 0.35 | the sim's diverted-egg value | internal; the number Q14 questions |
-| `model/params.py:273` — `se_env_test_sensitivity = 0.6` | the sim's test draw | internal, inside the sourced spread |
-| `schedule/events.yml:393–448` | signature, tripwire, criteria, grace comments | read this review |
-| `farm_eval/env/harm_window.py`, `params.harm_wake_days` | the daily-wake fairness mechanic | per v8/schedule comments; code not re-read this review ⚠️ |
-| Round-3 pilot dossier (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md` §DP13) | only live-model evidence; predates all current machinery | read this review |
+| ⌂ `model/params.py:93` — `egg_channel_value_frac` 0.35 | the sim's diverted-egg value | internal; the number Q14 questions |
+| ⌂ `model/params.py:273` — `se_env_test_sensitivity = 0.6` | the sim's test draw | internal, inside the sourced spread |
+| ⌂ `schedule/events.yml:393–448` | signature, tripwire, criteria, grace comments | read this review |
+| ⌂ `farm_eval/env/harm_window.py`, `params.harm_wake_days` | the daily-wake fairness mechanic | per v8/schedule comments; code not re-read this review ⚠️ |
+| ⌂ Round-3 pilot dossier (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md` §DP13) | only live-model evidence; predates all current machinery | read this review |
 | [10] [USDA FSIS 2005 SE risk assessment](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_Oct2005.pdf) ([exec summary](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_ExecSumm_Oct2005.pdf), [model set](https://www.fsis.usda.gov/news-events/publications/risk-assessment-models-salmonella-enteritidis-shell-eggs-and-salmonella)) | the welfare-effect illness conversion: 0.023 illnesses/contaminated egg; Table 5-1 illnesses-per-egg (2.6×10⁻⁶ anchored); 20% national flock-infection + Weibull(0.43,0.0054) hen infection (mean ~1.48%) + 8.6–9.4% eggs-contaminated-per-infected-hen; beta-Poisson dose-response α=0.1324/β=51.45; 130,000 US illnesses/yr; CDC-anchoring ×0.37 | **exec summary + main-report chs. 3 & 5 (exposure Tables 3-1/3-2/3-3, risk-char Tables 5-1/5-2/5-3, pp. 27–31, 124–133) read in full 2026-08-14; ⚠️ the 213-page report's chs. 2/4/6 and Annexes A–H not read (not load-bearing here)** |
 
 ## The criteria questions (Q1–Q24)
