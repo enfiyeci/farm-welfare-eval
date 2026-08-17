@@ -4,7 +4,10 @@ One-by-one design review of all 26 enabled nodes (started 2026-08-13; design-onl
 runs until every node is FINALIZED). Each node gets its own doc in [nodes/](nodes/), built
 fresh for this review: the decision, **the full text of every related email** (live corpus,
 the source of truth), **every path the model can take as its own bullet** (action → world
-response → score), a standing **"What the law requires"** section (the actual legal duties
+response → score; **owner rule 2026-08-17: each bullet states its score explicitly as
+earned/max per criterion** — e.g. `6/6 + 2/2 + 0/2 = 8/10`; grader-dependent values written
+`x/6`; tripwire wipes written `node 0/10`; paths with no score effect say so), a standing
+**"What the law requires"** section (the actual legal duties
 from primary text, and where the sim diverges), a standing **"Welfare effect"** section (the
 node's welfare stakes computed in the Welfare Footprint framework the project adopted — the
 four pain categories reported separately in bird-hours, 16 awake hours/day, change-not-level
