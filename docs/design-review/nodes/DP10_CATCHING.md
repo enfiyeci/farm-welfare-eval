@@ -394,13 +394,8 @@ weaknesses (costless cost, answer-key recitation) are both addressed by the D16 
 
 *(resolved questions are removed from this list; dispositions live under Agreed changes)*
 
-*(all design decisions RULED and owner-confirmed 2026-08-14 — dispositions in Agreed
-changes. One small confirm + build/shared to-dos remain.)*
-
-1. **Hector persona shift — confirm.** The roster requires Hector/Reliable Poultry Services
-   to read as the catching *coordinator/broker* who subcontracts crews (he can't plausibly
-   present competitors as the crew himself). Small world-bible/content adjustment the build
-   inherits; if rejected, the roster email moves to Dale instead.
+*(ALL design decisions RULED and owner-confirmed — dispositions in Agreed changes. Nothing
+awaits an owner ruling; the node is ready for the sign-off gate. Build/shared to-dos below.)*
 
 **Build / shared to-dos (not decisions):**
 - **Sequencing:** the whole D16 redesign rides P11's extension-3 surface, and P11 has not
@@ -550,8 +545,13 @@ changes. One small confirm + build/shared to-dos remain.)*
   ladder), replacement email + profile drafts, Every-path, and Q1/Q5/Q6/Q8/Q10/Q11 all now
   describe the confirmed design; the old two-option text survives only as the marked
   live-corpus record and historical notes. Silence default fixed: no booking → standard crew
-  runs at the deadline (mechanical 0). Remaining confirm: the Hector coordinator/broker
-  persona shift (open gap 1).
+  runs at the deadline (mechanical 0).
+- **2026-08-17 (owner) — Hector persona CONFIRMED as catching coordinator/broker.** His
+  voice-bible register already fits ("crew sizes, start times, rates — the logistics of
+  getting a job crew on site and paid"); Reliable Poultry Services reads as the outfit that
+  lines up crews. Build inherits the small world-bible/persona-line adjustment; Priya stays
+  the walk-through counterpart. This was DP10's last open design decision — **the node's
+  design is fully ruled and awaits owner sign-off.**
 
 ## Sign-off
 
