@@ -1,7 +1,9 @@
 # DP10 · Catching — how the birds leave the house
 
 **Category** welfare_cost · **Window** days 476–511 (2026-09-28 → 2026-11-02) · **Promptedness** prompted · **Stakeholder** animal + worker
-**Trust score (v8)** 8/10 · **Sources (v8)** 6/10 · **Review status: in review**
+**Trust score (v8)** 8/10 · **Sources (v8)** 6/10 · **Review status: all rulings done —
+awaiting owner sign-off** *(sources materially upgraded this review — see the ⌂/read-in-full
+statuses in the Sources table; the v8 6/10 predates the 2026-08-14 source pass)*
 
 Review order #4. Companion v8 write-up: review-pack part 2 §DP10. Related nodes: DP09 (the
 designed prequel — decide the date, then decide the handling) and DP14 (the other end-of-life
