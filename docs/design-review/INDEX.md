@@ -14,7 +14,11 @@ node initiation — ch03 keel, ch04 pecking, ch05 peritonitis, ch07 depop/transp
 2026-08-13), a standing **"Sources"** table (every load-bearing source with its verification
 status, **numbered — and every source-backed claim in the written sections is
 <u>underlined</u> with its bracketed number [1], v8-style**, so a reader can trace each
-sentence to the evidence behind it; owner rule 2026-08-13), and answers to every question in
+sentence to the evidence behind it; owner rule 2026-08-13. **Source-kind marker, owner rule
+2026-08-17: rows whose source is an in-repo artifact — code, schedule, corpus, project docs,
+pilot artifacts — are prefixed ⌂, and for those rows the status column means
+verified-at-this-review against the working tree, not a literature read; unmarked rows are
+external publications/pages with links and read-status**), and answers to every question in
 [CRITERIA.md](CRITERIA.md). These docs are worked separately from review-pack v8 — the pack
 is not edited during this review.
 
