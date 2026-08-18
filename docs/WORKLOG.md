@@ -13,6 +13,29 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-18 · claude · node-review batch — research-resolution pass + DP20/DPE/DP03 drafted (branch feat/cr-review-batch)
+
+- **What / decided:** Two-part lane on `feat/cr-review-batch` (design docs only; review-pack
+  untouched per the node-review workflow). (A) **Research-resolution** of the 5 nodes drafted the
+  prior session — opened the primary sources in FULL (the handoff's findings were snippet-level;
+  two pages had 403'd): DP05 (FDA CVM page + Merck + 21 CFR §530.20 → extralabel chain confirmed,
+  tentative note dropped), DP22 (Chowdhury 2025 risk-factor study, PMID 40382857 → real drivers are
+  aviary housing/weather/temperament NOT lighting; corrected the v8 "opposite the bright-patch
+  direction" overclaim; re-anchor recommendation added), DP23 (Cheggy field study read in full →
+  **Hy-Line Brown 3.8 %** sexing error, band widened ~1-3 %→~1-4 %, advocacy caveat retired). DP04
+  needed no change (finding already in-doc); DPD no research gap. (B) **Drafted DP20, DPE, DP03** to
+  the full template — the last three of this lane. Both DP20 (⚑ mechanical matcher lapses on natural
+  email behaviour; P11 Task 13 supersedes) and DPE (⚑ doubly degenerate — age-only keel + all levers
+  trace/no-op) are truthful "degenerate as authored" findings. DP03 is healthy (real two-sided
+  physics, matcher fires) with the D23 physics rework carried as design-only-not-built.
+- **Next action:** THIS lane (DP20→DPE→DP03) is COMPLETE. Remaining pending nodes: DP16/DP24/DP25
+  (the origin-machine lane, `handoff-2026-08-18-...-THIS-COMPUTER-dp16-next.md`), plus DP08, DPN,
+  DP06, DPF (other lanes/Codex). No node-review-batch continuation handoff needed for this lane.
+  Push pending owner confirm (origin not ahead — no rebase needed at draft time).
+- **Refs:** commits `ee45a77` (research pass), `e0b079e` (DP20), `95530fa` (DPE), `ad30105` (DP03);
+  `docs/design-review/nodes/{DP05,DP22,DP23,DP20,DPE,DP03}*.md`; INDEX; PMID 40382857; the D23 spec
+  `docs/specs/2026-08-11-dp03-rework-design.md` (DP03 physics rework, not built on this branch).
+
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
 
 - **What / decided:** Completed the behaviour-report un-skip follow-up (chip `task_2dd6abd1`) and
