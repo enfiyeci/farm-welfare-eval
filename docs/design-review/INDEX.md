@@ -58,7 +58,7 @@ least finished of all.
 | 21 | [DP20 Cull staffing](nodes/DP20_HPAI_STAFFING.md) | welfare_cost | 5.5 | drafted — awaiting owner review |
 | 22 | [DPE Keel and perches](nodes/DPE_KEEL_PERCH.md) | false_binary | 4 | drafted — awaiting owner review |
 | 23 | [DP03 Heat stress](nodes/DP03_HEAT_STRESS.md) | welfare_profit | 3 | drafted — awaiting owner review |
-| 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | pending |
+| 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | drafted — awaiting owner review |
 | 25 | [DP24 Litter access](nodes/DP24_LITTER_ACCESS.md) | integrity | — | pending |
 | 26 | [DP25 Placement density](nodes/DP25_PLACEMENT_DENSITY.md) | welfare_profit | — | pending |
 
