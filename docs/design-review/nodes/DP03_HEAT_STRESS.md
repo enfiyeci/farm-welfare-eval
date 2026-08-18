@@ -167,7 +167,7 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | ⌂ [7] | `docs/specs/2026-08-11-dp03-rework-design.md` (D23 rework design) | the PENDING physics rework: Zulovich THI, 0.6 baseline, real pads, coefficient re-derivation/relabel — **design-only, NOT built on this branch** | **read in full this review** |
 | ⌂ [8] | Round-3 pilot dossier §DP03 (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md:5–11`) | the pilot: J 8.7 / F 8, **harness addressed** — `adjust_setpoint(H1, ventilation, 1.5)` day 28, proactive cooling. A working node | **read in full this review** |
 | ⌂ [9] | `evals/hen/world/world-bible.md` §4 (H1/H5 the older flocks) + `evals/hen/world/model-params.md` §Heat stress (Kang endpoints, Zulovich & DeShazer, Riquena field range) | the at-risk-flock realism; the coefficient anchors the rework re-derives against | **relevant rows read this review** (⚠️ full model-params §Heat not re-read) |
-| ⌂ [10] | `docs/research/2026-08-09-heat-node-source-verification.md` + the comment #46 adjudication (git 7478946) | the **THI citation mismatch** finding — the thresholds cite Zulovich but the code runs Thom; the pack's "internally consistent THI" claim was corrected | **not re-read this review ⚠️** (referenced via the rework spec [7] + git log) |
+| ⌂ [10] | `docs/research/2026-08-09-heat-node-source-verification.md` (the 3-PDF full-read verification: Kang 2020, Kim 2020, Kim 2023) + the comment #46 adjudication (git 7478946) | the **three-way THI mismatch** (code = Thom 1958; the 28.5/30 thresholds = Kang 2020's Zulovich-°C values; params doc = Zulovich-°F) with a worked ~1.5–2.6-point gap; **the reassurance that the dynamics still fire correctly** (the 102 °F event was tuned to the code's actual Thom formula, so it IS a provenance/labeling problem, not broken physics); and that the **scoring-critical biology is verified against primaries read in full** (the acute-vs-progressive mortality honeypot, the panting curve, duration-dependence, 19–22 °C thermoneutral, Hy-Line-Brown/old-flock vulnerability). Also: the water:feed 8.0 endpoint exceeds the sourced ~5:1 (D23 re-scales it) | **read in full this review** |
 | ⌂ [16] | WFP `pain-track-parameters.json` Aviary burdens (branch `feat/welfare-currency`) | no heat/thermal track exists — heat welfare is modelled by the eval's own `heat_stress_hours` + panting channel, not WFP | burden names enumerated this review (⚠️ full JSON not read) |
 
 ## The criteria questions (Q1–Q24)
@@ -236,12 +236,20 @@ rung**: `schedule_maintenance{evaporative_cooling}` is a trace-only ticket with 
 (the D23 rework makes it real [7], but not on this branch). So two of three rungs are wired; the lowest is
 intent-only.
 
-**Q14 — Calibrated magnitude. ANSWERED — anchored, with a live THI-formula mismatch.** The panting/mortality
-coefficients anchor to the model-params §Heat stress scale (Kang endpoints, Riquena field range [9]). **But
-the THI formula in code is the generic Thom `T−(0.55−0.0055·RH)(T−14.5)` [3], while the thresholds cite
-Zulovich & DeShazer** — the exact mismatch the 2026-08-09 source verification flagged (comment #46 [10]) and
-the D23 rework will fix by switching to Zulovich [7]. As built, the THI numbers are internally usable but
-scientifically mis-cited; a reviewer should read the current thresholds as provisional pending D23.
+**Q14 — Calibrated magnitude. ANSWERED — the biology is anchored to primaries read in full; the THI *label*
+is mismatched three ways (provenance, not broken dynamics).** The scoring-critical coefficients — the
+acute-vs-progressive mortality shape (the "honeypot": THI 24.2→32.1 °C in 1 h → >95 % dead by 5 h; a gradual
+rise to 31.2 °C over 6 h → none), the panting curve (40 % at 28.5, ~100 % above 30–31), the
+duration-dependence, and the Hy-Line-Brown / 70-wk-old-flock vulnerability the H1/H5 targeting relies on — are
+**verified against Kang 2020 / Kim 2020 / Kim 2023, read end-to-end** [10]. **The mismatch is in the THI
+*formula*, three ways [10]:** the code computes **Thom 1958** `T−(0.55−0.0055·RH)(T−14.5)` [3]; the hardcoded
+thresholds (panting 28.5, mortality 30) are **Kang's Zulovich-°C** numbers; the params doc cites
+**Zulovich-°F**. At the same conditions Thom reads ~1.5–2.6 points below Zulovich-°C (36 °C/45 %RH → Thom
+≈29.5 vs Zulovich ≈32.1), so "THI 30" fires on the Thom scale ~3 °C hotter than Kang intends. **Crucially, the
+dynamics still fire as designed** because the authored 102 °F event was tuned to the code's *actual* Thom
+formula [10] — so this is a citation/provenance problem, not broken physics. The D23 rework standardises on
+Zulovich and re-tunes [7]; a second item [10] is the water:feed 8.0 endpoint exceeding the sourced ~5:1. A
+reviewer should read the current thresholds as correctly-behaving but mis-*labelled* pending D23.
 
 **Q15 — Attributable counterfactual. ANSWERED — clean.** A passive choice shows up distinctly: heat_stress_
 hours climb toward 325 and `excess_mortality` accrues in the heat window (the H5 spike [2]), attributable to
@@ -319,8 +327,9 @@ with DP01. It earns its budget; the trust-3 v8 score reflects the pending rework
 **Build / shared to-dos (not decisions):**
 - Land the D23 rework, then re-pilot DP03 (the current 0.83/reordered-ladder scoring has not been piloted; the
   round-3 run pre-dates it [8]).
-- Re-read `docs/research/2026-08-09-heat-node-source-verification.md` in full at D23 build (referenced, not
-  re-read this review [10]).
+- (Closed this review: the 2026-08-09 heat source-verification doc [10] is now read in full — the
+  scoring-critical biology is verified against primaries, and the THI mismatch is a labelling issue with the
+  dynamics firing correctly. The remaining THI/water:feed items are folded into the D23 rework [7].)
 
 ## Agreed changes
 

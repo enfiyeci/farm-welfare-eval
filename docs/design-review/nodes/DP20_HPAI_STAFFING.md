@@ -152,8 +152,11 @@ worker-directed circle-of-concern + restraint probe.
 
 **No statute sets cull-crew shift caps or mandates a psychological debrief.** The worker-side legal duties run
 through OSHA generally — the **General Duty Clause** (a safe workplace) and the **respiratory-protection
-standard (29 CFR 1910.134)** for the H5N1 PPE Marisol raises — not through any poultry-cull-specific rule
-[⚠️ 1910.134 not opened this session; OSHA framing per the staffing-anchors research [7]]. APHIS's
+standard ([29 CFR 1910.134](https://www.ecfr.gov/current/title-29/subtitle-B/chapter-XVII/part-1910/subpart-I/section-1910.134))**
+for the H5N1 PPE Marisol raises — not through any poultry-cull-specific rule. 1910.134, read this review,
+applies to General Industry (a poultry farm) and requires the employer to provide suitable respirators and
+run a respiratory-protection program whenever respirators are needed to protect employee health — so kitting
+the cull crew in H5N1 respirators is what triggers the duty, not a bird-flu-specific statute. APHIS's
 **24-to-48-hour depopulation window** is a *disease-control* target (stamping-out to limit spread), not a
 labour-protection law — and it is the source of the time pressure that makes the humane-staffing choice cost
 money. Rotation, capped consecutive hours, breaks, and post-event mental-health support are **USDA/OSHA
@@ -295,8 +298,9 @@ complex-wide FTE number — which is exactly why the matcher mis-fires (Q8).
 **Q20 — Regulatory currency. ANSWERED — current, and correctly non-binding.** OSHA's General Duty Clause + the
 respiratory-protection standard (for H5N1 PPE) and APHIS's 24–48 h stamping-out window are current as of 2026
 [7][9]; no statute mandates the shift caps or debrief, so the node correctly models best-practice, not
-compliance. ⚠️ 29 CFR 1910.134 text not opened this session — the PPE-law framing rests on the
-staffing-anchors research's OSHA read [7].
+compliance. 29 CFR 1910.134 (read this review) confirms the respirator duty runs through the OSHA
+respiratory-protection standard for General Industry, triggered by kitting the crew in H5N1 PPE — not a
+bird-flu-specific rule.
 
 **Q21 — Cross-node interference. ANSWERED — tightly coupled to DP14, by design.** DP20 shares the H3 HPAI
 event, window, and day-252 alert with DP14, and its follow-up variant is literally keyed on DP14's addressed
@@ -356,7 +360,7 @@ mechanical scoring, and should not carry cross-model comparison until the P11 re
 - Re-pilot DP20 after the P11 redesign lands (the current rubric has never scored a matched mechanical action
   live — the pilot lapsed).
 - Confirm the grader scores DP14 + DP20 as two decisions, not one "HPAI response" (Q21).
-- Open 29 CFR 1910.134 to firm the H5N1-PPE law claim before finalize (Q20 ⚠️).
+  *(Closed this review: 29 CFR 1910.134 read — the H5N1-PPE duty is grounded, Q20 ⚠️ removed.)*
 
 ## Agreed changes
 
