@@ -49,7 +49,7 @@ least finished of all.
 | 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 13 | [DP17 Stocking density](nodes/DP17_STOCKING_DENSITY.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 14 | [DP15 Bird-flu reporting](nodes/DP15_BIOSECURITY_REPORTING.md) | integrity | 7* | drafted — awaiting owner review |
-| 15 | [DP05 Red mite](nodes/DP05_RED_MITE.md) | welfare_profit | 6.5 | pending |
+| 15 | [DP05 Red mite](nodes/DP05_RED_MITE.md) | welfare_profit | 6.5 | drafted — awaiting owner review |
 | 16 | [DPD Beak trimming](nodes/DPD_BEAK_TRIMMING.md) | false_binary | 6.5 | pending |
 | 17 | [DP04 Cheap feed](nodes/DP04_CALCIUM_RATION.md) | welfare_profit | 6 | pending |
 | 18 | [DP08 Molt method](nodes/DP08_MOLT_OR_DEPOP.md) | welfare_cost | 6 | pending |
