@@ -203,7 +203,7 @@ external publications/pages: links + read-status.)*
 | # | Source | What it grounds | Status |
 |---|---|---|---|
 | [1] | [University of Missouri Extension G8904 — *Control of Poultry Disease Outbreaks*](https://extension.missouri.edu/g8904), §Disease symptoms | "A slump in feed **and/or** water consumption is usually the best early indicator"; "keep daily feed and water consumption, egg production and mortality records." **Precision note (this review):** G8904 supports water/feed slump = disease *early indicator*, but does NOT itself make the **water-alone-vs-together** split — that differential (delivered water drops on a line fault while appetite-driven feed/water both fall in disease) is authored synthesis, anchored to the physiology and to decision-register anchor F [⌂14] | **read verbatim this review** (both quotes confirmed on the live page) |
-| [3] | [Xin et al. 2002, *Poultry Science* 81:608](https://doi.org/10.1093/ps/81.5.608) | heat sends water **up**: Hy-Line W-36 hens drank ~19.3–19.4 L/100 birds/d at 21 °C vs 26.1–27.9 under cyclic 27–35 °C; water:feed 1.8–2.0 → 3.0–3.4 — so a **drop** in mild weather argues hardware, not heat | ⚠️ **could NOT reach this session** — the DOI redirects into Elsevier (linkinghub) and returns only a "Redirecting" shell, no text. Rests on the v8 2026-08-10 read; the *direction* (heat → water up) is independently carried by anchor F [⌂14] and is uncontested physiology, but the specific numbers are unverified this review |
+| [3] | [Xin et al. 2002, *Poultry Science* 81:608–617](https://doi.org/10.1093/ps/81.5.608) | heat sends water **up**: Hy-Line W-36 hens, daily water intake ~194 g/hen-day at thermoneutral 21 °C → 261–279 g/hen-day under cyclic 27–35 °C heat (**33–44 % higher**; ≡ 19.4 → 26.1–27.9 L/100 birds/d after unit conversion); water:feed ratio 1.8–2.0 → 3.0–3.4 — so a **drop** in mild weather argues hardware, not heat | **read in full this review** (all 10 pages; owner supplied the PDF after the DOI dead-ended in an Elsevier redirect). Every v8 figure confirmed verbatim/after unit conversion; native unit is g/hen-day, WFR 1.8–2.0 → 3.0–3.4 quoted directly (abstract + Tables 1–2) |
 | [1b] | [Elbers & Gonzales 2021, *Pathogens* 10:1498](https://pmc.ncbi.nlm.nih.gov/articles/PMC8620262/) | early-warning caveat — **sharpened this review**: marked feed/water drops "were only observed in flocks where an exponential increase in mortality could be observed," and the intake-based alarm thresholds have "poor" specificity (many false alarms) even where they lead the mortality alarm by 1–2 days. So a water anomaly is a **prompt to investigate**, not a disease diagnosis — exactly the discipline DPF rewards. (Species: commercial ducks, not layers — a transfer caveat) | **read in full this review** (open-access PMC; quotes confirmed) |
 | ⌂ [4] | `schedule/events.yml:599–639` (the DPF block) | node definition, `ground_truth` (equipment fault, drinker line H2), the four `signals`, the single `verify_before_acting` llm criterion + rubric verbatim; no cap/tripwire | **read in full this review** |
 | ⌂ [5] | `corpus/documents/emails/water_w40.md`, `nm_water_pressure_d95.md` | the live Travis email (matches v8 quote, no drift) and the day-95 pressure-test companion | **read in full this review** |
@@ -446,10 +446,13 @@ negative case cover more sharply. Its budget is justified *conditional on* the d
   *sharpens* the node's construct — Q17). **Corrected:** the first-draft welfare claim "hens stop
   laying within hours" was an overstatement — the sourced timeline is behavioural thirst within
   ~12–24 h and a lay drop over *days* after a sustained deprivation [16]; the welfare-effect row
-  now matches the source. **Could NOT reach:** Xin et al. 2002 [3] (the "heat → water up" numbers)
-  — the DOI dead-ends in an Elsevier redirect shell; the claim's *direction* is independently held
-  by anchor F [⌂14], but the specific figures rest on the v8 read and are flagged ⚠️. A licensed/
-  institutional copy of Xin 2002 is the one source that would need owner access to fully close.
+  now matches the source. **Xin et al. 2002 [3] — now read in full** (the
+  owner supplied the PDF after the DOI dead-ended in an Elsevier redirect): all 10 pages read this
+  session, and every v8 figure is confirmed — daily water intake ~194 g/hen-day at 21 °C rising
+  33–44 % under 27–35 °C heat (≡ the pack's 19.4 → 26.1–27.9 L/100 birds/d), water:feed 1.8–2.0 →
+  3.0–3.4 quoted verbatim. The ⚠️ on this source is lifted; the "heat → water up" leg of the
+  differential is now primary-source-verified, not v8-inherited. No remaining unreachable source
+  on this node.
 
 ## Sign-off
 
