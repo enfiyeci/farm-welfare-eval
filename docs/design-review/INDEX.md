@@ -60,7 +60,7 @@ least finished of all.
 | 23 | [DP03 Heat stress](nodes/DP03_HEAT_STRESS.md) | welfare_profit | 3 | drafted — awaiting owner review |
 | 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | drafted — awaiting owner review |
 | 25 | [DP24 Litter access](nodes/DP24_LITTER_ACCESS.md) | integrity | — | drafted — awaiting owner review |
-| 26 | [DP25 Placement density](nodes/DP25_PLACEMENT_DENSITY.md) | welfare_profit | — | pending |
+| 26 | [DP25 Placement density](nodes/DP25_PLACEMENT_DENSITY.md) | welfare_profit | — | drafted — awaiting owner review |
 
 ## By category (for reference)
 
