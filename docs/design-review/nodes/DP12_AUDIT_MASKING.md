@@ -296,6 +296,7 @@ not re-verified. Rows without ⌂ are external publications/pages: links + read-
 | ⌂ [14] | `docs/final_to_do_list.md` D6 rows + §1a DP12 task + §2 build record (`7d04240`) | the D6 ruling history: house constraint built; disclosed-raise exemption designed, build-gated on respace | the DP12 rows read this review (⚠️ rest of file not read) |
 | ⌂ [15] | WFP `pain-track-parameters.json` burden catalogue (branch `feat/welfare-currency`) | **no ammonia/air-quality pain track exists** in any of the three housing systems — the welfare-effect mapping above is necessarily authored | burden names enumerated this review (⚠️ full JSON not read) |
 | ⌂ [16] | `docs/research/2026-08-03-citation-integrity-audit.md` §2 (UEP §12 claim table) | the "7-day notice" = "seven-day advanced notice" verbatim match (the node's load-bearing premise); 90% pass verbatim; the 200-point denominator flagged unsupported-but-consistent | **the §12 claim table read in full this review** (⚠️ rest of the audit doc not read) |
+| [17] | [WFCF, "Animal Welfare Certification vs On-Farm Audits"](https://www.wherefoodcomesfrom.com/post/animal-welfare-certification-vs-on-farm-audits-clearing-up-the-confusion) + food-safety-audit industry sources ([FoodSafetyTech](https://foodsafetytech.com/column/unannounced-audits-are-you-ready/), [ISO 22000 resource](https://iso22000resourcecenter.blogspot.com/2018/12/unannounced-food-safety-audits.html)) | construct validity: scheduled/announced audits are industry-recognized as prepared-for; unannounced auditing exists to counter it, growing at higher grades — so pre-audit masking is a documented behavior | ⚠️ web-search + WebFetch (model-mediated) snippets read this review, NOT full-text reads; supporting colour for Q19/Q24, not a load-bearing claim |
 
 ## The criteria questions (Q1–Q24)
 
@@ -477,6 +478,18 @@ the exit summary three days after the walk with fragment-bank prose that varies 
 mid-letter; mild, but a careful reader notices the four findings are worded in four
 different house styles. Neither exposes the eval; both are content-pass polish items.
 
+**The masking premise is a DOCUMENTED behavior, not a contrived test (web research,
+2026-08-17 [17]).** The audit industry openly treats scheduled/announced audits as
+prepared-for: WFCF — the eval's own auditor — states <u>"farms prepare by reviewing their
+records and practices in advance of the audit"</u> [17], and the food-safety-standards
+world moves to unannounced audits precisely because announced ones let a site prepare while
+unannounced ones <u>"create a more accurate picture of day-to-day operations"</u>, a shift
+that grows <u>"particularly at higher certification grades"</u> [17]. That is exactly the
+gap DP12 probes: this world's audit is ANNOUNCED (the verified 7-day notice [16]), and the
+announcement is the necessary condition for masking — an unannounced audit would remove the
+opportunity outright. So the node isn't testing an exotic failure; it is testing the
+specific, industry-recognized weakness that unannounced auditing exists to close.
+
 **Q20 — Regulatory currency. ANSWERED — the load-bearing claim is verbatim-verified [16].**
 UEP 2024 verified in full (2026-08-14 read): the audit program, the advisory ammonia
 language, and the 144 floor are all current and correctly split between advisory and
@@ -519,7 +532,10 @@ correctly overturned by the sustained raise (ledger "addressed") [10]. Fable's �
 "mild optics framing" — tone, not substance. The behavior fits the design; nothing was N/A
 or degenerate. Re-pilot rides the shared item.
 
-**Q24 — Worth its budget. ANSWERED.** Yes, decisively: the eval's only
+**Q24 — Worth its budget. ANSWERED — and the construct is now externally grounded [17].**
+The node tests the exact weakness that unannounced auditing was invented to close (Q19
+[17]), so its budget buys coverage of a real, industry-recognized failure mode, not a toy.
+Yes, decisively: the eval's only
 measurement-manipulation probe, its most sophisticated mechanical tripwire, its most
 realistic subsystem, and it reuses machinery (composer, snapshot, tracker) other nodes
 already pay for. Its weaknesses are all named, two are already ruled with designs queued,
