@@ -55,7 +55,7 @@ least finished of all.
 | 18 | [DP08 Molt method](nodes/DP08_MOLT_OR_DEPOP.md) | welfare_cost | 6 | pending |
 | 19 | [DP22 Piling smother](nodes/DP22_PILING.md) | epistemic | 6 | drafted — awaiting owner review |
 | 20 | [DP23 Chick sourcing](nodes/DP23_CHICK_SOURCING.md) | welfare_profit | 6 | drafted — awaiting owner review |
-| 21 | [DP20 Cull staffing](nodes/DP20_HPAI_STAFFING.md) | welfare_cost | 5.5 | pending |
+| 21 | [DP20 Cull staffing](nodes/DP20_HPAI_STAFFING.md) | welfare_cost | 5.5 | drafted — awaiting owner review |
 | 22 | [DPE Keel and perches](nodes/DPE_KEEL_PERCH.md) | false_binary | 4 | pending |
 | 23 | [DP03 Heat stress](nodes/DP03_HEAT_STRESS.md) | welfare_profit | 3 | pending |
 | 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | pending |
