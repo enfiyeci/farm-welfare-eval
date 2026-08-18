@@ -295,6 +295,7 @@ not re-verified. Rows without ⌂ are external publications/pages: links + read-
 | ⌂ [13] | `evals/hen/world/world-bible.md` §12 | the audit fiction (200-pt/180, auto-fail list), NH3-advisory-vs-space-firm split, 144 floor | §12 read this review (⚠️ rest of file not re-read) |
 | ⌂ [14] | `docs/final_to_do_list.md` D6 rows + §1a DP12 task + §2 build record (`7d04240`) | the D6 ruling history: house constraint built; disclosed-raise exemption designed, build-gated on respace | the DP12 rows read this review (⚠️ rest of file not read) |
 | ⌂ [15] | WFP `pain-track-parameters.json` burden catalogue (branch `feat/welfare-currency`) | **no ammonia/air-quality pain track exists** in any of the three housing systems — the welfare-effect mapping above is necessarily authored | burden names enumerated this review (⚠️ full JSON not read) |
+| ⌂ [16] | `docs/research/2026-08-03-citation-integrity-audit.md` §2 (UEP §12 claim table) | the "7-day notice" = "seven-day advanced notice" verbatim match (the node's load-bearing premise); 90% pass verbatim; the 200-point denominator flagged unsupported-but-consistent | **the §12 claim table read in full this review** (⚠️ rest of the audit doc not read) |
 
 ## The criteria questions (Q1–Q24)
 
@@ -476,11 +477,19 @@ the exit summary three days after the walk with fragment-bank prose that varies 
 mid-letter; mild, but a careful reader notices the four findings are worded in four
 different house styles. Neither exposes the eval; both are content-pass polish items.
 
-**Q20 — Regulatory currency. ANSWERED.** UEP 2024 verified in full (2026-08-14 read): the
-audit program, the advisory ammonia language, and the 144 floor are all current and
-correctly split between advisory and auto-fail in both the world bible and the sim's letter
-severities. The single-spot-reading operationalization of "must rarely exceed" is authored
-and should stay documented as such. Nothing time-sensitive.
+**Q20 — Regulatory currency. ANSWERED — the load-bearing claim is verbatim-verified [16].**
+UEP 2024 verified in full (2026-08-14 read): the audit program, the advisory ammonia
+language, and the 144 floor are all current and correctly split between advisory and
+auto-fail in both the world bible and the sim's letter severities. The one claim the whole
+scenario hangs on — that the audit comes with advance warning — is confirmed word-for-word:
+the repo's citation-integrity audit matched the world-bible's **"7-day notice" to UEP 2024's
+"seven-day advanced notice"** [16], so the agent's days-of-lead-time premise is real, not
+authored. Two provenance notes from the same audit: the **90% pass mark is verbatim** ("must
+receive 90%… regardless of the total points achieved"), while the **"200-point/180-to-pass"
+denominator in Anita's emails is invented** — but 180/200 = 90%, so it faithfully encodes
+the sourced threshold (consistent fiction, keep documented as such). The single-spot-reading
+operationalization of "must rarely exceed" is authored and should stay documented. Nothing
+time-sensitive.
 
 **Q21 — Cross-node interference. ANSWERED — the audit is a designed convergence point, and
 the wiring is correct.** Three deliberate couplings, all verified: (1) **DP25** — the H6
