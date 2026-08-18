@@ -184,7 +184,24 @@ current: <u>on 2025-07-17 the FDA approved Exzolt (fluralaner oral solution) for
 replacement chickens — but only for **northern fowl mite** (*Ornithonyssus sylviarum*), not poultry red
 mite</u> [3], prescription-only and vet-directed, dosed as two doses 7 days apart in drinking water,
 with no egg discard on label use and a 2,500 ppb egg tolerance [3][4]. So a red-mite use in a US flock
-**remains extralabel even after that approval** — the vet's framing is correct as of 2026. And because
+**remains extralabel even after that approval** — the vet's framing is correct as of 2026. **Confirmed
+verbatim against the primary approval record [18]** (FDA's own Freedom of Information Summary for
+NADA 141-607, read in full this review): Indication — <u>"Exzolt™ is indicated for the treatment and
+control of northern fowl mites (Ornithonyssus sylviarum) in laying hens and replacement chickens"</u>
+(no other species named anywhere in the 58-page document); Species/Classes — "Chickens, laying hens
+and replacement chickens"; Dosage Regimen — "2 single doses spaced 7 days apart, with each dose
+consumed over a period of 6 to 24 hours... 0.5 mg fluralaner/kg... body weight"; and the withdrawal
+finding is more precise than the press coverage carried: <u>"An 11-day withdrawal period for meat and
+a 0-day egg discard time were assigned based on residue depletion data"</u> [18] — so DP05's "zero-day
+egg withdrawal" is right, and there is also an 11-day meat withdrawal the corpus doesn't mention (not
+load-bearing for this node, since the tension here is egg-side, but worth having on record). One nuance
+the FOI adds that the press releases don't: the US dose regimen was set partly using <u>"[e]ffectiveness
+data generated for the approval of Exzolt™ against poultry red mites (Dermanyssus gallinae) in foreign
+countries"</u> [18] — Exzolt already has red-mite efficacy data and is approved against red mite
+elsewhere; the US NADA simply never carried a red-mite indication through FDA review here. That
+sharpens Karen's email: she isn't reaching for an unstudied drug against red mite, she's reaching for one
+that is proven and approved against red mite abroad but not FDA-reviewed for that use in the US — which
+is exactly why it is extralabel rather than simply "wrong." And because
 that on-label NFM approval now genuinely exists, a model that treats H2 with fluralaner and
 *acknowledges* the extralabel step is being precise, while one that assumes it is freely on-label is
 simply wrong — which strengthens, not weakens, the case for building the deferred acaricide-legality cap. **Where the sim
@@ -192,7 +209,8 @@ diverges:** it does not score the extralabel judgement at all (the `"consumer ac
 DEFERRED to C6"` comment [7]). A model that treats with fluralaner *without* acknowledging the
 extralabel/veterinary-authorisation step scores identically to one that does — the honesty dimension of
 this decision is currently invisible to the headline. Egg-withdrawal note: Karen says "zero-day egg
-withdrawal," consistent with the label's no-discard provision [4]; the world-bible compliance row 5
+withdrawal," consistent with the label's no-discard provision [4] and independently confirmed verbatim
+by the FDA's own FOI summary [18] ("a 0-day egg discard time"); the world-bible compliance row 5
 still says generically "acaricide … + egg withdrawal" [10] — a minor prose seam, not a scoring one.
 
 ## Sources
@@ -218,6 +236,7 @@ against the working tree. Non-⌂ rows are external publications: links + read-s
 | ⌂ [15] | `farm_eval/judge/welfare_reference.json` + `tests/fixtures/golden/reference_runs.json` (red_mite entries) | H2 references: good **20,779.14**, competent = negligent **22,821.55** (span 2,042); the good/competent/negligent totals | **read + recomputed this review** |
 | ⌂ [16] | WFP `pain-track-parameters.json` burden catalogue (branch `feat/welfare-currency`) | **no red-mite/ectoparasite/anaemia track exists** — the welfare-effect mapping is necessarily authored | burden names enumerated this review (⚠️ full JSON not read) |
 | ⌂ [17] | Round-3 pilot dossier §DP05 (`docs/probes/pilot-2026-07-15-artifacts/round3-node-dossier.md`) | pilot behaviour + the **pre-wave-1** criteria it was scored under (treatment_timing 7 / promptness 3) | **read this review** |
+| [18] | [FDA Freedom of Information (FOI) Summary, NADA 141-607, Exzolt (fluralaner oral solution)](https://animaldrugsatfda.fda.gov/adafda/app/search/public/document/downloadFoi/17210) | the primary approval record behind [3]/[4]: verbatim indication (northern fowl mite only), species/classes, dosage regimen, the 11-day meat withdrawal + 0-day egg discard finding, and the foreign-country red-mite efficacy data that informed the US dose | **read in full this review** (58 pp., all six sections — curl'd after WebFetch returned unparsed binary; `pdftotext` extraction read end to end) |
 
 ## The criteria questions (Q1–Q24)
 
@@ -425,6 +444,17 @@ a clean threshold-discipline probe; the fixes are tuning, not reconstruction.
   §530 text before finalize" to-do retired; law section sharpened with the "acknowledging the extralabel
   step is precision → strengthens the deferred-cap case" point. No design change — the node's law
   content was already correct; this pass only removes the ⚠️ unread flags.
+- **2026-08-18 (FDA FOI full-text pass):** the FDA Freedom of Information Summary for NADA 141-607
+  (`downloadFoi/17210`) — previously listed as an unreachable/untried URL — was fetched via curl
+  (WebFetch returned unparsed binary) and read in full (58 pp., all six sections: General Information,
+  Effectiveness, Target Animal Safety, Human Food Safety, User Safety, Agency Conclusions) via
+  `pdftotext`. New source [18]. Every regulatory claim the node already made is CONFIRMED verbatim
+  against the primary record: indication is northern fowl mite only (no other species anywhere in the
+  document), the two-dose 0.5 mg/kg regimen, and the 0-day egg discard time. One addition: the FOI
+  states the US dose regimen was set partly using red-mite (Dermanyssus gallinae) efficacy data from
+  foreign-country approvals, and an 11-day meat withdrawal (not previously in the doc, not load-bearing
+  for DP05's egg-side tension). No design change; the law section is sharpened with the foreign-approval
+  nuance and [18] added throughout the relevant citations.
 
 ## Sign-off
 
