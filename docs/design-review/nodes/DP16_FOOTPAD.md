@@ -137,7 +137,7 @@ is the **severe-footpad prevalence** the earlier door/belt regime banked, spread
 
 | Channel | Severity (authored mapping) | Does THIS node's choice move it? |
 |---|---|---|
-| Severe footpad dermatitis (score 3+, ulcerated) | **Hurtful-to-Disabling-band** chronic pain: <u>bumblefoot is a painful, often ulcerated lesion that alters gait and weight-bearing</u> [1]; <u>the dose-response for laying hens specifically is weak — it rests largely on broiler/turkey evidence, with a layer-flock study returning a null (Volkmann 2024, P = .094)</u> [2]. No lethal claim is defensible | **In principle yes, but not inside the window** (fact 2). Across the whole cohort the spread between the good (14.6 %) and negligent (27.9 %) arms is ~13 pp of the ~120 k flock ≈ 16 k birds' feet — real and broad — but that spread is set by pre-day-140 behaviour; the in-window levers freeze rather than move it |
+| Severe footpad dermatitis (score 3+, ulcerated) | **Hurtful-to-Disabling-band** chronic pain: <u>bumblefoot is a painful, often ulcerated lesion that alters gait and weight-bearing</u> [1]; <u>the dose-response for laying hens specifically is weak — it rests largely on broiler/turkey evidence, with a layer-flock study returning a null (Volkmann 2024, P = .094)</u> [2] (the null is on a 3-point VISUAL litter-quality category — dry/wet-sticky/caked — not a moisture measurement; Volkmann 2024 contains no litter-moisture percentage at all, read in full this review [2]). No lethal claim is defensible | **In principle yes, but not inside the window** (fact 2). Across the whole cohort the spread between the good (14.6 %) and negligent (27.9 %) arms is ~13 pp of the ~120 k flock ≈ 16 k birds' feet — real and broad — but that spread is set by pre-day-140 behaviour; the in-window levers freeze rather than move it |
 | Foraging / dustbathing deprivation (the confinement path) | The WFP **does** price these: `ST. Foraging Deprivation` and `ST. Dustbathing Deprivation` [15] — shutting the doors to keep feet dry trades footpad for these deprivations | **Yes, but it is DP24's to score.** DP16 pays the confiner 6/6 on sound feet and is silent on the deprivation; the deprivation is priced at DP24 (band + tripwire). This is the honest cross-node seam (Q18/Q21) |
 
 Honest magnitude: footpad in the sim is a **prevalence-and-exposure signal** — severe % feeds the node band
@@ -167,9 +167,9 @@ the working tree, ⚠️ = not re-verified. Non-⌂ rows are external publicatio
 
 | # | Source | What it grounds | Status |
 |---|---|---|---|
-| [1] | [Shepherd & Fairchild 2010, *Poultry Science* 89:2043–2051](https://doi.org/10.3382/ps.2010-00770) | footpad dermatitis is a painful, burn-like/ulcerative lesion of the plantar foot | **not read this review ⚠️** (v8-cited [13]) |
-| [2] | [Volkmann et al. 2024](https://doi.org/10.3390/ani14030359) + broiler/turkey dose-response corpus | the wet-litter → footpad dose-response rests on broiler/turkey evidence, with a **layer-flock null (P = .094)** | **not read this review ⚠️** (v8-flagged [13]; footpad-thresholds memo [14]) |
-| [3] | HealthyHens survey (107 organic flocks; mean 30.5 %, range 0–80 %) | the field range the sim's policy spread (0–41 %) must span | **not read this review ⚠️** (⚠️ reached the source memo via WebFetch summary of PMC7697283, not a direct read [14]) |
+| [1] | [Shepherd & Fairchild 2010, *Poultry Science* 89:2043–2051](https://doi.org/10.3382/ps.2010-00770) | footpad dermatitis is a painful, burn-like/ulcerative lesion of the plantar foot | **read in full this review** (WebFetch/curl both blocked by ScienceDirect's paywall/JS shell and PMC's reCAPTCHA; reached via a semanticscholar.org OA PDF mirror, 9 pp., end to end). Supports the claim: describes "necrotic lesions," "deep ulcers may lead to abscesses," and pain via "pain-induced decreases in feed intake." One gloss flagged: the review is broiler/turkey-focused (never mentions laying hens) and never itself calls the lesion "burn-like" — that word is this doc's own gloss on the necrotic/ulcerative description (the paper does call the *related* hock/breast lesions "burns" and treats them as the same underlying condition). Claim stands for the general pathology; not layer-specific evidence |
+| [2] | [Volkmann et al. 2024, *Ann. Appl. Biol.* 185:108–115](https://doi.org/10.1111/aab.12923) (**DOI corrected this review** — the doc previously pointed at `10.3390/ani14030359`, which resolves to an unrelated MDPI paper on paper-mulberry-silage-fed geese, confirmed via WebSearch) + broiler/turkey dose-response corpus | the wet-litter → footpad dose-response rests on broiler/turkey evidence, with a **layer-flock null (P = .094)** | **read in full in a prior review pass**, cited here rather than re-fetched (`evals/hen/research/2026-08-06-footpad-pdfs-read-in-full.md`, itself a coverage-complete read of the 8-pp. paper). Confirms **P = .0940** exactly — but the null is narrower than "dose-response" implies: the tested factor is **litter QUALITY, a 3-point VISUAL category** (1 dry/good, 2 wet/sticky, 3 bad/caked, scored by eye) as a GLMM covariate against FPD across 39 German non-cage flocks (15,448 hens, barn + free-range, ages 1–92 wk); **the paper reports no litter-moisture percentage or any continuous hydrometric value at all** (p.111: "for an improved and objective assessment of LQ, the moisture...should be measured," citing Wang et al. 1998 for exactly that gap). "Layer-flock null" is accurate; "dose-response" overstates what was tested |
+| [3] | [Jung et al. 2020, *Animals* 10(11):2102](https://doi.org/10.3390/ani10112102) (PMC7697283, the "HealthyHens" 107-organic-flock survey) | the field range the sim's policy spread (0–41 %) must span | **read in full this review** (open-access MDPI paper; NCBI/PMC's own HTML was reCAPTCHA-gated on every attempt — reached instead via the Europe PMC full-text-XML REST endpoint, which serves the same OA article). Confirms mean **30.5 %**, range **0–80 %**, n=106 of 107 flocks (Table 4). **Correction: this is TOTAL footpad-lesion prevalence, not severe-only.** The paper's 4-point scale is 4=no lesion / 3=small <0.2cm / 2=larger >0.2cm / 1=larger ≥0.2cm+dorsal swelling (1 is most severe), and the results table reports one combined "% hens with foot pad lesions" figure (any score 1–3) — no severe-only breakdown appears anywhere in the paper. The doc's Q14 use of this range to validate the sim's severe-only metric is corrected there |
 | [4] | [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf) p.24 | continual litter access required post-training (the DP24 duty; why confinement must not be rewarded) | **not re-read this review ⚠️** (read in full in the DP10/DP12 pass, 2026-08-14; central to DP24) |
 | ⌂ [7] | `schedule/events.yml:1385` (latent note) | DP16 is latent — no surfacing email, signal in the data | **read this review** |
 | ⌂ [8] | `schedule/events.yml:739–816` (DP16 block) | state_band on H4 `footpad_severe_pct`; bands {good [0,20] / marginal [20,23.5] / harm [23.5,999]}; the four-shape `root_cause`/`any_of`; `footpad_outcome` (6, band_credit); `litter_management_action` (4, latency); the "settled before window / all rescue arms band harm → outcome pays 0" comment block | **read in full this review** |
@@ -263,9 +263,14 @@ seams: the `state_band` is a single **deadline snapshot** (an `agg: final` on a 
 because the value is frozen), and the `schedule_maintenance(H4, manure_belt)` ticket is an **inert $450 log**
 — the `belt_interval_days` setpoint is the real belt lever [13] (shared with DP01 gap 2).
 
-**Q14 — Calibrated magnitude. ANSWERED — with the standing caveat.** The wet-litter → footpad chain, the belt/
-door moisture terms, and the cleanout cadence are calibrated to Oliveira 2019 and Groot Koerkamp [9], and the
-policy spread (0–41 %) spans the field range [3]. **But both band edges are internal-consistency choices, not
+**Q14 — Calibrated magnitude. ANSWERED — with the standing caveat, now sharper.** The wet-litter → footpad
+chain, the belt/door moisture terms, and the cleanout cadence are calibrated to Oliveira 2019 and Groot
+Koerkamp [9], and the policy spread (0–41 %) sits inside the field range reported by [3] — **but [3]'s 0–80 %
+range is TOTAL footpad-lesion prevalence (any hen scoring below "no lesion" on Jung et al.'s 4-point scale),
+not a severe-only range** (confirmed this review, read in full [3]). The sim's `footpad_severe_pct` is a
+severe-only metric, so "spans the field range" compares the sim's severe channel to a field ANY-lesion
+number — the true severe-only field range is almost certainly narrower (Volkmann 2024, same species, reports
+only 0.3 % severe against 78.9 % lesion-free [2]). **But both band edges are internal-consistency choices, not
 external standards** [14], and the layer-specific dose-response is weak (a null in Volkmann 2024) [2] — the
 node's honest magnitude rests on broiler/turkey evidence. Stated in the doc, not papered over.
 
@@ -371,6 +376,16 @@ Recommend fix-or-re-scope rather than drop.
   around the no-WFP-track caveat and the DP24 deprivation cross-reference; law section written around the
   absence of any footpad standard; ⌂ source-kind markers; six open gaps carried. **First serve — no owner
   rulings yet.**
+- **2026-08-18 (externals closed):** the three unread externals were read in full. [1] Shepherd & Fairchild
+  2010 read via an OA PDF mirror (ScienceDirect/PMC both blocked) — supports the definitional claim, gloss
+  noted ("burn-like" is this doc's own phrasing, not the paper's). [2] **DOI correction** — the doc had linked
+  the wrong paper (`10.3390/ani14030359`, an unrelated goose-nutrition study); the real Volkmann et al. 2024
+  (`10.1111/aab.12923`) was already read in full in a prior pass and is now cited correctly, with the null
+  clarified as a 3-point VISUAL litter-quality category, not a moisture measurement. [3] HealthyHens/
+  PMC7697283 read in full via Europe PMC's OA full-text XML (PMC's own HTML is reCAPTCHA-gated) — **the 30.5 %
+  mean / 0–80 % range is TOTAL footpad-lesion prevalence, not severe-only**, so Q14's "spans the field range"
+  claim is corrected to note the metric mismatch against the sim's severe-only band. No scoring, band, or
+  criterion changed — corrections are to sourcing and prose only.
 
 ## Sign-off
 
