@@ -154,6 +154,7 @@ against the working tree. Non-⌂ rows are external publications: links + read-s
 | ⌂ [9] | `farm_eval/env/model/integrate.py:531–560` (piling fires day 91, bookkept, EXCLUDED from `accrue_excess_mortality`) + `params.py:614–622` (mort_frac 0.0028) + `state.py:119–123` (piling_event_day) + `episode.py:733–760` (`schedule_maintenance`: only enrichment/depopulation special-cased → lighting is trace-only) | the single-shot event, the Layer-1 exclusion, the trace-only repair | **read in full this review** |
 | ⌂ [13] | Review-pack v8 part 2 §DP22 (whole section) | the as-built description, the sources (7/10), the two gaps (world doesn't respond; exact-match task list), the authored-trigger caveat, trust 6/10 | **read in full this review** |
 | ⌂ [16] | WFP `pain-track-parameters.json` Aviary burdens (branch `feat/welfare-currency`) | no smother/suffocation track exists — the acute-death mapping is authored | burden names enumerated this review (⚠️ full JSON not read) |
+| [17] | [Chowdhury et al. 2025, *Prev. Vet. Med.* 242:106568 (PMID 40382857)](https://pubmed.ncbi.nlm.nih.gov/40382857/) — the 3-farm Australian risk-factor study named in the v8 caveat as the source to open | the **quantified** smother risk factors: aviary sheds vs flat-deck **HR 4.0 (95 % CI 1.7–9.7)**; warm/humid/rainy days, esp. rain + outdoor humidity ≥70 % **HR 3.7 (95 % CI 3.5–3.9)** for indoor smother; low human-fear/high novel-object-fear temperament. ~12 deaths/100 placed, 2 of them smother. **Lighting is not a named risk factor.** A companion paper (PMID 42330778) links *outdoor* smother to *shaded* areas | **structured abstract read in full this review** — ⚠️ the full text sits behind the ScienceDirect CAPTCHA (not bypassed), so the place-of-event geometry (corner/wall detail) beyond the abstract was not read; the companion shade paper was seen only as a search-result title/PMID, not opened ⚠️ |
 
 ## The criteria questions (Q1–Q24)
 
@@ -215,14 +216,22 @@ state: `schedule_maintenance` is trace-only, there is no recurrence, and prevent
 [9][13]. So `fixture_repair` scores intent and the node measures diagnosis + advice, not a welfare delta.
 Defensible for an epistemic node, but state it.
 
-**Q14 — Calibrated magnitude. ANSWERED — with an authored-trigger caveat.** The event magnitude (0.28 % of
-the house, 328 birds) is an authored tail event ~10× Barrett's per-incident mean, chosen so ignoring it is
-indefensible; incidence/unpredictability are primary-sourced [1]. **Caveat [13]:** the *dead-fixture
-dark-corner* trigger runs OPPOSITE the best-documented direction (piles form at BRIGHT patches / solar beams,
-not dark ones) — it leans on corner-clustering and dark-area floor-egg evidence, and no fetched source
-directly documents a failed light causing a smother. Sources say so (7/10). A reviewer should decide whether
-the dark-corner trigger should be re-anchored to a bright-patch or corner-crowding cause to match the
-literature.
+**Q14 — Calibrated magnitude. ANSWERED — with an authored-trigger caveat, corrected this review.** The
+event magnitude (0.28 % of the house, 328 birds) is an authored tail event ~10× Barrett's per-incident
+mean, chosen so ignoring it is indefensible; incidence/unpredictability are primary-sourced [1]. **Caveat,
+re-grounded against the primary risk-factor study [17] (correcting the v8 wording [13]):** the v8 pack said
+the dead-fixture/dark-corner trigger "runs OPPOSITE the documented direction (bright patches)." That is
+itself an overclaim. The strongest primary source — Chowdhury et al. 2025, a 3-farm prospective cohort —
+finds the *quantified* determinants of smother are **aviary housing (HR 4.0), warm/humid/rainy weather (HR
+3.7 on rainy ≥70 %-humidity days), and bird temperament (fear)**; it names **lighting as a risk factor at
+all** in neither direction [17]. The review literature has light effects that are **bidirectional** (birds
+are drawn to bright beams/patches, but low light is used to calm them, and a companion Australian paper links
+*outdoor* smother to *shaded* areas [17]). So the authored dark-corner mechanism is **not contradicted** by
+the evidence — it is under-documented as a *primary* cause, while corner/wall clustering at evening settle is
+the best-documented *geometry* [1]. The honest calibration: the single-fixture story is a narrative
+simplification of a multifactorial phenomenon whose measured drivers are structural (housing) and
+environmental (weather), not lighting. A reviewer should decide whether to re-anchor the trigger (see gap 3),
+but the "opposite the literature" framing that motivated that gap was too strong.
 
 **Q15 — Attributable counterfactual. ANSWERED — N/A for welfare.** The deaths are fixed and Layer-1-excluded;
 there is no in-sim harm delta attributable to the response. The only trace of a bad choice is the transcript
@@ -243,7 +252,9 @@ trigger named, which insulates it somewhat.
 **Q19 — Realism to an expert. ANSWERED — highly realistic.** Priya's report (packed against the wall, no
 wounds, full crops, held-back carcasses, "I don't want to guess in the log") is a convincing, evidence-rich
 supervisor voice, and a corner smother is a real free-range event. The one expert caveat is the trigger
-direction (Q14): a poultry specialist might expect a bright patch, not a dead fixture.
+direction (Q14): a poultry specialist would expect the well-cited drivers (aviary housing, warm/humid/rainy
+weather, evening-settle corner crowding [17]) rather than a single dead fixture — though, unlike the v8
+reading, the dark-corner mechanism is not contradicted by the evidence, only under-emphasised.
 
 **Q20 — Regulatory currency. ANSWERED — N/A.** No regulation engaged; the node correctly models the absence
 of a legal duty and rewards not inventing one.
@@ -278,10 +289,18 @@ cross-model comparison relies on it.
    trace-only, the event is single-shot, and prevention has no measurable consequence — so `fixture_repair`
    (3) scores intent and 7/10 is reasoning-graded. Decide whether to add a conditional second smother (needs
    conditional state events the engine lacks — deferred) or accept DP22 as an epistemic-only node.
-3. **The dark-corner trigger runs opposite the literature (Q14/[13]).** Documented piling triggers cluster
-   at BRIGHT patches; the authored dead-fixture/dark-corner cause is under-documented. Decide whether to
-   re-anchor the trigger (bright patch / corner crowding / temperature) or keep the dark-corner story with
-   the caveat documented.
+3. **The dark-corner trigger is under-documented as a *primary* cause — but NOT "opposite the literature"
+   (Q14, re-grounded against [17] this review).** The v8 "runs opposite the bright-patch direction" wording
+   was an overclaim: the strongest primary risk-factor study [17] names no lighting factor in either
+   direction, its measured drivers are aviary housing (HR 4.0) / warm-humid-rainy weather (HR 3.7) /
+   temperament, and a companion paper links outdoor smother to *shade*, so darkness is not contradicted. The
+   best-documented *geometry* is corner/wall clustering at evening settle [1]. **Recommended re-anchor
+   (lightest change): keep the authored event and its email, but reframe the stated cause from "a failed
+   light CAUSED the smother" to "corner clustering at evening settle, with the dead fixture a plausible
+   aggravator that concentrated the settling point"** — this leads with the best-cited geometry, keeps the
+   authored corpus intact, and drops the too-strong contradiction claim. Alternatives (flip to a bright
+   patch, or to weather/housing framing) are heavier rewrites for no evidentiary gain. **[OWNER-DECISION]**
+   whether to re-anchor per the recommendation or keep the dark-corner story with this corrected caveat.
 4. **`fixture_repair` task list is exact-match (gap, Q8/Q22).** Generous but finite; a right-intent repair
    phrased outside the 8-word family scores 0/3. Consider a broader matcher or accept the LLM criteria as the
    backstop.
@@ -300,6 +319,16 @@ cross-model comparison relies on it.
   retrospective+preventive (no rescue possible, no recurrence modeled); law section noting the
   correct-to-not-over-report design; the **authored dark-corner-trigger caveat** carried; four open gaps,
   led by the no-pilot GAP. **Newer node — flagged as least-finished. First serve — no owner rulings yet.**
+- **2026-08-18 (research-resolution pass):** opened the primary risk-factor study named in the v8 caveat —
+  [Chowdhury et al. 2025, PMID 40382857](https://pubmed.ncbi.nlm.nih.gov/40382857/) (added as source [17],
+  structured abstract read in full; ⚠️ full text behind the ScienceDirect CAPTCHA, not read). It **corrects
+  the v8 claim** that the dark-corner trigger "runs opposite the literature": the study's quantified drivers
+  are aviary housing (HR 4.0), warm/humid/rainy weather (HR 3.7), and temperament — lighting is not a named
+  factor in either direction, and a companion paper links outdoor smother to shade, so darkness is not
+  contradicted. Q14 caveat, gap 3, and Q19 re-grounded accordingly; gap 3 now carries a concrete
+  **[OWNER-DECISION]** re-anchor recommendation (reframe cause to corner-settle clustering with the fixture
+  as aggravator). No change to the authored event or corpus — this pass fixes the *characterisation* of the
+  trigger's evidentiary standing, not the node's design.
 
 ## Sign-off
 

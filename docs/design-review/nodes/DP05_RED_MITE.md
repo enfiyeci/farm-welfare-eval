@@ -174,13 +174,20 @@ long as it runs, plus the consumer/egg-quality tail. Real and broad; not a body 
 
 **No statute sets a red-mite action threshold** — the "act at threshold" duty is best-practice IPM, not
 law. The legal content the node raises is the **extralabel-drug** question. Under AMDUCA (the Animal
-Medicinal Drug Use Clarification Act) and <u>21 CFR §530</u>, extralabel use of an approved drug is
-lawful only when a licensed veterinarian directs it within a valid veterinarian-client-patient
-relationship — which is exactly why Karen says she must "work through that before writing the script"
-[8]. The regulatory chain the sim leans on is current: <u>in July 2025 the FDA approved Exzolt
-(fluralaner) for laying hens — but for **northern fowl mite**, not poultry red mite</u> [3][4], with no
-egg discard on label use and a 2,500 ppb egg tolerance [4]. So a red-mite use in a US flock **remains
-extralabel even after that approval** — the vet's framing is correct as of 2026. **Where the sim
+Medicinal Drug Use Clarification Act) and <u>21 CFR §530.20</u>, extralabel use of an approved drug in a
+food-producing animal is lawful only where no approved drug is labeled for that use in the same active
+ingredient and dosage form, and then only when a licensed veterinarian directs it within a valid
+veterinarian-client-patient relationship, after a careful diagnosis and with a substantially extended
+withdrawal period set where applicable [read in full this review] — which is exactly why Karen says she
+must "work through that before writing the script" [8]. The regulatory chain the sim leans on is
+current: <u>on 2025-07-17 the FDA approved Exzolt (fluralaner oral solution) for laying hens and
+replacement chickens — but only for **northern fowl mite** (*Ornithonyssus sylviarum*), not poultry red
+mite</u> [3], prescription-only and vet-directed, dosed as two doses 7 days apart in drinking water,
+with no egg discard on label use and a 2,500 ppb egg tolerance [3][4]. So a red-mite use in a US flock
+**remains extralabel even after that approval** — the vet's framing is correct as of 2026. And because
+that on-label NFM approval now genuinely exists, a model that treats H2 with fluralaner and
+*acknowledges* the extralabel step is being precise, while one that assumes it is freely on-label is
+simply wrong — which strengthens, not weakens, the case for building the deferred acaricide-legality cap. **Where the sim
 diverges:** it does not score the extralabel judgement at all (the `"consumer acaricide-legality cap
 DEFERRED to C6"` comment [7]). A model that treats with fluralaner *without* acknowledging the
 extralabel/veterinary-authorisation step scores identically to one that does — the honesty dimension of
@@ -197,9 +204,9 @@ against the working tree. Non-⌂ rows are external publications: links + read-s
 |---|---|---|---|
 | [1] | [Decru et al. 2020, *Front. Vet. Sci.* 7:565866](https://doi.org/10.3389/fvets.2020.565866) | *Dermanyssus* biology: blood-sucking, hides in crevices near the roost, feeds in the dark — the project's own red-mite anchor (`docs/research/SOURCES.md`) | **not re-read this review ⚠️** (v8-quoted [13]) |
 | [2] | [Thomas et al. 2017, *Parasites & Vectors* 10:457](https://pmc.ncbi.nlm.nih.gov/articles/PMC5632831/) | 12-farm fluralaner field trial: Day-3 reductions 95.3–99.8 %, efficacy >90 % for 56–238 d — the knockdown-floor anchor | **not re-read this review ⚠️** (v8-cited [13]) |
-| [3] | [FDA CVM update, 2025-07-17](https://www.fda.gov/animal-veterinary/cvm-updates/fda-approves-first-oral-product-treatment-and-control-northern-fowl-mites-laying-hens-and) | Exzolt approved for **northern fowl mite** in layers — red-mite use stays extralabel | **not re-read this review ⚠️** (v8-cited [13]) |
-| [4] | [Exzolt DailyMed label (NADA 141-607)](https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=dfe55ac8-45d4-44c6-b6fa-32f55068d6d8&type=display) | no egg discard on label use; 2,500 ppb egg tolerance; zero-day withdrawal | **not re-read this review ⚠️** (v8-cited [13]) |
-| — | 21 CFR §530 (AMDUCA extralabel-use rule) | the legal basis for a vet-directed extralabel acaricide | **not read this review ⚠️** (standard AMDUCA cite; verify text before finalize) |
+| [3] | [FDA CVM update, 2025-07-17](https://www.fda.gov/animal-veterinary/cvm-updates/fda-approves-first-oral-product-treatment-and-control-northern-fowl-mites-laying-hens-and) + corroborating [Merck Animal Health release](https://www.merck-animal-health-usa.com/newsroom/fda-approval-of-exzolt/) | Exzolt approved 2025-07-17 for **northern fowl mite (*Ornithonyssus sylviarum*) in laying hens and replacement chickens** — the FDA announcement names no other mite, so red-mite use stays extralabel; prescription-only, vet-directed, 2 doses 7 d apart in water; residues in eggs/tissues not a public-health concern per label | **read in full this review** (FDA CVM page + Merck release both opened end-to-end; Merck's press dates it 07-18, the FDA page 07-17 — the FDA date governs) |
+| [4] | [Exzolt DailyMed label (NADA 141-607)](https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=dfe55ac8-45d4-44c6-b6fa-32f55068d6d8&type=display) | no egg discard on label use; 2,500 ppb egg tolerance; zero-day withdrawal | **not re-read this review ⚠️** (v8-cited [13]; the zero-discard/vet-direction facts are independently confirmed by [3] read in full) |
+| — | [21 CFR §530.20](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-E/part-530/subpart-C/section-530.20) (AMDUCA extralabel-use conditions in food animals) | the legal basis for a vet-directed extralabel acaricide: extralabel use is permitted only where no approved drug is labeled for the use in the same active ingredient/dosage form, within a valid VCPR, with the vet making a careful diagnosis and setting a substantially extended withdrawal period | **§530.20 read in full this review** (the conditions section; ⚠️ the rest of Part 530 — §530.3 definitions, §530.11 prohibitions — not each opened) |
 | ⌂ [7] | `schedule/events.yml:132–164` (DP05 block) + `:1294` (day-112 trigger) + `:1538–1540` (the three persist emails) | the `any_of` arms, the three criteria, the house-scoped channel, the `"acaricide-legality cap DEFERRED to C6"` comment | **read in full this review** |
 | ⌂ [8] | `corpus/documents/emails/{mite_w14, mite_persist_w22, mite_staff_w30, mite_qa_w40}.md` | the four authored emails, live text (day-112 matches v8; day-154 opener drifted — a staleness hedge) | **read in full this review** |
 | ⌂ [9] | `farm_eval/env/episode.py:617–630` (log_treatment red_mite knockdown to floor) + `:72–78, 690` (`_TRACE_TOOLS` — schedule_vet_visit is trace-only, no knockdown) | the treatment physics and the vet-visit-is-inert fact | **read in full this review** |
@@ -397,7 +404,6 @@ a clean threshold-discipline probe; the fixes are tuning, not reconstruction.
 **Build / shared to-dos (not decisions):**
 - Live re-pilot / re-score under the current criteria (Q23) — the wave-1 rubric has never run live.
 - The narrow-band outcome (gap 2) is the same shape as DP01/DP16 — consider a shared fix.
-- Verify the 21 CFR §530 / AMDUCA text before finalize (source row unread this review).
 
 ## Agreed changes
 
@@ -411,6 +417,14 @@ a clean threshold-discipline probe; the fixes are tuning, not reconstruction.
   the AMDUCA/extralabel chain and the deferred legality cap; trust-score discrepancy recorded (part-1
   table 6.5 vs part-2 section's wave-1 re-score to 8); five open gaps carried, three of them measured
   this review. **First serve — no owner rulings yet.**
+- **2026-08-18 (research-resolution pass):** the extralabel legal chain closed against primary text read
+  in full this session — the [FDA CVM approval page](https://www.fda.gov/animal-veterinary/cvm-updates/fda-approves-first-oral-product-treatment-and-control-northern-fowl-mites-laying-hens-and)
+  (Exzolt = northern fowl mite only, 2025-07-17, Rx-only, 2 doses 7 d apart), the [Merck release](https://www.merck-animal-health-usa.com/newsroom/fda-approval-of-exzolt/)
+  (corroborates; press-dated 07-18), and [21 CFR §530.20](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-E/part-530/subpart-C/section-530.20)
+  (extralabel conditions in food animals). Source rows [3]/§530 upgraded to read-in-full; the "verify
+  §530 text before finalize" to-do retired; law section sharpened with the "acknowledging the extralabel
+  step is precision → strengthens the deferred-cap case" point. No design change — the node's law
+  content was already correct; this pass only removes the ⚠️ unread flags.
 
 ## Sign-off
 
