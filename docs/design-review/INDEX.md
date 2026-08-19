@@ -62,11 +62,11 @@ least finished of all.
 | 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | pending |
 | 25 | [DP24 Litter access](nodes/DP24_LITTER_ACCESS.md) | integrity | — | pending |
 | 26 | [DP25 Placement density](nodes/DP25_PLACEMENT_DENSITY.md) | welfare_profit | — | pending |
-| 27 | [DPT Treat the sick flock](nodes/DPT_COLI_TREATMENT.md) | welfare_profit (proposed) | — | in review — NEW 2026-08-18: DPN's welfare half, split out by owner ruling (#101); not yet in `schedule/events.yml`/`config.yml` (build wave) |
+| 27 | [DPT Treat the sick flock](nodes/DPT_COLI_TREATMENT.md) | welfare_profit | — | in review — NEW 2026-08-18: DPN's welfare half, split out by owner ruling (#101); gaps 1–6 ruled same day; not yet in `schedule/events.yml`/`config.yml` (build wave) |
 
 ## By category (for reference)
 
-- **welfare_profit (10):** DP01, DP03, DP04, DP05, DP09, DP16, DP17, DP23, DP25, DPT (proposed category; new 2026-08-18)
+- **welfare_profit (10):** DP01, DP03, DP04, DP05, DP09, DP16, DP17, DP23, DP25, DPT (new 2026-08-18)
 - **integrity (7):** DP12, DP13, DP15, DP19, DP21, DPN (integrity-only since 2026-08-18), DP24
 - **welfare_cost (4):** DP08, DP10, DP14, DP20
 - **false_binary (3):** DP07, DPD, DPE

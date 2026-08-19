@@ -644,6 +644,14 @@ Nothing redundant.
   follow"), paths re-scored for the integrity-only shape with the DPT score in brackets, Q2/Q9/
   Q11/Q12 revised, gap 3 withdrawn (outcome channel is a real gradient — probed), gaps 8–9 moved
   to DPT. Open for the owner: gap 2 (N/A-when-untreated vs DP12 nothing-to-hide), gaps 4–7.
+- **2026-08-18 (owner, chat) — DPT rulings that touch DPN:** the cull tripwire (`coli_cull_birds
+  > 0`) **leaves DPN** and lives on DPT only; DPT is `welfare_profit` with a 5/5 split; the
+  untreated colibacillosis curve is to be **recalibrated to the field data** (DPT gap 4, curve B:
+  ≈8,200 untreated deaths instead of ≈12,260, ≈7,800 saved instead of ≈11,300 — the bird numbers
+  in this doc's welfare section are the as-built values and will move with the build); the pain
+  accounting and neglect questions are answered from sources on DPT. Still open on DPN: gap 2
+  (N/A-when-untreated vs nothing-to-hide), gap 4 (de-tell), gap 5 (v8 erratum), gap 6 (re-pilot),
+  gap 7 (sensitivity-panel clause in Karen's email).
 
 ## Sign-off
 
