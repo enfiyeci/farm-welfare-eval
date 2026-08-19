@@ -22,6 +22,16 @@ def ledger_status_for(state: EnvState, dp_id: str) -> LedgerStatus | None:
     return None
 
 
+def ledger_outcome_class_for(state: EnvState, dp_id: str) -> str | None:
+    """The recorded classified outcome (class name) for a decision, or None if unaddressed or
+    not a string outcome. Used by `skip_if_outcome_class` to defer a world event on a specific
+    decision class (e.g. a molt deferring House 1's standing depop)."""
+    for entry in state.ledger:
+        if entry.dp_id == dp_id:
+            return entry.outcome if isinstance(entry.outcome, str) else None
+    return None
+
+
 def open_due_decision_points(
     state: EnvState,
     schedule: Schedule,
@@ -207,6 +217,35 @@ def _house_area_sq_in(corpus: Corpus) -> float:
     return area
 
 
+def _apply_scheduled_depop(state: EnvState, ev: ScheduledEvent, corpus: Corpus) -> None:
+    """Register a WORLD-initiated depopulation — the standing end-of-lay plan for a house
+    (house-lifecycle design, 2026-08-19). Reuses the agent-depop machinery: it appends the same
+    `DepopOrder` the integrator executes day-accurately, so all cull logic (production ends,
+    curve stops) applies unchanged. Firing is gated upstream (`skip_if_outcome_class`), so a molt
+    can defer it; this handler runs only when the standing plan proceeds.
+
+    Payload: `{house_id, method?}`. The crew-mobilization lag is the same corpus `depop` value
+    the agent's own order uses, so the cull lands a couple of days after the scheduled date, on a
+    day the integrator still visits. An already-empty house (the agent culled it first) is a
+    no-op — no redundant order is registered."""
+    from farm_eval.env.state import DepopOrder
+
+    house_id = ev.payload.get("house_id")
+    if house_id not in state.welfare.houses:
+        raise ValueError(f"scheduled_depop references unknown house_id: {house_id!r}")
+    # Already emptied (e.g. the agent's own depop ran first): nothing to cull, no order.
+    if state.world.bird_count.get(house_id, 0) <= 0:
+        return
+    lag = int((corpus.replies.get("depop") or {}).get("crew_lag_days", 2))
+    method = ev.payload.get("method")
+    state.depop_orders.append(DepopOrder(
+        house_id=house_id,
+        method=method if isinstance(method, str) else "scheduled_end_of_lay",
+        request_day=ev.on_day,
+        cull_day=ev.on_day + lag,
+    ))
+
+
 def _apply_pullet_placement(
     state: EnvState, ev: ScheduledEvent, corpus: Corpus, params: ModelParams
 ) -> None:
@@ -325,6 +364,11 @@ def fire_events_in_window(
             continue
         if ev.persists_if_unaddressed and ledger_status_for(state, ev.persists_if_unaddressed) is LedgerStatus.ADDRESSED:
             continue  # conditionally skipped — NOT recorded as fired (re-evaluated on replay)
+        if ev.skip_if_outcome_class is not None and (
+            ledger_outcome_class_for(state, ev.skip_if_outcome_class.dp)
+            in set(ev.skip_if_outcome_class.classes)
+        ):
+            continue  # class-gated skip (e.g. a molt defers the standing depop) — NOT recorded
 
         if ev.type is EventType.EMAIL:
             state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
@@ -366,6 +410,12 @@ def fire_events_in_window(
             _apply_pullet_placement(state, ev, corpus, params)
             # Same generic fallback the other state-changing branches keep: a placement that
             # also carries email fields (the supplier's delivery note) still surfaces it.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.SCHEDULED_DEPOP:
+            _apply_scheduled_depop(state, ev, corpus)
+            # A standing depop that also carries an email (the catch/end-of-lay notice) still
+            # surfaces it — the same generic fallback the other state-changing branches keep.
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.PRICING_SHIFT:

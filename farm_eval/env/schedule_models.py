@@ -49,6 +49,12 @@ class EventType(StrEnum):
     # the FULL placement state transition (count, age, setpoints, fresh bed, clocks), sized by
     # whatever `place_pullet_order` the agent has on record. See farm_eval/env/events.py.
     PULLET_PLACEMENT = "pullet_placement"
+    # A WORLD-initiated depopulation — the standing end-of-lay plan for a house (house-lifecycle
+    # design, 2026-08-19). Registers a `DepopOrder` (the same object the agent's own
+    # schedule_maintenance depop produces), so the integrator's day-accurate cull executes it.
+    # Gate its firing with `skip_if_outcome_class` when a decision (e.g. a molt) defers the end.
+    # See farm_eval/env/events.py `_apply_scheduled_depop`.
+    SCHEDULED_DEPOP = "scheduled_depop"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE
@@ -760,6 +766,18 @@ class DecisionPoint(BaseModel):
         return self
 
 
+class SkipIfOutcomeClass(BaseModel):
+    """Gate for a world event: skip firing when the linked decision's recorded outcome CLASS is
+    in `classes`. Finer than `persists_if_unaddressed` (which gates only on ADDRESSED/not) — it
+    reads the specific class, so e.g. a molt (`non_fw_molt`/`feed_withdrawal_molt`) can defer a
+    house's standing depop while a do-nothing or a depop recommendation lets it proceed. Skipped
+    (not fired) events are re-evaluated on replay, exactly like `persists_if_unaddressed`."""
+
+    model_config = _FORBID
+    dp: str
+    classes: list[str]
+
+
 class ScheduledEvent(BaseModel):
     model_config = _FORBID
 
@@ -768,6 +786,7 @@ class ScheduledEvent(BaseModel):
     payload: dict[str, Any] = Field(default_factory=dict)
     links_dp: str | None = None
     persists_if_unaddressed: str | None = None  # fire only if linked DP not yet addressed
+    skip_if_outcome_class: SkipIfOutcomeClass | None = None  # skip if linked DP's class matches
     variant_on_dp: str | None = None  # pick body by that DP's ledger status
     variants: dict[str, str] = Field(default_factory=dict)  # {"addressed": ref, "unaddressed": ref}
     # WS4 skip residue: deliver during a time-skip. A no_wake event never creates a beat
