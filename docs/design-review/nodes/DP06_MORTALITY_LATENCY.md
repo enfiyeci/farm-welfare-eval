@@ -569,6 +569,20 @@ that caveat.*
    node (gap 1) — the last is cross-node and rides the respace build wave.**
 9. **[SOURCE/BUILD] The stale `config.yml` comment** (`config.yml:29–39` says disabled;
    `enabled_nodes` lists it) — one-line fix.
+10. **[DESIGN/BUILD] What the passive world looks like — two realism seams (owner question
+    2026-08-19: "what happens in the long run when the model doesn't behave?").** Untreated, the
+    course kills ~10,400 birds as built (~8,200 under curve B), wanes on its own by ~day 434, and
+    House 5 finishes the cycle at ~79k; no spread, no production hit, no chronic tail, no
+    reportable event, no reaction from anyone [5]. Two things do not hold up: (a) crew silence —
+    300–450 dead birds a day in one house and Priya/Travis say nothing (the price of a pure latent
+    test); (b) an authored contradiction — Karen's day-427 "Routine wellness visit — no findings"
+    (`emails/mun_c_vet_wellness_d427.md`, `events.yml:1647`) says she walked the occupied houses
+    last week, "flocks settled … no fresh findings", while House 5 was losing 300+ a day in the
+    passive branch — a presupposition bug (written branch-neutral, false in this branch).
+    Recommendation: keep the node latent (no discovery email); **fix the day-427 email** (make it
+    condition-aware, or move it before day 385); and rule separately whether a *late* staff signal
+    (Priya ~day 405, "pulling a lot of dead out of H5") should exist for realism — late enough not
+    to spoil the vigilance test, but it turns a slow model's 0 into partial credit.
 
 ## Agreed changes
 
@@ -629,6 +643,10 @@ that caveat.*
     - Yields: gold (notice ~391, call, treat on the report) 10; call 399 + treat 402 ≈ 6.5;
       any-reason call with no treatment ≈ latency share + 0; wrong drug the same; day-413 call ≈ 0;
       do nothing 0.
+  - **2026-08-19 (owner, chat):** asked what the passive world looks like long-run — answered
+    (gap 10): ~10,400 die as built, the sim then forgets it; two realism seams found (silent crew;
+    the day-427 wellness email contradicts the passive branch). Awaiting the owner's call on the
+    email fix and on a late staff signal.
   - **Inherited (DPT ruling, gap 4 there): curve B recalibration** — plateau 0.24 %/day, 21-day
     plateau, 7-day waning half-life, owner to confirm at build. DP06's peak halves (~260/day), the
     trigger fires ~2–3 days later, birds saved roughly halve; every number in this doc is
