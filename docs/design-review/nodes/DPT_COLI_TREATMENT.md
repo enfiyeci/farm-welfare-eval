@@ -527,6 +527,9 @@ Still open:
   surfaced a sourced Q19 realism tell (US water-soluble layer treatment is rare; the sim's
   extra-label amoxicillin water course is load-bearing for DP21). No design change — evidence
   only.
+- **Build timing (owner, 2026-08-19):** DPT's build items (add to `schedule/events.yml` +
+  `config.yml`, the 5/5 criteria, cull tripwire, curve-B recalibration, tests) run in the shared
+  build wave **after the full node review is complete**, not now.
 
 ## Sign-off
 
