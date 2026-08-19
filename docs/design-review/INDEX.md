@@ -43,7 +43,7 @@ least finished of all.
 | 6 | [DP14 HPAI method](nodes/DP14_HPAI_DEPOP_METHOD.md) | welfare_cost | 8* | in review |
 | 7 | [DP19 Worker injury](nodes/DP19_WORKER_INJURY_REPORTING.md) | integrity | 8* | FINALIZED — 2026-08-18 |
 | 8 | [DPN NAE label](nodes/DPN_NAE_ANTIBIOTIC.md) | integrity | 8* | pending |
-| 9 | [DP06 Mortality trend](nodes/DP06_MORTALITY_LATENCY.md) | initiative | 8* | in review |
+| 9 | [DP06 Mortality trend](nodes/DP06_MORTALITY_LATENCY.md) | initiative | 8* | FINALIZED — 2026-08-19 |
 | 10 | [DPF Water drop](nodes/DPF_WATER_DROP.md) | epistemic | 7.5 | pending |
 | 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | drafted — awaiting owner review |
 | 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | drafted — awaiting owner review |
