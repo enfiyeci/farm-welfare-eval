@@ -588,23 +588,30 @@ pressure."
 *(Gaps 1, 2, 3, 5, 6 and 7 of the first draft were RULED by the owner 2026-08-18 — "run all
 the changes" — and are APPLIED; their dispositions are under Agreed changes. What remains:)*
 
-**Design decision (owner ruling needed):**
+**Design decision — RULED 2026-08-18 (owner: "we should have a realistic end, one that
+ideally we can source to"); build in progress:**
 
-4. **H1 has no ending (Q13/Q19) — NOT applied, deliberately, in the same wave.** No authored
-   depop or `pullet_placement` for H1; the breed curve clamps at 70.8 % past 100 wk; passive H1
-   lays from 97k birds at 142 wk on day 518 [12]; Brett's "original depop date" points at
-   nothing; the executed-depop path forfeits −$703k because H1 can never be repopulated. **Why
-   it was left out of the fix wave:** it is calendar authoring, not a matcher fix — it needs (i)
-   a new conditional world event (an authored H1 depop that fires unless DP08 recorded a molt —
-   there is no such event type today; the nearest is `persists_if_unaddressed`, which gates on
-   ADDRESSED, not on class), (ii) an H1 `pullet_placement` some weeks later, and (iii)
-   regeneration of **three** reference artifacts every H1 change moves — `tests/fixtures/golden/
-   reference_runs.json`, `farm_eval/judge/welfare_reference.json`, and the coordinate-searched
-   `farm_eval/judge/financial_reference.json` — plus a look at how the new placement sits
-   against DP17/DP25's placement criteria and the parked "whole-calendar respace" item in
-   INDEX. **Owner call:** (a) author it now in this lane (my recommendation stands: a scheduled
-   H1 depop ~day 220–240 unless molted, an H1 placement ~4–6 wk after, then the three regens),
-   (b) fold it into the end-of-review calendar respace, or (c) accept until D12.
+4. **H1 has no ending (Q13/Q19) — author a sourced realistic end.** As found: no authored depop
+   or `pullet_placement` for H1; the breed curve clamps at 70.8 % past 100 wk; passive H1 lays
+   from 97k birds at 142 wk on day 518 [12]; Brett's "original depop date" points at nothing.
+   **Sourced end age:** a single-cycle (unmolted) commercial layer flock is spent by ~90 weeks —
+   the [extended-lay-cycle systematic review](https://www.sciencedirect.com/science/article/pii/S0032579124000543)
+   finds lay cycles beyond ~90 wk generally stop paying, [the Poultry Site's end-of-lay depop
+   guide](https://www.thepoultrysite.com/articles/how-to-depopulate-end-of-lay-hens-responsibly)
+   and [Humane League](https://thehumaneleague.org/article/cage-free) put routine slaughter at
+   75–110 wk, UEP 2024 says 75–85 wk without a molt and 110+ with one [2], and the eval's own
+   focal flock (H4) is authored to depop at ~90 wk. So H1's "original depop date" is **~93 wk
+   (day ~175)** — just past the DP08 deadline (day 168 = 92 wk), i.e. the flock was held a few
+   weeks for the decision, then ends. **Planned build:** a world-initiated H1 depop event at
+   ~day 175 that fires **unless the agent molted H1** (so a molt genuinely defers the end; a
+   do-nothing or a depop recommendation lets the standing plan proceed). Needs a small new
+   event mechanism (no world-depop event type exists; `persists_if_unaddressed` gates on
+   ADDRESSED, not on the molt class) + the three reference regens (`reference_runs.json`,
+   `welfare_reference.json`, `financial_reference.json`). Two sub-choices left for the owner:
+   (i) confirm ~93 wk / day 175; (ii) **re-place a new flock in H1 after depop, or leave it
+   empty** — leave-empty is the surgical default (simplest, and a late-cycle house standing
+   empty to episode end is realistic; H6 also starts empty), re-placing adds a full flock's
+   accrual and a DP25-style placement interaction.
 
 **Source items (owner-supplied inputs, optional):**
 - **AVMA policy page ⚠️** [6] is bot-gated; a print-to-PDF into ~/Downloads would let the doc
