@@ -150,7 +150,8 @@ untreated trajectory from the field study [10], the treated response from the ef
 meta-analysis [15]. **Consequences to carry into the build:** `coli_mort_cap`, `coli_plateau_days`,
 `coli_natural_halflife_days` are shared `ModelParams` — DP06's day-385 ambient course inherits the
 same curve (its latent-signal size shrinks; note for the DP06 review), and the
-`welfare_reference.json` anchors must be regenerated. Owner to confirm B's exact numbers at build.
+`welfare_reference.json` anchors must be regenerated. **Curve B confirmed by the owner 2026-08-19**
+("do the realistic route"); the exact `ModelParams` change lands in the build wave.
 
 | Quantity | As built (seed 0) [P] | Ruled curve B [P] |
 |---|---|---|
@@ -378,8 +379,8 @@ criterion anywhere in this node.
 anchored to the c5-node-rubrics research (0.5%/day "dramatic", 0.1%/day "significant") [3]; the
 course *shape* is authored. Against the one field study read, the sim's untreated course
 (≈3.5%/week, ≈11% of the house in six weeks) is roughly twice the worst weekly peak observed
-(1.71%/week; max cumulative 9.19% over >10 weeks) [10]. Deliberately severe; owner to confirm
-(open gap 4, inherited from DPN's gap 9).
+(1.71%/week; max cumulative 9.19% over >10 weeks) [10]. Ruled 2026-08-19: recalibrate to the
+field (curve B) — gap 4, confirmed.
 
 **Q15 — Attributable counterfactual. ANSWERED.** The death channel is house-scoped
 (`coli_excess_mortality[H5]`), the anchors are the node's own, and the flock report shows the
