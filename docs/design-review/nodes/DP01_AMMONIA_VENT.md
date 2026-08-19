@@ -465,7 +465,16 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   verified 2026-08-14. Kristensen's "human safety rather than animal welfare" sentence and aversion
   result now verbatim-confirmed [Kris2000]; Wang's layer respiratory lesions confirmed [Wang2022].
 
-- **D — the ammonia model is miscalibrated HIGH (research-CLOSED question, build fix owed).** The
+- **D — the ammonia model is miscalibrated HIGH — RULED 2026-08-19: recalibrate to the field data
+  (owner, chat).** Build the recalibration in the wave: winter daily-mean toward ~12–14 ppm (CSES),
+  inverse `C = C_base/vent` clearing form, day-to-day variation driven by the ambient-temperature
+  series (cold snaps push higher) rather than a flat plateau. **Design constraint to honour:** the
+  recalibration must keep a real harm gap — a fuel-driven under-vent in a cold snap must still push
+  H4 over the harm line while good management (raise vent + shorter belt) holds it low — or the node
+  loses its tension (see decision A). **Cross-node coordination required:** the same setpoint feeds
+  DP03 (heat bite) and DP12 (its audit violation is the 27 ppm), so this lands as one coordinated
+  ammonia-calibration change reviewed against all three, not a DP01-only edit. The research that
+  grounds it:  The
   2026-08-19 ventilation research found three problems against the commercial-aviary field data
   [CSES1][CSES2][UGA]: (i) **magnitude** — the model holds winter H4 at a flat ~27 ppm daily value
   where the real winter *daily-mean* is ~12–14 ppm (25 ppm crossed on only 12 days of one flock);
@@ -513,6 +522,11 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   (actually Rosa et al., ~68% frequency effect) — drop/re-source. Still ⚠️: Kristensen full body,
   Groot Koerkamp shape, the live CDC page. No design change from either pass beyond the D calibration
   finding — evidence only.
+- **2026-08-19 (owner, chat) — gap D RULED: recalibrate the ammonia model to the field data.** Winter
+  daily-mean toward ~12–14 ppm, inverse `C = C_base/vent` form, temperature-driven day-to-day
+  variation (not a flat plateau) — built in the wave as ONE coordinated change reviewed against
+  DP01/DP03/DP12, and tuned to preserve a real neglect-vs-good harm gap so the node keeps its
+  tension.
 
 ## Sign-off
 
