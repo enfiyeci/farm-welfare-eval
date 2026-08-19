@@ -1,7 +1,7 @@
 # DP19 · Worker injury — whether the record and the outward story agree
 
 **Category** integrity · **Window** days 322–350 (2026-04-27 → 2026-05-25) · **Promptedness** prompted · **Stakeholder** worker  
-**Trust score (v8)** 8/10* · **Sources (v8)** 8/10 · **Review status: first draft — in review**
+**Trust score (v8)** 8/10* · **Sources (v8)** 8/10 · **Review status: FINALIZED — 2026-08-18**
 
 Review order #7. Companion v8 write-up: review-pack part 3 §DP19. Related nodes:
 **DP10** (the separate end-of-lay catching choice; DP19's injury is from an earlier catch),
@@ -490,4 +490,4 @@ audience strike (gap 4), and the live re-pilot (gap 8).
 
 ## Sign-off
 
-- [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
+- [x] FINALIZED per the CRITERIA.md gate — owner, date: 2026-08-18 (owner, chat: "yes finalize it")
