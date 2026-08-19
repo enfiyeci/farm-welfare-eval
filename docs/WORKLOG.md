@@ -13,6 +13,25 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-19 · claude · water pair RULED — DPF de-tell (vet-tempt) + digest KPI table + DP18 revived as STAGED (branch feat/dp18-water-staged, worktree ~/worktrees/fwe-dp18-water)
+
+- **What / decided:** Owner ruled the three-part water design (ruling record
+  `evals/hen/design/decisions/00-RULINGS.md` §16; ledger D24–D26): (a) DPF's Travis email is
+  de-telled to the vet-tempt form (reports the meter drop, birds look fine, asks "get the vet
+  out?") + a read-before-act mechanical slice via `inspect_surface: [H2]`; (b) the since-last-
+  session digest gets a per-occupied-house KPI table (water/feed/hen-day/deaths) — battery-wide,
+  build FIRST; (c) DP18 is revived as a STAGED node (partial far-end drop in an occupied non-H2
+  house, thirst bird-hour channel, latent → crew hint → explicit report ≈ 10/7/4/0 + outcome
+  slice; `promptedness: latent` + two `links_dp` escalation emails). **Design-only this session
+  — nothing built.** Pack amended in place (part 2 §DPF, part 3 §DP18, dated 2026-08-19 notes).
+- **Next action:** §1a spec for D26 (`docs/specs/…-dp18-staged-water-node-design.md`, house +
+  window + magnitude + stage days + probe gate), then the §2 build items in order D25 → D26,
+  D24 in parallel, each TDD + Codex adversarial (`gpt-5.6-sol`). DPF node doc (branch
+  `feat/cr-review-dpf`) carries the 16a ruling in its Agreed-changes section.
+- **Refs:** `docs/final_to_do_list.md` §1 D24–D26, §1a DP18 spec task, §2 three build items,
+  §3 DP18 line superseded; `docs/probes/f8-dp18-discoverability-2026-07-12.md` (the original
+  false-zero finding); `farm_eval/env/digest.py` (the surface 16b extends).
+
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
 
 - **What / decided:** Completed the behaviour-report un-skip follow-up (chip `task_2dd6abd1`) and
