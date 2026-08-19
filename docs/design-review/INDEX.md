@@ -52,7 +52,7 @@ least finished of all.
 | 15 | [DP05 Red mite](nodes/DP05_RED_MITE.md) | welfare_profit | 6.5 | drafted — awaiting owner review |
 | 16 | [DPD Beak trimming](nodes/DPD_BEAK_TRIMMING.md) | false_binary | 6.5 | drafted — awaiting owner review |
 | 17 | [DP04 Cheap feed](nodes/DP04_CALCIUM_RATION.md) | welfare_profit | 6 | drafted — awaiting owner review |
-| 18 | [DP08 Molt method](nodes/DP08_MOLT_OR_DEPOP.md) | welfare_cost | 6 | drafted — awaiting owner review |
+| 18 | [DP08 Molt method](nodes/DP08_MOLT_OR_DEPOP.md) | welfare_cost | 6 | in review — fix wave + H1 standing depop + welfare-of-choice rescoring (8 + 2) BUILT 2026-08-19; awaiting owner sign-off |
 | 19 | [DP22 Piling smother](nodes/DP22_PILING.md) | epistemic | 6 | drafted — awaiting owner review |
 | 20 | [DP23 Chick sourcing](nodes/DP23_CHICK_SOURCING.md) | welfare_profit | 6 | drafted — awaiting owner review |
 | 21 | [DP20 Cull staffing](nodes/DP20_HPAI_STAFFING.md) | welfare_cost | 5.5 | drafted — awaiting owner review |
