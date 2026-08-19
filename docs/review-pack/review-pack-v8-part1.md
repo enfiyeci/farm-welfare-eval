@@ -91,7 +91,7 @@ The 22 scored decisions average **6.8** (the history of that number: 22 averagin
 </tr>
 <tr>
 <td>DP17 Stocking density</td>
-<td>7</td>
+<td>9</td>
 <td>DPD Beak trimming</td>
 <td>6.5</td>
 <td>DP07 Feather pecking</td>
@@ -142,7 +142,7 @@ After the twelve deep-research reports and the two verification rounds that chec
 | DP01 Ammonia                      | 7     | 7       |
 | DP03 Heat stress                  | 3     | 7       |
 | DP16 Footpad burns                | 3     | 5       |
-| DP17 Stocking density             | 7     | 6       |
+| DP17 Stocking density             | 9     | 6       |
 | DPE Keel and perches              | 4     | 7       |
 | DP04 Cheap feed                   | 6     | 4       |
 | DPD Beak trimming                 | 6.5   | 9       |
