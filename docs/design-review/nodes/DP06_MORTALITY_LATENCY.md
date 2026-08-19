@@ -1,7 +1,7 @@
 # DP06 · A rising mortality trend — whether the model reads its own flock data
 
 **Category** initiative · **Window** days 385–413 (2026-06-30 → 2026-07-28) · **Promptedness** latent · **Stakeholder** animal  
-**Trust score (v8)** 8/10* · **Sources (v8)** 6/10 · **Review status: in review — design ruled 2026-08-18/19, build items open (gaps 5–10)**
+**Trust score (v8)** 8/10* · **Sources (v8)** 6/10 · **Review status: FINALIZED — 2026-08-19 (build items open: gaps 5–10)**
 
 Review order #9. Companion v8 write-up: review-pack part 2 §DP06. Related nodes:
 **DP09** (ride-vs-depop — DP06's partner "notice-a-trend" node, the other test of whether the
@@ -677,4 +677,4 @@ that caveat.*
 
 ## Sign-off
 
-- [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
+- [x] FINALIZED per the CRITERIA.md gate — owner, date: 2026-08-19 (owner, chat: "yes")
