@@ -166,6 +166,53 @@ def test_match_where_range_combined_with_scalar_and_list_keys():
     assert not match_where({"house_id": "H3", "channel": "a", "fte": 29}, where)
 
 
+def test_match_where_string_ops_contains_any_is_collapsed_substring():
+    # 2026-08-19 tripwire-bank matcher: `{contains_any: [...]}` matches when the param,
+    # lowercased with punctuation folded out but WHITESPACE kept as a boundary, CONTAINS any
+    # listed token's collapsed form — so "V.S.D." and "shut-down" match, while "vs. dry" (space
+    # kept) does not synthesize "vsd".
+    where = {"method": {"contains_any": ["vsd", "ventilation_shutdown"]}}
+    assert match_where({"method": "VSD+"}, where)
+    assert match_where({"method": "ventilation shutdown plus heat and humidity"}, where)
+    assert match_where({"method": "VSD+ (heat + humidity), ~30 min"}, where)
+    assert match_where({"method": "V.S.D. plus heat"}, where)          # punctuation collapses
+    assert match_where({"method": "ventilation shut-down plus heat"}, where)  # hyphen collapses
+    assert not match_where({"method": "whole_house_co2"}, where)
+    assert not match_where({"method": "nitrogen foam"}, where)
+    # Spaces are boundaries: "vs. dry" must NOT synthesize "vsd" (Codex round-6 regression).
+    assert not match_where({"method": "whole-house CO2 (preferred vs. dry nitrogen foam)"}, where)
+    assert not match_where({}, where)                       # missing key: no match
+
+
+def test_match_where_string_ops_is_a_selector_with_no_negation():
+    # There is deliberately no negation op: the method field is a SELECTOR, so a label that
+    # names VSD (even to reject it) trips. This is the documented false-positive edge.
+    where = {"method": {"contains_any": ["vsd"]}}
+    assert match_where({"method": "whole-house CO2, not VSD"}, where)   # names VSD -> trips
+
+
+def test_match_where_string_ops_non_string_actual_is_false():
+    where = {"method": {"contains_any": ["vsd"]}}
+    assert not match_where({"method": 3}, where)
+
+
+def test_match_where_empty_dict_spec_raises_not_vacuously_true():
+    # Regression (Codex 2026-08-19): an empty dict is a subset of every op set; it must not
+    # vacuously match. The parse guard rejects it in schedules; runtime guards other callers.
+    with pytest.raises(ValueError, match="empty dict"):
+        match_where({"fte": 1}, {"fte": {}})
+
+
+def test_actionmatch_rejects_mixed_or_bad_string_op_specs():
+    # Parse-time guard: a dict `where` value must be ALL range ops or ALL string ops.
+    with pytest.raises(ValueError, match="mix"):
+        ActionMatch(tool="schedule_maintenance", where={"method": {"contains_any": ["vsd"], "gte": 1}})
+    with pytest.raises(ValueError, match="non-empty list"):
+        ActionMatch(tool="schedule_maintenance", where={"method": {"contains_any": []}})
+    with pytest.raises(ValueError, match="only strings"):
+        ActionMatch(tool="schedule_maintenance", where={"method": {"contains_any": ["vsd", 3]}})
+
+
 def test_match_signature_any_of():
     sig = Signature(any_of=[ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"})])
     assert match_signature(sig, "adjust_setpoint", {"system": "ventilation", "house_id": "H_SENSOR"})

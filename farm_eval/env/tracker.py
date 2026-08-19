@@ -22,6 +22,7 @@ from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
 from farm_eval.env.schedule_models import (
     RANGE_OP_KEYS,
+    STRING_OP_KEYS,
     ActionMatch,
     AnyOfMatch,
     ClassMatch,
@@ -37,6 +38,18 @@ TRANSIENT_BEFORE_WINDOW_DAYS = 14
 
 
 _NORMALIZE_RUN = re.compile(r"[^a-z0-9]+")
+# For collapsed-substring matching (STRING_OP_KEYS): whitespace and underscores are TOKEN
+# BOUNDARIES (mapped to a single space), every OTHER non-alphanumeric char is intra-token
+# punctuation and is dropped. So "V.S.D." -> "vsd" and "shut-down" -> "shutdown" (punctuation
+# joins), while "vs. dry" -> "vs dry" (the space keeps `vsd` from forming across the boundary).
+_COLLAPSE_DROP = re.compile(r"[^a-z0-9\s]+")
+_COLLAPSE_SPACE = re.compile(r"[\s_]+")
+
+
+def _collapse_for_contains(value: str) -> str:
+    lowered = value.lower()
+    boundaries = _COLLAPSE_SPACE.sub(" ", lowered)   # whitespace/underscore runs -> one space
+    return _COLLAPSE_DROP.sub("", boundaries).strip()  # drop other punctuation (keep spaces)
 
 
 def _normalize_string(value: str) -> str:
@@ -82,31 +95,57 @@ def match_where(params: dict, where: dict) -> bool:
     # (scalar or list-member) are compared on their normalized form (_normalize_string) on
     # BOTH sides, so case/punctuation/spacing variants of the same term match; non-string
     # values are compared with plain `==` (no coercion).
-    # A `where` VALUE given as a DICT is a numeric-range comparison spec, e.g.
-    # `{fte: {gte: 30}}` or `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold).
-    # Allowed op keys: gte/lte/gt/lt (RANGE_OP_KEYS); an unknown op key raises (fail-loud,
-    # never silently False) — but note the raise only fires when the param key is PRESENT in
-    # the recorded call: an absent key returns False via the outer `key in params` gate before
-    # any op is checked. Schedule typos are therefore caught statically instead, by
-    # ActionMatch's parse-time range-spec validator (schedule_models.py); the raise here is
-    # belt-and-suspenders for non-schedule callers. A non-numeric actual value (bool included)
-    # is a non-match, not an error.
+    # A `where` VALUE given as a DICT is EITHER a numeric-range comparison spec, e.g.
+    # `{fte: {gte: 30}}` or `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold;
+    # op keys gte/lte/gt/lt = RANGE_OP_KEYS), OR a collapsed-substring spec `{contains_any: [...]}`
+    # (STRING_OP_KEYS) — the tripwire-bank matcher: matches when the param, reduced to bare
+    # alphanumerics, CONTAINS any listed token's collapsed form. An unknown / mixed op key, or an
+    # empty dict, raises (fail-loud, never silently True/False) — but the raise only fires when
+    # the param key is PRESENT in the recorded call: an absent key returns False via the outer
+    # `key in params` gate before any op is checked. Schedule typos are caught statically instead
+    # by ActionMatch's parse-time validator (schedule_models.py); the raise here is
+    # belt-and-suspenders for non-schedule callers. A non-numeric actual for a range spec, or a
+    # non-string actual for a string-op spec, is a non-match, not an error.
     def _equal(actual: object, expected: object) -> bool:
         if isinstance(actual, str) and isinstance(expected, str):
             return _normalize_string(actual) == _normalize_string(expected)
         return bool(actual == expected)
 
     def _matches_range(actual: object, spec: dict) -> bool:
-        unknown = set(spec) - set(_RANGE_OPS)
-        if unknown:
-            raise ValueError(f"match_where: unknown range op(s) {sorted(unknown)!r} in {spec!r}")
         if not _is_numeric(actual):
             return False
         return all(_RANGE_OPS[op](actual, bound) for op, bound in spec.items())
 
+    def _matches_string_ops(actual: object, spec: dict) -> bool:
+        # `contains_any`: the collapsed param CONTAINS at least one listed token's collapsed
+        # form (`_collapse_for_contains` keeps spaces as boundaries, so "vs. dry" cannot
+        # synthesize "vsd"). No negation op — the field is a method selector (see STRING_OP_KEYS).
+        if not isinstance(actual, str):
+            return False
+        collapsed = _collapse_for_contains(actual)
+        include = spec.get("contains_any")
+        if include is not None and not any(_collapse_for_contains(s) in collapsed for s in include):
+            return False
+        return True
+
+    def _matches_dict(actual: object, spec: dict) -> bool:
+        keys = set(spec)
+        if not keys:
+            # Empty dict: subset of every op set, so it would vacuously match. The parse guard
+            # rejects it in schedules; guard non-schedule callers here too (no silent match).
+            raise ValueError("match_where: empty dict spec {} is not a valid matcher")
+        if keys <= RANGE_OP_KEYS:
+            return _matches_range(actual, spec)
+        if keys <= STRING_OP_KEYS:
+            return _matches_string_ops(actual, spec)
+        raise ValueError(
+            f"match_where: dict spec {spec!r} mixes/misspells op keys — must be all range ops "
+            f"{sorted(RANGE_OP_KEYS)} or all string ops {sorted(STRING_OP_KEYS)}"
+        )
+
     def _matches(actual: object, expected: object) -> bool:
         if isinstance(expected, dict):
-            return _matches_range(actual, expected)
+            return _matches_dict(actual, expected)
         if isinstance(expected, list):
             return any(_equal(actual, item) for item in expected)
         return _equal(actual, expected)

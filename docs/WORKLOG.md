@@ -25,8 +25,13 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   tripwire class declared after an ordinary class can still escalate. Scoring-only: no
   reference regen. Tier-2 Codex pass (gpt-5.6-sol): REVISE → REVISE → APPROVED, all findings
   fixed or recorded won't-fix (exact banks, not substring, for tripwires). Suite 2220/3 skip.
-- **Next action:** owner sign-off on the DP08 node doc (serve via claude-review); owner call on
-  whether tripwire banks should get a prefix/substring `where` op (cross-node); the H1-refill
+- **Follow-up (owner ruled 2026-08-19):** tripwire method matchers converted from exact banks
+  to a **collapsed-substring** `where` op (`{contains_any: [...]}`, new in
+  `farm_eval/env/schedule_models.py` + `tracker.py`) — shared verbatim by DP08 `cruel_depop` and
+  DP14 `vsd_plus`. The `method` field is a selector (no negation op). Codex re-review REVISE×2 →
+  APPROVED (round 7). Cross-tool note: any future tripwire that classifies a free-text arg can
+  reuse this op.
+- **Next action:** owner sign-off on the DP08 node doc (serve via claude-review); the H1-refill
   density node (ruled: lost-revenue framing) and H2/H5 ends remain parked (INDEX q4); the
   review pack §DP08 is stale in six places — fold into the queued pack refresh.
 - **Refs:** `schedule/events.yml` DP08 block (:257–324) + DP14 bank (:509–512);
