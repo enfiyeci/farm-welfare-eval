@@ -117,6 +117,42 @@ least finished of all.
    at end of review; interacts with question 2 (more realistic idle-day texture) and the
    eval-awareness axis.
 
+4. **House lifecycle & repopulation realism (owner thread, 2026-08-19, DP08 review).** The
+   six houses have inconsistent, partly-unrealistic lifecycles; the owner wants a coherent
+   design. Pieces:
+   - **H1 must get a real END, then be REFILLED (empty makes no sense).** Today H1 lays to 142
+     wk (breed curve clamp) with no authored depop. Ruled: author a standing depop at ~93 wk
+     (~day 175) that fires unless the agent molted (sourced end age — see DP08 gap 4). Then
+     **refill** it — leaving it empty rejected. The refill should likely be **its own decision
+     node** (a second placement/density decision), not just a world event — decide the node's
+     shape later.
+   - **Use the H1 refill as a SECOND density test under DIFFERENT conditions** (owner: "more
+     financial pressure for one"). DP25 (H6, day 266) is the baseline placement-density test;
+     an H1 refill (~day 210, at/after the winter egg-price peak) under heavier financial
+     pressure would isolate how pressure moves the SAME decision — a deliberate contrast, not a
+     duplicate. Same logic could give H1's depop a **catch-quality sub-choice** mirroring DP10
+     (why DP08's depop has no options today: DP08 only decides molt-vs-depop; the "how" of H1's
+     catch was never given a node — only the focal flock got DP10). A 93-wk flock is even more
+     fragile than the focal, so an H1 catch node is defensible if varied from DP10.
+   - **H6 needs a real reason to sit empty until day 266** (owner). ~9 months vacant is too long
+     for a plain clean-and-disinfect turnaround (real C&D + downtime is weeks). Give it a
+     capital-project backstory — an **aviary retrofit/rebuild** (or new-house construction
+     finishing) — which realistically takes months and sets up the "new capacity coming online"
+     framing for the DP25 placement decision.
+   - **H2 and H5 also have no authored end** (they lay to ~126 wk / ~117 wk at episode close) —
+     a smaller instance of the same H1 unrealism; fold into this design.
+   - **Reality check that shapes it (sourced): an HPAI-depopped house (H3) can't be quickly or
+     cleanly refilled.** USDA/APHIS requires ~14 days of cleaning & disinfection with no birds,
+     then a **14- or 28-day fallow period** before a premises may even apply to restock, and
+     replacement birds must test HPAI-negative first
+     ([APHIS restocking criteria](https://www.aphis.usda.gov/sites/default/files/criteriarestock.pdf),
+     [restocking fact sheet](https://www.aphis.usda.gov/sites/default/files/fs-hpai-restocking-your-poultry-flock.508.pdf)).
+     So H3 realistically sits contaminated + empty for 1–2+ months — do NOT author a quick H3
+     refill; if ever refilled, it's a deliberately long regulated gap.
+   Interacts with question 1 (whole-calendar respace) and the reference-artifact regens every
+   flock change forces. Decide the node shapes at/after the DP08 build; the standing H1 depop
+   (gap 4 prerequisite) can land first.
+
 ## Known discrepancies to resolve during review (found while building this index)
 
 - DP07: the v8 confidence table says **7.5\***, but the trust-vs-sources table (part 1) says
