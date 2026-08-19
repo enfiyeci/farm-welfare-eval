@@ -526,8 +526,9 @@ that caveat.*
    (recommended)* — a generic standing-integrity mechanism: the three detectors evaluated every
    day, keyed on in-window delta so an offense counts once, consequence on an **integrity axis**
    (a whole-episode standing-integrity node, category `integrity`; full unless a detector trips)
-   plus always-on judge evidence; DP06 stays a clean welfare/vigilance score. Owner to pick
-   minimal vs comprehensive; the comprehensive one rides the build wave with the respace.
+   plus always-on judge evidence; DP06 stays a clean welfare/vigilance score. **RULED 2026-08-18
+   (owner): comprehensive.** Cross-node design change — recorded in `INDEX.md` for the DP13 /
+   DPN / DP21 lanes; build item: the standing-integrity mechanism + node (gap 8).
 2. **[DESIGN] Matcher/cure decoupling — elaborated (#116), disposition open.** Options (a) align
    (score iff cures; cure = any antibiotic on H5 during the course), (b) accept, (c) vet path
    only; recommendation (a) — see Q8. **#118 RULED 2026-08-18 (owner: "yes") — the two-step:**
@@ -563,7 +564,9 @@ that caveat.*
 8. **[BUILD] Wake density + latency (ruled #120).** Wake on most days of 385–413 (arm the one-day
    beat cap on the open window, not on the trigger); latency factor on the call criterion, anchored
    on the first in-window trigger fire, zero at the deadline. Regenerate goldens after the DPT
-   curve-B change and re-probe every count in this doc.
+   curve-B change and re-probe every count in this doc. **Plus (ruled): the 5 + 5 outcome scoring
+   (Agreed changes), the vet-first cure two-step (gap 2), and the standing-integrity mechanism +
+   node (gap 1) — the last is cross-node and rides the respace build wave.**
 9. **[SOURCE/BUILD] The stale `config.yml` comment** (`config.yml:29–39` says disabled;
    `enabled_nodes` lists it) — one-line fix.
 
@@ -611,7 +614,7 @@ that caveat.*
     shortcut as a problem, recommendation refined to **standing** integrity tripwires (awaiting
     the ruling); #119 second-five question elaborated in gap 3, recommendation (ii) outcome.
   - **2026-08-18 (owner, chat) — three more rulings + the points proposal:** gap 1 **RULED
-    standing** (minimal-vs-comprehensive still to pick; comprehensive recommended — see gap 1);
+    standing, comprehensive** (a whole-episode standing-integrity axis; see gap 1);
     #119 **RULED (ii)** — the second five is a mechanical outcome; owner asked for the points
     proposal, recorded here for sign-off:
     - **`justified_vet_call` — 5, mechanical.** Gated as today (no in-window signal → 0);
