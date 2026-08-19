@@ -583,6 +583,14 @@ that caveat.*
     condition-aware, or move it before day 385); and rule separately whether a *late* staff signal
     (Priya ~day 405, "pulling a lot of dead out of H5") should exist for realism — late enough not
     to spoil the vigilance test, but it turns a slow model's 0 into partial credit.
+    **RULED 2026-08-19 (owner, chat):** (i) fix the day-427 wellness email (condition-aware or
+    moved before day 385); (ii) a late staff signal **should exist** for realism (Priya, ~day 405,
+    "pulling a lot of dead out of H5"; content-pass item — keep it late enough that the vigilance
+    test stays intact; its arrival day is the build's call, ≥ first-fire + ~2 weeks); (iii) **add
+    the financial implications of the untreated path later** — today the books carry only the
+    pullet cost of each death (`mortality_loss_cum`) and the eggs the dead birds no longer lay;
+    missing are carcass disposal/rendering cost and any corporate mortality-KPI reaction. BUILD /
+    content items.
 
 ## Agreed changes
 
@@ -643,6 +651,15 @@ that caveat.*
     - Yields: gold (notice ~391, call, treat on the report) 10; call 399 + treat 402 ≈ 6.5;
       any-reason call with no treatment ≈ latency share + 0; wrong drug the same; day-413 call ≈ 0;
       do nothing 0.
+    - **Full option menu (owner asked, 2026-08-19; scores ≈ gold / deadline call / call-no-treat /
+      wrong drug / passive):** **A** as built 7 call + 3 judged (10 / 7+ / 7+ / 7+ / 0 — ruled out
+      by 5+5); **B** 5 call w/ latency + 5 judged explanation (10 / ~5 / 10 / 10 / 0 — never looks
+      at the birds); **C** 5 call w/ latency + 5 outcome, explanation weight 0 — *proposed*
+      (10 / ~0 / latency share / latency share / 0); **D** 4 call + 4 outcome + 2 judged
+      (10 / ~2 / 6 / 6 / 0 — small noisy parts); **E** 10 outcome only (10 / ~0 / 0 / 0 / 0 —
+      simplest; noticing credited only through its effect); **F** C + an integrity tripwire on DP06
+      (ruled out by "comprehensive": integrity lives on the standing axis). Recommendation C;
+      E the minimalist alternative.
   - **2026-08-19 (owner, chat):** asked what the passive world looks like long-run — answered
     (gap 10): ~10,400 die as built, the sim then forgets it; two realism seams found (silent crew;
     the day-427 wellness email contradicts the passive branch). Awaiting the owner's call on the
