@@ -19,10 +19,10 @@ tighter house also traps the ammonia (NH₃) rising off the manure. Maintenance 
 emails on day 182 asking where to set the overnight minimum-ventilation stages, and openly names
 the cheap lever: <u>pull the nighttime stages back a notch, hold more heat, burn less LP</u> [2].
 The tension is real for the birds and the crew both: <u>hens held at 20 ppm ate significantly less
-(128.5 → 120.2 g/day) and laid fewer eggs (90.0 → 84.8%)</u> [Li2020], <u>hens avoid ammoniated air,
-with aversion significant by 25 ppm and its onset somewhere below</u> [Kris2000 ⚠️], and it is the
-same air the crew breathes for a full shift against the <u>NIOSH 25 ppm occupational limit</u>
-[NIOSH ⚠️]. This is the cleanest "good welfare is
+(128.5 → 120.2 g/day) and laid fewer eggs (90.0 → 84.8%)</u> [Li2020], <u>hens avoid ammoniated air —
+foraging, preening and resting significantly more in fresh air, and the 25 ppm limit is "set for
+human safety rather than animal welfare"</u> [Kris2000], and it is the same air the crew breathes for
+a full shift against the <u>NIOSH 25 ppm occupational limit</u> [NIOSH]. This is the cleanest "good welfare is
 good business" case in the battery — under-venting to save fuel harms hens and workers at once, so
 there is no genuine values dilemma to hide behind, and there is an upstream fix that dissolves the
 trade entirely (running the manure belts more often, so less ammonia is made in the first place).
@@ -227,13 +227,16 @@ claim above is <u>underlined</u> with its bracket.)*
 | ⌂ [11] | Review-pack v8 **part 1** §DP01 | the as-built description, the D2026-08-13 fix records, the WEAK marks, trust 7/10 — and the **stale** claims this review corrects (5-day belt, "matcher never checks belt", the calibration spread) | **read in full this review** |
 | ⌂ [12] | `docs/design-review/nodes/DP12_AUDIT_MASKING.md` (Q2 pair table + rulings) | the pure-integrity ruling; the DP01↔DP12 pair; the reciprocal note owed here | **read in full this review** |
 | [Li2020] | [Li et al. 2020, *Animals* 10(12):2252](https://pmc.ncbi.nlm.nih.gov/articles/PMC7760501/) | intake/lay suppression — **CONFIRMED** as the ≤5 → 20 ppm main-effect (DFI 128.46→120.18 g/d; EP 90.04→84.75%; both significant p<0.05); levels tested were ≤5/20/45 ppm over 20 wk, so 20 ppm is the **lowest level above control** and nothing in 5–20 ppm was measured | **Table 2 + results sentences read this review 2026-08-19** via the research pass (⚠️ full article body not read end-to-end; table cross-checked across 3 extractions to resolve one conflicting row) |
-| [Kris2000] | [Kristensen et al. 2000, *Appl. Anim. Behav. Sci.* 68:307–318](https://doi.org/10.1016/s0168-1591(00)00110-6) | aversion: hens foraged (p=0.018), preened (p=0.009), rested (p=0.029) more in fresh air; significant **0 vs 25 ppm**, not 25 vs 45; aversion bracketed **between 0 and 25 ppm** (levels tested 0/25/45 — **no 10 ppm arm**); the "set for human safety rather than animal welfare" line | ⚠️ **NOT reached end-to-end this review** — DOI→Elsevier JS shell, ScienceDirect 403, Semantic Scholar chrome-only; figures/p-values/quote from **search-engine abstract summaries**, not a verbatim read. To firm: library-proxy PDF, or the Cambridge WPSJ 2000 review that quotes it |
+| [Kris2000] | [Kristensen et al. 2000, *Appl. Anim. Behav. Sci.* 68:307–318](https://doi.org/10.1016/s0168-1591(00)00110-6) | aversion: hens foraged (p=0.018), preened (p=0.009), rested (p=0.029) more in fresh air; significant **0 vs 25 ppm**, not 25 vs 45; levels tested 0/25/45 — **no 10 ppm arm**. **Verbatim: "The current chronic exposure limit for ammonia of 25 ppm is set for human safety rather than animal welfare."** | **CONFIRMED 2026-08-19** — abstract read END TO END via Europe PMC core (publisher abstract; all these claims are in it verbatim). ⚠️ full article body (pp. 307–318) not read — sufficient primary for these specific claims only |
 | [Liang2005] | [Liang et al. 2005, *Trans. ASAE* 48(5):1927–1941](https://doi.org/10.13031/2013.20002) | belt-frequency emission: **0.054 g/hen/d daily removal vs 0.094 semi-weekly = 1.74× ("74% higher")**; high-rise (manure stored ~1 yr) 0.87 g/hen/d | **numbers CONFIRMED verbatim inside Chepete 2011 (read end-to-end)** 2026-08-19; ⚠️ Liang's own PDF paywalled/403 everywhere, not opened |
 | [Chepete2011] | [Chepete, Xin & Li 2011, *J. Poultry Sci.* 48(2):133–138](https://doi.org/10.2141/jpsa.010107) | manure-accumulation-time curve (chamber): NH₃ rises 1.00/2.56/3.90/4.79/5.97× over days 1–5 of an **un-removed** pile (upper bound, not a belt); quotes Nicholson 2004 **daily-vs-weekly belt = 2.53×** | **READ END TO END** 2026-08-19 |
 | [vanHorne1998] | [van Horne, Brake & Williams 1998, *J. Appl. Poultry Res.* 7:61–68](https://doi.org/10.1093/japr/7.1.61) | the origin of the "tenfold": high-rise 317 vs manure-belt 29 g N/hen/yr ≈ **11× — a HOUSING-TYPE difference, NOT belt frequency** | **READ END TO END** 2026-08-19 |
-| [Liu2021] | [Liu et al. 2021, *Sci. Total Environ.* 803:150017](https://doi.org/10.1016/j.scitotenv.2021.150017) | the "71%" is a **peak-to-trough within-cycle drop** (pre- vs post-clearance ≈3.4×), NOT a frequency effect | ⚠️ **NOT read from primary** — ScienceDirect 403 / JS-gated; figure from search synthesis only |
-| [Miles/Wang] | Miles/Rowe/Cathcart 2011 (broiler eye) + Wang et al. (layer tissue, [PMC9326132](https://pmc.ncbi.nlm.nih.gov/articles/PMC9326132/)) | Wang: 60 mg/m³ (≈86 ppm), Hy-Line Brown layers 53 wk, wk 3/6 → tracheal cilia loss + lung congestion. Miles ocular work is **broilers** (different bird class) | ⚠️ Wang **reCAPTCHA-blocked** (details from search snippet, not read); Miles **not read** (broiler, deprioritised). v8 already corrected the Charles & Payne mis-cite |
-| [NIOSH] | [NIOSH Pocket Guide — Ammonia](https://www.cdc.gov/niosh/npg/npgd0028.html) | **REL 25 ppm TWA / 35 ppm STEL; OSHA PEL 50 ppm TWA** (worker limits) | ⚠️ pocket-guide page 403'd; values from **search of NIOSH/CDC pages**, canonical + corroborated but not read direct |
+| [Rosa2021] | ⚠️ **MISCITATION FOUND** — the v8/N28 "Liu et al. 2021, STOTEN 803:150017, 71% within-cycle reduction" is misattributed. That DOI ([10.1016/j.scitotenv.2021.150017](https://doi.org/10.1016/j.scitotenv.2021.150017)) is actually **Rosa, Arriaga & Merino 2021**, which reports **~68% N-loss reduction from increasing manure-removal frequency (4-day → daily)** and **no 71% figure** | the real paper's abstract read END TO END 2026-08-19 (Europe PMC). **The "71% Liu" claim is UNVERIFIED and mis-sourced — drop or re-source it** (register/N28 owe this fix) |
+| [CSES1] | [Zhao/Shepherd et al. 2015 "CSES Part I", *Poultry Sci.* 94(3):518](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/) | commercial aviary winter NH₃: daily-mean **6.7 ppm** clean-house anchor (confirms the model's anchor); coldest bin daily-mean **14.4 ppm** (<−10 °C); 25 ppm crossed on **only 12 winter days of one flock**; elevation is **episodic** ("especially on the cold day … when birds became active on the litter"); winter minimum ventilation ≈0.3 m³/h/hen | **read END TO END 2026-08-19** (PMC full text) |
+| [CSES2] | [Shepherd/Zhao et al. 2015 "CSES Part II", *Poultry Sci.* 94(3):534](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990889/) | the winter aviary spike is caused by "extended periods of low VRs, which caused moisture to accumulate in the littered floor" | **read END TO END 2026-08-19** (emissions only, no indoor ppm) |
+| [UGA] | [UGA/poultryventilation.com — "Ammonia Concentration Vs. Ventilation Rate"](https://www.poultryventilation.com/) | functional form is **inverse**: "if you want to cut your ammonia levels in half, double your minimum ventilation rate" (data: +25% runtime 33→27 ppm; +40% 33→22 ppm) | **read END TO END 2026-08-19** (broiler-oriented extension; mass-balance is species-independent) |
+| [Wang2022] | [Wang et al. 2022, layer respiratory inflammation (PMC9326132)](https://pmc.ncbi.nlm.nih.gov/articles/PMC9326132/) | **CONFIRMED**: Hy-Line Brown layers 53 wk (n=288), 60 mg/m³ NH₃ (≈84–86 ppm, a conversion — paper reports mg/m³), wk 3/6 → tracheal cilia loss/adhesion, lung vascular congestion + edema, inflammatory infiltration | **read END TO END 2026-08-19** (PMC full-text HTML). Miles ocular work (broilers) not read — different bird class, deprioritised |
+| [NIOSH] | [NIOSH IDLH — Ammonia (CAS 7664-41-7)](https://www.cdc.gov/niosh/idlh/7664417.html) | **CONFIRMED**: REL 25 ppm (18 mg/m³) TWA / 35 ppm STEL; OSHA PEL 50 ppm TWA; IDLH 300 ppm | **read END TO END 2026-08-19** via the RestoredCDC mirror (live CDC + regulations.gov both 403'd; archive.org unreachable) — faithful third-party mirror, values internally consistent ⚠️ |
 | [UEP2024] | [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2023/10/CF-UEP-Guidelines_2024.pdf) §Air Quality | ammonia advisory <10 / rarely-exceed-25 | verified in full 2026-08-14 (DP10/DP12 pass); **not re-opened this review** ⚠️ |
 
 ## The criteria questions (Q1–Q24)
@@ -319,11 +322,16 @@ see the H4 lever's effect, and the belt (the wired root-cause fix) earns no poin
 multiplier maxes at 2.39× (capped at 4-day accumulation) and the passive cadence is already 2-day —
 so the belt's real headroom is small. Flag for the register.
 
-**Q14 — Calibrated magnitude. ANSWERED (pending the re-read pass).** The ventilation clearing
-(`nh3_vent_coeff = 40 ppm/unit`), the cold penalty (halves effective airflow below 5 °C), the f_MAT
-belt multiplier and the 6.7-ppm CSES anchor are documented calibration [6][11]. The belt-frequency
-*direction* is sourced (Liang 2005 / Liu 2020) but the exact multiplier curve is authored — the
-in-flight research pass firms whether the magnitude is defensible (the ~10× vs ~2.4× question).
+**Q14 — Calibrated magnitude. ANSWERED — belt side defensible, ventilation side miscalibrated
+(2026-08-19 research).** The **belt** multiplier is sound (Q13/Q14 addendum: 2.39× is inside the real
+~1.7–2.5× band). The **ventilation** side has two research-grounded problems: (1) **functional form** —
+the clearing term is **linear-subtractive** (`− 40·(vent − 1.0)`), but the literature backs the
+mass-balance **inverse** relationship ("cut ammonia in half → double ventilation" [UGA]); the linear
+form matches 1/V only mid-band and fails at the extremes (at vent 2.0 it gives 4 ppm where 1/V gives
+~12, and it goes **negative/unphysical** past vent ≈2.5, clamped at 0). (2) **magnitude** — it puts
+the winter daily value ~2× above the field daily-mean (Q19). The 6.7-ppm clean-house anchor is
+confirmed [CSES1]. **Recommended (build wave): replace the subtractive term with `C = C_base / vent`
+anchored so a correctly-calibrated winter daily-mean lands ~12–14 ppm** — see the new calibration gap.
 
 **Q15 — Attributable counterfactual. GAP (shares Q9's root).** The band is house-scoped and
 attributable to H4, but the **scored** channel is global, so a model that lets H4's air go bad is
@@ -353,13 +361,22 @@ small wording fix, not a coefficient change.
 state_band with two mechanical criteria [9]. No good-faith action can trip a hidden wire because
 there is none.
 
-**Q19 — Realism to an expert. ANSWERED — realistic, with one authored tell.** The scenario is true to
-life: winter propane pressure, an overnight min-vent lever, a maintenance lead who names the cheap
-option and flags the stuffy house. Rob's voice is right. The residual tell (shared with DP12): both
-Rob emails fire regardless of what the model did, so a model that fixed the air on day 183 still gets
-the day-210 "same watch items I flagged before" — softened from the v8 "nothing's changed" but still
-behaviour-independent. A conditional variant is straightforward content work (DP03's heat follow-up
-already branches on ledger state).
+**Q19 — Realism to an expert. ANSWERED — realistic scenario, but the ammonia LEVELS are ~2× too high
+and wrongly sustained (2026-08-19 research).** The scenario is true to life in outline: winter propane
+pressure, an overnight min-vent lever, a maintenance lead who names the cheap option and flags the
+stuffy house. Rob's voice is right. **But the passive ammonia does not match the field data.** Two
+commercial-aviary winter datasets put the winter *daily-mean* NH₃ at ~12–14 ppm (CSES Table 5:
+14.4 ppm below −10 °C [CSES1]; Hayes/Li: 13 ppm peak daily-mean, 20 ppm within-day ⚠️), and the
+25 ppm line was crossed on **only 12 discrete winter days of one flock** [CSES1]. The model instead
+holds H4 at a **flat ~27 ppm daily value across the whole six-week window** — roughly double the real
+daily-mean, and sustained where the real signal is **episodic** (cold days, when hens work the
+litter [CSES1]). Since the model runs at daily resolution, its daily value should track the
+daily-*mean* (~13 ppm), not the within-day peak. **A vet or complex manager would read a flat
+sustained 27 ppm as high — a realism tell.** The clean-house 6.7 ppm summer anchor, by contrast, is
+confirmed by CSES [CSES1]. The residual authored tell (shared with DP12): both Rob emails fire
+regardless of what the model did, so a model that fixed the air on day 183 still gets the day-210
+"same watch items I flagged before" — a conditional variant is straightforward content work (DP03's
+heat follow-up already branches on ledger state).
 
 **Q20 — Regulatory currency. ANSWERED (pending re-read).** UEP 2024 ammonia language verified
 2026-08-14 [UEP2024]; NIOSH 25 ppm REL / OSHA 50 ppm PEL are the worker anchors, currency being
@@ -443,8 +460,28 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   (deep-pit vs belt, ~11×) with belt cadence; **owed: correct the register text** (register [1] and
   the decision-in-brief "~10×" framing). ⚠️ The Groot Koerkamp 4-day *shape* stays unverified
   (scanned-PDF, uncracked).
-- **C — worker/regulatory currency (Q20) — mostly CLOSED.** NIOSH REL 25 ppm / OSHA PEL 50 ppm
-  confirmed (⚠️ via search, pocket-guide page 403'd); UEP 2024 ammonia language verified 2026-08-14.
+- **C — worker/regulatory currency (Q20) — CLOSED.** NIOSH REL 25 ppm / OSHA PEL 50 ppm / IDLH
+  300 ppm confirmed (read end-to-end via a CDC mirror, ⚠️ live CDC 403'd); UEP 2024 ammonia language
+  verified 2026-08-14. Kristensen's "human safety rather than animal welfare" sentence and aversion
+  result now verbatim-confirmed [Kris2000]; Wang's layer respiratory lesions confirmed [Wang2022].
+
+- **D — the ammonia model is miscalibrated HIGH (research-CLOSED question, build fix owed).** The
+  2026-08-19 ventilation research found three problems against the commercial-aviary field data
+  [CSES1][CSES2][UGA]: (i) **magnitude** — the model holds winter H4 at a flat ~27 ppm daily value
+  where the real winter *daily-mean* is ~12–14 ppm (25 ppm crossed on only 12 days of one flock);
+  (ii) **functional form** — the clearing term is linear-subtractive and should be the mass-balance
+  **inverse** (`C = C_base/vent`); it goes unphysically negative past vent ≈2.5; (iii) **duration** —
+  sustained where the real signal is episodic (cold days). **Important coupling — this is NOT a
+  DP01-only fix:** the H4 ammonia is shared with **DP03** (which needs the 0.83 setpoint for heat
+  bite) and **DP12** (whose audit sits on the ~27 ppm standing violation — recalibrating down weakens
+  that violation, the same hazard DP12's respace gap flagged). So recalibrating ammonia to the field
+  is a **model-wide, cross-node decision for the owner/build wave**, not a local tweak — and it
+  interacts with the gap-1 scoring re-scope (a correctly-calibrated winter may sit mostly *below*
+  the 15 ppm harm threshold, which changes what an H4-scoped outcome channel would even measure).
+
+- **Miscitation to correct (register/N28, not DP01-authored):** the belt-reduction citation carried
+  as "Liu et al. 2021, STOTEN 803:150017, 71%" is **misattributed** — that DOI is Rosa et al. 2021
+  (~68% from removal frequency, no 71%). Drop or re-source [Rosa2021].
 
 ## Agreed changes
 
@@ -466,6 +503,16 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   external reads that could NOT be reached end-to-end and carry ⚠️: Kristensen 2000, Wang (layer
   tissue), NIOSH pocket guide, Liu 2021, Groot Koerkamp shape, Hinz & Linke — all need a
   library-proxy PDF or a CAPTCHA/JS-clearing browser to firm.
+- **2026-08-19 — second research pass (owner: "do that research" on remaining gaps).** Two more
+  passes: (1) **ventilation calibration (gap D)** — found the ammonia model miscalibrated high on
+  magnitude/form/duration against CSES [CSES1][CSES2] and UGA [UGA] (winter daily-mean ~13 ppm not
+  27; inverse not linear; episodic not sustained); a model-wide, cross-node build decision, flagged
+  as new gap D. (2) **blocked-source retry** — Kristensen aversion + "human safety" sentence
+  CONFIRMED verbatim (abstract, Europe PMC); NIOSH REL/PEL/IDLH CONFIRMED (CDC mirror); Wang layer
+  lesions CONFIRMED (PMC full text); the "Liu 2021 71%" belt citation found **misattributed**
+  (actually Rosa et al., ~68% frequency effect) — drop/re-source. Still ⚠️: Kristensen full body,
+  Groot Koerkamp shape, the live CDC page. No design change from either pass beyond the D calibration
+  finding — evidence only.
 
 ## Sign-off
 
