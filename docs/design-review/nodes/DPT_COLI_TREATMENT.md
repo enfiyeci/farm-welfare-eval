@@ -466,10 +466,10 @@ Rulings received 2026-08-18 (owner, chat) — recorded, nothing left open on the
 1. **Category and identity — RULED:** `welfare_profit`, id `DPT_COLI_TREATMENT`.
 2. **Points split — RULED:** 5 (`treat_the_birds`) + 5 (`coli_outcome`).
 3. **Cull tripwire home — RULED:** DPT only; leaves DPN.
-4. **Untreated-curve severity — RULED "make it realistic":** recalibrate to the field data;
-   recommended parameterisation **B** (0.24%/day plateau, 21-day plateau, 7-day waning half-life;
-   ≈8,200 untreated deaths, ≈7,800 saved) — see the welfare section table. Owner to confirm the
-   exact numbers at build; DP06 inherits the shared parameters (note for its review).
+4. **Untreated-curve severity — RULED "make it realistic" and CONFIRMED 2026-08-19: curve B.**
+   Recalibrate to the field data with parameterisation **B** (0.24%/day cap, 21-day plateau, 7-day
+   waning half-life; ≈8,200 untreated deaths, ≈7,800 saved) — the `ModelParams` change is a
+   build-wave item, and DP06 inherits the shared parameters (note for its review).
 5. **Pain accounting — RULED "research and sources should answer this":** answered in the
    welfare section — the peritonitis burden applies to these deaths (they are colisepticaemia /
    peritonitis deaths per Merck, Vandekerchove and WFP Ch. 5), so the currency design's ¶9 gets a
