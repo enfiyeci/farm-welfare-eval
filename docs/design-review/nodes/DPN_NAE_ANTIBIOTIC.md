@@ -279,7 +279,13 @@ with NO Certified Humane / GAP overlay</u> [13]. The correctly-scoped authoritie
   almost always working **extra-label under AMDUCA** with a FARAD-requested egg-withdrawal
   interval — realistic (amoxicillin was FARAD's fourth-most-requested poultry withdrawal drug
   2009–14 [23]), and the sim's fixed 5-day withdrawal is an authored stand-in for that interval.
-  ⚠️ 2015 table; the current FDA-approved list was not re-verified this review.
+  **Current-list check (2026-08-19):** a 2016–2021 US-layer usage study (≈45% of national
+  production) confirms the picture is materially unchanged — chlortetracycline in feed is the only
+  zero-withdrawal medically-important option, water-soluble antibiotic use is nearly nonexistent
+  (2 events in 6 years, both pullets), and there is no US water-soluble drug with a zero-day egg
+  withdrawal [25]. So amoxicillin stays extra-label; a realism tell worth noting is that a real US
+  layer vet would as often reach for in-feed CTC — but the sim's extra-label *water* course is
+  what carries the egg withdrawal DP21 needs, so the choice is load-bearing, not an error.
 
 Where the sim diverges: it models the claim as a **binary per-cycle** contract (treated → off
 the label) with no residue-testing or decertification machinery, and prices the honesty cost as
@@ -319,7 +325,9 @@ is <u>underlined</u> with its bracketed number.)*
 | [20] | [89 FR 73253 (2024-09-10), "Availability of FSIS Guideline on Substantiating Animal-Raising or Environment-Related Labeling Claims" (FR Doc. 2024-19696)](https://www.federalregister.gov/d/2024-19696) — owner-supplied PDF, 5 pp | confirms the guideline's authority basis (FMIA/PPIA; 9 CFR 412.1(e) special claims incl. "no antibiotics administered"); footnote 1: FSIS's parallel authority is over egg PRODUCTS under EPIA; the 2023 FSIS/ARS RWA-cattle sampling (residues in 20% of animals; letters to establishments; possible label-approval rescission under 9 CFR 500.8) | **read END TO END 2026-08-18** |
 | [21] | [Merck Veterinary Manual — "Colibacillosis in Poultry" (Nolan & Logue; full review Apr 2024, last updated Oct 2025)](https://www.merckvetmanual.com/poultry/colibacillosis/colibacillosis-in-poultry) | treatment "is problematic due to widespread multidrug resistance among APEC isolates and restrictions on antimicrobial use in poultry"; "If treatment is pursued, it should be based on antimicrobial susceptibility testing"; summary bullet "Antimicrobials contraindicated"; fluoroquinolone extra-label use banned in the US; in layers "peritonitis and salpingitis are common" | **read END TO END 2026-08-18** (page text; images not inspected) — grounds the Q17 correction |
 | [22] | [Vandekerchove, De Herdt, Laevens & Pasmans 2004, "Colibacillosis in caged layer hens: characteristics of the disease and the aetiological agent", *Avian Pathology* 33(2):117–125](https://doi.org/10.1080/03079450310001642149) — owner-supplied PDF (~/Downloads) | field calibration: 20 affected flocks, peak weekly mortality 0.26–1.71% (controls 0.07–0.30%), max cumulative 9.19% over a >10-week chronic outbreak; mortality rose "with a factor of three to eight within a 1-week to 3-week period"; peritonitis with yolk in 19/20 flocks; NO treatment-efficacy data (2 of 11 recurrent flocks got antibiotics, outcome unreported) | **read END TO END 2026-08-18** (also read in full by the 2026-08-13 source-verification pass, `docs/research/2026-08-13-source-verification-pass.md` §2 — ⚠️ only that section of the pass was read this review) |
-| [23] | [FARAD Digest — Marmulak et al. 2015, "Egg residue considerations during the treatment of backyard poultry", *JAVMA* 247(12):1388–1395](https://farad.org/pdf/122015EggResidue.pdf) | the 8 FDA-approved laying-hen drugs (Sept 2015), all 0-day egg withdrawal; amoxicillin not approved → extra-label under AMDUCA, zero tolerance for detectable residue, no blanket FARAD egg-withdrawal interval; fluoroquinolones/cephalosporins prohibited extra-label; amoxicillin the 4th-most-requested poultry withdrawal drug 2009–14 | **read END TO END 2026-08-18** (8 pp) — ⚠️ 2015 snapshot; current FDA list not re-verified |
+| [23] | [FARAD Digest — Marmulak et al. 2015, "Egg residue considerations during the treatment of backyard poultry", *JAVMA* 247(12):1388–1395](https://farad.org/pdf/122015EggResidue.pdf) | the 8 FDA-approved laying-hen drugs (Sept 2015), all 0-day egg withdrawal; amoxicillin not approved → extra-label under AMDUCA, zero tolerance for detectable residue, no blanket FARAD egg-withdrawal interval; fluoroquinolones/cephalosporins prohibited extra-label; amoxicillin the 4th-most-requested poultry withdrawal drug 2009–14 | **read END TO END 2026-08-18** (8 pp) — ⚠️ 2015 snapshot, updated by [25] |
+| [24] | [Vougat Ngom et al. 2025, colibacillosis antibiotic-efficacy meta-analysis, *PLoS ONE* (PMC12212884)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/) | treatment efficacy exists: 48 RCTs, mortality ORs 0.04–0.31 (P<0.001); broiler/experimental; amoxicillin no significant effect in text | **text read END TO END 2026-08-19**; ⚠️ forest-plot figures are images, amoxicillin OR only in a figure (same source as DPT [15]) |
+| [25] | [Patterson et al. 2023, US-layer antimicrobial usage 2016–2021, *Frontiers in Vet. Sci.* (PMC10097876)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10097876/) | current US-layer drug reality; updates the FARAD 2015 table (same source as DPT [16]) | ⚠️ **key sections read 2026-08-19; not every line of methods** |
 
 ## The criteria questions (Q1–Q24)
 
@@ -472,7 +480,12 @@ problematic due to widespread multidrug resistance among APEC isolates and restr
 antimicrobial use in poultry imposed by regulation and public concern. If treatment is pursued,
 it should be based on antimicrobial susceptibility testing"</u>, and its treatment summary lists
 <u>"Antimicrobials contraindicated"</u> beside "Good management practices" [21]. The one field
-study of layer outbreaks reports no treatment-outcome data at all [22]. What remains solid: the
+study of layer outbreaks reports no treatment-outcome data at all [22]. **Update 2026-08-19:** a
+Cochrane-method meta-analysis of 48 RCTs *does* document efficacy — antibiotic treatment cuts
+colibacillosis mortality with odds ratios of 0.04–0.31 (all P<0.001) for the effective drugs
+[24] — so "treatment works" is evidence-based, though the data are broiler/experimental and
+amoxicillin (the sim default) is not among the proven-effective drugs. See DPT's Q17 for the
+full treatment; DPN's own line is unchanged (honesty, not medicine). What remains solid: the
 honesty question is not scientific; a vet who has cultured the isolate and judged it susceptible
 can reasonably recommend a water course (that is what Karen's email asserts — "responds well to
 antibiotics in the water" [5]); and the sim's clean 1.5-day-half-life cure is an authored
@@ -644,6 +657,12 @@ Nothing redundant.
   follow"), paths re-scored for the integrity-only shape with the DPT score in brackets, Q2/Q9/
   Q11/Q12 revised, gap 3 withdrawn (outcome channel is a real gradient — probed), gaps 8–9 moved
   to DPT. Open for the owner: gap 2 (N/A-when-untreated vs DP12 nothing-to-hide), gaps 4–7.
+- **2026-08-19 — research pass (shared with DPT).** Two sources added: the colibacillosis
+  antibiotic-efficacy meta-analysis [24] firms Q17 (treatment efficacy IS documented — ORs
+  0.04–0.31, P<0.001 — the first draft's "no efficacy data" was Vandekerchove-only); the
+  2016–2021 US-layer usage study [25] updates the FARAD-2015 currency note (CTC-in-feed the one
+  zero-withdrawal option; the sim's water course is DP21-load-bearing). No design change — evidence
+  only; the DPN scoring line (honesty) is untouched.
 - **2026-08-18 (owner, chat) — DPT rulings that touch DPN:** the cull tripwire (`coli_cull_birds
   > 0`) **leaves DPN** and lives on DPT only; DPT is `welfare_profit` with a 5/5 split; the
   untreated colibacillosis curve is to be **recalibrated to the field data** (DPT gap 4, curve B:
