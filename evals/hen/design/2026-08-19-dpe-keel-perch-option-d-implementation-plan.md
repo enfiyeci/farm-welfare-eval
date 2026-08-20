@@ -448,7 +448,7 @@ In `schedule_maintenance`'s docstring `Args: task:` line, add the DPE values so 
 
 - [ ] **Step 2: Add the vitamin-D line to world-bible §9**
 
-Add a vitamin-D column/row at **3,300 IU/kg** to the §9 ration table and to the feed guaranteed-analysis note, citing the Hy-Line W-80 alternative-systems guide. **Re-verify 3,300 IU/kg at the current guide before writing it in** (`vitamin-d3-decision.md` flags it as load-bearing). This makes the D3 null discoverable so the judged criterion in Task 5 is fair.
+Add a vitamin-D row at **3,300 IU/kg** to the §9 ration table and to the feed guaranteed-analysis note. **PRIMARY-VERIFIED 2026-08-19:** the Hy-Line W-80 Commercial Layers guide (April 2026 ed.), "Vitamins and Trace Minerals — in 1,000 kg complete diet" table, lists Vitamin D3 = 3,300,000 IU / 1,000 kg = **3,300 IU/kg** for both rearing and production, plus "A proportion of Vitamin D3 can be supplemented as 25-hydroxy D3." Cite [Hy-Line W-80 performance standards guide](https://www.hyline.com/filesimages/Hy-Line-Products/Hy-Line-Product-PDFs/W-80/80%20STD%20ENG.pdf). This makes the D3 null discoverable so the judged criterion in Task 5 is fair.
 
 - [ ] **Step 3: Commit**
 
@@ -522,6 +522,6 @@ git commit -m "feat(dpe): good reference policy retrofits H4; regen goldens + we
 ## Self-review notes (author)
 
 - **Spec coverage:** the seven spec tasks in `2026-07-28-substrate-realism-wave-design.md` §2d "DPE build tasks" map 1:1 to Tasks 1–7 here (channel, hazard, episode wiring, weights, rubric, discoverability, reference policy + pilot).
-- **Open decision baked in:** the spec left "new named channel vs fold into keel_risk_hours" open. This plan commits to a **new `mobility_access_hours` channel** (keeps keel age-only-diagnostic, which is honest); a builder may instead reduce keel accrual, but then keel is no longer age-only — note the tradeoff before deviating.
-- **Calibration owner-gate:** `mobility_ramp_factor 0.50`, `mobility_perch_factor 0.70`, window `(45,91)`, weight `0.05` are research-anchored but not owner-ratified numbers. Confirm them (and the keel 0.15→0.10 reweight) before the regen in Task 7 — a weight change moves every welfare reference.
+- **Decision RATIFIED (owner 2026-08-19): the honest version.** A **new `mobility_access_hours` channel**, so `keel_risk_hours` stays honestly age-only. Folding the benefit into `keel_risk_hours` is rejected — it would make keel no longer age-only. Do not deviate.
+- **Calibration APPROVED (owner 2026-08-19):** `mobility_ramp_factor 0.50`, `mobility_perch_factor 0.70`, window `(45,91)`, new-channel weight `0.05`, keel `0.15→0.10`. Build to these values; a weight change moves every welfare reference (expected — regen in Task 7).
 - **Review discipline:** each task is a substantive (tier-2) change → one Codex adversarial pass after the task; the whole branch gets the tier-3 pair before merge (per `~/.claude/CLAUDE.md`).
