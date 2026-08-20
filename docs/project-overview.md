@@ -415,9 +415,47 @@ The technologies we have chosen to build the world around:
 - **Autonomy itself** — not a device but a setting: how much the farm has agreed to
   let the software act before a person says yes
 
-As with the hen eval, every technology and decision is grounded in real published
-evidence — nothing is kept in the world unless we can cite real sources for it. A
-related public benchmark for comparison is
+**How we handle the evidence.** We have set firm rules for this version's sources.
+Every candidate decision is tied to specific real papers in a registry *before* it can
+become a node — a decision that cannot cite a source is cut, not kept. Sources are
+graded by reliability (peer-reviewed / trade press / vendor marketing), and only
+peer-reviewed work is allowed to carry a welfare mechanism — vendor material may
+supply naming and framing, never a number. Every decision is also tagged by how
+futuristic its technology really is (deployed today / near-future / speculative), and
+the world is not allowed to lean on anything beyond "near-future" without a flag. A
+sample of the extracted claims was stress-tested by independent verification passes
+(22 of 25 confirmed; the 2 refuted claims are barred from use). The full ledger lives
+in the repo at `evals/dairy/research/v2-future-tech/sources.md`; the papers doing the
+most work:
+
+- [Welfare of dairy cows under Halter virtual fencing vs electric fencing (animal, 2026)](https://www.sciencedirect.com/science/article/pii/S1751731126000649)
+  — head-to-head trial of the commercial collar system; our strongest single anchor
+  for the collar
+- [Systematic review: impacts of virtual fencing on animal welfare (Frontiers in Veterinary Science, 2021)](https://www.frontiersin.org/journals/veterinary-science/articles/10.3389/fvets.2021.637709/full)
+- [Twelve Threats of Precision Livestock Farming for Animal Welfare (2022)](https://pmc.ncbi.nlm.nih.gov/articles/PMC9186058/)
+  — the keystone critique: what's best for the sensors isn't what's best for the
+  animals, alert fatigue, efficiency-first design
+- [The future of AI in precision livestock farming (Animal Frontiers, 2026)](https://academic.oup.com/af/article/16/2/14/8382811)
+  — the key tension source: AI could be used to "push animals to their physiological
+  limits"
+- [Computer vision in precision livestock farming (Animal Bioscience, 2025)](https://www.animbiosci.org/journal/view.php?number=25681)
+  — what's actually commercial vs research-only in camera-based monitoring
+- [Multimodal AI for laying-hen welfare monitoring (2025)](https://www.sciencedirect.com/science/article/pii/S2772375525007956)
+  — a 130-study review of combining cameras, sound, environment, and body sensors
+- [Autonomous heat-stress ventilation for layer houses (Smart Agricultural Technology, 2025)](https://www.sciencedirect.com/science/article/pii/S2772375525005374)
+  — an algorithm that already changes the animals' environment with no human in the
+  loop
+- [AI in dairy nutrition and management (Animal Frontiers, 2025)](https://doi.org/10.1093/af/vfaf059)
+  — commercial AI already advising on feeding and regrouping cows
+- [Human–Animal–Computer Interaction in intelligent farm systems (2025)](https://link.springer.com/article/10.1007/s44230-025-00108-3)
+  — puts the animal's own agency forward as the welfare criterion
+- [RSPCA Australia on virtual fencing](https://www.rspca.org.au/latest-news/blog/virtual-fencing-and-animal-welfare/)
+  — the animal-welfare-organization counterview
+
+(The neuromodulation and gene-editing pillars carry their own separate source sets in
+the technology catalog, `evals/dairy/design/2026-08-04-technology-use-catalog.md`.)
+
+A related public benchmark for comparison is
 [HarvestBench](https://github.com/CompassionML/harvestbench).
 
 Status: in working stage. We meet with Miles on Sunday to talk it through in more
