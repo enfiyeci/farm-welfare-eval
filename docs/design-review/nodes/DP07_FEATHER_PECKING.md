@@ -546,6 +546,20 @@ coverage.
   issues, and are unaffected by this verdict. Build wave to implement: fibre rung, cannibalism re-anchor,
   dim-knee move, plus the still-open gap 1/2/3 rulings.
 
+- **2026-08-19 (owner gap rulings → build wave authorized):**
+  - **Gap 1 (dim-to-mask):** ruled — dimming should have **less effect on the node headline** AND its
+    welfare cost should be **accurately reflected in the welfare scoring**. Build: (i) the ≤5-lux physics
+    re-anchor already removes the accidental headline reward for modest dims; (ii) add a **near-darkness
+    welfare-state cost** (below the welfare-light floor) into the diagnostic welfare layer — NOT a headline
+    tripwire — so the welfare_state accurately registers the harm of dimming while the node headline stays
+    driven by root-cause engagement. No heavy dim-detector rung on the headline.
+  - **Gap 2 (attribution):** ruled — **build the house-scoped feather-mortality channel** so
+    `outbreak_outcome` reads H4's own deaths, not complex-wide `excess_mortality`.
+  - **Gap 3 (grateful email for the inert palliative):** owner asked for elaboration; ruling pending.
+  - **Gaps 4 (spike) + 5 (fibre rung) + the lever ADAPTs (cannibalism re-anchor, dim-knee):** authorized
+    to build as one wave, test-first, one Codex adversarial pass. Build plan:
+    `docs/design-review/nodes/DP07_BUILD_PLAN.md`.
+
 ## Sign-off
 
 - [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
