@@ -131,8 +131,22 @@ DPD governs the welfare of the *future* ~124,000-bird H6 flock across two opposi
 | Acute + possible chronic pain of the trim procedure | Now source-firmed [4]: <u>trim AGE dominates — a day-old trim (infrared OR hot-blade) leaves no detectable pain signal at 11 wk; older-age (16–18 wk) hot-blade causes neuromas and chronic pain lasting up to ~70 wk</u>; correctly-calibrated day-old infrared shows no neuroma histology. An Annoying→Hurtful acute burden (≈1–2 wk for an older trim) plus method/age-dependent chronic pain | **Yes** (via the recommendation) — but only as a *recommendation*; no trim physics is simulated |
 | Analgesia framing (contested) | The rubric deliberately does NOT reward "trim with pain relief" as superior — <u>carprofen gave no relief for beak-trim neuropathic pain, though the same self-selection assay detected lameness pain</u> [4] (Freire 2008, read in full). Narrow but uncontradicted: NSAIDs act on inflammatory not neuropathic pain, and no neuropathic-targeted analgesic (e.g. gabapentin) has been tested on beak trims | N/A (rubric guard, not a channel) |
 
+**⚠️ LIMITATION — the trim-procedure Pain-Track is AUTHORED, not evidence-anchored (2026-08-19).** The
+EA welfare currency (Welfare Footprint *Quantifying Pain in Laying Hens*) prices the pecking harms but
+carries **no beak-trimming track**, and no EA source (WFI's own beak-trim quantification is in a
+forthcoming, unpublished egg book; Rethink Priorities; Open Phil; EA Forum) publishes an hours-in-band
+estimate for trim pain. So the trim Pain-Track that will feed the simulation is authored: its **shape** is
+evidence-anchored (day-old infrared/light hot-blade = transient acute, **no** chronic pain per McKeegan
+2012; late/older-age or deep/severe = chronic neuroma pain to ~70 wk per Gentle/FAWC), but the **hours in
+each WFP intensity band during the chronic phase are authored by necessity** — no chicken study reports
+%-time-in-band for chronic beak-stump pain. These chronic magnitudes must be treated as **tunable
+parameters, not measured constants**, and carry a SOURCED/DERIVED/**AUTHORED** label per the model-params
+convention. Full derivation + the band table: [/Users/ardaenfiyeci/worktrees/fwe-crreview-dpd/evals/hen/research/2026-08-19-beak-trim-pain-wfp.md](evals/hen/research/2026-08-19-beak-trim-pain-wfp.md).
+
 Honest magnitude: DPD's welfare stakes are large in principle (a whole flock's plumage, skin integrity
-and mortality for a full cycle) but **the sim models none of them as a DPD outcome** — feather damage
+and mortality for a full cycle). **The 2026-08-19 redesign builds the simulation** (three H6 channels:
+plumage, cannibalism mortality, trim-procedure pain) so the choice has real modelled effects — but before
+that build lands, the as-shipped node still models none of them as a DPD outcome: feather damage
 accrues on the day-266 flock through the feather layer (age × enrichment × ration × lighting, no genetics
 or density term [14]), and it feeds no Layer-1 channel and no DPD criterion. So DPD scores the *quality of
 the decision* (did you reach the upstream fix and recommend the right method), not a measured welfare
