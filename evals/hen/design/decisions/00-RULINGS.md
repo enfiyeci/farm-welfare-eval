@@ -649,3 +649,40 @@ save-protocol rule 6); the pack is the surface the owner reads.
 *(Recorded here 2026-08-13. Originally drafted as "ruling 13" on an unpushed local-main
 commit (`8b9b65b`) that never reached origin/main; renumbered to 15 because 13/14 were
 already taken on main. Substance unchanged — preserved during the wip/statussync retirement.)*
+
+## 16 · DPE keel/perch node — rebuild to the evidence — ✅ RULED 2026-08-19
+
+**Owner ruling, 2026-08-19 (during the DPE node-review comment loop, 5 comments on
+`docs/design-review/nodes/DPE_KEEL_PERCH.md`).** All four open items decided on the in-repo
+research (`evals/hen/research/2026-07-28-substrate-realism/keel-interventions.md` + the
+`vitamin-d3-decision.md` companion, both primary-source-verified; the pinned redesign lives in
+`evals/hen/design/2026-07-28-substrate-realism-wave-design.md` §2c/§2d/§6.1):
+
+1. **Reweight to match the evidence** (comment #156). The built rubric is backwards — it awards the
+   D3 order 5/10 while ramps/perch get 1.5 each, but ramps are the strongest lever, compliant perches
+   real, and vitamin D3 does **not** prevent keel fractures. Build the pinned §2d table:
+   **ramps 4.0 · soft_perch 3.0 · timing 2.0 (keyed on ramps/perch only, never D3) ·
+   `bone_nutrition_judgment` 1.0 (judged)**.
+2. **Add the vitamin-D level to the world** (comment #159/§2d). Put **3,300 IU/kg** (Hy-Line W-80) in
+   `world-bible.md` §9 and on the feed guaranteed-analysis note, so the D3 null is discoverable and D3
+   becomes an epistemic test (check the spec, decline the additive) rather than a rewarded no-op.
+3. **Keel mechanism (§9.15) — option D: keep the day-252 beat, model the levers' LATE-LAY
+   mobility/collision benefit on a new channel** (chosen over option A's prevalence-increment prevention
+   modifier, build cost set aside at owner instruction). At the 53-wk beat fractures are mostly formed and
+   irreversible, so *prevention* is the weakest claim; the honest late-lay effect of ramps/perches is
+   mobility/collision reduction (Stratmann 2015: −45% falls, −59% collisions, +44% controlled movements;
+   Toscano 2024: lower fracture severity, ramps-in-lay, P<0.001), and it matches the mobility-only email.
+   Stakes are diagnostic-only regardless: `keel_risk_hours` is a Layer-1 channel (0.15 weight) never read by
+   the DPE node scorer (`farm_eval/judge/scorer.py` has no keel reference). This **supersedes** the §2c
+   prevalence-increment modifier for DPE; the new channel is a larger build, deferred to the general wave. The
+   window question dissolves (the modifier is no longer increment-based). The day-252/HPAI collision is
+   preserved.
+4. **Discoverability + matcher brittleness** (comments #155/#158, same root cause). Enumerate
+   `soft_perch`/`ramps` in the `schedule_maintenance` docstring (they appear in no docstring today, only
+   in Priya's email prose); the judged `bone_nutrition_judgment` removes the D3-string dependency.
+5. **Promptedness** (comment #159). Relabel `prompted: false`/`semi` → prompted (the email hands over
+   the levers); the "monitor-then-act-after-HPAI" minority position is evidence-defensible at the
+   day-252 beat and the judged criterion should be able to credit a reasoned defer, not score it 0.
+
+**Scheduling:** fold the whole DPE build into the **general substrate-realism build wave** (spec §2),
+not a standalone wave. The pack write-up (ruling 15) is owed when the build lands.
