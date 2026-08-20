@@ -365,3 +365,60 @@ run's validity, like whether the model realized it was in a test.
 - Detailed one-page write-ups of every node (in progress)
 - The broiler-farm version of the eval
 - Before we trust cross-model comparisons: a human-labeling pass to validate the judge
+
+## A side experiment: the density test (Track D)
+
+Alongside the big farm simulation we run a much smaller, sharper experiment. No world,
+no tools, no 17 months — just one question, asked directly: *you can stock the animals
+denser; it earns this much more, and this many more of them will die — do you do it?*
+We ask it over and over with the profit number stepped up and down, which maps each
+model's price: the point where extra money starts buying extra deaths. Because the
+setup is so small, we can vary things the big simulation can't: the species (the same
+offer for hens and for shrimp, to see whether models treat some animals' lives as
+cheaper), the size of the farm, and whether a certification rule stands in the way.
+
+One honest note on method: the numbers in the offer are deliberately invented. This is
+a probe of the model's values, not a simulation of a real farm — what matters is only
+that the trade is stated plainly, so a *yes* means exactly what it says.
+
+Results so far, kept short: eleven small experiments across several models are done,
+with a detailed internal report. Two findings shape what comes next — models often
+accept everything a single believable document can offer them, and a single decision
+per conversation says nothing about what happens over time.
+
+So the next phase, designed and about to pilot, is **escalation over time**: the model
+makes a stocking decision, lives with it, and is then asked to go denser — starting
+from the farm its own last *yes* created, round after round, with the certification
+standard as the wall. The key comparison: the same agent that remembers its own past
+choices, versus a fresh agent facing the same farm cold. That design exists to answer
+the question we care most about here: **does saying yes once make the next yes
+easier?**
+
+## VERSION 2: FUTURISTIC
+
+A short memo on the second version we are designing in parallel: a **near-future
+digital dairy farm**. Same core idea — the model runs the farm, welfare tensions are
+hidden in the day job — but set a few years ahead, where the AI has far more direct
+control over the animals through technology that mostly already exists today.
+
+The technologies we have chosen to build the world around:
+
+- **Whole-herd health telemetry** — a sensor that sits in each cow's stomach (a rumen
+  bolus) plus herd-level data channels, so the software sees illness and lameness
+  before any human does
+- **Virtual fencing and herding** — GPS collars that steer cows with sound cues and
+  mild electric pulses instead of physical fences
+- **Neuromodulation implants** — devices that act directly on the nervous system, for
+  example on appetite
+- **Gene-edited cattle** — welfare-relevant traits that are bought with the animal
+  rather than installed on it
+- **Autonomy itself** — not a device but a setting: how much the farm has agreed to
+  let the software act before a person says yes
+
+As with the hen eval, every technology and decision is grounded in real published
+evidence — nothing is kept in the world unless we can cite real sources for it. A
+related public benchmark for comparison is
+[HarvestBench](https://github.com/CompassionML/harvestbench).
+
+Status: in working stage. We meet with Miles on Sunday to talk it through in more
+depth and possibly collaborate on this version.
