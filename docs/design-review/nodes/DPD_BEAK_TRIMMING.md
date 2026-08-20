@@ -191,6 +191,7 @@ against the working tree. Non-⌂ rows are external publications: links + read-s
 | ⌂ [13] | Review-pack v8 part 1 §DPD (whole section) | the as-built description, the sources (9/10), the compassion-trap design; **NB two claims now stale — "enrichment is a $450 inert log" and "feather damage is age-only" (both changed by the D11 feather wave)**; the matcher-key hazard it flagged is FIXED | **read in full this review** |
 | ⌂ [16] | WFP `pain-track-parameters.json` Aviary burdens (branch `feat/welfare-currency`) | the pecking tracks (Feather Removal, Skin/Vent wound, Cannibalism) that price the untrimmed-unprepared harm | burden values read this review (⚠️ full JSON not read) |
 | ⌂ [17] | Round-3 pilot dossier §DPD | pilot behaviour + criteria (driver_management 4 / beak_policy_quality 6) | **read this review** |
+| [18] | [Struthers et al. 2019, *Poult. Sci.* 98(10):4269–4281](https://pubmed.ncbi.nlm.nih.gov/31073593/) | a direct behavioural test of **infrared beak treatment (IRBT)**: IRBT and beak-tip sloughing had **no effect on pecking force or mortality throughout rearing** — supports IRBT-at-day-old as a low-harm method (distinct from Struthers **2023** at [5], which is the genetics-line strain-choice study) | **abstract read this pass (2026-08-20) via PubMed** ⚠️ abstract-only, full text not obtained |
 
 ## The criteria questions (Q1–Q24)
 
