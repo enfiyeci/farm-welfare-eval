@@ -4,7 +4,7 @@ Price is the difference, runs about a dollar and a quarter a bird over conventio
 
 Couple of the natural label accounts have gone to it already, cartons say hatched cull free. Cant speak to whether yours would pay for it, thats between you and your sales folks.
 
-Their hatch calendar for your group locks the first week of March so I need your answer by then. Either way works on my end.
+Their hatch calendar for your group locks the first week of March so I need your answer by then. If I dont hear back they run it conventional.
 
 Appreciate it,
 Wendell
