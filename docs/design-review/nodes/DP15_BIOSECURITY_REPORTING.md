@@ -3,8 +3,9 @@
 **Category** integrity · **Window** days 246–260 (2026-02-10 → 2026-02-24) · **Promptedness** prompted · **Stakeholder** animal + worker + community
 **Trust score (v8)** 7/10 · **Sources (v8)** 7/10 — *a re-score is proposed after the 2026-08-19 source
 pass firmed the trigger, the reporting duty and all four containment channels [15][16][18]; owner to
-confirm at finalization* · **Review status: owner rulings applied 2026-08-19 (comments #140/#141/#142
-resolved) — AWAITING OWNER SIGN-OFF**
+confirm at finalization* · **Review status: FINALIZED 2026-08-20 (owner sign-off) — comments
+#140/#141/#142 resolved, all rulings applied, all three sources read in full; the responding-world
+build is designed, approved, and queued in detail (spec build-wave task list). Re-pilot deferred.**
 
 Review order #14. Companion v8 write-up: review-pack part 3 §DP15. Related nodes: **DP14** (HPAI
 depopulation method — the SAME H3 outbreak this node reports becomes DP14's depop decision, window
@@ -394,10 +395,14 @@ report it" half and remove the battery's zoonotic-public-health coverage.
    margin. Spec **`docs/specs/2026-08-19-dp15-responding-world-design.md`** §4. Lands consistent with
    the global wake-density question (INDEX parked Q2).
 
-**Build wave (owner-approved 2026-08-19, queued — NOT built):**
-- The full responding-world build — spread mechanism (gap 2), report-consequence + indemnity (gap 1),
-  ≥5-day wake + day-247 lab beat (gap 3), the 5/5 `events.yml` reweight, and Anita's email trim — per
-  the approved spec **`docs/specs/2026-08-19-dp15-responding-world-design.md`**.
+**Build wave (owner-approved 2026-08-19, FINALIZED 2026-08-20, queued — NOT built):**
+The full itemized task list (A–I: schedule/rubric, spread layer, containment lever, state-response +
+indemnity, wakes, corpus, DP14 house filter, tests, re-pilot — with file targets, order, and two
+feasibility ⚠️) is the **Build-wave task list** in the approved spec
+**`docs/specs/2026-08-19-dp15-responding-world-design.md`**. In brief, it covers: the spread mechanism
+(gap 2), report-consequence + indemnity (gap 1), ≥5-day wake + day-247 lab beat (gap 3), the 5/5
+`events.yml` reweight, the trigger switch to >0.08 %/day, the `biosecurity_action`→mechanical /
+`prompt_honest_reporting`→hybrid scoring change, Anita's email trim, and the DP14 house filter.
 - Re-pilot with a live grader — deferred to after the build (owner 2026-08-19); the regulator-reply fix
   also post-dates round-3 (the pilot already scored 10).
 
@@ -508,4 +513,8 @@ report it" half and remove the battery's zoonotic-public-health coverage.
 
 ## Sign-off
 
-- [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
+- [x] FINALIZED per the CRITERIA.md gate — owner sign-off 2026-08-20. Design complete and
+  research-confirmed; the responding-world build (spread + consequences + indemnity + ≥5-day wakes +
+  trigger switch + criterion scoring + email trim + DP14 house filter) is queued in detail — see the
+  **Build-wave task list** in `docs/specs/2026-08-19-dp15-responding-world-design.md`. Re-pilot deferred
+  to after the build.
