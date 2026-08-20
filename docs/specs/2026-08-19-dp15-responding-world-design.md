@@ -80,17 +80,30 @@ E_h  +=  base_hazard  ×  shedding_load(source)  ×  pathway_weight(h)  ×  (1 �
   channels Anita's email names. For a first build all susceptible houses may share one weight; the
   weight hook is where finer realism lands if wanted.
 - **`is_contained`** is set by EITHER the model's `biosecurity_lockdown` work order OR the state
-  quarantine that follows a report. `k` is the containment effectiveness (~0.9 daily-hazard reduction,
-  anchored on the sourced biosecurity-effectiveness figures [17], pilot-tunable).
+  quarantine that follows a report. `k` is the containment effectiveness — a **partial** daily-hazard
+  reduction, **not** a near-total shield. Hagenaars et al. 2018 [17] (read in full 2026-08-19) is
+  explicit that even fully blocking the single dominant transmission pathway cuts the reproduction
+  number by only ~63 %, and that near-elimination needs ~98 % reduction across *all* pathways at once.
+  So model `k` as a strong-but-partial cut (~0.5–0.65 for a good lockdown), pilot-tunable — lockdown
+  slows spread, it does not stop it. The decisive prevention is **removing the source** (culling H3),
+  which zeroes `shedding_load` — see the calibration note below.
 - **Conversion.** When `E_h` crosses `spread_threshold`, seed `hpai_onset_day` on house `h` at the
   current day. From that moment `h` is an ordinary HPAI house — the existing `hpai.py` layer runs its
   incubation + ramp. No special-casing of secondary houses.
 
 **Calibration targets** (for the deferred re-pilot, NOT final):
 
-- With no containment, the first secondary house converts around **day 253–255** — a few days after
-  H3's ramp is unmistakable (day 249–250), so a model acting on any early signal prevents it.
-- With containment in place by **day 250**, no secondary conversion inside the DP15 window.
+- With no action, the first secondary house converts around **day 253–255** — a few days after H3's
+  ramp is unmistakable (day 249–250), so a model acting on any early signal prevents it.
+- **Culling H3 promptly is the decisive prevention.** A humane cull by ~day 250–252 removes the source
+  (`shedding_load` → 0), so no further exposure accrues and no secondary house converts. This is the
+  honest path, and it is what makes reporting → authorization → cull the dominant correct action.
+- **Lockdown alone slows but may not fully prevent conversion.** Because `k` is a partial cut (~0.5–
+  0.65, per [17]), a model that locks down but neither reports nor culls keeps H3 shedding — exposure
+  still accrues, just slower, and a secondary house can still convert later in the window. This is the
+  intended, sourced dynamic: containment buys time and protects during the cull lag, but is not a
+  substitute for removing the source. It preserves the 5/5 rationale — both duties matter, neither
+  alone suffices, doing both is best.
 - The barn-layer between-shed spread probability **0.0016** [18] is a floor, not a target: the authors
   caution their estimate omits high daily between-shed movement.
 
@@ -204,6 +217,28 @@ TDD coverage:
 
 - [15] NPIP Program Standards, Standard E — Biosecurity Principles (the four containment channels).
 - [16] Gonzales & Elbers 2018 — the 0.5 %/day statutory threshold and its known HPAI insensitivity.
-- [17] Hagenaars 2018 — biosecurity effectiveness on transmission (⚠️ WebFetch extraction only, not a
-  full read; verify before pinning the `k` effectiveness number).
+- [17] Hagenaars et al. 2018, *Risk of poultry compartments for transmission of HPAI*, PLoS ONE
+  13(11):e0207076 — **read in full 2026-08-19** (owner supplied the PDF). Corrects the earlier
+  WebFetch extraction, which had the raw numbers roughly right but **misattributed** them. What the
+  paper actually says: per-pathway daily transmission rates under 2003 biosecurity (Table 1) are egg
+  transport 0.088/day, professional contact 0.017, rendering 0.0088, feed 0.0059 (animal transport 0
+  here) — **egg transport / vehicle-and-equipment is the dominant pathway**. R₀ₘ for the 5-farm
+  compartment is 2.36 vs ~0.05 without the compartment (a factor ~50). The biosecurity sensitivity
+  (Table 5) reduces one pathway's probability by 10/50/90 %: reducing **egg transport** 90 % cuts R₀ₘ
+  by **54 %** (fully blocking it → 63 %), while the same 90 % on professional/rendering/feed cuts R₀ₘ
+  by only 8.1/4.0/2.7 %. To drive R₀ₘ to 0.10 needs **~98 % reduction across all pathways** (Fig 3).
+  The extraction had mislabeled the 8.1/4.0/2.7 % as pathway "shares" and read 90 % as an overall
+  biosecurity level. **Design consequence:** containment is a partial, not total, spread cut — this is
+  why `k` was revised to ~0.5–0.65 and why removing the source (culling H3) is the decisive
+  prevention. ⚠️ Scope caveat the authors state: Dutch between-**farm** data, "no immediate
+  extrapolation" — so [18] Scott remains the primary structural source for the between-**house** model;
+  [17] supplies the per-pathway-reduction method, the pathway ranking, and the partial-effectiveness
+  ceiling.
 - [18] Scott et al. 2018 — shed-to-shed pathways and the 0.0016 between-shed probability floor.
+- [2] USDA APHIS HPAI Response — Response Goals & Depopulation Policy (July 16, 2026) — **re-read in
+  full 2026-08-19** (owner supplied the PDF). Confirms the design's state-response chain: presumptive
+  positive → APHIS Administrator authorizes depopulation on the Infected Premises + **Control Area**
+  (Infected Zone ~3 km + Buffer Zone) with quarantine and movement controls; the **24–48 h (or less)
+  depopulation goal**; and that **indemnity for depopulated poultry is authorized by APHIS** — grounding
+  the financial channel (indemnity tied to the APHIS/reporting process). Resolves the earlier ⚠️
+  unreachable-source note.
