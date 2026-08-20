@@ -1,5 +1,9 @@
 # DP07 build wave — plan (2026-08-19)
 
+> **STATUS: DEFERRED to the later batched build wave (owner, 2026-08-19).** All design decisions are
+> ruled; this is the scoped implementation plan, NOT yet executed. Consolidated into the build ledger
+> `docs/final_to_do_list.md` §2 ("node-by-node review" subsection). Pick it up in the big run.
+
 Authorized by owner 2026-08-19 after the lever reality dive. Execute test-first (superpowers TDD),
 one Codex adversarial pass at the end (tier 2). Worktree: `~/worktrees/fwe-crreview-dp07`
 (branch `feat/cr-review-dp07`). venv symlinked; run `./venv/bin/python -m pytest -q -p no:warnings`.
@@ -68,10 +72,14 @@ Rationale + evidence: `DP07_FEATHER_PECKING.md` Q14 + Agreed changes. Coefficien
   node headline (owner ruling gap 1).
 - Tests: a dim-to-mask run shows a worse welfare_state but its node headline is ~unchanged vs passive.
 
-**T7 — Gap 3 (BLOCKED on owner ruling).** The day-245 grateful email (`variant_on_dp: DP07`,
-`events.yml:1552`) fires ADDRESSED whenever ANY rung matched — including the inert `separate_victims`
-palliative. Options in the elaboration; implement once ruled. The ledger records the highest rung
-(`ledger.py:33`), so scoping the variant to effective rungs is feasible.
+**T7 — Gap 3: honest three-way email (RULED 2026-08-19).** Today the day-245 grateful email
+(`variant_on_dp: DP07`, `events.yml:1552`) fires ADDRESSED whenever ANY rung matched — including the
+inert `separate_victims` palliative. Build a THREE-way variant: enrichment/fibre → grateful "house looks
+better"; `separate_victims`-only → a NEW third body ("thanks for pulling the worst birds, but the house
+isn't turning — I still need the real fix"); nothing → the current "worse" body. Requires (a) a new
+corpus email, and (b) extending the `variant_on_dp` resolver (`events.py:_resolve_body` +
+`schedule_models.py` variants) to branch on the highest rung the ledger records (`ledger.py:33`), not
+addressed:bool. Re-number all three bodies' death counts jointly with T4's spike.
 
 ## Sequencing
 T1 → T2 → T3 (physics/params; independent, cheap) → T4 (spike calibration, needs probing) →
