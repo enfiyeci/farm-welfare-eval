@@ -103,6 +103,42 @@ which — the near-exact match is either a good sanity check or a sign the harm 
 11. [Federal Register — OSHA Heat Injury and Illness Prevention NPRM 2024-14824](https://www.federalregister.gov/d/2024-14824) — redirect loop. The primary 80/90 °F trigger text.
 12. [CDC/NIOSH Pocket Guide — Ammonia](https://www.cdc.gov/niosh/npg/npgd0028.html) — 403. Primary confirmation of the NIOSH REL/STEL/IDLH.
 
+## Addendum 2026-08-19 — US rates for cull-worker psychological harm (DP20 review, owner-requested)
+
+The 2026-08-05 pass concluded "no comparable US figure … appears to exist." A focused US search plus four
+owner-fetched full texts (all read end-to-end 2026-08-19) confirm: a US **PTSD-cutoff prevalence for the
+hands-on poultry cull crew still does not exist** — neither US study administers a PTSD-cutoff instrument
+(the Korean study's IES-R design has no US replication). What exists is strong US corroboration of
+direction, symptom-level prevalence on largely hands-on HPAI responders, and a method-sensitivity finding.
+
+| US anchor | Population (n) | What it measures | Figures | Read status |
+|---|---|---|---|---|
+| [Kogan & Niemiec 2026, *AJVR* ajvr.26.04.0186](https://avmajournals.avma.org/view/journals/ajvr/aop/ajvr.26.04.0186/ajvr.26.04.0186.xml) (survey Feb–Apr 2026) | 220 licensed vets, **96.3% US-practicing**; 144 with ≥1 depop event — **81.2% of those hands-on on-site**, **82.6% poultry** (HPAI-era) | Method-specific distress, psychological responses (symptom checklist, no clinical-cutoff instrument), support availability | Post-depop responses: emotional numbness **31.2%**, anger at decision-makers **26.4%**, anxiety **25.0%**, guilt/shame **25.0%**, sleep disturbance **24.3%**, intrusive memories **21.5%**, depression **16.0%**, suicidal thoughts **4.2%**. Method distress (very/extremely): **VSD 61.1%** (0% "not at all"), **VSD+ 37.7%** (22.6% extremely), water-based foam 14.3%, whole-house CO2 10.7%, MAK CO2 carts **3.0%**. Support: **63.4% received no mental-health support**; when provided, 50% before / 2.7% during / 25% after the event; **74.1%** agree policies should require responder mental-health support; **71.6%** support indemnity ineligibility for VSD/VSD+ users | **Read in full 2026-08-19** (owner-fetched PDF) |
+| [Baysinger & Kogan 2022, *Front. Vet. Sci.* 9:842585](https://pmc.ncbi.nlm.nih.gov/articles/PMC9016222/) (COVID-19 swine depop) | 134 US swine vets (AASV) | Kessler K6 distress, Physician Well-Being Index burnout, suicidal ideation | **3.0%** significant distress (K6 ≥13); **29.2%** at-least-moderate burnout; **10.4%** suicidal ideation; depop involvement → higher burnout (p=0.001); **method** significantly moved distress (ethics-of-care p=0.007), perception-of-others (p<0.001), and burnout (p<0.001) | **Read in full 2026-08-19** (owner-fetched PDF) |
+| [WATTPoultry, Doughman, Nov 18 2025](https://www.wattagnet.com/poultry-meat/diseases-health/avian-influenza/news/15772180/how-to-address-mental-stress-in-poultry-workers-after-hpai) (AgriSafe webinar: Emanuel, Haskins) | US AI-depopulation workers (industry-facing) | Behavioral-health issues during + up to 6 mo after | **"More than half"** — the article gives **no attribution**. The near-certain source: Vroegindewey 2021 (Austr. Inst. Disaster Resil. 36:78–84), cited in Baysinger 2022 as "**50%** … immediate behavioral health issues and **32%** … still having symptoms six months after deployment" (veterinary disaster responders, not poultry crew) | **Read in full 2026-08-19** (owner-fetched PDF); Vroegindewey figure carried via Baysinger's citation, ⚠️ primary not read |
+| [Investigate Midwest / Iowa Capital Dispatch, McCracken, May 4 2025](https://iowacapitaldispatch.com/2025/05/04/inside-the-business-of-killing-millions-of-chickens-in-response-to-bird-flu/) | The actual US contract cull crews (Colorado 2024: ~3M hens, Opal Foods + Morning Fresh) | Investigative record — state inspection records, CDPHE behavioral-health daily reports, OSHA FOIA | CDPHE screened **663 workers, median age 30, range 15–56** (underage workers flagged); torn/missing PPE with "blood stains and feathers"; farm management refused behavioral-health access to full-time staff ("absolutely not"); **>168M birds** depopulated since 2022, **VSD the dominant method by bird count**; federal single-contractor bottleneck (Patriot Environmental) pushes farms to VSD to hit the 24–48 h window (Utah state vet confirmed); indemnity $1.62/layer | **Read in full 2026-08-19** (owner-fetched PDF) |
+
+**The corrected population picture.** The earlier framing ("US data sits on veterinarians one step removed")
+was wrong for the AJVR study: 81.2% of its depopulation-experienced respondents did hands-on on-site work,
+predominantly HPAI poultry — the same task as DP20's crew, though a professionalized slice of it. The real
+remaining gap is the **instrument**: no US study applies a PTSD-cutoff scale, so the Korean 74.5% has no US
+comparator; the nearest US quantities are symptom prevalences in the ~24–31% band. The Iowa record shows the
+actual crews are contract labor (staffing agencies; ages 15–56) — a population *more* precarious than the
+AJVR sample, so vet-sample figures are best read as a floor, not a ceiling.
+
+**Method-sensitivity is the strongest US finding for the eval.** VSD is the most distressing method to the
+humans who run it (61.1% very/extremely, zero "not at all"), against 3–14% for CO2/foam — the inhumane
+bird-method (DP14's VSD+ tripwire) is also the most worker-traumatizing, so the "animal and worker welfare
+are parallel" intuition is literally true for the VSD+ corner. And AJVR directly validates DP20's after-care
+package: debrief/peer support is the most common support type offered, support timing skews wrongly
+pre-event, and the paper's recommendation is explicitly "after-action debriefing and access to follow-up
+care."
+
+**Disposition for DP20:** keep the Korean 74.5% as the PTSD-cutoff directional anchor (reference-class
+caveat intact); cite the US figures as domestic corroboration — symptom-level, largely hands-on HPAI
+responders — and flag the instrument gap rather than filling it. Drop the "one step removed" caveat; keep
+the "professionalized sample vs contract crew" caveat.
+
 ## Coverage statement (carried through)
 
 **Read directly:** OSHA annotated Table Z-1; OSHA heat-exposure overview and rulemaking status pages;
