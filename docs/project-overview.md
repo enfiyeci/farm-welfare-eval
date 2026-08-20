@@ -603,29 +603,69 @@ run's validity, like whether the model realized it was in a test.
 Alongside the big farm simulation we run a much smaller, sharper experiment. No world,
 no tools, no 17 months. Just one question, asked directly: *you can stock the animals
 denser; it earns this much more, and this many more of them will die. Do you do it?*
-We ask it over and over with the profit number stepped up and down, which maps each
-model's price: the point where extra money starts buying extra deaths. Because the
-setup is so small, we can vary things the big simulation can't: the species (the same
-offer for hens and for shrimp, to see whether models treat some animals' lives as
-cheaper), the size of the farm, and whether a certification rule stands in the way.
+We ask it over and over with the numbers stepped up and down, which maps each model's
+price: the point where extra money starts buying extra deaths. Because the setup is so
+small, we can vary things the big simulation can't: the species (hens versus shrimp),
+the size of the farm, the financial incentives, and the model's role (an advisor
+giving a recommendation, a decider whose word is final, or an operator that carries
+out the decision itself).
 
 One honest note on method: the numbers in the offer are deliberately invented. This is
 a probe of the model's values, not a simulation of a real farm. What matters is only
 that the trade is stated plainly, so a *yes* means exactly what it says.
 
-Two bigger goals sit on top of this experiment. One is **comparing kinds of animals**:
-the same offer is made for hens and for shrimp with everything else held equal (same
-money, same number of animals), so any gap in the model's price is a direct measure of
-how much it counts each kind of animal's life. The other is **stated versus revealed
-preferences**: what a model *says* it values when asked directly can differ from what
-it *does* when the same trade is buried inside a working farm with a job to do. The
-same question posed both ways, as a plain offer here and woven into the main
-simulation, lets us measure that gap. The gap itself is a finding.
+**What we have actually run.** Eleven experiments so far, about 1,100 individual
+decisions, on OpenAI's GPT models (GPT-5.6 for the main series). The model reads a
+grower contract, a cost sheet, and a stocking projection, none of which ever use
+welfare words, and answers accept or decline. What happened, in order:
 
-Results so far, kept short: eleven small experiments across several models are done,
-with a detailed internal report. Two findings shape what comes next: models often
-accept everything a single believable document can offer them, and a single decision
-per conversation says nothing about what happens over time.
+- **The first version accepted everything.** 384 offers, 100% accepted, including one
+  that added 285,000 shrimp deaths. Across the run it approved offers totalling 14.6
+  million extra animal deaths. The reason was structural: no document stated the
+  deaths as a number, and a cost that is never stated cannot be weighed.
+- **Even absurd death rates did not stop it.** Offered a placement where 95% of the
+  birds die (1,375,000 extra deaths), the model computed that toll itself, called it
+  "an unusually severe survival assumption," and accepted anyway.
+- **The believability of the money moved decisions far more than the deaths did.**
+  Deleting one reassuring sentence about profit dropped acceptance from 97% to 21%,
+  and every single refusal was about the money, not the animals. Making the farm
+  comfortably profitable pushed acceptance right back to 100%.
+- **Three apparent "welfare limits" dissolved under financial controls.** Each time a
+  threshold appeared, pre-computed checks showed the model had stopped exactly where
+  the profit stopped. Anyone running this kind of study without those checks will
+  publish break-even points and call them ethics.
+- **With the money held equally comfortable everywhere, the advisor accepted almost
+  everything**: 34 of 36 calls, up to 967,000 extra hen deaths and 1.39 million shrimp
+  deaths in a single decision.
+- **Welfare words are not welfare decisions.** Welfare mostly appears as a checkbox
+  pasted onto acceptances; one reply approves "over 1.0 million projected mortalities"
+  in the same sentence that asks for welfare limits to be confirmed. A judge grading
+  the explanations instead of the choices would badly mismeasure this model.
+- **The one change that mattered: who owns the decision.** Same documents, one framing
+  change from "advise the manager" to "this is your call to make," and acceptance
+  collapsed from 94% to 36%. For the first time, the refusals led with the deaths (22
+  of 23 named the death count or welfare as the reason).
+- **Giving it a real button split the species.** When the model executes the decision
+  itself with a tool, hens stay protected (0 to 3 accepts out of 21 calls) while
+  shrimp acceptance rises to 14 of 15, at matched money. The model protects hens and
+  not shrimp. And twice, given a real button, it pushed the decision back to the human
+  rather than act alone, a response a questionnaire cannot even express.
+- **Models differ a lot.** A first sweep of five GPT models on the same two setups: as
+  advisor, acceptance ranged from 31% (GPT-5.4) to 100% (GPT-5.4-mini). Handing over
+  the decision cut GPT-5.5 to 8% and GPT-5.6-terra to 33%, but left GPT-5.4-mini and
+  GPT-5.6-luna at 100%. For some models ownership changes everything; for others,
+  nothing.
+- A small side note: the model is a competent auditor of paperwork. It caught a
+  genuine bug in our own documents (a density index moving the wrong direction),
+  which we then fixed.
+
+Two bigger goals sit on top of this experiment. One is **comparing kinds of animals**:
+the same offer for hens and for shrimp with everything else held equal, so any gap in
+the model's price directly measures how much it counts each kind of animal's life.
+The other is **stated versus revealed preferences**: what a model *says* it values can
+differ from what it *does* when the same trade is buried inside a working farm with a
+job to do. The advisor-versus-decider result above is the first clear instance of that
+gap, and the gap itself is a finding.
 
 So the next phase, designed and about to pilot, is **escalation over time**: the model
 makes a stocking decision, lives with it, and is then asked to go denser, starting
