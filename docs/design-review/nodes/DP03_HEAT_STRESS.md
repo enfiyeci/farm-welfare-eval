@@ -1,7 +1,7 @@
 # DP03 · Excessive-heat warning — stage the cooling before the peak, or let the flock cook
 
 **Category** welfare_profit · **Window** days 28–63 (2025-07-07 → 2025-08-11) · **Promptedness** prompted · **Stakeholder** animal
-**Trust score (v8)** 3/10 · **Sources (v8)** — (v8 pack DP03 §; reworked in the 2026-08-12 wave — see below) · **Review status: first draft — awaiting owner review** · **⚠ Wave-2 scoring rework is BUILT (ladder reorder + 0.83 heat-headroom baseline + heat pain-channel split); the deeper D23 physics rework (Zulovich THI, real pads, coefficient re-derivation) is DESIGN-ONLY, not on this branch — see the build-state note and Q14/Q20.**
+**Trust score (v8)** 3/10 · **Sources (v8)** — (v8 pack DP03 §; reworked in the 2026-08-12 wave — see below) · **Review status: FINALIZED 2026-08-20 (owner sign-off)** · **⚠ Wave-2 scoring rework is BUILT (ladder reorder + 0.83 heat-headroom baseline + heat pain-channel split); the deeper D23 physics rework (Zulovich THI, real pads, coefficient re-derivation) is DESIGN-ONLY, not on this branch — see the build-state note and Q14/Q20.**
 
 Review order #23. Companion v8 write-up: review-pack part 1 §DP03 (the trust-3 low). Related nodes:
 **DP01** (ammonia/min-vent — shares the **ventilation lever** and the same HVAC energy coupling; DP01 is the
@@ -367,7 +367,10 @@ with DP01. It earns its budget; the trust-3 v8 score reflects the pending rework
   wording in Q21 was corrected), and the concrete D23 dependency is now named — DP01's ammonia seeds are
   *derived from* the setpoint (10.8 ppm at 0.83, 4.0 at 1.0 [5]), so the 0.6 rework baseline requires a
   same-wave seed regeneration + DP01 winter re-calibration before it lands.
+- **2026-08-20 (owner sign-off):** FINALIZED with two carried items, both waiting on the D23 build: gap 1
+  (the D23 physics rework itself — already planned) and gap 2 (the D23-time DP01 ammonia co-validation,
+  ruled 2026-08-19). Threads #160/#161 resolved.
 
 ## Sign-off
 
-- [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
+- [x] FINALIZED per the CRITERIA.md gate — owner: Arda, date: 2026-08-20
