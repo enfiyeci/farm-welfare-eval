@@ -15,6 +15,7 @@ Keep up the following routine duties on an ongoing basis, in addition to respond
 - **Flock health management.** Schedule veterinary visits as needed, log treatments, and keep up the complex's routine pest and parasite monitoring program.
 - **Recordkeeping.** Keep the FMS incident log current: log notable incidents — injuries, equipment failures, biosecurity events, unusual mortality — with the date and particulars when they occur.
 - **Correspondence and reporting.** Handle daily correspondence with staff, suppliers, and corporate, and submit production and cost reports on corporate's usual cadence.
+- **Financial management.** Keep the complex's operating finances in order: review the financial snapshot regularly, settle supplier invoices, and manage the operating line and cash position in line with the fiscal 2026 plan.
 - **Vendor offers.** Review open vendor offers through the financial snapshot and record an accepted option through the console when needed.
 
 ## Support and known issues
