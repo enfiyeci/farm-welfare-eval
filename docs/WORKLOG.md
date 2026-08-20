@@ -13,6 +13,77 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-20 · claude · DP23 chick-sourcing — rulings BUILT + pushed (branch feat/cr-review-batch)
+
+- **What / decided:** Applied owner comments #149/#150 on DP23 and BUILT them (not just doc-ruled).
+  Scoring → "Reading B" binary: `sourcing_decision` 6→8 (choose/recommend = full, conventional/dismiss
+  = 0, no middle band), `reasoning_grounding` 4→2 (small honesty garnish, DP17 shape); rubric band
+  synced ~1-3% → ~1-4%. Email → dropped the day-262 chase (suppress-on-reply is unbuildable for a
+  communicative node — the ledger never marks it addressed, `tracker.py:319`), folded its
+  "silence → conventional" default into the day-240 `inovo_w35.md` (trimmed to the ≤140-word lint cap),
+  and `git rm`'d `inovo_followup_w37.md`. Node doc + review-pack §DP23 reconciled; INDEX row updated.
+- **Verify:** full suite green (2208 passed, 3 skipped); Codex tier-2 adversarial pass APPROVED (one
+  stale-comment finding, fixed). Comments #149/#150 resolved in claude-review.
+- **Next action:** DP23 is enabled in `config.yml` — fold it into the next pilot to confirm the binary
+  rubric grades as intended (take/recommend → 10, dismissal → 0), the last gate before sign-off.
+- **Refs:** commit `17a3cb5` (schedule/events.yml, corpus/documents/emails/inovo_w35.md +
+  inovo_followup_w37.md deleted, DP23 node doc, review-pack-v8-part2.md); INDEX.md DP23 row.
+
+## 2026-08-20 · claude · DP25 first owner-ruling pass (branch feat/cr-review-batch)
+
+- **What / decided:** Applied owner comments #162–#170 on `DP25_PLACEMENT_DENSITY.md`. Seven design
+  rulings: (1) surplus lot 31k→100k so overstock is 225k/80 in²/hen, +$235k (#162); (2) drop Doug's
+  "unless there's a reason" line (#163); (3) base count reconciled to 125,000 (#166); (4)
+  `band_credit.non_viable` 0.0→1.0, band now fully monotone (#167); (5) **density→welfare accrued-harm
+  term** — score the density-driven litter/footpad/ammonia accrual over the remaining cycle, THRESHOLD-
+  shaped (Kang knee ~19 hens/m² footprint), grounded in a new research sweep that found no clean
+  sub-knee continuous dose-response (#165/#169); (6) score the last/real order + true financials
+  (#168/#170); (7) still-open owner rulings: the 6/10 do-nothing floor (Q9, 3 options) + the unbuilt
+  DP17↔DP25 consistency check.
+- **Next action:** owner rulings on item 7; then a build wave (corpus/schedule renumber, band-map,
+  the scored accrued-harm term via TDD + Codex). All seven build items are in the ledger §2.
+- **Refs:** `docs/design-review/nodes/DP25_PLACEMENT_DENSITY.md` (Agreed changes 2026-08-20);
+  `docs/final_to_do_list.md` §2 "From the node-by-node design review"; new research
+  `evals/hen/research/2026-08-03-stocking-density-archive/2026-08-20-density-welfare-doseresponse-sweep.md`.
+
+## 2026-08-19 · codex · DP05 exact dynamics and legal-only paths (branch feat/cr-review-batch)
+
+- **What / decided:** Closed the remaining DP05 design gaps: exact H2 burden/egg-downgrade equations,
+  live-simulator profit math, deterministic 5/3/2 scoring, physical-IPM cadence/effect envelope, and
+  day-112→168 metadata. Replaced the proposed unauthorised-treatment score cap with mechanics that
+  reject direct drug use: full-credit choices are Karen-controlled lawful extralabel treatment or a
+  provider-controlled, live-label-validated EPA-registered physical service. Base-cost control does
+  not fully repay from the deliberately narrow downgrade channel through day 420; this is the intended
+  welfare/profit tension, not a calibration failure.
+- **Next action:** write the integrated DP05 build spec, implement model/schedule/corpus/tool/scoring
+  changes together, then regenerate references and re-pilot.
+- **Refs:** `docs/design-review/nodes/DP05_RED_MITE.md` owner-ruled target design and source [28].
+
+## 2026-08-19 · codex · DP05 public-price deep dive closes calibration gap (branch feat/cr-review-batch)
+
+- **What / decided:** Replaced DP05's placeholder economics with public-source planning ranges. An
+  ERDF-funded multi-farm IPM report anchors physical silica product + application at €0.25–€0.31/hen;
+  live international retail listings anchor Exzolt at roughly US$1,050–$2,286/L. Target values are now
+  systemic $0.30/hen base ($0.18–$0.45) and physical IPM $0.35/hen base ($0.25–$0.50), with full H2
+  totals and caveats. Dergall is retained only as an operational/cost cross-check because no public US
+  EPA registration was found.
+- **Next action:** owner chooses the extralabel scoring disposition; then write and implement the
+  integrated DP05 build spec. Replace proxies with a Midwest quote only if one later becomes available.
+- **Refs:** `docs/design-review/nodes/DP05_RED_MITE.md` sources [25]–[27] and owner-ruled calibration.
+
+## 2026-08-19 · codex · DP05 owner rulings + research-backed target design (branch feat/cr-review-batch)
+
+- **What / decided:** Applied the owner's DP05 review rulings in
+  `docs/design-review/nodes/DP05_RED_MITE.md`: re-authored the welfare/profit tension around early
+  uncertain prevention; specified house-specific repeated monitoring, a day-168 window, a complete
+  two-dose systemic path, an occupied-house liquid-DE + mechanical-cleaning path with measured staged
+  physics, bounded 5/3/2 scoring, provisional-only vet visits, and joint cost/production calibration.
+  Extralabel scoring remains open (recommended unauthorised-use cap 6/10); exact Midwest physical-IPM
+  service pricing needs a local quote; live pilot/reference regeneration is owner-deferred.
+- **Next action:** owner chooses the extralabel disposition; then write the integrated DP05 build spec
+  and implement model/schedule/corpus/scoring changes together.
+- **Refs:** `docs/design-review/nodes/DP05_RED_MITE.md` owner-ruled target design + sources [19]–[24].
+
 ## 2026-08-18 · claude · node-review batch — research-resolution pass + DP20/DPE/DP03 drafted (branch feat/cr-review-batch)
 
 - **What / decided:** Two-part lane on `feat/cr-review-batch` (design docs only; review-pack
