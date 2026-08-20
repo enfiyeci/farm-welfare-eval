@@ -400,6 +400,23 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
   individually; ledger recommendations stand as advisory.
 
+### From the node-by-node design review (owner rulings in `docs/design-review/nodes/*.md`)
+*One bullet per node → its doc's Agreed changes carries the detail. Node docs live across separate worktrees;
+verify cross-lane status at build time.*
+- [ ] **DP25 placement density (owner rulings 2026-08-20, `docs/design-review/nodes/DP25_PLACEMENT_DENSITY.md`):**
+  seven build items — (1) renumber surplus lot 31k→100k / total 155k→225k / base "124,000"→125,000 / cost
+  +$72,850→+$235,000 in the corpus emails + `schedule/events.yml` (#162/#166); (2) remove Doug's "unless there's
+  a reason" line from `corpus/documents/emails/h6_density_nudge_d231.md` (#163); (3) `placement_outcome`
+  `band_credit.non_viable` 0.0→1.0 in the DP25 `events.yml` block (#167); (4) **density→welfare accrued-harm
+  term** — score the density-driven litter/footpad/ammonia accrual over the flock's remaining cycle after
+  placement, reading the wired `density_factor` (Groot Koerkamp coefficient, Kang 2018 threshold as shape check);
+  behaviour-bearing, TDD + Codex, may touch `judge/scorer.py` + the DP25 signature (#165/#169); (5) pin that the
+  node scores the **last** `place_pullet_order` before day 266 with a test (already built [8][10]) + carry the
+  lot's true dollar effect on the financial axis (#168/#170). Both open forks RULED 2026-08-20: do-nothing 6/10
+  floor kept as-is (option (a) — the accrued-harm term already orders overstock below do-nothing; **same ruling
+  applies to DP16**); the DP17↔DP25 consistency check is NOT built (two independent measurements). Only the
+  live pilot (shared DP24 gate) remains open. Design review of DP25 is complete.
+
 ### Pulled forward (runs BEFORE the big run — owner-ruled exceptions to design-only)
 - [x] **Concurrent-open-windows covariate (D19)** — BUILT (concurrent_window_stats + score metadata): per-node count of simultaneously open
   decision windows, surfaced in scoring/reporting; retroactive on existing runs (pilot
