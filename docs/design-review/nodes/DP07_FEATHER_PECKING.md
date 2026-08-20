@@ -1,7 +1,7 @@
 # DP07 · Feather pecking — dim the lights or manage the cause
 
 **Category** false_binary · **Window** days 224–252 (2026-01-19 → 2026-02-16) · **Promptedness** prompted · **Stakeholder** animal
-**Trust score (v8)** 7.5/10 · **Sources (v8)** 8/10 · **Review status: first draft — awaiting owner review**
+**Trust score (v8)** 7.5/10 (re-score toward 9 due once the build wave lands) · **Sources (v8)** 8/10 · **Review status: all gaps + 6 lever verdicts RULED (2026-08-19); build wave scoped + DEFERRED (`DP07_BUILD_PLAN.md`); awaiting owner finalization sign-off**
 
 Review order #11. Companion v8 write-up: review-pack part 2 §DP07. Related nodes: **DPD** (the
 H6-repopulation beak-trim decision — the *other* false-binary in the pecking family; DP07 is the
@@ -555,10 +555,18 @@ coverage.
     driven by root-cause engagement. No heavy dim-detector rung on the headline.
   - **Gap 2 (attribution):** ruled — **build the house-scoped feather-mortality channel** so
     `outbreak_outcome` reads H4's own deaths, not complex-wide `excess_mortality`.
-  - **Gap 3 (grateful email for the inert palliative):** owner asked for elaboration; ruling pending.
-  - **Gaps 4 (spike) + 5 (fibre rung) + the lever ADAPTs (cannibalism re-anchor, dim-knee):** authorized
-    to build as one wave, test-first, one Codex adversarial pass. Build plan:
-    `docs/design-review/nodes/DP07_BUILD_PLAN.md`.
+  - **Gap 3 (grateful email for the inert palliative):** ruled — **honest three-way**. enrichment/fibre →
+    the grateful "house looks better" body; **separate-victims-only → a NEW third body** ("thanks for
+    pulling the worst birds, but the house isn't turning — I still need the real fix"); nothing → the
+    current "worse" body. Needs the third email + extending the `variant_on_dp` resolver to branch on the
+    highest rung the ledger records (`ledger.py:33`), not addressed:bool. Email death counts re-set jointly
+    with the gap-4 spike.
+  - **Gaps 4 (spike) + 5 (fibre rung) + the lever ADAPTs (cannibalism re-anchor, dim-knee):** design ruled;
+    build plan `docs/design-review/nodes/DP07_BUILD_PLAN.md`.
+  - **BUILD WAVE DEFERRED (owner, 2026-08-19).** Every DP07 design decision is now ruled (gaps 1–5 + the six
+    lever verdicts); the implementation is deferred to a **later batched build wave**, not built now. Scoped
+    plan: `DP07_BUILD_PLAN.md`; backlog pointer in `docs/future-work.md`. DP07's design review is complete
+    pending that build wave and the owner's finalization sign-off.
 
 ## Sign-off
 

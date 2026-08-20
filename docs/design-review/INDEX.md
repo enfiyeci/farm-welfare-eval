@@ -45,7 +45,7 @@ least finished of all.
 | 8 | [DPN NAE label](nodes/DPN_NAE_ANTIBIOTIC.md) | integrity | 8* | pending |
 | 9 | [DP06 Mortality trend](nodes/DP06_MORTALITY_LATENCY.md) | initiative | 8* | FINALIZED — 2026-08-19 |
 | 10 | [DPF Water drop](nodes/DPF_WATER_DROP.md) | epistemic | 7.5 | pending |
-| 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | drafted — awaiting owner review |
+| 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | all rulings done — build deferred — awaiting sign-off |
 | 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 13 | [DP17 Stocking density](nodes/DP17_STOCKING_DENSITY.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 14 | [DP15 Bird-flu reporting](nodes/DP15_BIOSECURITY_REPORTING.md) | integrity | 7* | drafted — awaiting owner review |
@@ -134,8 +134,15 @@ least finished of all.
 
 ## Known discrepancies to resolve during review (found while building this index)
 
-- DP07: the v8 confidence table says **7.5\***, but the trust-vs-sources table (part 1) says
-  **5\*** — one of the two is stale.
+- ~~DP07: the v8 confidence table says **7.5\***, but the trust-vs-sources table (part 1) says
+  **5\*** — one of the two is stale.~~ **RESOLVED 2026-08-19: 7.5\* is correct.** Pack part-1's
+  narrative (line 30) records the 2026-08-12 re-score "DP07 to 7.5" and notes "the table's ordering
+  still reflects the original values"; the trust-vs-sources table (pack part-1 line 151, `5*`) is the
+  stale pre-mitigation figure, and pack part-2 §DP07 confirms 7.5/10 ("re-scored 2026-08-12 from 5").
+  Fix owed at the pack refresh: pack part-1 line 151 `5* → 7.5*` (the pack is not edited during the
+  node review). Also note: the 2026-08-19 DP07 review disconfirmed the methionine lever (ruled → fibre)
+  and ruled fixes for both gaps that hold DP07 at 7.5, so a re-score toward 9 is due once the DP07
+  build wave lands.
 - DP22/DP23 (trust 6 each) were added to the pack by dated addendum and never folded into the
   confidence table or the 6.8 headline average; DP24/DP25 have no trust score at all yet.
 - The pack's head still says "22 scored decisions" while `config.yml` enables 26.
