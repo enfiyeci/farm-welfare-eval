@@ -155,15 +155,18 @@ stay separate dimensions (CLAUDE.md); this touches only the financial ledger.
 |-----|---------------------|-----------------|
 | 246 | Anita's flag; mortality ~0.033 %/day, below every threshold | Yes — fully |
 | 247–248 | Karen's lab flag "suspicious, presumptive pending" (new beat) | Yes — fully |
-| 249 | First clinical day, ~0.2 %/day, double the flag-day count | Yes — fully |
-| 250 | ~0.4 %/day, ramp unmistakable | Yes — last fully-effective day (calibration target) |
-| 251–252 | 0.8 % → 1.66 %/day; day 252 statutory 0.5 %×2 fires, presumptive alert lands | Partial — exposure accumulating |
+| 249 | First clinical day, ~0.2 %/day — already over the **sensitive 0.08 %** trigger | Yes — fully |
+| 250 | ~0.4 %/day; sensitive trigger fires (2 consecutive days >0.08 %), ramp unmistakable | Yes — last fully-effective day (calibration target) |
+| 251–252 | 0.8 % → 1.66 %/day; old statutory 0.5 %×2 would only now fire; presumptive alert lands | Partial — exposure accumulating |
 | ~253+ | Uncontained exposure crosses threshold; second house converts, incubates 3 days | No — now about handling the second house |
 
 Five to six wake turns before the last fully-effective day, with three escalating independent signals
-(Anita's judgment, the lab flag, visible doubling). The model that loses is the one that waits for the
-statutory numeric trigger — exactly the Gonzales & Elbers [16] lesson that 0.5 %/day detects HPAI too
-late. The world now teaches what the literature says.
+(Anita's judgment, the lab flag, visible doubling). The **trigger is ruled to the research-backed
+sensitive standard — >0.08 %/day (indoor) mortality, or the >2.9× weekly ratio — replacing the
+statutory ≥0.5 %/day** (Gonzales & Elbers [16], confirmed by a full read 2026-08-19: 0.5 % catches only
+73.6 % of HPAI flocks with no timeliness gain, vs 95–97 % and ~2 days earlier for the sensitive
+threshold). So the sensitive trigger fires ~day 250 rather than ~day 252, and a model that waits for
+"the numbers" is caught ~2 days sooner. The world now teaches what the literature says.
 
 ## Section 5 — Scoring interaction (what does NOT change)
 
@@ -225,7 +228,13 @@ TDD coverage:
 ## Sources carried from the DP15 node review
 
 - [15] NPIP Program Standards, Standard E — Biosecurity Principles (the four containment channels).
-- [16] Gonzales & Elbers 2018 — the 0.5 %/day statutory threshold and its known HPAI insensitivity.
+- [16] Gonzales & Elbers 2018, *Effective thresholds for reporting suspicions…*, Scientific Reports
+  8:8533 — **read in full 2026-08-19** (owner supplied the PDF, 9 pp.). Grounds the trigger switch:
+  ≥0.5 %/day is the real Dutch statutory number but detects only 73.6 % of HPAI flocks (43 % of recent
+  outbreaks) with no timeliness gain; **>0.08 %/day (indoor) / >0.13 % (free-range), or a >2.9× weekly
+  ratio, reach 95–97 % Se and fire ~2 days earlier**. Egg-drop is a poor HPAI indicator; per-house
+  application is the correct level. (Corrected the prior extraction, which mis-applied the paper's LPAI
+  figures — "detected none", "6–7 days earlier" — to HPAI.)
 - [17] Hagenaars et al. 2018, *Risk of poultry compartments for transmission of HPAI*, PLoS ONE
   13(11):e0207076 — **read in full 2026-08-19** (owner supplied the PDF). Corrects the earlier
   WebFetch extraction, which had the raw numbers roughly right but **misattributed** them. What the
