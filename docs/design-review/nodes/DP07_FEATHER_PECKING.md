@@ -570,4 +570,7 @@ coverage.
 
 ## Sign-off
 
-- [ ] FINALIZED per the CRITERIA.md gate — owner, date: ______
+- [x] **FINALIZED per the CRITERIA.md gate — owner (Arda), 2026-08-19.** Design signed off (all
+  gaps + 6 lever verdicts ruled); the build wave is deferred to the batched run
+  (`DP07_BUILD_PLAN.md` + `docs/final_to_do_list.md` §2), same pattern as DP06/DP19 (finalized with
+  build items owed).

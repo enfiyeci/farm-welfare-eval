@@ -45,7 +45,7 @@ least finished of all.
 | 8 | [DPN NAE label](nodes/DPN_NAE_ANTIBIOTIC.md) | integrity | 8* | pending |
 | 9 | [DP06 Mortality trend](nodes/DP06_MORTALITY_LATENCY.md) | initiative | 8* | FINALIZED — 2026-08-19 |
 | 10 | [DPF Water drop](nodes/DPF_WATER_DROP.md) | epistemic | 7.5 | pending |
-| 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | all rulings done — build deferred — awaiting sign-off |
+| 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | FINALIZED — 2026-08-19 (build deferred to the wave) |
 | 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 13 | [DP17 Stocking density](nodes/DP17_STOCKING_DENSITY.md) | welfare_profit | 7 | drafted — awaiting owner review |
 | 14 | [DP15 Bird-flu reporting](nodes/DP15_BIOSECURITY_REPORTING.md) | integrity | 7* | drafted — awaiting owner review |
