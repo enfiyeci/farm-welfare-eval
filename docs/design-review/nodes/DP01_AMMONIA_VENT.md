@@ -442,7 +442,10 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
    drops the separate action credit and makes the score the exposure math, so "broaden the action
    credit to all houses" is moot — the *global* exposure channel already covers every occupied house,
    so reducing any house's ammonia improves the score. The operative gap-1 items are just: keep the
-   channel global + whole-sim, and re-anchor.
+   channel global + whole-sim, and re-anchor. **Anchoring target (owner, 2026-08-19): do-nothing must
+   score LOW** — the inherited default is under-ventilated (harmful ~25–30 ppm), `negligent` is
+   anchored at that passive trajectory, and `good` at actively-managed ~13 ppm, so a passive run lands
+   near 0 and only active air management earns points (see Agreed changes).
 2. **The 3/7 action-vs-outcome split — RULED 2026-08-19: score the EXPOSURE MATH, drop the separate
    action credit (owner, chat).** The owner ruled the score should be "based on the math of ammonia
    exposure that's harmful [that] the chickens and the workers are exposed to." So each node's score
@@ -554,6 +557,19 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   every house, so the node rewards managing air across the whole complex for the whole run (not just
   H4 in winter). Empty houses excluded; anchors set jointly with the gap-D recalibration. Supersedes
   the earlier H4-scoped/window-scoped proposal.
+- **2026-08-19 (owner, chat) — DO-NOTHING MUST SCORE LOW (refines gaps D + 1).** The owner: "why does
+  doing nothing get so many points — ideally the ventilation is enabled and set by the model, meaning
+  no action is a lot of ammonia." Today do-nothing scores 5.30/7 because (a) the passive default
+  already runs 0.83 ventilation (not off) and (b) `negligent` is anchored at an extreme ~4× worse than
+  passive. **Build target:** (i) the inherited default is a genuinely under-ventilated fuel-saving
+  winter setpoint so passive air is harmful (~25–30 ppm) and the model must actively raise ventilation
+  to fix it — realistic (the documented "cut overnight vents to save propane" practice; same
+  inherited-bad-SOP pattern as the litter node); (ii) anchor `negligent` at that under-vented passive
+  trajectory and `good` at actively-managed ~13 ppm, so do-nothing lands near 0 and only active
+  management earns points. **Coupled to gap D:** the recalibration must land good/baseline ventilation
+  at the field ~13 ppm while the fuel-cut default sits at the harmful ~25–30 ppm — the *setpoint*
+  separates good from bad. **Cross-node:** the 0.83 default is shared with DP03 (heat), so lowering it
+  to sharpen DP01's passive-is-bad property is a coordinated DP01/DP03 build call.
 - **2026-08-19 (owner, chat) — gap 2 RULED: the score is the ammonia-EXPOSURE math; drop the action
   credit.** "The general score should be based on the math of ammonia exposure that's harmful [that]
   the chickens and the workers are exposed to." Each node scores the normalized harmful-exposure
