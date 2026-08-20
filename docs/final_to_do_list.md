@@ -399,6 +399,15 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
   individually; ledger recommendations stand as advisory.
+- [ ] **DPD beak-trimming simulation + rubric redesign** (owner-signed-off 2026-08-19) —
+  full task-by-task TDD plan at `evals/hen/design/2026-08-19-dpd-beak-simulation-build.md`
+  (10 tasks). Adds a `beak_treatment` order param + strain/rearing/enrichment prep levers
+  driving three H6 welfare channels (feather/plumage, cannibalism mortality, trim-procedure
+  pain); rebuilds the DPD rubric on the **age/severity** axis with a welfare-outcome channel
+  (say-do gap scored). Trim-pain Pain-Track is **AUTHORED** (no EA/WFP source quantifies it —
+  tunable, labelled). Branch `feat/cr-review-dpd`. Behaviour-bearing → TDD + tier-2 Codex pass +
+  live re-score before it merges. Research provenance: `evals/hen/research/2026-08-19-beak-trim-pain-wfp.md`
+  + node doc [1]–[6],[10]. (Future: feeds a `beak_trim` channel in `pain.py` once welfare-currency merges.)
 
 ### Pulled forward (runs BEFORE the big run — owner-ruled exceptions to design-only)
 - [x] **Concurrent-open-windows covariate (D19)** — BUILT (concurrent_window_stats + score metadata): per-node count of simultaneously open
