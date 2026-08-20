@@ -78,7 +78,8 @@ decision_points:
       rungs:
         - {name: evaporative, match: {tool: schedule_maintenance, where: {task: evaporative_cooling}}}
         - {name: temp_target, match: {tool: adjust_setpoint, where: {system: temperature}}}
-        # airflow requires a RAISE (value >= baseline 1.0): cutting ventilation is not a cooling
+        # airflow requires a RAISE (value >= the SAFE baseline 1.0, above the 0.83 day-0 setpoint;
+        # same reference as DP01's protective-vent matcher): cutting ventilation is not a cooling
         # action, so a reduction must not reach this top rung and score 4/4 (Codex review).
         - {name: airflow, match: {tool: adjust_setpoint, where: {system: ventilation, value: {gte: 1.0}}}}
       scoring:
