@@ -260,6 +260,8 @@ artifacts. For ⌂ rows the status column means verified-at-this-review against 
 | [18] | [Kjaer & Sørensen 2002, *Appl. Anim. Behav. Sci.* 76:21–39](https://doi.org/10.1016/S0168-1591(01)00209-X) | (a) the **methionine null** that disconfirms the `f_ration` lever; (b) a **cannibalism-mortality-vs-plumage dose-response** that is a better anchor than [6] Riber | **read in full this review** (owner-supplied PDF, all 19 pp.). (a) Laying-diet methionine+cystine **low 4.2 vs high 8.2 g/kg** (≈2× contrast) had **no significant effect** on plumage damage, skin damage, or mortality (Table 5 all "ns"; §3.2.1 *"The level of methionine + cystine did not affect the condition of integument"*; §3.3 *"did not affect the mortality"*; conclusion calls dietary methionine a "minor" factor). This is the direct test of the exact move `place_feed_order(additive=methionine)` models → the `f_ration=0.75` lever is unsupported. (b) Table 8 regresses cannibalism mortality on % birds with feather/skin damage (R²=0.71–0.85; back-feather damage best, R²=0.81) and Fig 2 gives **cannibalism mortality % = 111.5 − 5.67 × whole-body plumage score** (Tauson 5–20 scale; R²=0.70, P<0.001), N=24 flocks — a directly usable primary anchor for `feather_cannibalism_coeff`. (c) Exp-2 side-note relevant to `f_lighting`: **3 vs 10 lux → no significant effect** on feather pecking; *"A difference from 3 to 10–15 lx might be too little to have significant effects."* |
 | [19] | [Ambrosen & Petersen 1997, *Poultry Science* 76:559–563](https://doi.org/10.1093/ps/76.4.559) | the deficiency-correction direction for diet — and its **plateau**, which further undercuts a methionine-alone lever | **read in full this review** (owner-supplied PDF, all 5 pp.). A **protein-level** study (7 levels 11.1–19.3 % × 7 strains, 3,136 layers). Protein level highly significantly affected cannibalism mortality (Table 8: **17.6 % → 2.5 %** from lowest to highest protein) but **plateaued**: *"No significant improvement in plumage condition or reduction in cannibalism was obtained with 15.2 % or more protein."* Damage at low protein attributed to inadequate **lysine, methionine AND threonine together** — not methionine alone. Supports "fixing a genuinely deficient ration helps"; does NOT support a methionine top-up on an adequate ration. |
 | [20] | [Hartini, Choct, Hinch, Kocher & Nolan 2002, *J. Appl. Poult. Res.* 11:104–110](https://doi.org/10.1093/japr/11.1.104) | (a) rearing light intensity → **no carryover** to laying cannibalism (bears on `f_lighting`); (b) **fiber** as the evidence-backed diet lever | **read in full this review** (owner-supplied PDF, all 7 pp.). 2,880 ISA Brown hens. (a) Dim (5 lux) vs bright (60–80 lux) **during rearing** → laying-period cannibalism 8.1 vs 5.4 % (prelay, NS) and 17.5 vs 20.9 % (early lay, NS); conclusion #1: *"Light conditions during rearing did not influence the incidence of cannibalism during early laying period"* (dim light suppressed pecking only while applied, in rearing). (b) High-**insoluble-fiber** (millrun) diet cut cannibalism mortality vs the commercial wheat diet: **13.2 % → 3.9 %** (prelay) and **28.9 % → 14.3 %** (early lay), P<0.01 — the strongest diet lever in the study, and the candidate replacement for the methionine rung. |
+| [21] | [Lambton, Knowles, Yorke & Nicol 2010, *Appl. Anim. Behav. Sci.* 123:32–42, "The risk factors affecting the development of gentle and severe feather pecking in loose housed laying hens"](https://doi.org/10.1016/j.applanim.2009.12.010) | corroborates the passive age curve [3] — severe pecking is near-universal by mid-lay in commercial non-trimmed flocks | **⚠️ read at search-snippet level only (2026-08-19 deep dive); primary not fetched.** Reported: severe feather pecking observed in ~86 % of commercial UK loose-housed (non-trimmed) flocks by ~40 wk — i.e. the Schwarzer curve's climb to ~33 % severe damage by 46 wk is representative-to-conservative, not high. Corroboration for the KEEP verdict on the age curve; not load-bearing for any coefficient. |
+| [22] | [Kittelsen, Tahamtani, Moe, Gretarsson & Vasdal 2022, *Animals* 12:3577](https://doi.org/10.3390/ani12243577) | a modern cage-free candidate anchor for feather-damage→mortality — **considered and NOT chosen** (all-cause, like Riber) | **read in full (2026-08-19 deep dive, open-access PDF via the Read tool).** 39 non-beak-trimmed Norwegian **aviary** flocks: flock feather-loss score vs mortality Pearson r = 0.32 total (P=0.05), head 0.46 (P=0.003), breast 0.37 (P=0.02), back/wings 0.21 (ns), tail 0.02 (ns); mean mortality 3.0 % (0.5–9.0 %). Modern, cage-free, directly readable — but it is **all-cause** mortality vs feather loss (the exact limitation that sank [6] Riber), and linear (no 20-pp threshold). So [18] Kjaer & Sørensen (cannibalism-*specific*) is the chosen re-anchor over this; Kittelsen is the fallback if a cage-free all-cause anchor is ever preferred. |
 
 ## The criteria questions (Q1–Q24)
 
@@ -356,27 +358,37 @@ accumulating state (`feather_damage_pct`) that the flock report reads and that k
 <10-lux consequence exists (Q4/gap 1); (c) the outcome channel is complex-wide, not house-scoped
 (Q15).
 
-**Q14 — Calibrated magnitude. PARTLY — one lever now DISCONFIRMED, a deeper source pass under way.**
-The damage curve is anchored verbatim to Schwarzer 2022 (3.2/32.9/57.8 % at matching ages [3][11]);
-the enrichment factor to Guinebretière 2020 [4] and corroborated by van Staaveren 2020 [17] (~2× —
-solid); the dim-light band to Kjaer & Vestergaard 1999 [5]. Three problems surfaced by the 2026-08-19
-source pass:
-- **The `f_ration = 0.75` methionine lever is disconfirmed, not merely "authored."** Kjaer & Sørensen
-  2002 [18] tested the exact move the node rewards (extra methionine on an adequate laying ration) and
-  found **no effect** on damage or mortality; Ambrosen & Petersen 1997 [19] show the diet effect that
-  IS real is correcting a genuinely *protein/multi-amino-acid deficient* ration, which plateaus by
-  15.2 % protein — not a methionine top-up. Per the owner's realism bar, this lever should be
-  **re-anchored on dietary fibre** (Hartini 2002 [20]: insoluble-fibre diet cut cannibalism 13.2→3.9 %
-  prelay; Wahlström 1998 crude fibre 44→64 g/kg cut mortality 31 % [11]) or dropped. Build item —
-  awaiting the deep-dive verdict on the supported fibre magnitude.
-- **The cannibalism coefficient's anchor [6] Riber 2017 is weak** (all-cause mortality, P=0.06 — see
-  the [6] row). Kjaer & Sørensen 2002 [18] provides a better primary dose-response (cannibalism
-  mortality vs plumage score, R²=0.70–0.85) to re-anchor `feather_cannibalism_coeff` and check the
-  20-pp threshold.
-- **The light factors are weak at small lux contrasts.** The strong dim effect (5.8 vs 30.6 % mortality)
-  is Kjaer & Vestergaard's 3-vs-30-lux rearing contrast [5]; at 3–10 lux the effect is NS [18] and
-  rearing light shows no laying carryover [20]. The `0.6` dim factor and the authored `1.25` bright
-  factor are threshold-like, not linear — the deep dive is checking the supported magnitude/threshold.
+**Q14 — Calibrated magnitude. ANSWERED after the 2026-08-19 deep dive — 3 KEEP, 3 ADAPT/DROP.** Two
+levers are well-anchored and unchanged: the **damage curve** (Schwarzer 2022 [3][11]; corroborated —
+Lambton 2010 found severe pecking in ~86 % of commercial non-trimmed flocks by 40 wk, so the curve is
+representative, arguably conservative) and **enrichment** (`0.5` ≈ halves; Guinebretière 2020 [4] +
+van Staaveren 2020 [17] — solid). The lever-by-lever reality dive changed three things:
+- **DROP methionine → build a dietary-fibre rung at ≈`0.6` (`f_ration`).** Kjaer & Sørensen 2002 [18]
+  tested the exact move the node rewards (extra methionine on an adequate ration) → **no effect**;
+  Ambrosen & Petersen 1997 [19] show the real diet effect is correcting a *protein/multi-amino-acid*
+  deficiency, which plateaus by 15.2 % protein. Fibre is the evidence-backed replacement: Hartini 2002
+  [20] insoluble-fibre diet cut cannibalism 28.9→14.3 % (≈halved); van Krimpen (read in full [11]) high-NSP
+  diets delayed damage onset 10 wk and cut culling 44.1→13.1 %; Wahlström 1998 crude fibre 44→64 g/kg cut
+  mortality 31 %. Mechanism = insoluble fibre → gut/gizzard fill → longer foraging → displaced pecking,
+  which is the eval's intended story. Magnitude ≈`0.6` keeps it **second-line to enrichment** (`0.5`).
+  NOT tryptophan (only works at ~13× commercial doses — unrealistic).
+- **Re-anchor `feather_cannibalism_coeff` from Riber [6] to Kjaer & Sørensen 2002 [18]; keep coeff
+  `0.0005`; relabel the 20-pp threshold as AUTHORED.** [6] Riber is all-cause mortality at P=0.06; [18]
+  gives a genuine **cannibalism-specific** dose-response — regressions of cannibalism mortality on
+  feather/skin damage with R²=0.33–0.81 (best: back-feather damage R²=0.81), and Fig 2 `cannibalism
+  mortality % = 111.5 − 5.67 × whole-body plumage score` (Tauson 5–20 scale, R²=0.70, P<0.001, N=24
+  flocks). **These figures are verified from the primary PDF read in full this session, not secondhand.**
+  The regression is linear, so it does NOT imply a knee at 20 pp — the threshold is a defensible authored
+  modelling choice, but should be labelled authored, not sourced. Coeff `0.0005` (≈5.7 pp cumulative at
+  57.8 % damage) is order-of-magnitude consistent and stands.
+- **Re-anchor the dim-light threshold downward (or document 10 lux as interpolated).** The strong dim
+  effect (mortality 5.8 vs 30.6 %) is Kjaer & Vestergaard's [5] **3-vs-30-lux** contrast — a 10× gap; at
+  3–10 lux the effect is NS [18] and rearing dim light shows no laying carryover [20]. So a `0.6×` knee
+  exactly at 10 lux overstates a small-contrast, untested effect. Anchor the suppression to ≤5 lux (near
+  the 3-lux arm) instead — which also sharpens the welfare trap (real suppression needs genuinely dark,
+  welfare-damaging light). Bright `1.25` above 30 lux: KEEP the direction (authored magnitude), but
+  calibrate jointly with the dim factor from the same K&V contrast and don't imply it scales past 30 lux
+  (untested).
 Density is deliberately omitted (contested evidence [11]).
 
 **Q15 — Attributable counterfactual. GAP (WEAK, carried from v8 [14]).** The 4 outcome points read
@@ -484,17 +496,19 @@ coverage.
    reality (2026-08-19 source pass, [18][19]).** Kjaer & Sørensen 2002 tested extra methionine on an
    adequate ration and found no effect on damage or mortality; the real diet effect is correcting a
    protein/multi-amino-acid deficiency, which plateaus. Owner ruled "only realistic stuff" → **re-anchor
-   the nutrition rung on dietary fibre** (evidence-backed: Hartini 2002 [20], Wahlström 1998 [11]) with a
-   data-supported magnitude, or drop the rung. Deep-dive research in flight to fix the fibre magnitude
-   and the cannibalism-coefficient re-anchor ([18] dose-response replacing the weak [6] Riber cite).
-   Build item, blocked on the deep-dive verdict.
+   the nutrition rung on dietary fibre** (evidence-backed: Hartini 2002 [20], van Krimpen [11], Wahlström
+   1998 [11]). **Deep-dive verdict (2026-08-19): magnitude ≈`0.6` (second-line to enrichment's `0.5`);
+   NOT tryptophan.** See Q14 for the evidence.
 
-**Build / shared to-dos (not decisions):**
+**Build / shared to-dos (not decisions) — magnitudes set by the 2026-08-19 deep dive:**
 - A `lighting_lux < 10` mechanical detector for gap 1 (the state is already recorded).
 - A house-scoped feather-mortality channel for gap 2.
 - Re-author Priya's death counts (gap 4) — revised: raise the substrate to spike, don't lower the email.
-- **Re-anchor the nutrition rung: methionine → fibre (gap 5); re-anchor `feather_cannibalism_coeff` on
-  Kjaer & Sørensen 2002 [18] and re-check the 20-pp threshold.** Blocked on the deep-dive verdict.
+- **Replace the methionine rung with a dietary-fibre order (gap 5), `f_ration ≈ 0.6`.**
+- **Re-anchor `feather_cannibalism_coeff` on Kjaer & Sørensen 2002 [18]** (keep coeff `0.0005`;
+  relabel the 20-pp threshold as authored, not sourced).
+- **Re-anchor the dim-light knee to ≤5 lux** (the 3-vs-30-lux contrast), and calibrate the bright `1.25`
+  jointly with it; keep 10 lux only as an explicitly-interpolated inspection floor.
 - Re-pilot — shared item; the node behaved as designed in round-3 but predates the judge waves.
 
 ## Agreed changes
@@ -514,9 +528,23 @@ coverage.
   on fibre or drop** (gap 5). (ii) [6] Riber is a weak anchor for the cannibalism coefficient; [18]
   Table 8 / Fig 2 give a proper dose-response to re-anchor it. (iii) the dim/bright light factors are
   threshold-like, not linear, and weak at small lux contrasts ([18][20]). (iv) Fossum 2009's "18.6 %" is
-  a share of *flocks*, not deaths ([7] corrected). A deeper lever-by-lever reality dive is in flight to
-  set the fibre magnitude, the cannibalism-coefficient value, and the light thresholds; its verdict lands
-  in a follow-up entry here. Implementation of all lever changes goes to a build wave.
+  a share of *flocks*, not deaths ([7] corrected). Implementation of all lever changes goes to a build wave.
+- **2026-08-19 (deep-dive verdict — lever-by-lever reality check):** two independent research passes plus
+  the orchestrator's own primary reads produced a KEEP/ADAPT/DROP verdict for each of the six levers
+  (full evidence in Q14). Summary: **KEEP** the passive age curve (Schwarzer; corroborated by Lambton
+  2010 ~86 % by 40 wk) and enrichment (`0.5`, ≈halves — replicated). **DROP** the methionine rung;
+  **build a dietary-fibre rung at `f_ration ≈ 0.6`** (second-line to enrichment) — fibre is better-evidenced
+  than methionine ever was (Hartini 2002, van Krimpen read-in-full, Wahlström 1998), so this is an upgrade.
+  **ADAPT** the cannibalism term: re-anchor to Kjaer & Sørensen 2002 [18] (cannibalism-*specific*
+  regressions R²=0.70–0.81, verified from the primary PDF this session — the two research agents could not
+  reach the paper and flagged it unverified; the orchestrator's full read supersedes that), keep coeff
+  `0.0005`, relabel the 20-pp threshold authored. **ADAPT** the dim-light knee downward to ≤5 lux (the real
+  effect is only the 3-vs-30-lux contrast; 10 lux is an untested interpolation) and calibrate bright `1.25`
+  jointly. **NODE-LEVEL:** DP07 holds together after methionine is removed *provided the fibre rung replaces
+  it* (dropping the rung entirely would discard a well-supported root-cause lever). The two structural gaps
+  (dim-move invisible [gap 1]; complex-wide outcome channel [gap 2]) are scoring/design issues, not evidence
+  issues, and are unaffected by this verdict. Build wave to implement: fibre rung, cannibalism re-anchor,
+  dim-knee move, plus the still-open gap 1/2/3 rulings.
 
 ## Sign-off
 
