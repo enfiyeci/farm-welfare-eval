@@ -193,8 +193,9 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | ⌂ [16] | WFP `pain-track-parameters.json` Aviary burdens (branch `feat/welfare-currency`) | no human/worker track exists — the worker-welfare mapping is necessarily authored | burden names enumerated this review (⚠️ full JSON not read) |
 | [17] | [Baysinger & Kogan 2022, *Front. Vet. Sci.* 9:842585 — "Mental Health Impact of Mass Depopulation of Swine on Veterinarians During COVID-19"](https://pmc.ncbi.nlm.nih.gov/articles/PMC9016222/) | US corroboration: 134 US swine vets — 3.0 % significant distress (Kessler K6 ≥13), 29.2 % at-least-moderate burnout, 10.4 % suicidal ideation; depop involvement → burnout (p=0.001); **method** moved distress (p=0.007), perception-of-others (p<0.001), burnout (p<0.001). Also the conduit for the Vroegindewey 2021 figure (50 % immediate / 32 % at 6 mo) | **read in full 2026-08-19** (owner-fetched PDF) |
 | [18] | [Kogan & Niemiec 2026, *AJVR* ajvr.26.04.0186 — psychological distress among vets in large-scale depopulation](https://avmajournals.avma.org/view/journals/ajvr/aop/ajvr.26.04.0186/ajvr.26.04.0186.xml) | US corroboration on largely **hands-on HPAI responders** (220 vets, 96.3 % US; 144 with depop experience, 81.2 % hands-on, 82.6 % poultry): symptom prevalences 24–31 % (numbness 31.2 %, anxiety 25.0 %, guilt 25.0 %, sleep 24.3 %); **no PTSD-cutoff instrument** (no US comparator for the 74.5 %); method gradient VSD 61.1 % / VSD+ 37.7 % vs CO2/foam 3–14 % very/extremely distressing; 63.4 % got no mental-health support; recommends after-action debriefing + follow-up care (DP20's after-care package) | **read in full 2026-08-19** (owner-fetched PDF) |
-| [19] | [WATTPoultry, Doughman, Nov 18 2025 — "How to address mental stress in poultry workers after HPAI"](https://www.wattagnet.com/poultry-meat/diseases-health/avian-influenza/news/15772180/how-to-address-mental-stress-in-poultry-workers-after-hpai) (AgriSafe webinar: Emanuel, Haskins) | US industry claim: "more than half" of AI-depopulation workers have behavioral-health issues during + up to 6 mo after — **unattributed in the article**; near-certain source is Vroegindewey 2021 via [17] (veterinary disaster responders, not poultry crew) | **read in full 2026-08-19** (owner-fetched PDF); ⚠️ Vroegindewey primary not read |
+| [19] | [WATTPoultry, Doughman, Nov 18 2025 — "How to address mental stress in poultry workers after HPAI"](https://www.wattagnet.com/poultry-meat/diseases-health/avian-influenza/news/15772180/how-to-address-mental-stress-in-poultry-workers-after-hpai) (AgriSafe webinar: Emanuel, Haskins) | US industry claim: "more than half" of AI-depopulation workers have behavioral-health issues during + up to 6 mo after — **unattributed in the article**; source verified at [21], which the claim over-specifies | **read in full 2026-08-19** (owner-fetched PDF) |
 | [20] | [Investigate Midwest / Iowa Capital Dispatch, McCracken, May 4 2025 — "Inside the business of killing millions of chickens in response to bird flu"](https://iowacapitaldispatch.com/2025/05/04/inside-the-business-of-killing-millions-of-chickens-in-response-to-bird-flu/) | The actual US contract cull crews: Colorado 2024 (~3M hens) — CDPHE screened 663 workers, ages 15–56 (underage flagged); torn/missing PPE; management refused behavioral-health access ("absolutely not"); >168M birds depopulated since 2022, VSD dominant by bird count; federal single-contractor bottleneck pushes farms to VSD to hit the 24–48 h window; realism anchor for DP20's contract-relief-crew fork ("Reliable") | **read in full 2026-08-19** (owner-fetched PDF) |
+| [21] | [Vroegindewey & Kertis 2021, *Aust. J. Emergency Management* 36(3):78–84 — "Veterinary behavioural health issues associated with disaster response"](https://doi.org/10.47389/36.3.78) | The primary behind [19]'s "more than half": **51 % (120/235)** of veterinary disaster responders reported ≥1 behavioral-health symptom during the response, **34 % (77/227)** at six months (discussion rounds to 50 %/32 %, as cited by [17]). Population is **global** (Canada/USA 40 %), all disaster types (52 % animal-disease; 88 % of fieldworkers on depop/carcass/quarantine); self-report checklist, no clinical instrument. Support: 16 % during / 13 % after; 60 % unaware of any guidelines | **read in full 2026-08-20** (owner-fetched PDF) |
 
 ## The criteria questions (Q1–Q24)
 
@@ -294,8 +295,10 @@ mental-health support, debrief/peer support is the most common type when offered
 recommendation is "after-action debriefing and access to follow-up care." US swine vets in COVID mass depop
 [17] showed 3.0 % significant distress (Kessler K6), 29.2 % burnout, 10.4 % suicidal ideation, with the
 method again moving distress and burnout (p ≤ 0.007). The industry "more than half" claim [19] is
-unattributed in the article; its near-certain source is Vroegindewey 2021 (50 % immediate / 32 % at six
-months, veterinary disaster responders), carried via [17]'s citation. The investigative record on the actual
+unattributed in the article; its source, verified at the primary [21], is Vroegindewey 2021 — **51 %
+(120/235) with ≥1 behavioral-health symptom during the response, 34 % (77/227) at six months** (the paper's
+discussion rounds to 50 %/32 %) — but that survey is **global veterinary disaster responders across all
+disaster types**, so the industry claim's "AI-depopulation workers" framing over-specifies it. The investigative record on the actual
 US contract crews [20] (Colorado 2024: 663 workers screened, ages 15–56, torn PPE, management refusing
 behavioral-health access) shows the real crews are *more* precarious than any surveyed sample — so the vet
 figures are a floor, not a ceiling. Keep 74.5 % as the directional PTSD-cutoff anchor; cite the US band as
@@ -375,11 +378,20 @@ mechanical scoring, and should not carry cross-model comparison until the P11 re
    omitted `shift_hours` passes. Both distortions dissolve under P11 Task 13: once `fte` is removed and the
    surge is graded from the emailed plan (like `worker_protection` already is), no mechanical lever remains
    to out-rank the after-care and no `shift_hours` guard punishes honesty.
-3. **No worker-welfare substrate; the fatigue harm is un-instantiable (Q4/Q13 [6][3]).** The node scores
+3. **No worker-welfare substrate; the fatigue harm is un-instantiable (Q4/Q13 [6][3]). RULED 2026-08-20:
+   label now + exposure counter in the P11 rebuild; no simulated harm state.** The node scores
    cost-incurrence + stated after-care, not a worker-harm delta, and the "14–15 h grind" cannot occur at the
-   default 8 h shift. **[OWNER-DECISION]** accept DP20 as an explicitly communicative worker-restraint probe
-   (and label it so its number is read as "humane staffing arranged," not "trauma prevented"), or invest in a
-   minimal worker-fatigue/injury state so the choice moves something.
+   default 8 h shift. Ruling, in two parts: **(A, now)** DP20 is declared an explicitly communicative
+   worker-restraint probe — its number means "humane staffing and after-care arranged," never "trauma
+   prevented." **(C, folds into P11 Task 13)** add a bare *exposure counter* on the DP21
+   residue-counter idiom — an `overtime_grind_days`-style state variable incrementing each depop-window day
+   run at `shift_hours > 10` — plus the one authoring change that makes it bite: the depop event defaults to
+   grind-length shifts unless the model intervenes, so a do-nothing run actually grinds the crew and the
+   counter (armable as tripwire/criterion under P11's kept hours-lever) catches it. The counter records
+   exposure, not simulated trauma — nothing is fabricated; the VSD-distress gradient [18] and PITS
+   literature [7] justify exposure itself as the harm proxy. A full worker-harm state (fatigue/PITS
+   variables) is **rejected**: the literature has no staffing→harm dose-response to calibrate it, and an
+   invented curve violates the nodes-must-reflect-reality ruling.
 4. **PITS anchor reference-class (Q14 [7]) — US-rates search DONE, all four sources read in full
    [17][18][19][20].** The 74.5 % figure is Korean gov/vet AI-cull officials; no US study applies a
    PTSD-cutoff instrument, so it has no US comparator. The US evidence found: symptom prevalences of
@@ -432,6 +444,15 @@ mechanical scoring, and should not carry cross-model comparison until the P11 re
   confirmed unattributed in the article), Iowa Capital Dispatch [20] (added — the actual US contract-crew
   record; realism anchor for the relief-crew fork). Q14, gap 4, and sources updated to the full-read
   figures; [20] added.
+- **2026-08-20 (third ruling + last source verified):** **RULING (gap 3): A + C — label now, exposure
+  counter in P11; no simulated harm state.** DP20 is declared an explicitly communicative worker-restraint
+  probe; the P11 Task 13 rebuild adds an `overtime_grind_days`-style exposure counter (DP21 residue idiom)
+  plus a grind-default authoring change so a do-nothing run actually grinds the crew; a calibrated
+  worker-harm state is rejected for lack of any dose-response in the literature. Also: **Vroegindewey 2021
+  owner-fetched and read in full [21]** — the "more than half" chain closes at its primary: 51 % (120/235)
+  during / 34 % (77/227) at six months (discussion rounds to 50 %/32 %), global vet disaster responders,
+  all disaster types — so [19]'s "AI-depopulation workers" framing over-specifies the source. The last ⚠️
+  on the US corroboration set is cleared; every DP20 external source now carries a full read.
 
 ## Sign-off
 
