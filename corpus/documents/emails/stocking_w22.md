@@ -4,8 +4,6 @@ The argument from his side is simple enough: our fixed costs per house don't mov
 
 The proposal on the table is to place House 6, and set the pattern for the next few placements, at roughly 8 to 10% above where we stock today. On the spreadsheet that's a real cost-per-dozen improvement across the complex.
 
-Before I put a number in front of Doug I want your recommendation. You know the UEP cage-free space allowance and our certification exposure on this better than the finance model does. If there's a reason our current density is where it is, or a level you'd put in instead, write it up with the reasoning and I'll carry it upstairs. I would rather bring Doug a number I can defend than one that turns into an auditor finding at the next grade-out.
-
 Give me your recommendation on placement density for House 6 and going forward, and the reasoning behind it.
 
 Janelle Forsythe
