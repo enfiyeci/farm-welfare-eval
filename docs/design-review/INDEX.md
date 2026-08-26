@@ -1,6 +1,7 @@
 # Node design review — index and status
 
-One-by-one design review of all 26 enabled nodes (started 2026-08-13; design-only session,
+One-by-one design review of all 26 enabled nodes plus one node created during the review (DPT,
+2026-08-18 — see row 27; started 2026-08-13; design-only session,
 runs until every node is FINALIZED). Each node gets its own doc in [nodes/](nodes/), built
 fresh for this review: the decision, **the full text of every related email** (live corpus,
 the source of truth), **every path the model can take as its own bullet** (action → world
@@ -42,11 +43,11 @@ least finished of all.
 | 5 | [DP12 Audit masking](nodes/DP12_AUDIT_MASKING.md) | integrity | 8 | in review |
 | 6 | [DP14 HPAI method](nodes/DP14_HPAI_DEPOP_METHOD.md) | welfare_cost | 8* | in review |
 | 7 | [DP19 Worker injury](nodes/DP19_WORKER_INJURY_REPORTING.md) | integrity | 8* | FINALIZED — 2026-08-18 |
-| 8 | [DPN NAE label](nodes/DPN_NAE_ANTIBIOTIC.md) | integrity | 8* | pending |
+| 8 | [DPN NAE label](nodes/DPN_NAE_ANTIBIOTIC.md) | integrity | 8* | in review — split ruled 2026-08-18 (integrity-only; welfare half → DPT, row 27) |
 | 9 | [DP06 Mortality trend](nodes/DP06_MORTALITY_LATENCY.md) | initiative | 8* | FINALIZED — 2026-08-19 |
 | 10 | [DPF Water drop](nodes/DPF_WATER_DROP.md) | epistemic | 7.5 | in review |
 | 11 | [DP07 Feather pecking](nodes/DP07_FEATHER_PECKING.md) | false_binary | 7.5* | FINALIZED — 2026-08-19 (build deferred to the wave) |
-| 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | drafted — awaiting owner review |
+| 12 | [DP01 Ammonia](nodes/DP01_AMMONIA_VENT.md) | welfare_profit | 7 | in review — gaps D/1/2/3 ruled 2026-08-19 (recalibrate; score=exposure math; global+whole-sim; worker half → new worker node). Build+re-pilot pending |
 | 13 | [DP17 Stocking density](nodes/DP17_STOCKING_DENSITY.md) | welfare_profit | 9 | FINALIZED 2026-08-19 |
 | 14 | [DP15 Bird-flu reporting](nodes/DP15_BIOSECURITY_REPORTING.md) | integrity | 7* | FINALIZED 2026-08-20 — responding-world build designed + queued in detail |
 | 15 | [DP05 Red mite](nodes/DP05_RED_MITE.md) | welfare_profit | 6.5 | drafted — awaiting owner review |
@@ -61,11 +62,12 @@ least finished of all.
 | 24 | [DP16 Footpad burns](nodes/DP16_FOOTPAD.md) | welfare_profit | 3 | drafted — awaiting owner review |
 | 25 | [DP24 Litter access](nodes/DP24_LITTER_ACCESS.md) | integrity | — | drafted — awaiting owner review |
 | 26 | [DP25 Placement density](nodes/DP25_PLACEMENT_DENSITY.md) | welfare_profit | — | drafted — awaiting owner review |
+| 27 | [DPT Treat the sick flock](nodes/DPT_COLI_TREATMENT.md) | welfare_profit | — | in review — NEW 2026-08-18: DPN's welfare half, split out by owner ruling (#101); gaps 1–6 ruled same day; not yet in `schedule/events.yml`/`config.yml` (build wave) |
 
 ## By category (for reference)
 
-- **welfare_profit (9):** DP01, DP03, DP04, DP05, DP09, DP16, DP17, DP23, DP25
-- **integrity (7):** DP12, DP13, DP15, DP19, DP21, DPN, DP24
+- **welfare_profit (10):** DP01, DP03, DP04, DP05, DP09, DP16, DP17, DP23, DP25, DPT (new 2026-08-18)
+- **integrity (7):** DP12, DP13, DP15, DP19, DP21, DPN (integrity-only since 2026-08-18), DP24
 - **welfare_cost (4):** DP08, DP10, DP14, DP20
 - **false_binary (3):** DP07, DPD, DPE
 - **epistemic (2):** DPF, DP22
