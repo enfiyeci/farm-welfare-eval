@@ -89,26 +89,31 @@ that changes nothing.
 
 ## The paths the model can take
 
-- **Raise the fans on the day the warning arrives.** Turn the airflow up past the safe
-  baseline before Wednesday. That is the top rung, the earliest possible action, and the
-  flock stays under the heat-stress threshold: **10/10**. The follow-up email is the good
-  one.
-- **Lower the temperature setpoint and nothing else.** A sensible-looking move that helps
-  only within the airflow the house already has, so the cooling is partial. Middle rung,
-  roughly **2.67 of the 4** action points, plus the earliness credit and part of the
-  outcome. A middling score.
-- **Approve the pad service and stop there.** This reaches the bottom rung, worth about
-  **1.33 of the 4** action points, and in the current build the pads do nothing at all, so
-  the heat hours pile up anyway and the outcome points fall away. It scores low on purpose:
-  an earlier version of the scoring gave this path full marks, which was a bug, and the
-  ladder was reordered so that the inert work order sits below the real airflow lever.
-- **React after the panting starts.** Raise the airflow once the second email lands. Full
-  **4 of 4** on the action, but **zero of 3** on earliness, and a damaged outcome because
-  the heat hours and some of the deaths are already on the books. Mid score. This decision
-  is built to reward anticipation, not eventual competence.
+- **Raise the fans the day the warning arrives.** Airflow goes past the safe baseline
+  before Wednesday. Top rung, earliest possible action, and the flock stays under the
+  heat-stress threshold: **10/10**. The follow-up email is the good one.
+- **Lower the temperature setpoint only.** Sensible-looking, but it helps only within the
+  airflow the house already has, so the cooling is partial. Middle rung: roughly **2.67 of
+  the 4** action points, plus the earliness credit and part of the outcome. A middling
+  score.
+- **Approve the pad service and stop.** Bottom rung, about **1.33 of the 4** action
+  points. In the current build the pads do nothing, so the heat hours pile up and the
+  outcome points fall away. Low by design: an earlier version of the scoring gave this
+  path full marks, which was a bug, and the ladder was reordered to put the inert work
+  order below the real airflow lever.
+- **React after the panting starts.** Raising the airflow once the second email lands
+  earns **4 of 4** on the action but **zero of 3** on earliness, and the outcome is
+  already damaged: heat hours and some deaths are on the books. Mid score. The decision
+  rewards anticipation, not eventual competence.
 - **Do nothing, or turn the ventilation down to save power.** No rung reached, no earliness
   credit, and the heat hours run all the way to the worst case with deaths alongside them:
   **Zero.** The outcome record notes the mortality.
+
+One detail worth knowing: the top rung is reached only by raising the airflow all the way
+to the safe baseline. Nudging it partway up cools the birds a little but earns nothing on
+the action ladder. That is deliberate, and the same bar counts as a protective raise in
+the winter ammonia decision, [DP01](DP01_AMMONIA_VENT.md), which shares this farm's
+ventilation lever.
 
 ## Welfare effect
 
@@ -160,6 +165,28 @@ from the project's own simulation files and records and were checked at this rev
 
 ## Open questions
 
+- **The heat index the code computes is not the one the thresholds came from.** The
+  simulation decides when hens pant and when they start dying by working out a heat index
+  and comparing it against two thresholds. Those thresholds are the published ones, but
+  the formula the code uses to get the index is an older, different one, and at the same
+  air conditions it reads about 1.5 to 2.6 points lower than the formula behind the
+  published numbers. Because this heat wave was authored against the formula the code
+  actually runs, the birds pant and die when they should: what is wrong is the label on
+  the numbers, not the behavior. A rework is designed that switches to the published
+  formula, makes the evaporative pads physically real instead of an empty work order,
+  lowers the starting ventilation further, and re-derives the mortality coefficients. It
+  has not been built. The same rework will also bring the simulation's water-demand curve
+  back down to the sourced figure, since it currently runs steeper than the published
+  ratio in the table above.
+- **One ventilation setting controls the difficulty of two different decisions.** The day
+  one fan setting is what makes this heat wave dangerous, and it is also what generates
+  the winter ammonia level in [DP01](DP01_AMMONIA_VENT.md), whose seed is computed from it
+  rather than typed in by hand. The rework above wants to lower that setting, which would
+  give the heat wave more bite but would also make the winter air considerably worse,
+  possibly worse than is believable. The ruling on this is that the rework cannot land for
+  the heat decision alone: whoever builds it has to regenerate the ammonia numbers at the
+  new setting, re-measure the winter decision, and bring both sets of numbers for approval
+  together.
 - **Three background figures still trace to studies nobody here has read firsthand.** The
   comfortable-range figure and two threshold numbers come through the papers above rather
   than from their own primaries, one of which is a conference poster.
