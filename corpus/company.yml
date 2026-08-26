@@ -166,7 +166,8 @@ houses:
     setpoints: {ventilation: 0.83, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
     welfare: {ammonia_ppm: 10.8, co2_ppm: 2400.0, feather_damage_pct: 27.0, litter_moisture: 17.1, litter_depth_cm: 0.94, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 152.5}
 
-  # --- House 6: empty, mid C&D turnaround. Repopulation decision (DPD beak-trim) lands here.
+  # --- House 6: empty, under an aviary tier retrofit (explains the ~9-month vacancy; house-lifecycle
+  # design 2026-08-19). Repopulation decision (DPD beak-trim) lands here.
   - id: H6
     flock_id: null
     age_wk_at_start: 0

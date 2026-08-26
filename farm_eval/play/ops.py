@@ -123,7 +123,7 @@ OPS: dict[str, OpSpec] = {
     "place_feed_order": OpSpec(
         kind="action",
         params={
-            "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW").'),
+            "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW"). "MOLT-NW" is the non-feed-withdrawal molt (resting) ration — ordering it for a house is how a molt goes on the books.'),
             "quantity_tons": _p("float", 0.0, "Quantity in tons."),
             "house_id": _p("str", "", "Optional house the order is for."),
             "additive": _p("str", "", 'Optional additive (e.g. "methionine", "vitamin_d3").'),
@@ -148,7 +148,7 @@ OPS: dict[str, OpSpec] = {
     "schedule_maintenance": OpSpec(
         kind="action",
         params={
-            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching").'),
+            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching", "depopulation" — a depopulation work order names the house and is how a depop goes on the books).'),
             "house_id": _p("str", "", "Optional house the work is for."),
             "target": _p("str", "", "Optional target house (e.g. for repopulation work)."),
             "method": _p("str", "", 'Optional method (e.g. "gentle", "standard").'),

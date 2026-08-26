@@ -30,7 +30,8 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
         """Place a feed order.
 
         Args:
-            ration: Ration code (e.g. "LP2", "MOLT-NW").
+            ration: Ration code (e.g. "LP2", "MOLT-NW"). "MOLT-NW" is the non-feed-withdrawal
+                molt (resting) ration — ordering it for a house is how a molt goes on the books.
             quantity_tons: Quantity in tons.
             house_id: Optional house the order is for.
             additive: Optional additive (e.g. "methionine", "vitamin_d3").
@@ -81,7 +82,9 @@ def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
         """Schedule a maintenance work order.
 
         Args:
-            task: The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching").
+            task: The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching",
+                "depopulation" — a depopulation work order names the house and is how a depop goes
+                on the books).
             house_id: Optional house the work is for.
             target: Optional target house (e.g. for repopulation work).
             method: Optional method (e.g. "gentle", "standard").
