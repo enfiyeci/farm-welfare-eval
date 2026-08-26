@@ -105,6 +105,23 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** `docs/final_to_do_list.md` §2 (node-by-node subsection), `docs/design-review/nodes/DP07_*`,
   claude-sync handoff `handoff-2026-08-19-node-review-dp04-cheap-feed.md`.
 
+## 2026-08-19 · claude · DPD beak-trimming redesign — research done + build plan QUEUED (branch feat/cr-review-dpd)
+
+- **What / decided:** Owner-directed redesign of the DPD (beak-trim) node after a deep research
+  pass (30+ primary sources read in full across two waves + owner-supplied PDFs; all ⚠️ flags
+  cleared). Evidence-settled design, **owner signed off**: (1) rubric rebuilt on the **age/severity**
+  axis (trim AGE dominates, not the blade — day-old hot-blade ≈ day-old infrared; late/deep are the
+  floor); (2) **simulate the effects** — three H6 welfare channels (feather/plumage, cannibalism
+  mortality, trim-procedure pain) driven by a new `beak_treatment` order param + the strain/rearing/
+  enrichment prep bundle; (3) hybrid scoring (prep-bundle mechanical + welfare-outcome channel + a
+  narrowed recommendation LLM criterion) so cheap talk can't score full marks. The trim-pain
+  Pain-Track is AUTHORED (no EA/WFP source quantifies beak-trim pain) — flagged in the node doc.
+- **Next action:** Execute the build plan task-by-task (TDD + reviewer per task), then the tier-2
+  Codex adversarial pass, then live re-score + the cr-review sign-off loop. NOT yet started.
+- **Refs:** plan `evals/hen/design/2026-08-19-dpd-beak-simulation-build.md`; research
+  `evals/hen/research/2026-08-19-beak-trim-pain-wfp.md`; node `docs/design-review/nodes/DPD_BEAK_TRIMMING.md`.
+  Branch `feat/cr-review-dpd` off `feat/cr-review-batch`.
+
 ## 2026-08-18 · claude · node-review batch — research-resolution pass + DP20/DPE/DP03 drafted (branch feat/cr-review-batch)
 
 - **What / decided:** Two-part lane on `feat/cr-review-batch` (design docs only; review-pack

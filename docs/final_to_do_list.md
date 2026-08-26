@@ -38,6 +38,7 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 | D22 | DP01 fuel emails carry behavior-dependent usage claims (#31) | RULED 2026-08-11: **reword to behavior-independent facts** — the authored LP per-gallon increase + the cold snap; both `fuel_w26.md` ("30% over November") and `fuel_followup_w30.md` ("well over where we sat in fall") → §2 content pass |
 | D23 | DP03 heat-stress rework (#33/#35/#36) | RULED 2026-08-11: **full rework** — occupied houses start below full ventilation so the model must raise the fans itself (realistic mild-weather baseline; fan electricity now costs money); ladder reordered so the effective lever is the top rung (or pads become physically effective — design decides); mortality coefficients re-derived/relabelled as authored (#34); goal state: 10/10 = real emergency response, not avoiding self-sabotage → §1a design, §2 build |
 | D24 | DP04 LP-CHEAP $9/ton feed saving is mechanically implausible (2026-08-18 Set-A research, `docs/design-review/nodes/DP04_CALCIUM_RATION.md`: limestone is ~9–10% of ration weight at ~$227/ton retail / ~$30–70/ton bulk, so the limestone-fraction ceiling is ~$1–3/ton and plausibly a net increase after corn backfill). `corpus/pricing.yml` still hard-codes the $9/ton, though the sim books flat pricing so LP-CHEAP saves $0 in-world either way | SUPERSEDED 2026-08-19 by the DP04 RE-ANCHOR (calcium → available phosphorus) in §2 "From the node-by-node design review" — the whole node lever is re-themed onto phosphorus (real ~$2–4/ton saving + real delayed keel/bone harm), which resolves this line. |
+| D25 | DPD beak-trimming redesign: rebuild the rubric on the age/severity method hierarchy + simulate the beak decision's effects on the H6 flock (feather/plumage, cannibalism mortality, trim-procedure pain), and adapt the genetics lever to strain-choice reality. Settled by ~35 primary sources read in full (node doc `docs/design-review/nodes/DPD_BEAK_TRIMMING.md` [1]–[6],[10],[11]) | RULED 2026-08-19: **go — full redesign + build.** Owner signed off the design (rubric rungs, three welfare channels, hybrid scoring, authored trim-pain track). → §2 build |
 
 ## 1a. Design-session tasks (spec work that happens BEFORE the big run)
 
@@ -399,6 +400,15 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
   individually; ledger recommendations stand as advisory.
+- [ ] **DPD beak-trimming simulation + rubric redesign (D25)** — full task-by-task TDD plan at
+  `evals/hen/design/2026-08-19-dpd-beak-simulation-build.md`
+  (10 tasks). Adds a `beak_treatment` order param + strain/rearing/enrichment prep levers
+  driving three H6 welfare channels (feather/plumage, cannibalism mortality, trim-procedure
+  pain); rebuilds the DPD rubric on the **age/severity** axis with a welfare-outcome channel
+  (say-do gap scored). Trim-pain Pain-Track is **AUTHORED** (no EA/WFP source quantifies it —
+  tunable, labelled). Branch `feat/cr-review-dpd`. Behaviour-bearing → TDD + tier-2 Codex pass +
+  live re-score before it merges. Research provenance: `evals/hen/research/2026-08-19-beak-trim-pain-wfp.md`
+  + node doc [1]–[6],[10]. (Future: feeds a `beak_trim` channel in `pain.py` once welfare-currency merges.)
 
 ### From the node-by-node design review (2026-08-19 onward)
 
