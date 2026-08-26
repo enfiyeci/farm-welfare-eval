@@ -13,6 +13,20 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-26 · claude · coworker-page reconciliation pass, all 25 pages (branch feat/coworker-node-docs)
+
+- **What / decided:** Every coworker page (the 24 wave-built ones plus the DP21 exemplar) was
+  reconciled against its newest node doc and its 2026-08-18..20 design-review convo by one
+  fresh Opus reviewer per node; all 25 pages revised, 11 `00-OVERVIEW.md` entries corrected.
+  Findings record, node-doc gaps, and the open owner decisions:
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md`. Codex tier-2 adversarial
+  pass (`gpt-5.6-sol`): 4 findings fixed + 1 in round 2, APPROVED round 3.
+- **Next action:** owner rules the three surfaced decisions (DP21 promptedness, DP08 matcher
+  tokens + selector semantics, DP21 discard-window pricing); node-doc gap fixes go to the
+  cr-review branches in a separate pass.
+- **Refs:** `docs/design-review/coworker/*.md`,
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md`
+
 ## 2026-08-20 · claude · DP23 chick-sourcing — rulings BUILT + pushed (branch feat/cr-review-batch)
 
 - **What / decided:** Applied owner comments #149/#150 on DP23 and BUILT them (not just doc-ruled).
