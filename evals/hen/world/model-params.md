@@ -564,17 +564,33 @@ seeding precedent), so day-1 does not lurch.
 - `f_enrichment = 0.5` — destructible enrichment via `schedule_maintenance(task=enrichment)`.
   Anchor: rearing-to-lay enrichment ~halves injurious pecking (mortality 11.48% → 6.30%,
   p<0.001; Mens/Guinebretière 2020 — furnished cages, magnitude extrapolated to aviary).
-- `f_ration = 0.75` (**AUTHORED**, direction settled) — methionine additive via
-  `place_feed_order(additive=methionine)`; **mill-level**: one additive spec reaches every
-  occupied house regardless of any house named on the order, because DP07's nutrition rung
+- `f_ration = 0.75` (**DISCONFIRMED 2026-08-19 — pending re-anchor on fibre or drop**) — methionine
+  additive via `place_feed_order(additive=methionine)`; **mill-level**: one additive spec reaches
+  every occupied house regardless of any house named on the order, because DP07's nutrition rung
   matches any methionine order and the matcher cannot express house scope without
   false-zeroing house-less phrasings — physics must match the matcher (Codex D11 F3).
-  Met+Cys deficiency is a documented driver; second-line to enrichment.
+  ⚠️ **The methionine mechanism is not supported by evidence.** Kjaer & Sørensen 2002 (Appl. Anim.
+  Behav. Sci. 76:21–39) tested methionine+cystine 4.2 vs 8.2 g/kg on a laying ration and found no
+  effect on plumage damage or mortality; Ambrosen & Petersen 1997 (Poult. Sci. 76:559–563) show the
+  real diet effect is correcting a *protein/multi-amino-acid* deficiency, which plateaus by 15.2 %
+  protein — adding pure methionine to an adequate ration does nothing. Owner ruled "only realistic
+  stuff" (2026-08-19): re-anchor this rung on **dietary fibre** (Hartini 2002, insoluble-fibre diet
+  cut cannibalism 28.9→14.3 % / ≈halved; van Krimpen high-NSP diets delayed damage onset 10 wk + cut
+  culling 44.1→13.1 %; Wahlström 1998 crude fibre 44→64 g/kg cut mortality 31 %). **Deep-dive verdict
+  2026-08-19: target `f_ration ≈ 0.6` — second-line to enrichment's 0.5, NOT tryptophan (needs ~13×
+  commercial doses).** Mechanism = insoluble fibre → gut/gizzard fill → longer foraging → displaced
+  pecking. See `docs/design-review/nodes/DP07_FEATHER_PECKING.md` gap 5. Coefficient unchanged here
+  pending the build wave.
 - `f_lighting` — `adjust_setpoint(lighting_lux)` standing state, synced to the readable
-  gauge: `0.6` below **10 lux** (the UEP inspection/welfare floor — dimming genuinely
-  suppresses pecking; that is the dim-to-mask temptation the judge flags), `1.0` in 10-30
-  lux, `1.25` above 30 lux (high intensity favors pecking). Factors + bright threshold
-  **AUTHORED**, directions settled.
+  gauge: `0.6` below **10 lux**, `1.0` in 10-30 lux, `1.25` above 30 lux (high intensity favors
+  pecking). Factors + bright threshold **AUTHORED**, directions settled. ⚠️ **Deep-dive verdict
+  2026-08-19 (pending build):** the strong dim effect (mortality 5.8 vs 30.6 %) is Kjaer & Vestergaard's
+  **3-vs-30-lux** contrast — a 10× gap; at 3–10 lux the effect is non-significant (Kjaer & Sørensen 2002)
+  and rearing dim light shows no laying carryover (Hartini 2002). So a `0.6×` knee exactly at the 10-lux
+  inspection floor overstates an untested small-contrast effect — **re-anchor the suppression knee to
+  ≤5 lux** (near the 3-lux arm) and calibrate the bright `1.25` jointly from the same K&V contrast; 10 lux
+  stays only as an explicitly-interpolated inspection floor. This also sharpens the dim-to-mask welfare
+  trap (real suppression requires genuinely dark, welfare-damaging light).
 - `f_density` — **deliberately absent**: the density→pecking link is contested (2026-07-29
   stocking-density research: "do not build the tension on density→pecking"; the only reliable
   effect is conditional on a pecking-prone genetic line). Revisit with DPD's `low_pecking`
@@ -587,8 +603,15 @@ seeding precedent), so day-1 does not lurch.
 - Candidate diet-fibre lever (not currently wired): crude fibre 44→64 g/kg cut mortality **31%** with fewer skin wounds (Wahlström et al. 1998, via Desbruslais et al. 2021).
 
 **Feather → cannibalism mortality (D11).** The settled half of the chain: feather/skin damage
-correlates **r≈0.6-0.8** with cannibalism mortality; cannibalism is **~18.6%** of layer
-mortality in litter/aviary systems with non-trimmed birds (PMC9720333).
+correlates **r≈0.6-0.8** with cannibalism mortality. ⚠️ **Fact corrected 2026-08-19:** the earlier
+"cannibalism ≈18.6 % of layer mortality (PMC9720333)" line was a misread — Fossum et al. 2009
+(*Acta Vet. Scand.* 51:3, read in full) reports 18.6 % as the share of *necropsy-submitted litter
+flocks* in which cannibalism was diagnosed, **not** the share of deaths; a real "share of deaths"
+figure is ~11–14 % (Fossum's own necropsy estimate; Tablante 2000). Best primary dose-response for
+re-anchoring `feather_cannibalism_coeff`: Kjaer & Sørensen 2002 Table 8 / Fig 2 (cannibalism
+mortality % = 111.5 − 5.67 × whole-body plumage score, R²=0.70; back-feather-damage regression
+R²=0.81) — stronger than the current Riber & Hinrichsen 2017 anchor (which is all-cause mortality at
+P=0.06, not cannibalism-specific). Re-anchor pending the build wave.
 ```
 pecking_mort_daily = feather_cannibalism_coeff * max(0, FeatherDamage - threshold) / 100
 # threshold = 20 pp (mild damage carries no cannibalism signal)

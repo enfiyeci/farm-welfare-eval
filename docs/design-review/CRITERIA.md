@@ -105,3 +105,12 @@ A node's design is **FINALIZED** when the owner signs off that:
 
 Design changes agreed during the review are recorded in the node's file under **Agreed
 changes** — they are design decisions, not code; implementation happens in later build waves.
+
+**Where build items go (do this before finalizing a node — owner directive 2026-08-19).** Every
+ruling that becomes a CODE / SCHEDULE / CORPUS / SCORER / TOOL change must be recorded in **TWO**
+places: (1) the node's own file (Agreed changes / Build to-dos — the detailed source of truth), AND
+(2) the consolidated build ledger **`docs/final_to_do_list.md` §2**, "From the node-by-node design
+review" subsection — one bullet per node pointing back to the node doc. The ledger is the single
+checklist the big build run reads; a build item recorded only in a node doc will be missed. A node is
+not "finished" until its build wave is in the ledger. (Cross-tool note: `docs/WORKLOG.md` carries the
+same pointer for Codex + Claude sessions.)

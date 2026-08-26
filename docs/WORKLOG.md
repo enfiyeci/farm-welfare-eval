@@ -83,6 +83,27 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Next action:** owner chooses the extralabel disposition; then write the integrated DP05 build spec
   and implement model/schedule/corpus/scoring changes together.
 - **Refs:** `docs/design-review/nodes/DP05_RED_MITE.md` owner-ruled target design + sources [19]–[24].
+## 2026-08-19 · claude · WHERE BUILD-WAVE ITEMS GO + DP07 finalized (branch feat/cr-review-dp07)
+
+- **⚑ READ THIS if you are doing a node design review:** when a ruling turns into a CODE / SCHEDULE /
+  CORPUS / SCORER / TOOL change, record it in **`docs/final_to_do_list.md` §2**, in the
+  "From the node-by-node design review" subsection — one bullet per node, pointing back to the node
+  doc as source of truth. The node doc's "Build / shared to-dos" + "Agreed changes" stay the detailed
+  record; the ledger is the ONE consolidated checklist the big build run reads. This was added because
+  the recent review's build items had scattered into individual node docs and the ledger (keyed to the
+  older D1–D24 batch) never caught them — the big run would have missed them.
+- **What / decided:** DP07 (feather pecking) FINALIZED 2026-08-19 — methionine lever disconfirmed
+  (Kjaer & Sørensen 2002, owner-supplied PDF read in full) → ruled re-anchor on dietary fibre; 6-lever
+  reality dive (3 KEEP / 3 ADAPT-DROP); all gaps ruled; build wave scoped (`DP07_BUILD_PLAN.md`) and
+  DEFERRED to the batched run. Consolidated ALL 13 reviewed nodes' deferred build items into the ledger.
+- **⚑ Two status gaps for whoever owns them:** DP01 and DP17 node docs say "first serve — no owner
+  rulings yet" but the master list marks both ✔ — reconcile. And the DP10 doc's "P11 not started" is
+  STALE: P11 design + a 22-task build plan are done and a base staffing model is already on `main`
+  (`layers/staffing.py`); DP10 rides the P11 *redesign* build (hours-only lever), not a from-scratch lane.
+- **Next action:** next node review = **DP04 Cheap feed / calcium** (handoff written). Cross-lane status
+  claims to be verified against branches per node at build time.
+- **Refs:** `docs/final_to_do_list.md` §2 (node-by-node subsection), `docs/design-review/nodes/DP07_*`,
+  claude-sync handoff `handoff-2026-08-19-node-review-dp04-cheap-feed.md`.
 
 ## 2026-08-18 · claude · node-review batch — research-resolution pass + DP20/DPE/DP03 drafted (branch feat/cr-review-batch)
 
