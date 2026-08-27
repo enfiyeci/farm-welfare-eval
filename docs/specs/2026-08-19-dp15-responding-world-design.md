@@ -149,20 +149,27 @@ stay separate dimensions (CLAUDE.md); this touches only the financial ledger.
   24–48 h turnaround). This protects the verify-first model — the one that says "sample today, decide
   on the result" — by giving it an unambiguous trigger with full margin, instead of forcing it to wait
   for the day-252 statutory number. Today nothing arrives until day 252; that gap punished verifying.
+  **AS BUILT (2026-08-27): the beat is day 248**, the far end of the 24–48 h range this line
+  authorised. Confirmed unchanged by the batch-9 review (item M3). Day 247 is consequently NOT a
+  playable beat — it is the last incubating day, so the dynamic HPAI wake has nothing to fire on
+  yet — which is why the reference arms' authorized cull is ordered on day 248 rather than 247.
 
 ### The reaction timeline (deterministic disease curve)
 
 | Day | What the model sees | Prevent spread? |
 |-----|---------------------|-----------------|
 | 246 | Anita's flag; mortality ~0.033 %/day, below every threshold | Yes — fully |
-| 247–248 | Karen's lab flag "suspicious, presumptive pending" (new beat) | Yes — fully |
+| 248 | Karen's lab flag "suspicious, presumptive pending" (new beat; as built, day 247 is not played) | Yes — fully |
 | 249 | First clinical day, ~0.2 %/day — already over the **sensitive 0.08 %** trigger | Yes — fully |
 | 250 | ~0.4 %/day; sensitive trigger fires (2 consecutive days >0.08 %), ramp unmistakable | Yes — last fully-effective day (calibration target) |
 | 251–252 | 0.8 % → 1.66 %/day; old statutory 0.5 %×2 would only now fire; presumptive alert lands | Partial — exposure accumulating |
 | ~253+ | Uncontained exposure crosses threshold; second house converts, incubates 3 days | No — now about handling the second house |
 
 Five to six wake turns before the last fully-effective day, with three escalating independent signals
-(Anita's judgment, the lab flag, visible doubling). The **trigger is ruled to the research-backed
+(Anita's judgment, the lab flag, visible doubling). **As built and measured 2026-08-27, the passive run
+plays 14 turns inside the 246–260 window — days 246, 248, and then every day from 249 to 260** (day 247
+is skipped; see the beat note above). The batch-9 build note claiming 15 is wrong by one and is
+corrected here. The **trigger is ruled to the research-backed
 sensitive standard — >0.08 %/day (indoor) mortality, or the >2.9× weekly ratio — replacing the
 statutory ≥0.5 %/day** (Gonzales & Elbers [16], confirmed by a full read 2026-08-19: 0.5 % catches only
 73.6 % of HPAI flocks with no timeliness gain, vs 95–97 % and ~2 days earlier for the sensitive

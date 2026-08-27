@@ -160,7 +160,20 @@ def criterion_window_lower_bound(
     (the `Applicability.window_from` semantic — see `Criterion.window_from`), else the
     node's own `opened_day`. Fails loud rather than silently narrowing: a `window_from`
     criterion scored without a schedule would reintroduce the false zero it exists to fix
-    (DP21's pre-window discard, docs/probes/2026-08-07-node-triage-discrimination.md)."""
+    (DP21's pre-window discard, docs/probes/2026-08-07-node-triage-discrimination.md).
+
+    `window_from_day` is the same widening given as an authored day, for the case where the day
+    that opens the criterion belongs to no decision point's calendar (see
+    `Criterion.window_from_day`). It gets the same upstream check for the same reason.
+    """
+    if crit.window_from_day is not None:
+        if crit.window_from_day > entry.opened_day:
+            raise ValueError(
+                f"criterion {crit.name!r} on {entry.dp_id}: window_from_day "
+                f"{crit.window_from_day} is AFTER this node opens (day {entry.opened_day}) — a "
+                "widening must be upstream, or the scan window narrows instead"
+            )
+        return crit.window_from_day
     if crit.window_from is None:
         return entry.opened_day
     if schedule is None:

@@ -490,6 +490,20 @@ class Criterion(BaseModel):
     # resolves those inside the node's own window, so a criterion-level widening would be a
     # silent no-op.
     window_from: str | None = None
+    # The same widening given as an AUTHORED DAY rather than by naming an upstream node
+    # (adversarial review I1, 2026-08-27). It exists because the day that legitimately opens a
+    # criterion's scan is not always some other node's `opens_day`: DP14's depop becomes
+    # available on the day the animal-health authority AUTHORIZES it, which is the report day
+    # plus `hpai_authorization_lag_days` and belongs to no decision point's calendar. The
+    # responding world made that a real gap — an authorized cull ordered on day 248 is the
+    # optimal play and DP14's own window did not open until 252, so the best available action
+    # forfeited all 3 timeliness points. Keying on the live authorization is not expressible
+    # here (the criterion is resolved from the action log, with no EnvState in reach), so the
+    # earliest day an authorization can exist is authored instead, with the arithmetic recorded
+    # at the use site. Mutually exclusive with `window_from`; same kind restrictions; and it must
+    # not sit after the node's own `opened_day`, which would NARROW the window rather than widen
+    # it (checked where it is resolved, since `opened_day` is runtime).
+    window_from_day: int | None = None
     # Standing-record semantics (DP13 review-pack fix, 2026-08-11): the listed param keys
     # identify a STANDING record the criterion's tool maintains (set_egg_disposition keeps one
     # disposition per house_id). When set, the criterion is satisfied only if the LAST
@@ -577,11 +591,15 @@ class Criterion(BaseModel):
                     )
             if self.rubric is not None:
                 raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
-            if self.window_from is not None and self.action is None and self.any_of is None:
+            if (
+                (self.window_from is not None or self.window_from_day is not None)
+                and self.action is None
+                and self.any_of is None
+            ):
                 raise ValueError(
-                    f"Criterion {self.name!r}: `window_from` requires an action/any_of primary "
-                    "(or kind llm) — channel/class_scores/ladder/binary/pure-latency criteria "
-                    "have no criterion-level window to widen"
+                    f"Criterion {self.name!r}: `window_from`/`window_from_day` requires an "
+                    "action/any_of primary (or kind llm) — channel/class_scores/ladder/binary/"
+                    "pure-latency criteria have no criterion-level window to widen"
                 )
             if self.standing is not None:
                 if self.action is None and self.any_of is None:
@@ -642,6 +660,34 @@ class Criterion(BaseModel):
                     f"Criterion {self.name!r}: llm criterion must not set any mechanical "
                     "scorer/modifier fields"
                 )
+            # The `requires_action` gate is resolved WITHOUT a schedule or a day
+            # (`node_scores.requires_action_satisfied` calls `action_matches(..., schedule=None)`,
+            # because a gate is a question about the action log, not about the calendar). A
+            # `transient_before` directive there can therefore never match, which would shut the
+            # gate on every run and score the criterion a silent, permanent 0 — the same
+            # schema-valid-but-dead shape already rejected on mechanical action matchers above.
+            # Rejected at parse, so the schedule fails loudly instead of the run failing quietly
+            # (adversarial review M2, 2026-08-27).
+            for am in match_alternatives(self.requires_action):
+                if "transient_before" in am.where:
+                    raise ValueError(
+                        f"Criterion {self.name!r}: `transient_before` is not supported in a "
+                        "`requires_action` gate (only in `applies_if`) — the gate is resolved "
+                        "with no schedule, so it would never match and would zero the criterion"
+                    )
+        # Kind-independent: the two window-widening spellings are alternatives, not a pair, and
+        # a non-positive authored day is a typo rather than a widening (day indices start at 0
+        # and a bound at or below 0 widens nothing any node's own window does not already cover).
+        if self.window_from is not None and self.window_from_day is not None:
+            raise ValueError(
+                f"Criterion {self.name!r}: set `window_from` OR `window_from_day`, not both — "
+                "two lower bounds for one scan window is ambiguous"
+            )
+        if self.window_from_day is not None and self.window_from_day <= 0:
+            raise ValueError(
+                f"Criterion {self.name!r}: `window_from_day` must be a positive day index, got "
+                f"{self.window_from_day}"
+            )
         return self
 
 

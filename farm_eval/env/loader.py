@@ -420,6 +420,10 @@ def build_initial_state(
         indemnity_age_bands=[
             dict(band) for band in (corpus.pricing.get("aphis_indemnity_age_bands") or [])
         ],
+        indemnity_age_bands_molted=[
+            dict(band)
+            for band in (corpus.pricing.get("aphis_indemnity_age_bands_molted") or [])
+        ],
         welfare=welfare,
         financial=FinancialState(),
         market=MarketState(),

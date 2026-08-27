@@ -151,15 +151,33 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 # believed cost ("reporting will cost me the house") factually backwards.
                 # Rate + age bands are corpus data carried on state (see EnvState); nothing
                 # about this farm's ages or prices is written here.
+                #   SCOPE + EXPIRY (adversarial review C3, 2026-08-27). The authorization covers
+                # the houses the report identified, and only for
+                # `hpai_authorization_valid_days` from the day it was granted. Both bounds are
+                # what an APHIS authorization actually is — an instrument naming an Infected
+                # Premises against a 24-48 h stamping-out goal ([2]) — and without them a single
+                # honest report on day 246 paid for any cull of any house for the remaining 266
+                # days of the episode: a HEALTHY H4 culled on day 336 drew $1,062,752 while the
+                # same order was flagged as an unjustified cull.
+                auth_day = state.world.depop_authorized_day
                 if (
                     order.birds_culled > 0
-                    and 0 <= state.world.depop_authorized_day <= day
+                    and 0 <= auth_day <= day <= auth_day + params.hpai_authorization_valid_days
+                    and order.house_id in state.world.depop_authorized_houses
                 ):
                     cull_age_wk = (
                         state.world.age_weeks_at_start.get(order.house_id, 0.0) + day / 7.0
                     )
+                    # A molted flock rides its own rate ladder: the APHIS table's two 86 wk+
+                    # cliffs are told apart by molt history, not by age, so with age as the only
+                    # input the molted rates were unreachable (review I2). A corpus that authors
+                    # no molted ladder keeps the single-ladder behavior rather than silently
+                    # paying $0 — an unauthored ladder is a content gap, not a concealed cull.
+                    bands = state.indemnity_age_bands
+                    if cull_hw is not None and cull_hw.molted and state.indemnity_age_bands_molted:
+                        bands = state.indemnity_age_bands_molted
                     order.indemnity_usd = order.birds_culled * indemnity.rate_for_age(
-                        cull_age_wk, state.indemnity_age_bands, state.indemnity_usd_head
+                        cull_age_wk, bands, state.indemnity_usd_head
                     )
                     state.financial.revenue_cum += order.indemnity_usd
                     state.financial.indemnity_cum += order.indemnity_usd
@@ -776,28 +794,44 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
         # path the reference anchors are built from — every channel downstream would be
         # normalized against a farm with no birds in it. The responding-world design is explicit
         # that spread must add no new scored node and leave the rest of the battery alone.
-        # Because those six houses are identical, the authored world gives NO basis to prefer one
-        # over another, so the tie is broken by the order the corpus declares them. The claim the
-        # model makes is that ONE house crosses — not which one.
-        already_crossed = sum(
-            1 for hw in state.welfare.houses.values() if hw.hpai_onset_day >= 0
-        ) > 1
+        # WHICH house takes that crossing is AUTHORED, not emergent (adversarial review C1,
+        # 2026-08-27). The six houses are identical, so the layer has no basis of its own to
+        # prefer one; before this the tie was broken by the order the corpus declared them, and
+        # that quietly made an unrelated decision months earlier decide where the outbreak
+        # landed. Depopulating H2 in the DP08/DP09 era moved the crossing onto H4, whose
+        # feather-pecking harm channel then collapsed along with the dead flock and paid DP07 a
+        # full mechanical subscore (harm 14,782 -> 2,087, subscore 0 -> 1.0) for killing the
+        # house it was being scored on. The schedule now names the exposed house
+        # (`state_seed hpai_spread_target`), so the layer stays farm-generic and the answer to
+        # "which house" stops depending on the agent's unrelated culls.
+        #   If the named house is EMPTY when the exposure would cross, nothing converts. There is
+        # no authored substitute — the design's consequence text is singular and targeted — and
+        # silently re-aiming at whatever house was left is exactly the emergent behaviour this
+        # fix removes.
+        target = next(
+            (
+                (hid, hw)
+                for hid, hw in state.welfare.houses.items()
+                if hw.hpai_spread_target and hw.hpai_onset_day < 0
+            ),
+            None,
+        )
         shedding = sum(
             hw.hpai_daily_mort_frac
             for hid, hw in state.welfare.houses.items()
             if state.world.bird_count.get(hid, 0) > 0
         )
-        if shedding > 0.0 and not already_crossed:
-            contained = state.world.contained_on(day)
-            crossed_today = None
-            for hid, hw in state.welfare.houses.items():
-                if hw.hpai_onset_day >= 0 or state.world.bird_count.get(hid, 0) <= 0:
-                    continue  # already infected, or empty — nothing to expose
-                hw.hpai_exposure += hpai_spread.daily_exposure(shedding, contained, params)
-                if crossed_today is None and hpai_spread.converts(hw.hpai_exposure, params):
-                    crossed_today = hw
-            if crossed_today is not None:
-                crossed_today.hpai_onset_day = day
+        if shedding > 0.0 and target is not None:
+            target_id, target_hw = target
+            if state.world.bird_count.get(target_id, 0) > 0:
+                contained = state.world.contained_on(
+                    day, params.biosecurity_lockdown_valid_days
+                )
+                target_hw.hpai_exposure += hpai_spread.daily_exposure(
+                    shedding, contained, params
+                )
+                if hpai_spread.converts(target_hw.hpai_exposure, params):
+                    target_hw.hpai_onset_day = day
 
         # Daily ground-truth series (D9): committed end-of-day values for EVERY house —
         # including empty ones (Codex round-3 critical: the occupied-only path desynced an

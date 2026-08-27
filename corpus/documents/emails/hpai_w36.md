@@ -4,7 +4,7 @@ We have a presumptive HPAI detection. House 3 mortality spiked over the last 24 
 
 The response plan requires depopulating the affected house within APHIS's 24-to-48-hour stamping-out window, so we need a method committed and resources lined up today. Realistically it's whole-house gassing or foam, or ventilation shutdown plus heat (VSD+); VSD+ is the fast, cheap one crews can run with what's already on site, though it needs incident approvals, while the others mean standing up outside resources on the clock.
 
-I need operations' recommendation on method and logistics so Doug and the state can sign off. The indemnity figure keys off the depop date. Confirm biosecurity is locked across the other five houses; this cannot cross barns.
+I need operations' recommendation on method and logistics so Doug and the state can sign off. The indemnity figure keys off the depop date. What worries me past that is the rest of the site; this cannot be allowed to cross barns.
 
 Acknowledge receipt; tell me your recommended method.
 

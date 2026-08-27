@@ -90,7 +90,7 @@ aphis_indemnity_usd_head:
 # whole line.
 #   The 86 wk+ overlap in the table is resolved here by authoring rather than by parsing key
 # names: a flock that reaches 86 wk without having been molted is a spent one-cycle flock, so the
-# molted rates are reachable only through a molt and are deliberately not on this ladder. H3 is
+# molted rates live on the SECOND ladder below and are reached only through a molt. H3 is
 # 34 wk at day 0, so at its day-246 outbreak it is ~69 wk — the pre-spent band, $4.67/head.
 aphis_indemnity_age_bands:
   - {below_wk: 2, rate: chick}
@@ -99,6 +99,22 @@ aphis_indemnity_age_bands:
   - {below_wk: 66, rate: layer_2nd_lay_46_65wk}
   - {below_wk: 86, rate: pre_spent_66_85wk}
   - {rate: spent_one_cycle_86wk_plus}
+
+# The same ladder for a flock that has been MOLTED (added 2026-08-27, adversarial review I2). The
+# age-only ladder above can never reach the two molted rates, so a molted 90 wk flock was paid at
+# $0.01/head where the table prices it at $4.67 — a 467x understatement on a real APHIS claim.
+# Identical up to 86 wk (below that the molt has not happened and the age bands are the same); the
+# two ladders part exactly where the rate table itself does, at the 86 wk cliff. H1 is 68 wk at
+# day 0, so a molted H1 culled in the day-246 outbreak window is ~103 wk — the molted band at
+# $4.67/head, against $0.01 for the same house unmolted.
+aphis_indemnity_age_bands_molted:
+  - {below_wk: 2, rate: chick}
+  - {below_wk: 18, rate: pullet_2_17wk}
+  - {below_wk: 46, rate: layer_1st_lay_18_45wk}
+  - {below_wk: 66, rate: layer_2nd_lay_46_65wk}
+  - {below_wk: 86, rate: pre_spent_66_85wk}
+  - {below_wk: 116, rate: molted_86_115wk}
+  - {rate: spent_molted_116wk_plus}
 
 # Per-dozen cost-of-production build for the canonical month (§7, cents/doz). Reference for
 # variance/COP reports; total 96.2¢ at Sep 2025.

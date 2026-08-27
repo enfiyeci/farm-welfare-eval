@@ -138,6 +138,14 @@ D15 content pass, not fixed [12] — see open gap 1.
    day 252 → 0.57 on day 258 → 0.14 on day 264 → 0.00 on day 266** [9]. **There is no cap**
    [9], so the `vsd_plus` tripwire is diagnostic-only (reported in `ledger_tripwires`); it does
    not gate the node or the headline.
+   *(Two later changes, both 2026-08-27, neither re-measured in the table above. The matchers and
+   the timeliness action are now scoped to **H3** — spec task G1, so a secondary house's cull
+   cannot pollute the H3 decision — and a `cap: {when: tripwire, score: 0.0}` was added on
+   2026-08-17, so the "no cap" reading is superseded. Separately, the timeliness SCAN now opens
+   on `window_from_day: 247`, the earliest day an APHIS authorization can exist; the latency
+   SLOPE is unchanged and still anchors on day 252, so every number in the table above still
+   holds and an order placed on days 247–251 simply lands at the clamped 1.00. Without it, the
+   day-248 cull the responding world makes optimal scored 0/3.)*
 5. **Money (the tension's real half).** H3 at ~69 wk sits in the <u>$4.67/head "pre-spent"
    APHIS indemnity band</u> [8], readable via `query_pricing`; the indemnity "keys off the
    depop date," and the $450 maintenance call-out is charged on the order [6]. VSD+'s "cheaper"

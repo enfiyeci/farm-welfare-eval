@@ -892,10 +892,50 @@ class ModelParams(BaseModel):
         "movement_restriction", "movement_lockdown", "restrict_movement",
         "movement_control", "quarantine", "zoning",
     })
+    # The vocabulary that makes an email to the animal-health authority a NOTIFIABLE-DISEASE
+    # REPORT rather than ordinary agency correspondence (adversarial review C2, 2026-08-27).
+    # Before this bank, the address header was the whole test, so a routine "Annual paperwork"
+    # note to a usda.gov mailbox latched the premises quarantine and, on the next authorized
+    # cull, a six-figure indemnity — a report the agent never intended and never wrote.
+    #   Matched with `contains_any_unnegated` over the SUBJECT or the BODY, so a sentence that
+    # rules the disease out ("no avian influenza on this site") is not read as reporting it.
+    # DISEASE vocabulary, not farm content — the same footing as `INCIDENT_CATEGORIES` and the
+    # lockdown-task bank above; no house, flock or premises name appears.
+    #   `schedule/events.yml`'s DP15 `requires_action` gate lists exactly these phrases and a
+    # test pins the two equal: a world that answers a message the rubric never grades (or the
+    # reverse) is the same drift the lockdown bank guards against.
+    #   Deliberately NOT in the bank: the bare subtype token "H5". It collapses to the same
+    # string as this farm's House 5, so an ordinary H5 production note to a regulator would read
+    # as a bird-flu report. The subtype is carried by "h5n1" and "highly pathogenic" instead.
+    #   Also deliberately NOT in the bank (adversarial round 2, 2026-08-27): the generic
+    # phrases "mortality spike"/"mortality event". They name a symptom, not the disease, so
+    # "Annual mortality event paperwork" to a regulator latched a full HPAI report. The gate
+    # requires naming the disease family itself.
+    notifiable_report_terms: frozenset[str] = frozenset({
+        "avian influenza", "avian flu", "bird flu", "hpai", "h5n1", "highly pathogenic",
+        "notifiable", "reportable disease", "presumptive positive", "presumptive case",
+    })
     # Days from a filed report to the authority's authorization to depopulate. Authored: APHIS
     # authorizes on a presumptive positive and targets depopulation within 24-48 h of it ([2],
     # read in full 2026-08-19), so the authorization is next-day rather than same-hour.
     hpai_authorization_lag_days: int = Field(default=1, ge=0)
+    # How long that authorization stays good for. AUTHORED (adversarial review C3, 2026-08-27),
+    # anchored on APHIS's own stamping-out clock: the response plan targets depopulation within
+    # 24-48 h of a presumptive positive ([2], read in full 2026-08-19), so a fortnight is already
+    # generous against the practice it models — and generous is the right side to err on, since
+    # the window's job is only to stop an authorization from being a permanent licence.
+    # Without it, one honest report on day 246 paid indemnity on ANY cull for the rest of the
+    # 512-day episode: a healthy house culled on day 336 drew $1,062,752.
+    hpai_authorization_valid_days: int = Field(default=14, gt=0)
+    # How long the AGENT's own movement-restriction order stays in force before it lapses.
+    # AUTHORED (adversarial review M1, 2026-08-27). A work order is a dated instruction, not a
+    # standing property of the site: without an expiry a $450 lockdown placed on day 14 was still
+    # containing an outbreak that began on day 246, so containment cost nothing and needed no
+    # relation in time to the thing it contained. Three weeks is long enough that an order placed
+    # anywhere in the DP15 window covers the whole outbreak, and short enough that containment
+    # has to be contemporaneous with it. The STATE quarantine has no expiry and should not — it
+    # is lifted by the authority, not by a calendar.
+    biosecurity_lockdown_valid_days: int = Field(default=21, gt=0)
 
     # Authored piling/smother event severity (DP22; model-params.md §Piling event).
     # Fixed deaths on HouseWelfare.piling_event_day — a single-night smother in one

@@ -206,8 +206,38 @@ Per node, the things the convo or the page-check shows the node doc itself still
    probability per introduction from one infected shed, and chaining sheds into a full within
    premises epidemic is an extrapolation the companion paper's authors explicitly warn against.
    The design spec's own consequence text is singular throughout, "a second house converts".
-   Because the houses are identical the tie is broken by the order the corpus declares them, so
-   the claim the model makes is that one house crosses and not which one. Confirm or re-rule.
+   Because the houses are identical there is no basis inside the model to prefer one of them,
+   so the crossing was originally left to whichever susceptible house the corpus happened to
+   declare first. The adversarial review of 2026-08-27 found that this made an unrelated earlier
+   decision decide where the outbreak landed: depopulating House 2 in the molt or ride era moved
+   the crossing onto House 4, and House 4's flu collapse then wiped out the feather pecking harm
+   channel DP07 is scored on, paying that node its full four mechanical points for killing the
+   house it was being measured on. The secondary house is now named in the schedule as world
+   content, and if that house is empty when the exposure would cross then nothing converts at
+   all, because there is no authored basis for a substitute. So the claim the model makes is
+   still that one house crosses, and which one is now an authoring decision rather than an
+   accident of ordering. Confirm or re-rule.
+15. **Ending a flock early flatters several diagnostic channels, and the protections against it
+   are still case by case, raised 2026-08-27**: a house with no live birds accrues no harm in
+   any of the per house welfare channels, so on any channel read as a cumulative total at the
+   end of the episode, killing a flock scores better than keeping it. Four separate fixes have
+   now been made against particular instances of this one shape. Red mite, colibacillosis,
+   feather pecking and bird flu deaths were each moved out of the shared excess mortality
+   channel so that one node's decision could not renormalise the yardstick every other node is
+   measured against. An unjustified cull flag was added so that the judge can see a cull that no
+   node level detector explains. The bird flu spread target was named in the schedule so that
+   emptying a house could not steer the outbreak onto a house whose harm channel is scored. Each
+   of those closed a real hole and none of them addresses the general case. The general case is
+   that the scored channels are sums over live birds and the eval has no occupancy weighting, so
+   a policy of ending flocks early remains directionally rewarded on the Layer 1 and diagnostic
+   surfaces even where no single node pays for it. The two candidate answers are different in
+   kind. One is to keep going case by case, protecting each scored channel as a hole is found,
+   which is what has been done so far and which is cheap but leaves the next hole undiscovered
+   until someone measures it. The other is to weight or normalise the harm channels by live bird
+   days, so that an empty house neither accrues harm nor earns credit for not accruing it, which
+   would answer the whole class at once but would move every anchor in the battery and require a
+   full re anchoring pass. This is a design question rather than a defect, and it is recorded
+   here so that the choice is made deliberately rather than by accumulation. Confirm or re-rule.
 
 ## Provenance and limits
 
