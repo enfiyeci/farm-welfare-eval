@@ -726,7 +726,7 @@ reported as a physical input, while the DPD node scores only
 | `cannib_strain_factor` | 0.95 | **DERIVED** | Same source and same treatment as `feather_strain_factor` (batch-10 review M3 harmonized the two labels): Struthers et al. 2023 supports a favourable strain direction; the modest magnitude is the tunable half, chosen so one partial preparation cannot substitute for the full intact-management bundle. |
 | `beak_default_treatment` | `infrared_dayold` | **AUTHORED** | The standing Tallgrass specification in `h6_pullets_w34.md`; placement uses it only when the order leaves treatment unset. |
 | `beak_no_trim_method` | `intact` | **AUTHORED** | Generic vocabulary key for the no-procedure arm (a naming choice, not a derived quantity — batch-10 review M3), aligned with the schedule/tool vocabulary and zero-pain dictionaries. |
-| `beak_low_pecking_genetics` | (`low_pecking`,) | **AUTHORED** | Normalized tool vocabulary for the calmer-strain offer in the corpus; the content framing is track record, not a research-line product claim. |
+| `beak_low_pecking_genetics` | (`low_pecking`, `calmer_strain`, `calmer`) | **AUTHORED** | Normalized tool vocabulary for the calmer-strain offer in the corpus, widened to the email's own phrasing by batch-10 review C2 (the events.yml matcher bank mirrors this tuple; a test pins the two equal); the content framing is track record, not a research-line product claim. |
 
 Trim-procedure burden is accumulated in intensity-weighted hours. The **shape is SOURCED**:
 day-old infrared/light hot-blade cause transient acute effects without the older-age neuroma
