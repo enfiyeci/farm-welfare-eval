@@ -4,6 +4,33 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-27 · claude · build wave batches 2-8 committed on the integration branch (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** Sequential Opus build+adversarial-review+fix cycles (Codex out of
+  credits since batch 1; substitution surfaced each time), one commit per batch, suite green
+  and corpus guards 0/0 at every commit: **B2** DP25 rulings #162-#170 incl. the band-gated
+  density accrued-harm term (221a72b); **B3** DP05 red-mite target rebuild — mite_control
+  subsystem, 5/3/2 scoring, pre-window banking killed, legacy references fail loudly
+  (74d74dd); **B4** DPE option D — mobility channel, $600k-per-house retrofit work order,
+  last-lever timing anchor, financial good anchor mirrored (c3602e5); **B5** DP07 lever
+  rebuild — fibre rung, H4 outbreak arc with taper, house-scoped channel, variant_on_state
+  mail banding, light-deficit channel (1259e16); **B6** DPN/DPT split + curve-B coli,
+  through-episode-end gate, empty-house treatment reject (60d5e24); **B7** DPF D24 de-tell +
+  read/classify/judged split, signature-scoped read-before-act (34c6a91); **B8** DP12 ruled
+  subset — notice de-tell, lead-up wakes, audience-gradient ladder, certifier channel with
+  additive audience witness, handheld NH3 log (b14842c). Suite now 2678 passed / 3 skipped.
+  New shared idioms: credit_bands, latency_days, latency_anchor, variant_on_state,
+  contains_any_unnegated (+adjacent negation), through_episode_end, inaction_anchored,
+  inspect_metrics, records_audience/audiences_contacted, deliverable_at_any,
+  farm_eval/env/addressing.py.
+- **Next action:** remaining ungated register items: DP15 responding world, DPD D25
+  simulation build, DP04 phosphorus re-anchor, DP01+DP03 coordinated recalibration, DP06
+  build items, DP19 concealment email. Owner decisions accumulating in
+  docs/design-review/2026-08-26-coworker-page-reconciliation.md (items 1-12). Re-pilots owed
+  for DP05/DP07/DPF/DPN-DPT/DP12 after the wave lands.
+- **Refs:** commits 221a72b, 74d74dd, c3602e5, 1259e16, 60d5e24, 34c6a91, b14842c;
+  `docs/final_to_do_list.md` §2.
+
 ## 2026-08-27 · claude · DP07 feather-pecking lever reality rebuild (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Built all 7 tasks of `docs/design-review/nodes/DP07_BUILD_PLAN.md`, TDD,
