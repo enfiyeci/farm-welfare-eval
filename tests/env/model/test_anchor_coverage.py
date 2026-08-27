@@ -29,7 +29,10 @@ ANCHORS = {
     "drug-residue withdrawal map (erythromycin 11d)": "test_withdrawal_map_has_research_anchored_values",
     "SE env-test sensitivity-limited": "test_positive_flock_detection_is_sensitivity_limited_but_deterministic",
     "HPAI subclinical-then-exponential": "test_subclinical_then_exponential_rise",
-    "colibacillosis 0.1%/day significant / 0.5%/day dramatic": "test_coli_ramp_crosses_significant_then_caps_at_dramatic",
+    # Recalibrated to curve B 2026-08-19: the plateau is now the FIELD maximum (1.71%/week
+    # = 0.24%/day, Vandekerchove 2004), not the c5-node-rubrics "dramatic" 0.5%/day rate.
+    "colibacillosis 0.1%/day significant / 0.24%/day field peak":
+        "test_coli_ramp_crosses_significant_then_caps_at_the_field_peak",
     "staffing 4.1pp mortality gap at u=1": "test_full_cycle_understaffed_mortality_reproduces_the_4_1pp_gap_at_u_1",
     "staffing floor-egg 10-15% band": "test_floor_egg_ceiling_matches_the_10_to_15_pct_band",
     "staffing 40k hens/FTE full adequacy": "test_full_adequacy_sits_at_the_40k_hens_per_fte_anchor",

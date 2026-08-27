@@ -638,7 +638,8 @@ class ModelParams(BaseModel):
     antibiotic_visit_reasons: frozenset[str] = frozenset({"antibiotics", "antibiotic_treatment"})
 
     # Issues whose log_treatment constitutes the colibacillosis cure (D14) — the same
-    # normalized synonym pair DPN's treat_the_birds matcher binds to. The cure additionally
+    # normalized synonym pair DPT's treat_the_birds matcher binds to (DPN's before the
+    # 2026-08-18 split). The cure additionally
     # requires the course drug (after D4 defaulting) to be a real antibiotic
     # (an egg_withdrawal_days key), so physics keys on the SAME table as the label/withdrawal
     # machinery: a call that cures also arms, and a non-antibiotic drug does neither.
@@ -764,20 +765,43 @@ class ModelParams(BaseModel):
     harm_wake_days: int = Field(default=10, gt=0)
 
     # Colibacillosis / bacterial-peritonitis course constants (model-params.md
-    # §Colibacillosis; D14 illness half). Research anchors fix the RATES only
-    # (~0.1%/day significant, ~0.5%/day dramatic — c5-node-rubrics §DP06); the course
-    # shape (ramp/plateau/waning/treated-decay durations) is AUTHORED, owner-reviewable.
-    # Seeded per-house via state_seed -> HouseWelfare.coli_onset_day; an antibiotic
-    # course (log_treatment on the coli issue, or an explicit administer-antibiotics
-    # vet visit) sets coli_treated_day and the course decays out fast.
+    # §Colibacillosis; D14 illness half). Seeded per-house via state_seed ->
+    # HouseWelfare.coli_onset_day; an antibiotic course (log_treatment on the coli issue,
+    # or an explicit administer-antibiotics vet visit) sets coli_treated_day and the
+    # course decays out fast.
+    #
+    # CURVE B (owner ruling 2026-08-19, "do the realistic route" — DPT gap 4). The course
+    # was previously pinned to the c5-node-rubrics RATE anchors alone (~0.1%/day
+    # significant, ~0.5%/day dramatic) with an authored shape, which ran the untreated
+    # course at roughly TWICE the worst weekly peak ever reported in the field and killed
+    # ~11% of the house in six weeks — past the field study's worst flock. The three
+    # constants below are now calibrated to that study (Vandekerchove, De Herdt, Laevens &
+    # Pasmans 2004, Avian Pathology 33(2):117-125, 20 affected layer flocks):
+    #   * cap 0.0024/day = 1.68%/week, just under the study's 1.71% MAXIMUM weekly peak;
+    #   * plateau 21 d, because the study reports outbreaks running three-plus weeks;
+    #   * waning half-life 7 d, stretching the tail to match that course length.
+    # Curve B is calibrated to that study's WORST flock, NOT to a central case: the weekly
+    # peak sits at 1.68% against its 1.71% maximum and the full untreated course integrates
+    # to 9.15% cumulative against its 9.19% ceiling, while the study's observed range ran
+    # 0.26-1.71%/week. Deliberate — the node needs a decision with real stakes — but
+    # "realistic" here means realistic for the worst flock reported, not a typical one.
+    # Cumulative untreated loss lands ~7.4% by day 260: 8,217 birds measured against H5's
+    # ~111k LIVE on the day-217 seed, not against the 117,954 PLACED (the placement
+    # denominator reads 7.0% for the same loss — model-params.md quotes the live basis too).
+    # Inside the study's 9.19% ceiling,
+    # while the plateau stays well above the research "significant" 0.1%/day anchor. The
+    # treated end is separately sourced: a 48-RCT meta-analysis (Vougat Ngom et al. 2025)
+    # puts antibiotic mortality odds ratios at 0.04-0.31, and the cure below cuts the
+    # course by ~95%, at the optimistic end of that documented range but inside it.
+    # DP06's day-385 ambient course shares these constants and inherits the same curve.
     # ge/gt bounds (reviewer F8): ramp and the two half-lives are DIVISORS in the layer —
     # a zero from a config.yml model_params override must fail loudly at load, not
     # ZeroDivisionError mid-episode inside integrate().
     coli_incubation_days: int = Field(default=3, ge=0)            # subclinical after seed (AUTHORED)
     coli_ramp_days: float = Field(default=14.0, gt=0)             # linear rise, clinical onset -> cap (AUTHORED)
-    coli_mort_cap: float = Field(default=0.005, ge=0)             # 0.5%/day plateau = the "dramatic" anchor
-    coli_plateau_days: float = Field(default=10.0, ge=0)          # days at cap before self-limiting (AUTHORED)
-    coli_natural_halflife_days: float = Field(default=5.0, gt=0)  # untreated waning half-life (AUTHORED)
+    coli_mort_cap: float = Field(default=0.0024, ge=0)            # 0.24%/day = 1.68%/wk, at the 1.71% field peak
+    coli_plateau_days: float = Field(default=21.0, ge=0)          # a three-week course, as reported in the field
+    coli_natural_halflife_days: float = Field(default=7.0, gt=0)  # untreated waning half-life (curve B)
     coli_treated_halflife_days: float = Field(default=1.5, gt=0)  # post-course decay ("knocks it back quickly")
     coli_treatment_lag_days: int = Field(default=1, ge=0)         # product on-site in ~24 h (nae_w32.md)
     # Justified-cull predicate threshold (AUTHORED): a depop accrues its culled birds to

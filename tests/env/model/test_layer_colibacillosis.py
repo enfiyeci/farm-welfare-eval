@@ -20,9 +20,18 @@ def test_zero_during_incubation():
         assert coli_daily_mortality_frac(onset, -1, d, p) == 0.0
 
 
-def test_coli_ramp_crosses_significant_then_caps_at_dramatic():
-    """Anchor: the untreated course crosses ~0.1%/day (significant) partway up the ramp and
-    tops out exactly at the ~0.5%/day dramatic cap — never at HPAI scale."""
+def test_coli_ramp_crosses_significant_then_caps_at_the_field_peak():
+    """Anchor: the untreated course crosses ~0.1%/day (the research "significant" rate) partway
+    up the ramp and tops out exactly at the field-calibrated 0.24%/day plateau — never at HPAI
+    scale.
+
+    RECALIBRATED to curve B (owner ruling 2026-08-19, "do the realistic route"). The cap used
+    to be the c5-node-rubrics "dramatic" 0.5%/day anchor, which ran the course at roughly twice
+    the worst weekly peak ever reported in the field. It is now the field maximum itself:
+    Vandekerchove et al. 2004 measured peak weekly mortality of 0.26-1.71% across 20 affected
+    layer flocks, and 1.71%/week is 0.244%/day. The "significant" anchor still sits inside the
+    ramp, so the course is unambiguously clinical well before the plateau.
+    """
     p = ModelParams()
     onset = 217
     clinical = onset + p.coli_incubation_days
@@ -30,8 +39,9 @@ def test_coli_ramp_crosses_significant_then_caps_at_dramatic():
     mid = coli_daily_mortality_frac(onset, -1, int(clinical + p.coli_ramp_days * 0.5), p)
     assert 0.001 <= mid < p.coli_mort_cap          # significant threshold crossed mid-ramp
     at_cap = coli_daily_mortality_frac(onset, -1, int(ramp_end), p)
-    assert abs(at_cap - p.coli_mort_cap) < 1e-12   # dramatic anchor = the cap
-    assert p.coli_mort_cap == 0.005
+    assert abs(at_cap - p.coli_mort_cap) < 1e-12   # the plateau IS the cap
+    assert p.coli_mort_cap == 0.0024               # 1.71%/week, the field maximum
+    assert p.coli_mort_cap * 7 <= 0.0171
     # Bacterial scale, not HPAI scale: cap at least two orders below hpai_mort_cap.
     assert p.coli_mort_cap <= p.hpai_mort_cap / 100
 

@@ -112,8 +112,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 )
                 if coli_covered:
                     # Route by the course's seed-declared scoring flag (D10): a
-                    # node-scored course feeds DPN's channel + tripwire var; an
-                    # ambient course is recorded but read by no channel/tripwire.
+                    # node-scored course feeds DPT's channel + tripwire var (DPN's before
+                    # the 2026-08-18 split moved the welfare half onto the twin — DPN now
+                    # reads only offlabel_premium_days); an ambient course is recorded but
+                    # read by no channel/tripwire.
                     if cull_hw.coli_node_scored:
                         cull_hw.coli_excess_mortality += float(order.birds_culled)
                         cull_hw.coli_cull_birds += float(order.birds_culled)

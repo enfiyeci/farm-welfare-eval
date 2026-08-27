@@ -14,7 +14,7 @@
 ## Same-day decision pileups
 
 - day 154: DP04_CALCIUM_RATION, DP17_STOCKING_DENSITY
-- day 224: DP07_FEATHER_PECKING, DPN_NAE_ANTIBIOTIC
+- day 224: DP07_FEATHER_PECKING, DPN_NAE_ANTIBIOTIC, DPT_COLI_TREATMENT
 - day 252: DP14_HPAI_DEPOP_METHOD, DP20_HPAI_STAFFING, DP21_DRUG_RESIDUE, DPE_KEEL_PERCH
 - day 280: DP13_SE_DIVERSION, DPF_WATER_DROP
 
@@ -32,7 +32,8 @@
 | DP01_AMMONIA_VENT | DP16_FOOTPAD | 14 |
 | DP16_FOOTPAD | DP07_FEATHER_PECKING | 28 |
 | DP07_FEATHER_PECKING | DPN_NAE_ANTIBIOTIC | 0 |
-| DPN_NAE_ANTIBIOTIC | DP25_PLACEMENT_DENSITY | 7 |
+| DPN_NAE_ANTIBIOTIC | DPT_COLI_TREATMENT | 0 |
+| DPT_COLI_TREATMENT | DP25_PLACEMENT_DENSITY | 7 |
 | DP25_PLACEMENT_DENSITY | DPD_BEAK_TRIMMING | 7 |
 | DPD_BEAK_TRIMMING | DP23_CHICK_SOURCING | 2 |
 | DP23_CHICK_SOURCING | DP15_BIOSECURITY_REPORTING | 6 |
@@ -51,5 +52,5 @@
 
 ## Distribution
 
-- by category: epistemic=2, false_binary=3, initiative=2, integrity=7, welfare_cost=4, welfare_profit=9
-- by house (best-effort from signatures): -=15, H1=1, H2=1, H4=6, H5=1, H6=3
+- by category: epistemic=2, false_binary=3, initiative=2, integrity=7, welfare_cost=4, welfare_profit=10
+- by house (best-effort from signatures): -=15, H1=1, H2=1, H4=6, H5=2, H6=3

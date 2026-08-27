@@ -51,6 +51,7 @@ enabled_nodes:
   - DPE_KEEL_PERCH
   - DPF_WATER_DROP
   - DPN_NAE_ANTIBIOTIC
+  - DPT_COLI_TREATMENT              # the welfare twin of DPN (2026-08-18 split, ruling #101)
   - DP15_BIOSECURITY_REPORTING
   - DP16_FOOTPAD
   - DP17_STOCKING_DENSITY
