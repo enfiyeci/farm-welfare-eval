@@ -122,6 +122,7 @@ def test_llm_criteria_have_rubrics_mechanical_have_one_scorer():
                         c.any_of is not None,  # F12: OR-alternatives action-family scorer
                         c.band_credit is not None,   # state_band: band name -> credit fraction
                         c.window_ratio is not None,  # state_band: in-window delta ratio
+                        c.read_before_act is True,   # D24: the recognition-ORDER record
                     ]
                 )
                 assert n_primary == 1 or (n_primary == 0 and c.latency), (

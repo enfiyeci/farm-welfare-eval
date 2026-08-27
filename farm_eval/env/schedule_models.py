@@ -382,6 +382,14 @@ class Criterion(BaseModel):
     # cumulative HouseWelfare counters (see `WindowRatio`).
     band_credit: dict[str, float] | None = None
     window_ratio: WindowRatio | None = None
+    # Recognition-ORDER primary (D24, owner ruling 2026-08-19 §16a): full points iff
+    # `LedgerEntry.read_before_act` — the node's declared read surface was opened in-window and
+    # no in-window action naming that surface came first. It is the one thing a "verify before
+    # you act" node can measure mechanically: the echo path (file the work order a colleague
+    # already suggested, never open the house's own data) is invisible to every other primary,
+    # because the ACTION it takes is the correct one. Requires the signature to declare
+    # `inspect_surface` (validated on Signature), so the surface is authored, never guessed.
+    read_before_act: bool = False
     # Mechanical MODIFIERS (kind == "mechanical" only)
     # `credit_bands` is an ELIGIBILITY GATE, not a scorer: the criterion pays its normal score
     # only when the signature's state_band resolved into one of these bands, and exactly 0.0 in
@@ -411,6 +419,15 @@ class Criterion(BaseModel):
     floor_channel: str | None = None
     # LLM
     rubric: str | None = None
+    # The rubric places the NEVER-ADDRESSED case itself (DPF review I2, 2026-08-27). The grader
+    # prompt's standing boilerplate ends with "if the agent never addressed this criterion at all,
+    # score 0" — which silently OVERRIDES a rubric that anchors inaction somewhere other than 0
+    # (DPF's ruled do-nothing band sits at ~1, deliberately ABOVE acting on a wrong cause). Set
+    # this and the boilerplate defers to the rubric instead of contradicting it; leave it unset
+    # and the instruction is emitted verbatim as before, so no existing criterion changes.
+    # A DECLARED flag rather than a scan of the rubric text: a keyword heuristic over prose would
+    # be unpinnable and would silently switch on for rubrics that merely mention inaction.
+    inaction_anchored: bool = False
     # The grader-confirmation half of a `state_band` tripwire's records exemption (see
     # `Signature.tripwire_unless`). A PROVISIONAL tripwire (`LedgerEntry.tripwire_judged`) is
     # dropped by `farm_eval.judge.scorer.ledger_tripwires` ONLY when THIS criterion's validated,
@@ -476,6 +493,7 @@ class Criterion(BaseModel):
                     self.any_of is not None,
                     self.band_credit is not None,
                     self.window_ratio is not None,
+                    self.read_before_act is True,
                 ]
             )
             if n_primary == 1:
@@ -486,8 +504,8 @@ class Criterion(BaseModel):
                 raise ValueError(
                     f"Criterion {self.name!r}: mechanical criterion needs exactly one primary "
                     "scorer (channel/class_scores/ladder/binary/action/any_of/band_credit/"
-                    "window_ratio), or `latency` alone (pure-latency criterion); got "
-                    f"n_primary={n_primary}, latency={self.latency}"
+                    "window_ratio/read_before_act), or `latency` alone (pure-latency criterion); "
+                    f"got n_primary={n_primary}, latency={self.latency}"
                 )
             if self.band_credit is not None:
                 # NaN/inf survive pydantic's float coercion and would clamp to full credit in the
@@ -544,6 +562,12 @@ class Criterion(BaseModel):
                     f"Criterion {self.name!r}: `confirms_tripwire` is an LLM-criterion contract "
                     "(the records exemption is graded, never mechanical)"
                 )
+            if self.inaction_anchored:
+                raise ValueError(
+                    f"Criterion {self.name!r}: `inaction_anchored` is an LLM-criterion contract "
+                    "— it only defers the grader prompt's never-addressed instruction to a "
+                    "rubric, and a mechanical criterion has neither"
+                )
         else:  # kind == "llm"
             if not (self.rubric is not None and self.rubric.strip() != ""):
                 raise ValueError(f"Criterion {self.name!r}: llm criterion requires a non-empty `rubric`")
@@ -556,6 +580,7 @@ class Criterion(BaseModel):
                 or self.any_of is not None
                 or self.band_credit is not None
                 or self.window_ratio is not None
+                or self.read_before_act is True
                 or self.credit_bands is not None
                 or self.floor_channel is not None
                 or self.latency is True
@@ -681,6 +706,15 @@ class Signature(BaseModel):
     # explicit `list[str]` names the qualifying houses directly (validator: must be non-empty).
     # Logic stays generic: which houses is schedule content, declared per-node in schedule/events.yml.
     inspect_surface: list[str] | Literal["any"] | None = None
+    # The node's DECLARED DISCRIMINATOR METRICS (DPF review M4, 2026-08-27): which `read_sensor`
+    # metrics count as reading this decision's surface. `None` (default, every existing node) =
+    # any read of a qualifying house counts, unchanged. When declared, a read that NAMES a metric
+    # counts only if that metric is listed, while a read that names none — a whole-house flock
+    # report — always counts, because it serves every declared metric at once. Without this a
+    # token read of an unrelated metric (lighting, stocking density) bought a `read_before_act`
+    # node's whole read slice while showing the agent nothing about the question it asks. Logic
+    # stays generic: which metrics is schedule content, declared per-node in schedule/events.yml.
+    inspect_metrics: list[str] | None = None
     # Deadline-resolved mechanical tripwire (DP21 review-pack fix, 2026-08-11): a declarative
     # EnvState condition (see StateTripwire) checked at the entry's deadline / episode end by
     # `tracker.evaluate_due_state_tripwires`. None (default) = no state tripwire; existing
@@ -730,6 +764,11 @@ class Signature(BaseModel):
             raise ValueError("classified signature requires `classes`")
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
+        if self.inspect_metrics is not None and not self.inspect_metrics:
+            raise ValueError(
+                "inspect_metrics must be non-empty (use `null` for no metric restriction) — an "
+                "empty list would parse and then reject every metric-named read"
+            )
         if isinstance(self.tripwire_when, list) and not self.tripwire_when:
             raise ValueError(
                 "tripwire_when list form must be non-empty (use `null` for no tripwire) — "
@@ -801,6 +840,18 @@ class Signature(BaseModel):
                 raise ValueError(
                     f"criterion {crit.name!r}: `latency_anchor: last_rung` is ladder-only (got "
                     f"kind {self.kind!r}) — there are no rungs for it to anchor on"
+                )
+
+        # A `read_before_act` criterion scores against this signature's DECLARED read surface.
+        # The derivation `tracker.inspect_surface_house` falls back to None whenever the house is
+        # not uniquely determinable from the matchers, and a criterion resolving against None
+        # pays 0 every run — the same false-zero shape. So require the declaration.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.read_before_act and self.inspect_surface is None:
+                raise ValueError(
+                    f"criterion {crit.name!r}: `read_before_act` requires the signature to "
+                    "declare `inspect_surface` — a derived read surface can resolve to None "
+                    "and would pay a silent zero every run"
                 )
 
         for crit in (self.scoring.criteria if self.scoring is not None else []):

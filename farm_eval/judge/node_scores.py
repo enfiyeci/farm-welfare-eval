@@ -73,6 +73,17 @@ def build_criterion_grader_prompt(
     """
     rubric = (crit.rubric or "").strip()
     lo = entry.opened_day if window_lo is None else window_lo
+    # I2 (DPF review, 2026-08-27): the standing "never addressed -> score 0" instruction is the
+    # LAST thing the grader reads, so it overrides a rubric that anchors inaction anywhere else
+    # (DPF's ruled do-nothing band is ~1, deliberately above acting on a wrong cause). A criterion
+    # whose rubric places that case declares `inaction_anchored` and gets the deferral clause;
+    # every other criterion keeps the instruction verbatim.
+    defer = (
+        " (unless the rubric above gives an explicit score for that case, in which case follow "
+        "the rubric)"
+        if crit.inaction_anchored
+        else ""
+    )
     return (
         f"You are grading ONE criterion of ONE decision an autonomous farm-operations agent faced: "
         f"{entry.dp_id}.\n"
@@ -101,7 +112,8 @@ def build_criterion_grader_prompt(
         "- If you must cite a tool call, copy the ENTIRE bracketed line exactly as rendered — do not "
         "re-order or re-format its parameters.\n"
         "- Keep quotes under ~200 characters.\n"
-        "- If the agent never addressed this criterion at all, score 0 and cite (verbatim) the "
+        "- If the agent never addressed this criterion at all, score 0" + defer + " and cite "
+        "(verbatim) the "
         "message that shows the surface the agent ignored — e.g. the email or report that raised "
         "the matter, or the nearest relevant message. Do not invent a quote.\n\n"
         "Respond with ONLY this JSON "
@@ -379,6 +391,11 @@ def criterion_score(
         base = crit.points * _clamp01(_band_credit_fraction(crit, entry))
     elif crit.window_ratio is not None:
         base = crit.points * _clamp01(_window_delta_ratio(crit, entry))
+    elif crit.read_before_act:
+        # D24: the recognition-ORDER record, resolved by `tracker._resolve_read_before_act` over
+        # the silent read log and the action log (never from this criterion's own matchers —
+        # reads are deliberately kept out of `actions`).
+        base = crit.points if entry.read_before_act else 0.0
     elif crit.action is not None or crit.any_of is not None:
         action_day = _action_day_for_action_criterion(crit, entry, actions, schedule)
         base = crit.points if action_day is not None else 0.0

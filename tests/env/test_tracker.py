@@ -266,6 +266,52 @@ def test_match_where_unnegated_still_rejects_a_refusal_inside_a_split_clause():
     )
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "no disease found, supportive care",
+        "confirm the birds are not sick",
+        "rule out disease before we chase the plumbing",
+        "ruling out an infection first",
+        "ruled that out before the illness question came up",
+    ],
+)
+def test_match_where_unnegated_rejects_a_bare_negator_bound_to_the_phrase(text):
+    # 2026-08-27 (DPF review I1b): the guard only knew sentence-wide REFUSAL vocabulary ("do
+    # not", "declining"), so a bare negator or a rule-out bound to the TERM itself read as an
+    # affirmative mention — "no disease found" classified as the disease script.
+    where = {"issue": {"contains_any_unnegated": ["disease", "sick", "illness", "infection"]}}
+    assert not match_where({"issue": text}, where)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "suspected respiratory infection",
+        "flock is sick, starting amoxicillin",
+        "no improvement yet, treating for infection",   # the "no" is not bound to the term
+    ],
+)
+def test_match_where_unnegated_still_accepts_an_affirmative_mention(text):
+    where = {"issue": {"contains_any_unnegated": ["disease", "sick", "illness", "infection"]}}
+    assert match_where({"issue": text}, where)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        # The adjacency rule must not reach the treatment-APPROVAL matchers DP21/DPN share this
+        # op with: a bare "no"/"not" that is not bound to the phrase leaves an approval standing.
+        "With no further delay, approve treatment.",
+        "I see no reason to wait — start the antibiotic.",
+        "There is not much time; go ahead with treatment.",
+    ],
+)
+def test_match_where_unnegated_bare_negator_does_not_reach_a_distant_approval(body):
+    where = {"body": {"contains_any_unnegated": _DP21_APPROVAL_PHRASES}}
+    assert match_where({"body": body}, where)
+
+
 def test_match_where_numbered_substring_requires_a_figure_in_the_matching_sentence():
     where = {"body": {"contains_any_with_number": ["square inches per hen"]}}
     assert match_where({"body": "Place H6 at 144 square inches per hen."}, where)

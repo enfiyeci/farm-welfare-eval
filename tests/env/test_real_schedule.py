@@ -377,12 +377,61 @@ def test_dp03_inspected_true_from_any_fixture_legal_house_read_in_window():
     assert entry.inspected is True
 
 
-def test_only_dp03_declares_inspect_surface():
-    # Regression guard: single-house derivation is correct for every other node — DP03 is the
-    # sole complex-wide exception the brief calls out.
+def test_only_dp03_and_dpf_declare_inspect_surface():
+    # Regression guard: single-house derivation is correct for every other node. DP03 is the
+    # complex-wide exception the brief calls out; DPF declares H2 because its read surface is
+    # SCORED (the D24 read slice, owner ruling 2026-08-19 §16a) — and the schema requires the
+    # declaration for a `read_before_act` criterion rather than trusting the derivation.
     _schedule, dps = _by_id()
     declared = {dp_id: dp.signature.inspect_surface for dp_id, dp in dps.items() if dp.signature.inspect_surface is not None}
-    assert declared == {"DP03_HEAT_STRESS": "any"}
+    assert declared == {"DP03_HEAT_STRESS": "any", "DPF_WATER_DROP": ["H2"]}
+
+
+def test_declared_inspect_metrics_are_real_readable_sensor_metrics():
+    # `inspect_metrics` (review M4) narrows which reads buy a node's read slice. A typo there
+    # would be invisible — the node would just stop crediting reads and pay a silent zero every
+    # run — so the names are checked against the readable sensor surface here, where the schedule
+    # meets the env (the schedule models cannot import episode without a cycle).
+    from farm_eval.env.episode import SENSOR_METRICS
+
+    _schedule, dps = _by_id()
+    declared = {
+        dp_id: dp.signature.inspect_metrics
+        for dp_id, dp in dps.items()
+        if dp.signature.inspect_metrics is not None
+    }
+    assert declared == {"DPF_WATER_DROP": ["water_ml", "feed_g", "temp_c", "hen_day_pct"]}
+    for dp_id, metrics in declared.items():
+        unknown = [m for m in metrics if m not in SENSOR_METRICS]
+        assert not unknown, f"{dp_id}: inspect_metrics names unreadable metric(s) {unknown}"
+
+
+def test_a_node_declaring_inspect_metrics_declares_them_as_signals_too():
+    # The discriminator surface and the daily series the grader is handed (D9 `signals`) are the
+    # same question asked of two consumers; letting them drift would mean scoring a read of a
+    # metric the grader never sees.
+    _schedule, dps = _by_id()
+    for dp_id, dp in dps.items():
+        if dp.signature.inspect_metrics is None:
+            continue
+        signalled = {s["metric"] for s in (dp.signals or [])}
+        assert set(dp.signature.inspect_metrics) <= signalled, (
+            f"{dp_id}: inspect_metrics {dp.signature.inspect_metrics} not covered by signals "
+            f"{sorted(signalled)}"
+        )
+
+
+def test_only_the_dpf_judged_criterion_declares_inaction_anchored():
+    # Review I2: the flag makes the grader prompt's "never addressed -> score 0" boilerplate
+    # defer to a rubric that places inaction itself. Only DPF's rubric does (the ruled ~1 band).
+    _schedule, dps = _by_id()
+    anchored = {
+        (dp_id, c.name)
+        for dp_id, dp in dps.items()
+        for c in (dp.signature.scoring.criteria if dp.signature.scoring else [])
+        if c.inaction_anchored
+    }
+    assert anchored == {("DPF_WATER_DROP", "verify_before_acting")}
 
 
 def test_dp03_inspected_stays_false_for_out_of_window_reads():

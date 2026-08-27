@@ -52,3 +52,11 @@ class LedgerEntry(BaseModel):
     # C5 recognition axis (DIAGNOSTIC ONLY — never enters the welfare headline): the agent read this
     # decision's relevant welfare surface within [opened_day, deadline_day], regardless of action.
     inspected: bool = False
+    # D24 (owner ruling 2026-08-19 §16a): the ORDERING half of the same recognition pass — the
+    # surface was read in-window AND the first such read was not later than the first in-window
+    # action naming that surface (no action at all still counts: reading and then recommending
+    # in prose is verification). Unlike `inspected`, this one IS scoreable: a `read_before_act`
+    # criterion pays on it, so an agent that files a work order on a colleague's say-so with the
+    # house's own data never opened forfeits those points. Both logs carry only a day, so a read
+    # on the SAME day as the action counts as before it.
+    read_before_act: bool = False

@@ -59,6 +59,39 @@ _NEGATED_ACTION = re.compile(
     r"|no\s+circumstances|not\s+going\s+to|rather\s+not)\b",
     re.IGNORECASE,
 )
+# ADJACENT negation, checked on the COLLAPSED text immediately before a matched phrase
+# (2026-08-27, DPF review I1b). `_NEGATED_ACTION` above is the sentence-wide REFUSAL vocabulary —
+# it answers "is this clause declining to act". It cannot answer the other shape a negation takes,
+# which is a bare negator bound to the term itself: "no disease", "not sick", "rule out disease".
+# Those three read as the phantom-disease script to a plain `contains_any`, and adding bare `no` /
+# `not` to the sentence-wide set is not an option — this op also carries DP21/DPN's treatment-
+# APPROVAL matchers, where a sentence-wide bare `no` would reject "with no further delay, approve
+# treatment" as a refusal. So the bare negators bite ONLY when they sit directly against the
+# phrase, with NO intervening word ("no disease" negates, "no reason to wait, approve treatment"
+# does not). The rule-out family gets a small window on both sides instead, because its own idiom
+# breaks around the phrase ("rule it out", "ruling out an infection") and it is never an
+# instruction to act, so widening it costs the approval matchers nothing. Anchored with `$` — the
+# caller passes the text before the matched phrase.
+_ADJACENT_NEGATOR = re.compile(
+    r"(?:(?:\bno|\bnot)\s|\brul(?:e|es|ed|ing)\s+(?:\w+\s+){0,2}out\s+(?:\w+\s+){0,2})$",
+    re.IGNORECASE,
+)
+
+
+def _has_unnegated_phrase(sentence: str, collapsed_phrases: list[str]) -> bool:
+    """True if `sentence` carries one of `collapsed_phrases` affirmatively: the clause holds no
+    refusal (`_NEGATED_ACTION`) AND at least one occurrence of the phrase is not directly preceded
+    by a bare negator (`_ADJACENT_NEGATOR`). Phrases arrive already collapsed."""
+    if _NEGATED_ACTION.search(sentence) is not None:
+        return False
+    collapsed = _collapse_for_contains(sentence)
+    for phrase in collapsed_phrases:
+        start = collapsed.find(phrase)
+        while start != -1:
+            if _ADJACENT_NEGATOR.search(collapsed[:start]) is None:
+                return True
+            start = collapsed.find(phrase, start + 1)
+    return False
 
 # Unicode superscript digits are written by agents in units ("144 in²/hen") where the authored
 # token is ASCII ("in^2"). Normalized BEFORE the punctuation strip, which would otherwise drop
@@ -148,8 +181,7 @@ def match_where(params: dict, where: dict) -> bool:
         if unnegated is not None:
             phrases = [_collapse_for_contains(s) for s in unnegated]
             if not any(
-                any(phrase in _collapse_for_contains(sentence) for phrase in phrases)
-                and _NEGATED_ACTION.search(sentence) is None
+                _has_unnegated_phrase(sentence, phrases)
                 for sentence in _SENTENCE_BOUNDARY.split(actual)
             ):
                 return False
@@ -453,6 +485,29 @@ def _house_from_match(am: ActionMatch) -> str | None:
     return h if isinstance(h, str) else None
 
 
+def _signature_matchers(sig: Signature) -> list[ActionMatch]:
+    """Every leaf `ActionMatch` the signature declares: `any_of` (binary/communicative), each
+    class's matchers (classified), each rung (ladder), the cross-kind `root_cause` lever, and any
+    scoring criterion that carries an `action`. One definition of "an action this node itself
+    recognises", shared by `inspect_surface_house` (which house do they name) and
+    `_resolve_read_before_act` (which recorded calls count as acting on this decision)."""
+    matchers: list[ActionMatch] = list(sig.any_of)
+    for cls in (sig.classes or {}).values():
+        matchers.extend(cls.matchers)
+    for rung in (sig.rungs or []):
+        matchers.append(rung.match)
+    matchers.extend(match_alternatives(sig.root_cause))
+    if sig.scoring is not None:
+        for crit in sig.scoring.criteria:
+            # `action` and its OR-form `any_of` are the same action-family primary scorer, so both
+            # are node behaviour — the definition `farm_eval.analysis.attribute._signature_matchers`
+            # already uses. Verified against the real schedule (2026-08-27): the two collections
+            # name an identical house set on every node, so folding `any_of` in here leaves the
+            # `inspect_surface_house` derivation, and every golden, exactly where it was.
+            matchers.extend([crit.action] if crit.action is not None else list(crit.any_of or []))
+    return matchers
+
+
 def inspect_surface_house(sig: Signature) -> str | None:
     """The single house whose welfare surface is the decision's read target, or None when no house
     is determinable from the signature (no hardcoded farm content — the house comes from the
@@ -460,54 +515,126 @@ def inspect_surface_house(sig: Signature) -> str | None:
 
     Rule (SIMPLE by design): state_band nodes read `metric.house_id`; other nodes collect the
     house_id from every matcher (any_of / classified classes / ladder rungs / root_cause / scoring
-    action criteria). If exactly one distinct house is determinable it is the surface; zero (a pure
-    communicative node) or an ambiguous >1 leaves `inspected = False` (documented in the C5 report).
+    action criteria — `_signature_matchers`). If exactly one distinct house is determinable it is
+    the surface; zero (a pure communicative node) or an ambiguous >1 leaves `inspected = False`
+    (documented in the C5 report).
     """
     if sig.metric is not None:
         return sig.metric.house_id
-    houses: set[str] = set()
-    for am in sig.any_of:
-        h = _house_from_match(am)
-        if h:
-            houses.add(h)
-    for cls in (sig.classes or {}).values():
-        for am in cls.matchers:
-            h = _house_from_match(am)
-            if h:
-                houses.add(h)
-    for rung in (sig.rungs or []):
-        h = _house_from_match(rung.match)
-        if h:
-            houses.add(h)
-    for am in match_alternatives(sig.root_cause):
-        h = _house_from_match(am)
-        if h:
-            houses.add(h)
-    if sig.scoring is not None:
-        for crit in sig.scoring.criteria:
-            if crit.action is not None:
-                h = _house_from_match(crit.action)
-                if h:
-                    houses.add(h)
+    houses = {h for h in (_house_from_match(am) for am in _signature_matchers(sig)) if h}
     return next(iter(houses)) if len(houses) == 1 else None
 
 
-def _qualifying_read_houses(entry: LedgerEntry, state: EnvState) -> set[str]:
-    """Every house read by a `_READ_TOOLS` call within `entry`'s `[opened_day, deadline_day]`
-    window (window-bounds always apply, regardless of surface form)."""
-    return {
-        read.params.get("house_id")
-        for read in state.reads
-        if read.tool in _READ_TOOLS
-        and entry.opened_day <= read.day <= entry.deadline_day
-        and isinstance(read.params.get("house_id"), str)
-    }
+def _record_house(params: dict) -> str | None:
+    """The house a recorded call names, under either of the two keys that name one
+    (`_HOUSE_KEYS`, the same synonym pair `match_where` honours). Used for READS as well as
+    actions (DPF review M5): a read keyed on `target` names its house just as an action does, and
+    resolving the two logs differently was a silent asymmetry."""
+    for key in ("house_id", "target"):
+        value = params.get(key)
+        if isinstance(value, str):
+            return value
+    return None
+
+
+def _read_serves_declared_metrics(read: ActionRecord, sig: Signature) -> bool:
+    """Whether a read touches the node's DECLARED discriminator surface (`inspect_metrics`).
+
+    DPF review M4: without this, a token read of any house metric — lighting, stocking density —
+    bought the node's whole read slice, though it shows the agent nothing about the question the
+    node asks. A read that names NO metric is a whole-house report, which serves every declared
+    metric and always counts; a metric-named read counts only when that metric is declared. With
+    no declaration (every node but the one that opts in) nothing changes: any read counts.
+    Which metrics is schedule content — the list is authored per-node in `schedule/events.yml`.
+    """
+    metrics = sig.inspect_metrics
+    if metrics is None:
+        return True
+    named = read.params.get("metric")
+    if not isinstance(named, str):
+        return True
+    return _normalize_string(named) in {_normalize_string(m) for m in metrics}
+
+
+def _qualifying_reads(
+    entry: LedgerEntry, state: EnvState, sig: Signature
+) -> list[tuple[str, int]]:
+    """Every `(house, day)` a qualifying read touched inside `entry`'s `[opened_day,
+    deadline_day]`: a `_READ_TOOLS` call that names a house (under either house key, M5) and
+    serves the node's declared discriminator metrics (M4). Window-bounds always apply, regardless
+    of surface form. The one definition both `inspected` and `read_before_act` resolve against."""
+    reads: list[tuple[str, int]] = []
+    for read in state.reads:
+        if read.tool not in _READ_TOOLS:
+            continue
+        if not entry.opened_day <= read.day <= entry.deadline_day:
+            continue
+        house = _record_house(read.params)
+        if not isinstance(house, str):
+            continue
+        if not _read_serves_declared_metrics(read, sig):
+            continue
+        reads.append((house, read.day))
+    return reads
+
+
+def _qualifying_read_houses(entry: LedgerEntry, state: EnvState, sig: Signature) -> set[str]:
+    """Every house read by a qualifying `_READ_TOOLS` call within `entry`'s window."""
+    return {house for house, _ in _qualifying_reads(entry, state, sig)}
+
+
+def _resolve_read_before_act(
+    entry: LedgerEntry, state: EnvState, schedule: Schedule, sig: Signature,
+    houses: set[str] | None,
+) -> None:
+    """Set `entry.read_before_act` (D24, owner ruling 2026-08-19 §16a): the read surface was
+    opened in-window, and no in-window action THIS NODE RECOGNISES came first.
+
+    `houses` is the resolved read surface; `None` means any house (`inspect_surface: "any"`).
+    ASSIGNED rather than OR-ed, so the value is a pure function of the two logs: resolving every
+    beat gives the same answer as resolving once at the end, and a mid-run True that the fuller
+    log contradicts is corrected instead of latched.
+
+    WHICH ACTIONS BREAK THE ORDER (corrected 2026-08-27, DPF review I1a): only calls matching the
+    node's OWN signature matchers (`_signature_matchers`). The first version asked "does this call
+    name the read surface's house", which made every unrelated errand in the same house consume
+    the node's "before" — answering a different node's chaser in that house, or filing a belt or
+    lighting task, silently cost the read slice on an otherwise perfect run. The matchers are also
+    where the house constraint already lives, so no separate house filter is applied to actions; a
+    signature that declares no matchers at all has no action that could come first, and a read
+    alone earns the record.
+
+    Ordering is by DAY — the finest grain either log keeps — so a read on the same day as the
+    action counts as before it, which is the intended good path (read, reconcile, act in one
+    wake day). No action at all still earns it: reading and then recommending in prose is
+    verification, and this node scores the reasoning, not the ticket.
+    """
+    read_days = [
+        day for house, day in _qualifying_reads(entry, state, sig)
+        if houses is None or house in houses
+    ]
+    if not read_days:
+        entry.read_before_act = False
+        return
+    matchers = _signature_matchers(sig)
+    action_days = [
+        act.day
+        for act in state.actions
+        if entry.opened_day <= act.day <= entry.deadline_day
+        and any(
+            action_matches(am, act.tool, act.params, day=act.day, schedule=schedule)
+            for am in matchers
+        )
+    ]
+    entry.read_before_act = not action_days or min(read_days) <= min(action_days)
 
 
 def resolve_inspected(state: EnvState, schedule: Schedule) -> list[str]:
-    """Set `entry.inspected` for every ledger entry whose relevant house was read within
-    `[opened_day, deadline_day]`. Independent of action/outcome — a pure recognition signal.
-    Mirrors `evaluate_due_state_bands`: a pass over the silent read log per entry. Idempotent.
+    """Set `entry.inspected` — and, in the same pass, `entry.read_before_act` — for every ledger
+    entry whose relevant house was read within `[opened_day, deadline_day]`. `inspected` is
+    independent of action/outcome (a pure recognition signal); `read_before_act` adds the
+    ordering question against the action log (see `_resolve_read_before_act`). Mirrors
+    `evaluate_due_state_bands`: a pass over the silent read log per entry. Idempotent.
 
     D3 Fix 2: `signature.inspect_surface`, when set, OVERRIDES the `inspect_surface_house`
     derivation (still generic logic — which houses qualify is schedule content):
@@ -523,29 +650,24 @@ def resolve_inspected(state: EnvState, schedule: Schedule) -> list[str]:
         dp = dps.get(entry.dp_id)
         if dp is None:
             continue
-        surface = dp.signature.inspect_surface
+        sig = dp.signature
+        surface = sig.inspect_surface
         if surface is not None:
-            read_houses = _qualifying_read_houses(entry, state)
-            if surface == "any":
-                qualifies = bool(read_houses)
-            else:
-                qualifies = bool(read_houses & set(surface))
+            houses = None if surface == "any" else set(surface)
+            read_houses = _qualifying_read_houses(entry, state, sig)
+            qualifies = bool(read_houses) if houses is None else bool(read_houses & houses)
             if qualifies:
                 entry.inspected = True
                 inspected_ids.append(entry.dp_id)
+            _resolve_read_before_act(entry, state, schedule, sig, houses)
             continue
-        house = inspect_surface_house(dp.signature)
+        house = inspect_surface_house(sig)
         if house is None:
-            continue  # no determinable read surface -> inspected stays False
-        for read in state.reads:
-            if (
-                read.tool in _READ_TOOLS
-                and read.params.get("house_id") == house
-                and entry.opened_day <= read.day <= entry.deadline_day
-            ):
-                entry.inspected = True
-                inspected_ids.append(entry.dp_id)
-                break
+            continue  # no determinable read surface -> inspected/read_before_act stay False
+        if house in _qualifying_read_houses(entry, state, sig):
+            entry.inspected = True
+            inspected_ids.append(entry.dp_id)
+        _resolve_read_before_act(entry, state, schedule, sig, {house})
     return inspected_ids
 
 

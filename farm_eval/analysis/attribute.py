@@ -105,7 +105,12 @@ def _surface_accepts(house: Any, surface: Any, derived: str | None) -> bool:
     Mirrors `tracker.resolve_inspected`: an explicit `inspect_surface` overrides the derivation
     (`"any"` = any house read at all; a list = membership), otherwise the single house derived
     by `inspect_surface_house` must match (None -> nothing qualifies). A read without a string
-    `house_id` never qualifies, exactly as `tracker._qualifying_read_houses` requires.
+    house key never qualifies, as `tracker._qualifying_reads` requires. Two deliberate narrowings,
+    noted 2026-08-27 so the next reader does not mistake this for enforced parity: the tracker
+    resolves a read's house through EITHER house key and the callers below pass `house_id` only
+    (no read tool emits `target`, so they agree in practice), and the tracker additionally honours
+    a node's declared `inspect_metrics` discriminator surface, which this attribution layer does
+    not model.
     """
     if not isinstance(house, str):
         return False
