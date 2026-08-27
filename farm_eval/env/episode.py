@@ -1526,6 +1526,7 @@ class FarmEnv:
                 "feed_g_per_bird": round(hw.feed_g, 1),
                 "water_ml_per_bird": round(hw.water_ml, 1),
             },
+            **self._handheld_nh3_log(house_id, hw),
             "welfare_obs": {
                 "footpad_affected_pct": round(hw.footpad_mild_pct + hw.footpad_severe_pct, 1),
                 "footpad_severe_pct": round(hw.footpad_severe_pct, 1),
@@ -1543,6 +1544,35 @@ class FarmEnv:
                 "effective_hours": effective_hours,
                 "confinement_days_used": round(hw.confinement_days_used, 1),
             },
+        }
+
+    def _handheld_nh3_log(self, house_id: str, hw) -> dict:
+        """The crew's handheld NH3 spot reading, for a house with no fixed sensor (task_4c676338).
+
+        `get_sensor` refuses an ammonia read on such a house and points at "handheld NH3 logs in
+        the flock reports" — a pointer that led nowhere until this: no tool served their air at
+        all, so the UEP audit could write up a house the agent had no way to inspect (DP12 gap 3,
+        owner-ruled 2026-08-17; DP01 carries the same gap). Served ONLY where the fixed sensor is
+        missing, which is the authored sensor asymmetry, not a special case: a sensored house is
+        read through `read_sensor`, and duplicating it here would hand it a second surface.
+
+        Reads live state like every other field in this report — never a canned figure — so a
+        remediating agent can see its fix land.
+
+        An EMPTY house serves none: nobody walks a house with no flock in it, the audit skips
+        empty houses when it takes its snapshot, and the substrate's ammonia field goes on
+        holding its last value there — so a reading would be paperwork about nothing. Same rule,
+        for the same reason, as `_feed_spec`.
+        """
+        if house_id in self.state.nh3_sensor_houses:
+            return {}
+        if self.state.world.bird_count.get(house_id, 0) <= 0:
+            return {}
+        return {
+            "air_quality": {
+                "handheld_nh3_ppm": round(hw.ammonia_ppm, 1),
+                "note": "handheld spot reading logged by the crew; no fixed NH3 sensor in this house",
+            }
         }
 
     def _feed_spec(self, house_id: str) -> dict:

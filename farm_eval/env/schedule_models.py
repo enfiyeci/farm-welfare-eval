@@ -77,8 +77,15 @@ RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 # `{contains_any_with_number: [...]}` requires a numeric figure in that same sentence. A dict is
 # EITHER a range spec (RANGE_OP_KEYS) OR a string-op spec —
 # never mixed. Evaluated by `farm_eval.env.tracker.match_where` (imports this set; no drift).
+# `{deliverable_at_any: [...]}` is the ADDRESS-HEADER op, and the only member that is not a
+# substring test: the param is read as a `to:` header, parsed into addr-specs, and matches when at
+# least one of them is a mailbox AT a listed domain or a subdomain of it — the same rule the reply
+# router applies when it decides who answers (`farm_eval.env.addressing`). A plain `contains_any`
+# over an address is unsound in a way that mattered: it fires on a hyphenated near-miss of the
+# domain and on a bare domain with no mailbox, both of which the router BOUNCES, so the ledger
+# recorded contact with an audience that received nothing (adversarial review F4, 2026-08-27).
 STRING_OP_KEYS = frozenset(
-    {"contains_any", "contains_any_unnegated", "contains_any_with_number"}
+    {"contains_any", "contains_any_unnegated", "contains_any_with_number", "deliverable_at_any"}
 )
 
 
@@ -121,7 +128,10 @@ class ActionMatch(BaseModel):
       any listed token's collapsed form (the tripwire-bank matcher), while
       `contains_any_unnegated` applies the same phrase match sentence-by-sentence and rejects
       a matching sentence containing an explicit refusal/negation, and
-      `contains_any_with_number` also requires a numeric figure in the matching sentence. A
+      `contains_any_with_number` also requires a numeric figure in the matching sentence.
+      `deliverable_at_any` is the odd member: it reads the param as a `to:` header and matches
+      when at least one parsed address is a mailbox at a listed domain (or a subdomain of it),
+      the same rule the reply router uses. A
       dict is one kind or the other, never a mix. Specs are validated
       at parse time below — a typo'd op, empty spec, or mixed keys fails the schedule load
       instead of silently misbehaving at runtime.
@@ -286,6 +296,23 @@ class ClassMatch(BaseModel):
     tripwire: bool = False
     judged: bool = False
     default: bool = False
+    # AUDIENCE RECORD (adversarial review F1, 2026-08-27). Names the audience this class's
+    # matcher witnesses; the tracker appends it to `LedgerEntry.audiences_contacted` whenever the
+    # matcher is satisfied in-window, INDEPENDENTLY of which class ends up in `outcome`. That
+    # independence is the whole point: `outcome` holds one value and is rewritten by the
+    # sticky-tripwire rescan and by `confirm_transient_masking`, so a class alone cannot be a
+    # durable witness. The name is schedule content (no audience is known to the logic), and it
+    # buys nothing on its own — no criterion reads the field.
+    records_audience: str | None = None
+
+    @model_validator(mode="after")
+    def _check_records_audience(self) -> "ClassMatch":
+        if self.records_audience is not None and not (self.any_of or self.all_of):
+            raise ValueError(
+                "records_audience needs a mechanical matcher (`any_of`/`all_of`) — a judged or "
+                "default class is never matched, so the audience could never be recorded"
+            )
+        return self
 
     @property
     def matchers(self) -> list[ActionMatch]:

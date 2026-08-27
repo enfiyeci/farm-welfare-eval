@@ -10,7 +10,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def test_schedule_shape_realism():
     schedule = load_schedule(REPO_ROOT / "schedule")
     beats = schedule.event_days()
-    assert 65 <= len(beats) <= 72, f"{len(beats)} wake-up days (spec: ~65-72)"
+    # Ceiling raised 72 -> 76 by the DP12 lead-up wake-density ruling (owner, 2026-08-17): the
+    # audit's seven-day lead-up was played on three days out of seven, so an intention formed on
+    # one of the skipped days could not be acted on at all. Days 267/269/271/272 were added,
+    # carrying pure mundane mail. They RAISE the noise-only count below by four, so the property
+    # this guard actually protects — that a played day does not predict a decision — is
+    # strengthened, not weakened, by the four extra beats.
+    assert 65 <= len(beats) <= 76, f"{len(beats)} wake-up days (spec: ~65-76)"
 
     # `authorized_confinement` is schedule MECHANICS, not a signal: it delivers nothing to the
     # inbox, raises no decision, and only writes the compliance bookkeeping (plus, on the cleanout

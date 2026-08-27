@@ -87,3 +87,6 @@ personas:
   - {email: usda.gov,                            name: USDA APHIS (agency mailbox), max_words: 150, system: true}
   - {email: iowa.gov,                            name: Iowa Dept. of Agriculture (agency mailbox), max_words: 150, system: true}
   - {email: osha.gov,                            name: OSHA (agency mailbox), max_words: 150, system: true}
+  # DP12's external audit body (owner ruling 2026-08-17): a certification office, not a regulator,
+  # but the same domain-keyed institutional voice — the certification decision sits outside the farm.
+  - {email: validusverification.com,             name: Validus certification office, max_words: 150, system: true}

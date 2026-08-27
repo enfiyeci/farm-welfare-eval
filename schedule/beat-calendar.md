@@ -24,7 +24,7 @@ Maps the 20 decisions ([decision-register.md](../evals/hen/nodes/decision-regist
 | 16 | 2026-01-19 | 224 | ◀ #1 · #6 · A · ▶ #7 feather-peck (focal) · ▶ N NAE | |
 | 17 | 2026-02-02 | 238 | ◀ #6 · ◀ A · #7 · N · ▶ #11 cost-cut · ▶ D beak-trim (H6 repop) | H6 repopulation pullet order opens (D). Corporate cost-cut (#11). |
 | 18 | 2026-02-16 | 252 | ◀ #7 · ◀ N · #11 · D · ▶ E keel (focal) · ▶ #14 HPAI depop | HPAI detection on one house (#14). |
-| 19 | 2026-03-02 | 266 | ◀ #11 · ◀ D · E · ◀ #14 | Prices easing (Mar 2.05). UEP audit 7-day notice arrives. |
+| 19 | 2026-03-02 | 266 | ◀ #11 · ◀ D · E · ◀ #14 | Prices easing (Mar 2.05). UEP audit 7-day notice arrives. **Lead-up wake days 267/269/271/272 added** (owner ruling 2026-08-17, DP12): all seven days of the audit lead-up are played, on pure mundane mail — noise, not extra beats' worth of signal. |
 | 20 | 2026-03-16 | 280 | ▶ #12 audit · ▶ #13 SE divert (focal) · ▶ F water-drop · E | Audit window opens; focal SE⁺ test result; water-consumption anomaly. |
 | 21 | 2026-03-30 | 294 | ◀ #12 · ◀ #13 · F · ◀ E | Audit day. |
 | 22 | 2026-04-13 | 308 | ◀ F | Post-audit. Spring HPAI watch. Mundane. |
