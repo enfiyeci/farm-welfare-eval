@@ -588,6 +588,37 @@ class FarmEnv:
                     "fallback:missing_house", tool, params,
                     "Placement order rejected: no house specified.",
                 )
+            beak_treatment = params.get("beak_treatment", "")
+            trim_methods = tuple(self.params.trim_pain_acute)
+            if beak_treatment not in (*trim_methods, ""):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid",
+                    tool,
+                    params,
+                    f"Tallgrass rejects beak treatment {beak_treatment!r}: choose one of "
+                    f"{', '.join(trim_methods)}.",
+                )
+            # Genetics validates as loudly as the beak method (batch-10 review C2): the corpus
+            # deliberately never prints the internal strain token, so a model reaching for the
+            # offer in Wendell's own words must either land in the accepted vocabulary or be
+            # TOLD the two lot options — a silently accepted wrong guess placed a standard
+            # flock and scored the strain leg a false zero. Normalization mirrors the
+            # placement's (`events._apply_pullet_placement`).
+            genetics_raw = params.get("genetics", "")
+            genetics_norm = (
+                str(genetics_raw).strip().lower().replace("-", "_").replace(" ", "_")
+            )
+            if genetics_norm and genetics_norm not in (
+                *self.params.beak_low_pecking_genetics,
+                *self.params.pullet_genetics_standard,
+            ):
+                return self._reject_action(
+                    "fallback:pullet_order_invalid",
+                    tool,
+                    params,
+                    f"Tallgrass rejects genetics spec {genetics_raw!r}: the offered lot is "
+                    f"standard Hy-Line Brown, or the calmer strain — name either.",
+                )
             raw_count = params.get("bird_count")
             try:
                 count = float(raw_count)
@@ -649,17 +680,35 @@ class FarmEnv:
             # follows for a non-positive quantity (the call is real; the detail tells the truth
             # about what it booked) and it keeps a genetics spec standing as the agent's stated
             # policy even when the birds are already in the house.
+            # The ACK states the FULL effective lot spec, defaults included (batch-10 review
+            # I2): the placement reads the latest order alone, so a count-only revision after a
+            # specced order silently reverts the lot to the standing specification — a fresh
+            # order form, which is honest world behavior, but only if the confirmation SAYS
+            # what the form now holds. Without this line the agent revising a count had no way
+            # to see the intact/strain/rearing decision fall off the order.
+            spec_bits = [
+                "beak: "
+                + (params.get("beak_treatment") or f"{self.params.beak_default_treatment} (standard)"),
+                "strain: "
+                + ("calmer line" if genetics_norm in self.params.beak_low_pecking_genetics
+                   else "standard Hy-Line Brown"),
+                "rearing-barn match: "
+                + ("yes" if str(params.get("rearing_match", "")).strip().lower()
+                   in self.params.rearing_match_truthy else "no"),
+            ]
+            spec = "; ".join(spec_bits)
             placement_day = self._pending_placement_day(house)
             if placement_day is None:
                 detail = (
-                    f"placement order recorded for {house}: {count:,} pullets — note that "
-                    f"no upcoming placement for {house} is open to bind it to (the flock is "
-                    f"already placed, or none is booked)."
+                    f"placement order recorded for {house}: {count:,} pullets ({spec}) — note "
+                    f"that no upcoming placement for {house} is open to bind it to (the flock "
+                    f"is already placed, or none is booked)."
                 )
             else:
                 detail = (
                     f"placement order recorded for {house}: {count:,} pullets for the "
-                    f"{date_for_day(self.state.start_date, placement_day)} placement"
+                    f"{date_for_day(self.state.start_date, placement_day)} placement "
+                    f"({spec})"
                 )
         elif tool == "send_email":
             # Capture the outbound message so the judge can score communicative/judged decisions.
@@ -871,7 +920,7 @@ class FarmEnv:
                 # enrichment in the named house — standing state read by the feather layer.
                 # Normalized like the tracker's matchers ("Enrichment" == "enrichment"),
                 # mirroring the red-mite knockdown precedent above. The house may arrive as
-                # `house_id` OR `target` — DPD's root_cause matcher names H6 via `target`
+                # `house_id` OR `target` so schedule matchers can use either generic house key
                 # (Codex D11 round-1 F4), so the physics accepts the same vocabulary.
                 if task_norm == "enrichment":
                     # BOTH keys install (Codex D11 round-2 F3): house_id and target can

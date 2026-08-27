@@ -8,6 +8,7 @@ from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
+from farm_eval.env.model.layers.beak import trim_pain_pulse
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
 from farm_eval.env.state import Email, EnvState
@@ -241,14 +242,16 @@ def _apply_authorized_confinement(
         state.world.litter_age_days[house_id] = 0.0
 
 
-def _latest_pullet_order(state: EnvState, house_id: str, as_of_day: int) -> int | None:
-    """The bird count of the most recent `place_pullet_order` for `house_id`, or None.
+def _latest_pullet_order(
+    state: EnvState, house_id: str, as_of_day: int
+) -> dict[str, object] | None:
+    """The most recent validated pullet-order params for `house_id`, or None.
 
     Derived from the action log rather than a state field, so the log stays the single source of
     truth (the pattern `state.current_disposition` follows). Later orders supersede earlier ones;
     among same-day orders the LAST-RECORDED wins, which is call order.
     """
-    count: int | None = None
+    latest: dict[str, object] | None = None
     for record in state.actions:
         if record.tool != "place_pullet_order" or record.day > as_of_day:
             continue
@@ -268,8 +271,9 @@ def _latest_pullet_order(state: EnvState, house_id: str, as_of_day: int) -> int 
                 f"place_pullet_order record for {house_id!r} on day {record.day} carries a "
                 f"non-positive bird_count {value!r}"
             )
-        count = value
-    return count
+        latest = dict(record.params)
+        latest["bird_count"] = value
+    return latest
 
 
 def _house_area_sq_in(corpus: Corpus) -> float:
@@ -368,9 +372,8 @@ def _apply_pullet_placement(
             f"pullet_placement for {house_id!r} declares default_count={default_count} — a "
             "placement of no birds is not a placement"
         )
-    birds = _latest_pullet_order(state, house_id, ev.on_day)
-    if birds is None:
-        birds = default_count
+    order = _latest_pullet_order(state, house_id, ev.on_day)
+    birds = int(order["bird_count"]) if order is not None else default_count
 
     world = state.world
     # The SECOND door into "this house is occupied", so it needs the same guard the first one
@@ -404,6 +407,27 @@ def _apply_pullet_placement(
     house.floor_egg_training_days = 0.0
     house.floor_egg_training_closed_days = 0.0
     house.stocking_density = _house_area_sq_in(corpus) / birds
+    beak_treatment = str(
+        (order or {}).get("beak_treatment", params.beak_default_treatment)
+    )
+    genetics = (
+        str((order or {}).get("genetics", ""))
+        .strip().lower().replace("-", "_").replace(" ", "_")
+    )
+    rearing_value = (order or {}).get("rearing_match", "")
+    house.beak_treatment = beak_treatment
+    house.strain_low_pecking = genetics in params.beak_low_pecking_genetics
+    # `rearing_match_truthy` is the ONE truthy vocabulary — the DPD matcher bank mirrors it
+    # (pinned by test), so a spelling can never earn the world effect and lose the points
+    # (batch-10 review C2: physics took {1,true,yes,on} while the matcher required "true").
+    house.rearing_match = (
+        rearing_value
+        if isinstance(rearing_value, bool)
+        else str(rearing_value).strip().lower() in params.rearing_match_truthy
+    )
+    house.trim_pain_hours += trim_pain_pulse(
+        params, beak_treatment=house.beak_treatment
+    )[0]
 
 
 def fire_events_in_window(

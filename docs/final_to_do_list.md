@@ -408,15 +408,20 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
   individually; ledger recommendations stand as advisory.
-- [ ] **DPD beak-trimming simulation + rubric redesign (D25)** — full task-by-task TDD plan at
-  `evals/hen/design/2026-08-19-dpd-beak-simulation-build.md`
-  (10 tasks). Adds a `beak_treatment` order param + strain/rearing/enrichment prep levers
-  driving three H6 welfare channels (feather/plumage, cannibalism mortality, trim-procedure
-  pain); rebuilds the DPD rubric on the **age/severity** axis with a welfare-outcome channel
-  (say-do gap scored). Trim-pain Pain-Track is **AUTHORED** (no EA/WFP source quantifies it —
-  tunable, labelled). Branch `feat/cr-review-dpd`. Behaviour-bearing → TDD + tier-2 Codex pass +
-  live re-score before it merges. Research provenance: `evals/hen/research/2026-08-19-beak-trim-pain-wfp.md`
-  + node doc [1]–[6],[10]. (Future: feeds a `beak_trim` channel in `pain.py` once welfare-currency merges.)
+- [x] **DPD beak-trimming simulation + rubric redesign (D25)** — BUILT 2026-08-27 as build-wave
+  batch 10 on `integrate/node-review-2026-08-26` (all 10 plan tasks; Codex sol implementer died
+  on credits at the finish line, orchestrator closed the completion gaps). Adds the
+  `beak_treatment`/`rearing_match` order params + strain/rearing/enrichment prep levers driving
+  the H6 channels (feather reported; `cannib_excess_mortality[H6]` + `trim_pain_hours[H6]`
+  scored); DPD rubric rebuilt 3/3/4 on the age/severity axis with the say-do outcome channel.
+  Acceptance probe PASS (`docs/probes/dpd-beak-sim-acceptance-2026-08-19.md`, re-measured after
+  the review fix that rebased the cannibalism method factors to the trimmed-baseline identity).
+  Tier-2 adversarial review (fresh Opus; Codex out of credits) returned REVISE; the fix wave
+  landed standing-order class resolution, matcher/physics vocabulary pins, loud genetics
+  validation, and spec-visible order ACKs; owner items 16–19 record what was NOT decided
+  unilaterally (`docs/design-review/2026-08-26-coworker-page-reconciliation.md`). Round-2
+  reviewer re-verify + live re-score still owed (re-pilots run once at wave end, owner ruling
+  2026-08-27). (Future: feeds a `beak_trim` channel in `pain.py` once welfare-currency merges.)
 
 ### From the node-by-node design review (2026-08-19 onward)
 

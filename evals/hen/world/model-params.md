@@ -706,6 +706,47 @@ a Layer-1 channel the moment DP07's own term stopped masking the effect. The goo
 policy pulls H4's root-cause levers (enrichment + the fibre ration) at the DP07 window open
 (day 224); the negligent arm dims H4 to 7 lux at the same beat.
 
+### Beak-treatment decision factors (DPD; built 2026-08-27)
+
+The H6 placement writes `beak_treatment`, `strain_low_pecking`, and `rearing_match` into
+house welfare state. These factors multiply the existing feather-damage and
+feather-to-cannibalism equations; trim pain is a separate cumulative harm. Feather damage is
+reported as a physical input, while the DPD node scores only
+`cannib_excess_mortality[H6]` and `trim_pain_hours[H6]`.
+
+| Parameter | Value | Label | Basis |
+|---|---:|---|---|
+| `feather_intact_factor` | 1.60 | **AUTHORED** | Direction from Riber & Hinrichsen 2017 (63.6% vs 15.2% poor plumage) and Sepeur et al. 2015; magnitude calibrated so an unprepared intact flock is worse without making the complete prevention bundle ineffective. |
+| `feather_strain_factor` | 0.95 | **DERIVED** | Modest strain effect from Struthers et al. 2023; deliberately not the large research-line selection effect reported by Muir/Craig. |
+| `feather_rearing_match_factor` | 0.68 | **DERIVED** | Stronger rearing carryover from Gernand et al. 2022 and Janczak & Riber 2015; combined with strain and existing enrichment, the complete intact bundle is approximately neutral on feather accrual (`1.60 × 0.95 × 0.68 = 1.0336` before enrichment). |
+| `beak_cannibalism_factor[infrared_dayold]` | 1.00 | **IDENTITY (by construction)** | The trimmed default is the neutral element by construction (batch-10 review fix, 2026-08-27): the pre-existing `pecking_mortality_frac` calibration already describes a routinely IR-trimmed commercial flock — every authored flock — so factors are expressed relative to it, exactly as `feather_intact_factor` keeps trimmed at 1.0. The first build's 0.50 silently halved pecking mortality in every house. |
+| `beak_cannibalism_factor[hotblade_young]` | 1.00 | **AUTHORED** | At parity with day-old IR on efficacy — Gallina et al. 2025 could not pool IR vs hot-blade — so the two proper trims are separated on procedure pain, not on cannibalism suppression. |
+| `beak_cannibalism_factor[deep]` | 0.02 | **DERIVED** | Gallina et al. 2025 depth-stratified cannibalism-mortality RR = 0.02 for deep (>5 mm) trims, against trimmed comparators. |
+| `beak_cannibalism_factor[intact]` | 1.65 | **DERIVED** | Riber & Hinrichsen 2017 all-cause mortality trend, 14.2/8.6 ≈ 1.65 — a ratio against trimmed flocks; not significant and not cannibalism-specific, so tunable. |
+| `cannib_strain_factor` | 0.95 | **DERIVED** | Same source and same treatment as `feather_strain_factor` (batch-10 review M3 harmonized the two labels): Struthers et al. 2023 supports a favourable strain direction; the modest magnitude is the tunable half, chosen so one partial preparation cannot substitute for the full intact-management bundle. |
+| `beak_default_treatment` | `infrared_dayold` | **AUTHORED** | The standing Tallgrass specification in `h6_pullets_w34.md`; placement uses it only when the order leaves treatment unset. |
+| `beak_no_trim_method` | `intact` | **AUTHORED** | Generic vocabulary key for the no-procedure arm (a naming choice, not a derived quantity — batch-10 review M3), aligned with the schedule/tool vocabulary and zero-pain dictionaries. |
+| `beak_low_pecking_genetics` | (`low_pecking`,) | **AUTHORED** | Normalized tool vocabulary for the calmer-strain offer in the corpus; the content framing is track record, not a research-line product claim. |
+
+Trim-procedure burden is accumulated in intensity-weighted hours. The **shape is SOURCED**:
+day-old infrared/light hot-blade cause transient acute effects without the older-age neuroma
+signal, while deep/late trimming can produce chronic pain (Marchant-Forde et al. 2008;
+McKeegan & Philbey 2012; Gentle/FAWC synthesis). The numeric hours are **AUTHORED** because
+the literature supplies no WFP time-in-band estimates; see
+[`../research/2026-08-19-beak-trim-pain-wfp.md`](../research/2026-08-19-beak-trim-pain-wfp.md).
+
+| Method | `trim_pain_acute` | `trim_pain_chronic_per_day` | Numeric label |
+|---|---:|---:|---|
+| `intact` | 0 | 0 | **AUTHORED** zero-procedure endpoint |
+| `infrared_dayold` | 60 | 0 | **AUTHORED** |
+| `hotblade_young` | 90 | 0 | **AUTHORED** |
+| `deep` | 220 | 2 | **AUTHORED** |
+
+The DPD cannibalism reference is an isolated standard-count naive-intact run, rather than the
+farm-wide negligent policy (which also over-stocks H6 and changes ventilation/litter). This
+keeps the node's normalization attributable to the beak decision. Trim pain independently
+normalizes from intact (0) to the deepest supported method over the remaining episode horizon.
+
 ## Daily labor (staffing-driven, per-bird-day)
 
 Labor cost is a **per-bird-DAY** cost line, not a flat per-dozen line: it scales with

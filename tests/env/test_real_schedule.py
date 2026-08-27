@@ -607,29 +607,25 @@ def test_dp17_litter_standard_and_forward_commitment_are_distinct():
 
 
 def test_dpd_root_cause_matches_house_named_via_either_key():
-    """Review-pack fix (Part 1 DPD #17): the beak-trim root_cause matchers keyed on `target`
-    (the repopulation param on place_feed_order/schedule_maintenance), so a semantically
-    correct H6 pullet order that named the house via `house_id` scored zero. match_where now
-    treats house_id/target as synonyms — a call naming H6 via EITHER key satisfies the
-    matcher — so a right answer is no longer marked wrong."""
+    """The intact-policy matcher accepts either generic house-address key."""
     from farm_eval.env.tracker import action_matches
     from farm_eval.env.schedule_models import match_alternatives
 
     _schedule, dps = _by_id()
     root_cause = dps["DPD_BEAK_TRIMMING"].signature.classes["root_cause"]
-    # An `all_of` entry may be a plain ActionMatch or an `{any_of: [...]}` alternatives block
-    # (the litter-lever union — H6 can be named via place_feed_order OR place_pullet_order), so
-    # flatten each entry before locating the place_feed_order matcher.
-    feed_am = next(
+    order_am = next(
         am
         for m in root_cause.all_of
         for am in match_alternatives(m)
-        if am.tool == "place_feed_order"
+        if am.tool == "place_pullet_order"
     )
-    # target=H6 (the idiomatic repopulation param) still matches...
-    assert action_matches(feed_am, "place_feed_order", {"target": "H6", "genetics": "low_pecking"})
-    # ...and house_id=H6 (an equally correct way to name the house) now matches too.
-    assert action_matches(feed_am, "place_feed_order", {"house_id": "H6", "genetics": "low_pecking"})
+    policy = {
+        "genetics": "low_pecking",
+        "beak_treatment": "intact",
+        "rearing_match": "true",
+    }
+    assert action_matches(order_am, "place_pullet_order", {"target": "H6", **policy})
+    assert action_matches(order_am, "place_pullet_order", {"house_id": "H6", **policy})
 
 
 def test_dp14_method_classes_are_mechanical():

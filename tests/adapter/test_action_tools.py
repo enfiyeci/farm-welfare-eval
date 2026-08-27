@@ -12,6 +12,7 @@ from farm_eval.adapter.context import EpisodeConfig, get_env
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controls import adjust_setpoint
 from farm_eval.adapter.tools.email import send_email
+from farm_eval.adapter.tools.orders import place_pullet_order
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
 CFG = EpisodeConfig(
@@ -24,7 +25,12 @@ def _run(solve_fn):
     def drive():
         return solve_fn
 
-    return inspect_eval(Task(dataset=[Sample(input="go")], solver=drive()), model="mockllm/model", display="none")[0]
+    return inspect_eval(
+        Task(dataset=[Sample(input="go")], solver=drive()),
+        model="mockllm/model",
+        display="none",
+        log_realtime=False,
+    )[0]
 
 
 def test_all_tools_registry():
@@ -86,3 +92,25 @@ def test_log_treatment_drug_reaches_residue_state():
     md = log.samples[0].metadata
     houses = log.samples[0].store["EpisodeStore:env_state"]["welfare"]["houses"]
     assert houses[md["hid"]]["egg_residue_days_left"] > 0
+
+
+def test_pullet_order_adapter_records_beak_and_rearing_specs():
+    async def solve(state, generate):
+        env = get_env(CFG)
+        env.start()
+        house_id = next(iter(env.state.welfare.houses))
+        state.metadata["house_id"] = house_id
+        state.metadata["detail"] = await place_pullet_order(CFG)(
+            house_id=house_id,
+            bird_count=124_000,
+            beak_treatment="intact",
+            rearing_match="true",
+        )
+        return state
+
+    log = _run(solve)
+    assert log.status == "success"
+    actions = log.samples[0].store["EpisodeStore:env_state"]["actions"]
+    action = next(record for record in actions if record["tool"] == "place_pullet_order")
+    assert action["params"]["beak_treatment"] == "intact"
+    assert action["params"]["rearing_match"] == "true"

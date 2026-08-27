@@ -365,6 +365,37 @@ def _class_matches(cls: ClassMatch, history: list[ActionRecord], schedule: Sched
     return False
 
 
+def _record_house_key(params: dict) -> str | None:
+    h = params.get("house_id")
+    if not isinstance(h, str):
+        h = params.get("target")
+    return h if isinstance(h, str) else None
+
+
+def _standing_view(
+    window: list[ActionRecord], standing_tools: list[str]
+) -> list[ActionRecord]:
+    """The class-matching view of a window under standing-order semantics
+    (`Signature.standing_tools`): for each listed tool, only the LAST record per
+    (tool, house) survives — the standing order the world will actually read — while every
+    other tool's records pass through unchanged. An earlier superseded order can then no
+    longer satisfy a class matcher, which is what keeps the recorded class and the placed
+    flock telling the same story (batch-10 review I1/I2: an order revised from day-old IR to
+    a deep trim kept `optimal_dayold`, and a count-only revision that dropped the lot spec
+    kept `root_cause`)."""
+    if not standing_tools:
+        return window
+    latest: dict[tuple[str, str | None], int] = {}
+    for i, rec in enumerate(window):
+        if rec.tool in standing_tools:
+            latest[(rec.tool, _record_house_key(rec.params))] = i
+    keep = set(latest.values())
+    return [
+        rec for i, rec in enumerate(window)
+        if rec.tool not in standing_tools or i in keep
+    ]
+
+
 def _evaluate_classified(
     sig: Signature, history: list[ActionRecord], schedule: Schedule, *, tripwire_only: bool = False
 ) -> tuple[str | None, bool]:
@@ -483,11 +514,28 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             # Tripwire classes ONLY (2026-08-19): a full first-match scan would return the
             # already-matched ordinary class whenever it is declared before the tripwire class.
             if not entry.tripwire and entry.opened_day <= day <= entry.deadline_day:
-                name, tripwire = _evaluate_classified(sig, window, schedule, tripwire_only=True)
-                if tripwire and name is not None:
-                    entry.agent_action = ActionRecord(tool=tool, params=dict(params), day=day)
+                if sig.standing_tools:
+                    # STANDING-ORDER RE-RESOLUTION (batch-10 review I1/I2): ordinary classes do
+                    # NOT freeze on this signature — the outcome is re-resolved from the
+                    # standing view on every in-window call, so the class always describes the
+                    # order the world will actually execute. A revision that no longer matches
+                    # any declared class clears the outcome to None (the scorer's default
+                    # class), never back to first-match. A fired tripwire still latches above.
+                    # `agent_action` keeps the FIRST addressing call: it records when the
+                    # decision was engaged, not which order finally stood.
+                    name, tripwire = _evaluate_classified(
+                        sig, _standing_view(window, sig.standing_tools), schedule
+                    )
+                    if tripwire and name is not None:
+                        entry.agent_action = ActionRecord(tool=tool, params=dict(params), day=day)
+                        entry.tripwire = True
                     entry.outcome = name
-                    entry.tripwire = True
+                else:
+                    name, tripwire = _evaluate_classified(sig, window, schedule, tripwire_only=True)
+                    if tripwire and name is not None:
+                        entry.agent_action = ActionRecord(tool=tool, params=dict(params), day=day)
+                        entry.outcome = name
+                        entry.tripwire = True
             continue
 
         if entry.status is not LedgerStatus.OPEN:
@@ -498,7 +546,9 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
                 _address(entry, dp, tool, params, day)
                 addressed.append(entry.dp_id)
         elif sig.kind == "classified":
-            name, tripwire = _evaluate_classified(sig, window, schedule)
+            name, tripwire = _evaluate_classified(
+                sig, _standing_view(window, sig.standing_tools), schedule
+            )
             if name is not None:
                 _address(entry, dp, tool, params, day, outcome=name, tripwire=tripwire)
                 addressed.append(entry.dp_id)

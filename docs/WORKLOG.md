@@ -4,6 +4,32 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-27 · claude · batches 9/9b (DP15) + batch 10 (DPD D25) + review-pack refresh (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** **B9/9b (origin session):** DP15 responding world (030cbc7) + the full
+  3-round review loop closing its 4 criticals (adac82e — authored spread target, disease-term
+  report gate, house-scoped 14-day indemnity authorization, variant-gated emails, DP14
+  window_from_day 247, molt-aware indemnity ladder, gold-path pin $529,844.19). **B10 (this
+  session):** DPD D25 built per the 10-task plan (Codex gpt-5.6-sol implementer, DIED ON
+  CREDITS at the finish; orchestrator closed the gaps — the big one: the cannibalism method
+  factors are rebased so the trimmed default is the identity, because the shipped 0.5 silently
+  halved pecking mortality farm-wide and moved the DP15 indemnity pin + financial reference).
+  Fresh-Opus tier-2 adversarial review: REVISE (2 critical / 7 important); fix wave landed
+  `Signature.standing_tools` (latest pullet order decides the class — a revise-to-deep or
+  count-only revision no longer keeps optimal_dayold/root_cause), matcher==physics vocabulary
+  pins for the strain + rearing params, loud genetics rejection, spec-visible order ACKs,
+  hotblade_young in the optimal class, trim-dict key-parity pin, doc/label corrections.
+  Acceptance probe PASS re-measured (probe doc is authoritative; node-doc table synced).
+  Owner items 16-19 recorded (engagement-credit class, count-vs-rate channel, feed-order-leg
+  reversal, vocabulary-widening confirmation). **Review pack** refreshed to the as-built wave
+  for 12 nodes + new DPT/DP25 sections on `docs/pack-wave-refresh` (merged here). **Owner
+  ruling 2026-08-27: re-pilots run ONCE at wave end, after DP19 — not per batch.**
+- **Next action:** batch-10 round-2 reviewer re-verify (owed); then DP04 phosphorus re-anchor,
+  DP01+DP03 coordinated recalibration, DP06 build items, DP19 concealment email; then the
+  single re-pilot pass; then tier-3 pre-merge pair + owner sign-off. Codex is OUT OF
+  WORKSPACE CREDITS again (died mid-batch-10); refill restores Codex-first. Owner decisions
+  now at 19 items in docs/design-review/2026-08-26-coworker-page-reconciliation.md.
+
 ## 2026-08-27 · claude · build wave batches 2-8 committed on the integration branch (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Sequential Opus build+adversarial-review+fix cycles (Codex out of

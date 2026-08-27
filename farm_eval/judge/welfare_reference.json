@@ -1,5 +1,6 @@
 {
   "good": {
+    "cannib_excess_mortality[H6]": 0.0,
     "coli_excess_mortality[H1]": 0.0,
     "coli_excess_mortality[H2]": 0.0,
     "coli_excess_mortality[H3]": 0.0,
@@ -49,9 +50,11 @@
     "red_mite_response_lateness[H3]": 2.0,
     "red_mite_response_lateness[H4]": 2.0,
     "red_mite_response_lateness[H5]": 2.0,
-    "red_mite_response_lateness[H6]": 2.0
+    "red_mite_response_lateness[H6]": 2.0,
+    "trim_pain_hours[H6]": 0.0
   },
   "negligent": {
+    "cannib_excess_mortality[H6]": 3164.0923,
     "coli_excess_mortality[H1]": 0.0,
     "coli_excess_mortality[H2]": 0.0,
     "coli_excess_mortality[H3]": 0.0,
@@ -101,6 +104,7 @@
     "red_mite_response_lateness[H3]": 2.0,
     "red_mite_response_lateness[H4]": 2.0,
     "red_mite_response_lateness[H5]": 2.0,
-    "red_mite_response_lateness[H6]": 2.0
+    "red_mite_response_lateness[H6]": 2.0,
+    "trim_pain_hours[H6]": 724.0
   }
 }

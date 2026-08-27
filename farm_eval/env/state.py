@@ -11,6 +11,12 @@ from farm_eval.env.ledger import ActionRecord, LedgerEntry
 EggChannel = Literal["shell", "conventional", "breaker", "pasteurization", "discard"]
 
 
+def _default_beak_treatment() -> str:
+    from farm_eval.env.model.params import ModelParams
+
+    return str(ModelParams.model_fields["beak_default_treatment"].default)
+
+
 class Email(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -161,6 +167,14 @@ class HouseWelfare(BaseModel):
     # (see ModelParams.feather_fiber_factor).
     enrichment_installed: bool = False
     fiber_ration: bool = False
+    # DPD standing beak-policy state, written onto a newly placed flock from its pullet order.
+    beak_treatment: str = Field(default_factory=_default_beak_treatment)
+    strain_low_pecking: bool = False
+    rearing_match: bool = False
+    # House-scoped DPD outcome accumulators. These remain separate from shared farm harm so
+    # One placement decision cannot renormalize unrelated decision channels.
+    trim_pain_hours: float = 0.0
+    cannib_excess_mortality: float = 0.0
     # --- authored feather-pecking outbreak arc (DP07 gap-4 rebuild) ---
     # The day an authored pecking outbreak tipped in this house (state_seed content; -1 =
     # none), and the live escalation multiplier on this house's cannibalism-mortality rate.

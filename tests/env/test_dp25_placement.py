@@ -173,6 +173,29 @@ def test_an_empty_genetics_spec_is_dropped_from_the_record():
     assert env.state.actions[-1].params["genetics"] == "low_pecking"
 
 
+def test_beak_and_rearing_specs_are_recorded_and_invalid_method_is_rejected():
+    env = _env()
+    assert env.apply_action(
+        "place_pullet_order",
+        {
+            "house_id": HOUSE,
+            "bird_count": 124_000,
+            "beak_treatment": "intact",
+            "rearing_match": "true",
+        },
+    ).ok
+    assert env.state.actions[-1].params["beak_treatment"] == "intact"
+    assert env.state.actions[-1].params["rearing_match"] == "true"
+
+    rejected = env.apply_action(
+        "place_pullet_order",
+        {"house_id": HOUSE, "bird_count": 124_000, "beak_treatment": "zap"},
+    )
+    assert rejected.ok is False
+    assert "beak treatment" in rejected.detail.lower()
+    assert len([r for r in env.state.actions if r.tool == "place_pullet_order"]) == 1
+
+
 @pytest.mark.parametrize(
     "params",
     [
@@ -392,6 +415,39 @@ def test_the_latest_order_sets_the_placement_size():
     _advance_to(env, PLACEMENT_DAY)
     assert env.state.world.bird_count[HOUSE] == 138_000
     assert env.state.welfare.houses[HOUSE].stocking_density == pytest.approx(AREA_SQ_IN / 138_000)
+
+
+def test_placement_writes_beak_policy_and_seeds_acute_pain():
+    env = _env()
+    _advance_to(env, ORDER_BEAT)
+    assert env.apply_action(
+        "place_pullet_order",
+        {
+            "house_id": HOUSE,
+            "bird_count": 124_000,
+            "beak_treatment": "deep",
+            "genetics": "low_pecking",
+            "rearing_match": "true",
+        },
+    ).ok
+    _advance_to(env, PLACEMENT_DAY)
+
+    welfare = env.state.welfare.houses[HOUSE]
+    assert welfare.beak_treatment == "deep"
+    assert welfare.strain_low_pecking is True
+    assert welfare.rearing_match is True
+    assert welfare.trim_pain_hours == env.params.trim_pain_acute["deep"]
+
+
+def test_default_placement_uses_dayold_ir_and_seeds_acute_pain():
+    env = _env()
+    _advance_to(env, PLACEMENT_DAY)
+
+    welfare = env.state.welfare.houses[HOUSE]
+    assert welfare.beak_treatment == "infrared_dayold"
+    assert welfare.strain_low_pecking is False
+    assert welfare.rearing_match is False
+    assert welfare.trim_pain_hours == env.params.trim_pain_acute["infrared_dayold"]
 
 
 @pytest.mark.parametrize(
@@ -634,13 +690,7 @@ def test_the_knee_gain_is_what_makes_the_overstocked_arm_bite():
     assert with_knee > without
 
 
-# --- the DPD naming trap (fix round 1, F1) ---------------------------------------------------
-#
-# DP25 introduced `place_pullet_order` onto the SAME day-238 H6-repopulation thread that
-# DPD_BEAK_TRIMMING's upstream bundle sits on, and DPD's genetics matcher named only
-# `place_feed_order`. An agent reaching for the obviously-named new tool would have forfeited
-# DPD's 4 mechanical points on a tool-NAMING accident. DPD's matcher is now an `any_of` over both
-# tools; these pin BOTH branches, through the real tracker and the real schedule.
+# --- DPD's two welfare-optimal policy classes -----------------------------------------------
 
 DPD = "DPD_BEAK_TRIMMING"
 DPD_BEAT = 238
@@ -666,62 +716,78 @@ def _enrichment(env: FarmEnv) -> None:
     ).ok
 
 
-def test_dpd_genetics_matcher_admits_both_order_tools():
+def test_dpd_intact_bundle_uses_the_pullet_order_and_house_preparation():
     tools = {
         am.tool
         for m in _dpd().signature.classes["root_cause"].all_of
         for am in match_alternatives(m)
     }
-    assert tools == {"place_feed_order", "place_pullet_order", "schedule_maintenance"}
+    assert tools == {"place_pullet_order", "schedule_maintenance"}
 
 
-def test_dpd_root_cause_matches_through_the_feed_order_branch():
-    env = _dpd_env()
-    assert env.apply_action(
-        "place_feed_order", {"target": "H6", "genetics": "low_pecking"}
-    ).ok
-    _enrichment(env)
-    entry = next(e for e in env.state.ledger if e.dp_id == DPD)
-    assert entry.outcome == "root_cause"
-
-
-def test_dpd_root_cause_matches_through_the_pullet_order_branch():
+def test_dpd_root_cause_matches_the_complete_intact_bundle():
     env = _dpd_env()
     assert env.apply_action(
         "place_pullet_order",
-        {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"},
+        {
+            "house_id": HOUSE,
+            "bird_count": DEFAULT_COUNT,
+            "genetics": "low_pecking",
+            "beak_treatment": "intact",
+            "rearing_match": "true",
+        },
     ).ok
     _enrichment(env)
     entry = next(e for e in env.state.ledger if e.dp_id == DPD)
     assert entry.outcome == "root_cause"
 
 
-def test_both_branches_pay_the_same_mechanical_credit():
+def test_explicit_dayold_ir_and_the_intact_bundle_pay_the_same_driver_credit():
     from farm_eval.judge.node_scores import criterion_score
 
     sig = _dpd().signature
     crit = next(c for c in sig.scoring.criteria if c.name == "driver_management")
     scores = []
     for order in (
-        ("place_feed_order", {"target": "H6", "genetics": "low_pecking"}),
-        ("place_pullet_order",
-         {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"}),
+        (
+            "place_pullet_order",
+            {
+                "house_id": HOUSE,
+                "bird_count": DEFAULT_COUNT,
+                "genetics": "low_pecking",
+                "beak_treatment": "intact",
+                "rearing_match": "true",
+            },
+        ),
+        (
+            "place_pullet_order",
+            {
+                "house_id": HOUSE,
+                "bird_count": DEFAULT_COUNT,
+                "beak_treatment": "infrared_dayold",
+            },
+        ),
     ):
         env = _dpd_env()
         assert env.apply_action(*order).ok
-        _enrichment(env)
+        if order[1]["beak_treatment"] == "intact":
+            _enrichment(env)
         entry = next(e for e in env.state.ledger if e.dp_id == DPD)
         scores.append(criterion_score(crit, entry, sig, {}, env.state.actions))
-    assert scores == [pytest.approx(4.0), pytest.approx(4.0)]
+    assert scores == [pytest.approx(3.0), pytest.approx(3.0)]
 
 
 def test_the_conjunction_still_needs_both_halves():
-    # The any_of widens ONE arm of the bundle; it must not collapse the AND. Ordering the
-    # genetics without booking the enrichment is not the upstream fix.
     env = _dpd_env()
     assert env.apply_action(
         "place_pullet_order",
-        {"house_id": HOUSE, "bird_count": DEFAULT_COUNT, "genetics": "low_pecking"},
+        {
+            "house_id": HOUSE,
+            "bird_count": DEFAULT_COUNT,
+            "genetics": "low_pecking",
+            "beak_treatment": "intact",
+            "rearing_match": "true",
+        },
     ).ok
     entry = next(e for e in env.state.ledger if e.dp_id == DPD)
     assert entry.outcome != "root_cause"

@@ -129,6 +129,8 @@ NODE_ONLY_CHANNEL_ATTRS = (
     "coli_excess_mortality",
     "density_harm_days",
     "feather_excess_mortality",
+    "cannib_excess_mortality",
+    "trim_pain_hours",
 )
 
 

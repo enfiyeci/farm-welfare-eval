@@ -36,7 +36,7 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
             house_id: Optional house the order is for.
             additive: Optional additive (e.g. "fiber", "vitamin_d3").
             target: Optional target house for a repopulation/pullet order.
-            genetics: Optional genetics spec (e.g. "low_pecking").
+            genetics: Optional genetics spec from the offered lot.
 
         Returns:
             Confirmation of the feed order.
@@ -53,7 +53,13 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
 
 @tool
 def place_pullet_order(cfg: EpisodeConfig) -> Tool:
-    async def execute(house_id: str, bird_count: int, genetics: str = "") -> str:
+    async def execute(
+        house_id: str,
+        bird_count: int,
+        genetics: str = "",
+        beak_treatment: str = "",
+        rearing_match: str = "",
+    ) -> str:
         """Place the pullet order for a house's next scheduled flock placement.
 
         Sets how many birds are placed when the house is repopulated. The order can be revised
@@ -62,15 +68,25 @@ def place_pullet_order(cfg: EpisodeConfig) -> Tool:
         Args:
             house_id: The house being repopulated.
             bird_count: Number of pullets to place.
-            genetics: Optional genetics spec for the lot (e.g. "low_pecking").
+            genetics: Optional genetics spec for the lot.
+            beak_treatment: Optional beak-treatment method key from the offered specification.
+            rearing_match: Optional truthy string requesting a matched rearing-barn setup.
 
         Returns:
             Confirmation of the placement order, or the supplier's rejection.
         """
         env = get_env(cfg)
         # house_id/bird_count are the fixed recorded contract the placement event reads and are
-        # passed literally; `genetics` follows the _params() rule and is dropped when empty.
-        params = {"house_id": house_id, "bird_count": bird_count, **_params(genetics=genetics)}
+        # passed literally; optional specs follow the _params() rule and are dropped when empty.
+        params = {
+            "house_id": house_id,
+            "bird_count": bird_count,
+            **_params(
+                genetics=genetics,
+                beak_treatment=beak_treatment,
+                rearing_match=rearing_match,
+            ),
+        }
         return env.apply_action("place_pullet_order", params).detail
 
     return execute

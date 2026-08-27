@@ -29,6 +29,7 @@ from farm_eval.env.model.layers import (
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
 from farm_eval.env.model import triggers
+from farm_eval.env.model.layers.beak import beak_cannibalism_multiplier
 
 
 def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
@@ -552,6 +553,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 enrichment_installed=hw.enrichment_installed,
                 fiber_ration=hw.fiber_ration,
                 lighting_lux=hw.lighting_lux,
+                beak_treatment=hw.beak_treatment,
+                strain_low_pecking=hw.strain_low_pecking,
+                rearing_match=hw.rearing_match,
             )
             hw.feather_damage_pct = feather.feather_step(
                 hw.feather_damage_pct, age, f_mult, params
@@ -587,6 +591,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 lighting_hours,
                 params.welfare_light_floor_lux,
             )
+            acc.accrue_trim_pain(hw, params)
 
             # --- Red-mite burden (daily; growth only in a house carrying an authored arc,
             # suppressed while a legal control course is running) ---
@@ -624,6 +629,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # multiplier is 1.0 in every house with no authored arc.
             pecking_mort = feather.pecking_mortality_frac(
                 hw.feather_damage_pct, params, hw.feather_outbreak_mult
+            )
+            pecking_mort *= beak_cannibalism_multiplier(
+                params,
+                beak_treatment=hw.beak_treatment,
+                strain_low_pecking=hw.strain_low_pecking,
             )
             # Coli deaths kill birds like every other excess source, but their HARM
             # accrual is house-scoped (coli_excess_mortality below) — the shared farm
@@ -678,6 +688,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # It was only ever in the shared channel to make DP07's outcome discriminate
             # (the D11 "1.000-to-passive" fix), and the house-scoped channel now does that job.
             pecking_amt = min(pecking_mort, headroom) * birds
+            acc.accrue_cannibalism(hw, min(pecking_mort, headroom), birds)
             # HPAI leaves the shared channel too (2026-08-27, responding-world build), for
             # exactly the reason coli and pecking left it before: it is now a DECISION-dependent
             # quantity rather than a constant. Reporting promptly and culling the index house

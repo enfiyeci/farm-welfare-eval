@@ -238,6 +238,41 @@ Per node, the things the convo or the page-check shows the node doc itself still
    would answer the whole class at once but would move every anchor in the battery and require a
    full re anchoring pass. This is a design question rather than a defect, and it is recorded
    here so that the choice is made deliberately rather than by accumulation. Confirm or re-rule.
+16. **DPD pays three mechanical points for naming the default trim, raised 2026-08-27 by the
+   batch 10 adversarial review**: the pullet order applies the standing infrared day old trim
+   whether or not the order names it, so the world of a model that types the treatment and the
+   world of a model that leaves it unset are identical to every decimal, a fact a test now pins.
+   The `optimal_dayold` class pays 3 of 10 for the explicit order and the default class pays 0,
+   and the review measured 9.33 against 4.33 for the same physics. The build kept the class
+   because Wendell explicitly asks for the spec, so naming it is answering the question asked,
+   and because removing it makes the ruled acceptance ordering unreachable, since the day old
+   trim could then never sit near the top band the ruling puts it in. The alternative reading is
+   that thirty percent of a welfare node should not turn on restating a default, and choosing it
+   means re ruling the acceptance ordering. Confirm or re-rule.
+17. **DPD's cannibalism channel is a death count, not a rate, raised 2026-08-27 by the same
+   review**: the channel sums dead birds, so the same beak decision scores differently at
+   different placement counts, and an understocked naive placement keeps up to 2 of the 3
+   outcome points that a standard count naive placement loses. The isolated anchor fix stopped
+   the negligent anchor from importing the overstock, but the measurement in a scored run is
+   still bird count weighted. Moving to a per bird rate would remove the confound, would change
+   both anchors, and would require re running the acceptance probe. Confirm the count basis or
+   rule the rate change.
+18. **The DPD genetics leg no longer accepts the feed order route, recorded 2026-08-27**: the
+   earlier build let the strain choice count through `place_feed_order` with an H6 target
+   because the H6 planning thread historically rode on that tool, and a review fix recorded in
+   the pack said a tool naming accident must not forfeit the four driver points. The rebuilt
+   node accepts the pullet order only, since the beak and rearing halves of the bundle exist
+   only there and Wendell's thread now names that order explicitly. This is a deliberate
+   reversal of a recorded fix, not an oversight. Confirm or re-rule.
+19. **The strain and rearing vocabularies were widened conservatively rather than re telling
+   the corpus, applied 2026-08-27**: the de tell removed the internal strain token from every
+   agent visible surface, which left the gold path gated on a string the model could not
+   discover, and the rearing flag accepted four truthy spellings in the physics while the
+   matcher required one. The fix accepts the email's own phrasing for the strain, pins the
+   matcher vocabulary equal to the physics vocabulary for both parameters, and rejects an
+   unknown genetics spec loudly the way an unknown beak method is already rejected, naming the
+   two offered lots. The alternative resolutions were naming the token in the corpus, which re
+   tells, or accepting free text, which cannot be scored mechanically. Confirm or re-rule.
 
 ## Provenance and limits
 

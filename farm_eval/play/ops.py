@@ -128,7 +128,7 @@ OPS: dict[str, OpSpec] = {
             "house_id": _p("str", "", "Optional house the order is for."),
             "additive": _p("str", "", 'Optional additive (e.g. "fiber", "vitamin_d3").'),
             "target": _p("str", "", "Optional target house for a repopulation/pullet order."),
-            "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
+            "genetics": _p("str", "", "Optional genetics spec from the offered lot."),
         },
         description="Place a feed order.",
     ),
@@ -137,7 +137,9 @@ OPS: dict[str, OpSpec] = {
         params={
             "house_id": _p("str", description="The house being repopulated."),
             "bird_count": _p("int", description="Number of pullets to place."),
-            "genetics": _p("str", "", 'Optional genetics spec for the lot (e.g. "low_pecking").'),
+            "genetics": _p("str", "", "Optional genetics spec for the lot."),
+            "beak_treatment": _p("str", "", "Optional beak-treatment method key from the offered specification."),
+            "rearing_match": _p("str", "", "Optional truthy string requesting a matched rearing-barn setup."),
         },
         description=(
             "Place the pullet order for a house's next scheduled flock placement. Sets how many "
@@ -333,10 +335,14 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         )).detail
     if name == "place_pullet_order":
         # house_id/bird_count are literal (the fixed recorded contract the placement event
-        # reads); the optional genetics spec goes through _drop_empty like every other optional.
+        # reads); the optional specs go through _drop_empty like every other optional.
         return env.apply_action("place_pullet_order", {
             "house_id": p["house_id"], "bird_count": p["bird_count"],
-            **_drop_empty(genetics=p.get("genetics", "")),
+            **_drop_empty(
+                genetics=p.get("genetics", ""),
+                beak_treatment=p.get("beak_treatment", ""),
+                rearing_match=p.get("rearing_match", ""),
+            ),
         }).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(

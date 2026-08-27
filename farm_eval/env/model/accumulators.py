@@ -123,6 +123,29 @@ def accrue_excess_mortality(h: HarmAccumulators, frac: float, birds: int) -> Non
     h.excess_mortality += frac * birds
 
 
+def accrue_trim_pain(hw, params) -> None:
+    """Accrue one day of chronic beak-trim pain onto a house."""
+    from farm_eval.env.model.layers.beak import trim_pain_pulse
+
+    hw.trim_pain_hours += trim_pain_pulse(
+        params, beak_treatment=hw.beak_treatment
+    )[1]
+
+
+def accrue_cannibalism(hw, frac: float, birds: int) -> float:
+    """Accrue feather-driven cannibalism deaths onto a house-scoped DPD channel.
+
+    DELIBERATE ALIAS of the same physical quantity `feather_excess_mortality` accrues
+    (batch-10 review M2, accepted): both count pecking-chain deaths, but the two channels
+    are anchored for different houses by different nodes (DP07 reads [H4], DPD reads [H6]),
+    and giving DPD its own attribute keeps either node's anchor regenerable without touching
+    the other's committed pins. Merging them would couple DP07's and DPD's scales.
+    """
+    delta = max(0.0, frac) * max(0, birds)
+    hw.cannib_excess_mortality += delta
+    return delta
+
+
 def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: float) -> None:
     """Accumulate worker NH3 ppm-hours above the occupational threshold (same in-house air).
 

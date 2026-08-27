@@ -61,7 +61,7 @@ def test_competent_reports_all_channels():
     # 2026-08-20; DP05's three rebuilt mite channels, 2026-08-26; DP07's outbreak-house
     # feather-mortality channel, gap-2 ruling 2026-08-19), nothing else.
     assert set(got) == base | bracketed
-    assert bracketed == {
+    expected = {
         f"{attr}[H{i}]"
         for i in range(1, 7)
         for attr in (
@@ -74,6 +74,8 @@ def test_competent_reports_all_channels():
             "feather_excess_mortality",
         )
     }
+    expected |= {"cannib_excess_mortality[H6]", "trim_pain_hours[H6]"}
+    assert bracketed == expected
 
 
 def test_welfare_reference_endpoints_are_harm_channels_only():

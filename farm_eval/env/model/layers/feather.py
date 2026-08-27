@@ -30,6 +30,7 @@ Rationale and sources live on the ModelParams fields.
 from __future__ import annotations
 
 from farm_eval.env.model.layers.production import _interp
+from farm_eval.env.model.layers.beak import beak_feather_multiplier
 from farm_eval.env.model.params import ModelParams
 
 
@@ -58,6 +59,9 @@ def feather_rate_multiplier(
     enrichment_installed: bool,
     fiber_ration: bool,
     lighting_lux: float,
+    beak_treatment: str = "",
+    strain_low_pecking: bool = False,
+    rearing_match: bool = False,
 ) -> float:
     """Fold the mitigation inputs into one multiplicative rate factor.
 
@@ -78,7 +82,12 @@ def feather_rate_multiplier(
         f *= params.feather_light_dim_factor
     elif lighting_lux > params.feather_light_bright_lux:
         f *= params.feather_light_bright_factor
-    return f
+    return f * beak_feather_multiplier(
+        params,
+        beak_treatment=beak_treatment,
+        strain_low_pecking=strain_low_pecking,
+        rearing_match=rearing_match,
+    )
 
 
 def feather_step(

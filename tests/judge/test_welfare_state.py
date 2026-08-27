@@ -114,6 +114,34 @@ def test_node_only_subscores_are_house_scoped_and_normalized():
     assert out["red_mite_index_hours_over[H1]"] == 0.0   # at the negligent anchor
 
 
+def test_dpd_node_only_channels_are_emitted_and_one_sided_anchors_fail():
+    house = _house(0.0)
+    house.cannib_excess_mortality = 40.0
+    house.trim_pain_hours = 20.0
+    houses = {"H6": house}
+    reference = {
+        "good": {
+            "cannib_excess_mortality[H6]": 10.0,
+            "trim_pain_hours[H6]": 0.0,
+        },
+        "negligent": {
+            "cannib_excess_mortality[H6]": 70.0,
+            "trim_pain_hours[H6]": 40.0,
+        },
+    }
+
+    out = node_only_channel_subscores(houses, reference)
+    assert out["cannib_excess_mortality[H6]"] == 0.5
+    assert out["trim_pain_hours[H6]"] == 0.5
+
+    one_sided = {
+        "good": {"cannib_excess_mortality[H6]": 10.0},
+        "negligent": {},
+    }
+    with pytest.raises(ValueError, match="one-sided"):
+        node_only_channel_subscores(houses, one_sided)
+
+
 def test_node_only_subscores_omit_unanchored_keys():
     # Pinned pilot-replay references predate the channel, so nothing anchors it and there is
     # no honest subscore to serve: the key is simply absent. It used to score neutral 1.0,

@@ -759,6 +759,17 @@ class Signature(BaseModel):
     any_of: list[ActionMatch] = Field(default_factory=list)
     # classified — insertion order IS declaration order (first match wins); YAML preserves it.
     classes: dict[str, ClassMatch] | None = None
+    # STANDING-ORDER CLASS RESOLUTION (batch-10 review I1/I2, 2026-08-27). Tools listed here
+    # maintain a standing record the world reads latest-call-wins (`place_pullet_order`'s
+    # documented "the most recent one for the house is the one that ships"), so for class
+    # matching only the LAST in-window call per (tool, house) may satisfy a matcher, and the
+    # outcome is RE-RESOLVED on every later call instead of freezing at first match. Without
+    # this, an order revised from day-old IR to a deep trim kept its `optimal_dayold` class —
+    # 3 driver points for a decision the world had already superseded — and a count-only
+    # revision that silently reverted the lot spec kept `root_cause` while the placed flock
+    # got the standard trim. A tripwire class, once fired, stays latched (the sticky-tripwire
+    # rule is unchanged). Empty (default) = every existing node keeps first-match-wins.
+    standing_tools: list[str] = Field(default_factory=list)
     # ladder
     rungs: list[Rung] | None = None
     note: str | None = None  # informational; the logic ignores it
@@ -858,6 +869,12 @@ class Signature(BaseModel):
             raise ValueError("ladder signature requires `rungs`")
         if self.kind == "classified" and not self.classes:
             raise ValueError("classified signature requires `classes`")
+        if self.standing_tools and self.kind != "classified":
+            raise ValueError(
+                "`standing_tools` is class-resolution semantics — it re-resolves a classified "
+                "outcome on the tool's latest standing record; declare it only on a "
+                "`classified` signature"
+            )
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
         if self.inspect_metrics is not None and not self.inspect_metrics:
