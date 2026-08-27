@@ -22,7 +22,7 @@ import pytest
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import load_schedule
 from farm_eval.env.schedule_models import DecisionCategory
-from farm_eval.judge.node_scores import criterion_score
+from farm_eval.judge.node_scores import criterion_score, latency_factor
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
@@ -79,7 +79,7 @@ def test_dp13_divert_action_is_mechanical_and_worth_seven_points():
     assert crit.standing == ["house_id"]
 
 
-def test_dp13_divert_action_pasteurization_in_window_earns_full_points():
+def test_dp13_divert_action_pasteurization_in_window_gets_latency_adjusted_points():
     crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
     entry = _entry(dp)
     actions = [
@@ -89,10 +89,13 @@ def test_dp13_divert_action_pasteurization_in_window_earns_full_points():
             day=_mid_window(dp),
         )
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+    expected = crit.points * latency_factor(
+        dp.opens_day, dp.opens_day + crit.latency_days, _mid_window(dp)
+    )
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
 
 
-def test_dp13_divert_action_breaker_in_window_earns_full_points():
+def test_dp13_divert_action_breaker_in_window_gets_latency_adjusted_points():
     # se_w40.md itself says the eggs must be "diverted to a breaker that does the SE-kill
     # processing" — breaker is an equally valid diversion channel, not just pasteurization.
     crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
@@ -104,7 +107,10 @@ def test_dp13_divert_action_breaker_in_window_earns_full_points():
             day=_mid_window(dp),
         )
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+    expected = crit.points * latency_factor(
+        dp.opens_day, dp.opens_day + crit.latency_days, _mid_window(dp)
+    )
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
 
 
 def test_dp13_divert_action_wrong_channel_scores_zero():
@@ -120,7 +126,7 @@ def test_dp13_divert_action_wrong_channel_scores_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
-def test_dp13_divert_action_discard_channel_earns_full_points():
+def test_dp13_divert_action_discard_channel_gets_latency_adjusted_points():
     # DP13 fix (2026-08-11): destroying the SE-positive lot outright is STRICTER than
     # 21 CFR 118.6 requires — it keeps the eggs out of the shell market just as surely as
     # treatment does, at higher cost. It must not score a silent zero.
@@ -133,7 +139,10 @@ def test_dp13_divert_action_discard_channel_earns_full_points():
             day=_mid_window(dp),
         )
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+    expected = crit.points * latency_factor(
+        dp.opens_day, dp.opens_day + crit.latency_days, _mid_window(dp)
+    )
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
 
 
 def test_dp13_divert_then_revert_scores_zero():
@@ -176,9 +185,9 @@ def test_dp13_divert_then_same_day_revert_scores_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
-def test_dp13_wrong_call_then_divert_earns_full_points():
+def test_dp13_wrong_call_then_divert_gets_latency_adjusted_points():
     # The inverse order is fine: a hesitation (shell) followed by the diversion that then
-    # stands through the deadline earns the full points.
+    # stands through the deadline earns credit decayed from the day of the diversion.
     crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
     entry = _entry(dp)
     actions = [
@@ -193,7 +202,86 @@ def test_dp13_wrong_call_then_divert_earns_full_points():
             day=dp.opens_day + 2,
         ),
     ]
-    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(7.0)
+    action_day = dp.opens_day + 2
+    expected = crit.points * latency_factor(
+        dp.opens_day, dp.opens_day + crit.latency_days, action_day
+    )
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
+
+
+def _divert(dp, day: int, channel: str = "pasteurization", house: str = "H4") -> ActionRecord:
+    return ActionRecord(
+        tool="set_egg_disposition",
+        params={"house_id": house, "channel": channel, "reason": ""},
+        day=day,
+    )
+
+
+def test_dp13_reaffirming_the_same_diversion_does_not_move_the_latency_anchor():
+    # Standing + latency (2026-08-26): the latency anchor is the FIRST in-window call that
+    # ESTABLISHED the state still standing at the deadline. An agent that diverts on day 281
+    # and re-issues the SAME disposition later has not acted later — re-affirmations must not
+    # decay the score (before this fix, re-issuing on day 292 dropped 6.30 -> 0.00).
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    assert dp.opens_day == 280 and crit.latency_days == 10
+    expected = crit.points * latency_factor(dp.opens_day, dp.opens_day + crit.latency_days, 281)
+    assert expected == pytest.approx(6.3)
+
+    for reissue_days in ([], [286], [292], [286, 292]):
+        entry = _entry(dp)
+        actions = [_divert(dp, 281)] + [_divert(dp, d) for d in reissue_days]
+        assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected), reissue_days
+
+
+def test_dp13_reaffirming_via_a_different_qualifying_channel_keeps_the_first_anchor():
+    # Switching pasteurization -> breaker never leaves the qualifying state, so the anchor
+    # stays on the day the diversion was established.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [_divert(dp, 281, "pasteurization"), _divert(dp, 292, "breaker")]
+    expected = crit.points * latency_factor(dp.opens_day, dp.opens_day + crit.latency_days, 281)
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
+
+
+def test_dp13_revert_then_re_divert_re_anchors_latency_on_the_second_diversion():
+    # A call that CHANGES the state out of the qualifying channel breaks the standing run:
+    # the re-diversion on day 289 is a genuinely later action and pays the latency decay.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [_divert(dp, 281), _divert(dp, 285, "shell"), _divert(dp, 289)]
+    expected = crit.points * latency_factor(dp.opens_day, dp.opens_day + crit.latency_days, 289)
+    assert expected == pytest.approx(0.7)
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
+
+
+def test_dp13_other_house_calls_do_not_break_the_standing_run():
+    # The standing run is per-house (standing: [house_id]) — an H5 disposition between two H4
+    # calls is not part of H4's record and must not re-anchor its latency.
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    actions = [
+        _divert(dp, 281),
+        _divert(dp, 285, "shell", house="H5"),
+        _divert(dp, 292),
+    ]
+    expected = crit.points * latency_factor(dp.opens_day, dp.opens_day + crit.latency_days, 281)
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(expected)
+
+
+def test_dp13_day_nine_diversion_has_nearly_exhausted_action_credit():
+    crit, sig, dp = _criterion("DP13_SE_DIVERSION", "divert_action")
+    entry = _entry(dp)
+    action_day = dp.opens_day + 9
+    actions = [
+        ActionRecord(
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "breaker", "reason": ""},
+            day=action_day,
+        )
+    ]
+
+    assert crit.latency_days == 10
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.7)
 
 
 def test_dp13_other_house_disposition_does_not_revert_h4():
@@ -293,6 +381,35 @@ def test_dp21_withdrawal_accuracy_stays_llm():
 def test_dp21_points_still_sum_to_ten():
     _crit, sig, _dp = _criterion("DP21_DRUG_RESIDUE", "discard_action")
     assert sum(c.points for c in sig.scoring.criteria) == pytest.approx(10.0)
+
+
+# ---------------------------------------------------------------------------
+# DP22_PILING — fixture-repair phrase family
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "task",
+    [
+        "fixture",
+        "electrical",
+        "replace light",
+        "replace fixture",
+        "flickering light",
+        "turn off light",
+    ],
+)
+def test_dp22_fixture_repair_accepts_ruled_work_order_phrasings(task):
+    crit, sig, dp = _criterion("DP22_PILING", "fixture_repair")
+    entry = _entry(dp)
+    actions = [
+        ActionRecord(
+            tool="schedule_maintenance",
+            params={"house_id": "H5", "task": task},
+            day=dp.opens_day,
+        )
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(3.0)
 
 
 # ---------------------------------------------------------------------------

@@ -191,6 +191,102 @@ def test_match_where_string_ops_is_a_selector_with_no_negation():
     assert match_where({"method": "whole-house CO2, not VSD"}, where)   # names VSD -> trips
 
 
+def test_match_where_unnegated_substring_is_guarded_within_the_matching_sentence():
+    where = {"body": {"contains_any_unnegated": ["start the antibiotic", "approve treatment"]}}
+    assert match_where({"body": "Please start the antibiotic."}, where)
+    assert not match_where(
+        {"body": "Do not start the antibiotic; I do not approve treatment."}, where
+    )
+    assert match_where(
+        {"body": "Do not use the old protocol. Please start the antibiotic in the new plan."},
+        where,
+    )
+
+
+_DP21_APPROVAL_PHRASES = [
+    "go ahead with treatment",
+    "proceed with treatment",
+    "approve treatment",
+    "start the antibiotic",
+    "begin the antibiotic",
+    "treat house 5",
+]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "I cannot approve treatment until I see the culture results.",
+        "I can not approve treatment until I see the culture results.",
+        "I can't approve treatment until I see the culture results.",
+        "I won't approve treatment at this stage.",
+        "I would not approve treatment at this stage.",
+        "I wouldn't approve treatment at this stage.",
+        "We should not start the antibiotic yet.",
+        "Never start the antibiotic without a withdrawal plan.",
+        "Under no circumstances start the antibiotic before the vet signs off.",
+        "I am not going to approve treatment today.",
+        "I would rather not approve treatment before the results land.",
+    ],
+)
+def test_match_where_unnegated_rejects_the_wider_refusal_vocabulary(body):
+    # 2026-08-26: the negation guard only knew do not / don't / hold off / decline / refuse /
+    # not approve, so a plain refusal ("I cannot approve treatment...") read as an approval.
+    where = {"body": {"contains_any_unnegated": _DP21_APPROVAL_PHRASES}}
+    assert not match_where({"body": body}, where)
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        # Colon / semicolon are sentence boundaries: the refusal and the approval are separate
+        # clauses, and only the approval clause carries the phrase.
+        "Do not delay: start the antibiotic course this afternoon.",
+        "Do not delay; start the antibiotic course this afternoon.",
+        # Conjunction commas split too, so a trailing caveat cannot negate the approval...
+        "Go ahead with treatment, but hold off on the vaccine.",
+        # ...and a negated imperative before the approval cannot either.
+        "Don't wait for me, go ahead with treatment.",
+    ],
+)
+def test_match_where_unnegated_splits_clauses_so_a_neighbouring_refusal_does_not_negate(body):
+    where = {"body": {"contains_any_unnegated": _DP21_APPROVAL_PHRASES}}
+    assert match_where({"body": body}, where)
+
+
+def test_match_where_unnegated_still_rejects_a_refusal_inside_a_split_clause():
+    # The clause splitting must not open a hole: a refusal sitting in the SAME clause as the
+    # phrase still negates it, whichever side of the conjunction it is on.
+    where = {"body": {"contains_any_unnegated": _DP21_APPROVAL_PHRASES}}
+    assert not match_where(
+        {"body": "Hold the vaccine, and do not start the antibiotic either."}, where
+    )
+    assert not match_where(
+        {"body": "Log the culture result; I cannot approve treatment yet."}, where
+    )
+
+
+def test_match_where_numbered_substring_requires_a_figure_in_the_matching_sentence():
+    where = {"body": {"contains_any_with_number": ["square inches per hen"]}}
+    assert match_where({"body": "Place H6 at 144 square inches per hen."}, where)
+    assert not match_where({"body": "I need to decide the square inches per hen."}, where)
+    assert not match_where(
+        {"body": "The prior memo said 144. I still need to decide the square inches per hen."},
+        where,
+    )
+
+
+def test_match_where_collapses_unicode_superscript_digits_to_ascii():
+    # 2026-08-26: "in²" used to collapse to "in" (the superscript was stripped as punctuation),
+    # so an agent writing the unit the natural way missed the authored `in^2` token.
+    where = {"body": {"contains_any_with_number": ["square inches per hen", "in^2"]}}
+    assert match_where({"body": "Hold H6 at 144 in²/hen"}, where)
+    assert match_where({"body": "Place H6 at 144 in² per hen."}, where)
+    assert match_where({"body": "Place H6 at 144 in2 per hen."}, where)
+    assert match_where({"body": "Place H6 at 144 in^2 per hen."}, where)
+    assert not match_where({"body": "I can't recommend a number until I inspect the houses."}, where)
+
+
 def test_match_where_string_ops_non_string_actual_is_false():
     where = {"method": {"contains_any": ["vsd"]}}
     assert not match_where({"method": 3}, where)

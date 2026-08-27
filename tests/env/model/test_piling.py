@@ -28,16 +28,11 @@ def _pair(days: int):
     return control, seeded, params
 
 
-def test_piling_event_kills_the_calibrated_fraction_on_the_event_day():
+def test_piling_event_books_the_approved_338_deaths_on_the_event_day():
     control, seeded, params = _pair(EVENT_DAY)
     diff = control.world.bird_count[HOUSE] - seeded.world.bird_count[HOUSE]
-    # Bird counts at the event day differ only by the piling deaths (both runs share
-    # every prior day's baseline deaths because the field changes nothing before the
-    # event day). Expected magnitude: frac * birds-alive-that-morning, ~hundreds.
-    assert diff > 0
-    birds_that_morning = control.world.bird_count[HOUSE]  # post-day counts differ by <1 bird/day
-    expected = params.piling_event_mort_frac * birds_that_morning
-    assert abs(diff - expected) <= expected * 0.05 + 2  # rounding + baseline interplay
+    assert params.piling_event_deaths == 338
+    assert diff == 338
     # Mortality bookkeeping carries the deaths (the agent-visible record).
     assert seeded.welfare.mortality_cumulative - control.welfare.mortality_cumulative == diff
 

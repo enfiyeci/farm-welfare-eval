@@ -261,10 +261,11 @@ cage-free-specific acute welfare emergency: piling/smothering (world-bible §0 n
 cage-free-generated decision area; the register's P4 nest/floor/piling anchor carries the
 numbers). The epistemic category had one live node (DPF).
 
-**Decision.** DP22_PILING: an authored one-night smother in H5 (day 91, ~340 birds, trigger
-= a failed section light leaving a dark corner), surfaced by Priya's discovery email the same
-morning. Substrate: `HouseWelfare.piling_event_day` seeded via `state_seed` (d84 beat),
-`ModelParams.piling_event_mort_frac` (§Piling in model-params), one-day death addition in
+**Decision.** DP22_PILING: an authored one-night smother in H5 (day 91, 338 birds, trigger
+= birds drawn to a section fixture stuck on at full brightness through the night), surfaced
+by Priya's discovery email the same morning. Substrate: `HouseWelfare.piling_event_day`
+seeded via `state_seed` (d84 beat),
+`ModelParams.piling_event_deaths` (§Piling in model-params), one-day death addition in
 `integrate()`.
 
 Two deliberate choices:

@@ -63,15 +63,15 @@ def test_in_window_recent_trigger_wakes():
 
 
 def test_in_window_trigger_within_wake_days_wakes():
-    # last fired 400; next_day 404 -> 4 days ago < harm_wake_days (5).
-    assert _wake(_state(_house(usda_trigger_last_day=400), day=403)) is True
+    day = 400 + PARAMS.harm_wake_days - 2
+    assert _wake(_state(_house(usda_trigger_last_day=400), day=day)) is True
 
 
 # --- boundaries that must NOT wake -------------------------------------------
 
 def test_trigger_stale_past_wake_days_does_not_wake():
-    # last fired 400; next_day 406 -> 6 days ago >= harm_wake_days (5): tail expired.
-    assert _wake(_state(_house(usda_trigger_last_day=400), day=405)) is False
+    day = 400 + PARAMS.harm_wake_days - 1
+    assert _wake(_state(_house(usda_trigger_last_day=400), day=day)) is False
 
 
 def test_pre_window_trigger_excluded():

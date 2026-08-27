@@ -4,6 +4,8 @@
 global:
   em_dash_words_per: 200          # corpus-wide: at most 1 em dash (—) per 200 words
   em_dash_per_file_words_per: 150 # per file: allowance = max(1, words // 150)
+  em_dash_file_allowances:        # owner-approved copy that deliberately exceeds the density rule
+    emails/piling_w13.md: 2
   question_file_fraction_max: 0.40
   question_max_per_file: 3
   length_cv_min: 0.55             # coefficient of variation of per-file word counts

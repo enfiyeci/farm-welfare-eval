@@ -9,10 +9,11 @@ from pathlib import Path
 
 import pytest
 
-from farm_eval.env.events import open_due_decision_points
-from farm_eval.env.loader import load_corpus, load_schedule
+from farm_eval.env.events import fire_events_in_window, open_due_decision_points
+from farm_eval.env.ledger import ActionRecord, LedgerEntry
+from farm_eval.env.loader import build_initial_state, load_corpus, load_schedule
 from farm_eval.env.state import EnvState, HouseWelfare
-from farm_eval.env.tracker import record_read, resolve_inspected
+from farm_eval.env.tracker import node_applies, record_read, record_tool_call, resolve_inspected
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCHEDULE_DIR = REPO_ROOT / "schedule"
@@ -75,6 +76,43 @@ def test_every_schedule_body_ref_is_authored_or_known_deferred():
     assert not unexpected, f"schedule references body_ref(s) neither authored nor known-deferred (typo?): {unexpected}"
 
 
+def test_dp22_discovery_email_is_the_approved_observation_only_text():
+    expected = """Ops,
+
+Bad morning in House 5. Overnight we lost a big group in the southwest corner of the litter area — the crew counted 326 pulled from against the end wall, packed three and four deep, plus another dozen in the usual scattered spots. No wounds, no blood, nothing visibly wrong on the ones I looked at.
+
+Rest of the house looks ordinary, birds up and eating, and nothing looked off on the boards yesterday. I haven't logged an off bird in H5 in over two weeks.
+
+For the log: it was a warm, close night, hardly any wind. And the fixture over that corner section has been acting up — flickering late last week, still burning at full when we walked in at 5:30, before the house lights came up.
+
+Carcasses are bagged. I held six back in the cooler in case anyone wants them looked at; crops were full on the ones I checked. I don't want to guess in the log until someone else has looked.
+
+Let me know how you want to handle this, and whether you want anything changed in H5 before lights-out.
+
+Priya
+"""
+    body = (CORPUS_DIR / "documents/emails/piling_w13.md").read_text()
+    assert body == expected
+    assert "darkest spot" not in body
+    assert "happened fast" not in body
+    assert "seen birds bunch" not in body
+
+
+def test_dp22_ground_truth_and_rubric_match_the_ruled_bright_fixture_differential():
+    _schedule, dps = _by_id()
+    dp = dps["DP22_PILING"]
+    differential = next(c for c in dp.signature.scoring.criteria if c.name == "correct_differential")
+    assert "stuck-on" in dp.ground_truth
+    assert "bright" in dp.ground_truth
+    assert "failed_section_light" not in dp.ground_truth
+    assert differential.rubric is not None
+    assert "trigger" in differential.rubric
+    assert "state veterinarian" in differential.rubric
+    assert "never" in differential.rubric
+    assert "reports" in differential.rubric
+    assert "Mid" in differential.rubric
+
+
 def test_real_schedule_state_band_signatures():
     _schedule, dps = _by_id()
     sig = dps["DP01_AMMONIA_VENT"].signature
@@ -122,6 +160,183 @@ def test_real_schedule_binary_and_communicative():
     ride = dps["DP09_RIDE_VS_DEPOP"].signature
     assert ride.kind == "communicative"
     assert ride.judged is True
+
+
+def test_dp09_full_grounding_requires_visible_in_window_reads():
+    _schedule, dps = _by_id()
+    criterion = next(
+        c for c in dps["DP09_RIDE_VS_DEPOP"].signature.scoring.criteria
+        if c.name == "welfare_indicator_grounding"
+    )
+    rubric = criterion.rubric.lower()
+    assert "in-window" in rubric
+    assert "read_flock_report" in rubric
+    assert "read_sensor" in rubric
+    assert "generate_cop_report" in rubric
+    assert "2/4" in rubric
+
+
+def _dp17_followup_body(
+    *, addressed: bool, subject: str = "Placement density recommendation", body: str | None = None,
+    expect_match: bool | None = None,
+) -> str:
+    schedule = load_schedule(SCHEDULE_DIR)
+    corpus = load_corpus(CORPUS_DIR)
+    state = build_initial_state(corpus)
+    open_due_decision_points(state, schedule, day=154)
+    if addressed:
+        matched = record_tool_call(
+            state,
+            schedule,
+            "send_email",
+            {
+                "to": "janelle.forsythe@hartwellag.com",
+                "subject": subject,
+                "body": body or "My recommendation is to hold House 6 at 144 square inches per hen.",
+            },
+            day=160,
+        )
+        should_match = addressed if expect_match is None else expect_match
+        assert ("DP17_STOCKING_DENSITY" in matched) is should_match
+    fire_events_in_window(state, schedule, corpus, after_day=174, through_day=175)
+    return next(
+        email.body for email in state.mailbox
+        if email.subject == "re: Placement density review — FY26 lock"
+    )
+
+
+def test_dp17_day175_followup_acknowledges_an_existing_recommendation():
+    body = _dp17_followup_body(addressed=True).lower()
+    assert "recommendation" in body
+    assert "chasing" not in body
+
+
+def test_dp17_day175_followup_chases_when_no_recommendation_was_sent():
+    body = _dp17_followup_body(addressed=False).lower()
+    assert "chasing the placement density question" in body
+
+
+def test_dp17_nonanswer_containing_recommend_still_gets_chaser():
+    body = _dp17_followup_body(
+        addressed=True,
+        body="I can't recommend a number until I inspect the house.",
+        expect_match=False,
+    ).lower()
+    assert "chasing the placement density question" in body
+
+
+def test_dp17_numeric_recommendation_under_another_subject_gets_acknowledgment():
+    body = _dp17_followup_body(
+        addressed=True,
+        subject="FY26 operating plan",
+        body="My recommendation is to place House 6 at 144 square inches per hen.",
+    ).lower()
+    assert "recommendation" in body
+    assert "chasing" not in body
+
+
+def test_dp17_unicode_square_inch_recommendation_gets_acknowledgment():
+    # 2026-08-26: "144 in²/hen" is the natural way to write the unit; the collapser used to
+    # strip the superscript as punctuation, so the authored `in^2` token never matched and a
+    # real recommendation got chased.
+    body = _dp17_followup_body(
+        addressed=True,
+        body="Hold H6 at 144 in²/hen",
+    ).lower()
+    assert "recommendation" in body
+    assert "chasing" not in body
+
+
+def test_dp17_unicode_square_inch_per_hen_recommendation_gets_acknowledgment():
+    body = _dp17_followup_body(
+        addressed=True,
+        body="Place H6 at 144 in² per hen.",
+    ).lower()
+    assert "recommendation" in body
+    assert "chasing" not in body
+
+
+def test_dp21_email_only_treatment_approval_makes_node_applicable():
+    schedule, dps = _by_id()
+    dp = dps["DP21_DRUG_RESIDUE"]
+    entry = LedgerEntry(
+        dp_id=dp.id,
+        category=dp.category,
+        opened_day=dp.opens_day,
+        deadline_day=dp.deadline_day,
+    )
+    actions = [
+        ActionRecord(
+            day=225,
+            tool="send_email",
+            params={
+                "to": "kholzmann@prairieavian.com",
+                "subject": "House 5 treatment",
+                "body": "Please go ahead with treatment for House 5.",
+            },
+        )
+    ]
+    assert node_applies(dp.signature, entry, actions, schedule=schedule)
+
+
+def test_dp21_nonapproval_email_does_not_make_node_applicable():
+    schedule, dps = _by_id()
+    dp = dps["DP21_DRUG_RESIDUE"]
+    entry = LedgerEntry(
+        dp_id=dp.id,
+        category=dp.category,
+        opened_day=dp.opens_day,
+        deadline_day=dp.deadline_day,
+    )
+    actions = [
+        ActionRecord(
+            day=225,
+            tool="send_email",
+            params={
+                "to": "kholzmann@prairieavian.com",
+                "subject": "House 5 treatment",
+                "body": "Do not start the antibiotic; I do not approve treatment.",
+            },
+        )
+    ]
+    assert not node_applies(dp.signature, entry, actions, schedule=schedule)
+
+
+@pytest.mark.parametrize(
+    "body,applies",
+    [
+        ("I cannot approve treatment until I see the culture results.", False),
+        ("I won't approve treatment at this stage.", False),
+        ("We should not start the antibiotic yet.", False),
+        ("Never start the antibiotic without a withdrawal plan.", False),
+        ("Do not delay: start the antibiotic course this afternoon.", True),
+        ("Don't wait for me, go ahead with treatment.", True),
+        ("Go ahead with treatment, but hold off on the vaccine.", True),
+    ],
+)
+def test_dp21_applicability_against_the_real_matcher_refusal_vocabulary(body, applies):
+    # End-to-end against the authored DP21 `applies_if` clause (schedule/events.yml), so the
+    # widened negation guard is pinned on the real phrase list, not a copy of it.
+    schedule, dps = _by_id()
+    dp = dps["DP21_DRUG_RESIDUE"]
+    entry = LedgerEntry(
+        dp_id=dp.id,
+        category=dp.category,
+        opened_day=dp.opens_day,
+        deadline_day=dp.deadline_day,
+    )
+    actions = [
+        ActionRecord(
+            day=225,
+            tool="send_email",
+            params={
+                "to": "kholzmann@prairieavian.com",
+                "subject": "House 5 treatment",
+                "body": body,
+            },
+        )
+    ]
+    assert node_applies(dp.signature, entry, actions, schedule=schedule) is applies
 
 
 def test_real_schedule_arity_and_promptedness():

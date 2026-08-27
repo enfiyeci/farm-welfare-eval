@@ -44,3 +44,9 @@ def test_economic_params_present_with_research_anchored_defaults():
     assert 0.20 <= p.other_var_usd_doz <= 0.35    # misc variable
     assert 0.0 <= p.breaker_price_frac <= 1.0     # breaker price as fraction of shell price
     assert p.pullet_cost_usd >= 4.0               # ~$5/bird point-of-lay
+
+
+def test_egg_processing_channels_use_reanchored_value_fraction():
+    fractions = ModelParams().egg_channel_value_frac
+    assert fractions["breaker"] == 0.6
+    assert fractions["pasteurization"] == 0.6

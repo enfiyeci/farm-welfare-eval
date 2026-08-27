@@ -4,6 +4,29 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-26 · claude+codex · build-wave batch 1: DP17/DP09/DP21 + DP13 trio + DP22 redesign (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** This integration branch now consolidates ALL ten node-review branches
+  (union-resolved INDEX/WORKLOG/ledger; every branch fully contained) and carries build-wave
+  batch 1, Codex-implemented + reviewed: DP17 conditional day-175 chaser (variant_on_dp, new
+  `stocking_ack_w25.md`); DP09 recitation-loophole rubric tightening; DP21 withdrawal-duty ack
+  at `log_treatment` + email-only-approval applicability (negation-guarded matcher, new
+  `contains_any_unnegated` op); DP13 grace trio (tripwire `gt: 9`, 10-day latency decay on
+  `divert_action`, `harm_wake_days` 10 + invariant test, `egg_channel_value_frac` 0.6); DP22
+  redesign (approved observation-only email verbatim, bright-fixture cause, trigger-agnostic
+  rubric, narrowed zero line, widened repair matcher, `piling_event_deaths = 338` exact —
+  goldens + financial reference REGENERATED, drift 100% attributed). Review: Codex adversarial
+  (3 findings fixed) + Opus adversarial re-verify (4 more fixed: standing-latency anchor,
+  negator vocabulary + clause splitting, unicode `in²`) — Codex ran OUT OF CREDITS mid-run,
+  Opus substituted for rounds 2–3 (surfaced, not silent). Suite 2280 passed / 3 skipped;
+  corpus guards 0/0.
+- **Next action:** continue the build wave per the completed register in
+  `docs/final_to_do_list.md` §2 (staged prompts exist for DP25 and DP05); Codex credits need a
+  refill before Codex-first delegation resumes.
+- **Refs:** `schedule/events.yml`, `farm_eval/env/tracker.py`, `farm_eval/judge/node_scores.py`,
+  `farm_eval/env/model/params.py`, `corpus/documents/emails/{piling_w13,stocking_ack_w25}.md`,
+  `corpus/documents/tool_acks/`, `tests/fixtures/golden/reference_runs.json`.
+
 ### Entry template (copy, fill in, put at the TOP)
 
 ```
@@ -12,6 +35,31 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Next action:** <the concrete next step, or "none">
 - **Refs:** <files / commit SHAs / spec paths>
 ```
+
+## 2026-08-26 · codex · DP13 10-day decaying grace and economics re-anchor (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** Built the owner-ruled DP13 trio: `gt:9` 10-day grace with latency decay
+  on diversion credit, `harm_wake_days=10` with a schedule-to-param invariant, and breaker /
+  pasteurization value fractions re-anchored to 0.6. Added/updated regression tests via TDD;
+  environment/judge tests and both corpus checks are clean. No golden or financial fixture regen.
+- **Next action:** Run the literal full suite outside the restricted sandbox; Inspect tests need
+  user-data writes and play/spectator server tests need socket binding.
+- **Refs:** `schedule/events.yml`, `farm_eval/env/model/params.py`,
+  `tests/env/model/test_egg_test_subsystem.py`, `tests/env/model/test_economics_params.py`,
+  `tests/judge/test_disposition_nodes.py`.
+
+## 2026-08-26 · codex · DP17/DP09/DP21 ruled build items (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** Built the DP17 conditional day-175 acknowledgment/chaser, tightened DP09
+  grounding to require visible in-window reads, and added DP21's corpus-backed withdrawal-duty
+  treatment ack plus a narrow vet-approval-email applicability matcher. Added seven regression
+  tests; all `tests/env` and focused loader/action tests pass; corpus lint/consistency are clean.
+- **Next action:** Run the full suite outside the restricted sandbox (Inspect writes under the user
+  data directory and server tests bind sockets here); review the narrow DP21 approval phrase bank
+  if broader natural-language confirmation coverage is desired.
+- **Refs:** `schedule/events.yml`, `farm_eval/env/{tracker,episode,loader}.py`,
+  `corpus/documents/{emails/stocking_ack_w25.md,tool_acks/log_treatment_withdrawal.md}`,
+  `tests/env/{test_real_schedule.py,model/test_drug_residue.py}`.
 
 ## 2026-08-26 · claude · coworker-page reconciliation pass, all 25 pages (branch feat/coworker-node-docs)
 

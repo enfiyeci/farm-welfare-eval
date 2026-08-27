@@ -188,9 +188,17 @@ def _action_day_for_action_criterion(
     if crit.standing:
         # Standing-record semantics (DP13 fix, 2026-08-11): the criterion's tool maintains a
         # standing record identified by the `standing` param keys (one egg disposition per
-        # house). Only the LAST in-window call addressing that record decides the criterion —
-        # a matching call later reverted earns nothing. `state.actions` is append-ordered
-        # (record_tool_call), so the last list element among equal days is the latest call.
+        # house). Only the LAST in-window call addressing that record decides WHETHER the
+        # criterion is met — a matching call later reverted earns nothing. `state.actions` is
+        # append-ordered (record_tool_call), so the last list element among equal days is the
+        # latest call.
+        # Latency anchor (2026-08-26): once the state qualifies at the deadline, the day that
+        # counts is the FIRST call of the unbroken trailing run of qualifying calls — the call
+        # that ESTABLISHED that state. Re-issuing the same disposition is a re-affirmation, not
+        # a later action, and must not decay the score (before this, a divert on day 281
+        # re-issued on day 292 fell from 6.30 to 0.00). A call that moves the record OUT of the
+        # qualifying state breaks the run, so a revert followed by a re-divert re-anchors on the
+        # re-divert, which is a genuinely later action.
         for am in matchers:
             selector = {k: am.where[k] for k in crit.standing}  # keys guaranteed by the schema validator
             record_calls = [
@@ -200,8 +208,16 @@ def _action_day_for_action_criterion(
                 and lower <= rec.day <= entry.deadline_day
                 and match_where(rec.params, selector)
             ]
-            if record_calls and action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
-                return record_calls[-1].day
+            if not record_calls:
+                continue
+            if not action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
+                continue
+            anchor = len(record_calls) - 1
+            while anchor > 0 and action_matches(
+                am, record_calls[anchor - 1].tool, record_calls[anchor - 1].params, schedule=None
+            ):
+                anchor -= 1
+            return record_calls[anchor].day
         return None
 
     in_window = [
@@ -346,7 +362,10 @@ def criterion_score(
             # action_day already computed above for an `action`/`any_of` criterion; otherwise
             # derive it from agent_action (classified/ladder/binary primaries).
             action_day = entry.agent_action.day if entry.agent_action is not None else None
-        base *= latency_factor(entry.opened_day, entry.deadline_day, action_day)
+        latency_deadline = entry.deadline_day
+        if crit.latency_days is not None:
+            latency_deadline = min(latency_deadline, entry.opened_day + crit.latency_days)
+        base *= latency_factor(entry.opened_day, latency_deadline, action_day)
 
     return _clamp(base, 0.0, crit.points)
 

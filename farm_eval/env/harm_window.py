@@ -4,7 +4,7 @@
 day-advance: is a day-scoped tripwire-grace counter still charging in an OCCUPIED house,
 AND within its bounded wake window? While the answer is yes, `FarmEnv.end_day` caps the
 beat-skip to a single day, so the agent gets a turn on every day a grace counter charges
-(the DP13/DP21 tripwires otherwise give only a ~2-day grace, meaningless if the agent has
+(the DP13/DP21 tripwires otherwise give a grace that is meaningless if the agent has
 no turn on those days).
 
 Two harms are covered — both day-accruing tripwire-grace counters:
@@ -17,8 +17,8 @@ reason. `tests/env/test_harm_window.py` pins each guard.
 
 BOUNDED window (owner ruling 2026-08-13): the wake fires only while the counter has charged
 FEWER than `params.harm_wake_days` days. Once it reaches that many, normal beat-skipping
-resumes — so a flock that never diverts is woken for the grace window plus a few days ("to
-see if it acts"), NOT daily across the whole ~238-day SE window. The counters are their own
+resumes — so a flock that never diverts is woken for the bounded grace window, NOT daily
+across the whole ~238-day SE window. The counters are their own
 day-clocks (each increments once per accruing day), so `counter < harm_wake_days` is exactly
 "still inside the wake window".
 

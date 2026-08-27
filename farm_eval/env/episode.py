@@ -617,6 +617,7 @@ class FarmEnv:
         elif tool == "log_treatment":
             issue_raw = params.get("issue")
             issue_norm = _normalize_string(issue_raw) if isinstance(issue_raw, str) else None
+            withdrawal_days = 0.0
             # Normalized comparison (Codex round-2 F2, 2026-08-11): the tracker matches
             # "Red mite" == "red_mite" when marking DP05 addressed, so the knockdown
             # physics must accept the same spellings — an exact-string mismatch made the
@@ -652,8 +653,8 @@ class FarmEnv:
                     # Longest active withdrawal governs: a second (shorter or unrecognized) drug
                     # must not truncate an in-progress withdrawal — eggs stay unsafe until every
                     # logged drug has cleared. Unknown drug -> 0 -> max() leaves residue unchanged.
-                    new_withdrawal = float(self.params.egg_withdrawal_days.get(drug_norm, 0))
-                    hw.egg_residue_days_left = max(hw.egg_residue_days_left, new_withdrawal)
+                    withdrawal_days = float(self.params.egg_withdrawal_days.get(drug_norm, 0))
+                    hw.egg_residue_days_left = max(hw.egg_residue_days_left, withdrawal_days)
                     # NAE label contract (Codex F1 + R2-F2 on D14): an ANTIBIOTIC course marks
                     # the flock treated for the CYCLE — feeds offlabel_premium_days. The
                     # antibiotic table is egg_withdrawal_days (keyed by antibiotic name); an
@@ -687,6 +688,15 @@ class FarmEnv:
                 detail = f"treatment logged (materials ~${fee:,.0f})"
             else:
                 detail = "treatment logged"
+            if withdrawal_days > 0:
+                ack_ref = (self.corpus.replies.get("tool_acks") or {}).get(
+                    "log_treatment_withdrawal_ref"
+                )
+                if ack_ref:
+                    duty = self.corpus.document(ack_ref).strip().replace(
+                        "WITHDRAWAL_DAYS", f"{withdrawal_days:g}"
+                    )
+                    detail = f"{detail}. {duty}"
         elif tool in _TRACE_TOOLS:
             # Lightweight trace + a real service charge (owner directive 2026-07-12: welfare
             # actions cost money): a corrective work order books a callout fee, a vet visit

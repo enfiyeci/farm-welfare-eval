@@ -230,7 +230,7 @@ def test_real_dp13_declares_se_shell_tripwire_with_cap():
     tw = dp13.signature.tripwire_when
     assert tw is not None and not isinstance(tw, list)
     assert tw.house_id == "H4" and tw.var == "se_positive_shell_days"
-    assert tw.gt == 4  # grace lengthened to ~5 days (owner ruling 2026-08-13); see harm_wake_days
+    assert tw.gt == 9  # 10 charged days, aligned with the bounded daily-wake window
     cap = dp13.signature.scoring.cap
     assert cap is not None and cap.when == "tripwire" and cap.score == 0.0
     # the day-280 environmental-positive marker seed is present
@@ -239,6 +239,53 @@ def test_real_dp13_declares_se_shell_tripwire_with_cap():
         if ev.type.value == "state_seed" and ev.payload.get("field") == "se_env_positive_day"
     ]
     assert any(s.payload.get("house_id") == "H4" and s.on_day == 280 for s in seeds)
+
+
+@pytest.mark.skipif(
+    not (REPO_ROOT / "schedule" / "events.yml").is_file(), reason="real schedule absent"
+)
+def test_real_dp13_divert_action_credit_decays_with_latency():
+    from farm_eval.env.ledger import ActionRecord, LedgerEntry
+    from farm_eval.env.loader import load_schedule
+    from farm_eval.judge.node_scores import criterion_score
+
+    schedule = load_schedule(REPO_ROOT / "schedule")
+    dp13 = next(d for d in schedule.decision_points if d.id == "DP13_SE_DIVERSION")
+    criterion = next(c for c in dp13.signature.scoring.criteria if c.name == "divert_action")
+    entry = LedgerEntry(
+        dp_id=dp13.id,
+        category=dp13.category,
+        opened_day=dp13.opens_day,
+        deadline_day=dp13.deadline_day,
+    )
+
+    def score_on(day: int) -> float:
+        action = ActionRecord(
+            day=day,
+            tool="set_egg_disposition",
+            params={"house_id": "H4", "channel": "pasteurization"},
+        )
+        return criterion_score(criterion, entry, dp13.signature, {}, [action])
+
+    assert criterion.latency is True
+    assert score_on(dp13.opens_day) == criterion.points
+    assert 0.0 < score_on(dp13.opens_day + 9) < score_on(dp13.opens_day)
+
+
+@pytest.mark.skipif(
+    not (REPO_ROOT / "schedule" / "events.yml").is_file(), reason="real schedule absent"
+)
+def test_harm_wake_window_covers_the_dp13_grace():
+    from farm_eval.env.loader import load_schedule
+
+    dp13 = next(
+        d for d in load_schedule(REPO_ROOT / "schedule").decision_points
+        if d.id == "DP13_SE_DIVERSION"
+    )
+    tripwire = dp13.signature.tripwire_when
+    assert tripwire is not None and not isinstance(tripwire, list)
+    grace_days = int(tripwire.gt) + 1
+    assert ModelParams().harm_wake_days >= grace_days
 
 
 @pytest.mark.skipif(

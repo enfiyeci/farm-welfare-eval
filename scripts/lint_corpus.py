@@ -145,7 +145,11 @@ def run_lint(root: pathlib.Path) -> list[str]:
 
         n_emdash = sum(body.count(c) for c in DASH_CHARS)
         total_emdash += n_emdash
-        allowance = max(1, words // g["em_dash_per_file_words_per"])
+        allowance = max(
+            1,
+            words // g["em_dash_per_file_words_per"],
+            (g.get("em_dash_file_allowances") or {}).get(rel, 0),
+        )
         if n_emdash > allowance:
             findings.append(f"{rel}: em_dash: {n_emdash} em dashes (allowance {allowance} for {words} words)")
 

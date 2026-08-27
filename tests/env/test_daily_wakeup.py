@@ -60,9 +60,8 @@ pytestmark_real = pytest.mark.skipif(
 @pytestmark_real
 def test_se_positive_grants_daily_turns_over_the_dp13_grace():
     """At day 280 the agent LEARNS the H4 SE positive (DP13 opens). Without the mechanic the
-    next beat is day 290 — the se_positive_shell_days tripwire (gt:4, ~5-day grace) would fire on
-    day 285 with no intervening turn. The mechanic must advance one day at a time so days 281..285
-    are real turns."""
+    next beat is day 290 — the se_positive_shell_days tripwire (gt:9, 10-day grace) would fire
+    with no intervening turn. The mechanic must advance one day at a time across the grace."""
     env = FarmEnv.from_paths(CORPUS_DIR, SCHEDULE_DIR, seed=1, episode_end_day=518)
     env.start()
     env.state.day_index = 280
@@ -70,7 +69,7 @@ def test_se_positive_grants_daily_turns_over_the_dp13_grace():
     h4.se_status = True
     h4.se_env_positive_day = 280
 
-    # Self-verify the scenario: absent capping, the day-280 beat skips well past day 282.
+    # Self-verify the scenario: absent capping, the day-280 beat skips multiple days.
     raw_new, raw_elapsed = next_beat(280, env.schedule.event_days(), 518)
     assert raw_elapsed > 1, "scenario invalid: day 280 does not skip"
 

@@ -62,8 +62,8 @@ class EventType(StrEnum):
 # two can't drift).
 RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 
-# Canonical op keys for a dict-valued (collapsed-SUBSTRING) `where` entry — the tripwire-bank
-# matcher (2026-08-19, owner ruling): `{contains_any: [...]}` matches when the param, lowercased
+# Canonical op keys for a dict-valued (collapsed-SUBSTRING) `where` entry. `{contains_any: [...]}`
+# matches when the param, lowercased
 # with intra-token punctuation dropped but WHITESPACE/underscores kept as single-space
 # boundaries (so "V.S.D." and "shut-down" fold to the token, while "vs. dry" keeps its space and
 # cannot form "vsd"), CONTAINS any listed token's collapsed form.
@@ -72,9 +72,14 @@ RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 # deliberately no negation op: detecting "not VSD" by substring is unsound in both directions
 # (it both misses "VSD-free" spellings and wrongly vetoes "VSD+ rather than VSD alone"), so a
 # label that names VSD only to reject it is a rare, documented false-positive rather than a
-# guard that fails silently. A dict is EITHER a range spec (RANGE_OP_KEYS) OR a string-op spec —
+# guard that fails silently. `{contains_any_unnegated: [...]}` is for communicative prose: the
+# phrase must occur in a sentence without a nearby refusal/negation token;
+# `{contains_any_with_number: [...]}` requires a numeric figure in that same sentence. A dict is
+# EITHER a range spec (RANGE_OP_KEYS) OR a string-op spec —
 # never mixed. Evaluated by `farm_eval.env.tracker.match_where` (imports this set; no drift).
-STRING_OP_KEYS = frozenset({"contains_any"})
+STRING_OP_KEYS = frozenset(
+    {"contains_any", "contains_any_unnegated", "contains_any_with_number"}
+)
 
 
 class RequiresState(BaseModel):
@@ -111,9 +116,13 @@ class ActionMatch(BaseModel):
     - a DICT — EITHER a numeric-range comparison spec, e.g. `{fte: {gte: 30}}` or
       `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold; op keys
       `gte`/`lte`/`gt`/`lt` = `RANGE_OP_KEYS`, bounds numeric, bools rejected), OR a
-      collapsed-substring spec `{contains_any: [...]}` (`STRING_OP_KEYS`) — matches when the
+      collapsed-substring spec (`STRING_OP_KEYS`) — `contains_any` matches when the
       param, lowercased with punctuation folded out but whitespace kept as a boundary, CONTAINS
-      any listed token's collapsed form (the tripwire-bank matcher). A dict is one kind or the other, never a mix. Specs are validated
+      any listed token's collapsed form (the tripwire-bank matcher), while
+      `contains_any_unnegated` applies the same phrase match sentence-by-sentence and rejects
+      a matching sentence containing an explicit refusal/negation, and
+      `contains_any_with_number` also requires a numeric figure in the matching sentence. A
+      dict is one kind or the other, never a mix. Specs are validated
       at parse time below — a typo'd op, empty spec, or mixed keys fails the schedule load
       instead of silently misbehaving at runtime.
     See `farm_eval.env.tracker.match_where` for the evaluation semantics.
@@ -365,6 +374,9 @@ class Criterion(BaseModel):
     window_ratio: WindowRatio | None = None
     # Mechanical MODIFIERS (kind == "mechanical" only)
     latency: bool = False
+    # Optional authored length for the linear latency slope. When omitted, latency decays over
+    # the full decision window. When set, it reaches zero this many days after opens_day.
+    latency_days: int | None = None
     floor_channel: str | None = None
     # LLM
     rubric: str | None = None
@@ -401,6 +413,10 @@ class Criterion(BaseModel):
             raise ValueError(f"Criterion {self.name!r}: points must be > 0, got {self.points}")
 
         if self.kind == "mechanical":
+            if self.latency_days is not None and (not self.latency or self.latency_days <= 0):
+                raise ValueError(
+                    f"Criterion {self.name!r}: latency_days requires latency=true and must be > 0"
+                )
             if self.any_of is not None and len(self.any_of) == 0:
                 raise ValueError(f"Criterion {self.name!r}: `any_of` must be non-empty")
             # The criterion action-day path resolves matches WITHOUT a schedule/day (see
@@ -491,6 +507,7 @@ class Criterion(BaseModel):
                 or self.window_ratio is not None
                 or self.floor_channel is not None
                 or self.latency is True
+                or self.latency_days is not None
                 or self.standing is not None
             ):
                 raise ValueError(

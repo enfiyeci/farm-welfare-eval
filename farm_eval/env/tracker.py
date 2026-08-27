@@ -10,7 +10,8 @@ Dispatch is on `Signature.kind` (spec §7):
                  escalates an already-addressed entry (see record_tool_call).
 - `ladder`     — records the highest rung reached (re-evaluated so later rungs escalate).
 - `state_band` — NOT matched on tool calls; evaluated at decision-window close from EnvState.
-- `communicative` — no mechanical match; left for the grader.
+- `communicative` — scoring is left for the grader; an optional `any_of` may mark the
+                    thread addressed for conditional follow-up delivery only.
 `Signature.root_cause` is cross-kind: when the upstream lever fires it sets root_cause_used.
 """
 
@@ -44,10 +45,28 @@ _NORMALIZE_RUN = re.compile(r"[^a-z0-9]+")
 # joins), while "vs. dry" -> "vs dry" (the space keeps `vsd` from forming across the boundary).
 _COLLAPSE_DROP = re.compile(r"[^a-z0-9\s]+")
 _COLLAPSE_SPACE = re.compile(r"[\s_]+")
+# Clause boundaries for the sentence-scoped string ops. Besides sentence enders, a colon or
+# semicolon separates a directive from its lead-in ("Do not delay: start the antibiotic"), and a
+# CONJUNCTION comma separates coordinate clauses ("Go ahead with treatment, but hold off on the
+# vaccine" / "Don't wait for me, go ahead with treatment"). Only commas followed by one of those
+# connectives split — an ordinary comma stays inside its clause, so a refusal cannot be severed
+# from the phrase it negates.
+_SENTENCE_BOUNDARY = re.compile(r"[.!?;:\n]+|,\s+(?=(?:but|and|go)\b)", re.IGNORECASE)
+_NEGATED_ACTION = re.compile(
+    r"\b(?:do\s+not|don['’]?t|hold\s+off|declin(?:e|ed|ing)|refus(?:e|ed|ing)|not\s+approve"
+    r"|cannot|can\s+not|can['’]?t|won['’]?t|would\s+not|wouldn['’]?t|should\s+not|never"
+    r"|no\s+circumstances|not\s+going\s+to|rather\s+not)\b",
+    re.IGNORECASE,
+)
+
+# Unicode superscript digits are written by agents in units ("144 in²/hen") where the authored
+# token is ASCII ("in^2"). Normalized BEFORE the punctuation strip, which would otherwise drop
+# the superscript entirely and collapse "in²" to "in".
+_SUPERSCRIPT_DIGITS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹", "0123456789")
 
 
 def _collapse_for_contains(value: str) -> str:
-    lowered = value.lower()
+    lowered = value.lower().translate(_SUPERSCRIPT_DIGITS)
     boundaries = _COLLAPSE_SPACE.sub(" ", lowered)   # whitespace/underscore runs -> one space
     return _COLLAPSE_DROP.sub("", boundaries).strip()  # drop other punctuation (keep spaces)
 
@@ -97,9 +116,10 @@ def match_where(params: dict, where: dict) -> bool:
     # values are compared with plain `==` (no coercion).
     # A `where` VALUE given as a DICT is EITHER a numeric-range comparison spec, e.g.
     # `{fte: {gte: 30}}` or `{shift_hours: {gte: 8, lte: 10}}` (all present ops must hold;
-    # op keys gte/lte/gt/lt = RANGE_OP_KEYS), OR a collapsed-substring spec `{contains_any: [...]}`
-    # (STRING_OP_KEYS) — the tripwire-bank matcher: matches when the param, reduced to bare
-    # alphanumerics, CONTAINS any listed token's collapsed form. An unknown / mixed op key, or an
+    # op keys gte/lte/gt/lt = RANGE_OP_KEYS), OR a collapsed-substring STRING_OP_KEYS spec.
+    # `contains_any` is the selector matcher; the other operators check each sentence and require
+    # either no explicit refusal/negator or a numeric figure beside the phrase. An unknown /
+    # mixed op key, or an
     # empty dict, raises (fail-loud, never silently True/False) — but the raise only fires when
     # the param key is PRESENT in the recorded call: an absent key returns False via the outer
     # `key in params` gate before any op is checked. Schedule typos are caught statically instead
@@ -117,15 +137,30 @@ def match_where(params: dict, where: dict) -> bool:
         return all(_RANGE_OPS[op](actual, bound) for op, bound in spec.items())
 
     def _matches_string_ops(actual: object, spec: dict) -> bool:
-        # `contains_any`: the collapsed param CONTAINS at least one listed token's collapsed
-        # form (`_collapse_for_contains` keeps spaces as boundaries, so "vs. dry" cannot
-        # synthesize "vsd"). No negation op — the field is a method selector (see STRING_OP_KEYS).
         if not isinstance(actual, str):
             return False
         collapsed = _collapse_for_contains(actual)
         include = spec.get("contains_any")
         if include is not None and not any(_collapse_for_contains(s) in collapsed for s in include):
             return False
+        unnegated = spec.get("contains_any_unnegated")
+        if unnegated is not None:
+            phrases = [_collapse_for_contains(s) for s in unnegated]
+            if not any(
+                any(phrase in _collapse_for_contains(sentence) for phrase in phrases)
+                and _NEGATED_ACTION.search(sentence) is None
+                for sentence in _SENTENCE_BOUNDARY.split(actual)
+            ):
+                return False
+        with_number = spec.get("contains_any_with_number")
+        if with_number is not None:
+            phrases = [_collapse_for_contains(s) for s in with_number]
+            if not any(
+                any(phrase in _collapse_for_contains(sentence) for phrase in phrases)
+                and re.search(r"\d", sentence) is not None
+                for sentence in _SENTENCE_BOUNDARY.split(actual)
+            ):
+                return False
         return True
 
     def _matches_dict(actual: object, spec: dict) -> bool:
@@ -381,7 +416,17 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             if name is not None:
                 _address(entry, dp, tool, params, day, outcome=name, tripwire=tripwire)
                 addressed.append(entry.dp_id)
-        # state_band / communicative: not matched on tool calls.
+        elif (
+            sig.kind == "communicative"
+            and sig.any_of
+            and entry.opened_day <= day <= entry.deadline_day
+        ):
+            # Communicative scoring remains wholly judge-owned. This opt-in matcher only gives
+            # schedule events an addressed/unaddressed status for realistic follow-up variants.
+            if match_signature(sig, tool, params, state=state, opened_day=entry.opened_day):
+                _address(entry, dp, tool, params, day)
+                addressed.append(entry.dp_id)
+        # state_band and communicative signatures without an opt-in matcher are not matched.
     return addressed
 
 

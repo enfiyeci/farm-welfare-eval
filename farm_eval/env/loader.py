@@ -205,6 +205,15 @@ def validate_reply_refs(corpus: Corpus) -> None:
     if "audit" in corpus.replies:
         for key in ("nh3_refs", "space_refs"):
             ref_bank(audit_cfg, key, "audit section")
+    tool_acks = corpus.replies.get("tool_acks") or {}
+    if tool_acks:
+        ref = tool_acks.get("log_treatment_withdrawal_ref")
+        if not isinstance(ref, str) or not ref:
+            raise ValueError(
+                "replies.yml tool_acks missing required key 'log_treatment_withdrawal_ref'"
+            )
+        if ref not in corpus.documents:
+            missing.append(ref)
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 

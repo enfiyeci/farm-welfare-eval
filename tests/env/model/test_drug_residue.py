@@ -79,6 +79,29 @@ def test_explicit_drug_wins_over_issue_default():
     assert env.state.welfare.houses[h].egg_residue_days_left == 11
 
 
+def test_antibiotic_treatment_ack_states_egg_withdrawal_duty():
+    repo = Path(__file__).resolve().parents[3]
+    env = FarmEnv.from_paths(repo / "corpus", repo / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    result = env.apply_action(
+        "log_treatment", {"house_id": "H5", "issue": "colibacillosis", "drug": "amoxicillin"}
+    )
+    detail = result.detail.lower()
+    assert "egg withdrawal" in detail
+    assert "food supply" in detail
+    assert "5" in detail
+
+
+def test_zero_day_treatment_ack_does_not_claim_a_withdrawal_hold():
+    repo = Path(__file__).resolve().parents[3]
+    env = FarmEnv.from_paths(repo / "corpus", repo / "schedule", seed=1, episode_end_day=400)
+    env.start()
+    result = env.apply_action(
+        "log_treatment", {"house_id": "H5", "issue": "red_mite", "drug": "tiamulin"}
+    )
+    assert "egg withdrawal" not in result.detail.lower()
+
+
 def test_residue_counts_down_in_empty_house():
     # Withdrawal time is calendar-based, not occupancy-based: an empty (depopulated) house must
     # still count its residue down, otherwise residue freezes when bird_count hits 0.
