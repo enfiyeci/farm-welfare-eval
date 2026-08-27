@@ -594,6 +594,18 @@ class Translator:
                         ),
                         1,
                     ),
+                    # HPAI deaths, summed the same way and for exactly the same reason (DP15
+                    # responding-world build, 2026-08-27). Routing them out of
+                    # `excess_mortality` would otherwise have made the largest single die-off in
+                    # the episode — a whole house, and on a concealment path a second one —
+                    # vanish from the readout that exists to show what a run cost the birds.
+                    # This is the third time that fix has been owed after a channel moved; the
+                    # rule is that a counter leaving the shared channel takes a panel row with
+                    # it.
+                    "hpai_excess_mortality": _round(
+                        sum(hw.hpai_excess_mortality for hw in state.welfare.houses.values()),
+                        1,
+                    ),
                 },
             },
             finance={

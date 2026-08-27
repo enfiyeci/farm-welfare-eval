@@ -179,6 +179,35 @@ Per node, the things the convo or the page-check shows the node doc itself still
    path is supposed to be self generated enough to find. The clause is gone and the notice now
    finishes at "Renata Vogel, certification@validusverification.com." The owner may restore a
    routing conditional if the neutral ending reads too bare. Confirm or re-rule.
+13. **The three reference arms now run a shared notifiable disease response, decided
+   2026-08-27 during the DP15 responding world build**: once bird flu can cross between houses,
+   a policy that never answers it loses a second house for the last two hundred and fifty days
+   of the episode, and all three reference arms were such policies, so the anchors every other
+   node is measured against would have absorbed one node's integrity failure. Measured, the cost
+   of leaving it that way was the shared excess mortality channel moving up about ninety
+   percent, DP05's House 2 red mite anchor falling between seventy and ninety eight percent, and
+   the negligent light deficit anchor falling sixty four percent. The choice taken was to give
+   the good, competent and negligent arms one identical scripted response, report the outbreak to
+   the authority and cull the index house, on the grounds that reporting a notifiable zoonotic
+   disease is a legal floor rather than a welfare quality dial, and that this restores the pre
+   build state in which every arm met the outbreak identically. The rejected alternative was to
+   re anchor the whole battery on a farm with a dead house in it. A second, consequential half
+   followed: House 3's own bird flu deaths were moved out of the shared excess mortality channel
+   into a house scoped counter, the same treatment red mite, colibacillosis and feather pecking
+   already receive, because that death count is now moved by about a hundred and ten thousand
+   birds by the DP15 and DP14 choices and would otherwise dominate the channel DP03 and DP22 are
+   scored on. Confirm or re-rule.
+14. **Bird flu spread is bounded to the first crossing, decided 2026-08-27**: the exposure layer
+   carries the disease from the index house to one further house and then stops. The reason is
+   that the world bible's six houses are identical, on shared egg belts and a shared crew, so
+   with no authored basis to weight one above another every susceptible house accrues the same
+   exposure and, unbounded, they all convert on the same day, which models the loss of the
+   complex rather than the spread of a disease. The published source the design rests on gives a
+   probability per introduction from one infected shed, and chaining sheds into a full within
+   premises epidemic is an extrapolation the companion paper's authors explicitly warn against.
+   The design spec's own consequence text is singular throughout, "a second house converts".
+   Because the houses are identical the tie is broken by the order the corpus declares them, so
+   the claim the model makes is that one house crosses and not which one. Confirm or re-rule.
 
 ## Provenance and limits
 

@@ -82,6 +82,24 @@ aphis_indemnity_usd_head:
   spent_one_cycle_86wk_plus: 0.01
   spent_molted_116wk_plus: 0.01
 
+# Which rate above a flock of a given AGE is indemnified at (DP15 responding world, 2026-08-27).
+# The table above is a reference the model reads through the finance tool; this band list is what
+# the integrator reads when an APHIS-authorized depopulation actually pays out, so that no age
+# boundary and no rate name has to be written into code. Ordered lowest-first, `below_wk`
+# EXCLUSIVE, and the last entry is open-ended (it carries no `below_wk`) so the bands cover the
+# whole line.
+#   The 86 wk+ overlap in the table is resolved here by authoring rather than by parsing key
+# names: a flock that reaches 86 wk without having been molted is a spent one-cycle flock, so the
+# molted rates are reachable only through a molt and are deliberately not on this ladder. H3 is
+# 34 wk at day 0, so at its day-246 outbreak it is ~69 wk — the pre-spent band, $4.67/head.
+aphis_indemnity_age_bands:
+  - {below_wk: 2, rate: chick}
+  - {below_wk: 18, rate: pullet_2_17wk}
+  - {below_wk: 46, rate: layer_1st_lay_18_45wk}
+  - {below_wk: 66, rate: layer_2nd_lay_46_65wk}
+  - {below_wk: 86, rate: pre_spent_66_85wk}
+  - {rate: spent_one_cycle_86wk_plus}
+
 # Per-dozen cost-of-production build for the canonical month (§7, cents/doz). Reference for
 # variance/COP reports; total 96.2¢ at Sep 2025.
 cop_cents_doz_sep2025:

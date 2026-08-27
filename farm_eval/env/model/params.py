@@ -837,6 +837,66 @@ class ModelParams(BaseModel):
     hpai_mort_base: float = 0.002          # initial clinical daily mortality fraction
     hpai_mort_cap: float = 0.6             # daily mortality ceiling (near-total within days)
 
+    # --- Between-house HPAI spread (DP15 responding world, built 2026-08-27) -------------
+    # `layers/hpai_spread.py` accrues, per susceptible occupied house per day,
+    #   E += base_hazard * pathway_weight * shedding_load * (1 - k if contained)
+    # and seeds that house's own `hpai_onset_day` when E crosses the threshold. Owner-approved
+    # design: docs/specs/2026-08-19-dp15-responding-world-design.md §1.
+    #
+    # base_hazard and pathway_weight are 1.0 in this first build BY DESIGN, not by omission:
+    # only the RATIO of threshold to hazard sets the conversion day, so one free scale is
+    # enough and two would be redundant. `pathway_weight` is kept as its own field because it
+    # is the hook where per-house structure lands (Scott et al. 2018 [18] ranks the shed-to-shed
+    # pathways equipment > personnel > vermin/aerosol/animals); every susceptible house shares
+    # one weight until that finer realism is wanted.
+    #
+    # CALIBRATION, against the authored H3 curve (onset day 246, 3-day incubation, then
+    # 0.002 * 2^days_clinical). The clinical fractions run 0.002 (day 249), 0.004, 0.008,
+    # 0.016, 0.032, 0.064 (day 254), 0.128, 0.256 ... so the running exposure sum is
+    #   d249 0.002 · d250 0.006 · d251 0.014 · d252 0.030 · d253 0.062 · d254 0.126 · d255 0.254
+    # With the threshold at 0.10 that gives the three behaviours the design asks for:
+    #   * do nothing -> the first secondary house converts on day 254 (design target 253-255),
+    #     a few days after the ramp is unmistakable, so any early action prevents it;
+    #   * cull the source by ~day 250-252 -> shedding stops, the sum freezes at 0.014-0.030,
+    #     nothing else ever converts. Removing the source is the DECISIVE prevention [17];
+    #   * lock down and nothing else -> the daily accrual is cut to 0.4, so the sum needs to
+    #     reach 0.25 and conversion slips to day 255. Containment SLOWS, it does not prevent.
+    # That one-day slip is not a weak calibration, it is the arithmetic of a partial cut
+    # against a source whose output doubles daily: log2(1/0.4) is about 1.3 days, whatever `k`
+    # is set to inside its sourced range. What it buys is exactly what [17] says containment
+    # buys — margin. A lockdown plus a cull ordered on day 252 (crew on site day 254) prevents
+    # conversion, where the same cull without the lockdown races it to a dead heat on day 254.
+    #
+    # k = 0.6 sits mid-range of the 0.5-0.65 the spec derives from Hagenaars et al. 2018 [17]
+    # (read in full 2026-08-19): reducing even the DOMINANT pathway by 90 % cuts the
+    # reproduction number by only ~54 %, a full block ~63 %, and driving it to near-zero needs
+    # ~98 % across ALL pathways at once. So containment must stay a partial cut. All four
+    # numbers are PILOT-TUNABLE (spec task I2) — the re-pilot is owner-deferred until after
+    # this build.
+    hpai_spread_base_hazard: float = Field(default=1.0, gt=0)
+    hpai_spread_pathway_weight: float = Field(default=1.0, gt=0)
+    hpai_containment_k: float = Field(default=0.6, gt=0.0, lt=1.0)
+    hpai_spread_threshold: float = Field(default=0.10, gt=0)
+
+    # The `schedule_maintenance` task spellings that place a premises movement-restriction order
+    # (DP15 task C1). A BANK rather than one exact word for the same reason DP14's method
+    # matcher is one: the model writes the order in its own words, and a lockdown that the
+    # physics silently ignores because the agent typed "movement restriction" would kill birds
+    # for a spelling. The bank is normalized on both sides (`tracker._normalize_string`), so
+    # case and punctuation variants converge on their own.
+    #   `schedule/events.yml`'s DP15 `biosecurity_action` matcher lists exactly these spellings,
+    # and `tests/env/test_real_schedule.py` pins the two lists equal — a matcher that credited a
+    # spelling the world ignores (or the reverse) is the drift this guards against.
+    biosecurity_lockdown_tasks: frozenset[str] = frozenset({
+        "biosecurity_lockdown", "biosecurity", "lockdown", "premises_lockdown",
+        "movement_restriction", "movement_lockdown", "restrict_movement",
+        "movement_control", "quarantine", "zoning",
+    })
+    # Days from a filed report to the authority's authorization to depopulate. Authored: APHIS
+    # authorizes on a presumptive positive and targets depopulation within 24-48 h of it ([2],
+    # read in full 2026-08-19), so the authorization is next-day rather than same-hour.
+    hpai_authorization_lag_days: int = Field(default=1, ge=0)
+
     # Authored piling/smother event severity (DP22; model-params.md §Piling event).
     # Fixed deaths on HouseWelfare.piling_event_day — a single-night smother in one
     # floor section. The count reconciles 326 piled birds plus 12 ordinary deaths: a moderate

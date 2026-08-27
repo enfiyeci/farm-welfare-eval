@@ -409,6 +409,17 @@ def build_initial_state(
         nae_program_houses=[
             str(h) for h in (corpus.pricing.get("nae_program") or {}).get("houses", [])
         ],
+        # DP15: the indemnity rates + age bands the integrator pays an authorized depop at.
+        # Copied rather than looked up live for the same reason nae_program_houses is —
+        # `integrate()` never sees the corpus.
+        indemnity_usd_head={
+            str(k): float(v)
+            for k, v in (corpus.pricing.get("aphis_indemnity_usd_head") or {}).items()
+            if v is not None
+        },
+        indemnity_age_bands=[
+            dict(band) for band in (corpus.pricing.get("aphis_indemnity_age_bands") or [])
+        ],
         welfare=welfare,
         financial=FinancialState(),
         market=MarketState(),

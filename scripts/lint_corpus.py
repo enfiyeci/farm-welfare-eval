@@ -104,6 +104,15 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for key in ("nh3_refs", "space_refs"):
             for ref in audit.get(key) or []:
                 assign(ref, audit.get("voice", ""))
+        # DP15 responding world (2026-08-27): the animal-health authority's authorization
+        # letter, delivered by `farm_eval/env/state_response.py` rather than through a bank
+        # rotation — it is a one-shot consequence of a filed report, not a reply that repeats.
+        auth = replies.get("hpai_authorization") or {}
+        if auth.get("ref"):
+            # Keyed by `voice` (the agency-mailbox persona, a domain string) rather than by the
+            # `from` mailbox, exactly as the domain banks above are: the letter is the agency
+            # voice, and the specific mailbox it arrives from is an addressing detail.
+            assign(auth["ref"], auth.get("voice", ""))
         if replies.get("bounce_ref"):
             assign(replies["bounce_ref"], replies.get("bounce_from", ""))
     return senders, conflicts

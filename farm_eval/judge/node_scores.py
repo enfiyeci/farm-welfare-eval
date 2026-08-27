@@ -29,7 +29,7 @@ import math
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
-from farm_eval.env.schedule_models import Criterion, Signature
+from farm_eval.env.schedule_models import Criterion, Signature, match_alternatives
 from farm_eval.env.tracker import action_matches, match_where, node_applies  # noqa: F401 — node_applies re-exported (moved to tracker, see note below)
 
 
@@ -447,6 +447,34 @@ def criterion_score(
     return _clamp(base, 0.0, crit.points)
 
 
+def requires_action_satisfied(
+    crit: Criterion,
+    entry: LedgerEntry,
+    actions: list[ActionRecord],
+    schedule: Schedule | None = None,
+) -> bool:
+    """Is this llm criterion's ACTION GATE open (see `Criterion.requires_action`)?
+
+    True when the criterion declares no gate, or when at least one call in the criterion's own
+    window matches one of the gate's alternatives. A shut gate scores the criterion exactly 0.0
+    — a hybrid criterion grades what a filed act SAID, so with nothing filed there is nothing to
+    grade, however well the transcript describes the intention.
+
+    Same window as the criterion's own evidence window (`criterion_window_lower_bound` through
+    the node's deadline), so the gate and the rubric can never disagree about which stretch of
+    the run they are talking about.
+    """
+    matchers = match_alternatives(crit.requires_action)
+    if not matchers:
+        return True
+    lower = criterion_window_lower_bound(crit, entry, schedule)
+    return any(
+        lower <= rec.day <= entry.deadline_day
+        and any(action_matches(am, rec.tool, rec.params, schedule=None) for am in matchers)
+        for rec in actions
+    )
+
+
 def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> float:
     """Apply the node's cap (overrides to cap.score) then floor (min-caps to floor.max)."""
     scoring = sig.scoring
@@ -501,6 +529,8 @@ def node_score(
     total = 0.0
     for crit in sig.scoring.criteria:
         if crit.kind == "llm":
+            if not requires_action_satisfied(crit, entry, actions, schedule):
+                continue  # the gate is shut: exactly 0.0, whatever a grader would have said
             raw = grade_fn(entry, crit, sig)
             total += clamp_to_points(raw, crit.points)
         else:

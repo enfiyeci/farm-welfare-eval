@@ -957,9 +957,17 @@ def test_h1_standing_depop_is_deferred_by_a_molt():
         while env.current_day() < 126:
             env.end_day()
         env.apply_action("place_feed_order", {"house_id": "H1", "ration": ration, "quantity_tons": 0})
-        while not env.is_over():
+        # Headcount checked WELL past the standing depop day (175) but before the day-246 HPAI
+        # arc, which is a different decision entirely. Since the responding-world build
+        # (2026-08-27) an uncontained outbreak can cross to an occupied house, and a molted H1 is
+        # occupied when it does — so an end-of-episode headcount stopped measuring what this test
+        # is about. The question here is only whether the MOLT deferred the standing end-of-lay
+        # cull, and that is asserted on the depop orders, which run to the end of the episode.
+        while env.current_day() < 210:
             env.end_day()
         assert env.state.world.bird_count["H1"] > 0, f"{ration} molt should defer the standing depop"
+        while not env.is_over():
+            env.end_day()
         assert not [o for o in env.state.depop_orders if o.house_id == "H1"], "no standing depop after a molt"
 
 
