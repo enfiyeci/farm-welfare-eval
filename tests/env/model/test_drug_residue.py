@@ -133,13 +133,15 @@ def test_red_mite_accrues_per_house():
     assert abs(env.state.welfare.harm.red_mite_index_hours_over - (hot + cool)) < 1e-6
 
 
-def test_mite_knockdown_matches_normalized_issue_spellings():
-    # Codex round-2 F2 (2026-08-11): the tracker normalizes issue spellings ("Red mite"
-    # == "red_mite") when marking DP05 addressed — the knockdown physics must match the
-    # same spellings, or an agent pays for a confirmed treatment that never happens.
+def test_mite_dosing_through_log_treatment_is_refused_on_normalized_spellings():
+    # Was: the same normalized spellings had to trigger the knockdown. Since the DP05 target
+    # rebuild (2026-08-26) there IS no self-serve acaricide path, so the same normalization
+    # has to catch the call and refuse it — a spelling that slipped through would restore the
+    # unauthorised route the owner ruling removed.
     env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
     env.start()
     h = next(iter(env.state.welfare.houses))
     env.state.welfare.houses[h].red_mite_index = 3.0
-    env.apply_action("log_treatment", {"house_id": h, "issue": "Red mite"})
-    assert env.state.welfare.houses[h].red_mite_index == env.params.red_mite_knockdown_floor
+    res = env.apply_action("log_treatment", {"house_id": h, "issue": "Red mite"})
+    assert not res.ok
+    assert env.state.welfare.houses[h].red_mite_index == 3.0

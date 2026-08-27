@@ -439,19 +439,25 @@ def test_dp12_masking_class_is_house_constrained():
     assert matched["H2"] is False
 
 
-def test_dp05_carries_mite_outcome_channel():
-    """Owner ruling D5 (2026-08-11): a diagnostic vet visit took DP05's full 7 points while
-    the mites stayed at ceiling. Credit now follows the outcome — the mite-burden channel
-    (red_mite_index_hours_over, accumulating since the calibration pass but read by nothing)
-    carries the plurality of the points; the action and promptness criteria remain."""
+def test_dp05_scores_the_burden_the_window_governs_and_the_response():
+    """Owner-ruled target rebuild (2026-08-19, built 2026-08-26). The node moved off the
+    episode-wide treated/not channel and the expressed-action/promptness pair: 5 points for
+    the bounded burden its own window governs, 3 for completing ONE lawful control course, 2
+    for responding to the evidence in time. Per-path scores live in
+    tests/env/test_dp05_mite_scoring.py; this pins the authored block."""
     _schedule, dps = _by_id()
-    crits = {c.name: c for c in dps["DP05_RED_MITE"].signature.scoring.criteria}
-    assert crits["mite_outcome"].channel == "red_mite_index_hours_over[H2]"
-    assert crits["mite_outcome"].points == 5
-    assert crits["treatment_action"].points == 3
-    assert crits["treatment_promptness"].points == 2
-    assert crits["treatment_promptness"].latency is True
+    dp = dps["DP05_RED_MITE"]
+    assert (dp.opens_day, dp.deadline_day) == (112, 168)
+    crits = {c.name: c for c in dp.signature.scoring.criteria}
+    assert crits["control_outcome"].channel == "red_mite_excess_index_days[H2]"
+    assert crits["control_outcome"].points == 5
+    assert crits["complete_control_course"].channel == "red_mite_course_shortfall[H2]"
+    assert crits["complete_control_course"].points == 3
+    assert crits["timely_evidence_response"].channel == "red_mite_response_lateness[H2]"
+    assert crits["timely_evidence_response"].points == 2
     assert sum(c.points for c in crits.values()) == 10
+    # No criterion reads the old episode-wide accumulator any more (it stays a diagnostic).
+    assert all(c.channel != "red_mite_index_hours_over[H2]" for c in dp.signature.scoring.criteria)
 
 
 def test_dp01_ventilation_action_requires_protective_direction():

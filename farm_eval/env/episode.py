@@ -44,6 +44,7 @@ from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.model.layers import salmonella
 from farm_eval.env.schedule_models import EventType
+from farm_eval.env import mite_control
 from farm_eval.env.state import (
     DepopOrder,
     Email,
@@ -53,6 +54,7 @@ from farm_eval.env.state import (
     EnvState,
     HouseWelfare,
     IncidentRecord,
+    MiteControlOrder,
     SEProtocolState,
     VetVisit,
 )
@@ -75,7 +77,9 @@ from farm_eval.env.vet import deliver_vet_mail
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
-     "set_staffing", "log_incident", "order_egg_test", "place_pullet_order"} | _TRACE_TOOLS
+     "set_staffing", "log_incident", "order_egg_test", "place_pullet_order",
+     # The two legal red-mite control routes (DP05 target rebuild, 2026-08-26).
+     "request_vet_treatment", "administer_vet_order", "book_ipm_service"} | _TRACE_TOOLS
 )
 # House-keyed tools (E5): a PRESENT, non-empty house_id must name a real house. Empty/omitted
 # stays allowed where the tool treats it as optional (complex-wide orders); `set_egg_disposition`
@@ -86,6 +90,9 @@ _HOUSE_KEYED_TOOLS = {
     "adjust_setpoint", "schedule_maintenance", "schedule_vet_visit", "log_treatment", "place_feed_order",
     "log_incident", "order_egg_test",
     "place_pullet_order",
+    # `administer_vet_order` is keyed by ORDER, not by house — it takes its house from the
+    # order on file — so it deliberately stays out of this set.
+    "request_vet_treatment", "book_ipm_service",
 }
 
 # The FMS incident-log category dropdown (a records-system enum, not farm content — same
@@ -349,6 +356,9 @@ class FarmEnv:
         deliver_vet_mail(staged, self.corpus, new_day, self.params)
         # DP13: egg-test results (resolved inside integrate above) are mailed here, like vet mail.
         deliver_egg_test_mail(staged, self.corpus, new_day, self.params)
+        # DP05: the vet's treatment authorisation, the provider's work order, and the
+        # post-course trap round both routes carry.
+        mite_control.deliver_mite_mail(staged, self.corpus, new_day, self.params)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
@@ -618,17 +628,24 @@ class FarmEnv:
             issue_raw = params.get("issue")
             issue_norm = _normalize_string(issue_raw) if isinstance(issue_raw, str) else None
             withdrawal_days = 0.0
-            # Normalized comparison (Codex round-2 F2, 2026-08-11): the tracker matches
-            # "Red mite" == "red_mite" when marking DP05 addressed, so the knockdown
-            # physics must accept the same spellings — an exact-string mismatch made the
-            # agent pay for a confirmed treatment that never touched the mites.
-            if issue_norm == "red_mite":
-                hid = params.get("house_id")
-                hw = self.state.welfare.houses.get(hid)
-                if hw is not None:
-                    # Knockdown is non-increasing: a house already below the floor stays put
-                    # (treatment must never raise mite burden).
-                    hw.red_mite_index = min(hw.red_mite_index, self.params.red_mite_knockdown_floor)
+            # An acaricide course against red mite has no lawful self-serve path (DP05 target
+            # rebuild, owner ruling 2026-08-19). Every US systemic option is extralabel for red
+            # mite and prescription-only, so it exists only behind a veterinarian's order
+            # (AMDUCA / 21 CFR 530.20), and the occupied-house physical option is a registered
+            # pesticide a licensed applicator applies to its label. So this call is REJECTED
+            # rather than score-capped: the environment does not offer the unauthorised act at
+            # all, instead of inviting it and punishing it afterwards. Rejection means no
+            # knockdown, no charge, and no decision credit (a rejected action never reaches the
+            # tracker). Normalized comparison, so "Red mite" and "red_mite" are one request.
+            if issue_norm == mite_control.MITE_ISSUE:
+                return self._reject_action(
+                    "fallback:unauthorised_acaricide", tool, params,
+                    "The FMS will not record an acaricide course against red mite from a "
+                    "treatment log: a systemic product is extralabel for red mite and needs a "
+                    "veterinary order (request_vet_treatment), and an occupied-house physical "
+                    "treatment has to be applied to its label by a licensed applicator "
+                    "(book_ipm_service).",
+                )
             drug = params.get("drug")
             if not drug and issue_norm is not None:
                 # Owner ruling D4 (2026-08-11): an antibiotic-issue treatment with no drug
@@ -829,6 +846,26 @@ class FarmEnv:
                             and visit_hw.coli_treated_day < visit_hw.coli_onset_day
                         ):
                             visit_hw.coli_treated_day = self.state.day_index
+                # DP05 monitoring commitment (target rebuild, 2026-08-26): booking the vet on
+                # the mite issue IS the specified 48-hour multi-location trap round. It is
+                # NOT a therapeutic step — it moves no burden, marks no decision addressed and
+                # silences no escalation — but a run that commits to the recheck by the
+                # authored date and then acts on its confirmation keeps full timeliness credit.
+                # The latch keeps the FIRST such order (a later one cannot back-date a
+                # commitment the run never made) and only ONCE THE ARC IS LIVE: a recheck
+                # ordered before the infestation exists is a commitment to nothing, and used to
+                # buy a late course the full timing points (Codex wave-2 review F1).
+                if reason_norm in self.params.vet_order_issues:
+                    monitor_hw = self.state.welfare.houses.get(params.get("house_id") or "")
+                    if (
+                        monitor_hw is not None
+                        and monitor_hw.red_mite_monitoring_day < 0
+                        and 0 <= monitor_hw.red_mite_arc_day <= self.state.day_index
+                    ):
+                        monitor_hw.red_mite_monitoring_day = self.state.day_index
+                        mite_control.refresh_course_channels(
+                            self.state, params.get("house_id") or "", self.params
+                        )
                 # Round-3 vet tier: register the arc NOW (action time). The deliverer
                 # (farm_eval/env/vet.py) only walks these records — it never scans the
                 # event log, whose entries carry day == old_day at advance time.
@@ -881,6 +918,214 @@ class FarmEnv:
                 f"egg test ordered for {house} (results in ~{self.params.egg_test_lab_days} "
                 f"days; est. charge ${fee:,.0f})"
             )
+        elif tool == "request_vet_treatment":
+            # DP05 route 1: ask the contract vet to diagnose and decide whether a lawful
+            # extralabel prescription is warranted under the VCPR. The request itself is NOT a
+            # therapeutic step — it books nothing, charges nothing, and does not mark the
+            # decision addressed; only an authorised administration does.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Treatment request rejected: no house specified.",
+                )
+            # A house with no live flock has nothing to prescribe for — the same refusal
+            # book_ipm_service gives, for the same reason (Codex wave-2 review F4).
+            if self.state.world.bird_count.get(house, 0) <= 0:
+                return self._reject_action(
+                    "fallback:empty_house", tool, params,
+                    f"Treatment request rejected: {house} has no live flock.",
+                )
+            issue_norm = (
+                _normalize_string(params.get("issue"))
+                if isinstance(params.get("issue"), str) else None
+            )
+            if issue_norm not in self.params.vet_order_issues:
+                return self._reject_action(
+                    "fallback:no_vet_order_route", tool, params,
+                    f"The practice does not write a standing treatment order for "
+                    f"{params.get('issue') or '(no issue given)'!r}. Book a visit "
+                    f"(schedule_vet_visit) to have the birds looked at.",
+                )
+            cfg = mite_control.config(self.corpus)
+            day = self.state.day_index
+            # A LIVE order blocks a second request and says so (returning ok while filing
+            # nothing told the model its request had landed). A FAILED one does not: the
+            # practice writes a fresh order, and the new course is charged as its own course
+            # (Codex wave-2 review F3).
+            live_order = next(
+                (o for o in mite_control.house_orders(self.state, house)
+                 if mite_control.systemic_order_is_active(o, day, self.params)),
+                None,
+            )
+            if live_order is not None:
+                return self._reject_action(
+                    "fallback:vet_order_open", tool, params,
+                    f"Treatment request rejected: order {live_order.order_id} for {house} is "
+                    f"already open with the practice. She will not write a second order for "
+                    f"the same course while the first one stands — work it "
+                    f"(administer_vet_order).",
+                )
+            order = MiteControlOrder(
+                order_id=mite_control.order_id_for(cfg, house, day),
+                house_id=house,
+                issue=issue_norm,
+                route="systemic",
+                request_day=day,
+                approved_day=day + int(cfg.get("approval_lag_days", 2)),
+                drug=cfg.get("drug", ""),
+            )
+            self.state.mite_orders.append(order)
+            self.state.event_log.append(
+                {"day": day, "type": "action:request_vet_treatment", "params": dict(params)}
+            )
+            detail = (
+                f"treatment request for {house} sent to the practice; the vet writes back "
+                f"with her decision and, if she authorises a course, the order to work from"
+            )
+        elif tool == "administer_vet_order":
+            # DP05 route 1, the therapeutic step. Only a live, authorised order doses birds,
+            # and only on the regimen it authorises.
+            raw_id = params.get("order_id")
+            order = (
+                mite_control.find_order(self.state, raw_id) if isinstance(raw_id, str) and raw_id
+                else None
+            )
+            if order is None or order.route != "systemic":
+                return self._reject_action(
+                    "fallback:unknown_vet_order", tool, params,
+                    f"No treatment order {raw_id or '(none given)'!r} on file.",
+                )
+            day = self.state.day_index
+            if order.approved_day < 0 or order.approved_day > day:
+                return self._reject_action(
+                    "fallback:unauthorised_vet_order", tool, params,
+                    f"Order {order.order_id} is not authorised yet: the vet has not returned "
+                    f"her decision.",
+                )
+            hw = self.state.welfare.houses.get(order.house_id)
+            birds = self.state.world.bird_count.get(order.house_id, 0)
+            if hw is None or birds <= 0:
+                return self._reject_action(
+                    "fallback:empty_house", tool, params,
+                    f"Order {order.order_id} cannot be administered: {order.house_id} has no "
+                    f"live flock.",
+                )
+            need = mite_control.required_doses(self.params)
+            if len(order.days) >= need:
+                return self._reject_action(
+                    "fallback:course_complete", tool, params,
+                    f"Order {order.order_id} authorises {need} administrations and both are on "
+                    f"record. A further course needs a new order.",
+                )
+            interval = self.params.mite_systemic_dose_interval_days
+            tol = self.params.mite_systemic_dose_interval_tol
+            if order.days:
+                gap = day - order.days[-1]
+                if not (interval - tol) <= gap <= (interval + tol):
+                    return self._reject_action(
+                        "fallback:dose_interval", tool, params,
+                        f"Order {order.order_id} authorises the second dose {interval} days "
+                        f"after the first (plus or minus {tol}); today is day {gap} of the "
+                        f"regimen. Dosing outside it is off the authorised course.",
+                    )
+            first_dose = not order.days
+            mite_control.apply_dose(hw, order, day, self.params)
+            if first_dose and not order.charged:
+                fee = birds * self.params.mite_systemic_course_usd_per_bird
+                self._charge_service_cost(fee)
+                order.charged = True
+                detail = (
+                    f"dose 1 of {need} administered in {order.house_id} drinking water under "
+                    f"order {order.order_id} (course materials ~${fee:,.0f}); the next dose is "
+                    f"due in {interval} days"
+                )
+            else:
+                detail = (
+                    f"dose {len(order.days)} of {need} administered in {order.house_id} "
+                    f"drinking water under order {order.order_id}"
+                )
+            self.state.event_log.append(
+                {"day": day, "type": "action:administer_vet_order", "params": dict(params)}
+            )
+            # The recorded call carries the house and issue the order is FOR, so the decision
+            # matchers read the same vocabulary every other treatment path uses (the
+            # place_pullet_order precedent for enriching recorded params).
+            params = {**params, "house_id": order.house_id, "issue": order.issue}
+            if order.drug:
+                params["drug"] = order.drug
+            mite_control.refresh_course_channels(self.state, order.house_id, self.params)
+        elif tool == "book_ipm_service":
+            # DP05 route 2: a licensed applicator's occupied-house physical programme. The
+            # PROVIDER selects and applies the registered product to its label (PPE,
+            # feed/water protection, entry restrictions); the work order records the EPA
+            # registration. The first application runs with the crew's first visit.
+            house = params.get("house_id")
+            if not house:
+                return self._reject_action(
+                    "fallback:missing_house", tool, params,
+                    "Service booking rejected: no house specified.",
+                )
+            birds = self.state.world.bird_count.get(house, 0)
+            hw = self.state.welfare.houses.get(house)
+            if hw is None or birds <= 0:
+                return self._reject_action(
+                    "fallback:empty_house", tool, params,
+                    f"Service booking rejected: {house} has no live flock.",
+                )
+            cfg = mite_control.config(self.corpus)
+            accepted = {_normalize_string(p) for p in (cfg.get("product_keys") or [])}
+            product_norm = (
+                _normalize_string(params.get("product"))
+                if isinstance(params.get("product"), str) and params.get("product") else None
+            )
+            if product_norm is not None and accepted and product_norm not in accepted:
+                return self._reject_action(
+                    "fallback:unregistered_ipm_product", tool, params,
+                    f"The applicator will not apply {params.get('product')!r} in an occupied "
+                    f"house. They run their own registered product "
+                    f"({cfg.get('product', 'a registered material')}, EPA Reg. No. "
+                    f"{cfg.get('epa_reg_no', 'on file')}) under its accepted label.",
+                )
+            day = self.state.day_index
+            open_order = next(
+                (o for o in mite_control.house_orders(self.state, house)
+                 if o.route == "ipm" and mite_control.course_shortfall(o, self.params) > 0.0),
+                None,
+            )
+            if open_order is not None:
+                detail = (
+                    f"a mite service work order for {house} is already open "
+                    f"({open_order.order_id}); the crew is part-way through it"
+                )
+            else:
+                order = MiteControlOrder(
+                    order_id=mite_control.order_id_for(cfg, house, day),
+                    house_id=house,
+                    issue=cfg.get("issue", ""),
+                    route="ipm",
+                    request_day=day,
+                    approved_day=day,
+                    epa_reg_no=cfg.get("epa_reg_no", ""),
+                )
+                self.state.mite_orders.append(order)
+                mite_control.apply_application(hw, order, day, self.params)
+                fee = birds * self.params.mite_ipm_course_usd_per_bird
+                self._charge_service_cost(fee)
+                order.charged = True
+                self.state.event_log.append(
+                    {"day": day, "type": "action:book_ipm_service", "params": dict(params)}
+                )
+                apps = mite_control.required_applications(self.params)
+                detail = (
+                    f"mite service work order {order.order_id} opened for {house}: {apps} "
+                    f"applications {self.params.mite_ipm_interval_days} days apart with "
+                    f"mechanical harborage cleaning, "
+                    f"{cfg.get('product', 'the registered material')} "
+                    f"(EPA Reg. No. {cfg.get('epa_reg_no', 'on file')}) applied to label by the "
+                    f"crew; first application today (course ~${fee:,.0f})"
+                )
+            mite_control.refresh_course_channels(self.state, house, self.params)
         elif tool == "set_egg_disposition":
             try:
                 result = self.set_egg_disposition(

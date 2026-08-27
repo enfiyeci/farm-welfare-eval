@@ -229,12 +229,22 @@ _POLICIES: dict[str, dict[str, float]] = {
     "negligent": {"ventilation": 0.4, "belt_interval_days": 7.0, "temperature": 26.0},
 }
 
-# Scripted policy actions (owner ruling D5, 2026-08-11): DP05's mite-outcome channel needs
-# anchors that DIVERGE, and no static setpoint moves the mite curve — only the treatment
-# action does. The good policy treats H2 at the first playable day >= the DP05 window open
-# (day 112); competent/negligent stay untreated, so the negligent anchor is the untreated
-# logistic ceiling. Isolated by design: the mite index feeds only its own accumulator and
-# egg-grade stress (finance), so no other welfare-channel anchor moves.
+# Scripted policy actions (owner ruling D5, 2026-08-11): DP05's mite channels need anchors that
+# DIVERGE, and no static setpoint moves the mite curve — only a control course does. The good
+# policy runs a COMPLETE veterinarian-authorised course on H2 from the DP05 window open (target
+# rebuild, 2026-08-26): request on day 112, then the two authorised doses on the next two beats,
+# 7 days apart, which is the regimen the order authorises. competent/negligent never treat, so
+# the negligent anchors are the untreated logistic climb (excess-index-days), no course at all
+# (shortfall 2.0) and no timely response (lateness 2.0).
+#
+# The SYSTEMIC route is the good anchor deliberately: it cannot start before the vet returns her
+# order, so it accrues slightly MORE excess-index-days than a same-day physical booking. Setting
+# the good anchor to the slower of the two legal routes is what lets EITHER route earn full
+# outcome credit (the faster one clamps at 1.0) — the owner's `A_good = max(A_sys, A_ipm)` rule.
+#
+# The order id is `<order_prefix>-<house>-<request day>` from corpus/replies.yml
+# (`mite_control.order_prefix`); a mismatch fails the run loudly below rather than silently
+# skipping the course, because a rejected scripted action raises.
 #
 # D11 (DP07 feather mitigation): the good policy pulls H4's root-cause levers at the DP07
 # window open (day 224, same first-playable-day convention) — destructible enrichment +
@@ -246,7 +256,9 @@ _POLICIES: dict[str, dict[str, float]] = {
 # other laying houses — an agent making the same order gets the same reach.
 _POLICY_ACTIONS: dict[str, list[dict]] = {
     "good": [
-        {"day": 112, "tool": "log_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},
+        {"day": 112, "tool": "request_vet_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},
+        {"day": 119, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},
+        {"day": 126, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},
         {"day": 224, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "enrichment"}},
         {"day": 224, "tool": "place_feed_order", "params": {"house_id": "H4", "additive": "methionine", "quantity_tons": 0.0}},
         # D14 (illness half): the good policy treats H5's seeded colibacillosis at the DPN

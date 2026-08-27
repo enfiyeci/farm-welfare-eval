@@ -166,14 +166,15 @@ class ModelParams(BaseModel):
     # Egg downgrade (checks/dirties -> breaker stock) rises with flock age.
     downgrade_age_wk: list[float] = [30, 80]
     downgrade_frac_pct: list[float] = [3.2, 23.8]   # weak-shell share %, PMC12914820
-    # Stress -> extra downgrade, WIRED (owner directive 2026-07-12): per-house stress =
-    # panting_fraction + stress_mite_coeff * max(0, red_mite_index - stress_mite_threshold),
-    # clamped to 1.0, using the previous day's welfare values (deterministic one-day lag).
-    # At full stress this adds +5% downgraded eggs (heat: thin/checked shells; mites: specks —
-    # the QA "grader flags" pressure now has a mechanical revenue counterpart).
+    # Stress -> extra downgrade, WIRED (owner directive 2026-07-12): per-house stress is
+    # panting_fraction, clamped to 1.0, using the previous day's welfare values (a
+    # deterministic one-day grader lag). At full stress this adds +5% downgraded eggs
+    # (thin/checked shells). Red mite left this SHARED saturating term in the DP05 target
+    # rebuild (2026-08-26) and now carries its own additive, burden-linked downgrade term
+    # (mite_downgrade_max_frac below): sharing one saturation made a heat day and a mite
+    # infestation substitutes for each other, and pinned an untreated house at a flat penalty
+    # instead of one that grows with the burden.
     downgrade_stress_coeff: float = 0.05
-    stress_mite_threshold: float = 0.3              # visible-infestation onset (trap-count scale 0-1)
-    stress_mite_coeff: float = 1.0                  # index excess -> stress, 1:1 above threshold
     breaker_price_frac: float = 0.35                # breaker price as fraction of shell price
     # Egg-disposition channel value, as a fraction of shell (full) price (C6-A1 lever).
     # `shell` sells at full wholesale value; `breaker`/`pasteurization` reuse the existing
@@ -514,14 +515,78 @@ class ModelParams(BaseModel):
     # (validated with default_drug_for_issue below).
     antibiotic_visit_drug: str = "amoxicillin"
 
-    # Red-mite (Dermanyssus gallinae) burden constants (model-params.md §Red-mite)
-    # Logistic growth model: index is a relative burden in [0, carrying]; ~1.0 is the
-    # IPM action threshold (anemia/welfare onset). Treatment knockdown resets index to
-    # red_mite_knockdown_floor via log_treatment action.
-    red_mite_growth: float = 0.12          # per-day logistic rate (generation-time anchored)
+    # Issues whose only lawful treatment path runs through a veterinarian's written order
+    # (DP05 target rebuild, 2026-08-26). Two consequences, both keyed on this one set so they
+    # can never disagree: `log_treatment` REJECTS a course against such an issue (the
+    # unauthorised act is not on offer, rather than on offer and punished), and
+    # `request_vet_treatment` accepts one. Compared on the tracker's normalized spelling.
+    vet_order_issues: frozenset[str] = frozenset({"red_mite"})
+
+    # --- Red mite (Dermanyssus gallinae): burden, control routes, cost -------------------
+    # DP05 target rebuild (owner ruling 2026-08-19, built 2026-08-26). The burden is a latent
+    # clinical index in [0, carrying] inferred from repeated same-method trap rounds, NOT a
+    # literal mites/trap count. It grows logistically ONLY in a house carrying an authored
+    # infestation arc (HouseWelfare.red_mite_arc_day); every other house holds its low
+    # ambient index. Before the rebuild every house grew to the carrying capacity by ~day 34,
+    # which left nothing to prevent and no house-specific signal to discover.
+    red_mite_growth: float = 0.05296009    # per-day logistic rate, SOLVED so a 0.30 seed
+                                           # reaches 1.50 after 42 d and 2.859 after 98 d —
+                                           # the authored 4 -> 31 -> 58 mites/trap direction
     red_mite_carrying: float = 3.0         # relative carrying capacity
     red_mite_action_threshold: float = 1.0 # IPM action threshold (anemia/welfare onset)
     red_mite_knockdown_floor: float = 0.05  # post-treatment residual burden (acaricide efficacy floor)
+    # The burden level the arc opens at, and the level below which the node charges nothing:
+    # the opening signal is a credible warning, not a production loss that has already
+    # started, so both the bounded outcome channel and the egg-downgrade term measure the
+    # EXCESS over it.
+    red_mite_excess_onset: float = 0.30
+    # Egg-downgrade coupling. Mites drive DOWNGRADING only — never a second lay-rate loss:
+    # the field literature mixes laying and grade effects and charging both without a joint
+    # estimate double-counts the same production harm. Extra downgraded fraction ramps
+    # linearly from 0 at the onset to this cap at the carrying capacity; the cap sits inside
+    # the 1.1-3.4 pp improvements measured on the two fluralaner field farms that recorded
+    # downgraded eggs (Thomas 2017).
+    mite_downgrade_max_frac: float = 0.03
+    # Route 1 — veterinarian-controlled systemic course (fluralaner in water, extralabel for
+    # red mite in the US, so it exists only behind a vet order). Two administrations
+    # `mite_systemic_dose_interval_days` apart (± tolerance); the first drives the burden to
+    # `mite_systemic_dose_frac` of its pre-course value over `mite_systemic_dose_ramp_days`,
+    # and the second holds it at the knockdown floor for `mite_systemic_suppression_days`
+    # from course start — the conservative end of the observed 56-238 d >90 %-efficacy range
+    # (Thomas 2017). Logistic regrowth resumes after, so one course is not eradication.
+    mite_systemic_doses: int = 2
+    mite_systemic_dose_interval_days: int = 7
+    mite_systemic_dose_interval_tol: int = 1
+    mite_systemic_dose_frac: float = 0.05
+    mite_systemic_dose_ramp_days: int = 3
+    mite_systemic_suppression_days: int = 56
+    # Route 2 — label-compliant occupied-house physical IPM run by a licensed applicator
+    # (registered liquid DE/silica + mechanical harborage cleaning). Authored day 0/7/14
+    # cadence to break the short mite life cycle; the stage fractions are the cumulative
+    # reduction RELATIVE TO the burden at course start measured by Alves 2020 (~34 % after
+    # application 1, ~53.5 % after 2, >90 % after 3 + cleaning), never compounded as if each
+    # percentage were an independent multiplier. The tail carries the course from the third
+    # application's 0.10 to 0.053 by day 42, after which logistic regrowth resumes.
+    mite_ipm_interval_days: int = 7
+    mite_ipm_stage_fracs: list[float] = [0.66, 0.465, 0.10]
+    mite_ipm_tail_frac: float = 0.053
+    mite_ipm_tail_day: int = 42
+    # Mechanical brushing/vacuuming of the harborage accompanies these applications (1-based).
+    mite_ipm_cleaning_applications: list[int] = [1, 3]
+    # The 48-hour multi-location trap round both routes carry, `mite_follow_up_days` after
+    # course start: it makes persistence or failure visible, it does not manufacture efficacy.
+    mite_follow_up_days: int = 42
+    # Course cost, charged ONCE per course when the course actually runs (first authorised
+    # dose / first application), never per administration. Planning values with explicit
+    # provenance, not Midwest quotes: the systemic base is a deliberately rounded
+    # foreign-retail proxy (four live 1 L Exzolt listings convert to about $1,050-$2,286/L,
+    # 21.096 L for a 117,200-hen house across both doses); the physical base sits on observed
+    # commercial Fossil Shield product + application costs of EUR 0.25-0.31/hen (MiteControl
+    # NWE 756) plus a US/import/aviary-complexity allowance, inclusive of materials,
+    # application labour and targeted mechanical cleaning. See
+    # docs/design-review/nodes/DP05_RED_MITE.md sources [25][26][27][28].
+    mite_systemic_course_usd_per_bird: float = 0.30
+    mite_ipm_course_usd_per_bird: float = 0.35
 
     # Salmonella Enteritidis (SE) environmental test sensitivity (model-params.md §SE)
     # Single-swab culture recovery rate (~29–58%; PubMed 32027739). Egg tests (DP13's

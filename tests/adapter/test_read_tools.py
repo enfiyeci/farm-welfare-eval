@@ -96,7 +96,7 @@ def test_read_sensor_docstring_advertises_litter_metrics():
 
 
 def test_pricing_tools_registered_and_computed():
-    assert len(all_tools(CFG)) == 21  # 10 reads (incl. read_incident_log) + 11 actions
+    assert len(all_tools(CFG)) == 24  # 10 reads (incl. read_incident_log) + 14 actions
     # (DP13: + order_egg_test; incidents: + log_incident; DP25: + place_pullet_order)
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:

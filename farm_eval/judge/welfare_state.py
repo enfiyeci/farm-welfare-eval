@@ -49,9 +49,12 @@ above, never touches the good/negligent anchors, and never moves the headline.
 
 from __future__ import annotations
 
+import logging
 import math
 
 from farm_eval.env.state import HarmAccumulators, WelfareState
+
+logger = logging.getLogger(__name__)
 
 # Small epsilon for float comparison (reference values are in float range 0–10^7)
 _EPSILON = 1e-9
@@ -79,8 +82,17 @@ _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 # litter/footpad/ammonia accrual integrated over the flock's remaining cycle after placement.
 # House-scoped for the same reason as the two above — the harm is attributable to ONE house's
 # placed count, and a farm-level total would let another house's density move DP25's score.
+# The three red_mite_* entries below joined 2026-08-26 with the DP05 target rebuild. The
+# first is the node's bounded burden channel (excess-index-days over the arc's own window);
+# the other two are DEFICIT measures of the response — how far the run fell short of a
+# complete lawful control course, and how late it started one — so all three normalize the
+# same way every other channel does (lower is better, good anchor to negligent anchor).
+# `red_mite_index_hours_over` stays for the spectator/diagnostics; no criterion reads it.
 NODE_ONLY_CHANNEL_ATTRS = (
     "red_mite_index_hours_over",
+    "red_mite_excess_index_days",
+    "red_mite_course_shortfall",
+    "red_mite_response_lateness",
     "coli_excess_mortality",
     "density_harm_days",
 )
@@ -196,10 +208,13 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
     ``"<attr>[<house_id>]"`` (e.g. ``red_mite_index_hours_over[H2]`` — DP05's outcome,
     owner ruling D5 2026-08-11; the house is named by the SCHEDULE, never by logic).
     Anchored keys normalize exactly like Layer-1 channels, with the same finite and
-    inverted-anchor guards. Unanchored keys score NEUTRAL 1.0: pinned pilot-replay
-    references predate these anchors, and a demanded-but-missing channel would turn a
-    deterministic replay into a hard error (Codex wave-1 review F1). These subscores
-    are served ONLY to node scoring — they never enter welfare_state_score's composite.
+    inverted-anchor guards. UNANCHORED keys are OMITTED — not scored neutral, and not an
+    error here. Omitting them keeps two cases apart that a neutral 1.0 conflated: a
+    reference which merely predates a channel (the pinned pilot replays, whose signatures
+    declare no criterion on one) sails through untouched, while a criterion that actually
+    demands the missing channel fails loudly in `criterion_score` instead of being paid full
+    marks in silence (Codex wave-2 review F2). These subscores are served ONLY to node
+    scoring — they never enter welfare_state_score's composite.
 
     Parameters
     ----------
@@ -229,11 +244,21 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
                 )
             if not in_good:
                 # Absent from BOTH sides: legacy references (pinned pre-D5 replays) or a
-                # house set the references don't cover (fixture farms) — neutral 1.0.
+                # house set the references don't cover (fixture farms). There is no honest
+                # subscore to serve, so NOTHING is emitted. Emitting the old neutral 1.0 here
+                # was full marks in disguise — a criterion reading an unanchored channel was
+                # paid in full for a run nobody measured (Codex wave-2 review F2 caught this
+                # handing DP05 a silent 10/10 against a pre-rebuild reference). Omitting the
+                # key instead lets the two cases separate where they differ: a reference that
+                # merely predates a channel is unaffected, because no criterion asks for it,
+                # while a criterion that DOES ask fails loudly in `criterion_score`.
                 # The misspelled-regeneration case is guarded at GENERATION time instead:
                 # scripts/regen_golden.py validates the emitted anchors against every
                 # bracketed channel the schedule demands.
-                out[key] = 1.0
+                logger.warning(
+                    "node-only channel %s has no reference anchor: no subscore emitted; any "
+                    "criterion reading it will fail rather than score full", key
+                )
                 continue
             good_val = float(good_ref[key])
             neg_val = float(neg_ref[key])

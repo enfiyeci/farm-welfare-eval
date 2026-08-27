@@ -30,7 +30,12 @@ REAL_CHANNELS = {
     "heat_stress_hours",
     "excess_mortality",
     "footpad_out_of_band_hours",
-    "red_mite_index_hours_over[H2]",   # house-scoped node-only channel (D5, 2026-08-11)
+    # DP05's three rebuilt house-scoped channels (target rebuild, 2026-08-26): the bounded
+    # burden the window governs, plus the two response deficits (course completeness,
+    # timeliness). `red_mite_index_hours_over` stays a diagnostic and no criterion reads it.
+    "red_mite_excess_index_days[H2]",
+    "red_mite_course_shortfall[H2]",
+    "red_mite_response_lateness[H2]",
     "coli_excess_mortality[H5]",       # house-scoped node-only channel (F4 ruling, 2026-08-12)
     "density_harm_days[H6]",           # house-scoped node-only channel (DP25 #165/#169, 2026-08-20)
 }

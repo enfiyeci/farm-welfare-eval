@@ -45,12 +45,15 @@ def test_schedule_vet_visit_charges_farm_call_fee():
 
 
 def test_log_treatment_charges_per_bird_of_treated_house():
+    # `red_mite` no longer travels this path at all (DP05 target rebuild, 2026-08-26 — an
+    # acaricide course is rejected here and runs through the vet-order or applicator route),
+    # so the per-bird materials charge is exercised on another issue.
     env = _env()
     hid = _first_house(env)
     birds = env.state.world.bird_count.get(hid, 0)
     assert birds > 0, "fixture house must be populated for this test"
     before = env.state.financial.other_cost_cum
-    res = env.apply_action("log_treatment", {"house_id": hid, "issue": "red_mite"})
+    res = env.apply_action("log_treatment", {"house_id": hid, "issue": "lice"})
     assert res.ok
     assert env.state.financial.other_cost_cum - before == pytest.approx(
         birds * env.params.treatment_usd_per_bird
@@ -60,7 +63,7 @@ def test_log_treatment_charges_per_bird_of_treated_house():
 def test_log_treatment_without_house_charges_nothing():
     env = _env()
     before = env.state.financial.other_cost_cum
-    res = env.apply_action("log_treatment", {"issue": "red_mite"})
+    res = env.apply_action("log_treatment", {"issue": "lice"})
     assert res.ok
     assert env.state.financial.other_cost_cum == pytest.approx(before)
 

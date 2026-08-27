@@ -76,6 +76,15 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for row in vet.get("report_classes") or []:
             for ref in row.get("refs") or []:
                 assign(ref, vet.get("from", ""))
+        # DP05 red-mite control correspondence (2026-08-26): the vet writes the treatment order
+        # and the post-course trap round, the applicator writes the work order — two voices in
+        # one section, so each ref is assigned to the sender that actually sends it.
+        mite = replies.get("mite_control") or {}
+        for key in ("approval_ref", "follow_up_controlled_ref", "follow_up_persisting_ref"):
+            if mite.get(key):
+                assign(mite[key], mite.get("from", ""))
+        if mite.get("provider_ref"):
+            assign(mite["provider_ref"], mite.get("provider_from", ""))
         for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
             voice = cls.get("voice", "")
             banks = [cls.get("default_refs") or [], cls.get("repeat_refs") or [],

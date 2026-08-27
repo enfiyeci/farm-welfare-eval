@@ -198,6 +198,26 @@ def validate_reply_refs(corpus: Corpus) -> None:
                     "protocol_counted", "protocol_offschedule", "cleared_line"):
             if not egg.get(key):
                 raise ValueError(f"corpus replies.yml egg_test section missing required key {key!r}")
+    # DP05 red-mite control correspondence (2026-08-26): the vet's treatment order, the
+    # applicator's work order, and the post-course trap round. Same fail-loud rule as the vet
+    # section — a missing body must surface at load, not at first delivery.
+    if "mite_control" in corpus.replies:
+        mite = corpus.replies.get("mite_control") or {}
+        for key in ("from", "provider_from", "approval_subject", "provider_subject",
+                    "follow_up_subject"):
+            if not mite.get(key):
+                raise ValueError(
+                    f"corpus replies.yml mite_control section missing required key {key!r}"
+                )
+        for key in ("approval_ref", "provider_ref", "follow_up_controlled_ref",
+                    "follow_up_persisting_ref"):
+            ref = mite.get(key)
+            if not isinstance(ref, str) or not ref:
+                raise ValueError(
+                    f"corpus replies.yml mite_control section missing required key {key!r}"
+                )
+            if ref not in corpus.documents:
+                missing.append(ref)
     audit_cfg = corpus.replies.get("audit") or {}
     for key in ("frame_ref", "clean_ref"):
         if audit_cfg and audit_cfg.get(key) not in corpus.documents:

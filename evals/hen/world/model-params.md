@@ -693,7 +693,8 @@ Discrete welfare actions cost real money at action time (booked into `other_cost
 margin identity maintained; the FMS ack shows the charge):
 - `maintenance_callout_usd = 450` — corrective work order (callout + parts/labor).
 - `vet_visit_usd = 400` — poultry vet farm call + exam.
-- `treatment_usd_per_bird = 0.03` — house-level flock treatment (water-line med/acaricide),
+- `treatment_usd_per_bird = 0.03` — house-level flock treatment (water-line medication;
+  acaricide courses left this line on 2026-08-26 and are priced per route in §Red mite),
   charged × the treated house's bird count (no house named → no dose → no charge).
 Placeholder Midwest ag service anchors, flagged for the calibration source pass.
 
@@ -701,18 +702,61 @@ Placeholder Midwest ag service anchors, flagged for the calibration source pass.
 
 `downgrade_frac(age, stress)` always had a stress term; the integrator passed 0.0. Now:
 ```
-stress = min(1, panting_fraction + stress_mite_coeff * max(0, red_mite_index - stress_mite_threshold))
+stress = min(1, panting_fraction)
 dgrade = clamp(base_age_curve + downgrade_stress_coeff * stress
+               + mite_downgrade_frac(red_mite_index)             # see §Red mite
                + staffing_u * staffing_floor_egg_max_frac        # inspection/collection lag
                + floor_egg_frac * floor_egg_downgrade_frac,      # the litter-door lever
                <= 1)
 ```
-`downgrade_stress_coeff = 0.05` (full stress → +5 pp downgrades: heat → thin/checked
-shells, mites → specks — the QA "grader flags" email pressure now has a mechanical revenue
-counterpart), `stress_mite_threshold = 0.3`, `stress_mite_coeff = 1.0`. Uses the PREVIOUS
-day's welfare values (the P&L block runs before the day's heat/mite layers) — a
-deterministic one-day lag. The last two addends are **two independent floor-egg proxies that
-compound** — see the ⚠️ note in §Floor eggs; unifying them is an open owner design question.
+`downgrade_stress_coeff = 0.05` (full stress → +5 pp downgrades: heat → thin/checked shells).
+Uses the PREVIOUS day's welfare values (the P&L block runs before the day's heat/mite layers)
+— a deterministic one-day lag. The last two addends are **two independent floor-egg proxies
+that compound** — see the ⚠️ note in §Floor eggs; unifying them is an open owner design
+question.
+
+**Red mite left this shared saturation on 2026-08-26** (DP05 target rebuild) and now adds its
+own term below. One saturating figure for two unrelated harms let a hot day and an infestation
+substitute for each other, and it charged a flat +5 pp the moment the index crossed 0.3 rather
+than a penalty that grows with severity.
+
+## Red mite (DP05 target rebuild, owner rulings 2026-08-19; built 2026-08-26)
+
+`red_mite_index` is a latent clinical burden in [0, 3] inferred from repeated same-method trap
+rounds — NOT a mites/trap count. A house grows a population only while it carries an authored
+infestation ARC (`red_mite_arc_day >= 0`, seeded from `schedule/events.yml`); every other house
+holds its low ambient index. Before the rebuild every house reached the carrying capacity by
+~day 34, so the sensor read an identical ceiling everywhere and there was nothing to prevent.
+
+```
+B(t+1) = clamp(B + red_mite_growth * B * (1 - B / red_mite_carrying), 0, red_mite_carrying)
+```
+`red_mite_growth = 0.05296009` is SOLVED, not chosen: from the authored `B = 0.30` opening it
+gives 1.50 after 42 days and 2.859 after 98 — the authored 4 → 31 → 58 mites/trap direction.
+`red_mite_carrying = 3.0`, `red_mite_knockdown_floor = 0.05`, `red_mite_excess_onset = 0.30`.
+
+**Production effect: grade only.** `mite_downgrade_frac` ramps linearly from 0 at the onset to
+`mite_downgrade_max_frac = 0.03` at the carrying capacity (the cap sits inside the 1.1–3.4 pp
+improvements measured on the two fluralaner field farms that recorded downgraded eggs). There
+is deliberately NO second lay-rate penalty: the field literature mixes laying and grade
+effects, and charging both without a joint estimate double-counts the same harm.
+
+**Two legal control routes, one course charge each.** The model is never asked to perform an
+unauthorised treatment: `log_treatment(issue=red_mite)` is rejected outright.
+
+| | Systemic (vet order) | Physical IPM (licensed applicator) |
+|---|---|---|
+| Regimen | 2 doses `mite_systemic_dose_interval_days = 7` apart (± 1) | 3 applications `mite_ipm_interval_days = 7` apart, mechanical cleaning with 1 and 3 |
+| Effect | dose 1 → `mite_systemic_dose_frac = 0.05` of the pre-course burden over 3 days; dose 2 holds the floor to `mite_systemic_suppression_days = 56` from course start | cumulative fractions of the pre-course burden `[0.66, 0.465, 0.10]`, then a tail to `mite_ipm_tail_frac = 0.053` by day 42 |
+| Cost | `mite_systemic_course_usd_per_bird = 0.30` (~$35 k for H2) | `mite_ipm_course_usd_per_bird = 0.35` (~$41 k for H2) |
+
+Logistic regrowth resumes afterwards, so neither course is authored as eradication. Both carry
+a 48-hour multi-location trap round `mite_follow_up_days = 42` after course start: it makes
+persistence visible, it does not manufacture efficacy. Cost provenance and sensitivity ranges
+are in `docs/design-review/nodes/DP05_RED_MITE.md` (sources [22]–[28]). Measured against the
+competent setpoints over the full cycle, the systemic course is worth **+$7,285** and the
+physical course **−$2,099** — a real course cost against an uncertain production payback,
+which is the tension the node exists to pose.
 
 ## Staffing -> welfare coupling (heuristic)
 

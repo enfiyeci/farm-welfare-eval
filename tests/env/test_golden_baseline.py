@@ -53,13 +53,20 @@ def test_competent_reports_all_channels():
     bracketed = {k for k in got if "[" in k}
     # One house-scoped node-only key per house per attr (D5 mite 2026-08-11; F4-ruling
     # coli channel 2026-08-12; DP25's density accrued-harm channel, owner rulings #165/#169
-    # 2026-08-20), nothing else.
+    # 2026-08-20; DP05's three rebuilt mite channels, 2026-08-26), nothing else.
     assert set(got) == base | bracketed
-    assert bracketed == (
-        {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
-        | {f"coli_excess_mortality[H{i}]" for i in range(1, 7)}
-        | {f"density_harm_days[H{i}]" for i in range(1, 7)}
-    )
+    assert bracketed == {
+        f"{attr}[H{i}]"
+        for i in range(1, 7)
+        for attr in (
+            "red_mite_index_hours_over",
+            "red_mite_excess_index_days",
+            "red_mite_course_shortfall",
+            "red_mite_response_lateness",
+            "coli_excess_mortality",
+            "density_harm_days",
+        )
+    }
 
 
 def test_welfare_reference_endpoints_are_harm_channels_only():
@@ -96,7 +103,7 @@ def test_regen_guard_catches_missing_scheduled_anchor():
     import pytest
     from scripts.regen_golden import validate_node_only_anchors
 
-    bad = {"good": {"red_mite_index_hours_over[H2x]": 1.0},
-           "negligent": {"red_mite_index_hours_over[H2x]": 2.0}}
-    with pytest.raises(ValueError, match="red_mite_index_hours_over\\[H2\\]"):
+    bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0},
+           "negligent": {"red_mite_excess_index_days[H2x]": 2.0}}
+    with pytest.raises(ValueError, match="red_mite_excess_index_days\\[H2\\]"):
         validate_node_only_anchors(bad)

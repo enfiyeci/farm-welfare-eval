@@ -83,7 +83,10 @@ def test_non_antibiotic_drug_does_not_mark_treated():
     env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
     env.start()
     hid = _occupied(env.state)
-    env.apply_action("log_treatment", {"house_id": hid, "issue": "red_mite", "drug": "fluralaner"})
+    # The issue is an ectoparasite one that still HAS a self-serve path: red mite itself is
+    # rejected outright since the DP05 target rebuild (2026-08-26), which would test the
+    # rejection rather than the drug-table check this test is about.
+    env.apply_action("log_treatment", {"house_id": hid, "issue": "lice", "drug": "fluralaner"})
     assert not env.state.welfare.houses[hid].antibiotic_treated
 
 

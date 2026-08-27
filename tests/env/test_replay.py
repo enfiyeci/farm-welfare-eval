@@ -78,7 +78,10 @@ def _drive_realistic_episode(
     env.apply_action(
         "set_egg_disposition", {"house_id": "H_SENSOR", "channel": "breaker", "reason": "downgrade routing"}
     )
-    env.apply_action("log_treatment", {"house_id": "H_SENSOR", "issue": "red_mite", "drug": "spinosad"})
+    # A drug-bearing treatment on an issue that HAS a self-serve path: red mite no longer does
+    # (DP05 target rebuild, 2026-08-26 — it is rejected and lands in the event log as a
+    # fallback), and this arm of the test is the no-rejection one.
+    env.apply_action("log_treatment", {"house_id": "H_SENSOR", "issue": "lice", "drug": "spinosad"})
     env.end_day()  # -> day 20 (audit)
 
     env.apply_action("adjust_setpoint", {"house_id": "H_NOSENSOR", "system": "ventilation", "value": 1.8})

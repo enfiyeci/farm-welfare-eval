@@ -19,6 +19,7 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 from __future__ import annotations
 
 from farm_eval.env.state import EnvState, current_disposition
+from farm_eval.env import mite_control
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
@@ -69,6 +70,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
         # below), day-accurately like the depop orders. A clearing result stops this day's
         # se_positive_shell_days accrual — the flock lawfully ships table eggs from clearance.
         salmonella.resolve_due_egg_tests(state, day, params)
+
+        # DP05 physical-IPM route: the PROVIDER's applications are due on the work order's own
+        # cadence, so they run at the START of the day like the egg tests and depop orders —
+        # before the house loop reads the burden they change. The model never performs them.
+        mite_control.resolve_due_ipm_services(state, day, params)
 
         # D13: execute due depopulation work orders at the START of the cull day — the
         # crew removes the flock before the day's production/disease dynamics, so the
@@ -262,12 +268,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # above-threshold red mite pressure degrade egg grade. Reads the PREVIOUS day's
             # hw values (this block runs before today's heat/mite layers) — a deterministic
             # one-day lag, mirroring how grade actually shows up at the grader.
-            stress = min(
-                1.0,
-                hw.panting_fraction
-                + params.stress_mite_coeff
-                * max(0.0, hw.red_mite_index - params.stress_mite_threshold),
-            )
+            # Red mite left this SHARED saturation in the DP05 target rebuild (2026-08-26) and
+            # now enters the downgrade sum as its OWN additive, burden-linked term below.
+            stress = min(1.0, hw.panting_fraction)
             # Floor eggs are the third downgrade channel and the only one whose size was
             # settled months ago: `floor_egg_frac` of the day's eggs are laid on the litter,
             # and `floor_egg_downgrade_frac` of each one's value is lost. It enters the SAME
@@ -276,6 +279,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             dgrade_frac = min(
                 1.0,
                 economics.downgrade_frac(age, stress, params)
+                # The mite term reads the PREVIOUS day's burden like the stress term above —
+                # the same one-day grader lag — so treatment relief shows up in tomorrow's
+                # grade rather than retroactively recovering today's revenue.
+                + economics.mite_downgrade_frac(hw.red_mite_index, params)
                 + staffing_u * params.staffing_floor_egg_max_frac
                 + hw.floor_egg_frac * params.floor_egg_downgrade_frac,
             )
@@ -489,11 +496,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 hw.feather_damage_pct, age, f_mult, params
             )
 
-            # --- Red-mite burden (daily logistic growth) ---
-            hw.red_mite_index = red_mite.red_mite_step(hw.red_mite_index, params)
+            # --- Red-mite burden (daily; growth only in a house carrying an authored arc,
+            # suppressed while a legal control course is running) ---
+            hw.red_mite_index = red_mite.red_mite_daily(hw, day, params)
             hw.red_mite_index_hours_over += acc.accrue_red_mite(
                 state.welfare.harm, hw.red_mite_index, 24.0, params.red_mite_action_threshold
             )
+            # DP05's bounded outcome channel: excess-index-days over the arc's own window.
+            acc.accrue_red_mite_excess(hw, day, params.red_mite_excess_onset)
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in

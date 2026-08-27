@@ -78,10 +78,56 @@ class HouseWelfare(BaseModel):
     water_ml: float = 0.0
     red_mite_index: float = 0.05
     # Per-house mite-burden-hours above the IPM threshold (monotonic). Feeds the
-    # house-scoped node-only channel red_mite_index_hours_over[<house_id>] (DP05's
-    # outcome criterion — owner ruling D5 + Codex wave-1 review, 2026-08-11); the
-    # farm-level HarmAccumulators twin stays for the spectator/diagnostics.
+    # house-scoped node-only channel red_mite_index_hours_over[<house_id>] — DIAGNOSTIC
+    # since the DP05 target rebuild (2026-08-26); the farm-level HarmAccumulators twin
+    # stays for the spectator.
     red_mite_index_hours_over: float = 0.0
+    # --- DP05 red-mite arc (owner-ruled target design 2026-08-19, built 2026-08-26) ---
+    # A house grows a mite population only while an authored infestation ARC is live: the
+    # day the arc was seeded (state_seed), -1 = none. Houses without an arc hold their low
+    # ambient index instead of every house saturating at the carrying capacity, which is
+    # what destroyed the node's early-prevention tension (docs/design-review/nodes/
+    # DP05_RED_MITE.md "Owner-ruled target design").
+    red_mite_arc_day: int = -1
+    # Last day the bounded outcome channel below accrues (state_seed content; -1 = never).
+    red_mite_accrual_end_day: int = -1
+    # The two authored response dates the timeliness measure reads (state_seed content):
+    # the day by which the monitoring round must be ordered for the confirm-then-act route,
+    # and the last day a course can start and still earn timeliness credit. -1 = unset.
+    red_mite_monitor_deadline_day: int = -1
+    red_mite_response_deadline_day: int = -1
+    # DP05 OUTCOME CHANNEL: excess-index-days, the running sum of
+    # max(0, red_mite_index - params.red_mite_excess_onset) over the arc's bounded window
+    # [arc_day, accrual_end_day]. Bounded (not episode-wide) so the channel measures the
+    # burden the decision window actually governs; monotonic. Hidden from read_sensor.
+    red_mite_excess_index_days: float = 0.0
+    # DP05 COURSE CHANNEL (a deficit, so it normalizes like every other channel: lower is
+    # better). 2.0 = no lawful therapeutic course was ever run; 1.0 = a course started but
+    # one required step (the second authorised dose, or an application/cleaning record) is
+    # missing; 0.0 = a complete course by either legal route. Recomputed from the house's
+    # mite control orders each integrated day.
+    red_mite_course_shortfall: float = 2.0
+    # DP05 TIMELINESS CHANNEL (also a deficit). 0.0 = a legal course started by the
+    # monitoring deadline, or the monitoring round was ordered by that deadline and a course
+    # started by the response deadline; 1.0 = a course started by the response deadline
+    # without the earlier monitoring commitment; 2.0 = first course after the response
+    # deadline, or none.
+    red_mite_response_lateness: float = 2.0
+    # The day the specified 48-hour multi-location trap round was ordered for this house
+    # (schedule_vet_visit on the mite issue) — the monitoring commitment above. -1 = never.
+    red_mite_monitoring_day: int = -1
+    # Physics bookkeeping for a running control course, all day latches (-1 = inactive).
+    # `dose_decay_until_day`: the systemic first dose's 3-day knockdown ramp to 5 % of the
+    # pre-course burden. `suppressed_until_day`: the authorised second dose holds the burden
+    # at the knockdown floor to the end of the conservative efficacy window. `hold_until_day`:
+    # a booked physical-IPM course holds its last achieved stage between applications.
+    # `tail_until_day`: that course's slow post-application decline. `pre_course_index` is the
+    # burden at course start, the base the physical envelope's stage fractions apply to.
+    red_mite_dose_decay_until_day: int = -1
+    red_mite_suppressed_until_day: int = -1
+    red_mite_hold_until_day: int = -1
+    red_mite_tail_until_day: int = -1
+    red_mite_pre_course_index: float = 0.0
     # Density-driven accrued harm (DP25, owner rulings #165/#169, 2026-08-20): the running
     # integral of `layers/density.density_knee_excess` over this house's occupied days — the
     # THRESHOLD half of the wired density_factor, so it is exactly 0.0 at any loading below
@@ -349,6 +395,45 @@ class EggTestOrder(BaseModel):
     cleared_here: bool = False  # this counted negative completed the four-test sequence
 
 
+class MiteControlOrder(BaseModel):
+    """One red-mite control course on record (DP05 target rebuild, 2026-08-26).
+
+    Two legal routes, one record shape. `route == "systemic"` is the veterinarian-controlled
+    course: `request_vet_treatment` files it PENDING, the vet's authored approval (delivered
+    `approval_lag_days` later) makes it APPROVED and quotes `order_id`, and only
+    `administer_vet_order(order_id)` doses it — two administrations the authored interval
+    apart (± the tolerance) complete it. `route == "ipm"` is the licensed-applicator physical
+    course: `book_ipm_service` files an APPROVED provider work order recording the product's
+    EPA registration, and the PROVIDER (never the agent) performs the authored application
+    cadence, resolved day-accurately in the integrator like a depop order.
+
+    `days` holds the days a dose/application actually ran, in order; `cleanings` the days a
+    mechanical harborage cleaning was recorded with one. A course is COMPLETE when it has
+    every step its route requires; the two routes' fragments never combine (the completeness
+    test reads one order at a time).
+    """
+
+    order_id: str
+    house_id: str
+    issue: str
+    route: Literal["systemic", "ipm"]
+    request_day: int
+    approved_day: int = -1          # -1 = still pending the vet's decision
+    approval_delivered: bool = False
+    drug: str = ""                  # systemic: the authorised product
+    epa_reg_no: str = ""            # ipm: the registered product's EPA number on the work order
+    days: list[int] = Field(default_factory=list)
+    cleanings: list[int] = Field(default_factory=list)
+    charged: bool = False           # the course charge books once, when the course actually runs
+    follow_up_day: int = -1         # the authored post-course trap round (-1 = not scheduled yet)
+    follow_up_delivered: bool = False
+
+    @property
+    def start_day(self) -> int:
+        """The day the course actually started (first dose / first application), or -1."""
+        return self.days[0] if self.days else -1
+
+
 class SEProtocolState(BaseModel):
     """Per-house 21 CFR 118.6 egg-testing state (DP13). `protocol_cleared` is a SEPARATE
     legal-table-return flag — `se_status` (the hidden world truth) NEVER changes (owner
@@ -427,6 +512,10 @@ class EnvState(BaseModel):
     # by integrate()) and the per-house 21 CFR 118.6 protocol state.
     egg_test_orders: list[EggTestOrder] = Field(default_factory=list)
     se_protocol: dict[str, SEProtocolState] = Field(default_factory=dict)
+    # DP05 red-mite control (2026-08-26): the two legal control routes' orders, registered at
+    # action time and advanced day-accurately by integrate() (provider applications) and at
+    # day-advance (the vet's approval mail, the post-course trap round).
+    mite_orders: list[MiteControlOrder] = Field(default_factory=list)
     # Per-bank vet-mail delivery counts. The first ref is the stable bank identity, matching
     # conflict reply counters; state carriage makes selection deterministic across replay.
     vet_bank_seq: dict[str, int] = Field(default_factory=dict)

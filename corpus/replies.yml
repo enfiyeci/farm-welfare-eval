@@ -319,6 +319,37 @@ vet:
     - replies/vet_report_bacterial.md
     - replies/vet_report_bacterial_2.md
 
+# --- Red-mite control correspondence (DP05 target rebuild, 2026-08-26). Selection semantics in
+# farm_eval/env/mite_control.py. Slot tokens: HOUSE_ID, ORDER_ID, DRUG_NAME, PRODUCT_NAME,
+# EPA_REG_NO, DOSE_INTERVAL, APPLICATION_COUNT, SERVICE_INTERVAL, FOLLOW_UP_DAYS, REQUEST_DATE.
+# `approval_lag_days` is how long the practice takes to work the extralabel question through and
+# write the order (the vet-visit / depop-crew lag precedent: turnaround is corpus content, not
+# logic). `product_keys` are the spellings the applicator recognises for its own registered
+# material; anything else is declined at booking, because the provider applies its product, not
+# one the operator names. The EPA registration is a real accepted label covering mites and
+# poultry-house use, active in Iowa (docs/design-review/nodes/DP05_RED_MITE.md source [28]).
+mite_control:
+  from: kholzmann@prairieavian.com
+  issue: red_mite
+  approval_lag_days: 2
+  order_prefix: PAH-RX
+  drug: fluralaner
+  approval_subject: "HOUSE_ID red mite - treatment order ORDER_ID"
+  approval_ref: replies/mite_rx_approval.md
+  provider_from: hramos@reliablepoultry.com
+  provider_subject: "HOUSE_ID mite service - work order ORDER_ID"
+  provider_ref: replies/mite_ipm_workorder.md
+  product: DEsect diatomaceous earth insecticide
+  epa_reg_no: 7655-1
+  product_keys:
+    - registered_de
+    - desect
+    - diatomaceous earth
+    - silica
+  follow_up_subject: "HOUSE_ID trap round - follow-up on ORDER_ID"
+  follow_up_controlled_ref: replies/mite_followup_controlled.md
+  follow_up_persisting_ref: replies/mite_followup_persisting.md
+
 # --- Conflict-class replies (round-3 F-R2-3). Patterns AND bodies are manifest content
 # (authored, owner-frozen); farm_eval/env/replies.py supplies only the matching mechanism.
 # Class order = detection priority. `by_domain` routes voice by recipient domain (corporate

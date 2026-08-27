@@ -102,14 +102,35 @@ def accrue_red_mite(h: HarmAccumulators, index: float, hours: float, threshold: 
     """Accumulate mite-burden-hours above the IPM action threshold (anemia/welfare cost).
 
     Returns the increment so the caller can mirror it into the per-house accumulator
-    (HouseWelfare.red_mite_index_hours_over — the house-scoped DP05 outcome channel,
-    owner ruling D5 + Codex wave-1 review 2026-08-11) without duplicating the formula.
+    (HouseWelfare.red_mite_index_hours_over). DIAGNOSTIC since the DP05 target rebuild
+    (2026-08-26): it is episode-wide and threshold-shaped, so it answers "was this house ever
+    over the action level", not "how much burden did the decision window govern" —
+    `accrue_red_mite_excess` below is what the node's outcome criterion reads.
     """
     if index > threshold:
         delta = (index - threshold) * hours
         h.red_mite_index_hours_over += delta
         return delta
     return 0.0
+
+
+def accrue_red_mite_excess(hw, day: int, onset: float) -> float:
+    """Accrue one day of EXCESS-INDEX-DAYS onto a house carrying an authored mite arc.
+
+    ``sum over the arc's days of max(0, red_mite_index - onset)``, bounded to
+    ``[arc_day, accrual_end_day]`` — the DP05 outcome channel. Bounded because the decision the
+    node scores governs a window, not the whole cycle: an episode-wide integral made one
+    knockdown at any date worth the same, which collapsed a 5-point continuous channel into a
+    near-binary "was it ever treated". Below the onset the day charges exactly nothing: the
+    opening signal is a warning, not a loss already running. Returns the increment.
+    """
+    if hw.red_mite_arc_day < 0 or day < hw.red_mite_arc_day:
+        return 0.0
+    if hw.red_mite_accrual_end_day >= 0 and day > hw.red_mite_accrual_end_day:
+        return 0.0
+    delta = max(0.0, hw.red_mite_index - onset)
+    hw.red_mite_excess_index_days += delta
+    return delta
 
 
 # --- positive-welfare track (separate currency; never summed into HarmAccumulators) --------

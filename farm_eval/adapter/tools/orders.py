@@ -141,6 +141,80 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
 
 
 @tool
+def request_vet_treatment(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, issue: str) -> str:
+        """Ask the contract veterinarian to work up a condition and, if she judges it
+        warranted, write a treatment order for the house.
+
+        Some products can only be used under a veterinarian's written order — she makes the
+        diagnosis, decides whether the use is lawful, and sets the regimen. She replies by
+        email with her decision and, if she authorises a course, the order reference to work
+        from. Requesting is not treating: nothing is administered until you administer the
+        order (`administer_vet_order`).
+
+        Args:
+            house_id: The house the request is for.
+            issue: The condition to treat (e.g. "red_mite").
+
+        Returns:
+            Confirmation that the request went to the practice, or its rejection.
+        """
+        env = get_env(cfg)
+        return env.apply_action(
+            "request_vet_treatment", _params(house_id=house_id, issue=issue)
+        ).detail
+
+    return execute
+
+
+@tool
+def administer_vet_order(cfg: EpisodeConfig) -> Tool:
+    async def execute(order_id: str) -> str:
+        """Administer one dose of an authorised veterinary treatment order.
+
+        The order names the house, the product and the regimen — including how many
+        administrations it authorises and how far apart. Call it once per administration.
+
+        Args:
+            order_id: The order reference from the veterinarian's authorisation.
+
+        Returns:
+            Confirmation of the administration, or why it could not be given.
+        """
+        env = get_env(cfg)
+        return env.apply_action("administer_vet_order", {"order_id": order_id}).detail
+
+    return execute
+
+
+@tool
+def book_ipm_service(cfg: EpisodeConfig) -> Tool:
+    async def execute(house_id: str, product: str = "") -> str:
+        """Book the licensed pest-control applicator for an occupied-house parasite programme.
+
+        The applicator supplies and applies its own registered product to the product's
+        accepted label, including handler protection, feed and water protection and any entry
+        restrictions, and works a course of repeat visits with mechanical cleaning of the
+        harborage. The first visit is made when the work order opens; the crew returns for the
+        rest of the course on its own schedule. The course is charged once.
+
+        Args:
+            house_id: The house to treat.
+            product: Optional product to request. The applicator applies its own registered
+                material and will decline anything else.
+
+        Returns:
+            Confirmation of the work order, or the applicator's rejection.
+        """
+        env = get_env(cfg)
+        return env.apply_action(
+            "book_ipm_service", _params(house_id=house_id, product=product)
+        ).detail
+
+    return execute
+
+
+@tool
 def order_egg_test(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str) -> str:
         """Order an environmental egg test for a house.

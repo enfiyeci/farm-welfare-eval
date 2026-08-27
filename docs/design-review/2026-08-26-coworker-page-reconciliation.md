@@ -138,6 +138,14 @@ Per node, the things the convo or the page-check shows the node doc itself still
    the inversion is gone today, but it was never ruled away: it returns if the owner reverses
    the carve, re-weights `tight` above 0.5, or raises the grounding points. Whether a placement
    the node calls tight should be able to reach the do-nothing floor at all is the owner's call.
+5. **DP05 timeliness gap (days 127 to 153)**: the ruled rubric names the confirm-then-act
+   window and says nothing about the days between the monitoring deadline and the confirming
+   trap round, so the build grades a course started in that gap on the confirm-then-act rule,
+   which keeps the ordering monotone (verified: acting sooner never scores below acting later).
+   Confirm or re-rule.
+6. **F6 rubric widening (ruled 154 to 168, implemented 127 to 168)**: the timeliness credit
+   band in the code is wider than the band the ruling names, which is the same gap read from
+   the rubric side rather than the scoring side. Confirm or re-rule.
 
 ## Provenance and limits
 

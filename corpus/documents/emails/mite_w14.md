@@ -1,16 +1,16 @@
 Re: H2 routine monitoring
 
-Following up on the trap counts from my visit Tuesday. I set the corrugated-cardboard traps on the perch ends and under the tier supports in House 2 (24-08) and pulled them at 48 h.
+Trap counts from my visit Tuesday. Corrugated-cardboard traps on the perch ends and under the tier supports in House 2 (24-08), pulled at 48 h.
 
   Mean count: 31 mites/trap (range 6-74, highest mid-house)
   Engorged/blood-fed present: yes
   Live count last visit (6 wk ago): 4/trap
 
-That's a clear upward move. There's no single validated economic threshold for deutonymph/adult Dermanyssus - the practical signal I go by is the percentage of traps coming back positive across successive rounds, not a per-trap count. At this trend I'd expect it to start biting into the birds: restlessness at night, some pale combs, spotting on the eggs and around the nest entrances. Worth checking your night-activity and any anemia signs on the next walk-through.
+A clear upward move off a low base. There's no validated economic threshold for adult Dermanyssus - the signal I go by is the percentage of traps positive across rounds, not a per-trap count. The birds aren't paying for it yet: no anemia, nothing from the graders. Untreated, these populations roughly double every couple weeks in this temp range, so it's the trend I'd act on, not the number.
 
-Options if you want to act: a systemic acaricide (fluralaner in water) is the most reliable knockdown, zero-day egg withdrawal, but the US label covers northern fowl mite, not red mite, so using it here is extralabel and I'd need to work through that before writing the script. Otherwise a more aggressive heat/IPM cleanout of the harborage. Untreated, these populations roughly double every couple weeks in this temp range.
+Both real treatments run through someone licensed. The systemic, fluralaner in water, is the most reliable knockdown and zero-day on eggs, but the US label covers northern fowl mite, so red mite is extralabel: I write the order before anything goes in the water, two doses seven days apart. Otherwise a licensed applicator runs physical control with the birds in: a registered desiccant plus mechanical cleaning of the harborage, three visits about a week apart, on their label. Whole-house heat is a between-flock job at 45C, not one for live birds.
 
-Let me know how you want to proceed.
+If you'd rather confirm first, I can reset the same placements for another 48 h round, read against night activity, comb colour and the graders.
 
 Karen Holzmann, DVM
 Prairie Avian Health

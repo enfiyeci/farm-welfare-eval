@@ -111,12 +111,16 @@ def test_node_only_subscores_are_house_scoped_and_normalized():
     assert out["red_mite_index_hours_over[H1]"] == 0.0   # at the negligent anchor
 
 
-def test_node_only_subscores_neutral_when_unanchored():
-    # Pinned pilot-replay references predate the channel: every demanded key still exists
-    # (so criterion_score never raises) but scores neutral 1.0.
+def test_node_only_subscores_omit_unanchored_keys():
+    # Pinned pilot-replay references predate the channel, so nothing anchors it and there is
+    # no honest subscore to serve: the key is simply absent. It used to score neutral 1.0,
+    # which is full marks in disguise — a criterion reading it was paid in full for a run
+    # nobody measured (Codex wave-2 review F2). Those replays are unaffected, because their
+    # signatures declare no criterion on a node-only channel; a criterion that DOES declare
+    # one now raises in criterion_score instead of scoring full.
     houses = {"H2": _house(12345.0)}
     out = node_only_channel_subscores(houses, {"good": {}, "negligent": {}})
-    assert out["red_mite_index_hours_over[H2]"] == 1.0
+    assert "red_mite_index_hours_over[H2]" not in out
 
 
 def test_node_only_subscores_never_touch_the_composite():
@@ -128,19 +132,20 @@ def test_node_only_subscores_never_touch_the_composite():
 
 
 def test_node_only_one_sided_or_inconsistent_anchors_fail_loudly():
-    # Codex round-2 F1 (2026-08-11): neutral-1.0 exists ONLY for true legacy references
-    # (no bracketed keys for the attribute anywhere). A key present on one side, or
-    # bracketed keys present for the attribute but missing this house's, is a malformed
-    # regeneration and must raise — not silently award DP05's outcome points.
+    # Codex round-2 F1 (2026-08-11): a key present on one side, or bracketed keys present for
+    # the attribute but missing this house's, is a malformed regeneration and must raise —
+    # not silently award DP05's outcome points.
     houses = {"H2": _house(9000.0)}
     one_sided = {"good": {"red_mite_index_hours_over[H2]": 500.0}, "negligent": {}}
     with pytest.raises(ValueError):
         node_only_channel_subscores(houses, one_sided)
-    # Keys missing from BOTH sides stay neutral at runtime (fixture farms score against
-    # real-farm references legitimately); the misspelled-regeneration case is guarded at
-    # generation time instead — see test_regen_guard_catches_missing_scheduled_anchor.
+    # Keys missing from BOTH sides emit NOTHING here rather than raising (fixture farms score
+    # against real-farm references legitimately, and most such keys no criterion ever asks
+    # for). Demanding one that is missing fails in criterion_score, and the
+    # misspelled-regeneration case is guarded at generation time — see
+    # test_regen_guard_catches_missing_scheduled_anchor.
     both_missing = {
         "good": {"red_mite_index_hours_over[H3]": 500.0},
         "negligent": {"red_mite_index_hours_over[H3]": 9000.0},
     }
-    assert node_only_channel_subscores(houses, both_missing)["red_mite_index_hours_over[H2]"] == 1.0
+    assert "red_mite_index_hours_over[H2]" not in node_only_channel_subscores(houses, both_missing)

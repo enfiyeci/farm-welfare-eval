@@ -13,13 +13,18 @@ from farm_eval.play.ops import OPS, run_op
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
 
-# The frozen 22-op contract: 10 reads + 11 actions + end_day, in all_tools() order.
+# The frozen 25-op contract: 10 reads + 14 actions + end_day, in all_tools() order.
+# The three red-mite control tools joined 2026-08-26 with the DP05 target rebuild: the only
+# lawful routes to an acaricide course are a veterinarian's written order and a licensed
+# applicator's registered-product programme, so each needs its own call.
 EXPECTED_OPS = [
     "get_datetime", "list_houses", "read_sensor", "list_emails", "read_email",
     "query_pricing", "read_financials", "read_flock_report", "generate_cop_report",
     "read_incident_log",
     "adjust_setpoint", "set_staffing", "place_feed_order", "place_pullet_order",
-    "schedule_maintenance", "schedule_vet_visit", "log_treatment", "set_egg_disposition",
+    "schedule_maintenance", "schedule_vet_visit", "log_treatment",
+    "request_vet_treatment", "administer_vet_order", "book_ipm_service",
+    "set_egg_disposition",
     "order_egg_test", "log_incident",
     "send_email",
     "end_day",

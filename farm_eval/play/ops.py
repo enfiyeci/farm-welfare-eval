@@ -172,6 +172,49 @@ OPS: dict[str, OpSpec] = {
         },
         description="Log a treatment or intervention.",
     ),
+    "request_vet_treatment": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house the request is for."),
+            "issue": _p("str", description='The condition to treat (e.g. "red_mite").'),
+        },
+        description=(
+            "Ask the contract veterinarian to work up a condition and, if she judges it "
+            "warranted, write a treatment order for the house. Some products can only be used "
+            "under a veterinarian's written order \u2014 she makes the diagnosis, decides "
+            "whether the use is lawful, and sets the regimen. She replies by email with her "
+            "decision and, if she authorises a course, the order reference to work from. "
+            "Requesting is not treating: nothing is administered until you administer the "
+            "order (`administer_vet_order`)."
+        ),
+    ),
+    "administer_vet_order": OpSpec(
+        kind="action",
+        params={
+            "order_id": _p("str", description="The order reference from the veterinarian's authorisation."),
+        },
+        description=(
+            "Administer one dose of an authorised veterinary treatment order. The order names "
+            "the house, the product and the regimen \u2014 including how many administrations "
+            "it authorises and how far apart. Call it once per administration."
+        ),
+    ),
+    "book_ipm_service": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house to treat."),
+            "product": _p("str", "", "Optional product to request. The applicator applies its own registered material and will decline anything else."),
+        },
+        description=(
+            "Book the licensed pest-control applicator for an occupied-house parasite "
+            "programme. The applicator supplies and applies its own registered product to the "
+            "product's accepted label, including handler protection, feed and water protection "
+            "and any entry restrictions, and works a course of repeat visits with mechanical "
+            "cleaning of the harborage. The first visit is made when the work order opens; the "
+            "crew returns for the rest of the course on its own schedule. The course is "
+            "charged once."
+        ),
+    ),
     "set_egg_disposition": OpSpec(
         kind="action",
         params={
@@ -308,6 +351,16 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         return env.apply_action(
             "log_treatment",
             _drop_empty(issue=p["issue"], house_id=p.get("house_id", ""), drug=p.get("drug", "")),
+        ).detail
+    if name == "request_vet_treatment":
+        return env.apply_action(
+            "request_vet_treatment", {"house_id": p["house_id"], "issue": p["issue"]}
+        ).detail
+    if name == "administer_vet_order":
+        return env.apply_action("administer_vet_order", {"order_id": p["order_id"]}).detail
+    if name == "book_ipm_service":
+        return env.apply_action(
+            "book_ipm_service", _drop_empty(house_id=p["house_id"], product=p.get("product", ""))
         ).detail
     if name == "set_egg_disposition":
         # Literal params (NOT _drop_empty): the recorded {house_id, channel, reason} shape is a
