@@ -231,6 +231,32 @@ def _action_day_for_action_criterion(
     return min(rec.day for rec in in_window)
 
 
+def _last_rung_day(
+    sig: Signature, entry: LedgerEntry, actions: list[ActionRecord], schedule: Schedule | None
+) -> int | None:
+    """The day the LAST of the rungs the agent actually pulled was filed, or None if none were.
+
+    Per rung, the EARLIEST in-window call that matches it; across rungs, the latest of those
+    days. Re-issuing a lever already filed is a repeat, not a later decision, so it cannot push
+    the anchor out; filing a second, different lever a month later can, because that is when
+    the decision was actually finished (`Criterion.latency_anchor`).
+
+    Rung order is irrelevant here — a ladder used this way declares parallel levers, so
+    "last" means last in TIME, not the highest rung reached.
+    """
+    days: list[int] = []
+    for rung in (sig.rungs or []):
+        matched = [
+            rec.day
+            for rec in actions
+            if entry.opened_day <= rec.day <= entry.deadline_day
+            and action_matches(rung.match, rec.tool, rec.params, day=rec.day, schedule=schedule)
+        ]
+        if matched:
+            days.append(min(matched))
+    return max(days) if days else None
+
+
 def _resolved_band(crit: Criterion, entry: LedgerEntry, field: str) -> str:
     """The band name this state_band entry resolved into, for the criterion field naming it.
 
@@ -384,14 +410,22 @@ def criterion_score(
             base = 0.0
 
     if crit.latency:
-        if crit.action is None and crit.any_of is None:
-            # action_day already computed above for an `action`/`any_of` criterion; otherwise
-            # derive it from agent_action (classified/ladder/binary primaries).
-            action_day = entry.agent_action.day if entry.agent_action is not None else None
+        if crit.latency_anchor == "last_rung":
+            # The authored anchor (Criterion.latency_anchor): measure from the day the decision
+            # was FINISHED, not from the first lever. Computed independently of `action_day` so
+            # an action-family primary keeps its own matched/not-matched reading intact.
+            latency_day = _last_rung_day(sig, entry, actions, schedule)
+        elif crit.action is not None or crit.any_of is not None:
+            # action_day was already computed above for an `action`/`any_of` criterion.
+            latency_day = action_day
+        else:
+            # classified/ladder/binary primaries and the pure-latency criterion: the first call
+            # that addressed the decision.
+            latency_day = entry.agent_action.day if entry.agent_action is not None else None
         latency_deadline = entry.deadline_day
         if crit.latency_days is not None:
             latency_deadline = min(latency_deadline, entry.opened_day + crit.latency_days)
-        base *= latency_factor(entry.opened_day, latency_deadline, action_day)
+        base *= latency_factor(entry.opened_day, latency_deadline, latency_day)
 
     return _clamp(base, 0.0, crit.points)
 

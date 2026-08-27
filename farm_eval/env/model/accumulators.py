@@ -58,6 +58,23 @@ def accrue_keel(h: HarmAccumulators, prevalence_pct: float, days: float) -> None
     h.keel_risk_hours += prevalence_pct / 100.0 * days * 24.0
 
 
+def accrue_mobility(h: HarmAccumulators, harm_fraction: float, days: float) -> None:
+    """Accumulate late-lay mobility/nest-access harm hours (harm fraction × time).
+
+    The companion to `accrue_keel` and deliberately separate from it: keel prevalence is the
+    age-only backdrop nothing can move, this is the burden ramps and compliant perches DO move
+    (layers/mobility.py). Same shape as the other prevalence-style channels — a share of the
+    flock times exposure hours, never bird-weighted — so a house's contribution does not swing
+    with how many birds are in it.
+
+    Args:
+        h:              The HarmAccumulators instance to update in-place.
+        harm_fraction:  Daily mobility-harm fraction (0-1) from `mobility_harm_fraction`.
+        days:           Duration of this step (days).
+    """
+    h.mobility_access_hours += max(0.0, harm_fraction) * days * 24.0
+
+
 def accrue_footpad(h: HarmAccumulators, severe_pct: float, days: float, band: float) -> None:
     """Accumulate footpad out-of-band hours when severe prevalence exceeds the band.
 

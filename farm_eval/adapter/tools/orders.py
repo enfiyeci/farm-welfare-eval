@@ -84,7 +84,10 @@ def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
         Args:
             task: The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching",
                 "depopulation" — a depopulation work order names the house and is how a depop goes
-                on the books).
+                on the books). Aviary hardware retrofits are booked here too, as
+                "ramps" (tier access ramps) and "soft_perch" (compliant soft/wide perches);
+                each is a quoted capital job on the named house, so it goes for sign-off and is
+                fitted about two weeks after the order.
             house_id: Optional house the work is for.
             target: Optional target house (e.g. for repopulation work).
             method: Optional method (e.g. "gentle", "standard").

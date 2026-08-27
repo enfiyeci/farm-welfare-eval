@@ -329,6 +329,127 @@ def test_criterion_score_latency_acted_at_deadline_is_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
+def _parallel_lever_sig():
+    """A ladder whose rungs are two SEPARATE levers, not escalating strengths of one."""
+    return Signature(
+        kind="ladder",
+        rungs=[
+            Rung(name="lever_a", match=ActionMatch(tool="t1")),
+            Rung(name="lever_b", match=ActionMatch(tool="t2")),
+        ],
+    )
+
+
+def _last_rung_timing():
+    return Criterion(name="timing", points=2.0, latency=True, latency_anchor="last_rung")
+
+
+def test_latency_anchor_last_rung_measures_from_the_later_lever():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    # The first lever addressed the decision on day 10; the second was not filed until the
+    # deadline, so the decision was not actually finished until then.
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=20),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+    # The default anchor pays FULL credit for the same run — the bug this flag exists to fix.
+    default_crit = Criterion(name="timing", points=2.0, latency=True)
+    assert criterion_score(default_crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_full_credit_when_every_lever_lands_early():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=10),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_ignores_a_lever_never_pulled():
+    # One lever, filed on the opening day: nothing else was ordered, so the last lever filed IS
+    # the opening-day one and the timing points stand.
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t2", params={}, day=10),
+    )
+    actions = [ActionRecord(tool="t2", params={}, day=10)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_repeat_call_does_not_push_the_anchor_out():
+    # Re-issuing a lever already filed is a re-affirmation, not a later decision.
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=10),
+        ActionRecord(tool="t1", params={}, day=20),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_ignores_out_of_window_calls():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=99),   # after the deadline: not this decision
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_never_acted_is_zero():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(opened_day=10, deadline_day=20)
+    assert criterion_score(crit, entry, sig, {}, []) == pytest.approx(0.0)
+
+
+def test_latency_anchor_requires_latency():
+    with pytest.raises(ValueError, match="latency_anchor requires latency"):
+        Criterion(name="c", points=2.0, ladder=True, latency_anchor="last_rung")
+
+
+def test_latency_anchor_last_rung_is_ladder_only():
+    # points must sum to 10.0 for NodeScoring to parse at all, so the guard is exercised on a
+    # single full-weight criterion.
+    crit = Criterion(name="timing", points=10.0, latency=True, latency_anchor="last_rung")
+    with pytest.raises(ValueError, match="ladder-only"):
+        Signature(
+            kind="state_band",
+            metric=Metric(house_id="H1", var="nh3_ppm", agg="final"),
+            bands={"ok": [[0.0, 10.0]]},
+            scoring=NodeScoring(criteria=[crit]),
+        )
+
+
+def test_latency_anchor_is_rejected_on_an_llm_criterion():
+    with pytest.raises(ValueError, match="must not set any mechanical"):
+        Criterion(name="c", points=2.0, kind="llm", rubric="grade it", latency_anchor="last_rung")
+
+
 def test_criterion_score_any_of_with_latency_uses_matched_action_day():
     # Codex round-2 review (2026-07-12): the latency modifier used to overwrite the any_of match's
     # action day with entry.agent_action (None on a communicative entry) because it only checked

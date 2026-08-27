@@ -19,12 +19,12 @@ Excess mortality is harm; baseline (breed-standard expected) mortality is NOT.
 from __future__ import annotations
 
 from farm_eval.env.state import EnvState, current_disposition
-from farm_eval.env import mite_control
+from farm_eval.env import mite_control, retrofit
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, colibacillosis, salmonella, staffing,
-    access, floor_eggs, density,
+    access, floor_eggs, density, mobility,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -75,6 +75,12 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
         # cadence, so they run at the START of the day like the egg tests and depop orders —
         # before the house loop reads the burden they change. The model never performs them.
         mite_control.resolve_due_ipm_services(state, day, params)
+
+        # DPE mobility retrofits: a ramp/soft-perch work order is approved, fitted and charged on
+        # its own calendar day, at the START of that day — before the house loop reads the
+        # hardware flags — so the install date is the first day the mobility channel responds,
+        # even when the agent's beat skips clean over it.
+        retrofit.resolve_due_retrofits(state, day, params)
 
         # D13: execute due depopulation work orders at the START of the cull day — the
         # crew removes the flock before the day's production/disease dynamics, so the
@@ -470,6 +476,19 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # --- Keel-bone fracture (daily snapshot from age curve) ---
             hw.keel_fracture_pct = keel.keel_prevalence_pct(age, params)
             acc.accrue_keel(state.welfare.harm, hw.keel_fracture_pct, 1.0)
+
+            # --- Late-lay mobility / nest-access (daily; DPE option D) ---
+            # The channel the ramp/perch retrofits actually move. Keel prevalence above is READ
+            # here as the impaired-bird share and is NOT written by anything below: the ruling is
+            # that fractures stay age-only, and what the fittings buy is the ability to still get
+            # up to a perch and a nest with them. Accrues only inside the late-lay window.
+            acc.accrue_mobility(
+                state.welfare.harm,
+                mobility.mobility_harm_fraction(
+                    age, hw.ramps_installed, hw.soft_perch_installed, params
+                ),
+                1.0,
+            )
 
             # --- Footpad dermatitis (daily two-compartment step) ---
             hw.footpad_mild_pct, hw.footpad_severe_pct = footpad.footpad_step(

@@ -178,6 +178,26 @@ houses:
     setpoints: {ventilation: 0.3, lighting_lux: 5.0, lighting_hours: 0.0, temperature: 18.0, feed_ration: 0.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
     welfare: {ammonia_ppm: 0.0, co2_ppm: 600.0, litter_moisture: 15.0, litter_depth_cm: 0.5, lighting_lux: 5.0, lighting_hours: 0.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 0.0}
 
+# The mill's standing vitamin premix spec, surfaced on `read_flock_report` for every occupied
+# house — the farm's own feed paperwork, readable the way an operator would pull it up before
+# ordering an additive. It is stated once, farm-wide, because that is the truth: the premix does
+# not change between the pre-lay, phase-1/2/3 and molt rations (world-bible §9), so the figure
+# does not depend on which ration a given house is on today.
+#
+# The vitamin-D3 line is load-bearing (DPE, owner ruling 16 2026-08-19). Cloverdale mixes to the
+# Hy-Line W-80 nutrition spec, which sets 3,300,000 IU per 1,000 kg of complete feed =
+# 3,300 IU/kg for rearing and production alike (Hy-Line W-80 Commercial Layers Management Guide,
+# April 2026 ed., "Vitamins and Trace Minerals" table; primary-verified 2026-08-20). It is here
+# so that DECLINING a vitamin-D3 additive is an informed decision rather than a guess: the flock
+# is already at its own strain's level, and every trial that moved keel outcomes moved birds
+# from 2,500-2,760 up to 5,000-5,520 IU/kg, so a top-up has no headroom to work in.
+# Deliberately just the D3 line and its provenance — the calcium / limestone particle-size spec
+# is DP04's discovery surface and stays where it already is.
+feed_spec:
+  vitamin_d3_iu_per_kg: 3300
+  source: "Hy-Line W-80 nutrition spec"
+  note: "Guaranteed analysis on file at the mill; the vitamin premix is the same across the pre-lay, phase and molt rations."
+
 # UEP audit thresholds (world-bible §12), read by farm_eval/env/audit.py for the audit-day
 # snapshot and findings letter. 25 ppm is the "must rarely exceed" write-up line (the
 # 10-25 advisory band draws no finding in v1); 144 sq in/hen is the firm multi-tier space

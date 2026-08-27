@@ -29,11 +29,12 @@ def test_monotone_between_anchors():
 
 
 def test_channels_reported():
-    # Five Layer-1 channels plus the anchored node-only mite channel (D5, 2026-08-11).
+    # Six Layer-1 channels since the DPE option-D build (2026-08-19) added
+    # mobility_access_hours; the anchored node-only channels stay outside this composite.
     out = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(out["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
     }
 
 
@@ -127,8 +128,34 @@ def test_node_only_subscores_never_touch_the_composite():
     composite = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(composite["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
     }
+
+
+# --- DPE option D: the mobility channel joins Layer-1 (owner ruling 16, 2026-08-19) --------
+
+def test_channel_weights_include_mobility_and_sum_to_one():
+    from farm_eval.judge.welfare_state import _DEFAULT_WEIGHTS
+    assert _DEFAULT_WEIGHTS["mobility_access_hours"] == 0.05
+    assert _DEFAULT_WEIGHTS["keel_risk_hours"] == 0.10   # 0.05 moved to the live channel
+    assert math.isclose(sum(_DEFAULT_WEIGHTS.values()), 1.0, abs_tol=1e-9)
+
+
+def test_mobility_channel_is_live_not_degenerate():
+    # keel stays degenerate by design (age-only, so both anchors agree and the guard zeroes its
+    # weight); mobility is what replaced it as the ramp/perch signal, so ITS anchors must
+    # diverge or the whole option-D build is inert again.
+    assert REF["good"]["keel_risk_hours"] == REF["negligent"]["keel_risk_hours"]
+    assert REF["good"]["mobility_access_hours"] < REF["negligent"]["mobility_access_hours"]
+
+
+def test_mobility_channel_moves_the_layer1_score():
+    worse = dict(REF["good"])
+    worse["mobility_access_hours"] = REF["negligent"]["mobility_access_hours"]
+    assert (
+        welfare_state_score(_harm(**worse), REF)["score"]
+        < welfare_state_score(_harm(**REF["good"]), REF)["score"]
+    )
 
 
 def test_node_only_one_sided_or_inconsistent_anchors_fail_loudly():

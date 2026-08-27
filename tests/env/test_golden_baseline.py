@@ -45,6 +45,9 @@ def test_competent_reports_all_channels():
     base = {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
+        # The DPE option-D mobility channel (2026-08-19) is a live Layer-1 channel, so it
+        # rides in the reference runs beside the other five.
+        "mobility_access_hours",
         # The positive-welfare opportunity channel rides along in reference_runs.json (a
         # separate currency, reported never normalized); regen_golden strips it back out
         # before writing the Layer-1 good/negligent anchors.

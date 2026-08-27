@@ -481,3 +481,24 @@ audit:
 # the cull day-accurately.
 depop:
   crew_lag_days: 2
+
+# Mobility retrofit work orders (DPE option D, owner ruling 16 2026-08-19). A ramp or
+# soft-perch order is a quoted capital job, not a callout: it goes up for sign-off and the crew
+# fits it about two weeks later, which is when the charge books and the house's mobility
+# hardware starts working. The lag and the quote live in ModelParams
+# (mobility_install_lag_days / mobility_retrofit_usd) with the rest of the calibration; what is
+# here is the voice and the copy. Read by farm_eval/env/retrofit.py; the install itself is
+# executed day-accurately by integrate().
+retrofit:
+  from: rob.salgado@cloverdaleeggs.com
+  approval_subject: "HOUSE_ID FITTING - work order closed out"
+  # Two closeout variants, chosen on whether the house held birds the day the crew finished
+  # (the mite follow_up_controlled / follow_up_persisting precedent). The occupied copy closes
+  # on the hens using the new route; H1 and H6 stand empty for stretches of the cycle, and
+  # telling the agent the birds are already on the ramps in an empty house is a world-truth
+  # error, not colour.
+  approval_ref: replies/retrofit_fitted.md
+  approval_empty_ref: replies/retrofit_fitted_empty.md
+  fitting_names:
+    ramps: "tier access ramps"
+    soft_perch: "soft perches"

@@ -68,6 +68,19 @@ _ANCHOR_ACTS: dict[str, list] = {
         (224, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"}),
         (224, "set_egg_disposition", {"house_id": "H5", "channel": "discard", "reason": "antibiotic withdrawal"}),
         (230, "set_egg_disposition", {"house_id": "H5", "channel": "conventional", "reason": "NAE label exit"}),
+        # DPE mirror (2026-08-26): both H4 mobility retrofits at the window open, matching
+        # regen_golden.py::_POLICY_ACTIONS. Held back on the first option-D build because the
+        # quote was booking PER FITTING ($1,200,900 for the pair), which put the good anchor
+        # $77,377 below `floor_operating` and inverted the ordering invariant
+        # `tests/judge/test_financial_reference.py::test_reference_ordering_is_sane` asserts.
+        # The per-HOUSE pricing fix (Codex review F1) removed the question rather than
+        # answering it: the pair now costs $600,900, the good anchor stays comfortably inside
+        # [floor_operating, ceiling], and the welfare and financial anchors run the same policy
+        # again. The capital job is still the largest single welfare cost in this file, which is
+        # the design intent — a real retrofit is expensive, and that is what makes DPE a
+        # welfare-versus-profit decision rather than a free win.
+        (252, "schedule_maintenance", {"house_id": "H4", "task": "ramps"}),
+        (252, "schedule_maintenance", {"house_id": "H4", "task": "soft_perch"}),
     ],
 }
 

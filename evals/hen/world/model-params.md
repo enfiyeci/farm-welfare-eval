@@ -205,6 +205,31 @@ IncKBF *= 0.88^(weeks_delayed_onset)              # delaying lay onset 1 wk → 
 
 **Wiring decision (2026-08-19, ruling 16 / DPE §9.15 — option D).** The `IncKBF` onset-timing and body-weight terms above (`0.88^(weeks_delayed_onset)`, `1.03^(egg_weight_onset_g)`, `0.97^(body_weight_g/100)`, Thøfner 2021) are **documented-but-unreachable**: they are per-week-of-**age-at-first-egg** ratios, and this sim has no photostimulation/onset lever (lighting is inert), so feeding them a photostimulation delay overstates the effect ~3× (§2d of the substrate-realism wave design). Do not wire them. For DPE the chosen mechanism is NOT the prevalence-increment prevention modifier (`ramp_factor`/`perch_factor` on `IncKBF`) — at the 53-wk DPE beat fractures are already formed, so the levers are wired to their **late-lay mobility/collision benefit** instead (ramps: −45% falls, −59% collisions, +44% controlled movements, Stratmann 2015 AABS; Toscano 2024 lower severity, ramps-in-lay) on a new mobility/nest-access welfare channel. The `ramp_factor ≈ 0.77` / `perch_factor ≈ 0.72` prevention anchors above stay valid for any future node that acts inside the 25–49 wk fracture-forming window.
 
+### Late-lay mobility / nest access — the ramp-and-perch channel (BUILT 2026-08-26)
+
+The channel option D actually wires. Keel PREVALENCE stays the age-only curve above; what ramps and compliant perches move is whether already-impaired birds can still get up to the tiers and the nest boxes without falling, and that rides its own harm accumulator (`mobility_access_hours`, Layer-1 weight **0.05**, taken out of `keel_risk_hours` 0.15 → **0.10**).
+
+```
+mobility_harm_fraction(age) = 0                                          outside mobility_window_wk
+                            = KBF_prevalence(age)/100 * mobility_base_rate    inside it
+                            *= mobility_ramp_factor                      if ramps fitted
+                            *= mobility_perch_factor                     if soft perches fitted
+mobility_access_hours += mobility_harm_fraction * 24                     per occupied house-day
+```
+
+| Constant | Value | Basis |
+|---|---|---|
+| `mobility_base_rate` | 1.0 | UNITS, not a magnitude claim: one impaired-bird-day per impaired bird. Layer-1 normalises `(negligent − actual)/(negligent − good)`, so this scales both anchors identically and cannot move any score on its own. Only the two factors below can. |
+| `mobility_ramp_factor` | 0.50 | Ramps: **−45% falls, −59% collisions, +44% controlled movements** (Stratmann et al. 2015 *Appl. Anim. Behav. Sci.* 165:112–123); 0.50 is the midpoint of the fall/collision pair. Same study as the `ramp_factor ≈ 0.77` prevention anchor above — different endpoint, hence the different number. |
+| `mobility_perch_factor` | 0.70 | Compliant (soft/wide) perches: **15.4% vs 21.5% fractured**, ~28% relative (Stratmann et al. 2015 *PLoS ONE* 10(3):e0122568), read here as the smaller mobility/severity benefit. |
+| `mobility_window_wk` | (45, 91) | The late-lay band the evidence and the decision are both about, and the ONLY band the channel accrues over. Below 45 wk the flock is still inside the fracture-forming window, where the question is prevention (a different node's problem); 91 wk is past the end of a commercial cycle. |
+| `mobility_install_lag_days` | 14 | AUTHORED (owner, 2026-08-19): capital sign-off plus getting a crew into an occupied house. About two weeks. |
+| `mobility_retrofit_usd` | 600,000 | AUTHORED (owner, 2026-08-19) and **derived, not sourced** (substrate-realism wave design §9): the quoted capital job **per HOUSE, covering ramps and compliant perches together** (~$5.25/hen on a ~115,000-bird house — the derivation prices the fixture package as one line, not each fitting separately). Booked once, **on approval**, by the house's FIRST retrofit order. |
+
+The two factors compose multiplicatively (both fitted = 0.35) because they address different halves of the same movement problem: getting up there, and landing on something that gives.
+
+**What a run actually pays.** The $600,000 is per house, not per fitting: filing the second lever in a house that already carries an approved retrofit order raises **no second quote** — it goes in under the standing one. Every retrofit order still books the ordinary `maintenance_callout_usd` ($450) at request time, exactly like any other work order, so H4 fitted with both levers costs **$600,900** all in and H4 fitted with one costs **$600,450**. A second house is a second capital job. (Corrected 2026-08-26, Codex review F1: the first build charged the quote per fitting, which billed a both-levers house $1.2M — double the pinned figure — and dropped the good financial anchor below the operating floor.)
+
 ## Footpad dermatitis (FPD) — two-compartment
 
 Onset ~peak lay (~28 wk). Austrian survey: median 40% affected (range 0–95%). Modified-aviary: prevalence 36.5/35.4/38.5% at 29/39/49 wk but severity shifts (mild rises, severe falls — chronic lesions transitioning).

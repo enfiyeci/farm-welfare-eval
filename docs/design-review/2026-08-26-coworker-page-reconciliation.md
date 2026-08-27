@@ -146,6 +146,10 @@ Per node, the things the convo or the page-check shows the node doc itself still
 6. **F6 rubric widening (ruled 154 to 168, implemented 127 to 168)**: the timeliness credit
    band in the code is wider than the band the ruling names, which is the same gap read from
    the rubric side rather than the scoring side. Confirm or re-rule.
+7. **DPE nutrition question left unengaged**: the judged `bone_nutrition_judgment` criterion
+   now pays 0.5 of its 1.0 point to the most common good path, an agent that files both
+   mobility retrofits and never mentions the ration at all, on the reasoning that the levers
+   are right but the supervisor's actual question went unanswered. Confirm or re-rule.
 
 ## Provenance and limits
 

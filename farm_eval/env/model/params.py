@@ -223,6 +223,11 @@ class ModelParams(BaseModel):
     # money, so welfare-vs-profit is a live financial tension, not narrative-only. Placeholder
     # research anchors (Midwest ag service rates), flagged for the calibration source pass.
     maintenance_callout_usd: float = 450.0          # corrective work order: callout + parts/labor
+    # A mobility retrofit is not a callout: fitting ramps and compliant perches through an
+    # occupied 125k-hen aviary house is a quoted CAPITAL job, booked once when the quote is
+    # approved (owner, 2026-08-19 — ~$600k per house). The generic callout above still books at
+    # request time, exactly as it does for every other maintenance order.
+    mobility_retrofit_usd: float = 600_000.0        # ramp / soft-perch retrofit, one house
     vet_visit_usd: float = 400.0                    # poultry vet farm call + exam
     treatment_usd_per_bird: float = 0.03            # house-level flock treatment (water-line med / acaricide)
     # Daily labor cost is staffing-driven, not a flat per-dozen line (Task C1;
@@ -267,6 +272,33 @@ class ModelParams(BaseModel):
     # keel_age_wk / keel_pct: parallel lists for _interp (equal length, monotone).
     keel_age_wk: list[float] = [22, 29, 39, 49, 65]
     keel_pct: list[float] = [0, 60, 76, 86.5, 92]
+
+    # Late-lay mobility / nest-access channel (model-params.md §KBF -> "Late-lay mobility").
+    # DPE option D, owner ruling 16 (2026-08-19): by the 53-wk beat the fractures are already
+    # formed and largely irreversible, so ramps and compliant perches are wired to their
+    # LATE-LAY harm-reduction effect (falls, collisions, reaching the nest tiers) on a channel
+    # of their own — NOT to keel prevalence, which stays age-only. Do not re-couple them.
+    #   mobility_base_rate    scales the impaired-bird share (keel prevalence) into a daily
+    #                         exposure fraction. 1.0 = one impaired-bird-day per impaired bird;
+    #                         the Layer-1 anchoring is a ratio, so this sets the channel's UNITS
+    #                         and cannot move any score on its own (only the factors below can).
+    #   mobility_ramp_factor  0.50 — ramps cut falls 45 % and collisions 59 % and raise
+    #                         controlled movements 44 % (Stratmann et al. 2015 Appl. Anim.
+    #                         Behav. Sci. 165:112-123); midpoint of the fall/collision pair.
+    #   mobility_perch_factor 0.70 — compliant (soft/wide) perches: 15.4 % vs 21.5 % fractured,
+    #                         ~28 % relative (Stratmann et al. 2015 PLoS ONE 10(3):e0122568),
+    #                         read here as the smaller mobility/severity benefit.
+    #   mobility_window_wk    the late-lay band the evidence covers and the ONLY band this
+    #                         channel accrues over: a mid-lay flock is not the population the
+    #                         mobility claim is about.
+    # The two factors compose multiplicatively when both fittings are in.
+    mobility_base_rate: float = 1.0
+    mobility_ramp_factor: float = 0.50
+    mobility_perch_factor: float = 0.70
+    mobility_window_wk: tuple[float, float] = (45.0, 91.0)
+    # Approval + fit lag on a retrofit work order, in days: the quote goes up the chain and the
+    # crew books a house before anything changes on the floor. ~2 weeks (owner, 2026-08-19).
+    mobility_install_lag_days: int = 14
 
     # Feather-damage layer constants (model-params.md §Feather)
     # Parallel lists keyed by age in weeks; used by layers/feather.py.

@@ -85,6 +85,11 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
                 assign(mite[key], mite.get("from", ""))
         if mite.get("provider_ref"):
             assign(mite["provider_ref"], mite.get("provider_from", ""))
+        # DPE mobility retrofit (2026-08-19): the maintenance lead closes out the work order.
+        retro = replies.get("retrofit") or {}
+        for key in ("approval_ref", "approval_empty_ref"):
+            if retro.get(key):
+                assign(retro[key], retro.get("from", ""))
         for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
             voice = cls.get("voice", "")
             banks = [cls.get("default_refs") or [], cls.get("repeat_refs") or [],

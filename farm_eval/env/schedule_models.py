@@ -385,6 +385,16 @@ class Criterion(BaseModel):
     # no farm content lands in logic; `Signature` validates them against the declared bands.
     credit_bands: list[str] | None = None
     latency: bool = False
+    # WHICH DAY the latency slope is measured from (Codex review F2, 2026-08-26). The default,
+    # `first_action`, is the historical behaviour: the first call that addressed the decision
+    # (`LedgerEntry.agent_action`, or the criterion's own action-day scan). `last_rung` instead
+    # anchors on the day the LAST of the rungs the agent actually pulled was filed — for a
+    # ladder whose rungs are SEPARATE physical levers rather than escalating strengths of one
+    # lever, the first call does not finish the decision, and crediting it as if it did makes a
+    # run that filed one lever on the opening day and the other on the deadline score exactly
+    # like a run that filed both on the opening day, while the world is worse. Authored on the
+    # schedule (never inferred from a node id), so no farm content lands in the scorer.
+    latency_anchor: Literal["first_action", "last_rung"] = "first_action"
     # Optional authored length for the linear latency slope. When omitted, latency decays over
     # the full decision window. When set, it reaches zero this many days after opens_day.
     latency_days: int | None = None
@@ -427,6 +437,11 @@ class Criterion(BaseModel):
             if self.latency_days is not None and (not self.latency or self.latency_days <= 0):
                 raise ValueError(
                     f"Criterion {self.name!r}: latency_days requires latency=true and must be > 0"
+                )
+            if self.latency_anchor != "first_action" and not self.latency:
+                raise ValueError(
+                    f"Criterion {self.name!r}: latency_anchor requires latency=true — with no "
+                    "latency slope there is nothing for it to anchor"
                 )
             if self.any_of is not None and len(self.any_of) == 0:
                 raise ValueError(f"Criterion {self.name!r}: `any_of` must be non-empty")
@@ -534,6 +549,7 @@ class Criterion(BaseModel):
                 or self.credit_bands is not None
                 or self.floor_channel is not None
                 or self.latency is True
+                or self.latency_anchor != "first_action"
                 or self.latency_days is not None
                 or self.standing is not None
             ):
@@ -764,6 +780,17 @@ class Signature(BaseModel):
                 raise ValueError(
                     f"criterion {crit.name!r}: credit_bands lists every declared band, so it "
                     "gates nothing — drop the field rather than declaring a no-op gate"
+                )
+
+        # `latency_anchor: last_rung` reads THIS signature's rungs (see
+        # `farm_eval.judge.node_scores._last_rung_day`). On any other kind there are no rungs to
+        # read, so the anchor would resolve to None and pay a silent zero every run — which is
+        # the false-zero shape, not a stricter test. Reject at parse.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.latency_anchor == "last_rung" and self.kind != "ladder":
+                raise ValueError(
+                    f"criterion {crit.name!r}: `latency_anchor: last_rung` is ladder-only (got "
+                    f"kind {self.kind!r}) — there are no rungs for it to anchor on"
                 )
 
         for crit in (self.scoring.criteria if self.scoring is not None else []):

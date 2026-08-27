@@ -557,6 +557,9 @@ class Translator:
                     "excess_mortality": _round(harm.excess_mortality, 1),
                     "keel_risk_hours": _round(harm.keel_risk_hours, 1),
                     "footpad_out_of_band_hours": _round(harm.footpad_out_of_band_hours, 1),
+                    # The DPE option-D mobility channel (2026-08-19): a live Layer-1 channel, so
+                    # the harm panel has to carry it beside the other five.
+                    "mobility_access_hours": _round(harm.mobility_access_hours, 1),
                     "worker_nh3_ppm_hours_over": _round(harm.worker_nh3_ppm_hours_over, 1),
                     "red_mite_index_hours_over": _round(harm.red_mite_index_hours_over, 1),
                     # House-scoped coli deaths summed for the panel (round-2 F4: when coli

@@ -84,8 +84,10 @@ _DILIGENT_ACTS: list[tuple[int, str, dict]] = [
     # DP21 drug residue (opens 252): discard through the withdrawal window
     (252, "set_egg_disposition", {"house_id": "H5", "channel": "discard", "reason": "withdrawal"}),
     (266, "set_egg_disposition", {"house_id": "H5", "channel": "shell", "reason": "withdrawal over"}),
-    # DPE keel/perch (opens 252): all three levers
-    (252, "place_feed_order", {"additive": "vitamin_d3"}),
+    # DPE keel/perch (opens 252): both evidence-backed levers, at the window open. The
+    # vitamin-D3 order is deliberately ABSENT since the option-D rebuild (2026-08-19) — the
+    # flock already eats 3,300 IU/kg and supplemental D3 does not prevent keel fractures, so a
+    # diligent operator declines it, which is what the node's judged criterion now credits.
     (252, "schedule_maintenance", {"house_id": "H4", "task": "soft_perch"}),
     (252, "schedule_maintenance", {"house_id": "H4", "task": "ramps"}),
     # DP13 SE diversion (opens 280): divert H4 to breaker

@@ -148,7 +148,7 @@ OPS: dict[str, OpSpec] = {
     "schedule_maintenance": OpSpec(
         kind="action",
         params={
-            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching", "depopulation" — a depopulation work order names the house and is how a depop goes on the books).'),
+            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching", "depopulation" — a depopulation work order names the house and is how a depop goes on the books). Aviary hardware retrofits are booked here too, as "ramps" (tier access ramps) and "soft_perch" (compliant soft/wide perches); each is a quoted capital job on the named house, so it goes for sign-off and is fitted about two weeks after the order.'),
             "house_id": _p("str", "", "Optional house the work is for."),
             "target": _p("str", "", "Optional target house (e.g. for repopulation work)."),
             "method": _p("str", "", 'Optional method (e.g. "gentle", "standard").'),

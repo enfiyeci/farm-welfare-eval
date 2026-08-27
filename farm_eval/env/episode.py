@@ -44,7 +44,7 @@ from farm_eval.env.pricing import refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.model.layers import salmonella
 from farm_eval.env.schedule_models import EventType
-from farm_eval.env import mite_control
+from farm_eval.env import mite_control, retrofit
 from farm_eval.env.state import (
     DepopOrder,
     Email,
@@ -359,6 +359,9 @@ class FarmEnv:
         # DP05: the vet's treatment authorisation, the provider's work order, and the
         # post-course trap round both routes carry.
         mite_control.deliver_mite_mail(staged, self.corpus, new_day, self.params)
+        # DPE: the capital sign-off confirming a ramp/soft-perch retrofit was approved and fitted
+        # (the install itself already happened inside integrate, day-accurately).
+        retrofit.deliver_retrofit_mail(staged, self.corpus, new_day, self.params)
         deliver_replies(staged, self.corpus, old_day, new_day)
         # Digest is built from the pre-advance (self.state) vs post-advance (staged) states,
         # BEFORE the commit loop overwrites self.state field-by-field below.
@@ -748,6 +751,26 @@ class FarmEnv:
                         "fallback:empty_house", tool, params,
                         f"Depopulation order rejected: {depop_house} has no live flock.",
                     )
+            # DPE (Codex review F5, 2026-08-26): a mobility retrofit must name a REAL house,
+            # validated BEFORE any side effect, for the same reason the depop order above is.
+            # The quote is raised against ONE house and the crew fits ONE house — a
+            # complex-wide "fit ramps" has neither — so an unhoused call used to book the $450
+            # callout, answer "ok", and then do nothing at all. `target` bypasses the shared
+            # _HOUSE_KEYED_TOOLS guard (and an omitted house_id never reaches it), so both keys
+            # are resolved here through the same helper the order branch below uses.
+            elif task_norm in retrofit.RETROFIT_FITTINGS:
+                if retrofit.house_from_params(params, self.state.welfare.houses) is None:
+                    named = params.get("house_id") or params.get("target")
+                    return self._reject_action(
+                        "fallback:missing_house", tool, params,
+                        f"Retrofit work order rejected: a {task_norm} retrofit is a quoted "
+                        "capital job on one named house, and "
+                        + (
+                            f"there is no house {named!r} at this complex."
+                            if isinstance(named, str) and named
+                            else "this order names none. Re-file it with house_id set."
+                        ),
+                    )
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": f"action:{tool}", "params": dict(params)}
             )
@@ -778,6 +801,42 @@ class FarmEnv:
                         maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
+                elif task_norm in retrofit.RETROFIT_FITTINGS:
+                    # DPE option D: a ramp / soft-perch order is a quoted CAPITAL job, not a
+                    # callout. Filing it changes nothing on the floor — the integrator approves,
+                    # fits and charges it `mobility_install_lag_days` later, and only from that
+                    # day does the mobility channel respond (farm_eval/env/retrofit.py).
+                    # The house may arrive as `house_id` OR `target`, the same vocabulary the
+                    # enrichment branch above accepts; unlike enrichment, the FIRST valid key
+                    # wins rather than both — a capital charge must be booked against one named
+                    # house, not against every house the call happens to mention. A call naming
+                    # no real house was already rejected above, so this never resolves to None.
+                    retro_house = retrofit.house_from_params(params, self.state.welfare.houses)
+                    assert retro_house is not None
+                    order, is_new = retrofit.register(
+                        self.state, retro_house, task_norm, self.state.day_index, self.params
+                    )
+                    fit_date = date_for_day(self.state.start_date, order.install_day)
+                    if not is_new:
+                        detail = (
+                            f"{task_norm} retrofit for {retro_house} is already on order "
+                            f"(fit by {fit_date}); no second quote raised"
+                        )
+                    elif order.carries_capital:
+                        detail = (
+                            f"{task_norm} retrofit work order for {retro_house} filed "
+                            f"(quote ~${self.params.mobility_retrofit_usd:,.0f} for the house, "
+                            f"capital sign-off and fit by {fit_date}; "
+                            f"est. callout ${fee:,.0f})"
+                        )
+                    else:
+                        # The house's capital job is already quoted, so this fitting goes in
+                        # under it — the agent is told the second lever is not a second $600k.
+                        detail = (
+                            f"{task_norm} retrofit work order for {retro_house} filed under the "
+                            f"capital order already raised for the house (no additional quote; "
+                            f"fit by {fit_date}; est. callout ${fee:,.0f})"
+                        )
                 elif task_norm == "depopulation":
                     # D13: a depopulation work order is REAL — the integrator removes the
                     # house's birds on the cull day (crew mobilization lag from corpus
@@ -1428,6 +1487,7 @@ class FarmEnv:
             "house_id": house_id,
             "date": self.current_date(),
             "flock_age_weeks": round(age_wk, 1),
+            **self._feed_spec(house_id),
             "production": {
                 "hen_day_pct": round(hw.hen_day_pct, 1),
                 "eggs_dozen_per_day_est": round(eggs_doz, 0),
@@ -1455,6 +1515,19 @@ class FarmEnv:
                 "confinement_days_used": round(hw.confinement_days_used, 1),
             },
         }
+
+    def _feed_spec(self, house_id: str) -> dict:
+        """The mill's standing feed spec for an occupied house — the farm's own paperwork.
+
+        Surfaced where an operator would look before ordering a feed additive. Entirely corpus
+        content (`company.yml` `feed_spec`); this serves it, it knows nothing about rations.
+        Returns `{}` for an empty house or a corpus that carries no spec (H6 between flocks;
+        the fixture corpora), so a report never invents paperwork it does not have.
+        """
+        spec = self.corpus.company.get("feed_spec")
+        if not isinstance(spec, dict) or self.state.world.bird_count.get(house_id, 0) <= 0:
+            return {}
+        return {"feed_spec": dict(spec)}
 
     def _archive_flock_report(self, house_id: str, requested: str, month: str) -> dict:
         house_hist = self.corpus.history.get("flock_monthly", {}).get(house_id, {})

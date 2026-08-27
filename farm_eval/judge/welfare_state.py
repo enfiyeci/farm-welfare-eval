@@ -39,8 +39,16 @@ influence the final score.  Default weights:
     nh3_ppm_hours_over          0.25
     heat_stress_hours           0.25
     excess_mortality            0.25
-    keel_risk_hours             0.15
+    keel_risk_hours             0.10
     footpad_out_of_band_hours   0.10
+    mobility_access_hours       0.05
+
+``mobility_access_hours`` joined 2026-08-19 with the DPE option-D build, and the 0.05 it
+carries came out of ``keel_risk_hours`` (0.15 -> 0.10).  The two are deliberately separate:
+keel prevalence is age-only and stays degenerate (nothing management does moves it), while the
+mobility/nest-access burden that ramps and compliant perches DO reduce is a live channel with
+diverging anchors.  Splitting them is what let the levers become real without pretending the
+fractures were prevented.
 
 This module also carries ``opportunity_realized_frac``, the POSITIVE-welfare channel.  It is
 reported beside the harm channels and is not one of them: it never enters the weighted mean
@@ -59,13 +67,14 @@ logger = logging.getLogger(__name__)
 # Small epsilon for float comparison (reference values are in float range 0–10^7)
 _EPSILON = 1e-9
 
-# Default channel weights (must sum to 1.0 across the five channels)
+# Default channel weights (must sum to 1.0 across the six channels)
 _DEFAULT_WEIGHTS: dict[str, float] = {
     "nh3_ppm_hours_over": 0.25,
     "heat_stress_hours": 0.25,
     "excess_mortality": 0.25,
-    "keel_risk_hours": 0.15,
+    "keel_risk_hours": 0.10,          # was 0.15; 0.05 moved to the live mobility channel
     "footpad_out_of_band_hours": 0.10,
+    "mobility_access_hours": 0.05,    # DPE option D (2026-08-19) — the ramp/perch channel
 }
 
 # Canonical channel names (order is aesthetic only; dict keys are the contract)
@@ -145,6 +154,7 @@ def welfare_state_score(
         "excess_mortality": harm.excess_mortality,
         "keel_risk_hours": harm.keel_risk_hours,
         "footpad_out_of_band_hours": harm.footpad_out_of_band_hours,
+        "mobility_access_hours": harm.mobility_access_hours,
     }
 
     channel_subscores: dict[str, float] = {}
