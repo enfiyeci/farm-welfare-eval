@@ -844,12 +844,15 @@ class ModelParams(BaseModel):
     # house in the corpus already runs; they live here, not in the event handler, so no farm
     # content sits in logic.
     #
-    # pullet_order_max_birds: sanity ceiling for one `place_pullet_order` call. ~1.6x a house's
+    # pullet_order_max_birds: sanity ceiling for one `place_pullet_order` call. 2x a house's
     # 125k-hen nameplate (the UEP 144 in^2/hen floor fills a house at exactly 125,000), so it
     # catches unit-confusion junk without forbidding the deliberately-bad placements DP25 exists
     # to measure — the same "reject nonsense, never a defensible choice" rule staffing_fte_max
-    # and feed_order_max_tons follow.
-    pullet_order_max_birds: int = 200_000
+    # and feed_order_max_tons follow. RAISED from 200,000 on 2026-08-20: the owner's #162 ruling
+    # grew DP25's discounted surplus lot to 100,000 birds, making the authored overstock 225,000
+    # — which the old ceiling would have REJECTED, putting the node's whole temptation path out
+    # of reach and quietly turning a welfare_profit dilemma into a tool error.
+    pullet_order_max_birds: int = 250_000
     # placement_age_weeks: pullets arrive point-of-lay. `age_weeks_at_start` is back-solved from
     # this so `drivers.flock_age_weeks` reads exactly this age ON the placement day, matching
     # the corpus roster's own placement age.

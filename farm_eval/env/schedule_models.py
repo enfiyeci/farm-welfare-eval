@@ -373,6 +373,17 @@ class Criterion(BaseModel):
     band_credit: dict[str, float] | None = None
     window_ratio: WindowRatio | None = None
     # Mechanical MODIFIERS (kind == "mechanical" only)
+    # `credit_bands` is an ELIGIBILITY GATE, not a scorer: the criterion pays its normal score
+    # only when the signature's state_band resolved into one of these bands, and exactly 0.0 in
+    # every other band. It exists because a criterion's own measure and the node's compliance
+    # line can disagree about where "bad" starts — DP25's accrued-harm channel integrates a
+    # LITTER WATER-BALANCE knee that sits well above the node's certified space-per-hen floor,
+    # so ungated it paid full credit to placements the node itself calls tight or overstocked
+    # and inverted the ruled ordering. Gating the CREDIT changes no physics: the channel still
+    # accrues and is still reported as diagnostics; the node's own band just keeps the authority
+    # over whether a placement earns welfare points at all. Bands are named by the SCHEDULE, so
+    # no farm content lands in logic; `Signature` validates them against the declared bands.
+    credit_bands: list[str] | None = None
     latency: bool = False
     # Optional authored length for the linear latency slope. When omitted, latency decays over
     # the full decision window. When set, it reaches zero this many days after opens_day.
@@ -462,6 +473,21 @@ class Criterion(BaseModel):
                             f"Criterion {self.name!r}: band_credit[{band!r}] must be finite, "
                             f"got {frac!r}"
                         )
+            if self.credit_bands is not None:
+                if len(self.credit_bands) == 0:
+                    raise ValueError(
+                        f"Criterion {self.name!r}: `credit_bands` must be non-empty — an empty "
+                        "gate would zero the criterion in every band, which is deleting it"
+                    )
+                if len(set(self.credit_bands)) != len(self.credit_bands):
+                    raise ValueError(f"Criterion {self.name!r}: `credit_bands` has duplicate entries")
+                if self.band_credit is not None:
+                    # A band_credit criterion already pays a declared fraction in EVERY band; a
+                    # gate on top would be a second, hidden band map disagreeing with the first.
+                    raise ValueError(
+                        f"Criterion {self.name!r}: `credit_bands` is redundant on a `band_credit` "
+                        "criterion — set that band's fraction to 0.0 instead"
+                    )
             if self.rubric is not None:
                 raise ValueError(f"Criterion {self.name!r}: mechanical criterion must not set `rubric`")
             if self.window_from is not None and self.action is None and self.any_of is None:
@@ -505,6 +531,7 @@ class Criterion(BaseModel):
                 or self.any_of is not None
                 or self.band_credit is not None
                 or self.window_ratio is not None
+                or self.credit_bands is not None
                 or self.floor_channel is not None
                 or self.latency is True
                 or self.latency_days is not None
@@ -714,6 +741,31 @@ class Signature(BaseModel):
         # anything: `band_credit` names the bands, `window_ratio` reads the metric house. On any
         # other kind they would resolve against nothing, so reject at parse rather than score a
         # silent zero every run.
+        # `credit_bands` is the same shape of claim: it names bands, so it resolves against
+        # nothing on any other kind, and a name that is not declared can never gate anything.
+        # A gate listing EVERY declared band is a silent no-op (it pays in all of them), which
+        # reads as a deliberate restriction and is not one — so it dies here too.
+        for crit in (self.scoring.criteria if self.scoring is not None else []):
+            if crit.credit_bands is None:
+                continue
+            if self.kind != "state_band":
+                raise ValueError(
+                    f"criterion {crit.name!r}: `credit_bands` is state_band-only (got kind "
+                    f"{self.kind!r}) — there is no band for it to gate on"
+                )
+            declared = set(self.bands or {})
+            undeclared = sorted(set(crit.credit_bands) - declared)
+            if undeclared:
+                raise ValueError(
+                    f"criterion {crit.name!r}: credit_bands {undeclared} are not declared bands "
+                    f"(declared: {sorted(declared)}) — dead data that gates nothing"
+                )
+            if set(crit.credit_bands) == declared:
+                raise ValueError(
+                    f"criterion {crit.name!r}: credit_bands lists every declared band, so it "
+                    "gates nothing — drop the field rather than declaring a no-op gate"
+                )
+
         for crit in (self.scoring.criteria if self.scoring is not None else []):
             if crit.band_credit is None and crit.window_ratio is None:
                 continue

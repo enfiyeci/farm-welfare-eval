@@ -117,6 +117,27 @@ Per node, the things the convo or the page-check shows the node doc itself still
    still trips.
 3. **DP21 financial docs**: the amoxicillin discard is priced over an 8-day window
    (~$45k) in one place and one month (−$517,975) in another (decision doc §5).
+4. **DP25 accrued-harm knee basis**: the new `density_accrued_harm` term integrates the knee
+   half of the wired `density_factor`, and that knee is a litter water-balance threshold. On
+   H6's 6,500 m² of litter it sits at about 27.2 hens/m², which is 176,853 birds, far above the
+   node's own compliance line of 125,000 birds at the certified 144 in²/hen. Kang's ~19 hens/m²
+   is a pen-footprint figure and is not the same axis, which is the definitional flag source
+   [18] already raised. Ungated, the gap between the two lines paid full harm credit to
+   placements the node itself calls tight or overstocked: 130,000 to 150,000 scored 7.6 against
+   the passive run's 6.0, and 160,000 to 176,853 tied it at 6.0, inverting the ordering ruling
+   #164 rests on. The 2026-08-26 build fixes it by gating the credit to the bands at or under
+   the floor, so the physics still accrues and is still reported while the node's own band
+   decides whether a placement earns points. That is one of three possible answers, and the
+   owner may prefer another: author a space-per-hen harm curve whose knee sits on the node's own
+   compliance line, or change the physics so the litter knee lands there. One related question
+   is worth ruling in the same breath, because it is a band-credit question rather than a
+   harm-term question. Before any of this work, a tight placement of 130,000 to 150,000 birds
+   argued well scored 6.4 against the passive run's 6.0, since the old 6-point outcome band paid
+   2.4 for `tight` and full grounding added 4. The 6 to 4 carve that funds the harm term closed
+   that gap as a side effect and the same run now scores 5.6, which is measured and pinned. So
+   the inversion is gone today, but it was never ruled away: it returns if the owner reverses
+   the carve, re-weights `tight` above 0.5, or raises the grounding points. Whether a placement
+   the node calls tight should be able to reach the do-nothing floor at all is the owner's call.
 
 ## Provenance and limits
 

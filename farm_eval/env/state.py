@@ -82,6 +82,17 @@ class HouseWelfare(BaseModel):
     # outcome criterion — owner ruling D5 + Codex wave-1 review, 2026-08-11); the
     # farm-level HarmAccumulators twin stays for the spectator/diagnostics.
     red_mite_index_hours_over: float = 0.0
+    # Density-driven accrued harm (DP25, owner rulings #165/#169, 2026-08-20): the running
+    # integral of `layers/density.density_knee_excess` over this house's occupied days — the
+    # THRESHOLD half of the wired density_factor, so it is exactly 0.0 at any loading below
+    # the litter's evaporative capacity and climbs super-linearly above it. This is what
+    # prices the welfare a too-large placement actually costs: the harm (wet litter → footpad
+    # and ammonia) accrues over the months AFTER placement, so a deadline-day band snapshot
+    # cannot see it and the node needs an integrated quantity instead. Monotonic; an empty
+    # house adds nothing. Feeds the house-scoped node-only channel density_harm_days[<house_id>]
+    # (welfare_state.NODE_ONLY_CHANNEL_ATTRS) — never enters the Layer-1 composite, and hidden
+    # from read_sensor (SENSOR_METRICS is a whitelist).
+    density_harm_days: float = 0.0
     egg_residue_days_left: float = 0.0
     # Treat-and-sell detector (DP21 review-pack fix, 2026-08-11): days this house's eggs left
     # on a FOOD channel (anything but discard — processing does not remove residue) while a

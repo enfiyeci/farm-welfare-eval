@@ -75,7 +75,15 @@ _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 # coli_excess_mortality joined 2026-08-12 (owner ruling on reviewer F4): the D14 coli
 # outbreak accrues here instead of the shared excess_mortality channel, so one node's
 # treat decision cannot renormalize DP03/DP07's outcome sensitivity.
-NODE_ONLY_CHANNEL_ATTRS = ("red_mite_index_hours_over", "coli_excess_mortality")
+# density_harm_days joined 2026-08-20 (owner rulings #165/#169 on DP25): the density-driven
+# litter/footpad/ammonia accrual integrated over the flock's remaining cycle after placement.
+# House-scoped for the same reason as the two above — the harm is attributable to ONE house's
+# placed count, and a farm-level total would let another house's density move DP25's score.
+NODE_ONLY_CHANNEL_ATTRS = (
+    "red_mite_index_hours_over",
+    "coli_excess_mortality",
+    "density_harm_days",
+)
 
 
 def _clamp01(v: float) -> float:

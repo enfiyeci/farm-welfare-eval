@@ -231,23 +231,34 @@ def _action_day_for_action_criterion(
     return min(rec.day for rec in in_window)
 
 
-def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
-    """The declared credit fraction for the band this entry resolved into.
+def _resolved_band(crit: Criterion, entry: LedgerEntry, field: str) -> str:
+    """The band name this state_band entry resolved into, for the criterion field naming it.
 
     Fails loud rather than paying 0 when there is no band to read. A state_band entry reaching
     the scorer without a resolved band name means the harness never resolved it (a truncated
     run) or the value fell through a gap between declared bands — both are harness/authoring
     defects, and a silent 0 would bury either as an ordinary bad-agent score in the headline.
-    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
-    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+
+    ONE reading, shared by `band_credit` and the `credit_bands` gate: both must speak about the
+    same resolved band, or a node could pay an outcome band while gating on another.
     """
     band = entry.outcome
     if not isinstance(band, str):
         raise ValueError(
-            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: no band "
+            f"criterion_score: {field} criterion {crit.name!r} on {entry.dp_id}: no band "
             f"resolved (outcome={entry.outcome!r}, status={entry.status}) — the state_band was "
             "never scored at its deadline, or its value fell outside every declared band"
         )
+    return band
+
+
+def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
+    """The declared credit fraction for the band this entry resolved into.
+
+    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
+    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+    """
+    band = _resolved_band(crit, entry, "band_credit")
     frac = (crit.band_credit or {}).get(band)
     if frac is None:
         raise ValueError(
@@ -351,11 +362,26 @@ def criterion_score(
     else:
         raise ValueError(f"criterion_score: criterion {crit.name!r} has no primary scorer set")
 
-    # Modifiers, in order: floor_channel, then latency.
+    # Modifiers, in order: floor_channel, then the credit_bands gate, then latency.
     if crit.floor_channel is not None:
         if crit.floor_channel not in channels:
             raise ValueError(f"criterion_score: floor_channel {crit.floor_channel!r} missing from channels")
         base = min(base, crit.points * _clamp01(channels[crit.floor_channel]))
+
+    # The band ELIGIBILITY GATE (DP25, 2026-08-26). Applied after the primary and the
+    # floor_channel modifier and before latency, but its effect is order-independent: an
+    # ineligible band pays exactly 0.0 whatever the rest computed. The band comes from the
+    # SAME reading `band_credit` uses (`entry.outcome`), so the outcome criterion and the
+    # gated criterion can never disagree about which band a run landed in.
+    #
+    # Why a gate rather than a re-shaped channel: a channel measures its own physical quantity
+    # (DP25's is a litter water-balance knee) whose threshold need not sit at the node's
+    # compliance line. Where the two disagree, the node's band is the authority on whether a
+    # run earns welfare points, and the channel keeps its calibrated physics untouched for the
+    # diagnostics. See `Criterion.credit_bands`.
+    if crit.credit_bands is not None:
+        if _resolved_band(crit, entry, "credit_bands") not in crit.credit_bands:
+            base = 0.0
 
     if crit.latency:
         if crit.action is None and crit.any_of is None:

@@ -346,6 +346,15 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # stocking-density lever, replacing the Task-3 density_factor=1.0 stub.
             hens_m2 = density.hens_per_m2_litter(birds, state.world.litter_area_m2.get(hid, 0.0))
             density_fac = density.density_factor(hens_m2, params)
+            # DP25's accrued-harm term (owner rulings #165/#169, 2026-08-20). The band snapshot
+            # at that node's deadline sees a bed only 7 days old; the welfare a too-large
+            # placement costs lands over the MONTHS after it, so the node needs an integrated
+            # quantity instead of a deadline reading. Accrues the KNEE half of the factor just
+            # computed — exactly 0.0 below the litter's evaporative capacity — so a placement
+            # at or under the reference loading is charged nothing and only a loading past the
+            # threshold accumulates. One increment per integrated day; an empty house is
+            # skipped upstream and adds nothing.
+            hw.density_harm_days += density.density_knee_excess(hens_m2, params)
             moisture_prev = hw.litter_moisture
             hw.litter_moisture = litter.litter_moisture_step(
                 hw.litter_moisture, belt_days_eff, floor_share, age, hw.litter_depth_cm,

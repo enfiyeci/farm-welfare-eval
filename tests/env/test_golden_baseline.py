@@ -52,11 +52,13 @@ def test_competent_reports_all_channels():
     }
     bracketed = {k for k in got if "[" in k}
     # One house-scoped node-only key per house per attr (D5 mite 2026-08-11; F4-ruling
-    # coli channel 2026-08-12), nothing else.
+    # coli channel 2026-08-12; DP25's density accrued-harm channel, owner rulings #165/#169
+    # 2026-08-20), nothing else.
     assert set(got) == base | bracketed
     assert bracketed == (
         {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
         | {f"coli_excess_mortality[H{i}]" for i in range(1, 7)}
+        | {f"density_harm_days[H{i}]" for i in range(1, 7)}
     )
 
 
