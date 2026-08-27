@@ -95,6 +95,17 @@ _HOUSE_KEYED_TOOLS = {
     "request_vet_treatment", "book_ipm_service",
 }
 
+# The feed-mill additive spellings that specify a high-insoluble-fibre ration (a mill order
+# vocabulary, not farm content — same footing as INCIDENT_CATEGORIES below). Compared on the
+# tracker's normalized form, so "Insoluble Fibre" and "insoluble_fiber" both land here. The
+# set must stay identical to DP07's nutrition-rung `where: {additive: [...]}` list in
+# schedule/events.yml — a spelling the matcher credits but the mill ignores would score an
+# order that changed nothing, and a spelling the mill honours but the matcher misses would
+# silently give away the physics for free. A test pins the two lists together.
+FIBER_ADDITIVE_SPELLINGS: frozenset[str] = frozenset(
+    {"fiber", "fibre", "insoluble_fiber", "insoluble_fibre", "roughage"}
+)
+
 # The FMS incident-log category dropdown (a records-system enum, not farm content — same
 # footing as EggChannel). Compared on the tracker's normalized form so spelling variants
 # ("Mortality Event") land on the canonical key.
@@ -499,20 +510,23 @@ class FarmEnv:
                     f"storage capacity (max {self.params.feed_order_max_tons:g} t per order). "
                     f"Confirm the quantity — did you mean tons?",
                 )
-            # Feather mitigation (D11): a methionine additive is a MILL-LEVEL ration-spec
-            # change — it reaches every occupied house regardless of any house named on
-            # the order (Codex D11 round-1 F3: DP07's nutrition rung matches any methionine
-            # order, and the matcher cannot express house scope without false-zeroing
-            # house-less phrasings, so the physics must match the matcher). Normalized
-            # spelling, same form the tracker's matchers use ("Methionine" == "methionine").
+            # Feather mitigation (D11; re-anchored onto dietary fibre 2026-08-19): a
+            # high-insoluble-fibre additive is a MILL-LEVEL ration-spec change — it reaches
+            # every occupied house regardless of any house named on the order (Codex D11
+            # round-1 F3: DP07's nutrition rung matches any fibre order, and the matcher
+            # cannot express house scope without false-zeroing house-less phrasings, so the
+            # physics must match the matcher). Normalized spelling, the same form the
+            # tracker's matchers use ("Insoluble Fibre" -> "insoluble_fibre"); the accepted
+            # set below mirrors DP07's rung `where` list, and a test pins the two together so
+            # a spelling can never be creditable-but-inert (or effective-but-uncredited).
             additive_raw = params.get("additive")
             additive_norm = (
                 _normalize_string(additive_raw) if isinstance(additive_raw, str) else None
             )
-            if additive_norm == "methionine":
+            if additive_norm in FIBER_ADDITIVE_SPELLINGS:
                 for hid, hw in self.state.welfare.houses.items():
                     if self.state.world.bird_count.get(hid, 0) > 0:
-                        hw.methionine_ration = True
+                        hw.fiber_ration = True
             price = self.state.market.layer_ration_usd_ton
             if qty > 0.0:
                 self.state.financial.feed_inventory_tons += qty

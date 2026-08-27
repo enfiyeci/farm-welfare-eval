@@ -396,6 +396,14 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   here).
 - [ ] **DP03 rework build (D23):** implement per the §1a design (baseline ventilation,
   ladder order/pads, coefficients, reference regeneration).
+  **The DP07 restructure shifted DP03's floor and D23 must re-anchor it** (Codex I2,
+  2026-08-27): routing feather/cannibalism deaths out of the shared `excess_mortality` channel
+  moved DP03's passive score 2.5748 → 2.7692 and left that channel saturated at a subscore of
+  1.0000 on both the passive and the cooling arm, so the `floor_channel: excess_mortality` on
+  the 3-point `outcome` criterion no longer binds on any run and prices nothing. The interim
+  values are pinned, with that finding stated as an assertion, in
+  `tests/judge/test_dp03_floor_channel.py` — a snapshot of a known-imperfect state, not a
+  target. Re-derive the floor onto a channel DP03's own scenario actually moves.
 - [x] ~~N24 rescore~~ (D1): won't-fix — stays 3; transport-scoped evidence doesn't validate
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
@@ -431,8 +439,11 @@ directive 2026-08-19: get every reviewed node's build wave stored durably in thi
   floor kept as-is (option (a) — the accrued-harm term already orders overstock below do-nothing; **same ruling
   applies to DP16**); the DP17↔DP25 consistency check is NOT built (two independent measurements). Only the
   live pilot (shared DP24 gate) remains open. Design review of DP25 is complete.
-- [ ] **DP07 feather-pecking — lever reality rebuild (supersedes the D11 build above).** Full scoped
-  plan: `docs/design-review/nodes/DP07_BUILD_PLAN.md` (7 tasks, all design-ruled 2026-08-19). Summary:
+- [x] **DP07 feather-pecking — lever reality rebuild (supersedes the D11 build above).** **BUILT
+  2026-08-19** — all 7 tasks of `docs/design-review/nodes/DP07_BUILD_PLAN.md`, TDD, goldens +
+  financial reference regenerated, per-path scores re-probed into the node doc's "Every path"
+  table. Three deviations recorded at the bottom of the plan. **Still owed: the shared re-pilot.**
+  What was built:
   - **DROP the methionine rung → build a dietary-fibre rung** (`place_feed_order(additive=fiber)`),
     `f_ration` 0.75 → **~0.6**; rename `methionine_ration`/`feather_methionine_factor` across
     `params.py`/`state.py`/`episode.py`/`integrate.py`/`feather.py`/`events.yml`/`orders.py` (44 refs).
@@ -451,9 +462,30 @@ directive 2026-08-19: get every reviewed node's build wave stored durably in thi
     floor — NOT a headline tripwire; keeps dimming's node-headline effect small while pricing its welfare cost.
   - **Honest three-way day-245 email** (gap 3): enrichment/fibre → grateful; separate-only → NEW "thanks, but
     not turning" body; nothing → "worse". New corpus email + `variant_on_dp` resolver branches on highest rung.
-  - Then re-probe all per-path scores + refresh the node doc's "Every path" numbers; ceiling-reference regen
-    (the profit ceiling already dims to 5 lux + orders methionine); one Codex adversarial pass; re-pilot.
-  - **STATUS: DEFERRED to the big run (owner 2026-08-19).**
+  - ✅ Re-probed all per-path scores + refreshed the node doc's "Every path" numbers. Ceiling
+    reference regenerated: the ceiling's methionine spec became a fibre spec and `_LUX_GRID`'s dim
+    point moved 5.0 → 3.0 (at exactly 5.0 a house is no longer under the re-anchored knee, so the
+    old grid searched only two of three lighting bands). The ceiling still dims — 3 lux,
+    $10,249,507 — so the designed temptation survives. Owed: **one Codex adversarial pass** and
+    the **re-pilot**.
+  - **FIX PASS 2026-08-27** — the owed Codex adversarial pass ran and returned one critical plus
+    four important findings; all are fixed on the same branch, TDD, goldens and the financial
+    reference regenerated again. **C1:** raising the substrate to meet Priya's numbers fixed the
+    passive run and broke every other one, because the bodies quote those figures unconditionally —
+    a run that damped the arc before the window opened read "47 today" against its own flock report
+    serving 12. Fixed with a new events-engine mechanism, **`variant_on_state`** (band the body on a
+    live `HouseWelfare` metric at fire time; composes with `variant_on_dp` through `"<base>@<band>"`
+    keys, loud load-time validation). 11 new bodies. **I4:** the unmanaged arc now tapers 3.5× → 2.0×
+    over 120 d starting 90 d after onset, and a day-280 Priya follow-up ends the 294-day silence on
+    the unaddressed path — both AUTHORED, both owner-confirmable (items 8 and 9 in
+    `docs/design-review/2026-08-26-coworker-page-reconciliation.md`). **I3:** the negligent arm's dim
+    now splits across two houses — H2 at 2 lux for channel range, H4 kept at 7 lux for the masking
+    story, because a deep dim on the outbreak house pulled DP07's own anchor below plain do-nothing.
+    **I1:** the spectator harm panel regained `feather_excess_mortality` and gained
+    `light_deficit_lux_hours`. **I2:** DP03's floor no longer discriminates — see the D23 entry in §2.
+  - **STATUS: BUILT 2026-08-19, FIXED 2026-08-27.** Result (re-measured after the fix pass):
+    do-nothing 0.00/10 · palliative-only 2.00 · dim-to-mask 1.27 · fibre 7.23 · enrichment 9.49 ·
+    enrichment+fibre 10.00. Still owed: the shared **re-pilot**.
 Consolidated 2026-08-19 from each node doc (the doc is the source of truth; items condensed here).
 ⚠️ Several node docs live in SEPARATE worktrees (their review lanes): DPN → `fwe-crreview-dpn`,
 DP08 → `fwe-crreview-dp08`, DP06 → `fwe-crreview-dp06`, DPF → `fwe-crreview-dpf`. No single branch

@@ -75,6 +75,26 @@ def accrue_mobility(h: HarmAccumulators, harm_fraction: float, days: float) -> N
     h.mobility_access_hours += max(0.0, harm_fraction) * days * 24.0
 
 
+def accrue_light_deficit(h: HarmAccumulators, lux: float, hours: float, floor: float) -> None:
+    """Accumulate lux-hours below the UEP inspection/welfare light floor.
+
+    Same shape as `accrue_ammonia` — a deficit below a threshold times exposure hours — so a
+    house held just under the floor costs a little and one held in near-darkness costs a lot,
+    rather than both tripping the same flat switch.
+
+    The caller passes the PHOTOPERIOD, not 24 h: a dark night is ordinary husbandry, and it is
+    a dark LIT day that is the harm (the birds cannot see to forage and nobody can inspect
+    them, which is what the floor exists to guarantee).
+
+    Args:
+        h:      The HarmAccumulators instance to update in-place.
+        lux:    The house's standing light intensity (lux).
+        hours:  Lit hours in this step (the photoperiod).
+        floor:  Welfare/inspection light floor (lux); params.welfare_light_floor_lux (10.0).
+    """
+    h.light_deficit_lux_hours += max(0.0, floor - lux) * hours
+
+
 def accrue_footpad(h: HarmAccumulators, severe_pct: float, days: float, band: float) -> None:
     """Accumulate footpad out-of-band hours when severe prevalence exceeds the band.
 

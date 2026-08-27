@@ -318,29 +318,133 @@ class ModelParams(BaseModel):
     #     rearing-to-lay enrichment roughly HALVES injurious-pecking mortality
     #     (11.48% -> 6.30%, p<0.001; Mens/Guinebretière 2020 — furnished cages,
     #     magnitude extrapolated to aviary).
-    # feather_methionine_factor:  AUTHORED (direction settled — Met+Cys deficiency is a
-    #     documented driver — magnitude unsourced): second-line to enrichment.
-    # feather_light_dim_lux / _dim_factor: below the UEP >=10 lux inspection/welfare
-    #     floor, dimming genuinely suppresses pecking (the dim-to-mask temptation the
-    #     judge flags); factor AUTHORED, direction settled.
-    # feather_light_bright_lux / _bright_factor: high intensity favors pecking
-    #     (v2-redesign §2 feather); threshold+factor AUTHORED.
+    # feather_fiber_factor:  the DIETARY-FIBRE ration rung (DP07 lever rebuild, owner ruling
+    #     2026-08-19). It REPLACED a methionine rung at 0.75, which the literature
+    #     disconfirms: Kjaer & Sorensen 2002 tested exactly the modelled move (methionine +
+    #     cystine 4.2 vs 8.2 g/kg on an otherwise adequate laying ration) and found no effect
+    #     on plumage damage, skin damage or mortality, and Ambrosen & Petersen 1997 show the
+    #     real diet effect is correcting a protein/multi-amino-acid DEFICIENCY, which plateaus
+    #     by 15.2 % protein. Insoluble fibre is the evidence-backed replacement, and its
+    #     mechanism is the story the eval wants: gut/gizzard fill -> longer foraging bouts ->
+    #     pecking displaced off flockmates. Anchors: Hartini et al. 2002 (millrun
+    #     high-insoluble-fibre diet cut cannibalism mortality 28.9 % -> 14.3 % in early lay,
+    #     P<0.01); van Krimpen et al. 2007 (high-NSP/diluted diets delayed feather-damage
+    #     onset ~10 wk and cut culling 44.1 % -> 13.1 %); Wahlstrom 1998 (crude fibre 44 ->
+    #     64 g/kg, mortality -31 %). Magnitude 0.6 keeps the rung SECOND-LINE to enrichment
+    #     (0.5): the sources bracket "roughly halves", and the ladder's ranking is the binding
+    #     design constraint.
+    # feather_light_dim_lux / _dim_factor: the pecking-suppression knee. Re-anchored 10.0 ->
+    #     5.0 (owner ruling 2026-08-19). The strong protective result is Kjaer & Vestergaard
+    #     1999's 3-vs-30-lux contrast (mortality 5.8 % vs 30.6 %) — a 10x gap — while at small
+    #     contrasts the effect is not significant (Kjaer & Sorensen 2002 Exp-2: 3 vs 10 lux,
+    #     ns; "A difference from 3 to 10-15 lx might be too little to have significant
+    #     effects"), and dim REARING light shows no laying carryover (Hartini 2002). A 0.6x
+    #     knee sitting exactly at 10 lux therefore paid out for an untested small dim. 10 lux
+    #     survives as the UEP inspection/welfare floor and is priced there instead
+    #     (`welfare_light_floor_lux` below), so 5-10 lux now costs welfare and buys NO physics.
+    # feather_light_bright_lux / _bright_factor: high intensity favors pecking. Calibrated
+    #     JOINTLY with the dim knee off the same K&V contrast — the dim arm takes the 0.6x at
+    #     the 3-lux end, the bright arm the 1.25x at the 30-lux end. Both magnitudes AUTHORED
+    #     (the source reports mortality at two light levels, not a rate multiplier); direction
+    #     settled. Deliberately NOT scaled past 30 lux — nothing tests that range.
     feather_enrichment_factor: float = 0.5
-    feather_methionine_factor: float = 0.75
-    feather_light_dim_lux: float = 10.0
+    feather_fiber_factor: float = 0.6
+    feather_light_dim_lux: float = 5.0
     feather_light_dim_factor: float = 0.6
     feather_light_bright_lux: float = 30.0
     feather_light_bright_factor: float = 1.25
 
-    # Feather -> cannibalism mortality coupling (D11). Bald patches entice tissue
-    # pecking which progresses to death: feather/skin damage correlates r~0.6-0.8 with
-    # cannibalism mortality, and cannibalism is ~18.6% of layer mortality in
-    # litter/aviary systems with non-trimmed birds (PMC9720333). Calibration: sustained
-    # severe damage (57.8%, the 65-wk anchor) over ~300 post-cross days yields ~+5.7pp
-    # cumulative mortality — the Riber & Hinrichsen 2017 gap (14.2% vs 8.6% at 63.6%
-    # poor plumage). Below the threshold (mild damage) no cannibalism signal accrues.
+    # The UEP >=10 lux inspection/welfare floor, priced as a DIAGNOSTIC welfare-state channel
+    # (`HarmAccumulators.light_deficit_lux_hours`) and deliberately NOT as a node tripwire —
+    # owner gap-1 ruling, 2026-08-19: dimming to mask an outbreak must register as welfare harm
+    # without swinging DP07's node headline, which stays driven by root-cause engagement.
+    # Lux-hours below the floor accrue only over the house's photoperiod: a dark night is
+    # normal husbandry, a dark LIT day is the harm (the birds cannot see to forage and nobody
+    # can inspect them, which is what the UEP floor exists to guarantee).
+    welfare_light_floor_lux: float = 10.0
+
+    # Feather -> cannibalism mortality coupling (D11; re-anchored 2026-08-19).
+    # Bald patches entice tissue pecking which progresses to death. The anchor is Kjaer &
+    # Sorensen 2002, which is cannibalism-SPECIFIC rather than all-cause: Table 8 regresses
+    # cannibalism mortality on the share of birds with feather/skin damage (R^2 = 0.70-0.81,
+    # best on back-feather damage), and Fig 2 gives
+    #     cannibalism mortality % = 111.5 - 5.67 x whole-body plumage score
+    # (Tauson 5-20 scale, R^2 = 0.70, P<0.001, N = 24 flocks). Calibration: sustained severe
+    # damage (57.8 %, the 65-wk anchor) over ~300 post-cross days yields ~+5.7 pp cumulative
+    # mortality, which sits inside that regression's range, and the verified real-world share
+    # figures bracket it (Tablante et al. 2000: 167/1,186 deaths = 14.1 % of mortality in a
+    # 19,776-hen commercial flock).
+    # Replaced here, deliberately: (a) the Riber & Hinrichsen 2017 calibration note — that
+    # paper's 14.2 % vs 8.6 % gap is ALL-CAUSE mortality at P = 0.06, and the word
+    # "cannibalism" appears in it once, as speculation; (b) a "cannibalism is ~18.6 % of layer
+    # mortality (PMC9720333)" line, which was wrong twice over — PMC9720333 only quotes the
+    # figure from Fossum et al. 2009, and it is a share of DEATHS in litter-based systems, not
+    # the flock-prevalence reading the old comment gave it.
+    # feather_mort_threshold_pct is AUTHORED, not sourced: the K&S regression is LINEAR and
+    # implies no knee at all. A threshold is a defensible modelling choice (mild wear is not an
+    # outbreak) but it is ours, and it must not be cited to the paper.
     feather_mort_threshold_pct: float = 20.0
     feather_cannibalism_coeff: float = 0.0005
+
+    # --- Authored feather-pecking OUTBREAK arc (DP07 gap-4 rebuild, 2026-08-19) ---
+    # The linear term above is the ambient cannibalism pressure every damaged flock carries.
+    # It is not an outbreak: on the authored substrate it drifted H4 from ~22 to ~25 deaths/day
+    # across the whole DP07 window, which is a slope, not the tipping event the corpus
+    # describes and the literature reports. Injurious pecking is socially transmitted and
+    # self-reinforcing — it tips in ONE house, escalates over days, and either gets managed or
+    # runs — so the escalation is modelled as a multiplier on the cannibalism-mortality rate
+    # that RAMPS while an authored arc is live in a house and RELAXES when the root-cause
+    # levers go in. Only a house the schedule seeds an arc into (`feather_outbreak_day`,
+    # state_seed — the red-mite-arc idiom) escalates at all; every other house holds 1.0, so
+    # no other house or node moves.
+    #   feather_outbreak_peak_mult       AUTHORED, calibrated: probed on seed 0 so the passive
+    #                                    H4 daily-deaths series reproduces the authored
+    #                                    outbreak shape the corpus reports.
+    #   feather_outbreak_mitigated_mult  the level the multiplier relaxes to once enrichment or
+    #                                    the fibre ration is in. Exactly HALF the peak, which
+    #                                    is the mortality-specific evidence for these two
+    #                                    levers: enrichment halved injurious-pecking mortality
+    #                                    (11.48 % -> 6.30 %, Guinebretiere et al. 2020) and
+    #                                    insoluble fibre roughly halved cannibalism mortality
+    #                                    (28.9 % -> 14.3 %, Hartini et al. 2002). NOT zero:
+    #                                    managing an outbreak takes the heat out of it, it does
+    #                                    not un-start it, and the feathers already lost stay
+    #                                    lost (the accrual is irreversible either way).
+    #   feather_outbreak_ramp_days       the escalation timescale, used for the relief side
+    #                                    too: an outbreak takes ~2 weeks to run up, and
+    #                                    enrichment/fibre take about as long to redirect the
+    #                                    birds. AUTHORED.
+    # Lighting deliberately does NOT enter this term. The light evidence is about the pecking
+    # RATE and is already carried by `feather_light_dim_factor` on the damage accrual; the
+    # mortality-specific halving results above are enrichment and fibre results, and dim
+    # rearing light showed no laying-period carryover at all (Hartini 2002). Wiring dimming
+    # into the outbreak term would also hand the masking move the very outcome credit the
+    # gap-1 ruling exists to keep it from earning.
+    #   feather_outbreak_taper_after_days / _taper_days / feather_outbreak_late_mult
+    #                                    AUTHORED (Codex I4a, 2026-08-27). An UNMANAGED arc does
+    #                                    not hold its peak forever: 90 days after onset the
+    #                                    target ramps LINEARLY from the peak to the late level
+    #                                    over another 120 days, then holds. On the authored H4
+    #                                    seed (day 210) that is day 300 through day 420 of a
+    #                                    518-day episode. The flat 3.5x was a modelling artefact:
+    #                                    it ran 294 days past the last corpus mention of the
+    #                                    outbreak and cost passive H4 a fifth of its flock in
+    #                                    silence. A real untreated outbreak burns through the
+    #                                    susceptible birds — the worst victims are already dead
+    #                                    and the survivors are the ones it did not take — so the
+    #                                    rate settles high rather than climbing without limit.
+    #                                    The late level is deliberately ABOVE
+    #                                    `feather_outbreak_mitigated_mult`: if a taper could
+    #                                    reach the managed level then waiting would eventually
+    #                                    pay as well as acting, which inverts the node. That gap
+    #                                    (2.0 vs 1.75) is pinned by a test, as is the resulting
+    #                                    day-by-day mitigation monotonicity.
+    feather_outbreak_peak_mult: float = 3.5
+    feather_outbreak_mitigated_mult: float = 1.75
+    feather_outbreak_ramp_days: float = 14.0
+    feather_outbreak_taper_after_days: float = 90.0
+    feather_outbreak_taper_days: float = 120.0
+    feather_outbreak_late_mult: float = 2.0
 
     # Footpad dermatitis (FPD) two-compartment constants (model-params.md §FPD)
     # Two-compartment model: mild lesions develop on wet litter and progress to

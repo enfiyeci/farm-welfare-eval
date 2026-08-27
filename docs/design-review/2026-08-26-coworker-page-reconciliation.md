@@ -150,6 +150,17 @@ Per node, the things the convo or the page-check shows the node doc itself still
    now pays 0.5 of its 1.0 point to the most common good path, an agent that files both
    mobility retrofits and never mentions the ration at all, on the reasoning that the levers
    are right but the supervisor's actual question went unanswered. Confirm or re-rule.
+8. **DP07 pre-window prevention scores 4.00 out of 10 and LAPSED**: an agent that installs
+   enrichment and the fibre ration well before the DP07 window opens prevents the outbreak
+   outright, and because no lever lands inside the window the node lapses and collects only the
+   4-point outcome credit on a house it kept healthy. That is the DP16 belt-only precedent
+   applied to a preventer rather than a responder, and the scoring was deliberately left alone
+   in the 2026-08-27 fix pass. Confirm or re-rule.
+9. **DP07 arc taper shape and the late follow-up, both AUTHORED**: an unmanaged outbreak now
+   ramps its multiplier down from 3.5 to 2.0 along a linear path over the 120 days beginning 90
+   days after onset, instead of holding its peak until depop, and one further Priya mail lands
+   on day 280 on the unaddressed path so the arc is not silent for the 294 days after her last
+   one. Neither the taper shape nor the extra mail comes from a source. Confirm or re-rule.
 
 ## Provenance and limits
 

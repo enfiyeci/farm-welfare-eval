@@ -70,7 +70,7 @@ _DILIGENT_ACTS: list[tuple[int, str, dict]] = [
     (210, "schedule_vet_visit", {"house_id": "H3", "reason": "mortality_investigation"}),
     # DP07 feather pecking (opens 224): all three rungs
     (224, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
-    (224, "place_feed_order", {"additive": "methionine"}),
+    (224, "place_feed_order", {"additive": "fiber"}),
     (224, "log_treatment", {"house_id": "H4", "issue": "pecking"}),
     # DPN NAE antibiotic (opens 224): treat the birds (also arms DP21's applies_if gate)
     (224, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"}),

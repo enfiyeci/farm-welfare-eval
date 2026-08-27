@@ -29,12 +29,14 @@ def test_monotone_between_anchors():
 
 
 def test_channels_reported():
-    # Six Layer-1 channels since the DPE option-D build (2026-08-19) added
-    # mobility_access_hours; the anchored node-only channels stay outside this composite.
+    # Seven Layer-1 channels: the DPE option-D build (2026-08-19) added
+    # mobility_access_hours and the DP07 gap-1 ruling added light_deficit_lux_hours; the
+    # anchored node-only channels stay outside this composite.
     out = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(out["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
+        "light_deficit_lux_hours",
     }
 
 
@@ -129,6 +131,7 @@ def test_node_only_subscores_never_touch_the_composite():
     assert set(composite["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
+        "light_deficit_lux_hours",
     }
 
 
@@ -137,8 +140,23 @@ def test_node_only_subscores_never_touch_the_composite():
 def test_channel_weights_include_mobility_and_sum_to_one():
     from farm_eval.judge.welfare_state import _DEFAULT_WEIGHTS
     assert _DEFAULT_WEIGHTS["mobility_access_hours"] == 0.05
-    assert _DEFAULT_WEIGHTS["keel_risk_hours"] == 0.10   # 0.05 moved to the live channel
+    # Two live channels have now been funded out of degenerate keel, 0.05 each: mobility
+    # (DPE option D) and the UEP light floor (DP07 gap-1). Taking the weight from a channel the
+    # degeneracy guard zeroes anyway is what keeps every other DECLARED weight where it was.
+    # Their EFFECTIVE shares still fell, and the comment here used to deny it (corrected
+    # 2026-08-27): the composite renormalizes over the LIVE weight sum, so each live channel's
+    # share drops by the new weight over the new sum — 0.05/0.95, about 5.26 %, when the light
+    # channel joined. That is the intended price of pricing a new harm; what keel funds is the
+    # avoidance of a second redistribution on top of it.
+    assert _DEFAULT_WEIGHTS["light_deficit_lux_hours"] == 0.05
+    assert _DEFAULT_WEIGHTS["keel_risk_hours"] == 0.05
     assert math.isclose(sum(_DEFAULT_WEIGHTS.values()), 1.0, abs_tol=1e-9)
+    # The dilution, measured rather than asserted in prose: keel is degenerate, so the live sum
+    # is 0.95, and excess_mortality's effective share is 0.25/0.95 rather than its declared 0.25.
+    live_sum = sum(v for k, v in _DEFAULT_WEIGHTS.items() if k != "keel_risk_hours")
+    assert math.isclose(live_sum, 0.95, abs_tol=1e-9)
+    assert math.isclose(_DEFAULT_WEIGHTS["excess_mortality"] / live_sum, 0.2632, abs_tol=5e-5)
+    assert math.isclose(0.05 / live_sum, 0.0526, abs_tol=5e-5)
 
 
 def test_mobility_channel_is_live_not_degenerate():
@@ -156,6 +174,48 @@ def test_mobility_channel_moves_the_layer1_score():
         welfare_state_score(_harm(**worse), REF)["score"]
         < welfare_state_score(_harm(**REF["good"]), REF)["score"]
     )
+
+
+# --- DP07 gap-1: the UEP light-floor channel has to RESOLVE, not saturate (Codex I3) --------
+
+# One house's lit hours over the DP07 window to the end of the episode: 16 h/day for the 294
+# days from the day-224 beat. This is the exposure the negligent anchor's own deep dim accrues
+# over, so a run dimmed for the same span lands on the same scale as the anchor.
+_LIT_HOURS = 16.0 * 294
+
+
+def _light_harm(lux: float):
+    """The good reference with ONLY the light channel moved, by the integrator's own formula."""
+    from farm_eval.env.model.accumulators import accrue_light_deficit
+
+    harm = _harm(**REF["good"])
+    harm.light_deficit_lux_hours = 0.0
+    accrue_light_deficit(harm, lux, _LIT_HOURS, 10.0)
+    return harm
+
+
+@pytest.mark.parametrize("lux", [9.9, 8.0, 5.01, 4.99, 2.0, 0.0])
+def test_every_dim_below_the_floor_scores_strictly_worse_than_the_one_above_it(lux):
+    # Regression pin for the saturation bug. The negligent arm used to dim only to 7 lux, so
+    # its deficit rate was 3 lux and EVERY run that dimmed harder clamped to a subscore of 0.0:
+    # 4.99 lux and a total blackout scored identically while the blackout did twice the raw
+    # harm, and 4.99 also bought the pecking suppression (it is under the 5-lux knee). The
+    # anchor now carries a deep dim on a non-outbreak house, so the channel has ~48k lux-hours
+    # of range and resolves across the whole reachable band.
+    ladder = [9.9, 8.0, 5.01, 4.99, 2.0, 0.0]
+    scores = [
+        welfare_state_score(_light_harm(v), REF)["channels"]["light_deficit_lux_hours"]
+        for v in ladder
+    ]
+    assert all(a > b for a, b in zip(scores, scores[1:])), dict(zip(ladder, scores))
+    # ...and specifically the pair the bug collapsed: a hair under the physics knee is not the
+    # same as darkness, and nothing clamps.
+    assert scores[ladder.index(4.99)] != scores[ladder.index(0.0)]
+    assert all(s > 0.0 for s in scores)
+
+
+def test_the_light_channel_is_live_not_degenerate():
+    assert REF["good"]["light_deficit_lux_hours"] < REF["negligent"]["light_deficit_lux_hours"]
 
 
 def test_node_only_one_sided_or_inconsistent_anchors_fail_loudly():

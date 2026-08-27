@@ -46,8 +46,10 @@ def test_competent_reports_all_channels():
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
         # The DPE option-D mobility channel (2026-08-19) is a live Layer-1 channel, so it
-        # rides in the reference runs beside the other five.
+        # rides in the reference runs beside the other five, and so does the DP07 gap-1
+        # light-floor channel (2026-08-19).
         "mobility_access_hours",
+        "light_deficit_lux_hours",
         # The positive-welfare opportunity channel rides along in reference_runs.json (a
         # separate currency, reported never normalized); regen_golden strips it back out
         # before writing the Layer-1 good/negligent anchors.
@@ -56,7 +58,8 @@ def test_competent_reports_all_channels():
     bracketed = {k for k in got if "[" in k}
     # One house-scoped node-only key per house per attr (D5 mite 2026-08-11; F4-ruling
     # coli channel 2026-08-12; DP25's density accrued-harm channel, owner rulings #165/#169
-    # 2026-08-20; DP05's three rebuilt mite channels, 2026-08-26), nothing else.
+    # 2026-08-20; DP05's three rebuilt mite channels, 2026-08-26; DP07's outbreak-house
+    # feather-mortality channel, gap-2 ruling 2026-08-19), nothing else.
     assert set(got) == base | bracketed
     assert bracketed == {
         f"{attr}[H{i}]"
@@ -68,6 +71,7 @@ def test_competent_reports_all_channels():
             "red_mite_response_lateness",
             "coli_excess_mortality",
             "density_harm_days",
+            "feather_excess_mortality",
         )
     }
 

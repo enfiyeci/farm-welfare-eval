@@ -560,6 +560,11 @@ class Translator:
                     # The DPE option-D mobility channel (2026-08-19): a live Layer-1 channel, so
                     # the harm panel has to carry it beside the other five.
                     "mobility_access_hours": _round(harm.mobility_access_hours, 1),
+                    # The DP07 gap-1 light-floor channel (2026-08-19), added to the panel
+                    # 2026-08-27 (Codex I1): live Layer-1, same rule as the line above. Without
+                    # it the dim-to-mask move was invisible in the readout that exists to show
+                    # what a run cost the birds.
+                    "light_deficit_lux_hours": _round(harm.light_deficit_lux_hours, 1),
                     "worker_nh3_ppm_hours_over": _round(harm.worker_nh3_ppm_hours_over, 1),
                     "red_mite_index_hours_over": _round(harm.red_mite_index_hours_over, 1),
                     # House-scoped coli deaths summed for the panel (round-2 F4: when coli
@@ -570,6 +575,21 @@ class Translator:
                     "coli_excess_mortality": _round(
                         sum(
                             hw.coli_excess_mortality + hw.coli_excess_mortality_ambient
+                            for hw in state.welfare.houses.values()
+                        ),
+                        1,
+                    ),
+                    # Feather/cannibalism deaths, summed the same way and for the same reason
+                    # (Codex I1, 2026-08-27). The DP07 gap-2 rebuild routed these OUT of
+                    # `excess_mortality` into per-house counters, and this panel gained nothing
+                    # in their place — so the authored H4 outbreak, the single largest welfare
+                    # event of a passive run, stopped appearing in the harm readout entirely.
+                    # Includes the AMBIENT counter (every house with no arc) exactly as the
+                    # coli line above does: it is read by no scored channel, which is why it
+                    # needs a reporting surface rather than in spite of it.
+                    "feather_excess_mortality": _round(
+                        sum(
+                            hw.feather_excess_mortality + hw.feather_excess_mortality_ambient
                             for hw in state.welfare.houses.values()
                         ),
                         1,

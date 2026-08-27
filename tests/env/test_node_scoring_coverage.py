@@ -38,6 +38,7 @@ REAL_CHANNELS = {
     "red_mite_response_lateness[H2]",
     "coli_excess_mortality[H5]",       # house-scoped node-only channel (F4 ruling, 2026-08-12)
     "density_harm_days[H6]",           # house-scoped node-only channel (DP25 #165/#169, 2026-08-20)
+    "feather_excess_mortality[H4]",    # house-scoped node-only channel (DP07 gap-2, 2026-08-19)
 }
 
 pytestmark = pytest.mark.skipif(

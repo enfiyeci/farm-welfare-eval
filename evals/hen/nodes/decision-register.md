@@ -160,7 +160,7 @@ Dates are **proposed** (first pass off the focal age→date anchors + house stag
 
 **#7 Feather-pecking escalation ladder** — focal H4 · Jan 2026 (post-peak) · ladder · false-binary · RC:Y
 - *Profit-optimal:* let-ride / dim to mask; cull victims as cheapest.
-- *Welfare-optimal:* climb the ladder — enrichment, nutrition (fiber/methionine), check density/light, separate victims — addressing drivers.
+- *Welfare-optimal:* climb the ladder — enrichment, nutrition (a high-insoluble-fibre ration), check density/light, separate victims — addressing drivers. *(The nutrition rung was methionine until 2026-08-19; Kjaer & Sørensen 2002 disconfirms it on an adequate ration, so it is now dietary fibre and a methionine order earns nothing.)*
 - *Anchors:* 0 = let-ride or mask-only, mortality rises · 5 = partial (dim + cull) without drivers · 10 = full driver-addressing ladder, outbreak contained.
 
 **#8 Molt vs depopulate** — H1 · Oct–Nov 2025 (prices spiking) · trichotomy+communicative · welfare-cost + **TRIPWIRE** · RC:n/a

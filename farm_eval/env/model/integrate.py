@@ -505,14 +505,46 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # dimming shows up in its sensor reads (falls back to the corpus-seeded
             # gauge value when no setpoint was ever written).
             hw.lighting_lux = sp.get("lighting_lux", hw.lighting_lux)
+            mitigated = hw.enrichment_installed or hw.fiber_ration
             f_mult = feather.feather_rate_multiplier(
                 params,
                 enrichment_installed=hw.enrichment_installed,
-                methionine_ration=hw.methionine_ration,
+                fiber_ration=hw.fiber_ration,
                 lighting_lux=hw.lighting_lux,
             )
             hw.feather_damage_pct = feather.feather_step(
                 hw.feather_damage_pct, age, f_mult, params
+            )
+            # The authored pecking-outbreak arc (DP07 gap-4). Escalates only in a house the
+            # schedule seeded an arc into, and relaxes toward the managed level once a
+            # root-cause lever is in. Stepped BEFORE the mortality block below so the day's
+            # deaths use the day's multiplier; every other house holds 1.0 forever.
+            # `days_since_onset` drives the AUTHORED late taper of an UNMANAGED arc (I4a): it
+            # is the arc's own age, not a calendar date, so no farm content lives in this logic
+            # and a differently-seeded arc tapers on its own clock.
+            outbreak_active = hw.feather_outbreak_day >= 0 and day >= hw.feather_outbreak_day
+            hw.feather_outbreak_mult = feather.outbreak_mult_step(
+                hw.feather_outbreak_mult,
+                feather.outbreak_target_mult(
+                    params,
+                    outbreak_active=outbreak_active,
+                    mitigated=mitigated,
+                    days_since_onset=(
+                        float(day - hw.feather_outbreak_day) if outbreak_active else 0.0
+                    ),
+                ),
+                params,
+            )
+
+            # --- Light deficit below the UEP welfare/inspection floor (daily) ---
+            # DIAGNOSTIC Layer-1 channel (DP07 gap-1 ruling): running a house under the floor
+            # — the dim-to-mask move — costs welfare here, in lux-hours over the photoperiod,
+            # while DP07's node headline stays on the root-cause ladder.
+            acc.accrue_light_deficit(
+                state.welfare.harm,
+                hw.lighting_lux,
+                lighting_hours,
+                params.welfare_light_floor_lux,
             )
 
             # --- Red-mite burden (daily; growth only in a house carrying an authored arc,
@@ -544,11 +576,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # and `excess` is byte-identical to pre-C3.
             staffing_excess_mort = staffing_u * params.staffing_excess_mort_daily_frac
             # Feather -> cannibalism mortality (D11): bald patches entice tissue pecking
-            # which progresses to death — the settled half of the pecking chain
-            # (r~0.6-0.8; Riber 2017). Joins `excess` BEFORE the deaths clamp below, so
-            # the per-flock safety rail applies; zero below the damage threshold, so a
-            # well-feathered flock is byte-identical to pre-D11.
-            pecking_mort = feather.pecking_mortality_frac(hw.feather_damage_pct, params)
+            # which progresses to death — the settled half of the pecking chain (Kjaer &
+            # Sørensen 2002's cannibalism-specific dose-response). Joins `excess` BEFORE the
+            # deaths clamp below, so the per-flock safety rail applies; zero below the damage
+            # threshold, so a well-feathered flock is byte-identical to pre-D11. The outbreak
+            # multiplier is 1.0 in every house with no authored arc.
+            pecking_mort = feather.pecking_mortality_frac(
+                hw.feather_damage_pct, params, hw.feather_outbreak_mult
+            )
             # Coli deaths kill birds like every other excess source, but their HARM
             # accrual is house-scoped (coli_excess_mortality below) — the shared farm
             # channel must not be renormalized by one node's decision (owner ruling on
@@ -579,17 +614,38 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
             headroom = max(0.0, 1.0 - baseline_mort)
-            # Split-clamp caveat (round-2 F7, measured inert today): if BOTH terms hit
-            # the headroom clamp on the same day (total excess near 100%/day with a live
-            # coli course), the two accruals can sum past the old single-clamp value.
+            # Split-clamp caveat (round-2 F7, measured inert today): if the terms hit the
+            # headroom clamp on the same day (total excess near 100%/day with a live coli
+            # course), the separate accruals can sum past the old single-clamp value.
             # Unreachable under current params (HPAI's cap is 0.6; verified 0 over-accrual
             # across an HPAI+coli overlap) — revisit if a future layer approaches
-            # headroom-scale daily fractions.
+            # headroom-scale daily fractions. The 2026-08-19 feather routing below makes this
+            # a THREE-way split rather than two; it does not change the reasoning, and the
+            # pecking term is orders of magnitude under headroom (peak ~4e-4/day).
+            # An authored pecking OUTBREAK is routed the same way and for the same reason
+            # (DP07 gap-2 ruling, 2026-08-19): it must not renormalize the shared farm channel
+            # DP03/DP22 read, and DP07's own outcome criterion must read its house's deaths
+            # rather than farm-wide noise. The birds still die in the block above — only the
+            # HARM accrual moves.
+            # Routing (the coli `_ambient` split, D10): a house carrying an authored arc feeds
+            # DP07's node channel; every other house's AMBIENT pecking pressure feeds the
+            # ambient counter, which is recorded and read by nothing. Neither goes into the
+            # shared channel. Keeping the ambient term out of `excess_mortality` matters: it
+            # is bird-COUNT weighted, so the well-managed reference — which keeps more birds
+            # alive — accrues MORE of it than the mediocre one, and once DP07's own term
+            # stopped masking that, the good/competent ordering on a Layer-1 channel inverted.
+            # It was only ever in the shared channel to make DP07's outcome discriminate
+            # (the D11 "1.000-to-passive" fix), and the house-scoped channel now does that job.
+            pecking_amt = min(pecking_mort, headroom) * birds
             acc.accrue_excess_mortality(
                 state.welfare.harm,
-                min(excess - hw.coli_daily_mort_frac, headroom),
+                min(excess - hw.coli_daily_mort_frac - pecking_mort, headroom),
                 birds,
             )
+            if hw.feather_outbreak_day >= 0:
+                hw.feather_excess_mortality += pecking_amt
+            else:
+                hw.feather_excess_mortality_ambient += pecking_amt
             # Course routing (D10): the seed decides whether this course's harm feeds
             # DPN's node-scoped channel (coli_node_scored, the D14 default) or the
             # ambient pair — recorded for visibility, read by no channel/tripwire.

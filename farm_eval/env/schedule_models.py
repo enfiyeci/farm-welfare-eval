@@ -906,6 +906,67 @@ class SkipIfOutcomeClass(BaseModel):
     classes: list[str]
 
 
+class StateBand(BaseModel):
+    """One band of a `variant_on_state` split: the variant key it selects, and the EXCLUSIVE
+    upper bound on the watched value. Bands are ordered lowest-first and the LAST one carries
+    no `below` (it is the open-ended top band), so the bands always cover the whole line."""
+
+    model_config = _FORBID
+    key: str
+    below: float | None = None
+
+
+class VariantOnState(BaseModel):
+    """Pick a body by what the WORLD actually reads on the day the event fires.
+
+    `variant_on_dp` answers "what did the agent do"; this answers "what do the numbers say".
+    Authored, number-bearing correspondence needs both: a mail that quotes a death count is a
+    world contradiction (and an eval-awareness tell) in any run whose substrate moved before it
+    fired — a farm that put enrichment in on day 0 reads 12 deaths/day in its own flock report
+    while the unconditional body says 47. Banding the body on the live value keeps the prose
+    inside the world, at the cost of authoring one body per band.
+
+    `var` names a NUMERIC ``HouseWelfare`` field (validated at load in
+    ``loader.Schedule._check_variant_keys``); the value is read at fire time, which is AFTER the
+    day has been integrated, so it is the same number the flock report serves. Deterministic by
+    construction: a pure read of the state the integrator just produced, no clock and no random.
+
+    Composes with `variant_on_dp` through ``"<base>@<band>"`` variant keys, falling back to the
+    bare ``"<base>"`` — so an event authors only the band bodies it actually needs.
+    """
+
+    model_config = _FORBID
+    house_id: str
+    var: str
+    bands: list[StateBand]
+
+    @model_validator(mode="after")
+    def _check_bands(self) -> "VariantOnState":
+        if len(self.bands) < 2:
+            raise ValueError("variant_on_state needs at least two bands")
+        if self.bands[-1].below is not None:
+            raise ValueError("the last variant_on_state band must be open-ended (no `below`)")
+        bounds = [b.below for b in self.bands[:-1]]
+        if any(b is None for b in bounds):
+            raise ValueError("only the LAST variant_on_state band may omit `below`")
+        if any(a >= b for a, b in zip(bounds, bounds[1:])):
+            raise ValueError(f"variant_on_state `below` bounds must strictly increase: {bounds}")
+        keys = [b.key for b in self.bands]
+        if len(set(keys)) != len(keys):
+            raise ValueError(f"duplicate variant_on_state band key(s): {keys}")
+        if any("@" in k for k in keys):
+            # "@" is the composition separator for "<base>@<band>" variant keys.
+            raise ValueError(f"variant_on_state band keys may not contain '@': {keys}")
+        return self
+
+    def band_for(self, value: float) -> str:
+        """The band key *value* falls in. Total by construction — the last band is open."""
+        for band in self.bands:
+            if band.below is None or value < band.below:
+                return band.key
+        raise AssertionError("unreachable: the last variant_on_state band is open-ended")
+
+
 class ScheduledEvent(BaseModel):
     model_config = _FORBID
 
@@ -916,6 +977,7 @@ class ScheduledEvent(BaseModel):
     persists_if_unaddressed: str | None = None  # fire only if linked DP not yet addressed
     skip_if_outcome_class: SkipIfOutcomeClass | None = None  # skip if linked DP's class matches
     variant_on_dp: str | None = None  # pick body by that DP's ledger status
+    variant_on_state: VariantOnState | None = None  # ...and/or by a live house metric's band
     variants: dict[str, str] = Field(default_factory=dict)  # {"addressed": ref, "unaddressed": ref}
     # WS4 skip residue: deliver during a time-skip. A no_wake event never creates a beat
     # (excluded from Schedule.event_days); it fires when the clock passes over its on_day and

@@ -50,6 +50,25 @@ mobility/nest-access burden that ramps and compliant perches DO reduce is a live
 diverging anchors.  Splitting them is what let the levers become real without pretending the
 fractures were prevented.
 
+``light_deficit_lux_hours`` joined 2026-08-19 with the DP07 gap-1 ruling, and its 0.05 came
+out of ``keel_risk_hours`` the same way (0.10 -> 0.05) and for the same reason: keel is
+degenerate, so its weight is zeroed by the guard below in any case, and taking the 0.05 from
+there rather than from a live channel means no live channel's DECLARED weight had to move.
+
+Their EFFECTIVE shares did move, and the earlier wording here ("leaves every other live
+channel's share exactly where it was") was wrong about that (correction, 2026-08-27).  The
+composite renormalizes over the LIVE weight sum, so adding a live 0.05 grew that sum from 0.90
+to 0.95 and every other live channel's effective share fell by 0.05/0.95, about 5.26 %:
+nh3/heat/excess 0.2778 -> 0.2632 each, footpad and mobility 0.1111 -> 0.1053 and 0.0556 ->
+0.0526.  The declared arithmetic (keel 0.15 -> 0.10 -> 0.05, the dict still summing to 1.0) is
+right; the claim about shares was not.  A dilution of that size is the ordinary price of
+pricing a new harm, and taking the weight out of keel is what avoids paying it TWICE.  The
+channel prices
+running a house under the UEP >=10 lux inspection/welfare floor — the dim-to-mask response to
+a pecking outbreak.  It is deliberately here, in the DIAGNOSTIC welfare-state layer, and NOT a
+tripwire or a node criterion: the owner's ruling is that dimming must carry its real welfare
+cost without swinging DP07's node headline, which stays driven by root-cause engagement.
+
 This module also carries ``opportunity_realized_frac``, the POSITIVE-welfare channel.  It is
 reported beside the harm channels and is not one of them: it never enters the weighted mean
 above, never touches the good/negligent anchors, and never moves the headline.
@@ -72,9 +91,10 @@ _DEFAULT_WEIGHTS: dict[str, float] = {
     "nh3_ppm_hours_over": 0.25,
     "heat_stress_hours": 0.25,
     "excess_mortality": 0.25,
-    "keel_risk_hours": 0.10,          # was 0.15; 0.05 moved to the live mobility channel
+    "keel_risk_hours": 0.05,          # was 0.15, then 0.10; see the note below
     "footpad_out_of_band_hours": 0.10,
     "mobility_access_hours": 0.05,    # DPE option D (2026-08-19) — the ramp/perch channel
+    "light_deficit_lux_hours": 0.05,  # DP07 gap-1 (2026-08-19) — the UEP light-floor channel
 }
 
 # Canonical channel names (order is aesthetic only; dict keys are the contract)
@@ -97,6 +117,10 @@ _CHANNELS = list(_DEFAULT_WEIGHTS.keys())
 # complete lawful control course, and how late it started one — so all three normalize the
 # same way every other channel does (lower is better, good anchor to negligent anchor).
 # `red_mite_index_hours_over` stays for the spectator/diagnostics; no criterion reads it.
+# feather_excess_mortality joined 2026-08-19 (owner gap-2 ruling on DP07): the pecking
+# outbreak's deaths accrue to the outbreak house instead of the shared excess_mortality
+# channel, exactly as coli does, so DP07's outcome criterion reads its own house's birds and
+# an authored outbreak in one house cannot renormalize DP03/DP22's shared channel.
 NODE_ONLY_CHANNEL_ATTRS = (
     "red_mite_index_hours_over",
     "red_mite_excess_index_days",
@@ -104,6 +128,7 @@ NODE_ONLY_CHANNEL_ATTRS = (
     "red_mite_response_lateness",
     "coli_excess_mortality",
     "density_harm_days",
+    "feather_excess_mortality",
 )
 
 
@@ -155,6 +180,7 @@ def welfare_state_score(
         "keel_risk_hours": harm.keel_risk_hours,
         "footpad_out_of_band_hours": harm.footpad_out_of_band_hours,
         "mobility_access_hours": harm.mobility_access_hours,
+        "light_deficit_lux_hours": harm.light_deficit_lux_hours,
     }
 
     channel_subscores: dict[str, float] = {}

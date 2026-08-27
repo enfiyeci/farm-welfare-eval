@@ -193,7 +193,7 @@ def trim_pain_pulse(params, *, beak_treatment):
 
 - [ ] **Step 1: Failing test** — assert a fresh `HouseWelfare()` exposes the five fields with the defaults above.
 - [ ] **Step 2: Run → FAIL.**
-- [ ] **Step 3: Add the fields** to `HouseWelfare` mirroring `enrichment_installed`/`methionine_ration` (standing decision flags) and `red_mite_index_hours_over`/`coli_excess_mortality` (accumulators).
+- [ ] **Step 3: Add the fields** to `HouseWelfare` mirroring `enrichment_installed`/`fiber_ration` (standing decision flags) and `red_mite_index_hours_over`/`coli_excess_mortality` (accumulators).
 - [ ] **Step 4: Run → PASS.**
 - [ ] **Step 5: Commit** — `feat(state): H6 beak-decision fields + trim-pain/cannibalism accumulators`
 

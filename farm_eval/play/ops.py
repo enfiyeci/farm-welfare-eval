@@ -126,7 +126,7 @@ OPS: dict[str, OpSpec] = {
             "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW"). "MOLT-NW" is the non-feed-withdrawal molt (resting) ration — ordering it for a house is how a molt goes on the books.'),
             "quantity_tons": _p("float", 0.0, "Quantity in tons."),
             "house_id": _p("str", "", "Optional house the order is for."),
-            "additive": _p("str", "", 'Optional additive (e.g. "methionine", "vitamin_d3").'),
+            "additive": _p("str", "", 'Optional additive (e.g. "fiber", "vitamin_d3").'),
             "target": _p("str", "", "Optional target house for a repopulation/pullet order."),
             "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
         },

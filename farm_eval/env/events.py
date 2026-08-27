@@ -69,16 +69,89 @@ def lapse_expired_decision_points(state: EnvState, day: int) -> list[str]:
     return lapsed
 
 
+def _state_band_key(ev: ScheduledEvent, state: EnvState) -> str:
+    """The band key this event's watched house metric falls in, right now.
+
+    Read AFTER the day is integrated (see `FarmEnv.end_day`), so it is the same number the
+    flock report serves that day — which is the whole point: a body chosen here cannot quote a
+    figure the world contradicts.
+    """
+    spec = ev.variant_on_state
+    assert spec is not None
+    hw = state.welfare.houses.get(spec.house_id)
+    if hw is None:
+        raise KeyError(
+            f"variant_on_state names house {spec.house_id!r}, which this world has no welfare "
+            f"record for (event on day {ev.on_day})"
+        )
+    value = getattr(hw, spec.var, None)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        raise TypeError(
+            f"variant_on_state var {spec.var!r} is not a numeric HouseWelfare field "
+            f"(got {value!r} on house {spec.house_id!r})"
+        )
+    return spec.band_for(float(value))
+
+
+def _variant_candidates(ev: ScheduledEvent, state: EnvState) -> list[str]:
+    """Variant keys to try, most specific first.
+
+    The `variant_on_dp` half answers "what did the agent do" and yields either
+    ``[<outcome>, "addressed"]`` or ``["unaddressed"]``; the `variant_on_state` half answers
+    "what do the numbers say" and expands each of those into ``"<base>@<band>"`` then the bare
+    ``"<base>"``.
+
+    The nesting is deliberate, and getting it backwards is a real bug rather than a preference:
+    WHAT THE AGENT DID is the outer loop and the band is the inner one, so a body written for
+    the specific rung beats a banded body written for the generic `addressed`. Listing every
+    banded key first put DP07's palliative-only run on the generic `addressed@high` body, which
+    thanked the agent for an order it had never placed. An event with only one of the two
+    mechanisms gets exactly the keys that mechanism produces, so a pre-banding schedule resolves
+    byte-identically.
+    """
+    base: list[str] = []
+    if ev.variant_on_dp:
+        status = ledger_status_for(state, ev.variant_on_dp)
+        if status is LedgerStatus.ADDRESSED:
+            # OUTCOME-specific branch (DP07 gap-3 ruling, 2026-08-19). A ladder or classified
+            # node records WHICH rung/class it reached, not just addressed:bool, so a follow-up
+            # can answer the specific thing the agent did. DP07 is why it exists: its day-245
+            # mail thanked the agent for the house looking better whenever ANY rung matched —
+            # including the palliative `separate_victims`, which changes nothing physical, so
+            # the world state did not support a word of it. An outcome with no body of its own
+            # falls through to the generic `addressed` body, which keeps this a narrow
+            # exception rather than an obligation on every variant event (DP07's two EFFECTIVE
+            # rungs deliberately share the grateful body). Keys are validated against the DP's
+            # declared rungs/classes at load time (`loader.Schedule._check_variant_keys`), so a
+            # typo'd outcome key fails loudly instead of silently serving the generic body.
+            outcome = ledger_outcome_class_for(state, ev.variant_on_dp)
+            if outcome is not None:
+                base.append(outcome)
+            base.append("addressed")
+        else:
+            base.append("unaddressed")
+    if ev.variant_on_state is None:
+        return base
+    band = _state_band_key(ev, state)
+    if not base:
+        return [band]
+    return [key for b in base for key in (f"{b}@{band}", b)]
+
+
 def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
     if ev.payload.get("composer") == "audit_findings":
         return compose_audit_findings(state, corpus)
-    if ev.variant_on_dp:
-        status = ledger_status_for(state, ev.variant_on_dp)
-        key = "addressed" if status is LedgerStatus.ADDRESSED else "unaddressed"
-        ref = ev.variants.get(key)
-        if ref is None:
-            raise KeyError(f"variant {key!r} not defined for event variant_on_dp={ev.variant_on_dp!r}")
-        return corpus.document(ref)
+    if ev.variant_on_dp or ev.variant_on_state:
+        candidates = _variant_candidates(ev, state)
+        for key in candidates:
+            ref = ev.variants.get(key)
+            if ref is not None:
+                return corpus.document(ref)
+        raise KeyError(
+            f"no variant among {candidates!r} defined for event on day {ev.on_day} "
+            f"(variant_on_dp={ev.variant_on_dp!r}, "
+            f"variant_on_state={'set' if ev.variant_on_state else None})"
+        )
     if "body_ref" in ev.payload:
         # Tolerate a not-yet-authored body: bodies are written in the C7 corpus pass, but the
         # schedule references them before then, so a missing body_ref surfaces a visible

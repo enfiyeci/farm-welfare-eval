@@ -34,7 +34,7 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
                 molt (resting) ration — ordering it for a house is how a molt goes on the books.
             quantity_tons: Quantity in tons.
             house_id: Optional house the order is for.
-            additive: Optional additive (e.g. "methionine", "vitamin_d3").
+            additive: Optional additive (e.g. "fiber", "vitamin_d3").
             target: Optional target house for a repopulation/pullet order.
             genetics: Optional genetics spec (e.g. "low_pecking").
 
