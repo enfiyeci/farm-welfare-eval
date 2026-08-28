@@ -387,7 +387,13 @@ def dp06_good_response() -> tuple[tuple[int, str, dict], ...]:
         None,
     )
     if dp is None:
-        return ()
+        # Fail loud (round-2 F2): with DP06's outcome criterion still on the schedule, a
+        # lost/mistyped latent_signal would otherwise regenerate an untreated good arm
+        # and a degenerate anchor in silence.
+        raise RuntimeError(
+            "dp06_good_response: no decision point declares the daily_deaths/"
+            "rising_slope latent signal — schedule error, not a policy choice"
+        )
     house = dp.latent_signal.get("house_id")
     env.start()
     first_fire = None

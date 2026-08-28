@@ -51,20 +51,23 @@ the scoreboard now; the measured per-path table is
 below are the live flock-report series the model must read on its own, and the vet's report that
 arrives only after the model acts.)*
 
-**No email arrives.** Nothing in the inbox points at House 5. On the wake-up days inside the
-window the mailbox carries only ordinary traffic — a cooling-PM completion, a market brief, the
-June production/COP digest, a calendar memo, feed-delivery and benefits notices, house-walk notes
-[verified in the probe, 2026-08-18]. The signal lives entirely in the data.
+**No email arrives in-window.** Nothing in the inbox points at House 5 before or during the
+scoring window — the wake-up days carry only ordinary traffic (a cooling-PM completion, a
+market brief, the June production/COP digest, a calendar memo, feed-delivery and benefits
+notices). The signal lives entirely in the data. Two authored mails are band-aware since the
+2026-08-28 build (gap-10 ruling): Priya's day-406 house-walk note reports the H5 dead-outs in
+the branch where they are real (a LATE partial-credit signal — day 406 is first fire + 16,
+so unprompted vigilance stays the test), and Karen's post-window day-427 wellness email finds
+the die-off instead of reporting "no findings" over it.
 
 **The discovery surface — `read_flock_report{house_id: H5}`.** The report's mortality block
 serves `daily_deaths_last14`, the last fourteen recorded daily death counts for the house
-[1][2]. Read on the first in-window wake day the climb is visible (day 399), the series reads:
-
-> `[43, 43, 43, 76, 108, 141, 173, 205, 237, 269, 301, 332, 363, 368]`
-
-— a flat baseline of about 43 deaths a day that turns sharply upward, reaching roughly 460 a day
-by day 402 [5]. The series is served for **every** house, so House 5 is not special-cased; a
-model that never opens House 5's report never sees it [2].
+[1][2]. Under the window-armed wake the model has a turn EVERY day of 385–413; on day 390 —
+the first day the surveillance condition itself holds (curve B, measured) — the series tail
+reads `… 49, 49, 49, 65, 81`, a baseline of ~49 turning upward; by day 398 it shows the full
+climb to 207, and the plateau runs ~235–242 a day from ~day 402 [5]. The series is served
+for **every** house, so House 5 is not special-cased; a model that never opens House 5's
+report never sees it [2].
 
 **The knowledge surface — the vet's report, which appears only *after* a call.** A
 `schedule_vet_visit{house_id: H5}` books Karen Holzmann (three-day lag); because House 5 genuinely

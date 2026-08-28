@@ -303,12 +303,14 @@ def test_gated_antibiotics_visit_arms_nothing_before_the_vet_arrives():
     # Nothing dispensed yet: no label arm, no residue clock.
     assert hw.antibiotic_treated is False
     assert hw.egg_residue_days_left == 0.0
-    # Integrate through the visit day: the course arms exactly there.
+    # Integrate through the visit day: the course arms exactly there — BEFORE that day's
+    # residue capture (round-2 F1: the label and residue detectors must agree about the
+    # visit day's eggs), so the day's decrement has already consumed one countdown day.
     integrate(env.state, visit_day - env.state.day_index, env.params)
     assert hw.antibiotic_treated is True
     assert hw.egg_residue_days_left == float(
         env.params.egg_withdrawal_days[env.params.antibiotic_visit_drug]
-    )
+    ) - 1.0
     assert hw.coli_treated_day == visit_day
 
 
