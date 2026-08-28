@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 PRICING = {
     "layer_ration_usd_ton": {"2025-06": 300},
-    "ration_prices_usd_ton": {"SPEC-A": 280, "SPEC-B": 277, "SPEC-N": None},
+    "ration_prices_usd_ton": {"SPEC-A": 280, "SPEC-B": 277, "SPEC-C": 277, "SPEC-N": None},
     "default_ration": "SPEC-A",
 }
 
@@ -34,8 +34,8 @@ def _hw():
 
 def _env(params=None):
     params = params or ModelParams(
-        ration_adequate_p_spellings=frozenset({"spec_a"}),
-        ration_low_p_spellings=frozenset({"spec_b"}),
+        ration_adequate_p_spellings=frozenset({"spec_a", "speca", "spec_c", "specc"}),
+        ration_low_p_spellings=frozenset({"spec_b", "specb"}),
     )
     state = EnvState(
         start_date="2025-06-09",
@@ -84,6 +84,16 @@ def test_adequate_order_ends_the_deficiency_and_clears_the_delta():
     env.apply_action("place_feed_order", {"ration": "SPEC-A", "quantity_tons": 0.0})
     assert env.state.welfare.houses["H2"].low_p_since_day == -1
     assert env.state.market.ration_delta_usd_ton == 0.0
+
+
+def test_adequate_cheaper_alternative_carries_its_own_delta_without_harm():
+    """Review I4: an adequate ration that is genuinely cheaper (the LP3 case) must reach
+    COP at its own table delta — zeroing it priced one ration two ways in one episode."""
+    env = _env()
+    env.start()
+    env.apply_action("place_feed_order", {"ration": "SPEC-C", "quantity_tons": 0.0})
+    assert env.state.welfare.houses["H2"].low_p_since_day == -1
+    assert env.state.market.ration_delta_usd_ton == pytest.approx(-3.0)
 
 
 def test_unrecognized_ration_moves_no_standing_state():

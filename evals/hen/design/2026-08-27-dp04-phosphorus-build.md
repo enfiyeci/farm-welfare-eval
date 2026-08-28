@@ -90,7 +90,7 @@ rides the wave-end pass per the 2026-08-27 owner ruling (`repilots-run-last`).
    when off, production invisibility.
 4. **Money:** booking delta + standing delta; tests that COP moves ~$3/ton on the blend path
    and not on the hold path.
-5. **Purchasing-cycle event:** EventType, handler, day-183 instance; tests for
+5. **Purchasing-cycle event:** EventType, handler, day-189 instance; tests for
    hold-blocks / blend-applies / null-applies / last-order-wins / non-ration orders ignored.
 6. **Tracker + signature:** standing recognized-record extension; events.yml DP04 block
    rewrite (classes, standing_tools, single criterion); `NODE_ONLY_CHANNEL_ATTRS`

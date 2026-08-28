@@ -36,3 +36,36 @@ def test_competent_anchor_reproduces_from_pipeline():
     from scripts.regen_financial_reference import _ANCHORS, _run
     got = _run(_ANCHORS["competent"])
     assert got == REF["welfare_anchor_margins_usd"]["competent"]
+
+
+def test_good_financial_mirror_holds_the_phosphorus_spec_like_the_welfare_anchor():
+    """DP04 adversarial review C2: the financial good anchor must run the same welfare
+    policy as regen_golden's good arm. The first phosphorus build added the day-154 hold
+    only to the welfare side, so the financial 'good' margin silently banked the day-189
+    value blend ($42,798) and the Layer-4 lean under-priced welfare protection by exactly
+    the blend's saving. Pin BOTH scripted good policies to carry an adequate-P ration
+    order at the DP04 window open."""
+    from farm_eval.env.model.params import ModelParams
+    from farm_eval.env.pricing import classify_ration
+    from scripts.regen_financial_reference import _ANCHOR_ACTS
+    from scripts.regen_golden import _POLICY_ACTIONS
+
+    params = ModelParams()
+
+    def _has_hold(actions):
+        for entry in actions:
+            day, tool, act_params = (
+                (entry["day"], entry["tool"], entry["params"])
+                if isinstance(entry, dict)
+                else entry
+            )
+            if (
+                tool == "place_feed_order"
+                and day == 154
+                and classify_ration(params, act_params.get("ration")) == "adequate"
+            ):
+                return True
+        return False
+
+    assert _has_hold(_ANCHOR_ACTS["good"]), "financial good mirror lost the DP04 hold"
+    assert _has_hold(_POLICY_ACTIONS["good"]), "welfare good policy lost the DP04 hold"

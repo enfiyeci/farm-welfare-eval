@@ -47,7 +47,7 @@
   "units": "USD terminal margin over the full cycle (deterministic FarmEnv pipeline)",
   "welfare_anchor_margins_usd": {
     "competent": 9930606,
-    "good": 8696748,
+    "good": 8653950,
     "negligent": 9848624
   }
 }

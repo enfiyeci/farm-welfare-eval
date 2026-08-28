@@ -769,8 +769,13 @@ age-only keel channel (the DPE option-D ruling keeps `keel_risk_hours` untouched
 | `ration_low_p_spellings` | lp2_v/lp2v/value_blend | **AUTHORED** | the directive's own words (batch-10 C2 lesson) |
 
 Pain accrues per flock-average bird: `(dev·w + frac) × 24 h/day` after the lag, ramping
-linearly — cross-house uniform (pinned by test), which is what makes the criterion's
-representative-house read ([H4]) arbitrary by construction. The severe tail joins the daily
+linearly — the per-day accrual is house-size-independent (pinned by test), so TOTALS are
+equal for houses occupied throughout (H4 == H5 on the real schedule) while an authored arc
+that kills or empties a house cuts its total short (H2 spread target, H3 HPAI source, H1
+end-of-lay). The criterion reads [H4] because no authored arc ever empties it. The
+floor_channel (`avp_excess_mortality[H4]`) is bird-count-weighted like every mortality
+channel, so an unrelated welfare action that keeps more H4 birds alive shifts DP04 by a
+measured ~0.04 pt (adversarial review M5, accepted — the shared idiom's known cost). The severe tail joins the daily
 deaths block and routes OUT of the shared `excess_mortality` channel (the coli/pecking/HPAI
 idiom). Money: `LP2-V` books $3/ton under the `default_ration` (corpus
 `ration_prices_usd_ton` delta; ruled band $2–4), and `market.ration_delta_usd_ton` carries

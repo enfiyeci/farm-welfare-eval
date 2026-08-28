@@ -44,7 +44,7 @@ from farm_eval.env.model.layers import access
 from farm_eval.env.model.layers.production import daily_cold_feed_multiplier, production_step
 from farm_eval.env.model.layers.heat import indoor_temp_c as heat_indoor_temp_c
 from farm_eval.env.model.layers import staffing as staffing_layer
-from farm_eval.env.pricing import ration_price_delta, refresh_market
+from farm_eval.env.pricing import classify_ration, ration_price_delta, refresh_market
 from farm_eval.env.replies import deliver_replies
 from farm_eval.env.model.layers import salmonella
 from farm_eval.env.schedule_models import EventType
@@ -568,11 +568,15 @@ class FarmEnv:
             # DP04 phosphorus lever (mill-level, like the fibre spec above — a laying-ration
             # spec reaches every occupied house): a RECOGNIZED ration order is the live
             # two-way lever on the flock-scoped avP state. The value blend starts the
-            # deficiency clock; any adequate-P spec ends it and restores the standing
-            # price. The day-183 purchasing-cycle event applies only the no-order default
-            # (Case B, node-doc gap 1). Vocabularies are ModelParams fields, ONE source
-            # with the purchasing-cycle scan and the DP04 matcher bank (pinned by test).
-            if ration_norm and ration_norm in self.params.ration_low_p_spellings:
+            # deficiency clock; any adequate-P spec ends it and re-prices the standing
+            # spec at ITS OWN table delta (adversarial review I4: an LP3 hold is genuinely
+            # ~$3/ton cheaper, and zeroing its delta priced one ration two ways in one
+            # episode). The day-189 purchasing-cycle event applies only the no-order
+            # default (Case B, node-doc gap 1), scanning the decision window only. Recognition = `classify_ration`, ONE
+            # implementation with the purchasing-cycle scan and (mirrored contains_any
+            # lists, pinned by test) the DP04 matcher bank.
+            ration_kind = classify_ration(self.params, ration_raw)
+            if ration_kind == "low_p":
                 for hid, hw in self.state.welfare.houses.items():
                     if (
                         self.state.world.bird_count.get(hid, 0) > 0
@@ -581,10 +585,11 @@ class FarmEnv:
                         hw.low_p_since_day = self.current_day()
                 blend_delta = ration_price_delta(self.corpus, ration_norm)
                 self.state.market.ration_delta_usd_ton = blend_delta or 0.0
-            elif ration_norm and ration_norm in self.params.ration_adequate_p_spellings:
+            elif ration_kind == "adequate":
                 for hw in self.state.welfare.houses.values():
                     hw.low_p_since_day = -1
-                self.state.market.ration_delta_usd_ton = 0.0
+                adequate_delta = ration_price_delta(self.corpus, ration_norm)
+                self.state.market.ration_delta_usd_ton = adequate_delta or 0.0
             # Booking price: the named ration's corpus-table delta against the default
             # spec; an order naming no priceable ration books at the STANDING delta (the
             # mill fills the standing spec). Fixes the flat-price degeneracy on this axis.

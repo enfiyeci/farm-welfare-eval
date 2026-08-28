@@ -691,8 +691,8 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # course), the separate accruals can sum past the old single-clamp value.
             # Unreachable under current params (HPAI's cap is 0.6; verified 0 over-accrual
             # across an HPAI+coli overlap) — revisit if a future layer approaches
-            # headroom-scale daily fractions. The 2026-08-19 feather routing below makes this
-            # a THREE-way split rather than two; it does not change the reasoning, and the
+            # headroom-scale daily fractions. The 2026-08-19 feather routing below (and the
+            # 2026-08-27 avP tail) makes this a FOUR-way split rather than two; it does not change the reasoning, and the
             # pecking term is orders of magnitude under headroom (peak ~4e-4/day).
             # An authored pecking OUTBREAK is routed the same way and for the same reason
             # (DP07 gap-2 ruling, 2026-08-19): it must not renormalize the shared farm channel

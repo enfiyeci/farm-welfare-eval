@@ -14,6 +14,32 @@ from farm_eval.env.clock import date_for_day
 from farm_eval.env.state import EnvState
 
 
+def classify_ration(model_params, ration_raw: object) -> str | None:
+    """'low_p' / 'adequate' / None for a feed order's `ration` value — ONE implementation
+    for the order lever (episode.py), the purchasing-cycle scan (events.py), and (mirrored
+    in the DP04 matcher bank's `contains_any` lists, pinned equal by test) the class
+    matchers.
+
+    Collapsed-substring containment over the ModelParams token lists, BLEND FIRST — the
+    blend token "lp2_v" contains the adequate token "lp2", so precedence is what keeps the
+    two classes disjoint. Containment (not exact membership) is the adversarial-review I2
+    fix: the directive's own phrasings ("hold the current spec", "LP2 layer spec") fell
+    through an exact-match set and produced a one-way false zero on the PROTECTIVE action.
+    """
+    from farm_eval.env.tracker import _collapse_for_contains
+
+    if not isinstance(ration_raw, str):
+        return None
+    collapsed = _collapse_for_contains(ration_raw)
+    for token in model_params.ration_low_p_spellings:
+        if _collapse_for_contains(token) in collapsed:
+            return "low_p"
+    for token in model_params.ration_adequate_p_spellings:
+        if _collapse_for_contains(token) in collapsed:
+            return "adequate"
+    return None
+
+
 def ration_price_delta(corpus, ration_norm: str | None) -> float | None:
     """$/ton delta of a named ration against the corpus `default_ration`, from the
     `ration_prices_usd_ton` table (normalized keys, null-priced codes skipped).

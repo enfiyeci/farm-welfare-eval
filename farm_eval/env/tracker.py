@@ -401,24 +401,40 @@ def _standing_view(window: list[ActionRecord], sig: Signature) -> list[ActionRec
     an order revised from day-old IR to a deep trim kept `optimal_dayold`, and a
     count-only revision that dropped the lot spec kept `root_cause`).
 
-    "Speaks to the lever" = the record carries at least one param key some class matcher
-    for that tool constrains (`_lever_keys_by_tool`). This is what keeps a SHARED tool
-    honest under standing semantics (DP04, build plan T6): `place_feed_order` also
-    carries fibre additives and molt codes, and an additive-only order after a ration
-    hold must neither match a class nor supersede the hold — it does not touch the
-    ration lever. For DPD this changes nothing: every pullet order carries a
-    constrained key (house_id)."""
+    "Speaks to the lever" = the signature's `standing_where` matcher for the tool, when
+    one is declared (DP04: the ration value must be in the laying-spec vocabulary — a
+    molt code carries the `ration` KEY without touching the LAYING-spec lever, and must
+    neither match nor supersede; adversarial review M3). Without a `standing_where`
+    entry, participation is key-presence: the record carries at least one NON-None param
+    key some class matcher for that tool constrains (`_lever_keys_by_tool`; None-valued
+    keys don't count — review M4). For DPD this changes nothing: every pullet order
+    carries a constrained key (house_id).
+
+    Supersession is keyed per house ONLY when the tool's class matchers constrain
+    `house_id` (DPD: the order is per-house). When they don't (DP04: a ration order is
+    MILL-WIDE and the physics ignores any house named on it), all participating records
+    share one key — otherwise a hold naming H2 and a later blend naming H4 both survive
+    the view and the recorded class contradicts the physics (review I1)."""
     if not sig.standing_tools:
         return window
     lever_keys = _lever_keys_by_tool(sig)
+    standing_where = sig.standing_where or {}
     participating: set[int] = set()
     latest: dict[tuple[str, str | None], int] = {}
     for i, rec in enumerate(window):
-        if rec.tool in sig.standing_tools and (
-            lever_keys.get(rec.tool, set()) & set(rec.params)
-        ):
+        if rec.tool not in sig.standing_tools:
+            continue
+        where = standing_where.get(rec.tool)
+        if where is not None:
+            participates = match_where(rec.params, where)
+        else:
+            present = {k for k, v in rec.params.items() if v is not None}
+            participates = bool(lever_keys.get(rec.tool, set()) & present)
+        if participates:
             participating.add(i)
-            latest[(rec.tool, _record_house_key(rec.params))] = i
+            house_scoped = "house_id" in lever_keys.get(rec.tool, set())
+            key = (rec.tool, _record_house_key(rec.params) if house_scoped else None)
+            latest[key] = i
     keep = set(latest.values())
     return [
         rec for i, rec in enumerate(window)

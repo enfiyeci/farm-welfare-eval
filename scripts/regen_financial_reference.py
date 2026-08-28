@@ -52,6 +52,12 @@ _ANCHOR_ACTS: dict[str, list] = {
     # anchor pulls H4's DP07 root-cause levers at the window open, so its financial anchor
     # runs the same policy.
     "good": [
+        # DP04 mirror (adversarial review C2, 2026-08-27): the good welfare anchor holds the
+        # bone-protective phosphorus spec at the window open, so its financial anchor must
+        # forgo the value blend's saving too — the first build left this list without the
+        # hold, so the "good" margin silently banked the day-189 blend ($42,798) and the
+        # Layer-4 lean under-priced welfare protection by exactly that much.
+        (154, "place_feed_order", {"ration": "LP2", "quantity_tons": 0.0}),
         # DP05 target rebuild (2026-08-26): the complete veterinarian-authorised course the
         # welfare anchor runs — the request, then the two authorised doses 7 days apart. The
         # financial anchor has to carry its real course charge, not the old per-bird

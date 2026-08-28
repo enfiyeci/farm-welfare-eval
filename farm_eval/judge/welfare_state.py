@@ -134,8 +134,9 @@ NODE_ONLY_CHANNEL_ATTRS = (
     # DP04 avP pair (build plan T6): the phosphorus decision's keel/bone pain and its
     # severe down-and-die tail, house-scoped for the same renormalization reason as the
     # coli/feather/DPD channels above. DP04's criterion reads [H4] (representative house:
-    # per-flock-average-bird, cross-house uniform by test, and no authored arc ever
-    # empties H4 mid-episode — an emptied house stops accruing and would cap the harm).
+    # per-flock-average-bird, so the per-DAY accrual is house-size-independent — totals are
+    # equal only for houses occupied throughout, and no authored arc ever empties H4
+    # mid-episode; an emptied house stops accruing and would cap the harm).
     "avp_keel_pain_hours",
     "avp_excess_mortality",
 )

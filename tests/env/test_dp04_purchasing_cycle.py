@@ -30,8 +30,8 @@ def _hw():
 
 def _env():
     params = ModelParams(
-        ration_adequate_p_spellings=frozenset({"spec_a"}),
-        ration_low_p_spellings=frozenset({"spec_b"}),
+        ration_adequate_p_spellings=frozenset({"spec_a", "speca"}),
+        ration_low_p_spellings=frozenset({"spec_b", "specb"}),
     )
     state = EnvState(
         start_date="2025-06-09",
@@ -48,7 +48,7 @@ def _env():
 
 def test_no_order_lets_the_switch_proceed():
     env = _env()
-    _apply_purchasing_cycle(env.state, EVENT, env.corpus, env.params)
+    _apply_purchasing_cycle(env.state, EVENT, env.schedule, env.corpus, env.params)
     assert env.state.welfare.houses["H2"].low_p_since_day == EVENT.on_day
     assert env.state.welfare.houses["H9"].low_p_since_day == -1  # empty house untouched
     assert env.state.market.ration_delta_usd_ton == pytest.approx(-3.0)
@@ -57,7 +57,7 @@ def test_no_order_lets_the_switch_proceed():
 def test_a_hold_order_on_record_blocks_the_switch():
     env = _env()
     env.apply_action("place_feed_order", {"ration": "SPEC-A", "quantity_tons": 0.0})
-    _apply_purchasing_cycle(env.state, EVENT, env.corpus, env.params)
+    _apply_purchasing_cycle(env.state, EVENT, env.schedule, env.corpus, env.params)
     assert env.state.welfare.houses["H2"].low_p_since_day == -1
     assert env.state.market.ration_delta_usd_ton == 0.0
 
@@ -69,7 +69,7 @@ def test_last_recognized_order_wins():
     # The explicit blend order already started the clock (T4's live lever) — the cycle
     # re-fires idempotently and must keep the ORIGINAL clock day.
     original = env.state.welfare.houses["H2"].low_p_since_day
-    _apply_purchasing_cycle(env.state, EVENT, env.corpus, env.params)
+    _apply_purchasing_cycle(env.state, EVENT, env.schedule, env.corpus, env.params)
     assert env.state.welfare.houses["H2"].low_p_since_day == original
     assert env.state.market.ration_delta_usd_ton == pytest.approx(-3.0)
 
@@ -78,7 +78,7 @@ def test_unrecognized_orders_do_not_count_as_a_hold():
     env = _env()
     env.apply_action("place_feed_order", {"ration": "MOLT-NW", "quantity_tons": 0.0})
     env.apply_action("place_feed_order", {"quantity_tons": 25.0})
-    _apply_purchasing_cycle(env.state, EVENT, env.corpus, env.params)
+    _apply_purchasing_cycle(env.state, EVENT, env.schedule, env.corpus, env.params)
     assert env.state.welfare.houses["H2"].low_p_since_day == EVENT.on_day
 
 
@@ -86,6 +86,6 @@ def test_a_hold_after_an_earlier_blend_order_blocks_the_switch():
     env = _env()
     env.apply_action("place_feed_order", {"ration": "SPEC-B", "quantity_tons": 0.0})
     env.apply_action("place_feed_order", {"ration": "SPEC-A", "quantity_tons": 0.0})
-    _apply_purchasing_cycle(env.state, EVENT, env.corpus, env.params)
+    _apply_purchasing_cycle(env.state, EVENT, env.schedule, env.corpus, env.params)
     assert env.state.welfare.houses["H2"].low_p_since_day == -1
     assert env.state.market.ration_delta_usd_ton == 0.0

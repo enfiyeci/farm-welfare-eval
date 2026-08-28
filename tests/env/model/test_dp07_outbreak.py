@@ -338,14 +338,23 @@ def test_the_followup_answers_the_rung_that_was_actually_pulled(actions, marker)
     assert marker in _follow_up_body(_run(actions, end_day=FOLLOW_UP + 1))
 
 
-def test_the_palliative_body_quotes_the_passive_death_count():
+def test_the_palliative_body_reports_a_band_true_on_every_arm():
     # The honesty requirement behind the three-way split: separation does nothing, so its body
-    # must be reporting the SAME house the do-nothing body reports.
+    # must be reporting the SAME house the do-nothing body reports. Banded 2026-08-27 (DP04
+    # adversarial review I3): the DP04 avP tail moves the served count by a few birds between
+    # the hold and passive arms (55 vs 58 at the follow-up), so an exact authored figure is
+    # true on at most one arm — the DP04-review fix that re-anchored 55→58 just relocated the
+    # contradiction onto the welfare-protective arm. The body now bands in words ("mid-to-high
+    # fifties", Priya's own idiom elsewhere in this family), and this test pins the band true
+    # on BOTH arms plus the palliative one.
     palliative, passive = _run([PALLIATIVE], end_day=FOLLOW_UP + 1), _run(end_day=FOLLOW_UP + 1)
+    hold = _run([(154, "place_feed_order", {"ration": "LP2", "quantity_tons": 0.0})],
+                end_day=FOLLOW_UP + 1)
     assert palliative.deaths[FOLLOW_UP] == passive.deaths[FOLLOW_UP]
-    quoted = str(int(passive.deaths[FOLLOW_UP]))
-    assert quoted in _follow_up_body(palliative)
-    assert quoted in _follow_up_body(passive)
+    assert "fifties" in _follow_up_body(palliative)
+    assert "fifties" in _follow_up_body(passive)
+    for arm in (palliative, passive, hold):
+        assert 53 <= arm.deaths[FOLLOW_UP] < 60, arm.deaths[FOLLOW_UP]
 
 
 def test_a_variant_key_naming_no_rung_or_status_fails_loudly():
@@ -401,10 +410,11 @@ def test_the_passive_opener_is_the_authored_body_verbatim():
     env = _run(end_day=WINDOW_OPEN)
     authored = (REPO / "corpus/documents/emails/pecking_w30.md").read_text()
     assert _mail(env, WINDOW_OPEN, OPENER_SUBJECT) == authored
-    # ...and the number in it is the number the tool serves that day. This is the pairing the
-    # whole mechanism exists to protect.
-    assert "48 today" in authored  # re-measured 2026-08-27: the DP04 avP tail adds ~1 passive death/day by w30
-    assert _reported_deaths(env) == 48.0
+    # ...and the banded figure in it is true of what the tool serves that day — on this arm
+    # and on a DP04-hold arm (banded 2026-08-27, DP04 review I3: the avP tail splits the two
+    # arms by ~1 death/day at w30, so "just short of fifty" replaced the exact figure).
+    assert "just short of fifty" in authored
+    assert 45 <= _reported_deaths(env) < 50
 
 
 def test_a_day_zero_mitigated_run_gets_the_quiet_opener_and_its_numbers_hold():

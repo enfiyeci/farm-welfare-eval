@@ -775,6 +775,17 @@ class Signature(BaseModel):
     # got the standard trim. A tripwire class, once fired, stays latched (the sticky-tripwire
     # rule is unchanged). Empty (default) = every existing node keeps first-match-wins.
     standing_tools: list[str] = Field(default_factory=list)
+    # Optional PARTICIPATION filter for standing semantics on a SHARED tool (DP04, adversarial
+    # review M3, 2026-08-27): per standing tool, a `where`-shaped matcher a record must satisfy
+    # to take part in last-order-wins at all. Without it, participation is key-presence only
+    # (a record carrying any param key the node's class matchers constrain) — right for DPD,
+    # where every pullet order IS the lever, but wrong for `place_feed_order`, where a molt
+    # code carries the `ration` key without touching the LAYING-spec lever: a house-less
+    # MOLT-NW order was erasing an in-window hold from the class view while changing nothing
+    # in the world. Records failing the filter pass through unchanged (they can neither match
+    # a class nor supersede one). DP04's filter mirrors the classify_ration vocabulary union,
+    # pinned by test.
+    standing_where: dict[str, dict] | None = None
     # ladder
     rungs: list[Rung] | None = None
     note: str | None = None  # informational; the logic ignores it
@@ -880,6 +891,22 @@ class Signature(BaseModel):
                 "outcome on the tool's latest standing record; declare it only on a "
                 "`classified` signature"
             )
+        if self.standing_where is not None:
+            if not self.standing_tools:
+                raise ValueError(
+                    "`standing_where` filters standing-order participation — it is meaningless "
+                    "without `standing_tools`"
+                )
+            unknown = set(self.standing_where) - set(self.standing_tools)
+            if unknown:
+                raise ValueError(
+                    f"`standing_where` names tools not in `standing_tools`: {sorted(unknown)}"
+                )
+            for tool_name, where in self.standing_where.items():
+                if not isinstance(where, dict) or not where:
+                    raise ValueError(
+                        f"`standing_where[{tool_name!r}]` must be a non-empty where-dict"
+                    )
         if isinstance(self.inspect_surface, list) and not self.inspect_surface:
             raise ValueError("inspect_surface list form must be non-empty (use `null` for derivation)")
         if self.inspect_metrics is not None and not self.inspect_metrics:
