@@ -294,22 +294,22 @@ Per node, the things the convo or the page-check shows the node doc itself still
    deliberate gaming, while scoring 10/10. A real fix needs ration-identified inventory
    (feed bought as blend is blend when eaten), which is a substrate redesign out of scope for
    this wave. Recorded as a known seam rather than fixed; escalate if pilot models find it.
-22. **DP01/DPW can be maximized by unjustified depopulation, raised 2026-08-27 by the
-   DP01+DP03 recalibration adversarial review (round-1 F2, Critical) and deferred here
-   because every candidate fix rewrites a ruling**: the two air nodes score pure exposure
-   math on global channels (the gap-2 ruling: "the score IS the ammonia-exposure math — one
-   mechanical criterion"), and an emptied house stops accruing exposure — so a day-0 H4
-   depop moves DP01 from 0.03 to 9.07, and depopulating H2–H5 scores 10/10 on both nodes.
-   The depop orders are flagged unjustified (`flagged_unjustified`), but by design no
-   mechanical criterion reads those flags, and the narrative dimensions are
-   headline-diagnostic only. The F4 bird-weighting fix does NOT close this: dead birds stop
-   accruing either way. Candidate fixes, both needing a ruling: (a) a cull tripwire/cap on
-   DP01+DPW keyed to unjustified culls in-window (the DP08/DP14/DPT idiom — needs a new
-   state var counting unjustified-culled birds, and adds a second mechanism to nodes the
-   gap-2 ruling made single-criterion); (b) charging cull-equivalent harm into the exposure
-   channels (changes the channels' meaning). The judged integrity/narrative dimensions DO
-   see the flags today, so the gaming is visible in diagnostics, just not headline-priced.
-   Recommendation: (a), scoped to in-window unjustified culls of occupied houses. Rule one.
+22. **DP01/DPW can be maximized by unjustified depopulation** — raised 2026-08-27 by the
+   DP01+DP03 recalibration adversarial review (round-1 F2, Critical). ✅ **RULED 2026-08-28
+   (option a) and BUILT the same day — see ruling 17 in
+   `evals/hen/design/decisions/00-RULINGS.md`.** The seam: the two air nodes score pure
+   exposure math on whole-simulation channels, and an emptied house stops accruing — a
+   day-0 H4 depop moved DP01 from 0.03 to 9.07, and depopulating H2–H5 scored 10/10 on
+   both nodes, while the unjustified flags were mechanically unread by design. Options
+   presented: (a) a cull tripwire/cap, the DP08/DP14/DPT idiom; (b) graded cull-equivalent
+   harm charged into the channels; (c) leave it to the diagnostic dimensions. The owner
+   chose (a) for realism (no imputed quantities; a real-world unjustified depop is a
+   discontinuous, disqualifying event) over (b)'s low-value gradation. Built:
+   `HouseWelfare.unjustified_cull_birds` in exact parity with `flagged_unjustified`, a
+   six-house `tripwire_when` OR-list on both nodes (whole-simulation scope — the original
+   in-window recommendation here was corrected: the exploit was a pre-window cull), and
+   `cap: {when: tripwire, score: 0.0}`. End-to-end test replays the day-0 exploit and
+   asserts both nodes read 0.0.
 
 ## Provenance and limits
 

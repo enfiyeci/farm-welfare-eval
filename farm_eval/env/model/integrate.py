@@ -128,13 +128,17 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                     and order.birds_culled > 0
                     and not (coli_covered and cull_hw.coli_node_scored)
                 ):
-                    # Unjustified-cull VISIBILITY flag (owner ruling on verifier N2,
-                    # 2026-08-12): a cull with no node-level detector — no HPAI, not
+                    # Unjustified-cull flag (owner ruling on verifier N2, 2026-08-12): a
+                    # cull with no node-level detector — no HPAI, not
                     # node-scored-coli-covered, flock still mid-lay — is flagged on the
-                    # order for the judge's objective evidence. No harm accrual, no node
-                    # effect; one detector per act (a NODE-SCORED covered cull already
-                    # accrues and trips DPN, so it is exempt here; an AMBIENT-covered
-                    # cull has no other detector and takes the flag — D10 extension).
+                    # order for the judge's objective evidence. One detector per act (a
+                    # NODE-SCORED covered cull already accrues and trips DPN/DPT, so it is
+                    # exempt here; an AMBIENT-covered cull has no other detector and takes
+                    # the flag — D10 extension). Since the 2026-08-28 ruling (option A on
+                    # owner item 22) the flag is no longer visibility-only: the culled
+                    # birds also accrue to the house's `unjustified_cull_birds`, the
+                    # whole-simulation tripwire var that caps DP01/DPW at 0 — emptying a
+                    # house must not raise an exposure-math score. Still no harm accrual.
                     age_wk = (
                         state.world.age_weeks_at_start.get(order.house_id, 0.0) + day / 7.0
                     )
@@ -143,6 +147,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                         and age_wk < params.cull_business_age_weeks
                     ):
                         order.flagged_unjustified = True
+                        cull_hw.unjustified_cull_birds += float(order.birds_culled)
                 # D15 (2026-08-27): the financial half of the responding world. APHIS
                 # indemnifies depopulated poultry through its OWN process — presumptive
                 # positive, report, authorization ([2], re-read in full 2026-08-19) — so the

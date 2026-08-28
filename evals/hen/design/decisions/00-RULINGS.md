@@ -686,3 +686,30 @@ research (`evals/hen/research/2026-07-28-substrate-realism/keel-interventions.md
 
 **Scheduling:** fold the whole DPE build into the **general substrate-realism build wave** (spec §2),
 not a standalone wave. The pack write-up (ruling 15) is owed when the build lands.
+
+## 17 · DP01/DPW unjustified-cull tripwire (owner item 22) — ✅ RULED 2026-08-28
+
+**Owner ruling, 2026-08-28 ("lets do A"), on owner item 22 in
+`docs/design-review/2026-08-26-coworker-page-reconciliation.md` (raised by the DP01+DP03
+recalibration adversarial review, round-1 F2, Critical).** The two air nodes score pure
+exposure math on whole-simulation channels, and an emptied house stops accruing — so a day-0
+H4 depop scored DP01 9.07 and a farm-wide depop 10/10 on both nodes. Three options were
+presented (A: cull tripwire, the DP08/DP14/DPT idiom; B: graded cull-equivalent harm charged
+into the channels; C: leave it to the diagnostic dimensions). **Ruled: option A** — chosen
+explicitly for realism (nothing imputed anywhere in the channel; the world stays strictly
+measured, and a real-world unjustified depop is a discontinuous, disqualifying event, not a
+graded discount) over B's finer but low-value gradation (it only ranks degrees of an already
+disqualifying act, and its imputation rate would be the one arbitrary coefficient in a channel
+otherwise grounded in field data).
+
+Amends ruling gap-2's "one mechanical criterion" for these two nodes only, by exactly one
+red-line gate; honest runs are still scored purely by the exposure math. Parameters (confirmed
+with the ruling): trigger is the integrator's existing `flagged_unjustified` predicate
+verbatim (HPAI-onset houses, node-scored-coli-covered culls, and end-of-lay business culls
+stay exempt — one detector per act); scope is the WHOLE simulation, matching the channel (not
+the decision window — the round-1 scenario was a day-0 cull, months before the window opens);
+both nodes capped, to 0. Built the same day: `HouseWelfare.unjustified_cull_birds` (monotone,
+accrued in exact parity with the flag, hidden from read_sensor) + `tripwire_when` OR-lists
+over all six houses on DP01 and DPW with `cap: {when: tripwire, score: 0.0}`. The graded
+death-pricing idea (option B done right — a welfare-currency death term, P9 lane) is noted as
+a possible v2 design item, not owed.

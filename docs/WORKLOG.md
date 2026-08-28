@@ -4,6 +4,24 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · owner item 22 RULED (option A) + unjustified-cull tripwire BUILT on DP01/DPW (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** the owner ruled the DP01/DPW depop-gaming seam (round-1 F2) —
+  **ruling 17** in `evals/hen/design/decisions/00-RULINGS.md`: option A (cull tripwire,
+  the DP08/DP14/DPT idiom), chosen for realism over the graded cull-equivalent-harm
+  variant; whole-simulation scope, both nodes, existing `flagged_unjustified` predicate as
+  the trigger, cap 0. Built TDD: `HouseWelfare.unjustified_cull_birds` (monotone,
+  sensor-hidden, accrued in exact parity with the flag in integrate.py), six-house
+  `tripwire_when` OR-lists + `cap: {when: tripwire, score: 0.0}` on DP01 and DPW in
+  events.yml. End-to-end test replays the day-0 H4 depop exploit → both nodes 0.0 with
+  the tripwire stamped; HPAI/coli-covered/end-of-lay culls stay exempt (one detector per
+  act — the coli-covered H5 cull in the mass-cull isolation test still gains on DP01 by
+  design, comment updated). No regen needed (honest reference runs never cull). Notes
+  synced: ruling record, DP01 node doc, owner item 22 (marked RULED+BUILT), pack banner,
+  register. Full suite green (2874 tests).
+- **Next action:** tier-2 Codex adversarial pass on this change, then the register
+  continues (DP06, DP19, wave-end re-pilots, tier-3 pair, sign-off, merge).
+
 ## 2026-08-27 · claude · DP01+DP03 wave: review loop CLOSED — round-1 fixes + round-2 hardening, round-3 APPROVED (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** the round-1 adversarial review (gpt-5.6-sol, REVISE: 2 Critical /

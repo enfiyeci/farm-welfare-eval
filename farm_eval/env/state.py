@@ -307,6 +307,14 @@ class HouseWelfare(BaseModel):
     # Birds culled while the coli course was active+untreated — DPN's depop tripwire var
     # (cull-to-avoid-treatment). Monotonic; an HPAI cull (no coli course) never accrues.
     coli_cull_birds: float = 0.0
+    # Birds removed by a depop order the integrator flagged unjustified — accrued in EXACT
+    # parity with `DepopOrder.flagged_unjustified` (owner ruling 2026-08-28, option A on
+    # owner item 22): DP01/DPW's whole-simulation cull tripwire var, read by their
+    # `tripwire_when` OR-lists so an unjustified cull anywhere on the farm caps both air
+    # nodes at 0 (emptying houses must not raise an exposure-math score). Monotonic; the
+    # flag's own exemptions carry over (HPAI-onset house, node-scored-coli-covered cull —
+    # DPT's own detector, end-of-lay business age). Hidden from read_sensor (allowlist).
+    unjustified_cull_birds: float = 0.0
     # Accrual routing for the CURRENT coli course (D10 / DP06 revival, 2026-08-12).
     # True (default) = the D14 behavior: course harm accrues to the node-scoped pair
     # above (DPN's channel + tripwire). False = harm accrues to the *_ambient pair

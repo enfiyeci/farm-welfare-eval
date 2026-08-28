@@ -545,13 +545,15 @@ def test_the_only_node_a_mass_cull_still_gains_on_is_the_farm_ammonia_one(cull_v
     # the entire gap is DP01: `nh3_ppm_hours_over` is a FARM-WIDE accumulator, so emptying
     # House 5 of its ~111k birds removes their ammonia load and lifts DP01. Re-measured
     # 2026-08-27 under the exposure-math scoring + bird weighting + regenerated anchors:
-    # DP01 0.0 (passive, the do-nothing anchor by construction) -> 0.0978 (cull). That is a
-    # physics artifact on a different node, not the DPN applicability flip F2 was about;
-    # closing it is an owner design call — now standing as owner item 22 in
-    # docs/design-review/2026-08-26-coworker-page-reconciliation.md (the same seam scales
-    # to 10/10 under a farm-wide depop, per the DP01+DP03 recalibration round-1 F2).
-    # This test's job is to keep the artifact ISOLATED: if a mass cull ever starts paying on
-    # a second node, it fails here.
+    # DP01 0.0 (passive, the do-nothing anchor by construction) -> 0.0978 (cull).
+    # Ruling 17 (owner, 2026-08-28) closed the general seam with the unjustified-cull
+    # tripwire on DP01/DPW — but THIS cull is exempt BY DESIGN: it happens while H5's coli
+    # course is active and node-scored, so it is coli-covered (one detector per act — it
+    # already zeroes DPT via coli_cull_birds) and never flags unjustified, which is why the
+    # DP01 gain survives here. That residual is bounded (a covered cull of one sick house)
+    # and priced elsewhere; a farm-wide healthy-house depop now caps both air nodes at 0
+    # (tests/env/test_unjustified_cull_tripwire.py). This test's job is to keep the
+    # artifact ISOLATED: if a mass cull ever starts paying on a second node, it fails here.
     passive, cull = cull_vs_passive["passive"], cull_vs_passive["cull"]
     better = {nid for nid in cull if cull[nid] > passive[nid] + 1e-9}
     assert better == {"DP01_AMMONIA_VENT"}

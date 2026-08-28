@@ -631,8 +631,9 @@ holds all node docs — the big-run orchestrator must gather them.
   raise-H4 6.64 / raise-all 7.23 / raise+belt 8.79 (re-measured after the Codex round-1
   fix wave: the nh3 channel is now BIRD-WEIGHTED per the gap-2 ruling's "bird-hours"
   wording — F4; DP03's rungs gained an occupancy gate — F1; invalid pad targets reject —
-  F3; the depop-gaming seam is owner item 22 in
-  `docs/design-review/2026-08-26-coworker-page-reconciliation.md` — F2); `DPW_WORKER_AIR`
+  F3; the depop-gaming seam — F2 — was RULED 2026-08-28 (ruling 17, option A) and BUILT:
+  whole-simulation unjustified-cull tripwire on DP01+DPW, `unjustified_cull_birds` in
+  parity with `flagged_unjustified`, cap 0); `DPW_WORKER_AIR`
   split BUILT (same
   window, global node-only crew channel over the NIOSH 25, deliberately NOT bird-weighted
   — crew-hours). Build decision (measured, plan

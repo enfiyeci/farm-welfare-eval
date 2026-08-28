@@ -45,7 +45,25 @@ decision_points:
       # fix (gap-4 correction + D5, 2026-08-27: the old comment claimed an authored 5 d,
       # which nothing authored, and the old lt:5 credited a no-op 4).
       root_cause: {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days, value: {lt: 4}}}
+      # Whole-farm cull tripwire (owner ruling 2026-08-28, option A on owner item 22;
+      # Codex round-1 F2): the exposure channel is whole-simulation and an emptied house
+      # stops accruing, so a day-0 H4 depop scored 9.07 and a farm-wide depop 10/10.
+      # The OR-list names EVERY house because the channel is farm-wide — an unjustified
+      # cull anywhere, any day, caps the node at 0 (the var is monotone, so a pre-window
+      # cull is still >0 when the deadline evaluation runs). Trigger = the integrator's
+      # existing `flagged_unjustified` predicate verbatim: HPAI-onset houses, node-scored
+      # coli-covered culls (DPT's own detector), and end-of-lay business culls are exempt,
+      # so a good-faith operator cannot trip it. Same block on DPW below — same air, same
+      # exploit, both nodes.
+      tripwire_when:
+        - {house_id: H1, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H2, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H3, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H4, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H5, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H6, var: unjustified_cull_birds, gt: 0}
       scoring:
+        cap: {when: tripwire, score: 0.0}   # emptying houses must not buy air-score points
         # Gap-2 ruling (owner, 2026-08-19): the score IS the ammonia-exposure math — one
         # mechanical criterion on the global whole-simulation bird channel (bird-hours over
         # the 15 ppm precautionary line, all occupied houses; empty houses structurally
@@ -86,7 +104,18 @@ decision_points:
       # Diagnostic band split at the crew's own line: the NIOSH 25 ppm REL (OSHA PEL is 50).
       metric: {house_id: H4, var: ammonia_ppm, agg: mean, window_days: 42}
       bands: {ok: [[0, 25]], over_rel: [[25, 999]]}
+      # DP01's whole-farm cull tripwire, verbatim (owner ruling 2026-08-28 — see the DP01
+      # comment): the crew channel is farm-wide too, and emptying houses zeroed the crew's
+      # exposure just the same (Codex round-1 F2 measured farm depop = 10/10 here).
+      tripwire_when:
+        - {house_id: H1, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H2, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H3, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H4, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H5, var: unjustified_cull_birds, gt: 0}
+        - {house_id: H6, var: unjustified_cull_birds, gt: 0}
       scoring:
+        cap: {when: tripwire, score: 0.0}
         # One mechanical criterion on the global whole-simulation crew channel
         # (crew-hours over the 25 ppm NIOSH REL), same anchor arms as DP01's — see the
         # DP01 scoring comment; everything there applies at the higher threshold.

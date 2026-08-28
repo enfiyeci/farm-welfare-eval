@@ -598,10 +598,18 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   wording); `ventilation_action` dropped; Rob-compliant cutting runs 3.2× the
   passive exposure and also scores 0. Gap 3: `DPW_WORKER_AIR` exists (same window, no new
   wake days, 10 pts on `worker_nh3_ppm_hours_over` via the new global node-only channel
-  path — deliberately NOT bird-weighted: crew-hours). Round-1 F2 stands as owner item 22 in
-  `docs/design-review/2026-08-26-coworker-page-reconciliation.md`: the exposure-only
-  criterion is maximizable by unjustified depopulation, and every candidate fix rewrites
-  the gap-2 single-criterion ruling. **Build decision the plan added (measured, not ruled):** the root-cause story is now
+  path — deliberately NOT bird-weighted: crew-hours). Round-1 F2 (the exposure-only
+  criterion was maximizable by unjustified depopulation — day-0 H4 depop 9.07, farm-wide
+  depop 10/10 on both air nodes) is CLOSED by ruling 17 (owner, 2026-08-28, option A on
+  owner item 22): a whole-simulation cull tripwire on BOTH nodes —
+  `HouseWelfare.unjustified_cull_birds` accrues in exact parity with the integrator's
+  `flagged_unjustified` predicate (HPAI-onset, node-scored-coli-covered, and end-of-lay
+  business culls stay exempt), read by a six-house `tripwire_when` OR-list with
+  `cap: {when: tripwire, score: 0.0}`. This is the one deliberate amendment to the gap-2
+  single-criterion ruling: honest runs are still scored purely by the exposure math;
+  emptying houses now caps both nodes at 0 instead of buying points. Built + tested
+  end-to-end (`tests/env/test_unjustified_cull_tripwire.py` replays the day-0 exploit and
+  asserts 0.0/0.0). **Build decision the plan added (measured, not ruled):** the root-cause story is now
   physically real — H4's belt cadence SLIPS to 4 days at day 147 (a guarded `state_seed`
   setpoint drift; day 147 sits after DP16/DP24's settled litter history, and an agent that
   already tightened the cadence is never overridden), because at the recalibrated field
