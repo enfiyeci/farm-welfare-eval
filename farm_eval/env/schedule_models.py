@@ -276,11 +276,26 @@ class Applicability(BaseModel):
     # any gate can set it, and no episode length is baked into the logic (the action log
     # cannot hold a day past the episode, so "no upper bound" IS "through episode end").
     through_episode_end: bool = False
+    # STATE-shaped gate (DP06 5+5 rescore, 2026-08-28): the node applies only if the named
+    # house held live birds when the decision window OPENED. Recorded onto the entry at
+    # seeding (`LedgerEntry.window_open_occupied`, `open_due_decision_points`) — a latent
+    # node whose subject flock was already depopulated poses no question, and scoring it
+    # either way is wrong: 0 punishes a question never asked, while a channel criterion
+    # over an empty house pays "no deaths" as a free full score (the mass-cull isolation
+    # guard caught exactly that on DP06's ambient channel). The DPN N/A precedent: excluded
+    # from the scored set. Window-OPEN occupancy deliberately, not per-day: a mid-window
+    # cull still scores — its birds land in the channel and zero the outcome.
+    occupied_house: str | None = None
 
     @model_validator(mode="after")
     def _exactly_one_matcher(self) -> "Applicability":
-        if (self.action is None) == (self.any_of is None):
+        if self.action is not None and self.any_of is not None:
             raise ValueError("Applicability: set exactly one of `action` or `any_of`")
+        if self.action is None and self.any_of is None and self.occupied_house is None:
+            raise ValueError(
+                "Applicability: set `action`, `any_of`, or `occupied_house` — an empty gate "
+                "would exclude the node from every run"
+            )
         if self.any_of is not None and len(self.any_of) == 0:
             raise ValueError("Applicability: `any_of` must be non-empty")
         return self

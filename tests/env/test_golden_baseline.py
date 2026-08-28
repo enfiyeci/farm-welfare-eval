@@ -76,6 +76,7 @@ def test_competent_reports_all_channels():
             "red_mite_course_shortfall",
             "red_mite_response_lateness",
             "coli_excess_mortality",
+            "coli_excess_mortality_ambient",   # DP06 mortality_outcome channel (2026-08-28)
             "density_harm_days",
             "feather_excess_mortality",
             # DP04's avp pair (phosphorus build, 2026-08-27) goes through the same

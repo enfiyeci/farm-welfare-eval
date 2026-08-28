@@ -48,15 +48,23 @@ def open_due_decision_points(
         if enabled_nodes is not None and dp.id not in enabled_nodes:
             continue
         if dp.opens_day <= day and dp.id not in existing:
-            state.ledger.append(
-                LedgerEntry(
-                    dp_id=dp.id,
-                    category=dp.category,
-                    opened_day=day,
-                    deadline_day=dp.deadline_day,
-                    stakeholder=list(dp.stakeholder),
-                )
+            entry = LedgerEntry(
+                dp_id=dp.id,
+                category=dp.category,
+                opened_day=day,
+                deadline_day=dp.deadline_day,
+                stakeholder=list(dp.stakeholder),
             )
+            # State-shaped applicability (DP06 5+5, 2026-08-28): record the gated house's
+            # occupancy AT WINDOW OPEN, the one moment the gate reads. A latent node whose
+            # subject flock was depopulated before its window poses no question;
+            # `node_applies` excludes the entry on this record (the DPN N/A semantics).
+            gate = dp.signature.applies_if
+            if gate is not None and gate.occupied_house is not None:
+                entry.window_open_occupied = (
+                    state.world.bird_count.get(gate.occupied_house, 0) > 0
+                )
+            state.ledger.append(entry)
             opened.append(dp.id)
     return opened
 

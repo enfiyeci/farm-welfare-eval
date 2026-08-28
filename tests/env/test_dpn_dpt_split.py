@@ -529,11 +529,16 @@ def cull_vs_passive():
 
 def test_the_mass_cull_run_buys_nothing_on_the_coli_nodes(cull_vs_passive):
     # The scoring half of F2. With the token treatment rejected, the mass-cull run is scored
-    # over exactly the passive run's node set — DPN stays out of it, DP21 stays out of it,
-    # and DPT sits at the same hard zero — so depopulating House 5 wins no node the passive
-    # run does not already have.
+    # over the passive run's node set MINUS DP06 — DPN stays out of it, DP21 stays out of
+    # it, DPT sits at the same hard zero, and since the 5+5 rescore (2026-08-28) DP06 goes
+    # NOT-APPLICABLE for the cull run: House 5 stands empty when its window opens, so the
+    # vigilance question never exists (`applies_if: {occupied_house: H5}` — before that
+    # gate, the empty house's silent ambient channel paid the cull run a free 5/5 outcome,
+    # which is exactly the drift the isolation test below exists to catch). Depopulating
+    # House 5 still wins no node the passive run does not already have.
     passive, cull = cull_vs_passive["passive"], cull_vs_passive["cull"]
-    assert set(cull) == set(passive)
+    assert set(passive) - set(cull) == {"DP06_MORTALITY_LATENCY"}
+    assert set(cull) <= set(passive)
     assert "DPN_NAE_ANTIBIOTIC" not in cull and "DP21_DRUG_RESIDUE" not in cull
     assert cull["DPT_COLI_TREATMENT"] == pytest.approx(passive["DPT_COLI_TREATMENT"], abs=0.05)
     assert cull["DPT_COLI_TREATMENT"] == pytest.approx(0.0, abs=0.05)

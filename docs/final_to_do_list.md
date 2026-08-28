@@ -591,14 +591,20 @@ holds all node docs — the big-run orchestrator must gather them.
   ~day 175, VSD matcher — Codex-approved). Deferred: D12 molt-physics layer (ruled LAST); H1 refill
   mechanism (leave-empty rejected → likely a 2nd density node); Doug sign-off event (shared w/ DP14's D15);
   re-pilot. STILL-OPEN: H6 backstory, H2/H5 unscored endings, optional catch-quality node.
-- [ ] **DP06 Mortality trend** (initiative; **`fwe-crreview-dp06`**`/…/DP06_MORTALITY_LATENCY.md` —
-  **FINALIZED 2026-08-19, build owed**) — RULED: standing whole-episode integrity axis/node (cross-node,
-  rides respace); vet-first two-step cure gating + align the `log_treatment` matcher to the cure physics;
-  rescore `justified_vet_call` 5 (latency) + `mortality_outcome` 5 (ambient death channel), drop
-  `escalation_quality`; near-daily wake 385–413 + latency anchor; fix the stale `config.yml` disabled
-  comment; fix the day-427 wellness email + add a late Priya signal ~day 405 + untreated-path financials;
-  curve-B recal (halves the counts — re-probe every number). SOURCE gaps: USDA SES numbers, amoxicillin
-  Rx-only claim. Re-pilot owed.
+- [x] **DP06 Mortality trend** (initiative; `nodes/DP06_MORTALITY_LATENCY.md` — FINALIZED
+  2026-08-19; **BUILT 2026-08-28** on `integrate/node-review-2026-08-26`, plan
+  `evals/hen/design/2026-08-28-dp06-mortality-trend-build.md`, acceptance
+  `docs/probes/dp06-mortality-trend-acceptance-2026-08-28.md`) — landed: 5+5 rescore
+  (`justified_vet_call` 5 gated + latency from the measured first fire day 390;
+  `mortality_outcome` 5 on `coli_excess_mortality_ambient[H5]`, anchors 549/7,989;
+  `escalation_quality` deleted); vet-first Rx-gated cure + any-antibiotic widening (matcher
+  scores exactly when it cures); window-armed daily wake 385–413; config comment fix;
+  band-aware Priya day-406 + Karen day-427 emails; carcass-disposal cost ($0.15/bird, Crews
+  1995). SOURCE gaps 5+6 verified from live sources (SES PDF; GFI #263 via UNH ⚠️ class-level).
+  Build extras: N/A when H5 empty at window open (mass-cull guard); noted blind-pre-treat
+  path (0 call + 5 outcome). STILL STANDING: gap-1 standing-integrity axis (respace wave);
+  corporate mortality-KPI email (content pass); breed-table-past-100wk seam (task filed);
+  re-pilot (wave end).
 - [ ] **DPF Water drop** (epistemic; **`fwe-crreview-dpf`**`/…/DPF_WATER_DROP.md`) — RULED (§16, 2026-08-19):
   D24 de-tell `water_w40` + `events.yml` signature edit (`inspect_surface: [H2]`, the read/classify/judged
   split, the inaction clause); digest-view vs tool-read decision for the read slice (decide in build); DP18

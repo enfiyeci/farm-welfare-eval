@@ -1175,7 +1175,22 @@ def node_applies(
     gate = sig.applies_if
     if gate is None:
         return True
+    # State-shaped half (DP06 5+5, 2026-08-28): the gate's `occupied_house` reads the
+    # occupancy `open_due_decision_points` recorded when the window opened. A declared
+    # gate with no record means the entry was seeded outside that path — fail loud, never
+    # silently exclude or include. An unoccupied house at open = not applicable,
+    # whatever the action half would say.
+    if gate.occupied_house is not None:
+        if entry.window_open_occupied is None:
+            raise ValueError(
+                f"applies_if.occupied_house for {entry.dp_id}: entry carries no "
+                "window_open_occupied record — seeded without open_due_decision_points?"
+            )
+        if not entry.window_open_occupied:
+            return False
     matchers = gate.matchers  # single `action` or the F12 `any_of` alternatives, uniformly
+    if not matchers:
+        return True  # a pure state gate declares no creating action to scan for
     if any("transient_before" in am.where for am in matchers) and schedule is None:
         raise ValueError(
             f"applies_if for {entry.dp_id} uses a transient_before directive but no schedule was "

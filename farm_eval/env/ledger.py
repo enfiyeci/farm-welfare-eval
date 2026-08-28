@@ -77,3 +77,8 @@ class LedgerEntry(BaseModel):
     # loud on an ADDRESSED entry that declares the anchor but carries none (harness defect),
     # and never needs it for an unaddressed entry (latency is 0 with no action day).
     latency_anchor_day: int | None = None
+    # Occupancy of the `applies_if.occupied_house` house at window OPEN (DP06 5+5 rescore,
+    # 2026-08-28): recorded by `open_due_decision_points` for nodes declaring the state
+    # gate; None everywhere else. `node_applies` fails loud on a declared gate with no
+    # record (a hand-seeded entry) — never a silent exclusion or inclusion.
+    window_open_occupied: bool | None = None

@@ -326,6 +326,13 @@ decision_points:
                                                     # the flock report renders the last ~14 d
     signature:
       kind: binary
+      # NOT-APPLICABLE when H5 stands empty at window open (2026-08-28, the mass-cull
+      # isolation guard's catch): with the flock depopulated before day 385 the second
+      # course never runs, and the ambient outcome channel would read "no deaths" as a
+      # free 5/5 for a house with no birds. No flock -> no vigilance question -> excluded
+      # from the scored set (the DPN N/A precedent). A MID-window cull still scores: its
+      # birds land in the ambient channel and zero the outcome.
+      applies_if: {occupied_house: H5}
       # Signal-JUSTIFIED credit (D10 owner ruling): a vet call scores ONLY if the USDA
       # trigger had already fired in-window at call time — usda_trigger_last_day inside
       # [opens_day, deadline_day] (requires_state gate, tracker call-time evaluation). An

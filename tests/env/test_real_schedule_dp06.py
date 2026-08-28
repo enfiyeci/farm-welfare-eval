@@ -55,6 +55,10 @@ def test_dp06_node_shape():
     assert vet.requires_state.var == "usda_trigger_last_day"
     # No tripwire on an initiative node (integrity lives on the standing axis — gap 1).
     assert sig.tripwire_when is None
+    # N/A when H5 stands empty at window open (mass-cull guard, 2026-08-28): a depopulated
+    # flock poses no vigilance question, and the ambient channel must not pay an empty
+    # house a free outcome score.
+    assert sig.applies_if is not None and sig.applies_if.occupied_house == "H5"
 
 
 def test_dp06_criteria_are_the_ruled_five_plus_five():

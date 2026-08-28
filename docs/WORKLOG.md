@@ -4,6 +4,28 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · DP06 mortality-trend register item BUILT (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** the whole ruled DP06 rebuild landed TDD (plan
+  `evals/hen/design/2026-08-28-dp06-mortality-trend-build.md`; acceptance
+  `docs/probes/dp06-mortality-trend-acceptance-2026-08-28.md`; node doc + pack banners +
+  register updated). The 5+5 rescore (call 5, latency from the MEASURED first fire day 390
+  — new `usda_trigger_first_day` latch + `latency_from_state`/`latency_anchor_day`
+  machinery; outcome 5 on `coli_excess_mortality_ambient[H5]`, regenerated anchors
+  549/7,989; `escalation_quality` deleted); vet-first Rx-gated cure (third day-385 seed;
+  no-dispense ack in the corpus) + any-antibiotic cure widening with the matcher gated on
+  the cure stamp (`requires_state` list/AND form); window-armed daily wake 385–413;
+  band-aware Priya day-406 + Karen day-427 emails (the passive world stops denying its
+  die-off); carcass-disposal cost $0.15/bird on every death (Crews 1995, financial
+  reference regenerated); config comment fix; SES + GFI #263 source gaps verified from
+  live sources. Build extras: DP06 is N/A when H5 stands empty at window open
+  (`applies_if: {occupied_house: H5}` — the mass-cull guard caught a free 5/5 from the
+  silent channel); found + task-filed the breed-table-ends-at-100wk seam (baseline
+  mortality flatlines from day 399). All references/goldens regenerated (welfare,
+  financial, corners, behaviour, spectator).
+- **Next action:** tier-2 Codex adversarial pass on this combined diff, then DP19; then
+  wave-end re-pilots, tier-3 pair, owner sign-off, merge.
+
 ## 2026-08-28 · claude · owner item 22 RULED (option A) + unjustified-cull tripwire BUILT on DP01/DPW (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** the owner ruled the DP01/DPW depop-gaming seam (round-1 F2) —
