@@ -1253,8 +1253,9 @@ function, seeded again.
   {house_id: H5, var: usda_trigger_last_day}`), latency-weighted linearly from the FIRST
   in-window fire to 0 at the deadline. The first-fire day comes from a second latch,
   `HouseWelfare.usda_trigger_first_day` (re-anchored whenever a hit does not extend
-  yesterday's elevation), recorded per run onto `LedgerEntry.latency_anchor_day` — day 395
-  under curve B (probed 2026-08-28). The `log_treatment` alternative scores exactly when it
+  yesterday's elevation), recorded per run onto `LedgerEntry.latency_anchor_day` — day 390
+  under curve B (measured 2026-08-28; the comparator is the breed-standard EXPECTED
+  baseline, so it fires well before observed deaths triple). The `log_treatment` alternative scores exactly when it
   CURES (conjunction gate: trigger latch AND `coli_treated_day` in-window) — the six-word
   issue bank is gone. `mortality_outcome` (5, mechanical): `coli_excess_mortality_ambient[H5]`
   normalized between the reference anchors (ride ≈ 8.1k birds → 0; cure at first fire + the

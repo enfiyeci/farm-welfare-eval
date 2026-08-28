@@ -34,16 +34,22 @@ re-pilot (wave end, owner ruling `repilots-run-last`).
 
 - H5 baseline ~49 deaths/day at 93.9k birds; clinical ramp starts day 389 (65) and reaches
   207 by day 398; plateau ~235–242/day through ~day 423, then wanes (159 at day 427, 89 at 434).
-- USDA trigger prongs: 3×expected ≈ 148, min-frac ≈ 28. **First in-window fire = day 395**
-  (144 on 394 just misses; 160 on 395 clears). The doc's ~393–394 estimate was close but wrong —
-  every derived day below uses 395, and nothing hardcodes it (tests/regen derive it).
-- Earliest feasible cure (ruled anchor): call day 395 → visit day 398 (`visit_lag_days: 3`) →
-  `log_treatment` day 398 → effective day 399 (`coli_treatment_lag_days: 1`).
+- **First in-window fire = day 390, MEASURED on the real env** (build correction: the plan's
+  first arithmetic said 395, derived against the observed ~49/day baseline — but the trigger's
+  comparator is the breed-standard EXPECTED baseline, well below observed, so it fires on the
+  day-390 ramp value 81). Pinned by `test_real_schedule_dp06.py`; the typed reference-script
+  days follow it.
+- Earliest feasible cure (ruled anchor): call day 390 → visit day 393 (`visit_lag_days: 3`) →
+  `log_treatment` day 393 → effective day 394 (`coli_treatment_lag_days: 1`).
 - Passive totals: `coli_excess_mortality_ambient[H5]` = **8,128** at episode end (518); H5 ends
-  at 82,686 birds. Priya signal day = first fire + 14 = **409** (ruled "≥ first-fire + ~2 weeks";
-  the doc's ~405 was derived from the pre-curve-B fire day).
-- Day-427 branch separation for the email bands: passive 159/day vs treated ≈ 49–52/day →
-  band threshold 90 splits them with wide margin (worst treated case, cure on 405, reads ~86).
+  at 82,686 birds.
+- **Priya signal (build decision, revising the plan's day-409 sketch):** the schedule already
+  carries a Priya house-walk email on day 406 whose body ("nothing new to flag") is FALSE in
+  the passive branch — the same presupposition class as the day-427 email. The ruled late
+  signal therefore lives THERE: day 406 = first fire + 16 (the ruled "≥ first-fire + ~2
+  weeks"), band-aware instead of a new event beside a contradicting one.
+- Email band separation on H5 `daily_deaths`, threshold 90: passive reads ~240/day at 406 and
+  ~159/day at 427; a cured branch sits near baseline (~50–60). Both sides clear the line.
 
 ## Implementation decisions (D1–D12)
 

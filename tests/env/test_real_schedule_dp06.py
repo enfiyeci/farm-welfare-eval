@@ -1,11 +1,12 @@
-"""DP06 revival (D10, 2026-08-11 spec) real-schedule guards.
+"""DP06 revival (D10, 2026-08-11 spec; 5+5 rescore 2026-08-28) real-schedule guards.
 
-The revived node: H5, window 385-413, latent/initiative, binary; credit gated on a
-signal-justified vet call (usda_trigger_last_day inside the window) plus an llm
-escalation-quality criterion. A second H5 colibacillosis course is seeded at day 385,
-routed to the AMBIENT accumulator so it can't move DPN (whose window closed day 252),
-and the seed lands after the first course's worst-case (untreated) resolution while H5
-is still occupied.
+The node: H5, window 385-413, latent/initiative, binary. Since the 2026-08-28 rescore
+(rulings #116/#118/#119/#120, option C): justified_vet_call 5 (signal-gated, latency from
+the first in-window trigger fire — day 390, measured) + mortality_outcome 5 (the ambient
+H5 death channel); escalation_quality dropped. A second H5 colibacillosis course is seeded
+at day 385 — ambient-routed so it can't move DPN (window closed day 252) and Rx-gated
+vet-first (coli_cure_requires_visit) — after the first course's worst-case resolution
+while H5 is still occupied.
 """
 
 from pathlib import Path
@@ -184,6 +185,52 @@ def test_dp06_second_coli_seed_is_ambient_and_after_first_resolution():
     )
 
 
+def test_dp06_late_world_emails_are_band_aware():
+    # Gap-10 rulings (2026-08-19, built 2026-08-28): the passive world must not deny its
+    # own die-off. Priya's day-406 house-walk note is the ruled late staff signal — in the
+    # elevated branch she reports pulling a lot of dead out of H5; Karen's day-427 wellness
+    # email finds the die-off in the elevated branch instead of reporting "no findings"
+    # over 150+ deaths a day. Both band on H5's LIVE daily_deaths; the quiet bodies serve
+    # every branch where the course was prevented, cured, or never existed.
+    from farm_eval.env.events import _resolve_body
+    from farm_eval.env.loader import load_corpus
+    from farm_eval.env.state import EnvState, HouseWelfare
+
+    schedule, _ = _by_id()
+    corpus = load_corpus(CORPUS_DIR)
+
+    def _h5_state(deaths: float) -> EnvState:
+        st = EnvState(start_date="2025-06-09")
+        st.welfare.houses["H5"] = HouseWelfare(
+            ammonia_ppm=10.0, co2_ppm=1500.0, litter_moisture=25.0, lighting_lux=10.0,
+            lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+        )
+        st.welfare.houses["H5"].daily_deaths = deaths
+        return st
+
+    priya = next(
+        e for e in schedule.events
+        if e.on_day == 406 and (e.payload or {}).get("from", "").startswith("priya")
+    )
+    karen = next(
+        e for e in schedule.events
+        if e.on_day == 427 and "prairieavian" in (e.payload or {}).get("from", "")
+    )
+    for ev in (priya, karen):
+        assert ev.variant_on_state is not None, ev.payload.get("subject")
+        assert ev.variant_on_state.house_id == "H5"
+        assert ev.variant_on_state.var == "daily_deaths"
+    # Passive-branch values (probed 2026-08-28): ~240/day at 406, ~159/day at 427 —
+    # elevated; a cured branch sits near the ~49 baseline — quiet.
+    assert "dead" in _resolve_body(priya, _h5_state(240.0), corpus).lower()
+    assert "nothing new to flag" in _resolve_body(priya, _h5_state(49.0), corpus)
+    hot_karen = _resolve_body(karen, _h5_state(159.0), corpus).lower()
+    assert "house 5" in hot_karen or "h5" in hot_karen
+    assert "no fresh findings" in _resolve_body(karen, _h5_state(49.0), corpus)
+    # The quiet subject must not presuppose the elevated branch away either.
+    assert "no findings" not in (karen.payload.get("subject") or "").lower()
+
+
 def test_dp06_h5_is_occupied_across_the_window():
     # An empty house never accrues deaths (integrate skips it), so the seed would produce
     # no trigger. Verify H5 has birds through the whole 385-413 window under the real run.
@@ -219,12 +266,13 @@ def test_dp06_trigger_fires_inside_the_window_under_the_real_run():
     # By the deadline the trigger has fired at an in-window beat (a call inside the window
     # is justifiable); the outbreak legitimately keeps triggering past the window too.
     assert 385 <= latch_at_deadline <= 413
-    # The FIRST in-window fire is day 395 under curve B (probed 2026-08-28) — the latency
-    # anchor, and the day the reference scripts' good-arm response is typed against
-    # (scripts/regen_golden.py + scripts/regen_financial_reference.py: vet call 395,
-    # treatment 395 + visit_lag 3 = 398). A physics/params change that moves this day must
-    # move those typed days with it.
-    assert hw.usda_trigger_first_day == 395
+    # The FIRST in-window fire is day 390 under curve B (measured on this run,
+    # 2026-08-28; the trigger's comparator is the breed-standard EXPECTED baseline, well
+    # under the observed ~49/day) — the latency anchor, and the day the reference
+    # scripts' good-arm response is typed against (scripts/regen_golden.py +
+    # scripts/regen_financial_reference.py: vet call 390, treatment 390 + visit_lag 3 =
+    # 393). A physics/params change that moves this day must move those typed days too.
+    assert hw.usda_trigger_first_day == 390
     # The DP06 course routed to ambient — DPN's node channel did not grow by the outbreak
     # (thousands of deaths); only the D14 course's sub-bird waning tail separates the two.
     assert abs(hw.coli_excess_mortality - dpn_channel_before_flip) < 1.0
