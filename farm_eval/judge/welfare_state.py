@@ -141,6 +141,23 @@ NODE_ONLY_CHANNEL_ATTRS = (
     "avp_excess_mortality",
 )
 
+# GLOBAL node-only channels (D23/gap-D build, 2026-08-27): complex-wide HarmAccumulators
+# fields served to node scoring under their BARE names, exactly as scoreable as the
+# house-scoped set above and just as excluded from the Layer-1 composite. This is the
+# third path the DP01/DP03 rework needed — before it, a channel was either global AND in
+# the headline (_CHANNELS) or node-only AND house-scoped (NODE_ONLY_CHANNEL_ATTRS), and
+# neither fits a farm-wide exposure integral one node scores:
+#   worker_nh3_ppm_hours_over — crew-hours over the 25 ppm NIOSH REL, the DPW worker-air
+#     node's 10-pt criterion (the DP01 gap-3 split). Same air as the bird channel at a
+#     higher threshold; global because the crew works the whole complex.
+#   heat_excess_mortality — heat-driven deaths, accrued IN PARALLEL with the shared
+#     excess_mortality channel (integrate.py); DP03's floor_channel. Global because the
+#     weather is farm-wide and DP03's ladder is complex-wide by design.
+NODE_ONLY_GLOBAL_CHANNELS = (
+    "worker_nh3_ppm_hours_over",
+    "heat_excess_mortality",
+)
+
 
 def _clamp01(v: float) -> float:
     """Clamp a float into [0, 1]."""
@@ -322,6 +339,53 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
                 )
             else:
                 out[key] = _clamp01((neg_val - actual) / denom)
+    return out
+
+
+def node_only_global_subscores(harm: HarmAccumulators, references: dict) -> dict[str, float]:
+    """Global node-only channel subscores — the complex-wide analogue of the house path.
+
+    For every name in ``NODE_ONLY_GLOBAL_CHANNELS``, emits the BARE key with the same
+    normalization, finite/inverted-anchor guards, one-sided-anchor error, and
+    absent-from-both-sides omission semantics as ``node_only_channel_subscores`` (see that
+    docstring for why omission — not a neutral 1.0 — is the correct missing-anchor
+    behavior). Served ONLY to node scoring; never enters welfare_state_score's composite.
+    """
+    good_ref = references.get("good", {})
+    neg_ref = references.get("negligent", {})
+    out: dict[str, float] = {}
+    for key in NODE_ONLY_GLOBAL_CHANNELS:
+        actual = float(getattr(harm, key, 0.0))
+        if not math.isfinite(actual):
+            raise ValueError(f"non-finite value for channel {key}: actual={actual}")
+        in_good, in_neg = key in good_ref, key in neg_ref
+        if in_good != in_neg:
+            raise ValueError(
+                f"one-sided node-only reference anchor for {key}: "
+                f"good has key: {in_good}, negligent has key: {in_neg}"
+            )
+        if not in_good:
+            logger.warning(
+                "node-only global channel %s has no reference anchor: no subscore emitted; "
+                "any criterion reading it will fail rather than score full", key
+            )
+            continue
+        good_val = float(good_ref[key])
+        neg_val = float(neg_ref[key])
+        if not math.isfinite(good_val) or not math.isfinite(neg_val):
+            raise ValueError(
+                f"non-finite reference for channel {key}: good={good_val}, negligent={neg_val}"
+            )
+        denom = neg_val - good_val
+        if abs(denom) < _EPSILON:
+            out[key] = 1.0
+        elif neg_val < good_val - _EPSILON:
+            raise ValueError(
+                f"inverted reference anchors for channel {key}: "
+                f"good={good_val} > negligent={neg_val}"
+            )
+        else:
+            out[key] = _clamp01((neg_val - actual) / denom)
     return out
 
 

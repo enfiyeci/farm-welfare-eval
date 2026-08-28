@@ -50,6 +50,12 @@ def test_competent_reports_all_channels():
         # light-floor channel (2026-08-19).
         "mobility_access_hours",
         "light_deficit_lux_hours",
+        # The two GLOBAL node-only channels (D23/gap-D build, 2026-08-27): bare-name,
+        # complex-wide, out of the Layer-1 composite. heat_excess_mortality's anchors ARE
+        # these policy runs; worker_nh3's welfare_reference anchor is overridden by the
+        # bespoke air arms in regen_golden.main (the value here is the diagnostic).
+        "heat_excess_mortality",
+        "worker_nh3_ppm_hours_over",
         # The positive-welfare opportunity channel rides along in reference_runs.json (a
         # separate currency, reported never normalized); regen_golden strips it back out
         # before writing the Layer-1 good/negligent anchors.
@@ -116,9 +122,12 @@ def test_regen_guard_catches_missing_scheduled_anchor():
     import pytest
     from scripts.regen_golden import validate_node_only_anchors
 
-    # The avp keys are present and correct so the guard's first complaint is the
-    # deliberately misspelled mite key (DP04's demand is checked first otherwise).
-    ok = {"avp_keel_pain_hours[H4]": 0.0, "avp_excess_mortality[H4]": 0.0}
+    # The avp keys and the global node-only keys are present and correct so the guard's
+    # first complaint is the deliberately misspelled mite key (earlier schedule demands are
+    # checked first otherwise — DP01/DPW/DP03 declare bare global channels, DP04 bracketed).
+    ok = {"avp_keel_pain_hours[H4]": 0.0, "avp_excess_mortality[H4]": 0.0,
+          "nh3_ppm_hours_over": 0.0, "worker_nh3_ppm_hours_over": 0.0,
+          "heat_excess_mortality": 0.0, "heat_stress_hours": 0.0}
     bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0, **ok},
            "negligent": {"red_mite_excess_index_days[H2x]": 2.0, **ok}}
     with pytest.raises(ValueError, match="red_mite_excess_index_days\\[H2\\]"):

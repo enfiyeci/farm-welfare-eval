@@ -46,6 +46,7 @@ from farm_eval.judge.node_scores import (
 )
 from farm_eval.judge.welfare_state import (
     node_only_channel_subscores,
+    node_only_global_subscores,
     opportunity_realized_frac,
     welfare_state_score,
 )
@@ -1436,14 +1437,18 @@ async def grade_episode(
     composite = diagnostic_composite(avg, dimensions)  # reported secondary, never the headline
 
     # --- (2) NODE SPINE (the welfare headline) ---
-    # Layer-1 composite channels plus the house-scoped node-only channels (D5, 2026-08-11):
-    # bracketed keys like red_mite_index_hours_over[H2], normalized against the same
-    # references, neutral 1.0 when unanchored (pinned pre-D5 replay references), and never
-    # part of the Layer-1 composite.
+    # Layer-1 composite channels plus the node-only channels, both scopes: the house-scoped
+    # set (D5, 2026-08-11 — bracketed keys like red_mite_index_hours_over[H2]) and the
+    # GLOBAL set (D23/gap-D, 2026-08-27 — bare keys like worker_nh3_ppm_hours_over).
+    # All normalized against the same references; none of the node-only keys enter the
+    # Layer-1 composite.
     channels = {
         **compute_welfare_state(env_state, references=welfare_references)["channels"],
         **node_only_channel_subscores(
             env_state.welfare.houses, welfare_references or _WELFARE_REFERENCE
+        ),
+        **node_only_global_subscores(
+            env_state.welfare.harm, welfare_references or _WELFARE_REFERENCE
         ),
     }
     actions = env_state.actions

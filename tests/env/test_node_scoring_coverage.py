@@ -49,6 +49,11 @@ REAL_CHANNELS = {
     # floor_channel reads. H4 is the representative house (per-day accrual house-size-independent; no arc empties H4).
     "avp_keel_pain_hours[H4]",
     "avp_excess_mortality[H4]",
+    # GLOBAL node-only channels (D23/gap-D build, 2026-08-27): bare-name, complex-wide,
+    # scoreable, out of the Layer-1 composite. DPW's crew-exposure criterion and DP03's
+    # re-anchored floor_channel read these.
+    "worker_nh3_ppm_hours_over",
+    "heat_excess_mortality",
 }
 
 pytestmark = pytest.mark.skipif(

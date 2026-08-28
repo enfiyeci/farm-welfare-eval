@@ -36,6 +36,7 @@ model_params: {}          # ModelParams overrides for the reactive substrate (PL
 # NOTE: keep this list in sync with schedule/events.yml decision_points when nodes are added.
 enabled_nodes:
   - DP01_AMMONIA_VENT
+  - DPW_WORKER_AIR
   - DP03_HEAT_STRESS
   - DP04_PHOSPHORUS_RATION
   - DP05_RED_MITE
