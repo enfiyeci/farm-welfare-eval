@@ -627,9 +627,15 @@ holds all node docs — the big-run orchestrator must gather them.
   whole-sim channel; ventilation_action dropped); gap-D inverse clearing + continuous cold
   throttle calibrated to CSES (winter episodic, coldest-bin ~14.4 at the op point); baseline
   0.6 fuel-saving under-vent + bespoke passive/active-air anchors ⇒ DO-NOTHING SCORES 0.00
-  (measured; was 5.30), Rob-compliant cutting 0.00 at 3.4× exposure, gradient
-  raise-H4 6.54 / raise-all 7.29 / raise+belt 8.82; `DPW_WORKER_AIR` split BUILT (same
-  window, global node-only crew channel over the NIOSH 25). Build decision (measured, plan
+  (measured; was 5.30), Rob-compliant cutting 0.00 at 3.2× exposure, gradient
+  raise-H4 6.64 / raise-all 7.23 / raise+belt 8.79 (re-measured after the Codex round-1
+  fix wave: the nh3 channel is now BIRD-WEIGHTED per the gap-2 ruling's "bird-hours"
+  wording — F4; DP03's rungs gained an occupancy gate — F1; invalid pad targets reject —
+  F3; the depop-gaming seam is owner item 22 in
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md` — F2); `DPW_WORKER_AIR`
+  split BUILT (same
+  window, global node-only crew channel over the NIOSH 25, deliberately NOT bird-weighted
+  — crew-hours). Build decision (measured, plan
   D5): H4's belt cadence slips to 4 d at day 147 (guarded state_seed setpoint drift — after
   DP16/DP24's settled windows; drift-from guard protects a proactive fix), making the belt
   root cause physically real (belt-fix-only out-earns vent-only; the +0.02 inversion is

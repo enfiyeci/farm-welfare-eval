@@ -390,6 +390,13 @@ with DP01. It earns its budget; the trust-3 v8 score reflects the pending rework
   (its passive story now runs through H4's day-147 belt drift; see the DP01 doc's build
   entry). References/goldens/financial reference regenerated. Still open: re-pilot (wave
   end, owner ruling).
+- **2026-08-27 — Codex round-1 fixes (same wave, post-review):** every ladder rung now
+  carries a call-time occupancy gate (`requires_occupied_house` — an `adjust_setpoint` or a
+  named pad service on empty H6 used to take the top rung + latency and score 8.02/10 while
+  cooling nobody; a rung credited while the house was occupied is never retro-stripped),
+  and a pad-service order naming an invalid house (`target: H99`) is rejected before the
+  fee and the standing flag instead of silently falling back to servicing every occupied
+  house. Heat arms re-measured unchanged (1.02/6.06/9.29/7.42).
 
 ## Sign-off
 

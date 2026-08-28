@@ -186,9 +186,13 @@ owner ruling `repilots-run-last`).
    onset 31.2) + water:feed 5.0; unit tests against Kang's published pairs (36 °C/45 % →
    ≈32.1; the panting anchors; sustained-vs-blip ordering preserved on the new scale).
 2. **Heat mortality re-derivation + routing:** retuned `heat_mort_coeff`/`heat_mort_exp_rate`
-   (Kang endpoint tests: 32 sustained ≥95 % by 5 h; ≤31.2 → 0); `heat_excess_mortality`
-   accumulator + integrate routing/subtraction; tests that shared `excess_mortality` no
-   longer moves with heat and the new channel does.
+   on Kang's SHAPE with the Riquena field-bound magnitude (as built — see D6's
+   measured-at-build-time paragraph: the lab ≥95 %-by-5-h endpoint is deliberately not
+   reproduced; tests pin onset 31.2 → 0 and the ~1–2 % neglect-arm event loss);
+   `heat_excess_mortality` accumulator accrued IN PARALLEL with the shared channel (D8 —
+   NOT the subtract-out idiom; the shared channel keeps moving with heat), plus tests that
+   the dedicated channel moves under heat deaths. (Reworded 2026-08-27, Codex round-1 F5:
+   the original task text still carried the superseded 95 %-endpoint/subtraction design.)
 3. **Pads:** `pad_service` standing state + handler + `pad_cooling_degc` term + activation
    threshold; tests for flag set (housed/unhoused), winter inertness, partial protection at
    the event, callout fee unchanged.

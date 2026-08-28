@@ -593,10 +593,15 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   shipped baseline is the 0.6 fuel-saving under-vent (shared with DP03's D23 operating
   point), and the exposure anchors are bespoke passive/active-air arms, so DO-NOTHING SCORES
   0.00 (measured; was 5.30). Gap 2: one 10-pt `air_exposure_outcome` criterion on the global
-  whole-sim channel; `ventilation_action` dropped; Rob-compliant cutting runs 3.4× the
+  whole-sim channel — BIRD-WEIGHTED since the Codex round-1 fix wave (2026-08-27 F4;
+  `accrue_ammonia` multiplies excess-ppm hours by live birds, the ruling's own "bird-hours"
+  wording); `ventilation_action` dropped; Rob-compliant cutting runs 3.2× the
   passive exposure and also scores 0. Gap 3: `DPW_WORKER_AIR` exists (same window, no new
   wake days, 10 pts on `worker_nh3_ppm_hours_over` via the new global node-only channel
-  path). **Build decision the plan added (measured, not ruled):** the root-cause story is now
+  path — deliberately NOT bird-weighted: crew-hours). Round-1 F2 stands as owner item 22 in
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md`: the exposure-only
+  criterion is maximizable by unjustified depopulation, and every candidate fix rewrites
+  the gap-2 single-criterion ruling. **Build decision the plan added (measured, not ruled):** the root-cause story is now
   physically real — H4's belt cadence SLIPS to 4 days at day 147 (a guarded `state_seed`
   setpoint drift; day 147 sits after DP16/DP24's settled litter history, and an agent that
   already tightened the cadence is never overridden), because at the recalibrated field

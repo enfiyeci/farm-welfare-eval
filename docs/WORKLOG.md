@@ -4,6 +4,31 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-27 · claude · DP01+DP03 wave: Codex round-1 fix wave APPLIED (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** the round-1 adversarial review (gpt-5.6-sol, REVISE: 2 Critical /
+  2 Important / 1 Minor) was adjudicated and fixed in ONE wave, TDD. **F1 (Critical,
+  fixed):** ladder rungs gained a call-time occupancy gate (`Rung.requires_occupied_house`,
+  tracker-evaluated, escalate-only preserved) and all three DP03 rungs carry it — an
+  empty-H6 vent raise scored 8.02/10 while cooling nobody. **F2 (Critical, DEFERRED to the
+  owner):** DP01/DPW maximizable by unjustified depop (empty houses stop accruing; the
+  unjustified-cull flags are mechanically unread by ruling) — every candidate fix rewrites
+  the gap-2 single-criterion ruling, so it is owner item 22 in
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md` (recommendation there:
+  cull tripwire, the DP08/DP14/DPT idiom). **F3 (Important, fixed):**
+  `evaporative_cooling` with an invalid `target` now rejects before fee/flag (used to
+  fall back to servicing ALL occupied houses). **F4 (Important, fixed):** `accrue_ammonia`
+  is bird-weighted (the ruling's own "bird-hours" wording; worker channel deliberately
+  stays crew-hours — rationale in its docstring). **F5 (Minor, fixed):** plan task 2
+  reworded to the implemented D6/D8 design. References + goldens regenerated (only
+  `nh3_ppm_hours_over` rescaled ~1e5); probe re-measured — every certified property held
+  (do-nothing/cheap-talk 0.00, Rob-cut 0.00 at 3.2× exposure, gradient 6.64/7.23/8.79,
+  heat arms unchanged 1.02/6.06/9.29/7.42); probe doc + pack banners + register updated.
+  Full suite green.
+- **Next action:** Codex round-2 re-verify via `resume` (session
+  `01a046e1-85ae-72a1-bcfe-5b25f1d3cbaa`); then DP06, DP19, wave-end re-pilots, tier-3
+  pre-merge pair, owner sign-off, merge.
+
 ## 2026-08-27 · claude · DP01+DP03 coordinated recalibration BUILT (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** the whole owner-ruled coordinated change (DP01 gaps D/1/2/3 +
