@@ -934,6 +934,25 @@ class FarmEnv:
             # callout, answer "ok", and then do nothing at all. `target` bypasses the shared
             # _HOUSE_KEYED_TOOLS guard (and an omitted house_id never reaches it), so both keys
             # are resolved here through the same helper the order branch below uses.
+            # Codex round-1 F3 (2026-08-27): a pad-service order with a SUPPLIED house name
+            # must name a real house, validated BEFORE the fee and the standing flag — the
+            # same pre-side-effect rule as the depop and retrofit orders above. Only `target`
+            # needs checking here: an invalid house_id is already rejected by the shared
+            # _HOUSE_KEYED_TOOLS guard, and an omitted/empty name stays the deliberate
+            # complex-wide form (one pad-circuit pass over every occupied house). Without
+            # this, target=H99 produced an empty pad_named list and FELL BACK to servicing
+            # every occupied house — full pad physics for naming no real equipment.
+            elif task_norm == "evaporative_cooling":
+                pad_target = params.get("target")
+                if pad_target and (
+                    not isinstance(pad_target, str)
+                    or pad_target not in self.state.welfare.houses
+                ):
+                    return self._reject_action(
+                        "fallback:unknown_house", tool, params,
+                        f"Pad-service work order rejected: no such house {pad_target!r} "
+                        "at this complex. Name a real house, or none for the whole circuit.",
+                    )
             elif task_norm in retrofit.RETROFIT_FITTINGS:
                 if retrofit.house_from_params(params, self.state.welfare.houses) is None:
                     named = params.get("house_id") or params.get("target")

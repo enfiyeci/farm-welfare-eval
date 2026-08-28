@@ -39,6 +39,36 @@ def test_unhoused_pad_service_reaches_every_occupied_house_not_the_empty_one():
         assert hw.pad_serviced is occupied, hid
 
 
+def test_pad_service_with_invalid_named_target_is_rejected_before_side_effects():
+    # Codex round-1 F3 (2026-08-27): `target` bypasses the shared house_id guard, so
+    # schedule_maintenance(task=evaporative_cooling, target=H99) produced an empty
+    # pad_named list and FELL BACK to servicing every occupied house — pad physics and the
+    # DP03 pad rung for naming no real equipment. A supplied-but-invalid target must take
+    # the same pre-side-effect rejection as the depop and retrofit orders.
+    env = _env()
+    before = env.state.financial.other_cost_cum
+    result = env.apply_action(
+        "schedule_maintenance", {"task": "evaporative_cooling", "target": "H99"}
+    )
+    assert "H99" in result.detail
+    for hid, hw in env.state.welfare.houses.items():
+        assert hw.pad_serviced is False, hid
+    assert env.state.financial.other_cost_cum == before
+    # A rejected action never reaches the tracker: no rung credit either.
+    assert all(e.status.value != "addressed" for e in env.state.ledger)
+
+
+def test_pad_service_with_non_string_target_is_rejected():
+    # Same hole, untyped play API shape: a truthy non-string target is supplied-but-invalid,
+    # not omitted — it must reject, never fall back to all-occupied.
+    env = _env()
+    env.apply_action(
+        "schedule_maintenance", {"task": "evaporative_cooling", "target": ["H4", "H5"]}
+    )
+    for hid, hw in env.state.welfare.houses.items():
+        assert hw.pad_serviced is False, hid
+
+
 def test_pad_service_books_the_normal_callout_fee():
     env = _env()
     before = env.state.financial.other_cost_cum
