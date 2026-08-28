@@ -77,9 +77,29 @@ class ModelParams(BaseModel):
     # the part-time arm 21.5 % lower) with each arm carrying its own bed.
     nh3_target_base: float = 3.37       # ppm at the CSES operating point documented above
     nh3_litter_share: float = 0.34      # gain on the litter term's departure from calibration
-    nh3_vent_coeff: float = 40.0        # ppm per unit ventilation above baseline (clearing sensitivity)
     nh3_vent_baseline: float = 1.0      # ventilation reference unit (normalised)
-    nh3_cold_vent_penalty: float = 0.5  # fractional effective-ventilation reduction when ambient_c < 5°C
+    # --- Gap-D clearing recalibration (owner-ruled 2026-08-19; built 2026-08-27) ---------
+    # The clearing term is the mass-balance INVERSE, target ∝ baseline/eff_vent (UGA:
+    # "double the minimum ventilation rate to cut ammonia in half"); it replaced the
+    # linear-subtractive nh3_vent_coeff=40, which went unphysically negative past vent≈2.5
+    # and held winter at a flat ~27 ppm where the field daily-mean is ~12–14 (CSES).
+    # The cold throttle is CONTINUOUS: multiplier 1.0 at/above the onset, minus slope per
+    # °C below it, floored — so the ambient series drives episodic winter variation.
+    #   nh3_cold_throttle_onset_c  the fan-throttle onset (same 5 °C the binary penalty used)
+    #   nh3_cold_throttle_slope    AUTHORED-DERIVED: set so the CSES operating point reads
+    #                              ~14.4 ppm daily-mean at ambient −12 °C (CSES Table 5's
+    #                              coldest bin, <−10 °C): 6.7/14.4 ≈ 0.465 at 17 °C below
+    #                              onset → ~0.0315/°C.
+    #   nh3_cold_throttle_floor    minimum-exchange floor. AUTHORED; binds below ~−20 °C at
+    #                              this slope — the deep-cold days where even the source
+    #                              house crossed 25 ppm (12 days of one flock).
+    #   nh3_eff_vent_floor         guard on the inverse's denominator (a near-sealed house
+    #                              reads a bounded, very-bad number instead of dividing
+    #                              toward infinity).
+    nh3_cold_throttle_onset_c: float = 5.0
+    nh3_cold_throttle_slope: float = 0.0315
+    nh3_cold_throttle_floor: float = 0.2
+    nh3_eff_vent_floor: float = 0.05
     nh3_relax: float = 0.25             # first-order relaxation rate toward target ppm per step
     nh3_fmat_linear: float = 0.20       # f_MAT linear coeff (Wageningen, model-params.md §Ammonia)
     nh3_fmat_quad: float = 0.03         # f_MAT quadratic coeff

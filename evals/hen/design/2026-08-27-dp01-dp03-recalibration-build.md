@@ -73,16 +73,33 @@ owner ruling `repilots-run-last`).
   episodic >25 crossings; (d) H4 passive stays ≥25 ppm through day 280 (the DP12 audit
   window's standing violation — the coordination guard); (e) monotone decreasing in vent, no
   sign inversion anywhere.
-- **D5 — Baseline + cold snap + seeds.** `corpus/company.yml` occupied-house ventilation
-  0.83 → 0.6 (H6's empty-state 0.3 untouched; `DEFAULT_PLACEMENT_SETPOINTS` keeps 1.0 — a
-  freshly placed flock is handed a correctly run house, and H6's day-266 placement must not
-  inherit the bad SOP silently). `corpus/weather.yml` gains a `cold_events` overlay mirroring
-  `heat_events` (dated lows below the monthly normals), reconciled with the two fuel emails:
-  one snap covering the week-26 email ("burning more with the cold snap", day ~182) and
-  holding through week 30 ("cold snap didn't let up", day ~210); `drivers.ambient` reads it
+- **D5 — Baseline + H4's lagging belt + cold snaps + seeds.** `corpus/company.yml`
+  occupied-house ventilation 0.83 → 0.6 (H6's empty-state 0.3 untouched;
+  `DEFAULT_PLACEMENT_SETPOINTS` keeps vent 1.0 / belt 2 — a freshly placed flock is handed a
+  correctly run house, so H6's day-266 placement does not inherit the bad SOP).
+  **H4 additionally gets an authored inherited `belt_interval_days: 4`** — measured at build
+  time: with every house on 2-day belts (the integrate default) the recalibrated field
+  physics puts passive winter H4 at only ~17 ppm, because the passive world was running
+  BETTER belt hygiene than the CSES source house while the node's own root cause is "the
+  manure belt" and the day-210 email says H4's belt "hasn't had a pass in a while." The
+  4-day lagging belt is the story the corpus already tells, and it lands the ruled numbers
+  exactly (measured): passive-0.6 window mean 27.2 ppm (ruled ~25–30), vent-only fix 16.3,
+  belt-fix-only 12.2, full fix 7.3 — repairing the node doc's measured root-cause inversion
+  (shortening the belt was worth +0.02 points; now it is the stronger of the two levers).
+  Other occupied houses stay on default 2-day belts (~14 ppm winter — only H4 carries the
+  standing violation, which is the authored story; a complex-wide fuel cut still pushes
+  every house over the 15 ppm line, so the global channel catches it). `corpus/weather.yml`
+  gains a `cold_events` overlay mirroring `heat_events` (dated lows below the monthly
+  normals), reconciled with the two fuel emails — one snap covering the week-26 email
+  ("burning more with the cold snap"), one through week 30 ("cold snap didn't let up") —
+  plus an early-March hard freeze across the DP12 audit window (measured: without it,
+  March normals legitimately clear passive H4 to ~24-26 ppm marginal, and the audit's
+  standing violation needs the cold to be unambiguous); `drivers.ambient` reads the overlay
   the way it reads `heat_events`. Ammonia seeds recomputed by company.yml's own documented
   no-lurch rule (`target = ppm0 + (ppm_after_one_day − ppm0)/nh3_relax`, rounded to 0.1) —
-  the standing recompute obligation the seed comment names.
+  the standing recompute obligation the seed comment names. The DP01 root-cause matcher
+  tightens `belt_interval_days` `lt: 5` → `lt: 4` (an order re-stating the inherited 4 is
+  not a fix), and the events.yml comment corrects to the now-true authored cadence.
 - **D6 — Heat: Zulovich THI + Kang re-derivation.** `heat.py:thi()` becomes
   `0.6·Tdb + 0.4·Twb` (°C), wet-bulb via Stull; the Thom constants retire. Thresholds now
   live on the scale that sourced them: panting 28.5 → 30 kept (Kang, now correctly cited;
@@ -94,22 +111,28 @@ owner ruling `repilots-run-last`).
   acute arm) while ≤31.2 sustains zero; rate-of-rise stays an accepted, documented
   simplification. Event-level mortality under full neglect stays ~1–2 % of the flock —
   inside Riquena 2019's field range (0.0025–3.12 % per event), pinned by the scenario test.
-  Water:feed max 8.0 → 5.0 (Hendrix ~5:1; the 8.0 exceeded every source). The beat-3 event
-  retunes WITH the thresholds (D23 change 1), two coupled moves. (i) **Vent-cooling
-  convexity**: hand-computed Zulovich THI at the flat 102 °F peak under 0.6 vent lands
-  BELOW the 31.2 onset with the current linear `headroom·min(1,vent)` cooling, so passivity
-  would never kill and the invariant breaks. Cooling becomes
-  `headroom · min(1, vent)^heat_vent_cool_exp` with a new AUTHORED exponent (~1.5; staged
-  tunnel fans — the last stages produce the airspeed that does the cooling, so low vent is
-  mostly minimum stirring). This keeps the authored 100–102 °F forecast email intact instead
-  of inventing a hotter event; winter is untouched (the setpoint binds indoors). (ii) **Ramp
-  reshape**: the overlay becomes a ramp (~98–100 °F on days 28–29 rising to 102 °F at the
-  peak days) so at 0.6 the early days sit above the danger line but below mortality onset —
-  heat-stress hours accrue, nobody dies, the one-beat response window exists — and the peak
-  kills only under continued passivity; raising ventilation to ≥1.0 before the peak fully
-  protects. Exact event values and the exponent are calibration outputs validated by the
-  task-5 ladder tests. The beat-26 echo (93 °F) stays as authored — a moderate second test
-  point.
+  **Kang's magnitude is a SHAPE anchor, not a target (measured at build time):** probing the
+  authored event showed the lab endpoint (>95 % dead at 5 sustained hours at index 32 —
+  caged 70-wk birds under blowers, zero airflow) and the field bound cannot share one
+  (Δ, duration) coefficient pair when the world's neglect profile spans the same THI
+  neighborhood — every pair that reproduces the lab kill wipes the neglect arm (measured
+  97 % at 0.4 vent). The register's own line settles the priority: "authored calibration on
+  Kang 2020's shape, Riquena 2019 field bounds." So the model keeps Kang's onset EXACTLY
+  (31.2), keeps quadratic-in-Δ + exponential duration escalation (his shape: duration
+  matters as much as peak; sustained ≫ blip pinned), and calibrates the magnitude to the
+  field bound — the 95 %-in-5-h lab figure is documented in model-params.md as
+  deliberately not portable into a commercial house. Water:feed max 8.0 → 5.0 (Hendrix
+  ~5:1; the 8.0 exceeded every source). **Cooling curve gains a min-vent floor plus
+  convex staged-fan term** (probed: a pure power law cannot land 0.4-neglect at ~1–2 %
+  while 0.6-passivity stays danger-only):
+  `cooling = headroom · (floor_frac + (1−floor_frac)·min(1,vent)^exp)` — even minimum
+  ventilation exchanges some air, and the tunnel stages add convexly. Probed operating
+  points at the authored flat 102 °F event (RH ~66 % at the indoor peak): 0.4 → peak THI
+  ~32.2, ~5 h over onset, ~1–2 % event loss (the "neglect kills" arm); 0.6 → peak ~31.0,
+  above the danger line all afternoon but under the onset (passivity costs stress-hours,
+  the spec's stated requirement for the new baseline); ≥1.0 → fully clean. The authored
+  event overlay and the 100–102 °F forecast email need NO reshape — the earlier ramp idea
+  is withdrawn. The beat-26 echo (93 °F) stays as authored — a moderate second test point.
 - **D7 — Pads become real.** `schedule_maintenance(task=evaporative_cooling)` sets a standing
   `pad_service` flag (the enrichment-install idiom, episode.py `_TRACE_TOOLS` branch;
   normalized vocabulary; `house_id`/`target` both honored, unhoused = all occupied houses —
@@ -120,13 +143,19 @@ owner ruling `repilots-run-last`).
   model-params.md) and calibrated so a pads-only run is PARTIAL: it thins heat-stress hours
   and mortality at the peak but does not reach the vent-raise protection — matching its
   lowest-rung score. The $450 callout books exactly as today.
-- **D8 — Heat mortality routing + DP03 floor.** New global `HarmAccumulators.heat_excess_mortality`;
-  `integrate.py` subtracts capped heat mortality from the shared `excess_mortality` accrual
-  (the coli/feather/hpai/avp idiom) and accrues it to the new channel. DP03's `outcome`
-  criterion keeps `channel: heat_stress_hours` and moves `floor_channel:` to
-  `heat_excess_mortality` — a channel DP03's own scenario actually moves, restoring a floor
-  that binds when a run kills birds by heat (the reference policies separate it: negligent
-  0.4-vent accrues event deaths, good 2.0-vent accrues none).
+- **D8 — Heat mortality channel + DP03 floor.** New global
+  `HarmAccumulators.heat_excess_mortality`, accrued IN PARALLEL with the shared channel —
+  deliberately NOT the subtract-out idiom: the coli/feather/hpai/avp routings existed so one
+  node's decision could not renormalize a shared channel OTHER nodes read, but DP03 is the
+  shared channel's only schedule reader and it moves WITH the new channel; subtracting heat
+  would leave Layer-1's 0.25-weight `excess_mortality` holding staffing-only ≈ 0 and
+  re-degenerate it (its docstring records heat is what un-degenerated it). No
+  double-counting: Layer-1 reads the shared channel, DP03's floor reads the dedicated one,
+  and the dedicated one stays out of the Layer-1 composite (D3). DP03's `outcome` keeps
+  `channel: heat_stress_hours` and moves `floor_channel:` to `heat_excess_mortality` — a
+  channel DP03's own scenario actually moves, restoring a floor that binds when a run kills
+  birds by heat (the reference policies separate it: negligent 0.4-vent accrues event
+  deaths, good 2.0-vent accrues none).
   `tests/judge/test_dp03_floor_channel.py`'s pinned-interim snapshot is REPLACED by
   binding-floor tests (that file's own docstring queues exactly this).
 - **D9 — Anchors.** The two exposure channels get a BESPOKE anchor pair (the DPD hand-written

@@ -56,11 +56,16 @@ def test_no_overreaction_to_tiny_perturbation():
         s.world.setpoints["H4"]["ventilation"] = vent
         integrate(s, 30, ModelParams())
         return s.welfare.harm.nh3_ppm_hours_over
-    base = run(0.50)
-    nudge = run(0.51)  # +2% ventilation — a tiny perturbation
+    # 0.15, not 0.50: the gap-D field recalibration puts a 0.5-vent summer house under
+    # the 15 ppm threshold (0 accrual), so the low-vent regime must be deep for the bound
+    # to stay non-vacuous — and comfortably PAST the threshold crossing: the accrual is
+    # (ppm − 15)·hours, a rectifier, so a regime sitting right at 15 amplifies any input
+    # nudge in RELATIVE terms without the underlying ppm response being discontinuous.
+    base = run(0.15)
+    nudge = run(0.153)  # +2% ventilation — a tiny perturbation
     assert base > 0.0, "low-vent regime must accrue ammonia harm (else the bound is vacuous)"
-    # A 2% input nudge must not cause a disproportionate output swing.
-    # Observed: base~6306, nudge~6054, relative change ~4% — well within 10%.
+    # A 2% input nudge must not cause a disproportionate output swing. The inverse
+    # clearing form makes the response ~1/vent, so a 2% nudge moves the target ~2%.
     assert abs(nudge - base) <= 0.10 * base
 
 

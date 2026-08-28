@@ -4,7 +4,12 @@ import re
 ANCHORS = {
     "breed peak HDEP ~95%": "test_peak_lay_near_95pct",
     "ammonia mean ~6.7": "test_baseline_aviary_mean_near_6_7",
-    "ammonia 12 winter days >25": "test_winter_low_temp_pushes_over_25",
+    # Gap-D recalibration (2026-08-27): the 25 ppm exceedance is EPISODIC (deep-cold days),
+    # and the winter daily-mean anchor is CSES's coldest-bin 14.4 — two tests now carry
+    # what the old sustained-exceedance test mis-encoded.
+    "ammonia 12 winter days >25 (episodic)": "test_deep_cold_snap_crosses_25_episodically",
+    "ammonia winter coldest-bin ~14.4 (CSES)":
+        "test_winter_coldest_bin_matches_cses_at_the_operating_point",
     "ammonia weekly-belt aviary rail <=18.5 (Hinz 2010)":
         "test_weekly_belts_stay_under_the_hinz_aviary_rail",
     "ammonia -22% part-time vs full litter access (Oliveira 2019)":

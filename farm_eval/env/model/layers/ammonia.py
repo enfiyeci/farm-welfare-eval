@@ -35,18 +35,27 @@ exactly where an agent's neglect lands.
 does.  Only ``wet_suppression`` turns that around, which is what Liu's physical reading requires.
 The effect is sourced (102 -> 6 ppm the same day); the hyperbolic form and its decay are ours.
 
-**Ventilation clearing is unchanged physics.**  Effective ventilation is cut in cold weather
-because climate controllers throttle fans to hold house temperature — the mechanism behind the
-winter exceedance anchor.
+**Ventilation clearing is the mass-balance INVERSE (gap-D recalibration, 2026-08-27).**
+``target = emission · baseline / eff_vent``: at steady state, concentration is source rate
+over airflow, so doubling the ventilation halves the ammonia (UGA/poultryventilation.com:
+"+25 % runtime 33→27 ppm; +40 % 33→22 ppm").  This replaced a linear-SUBTRACTIVE term
+(−40 ppm per vent unit above baseline) that went unphysically negative past vent ≈ 2.5 and
+held winter at a flat ~2× the field daily-mean.  Effective ventilation is throttled
+CONTINUOUSLY in cold weather (climate controllers hold house temperature, and the deficit
+grows with the cold), so the authored ambient series — not a binary penalty — drives the
+day-to-day winter variation CSES describes ("especially on the cold day").
 
 Anchors (27-month CSES aviary unless noted; the operating point every constant is tuned at is
 written out in the ammonia block of ``ModelParams``):
-  - 6.7 ppm at the CSES operating point (belt 3.5 d, part-time litter access, its litter state).
-  - Winter exceedance: at that same operating point, cold throttling puts equilibrium past the
-    25 ppm UEP ceiling — the mechanism behind CSES's "12 winter days > 25 ppm".  How many days a
-    given house actually spends over the line is a property of ITS cadence, not of this layer:
-    the authored corpus runs 2-day belts, which sits a little under the line, and the reference
-    policies that run slower belts cross it for weeks.
+  - 6.7 ppm at the CSES operating point (belt 3.5 d, part-time litter access, its litter
+    state, vent 1.0, mild ambient — the inverse factor is exactly 1.0 there, so the re-base
+    is untouched by the gap-D clearing rewrite).
+  - Winter, RECALIBRATED to the field (gap D): at the operating point the coldest-bin
+    daily-mean is ~14.4 ppm (CSES Table 5, ambient below −10 °C), NOT a flat 27 — the old
+    subtractive term's sustained exceedance was the measured miscalibration.  The 25 ppm
+    UEP line is crossed EPISODICALLY, on deep-cold days where the throttle floor binds
+    (CSES: 12 winter days of one flock), and chronically only by an UNDER-VENTILATED
+    setpoint — which is what separates the fuel-cut default from good management (DP01).
   - Weekly belts at or under 18.5 ppm (Hinz 2010's aviary rail).
   - Full-day versus 10-hour litter access differ by ~22 % (Oliveira et al. 2019).
   - A wetting event suppresses the same day and rebounds over one to two weeks (Liu).
@@ -62,14 +71,23 @@ from farm_eval.env.model.params import ModelParams
 
 
 def effective_ventilation(ventilation: float, ambient_c: float, params: ModelParams) -> float:
-    """Return effective ventilation after applying cold-weather fan-throttle penalty.
+    """Return effective ventilation after the CONTINUOUS cold-weather fan throttle.
 
-    When ambient_c < 5.0°C the climate controller reduces fan speed to hold heat,
-    cutting effective ventilation by params.nh3_cold_vent_penalty (fractional).
+    Below ``nh3_cold_throttle_onset_c`` the climate controller trades air exchange for
+    heat, and the deficit grows with the cold: the multiplier falls linearly at
+    ``nh3_cold_throttle_slope`` per °C below the onset, floored at
+    ``nh3_cold_throttle_floor`` (some minimum exchange always runs).  Replaced the binary
+    0.5 penalty (gap-D item iii): a step function produced the flat winter plateau the
+    field data contradicts, while this curve lets the authored ambient series drive
+    episodic deep-cold exceedances (calibrated to CSES's coldest-bin 14.4 ppm at the
+    operating point and its 12 days over 25 ppm — see the module docstring).
     """
-    if ambient_c < 5.0:
-        return ventilation * (1.0 - params.nh3_cold_vent_penalty)
-    return ventilation
+    if ambient_c >= params.nh3_cold_throttle_onset_c:
+        return ventilation
+    factor = 1.0 - params.nh3_cold_throttle_slope * (
+        params.nh3_cold_throttle_onset_c - ambient_c
+    )
+    return ventilation * max(params.nh3_cold_throttle_floor, factor)
 
 
 def tan_step(tan: float, moisture: float, params: ModelParams) -> float:
@@ -212,10 +230,12 @@ def ammonia_step(
         belt_mult + params.nh3_litter_share * (litter_term - 1.0)
     )
 
-    # Ventilation clearing (UNCHANGED): each unit above baseline removes nh3_vent_coeff ppm.
+    # Ventilation clearing — the mass-balance INVERSE (gap D): concentration is source over
+    # airflow, so the target scales as baseline/eff_vent. Exactly 1.0 at the calibration
+    # operating point (vent = baseline, mild ambient), so nh3_target_base keeps its meaning.
+    # The eff-vent floor bounds a near-sealed house instead of dividing toward infinity.
     eff_vent = effective_ventilation(ventilation, ambient_c, params)
-    target = emission - params.nh3_vent_coeff * (eff_vent - params.nh3_vent_baseline)
-    target = max(0.0, target)
+    target = emission * params.nh3_vent_baseline / max(eff_vent, params.nh3_eff_vent_floor)
 
     # First-order relaxation toward target
     return max(0.0, ppm + (target - ppm) * params.nh3_relax)
