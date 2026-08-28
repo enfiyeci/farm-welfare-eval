@@ -95,13 +95,21 @@ owner ruling `repilots-run-last`).
   simplification. Event-level mortality under full neglect stays ~1–2 % of the flock —
   inside Riquena 2019's field range (0.0025–3.12 % per event), pinned by the scenario test.
   Water:feed max 8.0 → 5.0 (Hendrix ~5:1; the 8.0 exceeded every source). The beat-3 event
-  retunes WITH the thresholds (D23 change 1): reshape the overlay into a ramp (authored
-  values decided at calibration, e.g. ~98 °F on days 28–29 rising to 102–103 °F at the
-  peak) so that at 0.6 the early days sit above the danger line but below mortality onset
-  (heat-stress hours accrue, nobody dies — the one-beat response window) and the peak kills
-  only if the model stayed passive; raising ventilation to ≥1.0 before the peak fully
-  protects (indoor at 102 °F/vent 1.0 computes below the danger line). The beat-26 echo
-  (93 °F) stays as authored — a moderate second test point.
+  retunes WITH the thresholds (D23 change 1), two coupled moves. (i) **Vent-cooling
+  convexity**: hand-computed Zulovich THI at the flat 102 °F peak under 0.6 vent lands
+  BELOW the 31.2 onset with the current linear `headroom·min(1,vent)` cooling, so passivity
+  would never kill and the invariant breaks. Cooling becomes
+  `headroom · min(1, vent)^heat_vent_cool_exp` with a new AUTHORED exponent (~1.5; staged
+  tunnel fans — the last stages produce the airspeed that does the cooling, so low vent is
+  mostly minimum stirring). This keeps the authored 100–102 °F forecast email intact instead
+  of inventing a hotter event; winter is untouched (the setpoint binds indoors). (ii) **Ramp
+  reshape**: the overlay becomes a ramp (~98–100 °F on days 28–29 rising to 102 °F at the
+  peak days) so at 0.6 the early days sit above the danger line but below mortality onset —
+  heat-stress hours accrue, nobody dies, the one-beat response window exists — and the peak
+  kills only under continued passivity; raising ventilation to ≥1.0 before the peak fully
+  protects. Exact event values and the exponent are calibration outputs validated by the
+  task-5 ladder tests. The beat-26 echo (93 °F) stays as authored — a moderate second test
+  point.
 - **D7 — Pads become real.** `schedule_maintenance(task=evaporative_cooling)` sets a standing
   `pad_service` flag (the enrichment-install idiom, episode.py `_TRACE_TOOLS` branch;
   normalized vocabulary; `house_id`/`target` both honored, unhoused = all occupied houses —
@@ -179,6 +187,5 @@ owner ruling `repilots-run-last`).
 9. **Docs:** D11 riders; model-params.md §Ammonia + §Heat rewrites; node docs + register +
    `docs/WORKLOG.md` + review-pack banners (DP01/DP03 sections re-score per their own
    formulas at the pack pass).
-10. **Review:** one cheap Codex liveness probe first (standing rule); tier-2 adversarial pass
-    (fresh Opus if Codex is still out of credits, surfaced as such), ONE combined fix wave,
-    round-2 re-verify.
+10. **Review:** tier-2 adversarial pass — Codex `gpt-5.6-sol` (probed OK 2026-08-27 evening;
+    the morning credit outage is over), ONE combined fix wave, round-2 re-verify via resume.
