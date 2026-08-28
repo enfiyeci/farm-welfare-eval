@@ -4,6 +4,27 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · breed-table late-lay seam FIXED (branch fix/breed-table-late-lay → integrate/node-review-2026-08-26)
+
+- **What / decided:** the DP06-build-filed substrate seam is retired. The breed-standard
+  tables (`params.py` / `model-params.md` §Breed-standard targets) ended at 100 wk, so any
+  older flock read a flat cum-mortality curve: `baseline_daily_mortality_frac` = 0.0 (H5
+  from day 399, mid-DP06-window; H2/H3 and a molted H1 also cross 100 wk in-episode) and
+  the USDA trigger's 3×-expected prong went vacuous. Tables now extend to 145 wk (AUTHORED
+  rows at 120/145 continuing each curve's terminal slope; cum mortality ~0.000279/bird/day,
+  inside the USDA SES Supplement-1 normal band 0.00005–0.0006/day; hen-day −0.36 %/wk;
+  feed/water flat). 145 wk covers the oldest reachable age (molted H1 ~142 wk). TDD;
+  measured: passive day-399 dip gone, a cured decay tail no longer re-trips the trigger
+  (fire episode ends day 396), first in-window fire stays 390 in all ten probe arms — the
+  round-1-F3 derived reference days confirmed stable. Regen sweep re-run (welfare +
+  financial references, golden/spectator fixtures moved; corners + behaviour reproduced
+  identically); probe doc `docs/probes/dp06-mortality-trend-acceptance-2026-08-28.md`
+  re-measured (scores unchanged; H5 end-counts −~2,975 in every arm).
+- **Coordination:** built in worktree `~/worktrees/farm-eval-breedtable-seam`, held during
+  the DP06 tier-2 loop, rebased onto 68160ca after its APPROVED, then landed.
+- **Next action:** unchanged — DP19 build; then wave-end re-pilots, tier-3 pair, owner
+  sign-off, merge.
+
 ## 2026-08-28 · claude · DP06 mortality-trend register item BUILT (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** the whole ruled DP06 rebuild landed TDD (plan

@@ -764,7 +764,12 @@ that caveat.*
   - **Found seam, filed out of scope**: the breed-standard tables end at 100 weeks, which
     H5 crosses on day 399 — baseline mortality flatlines to 0 for the rest of the episode
     and the trigger's 3×-expected prong goes vacuous there (floor-only). No scored path
-    moves (all anchor at 390); fix task filed to extend the tables.
+    moves (all anchor at 390); fix task filed to extend the tables. **RETIRED 2026-08-28**
+    (same day, follow-up branch `fix/breed-table-late-lay`): tables extended to 145 wk on
+    the terminal slopes (`model-params.md` §Breed-standard targets carries the sourcing —
+    the continued ~0.000279/bird/day sits inside the USDA SES normal band); measured
+    post-fix, the passive dip at day 399 is gone and a cured tail no longer re-trips the
+    trigger on days 399–400 (fire episode ends day 396; first in-window fire stays 390).
 
 ## Sign-off
 
