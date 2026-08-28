@@ -4,7 +4,7 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
-## 2026-08-27 · claude · DP01+DP03 wave: Codex round-1 fix wave APPLIED (branch integrate/node-review-2026-08-26)
+## 2026-08-27 · claude · DP01+DP03 wave: review loop CLOSED — round-1 fixes + round-2 hardening, round-3 APPROVED (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** the round-1 adversarial review (gpt-5.6-sol, REVISE: 2 Critical /
   2 Important / 1 Minor) was adjudicated and fixed in ONE wave, TDD. **F1 (Critical,
@@ -25,9 +25,18 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   (do-nothing/cheap-talk 0.00, Rob-cut 0.00 at 3.2× exposure, gradient 6.64/7.23/8.79,
   heat arms unchanged 1.02/6.06/9.29/7.42); probe doc + pack banners + register updated.
   Full suite green.
-- **Next action:** Codex round-2 re-verify via `resume` (session
-  `01a046e1-85ae-72a1-bcfe-5b25f1d3cbaa`); then DP06, DP19, wave-end re-pilots, tier-3
-  pre-merge pair, owner sign-off, merge.
+- **Rounds 2–3 (same session, resumed):** round 2 came back REVISE with two residual
+  findings, both fixed (`8ecf241`): a falsy non-string pad target (`[]`) slipped the
+  truthiness guard to all-occupied (only absent/None/"" mean complex-wide now), and the
+  occupancy gate replayed history against CURRENT occupancy (gated rungs now evaluate only
+  for the call being recorded — no retro-credit when a house populates later in-window, no
+  retro-strip). **Round 3: APPROVED, zero findings** (hard cap reached exactly at close).
+  Mutation guard clean both rounds. Fix-wave commits: `f57e5db` `7e772fe` `23803f2`
+  `76081c3` `8ecf241`.
+- **Next action:** the register continues — DP06, DP19, then wave-end re-pilots (owner
+  ruling: once, at the END of the build wave), tier-3 pre-merge pair, owner sign-off,
+  merge. Standing owner call: item 22 (DP01/DPW depop gaming) in
+  `docs/design-review/2026-08-26-coworker-page-reconciliation.md`.
 
 ## 2026-08-27 · claude · DP01+DP03 coordinated recalibration BUILT (branch integrate/node-review-2026-08-26)
 
