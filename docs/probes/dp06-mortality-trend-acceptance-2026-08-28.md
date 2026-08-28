@@ -18,9 +18,12 @@ dropped; vet-first Rx-gated cure; window-armed daily wake.
 
 Re-measured 2026-08-28 after the breed-table late-lay extension (`fix/breed-table-late-lay`,
 see the retired-seam section below): every SCORE is unchanged to the reported precision;
-only the world counts moved — H5's end count drops ~2,975 birds in every arm (the restored
-~25/day late-lay baseline over the 119 post-day-399 days) and the ambient channel shifts by
-<40 birds (bird-count weighting). Pre-fix counts in parentheses.
+only the world counts moved — H5's end count drops 2,725–2,974 birds per occupied arm (the
+restored ~25/day late-lay baseline over the 119 post-day-399 days; the untreated arms drop
+least, 2,725, because the coli course has already killed part of the flock the baseline
+would otherwise reach), and the ambient channel moves ≤37 birds in the occupied-house arms
+and 76 in the cull arm's dumped-flock count (bird-count weighting). Pre-fix counts in
+parentheses.
 
 | arm | call | outcome | total | ambient birds | H5 at 518 | cure day |
 |---|---|---|---|---|---|---|

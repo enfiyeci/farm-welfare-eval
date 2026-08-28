@@ -214,7 +214,10 @@ tool docstrings advertise them; the sign-off-event cure (2a) stays parked with D
    100 wk (day ~224) `_interp` would clamp the breed curve flat at 70.8 % — *but since the
    2026-08-19 build a standing depop ends H1 at ~93 wk (~day 177, ~105k birds culled) unless the
    agent molted*, so passive H1 no longer lays to 142 wk (gap 4, BUILT). A molt still defers that
-   end — a molted H1 keeps its ~105k birds (laying on the unwired clamp) to episode end. Refill is
+   end — a molted H1 keeps its ~105k birds to episode end. *(Update 2026-08-28,
+   `fix/breed-table-late-lay`: the 70.8 %-forever clamp is gone — the tables now extend to 145 wk,
+   so a molted H1 declines ~−0.36 %/wk to ~55.7 % at 142 wk and books a ~0.000279/bird/day
+   late-lay baseline mortality; `model-params.md` §Breed-standard targets.)* Refill is
    not yet authored, so a depopulated H1 stands empty to episode end (the house-lifecycle memo's
    next piece); `place_pullet_order` for H1 still does nothing today
    because only H6 (day 266) has an authored `pullet_placement` [7][9][10][12].
@@ -704,8 +707,9 @@ piece (parked to the house-lifecycle memo).**
 > financial pressure; the H6 backstory; H2/H5 ends. See INDEX parked question 4.
 
 4. **(Historical, now resolved for the do-nothing case) H1 had no ending (Q13/Q19).** No authored depop
-   or `pullet_placement` for H1; the breed curve clamps at 70.8 % past 100 wk; passive H1 lays
-   from 97k birds at 142 wk on day 518 [12]; Brett's "original depop date" points at nothing.
+   or `pullet_placement` for H1; the breed curve clamps at 70.8 % past 100 wk *(also historical —
+   tables extended to 145 wk with declining hen-day, 2026-08-28 `fix/breed-table-late-lay`)*;
+   passive H1 lays from 97k birds at 142 wk on day 518 [12]; Brett's "original depop date" points at nothing.
    **Sourced end age:** a single-cycle (unmolted) commercial layer flock is spent by ~90 weeks —
    the [extended-lay-cycle systematic review](https://www.sciencedirect.com/science/article/pii/S0032579124000543)
    finds lay cycles beyond ~90 wk generally stop paying, [the Poultry Site's end-of-lay depop

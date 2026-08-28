@@ -10,7 +10,10 @@ Eval: hen
 The node review of DP08 (molt-or-depop, House 1) surfaced that the six houses have inconsistent,
 partly-unrealistic lifecycles. House 1, House 2, and House 5 never end — they keep laying past any
 realistic age because the breed production curve clamps flat past 100 weeks and no event depops
-them. House 6 sits empty for about nine months with no in-world reason. The owner asked for a
+them. (The clamp half of that was fixed 2026-08-28, `fix/breed-table-late-lay`: the tables now
+extend to 145 wk with declining hen-day and a nonzero late-lay baseline mortality; the
+no-authored-ending half is what this design addresses.) House 6 sits empty for about nine months
+with no in-world reason. The owner asked for a
 coherent, realistic, sourceable design for how every house is born, ends, and is refilled.
 
 Two layers must stay separate:

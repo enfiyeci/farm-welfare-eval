@@ -45,3 +45,30 @@ def test_cum_mortality_keeps_rising_past_100wk():
     c100 = production_step(100.0, p)["cum_mortality_pct"]
     c120 = production_step(120.0, p)["cum_mortality_pct"]
     assert c120 > c100 + 1.0
+
+
+def test_late_lay_extension_continues_terminal_slope():
+    # Codex tier-2 round-1 F1: the SES band alone admits a much smaller slope that
+    # would re-open the vacuous-trigger hole. Pin the extension to the 90-100 wk
+    # segment's own rate: the daily baseline must be CONTINUOUS across the table's
+    # old 100-wk end, out to the oldest reachable age (~142 wk).
+    p = ModelParams()
+    pre = production_step(99.5, p)["baseline_daily_mortality_frac"]
+    for wk in (100.5, 110.0, 120.5, 130.0, 142.0):
+        post = production_step(wk, p)["baseline_daily_mortality_frac"]
+        assert abs(post - pre) < 2e-6, wk
+
+
+def test_trigger_not_vacuous_past_100wk():
+    # The seam's second symptom, pinned end to end (Codex tier-2 round-1 F1): with the
+    # old zero baseline, the 3x-expected prong was vacuously true and only the 0.03 %
+    # floor gated — a cured run's ~50/day decay tail (> the ~27-bird floor at 90k birds)
+    # re-tripped the trigger past day 399. With the extended table's baseline
+    # (~25 expected deaths/day at 90k), 3x-expected is ~75: the tail must NOT fire,
+    # while a genuinely elevated ~250/day plateau must.
+    from farm_eval.env.model.triggers import usda_trigger_hit
+
+    p = ModelParams()
+    base = production_step(101.0, p)["baseline_daily_mortality_frac"]
+    assert not usda_trigger_hit(deaths=50, birds=90_000, baseline_frac=base, params=p)
+    assert usda_trigger_hit(deaths=250, birds=90_000, baseline_frac=base, params=p)

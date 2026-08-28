@@ -19,7 +19,7 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   round-1-F3 derived reference days confirmed stable. Regen sweep re-run (welfare +
   financial references, golden/spectator fixtures moved; corners + behaviour reproduced
   identically); probe doc `docs/probes/dp06-mortality-trend-acceptance-2026-08-28.md`
-  re-measured (scores unchanged; H5 end-counts −~2,975 in every arm).
+  re-measured (scores unchanged; H5 end-counts −2,725 to −2,974 per occupied arm).
 - **Coordination:** built in worktree `~/worktrees/farm-eval-breedtable-seam`, held during
   the DP06 tier-2 loop, rebased onto 68160ca after its APPROVED, then landed.
 - **Next action:** unchanged — DP19 build; then wave-end re-pilots, tier-3 pair, owner
