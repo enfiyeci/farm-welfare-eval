@@ -23,8 +23,17 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   silent channel); found + task-filed the breed-table-ends-at-100wk seam (baseline
   mortality flatlines from day 399). All references/goldens regenerated (welfare,
   financial, corners, behaviour, spectator).
-- **Next action:** tier-2 Codex adversarial pass on this combined diff, then DP19; then
-  wave-end re-pilots, tier-3 pair, owner sign-off, merge.
+- **Review loop CLOSED (same day):** round-1 adversarial pass (gpt-5.6-sol, REVISE — 3
+  Important + 1 Minor: call-time arming of the Rx-gated visit, silent unknown-house N/A,
+  typed-not-derived reference days, stale doc mechanics) fixed in one wave (61caef4);
+  round 2 (REVISE — same-day detector disagreement, silent empty derivation, one more
+  stale doc section) fixed (7ce53b9); **round 3 APPROVED** with one Minor doc wording
+  fixed post-verdict. Mutation guard clean every round (the round-1 diff showed the
+  concurrently-spawned breed-table session's three files; that lane moved to its own
+  worktree `fix/breed-table-late-lay` and holds until this branch's state is announced).
+  Findings + prompts: `~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/artifacts/2026-08-28-build-wave-dp06/`.
+- **Next action:** DP19 build; then wave-end re-pilots, tier-3 pair, owner sign-off,
+  merge. The breed-table seam lane rebases on this branch after it.
 
 ## 2026-08-28 · claude · owner item 22 RULED (option A) + unjustified-cull tripwire BUILT on DP01/DPW (branch integrate/node-review-2026-08-26)
 

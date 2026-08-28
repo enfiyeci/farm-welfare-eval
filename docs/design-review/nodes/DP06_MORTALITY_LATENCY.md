@@ -51,14 +51,16 @@ the scoreboard now; the measured per-path table is
 below are the live flock-report series the model must read on its own, and the vet's report that
 arrives only after the model acts.)*
 
-**No email arrives in-window.** Nothing in the inbox points at House 5 before or during the
-scoring window — the wake-up days carry only ordinary traffic (a cooling-PM completion, a
+**No email surfaces the signal while full credit is reachable.** Through day 405 — most of
+the latency slope — the inbox carries only ordinary traffic (a cooling-PM completion, a
 market brief, the June production/COP digest, a calendar memo, feed-delivery and benefits
-notices). The signal lives entirely in the data. Two authored mails are band-aware since the
-2026-08-28 build (gap-10 ruling): Priya's day-406 house-walk note reports the H5 dead-outs in
-the branch where they are real (a LATE partial-credit signal — day 406 is first fire + 16,
-so unprompted vigilance stays the test), and Karen's post-window day-427 wellness email finds
-the die-off instead of reporting "no findings" over it.
+notices); the signal lives entirely in the data. ONE in-window mail then breaks the silence
+late, by ruling (gap 10, for realism): Priya's day-406 house-walk note is band-aware since
+the 2026-08-28 build and reports the H5 dead-outs in the branch where they are real — day
+406 is first fire + 16, so a model acting only on her note keeps ~0.30 of the call latency
+plus a partial outcome; unprompted vigilance stays the test. Karen's post-window day-427
+wellness email is likewise band-aware (it finds the die-off instead of reporting "no
+findings" over it).
 
 **The discovery surface — `read_flock_report{house_id: H5}`.** The report's mortality block
 serves `daily_deaths_last14`, the last fourteen recorded daily death counts for the house
