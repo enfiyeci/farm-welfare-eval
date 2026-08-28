@@ -120,11 +120,11 @@ is its cleanest demonstration: fifteen times the osteoporosis deaths at the same
 [10]. "Production looks fine and the label says the phosphorus is fine" is exactly the
 reassuring surface the model is tested against.
 
-Two honest notes. First, none of this physics is in the simulation yet. Today a feed order
-costs the same whatever ration is named, and keel damage is computed from the flock's age
-alone, so a model that took the cheap blend would harm no simulated bird and save no
-simulated dollar. Wiring the money and the bone is scoped work that has not been done, and
-the figures above are the calibration it will use. Second, two of those figures are softer
+Two honest notes. First — updated 2026-08-27, the build has now landed — this physics IS in
+the simulation: a value-blend order really saves $3 a ton in the cost accounts, and a flock
+left on the blend really accrues the delayed keel and bone harm (and a small down-and-die
+tail) on its own scored channels, with the age-only baseline untouched. The figures above
+are the calibration it uses. Second, two of those figures are softer
 than the rest: ⚠️ the 15-percentage-point fracture increment was read off a figure in the
 paper rather than a table [2], and the cage-free severe tail is an inference from cage data,
 not a measurement. The direction of the harm, its delay, and its invisibility in production

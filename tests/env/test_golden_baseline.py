@@ -118,7 +118,7 @@ def test_regen_guard_catches_missing_scheduled_anchor():
 
     # The avp keys are present and correct so the guard's first complaint is the
     # deliberately misspelled mite key (DP04's demand is checked first otherwise).
-    ok = {"avp_keel_pain_hours[H2]": 0.0, "avp_excess_mortality[H2]": 0.0}
+    ok = {"avp_keel_pain_hours[H4]": 0.0, "avp_excess_mortality[H4]": 0.0}
     bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0, **ok},
            "negligent": {"red_mite_excess_index_days[H2x]": 2.0, **ok}}
     with pytest.raises(ValueError, match="red_mite_excess_index_days\\[H2\\]"):

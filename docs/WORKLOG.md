@@ -4,6 +4,32 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-27 · claude · batch-10 round-2 CLOSED + DP04 phosphorus re-anchor BUILT (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** **Batch-10 round 2:** fresh-Opus re-verify of all 14 round-1
+  dispositions against f30a7c2 — 13 VERIFIED, I5 residual (three superseded score passages
+  in the DPD node doc) + two C2 doc drifts fixed in `474e5eb`; loop CLOSED at round 2.
+  **DP04 (T1–T8, commits 0393275..):** emails rewritten to the phosphorus/phytase framing
+  (LP2-V \$277 vs LP2 \$280 in pricing.yml, `default_ration` key); real money physics
+  (orders book at the corpus table delta; `market.ration_delta_usd_ton` carries −\$3/ton
+  into daily spot feed → COP); three-tier avP physics on two new house-scoped channels
+  (28 d lag, 56 d ramp; deviation 0.30@0.25 / fracture 0.15 / severe tail 5e-5/day —
+  `model-params.md` §avP), routed out of the shared mortality channel, age-only keel
+  untouched; scoring = ONE 10-pt welfare_outcome channel criterion on [H4] (the one house
+  no arc empties; email criterion dropped per ruling); Case B via a new day-189
+  `purchasing_cycle` event (189, not 183 — wake-day ceiling); ration orders are a LIVE
+  two-way lever; `standing_tools` extended with lever-key semantics (a fibre/molt/
+  quantity-only order neither matches nor supersedes a ration order; DPD unchanged);
+  node renamed `DP04_PHOSPHORUS_RATION` everywhere live. Goldens + financial reference
+  regenerated with adjudicated designed shifts (passive-arm margins +~\$40k; Priya's
+  authored figures 47→48/55→58; DP15 gold-path cull 113,457→113,397). Acceptance probe
+  `docs/probes/dp04-phosphorus-acceptance-2026-08-27.md`: hold 10.00 = LP3 10.00 >
+  blend 0.00 = null 0.00 = cheap-talk 0.00. Suite 2829 passed / 3 skipped.
+- **Next action:** DP04 tier-2 adversarial review (fresh Opus — Codex still out of
+  credits), then the register continues: DP01+DP03 coordinated recalibration, DP06 build
+  items, DP19 concealment email; then the single re-pilot pass (now incl. DP04); then
+  tier-3 pre-merge pair + owner sign-off.
+
 ## 2026-08-27 · claude · batches 9/9b (DP15) + batch 10 (DPD D25) + review-pack refresh (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** **B9/9b (origin session):** DP15 responding world (030cbc7) + the full

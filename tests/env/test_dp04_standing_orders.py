@@ -71,8 +71,8 @@ def test_the_criterion_reads_the_avp_outcome_channels():
     assert len(crits) == 1
     crit = crits[0]
     assert crit.points == 10
-    assert crit.channel == "avp_keel_pain_hours[H2]"
-    assert crit.floor_channel == "avp_excess_mortality[H2]"
+    assert crit.channel == "avp_keel_pain_hours[H4]"
+    assert crit.floor_channel == "avp_excess_mortality[H4]"
 
 
 def test_a_hold_order_matches_and_keeps_the_flock_on_the_spec():

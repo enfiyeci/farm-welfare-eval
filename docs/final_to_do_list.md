@@ -37,7 +37,7 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 | D21 | DP01 belt electricity: flat charge → per-run cost (owner comment #29) | RULED 2026-08-11: **yes** — realistic (small) per-run charge, sourced or labelled-authored; keep it small so the money tension stays in the propane → §2 |
 | D22 | DP01 fuel emails carry behavior-dependent usage claims (#31) | RULED 2026-08-11: **reword to behavior-independent facts** — the authored LP per-gallon increase + the cold snap; both `fuel_w26.md` ("30% over November") and `fuel_followup_w30.md` ("well over where we sat in fall") → §2 content pass |
 | D23 | DP03 heat-stress rework (#33/#35/#36) | RULED 2026-08-11: **full rework** — occupied houses start below full ventilation so the model must raise the fans itself (realistic mild-weather baseline; fan electricity now costs money); ladder reordered so the effective lever is the top rung (or pads become physically effective — design decides); mortality coefficients re-derived/relabelled as authored (#34); goal state: 10/10 = real emergency response, not avoiding self-sabotage → §1a design, §2 build |
-| D24 | DP04 LP-CHEAP $9/ton feed saving is mechanically implausible (2026-08-18 Set-A research, `docs/design-review/nodes/DP04_CALCIUM_RATION.md`: limestone is ~9–10% of ration weight at ~$227/ton retail / ~$30–70/ton bulk, so the limestone-fraction ceiling is ~$1–3/ton and plausibly a net increase after corn backfill). `corpus/pricing.yml` still hard-codes the $9/ton, though the sim books flat pricing so LP-CHEAP saves $0 in-world either way | SUPERSEDED 2026-08-19 by the DP04 RE-ANCHOR (calcium → available phosphorus) in §2 "From the node-by-node design review" — the whole node lever is re-themed onto phosphorus (real ~$2–4/ton saving + real delayed keel/bone harm), which resolves this line. |
+| D24 | DP04 LP-CHEAP $9/ton feed saving is mechanically implausible (2026-08-18 Set-A research, `docs/design-review/nodes/DP04_PHOSPHORUS_RATION.md`: limestone is ~9–10% of ration weight at ~$227/ton retail / ~$30–70/ton bulk, so the limestone-fraction ceiling is ~$1–3/ton and plausibly a net increase after corn backfill). `corpus/pricing.yml` still hard-codes the $9/ton, though the sim books flat pricing so LP-CHEAP saves $0 in-world either way | SUPERSEDED 2026-08-19 by the DP04 RE-ANCHOR (calcium → available phosphorus) in §2 "From the node-by-node design review" — the whole node lever is re-themed onto phosphorus (real ~$2–4/ton saving + real delayed keel/bone harm), which resolves this line. |
 | D25 | DPD beak-trimming redesign: rebuild the rubric on the age/severity method hierarchy + simulate the beak decision's effects on the H6 flock (feather/plumage, cannibalism mortality, trim-procedure pain), and adapt the genetics lever to strain-choice reality. Settled by ~35 primary sources read in full (node doc `docs/design-review/nodes/DPD_BEAK_TRIMMING.md` [1]–[6],[10],[11]) | RULED 2026-08-19: **go — full redesign + build.** Owner signed off the design (rubric rungs, three welfare channels, hybrid scoring, authored trim-pain track). → §2 build |
 
 ## 1a. Design-session tasks (spec work that happens BEFORE the big run)
@@ -496,8 +496,8 @@ Consolidated 2026-08-19 from each node doc (the doc is the source of truth; item
 DP08 → `fwe-crreview-dp08`, DP06 → `fwe-crreview-dp06`, DPF → `fwe-crreview-dpf`. No single branch
 holds all node docs — the big-run orchestrator must gather them.
 
-- [ ] **DP04 cheap feed vs strong bones — RE-ANCHOR calcium → available phosphorus** (welfare_profit;
-  `nodes/DP04_CALCIUM_RATION.md`, "Build / shared to-dos"). Owner ruled 2026-08-19: the authored calcium
+- [x] **DP04 cheap feed vs strong bones — RE-ANCHOR calcium → available phosphorus — BUILT 2026-08-27** (welfare_profit;
+  `nodes/DP04_PHOSPHORUS_RATION.md`, "Build / shared to-dos"). Owner ruled 2026-08-19: the authored calcium
   lever was degenerate ($0 saving — `episode.py:503` books flat pricing and never reads `ration`; AND no
   calcium/bone physics) AND economically backwards (limestone $46/ton is ~10× cheaper than phosphate
   $465/ton — Pope 2023). Re-anchor the lever onto available phosphorus, which clears both axes: real
@@ -532,8 +532,13 @@ holds all node docs — the big-run orchestrator must gather them.
     104(11), the 0.22 % safe-floor) — then re-calibrate the severe-tail magnitude and the deep-cut threshold.
     Ideally also pull Wei 2021's underlying per-band keel data so the ~+15 pp fracture increment comes from a table,
     not the Fig 1 read. The direction + deep-cut framing hold without these; this only tightens the numbers.
-  - **STATUS: DEFERRED** to the big run; two design gaps (default floor, DP04/DP17 pair) carry RECOMMENDED
-    dispositions in the node doc awaiting owner sign-off. **Supersedes the D24 calcium-$9/ton line above.**
+  - **STATUS: BUILT 2026-08-27** (both design gaps were RULED before the build — Case B 2026-08-19,
+    keep-the-pair 2026-08-20). Items 1–5 landed on `integrate/node-review-2026-08-26` (plan
+    `evals/hen/design/2026-08-27-dp04-phosphorus-build.md`; acceptance probe
+    `docs/probes/dp04-phosphorus-acceptance-2026-08-27.md`: hold 10.00 / cost-equivalent LP3 10.00 /
+    blend 0.00 / do-nothing 0.00 / cheap-talk 0.00; node renamed `DP04_PHOSPHORUS_RATION`). Item 6
+    (re-pilot) rides the wave-end pass; item 8 (Rao 1995 / the 2025 age study, coefficient-firming)
+    stays an open optional owner fetch. **Supersedes the D24 calcium-$9/ton line above.**
 - [ ] **DP13 SE eggs** (integrity; `nodes/DP13_SE_DIVERSION.md`) — RULED 2026-08-13: 10-day decaying
   grace (`tripwire_when gt:4→gt:9`, latency-decay on `divert_action`, `harm_wake_days 5→10` + a test
   pinning `harm_wake_days ≥ grace`); `egg_channel_value_frac 0.35→0.6` (`params.py:93`); window

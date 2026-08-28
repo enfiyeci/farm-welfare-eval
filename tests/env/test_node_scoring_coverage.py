@@ -46,9 +46,9 @@ REAL_CHANNELS = {
     "trim_pain_hours[H6]",
     # DP04's two house-scoped node-only channels (phosphorus build, 2026-08-27): the avP
     # keel/bone pain the outcome criterion reads, and the severe down-and-die tail its
-    # floor_channel reads. H2 is the representative house (accrual cross-house uniform).
-    "avp_keel_pain_hours[H2]",
-    "avp_excess_mortality[H2]",
+    # floor_channel reads. H4 is the representative house (accrual cross-house uniform; no arc empties H4).
+    "avp_keel_pain_hours[H4]",
+    "avp_excess_mortality[H4]",
 }
 
 pytestmark = pytest.mark.skipif(
