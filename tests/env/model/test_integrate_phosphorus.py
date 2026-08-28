@@ -1,5 +1,5 @@
 """DP04 avP integration tests (build plan T3): channel accrual, mortality routing,
-onset lag, cross-house uniformity, and production invisibility."""
+onset lag, house-size-independent per-day accrual, and production invisibility."""
 
 from pathlib import Path
 

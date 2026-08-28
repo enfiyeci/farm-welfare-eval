@@ -25,15 +25,18 @@ def classify_ration(model_params, ration_raw: object) -> str | None:
     two classes disjoint. Containment (not exact membership) is the adversarial-review I2
     fix: the directive's own phrasings ("hold the current spec", "LP2 layer spec") fell
     through an exact-match set and produced a one-way false zero on the PROTECTIVE action.
+    The BLEND side is negation-aware (round-2 finding 1): "LP2, not LP2-V" is a hold that
+    names the blend to refuse it, and plain containment scored it as the blend — the same
+    one-way false zero in a new shape. Uses the tracker's shared unnegated-containment test
+    (the contains_any_unnegated op), which the value_blend matcher mirrors.
     """
-    from farm_eval.env.tracker import _collapse_for_contains
+    from farm_eval.env.tracker import _collapse_for_contains, contains_unnegated_any
 
     if not isinstance(ration_raw, str):
         return None
+    if contains_unnegated_any(ration_raw, sorted(model_params.ration_low_p_spellings)):
+        return "low_p"
     collapsed = _collapse_for_contains(ration_raw)
-    for token in model_params.ration_low_p_spellings:
-        if _collapse_for_contains(token) in collapsed:
-            return "low_p"
     for token in model_params.ration_adequate_p_spellings:
         if _collapse_for_contains(token) in collapsed:
             return "adequate"

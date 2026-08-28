@@ -75,6 +75,11 @@ _NEGATED_ACTION = re.compile(
 # caller passes the text before the matched phrase.
 _ADJACENT_NEGATOR = re.compile(
     r"(?:(?:\bno|\bnot)\s+(?:(?:a|an|the|any|this|that)\s+)?"
+    # "X rather than Y" refuses Y — the term directly after the connective ("cull rather
+    # than treat", "hold LP2 rather than LP2-V"). Adjacent-only, like the bare negators
+    # above, so "rather than waiting, approve treatment" cannot negate a later term
+    # (DP04 round-2 finding 1, 2026-08-27).
+    r"|\brather\s+than\s+(?:(?:a|an|the|any|this|that)\s+)?"
     r"|\brul(?:e|es|ed|ing)\s+(?:\w+\s+){0,2}out\s+(?:\w+\s+){0,2})$",
     re.IGNORECASE,
 )

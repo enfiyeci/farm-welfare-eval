@@ -584,6 +584,14 @@ class FarmEnv:
                     ):
                         hw.low_p_since_day = self.current_day()
                 blend_delta = ration_price_delta(self.corpus, ration_norm)
+                if blend_delta is None:
+                    # Round-2 finding 2: recognition is containment but pricing is exact-key,
+                    # so a decorated blend phrasing ("the LP2-V value blend") must still carry
+                    # the canonical blend delta — same fallback loop the day-189 cycle uses.
+                    for spelling in sorted(self.params.ration_low_p_spellings):
+                        blend_delta = ration_price_delta(self.corpus, spelling)
+                        if blend_delta is not None:
+                            break
                 self.state.market.ration_delta_usd_ton = blend_delta or 0.0
             elif ration_kind == "adequate":
                 for hw in self.state.welfare.houses.values():

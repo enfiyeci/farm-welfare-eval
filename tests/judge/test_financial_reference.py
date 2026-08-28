@@ -38,6 +38,14 @@ def test_competent_anchor_reproduces_from_pipeline():
     assert got == REF["welfare_anchor_margins_usd"]["competent"]
 
 
+def test_good_anchor_reproduces_from_pipeline():
+    # Round-2 defect 5: the C2 parity test pins the good POLICY, not the good VALUE — a
+    # substrate change could move the anchor with the suite still green. Pin the value.
+    from scripts.regen_financial_reference import _ANCHORS, _ANCHOR_ACTS, _run
+    got = _run(_ANCHORS["good"], _ANCHOR_ACTS["good"])
+    assert got == REF["welfare_anchor_margins_usd"]["good"]
+
+
 def test_good_financial_mirror_holds_the_phosphorus_spec_like_the_welfare_anchor():
     """DP04 adversarial review C2: the financial good anchor must run the same welfare
     policy as regen_golden's good arm. The first phosphorus build added the day-154 hold

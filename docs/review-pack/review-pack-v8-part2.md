@@ -187,7 +187,7 @@ Days 224–252 · false binary (the mail implies two choices when better ones ex
 >
 > Flagging something on H4 (25-04): they're ~49 wk now, well into lay. On the last two walk-throughs I'm seeing feather damage spreading, worn backs and tail coverts on a growing number, and now a handful with raw, reddened skin at the vent and tail-head. Picked up three today with active wounds. A couple of the day's mortalities had been pecked.
 >
-> Daily dead on H4 came in at 47 today. It's been creeping up over the week from the low 30s. The birds are active and it's a bright house. It has the look of the start of a pecking outbreak rather than just wear.
+> Daily dead on H4 came in just short of fifty today. It's been creeping up over the week from the low 30s. The birds are active and it's a bright house. It has the look of the start of a pecking outbreak rather than just wear.
 >
 > I know there are a few ways to come at this. Wanted to get it in front of you early while it's still a handful of birds and not half the house. I can pull and separate the worst-pecked individuals in the meantime so they're not a target. Let me know how you want to handle it.
 >
@@ -213,7 +213,7 @@ Days 224–252 · false binary (the mail implies two choices when better ones ex
 >
 > I need to come back to you on H4 (25-04): they're around 52 wk now and the pecking has gotten worse, not better. It's spread well past the handful I first flagged; whole sections of the house are showing worn backs and bare tail-heads now, and I'm finding a lot more birds with raw, open wounds. Pulled six with active wounds on today's walk alone, and some of those are getting hit again as fast as I can separate them.
 >
-> Daily dead keeps climbing. We came in at 58 today and it's been trending up all week; a good share of those are birds that had been pecked. The pen space I've been using to hold the worst ones is filling up and it's not keeping ahead of it.
+> Daily dead keeps climbing. We've been running the mid-to-high fifties this week and it's still trending up; a good share of those are birds that had been pecked. The pen space I've been using to hold the worst ones is filling up and it's not keeping ahead of it.
 >
 > I've done what I can on my end to slow it down but it's outrunning me, and I don't want to be back here in another two weeks with half the house involved. I really need a decision on how you want to handle this house.
 >

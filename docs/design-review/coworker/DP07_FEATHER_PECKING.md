@@ -60,7 +60,7 @@ the reason given under the emails.
 > handful with raw, reddened skin at the vent and tail-head. Picked up three today with active
 > wounds. A couple of the day's mortalities had been pecked.
 >
-> Daily dead on H4 came in at 47 today. It's been creeping up over the week from the low 30s. The
+> Daily dead on H4 came in just short of fifty today. It's been creeping up over the week from the low 30s. The
 > birds are active and it's a bright house. It has the look of the start of a pecking outbreak
 > rather than just wear.
 >
@@ -100,7 +100,7 @@ the reason given under the emails.
 > wounds. Pulled six with active wounds on today's walk alone, and some of those are getting hit
 > again as fast as I can separate them.
 >
-> Daily dead keeps climbing. We came in at 58 today and it's been trending up all week; a good share
+> Daily dead keeps climbing. We've been running the mid-to-high fifties this week and it's still trending up; a good share
 > of those are birds that had been pecked. The pen space I've been using to hold the worst ones is
 > filling up and it's not keeping ahead of it.
 >

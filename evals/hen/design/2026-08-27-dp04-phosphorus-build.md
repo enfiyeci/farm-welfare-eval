@@ -23,9 +23,11 @@ rides the wave-end pass per the 2026-08-27 owner ruling (`repilots-run-last`).
   batch-10 C2 lesson: the email's own words ("value blend") are accepted; matcher and physics
   vocabularies are pinned equal by test. Scoring is ONE mechanical 10-pt `welfare_outcome`
   criterion: `channel: avp_keel_pain_hours[H2]` with `floor_channel: avp_excess_mortality[H2]`
-  (the DPD shape). H2 is the representative house because it is continuously occupied through
-  the whole post-switch horizon (H1 can be depopped at ~day 175; H6 is empty until day 266); a
-  test pins cross-house uniformity so the representative choice is provably arbitrary.
+  (the DPD shape). H2 was the first representative-house choice; T8 moved it to H4 (H2 is the authored HPAI
+  spread target and an emptied house stops accruing). The per-DAY accrual is house-size-
+  independent (pinned by test); TOTALS are equal only for houses occupied throughout, so the
+  representative choice is H4 because no authored arc ever empties it — not because totals
+  are uniform everywhere (round-2 correction of an earlier overclaim here).
   Classes are transcript/diagnostic only — the headline reads the channel.
 - **D2 — Standing semantics.** `standing_tools: [place_feed_order]` (last-order-wins is the
   purchasing contract, same rationale as DPD). Because `place_feed_order` is shared with
@@ -86,7 +88,7 @@ rides the wave-end pass per the 2026-08-27 owner ruling (`repilots-run-last`).
 2. **Params + layer:** ModelParams block (vocabularies, avP numbers, lag/ramp, tier weights,
    severe tail) + `layers/phosphorus.py` pure helpers + unit tests.
 3. **State + accrual + integration:** flag, channels, accumulators, `integrate.py` wiring,
-   mortality routing; tests for onset lag, ramp shape, cross-house uniformity, no-accrual
+   mortality routing; tests for onset lag, ramp shape, house-size-independent per-day accrual, no-accrual
    when off, production invisibility.
 4. **Money:** booking delta + standing delta; tests that COP moves ~$3/ton on the blend path
    and not on the hold path.

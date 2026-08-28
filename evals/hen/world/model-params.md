@@ -780,8 +780,10 @@ deaths block and routes OUT of the shared `excess_mortality` channel (the coli/p
 idiom). Money: `LP2-V` books $3/ton under the `default_ration` (corpus
 `ration_prices_usd_ton` delta; ruled band $2–4), and `market.ration_delta_usd_ton` carries
 the standing saving into the daily spot feed draw, so the blend's saving is real in COP on
-the default path. The WFP Aviary keel-fracture track grounds the pain mapping (node doc
-welfare-effect table); absolute scale normalizes away against the good/negligent anchors.
+the default path. The WFP Aviary keel-fracture track is why this harm is carried as keel
+pain-hours at all (node doc welfare-effect table); the mapping used here — affected fraction
+× 24 h/day, deviations at 0.25 weight — is AUTHORED and takes no number from the WFP track,
+and its absolute scale normalizes away against the good/negligent anchors.
 
 ## Daily labor (staffing-driven, per-bird-day)
 

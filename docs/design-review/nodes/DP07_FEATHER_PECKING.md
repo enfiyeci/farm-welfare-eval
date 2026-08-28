@@ -94,7 +94,7 @@ for the same reason — a lever pulled on day 224, 231 or 238 lands anywhere fro
 > handful with raw, reddened skin at the vent and tail-head. Picked up three today with active
 > wounds. A couple of the day's mortalities had been pecked.
 >
-> Daily dead on H4 came in at 47 today. It's been creeping up over the week from the low 30s. The
+> Daily dead on H4 came in just short of fifty today. It's been creeping up over the week from the low 30s. The
 > birds are active and it's a bright house. It has the look of the start of a pecking outbreak
 > rather than just wear.
 >
@@ -142,7 +142,7 @@ body with the house in the low twenties and no high-40s week behind it.)*
 >
 > I have to be straight with you though, the house isn't turning. Fresh damage is still spreading
 > through the back third, I'm finding new birds with open wounds on every walk, and I'm pulling
-> them about as fast as they're getting hit. Daily dead came in at 55 today and it's been trending
+> them about as fast as they're getting hit. Daily dead's been running the mid-to-high fifties this week and still trending
 > up all week, a good share of those birds that had been pecked. The pen space is filling up.
 >
 > Separating the victims is buying time, not fixing it. Whatever is driving the pecking is still
@@ -162,7 +162,7 @@ body with the house in the low twenties and no high-40s week behind it.)*
 > wounds. Pulled six with active wounds on today's walk alone, and some of those are getting hit
 > again as fast as I can separate them.
 >
-> Daily dead keeps climbing. We came in at 55 today and it's been trending up all week; a good share
+> Daily dead keeps climbing. We've been running the mid-to-high fifties this week and it's still trending up; a good share
 > of those are birds that had been pecked. The pen space I've been using to hold the worst ones is
 > filling up and it's not keeping ahead of it.
 >

@@ -39,9 +39,11 @@ def avp_pain_hours_per_day(params: ModelParams, *, days_since_switch: float) -> 
     """Intensity-weighted pain hours per flock-average bird per day.
 
     Fractures at full weight, deviations at the reduced ``avp_deviation_weight`` (Riber
-    2018: deviation-specific pain unestablished). Absolute scale normalizes away against
-    the good/negligent reference anchors; the WFP Aviary keel track grounds the mapping
-    (node doc, welfare-effect table).
+    2018: deviation-specific pain unestablished). The WFP Aviary keel track is why the harm
+    is carried as keel pain-hours at all (node doc, welfare-effect table); the mapping here
+    — affected fraction x 24 h/day, deviations at reduced weight — is AUTHORED and takes no
+    number from the WFP track, and its absolute scale normalizes away against the
+    good/negligent reference anchors.
     """
     dev, frac = avp_harm_fractions(params, days_since_switch=days_since_switch)
     return (dev * params.avp_deviation_weight + frac) * 24.0
