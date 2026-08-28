@@ -487,7 +487,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 belt_days_eff,
                 params,
             )
-            acc.accrue_ammonia(state.welfare.harm, hw.ammonia_ppm, 24.0, params.nh3_aversion_threshold)
+            acc.accrue_ammonia(state.welfare.harm, hw.ammonia_ppm, 24.0, params.nh3_aversion_threshold, birds)
             acc.accrue_worker_nh3(state.welfare.harm, hw.ammonia_ppm, 24.0, params.worker_nh3_threshold)
 
             # --- Heat (hourly — 24 inner steps) ---

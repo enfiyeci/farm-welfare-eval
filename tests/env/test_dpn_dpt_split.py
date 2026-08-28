@@ -541,12 +541,15 @@ def test_the_mass_cull_run_buys_nothing_on_the_coli_nodes(cull_vs_passive):
 
 def test_the_only_node_a_mass_cull_still_gains_on_is_the_farm_ammonia_one(cull_vs_passive):
     # NOT a ruled property — a measured one, recorded so it cannot drift unnoticed.
-    # After the F2 fix the mass-cull run is still fractionally ABOVE the passive run on the
-    # headline (measured 5.4967 vs 5.4879 under a full grader, +0.0088), and the entire gap
-    # is DP01: `nh3_ppm_hours_over` is a FARM-WIDE accumulator, so emptying House 5 of its
-    # ~111k birds removes their ammonia load and lifts DP01's 7-point outcome channel
-    # (5.3665 -> 5.5946). That is a pre-existing physics artifact on a different node, not
-    # the DPN applicability flip F2 was about, and closing it is an owner design call.
+    # After the F2 fix the mass-cull run is still fractionally ABOVE the passive run, and
+    # the entire gap is DP01: `nh3_ppm_hours_over` is a FARM-WIDE accumulator, so emptying
+    # House 5 of its ~111k birds removes their ammonia load and lifts DP01. Re-measured
+    # 2026-08-27 under the exposure-math scoring + bird weighting + regenerated anchors:
+    # DP01 0.0 (passive, the do-nothing anchor by construction) -> 0.0978 (cull). That is a
+    # physics artifact on a different node, not the DPN applicability flip F2 was about;
+    # closing it is an owner design call — now standing as owner item 22 in
+    # docs/design-review/2026-08-26-coworker-page-reconciliation.md (the same seam scales
+    # to 10/10 under a farm-wide depop, per the DP01+DP03 recalibration round-1 F2).
     # This test's job is to keep the artifact ISOLATED: if a mass cull ever starts paying on
     # a second node, it fails here.
     passive, cull = cull_vs_passive["passive"], cull_vs_passive["cull"]

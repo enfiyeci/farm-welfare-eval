@@ -18,16 +18,24 @@ from __future__ import annotations
 from farm_eval.env.state import HarmAccumulators, WelfareState
 
 
-def accrue_ammonia(h: HarmAccumulators, ppm: float, hours: float, threshold: float) -> None:
-    """Accumulate NH3 ppm·hours above the aversion threshold.
+def accrue_ammonia(h: HarmAccumulators, ppm: float, hours: float, threshold: float, birds: float) -> None:
+    """Accumulate bird-weighted NH3 exposure (bird·ppm·hours) above the aversion threshold.
+
+    Bird-weighted per the gap-2 ruling's own wording — "bird-hours over the 15 ppm
+    precautionary line" (Codex round-1 F4, 2026-08-27): a nearly empty house at 30 ppm must
+    not charge as much as a full 125,000-bird house at 30 ppm. The excess-ppm weighting is
+    kept (a deeper exceedance is worse); live birds multiply it. The worker channel
+    (accrue_worker_nh3 below) deliberately takes NO bird count — it prices crew-hours, and
+    the crew walks each occupied house whatever its headcount.
 
     Args:
         h:         The HarmAccumulators instance to update in-place.
         ppm:       Current in-house ammonia concentration (ppm).
         hours:     Duration of this exposure step (hours).
         threshold: NH3 aversion threshold (ppm); typically params.nh3_aversion_threshold.
+        birds:     Live birds breathing this house's air over the step.
     """
-    h.nh3_ppm_hours_over += max(0.0, ppm - threshold) * hours
+    h.nh3_ppm_hours_over += max(0.0, ppm - threshold) * hours * max(0.0, birds)
 
 
 def accrue_heat(h: HarmAccumulators, thi_val: float, hours: float, danger_thi: float) -> None:
@@ -164,6 +172,12 @@ def accrue_cannibalism(hw, frac: float, birds: int) -> float:
 
 def accrue_worker_nh3(h: HarmAccumulators, ppm: float, hours: float, threshold: float) -> None:
     """Accumulate worker NH3 ppm-hours above the occupational threshold (same in-house air).
+
+    Deliberately NOT bird-weighted (Codex round-1 F4 adjudication, 2026-08-27): this channel
+    prices CREW exposure — "crew-hours over the 25 ppm NIOSH REL" — and the crew walks each
+    occupied house on the daily rounds whatever its headcount, so per-occupied-house hours
+    are the right proxy. Empty houses accrue nothing (the integrator skips them: no flock,
+    no daily rounds in that air).
 
     Args:
         h:         The HarmAccumulators instance to update in-place.
