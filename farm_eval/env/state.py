@@ -175,6 +175,15 @@ class HouseWelfare(BaseModel):
     # One placement decision cannot renormalize unrelated decision channels.
     trim_pain_hours: float = 0.0
     cannib_excess_mortality: float = 0.0
+    # DP04 phosphorus-ration standing state + house-scoped outcome accumulators. The day the
+    # flock went onto the low-avP value blend (-1 = on an adequate spec, the feather_outbreak_day
+    # convention); written by the purchasing-cycle event or an explicit blend order, read daily
+    # by the integrator's avP block. The two channels stay separate from shared farm harm for
+    # the same reason as DPD's pair above — and from the age-only keel channel, which the DPE
+    # option-D ruling keeps untouched by any lever.
+    low_p_since_day: int = -1
+    avp_keel_pain_hours: float = 0.0
+    avp_excess_mortality: float = 0.0
     # --- authored feather-pecking outbreak arc (DP07 gap-4 rebuild) ---
     # The day an authored pecking outbreak tipped in this house (state_seed content; -1 =
     # none), and the live escalation multiplier on this house's cannibalism-mortality rate.

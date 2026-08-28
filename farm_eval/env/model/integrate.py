@@ -24,7 +24,7 @@ from farm_eval.env.model.params import ModelParams
 from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, hpai_spread,
-    colibacillosis, salmonella, staffing, access, floor_eggs, density, mobility,
+    colibacillosis, salmonella, staffing, access, floor_eggs, density, mobility, phosphorus,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -592,6 +592,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 params.welfare_light_floor_lux,
             )
             acc.accrue_trim_pain(hw, params)
+            # DP04 avP keel/deviation pain (house-scoped node channel; zero on an adequate
+            # spec — the ration flag is the deep-cut gate, layers/phosphorus.py).
+            acc.accrue_avp_pain(hw, params, day)
 
             # --- Red-mite burden (daily; growth only in a house carrying an authored arc,
             # suppressed while a legal control course is running) ---
@@ -639,12 +642,24 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # accrual is house-scoped (coli_excess_mortality below) — the shared farm
             # channel must not be renormalized by one node's decision (owner ruling on
             # reviewer F4, 2026-08-12; the D5 red-mite pattern).
+            # avP severe / down-and-die tail (DP04): deficient-phosphorus fragility deaths.
+            # Joins `excess` BEFORE the deaths clamp like every other source; the HARM
+            # accrual routes to the house-scoped channel below (the coli/pecking/HPAI
+            # idiom), so a feed decision cannot renormalize the shared farm channel.
+            avp_mort = (
+                phosphorus.avp_severe_mortality_frac(
+                    params, days_since_switch=float(day - hw.low_p_since_day)
+                )
+                if hw.low_p_since_day >= 0
+                else 0.0
+            )
             excess = (
                 min(day_heat_mort, params.heat_mort_daily_cap)
                 + hw.hpai_daily_mort_frac
                 + hw.coli_daily_mort_frac
                 + staffing_excess_mort
                 + pecking_mort
+                + avp_mort
             )
             # Authored piling/smother event (DP22): a one-night smother books a fixed
             # death count on the seeded day. Bookkept like all deaths (bird_count /
@@ -699,6 +714,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # the HARM ACCRUAL moves, to the house-scoped counter.
             hpai_amt = min(hw.hpai_daily_mort_frac, headroom) * birds
             hw.hpai_excess_mortality += hpai_amt
+            # avP severe tail routes to its house-scoped DP04 channel (same reasoning as the
+            # three routings above; the birds died in the deaths block, only the HARM moves).
+            avp_amt = min(avp_mort, headroom) * birds
+            hw.avp_excess_mortality += avp_amt
             # `max(0.0, ...)`: with three terms now subtracted, a house whose whole excess IS
             # the routed terms lands on a residual of -1e-17 rather than 0.0, and an accumulator
             # that can be nudged NEGATIVE is a worse failure than the rounding it comes from —
@@ -708,7 +727,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 max(
                     0.0,
                     min(
-                        excess - hw.coli_daily_mort_frac - pecking_mort - hw.hpai_daily_mort_frac,
+                        excess
+                        - hw.coli_daily_mort_frac
+                        - pecking_mort
+                        - hw.hpai_daily_mort_frac
+                        - avp_mort,
                         headroom,
                     ),
                 ),

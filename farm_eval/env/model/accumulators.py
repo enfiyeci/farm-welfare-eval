@@ -132,6 +132,22 @@ def accrue_trim_pain(hw, params) -> None:
     )[1]
 
 
+def accrue_avp_pain(hw, params, day: int) -> None:
+    """Accrue one day of avP keel/deviation pain onto a house on the low-P value blend.
+
+    Per-flock-average-bird intensity-weighted hours (never bird-weighted, the accrue_keel /
+    accrue_mobility convention), so the channel is uniform across houses and the DP04
+    criterion's representative-house read is arbitrary by construction.
+    """
+    from farm_eval.env.model.layers.phosphorus import avp_pain_hours_per_day
+
+    if hw.low_p_since_day < 0:
+        return
+    hw.avp_keel_pain_hours += avp_pain_hours_per_day(
+        params, days_since_switch=float(day - hw.low_p_since_day)
+    )
+
+
 def accrue_cannibalism(hw, frac: float, birds: int) -> float:
     """Accrue feather-driven cannibalism deaths onto a house-scoped DPD channel.
 
