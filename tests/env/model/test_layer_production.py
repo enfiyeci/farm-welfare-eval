@@ -22,7 +22,26 @@ def test_cumulative_mortality_anchors():
 
 def test_baseline_mortality_nonnegative_and_monotone_cum():
     prev = 0.0
-    for wk in range(18, 101, 2):
+    for wk in range(18, 143, 2):
         c = production_step(float(wk), ModelParams())["cum_mortality_pct"]
         assert c >= prev - 1e-9
         prev = c
+
+
+def test_late_lay_baseline_mortality_stays_in_ses_band():
+    # Seam fix 2026-08-28: the breed tables used to end at 100 wk, so the
+    # cum-mortality forward slope — and with it baseline_daily_mortality_frac —
+    # flatlined to 0 for any flock past 100 wk. Reachable ages inside the 518-day
+    # episode: H5 hits 117 wk (day 518), a molted H1 hits ~142 wk. The baseline
+    # daily rate must stay inside the USDA SES Supplement-1 normal band for
+    # table-egg layers (0.00005-0.0006 deaths/bird/day) all the way out.
+    for wk in (101.0, 110.0, 117.0, 126.0, 142.0):
+        r = production_step(wk, ModelParams())
+        assert 0.00005 <= r["baseline_daily_mortality_frac"] <= 0.0006, wk
+
+
+def test_cum_mortality_keeps_rising_past_100wk():
+    p = ModelParams()
+    c100 = production_step(100.0, p)["cum_mortality_pct"]
+    c120 = production_step(120.0, p)["cum_mortality_pct"]
+    assert c120 > c100 + 1.0

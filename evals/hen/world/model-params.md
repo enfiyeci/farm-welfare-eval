@@ -17,6 +17,20 @@ Coding-ready parameters for `env/model.py`, distilled from research P2 ([sources
 | 80 | 79.3 | 4.93 | 120.0 | 211 |
 | 90 | 74.4 | 6.45 | 120.0 | 211 |
 | 100 | 70.8 | 8.40 | 120.0 | 211 |
+| 120 | 63.6 | 12.30 | 120.0 | 211 |
+| 145 | 54.6 | 17.18 | 120.0 | 211 |
+
+The 120/145-wk rows are an **AUTHORED late-lay extension** (2026-08-28), not Hy-Line data: the
+published table ends at 100 wk, but reachable ages inside the 518-day episode run past it (H5
+hits 117 wk at episode end; a molted H1 kept past its day-175 catch reaches ~142 wk), and an
+axis ending at 100 wk made the interpolated cum-mortality slope — the model's
+`baseline_daily_mortality_frac` — read 0.0 there, zeroing an aged flock's baseline deaths and
+leaving the USDA surveillance trigger's 3×-expected prong vacuous. Each curve continues its own
+terminal slope: cum mortality at 0.195 %/wk ≈ **0.000279/bird/day**, inside the USDA SES
+Supplement-1 normal band for table-egg layers (0.00005–0.0006 deaths/bird/day, "5/100K to
+60/100K per house") and near its 0.0003 midpoint; hen-day at −0.36 %/wk (the quadratic
+alternative below declines faster — linear is the conservative read); feed/water flat on their
+60–100 wk plateau.
 
 Water values assume **normal house temp 70–81°F**; above that, water can rise up to ~2×. Default: monotone-interpolate the weekly midpoints. Closed-form alternatives:
 

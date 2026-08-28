@@ -175,12 +175,24 @@ class ModelParams(BaseModel):
     # breed_label names the strain those tables are calibrated to. It is display metadata only —
     # nothing in the model reads it — so that a viewer labelling the reference curve takes the
     # name from the params that define the curve instead of hardcoding one of its own.
+    # The 120/145-wk rows are an AUTHORED late-lay extension (2026-08-28), not Hy-Line data:
+    # the published table ends at 100 wk, but reachable ages inside the 518-day episode run past
+    # it (H5 hits 117 wk at episode end; a molted H1 kept past its day-175 catch reaches ~142 wk).
+    # With the axis ending at 100 wk the interpolated cum-mortality curve went flat there, so
+    # baseline_daily_mortality_frac read 0.0 — an aged flock booked no baseline deaths and the
+    # USDA surveillance trigger's 3x-expected prong (triggers.py) was vacuously true whenever
+    # deaths > 0. The extension continues each curve's own terminal slope: cum mortality at
+    # 0.195 %/wk (~0.000279/bird/day — inside the USDA SES Supplement-1 normal band for
+    # table-egg layers, 0.00005-0.0006/day, near its 0.0003 midpoint; model-params.md
+    # §Breed-standard targets), hen-day at -0.36 %/wk (the doc's own quadratic alternative
+    # declines faster, so linear is the conservative read), feed/water flat on their
+    # 60-100 wk plateau. 145 wk covers the oldest reachable age (~142 wk) with margin.
     breed_label: str = "Hy-Line Brown"
-    breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100]
-    breed_hdep: list[float] = [4.4, 71.0, 92.3, 95.2, 95.7, 94.0, 89.0, 84.2, 79.3, 74.4, 70.8]
-    breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40]
-    breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
-    breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211]
+    breed_age_wk: list[float] = [18, 21, 23, 25, 30, 40, 60, 72, 80, 90, 100, 120, 145]
+    breed_hdep: list[float] = [4.4, 71.0, 92.3, 95.2, 95.7, 94.0, 89.0, 84.2, 79.3, 74.4, 70.8, 63.6, 54.6]
+    breed_cummort: list[float] = [0.05, 0.20, 0.34, 0.46, 0.71, 1.24, 2.57, 3.73, 4.93, 6.45, 8.40, 12.30, 17.18]
+    breed_feed_g: list[float] = [80.5, 100.0, 107.5, 115.5, 121.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0, 120.0]
+    breed_water_ml: list[float] = [143, 176, 189, 203, 213, 211, 211, 211, 211, 211, 211, 211, 211]
 
     # --- Economics (Tier-0 P&L). Research-anchored placeholders; verify at C7 (SOURCES.md). ---
     # Egg downgrade (checks/dirties -> breaker stock) rises with flock age.
