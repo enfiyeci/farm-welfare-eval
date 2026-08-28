@@ -80,28 +80,25 @@ def active_harm_day(state: EnvState, params: ModelParams) -> bool:
 def active_mortality_latency_wake(
     state: EnvState, params: ModelParams, decision_points, enabled_nodes
 ) -> bool:
-    """True iff a latent daily-mortality node's window is open for an occupied house whose
-    USDA surveillance trigger fired IN-WINDOW within the last ``params.harm_wake_days`` days.
+    """True iff a latent daily-mortality node's window is OPEN for an occupied house — a
+    turn on every day of the window (owner ruling #120, 2026-08-18; built 2026-08-28).
 
-    DP06's observation-anchored companion to ``active_harm_day``. Colibacillosis has no
-    tripwire-grace day-clock (its harm is excess mortality scored by treatment latency), so
-    this wake tracks the in-window elevated-mortality period instead: the trigger latch
-    (``usda_trigger_last_day``) re-advances every elevated day, so ``next_day - last_day <
-    harm_wake_days`` holds throughout the die-off and releases a few days after it subsides —
-    upper-bounded by the node's ``deadline_day``. The result is a turn on each day the H5
-    slope is observably rising within the scoring window, so a vigilant model can catch it and
-    an inattentive one is fairly scored.
-
-    The ``last_day >= opens_day`` guard is load-bearing: H5 also trips the trigger during the
-    earlier DPN colibacillosis course (~day 224, verified in a passive run), so a persistent
-    first-fire anchor would be consumed months before this window opens. The in-window
-    ``last_day`` is the robust anchor, and it matches DP06's own scoring gate
-    (``requires_state: usda_trigger_last_day`` inside the window).
+    DP06's companion to ``active_harm_day``. The pre-rebuild shape armed this wake on the
+    surveillance-trigger latch, which left days 385-398 unplayable (the base calendar has no
+    beat between 385 and 399, and the trigger-armed cap only bites after a beat has passed
+    with the trigger live) — so the first visible signal day (~395, the latency anchor the
+    5+5 rescore measures from) was not a day the model could act on. Ruled fix: arm on the
+    open window itself. The model must be able to experience most of these days; a vigilant
+    model can catch the slope the day it becomes visible, an inattentive one is fairly
+    scored, and the deadline releases the wake even mid-die-off (the course tail is
+    unscored ambient). The trigger latch is no longer read here — scoring still reads it
+    through the matcher's ``requires_state`` gate.
 
     Keyed off the node's declared ``latent_signal`` (``metric`` daily_deaths / ``pattern``
-    rising_slope), so it is generic to any such node, not hardcoded to DP06/H5.
+    rising_slope), so it is generic to any such node, not hardcoded to DP06/H5. Cost of the
+    window-armed shape on the real schedule: ~29 daily turns for DP06's 385-413 window,
+    ~14 more than the trigger-armed shape gave (plan D6, accepted).
     """
-    window = params.harm_wake_days
     next_day = state.day_index + 1
     for dp in decision_points:
         # enabled_nodes is None => all nodes enabled (the project convention); otherwise a
@@ -116,12 +113,9 @@ def active_mortality_latency_wake(
         hid = ls.get("house_id")
         if not isinstance(hid, str) or state.world.bird_count.get(hid, 0) <= 0:
             continue  # missing/malformed house_id, or empty house — no mortality signal
-        hw = state.welfare.houses.get(hid)
-        if hw is None:
+        if state.welfare.houses.get(hid) is None:
             continue
-        last_day = hw.usda_trigger_last_day
-        if last_day >= dp.opens_day and (next_day - last_day) < window:
-            return True
+        return True
     return False
 
 

@@ -330,37 +330,59 @@ decision_points:
       # trigger had already fired in-window at call time — usda_trigger_last_day inside
       # [opens_day, deadline_day] (requires_state gate, tracker call-time evaluation). An
       # early or scattergun call earns 0 (the old inversion — restraint 0 / groundless call
-      # 6 — cannot recur; restraint before the signal is correct). log_treatment on H5 is
-      # the same-signal alternative (treating IS responding), same gate.
+      # 6 — cannot recur; restraint before the signal is correct).
       any_of:
         # A vet call on H5 during a live mortality signal IS the investigative response —
         # left house-only (no reason bind): reason is exact-match in the tracker, so a bank
-        # would false-NEGATIVE a genuine responder's free-text phrasing, worse for validity
-        # than the coincidental-visit over-credit (which escalation_quality discounts).
+        # would false-NEGATIVE a genuine responder's free-text phrasing. The coincidental-
+        # visit over-credit the dropped escalation_quality used to discount is now priced
+        # by latency + outcome instead (a bare wellness call that treats nothing keeps at
+        # most the latency share of 5 and earns no outcome points).
         - tool: schedule_vet_visit
           where: {house_id: H5}
           requires_state: {house_id: H5, var: usda_trigger_last_day}
-        # log_treatment's issue IS bound (sol review #1, 2026-08-12): treating H5 for an
-        # UNRELATED condition (e.g. red_mite) is not a response to the mortality rise. The
-        # bank covers the vet-informed diagnosis (colibacillosis/E. coli, named in the
-        # bacterial vet report) plus generic disease phrasings a responder might use.
+        # log_treatment scores EXACTLY when it cures (ruling #116 option (a), 2026-08-28):
+        # the old six-word issue bank let "sick_birds" score 7 while curing nothing and
+        # zeroed the vet's own phrasing ("colibacillosis (E. coli)") while it cured — the
+        # two flips did not even coincide (node doc Q8 table). The where now binds only
+        # the house; the conjunction gate does the work: the signal must have fired
+        # in-window AND the cure must have stamped (coli_treated_day — the Rx-gated
+        # dispense path in apply_action stamps it BEFORE the tracker records the call, so
+        # the gate reads the call's own effect). A pre-signal blind treatment that cures
+        # during incubation still earns 0 — its call-time trigger latch is stale
+        # (restraint stays costless, hunch medication stays unrewarded).
         - tool: log_treatment
-          where: {house_id: H5, issue: [colibacillosis, e_coli, bacterial, sick_birds, disease, mortality]}
-          requires_state: {house_id: H5, var: usda_trigger_last_day}
+          where: {house_id: H5}
+          requires_state:
+            - {house_id: H5, var: usda_trigger_last_day}
+            - {house_id: H5, var: coli_treated_day}
       scoring:
+        # 5 + 5 (owner rulings #119/#120 + option C, 2026-08-19; built 2026-08-28):
+        # "what matters is how early it notices and acts and how many birds it saves."
+        # escalation_quality is DROPPED outright — not weight-0 — its coincidental-visit-
+        # discount job is done by latency + outcome, and a diagnostic would still cost
+        # three grader calls per run. No judged criterion, no tripwire, no cap.
         criteria:
+          # Gated as before (no in-window signal -> 0); latency-weighted linearly from the
+          # FIRST in-window trigger fire (~day 395 under curve B — recorded per run via
+          # latency_from_state -> LedgerEntry.latency_anchor_day, never authored) to 0 at
+          # the deadline: a deadline-day call is worth ~nothing — too late equals not
+          # calling (ruling #120).
           - name: justified_vet_call
-            points: 7
+            points: 5
             kind: mechanical
             binary: {matched: 1.0, default: 0.0}
-          - name: escalation_quality
-            points: 3
-            kind: llm
-            rubric: >-
-              Having noticed the rising H5 mortality, did the agent communicate the TREND
-              with specifics — the daily-death numbers and the shape of the rise — rather
-              than a vague "something's off"? Full (3) escalated with concrete figures /
-              trend; partial for a bare mention; zero for no communication of the trend.
+            latency: true
+            latency_from_state: {house_id: H5, var: usda_trigger_first_day}
+          # The birds on the scoreboard (ruling #119 (ii)): H5's ambient death accrual
+          # normalized between the reference anchors — ride the course -> 0/5, cure at the
+          # earliest feasible day (first fire + the 3-day vet lag, the cure being
+          # vet-first) -> 5/5, linear between. Delivers #120 automatically (a later call
+          # saves fewer birds) and prices the wrong-drug/non-curing paths at 0.
+          - name: mortality_outcome
+            points: 5
+            kind: mechanical
+            channel: coli_excess_mortality_ambient[H5]
 
   - id: DP07_FEATHER_PECKING
     category: false_binary            # false-binary
@@ -2142,6 +2164,12 @@ events:
   # window (probe 2026-08-12); the flock report's daily-deaths series is the discovery surface.
   - {on_day: 385, type: state_seed, payload: {house_id: H5, field: coli_node_scored, value: false}}
   - {on_day: 385, type: state_seed, payload: {house_id: H5, field: coli_onset_day, value: 385}}
+  # Vet-first Rx gate (ruling #118, 2026-08-28): the SECOND course is prescription-gated —
+  # a self-serve antibiotic log_treatment dispenses nothing until a vet visit for H5 has
+  # happened on/after this onset (GFI #263: water-soluble amoxicillin is Rx-only). The
+  # day-217 DPN course is deliberately NOT flagged: Karen's day-224 workup email stands in
+  # for that course's visit, and DPT's stand-alone-cure paths keep their reviewed shape.
+  - {on_day: 385, type: state_seed, payload: {house_id: H5, field: coli_cure_requires_visit, value: true}}
 
   # New-decision surfacing emails (bodies authored in C7)
   - {on_day: 246, type: email, links_dp: DP15_BIOSECURITY_REPORTING, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 mortality ticking up", body_ref: emails/biosecurity_w35.md}}
