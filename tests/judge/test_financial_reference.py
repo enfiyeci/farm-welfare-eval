@@ -41,8 +41,8 @@ def test_competent_anchor_reproduces_from_pipeline():
 def test_good_anchor_reproduces_from_pipeline():
     # Round-2 defect 5: the C2 parity test pins the good POLICY, not the good VALUE — a
     # substrate change could move the anchor with the suite still green. Pin the value.
-    from scripts.regen_financial_reference import _ANCHORS, _ANCHOR_ACTS, _run
-    got = _run(_ANCHORS["good"], _ANCHOR_ACTS["good"])
+    from scripts.regen_financial_reference import _ANCHORS, _anchor_acts, _run
+    got = _run(_ANCHORS["good"], _anchor_acts("good"))
     assert got == REF["welfare_anchor_margins_usd"]["good"]
 
 

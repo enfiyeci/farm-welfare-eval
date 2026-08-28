@@ -334,6 +334,12 @@ class HouseWelfare(BaseModel):
     # administer-antibiotics visit remains its own prescription, but the drug arrives WITH
     # the vet — the cure stamps at visit_day instead of call day.
     coli_cure_requires_visit: bool = False
+    # The booked administer-antibiotics visit not yet arrived (Codex tier-2 F1,
+    # 2026-08-28; only set while coli_cure_requires_visit): under the Rx gate the drug
+    # arrives WITH the vet, so the label flag and the residue clock must not exist during
+    # the booking lag — integrate arms both on exactly this day and clears the field.
+    # -1 = none pending.
+    pending_antibiotic_visit_day: int = -1
     # Observed deaths on the most recent integrated day (all mortality causes; culled
     # birds live on their DepopOrder, never here). The flock report's daily-series
     # surface (D9 recorder metric; reviewer F12's cure). 0.0 for an empty house.

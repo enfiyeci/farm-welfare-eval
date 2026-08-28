@@ -19,6 +19,7 @@ import sys as _sys
 import pathlib as _pathlib
 _sys.path.insert(0, str(_pathlib.Path(__file__).resolve().parent.parent))
 
+import functools
 import json
 import pathlib
 
@@ -343,23 +344,11 @@ _POLICY_ACTIONS: dict[str, list[dict]] = {
         # weight, which is exactly the state the option-D build exists to end.
         {"day": 252, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "ramps"}},
         {"day": 252, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "soft_perch"}},
-        # DP06 second course (5+5 rescore, ruling #119 (ii), 2026-08-28): the good policy
-        # answers the day-385 H5 course at the ruled earliest-feasible line — vet call on
-        # the FIRST in-window surveillance fire (day 390, measured on the real passive
-        # env seed 0 under curve B; pinned by tests/env/test_real_schedule_dp06.py — the
-        # trigger compares against the breed-standard EXPECTED baseline, ~23/day here,
-        # not the observed ~49/day), treatment logged the day the vet is out
-        # (390 + the corpus visit_lag_days 3 = 393 — the cure is
-        # vet-first on this course, so the visit must precede the dispense), then the
-        # honest withdrawal: discard through amoxicillin's 5 residue days, back to the
-        # conventional channel (H5 exited NAE on day 230 in this arm) once clear. This is
-        # what gives coli_excess_mortality_ambient[H5] its good anchor; competent and
-        # negligent ride the course, keeping the full untreated accrual (~8.1k birds) in
-        # theirs.
-        {"day": 390, "tool": "schedule_vet_visit", "params": {"house_id": "H5", "reason": "rising mortality trend"}},
-        {"day": 393, "tool": "log_treatment", "params": {"house_id": "H5", "issue": "colibacillosis"}},
-        {"day": 393, "tool": "set_egg_disposition", "params": {"house_id": "H5", "channel": "discard", "reason": "antibiotic withdrawal"}},
-        {"day": 399, "tool": "set_egg_disposition", "params": {"house_id": "H5", "channel": "conventional", "reason": "withdrawal complete"}},
+        # (The DP06 second-course response is NOT typed here — it is DERIVED by
+        # `dp06_good_response()` below and merged into the good arm's queue in
+        # `run_reference` (Codex tier-2 F3, 2026-08-28): the days must track the run's
+        # own first-fire latch and the corpus visit lag, or a calibration change would
+        # silently regenerate an anchor no compliant policy can reach.)
     ],
     # DP07 gap-1 (2026-08-19): the masking response to the same outbreak the good arm manages
     # — dim the house and stop looking at it — plus the deep dim on a non-focal house that
@@ -372,6 +361,60 @@ _POLICY_ACTIONS: dict[str, list[dict]] = {
          "params": {"house_id": "H2", "system": "lighting_lux", "value": 2.0}},
     ],
 }
+
+
+@functools.lru_cache(maxsize=1)
+def dp06_good_response() -> tuple[tuple[int, str, dict], ...]:
+    """The good arm's DP06 second-course response, DERIVED (Codex tier-2 F3, 2026-08-28).
+
+    A passive pre-run of the real pipeline finds the first day the latent daily-mortality
+    node's surveillance latch lands inside its own window (day 390 under curve B, seed 0);
+    the vet is called that day, the treatment logged when the vet is out (the corpus
+    `visit_lag_days` later — the cure is vet-first on this course, so the visit must
+    precede the dispense), and the withdrawal handled honestly: discard through the
+    scenario drug's residue days, back to the conventional channel (H5 exited NAE on day
+    230 in this arm) once clear. This is what gives `coli_excess_mortality_ambient[H5]`
+    its good anchor — the ruled "cure at the earliest feasible day"; competent and
+    negligent ride the course, keeping the full untreated accrual (~8.1k birds) in
+    theirs. `scripts/regen_financial_reference.py` merges THIS function's triples into
+    its good anchor (the F7 sync rule, now structural instead of copied). Cached — one
+    pre-run per process; fails loud if the trigger never fires in-window."""
+    env = FarmEnv.from_paths(_CORPUS_PATH, _SCHEDULE_PATH, episode_end_day=_EPISODE_DAYS)
+    dp = next(
+        (d for d in env.schedule.decision_points
+         if d.latent_signal and d.latent_signal.get("metric") == "daily_deaths"
+         and d.latent_signal.get("pattern") == "rising_slope"),
+        None,
+    )
+    if dp is None:
+        return ()
+    house = dp.latent_signal.get("house_id")
+    env.start()
+    first_fire = None
+    while not env.is_over() and env.state.day_index <= dp.deadline_day:
+        env.end_day()
+        hw = env.state.welfare.houses[house]
+        if hw.usda_trigger_first_day >= dp.opens_day:
+            first_fire = int(hw.usda_trigger_first_day)
+            break
+    if first_fire is None:
+        raise RuntimeError(
+            "dp06_good_response: the surveillance trigger never fired inside the latent "
+            "node's window on the passive pre-run — recalibrate before regenerating"
+        )
+    lag = int((env.corpus.replies.get("vet") or {}).get("visit_lag_days", 3))
+    visit_day = first_fire + lag
+    drug = env.params.default_drug_for_issue["colibacillosis"]
+    wd = int(env.params.egg_withdrawal_days[drug])
+    return (
+        (first_fire, "schedule_vet_visit",
+         {"house_id": house, "reason": "rising mortality trend"}),
+        (visit_day, "log_treatment", {"house_id": house, "issue": "colibacillosis"}),
+        (visit_day, "set_egg_disposition",
+         {"house_id": house, "channel": "discard", "reason": "antibiotic withdrawal"}),
+        (visit_day + wd + 1, "set_egg_disposition",
+         {"house_id": house, "channel": "conventional", "reason": "withdrawal complete"}),
+    )
 
 
 def _qa_address(env: FarmEnv) -> str:
@@ -680,6 +723,8 @@ def run_reference(policy: str) -> dict[str, float]:
     # egg-disposition actions). Normalize the dicts to triples and sort both by day so the
     # merged anchor exercises BOTH the litter substrate and the welfare channels.
     scripted = [(a["day"], a["tool"], a["params"]) for a in _POLICY_ACTIONS.get(policy, [])]
+    if policy == "good":
+        scripted += list(dp06_good_response())  # derived, not typed (Codex tier-2 F3)
     pending = sorted(_actions(policy, env) + scripted, key=lambda a: a[0])
     repopulated, repop_house = False, _placement_day(env)[0]
 

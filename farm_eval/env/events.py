@@ -61,6 +61,15 @@ def open_due_decision_points(
             # `node_applies` excludes the entry on this record (the DPN N/A semantics).
             gate = dp.signature.applies_if
             if gate is not None and gate.occupied_house is not None:
+                # Codex tier-2 F2 (2026-08-28): an unknown house is an invalid schedule,
+                # never "empty" — a typo would otherwise silently N/A the node out of
+                # every run. Keyed on the welfare-house set (the same registry every
+                # other fail-loud house lookup uses); bird_count then reads occupancy.
+                if gate.occupied_house not in state.welfare.houses:
+                    raise ValueError(
+                        f"applies_if.occupied_house for {dp.id} references unknown "
+                        f"house {gate.occupied_house!r}"
+                    )
                 entry.window_open_occupied = (
                     state.world.bird_count.get(gate.occupied_house, 0) > 0
                 )

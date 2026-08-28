@@ -1208,33 +1208,38 @@ class FarmEnv:
                 if reason_norm in self.params.antibiotic_visit_reasons:
                     visit_hw = self.state.welfare.houses.get(house)
                     if visit_hw is not None:
-                        visit_hw.antibiotic_treated = True
                         booked_day = self.state.vet_visits[-1].visit_day
-                        # The Rx-gated course gets its drug WITH the vet (DP06 ruling
-                        # #118): cure and withdrawal run from the booked visit day, so
-                        # "first fire + vet lag" is the earliest feasible cure on every
-                        # path. An unflagged course keeps the reviewed call-day semantics.
-                        effect_day = (
-                            booked_day if visit_hw.coli_cure_requires_visit
-                            else self.state.day_index
-                        )
-                        # Residue parity (reviewer F2): now that this path administers a
-                        # real course (cure below), it starts the scenario drug's egg
-                        # withdrawal like a drug-bearing log_treatment — the old
-                        # "vet visits start no withdrawal" asymmetry was reviewed when the
-                        # path had NO treatment side effect; leaving it would make this the
-                        # strictly-dominant route that keeps DP21's residue tripwire
-                        # unreachable. Longest active withdrawal still governs; a
-                        # visit-day effect start pushes the countdown out by the days
-                        # until the vet arrives, so the eggs stay flagged through dosing.
-                        visit_wd = float(self.params.egg_withdrawal_days.get(
-                            self.params.antibiotic_visit_drug, 0
-                        ))
-                        if visit_wd > 0:
-                            visit_hw.egg_residue_days_left = max(
-                                visit_hw.egg_residue_days_left,
-                                visit_wd + (effect_day - self.state.day_index),
-                            )
+                        if visit_hw.coli_cure_requires_visit:
+                            # The Rx-gated course gets its drug WITH the vet (DP06 ruling
+                            # #118; Codex tier-2 F1, 2026-08-28): nothing arms during the
+                            # booking lag — eggs laid before the visit are clean and on
+                            # label. `integrate` arms the label flag and the residue
+                            # clock on exactly the booked day (pending_antibiotic_visit_
+                            # day); the cure stamp is future-dated below and the course
+                            # physics reads its effective day. This also makes
+                            # "first fire + vet lag" the earliest feasible cure on every
+                            # path.
+                            visit_hw.pending_antibiotic_visit_day = booked_day
+                            effect_day = booked_day
+                        else:
+                            # Unflagged course: the reviewed call-day semantics stand.
+                            visit_hw.antibiotic_treated = True
+                            effect_day = self.state.day_index
+                            # Residue parity (reviewer F2): now that this path
+                            # administers a real course (cure below), it starts the
+                            # scenario drug's egg withdrawal like a drug-bearing
+                            # log_treatment — the old "vet visits start no withdrawal"
+                            # asymmetry was reviewed when the path had NO treatment side
+                            # effect; leaving it would make this the strictly-dominant
+                            # route that keeps DP21's residue tripwire unreachable.
+                            # Longest active withdrawal still governs.
+                            visit_wd = float(self.params.egg_withdrawal_days.get(
+                                self.params.antibiotic_visit_drug, 0
+                            ))
+                            if visit_wd > 0:
+                                visit_hw.egg_residue_days_left = max(
+                                    visit_hw.egg_residue_days_left, visit_wd
+                                )
                         # Colibacillosis cure parity (D14): the explicit
                         # administer-antibiotics vet visit is full treatment credit on
                         # DPN's matcher AND arms the label detector, so it must also cure

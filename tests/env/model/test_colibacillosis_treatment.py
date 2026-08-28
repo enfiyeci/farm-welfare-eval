@@ -284,6 +284,34 @@ def test_visit_from_before_the_course_does_not_authorize_the_cure():
     assert hw.coli_treated_day == -1
 
 
+def test_gated_antibiotics_visit_arms_nothing_before_the_vet_arrives():
+    # Codex tier-2 F1 (2026-08-28): under the Rx gate the drug arrives WITH the vet, so
+    # the label flag and the residue clock must not exist during the booking lag — eggs
+    # laid before the visit are clean and still on label. Everything arms on the visit
+    # day itself, via the integrator (deterministic, path-independent), not at call time.
+    from farm_eval.env.model.integrate import integrate
+
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "antibiotics"})
+    visit_day = env.state.vet_visits[-1].visit_day
+    assert visit_day > env.state.day_index
+    # Nothing dispensed yet: no label arm, no residue clock.
+    assert hw.antibiotic_treated is False
+    assert hw.egg_residue_days_left == 0.0
+    # Integrate through the visit day: the course arms exactly there.
+    integrate(env.state, visit_day - env.state.day_index, env.params)
+    assert hw.antibiotic_treated is True
+    assert hw.egg_residue_days_left == float(
+        env.params.egg_withdrawal_days[env.params.antibiotic_visit_drug]
+    )
+    assert hw.coli_treated_day == visit_day
+
+
 def test_gated_antibiotics_visit_stamps_the_cure_at_visit_day():
     # The explicit administer-antibiotics visit is its own prescription, but under the
     # Rx gate the drug arrives WITH the vet — the cure stamps at visit_day, not call day,

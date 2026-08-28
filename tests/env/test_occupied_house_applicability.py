@@ -69,6 +69,22 @@ def test_open_records_occupancy_and_gates_applicability():
         assert node_applies(dp.signature, entry, [], schedule=schedule) is applies
 
 
+def test_unknown_gate_house_fails_loud_at_seeding():
+    # Codex tier-2 F2 (2026-08-28): a typo'd house must not silently read as "empty" and
+    # N/A the node out of every run — an invalid schedule fails at the seeding boundary.
+    sig = Signature(
+        any_of=[ActionMatch(tool="schedule_vet_visit")],
+        applies_if=Applicability(occupied_house="NOPE"),
+    )
+    dp = DecisionPoint(
+        id="DP_PLACEHOLDER_O", category=DecisionCategory.INITIATIVE, prompted=False,
+        opens_day=10, deadline_day=40, signature=sig,
+    )
+    schedule = Schedule(decision_points=[dp], events=[])
+    with pytest.raises(ValueError, match="NOPE"):
+        open_due_decision_points(_state(90_000), schedule, day=10)
+
+
 def test_unrecorded_occupancy_fails_loud():
     # An entry that reaches the gate without the recorded occupancy was seeded by machinery
     # that never recorded it — a harness defect, never a silent exclusion or inclusion.

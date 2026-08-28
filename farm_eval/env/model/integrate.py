@@ -212,6 +212,21 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             residue_live = hw.egg_residue_days_left > 0.0
             if hw.egg_residue_days_left > 0.0:
                 hw.egg_residue_days_left = max(0.0, hw.egg_residue_days_left - 1.0)
+            # Rx-gated administer-antibiotics visit arriving TODAY (Codex tier-2 F1,
+            # 2026-08-28): the drug comes with the vet, so the label flag and the
+            # residue clock arm here — on the visit day, after this day's decrement, so
+            # the countdown starts intact exactly like a call-time arming would — never
+            # during the booking lag (eggs laid before the visit are clean and on
+            # label). The cure stamp itself was future-dated at call time; the course
+            # physics reads its effective day.
+            if hw.pending_antibiotic_visit_day == day:
+                hw.antibiotic_treated = True
+                pending_wd = float(
+                    params.egg_withdrawal_days.get(params.antibiotic_visit_drug, 0)
+                )
+                if pending_wd > 0:
+                    hw.egg_residue_days_left = max(hw.egg_residue_days_left, pending_wd)
+                hw.pending_antibiotic_visit_day = -1
 
             birds = state.world.bird_count.get(hid, 0)
             if birds <= 0:
