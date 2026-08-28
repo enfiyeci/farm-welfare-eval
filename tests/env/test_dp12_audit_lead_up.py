@@ -201,10 +201,13 @@ def test_every_house_the_audit_can_write_up_is_readable_before_the_audit():
     # list but a closure: every house the audit will actually inspect (occupied on the day) can
     # be read before it, through the sensor or through the handheld log the refusal points at.
     #
-    # Measured on this branch, day 266: H2, H4 and H5 are occupied and all read ~27.4 ppm; H2 is
-    # the sensor-less one, and it is the house the repair buys. H1 is EMPTY by then (its standing
-    # depop has fired), so it is out of the audit's snapshot — the node doc's four-house figure
-    # was measured before the batch waves and now reads three.
+    # Measured on this branch, day 266: H2, H4 and H5 are occupied; H2 is the sensor-less
+    # one, and it is the house the repair buys. H1 is EMPTY by then (its standing depop has
+    # fired), so it is out of the audit's snapshot. Since the gap-D recalibration
+    # (2026-08-27) only the FOCAL H4 — the under-vented house with the authored lagging
+    # belt — carries the standing 25+ breach; the other houses winter in the teens, which
+    # is the field-calibrated level (the old all-houses-~27.4 world was the measured
+    # miscalibration).
     env = _env_at(266)
     occupied = [h for h in sorted(env.state.welfare.houses)
                 if env.state.world.bird_count.get(h, 0) > 0]
@@ -220,4 +223,4 @@ def test_every_house_the_audit_can_write_up_is_readable_before_the_audit():
             f"{house}'s air is not readable before the audit"
 
     breaching = [h for h in occupied if env.state.welfare.houses[h].ammonia_ppm > 25.0]
-    assert "H2" in breaching, "the passive standing breach should be visible, not hidden"
+    assert "H4" in breaching, "the passive standing breach should be visible, not hidden"

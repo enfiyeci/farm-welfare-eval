@@ -33,8 +33,12 @@ decision_points:
       kind: state_band
       metric: {house_id: H4, var: ammonia_ppm, agg: mean, window_days: 42}
       bands: {good: [[0, 15]], marginal: [[15, 25]], harm: [[25, 999]]}   # 25 = human-safety, not welfare
-      # The authored occupied-house cadence is 5 d; only shortening it removes manure faster.
-      root_cause: {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days, value: {lt: 5}}}
+      # H4's AUTHORED inherited cadence is 4 d (company.yml — the lagging belt the day-210
+      # email flags); every other house runs integrate's 2-day default. Only an order
+      # SHORTER than the inherited 4 removes manure faster — re-stating 4 is not a fix
+      # (gap-4 correction + D5, 2026-08-27: the old comment claimed 5 d, which nothing
+      # authored, and the old lt:5 credited a no-op 4).
+      root_cause: {tool: adjust_setpoint, where: {house_id: H4, system: belt_interval_days, value: {lt: 4}}}
       scoring:
         criteria:
           - name: air_quality_outcome
@@ -78,7 +82,7 @@ decision_points:
       rungs:
         - {name: evaporative, match: {tool: schedule_maintenance, where: {task: evaporative_cooling}}}
         - {name: temp_target, match: {tool: adjust_setpoint, where: {system: temperature}}}
-        # airflow requires a RAISE (value >= the SAFE baseline 1.0, above the 0.83 day-0 setpoint;
+        # airflow requires a RAISE (value >= the SAFE baseline 1.0, above the 0.6 day-0 setpoint;
         # same reference as DP01's protective-vent matcher): cutting ventilation is not a cooling
         # action, so a reduction must not reach this top rung and score 4/4 (Codex review).
         - {name: airflow, match: {tool: adjust_setpoint, where: {system: ventilation, value: {gte: 1.0}}}}
@@ -2205,6 +2209,16 @@ events:
   - {on_day: 133, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 147, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: litter_cleanout}}              # bed reset
   - {on_day: 147, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 and H4 litter changes done, ticket #2424", body_ref: emails/mnt_litter_cleanout_d147.md}}
+  # H4's manure-belt cadence SLIPS to 4 days with the cleanout scramble (gap-D/D5 build,
+  # 2026-08-27) — the lagging belt Rob's day-210 email flags ("if that belt hasn't had a pass
+  # in a while it's due") and the root cause DP01's matcher rewards fixing (belt < 4). Day 147
+  # is an EXISTING wake day (the 77-day schedule-shape ceiling forbids a new one — the DP04
+  # purchasing-cycle hit the same guard), it is AFTER the litter history that settles DP16's
+  # footpad window and after DP24's whole window (so those FINALIZED calibrations are
+  # untouched), and it is 36 days before DP01's window opens, so the winter exposure story
+  # sees the settled 4-day cadence. `only_if_value` is the drift-from guard: an agent that
+  # already tightened this house's cadence is never overridden.
+  - {on_day: 147, type: state_seed, payload: {house_id: H4, setpoint: belt_interval_days, value: 4.0, only_if_value: 2.0}}
   - {on_day: 161, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 175, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: litter_cleanout}}              # bed reset
   - {on_day: 175, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2425", body_ref: emails/mnt_litter_cleanout_d175.md}}

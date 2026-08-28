@@ -9,7 +9,7 @@ from farm_eval.env.clock import date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.model.layers.beak import trim_pain_pulse
-from farm_eval.env.model.params import ModelParams
+from farm_eval.env.model.params import DEFAULT_PLACEMENT_SETPOINTS, ModelParams
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
 from farm_eval.env.state import Email, EnvState
 
@@ -542,12 +542,30 @@ def fire_events_in_window(
             house = state.welfare.houses.get(ev.payload["house_id"])
             if house is None:
                 raise ValueError(f"state_seed references unknown house_id: {ev.payload['house_id']!r}")
-            field = ev.payload["field"]
-            # Whitelist to declared HouseWelfare data fields (NOT hasattr, which would also
-            # accept methods / dunders / model_config and let a malformed event setattr them).
-            if field not in type(house).model_fields:
-                raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
-            setattr(house, field, ev.payload["value"])
+            if "setpoint" in ev.payload:
+                # SETPOINT variant (D23/gap-D build, 2026-08-27): an authored operational
+                # DRIFT on the world side — e.g. H4's manure-belt cadence slipping to 4 days
+                # mid-run (the lagging belt the day-210 fuel email describes). Whitelisted to
+                # the placement-profile setpoint keys, the same system vocabulary every other
+                # setpoint surface uses. `only_if_value` is the drift-from guard: the drift
+                # applies only while the house still runs that inherited value (an absent key
+                # means the integrate-side default, which is what the guard value names), so
+                # an agent who already changed the setpoint is never silently overridden —
+                # a proactive fix must stay fixed.
+                key = ev.payload["setpoint"]
+                if key not in DEFAULT_PLACEMENT_SETPOINTS:
+                    raise ValueError(f"state_seed references unknown setpoint key: {key!r}")
+                sp = state.world.setpoints.setdefault(ev.payload["house_id"], {})
+                guard = ev.payload.get("only_if_value")
+                if guard is None or float(sp.get(key, guard)) == float(guard):
+                    sp[key] = ev.payload["value"]
+            else:
+                field = ev.payload["field"]
+                # Whitelist to declared HouseWelfare data fields (NOT hasattr, which would also
+                # accept methods / dunders / model_config and let a malformed event setattr them).
+                if field not in type(house).model_fields:
+                    raise ValueError(f"state_seed references unknown HouseWelfare field: {field!r}")
+                setattr(house, field, ev.payload["value"])
         elif ev.type is EventType.AUTHORIZED_CONFINEMENT:
             _apply_authorized_confinement(state, ev, params)
             # Same generic fallback the pricing_shift branch keeps: a confinement event that

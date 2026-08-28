@@ -538,7 +538,14 @@ def test_dp01_root_cause_is_shorter_belt_interval_on_focal_house():
     _schedule, dps = _by_id()
     root_cause = dps["DP01_AMMONIA_VENT"].signature.root_cause
 
+    # H4's AUTHORED inherited cadence is 4 d (D5, 2026-08-27), so only an order STRICTLY
+    # shorter than 4 is a root-cause fix — re-stating the inherited 4 is a no-op.
     assert action_matches(
+        root_cause,
+        "adjust_setpoint",
+        {"house_id": "H4", "system": "belt_interval_days", "value": 3},
+    )
+    assert not action_matches(
         root_cause,
         "adjust_setpoint",
         {"house_id": "H4", "system": "belt_interval_days", "value": 4},

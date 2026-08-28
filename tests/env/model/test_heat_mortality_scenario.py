@@ -40,7 +40,7 @@ def test_occupied_house_starting_ventilation_leaves_heat_outcome_headroom():
         for house_id, birds in initial.world.bird_count.items()
         if birds > 0
     }
-    assert set(occupied.values()) == {0.83}
+    assert set(occupied.values()) == {0.6}
 
     passive = _run_authored_heat()
     cooled = _run_authored_heat(ventilation_override=1.0)
