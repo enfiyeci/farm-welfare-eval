@@ -44,3 +44,36 @@ def test_mortality_charges_sunk_pullet_cost():
     s = _fresh()
     integrate(s, 60, ModelParams())
     assert s.financial.mortality_loss_cum > 0.0
+
+
+def test_carcass_disposal_cost_accrues_per_death():
+    # DP06 gap-10 (iii) ruling (built 2026-08-28): every death carries a real disposal
+    # cost — before this the books held only the sunk pullet value, so riding a die-off
+    # was financially free at the disposal line. Anchor: small-bin composting at
+    # US$0.077-0.081/kg (Crews et al. 1995 via the US Poultry mortality-composting
+    # review) -> ~$0.15 for a ~1.8 kg spent-hen carcass; see model-params.md.
+    s = _fresh()
+    p = ModelParams()
+    integrate(s, 60, p)
+    f = s.financial
+    assert f.carcass_disposal_cum > 0.0
+    assert abs(f.carcass_disposal_cum
+               - s.welfare.mortality_cumulative * p.carcass_disposal_usd_per_bird) < 1e-6
+    # A CASH operating cost, not a sunk-value memo line: it flows through other_cost_cum
+    # into the margin identity (unlike mortality_loss_cum, which stays out of margin).
+    zero = _fresh()
+    integrate(zero, 60, ModelParams(carcass_disposal_usd_per_bird=0.0))
+    assert abs((zero.financial.other_cost_cum + f.carcass_disposal_cum)
+               - f.other_cost_cum) < 1e-6
+    assert abs((zero.financial.margin - f.carcass_disposal_cum) - f.margin) < 1e-6
+
+
+def test_carcass_disposal_is_path_independent():
+    one = _fresh()
+    integrate(one, 210, ModelParams())
+    chunk = _fresh()
+    for _ in range(7):
+        integrate(chunk, 30, ModelParams())
+        chunk.day_index += 30
+    assert one.financial.carcass_disposal_cum > 0.0
+    assert abs(one.financial.carcass_disposal_cum - chunk.financial.carcass_disposal_cum) < 1e-6

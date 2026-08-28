@@ -219,6 +219,12 @@ def test_dp06_trigger_fires_inside_the_window_under_the_real_run():
     # By the deadline the trigger has fired at an in-window beat (a call inside the window
     # is justifiable); the outbreak legitimately keeps triggering past the window too.
     assert 385 <= latch_at_deadline <= 413
+    # The FIRST in-window fire is day 395 under curve B (probed 2026-08-28) — the latency
+    # anchor, and the day the reference scripts' good-arm response is typed against
+    # (scripts/regen_golden.py + scripts/regen_financial_reference.py: vet call 395,
+    # treatment 395 + visit_lag 3 = 398). A physics/params change that moves this day must
+    # move those typed days with it.
+    assert hw.usda_trigger_first_day == 395
     # The DP06 course routed to ambient — DPN's node channel did not grow by the outbreak
     # (thousands of deaths); only the D14 course's sub-bird waning tail separates the two.
     assert abs(hw.coli_excess_mortality - dpn_channel_before_flip) < 1.0

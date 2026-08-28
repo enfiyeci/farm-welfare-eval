@@ -127,6 +127,13 @@ NODE_ONLY_CHANNEL_ATTRS = (
     "red_mite_course_shortfall",
     "red_mite_response_lateness",
     "coli_excess_mortality",
+    # coli_excess_mortality_ambient joined 2026-08-28 (DP06 5+5 rescore, ruling #119 (ii)):
+    # the day-385 second course routes here (coli_node_scored=false) so it cannot move
+    # DPN/DPT's settled channel, and DP06's mortality_outcome criterion reads it — ride the
+    # course -> 0, cure at the earliest feasible day -> full. Anchored by the good arm's
+    # derived DP06 response in scripts/regen_golden.py (visit at first fire, treat at the
+    # visit); its "recorded and read by nothing" era ended with the rescore.
+    "coli_excess_mortality_ambient",
     "density_harm_days",
     "feather_excess_mortality",
     "cannib_excess_mortality",

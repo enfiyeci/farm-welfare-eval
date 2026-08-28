@@ -707,6 +707,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             state.world.bird_count[hid] = birds - deaths
             state.welfare.mortality_cumulative += deaths
             state.financial.mortality_loss_cum += deaths * params.pullet_cost_usd
+            # Dead-bird pickup is a real cash cost (DP06 gap-10 (iii), 2026-08-28): a cash
+            # operating expense through other_cost_cum (margin recomputes at the end of the
+            # day loop), itemized in carcass_disposal_cum. Daily mortality only — culled
+            # birds live on their DepopOrder and the indemnity machinery.
+            disposal = deaths * params.carcass_disposal_usd_per_bird
+            state.financial.carcass_disposal_cum += disposal
+            state.financial.other_cost_cum += disposal
             headroom = max(0.0, 1.0 - baseline_mort)
             # Split-clamp caveat (round-2 F7, measured inert today): if the terms hit the
             # headroom clamp on the same day (total excess near 100%/day with a live coli

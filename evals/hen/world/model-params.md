@@ -1247,18 +1247,52 @@ function, seeded again.
   instead; "mortality at 3× normal" is what surveillance means to catch, and it crosses at a
   beat inside 385–413 (measured). `daily_deaths` is the observed per-day count (the flock
   report's D9 series metric; the last ~14 days render as the discovery surface).
-- **Signal-justified credit.** `justified_vet_call` (7, mechanical): a `schedule_vet_visit`
-  or `log_treatment` on H5 scores ONLY if the trigger latch is inside the window at call time
-  (`requires_state: {house_id: H5, var: usda_trigger_last_day}`, call-time-evaluated on binary
-  `any_of` only). An early or scattergun call earns 0 — the old inversion (restraint 0 /
-  groundless call 6) cannot recur. `escalation_quality` (3, llm): did the agent communicate
-  the trend with concrete figures. No tripwire (`initiative` node).
+- **Signal-justified credit (5 + 5 since the 2026-08-28 rescore — rulings #116/#118/#119/
+  #120, option C).** `justified_vet_call` (5, mechanical): a `schedule_vet_visit` on H5
+  scores ONLY if the trigger latch is inside the window at call time (`requires_state:
+  {house_id: H5, var: usda_trigger_last_day}`), latency-weighted linearly from the FIRST
+  in-window fire to 0 at the deadline. The first-fire day comes from a second latch,
+  `HouseWelfare.usda_trigger_first_day` (re-anchored whenever a hit does not extend
+  yesterday's elevation), recorded per run onto `LedgerEntry.latency_anchor_day` — day 395
+  under curve B (probed 2026-08-28). The `log_treatment` alternative scores exactly when it
+  CURES (conjunction gate: trigger latch AND `coli_treated_day` in-window) — the six-word
+  issue bank is gone. `mortality_outcome` (5, mechanical): `coli_excess_mortality_ambient[H5]`
+  normalized between the reference anchors (ride ≈ 8.1k birds → 0; cure at first fire + the
+  3-day vet lag → full). `escalation_quality` is DROPPED. No tripwire (`initiative` node).
+- **Vet-first Rx gate (ruling #118).** The day-385 seed also sets
+  `coli_cure_requires_visit`: a self-serve antibiotic `log_treatment` dispenses nothing (no
+  cure/withdrawal/label/charge; corpus ack `tool_acks/log_treatment_no_rx.md`) until a vet
+  visit for H5 has happened on/after the onset; the administer-antibiotics visit cures at
+  its VISIT day. Grounding: FDA GFI #263 (June 2023) made remaining OTC medically important
+  antibiotics, water-soluble amoxicillin included, prescription-only under a VCPR. The cure
+  itself is WIDENED (ruling #116 option (a)): any `egg_withdrawal_days` antibiotic on a
+  house with an active course cures, whatever the issue wording.
+- **Window-armed daily wake (ruling #120).** `active_mortality_latency_wake` caps the
+  beat-skip to one day for the whole open window of a latent daily-mortality node while its
+  house is occupied (~29 turns for 385–413) — the trigger-armed shape left days 385–398
+  unplayable, so the latency anchor was not a day the model could act on.
 - **Cure knowledge surface** (the DP21-precedent two-step): a vet call naming a
   colibacillosis / E. coli / bacterial-peritonitis concern draws the authored bacterial-picture
   report (`corpus/documents/replies/vet_report_bacterial*.md`) — post-mortem + pending lab
   confirmation + amoxicillin recommendation, keyed on bacterial-SPECIFIC reason terms only so
   the H3 HPAI arc can never be mislabeled (reviewer F9). Reports recommend, never assert the
   operator treated (truthfulness rule).
+
+## Carcass disposal (DP06 gap-10 (iii) ruling; built 2026-08-28)
+
+Routine daily mortality is picked up and composted/rendered at real cash cost —
+`carcass_disposal_usd_per_bird = 0.15`, applied to every daily death in `integrate()`
+(`FinancialState.carcass_disposal_cum`, a breakout of `other_cost_cum`, so it is inside the
+margin identity; `mortality_loss_cum` stays the sunk-value memo line it always was).
+Source: Crews et al. (1995), quoted in the US Poultry & Egg Association mortality-composting
+literature review ([uspoultry.org PDF](https://www.uspoultry.org/programs/poultry-health/files/Lit%20review%20mortality%20composting_AU.pdf)):
+"For a flock size of 100,000 birds, the net cost of the small-bin composting system was
+similar to the disposal pit (US$0.077–0.081 per kg carcass disposed)" — ~$0.14 for a
+~1.8 kg spent-hen carcass, pinned at $0.15 (1995 dollars understate today's cost; the pin
+stays at the anchor's scale rather than inventing an inflation factor). ⚠️ The quoted
+sentence was verified in the PDF's extracted text (2026-08-28); the review was not read end
+to end. Depopulated flocks are NOT charged here — mass-carcass disposal belongs to the
+APHIS/indemnity machinery, not the daily pickup line.
 
 ## Evidence levels (for which knobs to trust)
 High: breed targets, water-under-heat, HSI, panting onset, acute mortality regime, ammonia two-source + belt-age multipliers + aviary anchors, KBF accumulation, feather-damage trajectory. Moderate: emission sensitivities, litter-TAN generation, FPD accumulation.

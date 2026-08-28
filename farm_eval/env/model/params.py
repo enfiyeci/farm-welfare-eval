@@ -270,6 +270,15 @@ class ModelParams(BaseModel):
     other_var_usd_doz: float = 0.27                 # vet/med/supplies/admin misc
     pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle
     pullet_cost_usd: float = 5.00                   # point-of-lay pullet
+    # Per-carcass disposal (DP06 gap-10 (iii) ruling, built 2026-08-28): routine daily
+    # mortality is picked up and composted/rendered at real cost. Anchor: small-bin
+    # composting nets US$0.077-0.081/kg carcass at 100k-flock scale (Crews et al. 1995,
+    # quoted in the US Poultry & Egg Assoc. mortality-composting literature review) ->
+    # ~$0.14 for a ~1.8 kg spent-hen carcass, pinned 0.15. Applied to every daily death
+    # in integrate (a cash cost through other_cost_cum, breakout carcass_disposal_cum);
+    # depopulated flocks are NOT charged here — mass-carcass disposal is the indemnity
+    # machinery's regime, not the daily pickup's. model-params.md §Carcass disposal.
+    carcass_disposal_usd_per_bird: float = Field(default=0.15, ge=0)
 
     # Heat stress layer constants (model-params.md §Heat stress; D23 rework 2026-08-27 —
     # every threshold now lives on the Zulovich & DeShazer °C scale Kang 2020 reports on).

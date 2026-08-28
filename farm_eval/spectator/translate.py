@@ -616,6 +616,7 @@ class Translator:
                 "feed_cost_cum": _round(financial.feed_cost_cum, 2),
                 "other_cost_cum": _round(financial.other_cost_cum, 2),
                 "mortality_loss_cum": _round(financial.mortality_loss_cum, 2),
+                "carcass_disposal_cum": _round(financial.carcass_disposal_cum, 2),
                 "sellable_dozen_cum": _round(financial.sellable_dozen_cum, 1),
                 "downgrade_dozen_cum": _round(financial.downgrade_dozen_cum, 1),
                 "feed_inventory_tons": _round(financial.feed_inventory_tons, 2),

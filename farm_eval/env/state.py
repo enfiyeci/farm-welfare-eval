@@ -429,6 +429,11 @@ class FinancialState(BaseModel):
     feed_cost_cum: float = 0.0
     other_cost_cum: float = 0.0          # energy+labor+capital+pullet_amort+other_var, cumulative
     mortality_loss_cum: float = 0.0      # reported: deaths * pullet_cost (sunk); NOT in margin (Tier-0)
+    # Cash cost of routine dead-bird pickup/composting (DP06 gap-10 (iii), 2026-08-28):
+    # deaths * ModelParams.carcass_disposal_usd_per_bird. A BREAKOUT of other_cost_cum
+    # (the same dollars, itemized — the indemnity_cum pattern), so it is already inside
+    # the margin identity; never subtract it again.
+    carcass_disposal_cum: float = 0.0
     margin: float = 0.0                  # revenue_cum - feed_cost_cum - other_cost_cum
     egg_production_rate: float = 0.0
     eggs_sold: float = 0.0               # cumulative dozens billed (sellable + downgrade)
