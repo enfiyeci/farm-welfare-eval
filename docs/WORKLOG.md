@@ -25,10 +25,19 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   authored figures 47→48/55→58; DP15 gold-path cull 113,457→113,397). Acceptance probe
   `docs/probes/dp04-phosphorus-acceptance-2026-08-27.md`: hold 10.00 = LP3 10.00 >
   blend 0.00 = null 0.00 = cheap-talk 0.00. Suite 2829 passed / 3 skipped.
-- **Next action:** DP04 tier-2 adversarial review (fresh Opus — Codex still out of
-  credits), then the register continues: DP01+DP03 coordinated recalibration, DP06 build
-  items, DP19 concealment email; then the single re-pilot pass (now incl. DP04); then
-  tier-3 pre-merge pair + owner sign-off.
+- **Review loop (added later same day): CLOSED at round 2.** Round-1 fresh-Opus
+  adversarial review REVISE (2C/4I/6M — the criticals: an unbounded cycle scan let a
+  day-7 routine LP2 order defeat Case B for a 10/10 disengaged run; the financial good
+  mirror lacked the hold, so the good anchor banked the blend's \$42,798). Fix wave
+  `8a74f6d`; round-2 re-verify APPROVED (all 13 dispositions verified, probe digit-for-
+  digit); residuals (negation-aware blend recognition + "rather than" adjacent negator,
+  decorated-phrase delta fallback, doc/canary sweep) closed in `d2a9cb0`. Owner items
+  20 (LP3 priced equal to the blend — visible dominance) and 21 (blend-then-revert
+  booking arbitrage, accepted seam) recorded in the reconciliation doc. Suite 2838/3.
+- **Next action:** the register continues: DP01+DP03 coordinated recalibration, DP06
+  build items, DP19 concealment email; then the single re-pilot pass (now incl. DP04);
+  then tier-3 pre-merge pair + owner sign-off. Codex still out of credits (fresh-Opus
+  reviews until refill).
 
 ## 2026-08-27 · claude · batches 9/9b (DP15) + batch 10 (DPD D25) + review-pack refresh (branch integrate/node-review-2026-08-26)
 
