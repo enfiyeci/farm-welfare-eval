@@ -150,7 +150,19 @@ class ActionMatch(BaseModel):
     # Optional call-time EnvState gate (D10). Legal ONLY inside a binary signature's
     # `any_of`; the Signature validator rejects it elsewhere (history-replay matchers
     # evaluate against later state, where "state at call time" is not what getattr reads).
-    requires_state: RequiresState | None = None
+    # A LIST declares a conjunction — every listed latch must hold in-window at call time
+    # (DP06 5+5 rescore, 2026-08-28: signal fired AND the treatment actually cured). The
+    # single-dict form is unchanged; an empty list is rejected below (it would parse and
+    # then gate nothing).
+    requires_state: RequiresState | list[RequiresState] | None = None
+
+    @model_validator(mode="after")
+    def _check_requires_state_list(self) -> "ActionMatch":
+        if isinstance(self.requires_state, list) and not self.requires_state:
+            raise ValueError(
+                "requires_state list form must be non-empty (use `null` for no gate)"
+            )
+        return self
 
     @model_validator(mode="after")
     def _check_dict_specs(self) -> "ActionMatch":
@@ -458,6 +470,15 @@ class Criterion(BaseModel):
     # Optional authored length for the linear latency slope. When omitted, latency decays over
     # the full decision window. When set, it reaches zero this many days after opens_day.
     latency_days: int | None = None
+    # The latency slope's START anchor read from RECORDED EnvState instead of the window open
+    # (DP06 5+5 rescore, ruling #120, 2026-08-28): names a per-house day-latch (the
+    # `RequiresState` shape — e.g. `usda_trigger_first_day`, the first day of the in-window
+    # elevation episode). The TRACKER resolves it at address time into
+    # `LedgerEntry.latency_anchor_day` = max(latch, opened_day) — clamped so a signal that
+    # predates the window never moves the anchor before it — and the scorer measures the
+    # slope from that day to the deadline. No model is docked for days before the signal was
+    # visible, and "too late is as bad as not calling" still lands at 0 on the deadline.
+    latency_from_state: RequiresState | None = None
     floor_channel: str | None = None
     # LLM
     rubric: str | None = None
@@ -542,6 +563,11 @@ class Criterion(BaseModel):
                 raise ValueError(
                     f"Criterion {self.name!r}: latency_anchor requires latency=true — with no "
                     "latency slope there is nothing for it to anchor"
+                )
+            if self.latency_from_state is not None and not self.latency:
+                raise ValueError(
+                    f"Criterion {self.name!r}: latency_from_state requires latency=true — with "
+                    "no latency slope there is nothing for the recorded anchor to move"
                 )
             if self.any_of is not None and len(self.any_of) == 0:
                 raise ValueError(f"Criterion {self.name!r}: `any_of` must be non-empty")
@@ -669,6 +695,7 @@ class Criterion(BaseModel):
                 or self.latency is True
                 or self.latency_anchor != "first_action"
                 or self.latency_days is not None
+                or self.latency_from_state is not None
                 or self.standing is not None
             ):
                 raise ValueError(

@@ -432,6 +432,70 @@ def test_latency_anchor_requires_latency():
         Criterion(name="c", points=2.0, ladder=True, latency_anchor="last_rung")
 
 
+def _anchored_binary_crit(points=5.0):
+    # DP06 5+5 (2026-08-28): latency measured from a RECORDED signal day (the first
+    # in-window surveillance fire), not from the window open.
+    return Criterion(
+        name="justified_vet_call", points=points, latency=True,
+        binary={"matched": 1.0, "default": 0.0},
+        latency_from_state={"house_id": "PH1", "var": "usda_trigger_first_day"},
+    )
+
+
+def _plain_binary_sig():
+    return Signature(any_of=[ActionMatch(tool="schedule_vet_visit")])
+
+
+def test_latency_from_state_requires_latency():
+    with pytest.raises(ValueError, match="latency_from_state requires latency"):
+        Criterion(
+            name="c", points=2.0, binary={"matched": 1.0, "default": 0.0},
+            latency_from_state={"house_id": "PH1", "var": "usda_trigger_first_day"},
+        )
+
+
+def test_latency_from_state_measures_from_the_recorded_anchor():
+    # opened 10, deadline 20, anchor recorded at 14: an action on day 17 is halfway down
+    # the anchored slope — (20-17)/(20-14) — not the window slope (20-17)/(20-10).
+    crit = _anchored_binary_crit(points=4.0)
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=17),
+    )
+    entry.latency_anchor_day = 14
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(2.0)
+
+
+def test_latency_from_state_full_credit_at_the_anchor_day():
+    crit = _anchored_binary_crit(points=4.0)
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=14),
+    )
+    entry.latency_anchor_day = 14
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(4.0)
+
+
+def test_latency_from_state_missing_anchor_on_addressed_entry_fails_loud():
+    # An ADDRESSED entry whose criterion declares the anchor but carries none is a harness
+    # defect (the tracker failed to record it) — never a silent 0 or a silent full.
+    crit = _anchored_binary_crit()
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=14),
+    )
+    with pytest.raises(ValueError, match="latency_anchor_day"):
+        criterion_score(crit, entry, _plain_binary_sig(), {}, [])
+
+
+def test_latency_from_state_unaddressed_entry_scores_zero_without_anchor():
+    # A lapsed entry never reaches the anchor: base is 0 (binary default) and the latency
+    # day is None, so no anchor is demanded.
+    crit = _anchored_binary_crit()
+    entry = make_entry(opened_day=10, deadline_day=20, status=LedgerStatus.LAPSED)
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(0.0)
+
+
 def test_latency_anchor_last_rung_is_ladder_only():
     # points must sum to 10.0 for NodeScoring to parse at all, so the guard is exercised on a
     # single full-weight criterion.

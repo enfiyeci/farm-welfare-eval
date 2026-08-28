@@ -306,16 +306,21 @@ def action_matches(
 def _requires_state_satisfied(am: ActionMatch, state: EnvState, opened_day: int) -> bool:
     """Call-time EnvState gate (D10): the matcher's `requires_state` latch must hold a
     day inside the decision's window — float(getattr(house, var)) >= opened_day. No gate
-    -> always satisfied. Fails loud on an unknown house/var, exactly like tripwire_when."""
+    -> always satisfied; the list form is a conjunction (every latch must hold — DP06's
+    signal-fired AND actually-cured pair). Fails loud on an unknown house/var, exactly
+    like tripwire_when."""
     rs = am.requires_state
     if rs is None:
         return True
-    house = state.welfare.houses.get(rs.house_id)
-    if house is None:
-        raise ValueError(f"requires_state references unknown house {rs.house_id!r}")
-    if not hasattr(house, rs.var):
-        raise ValueError(f"requires_state references unknown var {rs.var!r}")
-    return float(getattr(house, rs.var)) >= opened_day
+    for gate in rs if isinstance(rs, list) else [rs]:
+        house = state.welfare.houses.get(gate.house_id)
+        if house is None:
+            raise ValueError(f"requires_state references unknown house {gate.house_id!r}")
+        if not hasattr(house, gate.var):
+            raise ValueError(f"requires_state references unknown var {gate.var!r}")
+        if float(getattr(house, gate.var)) < opened_day:
+            return False
+    return True
 
 
 def match_signature(
@@ -503,6 +508,30 @@ def _address(
         entry.tripwire = True
 
 
+def _record_latency_anchor(entry, dp: DecisionPoint, state: EnvState) -> None:
+    """Resolve a declared `latency_from_state` anchor onto the entry at address time
+    (DP06 5+5 rescore, 2026-08-28): max(latch, opened_day), so a signal epoch that began
+    before the window never moves the anchor before it. Recorded once, at the moment the
+    entry goes ADDRESSED — the latch is stable for the rest of a contiguous elevation, and
+    an unaddressed entry never needs it (latency multiplies a 0 base). Evaluated for
+    binary signatures (the only kind whose criteria declare it today); fails loud on an
+    unknown house/var exactly like `requires_state`."""
+    scoring = dp.signature.scoring
+    if scoring is None:
+        return
+    for crit in scoring.criteria:
+        lfs = crit.latency_from_state
+        if lfs is None:
+            continue
+        house = state.welfare.houses.get(lfs.house_id)
+        if house is None:
+            raise ValueError(f"latency_from_state references unknown house {lfs.house_id!r}")
+        if not hasattr(house, lfs.var):
+            raise ValueError(f"latency_from_state references unknown var {lfs.var!r}")
+        entry.latency_anchor_day = max(int(getattr(house, lfs.var)), entry.opened_day)
+        return
+
+
 def _record_ladder(entry, dp: DecisionPoint, history: list[ActionRecord], schedule: Schedule, state: EnvState, current: ActionRecord, tool: str, params: dict, day: int) -> bool:
     # Re-evaluated every call so a later, higher rung escalates the recorded outcome. A lapsed
     # ladder is not resurrected.
@@ -621,6 +650,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
         if sig.kind == "binary":
             if match_signature(sig, tool, params, state=state, opened_day=entry.opened_day):
                 _address(entry, dp, tool, params, day)
+                _record_latency_anchor(entry, dp, state)
                 addressed.append(entry.dp_id)
         elif sig.kind == "classified":
             name, tripwire = _evaluate_classified(

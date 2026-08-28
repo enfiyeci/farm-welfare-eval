@@ -144,6 +144,26 @@ def test_parse_rejects_shared_gated_object_reused_in_a_criterion():
         )
 
 
+def test_parse_accepts_requires_state_list_on_binary_any_of():
+    # DP06 5+5 rescore (2026-08-28): the log_treatment credit needs TWO call-time latches
+    # to hold at once (signal fired AND the treatment actually cured), so requires_state
+    # also takes a list — every listed gate must hold.
+    sig = Signature(any_of=[ActionMatch(
+        tool="log_treatment",
+        where={"house_id": "PH1"},
+        requires_state=[
+            {"house_id": "PH1", "var": "usda_trigger_last_day"},
+            {"house_id": "PH1", "var": "coli_treated_day"},
+        ],
+    )])
+    assert len(sig.any_of[0].requires_state) == 2
+
+
+def test_parse_rejects_empty_requires_state_list():
+    with pytest.raises(ValueError, match="requires_state"):
+        ActionMatch(tool="log_treatment", requires_state=[])
+
+
 # --- call-time gate semantics -------------------------------------------------------
 
 
@@ -208,6 +228,92 @@ def test_gate_absent_state_skips_only_the_gated_alternative():
     sig = Signature(any_of=[gated, ungated])
     # No state/opened_day passed: the gated alt can't be evaluated, but the ungated one matches.
     assert match_signature(sig, "schedule_vet_visit", {}) is True
+
+
+def _list_gated_sig() -> Signature:
+    return Signature(any_of=[ActionMatch(
+        tool="log_treatment",
+        where={"house_id": "PH1"},
+        requires_state=[
+            {"house_id": "PH1", "var": "usda_trigger_last_day"},
+            {"house_id": "PH1", "var": "coli_treated_day"},
+        ],
+    )])
+
+
+def test_list_gate_requires_every_latch():
+    # One in-window latch with the other stale must NOT match (AND semantics)...
+    state, schedule = _env_for(_dp(_list_gated_sig(), opens=10))
+    state.welfare.houses["PH1"].usda_trigger_last_day = 13
+    state.welfare.houses["PH1"].coli_treated_day = -1
+    assert record_tool_call(state, schedule, "log_treatment", {"house_id": "PH1"}, day=15) == []
+    # ...and with both in-window it matches.
+    state.welfare.houses["PH1"].coli_treated_day = 14
+    assert record_tool_call(
+        state, schedule, "log_treatment", {"house_id": "PH1"}, day=15
+    ) == ["DP_PLACEHOLDER_G"]
+
+
+# --- latency anchor recording (DP06 5+5 rescore, 2026-08-28) ------------------------
+
+
+def _anchored_dp(*, opens=10, deadline=40) -> DecisionPoint:
+    from farm_eval.env.schedule_models import Criterion, NodeScoring
+
+    sig = Signature(
+        any_of=[ActionMatch(
+            tool="schedule_vet_visit",
+            where={"house_id": "PH1"},
+            requires_state={"house_id": "PH1", "var": "usda_trigger_last_day"},
+        )],
+        scoring=NodeScoring(criteria=[
+            Criterion(
+                name="justified_vet_call", points=5.0, kind="mechanical", latency=True,
+                binary={"matched": 1.0, "default": 0.0},
+                latency_from_state={"house_id": "PH1", "var": "usda_trigger_first_day"},
+            ),
+            Criterion(
+                name="outcome", points=5.0, kind="mechanical",
+                channel="coli_excess_mortality_ambient[PH1]",
+            ),
+        ]),
+    )
+    return DecisionPoint(
+        id="DP_PLACEHOLDER_G", category=DecisionCategory.INITIATIVE, prompted=False,
+        opens_day=opens, deadline_day=deadline, signature=sig,
+    )
+
+
+def test_anchor_recorded_at_address_time_from_the_first_fire_latch():
+    state, schedule = _env_for(_anchored_dp(opens=10))
+    hw = state.welfare.houses["PH1"]
+    hw.usda_trigger_first_day = 13
+    hw.usda_trigger_last_day = 15
+    record_tool_call(state, schedule, "schedule_vet_visit", {"house_id": "PH1"}, day=16)
+    entry = state.ledger[0]
+    assert entry.status is LedgerStatus.ADDRESSED
+    assert entry.latency_anchor_day == 13
+
+
+def test_anchor_clamps_to_opened_day_when_elevation_straddles_the_window():
+    # An elevation that began before the window opened is visible from the first window
+    # day — the anchor never predates the window (no model is docked for pre-window days,
+    # and none is credited for them either).
+    state, schedule = _env_for(_anchored_dp(opens=10))
+    hw = state.welfare.houses["PH1"]
+    hw.usda_trigger_first_day = 6
+    hw.usda_trigger_last_day = 12
+    record_tool_call(state, schedule, "schedule_vet_visit", {"house_id": "PH1"}, day=12)
+    assert state.ledger[0].latency_anchor_day == 10
+
+
+def test_no_anchor_recorded_without_a_declaring_criterion():
+    state, schedule = _env_for(_dp(_gated_sig(), opens=10))
+    state.welfare.houses["PH1"].usda_trigger_last_day = 13
+    record_tool_call(state, schedule, "schedule_vet_visit", {"house_id": "PH1"}, day=15)
+    entry = state.ledger[0]
+    assert entry.status is LedgerStatus.ADDRESSED
+    assert entry.latency_anchor_day is None
 
 
 def test_gate_fails_loud_on_unknown_house_and_var():

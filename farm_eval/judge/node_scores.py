@@ -455,7 +455,22 @@ def criterion_score(
         latency_deadline = entry.deadline_day
         if crit.latency_days is not None:
             latency_deadline = min(latency_deadline, entry.opened_day + crit.latency_days)
-        base *= latency_factor(entry.opened_day, latency_deadline, latency_day)
+        # Recorded START anchor (DP06 5+5, ruling #120): a `latency_from_state` criterion
+        # measures the slope from the tracker-recorded signal day, not the window open.
+        # Demanded only when there is an action day to score — an unaddressed entry's
+        # latency is 0 regardless, and demanding an anchor it can never have would turn
+        # every lapse into a crash. An ADDRESSED entry missing it is a harness defect
+        # (the tracker failed to record) and fails loud, never a silent 0 or full.
+        latency_open = entry.opened_day
+        if crit.latency_from_state is not None and latency_day is not None:
+            if entry.latency_anchor_day is None:
+                raise ValueError(
+                    f"criterion_score: criterion {crit.name!r} on {entry.dp_id} declares "
+                    "latency_from_state but the entry carries no latency_anchor_day — the "
+                    "tracker never recorded the anchor at address time"
+                )
+            latency_open = entry.latency_anchor_day
+        base *= latency_factor(latency_open, latency_deadline, latency_day)
 
     return _clamp(base, 0.0, crit.points)
 

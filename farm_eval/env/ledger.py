@@ -71,3 +71,9 @@ class LedgerEntry(BaseModel):
     # house's own data never opened forfeits those points. Both logs carry only a day, so a read
     # on the SAME day as the action counts as before it.
     read_before_act: bool = False
+    # The latency slope's recorded START anchor (DP06 5+5 rescore, 2026-08-28): filled by the
+    # tracker at address time — max(the declared `latency_from_state` latch, opened_day) — for
+    # nodes whose criteria declare a state-read anchor. None everywhere else. The scorer fails
+    # loud on an ADDRESSED entry that declares the anchor but carries none (harness defect),
+    # and never needs it for an unaddressed entry (latency is 0 with no action day).
+    latency_anchor_day: int | None = None
