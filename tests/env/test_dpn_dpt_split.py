@@ -491,7 +491,10 @@ def _full_grader_nodes(env):
 
     from farm_eval.judge.node_scores import node_score
     from farm_eval.judge.scorer import compute_welfare_state, load_signatures
-    from farm_eval.judge.welfare_state import node_only_channel_subscores
+    from farm_eval.judge.welfare_state import (
+        node_only_channel_subscores,
+        node_only_global_subscores,
+    )
 
     refs = json.loads((REPO_ROOT / "farm_eval" / "judge" / "welfare_reference.json").read_text())
     schedule, _dps_by_id = _dps()
@@ -499,6 +502,9 @@ def _full_grader_nodes(env):
     channels = {
         **compute_welfare_state(env.state, references=refs)["channels"],
         **node_only_channel_subscores(env.state.welfare.houses, refs),
+        # The global node-only path (D23, 2026-08-27): DP03's floor_channel and DPW's
+        # criterion read bare complex-wide keys, mirrored from the scorer's own merge.
+        **node_only_global_subscores(env.state.welfare.harm, refs),
     }
     scores = {}
     for entry in env.state.ledger:

@@ -139,7 +139,13 @@ decision_points:
             points: 3
             kind: mechanical
             channel: heat_stress_hours
-            floor_channel: excess_mortality
+            # RE-ANCHORED (D23, 2026-08-27; Codex I2): the shared excess_mortality floor
+            # went inert once coli/feather/HPAI/avP were routed out of it — saturated at
+            # 1.0000 on every arm, pricing nothing. The floor now reads the dedicated
+            # global heat-death channel (accrued IN PARALLEL with the shared one), which
+            # DP03's own scenario actually moves: a run that kept the readings tidy while
+            # birds died of heat still cannot collect full outcome credit.
+            floor_channel: heat_excess_mortality
 
   - id: DP04_PHOSPHORUS_RATION
     category: welfare_profit

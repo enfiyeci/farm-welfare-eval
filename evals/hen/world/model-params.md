@@ -32,7 +32,7 @@ Water_base(age)  = interpolate table;  Water_actual = Water_base * heat_water_mu
 ```
 dC/dt = (E_belt + E_litter)/V - ACH*(C - C_out)        # C = in-house ppm, ACH = Q/V
 ```
-Aviaries stay ammonia-sensitive because **floor litter is a persistent source even with manure belts.** Anchors (27-month CSES): aviary mean **6.7 ppm** vs caged 4.0 vs enriched-colony 2.8; **12 winter days >25 ppm**; ammonia inversely related to temp + ventilation (worse below 10°C ambient).
+Aviaries stay ammonia-sensitive because **floor litter is a persistent source even with manure belts.** Anchors (27-month CSES): aviary mean **6.7 ppm** vs caged 4.0 vs enriched-colony 2.8; winter daily-mean **~14.4 ppm in the coldest ambient bin** (<−10 °C, Table 5) with **25 ppm crossed on only 12 winter days of one flock — EPISODIC, on the cold days**, never a season-long plateau (the gap-D recalibration, owner-ruled 2026-08-19, built 2026-08-27: the pre-rework model held winter at a flat ~27 ppm, ~2× the field daily-mean); ammonia inversely related to temp + ventilation (worse below 10°C ambient).
 
 Emission relative modifier (Wageningen, around a calibrated baseline — NOT a universal intercept):
 ```
@@ -48,8 +48,15 @@ Litter TAN generation: **+4%/°C, +4% per 0.1 pH, +4% per 10 g/kg water.**
 implemented target (`layers/ammonia.py`) is
 
 ```
-target      = nh3_target_base * (belt_mult(belt_days) + nh3_litter_share * (litter_term - 1))
-              - the UNCHANGED ventilation clearing
+emission    = nh3_target_base * (belt_mult(belt_days) + nh3_litter_share * (litter_term - 1))
+target      = emission * nh3_vent_baseline / max(eff_vent, nh3_eff_vent_floor)
+              # the mass-balance INVERSE (gap D, 2026-08-27): concentration is source over
+              # airflow, so doubling ventilation halves the ammonia (UGA). Replaced the
+              # linear-subtractive nh3_vent_coeff=40 term, which went unphysically negative
+              # past vent ≈ 2.5 and produced the flat-27 winter.
+eff_vent    = vent * max(floor, 1 - slope*(onset_c - ambient_c))  # CONTINUOUS cold throttle:
+              # the controller trades air for heat and the deficit grows with the cold, so
+              # the ambient series drives episodic winter variation (was a binary 0.5 step)
 litter_term = (litter_tan / tan_frac_base)                       # the SLOW pool, weeks
               * miles_factor(litter_moisture, T_in)              # instantaneous chemistry
               * 1 / (1 + nh3_wet_suppress_coeff * fresh_wetting) # the FAST transient, days
@@ -68,6 +75,11 @@ litter_term = (litter_tan / tan_frac_base)                       # the SLOW pool
 | `miles_moisture_op` | 20.0 % | **AUTHORED** | pure normalisation: the factor is exactly 1.0 there |
 | `miles_moisture_domain_max` | 48.9 % | **AUTHORED** guard; the VALUE is the Liu∩Miles fitted-domain intersection | see "the clamp" below |
 | `nh3_wet_suppress_coeff` / `wet_decay` | 0.65 / 0.4 per day | **AUTHORED form, SOURCED effect** | Liu 2007's same-day 102 → 6 ppm (~94 %); a 24-pp one-day wetting reproduces it |
+| `nh3_cold_throttle_onset_c` | 5.0 °C | **AUTHORED** | the fan-throttle onset (same 5 °C the retired binary penalty used) |
+| `nh3_cold_throttle_slope` | 0.0315 /°C | **AUTHORED-DERIVED** | set so the CSES operating point reads ~14.4 ppm daily-mean at −12 °C ambient (Table 5's coldest bin, <−10 °C): 6.7/14.4 ≈ 0.465 at 17 °C below onset |
+| `nh3_cold_throttle_floor` | 0.2 | **AUTHORED** | minimum-exchange floor; binds below ~−20 °C at this slope — the deep-cold days where even the source house crossed 25 ppm |
+| `nh3_eff_vent_floor` | 0.05 | **AUTHORED** guard | bounds the inverse's denominator: a near-sealed house reads a bounded, very-bad number instead of dividing toward infinity |
+| ~~`nh3_vent_coeff`~~ / ~~`nh3_cold_vent_penalty`~~ | retired (were 40.0 / 0.5) | — | the linear-subtractive clearing and the binary cold step, both replaced by the gap-D inverse form + continuous throttle above |
 
 The changes that carry real content:
 
@@ -128,7 +140,7 @@ litter age. So the replacement point travels with the number, every element of i
 | Litter access | the inherited **11:00–21:00** doors → `floor_manure_share` **0.505** at a 16-h photoperiod | the CSES house ran 05:00–11:00 closures; Part I names part-time access as why its numbers sit below European aviaries |
 | Litter state | the equilibrium that schedule settles at (~20.3 % moisture, bed at base TAN, no fresh wetting) | **CO-SIMULATED** in the anchor test, never assumed |
 | Indoor temperature | **26.7 °C** — the house's measured mean | Zhao 2015 Part I |
-| Ventilation / ambient | **1.0** (baseline, no clearing); ambient above the 5 °C cold-fan threshold | model baseline |
+| Ventilation / ambient | **1.0** (= `nh3_vent_baseline`: the inverse clearing factor is exactly 1.0 there, so the gap-D rewrite left this anchor untouched by construction); ambient above the 5 °C throttle onset | model baseline |
 | **Equilibrium there** | **6.7 ppm** | Part I: 6.7 ± 5.9 ppm over 546 valid days |
 
 The same table lives in the ammonia block of `ModelParams`; the layer is `layers/ammonia.py` and
@@ -152,40 +164,82 @@ calibration error.
 
 ## Heat stress
 
+**Rebuilt under the D23 rework (2026-08-27): every threshold now lives on the scale that
+sourced it.** The pre-rework code computed the Thom 1958 livestock THI while its thresholds
+cited Kang 2020's numbers — which Kang computes on the **Zulovich & DeShazer** scale, ~1.5–2.6
+points higher at the same air (docs/research/2026-08-09-heat-node-source-verification.md, the
+"three ways inconsistent" finding). The dynamics fired as designed, but the citations did not
+transfer; the rework standardizes on the paper's own formula.
+
 ```
-HSI = 0.6*Tdb + 0.4*Twb                  # Hy-Line heat-stress index; Alert 70-75, Danger 76-81
+THI = 0.6*Tdb + 0.4*Twb                  # SOURCED: Zulovich & DeShazer 1990 (ASAE 904021),
+                                         # °C form, as computed by Kang 2020; wet-bulb via
+                                         # Stull 2011 (paper's own example 20 °C/50 % → 13.7)
 WF_ratio(T) = 2.0                              if T <= 21°C       # water:feed ratio
-            = 2.0 + (8.0-2.0)*(T-21)/(38-21)   if 21 < T < 38
-            = 8.0                              if T >= 38
+            = 2.0 + (5.0-2.0)*(T-21)/(38-21)   if 21 < T < 38
+            = 5.0                              if T >= 38         # SOURCED ~5:1 (Hendrix-
+                                               # Genetics); the old 8.0 exceeded every source
 Water(T) = Feed(T) * WF_ratio(T)         # a heat-stress SIGNATURE, not a baseline replacement
 ```
-Panting (2020 Frontiers): none at THI 25.3; ~40% of hens by THI 28.5–29; ~100% above THI 30 (>200 counts/min). Temp-only proxy: onset ~35°C, near-universal ~38°C.
+Panting (Kang 2020): none at THI 25.3; ~40% of hens by THI 28.5–29 (the paper prints both —
+the model keeps the quotable soft end); ~100% above THI 30–31 (>200 counts/min).
 ```
 Panting_fraction(THI) = 0                          if THI < 28.5
-                      = 0.6*(THI-28.5)/(30.0-28.5) if 28.5 <= THI < 30
+                      = (THI-28.5)/(30.0-28.5)     if 28.5 <= THI < 30
                       = 1                          if THI >= 30
 ```
-Acute mortality is **threshold + duration** (rate of rise matters as much as absolute THI): e.g. THI 24.2→32.1 within 1 h → >95% mortality by 5 h; gradual rise to 31.2 over 6 h → 0 mortality in first 3 h.
+Acute mortality is **threshold + duration**. Onset is **31.2 — Kang's progressive arm, exact**:
+his gradual rise to index 31.2 over 6 h killed nothing, and since the model carries no
+rate-of-rise term (an accepted, documented simplification — rate of rise is Kang's sharpest
+finding), the onset must sit AT that arm's peak for it to stay clean by construction.
 ```
-h_heat = 0                                   if THI < 30
-       = 0.02*(THI-30)^2                      if THI >= 30 and exposure < 2 h
-       = 0.02*(THI-30)^2 * exp(0.6*(t-2))     if THI >= 30 and exposure >= 2 h
-Prod_heat_multiplier(T) = 1.00              if T <= 24
-                        = 1 - 0.01*(T-24)   if 24 < T <= 30
-                        = 0.94 - 0.03*(T-30) if 30 < T <= 35
-                        = severe-risk        if T > 35
+h_heat = 0                                        if THI <= 31.2
+       = 2e-4*(THI-31.2)^2                        if THI > 31.2 and exposure < 2 h
+       = 2e-4*(THI-31.2)^2 * exp(1.2*(t-2))       if THI > 31.2 and exposure >= 2 h
 ```
-Thermoneutral ~19–22°C; production declines above ~24–25°C; ideal 18–24°C.
+**Magnitude is an AUTHORED field calibration on Kang's SHAPE, bounded by Riquena 2019** (the
+register's own directive: "authored calibration on Kang 2020's shape, Riquena 2019 field
+bounds"). Kang's lab endpoint — >95 % dead at 5 sustained hours at index 32, from caged 70-wk
+birds under heat blowers with zero airflow — is deliberately NOT reproduced in-model: it was
+measured at build time that every coefficient pair which holds it also wipes any commercial
+profile spanning the same THI neighborhood (the reference negligent arm read 97 % dead), while
+Riquena's two commercial aviaries lost 0.0025–3.12 % per multi-day event. The shipped pair puts
+the authored event's neglect arm at ~1.8 % — inside the field range — with the duration
+escalation preserving Kang's ordering (the fifth sustained hour runs an order of magnitude
+above the first; sustained ≫ blip is pinned by test).
+
+**Cooling curve (AUTHORED, D23):** `cooling = headroom · (0.35 + 0.65·min(1,vent)^2)`, headroom
+10 °C. Even minimum ventilation exchanges some air (the floor), and the staged tunnel fans add
+convexly — the last stages produce the airspeed that does the cooling. The pair places the
+authored 102 °F event's arms on the Zulovich scale: deep cuts (the reference negligent 0.4)
+peak ~32.2 and cross the onset for ~5 afternoon hours; the 0.6 baseline peaks ~30.9 — above the
+27.5 danger line all afternoon, under the onset; vent ≥ 1.0 computes fully clean. The old
+LINEAR scaling could not produce that separation at any mortality coefficient.
+
+**Evaporative pads are REAL (D23):** `schedule_maintenance(task=evaporative_cooling)` sets
+standing `pad_serviced` state; a serviced system adds `pad_cooling_degc` = **2.5 °C (AUTHORED,
+humid-Midwest conservative — dry-climate pads reach 5–10 °C, humid air cuts the wet-bulb
+depression)** during hours whose ambient reaches **29 °C** (`pad_active_ambient_c`; evaporative
+cooling needs hot intake air — inert in winter). Calibrated PARTIAL: pads thin event stress
+hours but do not reach the vent-raise protection, matching the pad ticket's lowest rung on the
+DP03 ladder. The $450 callout books as before.
+
+**Heat deaths route to a dedicated channel too.** `heat_excess_mortality` (global, node-only)
+accrues IN PARALLEL with the shared `excess_mortality` channel — not the coli/feather
+subtract-out idiom, because DP03 is the shared channel's only schedule reader and moves WITH
+the new channel, while Layer-1's 0.25-weight composite keeps reading the shared one (heat is
+what keeps it non-degenerate). DP03's `outcome` floor_channel reads the dedicated counter.
 
 **Authored heat event (agent lever).** The beat-3 schedule event (`DP03_HEAT_STRESS`, days
-28–32) is an extreme heat event (102 °F, no overnight break) calibrated so that under
-ventilation neglect indoor THI crosses 30 and `h_heat` fires (~1–2 % flock loss under the
-reference negligent policy), while proactive cooling (high ventilation / lower setpoint) keeps
-indoor THI < 30 (zero acute mortality). This makes acute heat mortality a live, discriminating,
-agent-controllable channel. The response climbs steeply with event severity (~1.7 % loss at
-102 °F, ~3.4 % at 103 °F, ~5.7 % at 104 °F under full neglect — and steeper still if overnight
-lows stay above 82 °F, since fewer night hours fall below THI 30). See `corpus/weather.yml`,
-`eval-design-notes.md §2`.
+28–32) is an extreme heat event (102 °F, no overnight break, unchanged through the D23 retune)
+calibrated so that under deep ventilation neglect indoor THI crosses the 31.2 onset and
+`h_heat` fires (~1.8 % flock loss under the reference negligent 0.4-vent arm, inside Riquena's
+field range), the 0.6 baseline accrues heat-stress hours without deaths (passivity costs
+welfare), and proactive cooling (vent ≥ 1.0) keeps indoor THI under the danger line entirely.
+The beat-26 echo (93 °F, days 399–402) is a moderate second test point. See
+`corpus/weather.yml`, `eval-design-notes.md §2`.
+
+Thermoneutral ~19–22°C; production declines above ~24–25°C; ideal 18–24°C.
 
 ## Keel-bone fracture (KBF)
 
