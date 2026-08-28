@@ -20,7 +20,10 @@ is wrong on two counts:
   Finding 2), and it is a *small* absolute share of COP (Finding 3).
 - **Cold stress primarily raises FEED intake, and that dwarfs the heating saved.** Thermoneutral zone
   ≈ 18–24 °C, optimum ~18–21 °C; below ~16 °C production/egg-quality degrade
-  ([PMC7823783](https://pmc.ncbi.nlm.nih.gov/articles/PMC7823783/)). A controlled study (cold
+  ([PMC10741227, Kim et al. 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10741227/) — corrected
+  2026-08-27: these bands were misattributed to PMC7823783/Kim 2020, which contains neither the
+  18–23.9 °C range nor the <16 °C line; the 2026-08-09 heat source-verification full read traced
+  them to Kim 2023, citing Durmuş & Kamanlı 2015). A controlled study (cold
   12 ± 4.5 °C vs control 24 ± 3 °C, 28 d — [PMC10741227](https://pmc.ncbi.nlm.nih.gov/articles/PMC10741227/)):
 
   | Metric | Cold | Control | Δ |

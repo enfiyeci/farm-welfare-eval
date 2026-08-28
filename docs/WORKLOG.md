@@ -4,6 +4,41 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-27 · claude · DP01+DP03 coordinated recalibration BUILT (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** the whole owner-ruled coordinated change (DP01 gaps D/1/2/3 +
+  do-nothing-low, 2026-08-19; DP03 D23 spec, 2026-08-11) landed TDD in one wave — plan
+  `evals/hen/design/2026-08-27-dp01-dp03-recalibration-build.md`, commits `38b5003..`.
+  **Heat:** Zulovich THI (Stull wet-bulb), mortality onset 31.2, AUTHORED
+  Kang-shape/Riquena-bound coefficients (the lab 95 %-in-5-h endpoint documented,
+  deliberately unreproduced — measured: any pair holding it wipes the neglect arm);
+  water:feed →5:1; pads REAL (`pad_serviced`, 2.5 °C hot-hour term, partial); cooling =
+  min-vent floor 0.35 + convexity 2.0. **Ammonia (gap D):** inverse mass-balance clearing
+  + CONTINUOUS cold throttle (slope derived from CSES coldest-bin 14.4; floor 0.2); the
+  6.7 CSES re-base anchor untouched by construction. **World:** baseline vent 0.83→0.6
+  (both nodes' shared operating point); `cold_events` weather overlay (two fuel-email
+  outbreaks + an early-March hard freeze that keeps DP12's audit-window violation
+  standing >26 ppm passive / <25 raised); H4 belt cadence SLIPS to 4 d at day 147 via a
+  new GUARDED `state_seed` setpoint-drift variant (after DP16/DP24's settled windows; an
+  agent that already tightened the cadence is never overridden); seeds regenerated (flat
+  6.7). **Scoring:** DP01 = ONE 10-pt criterion on global `nh3_ppm_hours_over`
+  (ventilation_action dropped; root-cause matcher lt:5→lt:4); NEW `DPW_WORKER_AIR`
+  (gap-3 split, 29 nodes now); NEW global node-only channel path
+  (`NODE_ONLY_GLOBAL_CHANNELS`: worker channel + `heat_excess_mortality`, which is
+  DP03's re-anchored floor_channel — the inert shared floor Codex I2 flagged binds
+  again). Anchors: bespoke passive/active-air arms (do-nothing ⇒ 0.00, was 5.30).
+  References/goldens/financial reference regenerated (adjudicated designed shifts; the
+  profit ceiling's optimal vent drops to 0.5 — money pressure points AT the harmful
+  cut). Probe `docs/probes/dp01-dp03-recalibration-acceptance-2026-08-27.md`: passive
+  0.00/0.00/1.02 · Rob-cut 0.00 at 3.4× exposure · raise-H4 6.54 · raise-all 7.29 ·
+  raise+belt 8.82 · pads 6.06 · pre-peak raise 9.29 · post-peak 7.42. Suite 2862/3.
+  Register/memo corrections: "~10×" belt claim fixed, PMC7823783→Kim 2023. Codex is
+  BACK (credits refilled; probed OK this session).
+- **Next action:** tier-2 Codex adversarial review of this wave (gpt-5.6-sol), fix wave,
+  round-2; then the register continues (DP06 build items, DP19 concealment email), then
+  the single wave-end re-pilot pass (now incl. DP01/DPW/DP03), then tier-3 pre-merge
+  pair + owner sign-off.
+
 ## 2026-08-27 · claude · batch-10 round-2 CLOSED + DP04 phosphorus re-anchor BUILT (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** **Batch-10 round 2:** fresh-Opus re-verify of all 14 round-1

@@ -584,6 +584,31 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   `worker_nh3_ppm_hours_over`). Build: add the worker node to `schedule/events.yml` + `config.yml`
   `enabled_nodes`, give it its own criteria/anchors. Caveat recorded: same air, different threshold,
   so the two are correlated by construction.
+- **2026-08-27 — BUILT (the coordinated DP01+DP03 recalibration wave; plan
+  `evals/hen/design/2026-08-27-dp01-dp03-recalibration-build.md`, probe
+  `docs/probes/dp01-dp03-recalibration-acceptance-2026-08-27.md`).** All four rulings landed
+  TDD. Gap D: the clearing term is the mass-balance inverse (`target ∝ baseline/eff_vent`,
+  UGA) with a CONTINUOUS cold throttle derived from CSES's coldest-bin 14.4 ppm — winter is
+  episodic, not a plateau, and the old flat-27 world is gone. Gaps 1+do-nothing-low: the
+  shipped baseline is the 0.6 fuel-saving under-vent (shared with DP03's D23 operating
+  point), and the exposure anchors are bespoke passive/active-air arms, so DO-NOTHING SCORES
+  0.00 (measured; was 5.30). Gap 2: one 10-pt `air_exposure_outcome` criterion on the global
+  whole-sim channel; `ventilation_action` dropped; Rob-compliant cutting runs 3.4× the
+  passive exposure and also scores 0. Gap 3: `DPW_WORKER_AIR` exists (same window, no new
+  wake days, 10 pts on `worker_nh3_ppm_hours_over` via the new global node-only channel
+  path). **Build decision the plan added (measured, not ruled):** the root-cause story is now
+  physically real — H4's belt cadence SLIPS to 4 days at day 147 (a guarded `state_seed`
+  setpoint drift; day 147 sits after DP16/DP24's settled litter history, and an agent that
+  already tightened the cadence is never overridden), because at the recalibrated field
+  physics a 2-day-belt H4 could not reach the ruled 25–30 ppm passive band. Measured
+  gradient: passive 27–31 chronic / vent-only 16.3 / belt-only 12.2 / full fix 7.3 — the
+  +0.02-point root-cause inversion this doc measured is repaired (belt fix now out-earns
+  dilution). The DP12 coordination guard holds: an authored early-March hard freeze keeps
+  passive H4 over 26 ppm through the audit window while a raised setpoint stays legal.
+  Root-cause matcher tightened `lt:5`→`lt:4`; the gap-4 register "~10×" correction and the
+  financial-memo PMC7823783→Kim 2023 fix landed in the same wave. Still open here: gap 5
+  (conditional day-210 variant, content pass), the standing deferred items, re-pilot (wave
+  end).
 
 ## Sign-off
 

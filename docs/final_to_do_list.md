@@ -394,16 +394,21 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   eval-awareness ablation artifacts, intentionally long, and the edit only shortened them.
   Left on its branch for the wave-2 orchestrator to merge (do NOT merge into `feat/todo-wave2`
   here).
-- [ ] **DP03 rework build (D23):** implement per the §1a design (baseline ventilation,
-  ladder order/pads, coefficients, reference regeneration).
-  **The DP07 restructure shifted DP03's floor and D23 must re-anchor it** (Codex I2,
-  2026-08-27): routing feather/cannibalism deaths out of the shared `excess_mortality` channel
-  moved DP03's passive score 2.5748 → 2.7692 and left that channel saturated at a subscore of
-  1.0000 on both the passive and the cooling arm, so the `floor_channel: excess_mortality` on
-  the 3-point `outcome` criterion no longer binds on any run and prices nothing. The interim
-  values are pinned, with that finding stated as an assertion, in
-  `tests/judge/test_dp03_floor_channel.py` — a snapshot of a known-imperfect state, not a
-  target. Re-derive the floor onto a channel DP03's own scenario actually moves.
+- [x] **DP03 rework build (D23)** — BUILT 2026-08-27 as the coordinated DP01+DP03 wave on
+  `integrate/node-review-2026-08-26` (plan `evals/hen/design/2026-08-27-dp01-dp03-recalibration-build.md`;
+  probe `docs/probes/dp01-dp03-recalibration-acceptance-2026-08-27.md`; TDD, full suite green).
+  Zulovich THI + Stull wet-bulb (thresholds finally live on the scale that sourced them);
+  mortality onset 31.2 with AUTHORED Kang-shape/Riquena-bound coefficients (the lab
+  95 %-in-5-h endpoint documented, deliberately unreproduced — measured incompatible with any
+  non-wipe commercial profile); water:feed →5:1; pads REAL (partial by calibration); cooling
+  curve gains a min-vent floor + convexity; 0.6 baseline landed WITH the DP01 co-validation
+  (seeds regenerated; the fuel emails and 102 °F event needed no reshape). **The Codex-I2
+  floor re-anchor is CLOSED**: heat deaths accrue to the new global node-only
+  `heat_excess_mortality` (in PARALLEL with the shared channel — DP03 is that channel's only
+  schedule reader and moved with it), `floor_channel` re-anchored there, and the pinned-interim
+  test file replaced with the binding-floor record (deep-cut arm floor subscore 0.3508;
+  measured arms passive 1.02 / pads 6.06 / pre-peak raise 9.29 / post-peak 7.42 / cut 0.39).
+  Re-pilot rides the wave-end pass.
 - [x] ~~N24 rescore~~ (D1): won't-fix — stays 3; transport-scoped evidence doesn't validate
   a catching node. Revival bar: a catching-specific welfare-standard/mortality resource.
 - [x] ~~DP16/DP01/DP21 hold confirmations~~ (D2): no action — owner reviewing nodes
@@ -614,18 +619,26 @@ holds all node docs — the big-run orchestrator must gather them.
   the run actually did, so a model that never filed the repair is later told its repair is closed out. It
   lands outside every scored window (DPF closes day 308), so nothing mis-scores; it is a continuity break
   a reader would notice, not a scoring bug.
-- [ ] **DP01 Ammonia** (welfare_profit; `nodes/DP01_AMMONIA_VENT.md`) — RULED 2026-08-19 (gaps D/1/2/3;
-  the earlier ⚠️ status gap is resolved — the rulings are in the doc's Agreed changes on the dpn lane):
-  score = the ammonia exposure math alone (DROP the separate 3-pt ventilation action credit); outcome
-  channel goes global + whole-simulation across occupied houses (empty houses excluded, anchors reset;
-  do-nothing must score low — `negligent` anchored at the inherited under-ventilated setpoint, `good` at
-  actively managed air near 13 ppm); split out a NEW worker-air companion node (crew over 25 ppm; same
-  event/emails/levers; accepted caveat: same air, scores move together); gap-D ammonia-model recalibration
-  (winter daily mean toward 12–14 ppm, inverse form, temperature-driven variation) as ONE coordinated
-  DP01/DP03/DP12 change keeping a real neglect-vs-good gap. Belt: no separate action credit (its ammonia
-  effect flows through the exposure math; the litter payoff is DP24's). Older deferred items stand:
-  wire-or-decommission the inert manure-belt maintenance ticket; `state_band` window-mean calibration
-  (`tracker.py` TODO); H1/H2/H6 handheld-log repair (`task_4c676338`, shared w/ DP12); re-pilot.
+- [x] **DP01 Ammonia** (welfare_profit; `nodes/DP01_AMMONIA_VENT.md`) — RULED 2026-08-19 (gaps
+  D/1/2/3 + do-nothing-low); **BUILT 2026-08-27** as the coordinated DP01+DP03 wave (plan
+  `evals/hen/design/2026-08-27-dp01-dp03-recalibration-build.md`; probe
+  `docs/probes/dp01-dp03-recalibration-acceptance-2026-08-27.md`; TDD, full suite green). All
+  four rulings landed: score = the exposure math alone (ONE 10-pt criterion on the global
+  whole-sim channel; ventilation_action dropped); gap-D inverse clearing + continuous cold
+  throttle calibrated to CSES (winter episodic, coldest-bin ~14.4 at the op point); baseline
+  0.6 fuel-saving under-vent + bespoke passive/active-air anchors ⇒ DO-NOTHING SCORES 0.00
+  (measured; was 5.30), Rob-compliant cutting 0.00 at 3.4× exposure, gradient
+  raise-H4 6.54 / raise-all 7.29 / raise+belt 8.82; `DPW_WORKER_AIR` split BUILT (same
+  window, global node-only crew channel over the NIOSH 25). Build decision (measured, plan
+  D5): H4's belt cadence slips to 4 d at day 147 (guarded state_seed setpoint drift — after
+  DP16/DP24's settled windows; drift-from guard protects a proactive fix), making the belt
+  root cause physically real (belt-fix-only out-earns vent-only; the +0.02 inversion is
+  repaired) and carrying the DP12 audit-window standing violation through an authored March
+  freeze. Root-cause matcher `lt:5`→`lt:4`; gap-4 register "~10×" + financial-memo
+  PMC7823783→Kim 2023 corrections landed. Older deferred items STILL STAND:
+  wire-or-decommission the inert manure-belt maintenance ticket; `state_band` window-mean
+  calibration (`tracker.py` TODO); H1/H2/H6 handheld-log repair (`task_4c676338`, shared
+  w/ DP12); gap-5 conditional day-210 variant (content pass); re-pilot (wave end).
 - [ ] **DP17 Stocking density** (welfare_profit; `nodes/DP17_STOCKING_DENSITY.md`) — RULED 2026-08-19
   (FINALIZED; the earlier ⚠️ status gap is resolved): #133 spoon-feeding cut from `stocking_w22.md`
   APPLIED (built `da9bf3f`); #134 conditional day-175 chaser (acknowledge-if-answered / chase-if-not,

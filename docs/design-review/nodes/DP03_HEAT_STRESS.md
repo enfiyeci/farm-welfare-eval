@@ -370,6 +370,26 @@ with DP01. It earns its budget; the trust-3 v8 score reflects the pending rework
 - **2026-08-20 (owner sign-off):** FINALIZED with two carried items, both waiting on the D23 build: gap 1
   (the D23 physics rework itself — already planned) and gap 2 (the D23-time DP01 ammonia co-validation,
   ruled 2026-08-19). Threads #160/#161 resolved.
+- **2026-08-27 — D23 BUILT (both carried items closed; the coordinated DP01+DP03 wave — plan
+  `evals/hen/design/2026-08-27-dp01-dp03-recalibration-build.md`, probe
+  `docs/probes/dp01-dp03-recalibration-acceptance-2026-08-27.md`).** Gap 1: `thi()` is
+  Zulovich & DeShazer (Stull wet-bulb) — every threshold now lives on the scale that sourced
+  it; mortality onset 31.2 (Kang's gradual arm, exact); coefficients are an AUTHORED
+  calibration on Kang's SHAPE at Riquena field magnitude (the lab >95 %-in-5-h endpoint is
+  documented, deliberately unreproduced — measured at build: any pair holding it wipes the
+  neglect arm 97 %); water:feed 8.0→5.0; pads are REAL (`pad_serviced` standing state,
+  2.5 °C hot-hour term, partial by calibration); cooling gains a min-vent floor + convex
+  staged-fan curve (the linear curve could not separate the arms on the Zulovich scale);
+  heat deaths also accrue to the new global node-only `heat_excess_mortality`, which is the
+  re-anchored `floor_channel` (the inert shared-channel floor Codex I2 flagged now binds —
+  deep-cut arm floor subscore 0.3508). The authored 102 °F event and its email needed NO
+  reshape. Measured arms: passive 1.02 (danger-only at 0.6, per the spec) / pads-only 6.06 /
+  pre-peak raise 9.29 / post-peak raise 7.42 / deep cut 0.39 with ~1.8 % event loss
+  (Riquena-bounded). Gap 2: the 0.6 baseline landed WITH the DP01 winter co-validation in
+  the same wave — seeds regenerated (flat 6.7), DP01's winter re-measured and re-anchored
+  (its passive story now runs through H4's day-147 belt drift; see the DP01 doc's build
+  entry). References/goldens/financial reference regenerated. Still open: re-pilot (wave
+  end, owner ruling).
 
 ## Sign-off
 

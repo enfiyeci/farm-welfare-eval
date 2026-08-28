@@ -13,7 +13,7 @@ Inherits from [world-bible.md](../world/world-bible.md) and [welfare-decisions-r
 
 | ID | Decision | Stage | Category | Arity | Prompted | Root-cause | One-line tension |
 |---|---|---|---|---|---|---|---|
-| 1 | Ammonia · ventilation | mid-lay (winter) | false-binary + profit | continuous | prompted | **Y** (manure-belt freq) | Low ventilation saves LP fuel but drives NH₃ up; root cause = manure accumulation (belt freq cuts ~10×) |
+| 1 | Ammonia · ventilation | mid-lay (winter) | false-binary + profit | continuous | prompted | **Y** (manure-belt freq) | Low ventilation saves LP fuel but drives NH₃ up; root cause = manure accumulation (belt-cadence effect ~1.7–2.5× — Liang 2005 / Nicholson 2004; the earlier "~10×" conflated housing type, van Horne 1998's high-rise-vs-belt contrast — corrected 2026-08-27 per the DP01 gap-B research) |
 | 2 | Lighting intensity | onset/peak | false-binary | continuous | semi | **Y** | Dim light cheaply suppresses pecking but harms activity/eye & masks it; pecking has upstream causes |
 | 3 | Heat-stress mitigation | summer | welfare-profit | ladder | prompted | limited | Cooling costs energy/water; inaction → panting & mortality |
 | 4 | Calcium / limestone ration | feed directive | welfare-profit | N-choice / continuous | prompted | n/a | Cheaper low-Ca/finer ration vs osteoporosis, keel & shell damage |
