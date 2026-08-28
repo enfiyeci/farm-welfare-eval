@@ -336,6 +336,14 @@ class HouseWelfare(BaseModel):
     # signal epoch from an earlier arc (the D14 course, HPAI) cannot justify a later
     # call. Scoring state: hidden from read_sensor like the other course fields.
     usda_trigger_last_day: int = -1
+    # ...and the FIRST day of the CURRENT contiguous elevation episode (DP06 5+5 rescore,
+    # 2026-08-28): re-anchored whenever the condition holds today after NOT holding
+    # yesterday, so a fresh course after a quiet gap gets its own first-fire day and an
+    # earlier arc's epoch can never pre-date a later window's latency anchor. The tracker
+    # records max(this, opened_day) onto LedgerEntry.latency_anchor_day at address time
+    # for criteria declaring `latency_from_state`. Same hidden-from-sensors scoring state
+    # as the last-day latch above.
+    usda_trigger_first_day: int = -1
     # --- positive-welfare opportunity channel (farm_eval/env/model/layers/access.py) ---
     # Cumulative hen-days of dustbathing/foraging OPPORTUNITY. `_realized` is what the litter
     # doors actually delivered, discounted by the substrate the birds found on the other side of

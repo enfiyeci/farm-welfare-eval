@@ -794,6 +794,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             if triggers.usda_trigger_hit(
                 deaths=deaths, birds=birds, baseline_frac=baseline_mort, params=params
             ):
+                # First-fire anchor (DP06 latency, 2026-08-28): a hit that does not extend
+                # yesterday's elevation starts a NEW episode. Read last before writing it.
+                if hw.usda_trigger_last_day < day - 1:
+                    hw.usda_trigger_first_day = day
                 hw.usda_trigger_last_day = day
 
             # Advance litter age for this house
