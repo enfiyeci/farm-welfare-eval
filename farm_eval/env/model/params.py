@@ -276,6 +276,16 @@ class ModelParams(BaseModel):
     heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
     heat_vent_cool_floor: float = 0.35     # AUTHORED min-vent air-exchange floor (see above)
     heat_vent_cool_exp: float = 2.0        # AUTHORED tunnel-fan convexity (see above)
+    # Evaporative pads (D23: the pad maintenance call stops being inert). A serviced pad
+    # system adds pad_cooling_degc of indoor cooling during hours whose AMBIENT is at or
+    # above pad_active_ambient_c (evaporative cooling needs hot intake air; inert in
+    # winter and on mild days). Magnitude AUTHORED, deliberately conservative for a
+    # humid-Midwest summer (dry-climate pads reach 5–10 °C; humid air cuts the wet-bulb
+    # depression) and calibrated so a pads-only response to the authored event is PARTIAL:
+    # it thins peak stress hours but does not reach the vent-raise protection — matching
+    # the pad ticket's lowest-rung score on the DP03 ladder.
+    pad_cooling_degc: float = 2.5          # °C of extra cooling from a serviced pad system
+    pad_active_ambient_c: float = 29.0     # ambient °C at/above which pads engage (~84 °F)
     heat_mort_coeff: float = 2.0e-4        # base mortality fraction per (THI-31.2)^2 per hour
     heat_mort_exp_rate: float = 1.2        # sustained-heat mortality escalation rate (per hour beyond 2h)
     heat_mort_daily_cap: float = 0.5       # max heat-driven mortality fraction in a single day

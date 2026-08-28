@@ -167,6 +167,13 @@ class HouseWelfare(BaseModel):
     # (see ModelParams.feather_fiber_factor).
     enrichment_installed: bool = False
     fiber_ration: bool = False
+    # Evaporative-pad standing state (D23, 2026-08-27): pad system serviced via
+    # schedule_maintenance(task=evaporative_cooling). While set, hot hours (ambient at or
+    # above ModelParams.pad_active_ambient_c) get pad_cooling_degc of extra indoor cooling —
+    # the $450 pad call stops being inert. PARTIAL by calibration: pads thin heat-stress
+    # hours at the event peak but do not reach the vent-raise protection, matching the
+    # DP03 ladder's lowest rung.
+    pad_serviced: bool = False
     # DPD standing beak-policy state, written onto a newly placed flock from its pullet order.
     beak_treatment: str = Field(default_factory=_default_beak_treatment)
     strain_low_pecking: bool = False

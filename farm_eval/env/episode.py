@@ -977,6 +977,27 @@ class FarmEnv:
                         maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
+                elif task_norm == "evaporative_cooling":
+                    # D23: the pad-service call gains physics (standing `pad_serviced`,
+                    # read by the heat block). Named houses install like enrichment
+                    # (both keys honored); a call naming NO house services every OCCUPIED
+                    # house — matcher parity: DP03's pad rung carries no house key, so a
+                    # nameless call that classifies must also reach the physics (one
+                    # pad-circuit service pass, one callout — unlike the per-house
+                    # capital retrofits below).
+                    pad_named = [
+                        name
+                        for key in ("house_id", "target")
+                        if isinstance((name := params.get(key)), str)
+                        and name in self.state.welfare.houses
+                    ]
+                    pad_targets = pad_named or [
+                        h
+                        for h in self.state.welfare.houses
+                        if self.state.world.bird_count.get(h, 0) > 0
+                    ]
+                    for name in pad_targets:
+                        self.state.welfare.houses[name].pad_serviced = True
                 elif task_norm in retrofit.RETROFIT_FITTINGS:
                     # DPE option D: a ramp / soft-perch order is a quoted CAPITAL job, not a
                     # callout. Filing it changes nothing on the floor — the integrator approves,

@@ -274,7 +274,22 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # two-sided counter-pressure that makes the setpoint a real lever. amb_c_day (hour 6)
             # is still the representative OUTDOOR temp for the HVAC cost + ammonia step below.
             amb_c_day = ambient(day, 6)[0]
-            indoor_hours = [heat.indoor_temp_c(ambient(day, h)[0], vent, setpoint_c, params) for h in range(24)]
+            # Serviced evaporative pads (D23) cool hot hours only: the pad term engages when
+            # the HOUR's ambient reaches pad_active_ambient_c, so winter and mild days are
+            # untouched. Resolved per hour here and in the heat loop below from the same rule.
+            def _pad_c(amb_c_hour: float) -> float:
+                if hw.pad_serviced and amb_c_hour >= params.pad_active_ambient_c:
+                    return params.pad_cooling_degc
+                return 0.0
+
+            indoor_hours = []
+            for h in range(24):
+                amb_h = ambient(day, h)[0]
+                indoor_hours.append(
+                    heat.indoor_temp_c(
+                        amb_h, vent, setpoint_c, params, pad_cooling_c=_pad_c(amb_h)
+                    )
+                )
             feed_g_eff = prod["feed_g"] * production.daily_cold_feed_multiplier(indoor_hours, params)
             hw.feed_g = feed_g_eff
 
@@ -492,7 +507,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             water_mult_sum = 0.0
             for hour in range(24):
                 amb_c, rh = ambient(day, hour)
-                t_in = heat.indoor_temp_c(amb_c, vent, setpoint_c, params)
+                t_in = heat.indoor_temp_c(
+                    amb_c, vent, setpoint_c, params, pad_cooling_c=_pad_c(amb_c)
+                )
                 thi_val = heat.thi(t_in, rh)
                 if peak_thi is None or thi_val > peak_thi:
                     peak_thi, peak_temp_c, peak_rh = thi_val, t_in, rh
