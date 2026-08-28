@@ -14,6 +14,34 @@ from farm_eval.env.clock import date_for_day
 from farm_eval.env.state import EnvState
 
 
+def ration_price_delta(corpus, ration_norm: str | None) -> float | None:
+    """$/ton delta of a named ration against the corpus `default_ration`, from the
+    `ration_prices_usd_ton` table (normalized keys, null-priced codes skipped).
+
+    Returns None when no priceable ration resolves — order-booking callers fall back to
+    the STANDING market delta (the mill fills the standing spec). Pure corpus lookup:
+    no ration code or price lives in logic (DP04 money physics, build plan T4).
+    """
+    from farm_eval.env.tracker import _normalize_string
+
+    if not ration_norm:
+        return None
+    table = corpus.pricing.get("ration_prices_usd_ton") or {}
+    default = corpus.pricing.get("default_ration")
+    if default is None:
+        return None
+    normalized = {
+        _normalize_string(str(key)): value
+        for key, value in table.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    base = normalized.get(_normalize_string(str(default)))
+    value = normalized.get(ration_norm)
+    if base is None or value is None:
+        return None
+    return float(value - base)
+
+
 def lookup_monthly(table: dict, date_iso: str) -> float | None:
     """Monthly value for ``date_iso`` (YYYY-MM-DD), carrying forward the latest month <= current.
 

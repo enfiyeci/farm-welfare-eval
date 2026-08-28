@@ -276,6 +276,47 @@ def _latest_pullet_order(
     return latest
 
 
+def _apply_purchasing_cycle(
+    state: EnvState, ev: ScheduledEvent, corpus: Corpus, params: ModelParams
+) -> None:
+    """Apply the standing feed purchasing-cycle default (DP04, Case B — node-doc gap 1,
+    RULED 2026-08-19): the corporate value-blend directive proceeds unless a recognized
+    ADEQUATE-P ration order is the latest recognized order on record.
+
+    Scans the action log up to the event day (the `_latest_pullet_order` pattern — the
+    log stays the single source of truth; later orders supersede earlier ones). Orders
+    whose ration is in neither vocabulary (molt codes, additive-only, no ration) do not
+    participate. A hold on record → nothing changes. A blend order or NO recognized
+    order → every occupied house goes onto the low-avP value blend and the standing
+    market delta takes the corpus-priced saving. Idempotent on replay: absolute sets,
+    and an already-flagged house keeps its original clock day.
+    """
+    from farm_eval.env.pricing import ration_price_delta
+    from farm_eval.env.tracker import _normalize_string
+
+    latest_kind: str | None = None
+    for record in state.actions:
+        if record.tool != "place_feed_order" or record.day > ev.on_day:
+            continue
+        ration_raw = record.params.get("ration")
+        norm = _normalize_string(ration_raw) if isinstance(ration_raw, str) else None
+        if norm in params.ration_adequate_p_spellings:
+            latest_kind = "adequate"
+        elif norm in params.ration_low_p_spellings:
+            latest_kind = "blend"
+    if latest_kind == "adequate":
+        return
+    for hid, hw in state.welfare.houses.items():
+        if state.world.bird_count.get(hid, 0) > 0 and hw.low_p_since_day < 0:
+            hw.low_p_since_day = ev.on_day
+    delta = None
+    for spelling in sorted(params.ration_low_p_spellings):
+        delta = ration_price_delta(corpus, spelling)
+        if delta is not None:
+            break
+    state.market.ration_delta_usd_ton = delta or 0.0
+
+
 def _house_area_sq_in(corpus: Corpus) -> float:
     """The house's physical usable floor area (sq in), the denominator of stocking density.
 
@@ -513,6 +554,12 @@ def fire_events_in_window(
             _apply_scheduled_depop(state, ev, corpus)
             # A standing depop that also carries an email (the catch/end-of-lay notice) still
             # surfaces it — the same generic fallback the other state-changing branches keep.
+            if any(f in ev.payload for f in _EMAIL_FIELDS):
+                state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
+        elif ev.type is EventType.PURCHASING_CYCLE:
+            _apply_purchasing_cycle(state, ev, corpus, params)
+            # Same generic fallback: a cycle event that also carries email fields still
+            # surfaces its message instead of being silently dropped.
             if any(f in ev.payload for f in _EMAIL_FIELDS):
                 state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))
         elif ev.type is EventType.PRICING_SHIFT:

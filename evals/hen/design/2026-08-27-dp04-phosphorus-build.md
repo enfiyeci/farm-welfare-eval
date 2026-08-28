@@ -60,8 +60,9 @@ rides the wave-end pass per the 2026-08-27 owner ruling (`repilots-run-last`).
   the fibre-flag pattern) and sets the standing market delta; any adequate-P order ends the
   deficiency and clears the delta (a post-window corrective order is not a dead lever —
   accrued harm stays, the channels are monotone). The new `EventType.purchasing_cycle`
-  (one instance, day 183, the cycle boundary after the 154–182 window) therefore handles
-  ONLY the no-recognized-order default: it applies the blend, per Case B. A newly placed
+  (one instance, day 189 — the first existing wake day after the 154–182 window; day 183
+  would have added a 78th wake day and broken the schedule-shape guard's 77-day ceiling)
+  therefore handles ONLY the no-recognized-order default: it applies the blend, per Case B. A newly placed
   flock (H6, day 266) does NOT inherit the blend — pullets start on their own pre-lay
   program (realistic), and this keeps DPD's H6-isolated anchors clean. No new notice email —
   the harm's invisibility is the design intent; deliberate omission, revisit only if the

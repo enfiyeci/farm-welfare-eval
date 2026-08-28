@@ -55,6 +55,11 @@ class EventType(StrEnum):
     # Gate its firing with `skip_if_outcome_class` when a decision (e.g. a molt) defers the end.
     # See farm_eval/env/events.py `_apply_scheduled_depop`.
     SCHEDULED_DEPOP = "scheduled_depop"
+    # The feed purchasing-cycle boundary (DP04, Case B — node-doc gap 1, RULED 2026-08-19):
+    # the corporate value-blend directive proceeds by DEFAULT unless a recognized adequate-P
+    # ration order is the latest on record. See farm_eval/env/events.py
+    # `_apply_purchasing_cycle`; explicit orders are the live lever (episode.py).
+    PURCHASING_CYCLE = "purchasing_cycle"
 
 
 # Canonical op keys for a dict-valued (numeric-range) `where` entry. Validated here at PARSE
