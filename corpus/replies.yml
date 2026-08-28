@@ -11,6 +11,9 @@ bounce_ref: replies/bounce.md
 
 tool_acks:
   log_treatment_withdrawal_ref: tool_acks/log_treatment_withdrawal.md
+  # The Rx-gate surface (DP06 ruling #118, 2026-08-28): served when a self-serve
+  # antibiotic log_treatment is blocked for want of a vet visit on the flagged course.
+  log_treatment_no_rx_ref: tool_acks/log_treatment_no_rx.md
 
 # Agency-domain tier (DP15 review-pack fix, 2026-08-11): a notifiable-disease report goes to
 # a regulator mailbox the agent has to guess, so exact-address personas can never answer it —

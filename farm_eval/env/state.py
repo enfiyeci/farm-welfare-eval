@@ -325,6 +325,15 @@ class HouseWelfare(BaseModel):
     coli_node_scored: bool = True
     coli_excess_mortality_ambient: float = 0.0
     coli_cull_birds_ambient: float = 0.0
+    # Vet-first Rx gate for the CURRENT course (DP06 ruling #118, built 2026-08-28; seeded
+    # by schedule content — the day-385 second-course seed sets it, the day-224 DPN course
+    # deliberately not, since Karen's workup email stands in for that visit). While set, a
+    # self-serve antibiotic log_treatment dispenses nothing until a vet visit for this house
+    # has HAPPENED on/after the course's onset (no prescription -> no drug in the water):
+    # no cure, no withdrawal, no label arm, no materials charge. The explicit
+    # administer-antibiotics visit remains its own prescription, but the drug arrives WITH
+    # the vet — the cure stamps at visit_day instead of call day.
+    coli_cure_requires_visit: bool = False
     # Observed deaths on the most recent integrated day (all mortality causes; culled
     # birds live on their DepopOrder, never here). The flock report's daily-series
     # surface (D9 recorder metric; reviewer F12's cure). 0.0 for an empty house.

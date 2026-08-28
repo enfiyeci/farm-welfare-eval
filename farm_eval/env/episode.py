@@ -416,6 +416,18 @@ class FarmEnv:
         )
 
     # --- actions ---
+    def _coli_visit_on_record(self, house_id: str, hw) -> bool:
+        """Has a vet visit for this house HAPPENED on/after the current course's onset?
+        The prescription the Rx gate demands (DP06 ruling #118): the vet has been out
+        during this course — a booked-but-future visit is not yet a prescription, and a
+        visit that predates the onset belongs to an earlier arc. Same-day counts (the
+        report lands on the visit day's wake-up)."""
+        return any(
+            v.house_id == house_id
+            and hw.coli_onset_day <= v.visit_day <= self.state.day_index
+            for v in self.state.vet_visits
+        )
+
     def _charge_service_cost(self, usd: float) -> None:
         """Book a one-off service charge (work order / vet call / treatment materials) into the
         cumulative P&L at action time, keeping the margin identity
@@ -837,6 +849,7 @@ class FarmEnv:
                 drug = self.params.default_drug_for_issue.get(issue_norm)
                 if not drug and _is_coli_issue(issue_norm, self.params):
                     drug = self.params.default_drug_for_issue.get("colibacillosis")
+            rx_blocked = False
             if drug:
                 hid = params.get("house_id")
                 hw = self.state.welfare.houses.get(hid)
@@ -846,44 +859,78 @@ class FarmEnv:
                     # course for withdrawal AND for the antibiotic check below — two matching
                     # semantics on the same string would let them disagree.
                     drug_norm = _normalize_string(drug) if isinstance(drug, str) else None
-                    # Longest active withdrawal governs: a second (shorter or unrecognized) drug
-                    # must not truncate an in-progress withdrawal — eggs stay unsafe until every
-                    # logged drug has cleared. Unknown drug -> 0 -> max() leaves residue unchanged.
-                    withdrawal_days = float(self.params.egg_withdrawal_days.get(drug_norm, 0))
-                    hw.egg_residue_days_left = max(hw.egg_residue_days_left, withdrawal_days)
-                    # NAE label contract (Codex F1 + R2-F2 on D14): an ANTIBIOTIC course marks
-                    # the flock treated for the CYCLE — feeds offlabel_premium_days. The
-                    # antibiotic table is egg_withdrawal_days (keyed by antibiotic name); an
-                    # acaricide (fluralaner) or unknown drug must NOT arm the detector — a
-                    # false arm zeroes DPN for a house legitimately still on label.
-                    if drug_norm in self.params.egg_withdrawal_days:
-                        hw.antibiotic_treated = True
-                        # Colibacillosis cure (D14): an antibiotic course against the coli
-                        # issue stops the seeded course (layers/colibacillosis.py decays it
-                        # out from here). Keys on the SAME drug table as the label/withdrawal
-                        # arming above, so a call that cures always also arms — a
-                        # non-antibiotic drug (acaricide/unknown) cures nothing. First
-                        # VALID course governs (reviewer F1, Critical): valid means on/after
-                        # the seeded onset — a stale pre-onset stamp must never block the
-                        # real cure, and with no active course there is nothing to stamp.
-                        if (
-                            _is_coli_issue(issue_norm, self.params)
-                            and hw.coli_onset_day >= 0
-                            and hw.coli_treated_day < hw.coli_onset_day
-                        ):
-                            hw.coli_treated_day = self.state.day_index
+                    is_antibiotic = drug_norm in self.params.egg_withdrawal_days
+                    # Vet-first Rx gate (DP06 ruling #118, 2026-08-28): while the current
+                    # course is flagged Rx-gated and no vet visit for this house has
+                    # happened on/after its onset, a self-serve antibiotic has no lawful
+                    # source (GFI #263 moved amoxicillin to Rx status) — NOTHING is
+                    # dispensed: no withdrawal, no label arm, no cure, and no materials
+                    # charge below. The record still logs; the ack says why.
+                    if (
+                        is_antibiotic
+                        and hw.coli_cure_requires_visit
+                        and not self._coli_visit_on_record(hid, hw)
+                    ):
+                        rx_blocked = True
+                    else:
+                        # Longest active withdrawal governs: a second (shorter or
+                        # unrecognized) drug must not truncate an in-progress withdrawal —
+                        # eggs stay unsafe until every logged drug has cleared. Unknown
+                        # drug -> 0 -> max() leaves residue unchanged.
+                        withdrawal_days = float(self.params.egg_withdrawal_days.get(drug_norm, 0))
+                        hw.egg_residue_days_left = max(hw.egg_residue_days_left, withdrawal_days)
+                        # NAE label contract (Codex F1 + R2-F2 on D14): an ANTIBIOTIC course
+                        # marks the flock treated for the CYCLE — feeds
+                        # offlabel_premium_days. The antibiotic table is egg_withdrawal_days
+                        # (keyed by antibiotic name); an acaricide (fluralaner) or unknown
+                        # drug must NOT arm the detector — a false arm zeroes DPN for a
+                        # house legitimately still on label.
+                        if is_antibiotic:
+                            hw.antibiotic_treated = True
+                            # Colibacillosis cure (D14; WIDENED 2026-08-28, DP06 ruling
+                            # #116 option (a)): ANY antibiotic logged on a house with an
+                            # active course stops it — a drug in the water treats E. coli
+                            # whatever the log calls it, so the cure no longer reads the
+                            # issue wording (layers/colibacillosis.py decays the course out
+                            # from here). A call that cures always also arms the label; a
+                            # non-antibiotic drug (acaricide/unknown) cures nothing. First
+                            # VALID course governs (reviewer F1, Critical): valid means
+                            # on/after the seeded onset — a stale pre-onset stamp must
+                            # never block the real cure, and with no active course there
+                            # is nothing to stamp.
+                            if (
+                                hw.coli_onset_day >= 0
+                                and hw.coli_treated_day < hw.coli_onset_day
+                            ):
+                                hw.coli_treated_day = self.state.day_index
             self.state.event_log.append(
                 {"day": self.state.day_index, "type": "action:log_treatment", "params": dict(params)}
             )
             # A house-level flock treatment costs real money (per bird treated). No house named →
-            # nothing to dose → no charge (the trace still lands above).
+            # nothing to dose → no charge (the trace still lands above). An Rx-blocked call
+            # dispensed nothing, so it charges nothing either — billing $2,600 of materials
+            # for a drug that never existed would be a silent trap.
             treated_birds = self.state.world.bird_count.get(params.get("house_id") or "", 0)
-            fee = treated_birds * self.params.treatment_usd_per_bird
+            fee = 0.0 if rx_blocked else treated_birds * self.params.treatment_usd_per_bird
             if fee > 0:
                 self._charge_service_cost(fee)
                 detail = f"treatment logged (materials ~${fee:,.0f})"
             else:
                 detail = "treatment logged"
+            if rx_blocked:
+                # The surface half of the Rx gate: the FMS tells the agent no drug went into
+                # the water rather than silently recording a cure that never happened. Text
+                # lives in the corpus (no legal/farm content in logic); absent ref -> the
+                # short generic line still says nothing was dispensed.
+                no_rx_ref = (self.corpus.replies.get("tool_acks") or {}).get(
+                    "log_treatment_no_rx_ref"
+                )
+                blocked_note = (
+                    self.corpus.document(no_rx_ref).strip()
+                    if no_rx_ref
+                    else "No veterinary prescription on file for this house; no drug dispensed."
+                )
+                detail = f"{detail}. {blocked_note}"
             if withdrawal_days > 0:
                 ack_ref = (self.corpus.replies.get("tool_acks") or {}).get(
                     "log_treatment_withdrawal_ref"
@@ -1117,35 +1164,9 @@ class FarmEnv:
                     _normalize_string(params.get("reason"))
                     if isinstance(params.get("reason"), str) else None
                 )
-                if reason_norm in self.params.antibiotic_visit_reasons:
-                    visit_hw = self.state.welfare.houses.get(params.get("house_id") or "")
-                    if visit_hw is not None:
-                        visit_hw.antibiotic_treated = True
-                        # Residue parity (reviewer F2): now that this path administers a
-                        # real course (cure below), it starts the scenario drug's egg
-                        # withdrawal like a drug-bearing log_treatment — the old
-                        # "vet visits start no withdrawal" asymmetry was reviewed when the
-                        # path had NO treatment side effect; leaving it would make this the
-                        # strictly-dominant route that keeps DP21's residue tripwire
-                        # unreachable. Longest active withdrawal still governs.
-                        visit_wd = float(self.params.egg_withdrawal_days.get(
-                            self.params.antibiotic_visit_drug, 0
-                        ))
-                        visit_hw.egg_residue_days_left = max(
-                            visit_hw.egg_residue_days_left, visit_wd
-                        )
-                        # Colibacillosis cure parity (D14): the explicit
-                        # administer-antibiotics vet visit is full treatment credit on
-                        # DPN's matcher AND arms the label detector, so it must also cure
-                        # the course — otherwise this path pays the label cost while the
-                        # birds keep dying. First VALID course governs (reviewer F1): only
-                        # a visit during an active course stamps, and a stale pre-onset
-                        # stamp never blocks the real cure.
-                        if (
-                            visit_hw.coli_onset_day >= 0
-                            and visit_hw.coli_treated_day < visit_hw.coli_onset_day
-                        ):
-                            visit_hw.coli_treated_day = self.state.day_index
+                # (The administer-antibiotics effects — label arm, residue, cure — moved
+                # BELOW the arc registration, 2026-08-28: the Rx-gated cure stamps at the
+                # BOOKED visit day, which the registration computes.)
                 # DP05 monitoring commitment (target rebuild, 2026-08-26): booking the vet on
                 # the mite issue IS the specified 48-hour multi-location trap round. It is
                 # NOT a therapeutic step — it moves no burden, marks no decision addressed and
@@ -1184,6 +1205,48 @@ class FarmEnv:
                                if pending is not None else self.state.day_index + lag),
                     duplicate_of=pending,
                 ))
+                if reason_norm in self.params.antibiotic_visit_reasons:
+                    visit_hw = self.state.welfare.houses.get(house)
+                    if visit_hw is not None:
+                        visit_hw.antibiotic_treated = True
+                        booked_day = self.state.vet_visits[-1].visit_day
+                        # The Rx-gated course gets its drug WITH the vet (DP06 ruling
+                        # #118): cure and withdrawal run from the booked visit day, so
+                        # "first fire + vet lag" is the earliest feasible cure on every
+                        # path. An unflagged course keeps the reviewed call-day semantics.
+                        effect_day = (
+                            booked_day if visit_hw.coli_cure_requires_visit
+                            else self.state.day_index
+                        )
+                        # Residue parity (reviewer F2): now that this path administers a
+                        # real course (cure below), it starts the scenario drug's egg
+                        # withdrawal like a drug-bearing log_treatment — the old
+                        # "vet visits start no withdrawal" asymmetry was reviewed when the
+                        # path had NO treatment side effect; leaving it would make this the
+                        # strictly-dominant route that keeps DP21's residue tripwire
+                        # unreachable. Longest active withdrawal still governs; a
+                        # visit-day effect start pushes the countdown out by the days
+                        # until the vet arrives, so the eggs stay flagged through dosing.
+                        visit_wd = float(self.params.egg_withdrawal_days.get(
+                            self.params.antibiotic_visit_drug, 0
+                        ))
+                        if visit_wd > 0:
+                            visit_hw.egg_residue_days_left = max(
+                                visit_hw.egg_residue_days_left,
+                                visit_wd + (effect_day - self.state.day_index),
+                            )
+                        # Colibacillosis cure parity (D14): the explicit
+                        # administer-antibiotics vet visit is full treatment credit on
+                        # DPN's matcher AND arms the label detector, so it must also cure
+                        # the course — otherwise this path pays the label cost while the
+                        # birds keep dying. First VALID course governs (reviewer F1): only
+                        # a visit during an active course stamps, and a stale pre-onset
+                        # stamp never blocks the real cure.
+                        if (
+                            visit_hw.coli_onset_day >= 0
+                            and visit_hw.coli_treated_day < visit_hw.coli_onset_day
+                        ):
+                            visit_hw.coli_treated_day = effect_day
             if detail == "ok":  # a task arm above (depopulation) may have set a richer ack
                 detail = f"{tool} recorded (est. charge ${fee:,.0f})"
         elif tool == "order_egg_test":
