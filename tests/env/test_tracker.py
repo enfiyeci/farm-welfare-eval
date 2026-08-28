@@ -555,6 +555,72 @@ def test_ladder_does_not_escalate_from_post_deadline_action():
     assert state.ledger[0].outcome == "airflow"
 
 
+# --- ladder occupancy gate (Codex round-1 F1, 2026-08-27) ---
+
+def test_ladder_rung_occupancy_gate_blocks_empty_house_call():
+    # A rung with requires_occupied_house must not credit a call naming a house with no
+    # live birds (DP03's empty-H6 ventilation raise cools nobody yet took the top rung).
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="airflow",
+             match=ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"}),
+             requires_occupied_house=True),
+    ])
+    state, sched = _env_for(_dp(sig), houses={"H4": _house(), "H6": _house()})
+    state.world.bird_count = {"H4": 100_000, "H6": 0}
+    assert record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation", "house_id": "H6"}, day=1) == []
+    assert state.ledger[0].status is LedgerStatus.OPEN
+    assert state.ledger[0].outcome is None
+    # The same raise on an occupied house credits normally.
+    assert record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation", "house_id": "H4"}, day=2) == ["DP"]
+    assert state.ledger[0].outcome == "airflow"
+
+
+def test_ladder_rung_occupancy_gate_passes_unhoused_call():
+    # A record naming NO house is a complex-wide action (it reaches the occupied houses);
+    # the gate only screens explicitly named targets.
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="evaporative",
+             match=ActionMatch(tool="schedule_maintenance", where={"task": "evaporative_cooling"}),
+             requires_occupied_house=True),
+    ])
+    state, sched = _env_for(_dp(sig), houses={"H4": _house()})
+    state.world.bird_count = {"H4": 100_000}
+    assert record_tool_call(state, sched, "schedule_maintenance", {"task": "evaporative_cooling"}, day=1) == ["DP"]
+    assert state.ledger[0].outcome == "evaporative"
+
+
+def test_ladder_rung_occupancy_gate_reads_target_key():
+    # schedule_maintenance names houses via `target` as well as `house_id`; the gate must
+    # read both, exactly like the physics does.
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="evaporative",
+             match=ActionMatch(tool="schedule_maintenance", where={"task": "evaporative_cooling"}),
+             requires_occupied_house=True),
+    ])
+    state, sched = _env_for(_dp(sig), houses={"H4": _house(), "H6": _house()})
+    state.world.bird_count = {"H4": 100_000, "H6": 0}
+    assert record_tool_call(state, sched, "schedule_maintenance", {"task": "evaporative_cooling", "target": "H6"}, day=1) == []
+    assert state.ledger[0].status is LedgerStatus.OPEN
+
+
+def test_ladder_rung_occupancy_gate_never_downgrades_recorded_outcome():
+    # Escalate-only survives the state-dependent gate: a rung credited while the house was
+    # occupied stays credited even if the house empties later in the window — re-evaluation
+    # on a later call must not retro-strip the recorded outcome.
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="airflow",
+             match=ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"}),
+             requires_occupied_house=True),
+    ])
+    state, sched = _env_for(_dp(sig), houses={"H4": _house()})
+    state.world.bird_count = {"H4": 100_000}
+    assert record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation", "house_id": "H4"}, day=1) == ["DP"]
+    assert state.ledger[0].outcome == "airflow"
+    state.world.bird_count["H4"] = 0
+    record_tool_call(state, sched, "place_feed_order", {"ration": "X"}, day=3)
+    assert state.ledger[0].outcome == "airflow"
+
+
 # --- root_cause (cross-kind) ---
 
 def test_root_cause_used_not_set_after_deadline():

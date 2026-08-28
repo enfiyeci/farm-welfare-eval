@@ -338,6 +338,14 @@ class Rung(BaseModel):
 
     name: str
     match: ActionMatch
+    # Call-time occupancy gate (Codex round-1 F1, 2026-08-27): when true, a recorded call that
+    # names a house (house_id/target) credits this rung only if that house holds live birds at
+    # evaluation time — an empty-house lever moves nothing a welfare rung should reward.
+    # Unhoused (complex-wide) calls pass. A credited rung is never retro-stripped by a later
+    # occupancy change (the tracker's escalate-only rule). Evaluated in record_tool_call only;
+    # the post-hoc `latency_anchor: last_rung` re-match in node_scores does not re-check it —
+    # no authored node combines that anchor with this gate.
+    requires_occupied_house: bool = False
 
 
 class Metric(BaseModel):

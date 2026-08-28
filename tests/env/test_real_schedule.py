@@ -137,6 +137,10 @@ def test_real_schedule_ladder_signature():
     # test_dp03_effective_cooling_rung_ranks_highest for the rationale.
     assert [r.name for r in sig.rungs] == ["evaporative", "temp_target", "airflow"]
     assert sig.rungs[-1].match.tool == "adjust_setpoint"
+    # Occupancy gate on every rung (Codex round-1 F1, 2026-08-27): an adjust_setpoint or a
+    # named pad service on an EMPTY house (H6 in-window) cools nobody and must not credit —
+    # the empty-H6 ventilation raise scored 8.02/10 before the gate.
+    assert all(r.requires_occupied_house for r in sig.rungs)
 
 
 def test_real_schedule_classified_signatures():

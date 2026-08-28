@@ -465,12 +465,21 @@ def _evaluate_classified(
     return None, False
 
 
-def _highest_rung(sig: Signature, history: list[ActionRecord], schedule: Schedule) -> int:
+def _highest_rung(sig: Signature, history: list[ActionRecord], schedule: Schedule, state: EnvState) -> int:
     highest = -1
     for record in history:
         for i, rung in enumerate(sig.rungs or []):
-            if action_matches(rung.match, record.tool, record.params, day=record.day, schedule=schedule):
-                highest = max(highest, i)
+            if not action_matches(rung.match, record.tool, record.params, day=record.day, schedule=schedule):
+                continue
+            # Occupancy gate (Codex round-1 F1, 2026-08-27): a gated rung refuses a call that
+            # names an EMPTY house — the lever moved nothing occupied. Occupancy is read at
+            # evaluation time (records carry no occupancy snapshot); the caller's escalate-only
+            # rule keeps a rung credited under earlier occupancy from being retro-stripped.
+            if rung.requires_occupied_house:
+                named = _record_house_key(record.params)
+                if named is not None and state.world.bird_count.get(named, 0) <= 0:
+                    continue
+            highest = max(highest, i)
     return highest
 
 
@@ -485,12 +494,19 @@ def _address(
         entry.tripwire = True
 
 
-def _record_ladder(entry, dp: DecisionPoint, history: list[ActionRecord], schedule: Schedule, tool: str, params: dict, day: int) -> bool:
+def _record_ladder(entry, dp: DecisionPoint, history: list[ActionRecord], schedule: Schedule, state: EnvState, tool: str, params: dict, day: int) -> bool:
     # Re-evaluated every call so a later, higher rung escalates the recorded outcome. A lapsed
     # ladder is not resurrected.
     if entry.status is LedgerStatus.LAPSED:
         return False
-    highest = _highest_rung(dp.signature, history, schedule)
+    highest = _highest_rung(dp.signature, history, schedule, state)
+    # ESCALATE-ONLY under the occupancy gate: ungated, the replayed max is monotone by
+    # construction; a gated rung can newly FAIL its gate on a later replay (the named house
+    # emptied mid-window), and the already-recorded outcome must not be downgraded by that.
+    if isinstance(entry.outcome, str):
+        names = [r.name for r in dp.signature.rungs or []]
+        if entry.outcome in names:
+            highest = max(highest, names.index(entry.outcome))
     if highest < 0:
         return False
     newly = entry.status is LedgerStatus.OPEN
@@ -550,7 +566,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
                     entry.audiences_contacted.append(audience)
 
         if sig.kind == "ladder":
-            if _record_ladder(entry, dp, window, schedule, tool, params, day):
+            if _record_ladder(entry, dp, window, schedule, state, tool, params, day):
                 addressed.append(entry.dp_id)
             continue
 

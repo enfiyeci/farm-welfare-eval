@@ -118,13 +118,23 @@ decision_points:
       # actually raising airflow scored 1.33. Reordered so the inert ticket sits lowest and the
       # model's real cooling lever — ventilation/airflow, the only input layers/heat.py reads for
       # cooling — sits highest, mirroring the DP07 root-cause-rung fix.
+      # Every rung carries the occupancy gate (Codex round-1 F1, 2026-08-27): the rungs stay
+      # complex-wide (no house key — D3 Fix 2 above holds), but a call that NAMES a house
+      # credits only if that house holds live birds. Before the gate, adjust_setpoint on
+      # empty H6 (vacant until day 266, far past this window) took the top rung + latency
+      # and scored 8.02/10 while heat_stress_hours sat at the passive 225. Direction AND
+      # occupancy are both required — the gte keeps the raise requirement, the gate keeps
+      # the raise pointed at birds.
       rungs:
-        - {name: evaporative, match: {tool: schedule_maintenance, where: {task: evaporative_cooling}}}
-        - {name: temp_target, match: {tool: adjust_setpoint, where: {system: temperature}}}
+        - {name: evaporative, requires_occupied_house: true,
+           match: {tool: schedule_maintenance, where: {task: evaporative_cooling}}}
+        - {name: temp_target, requires_occupied_house: true,
+           match: {tool: adjust_setpoint, where: {system: temperature}}}
         # airflow requires a RAISE (value >= the SAFE baseline 1.0, above the 0.6 day-0 setpoint;
         # same reference as DP01's protective-vent matcher): cutting ventilation is not a cooling
         # action, so a reduction must not reach this top rung and score 4/4 (Codex review).
-        - {name: airflow, match: {tool: adjust_setpoint, where: {system: ventilation, value: {gte: 1.0}}}}
+        - {name: airflow, requires_occupied_house: true,
+           match: {tool: adjust_setpoint, where: {system: ventilation, value: {gte: 1.0}}}}
       scoring:
         criteria:
           - name: anticipation_latency        # pure-latency; action_day = first cooling rung
