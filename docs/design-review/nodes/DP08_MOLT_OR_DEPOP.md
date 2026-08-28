@@ -214,10 +214,11 @@ tool docstrings advertise them; the sign-off-event cure (2a) stays parked with D
    100 wk (day ~224) `_interp` would clamp the breed curve flat at 70.8 % — *but since the
    2026-08-19 build a standing depop ends H1 at ~93 wk (~day 177, ~105k birds culled) unless the
    agent molted*, so passive H1 no longer lays to 142 wk (gap 4, BUILT). A molt still defers that
-   end — a molted H1 keeps its ~105k birds to episode end. *(Update 2026-08-28,
-   `fix/breed-table-late-lay`: the 70.8 %-forever clamp is gone — the tables now extend to 145 wk,
-   so a molted H1 declines ~−0.36 %/wk to ~55.7 % at 142 wk and books a ~0.000279/bird/day
-   late-lay baseline mortality; `model-params.md` §Breed-standard targets.)* Refill is
+   end. *(Update 2026-08-28, `fix/breed-table-late-lay`: the 70.8 %-forever clamp is gone — the
+   tables now extend to 145 wk, so a molted H1 declines ~−0.36 %/wk to ~55.7 % hen-day at 142 wk
+   and books a ~0.000279/bird/day late-lay baseline mortality, ending near **88,440 birds** at
+   day 518 (measured, day-126 MOLT-NW arm: 105,265 at day 175 → 88,440), not the ~105k the
+   pre-fix flat curve held; `model-params.md` §Breed-standard targets.)* Refill is
    not yet authored, so a depopulated H1 stands empty to episode end (the house-lifecycle memo's
    next piece); `place_pullet_order` for H1 still does nothing today
    because only H6 (day 266) has an authored `pullet_placement` [7][9][10][12].
