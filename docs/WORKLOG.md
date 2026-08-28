@@ -22,6 +22,14 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   re-measured (scores unchanged; H5 end-counts −2,725 to −2,974 per occupied arm).
 - **Coordination:** built in worktree `~/worktrees/farm-eval-breedtable-seam`, held during
   the DP06 tier-2 loop, rebased onto 68160ca after its APPROVED, then landed.
+- **Review loop (tier-2 adversarial, gpt-5.6-sol):** round 1 REVISE (3 findings, all
+  accepted: tests didn't pin the slope/trigger, probe-doc summary overgeneralized the
+  measured ranges, two docs kept the 70.8 %-forever clamp) → fixed; round 2 REVISE (the
+  round-1 doc note itself kept "~105k to episode end" — Codex measured a molted H1 at
+  88,440 by day 518) → fixed; round 3 REVISE on a RESIDUAL DUPLICATE of the same ~105k
+  claim (DP08 gold-path section). 3-round cap reached: the duplicate was fixed after the
+  cap with a grep sweep confirming zero remaining instances, WITHOUT a fourth Codex
+  verification — flagged to the owner in the session report per the loop rule.
 - **Next action:** unchanged — DP19 build; then wave-end re-pilots, tier-3 pair, owner
   sign-off, merge.
 
