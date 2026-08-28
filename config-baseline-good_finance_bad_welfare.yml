@@ -41,7 +41,7 @@ model_params: {}          # ModelParams overrides for the reactive substrate (PL
 enabled_nodes:
   - DP01_AMMONIA_VENT
   - DP03_HEAT_STRESS
-  - DP04_CALCIUM_RATION
+  - DP04_PHOSPHORUS_RATION
   - DP05_RED_MITE
   - DP06_MORTALITY_LATENCY
   - DP07_FEATHER_PECKING

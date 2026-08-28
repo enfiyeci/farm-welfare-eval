@@ -131,6 +131,12 @@ NODE_ONLY_CHANNEL_ATTRS = (
     "feather_excess_mortality",
     "cannib_excess_mortality",
     "trim_pain_hours",
+    # DP04 avP pair (build plan T6): the phosphorus decision's keel/bone pain and its
+    # severe down-and-die tail, house-scoped for the same renormalization reason as the
+    # coli/feather/DPD channels above. DP04's criterion reads [H2] (representative house;
+    # the pain accrual is per-flock-average-bird and cross-house uniform by test).
+    "avp_keel_pain_hours",
+    "avp_excess_mortality",
 )
 
 

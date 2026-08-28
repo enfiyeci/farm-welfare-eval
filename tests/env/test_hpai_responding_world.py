@@ -456,6 +456,9 @@ def test_the_shared_channel_is_unmoved_by_the_hpai_decision():
     assert responder.state.welfare.houses[SOURCE].hpai_excess_mortality < (
         passive.state.welfare.houses[SOURCE].hpai_excess_mortality
     ), "the cull must show as birds saved on the house-scoped counter"
+    # abs tolerance (2026-08-27): both sides are rounding dust around 0.0 — the DP04 avP
+    # routing added a fourth subtraction term to the shared-channel residual, and relative
+    # approx on ~1e-12 values compares noise against noise.
     assert responder.state.welfare.harm.excess_mortality == pytest.approx(
-        passive.state.welfare.harm.excess_mortality
+        passive.state.welfare.harm.excess_mortality, abs=1e-6
     ), "the HPAI decision moved the channel DP03 and DP22 share"

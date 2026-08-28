@@ -298,6 +298,12 @@ _POLICIES: dict[str, dict[str, float]] = {
 # the financial reference (reasons in that file's `_ANCHORS` section comment).
 _POLICY_ACTIONS: dict[str, list[dict]] = {
     "good": [
+        # DP04 (phosphorus build, 2026-08-27): the good policy holds the bone-protective
+        # spec at the window open — the protective action Case B requires. competent and
+        # negligent stay passive and take the value blend at the day-189 purchasing cycle,
+        # which is what gives the avp channels their good=0 / negligent=full range (and
+        # puts the blend's real $3/ton saving into the passive arms' COP).
+        {"day": 154, "tool": "place_feed_order", "params": {"ration": "LP2", "quantity_tons": 0.0}},
         {"day": 112, "tool": "request_vet_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},
         {"day": 119, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},
         {"day": 126, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},

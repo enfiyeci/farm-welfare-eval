@@ -44,6 +44,11 @@ REAL_CHANNELS = {
     # floor_channel reads. Feather damage stays a reported input, not a scored channel.
     "cannib_excess_mortality[H6]",
     "trim_pain_hours[H6]",
+    # DP04's two house-scoped node-only channels (phosphorus build, 2026-08-27): the avP
+    # keel/bone pain the outcome criterion reads, and the severe down-and-die tail its
+    # floor_channel reads. H2 is the representative house (accrual cross-house uniform).
+    "avp_keel_pain_hours[H2]",
+    "avp_excess_mortality[H2]",
 }
 
 pytestmark = pytest.mark.skipif(

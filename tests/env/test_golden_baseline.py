@@ -72,6 +72,10 @@ def test_competent_reports_all_channels():
             "coli_excess_mortality",
             "density_harm_days",
             "feather_excess_mortality",
+            # DP04's avp pair (phosphorus build, 2026-08-27) goes through the same
+            # general per-house loop — complex-wide physics, unlike DPD's H6-only pair.
+            "avp_keel_pain_hours",
+            "avp_excess_mortality",
         )
     }
     expected |= {"cannib_excess_mortality[H6]", "trim_pain_hours[H6]"}
@@ -112,7 +116,10 @@ def test_regen_guard_catches_missing_scheduled_anchor():
     import pytest
     from scripts.regen_golden import validate_node_only_anchors
 
-    bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0},
-           "negligent": {"red_mite_excess_index_days[H2x]": 2.0}}
+    # The avp keys are present and correct so the guard's first complaint is the
+    # deliberately misspelled mite key (DP04's demand is checked first otherwise).
+    ok = {"avp_keel_pain_hours[H2]": 0.0, "avp_excess_mortality[H2]": 0.0}
+    bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0, **ok},
+           "negligent": {"red_mite_excess_index_days[H2x]": 2.0, **ok}}
     with pytest.raises(ValueError, match="red_mite_excess_index_days\\[H2\\]"):
         validate_node_only_anchors(bad)

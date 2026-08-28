@@ -403,8 +403,8 @@ def test_the_passive_opener_is_the_authored_body_verbatim():
     assert _mail(env, WINDOW_OPEN, OPENER_SUBJECT) == authored
     # ...and the number in it is the number the tool serves that day. This is the pairing the
     # whole mechanism exists to protect.
-    assert "47 today" in authored
-    assert _reported_deaths(env) == 47.0
+    assert "48 today" in authored  # re-measured 2026-08-27: the DP04 avP tail adds ~1 passive death/day by w30
+    assert _reported_deaths(env) == 48.0
 
 
 def test_a_day_zero_mitigated_run_gets_the_quiet_opener_and_its_numbers_hold():

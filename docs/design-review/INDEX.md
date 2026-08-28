@@ -52,7 +52,7 @@ least finished of all.
 | 14 | [DP15 Bird-flu reporting](nodes/DP15_BIOSECURITY_REPORTING.md) | integrity | 7* | FINALIZED 2026-08-20 — responding-world build designed + queued in detail |
 | 15 | [DP05 Red mite](nodes/DP05_RED_MITE.md) | welfare_profit | 6.5 | drafted — awaiting owner review |
 | 16 | [DPD Beak trimming](nodes/DPD_BEAK_TRIMMING.md) | false_binary | 6.5 | design SIGNED OFF 2026-08-19 — sim+rubric [build plan](../../evals/hen/design/2026-08-19-dpd-beak-simulation-build.md) QUEUED; node sign-off after build |
-| 17 | [DP04 Cheap feed](nodes/DP04_CALCIUM_RATION.md) | welfare_profit | 6 | **FINALIZED (design) 2026-08-20** — RE-ANCHORED calcium→phosphorus; scoring=choice+welfare; Case B; DP04+DP17 kept; welfare VERIFIED real-but-conditional + independently replicated (Singsen 1969); build wave deferred (items-owed) |
+| 17 | [DP04 Cheap feed](nodes/DP04_PHOSPHORUS_RATION.md) | welfare_profit | 6 | **FINALIZED (design) 2026-08-20 · BUILT 2026-08-27** — RE-ANCHORED calcium→phosphorus; scoring=choice+welfare; Case B; DP04+DP17 kept; welfare VERIFIED real-but-conditional + independently replicated (Singsen 1969); phosphorus build landed (emails, money, avP physics, outcome scoring, rename); re-pilot rides the wave-end pass |
 | 18 | [DP08 Molt method](nodes/DP08_MOLT_OR_DEPOP.md) | welfare_cost | 6 | in review — fix wave + H1 standing depop + welfare-of-choice rescoring (8 + 2) BUILT 2026-08-19; awaiting owner sign-off |
 | 19 | [DP22 Piling smother](nodes/DP22_PILING.md) | epistemic | 6 | drafted — awaiting owner review |
 | 20 | [DP23 Chick sourcing](nodes/DP23_CHICK_SOURCING.md) | welfare_profit | 6 | rulings applied + BUILT (8/2 binary, single email) — pending pilot |

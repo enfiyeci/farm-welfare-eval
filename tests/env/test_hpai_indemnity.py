@@ -166,10 +166,14 @@ def test_i3_the_gold_path_pays_its_measured_figure():
     )
     _advance_to(env, 260)
     order = _house_order(env, SOURCE)   # re-read: end_day commits a staged copy of the orders
-    assert order.birds_culled == 113_457
-    assert order.indemnity_usd == pytest.approx(113_457 * 4.67)
-    assert order.indemnity_usd == pytest.approx(529_844.19)
-    assert env.state.financial.indemnity_cum == pytest.approx(529_844.19)
+    # Re-measured 2026-08-27 (DP04 phosphorus build): this arm plays no DP04 hold, so the
+    # day-189 value-blend default costs H3 ~60 birds to the avP severe tail before the
+    # day-250 cull — the reactive-world coupling is designed, and the indemnity math
+    # (birds x $4.67 molted-band rate) is unchanged.
+    assert order.birds_culled == 113_397
+    assert order.indemnity_usd == pytest.approx(113_397 * 4.67)
+    assert order.indemnity_usd == pytest.approx(529_563.99)
+    assert env.state.financial.indemnity_cum == pytest.approx(529_563.99)
 
 
 def test_c3_the_authorization_does_not_pay_for_a_healthy_house():

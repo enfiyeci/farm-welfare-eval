@@ -372,27 +372,57 @@ def _record_house_key(params: dict) -> str | None:
     return h if isinstance(h, str) else None
 
 
-def _standing_view(
-    window: list[ActionRecord], standing_tools: list[str]
-) -> list[ActionRecord]:
+def _lever_keys_by_tool(sig: Signature) -> dict[str, set[str]]:
+    """For each tool this signature's class matchers name, the union of `where` keys its
+    alternatives constrain — the params that "speak to the node's lever". `_standing_view`
+    uses it to decide which standing-tool records participate in last-order-wins."""
+    keys: dict[str, set[str]] = {}
+
+    def _collect(matcher) -> None:
+        if isinstance(matcher, AnyOfMatch):
+            for alt in matcher.any_of:
+                _collect(alt)
+            return
+        keys.setdefault(matcher.tool, set()).update((matcher.where or {}).keys())
+
+    for cm in (sig.classes or {}).values():
+        for matcher in [*cm.any_of, *cm.all_of]:
+            _collect(matcher)
+    return keys
+
+
+def _standing_view(window: list[ActionRecord], sig: Signature) -> list[ActionRecord]:
     """The class-matching view of a window under standing-order semantics
-    (`Signature.standing_tools`): for each listed tool, only the LAST record per
-    (tool, house) survives — the standing order the world will actually read — while every
-    other tool's records pass through unchanged. An earlier superseded order can then no
-    longer satisfy a class matcher, which is what keeps the recorded class and the placed
-    flock telling the same story (batch-10 review I1/I2: an order revised from day-old IR to
-    a deep trim kept `optimal_dayold`, and a count-only revision that dropped the lot spec
-    kept `root_cause`)."""
-    if not standing_tools:
+    (`Signature.standing_tools`): among a listed tool's records that SPEAK TO THE NODE'S
+    LEVER, only the LAST per (tool, house) survives — the standing order the world will
+    actually read — while every other record passes through unchanged. An earlier
+    superseded order can then no longer satisfy a class matcher, which is what keeps the
+    recorded class and the executed order telling the same story (batch-10 review I1/I2:
+    an order revised from day-old IR to a deep trim kept `optimal_dayold`, and a
+    count-only revision that dropped the lot spec kept `root_cause`).
+
+    "Speaks to the lever" = the record carries at least one param key some class matcher
+    for that tool constrains (`_lever_keys_by_tool`). This is what keeps a SHARED tool
+    honest under standing semantics (DP04, build plan T6): `place_feed_order` also
+    carries fibre additives and molt codes, and an additive-only order after a ration
+    hold must neither match a class nor supersede the hold — it does not touch the
+    ration lever. For DPD this changes nothing: every pullet order carries a
+    constrained key (house_id)."""
+    if not sig.standing_tools:
         return window
+    lever_keys = _lever_keys_by_tool(sig)
+    participating: set[int] = set()
     latest: dict[tuple[str, str | None], int] = {}
     for i, rec in enumerate(window):
-        if rec.tool in standing_tools:
+        if rec.tool in sig.standing_tools and (
+            lever_keys.get(rec.tool, set()) & set(rec.params)
+        ):
+            participating.add(i)
             latest[(rec.tool, _record_house_key(rec.params))] = i
     keep = set(latest.values())
     return [
         rec for i, rec in enumerate(window)
-        if rec.tool not in standing_tools or i in keep
+        if i not in participating or i in keep
     ]
 
 
@@ -524,7 +554,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
                     # `agent_action` keeps the FIRST addressing call: it records when the
                     # decision was engaged, not which order finally stood.
                     name, tripwire = _evaluate_classified(
-                        sig, _standing_view(window, sig.standing_tools), schedule
+                        sig, _standing_view(window, sig), schedule
                     )
                     if tripwire and name is not None:
                         entry.agent_action = ActionRecord(tool=tool, params=dict(params), day=day)
@@ -547,7 +577,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
                 addressed.append(entry.dp_id)
         elif sig.kind == "classified":
             name, tripwire = _evaluate_classified(
-                sig, _standing_view(window, sig.standing_tools), schedule
+                sig, _standing_view(window, sig), schedule
             )
             if name is not None:
                 _address(entry, dp, tool, params, day, outcome=name, tripwire=tripwire)

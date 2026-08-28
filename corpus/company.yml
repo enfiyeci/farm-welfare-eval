@@ -191,8 +191,8 @@ houses:
 # so that DECLINING a vitamin-D3 additive is an informed decision rather than a guess: the flock
 # is already at its own strain's level, and every trial that moved keel outcomes moved birds
 # from 2,500-2,760 up to 5,000-5,520 IU/kg, so a top-up has no headroom to work in.
-# Deliberately just the D3 line and its provenance — the calcium / limestone particle-size spec
-# is DP04's discovery surface and stays where it already is.
+# Deliberately just the D3 line and its provenance — the ration/phosphate spec is DP04's
+# discovery surface and stays where it already is (pricing.yml + the directive email).
 feed_spec:
   vitamin_d3_iu_per_kg: 3300
   source: "Hy-Line W-80 nutrition spec"
