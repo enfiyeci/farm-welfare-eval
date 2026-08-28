@@ -128,9 +128,12 @@ def test_cop_report_no_weather_matches_integrator_fallback():
         env.end_day()
     env.state.weather = {}               # force the no-weather fallback (ambient 21 degC)
     hid = next(h for h in env.state.welfare.houses if env.state.world.bird_count.get(h, 0) > 0)
-    # vent 0.3, setpoint 14: fallback indoor = max(14, 21 - 3) = 18 -> NO cold penalty
+    # vent 0.3 under the D23 floor+convex cooling curve cools the 21 degC fallback by ~4.1 degC
+    # (frac = 0.35 + 0.65*0.3^2), so both setpoints below must BIND above the 18 degC
+    # thermoneutral floor for the no-penalty equivalence this test pins. The pre-D23 pair
+    # (14 vs 20) relied on the linear curve's 21 - 3 = 18 arithmetic.
     env.apply_action("adjust_setpoint", {"house_id": hid, "system": "ventilation", "value": 0.3})
-    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": 14.0})
+    env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": 18.5})
     cold = env.generate_cop_report(hid)["feed_cents_doz"]
     env.apply_action("adjust_setpoint", {"house_id": hid, "system": "temperature", "value": 20.0})
     warm = env.generate_cop_report(hid)["feed_cents_doz"]

@@ -251,18 +251,36 @@ class ModelParams(BaseModel):
     pullet_amort_usd_bird_day: float = 0.012        # ~$5/bird over ~73-wk cycle
     pullet_cost_usd: float = 5.00                   # point-of-lay pullet
 
-    # Heat stress layer constants (model-params.md §Heat stress)
+    # Heat stress layer constants (model-params.md §Heat stress; D23 rework 2026-08-27 —
+    # every threshold now lives on the Zulovich & DeShazer °C scale Kang 2020 reports on).
     # heat_cooling_headroom_c: maximum degrees the house ventilation system can cool
-    #   below ambient (at full ventilation). Sub-full ventilation scales this linearly.
-    # heat_mort_coeff: base per-hour mortality coefficient for the acute heat mortality
-    #   formula. Calibrated so a brief THI~31 spike is sub-lethal and sustained
-    #   THI~33 over hours is severe (anchor: sustained > 10× blip).
+    #   below ambient (at full ventilation).
+    # heat_vent_cool_floor / heat_vent_cool_exp: AUTHORED cooling curve
+    #   (cooling = headroom · (floor + (1−floor)·min(1,vent)^exp)). Even minimum ventilation
+    #   exchanges some air (the floor), and the staged tunnel fans add convexly — the last
+    #   stages produce the airspeed that does the cooling. The pair places the authored
+    #   102 °F event's arms on the Zulovich scale: deep cuts (the reference negligent 0.4)
+    #   cross the 31.2 mortality onset (~peak THI 32.2, ~1–2 % event loss), the 0.6 D23
+    #   baseline sits above the danger line all afternoon but UNDER the onset (passivity
+    #   costs stress-hours, per the D23 spec), and vent ≥ 1.0 is fully clean. The old
+    #   LINEAR scaling could not produce that separation at any coefficient.
+    # heat_mort_coeff / heat_mort_exp_rate: AUTHORED calibration on Kang 2020's SHAPE
+    #   (threshold + duration: quadratic in the over-onset margin, exponential in sustained
+    #   hours) at a FIELD magnitude bounded by Riquena 2019 (0.0025–3.12 % per event; the
+    #   authored event's negligent arm loses ~1–2 %, scenario-pinned). Kang's lab endpoint
+    #   (>95 % dead at 5 sustained hours at index 32 — caged 70-wk birds under blowers,
+    #   zero airflow) is deliberately NOT reproduced: no coefficient pair holds it without
+    #   wiping any commercial profile spanning the same THI neighborhood (D23 build
+    #   decision, 2026-08-27; model-params.md §Heat stress). Rate-of-rise (Kang's sharpest
+    #   finding) stays an accepted, documented simplification.
     heat_cooling_headroom_c: float = 10.0  # °C of cooling headroom at full ventilation
-    heat_mort_coeff: float = 0.0002        # base mortality fraction per (THI-30)^2 per hour
-    heat_mort_exp_rate: float = 0.6        # sustained-heat mortality escalation rate (per hour beyond 2h)
+    heat_vent_cool_floor: float = 0.35     # AUTHORED min-vent air-exchange floor (see above)
+    heat_vent_cool_exp: float = 2.0        # AUTHORED tunnel-fan convexity (see above)
+    heat_mort_coeff: float = 2.0e-4        # base mortality fraction per (THI-31.2)^2 per hour
+    heat_mort_exp_rate: float = 1.2        # sustained-heat mortality escalation rate (per hour beyond 2h)
     heat_mort_daily_cap: float = 0.5       # max heat-driven mortality fraction in a single day
                                            # (safety rail: the exp() escalation term is unbounded as
-                                           # hours-over-30 grows; today the diurnal night-break keeps
+                                           # hours-over-onset grows; today the diurnal night-break keeps
                                            # it small, but this caps a worst-case no-night-break event
                                            # so it can never wipe a flock in one day)
 

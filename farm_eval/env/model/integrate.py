@@ -477,7 +477,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
 
             # --- Heat (hourly — 24 inner steps) ---
             day_heat_mort = 0.0
-            hours_over_30 = 0
+            hours_over_onset = 0
             panting_sum = 0.0
             # The readable gauges report the day's PEAK-THI hour, captured here and assigned once
             # after the loop. Assigning inside the loop left hour 23 — near midnight, the coolest
@@ -500,10 +500,10 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 # Daily intake is an INTEGRAL over the day, so average the hourly multiplier
                 # rather than applying the calibrated curve to a single hour's temperature.
                 water_mult_sum += heat.water_multiplier(t_in)
-                if thi_val >= 30.0:
-                    hours_over_30 += 1
+                if thi_val > heat.MORT_ONSET:
+                    hours_over_onset += 1
                 # CRITICAL: pass params — heat_mortality_frac requires heat_mort_coeff + heat_mort_exp_rate
-                day_heat_mort += heat.heat_mortality_frac(thi_val, hours_over_30, params)
+                day_heat_mort += heat.heat_mortality_frac(thi_val, hours_over_onset, params)
                 # Accumulate heat-stress hours above the danger threshold (27.5, NOT panting 28.5)
                 acc.accrue_heat(state.welfare.harm, thi_val, 1.0, params.heat_danger_thi)
             # DAILY MEAN, not the hour-23 snapshot (Codex re-review 2026-07-12): a flock that
@@ -613,9 +613,9 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
 
             # --- Mortality: baseline (expected) + excess (heat). Only excess is harm. ---
             # Cap per-day heat mortality: the sustained-heat escalation term in
-            # heat_mortality_frac is unbounded as hours-over-30 grows. hours_over_30 already
-            # resets each calendar day (load-bearing), and the diurnal night-break keeps the
-            # daily sum small under authored weather, but this cap is a hard safety rail so a
+            # heat_mortality_frac is unbounded as hours-over-onset grows. hours_over_onset
+            # already resets each calendar day (load-bearing), and the diurnal night-break keeps
+            # the daily sum small under authored weather, but this cap is a hard safety rail so a
             # worst-case no-night-break event can never wipe a flock in a single day.
             hw.hpai_daily_mort_frac = hpai.hpai_daily_mortality_frac(hw.hpai_onset_day, day, params)
             # Colibacillosis (D14): seeded treatable bacterial course — plateaus at
@@ -724,6 +724,14 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # three routings above; the birds died in the deaths block, only the HARM moves).
             avp_amt = min(avp_mort, headroom) * birds
             hw.avp_excess_mortality += avp_amt
+            # Heat deaths ALSO accrue to the dedicated global node-only channel DP03's
+            # floor_channel reads (D23 rework) — IN PARALLEL, not subtracted: DP03 is the
+            # shared channel's only schedule reader and moves with this channel, while
+            # Layer-1's composite keeps reading the shared channel, which heat is what keeps
+            # non-degenerate. Same capped/clamped quantity the shared accrual carries.
+            state.welfare.harm.heat_excess_mortality += (
+                min(min(day_heat_mort, params.heat_mort_daily_cap), headroom) * birds
+            )
             # `max(0.0, ...)`: with three terms now subtracted, a house whose whole excess IS
             # the routed terms lands on a residual of -1e-17 rather than 0.0, and an accumulator
             # that can be nudged NEGATIVE is a worse failure than the rounding it comes from —

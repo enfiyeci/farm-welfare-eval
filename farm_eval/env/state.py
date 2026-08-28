@@ -370,6 +370,14 @@ class HarmAccumulators(BaseModel):
     light_deficit_lux_hours: float = 0.0
     worker_nh3_ppm_hours_over: float = 0.0
     red_mite_index_hours_over: float = 0.0
+    # Heat-driven excess deaths, accrued IN PARALLEL with the shared `excess_mortality`
+    # channel (D23 rework, 2026-08-27) — NOT the coli/feather/HPAI subtract-out idiom.
+    # This is DP03's `floor_channel`: the shared channel stays exactly as it was (heat +
+    # staffing feed it, and Layer-1's 0.25-weight composite reads it — heat is what keeps
+    # it non-degenerate), while the node floor reads this dedicated counter. Global,
+    # node-only: registered in welfare_state.NODE_ONLY_GLOBAL_CHANNELS, never in the
+    # Layer-1 composite, so nothing is double-counted.
+    heat_excess_mortality: float = 0.0
 
 
 class WelfareState(BaseModel):
