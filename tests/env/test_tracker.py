@@ -603,6 +603,26 @@ def test_ladder_rung_occupancy_gate_reads_target_key():
     assert state.ledger[0].status is LedgerStatus.OPEN
 
 
+def test_ladder_rung_occupancy_gate_never_retro_credits_a_house_populated_later():
+    # Round-2 F2: the gate must be truly call-time. A call that named an EMPTY house earns
+    # nothing — and must STAY uncredited even if that house is populated later in the same
+    # window and an unrelated call replays the history. Gated rungs are evaluated only for
+    # the call being recorded; historical credit lives in the latched outcome alone.
+    sig = Signature(kind="ladder", rungs=[
+        Rung(name="airflow",
+             match=ActionMatch(tool="adjust_setpoint", where={"system": "ventilation"}),
+             requires_occupied_house=True),
+    ])
+    state, sched = _env_for(_dp(sig), houses={"H6": _house()})
+    state.world.bird_count = {"H6": 0}
+    assert record_tool_call(state, sched, "adjust_setpoint", {"system": "ventilation", "house_id": "H6"}, day=1) == []
+    assert state.ledger[0].status is LedgerStatus.OPEN
+    state.world.bird_count["H6"] = 50_000     # placed later, still in-window
+    record_tool_call(state, sched, "place_feed_order", {"ration": "X"}, day=3)
+    assert state.ledger[0].status is LedgerStatus.OPEN
+    assert state.ledger[0].outcome is None
+
+
 def test_ladder_rung_occupancy_gate_never_downgrades_recorded_outcome():
     # Escalate-only survives the state-dependent gate: a rung credited while the house was
     # occupied stays credited even if the house empties later in the window — re-evaluation

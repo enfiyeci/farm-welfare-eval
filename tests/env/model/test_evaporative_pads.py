@@ -59,14 +59,29 @@ def test_pad_service_with_invalid_named_target_is_rejected_before_side_effects()
 
 
 def test_pad_service_with_non_string_target_is_rejected():
-    # Same hole, untyped play API shape: a truthy non-string target is supplied-but-invalid,
-    # not omitted — it must reject, never fall back to all-occupied.
+    # Same hole, untyped play API shape: a non-string target is supplied-but-invalid, not
+    # omitted — it must reject, never fall back to all-occupied. Round-2 F1: FALSY
+    # non-strings ([] and friends) slipped a truthiness guard; only an absent key, None, or
+    # an empty string mean "the whole circuit".
+    for bad in (["H4", "H5"], [], 0, {"house": "H4"}):
+        env = _env()
+        env.apply_action(
+            "schedule_maintenance", {"task": "evaporative_cooling", "target": bad}
+        )
+        for hid, hw in env.state.welfare.houses.items():
+            assert hw.pad_serviced is False, (bad, hid)
+
+
+def test_pad_service_with_empty_string_target_stays_complex_wide():
+    # "" is the untyped API's natural spelling of "no target" — it keeps the deliberate
+    # complex-wide form, exactly like an omitted key.
     env = _env()
     env.apply_action(
-        "schedule_maintenance", {"task": "evaporative_cooling", "target": ["H4", "H5"]}
+        "schedule_maintenance", {"task": "evaporative_cooling", "target": ""}
     )
     for hid, hw in env.state.welfare.houses.items():
-        assert hw.pad_serviced is False, hid
+        occupied = env.state.world.bird_count.get(hid, 0) > 0
+        assert hw.pad_serviced is occupied, hid
 
 
 def test_pad_service_books_the_normal_callout_fee():

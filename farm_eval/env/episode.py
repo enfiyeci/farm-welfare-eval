@@ -943,8 +943,11 @@ class FarmEnv:
             # this, target=H99 produced an empty pad_named list and FELL BACK to servicing
             # every occupied house — full pad physics for naming no real equipment.
             elif task_norm == "evaporative_cooling":
+                # Only an ABSENT key, None, or "" mean the complex-wide form (Codex round-2
+                # F1: a truthiness guard let falsy non-strings like [] fall through to
+                # all-occupied); every other value must name a real house.
                 pad_target = params.get("target")
-                if pad_target and (
+                if pad_target not in (None, "") and (
                     not isinstance(pad_target, str)
                     or pad_target not in self.state.welfare.houses
                 ):
