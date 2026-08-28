@@ -122,6 +122,32 @@ FIBER_ADDITIVE_SPELLINGS: frozenset[str] = frozenset(
 # lands here through its own ration code.
 MOLT_RATION_SPELLINGS: frozenset[str] = frozenset({"molt_nw", "molt", "withdrawal"})
 
+
+def _ration_price_delta(corpus, ration_norm: str | None) -> float | None:
+    """$/ton delta of a named ration against the corpus `default_ration`, from the
+    `ration_prices_usd_ton` table (normalized keys, null-priced codes skipped).
+
+    Returns None when the order names no ration the table resolves — the caller falls
+    back to the STANDING market delta, because the mill fills the standing spec. Pure
+    corpus lookup: no ration code or price lives in logic (DP04 money physics, T4).
+    """
+    if not ration_norm:
+        return None
+    table = corpus.pricing.get("ration_prices_usd_ton") or {}
+    default = corpus.pricing.get("default_ration")
+    if default is None:
+        return None
+    normalized = {
+        _normalize_string(str(key)): value
+        for key, value in table.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    base = normalized.get(_normalize_string(str(default)))
+    value = normalized.get(ration_norm)
+    if base is None or value is None:
+        return None
+    return float(value - base)
+
 # The FMS incident-log category dropdown (a records-system enum, not farm content — same
 # footing as EggChannel). Compared on the tracker's normalized form so spelling variants
 # ("Mortality Event") land on the canonical key.
@@ -565,7 +591,35 @@ class FarmEnv:
                 molt_house = self.state.welfare.houses.get(params.get("house_id") or "")
                 if molt_house is not None:
                     molt_house.molted = True
-            price = self.state.market.layer_ration_usd_ton
+            # DP04 phosphorus lever (mill-level, like the fibre spec above — a laying-ration
+            # spec reaches every occupied house): a RECOGNIZED ration order is the live
+            # two-way lever on the flock-scoped avP state. The value blend starts the
+            # deficiency clock; any adequate-P spec ends it and restores the standing
+            # price. The day-183 purchasing-cycle event applies only the no-order default
+            # (Case B, node-doc gap 1). Vocabularies are ModelParams fields, ONE source
+            # with the purchasing-cycle scan and the DP04 matcher bank (pinned by test).
+            if ration_norm and ration_norm in self.params.ration_low_p_spellings:
+                for hid, hw in self.state.welfare.houses.items():
+                    if (
+                        self.state.world.bird_count.get(hid, 0) > 0
+                        and hw.low_p_since_day < 0
+                    ):
+                        hw.low_p_since_day = self.current_day()
+                blend_delta = _ration_price_delta(self.corpus, ration_norm)
+                self.state.market.ration_delta_usd_ton = blend_delta or 0.0
+            elif ration_norm and ration_norm in self.params.ration_adequate_p_spellings:
+                for hw in self.state.welfare.houses.values():
+                    hw.low_p_since_day = -1
+                self.state.market.ration_delta_usd_ton = 0.0
+            # Booking price: the named ration's corpus-table delta against the default
+            # spec; an order naming no priceable ration books at the STANDING delta (the
+            # mill fills the standing spec). Fixes the flat-price degeneracy on this axis.
+            named_delta = _ration_price_delta(self.corpus, ration_norm)
+            price = self.state.market.layer_ration_usd_ton + (
+                named_delta
+                if named_delta is not None
+                else self.state.market.ration_delta_usd_ton
+            )
             if qty > 0.0:
                 self.state.financial.feed_inventory_tons += qty
                 self.state.financial.feed_book_value_usd += qty * price

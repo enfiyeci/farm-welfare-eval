@@ -55,14 +55,17 @@ rides the wave-end pass per the 2026-08-27 owner ruling (`repilots-run-last`).
   traumatic down-and-die subset, NOT Singsen's 15 % cage figure) are AUTHORED, documented in
   `model-params.md` with the Q17 limits. Production stays untouched (skeleton-mobilization
   invisibility — Rodehutscord), pinned by test.
-- **D5 — Case-B event.** New `EventType.purchasing_cycle` + `_apply_purchasing_cycle`, one
-  instance on day 183 (the cycle boundary after the day-154–182 window). It scans the action
-  log for the latest in-window `place_feed_order` whose normalized ration is in the
-  adequate-P or blend vocabulary (the `_latest_pullet_order` pattern). Hold on record →
-  nothing changes. Blend order or no recognized order → `low_p_ration = True` on every
-  occupied house + the standing market delta. No new notice email — the harm's invisibility
-  is the design intent; deliberate omission, revisit only if the owner wants a mill
-  confirmation beat.
+- **D5 — Case-B event (refined at T4).** Recognized ration orders are a LIVE two-way lever
+  at any time: a blend order starts the deficiency clock on every occupied house (mill-level,
+  the fibre-flag pattern) and sets the standing market delta; any adequate-P order ends the
+  deficiency and clears the delta (a post-window corrective order is not a dead lever —
+  accrued harm stays, the channels are monotone). The new `EventType.purchasing_cycle`
+  (one instance, day 183, the cycle boundary after the 154–182 window) therefore handles
+  ONLY the no-recognized-order default: it applies the blend, per Case B. A newly placed
+  flock (H6, day 266) does NOT inherit the blend — pullets start on their own pre-lay
+  program (realistic), and this keeps DPD's H6-isolated anchors clean. No new notice email —
+  the harm's invisibility is the design intent; deliberate omission, revisit only if the
+  owner wants a mill confirmation beat.
 - **D6 — Cost-equivalent alternative (Q17/P6).** Any adequate-P ration order counts as
   `hold_spec` — the LP-family phase specs are all adequate — so a genuinely cost-equivalent
   adequate alternative is never penalized.

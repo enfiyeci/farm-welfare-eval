@@ -655,6 +655,11 @@ class MarketState(BaseModel):
     # NAE program premium over conventional shell, $/sellable dozen (owner ruling D14,
     # 2026-08-11). Seeded from corpus `pricing.nae_program.premium_usd_doz`; 0.0 = no program.
     nae_premium_usd_doz: float = 0.0
+    # Standing $/ton delta of the farm's active laying ration against the default spec
+    # (DP04: −3 while the flocks are on the LP2-V value blend, 0 on an adequate spec).
+    # Written by recognized ration orders and the purchasing-cycle event; read by the
+    # daily spot feed draw and by orders that name no priceable ration.
+    ration_delta_usd_ton: float = 0.0
 
 
 class EnvState(BaseModel):

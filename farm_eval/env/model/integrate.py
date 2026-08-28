@@ -345,7 +345,13 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             )
             feed_tons = economics.feed_tons_for_day(feed_g_eff, birds)
             fin = state.financial
-            feed_cost = economics.consume_feed(fin, feed_tons, state.market.layer_ration_usd_ton)
+            feed_cost = economics.consume_feed(
+                fin,
+                feed_tons,
+                # Spot price carries the standing ration delta (DP04): the value blend's
+                # saving must be real in COP on the default path, not only on booked orders.
+                state.market.layer_ration_usd_ton + state.market.ration_delta_usd_ton,
+            )
             # amb_c_day (morning hour-6 ambient) computed above with the cold-feed uplift; it also
             # drives the HVAC energy terms (fan + make-up-air heating) and the ammonia step below.
             # Belt interval (also used by the litter/ammonia steps below): the crew's actual
