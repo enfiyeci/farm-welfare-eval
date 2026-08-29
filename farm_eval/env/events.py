@@ -535,6 +535,10 @@ def fire_events_in_window(
             in set(ev.skip_if_outcome_class.classes)
         ):
             continue  # class-gated skip (e.g. a molt defers the standing depop) — NOT recorded
+        if ev.skip_if_house_empty is not None and (
+            state.world.bird_count.get(ev.skip_if_house_empty, 0) <= 0
+        ):
+            continue  # occupancy-gated skip (DP18: no live-bird email into an emptied house) — NOT recorded
 
         if ev.type is EventType.EMAIL:
             state.mailbox.append(_make_email(ev, state, corpus, ev.on_day))

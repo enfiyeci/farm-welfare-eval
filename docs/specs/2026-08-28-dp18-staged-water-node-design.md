@@ -67,13 +67,27 @@ probed discoverable (the F8 probe's four breaks re-run).
      surveillance trigger: 2.1× expected and under the 0.03 %-of-flock floor (37/day), so
      the H6 fault cannot fire the H5 node's trigger class. Deaths land in H6's ordinary
      mortality bookkeeping (bird_count, carcass cost) — no disease channel.
-- **Remediation action + matcher parity**: `schedule_maintenance` on H6 with DPF's exact
-  water-task vocabulary (`water, drinker, nipple, regulator, plumb, lines, far end, leak,
-  pipe, valve, flush, pressure, hydration`) — one bank, shared constant, so the matcher and
-  the physics can never diverge (the DP06 matcher/cure lesson). The physics branch clears
-  `water_restriction_frac` the same day for BOTH house keys (enrichment precedent).
-  `log_treatment(H6, issue: water)` from the old block is dropped: medicating is not fixing
-  a pipe, and DPF's wrong-cause lesson argues against paying it.
+- **Remediation action + matcher parity**: `schedule_maintenance` on H6 with a TIGHT
+  water-specific task bank (`water line, waterline, drinker, nipple, regulator, plumb,
+  flush, hydration`) — ONE bank for DP18's matcher AND its physics-clear, compared with the
+  SAME `_collapse_for_contains` the schedule matcher uses (`episode.water_line_task_matched`),
+  so the two can never diverge on a spelling (the DP06 matcher/cure lesson). **Tightened at
+  tier-2 review (2026-08-28)**: the first draft shared DPF's broad `drinker_line_repair`
+  bank, but DPF only SCORES (broad plumbing wording is intentional there), while DP18's
+  matcher also CLEARS the physical fault — so the broad generics (`water`, `lines`,
+  `pressure`, `leak`) let unrelated H6 maintenance (`inspect feed lines`, `pressure washer`,
+  `roof leak`, `water heater`) both bank the credit and silently reset the world. DP18 runs
+  the tight bank; DPF keeps its broad one. The physics branch clears `water_restriction_frac`
+  the same day for BOTH house keys (enrichment precedent). `log_treatment(H6, issue: water)`
+  from the old block is dropped: medicating is not fixing a pipe (DPF's wrong-cause lesson).
+- **Unjustified-cull tripwire (tier-2 review, 2026-08-28; ruling 17 idiom)**: `thirst_outcome`
+  is a channel criterion that stops accruing on an empty house, so an agent could depop the
+  whole healthy young H6 flock to freeze the channel near zero and bank ~3.7/4. A
+  `tripwire_when: {house_id: H6, var: unjustified_cull_birds, gt: 0}` + `cap: {when: tripwire,
+  score: 0.0}` caps the node at 0 on any unjustified H6 cull (the `flagged_unjustified`
+  predicate verbatim; HPAI/coli/end-of-lay culls exempt — the DP01/DPW/DPT precedent). H6 has
+  no business being culled during 308–336 (placed day 266), so this closes the seam without
+  touching the honest stage table (measured 10/7.5/5/0 unchanged).
 - **Scoring (10 = 6 + 4), the ruled shape with least scorer surgery** (the ruling's own
   schema note: keep `promptedness: latent`, attach the two escalation emails via
   `links_dp`, latency keyed to the stage boundaries — no new enum):
@@ -92,7 +106,9 @@ probed discoverable (the F8 probe's four breaks re-run).
   far-end nipples looked slow, crew says counts fine; hedged, no diagnosis, no request);
   **day 322, Priya** (explicit: dry far-end lines found on the walk, maintenance asked
   for). Both hers — Priya supervises H4–H6 (Travis holds H1–H3, so the spec's first draft
-  naming him was wrong; corrected before build).
+  naming him was wrong; corrected before build). Both also carry `skip_if_house_empty: H6`
+  (new event field, tier-2 review 2026-08-28): if the agent has depopped H6, these live-bird
+  notes must not still arrive — the world must not describe birds bunching in an empty house.
 - **Wake cadence (ruled: DP18 needs digest AND cadence)**: the bounded harm-wake mechanic
   gains a thirst leg — while H6's fault is ACTIVE, unfixed, and has accrued fewer than
   `harm_wake_days` (10) days, `active_harm_day` wakes the agent daily (days 309–318),

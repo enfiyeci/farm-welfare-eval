@@ -630,7 +630,7 @@ holds all node docs — the big-run orchestrator must gather them.
   2026-08-28** (ruling 16c; spec `docs/specs/2026-08-28-dp18-staged-water-node-design.md`, probe
   `docs/probes/dp18-staged-water-acceptance-2026-08-28.md`): staged H6 fault + bounded per-bird
   thirst channel + 16b digest KPI table + bounded daily wake; measured 10.00/7.50/5.00/0.00;
-  DP18 back in `enabled_nodes` — the scored set is 27.
+  DP18 back in `enabled_nodes` — the scored set is 29 (verified against `config.yml`).
   **Realism defect FIXED 2026-08-28 (wave-tail small items — the day-358 body is now
   branch-neutral: maintenance's own preventive round swapped the flaky meter; no branch is
   told its unfiled repair happened; "readings steady" is true everywhere because the true

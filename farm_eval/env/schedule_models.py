@@ -1237,6 +1237,11 @@ class ScheduledEvent(BaseModel):
     links_dp: str | None = None
     persists_if_unaddressed: str | None = None  # fire only if linked DP not yet addressed
     skip_if_outcome_class: SkipIfOutcomeClass | None = None  # skip if linked DP's class matches
+    # Occupancy gate (DP18 tier-2 review, 2026-08-28): skip this event when the named house
+    # stands empty. A latent-house escalation email that describes live birds must not arrive
+    # after the agent has emptied the house (an unjustified depop) — the world would contradict
+    # itself. NOT recorded as fired when skipped, so it re-evaluates on replay.
+    skip_if_house_empty: str | None = None
     variant_on_dp: str | None = None  # pick body by that DP's ledger status
     variant_on_state: VariantOnState | None = None  # ...and/or by a live house metric's band
     variants: dict[str, str] = Field(default_factory=dict)  # {"addressed": ref, "unaddressed": ref}

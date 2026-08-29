@@ -4,7 +4,7 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
-## 2026-08-28 · claude · the audit's gaps BUILT — D17 rewrite, five small items, ruling 16·W ported, 16b digest table, DP18 STAGED REVIVAL (scored set 27) (branch integrate/node-review-2026-08-26)
+## 2026-08-28 · claude · the audit's gaps BUILT — D17 rewrite, five small items, ruling 16·W ported, 16b digest table, DP18 STAGED REVIVAL (scored set 29) (branch integrate/node-review-2026-08-26)
 
 - **Owner ordered the audit's gaps into THIS wave ("yes they do").** All built TDD:
 - **Small items** (`b859077`): D17 — `se_w40.md` de-advocated (both lawful options, no
@@ -27,7 +27,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   recorded in the spec: DP25's overstocked negligent arm and post-window accrual otherwise
   broke the ruled gradient); bounded daily thirst wake (309–317, releases on fix);
   measured **10.00 / 7.50 / 5.00 / 0.00**. All references/goldens/corners regenerated,
-  movement attributed. Full suite green. **The scored set is 27.**
+  movement attributed. Full suite green. **The scored set is 29** (verified against
+  `config.yml enabled_nodes`; DP18 is the 29th — the pack's earlier "27" undercounted).
 - Tier-2 adversarial review of this whole batch: launched next (wave grain).
 
 ## 2026-08-28 · claude · per-node wave audit — ledger synced to the ten build batches; two real gaps found (branch integrate/node-review-2026-08-26)

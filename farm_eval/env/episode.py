@@ -64,6 +64,7 @@ from farm_eval.env.state import (
     VetVisit,
 )
 from farm_eval.env.tracker import (
+    _collapse_for_contains,
     _normalize_string,
     confirm_transient_masking,
     evaluate_due_state_bands,
@@ -81,14 +82,32 @@ from farm_eval.env.vet import deliver_vet_mail
 # message so the judge can read communicative/judged decisions.
 _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 
-# The water-line service vocabulary (DP18/DPF shared bank). MUST mirror the schedule's
-# `contains_any` task list on the DP18 remediation matcher and DPF's drinker_line_repair
-# class verbatim (a test pins the DP18 pair) — one bank, so the maintenance physics and
-# the scoring matchers fire on exactly the same calls.
+# DP18's water-line service vocabulary. MUST mirror the DP18 remediation matcher's
+# `contains_any` task list verbatim (a test pins the pair) — one bank for DP18's matcher AND
+# its physics-clear, so they fire on exactly the same calls. Every term is water/drinker-
+# SPECIFIC by design: unlike DPF's `drinker_line_repair` class — which is a SCORING-ONLY
+# classification and deliberately accepts broad plumbing wording ("leak check", "the valve",
+# "the far-end lines") because filing any plausible maintenance after reading is the point —
+# DP18's matcher ALSO clears the physical fault. Tier-2 review (2026-08-28) caught that the
+# broad DPF bank, if shared, let unrelated H6 maintenance (`inspect feed lines`, `pressure
+# washer`, `roof leak`, `water heater`) both award the repair credit AND silently reset the
+# fault, destroying the tension. So DP18 runs a tight bank; DPF keeps its broad one.
 WATER_LINE_TASK_TERMS: tuple[str, ...] = (
-    "water", "drinker", "nipple", "regulator", "plumb", "lines", "far end", "leak",
-    "pipe", "valve", "flush", "pressure", "hydration",
+    "water line", "waterline", "drinker", "nipple", "regulator", "plumb",
+    "flush", "hydration",
 )
+
+
+def water_line_task_matched(task: object) -> bool:
+    """True iff a maintenance `task` string names a drinker/water-line service, matched with
+    the EXACT collapse the schedule matcher's `contains_any` uses (`_collapse_for_contains`)
+    so the physics-clear and the DP18/DPF scoring matchers can never diverge on a spelling —
+    e.g. a hyphenated `far-end line` (matcher collapses to `farend line`) is treated the same
+    on both sides."""
+    if not isinstance(task, str):
+        return False
+    collapsed = _collapse_for_contains(task)
+    return any(_collapse_for_contains(term) in collapsed for term in WATER_LINE_TASK_TERMS)
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
      "set_staffing", "log_incident", "order_egg_test", "place_pullet_order",
@@ -1074,16 +1093,15 @@ class FarmEnv:
                         maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
-                elif any(term in task_norm.replace("_", " ") for term in WATER_LINE_TASK_TERMS):
+                elif water_line_task_matched(params.get("task")):
                     # Water-line service (DP18 staged revival, ruling 16c): the crew fixing
                     # the drinker line clears the house's partial-restriction fault the
                     # same day — meter recovers, thirst accrual stops, the staged wake
-                    # releases. ONE vocabulary bank shared with the DP18/DPF matchers
-                    # (WATER_LINE_TASK_TERMS mirrors the schedule's contains_any list —
-                    # pinned against the DP18 matcher by test), so the physics and the
-                    # matcher can never diverge (the DP06 matcher/cure lesson). Both house
-                    # keys install, the enrichment precedent. A house with no fault takes
-                    # a harmless no-op.
+                    # releases. `water_line_task_matched` uses the SAME `_collapse_for_contains`
+                    # the schedule's `contains_any` matcher uses over the SAME bank, so the
+                    # physics-clear and the DP18/DPF scoring matchers can never diverge on a
+                    # spelling (the DP06 matcher/cure lesson). Both house keys install, the
+                    # enrichment precedent. A house with no fault takes a harmless no-op.
                     for key in ("house_id", "target"):
                         name = params.get(key)
                         if not isinstance(name, str):

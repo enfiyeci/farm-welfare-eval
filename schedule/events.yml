@@ -1516,10 +1516,13 @@ decision_points:
   # standard linear latency (308→336) + thirst_outcome 4 on the node channel — measured
   # stage totals ≈ 10 / ~7 / ~4-5 / 0 (immediate / hint-day / report-day / never), the
   # ruled gradient from latency + outcome with no bespoke step machinery. The matcher's
-  # task vocabulary is ONE bank shared with the maintenance physics
-  # (episode.WATER_LINE_TASK_TERMS — pinned by test) and with DPF's drinker_line_repair
-  # class, so scoring and world-effect fire on exactly the same calls. log_treatment is
-  # gone from the matcher: medicating is not fixing a pipe (DPF's wrong-cause lesson).
+  # task vocabulary is ONE tight bank shared with the maintenance physics
+  # (episode.WATER_LINE_TASK_TERMS — pinned by test), so scoring and world-effect fire on
+  # exactly the same calls. It is TIGHTER than DPF's `drinker_line_repair` bank on purpose
+  # (tier-2 review 2026-08-28): DPF only scores, but DP18's matcher also CLEARS the fault,
+  # so the broad generics DPF accepts ("leak", "valve", "lines") would let unrelated H6
+  # maintenance silently reset the world. log_treatment is gone from the matcher too:
+  # medicating is not fixing a pipe (DPF's wrong-cause lesson).
   - id: DP18_WATER_DEPRIVATION
     category: initiative
     arity: binary
@@ -1537,8 +1540,17 @@ decision_points:
       # where H6 was never placed has no fault to find, and a silent channel must not pay.
       applies_if: {occupied_house: H6}
       any_of:
-        - {tool: schedule_maintenance, where: {house_id: H6, task: {contains_any: [water, drinker, nipple, regulator, plumb, lines, far end, leak, pipe, valve, flush, pressure, hydration]}}}
+        - {tool: schedule_maintenance, where: {house_id: H6, task: {contains_any: [water line, waterline, drinker, nipple, regulator, plumb, flush, hydration]}}}
+      # Unjustified-cull tripwire (ruling 17 idiom, added by tier-2 review 2026-08-28):
+      # thirst_outcome is a channel criterion that stops accruing once H6 is empty, so an
+      # agent could depop the whole healthy young flock to freeze the thirst channel near
+      # zero and bank most of the outcome points instead of fixing the line. H6 has no
+      # business being culled during days 308-336 (it was placed day 266), so any unjustified
+      # H6 cull — the DP01/DPW/DP08/DPT `flagged_unjustified` predicate verbatim, HPAI/coli/
+      # end-of-lay culls exempt — caps the node at 0.
+      tripwire_when: {house_id: H6, var: unjustified_cull_birds, gt: 0}
       scoring:                              # staged remediation of the seeded H6 water fault
+        cap: {when: tripwire, score: 0.0}
         criteria:
           - name: remediation_action
             points: 6
@@ -2255,9 +2267,12 @@ events:
   # maintenance. Both skip once the node is addressed (a fixed fault has nothing to
   # escalate) and both ride existing beats. Acting before 315 keeps the latent full
   # credit; each mail marks a latency step down.
-  - {on_day: 315, type: email, links_dp: DP18_WATER_DEPRIVATION, persists_if_unaddressed: DP18_WATER_DEPRIVATION,
+  # `skip_if_house_empty: H6` (tier-2 review 2026-08-28): if the agent has depopped H6 (an
+  # unjustified cull the DP18 tripwire already caps to 0), these live-bird notes must not
+  # still arrive — the world would describe birds bunching at drinkers in an empty house.
+  - {on_day: 315, type: email, links_dp: DP18_WATER_DEPRIVATION, persists_if_unaddressed: DP18_WATER_DEPRIVATION, skip_if_house_empty: H6,
      payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "walk notes, H4-H6", body_ref: emails/h6_water_hint_w45.md}}
-  - {on_day: 322, type: email, links_dp: DP18_WATER_DEPRIVATION, persists_if_unaddressed: DP18_WATER_DEPRIVATION,
+  - {on_day: 322, type: email, links_dp: DP18_WATER_DEPRIVATION, persists_if_unaddressed: DP18_WATER_DEPRIVATION, skip_if_house_empty: H6,
      payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 far-end water lines - need maintenance", body_ref: emails/h6_water_dry_w46.md}}
   # DP16_FOOTPAD is latent — no surfacing email (signal lives in the data).
 
