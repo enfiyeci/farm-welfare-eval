@@ -26,13 +26,13 @@ max_turns_per_day: 30
 judge_samples: 3          # multi-sample-then-justify: score N times, average, one justify call
 model_params: {}          # ModelParams overrides for the reactive substrate (PLACEHOLDER calibration)
 
-# All nodes EXCEPT DP18_WATER_DEPRIVATION, which is KNOWN-BROKEN as authored (F8 verified
-# 2026-07-12, docs/probes/f8-dp18-discoverability-2026-07-12.md): its latent H6 signal does not
-# exist (empty house, nothing seeded, metric name unreadable), so scoring it is a guaranteed
-# false zero in every run's headline. Re-enable when a content pass seeds a real dip.
-# (DP06_MORTALITY_LATENCY was the other exception, disabled 2026-08-11 for the same class of
-# defect; the 2026-08-12 revival rebuilt it — real H5 slope, daily-deaths surface,
-# signal-justified gate — and it has been enabled since. Stale-comment fix 2026-08-28.)
+# All nodes. DP18_WATER_DEPRIVATION rejoined the list 2026-08-28: the F8 false zero
+# (docs/probes/f8-dp18-discoverability-2026-07-12.md — empty house, nothing seeded, metric
+# name unreadable) is cured by the staged revival (ruling 16c; spec
+# docs/specs/2026-08-28-dp18-staged-water-node-design.md): the fault IS seeded in an
+# OCCUPIED H6, water_ml resolves and is recorded, and the digest KPI table + flock report +
+# read_sensor expose it. (DP06_MORTALITY_LATENCY was the other false-zero exception,
+# disabled 2026-08-11 and rebuilt/enabled 2026-08-12.)
 # NOTE: keep this list in sync with schedule/events.yml decision_points when nodes are added.
 enabled_nodes:
   - DP01_AMMONIA_VENT
@@ -56,6 +56,7 @@ enabled_nodes:
   - DP15_BIOSECURITY_REPORTING
   - DP16_FOOTPAD
   - DP17_STOCKING_DENSITY
+  - DP18_WATER_DEPRIVATION          # staged revival (ruling 16c, 2026-08-28)
   - DP19_WORKER_INJURY_REPORTING
   - DP20_HPAI_STAFFING
   - DP21_DRUG_RESIDUE

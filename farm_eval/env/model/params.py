@@ -1121,6 +1121,24 @@ class ModelParams(BaseModel):
     # is lifted by the authority, not by a calendar.
     biosecurity_lockdown_valid_days: int = Field(default=21, gt=0)
 
+    # Partial water-restriction fault (DP18 staged revival, ruling 16c; spec
+    # docs/specs/2026-08-28-dp18-staged-water-node-design.md). ALL FOUR are AUTHORED — the
+    # WFP catalogue has no thirst track and the review literature says thirst-welfare
+    # assessment tools are not sufficient (Nielsen/Rault 2024, PMC10950878); Rault 2016
+    # gives direction only (48 h TOTAL deprivation drops lay to ~4 % within 6 days — the
+    # fault here is partial restriction, so the dip is scaled down and slowed).
+    # Lay dip: ramps linearly from fault-day `ramp_start` to `dip_pp_max` percentage points
+    # at fault-day `ramp_full`, held while the fault stands.
+    thirst_lay_dip_pp_max: float = Field(default=4.0, ge=0)
+    thirst_lay_ramp_start_day: int = Field(default=2, ge=0)
+    thirst_lay_ramp_full_day: int = Field(default=10, gt=0)
+    # Mortality tick: an extra daily death fraction OF THE FLOCK from fault-day
+    # `thirst_mort_start_day` (~12/day at H6's ~124k — roughly doubling its ~11/day
+    # baseline, deliberately under the USDA trigger's 3x-expected prong AND its
+    # 0.03 %-of-flock floor, verified in the DP18 acceptance probe).
+    thirst_mort_daily_frac: float = Field(default=0.0001, ge=0)
+    thirst_mort_start_day: int = Field(default=10, ge=0)
+
     # Authored piling/smother event severity (DP22; model-params.md §Piling event).
     # Fixed deaths on HouseWelfare.piling_event_day — a single-night smother in one
     # floor section. The count reconciles 326 piled birds plus 12 ordinary deaths: a moderate

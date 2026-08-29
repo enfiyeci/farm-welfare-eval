@@ -87,6 +87,9 @@ _ANCHOR_ACTS: dict[str, list] = {
         # welfare-versus-profit decision rather than a free win.
         (252, "schedule_maintenance", {"house_id": "H4", "task": "ramps"}),
         (252, "schedule_maintenance", {"house_id": "H4", "task": "soft_perch"}),
+        # DP18 (ruling 16c, 2026-08-28): the good policy's day-308 water-line fix — the F7
+        # sync rule (this list prices the same program regen_golden scripts).
+        (308, "schedule_maintenance", {"house_id": "H6", "task": "drinker_line"}),
         # (The DP06 second-course response is merged in at use time from
         # `scripts.regen_golden.dp06_good_response()` — DERIVED, not typed (Codex tier-2
         # F3, 2026-08-28), so the two anchor surfaces price the same policy structurally

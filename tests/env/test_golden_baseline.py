@@ -83,6 +83,9 @@ def test_competent_reports_all_channels():
             # general per-house loop — complex-wide physics, unlike DPD's H6-only pair.
             "avp_keel_pain_hours",
             "avp_excess_mortality",
+            # DP18's thirst channel (staged revival, 2026-08-28) goes through the same
+            # general per-house loop (only H6 ever accrues; the rest anchor at 0.0).
+            "thirst_restriction_hours",
         )
     }
     expected |= {"cannib_excess_mortality[H6]", "trim_pain_hours[H6]"}

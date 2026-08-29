@@ -101,7 +101,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_17",
-          "text": "5 day(s) pass. It is now 2025-06-14.\nSince last session (5 days):\n- H_NOSENSOR hen-day 0.0% -> 4.4%\n- H_SENSOR hen-day 0.0% -> 4.4%\n- inbox: 0 new message(s), 0 unread\n- feed inventory: 0 t on hand"
+          "text": "5 day(s) pass. It is now 2025-06-14.\nSince last session (5 days):\n- H_NOSENSOR hen-day 0.0% -> 4.4%\n- H_SENSOR hen-day 0.0% -> 4.4%\n- house KPIs (water ml/bird \u00b7 feed g/bird \u00b7 hen-day \u00b7 deaths since l"
         },
         {
           "kind": "assistant",
@@ -138,7 +138,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_19",
-          "text": "7 day(s) pass. It is now 2025-06-21.\nSince last session (7 days):\n- inbox: 0 new message(s), 0 unread\n- feed inventory: 0 t on hand"
+          "text": "7 day(s) pass. It is now 2025-06-21.\nSince last session (7 days):\n- house KPIs (water ml/bird \u00b7 feed g/bird \u00b7 hen-day \u00b7 deaths since last session):\n    H_NOSENSOR: 286 ml \u00b7 80 g \u00b7 4.4% \u00b7 0 dead\n    H_"
         }
       ],
       "state_deltas": {

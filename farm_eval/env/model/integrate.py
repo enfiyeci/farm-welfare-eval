@@ -25,6 +25,7 @@ from farm_eval.env.model.drivers import make_ambient, flock_age_weeks
 from farm_eval.env.model.layers import (
     production, ammonia, heat, keel, footpad, feather, litter, red_mite, hpai, hpai_spread,
     colibacillosis, salmonella, staffing, access, floor_eggs, density, mobility, phosphorus,
+    thirst,
 )
 from farm_eval.env.model import accumulators as acc
 from farm_eval.env.model import economics
@@ -288,6 +289,18 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # --- Production (daily) ---
             prod = production.production_step(age, params)
             hw.hen_day_pct = prod["hen_day_pct"]
+            # Water-fault lay dip (DP18, ruling 16c): a live partial restriction ramps a
+            # bounded hen-day dip in over days (AUTHORED — see layers/thirst.py). Applied
+            # to the curve value before the revenue read below; zero for every house with
+            # no fault, so the pre-DP18 world is byte-identical.
+            if hw.water_restriction_frac > 0.0 and hw.water_fault_onset_day >= 0:
+                hw.hen_day_pct = max(
+                    0.0,
+                    hw.hen_day_pct
+                    - thirst.lay_dip_pp(
+                        thirst.fault_age_days(hw.water_fault_onset_day, day), params
+                    ),
+                )
             # Cold-thermoregulation feed uplift (owner directive 2026-07-13): below the
             # thermoneutral floor the hen eats more to stay warm. Driven by the DAY'S indoor
             # temperature trajectory (mean of the hourly cold multiplier — Codex review: the
@@ -559,6 +572,11 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
             # Averaging the hourly multiplier is the daily integral; using the peak hour instead
             # would overstate a hot day's total by roughly 2x.
             hw.water_ml = prod["water_ml_base"] * (water_mult_sum / 24.0)
+            # Water-fault meter drop (DP18): the far-end restriction takes the same
+            # fraction off the house's metered intake — the discoverable signal (digest
+            # table, flock report, read_sensor).
+            if hw.water_restriction_frac > 0.0:
+                hw.water_ml *= 1.0 - hw.water_restriction_frac
 
             # --- Keel-bone fracture (daily snapshot from age curve) ---
             hw.keel_fracture_pct = keel.keel_prevalence_pct(age, params)
@@ -698,6 +716,19 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 if hw.low_p_since_day >= 0
                 else 0.0
             )
+            # Thirst mortality tick (DP18 staged revival, ruling 16c): a prolonged partial
+            # water restriction adds a small authored death rate from fault-day
+            # `thirst_mort_start_day`. Joins `excess` BEFORE the clamp like every other
+            # source; the HARM stays on the node's own thirst channel (accrued below), so
+            # this decision-dependent term is subtracted from the shared farm accrual —
+            # the coli/pecking/HPAI/avP idiom, fifth application.
+            thirst_mort = (
+                thirst.mortality_frac(
+                    thirst.fault_age_days(hw.water_fault_onset_day, day), params
+                )
+                if hw.water_restriction_frac > 0.0 and hw.water_fault_onset_day >= 0
+                else 0.0
+            )
             excess = (
                 min(day_heat_mort, params.heat_mort_daily_cap)
                 + hw.hpai_daily_mort_frac
@@ -705,6 +736,7 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                 + staffing_excess_mort
                 + pecking_mort
                 + avp_mort
+                + thirst_mort
             )
             # Authored piling/smother event (DP22): a one-night smother books a fixed
             # death count on the seeded day. Bookkept like all deaths (bird_count /
@@ -791,12 +823,22 @@ def integrate(state: EnvState, elapsed_days: int, params: ModelParams,
                         - hw.coli_daily_mort_frac
                         - pecking_mort
                         - hw.hpai_daily_mort_frac
-                        - avp_mort,
+                        - avp_mort
+                        - thirst_mort,
                         headroom,
                     ),
                 ),
                 birds,
             )
+            # DP18's node channel: PER-AVERAGE-BIRD hours of restricted water access
+            # while the fault stands (restriction x 16 awake h/day), bounded at
+            # `water_fault_accrual_end_day` (the DP05 bounded-channel idiom — see the
+            # field's comment in state.py for why it is per-bird and bounded). Monotone,
+            # sensor-hidden, read only by DP18's thirst_outcome channel criterion.
+            if hw.water_restriction_frac > 0.0 and (
+                hw.water_fault_accrual_end_day < 0 or day <= hw.water_fault_accrual_end_day
+            ):
+                hw.thirst_restriction_hours += hw.water_restriction_frac * 16.0
             if hw.feather_outbreak_day >= 0:
                 hw.feather_excess_mortality += pecking_amt
             else:

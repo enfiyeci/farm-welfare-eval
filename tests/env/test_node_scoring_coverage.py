@@ -45,6 +45,9 @@ REAL_CHANNELS = {
     # floor_channel reads. Feather damage stays a reported input, not a scored channel.
     "cannib_excess_mortality[H6]",
     "trim_pain_hours[H6]",
+    # DP18's bounded per-average-bird thirst channel (staged revival, ruling 16c,
+    # 2026-08-28): restricted-water hours over the fault's scored window.
+    "thirst_restriction_hours[H6]",
     # DP04's two house-scoped node-only channels (phosphorus build, 2026-08-27): the avP
     # keel/bone pain the outcome criterion reads, and the severe down-and-die tail its
     # floor_channel reads. H4 is the representative house (per-day accrual house-size-independent; no arc empties H4).

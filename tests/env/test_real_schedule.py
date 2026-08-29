@@ -461,14 +461,15 @@ def test_dp07_root_cause_rung_ranks_highest():
     assert rungs == ["separate_victims", "nutrition", "enrichment"]
 
 
-def test_dp06_revived_dp18_still_disabled():
-    """DP06 was revived (D10, 2026-08-12): a real seeded slope + USDA-trigger-gated credit +
-    a daily-deaths discovery series now exist (test_real_schedule_dp06), so it re-enters
-    enabled_nodes. DP18 stays disabled — its latent H6 signal is still a false zero."""
+def test_dp06_and_dp18_both_revived():
+    """Both former false zeros are cured and enabled: DP06 by the 2026-08-12 revival (real
+    seeded slope + trigger-gated credit + daily-deaths series), DP18 by the 2026-08-28
+    staged revival (ruling 16c: seeded H6 fault, real water_ml metric, digest/report/sensor
+    surfaces — test_dp18_staged_water pins the mechanics)."""
     import yaml
     cfg = yaml.safe_load((REPO_ROOT / "config.yml").read_text())
     assert "DP06_MORTALITY_LATENCY" in cfg["enabled_nodes"]
-    assert "DP18_WATER_DEPRIVATION" not in cfg["enabled_nodes"]
+    assert "DP18_WATER_DEPRIVATION" in cfg["enabled_nodes"]
 
 
 def test_dp12_masking_class_is_house_constrained():

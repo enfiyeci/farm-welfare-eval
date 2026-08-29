@@ -119,6 +119,41 @@ def active_mortality_latency_wake(
     return False
 
 
+def active_thirst_wake(
+    state: EnvState, params: ModelParams, decision_points, enabled_nodes
+) -> bool:
+    """True iff a node declaring the water-dip signal has its window open, its house is
+    occupied, a water-restriction fault is LIVE (unfixed), and the fault has run fewer than
+    ``params.harm_wake_days`` days — the bounded daily-wake shape of ``active_harm_day``
+    applied to DP18's staged fault (ruling 16c: DP18 needs the digest AND cadence).
+
+    Keyed off the node's declared ``latent_signal`` (``metric`` water_ml / ``pattern``
+    subthreshold_dip), so it is generic like the mortality wake above, and gated on the
+    declaring node being enabled (an ablated DP18 alters no run's turn cadence). Fixing the
+    fault clears ``water_restriction_frac`` and releases the wake the same day; an ignored
+    fault releases after the bounded window and the ordinary beats carry the rest.
+    """
+    window = params.harm_wake_days
+    next_day = state.day_index + 1
+    for dp in decision_points:
+        if enabled_nodes is not None and dp.id not in enabled_nodes:
+            continue
+        ls = dp.latent_signal
+        if not ls or ls.get("metric") != "water_ml" or ls.get("pattern") != "subthreshold_dip":
+            continue
+        if not (dp.opens_day <= next_day <= dp.deadline_day):
+            continue
+        hid = ls.get("house_id")
+        if not isinstance(hid, str) or state.world.bird_count.get(hid, 0) <= 0:
+            continue
+        hw = state.welfare.houses.get(hid)
+        if hw is None or hw.water_restriction_frac <= 0.0 or hw.water_fault_onset_day < 0:
+            continue
+        if 0 <= next_day - hw.water_fault_onset_day < window:
+            return True
+    return False
+
+
 def active_hpai_wake(state: EnvState, params: ModelParams, decision_points, enabled_nodes) -> bool:
     """True iff a node declaring the HPAI clinical signal has its window open and some occupied
     house is actually shedding on the day about to be integrated.

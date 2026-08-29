@@ -285,6 +285,29 @@ class HouseWelfare(BaseModel):
     # so it is deliberately NOT in `welfare_state.NODE_ONLY_CHANNEL_ATTRS` — both reference arms
     # run the same notifiable-disease baseline, so its anchors would be degenerate.
     hpai_excess_mortality: float = 0.0
+    # Partial water-restriction fault (DP18 staged revival, ruling 16c; spec
+    # docs/specs/2026-08-28-dp18-staged-water-node-design.md). A far-end drinker-line fault
+    # leaves this fraction of the house's birds on restricted water: the house water meter
+    # drops by the same fraction, a lay dip ramps in over days, and a small mortality tick
+    # starts at fault-day `thirst_mort_start_day`. Seeded via state_seed (0.12 on H6 at day
+    # 308); CLEARED (0.0) by a water-vocabulary maintenance call (episode.py — the same task
+    # bank the DP18/DPF matchers use, so physics and matcher cannot diverge). Hidden from
+    # read_sensor like every fault/course field.
+    water_restriction_frac: float = 0.0
+    water_fault_onset_day: int = -1
+    # DP18's node channel: PER-AVERAGE-BIRD hours of restricted water access
+    # (restriction x 16 awake h per fault day), monotone, accruing while the fault stands
+    # and ONLY through `water_fault_accrual_end_day` (seeded to the node deadline — the
+    # DP05 bounded-channel idiom; the calibration reason it is bounded and per-bird: an
+    # episode-end, bird-count-weighted accrual let DP25's overstocked negligent anchor
+    # nearly double a standard-placement passive run and flattened the ruled 10/7/4/0
+    # stage gradient — per-average-bird is the avP-channel precedent for house-size
+    # independence). The WORLD's fault persists past the bound (lay dip and mortality tick
+    # continue until fixed); only the scored channel stops. AUTHORED mapping: no WFP
+    # thirst track exists (Nielsen/Rault 2024 review — thirst-welfare tools "are not
+    # sufficient"); Rault 2016 supplies direction only.
+    thirst_restriction_hours: float = 0.0
+    water_fault_accrual_end_day: int = -1
     # Authored piling/smother event (DP22): the calendar day a one-night smother kills
     # ModelParams.piling_event_deaths birds, seeded via state_seed. -1 = none.
     # Deaths are bookkept (bird_count / mortality_cumulative) but NOT accrued to the

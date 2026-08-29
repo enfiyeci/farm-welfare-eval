@@ -4,6 +4,32 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · the audit's gaps BUILT — D17 rewrite, five small items, ruling 16·W ported, 16b digest table, DP18 STAGED REVIVAL (scored set 27) (branch integrate/node-review-2026-08-26)
+
+- **Owner ordered the audit's gaps into THIS wave ("yes they do").** All built TDD:
+- **Small items** (`b859077`): D17 — `se_w40.md` de-advocated (both lawful options, no
+  named good option); DPF's `nm_meter_swap_d358.md` made branch-neutral; DP01 gap-5 —
+  day-210 fuel follow-up band-aware on H4 live ammonia (threshold 20.0); the manure-belt
+  ticket WIRED (resets cadence, never loosens); `state_band` window-mean calibration
+  (agg:mean now averages the recorded series); DP16's two doc errors corrected;
+  `task_4c676338` verified already built.
+- **Ruling 16·W ported** from the never-merged `feat/dp18-water-staged` (its §16 collided
+  with DPE's; internal 16a/16b/16c labels kept; noted at DPE's §16).
+- **16b digest KPI table BUILT**: per-occupied-house `water ml/bird · feed g/bird ·
+  hen-day · deaths since last session` every wake (`farm_eval/env/digest.py`).
+- **DP18 STAGED REVIVAL BUILT + ENABLED** (spec
+  `docs/specs/2026-08-28-dp18-staged-water-node-design.md`; probe
+  `docs/probes/dp18-staged-water-acceptance-2026-08-28.md`): 12 % far-end restriction
+  seeded in OCCUPIED H6 day 308; lay dip + mortality tick (under DP06's trigger class,
+  verified); staged escalation (Priya hint day 315 / explicit day 322, both
+  `persists_if_unaddressed`, both existing beats); bounded per-average-bird thirst channel
+  (good 0.0 / negligent 53.76 anchors — the per-bird + deadline-bounded correction is
+  recorded in the spec: DP25's overstocked negligent arm and post-window accrual otherwise
+  broke the ruled gradient); bounded daily thirst wake (309–317, releases on fix);
+  measured **10.00 / 7.50 / 5.00 / 0.00**. All references/goldens/corners regenerated,
+  movement attributed. Full suite green. **The scored set is 27.**
+- Tier-2 adversarial review of this whole batch: launched next (wave grain).
+
 ## 2026-08-28 · claude · per-node wave audit — ledger synced to the ten build batches; two real gaps found (branch integrate/node-review-2026-08-26)
 
 - **Owner asked what remains per node.** Audit method: every ledger-open claim checked

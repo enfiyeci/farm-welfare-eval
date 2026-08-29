@@ -344,6 +344,12 @@ _POLICY_ACTIONS: dict[str, list[dict]] = {
         # weight, which is exactly the state the option-D build exists to end.
         {"day": 252, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "ramps"}},
         {"day": 252, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "soft_perch"}},
+        # DP18 staged water fault (ruling 16c, 2026-08-28): the good policy fixes the
+        # far-end line the day the fault appears (the same first-playable-day convention
+        # as the D5/D11/D14/DPE actions above), so `thirst_restriction_hours[H6]` anchors
+        # good with ~zero accrual while competent/negligent never fix it and carry the
+        # episode-end accrual — the live range DP18's thirst_outcome normalizes against.
+        {"day": 308, "tool": "schedule_maintenance", "params": {"house_id": "H6", "task": "drinker_line"}},
         # (The DP06 second-course response is NOT typed here — it is DERIVED by
         # `dp06_good_response()` below and merged into the good arm's queue in
         # `run_reference` (Codex tier-2 F3, 2026-08-28): the days must track the run's

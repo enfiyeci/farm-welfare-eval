@@ -146,6 +146,12 @@ NODE_ONLY_CHANNEL_ATTRS = (
     # mid-episode; an emptied house stops accruing and would cap the harm).
     "avp_keel_pain_hours",
     "avp_excess_mortality",
+    # DP18 staged water fault (ruling 16c, 2026-08-28): bird-hours of restricted water
+    # access on the faulted house — DP18's thirst_outcome criterion reads [H6] (fix early
+    # -> near-zero accrual -> full; never fix -> episode-end accrual -> 0). House-scoped
+    # and node-only for the standard renormalization reason: the accrual is one node's
+    # decision, and the AUTHORED thirst mapping (no WFP track) must not move Layer-1.
+    "thirst_restriction_hours",
 )
 
 # GLOBAL node-only channels (D23/gap-D build, 2026-08-27): complex-wide HarmAccumulators

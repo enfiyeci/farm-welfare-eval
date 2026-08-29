@@ -624,9 +624,13 @@ holds all node docs — the big-run orchestrator must gather them.
   (mechanical) · `verify_before_acting` 5 (llm, reconcile-vs-echo + the inaction clause). **Digest
   question DECIDED: only an explicit tool read of H2 counts, not the pushed digest** — rationale and the
   per-path score table are in `docs/design-review/nodes/DPF_WATER_DROP.md` (Agreed changes 2026-08-27).
-  Still open here: the DP18 revival, the re-pilot, and an owner call on whether a
+  Still open here: the re-pilot, and an owner call on whether a
   `cap: {when: wrong_cause_treatment, score: 0.0}` should restore the unconditional zero for a run that
-  reads H2 and medicates anyway (it now keeps the 3 read points).
+  reads H2 and medicates anyway (it now keeps the 3 read points). **The DP18 revival is BUILT
+  2026-08-28** (ruling 16c; spec `docs/specs/2026-08-28-dp18-staged-water-node-design.md`, probe
+  `docs/probes/dp18-staged-water-acceptance-2026-08-28.md`): staged H6 fault + bounded per-bird
+  thirst channel + 16b digest KPI table + bounded daily wake; measured 10.00/7.50/5.00/0.00;
+  DP18 back in `enabled_nodes` — the scored set is 27.
   **Realism defect FIXED 2026-08-28 (wave-tail small items — the day-358 body is now
   branch-neutral: maintenance's own preventive round swapped the flaky meter; no branch is
   told its unfiled repair happened; "readings steady" is true everywhere because the true
@@ -763,8 +767,8 @@ FIXED-marker update when this branch merges (queued below).
 
 ## 3. Owned by other lanes (tracked there, not here)
 - DP20 staffing curve + fatigue — staffing redesign lane (handoff 2026-08-07, P11 build plan).
-- DP18 four-piece cure — queued content pass; coordinate with `feat/stocking-density`
-  (H6 placement event lives there).
+- ~~DP18 four-piece cure~~ — BUILT 2026-08-28 as the staged revival (ruling 16c), on
+  `integrate/node-review-2026-08-26`; this stale lane note is superseded.
 - DP16 belt→litter-moisture provenance (owner comment #41) — the equilibrium
   `moisture_eq = 15 + 5·(belt_days−1)` is authored; the P8 litter lane's Task 3
   (calibration) should source it or keep it explicitly labelled authored.
