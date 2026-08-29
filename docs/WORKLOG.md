@@ -4,6 +4,18 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · owner decisions on the wave tail (chat, build-wave session)
+
+- **Decided:** (i) the breed-table entry's post-cap grep-sweep fix (the residual ~105k
+  duplicate, fixed without Codex re-verify — flagged in the next entry) gets a
+  **retroactive Codex re-verify** — owner: "lets reverify why not"; owed to the next
+  build-wave session, target = the doc changes in `2056028`. (ii) **DP19 build is next**,
+  same session thread. (iii) The two DP06 judgment calls (blind-pre-treat 0+5 scoring;
+  corporate mortality-KPI email deferred to a content pass) were elaborated to the owner;
+  ruling pending — do not treat either as settled.
+- Branch `integrate/node-review-2026-08-26` @ `2056028` is pushed (owner-approved).
+  Handoff: `~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/` (build-wave thread).
+
 ## 2026-08-28 · claude · breed-table late-lay seam FIXED (branch fix/breed-table-late-lay → integrate/node-review-2026-08-26)
 
 - **What / decided:** the DP06-build-filed substrate seam is retired. The breed-standard
