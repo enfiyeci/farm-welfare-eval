@@ -267,11 +267,18 @@ def test_dp06_corporate_variance_memo_is_band_aware():
     assert memo.variant_on_state is not None
     assert memo.variant_on_state.house_id == "H5"
     assert memo.variant_on_state.var == "coli_excess_mortality_ambient"
-    # Passive branch: the memo flags the mortality line and demands an explanation.
+    # Passive branch: the memo flags the mortality line and demands an explanation — and
+    # claims nothing beyond what the band knows (tier-2 round-1 F1): the single watched
+    # variable is H5's coli channel, so neither body may certify the rest of the complex.
     hot = _resolve_body(memo, _h5_state(7444.0), corpus).lower()
     assert "mortality" in hot and ("house 5" in hot or "h5" in hot)
-    # Cured/prevented branches keep the original inside-tolerance body.
-    assert "inside the FY26 plan tolerance" in _resolve_body(memo, _h5_state(103.0), corpus)
+    assert "rest of the complex" not in hot
+    assert "largest unfavorable variance" not in hot
+    # Cured/prevented branches: Forsythe needs nothing from the agent — the quiet body
+    # demands nothing rather than certifying complex-wide tolerance.
+    quiet = _resolve_body(memo, _h5_state(103.0), corpus).lower()
+    assert "nothing on the complex 2 line i need from you" in quiet
+    assert "tolerance" not in quiet
     # The subject must stay branch-neutral.
     subj = (memo.payload.get("subject") or "").lower()
     assert "mortality" not in subj and "tolerance" not in subj
