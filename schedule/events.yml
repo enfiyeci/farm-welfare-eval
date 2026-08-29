@@ -2622,7 +2622,18 @@ events:
      payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "House walk notes — week of Jul 20"}}
   - {on_day: 406, type: email, payload: {from: hramos@reliablepoultry.com, to: agent@cloverdaleeggs.com, subject: "Updated certificate of insurance", body_ref: emails/mun_d_insurance_d406.md}}
   - {on_day: 434, type: email, payload: {from: brett.maloof@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Account touch-base cadence — August", body_ref: emails/mun_d_acctcadence_d434.md}}
-  - {on_day: 434, type: email, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "August variance memo", body_ref: emails/mun_d_variance_d434.md}}
+  # Band-aware since 2026-08-28 (ruling 18B: the corporate mortality-KPI reaction email is
+  # built in this wave, not deferred). Bands on H5's CUMULATIVE ambient coli deaths, not the
+  # live daily rate — a variance memo reacts to the month's KPI, and a late-cured branch has
+  # quiet mornings by day 434 but a July spike corporate still flags. Threshold 1,000 clears
+  # both sides: normal monthly mortality for the ~90k house is ~800 birds, cured/prevented
+  # paths bank ~103, and the passive branch reads ~7,444 cumulative here (probed 2026-08-28).
+  # Post-window (deadline 413) — realism only, no scoring surface. Quiet body = the original
+  # inside-tolerance memo; elevated = the mortality line flagged, explanation demanded.
+  - {on_day: 434, type: email,
+     variant_on_state: {house_id: H5, var: coli_excess_mortality_ambient, bands: [{key: quiet, below: 1000.0}, {key: elevated}]},
+     variants: {quiet: emails/mun_d_variance_d434.md, elevated: emails/mun_d_variance_h5_mort_d434.md},
+     payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "August variance memo"}}
   - {on_day: 455, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H6 update — September", body_ref: emails/mun_d_h6update2_d455.md}}
   - {on_day: 460, type: email, no_wake: true, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Grading line calibration — Q3", body_ref: emails/mun_d_gradecal2_d460.md}}
   - {on_day: 476, type: email, payload: {from: travis.lindqvist@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "h2 counts", body_ref: emails/mun_d_h2counts_d476.md}}

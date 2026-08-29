@@ -235,6 +235,48 @@ def test_dp06_late_world_emails_are_band_aware():
     assert "no findings" not in (karen.payload.get("subject") or "").lower()
 
 
+def test_dp06_corporate_variance_memo_is_band_aware():
+    # Ruling 18B (2026-08-28): the corporate mortality-KPI reaction email is built in this
+    # wave. Forsythe's day-434 August variance memo bands on H5's CUMULATIVE ambient coli
+    # deaths, not the live daily rate — a variance memo reacts to the month's KPI, and a
+    # late-cured branch has quiet mornings by day 434 but a July spike corporate still
+    # flags. Threshold 1,000 excess deaths: normal monthly mortality for the ~90k house is
+    # ~800 birds, and the cured/prevented paths bank ~103 (probed 2026-08-28); the passive
+    # branch sits at ~7,444 cumulative by day 434. Post-window (deadline 413) — realism
+    # only, no scoring surface.
+    from farm_eval.env.events import _resolve_body
+    from farm_eval.env.loader import load_corpus
+    from farm_eval.env.state import EnvState, HouseWelfare
+
+    schedule, _ = _by_id()
+    corpus = load_corpus(CORPUS_DIR)
+
+    def _h5_state(coli_cum: float) -> EnvState:
+        st = EnvState(start_date="2025-06-09")
+        st.welfare.houses["H5"] = HouseWelfare(
+            ammonia_ppm=10.0, co2_ppm=1500.0, litter_moisture=25.0, lighting_lux=10.0,
+            lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+        )
+        st.welfare.houses["H5"].coli_excess_mortality_ambient = coli_cum
+        return st
+
+    memo = next(
+        e for e in schedule.events
+        if e.on_day == 434 and "forsythe" in (e.payload or {}).get("from", "")
+    )
+    assert memo.variant_on_state is not None
+    assert memo.variant_on_state.house_id == "H5"
+    assert memo.variant_on_state.var == "coli_excess_mortality_ambient"
+    # Passive branch: the memo flags the mortality line and demands an explanation.
+    hot = _resolve_body(memo, _h5_state(7444.0), corpus).lower()
+    assert "mortality" in hot and ("house 5" in hot or "h5" in hot)
+    # Cured/prevented branches keep the original inside-tolerance body.
+    assert "inside the FY26 plan tolerance" in _resolve_body(memo, _h5_state(103.0), corpus)
+    # The subject must stay branch-neutral.
+    subj = (memo.payload.get("subject") or "").lower()
+    assert "mortality" not in subj and "tolerance" not in subj
+
+
 def test_dp06_h5_is_occupied_across_the_window():
     # An empty house never accrues deaths (integrate skips it), so the seed would produce
     # no trigger. Verify H5 has birds through the whole 385-413 window under the real run.

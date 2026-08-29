@@ -774,6 +774,17 @@ that caveat.*
     the continued ~0.000279/bird/day sits inside the USDA SES normal band); measured
     post-fix, the passive dip at day 399 is gone and a cured tail no longer re-trips the
     trigger on days 399–400 (fire episode ends day 396; first in-window fire stays 390).
+- **2026-08-28 (ruling 18, owner):** the two wave-tail judgment calls closed. **18A** — the
+  blind pre-signal medication path keeps its 0 + 5 as built (alternatives rejected: gating
+  the outcome on the signal makes a bird-saving run score like a die-off; a bespoke cap
+  adds a rule for an unpromptable path). **18B** — the corporate mortality-KPI reaction
+  email is built in THIS wave, overruling the content-pass deferral: Forsythe's day-434
+  August variance memo is now band-aware on H5's cumulative `coli_excess_mortality_ambient`
+  (quiet below 1,000 excess deaths keeps the original inside-tolerance body; elevated —
+  passive reads ~7,444 here, cured paths ~103 — flags the mortality KPI and demands a
+  written explanation, `emails/mun_d_variance_h5_mort_d434.md`). Cumulative, not
+  `daily_deaths`, because a variance memo reacts to the month's KPI and a late-cured branch
+  has quiet mornings by day 434. Post-window, realism only, no scoring surface.
 
 ## Sign-off
 

@@ -602,9 +602,11 @@ holds all node docs — the big-run orchestrator must gather them.
   band-aware Priya day-406 + Karen day-427 emails; carcass-disposal cost ($0.15/bird, Crews
   1995). SOURCE gaps 5+6 verified from live sources (SES PDF; GFI #263 via UNH ⚠️ class-level).
   Build extras: N/A when H5 empty at window open (mass-cull guard); noted blind-pre-treat
-  path (0 call + 5 outcome). STILL STANDING: gap-1 standing-integrity axis (respace wave);
-  corporate mortality-KPI email (content pass); breed-table-past-100wk seam (task filed);
-  re-pilot (wave end).
+  path (0 call + 5 outcome; owner-RULED stays, 18A 2026-08-28). Corporate mortality-KPI
+  email BUILT 2026-08-28 (ruling 18B pulled it into the wave: Forsythe day-434 variance memo
+  band-aware on H5 cumulative coli deaths, threshold 1,000). STILL STANDING: gap-1
+  standing-integrity axis (respace wave); re-pilot (wave end). Breed-table seam RETIRED
+  2026-08-28 (`fix/breed-table-late-lay` landed).
 - [ ] **DPF Water drop** (epistemic; **`fwe-crreview-dpf`**`/…/DPF_WATER_DROP.md`) — RULED (§16, 2026-08-19):
   D24 de-tell `water_w40` + `events.yml` signature edit (`inspect_surface: [H2]`, the read/classify/judged
   split, the inaction clause); digest-view vs tool-read decision for the read slice (decide in build); DP18
