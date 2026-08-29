@@ -29,7 +29,25 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   measured **10.00 / 7.50 / 5.00 / 0.00**. All references/goldens/corners regenerated,
   movement attributed. Full suite green. **The scored set is 29** (verified against
   `config.yml enabled_nodes`; DP18 is the 29th — the pack's earlier "27" undercounted).
-- Tier-2 adversarial review of this whole batch: launched next (wave grain).
+- **Tier-2 adversarial loop CLOSED at the 3-round cap (gpt-5.6-sol, wave grain).** Round 1
+  REVISE (4 findings, all fixed `6ca26f3`): DP18's water-repair bank was too broad (shared
+  DPF's generics — a `feed lines`/`pressure washer`/`roof leak` task both scored and silently
+  cleared the fault), so DP18 got its own TIGHT bank while DPF kept its broad scoring-only
+  one; an unjustified-cull tripwire added (ruling-17 idiom — depopping healthy H6 to freeze
+  the thirst channel now caps the node at 0); a new `skip_if_house_empty` event field gates
+  the escalation emails so no live-bird note reaches a depopped H6; the scored-set count
+  corrected 27→29. Round 2 REVISE (`cbc71e2`): pared the bank further (dropped `regulator`
+  (propane) and `flush`, reworded Priya's day-322 to prime `drinker lines`), made the physics
+  clear house_id-only, fixed a residual pack "27". Round 3 REVISE (`282f9e9`): the round-2
+  house-key fix over-corrected — the physics now resolves the fault-house by EXACTLY
+  `match_where`'s rule (house_id if present else target), verified across all four key combos.
+  **ACCEPTED RESIDUAL at the cap, flagged to owner:** substring matching can't separate a
+  drinker "nipple" from a grease "nipple"; "nipple" is kept because Priya's emails prime it
+  and a false negative is worse (DP06 philosophy) — proper close is a respace-gated
+  grader-confirmation step. Honest stage table unchanged every round; no reference/golden
+  movement; full suite green. Findings: `~/claude-sync/handoffs/.../artifacts/` (this
+  session's scratch). **Next: wave-end re-pilots, tier-3 pre-merge pair, owner sign-off,
+  merge.**
 
 ## 2026-08-28 · claude · per-node wave audit — ledger synced to the ten build batches; two real gaps found (branch integrate/node-review-2026-08-26)
 
