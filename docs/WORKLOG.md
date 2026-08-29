@@ -4,6 +4,26 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · per-node wave audit — ledger synced to the ten build batches; two real gaps found (branch integrate/node-review-2026-08-26)
+
+- **Owner asked what remains per node.** Audit method: every ledger-open claim checked
+  against the working tree (greps on events.yml/params/corpus/judge) + the ten
+  `build(wave): batch N` commits (batches 1–10, `098810f`..`f30a7c2`, all ancestors of
+  HEAD). Result: the register's `- [ ]` boxes lagged badly — DP05, DP09, DP12(subset),
+  DP13(grace trio), DP15, DP17(chaser), DP21, DP22, DP25, DPE, DPN/DPT are all BUILT on
+  this branch. Ledger checkboxes synced with audit-verified annotations.
+- **Two genuinely unbuilt ungated items surfaced:** (1) **D17 — the DP13 Anita SE email
+  de-advocacy rewrite** (`se_w40.md` still names and advocates diversion, against the
+  D17 ruling); (2) **DP18 revival** (ruling 16c staged design; `config.yml` still
+  excludes DP18). Plus small owed items: DPF `nm_meter_swap_d358.md` continuity defect
+  (verified still present), DP16's two node-doc errors, DP01's deferred trio (inert belt
+  ticket, tracker window-mean TODO, gap-5 day-210 variant), `task_4c676338`.
+- Everything else open is gated (respace: DP19 gap-2, DP12 §2a, DP13 window, DP06
+  standing axis; P11: DP10 + DP20(C); research: DP17 density dynamic) or is an owner
+  call (DP14 trio, DP12 pair, DPF wrong-cause cap, DP16 "does it matter", DP04 optional
+  fetches, DP08 deferrals). Wave tail unchanged: re-pilots → tier-3 pair → sign-off →
+  merge. Branch pushed at `976599f` (owner-approved).
+
 ## 2026-08-28 · claude · ruling 18 + owed re-verify + 18B email + DP19 BUILT, tier-2 loop closed (branch integrate/node-review-2026-08-26)
 
 - **Owner rulings (chat, this session): ruling 18** in `evals/hen/design/decisions/00-RULINGS.md` —
