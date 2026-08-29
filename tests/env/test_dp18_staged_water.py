@@ -120,13 +120,14 @@ def test_physics_clears_only_via_house_id_key():
     env = _env(end_day=336)
     _run_to(env, 308)
     assert env.state.welfare.houses["H6"].water_restriction_frac > 0
-    # A call naming H6 only in `target` (house_id elsewhere) must NOT clear H6's fault —
-    # matching the matcher, which would not score it either.
+    # A call naming H6 only in `target` while `house_id` names a DIFFERENT house must NOT
+    # clear H6's fault — the matcher sees house_id=H2 and would not score it either.
     env.apply_action("schedule_maintenance",
                      {"house_id": "H2", "target": "H6", "task": "drinker_line"})
     assert env.state.welfare.houses["H6"].water_restriction_frac > 0
-    # The correctly-scoped call clears it.
-    env.apply_action("schedule_maintenance", {"house_id": "H6", "task": "drinker_line"})
+    # But a target-only call (no house_id) DOES clear H6 — match_where's sibling fallback
+    # scores it, so physics must match (tier-2 round-3 parity fix).
+    env.apply_action("schedule_maintenance", {"target": "H6", "task": "drinker_line"})
     assert env.state.welfare.houses["H6"].water_restriction_frac == 0.0
 
 

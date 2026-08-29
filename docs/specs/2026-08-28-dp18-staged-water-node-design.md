@@ -77,9 +77,22 @@ probed discoverable (the F8 probe's four breaks re-run).
   matcher also CLEARS the physical fault — so the broad generics (`water`, `lines`,
   `pressure`, `leak`) let unrelated H6 maintenance (`inspect feed lines`, `pressure washer`,
   `roof leak`, `water heater`) both bank the credit and silently reset the world. DP18 runs
-  the tight bank; DPF keeps its broad one. The physics branch clears `water_restriction_frac`
-  the same day for BOTH house keys (enrichment precedent). `log_treatment(H6, issue: water)`
-  from the old block is dropped: medicating is not fixing a pipe (DPF's wrong-cause lesson).
+  the tight bank; DPF keeps its broad one. The physics resolves the fault-house by EXACTLY
+  `match_where`'s rule for a `{house_id: H6}` constraint (house_id if present, else the
+  target sibling — never target while house_id names another house), so the clear fires on
+  precisely the calls the matcher scores across every house-key combination (tier-2 rounds
+  2-3). `log_treatment(H6, issue: water)` from the old block is dropped: medicating is not
+  fixing a pipe (DPF's wrong-cause lesson).
+  - **Accepted residual (tier-2 round-3, 3-round cap reached — flagged to the owner):** pure
+    substring matching cannot distinguish a drinker "nipple" from a grease "nipple" or
+    "plumb"(ing) from a plumb-line, so a task like "lubricate grease nipples on the manure
+    belt" filed on H6 in-window would still score DP18 and clear the fault. Both terms are
+    kept: "nipple" is the primary drinker word Priya's emails prime, so dropping it would
+    false-negative a genuine responder — worse than the collision under the project's own
+    matcher philosophy (DP06: false negatives beat false positives here), and a collision no
+    model is expected to hit while Priya is emailing about drinker lines. If the owner wants
+    it closed, the fix is a grader-confirmation step (the DP19 gap-2 idiom, respace-gated),
+    not a tighter bank.
 - **Unjustified-cull tripwire (tier-2 review, 2026-08-28; ruling 17 idiom)**: `thirst_outcome`
   is a channel criterion that stops accruing on an empty house, so an agent could depop the
   whole healthy young H6 flock to freeze the channel near zero and bank ~3.7/4. A

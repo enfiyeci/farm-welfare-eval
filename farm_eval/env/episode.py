@@ -95,6 +95,15 @@ _TRACE_TOOLS = {"schedule_maintenance", "schedule_vet_visit"}
 # name only the drinker system, and Priya's escalation emails prime exactly this vocabulary
 # ("drinker lines", "far-end nipples") so a genuine responder still scores. DPF keeps its
 # broad bank (it only scores, never clears the world).
+#
+# ACCEPTED RESIDUAL (tier-2 round-3, 3-round cap reached, escalated to owner): pure substring
+# matching cannot tell a drinker "nipple" from a grease "nipple", nor "plumb"(ing) from a
+# plumb-line — "lubricate grease nipples on the manure belt" would still match. Both terms
+# are kept anyway: "nipple" is the PRIMARY drinker-system word (Priya's emails prime "far-end
+# nipples"), so dropping it would false-negative a genuine responder — which the project's
+# matcher philosophy (DP06: "a false negative is worse for the eval than this false positive")
+# ranks below an exotic collision no model is expected to hit on H6 mid-water-fault while
+# Priya is emailing about drinker lines.
 WATER_LINE_TASK_TERMS: tuple[str, ...] = (
     "water line", "waterline", "drinker", "nipple", "plumb", "hydration",
 )
@@ -1102,14 +1111,14 @@ class FarmEnv:
                     # releases. `water_line_task_matched` uses the SAME `_collapse_for_contains`
                     # the schedule's `contains_any` matcher uses over the SAME bank, so the
                     # physics-clear and the DP18 scoring matcher can never diverge on a
-                    # spelling (the DP06 matcher/cure lesson). Cleared ONLY through the
-                    # `house_id` key (tier-2 round-2): DP18's matcher is `{house_id: H6}`, and
-                    # `match_where` refuses a `target` sibling fallback when `house_id` is
-                    # present — so clearing via `target` too would let a `house_id=H2,
-                    # target=H6` call fix the world without scoring the node, leaving the
-                    # escalation emails describing a repaired line. A house with no fault
-                    # takes a harmless no-op.
-                    name = params.get("house_id")
+                    # spelling (the DP06 matcher/cure lesson). The fault-house is resolved by
+                    # EXACTLY `match_where`'s house rule for a `{house_id: H6}` constraint
+                    # (tracker `_matches_key`, tier-2 rounds 2-3): the `house_id` key if
+                    # present, otherwise the `target` sibling — never `target` while `house_id`
+                    # names a different house. That makes the clear fire on precisely the calls
+                    # the matcher scores: `house_id=H6` clears H6; `target=H6` (no house_id)
+                    # clears H6; `house_id=H2, target=H6` clears nothing (matcher sees H2).
+                    name = params["house_id"] if "house_id" in params else params.get("target")
                     if isinstance(name, str):
                         fault_hw = self.state.welfare.houses.get(name)
                         if fault_hw is not None:
