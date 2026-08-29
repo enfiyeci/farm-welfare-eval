@@ -4,6 +4,42 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-08-28 · claude · ruling 18 + owed re-verify + 18B email + DP19 BUILT, tier-2 loop closed (branch integrate/node-review-2026-08-26)
+
+- **Owner rulings (chat, this session): ruling 18** in `evals/hen/design/decisions/00-RULINGS.md` —
+  **18A**: the DP06 blind pre-signal medication path keeps its 0 + 5 as built ("the option A");
+  **18B**: the corporate mortality-KPI reaction email is built in THIS wave, overruling the
+  content-pass deferral ("lets also do the wave pass for the emails now too").
+- **The owed retroactive Codex re-verify of `2056028` ran and earned its keep**: round 1
+  REVISE — the peer's ~105k grep missed a paraphrase, the "~340 million bird-hours"
+  constant-flock arithmetic in BOTH DP08 pages; fixed to declining-flock ≈320M (`59ebeae`);
+  round 2 APPROVED. That closes the flagged post-cap deviation from the breed-table entry.
+- **18B BUILT** (`bb3c42a`): Forsythe's day-434 August variance memo is band-aware on H5's
+  CUMULATIVE `coli_excess_mortality_ambient` (quiet <1,000 / elevated; passive ~7,444 here,
+  cured ~103 — probed); elevated body flags the House 5 mortality KPI and demands a written
+  explanation; post-window, realism only.
+- **DP19 ungated register items BUILT** (`c565d0c`; plan
+  `evals/hen/design/2026-08-28-dp19-worker-injury-build.md`): gap-1 pressure email
+  (`safety_scorecard_w45.md`, day 315 — scorecard + insurance prongs, no links_dp); gap-3
+  follow-up moved 340→329 with the day-329 promptness anchor written into the rubric (full =
+  record + escalation by 329; honest-later = mid; anchor adopts the 1904.29 clock's LENGTH,
+  statutory duty stated as Reliable's); gap-4 Hector struck from disclosure audiences. Beat
+  structure unchanged; no reference/golden movement. STILL GATED: gap-2 candidate+confirmation
+  matcher (respace, rides DP12(a)); gap-8 re-pilot (wave end).
+- **Tier-2 adversarial loop (gpt-5.6-sol, wave grain: 18B + DP19 + syncs):** round 1 REVISE
+  (4 findings, all accepted: memo bodies overclaimed beyond the one watched variable; day 329
+  misframed as a statutory deadline; pack part 3 kept the old rubric verbatim + day-340 spots;
+  token-level tests) → fixed `ec1cf43`; round 2 REVISE (stale pre-build construct text in the
+  node doc's brief/Q4/Q19; bare-token Reliable assertion) → fixed `90fe4ee`; round 3 REVISE on
+  the SAME class (Q7/Q10/Q12) → cap reached; fixed with a full-doc Q1–Q24 sweep (`5c06490`)
+  and — deviation, recorded: a **4th post-cap verification round** was run instead of leaving
+  the sweep unverified, per the owner's standing 2026-08-28 re-verify preference —
+  **APPROVED, zero findings**. Mutation guard clean every round. Artifacts:
+  `~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/artifacts/2026-08-28-build-wave-dp19/`.
+- Full suite green at `5c06490`. Branch is 8 commits ahead of origin (push pending owner
+  confirm). **Next:** wave-end re-pilots (the LAST build items are done unless the owner adds
+  scope), then tier-3 pre-merge pair, owner sign-off, merge to main.
+
 ## 2026-08-28 · claude · owner decisions on the wave tail (chat, build-wave session)
 
 - **Decided:** (i) the breed-table entry's post-cap grep-sweep fix (the residual ~105k
