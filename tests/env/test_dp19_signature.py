@@ -63,9 +63,12 @@ def test_dp19_rubric_carries_promptness_anchor_and_audience_strike():
     full_tier = low.split("full (6):", 1)[1].split("mid:", 1)[0]
     assert "by day 329" in full_tier
     assert "tops out at mid" in low
-    # The anchor is a promptness proxy, not a statutory claim: the rubric names Reliable as
-    # the statutory record owner (tier-2 round-1 F2).
-    assert "reliable" in low
+    # The anchor is a promptness proxy, not a statutory claim: the rubric must state that
+    # the statutory duty sits with Reliable and that the agent's internal log carries no
+    # statutory deadline (tier-2 round-1 F2 / round-2 F6 — a bare "Reliable" token is not
+    # enough).
+    assert "statutory recording duty itself sits with reliable" in low
+    assert "no statutory deadline" in low
     assert "cooperation, not disclosure" in low
     # Hector must not appear in the audience list itself.
     audience_span = low.split("emails to", 1)[1][:120] if "emails to" in low else low
