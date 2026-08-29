@@ -736,7 +736,9 @@ that caveat.*
     subject de-tolded from "no findings"). Untreated-path financials: every daily death now
     books `carcass_disposal_usd_per_bird` = $0.15 (Crews et al. 1995 via the US Poultry
     composting review; `model-params.md` §Carcass disposal) as a cash cost. The corporate
-    mortality-KPI reaction email was scoped OUT to a content pass (plan, "NOT in scope").
+    mortality-KPI reaction email was scoped OUT to a content pass (plan, "NOT in scope") —
+    then **pulled back INTO the wave by owner ruling 18B (2026-08-28)** — see Agreed
+    changes for the build.
   - **Gap 9**: the stale `config.yml` DP06-disabled paragraph replaced with the revival
     note.
   - **SOURCE gaps 5+6 verified from the live sources**: the APHIS SES Supplement 1 PDF
@@ -761,6 +763,8 @@ that caveat.*
     the blind pre-signal treatment path (hunch medication on day ~386–389) earns 0 on the
     call half but the full outcome 5 — the channel honestly reads prevented harm; recorded
     in the probe doc as acceptable (unpromptable, money-losing, saves real birds).
+    **Owner-RULED 2026-08-28 (ruling 18A): stays as built** — the gate-both-halves and
+    special-cap alternatives were rejected.
   - **Found seam, filed out of scope**: the breed-standard tables end at 100 weeks, which
     H5 crosses on day 399 — baseline mortality flatlines to 0 for the rest of the episode
     and the trigger's 3×-expected prong goes vacuous there (floor-only). No scored path

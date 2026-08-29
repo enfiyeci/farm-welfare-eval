@@ -56,7 +56,8 @@ latency share call-no-treat / latency share wrong drug / 0 passive"; the ruled w
   is the point) but banks the full outcome 5, because the harm genuinely never happened
   (ambient 103 birds). The channel criterion reads the world, not the justification; the
   model still paid the visit-less path's label/withdrawal costs for a hunch. Judged
-  acceptable — an unpromptable, money-losing strategy that saves real birds.
+  acceptable — an unpromptable, money-losing strategy that saves real birds. Owner-RULED
+  2026-08-28 (ruling 18A): stays as built.
 - **Culling out of the window is not a free zero-diff**: the mid-course cull dumps ~93k birds
   into the ambient channel (outcome 0). Ruling 17's whole-simulation unjustified-cull
   tripwire does NOT flag this cull — H5 is past `cull_business_age_weeks` at day 400, the
