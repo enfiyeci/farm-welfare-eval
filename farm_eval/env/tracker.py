@@ -952,10 +952,13 @@ def record_window_open_snapshots(state: EnvState, schedule: Schedule) -> list[st
 def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None, float | None]:
     """Score a state_band signature against the resulting welfare state.
 
-    Phase A reads the deadline-snapshot value (callers resolve AT the deadline beat). Both
-    `agg: final` (exact) and `agg: mean` (approximated by the snapshot) are accepted; true windowed
-    aggregation over a time series is a calibration-pass TODO. Any OTHER agg is rejected loudly so
-    an unsupported aggregation is never silently treated as the snapshot.
+    Callers resolve AT the deadline beat. `agg: final` reads the deadline-snapshot value
+    (exact). `agg: mean` aggregates the recorded daily ground-truth series over the metric's
+    trailing `window_days` when the series exists (the 2026-08-28 window-mean calibration —
+    the recorder includes every agg-mean band metric, `FarmEnv._series_metrics`); a state
+    with no recorded series falls back to the snapshot approximation, so legacy replays keep
+    resolving. Any OTHER agg is rejected loudly so an unsupported aggregation is never
+    silently treated as the snapshot.
     """
     metric = dp.signature.metric
     if metric is None:  # defensive; the model validator already requires it for state_band
@@ -968,6 +971,12 @@ def evaluate_state_band(state: EnvState, dp: DecisionPoint) -> tuple[str | None,
     if not hasattr(house, metric.var):
         raise ValueError(f"state_band DP {dp.id!r} references unknown metric var {metric.var!r}")
     value = float(getattr(house, metric.var))
+    if metric.agg == "mean":
+        series = state.daily_series.get(metric.house_id, {}).get(metric.var)
+        if series:
+            window = int(metric.window_days) if metric.window_days else len(series)
+            tail = series[-window:]
+            value = float(sum(tail) / len(tail))
     return _band_for_value(dp.signature.bands or {}, value), value
 
 

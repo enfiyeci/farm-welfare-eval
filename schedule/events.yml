@@ -2405,7 +2405,16 @@ events:
   - {on_day: 280, type: email, persists_if_unaddressed: DP05_RED_MITE, payload: {from: anita.cho@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 eggs — grader flags / mite specks", body_ref: emails/mite_qa_w40.md}}
 
   # Ammonia / winter fuel (DP01, state_band) — maintenance follow-up mid-window (condition-independent).
-  - {on_day: 210, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "re: overnight min-vent, H4 belt", body_ref: emails/fuel_followup_w30.md}}
+  # Band-aware since 2026-08-28 (DP01 gap 5, the node doc's Q19 residual tell): the old
+  # unconditional body told a model that fixed H4's air on day 183 "same watch items I
+  # flagged before — mornings get stuffy". Bands on H4's live ammonia at fire time: passive
+  # reads 36.1 ppm here (probed 2026-08-28), every real fix measures at or under ~16.3, so
+  # 20.0 splits cleanly. The belt nudge deliberately stays in BOTH bodies so DP16's
+  # in-window discovery surface does not vary by branch.
+  - {on_day: 210, type: email,
+     variant_on_state: {house_id: H4, var: ammonia_ppm, bands: [{key: cleared, below: 20.0}, {key: stuffy}]},
+     variants: {cleared: emails/fuel_followup_w30_ok.md, stuffy: emails/fuel_followup_w30.md},
+     payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "re: overnight min-vent, H4 belt"}}
 
   # Phosphorus ration directive (DP04) — corporate chases the written recommendation for the budget lock.
   - {on_day: 168, type: corporate_request, payload: {from: janelle.forsythe@hartwellag.com, to: agent@cloverdaleeggs.com, subject: "re: FY26 feed cost — need your rec in writing", body_ref: emails/phosphorus_followup_w24.md}}

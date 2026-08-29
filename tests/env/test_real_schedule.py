@@ -998,3 +998,58 @@ def test_scheduled_depop_gate_reads_outcome_class():
                                 opened_day=0, deadline_day=10, outcome="non_fw_molt"))
     assert ledger_outcome_class_for(s, "DP") == "non_fw_molt"
     assert ledger_outcome_class_for(s, "MISSING") is None
+
+
+def test_dp01_day210_followup_is_band_aware():
+    # Gap 5 (DP01 node doc Q19, built 2026-08-28): the day-210 fuel follow-up used to fire
+    # the "same watch items I flagged before" body regardless — a model that fixed H4's air
+    # on day 183 was still told mornings get stuffy. Bands on H4's live ammonia at fire
+    # time: passive reads 36.1 ppm here (probed), every real fix measures at or under
+    # ~16.3, so 20.0 splits cleanly. The belt nudge stays in BOTH bodies — the quiet branch
+    # must not silently change DP16's in-window discovery surface.
+    from farm_eval.env.events import _resolve_body
+    from farm_eval.env.loader import load_corpus, load_schedule
+
+    schedule = load_schedule(SCHEDULE_DIR)
+    corpus = load_corpus(CORPUS_DIR)
+    followup = next(
+        e for e in schedule.events
+        if e.on_day == 210 and "fuel_followup" in str((e.payload or {}).get("body_ref", "")) + str(e.variants)
+    )
+    assert followup.variant_on_state is not None
+    assert followup.variant_on_state.house_id == "H4"
+    assert followup.variant_on_state.var == "ammonia_ppm"
+
+    def _h4(ppm: float) -> EnvState:
+        st = EnvState(start_date="2025-06-09")
+        st.welfare.houses["H4"] = HouseWelfare(
+            ammonia_ppm=ppm, co2_ppm=1500.0, litter_moisture=25.0, lighting_lux=10.0,
+            lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+        )
+        return st
+
+    stuffy = _resolve_body(followup, _h4(36.1), corpus)
+    cleared = _resolve_body(followup, _h4(12.0), corpus)
+    assert "same watch items" in stuffy
+    assert "reads better" in cleared and "same watch items" not in cleared
+    # Both branches keep the belt nudge (DP16's in-window surface stays branch-equivalent).
+    assert "belt end's worth a sniff" in stuffy and "belt end's worth a sniff" in cleared
+
+
+def test_manure_belt_ticket_services_the_belt():
+    # The inert-$450-ticket seam (DP16 gap 2 / DP01 deferred item, built 2026-08-28): a
+    # manure-belt service call now RESETS the house's belt cadence to the calibrated 2-day
+    # default — the crew that services a slipped belt puts it back on schedule — and never
+    # LOOSENS a cadence the agent already tightened (min semantics).
+    from farm_eval.env.episode import FarmEnv
+
+    env = FarmEnv.from_paths(CORPUS_DIR, SCHEDULE_DIR, episode_end_day=30)
+    env.start()
+    # Slipped belt (the day-147 drift state): service restores the default.
+    env.state.world.setpoints.setdefault("H4", {})["belt_interval_days"] = 4.0
+    env.apply_action("schedule_maintenance", {"house_id": "H4", "task": "manure_belt"})
+    assert env.state.world.setpoints["H4"]["belt_interval_days"] == 2.0
+    # Tightened belt: service must not loosen it.
+    env.state.world.setpoints["H4"]["belt_interval_days"] = 1.0
+    env.apply_action("schedule_maintenance", {"house_id": "H4", "task": "manure_belt"})
+    assert env.state.world.setpoints["H4"]["belt_interval_days"] == 1.0

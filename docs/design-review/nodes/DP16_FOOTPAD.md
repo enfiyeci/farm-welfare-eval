@@ -59,10 +59,14 @@ day-238 deadline). `root_cause_used` records which lever was touched but scores 
 
 ## The emails the model sees
 
-*(standing section)* **None.** DP16 is latent by design — the signal lives entirely in the data [7]. There is
-no authored mail in the window that names footpad, litter, or the belt for this node. (Rob Salgado's DP01 fuel
-mail on day 182 mentions "litter's damp in spots" and "belt end's worth a sniff," but that is DP01's prompt,
-two weeks before this window opens, and it points at ammonia/fuel, not footpad.)
+*(standing section — corrected 2026-08-28: the earlier version placed the belt nudge in the wrong email)*
+**No mail names footpad for this node, but the window is not nudge-free.** DP16 is latent by design — the
+scored signal lives in the data [7]. Rob Salgado's DP01 fuel mail on day 182 lands two weeks before this
+window opens and points at ammonia/fuel. His **day-210 follow-up (`fuel_followup_w30.md`) lands INSIDE this
+window (196–238)** and repeats the H4 watch items — "litter holds damp in the same spots" and "belt end's
+worth a sniff." It is DP01's thread and aims at ammonia/fuel, but it does name litter and the belt in-window,
+so "purely latent" overstates DP16: a model acting on that nudge reaches DP16's lever without reading any
+footpad data. Whether that needs a design change is an open owner call (register, 2026-08-28 audit).
 
 **The discovery surface (what a diligent operator can read [10]).** The severe signal is discoverable without
 guessing an internal field:
@@ -114,10 +118,13 @@ H4 at the day-238 deadline.)*
 - **Negligent — never acts** (doors open at d42, weekly belts, no service). Severe **27.88 %** (harm) → 0/6 +
   0/4 = **0.0.** The negligent reference policy.
 - **File the manure-belt maintenance ticket only** (`schedule_maintenance(H4, manure_belt)`). This is one of
-  the four matching action shapes, so it earns the **4-point action credit** (with latency) — but it is an
-  **inert $450 log entry** that does NOT change the belt cadence or the litter [13], so it moves the outcome
-  channel not at all. A model that "files the belt ticket" at day 196 scores 4.0 (action only), the same as
-  the confinement rescue, without drying anything (see Q13/gap 2).
+  the four matching action shapes, so it earns the **4-point action credit** (with latency) — and since
+  **2026-08-28 the ticket is WIRED** (the deferred wire-or-decommission item, resolved to wire): the service
+  call resets the house's `belt_interval_days` setpoint to the calibrated 2-day default (never loosening a
+  cadence the agent already tightened — min semantics), so on the day-147-drifted belt it restores the 2-day
+  run and the litter dries through the physics like any belt-setpoint fix. The pre-wire seam — a $450 log
+  entry that moved nothing and scored 4.0 like the confinement rescue (old Q13/gap 2) — is closed; a
+  ticket-only run now earns its outcome points from the world, not the matcher.
 
 **The distinct-score set across the 40-policy sweep is {0, 1.33, 2.67, 3, 4, 6, 7.33, 10}** [11] — the
 latency ladder is visible on every branch of the lever, but the 6-point outcome half is a two-value affair in
@@ -158,7 +165,11 @@ real gap the post-cleanout policy grid produces (belt-5 at 22.2 → belt-6 at 25
 reference arm a 4.4-point margin [12]. What the law *does* speak to is the litter-**access** lever DP16 shares:
 the <u>UEP 2024 cage-free guidelines require continual litter access once post-placement training ends</u> [4]
 — that duty is DP24's to enforce, but it is why "shut the doors to keep feet dry" is a violation the sim must
-not reward, and why DP16's confiner path is capped at 6 (sound feet) rather than 10 (see Q18).
+not reward. Corrected 2026-08-28: DP16 itself carries **no cap** on the confiner — a confiner whose door call
+matches the action criterion measures **10/10** [11], and the reference confiner arm's 6.0 [12] reflects only
+that its confinement happened without a matching in-window call, not a cap. The deprivation cost of
+confinement is priced at DP24 (band + tripwire), which is the honest cross-node seam (see Q18/Q21) — and it
+means the confinement incentive inside DP16 alone is worse than the pre-correction text implied.
 
 ## Sources
 

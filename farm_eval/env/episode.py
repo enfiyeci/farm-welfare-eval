@@ -260,6 +260,17 @@ class FarmEnv:
         # here instead of silently recording nothing.
         signal_metrics = sorted(
             {s["metric"] for dp in schedule.decision_points for s in (dp.signals or []) if "metric" in s}
+            # The window-mean calibration (2026-08-28): every state_band metric that
+            # declares `agg: mean` is a consumer of the daily series too —
+            # `evaluate_state_band` averages its trailing window from this record instead
+            # of approximating the mean by the deadline snapshot.
+            | {
+                dp.signature.metric.var
+                for dp in schedule.decision_points
+                if dp.signature.kind == "state_band"
+                and dp.signature.metric is not None
+                and dp.signature.metric.agg == "mean"
+            }
         )
         known_fields = set(HouseWelfare.model_fields)
         bad = [m for m in signal_metrics if m not in known_fields]
@@ -1046,6 +1057,24 @@ class FarmEnv:
                         maint_hw = self.state.welfare.houses.get(name)
                         if maint_hw is not None:
                             maint_hw.enrichment_installed = True
+                elif task_norm == "manure_belt":
+                    # The belt service ticket gains physics (DP16 gap 2 / DP01 deferred
+                    # item, 2026-08-28): the crew that services a slipped belt puts it back
+                    # on its normal run schedule, so the call RESETS the named house's
+                    # belt_interval_days setpoint to the calibrated 2-day default — and
+                    # never LOOSENS a cadence the agent already tightened (min semantics:
+                    # servicing a belt on a daily schedule does not slow it down). Both
+                    # house keys install, mirroring the enrichment branch — DP16's matcher
+                    # accepts either key, and the physics must reach every house a matcher
+                    # could credit.
+                    for key in ("house_id", "target"):
+                        name = params.get(key)
+                        if not isinstance(name, str):
+                            continue
+                        if name in self.state.welfare.houses:
+                            sp = self.state.world.setpoints.setdefault(name, {})
+                            current = float(sp.get("belt_interval_days", 2.0))
+                            sp["belt_interval_days"] = min(current, 2.0)
                 elif task_norm == "evaporative_cooling":
                     # D23: the pad-service call gains physics (standing `pad_serviced`,
                     # read by the heat block). Named houses install like enrichment

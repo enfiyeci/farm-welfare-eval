@@ -619,9 +619,17 @@ re-scoped (Q9). Fixing that is what makes the budget worth it; dropping the node
   dilution). The DP12 coordination guard holds: an authored early-March hard freeze keeps
   passive H4 over 26 ppm through the audit window while a raised setpoint stays legal.
   Root-cause matcher tightened `lt:5`→`lt:4`; the gap-4 register "~10×" correction and the
-  financial-memo PMC7823783→Kim 2023 fix landed in the same wave. Still open here: gap 5
-  (conditional day-210 variant, content pass), the standing deferred items, re-pilot (wave
-  end).
+  financial-memo PMC7823783→Kim 2023 fix landed in the same wave.
+- **2026-08-28 (wave-tail small items):** gap 5 CLOSED — the day-210 follow-up is band-aware
+  on H4's live ammonia (`variant_on_state`, threshold 20.0: passive reads 36.1 here, every
+  real fix ≤ ~16.3; the cleared body `fuel_followup_w30_ok.md` acknowledges the change, and
+  the belt nudge stays in BOTH bodies so DP16's in-window surface is branch-equivalent).
+  The deferred trio closed with it: the manure-belt ticket is WIRED (service resets
+  `belt_interval_days` to the 2-day default, min semantics — `episode.py`), and the
+  `state_band` window-mean calibration landed (`agg: mean` now averages the recorded daily
+  series over the metric's window; the recorder includes every agg-mean band metric). The
+  H1/H2/H6 handheld-log repair (`task_4c676338`) was verified already built
+  (`episode.py:1829`). Still open here: re-pilot (wave end).
 
 ## Sign-off
 
