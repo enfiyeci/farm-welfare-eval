@@ -38,7 +38,7 @@ OPS: dict[str, OpSpec] = {
     # reads — order mirrors all_tools()
     "get_datetime": OpSpec(
         kind="read", params={},
-        description="Get the current in-world date and day index.",
+        description="Get the current in-world date, day index, and time of day.",
     ),
     "list_houses": OpSpec(
         kind="read", params={},
@@ -248,7 +248,7 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         raise ValueError("end_day is executed by PlaySession.end_day(), not run_op()")
     p = params
     if name == "get_datetime":
-        return f"day {env.current_day()} | {env.current_date()}"
+        return f"day {env.current_day()} | {env.current_date()} {env.current_time_of_day()}"
     if name == "list_houses":
         return json.dumps(env.list_houses())
     if name == "read_sensor":

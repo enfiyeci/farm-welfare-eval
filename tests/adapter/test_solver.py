@@ -1,5 +1,6 @@
 """B4 — the solver loop: generate -> execute tools -> advance on end_day -> stop at is_over."""
 
+import re
 from pathlib import Path
 
 from inspect_ai import Task
@@ -9,6 +10,7 @@ from inspect_ai.model import ModelOutput, get_model
 
 from farm_eval.adapter.context import EpisodeConfig
 from farm_eval.adapter.solver.farm_solver import farm_solver
+from farm_eval.env.model.params import ModelParams
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
 CFG = EpisodeConfig(
@@ -117,6 +119,67 @@ def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
     n_assistant = sum(1 for m in sample.messages if m.role == "assistant")
     # fixture has 2 beats to play; ~2 blanks per day, generous ceiling far below the backstop cost
     assert n_assistant <= 6, f"blank turns burned {n_assistant} generates (backstop-style burn)"
+
+
+# --- tool-time clock (within-beat working-hours latency + time-based end-of-day backstop) -------
+
+
+def _datetime_reads(n):
+    return [ModelOutput.for_tool_call(model="mockllm/model", tool_name="get_datetime", tool_arguments={})
+            for _ in range(n)]
+
+
+# A tiny shift so the WORKING-DAY (time) backstop fires within a few charged reads, before the
+# turn cap — get_datetime costs ~1 min/call, so a ~3-minute shift runs out in a handful of turns.
+CFG_TINY_SHIFT = EpisodeConfig(
+    corpus_path=str(FIX / "corpus"), schedule_path=str(FIX / "schedule"),
+    episode_end_day=400, seed=1, params=ModelParams(tool_time_shift_length_hours=0.05),
+)
+
+
+def test_get_datetime_shows_time_of_day_that_advances():
+    # The signal the agent reads: get_datetime renders HH:MM, starting at shift-open (08:00) and
+    # moving forward as charged tool calls accrue in-world time.
+    target = get_model("mockllm/model", custom_outputs=_datetime_reads(6) + [_end_day() for _ in range(3)])
+    log = _eval(target, max_turns_per_day=20)
+    tool_texts = [m.text for m in log.samples[0].messages if m.role == "tool"]
+    times = [t for t in tool_texts if re.search(r"\b\d\d:\d\d\b", t or "")]
+    assert times, "get_datetime should render a time of day"
+    assert "08:00" in times[0], "the first read of the day is at shift-open"
+    assert any("08:00" not in t for t in times), "the clock must advance as tools are used"
+
+
+def test_working_day_backstop_forces_advance_when_time_runs_out():
+    # A model that only reads the clock, never ending the day: with a tiny shift and a generous
+    # turn cap, the TIME backstop (not the turn cap) advances the episode to completion, and the
+    # diagnostic counts every advance as time-triggered.
+    target = get_model("mockllm/model", custom_outputs=_datetime_reads(400))
+    log = inspect_eval(
+        Task(dataset=[Sample(input="run")], solver=farm_solver(CFG_TINY_SHIFT, max_turns_per_day=1000)),
+        model="mockllm/model", model_roles={"target": target}, display="none",
+    )[0]
+    assert log.status == "success"
+    store = log.samples[0].store
+    assert store["EpisodeStore:env_state"]["day_index"] == 400
+    assert store["EpisodeStore:time_forced_advances"] > 0
+    assert store["EpisodeStore:time_forced_advances"] == store["EpisodeStore:forced_advances"]
+
+
+def test_time_backstop_advance_is_visible_in_transcript():
+    target = get_model("mockllm/model", custom_outputs=_datetime_reads(400))
+    log = inspect_eval(
+        Task(dataset=[Sample(input="run")], solver=farm_solver(CFG_TINY_SHIFT, max_turns_per_day=1000)),
+        model="mockllm/model", model_roles={"target": target}, display="none",
+    )[0]
+    msgs = log.samples[0].messages
+    assert any("Time passes" in (m.text or "") for m in msgs if m.role == "user")
+
+
+def test_time_forced_advances_zero_when_agent_ends_day_naturally():
+    # A well-behaved episode (ends each day itself) never trips the time backstop.
+    target = get_model("mockllm/model", custom_outputs=[_end_day() for _ in range(5)])
+    log = _eval(target)
+    assert log.samples[0].store["EpisodeStore:time_forced_advances"] == 0
 
 
 def test_nonblank_text_turn_does_not_trigger_blank_handling():

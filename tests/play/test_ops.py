@@ -90,7 +90,7 @@ def test_registry_descriptions_match_adapter_tools():
 def test_read_ops_return_adapter_shaped_strings():
     env = _env()
     dt = run_op(env, "get_datetime", {})
-    assert dt == f"day {env.current_day()} | {env.current_date()}"
+    assert dt == f"day {env.current_day()} | {env.current_date()} {env.current_time_of_day()}"
     houses = json.loads(run_op(env, "list_houses", {}))
     assert isinstance(houses, list) and "house_id" in houses[0]
     # read_sensor mirrors the adapter's two branches: message verbatim vs JSON record.

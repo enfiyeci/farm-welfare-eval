@@ -165,6 +165,11 @@ class PlaySession:
         if spec.kind == "action" and self._env.is_over():
             raise EpisodeOver("episode is over; action ops are closed (reads remain available)")
         result = run_op(self._env, op, full)
+        # Tool-time parity with the solver: charge this op's in-world minutes so the within-beat
+        # clock (surfaced by get_datetime) advances the same way it does under a model run. The
+        # human tester ends the day explicitly via end_day(), so — unlike the autonomous solver —
+        # the play surface does NOT auto-force-end on the working-hours backstop.
+        self._env.tick_clock(op)
         self._append({"kind": "op", "day_index": self._env.current_day(), "op": op,
                       "params": full, "result": result})
         return result
@@ -254,6 +259,10 @@ class PlaySession:
                 continue
             if rec["kind"] == "op":
                 run_op(env, rec["op"], rec["params"])
+                # Reproduce the tool-time clock exactly as call() advanced it: the last end_day
+                # snapshot reset day_minutes/day_tool_calls to 0, so replaying the tail ops must
+                # re-charge them or the resumed clock (and its jitter call indices) would diverge.
+                env.tick_clock(rec["op"])
             elif rec["kind"] == "day":
                 env.end_day()
 

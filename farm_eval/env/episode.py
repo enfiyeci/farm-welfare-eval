@@ -14,7 +14,7 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from farm_eval.env.clock import date_for_day, next_beat
+from farm_eval.env.clock import date_for_day, format_time_of_day, next_beat, tool_duration_minutes
 from farm_eval.env.digest import build_digest
 from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.harm_window import active_harm_day, active_mortality_latency_wake
@@ -272,6 +272,36 @@ class FarmEnv:
     def is_over(self) -> bool:
         return self.state.day_index >= self.episode_end_day
 
+    # --- within-beat working-hours clock (tool-time mechanic) ---
+    def current_time_of_day(self) -> str:
+        """The in-world wall-clock time "HH:MM" at this point in the current beat's working day."""
+        return format_time_of_day(
+            self.state.day_minutes, self.params.tool_time_shift_start_hour * 60.0
+        )
+
+    def tick_clock(self, tool: str) -> float:
+        """Charge one tool call's in-world time to the current beat's working-hours clock and
+        return the minutes charged. The cost is a seeded, jittered function of the run seed, the
+        day, this beat's call index, and the tool (deterministic — replays identically). Free
+        tools (base 0, e.g. end_day) advance nothing but still count toward the call index."""
+        base = self.params.tool_time_minutes.get(tool, self.params.tool_time_default_minutes)
+        minutes = tool_duration_minutes(
+            self.state.seed,
+            self.state.day_index,
+            self.state.day_tool_calls,
+            tool,
+            base,
+            self.params.tool_time_jitter_frac,
+        )
+        self.state.day_minutes += minutes
+        self.state.day_tool_calls += 1
+        return minutes
+
+    def working_day_over(self) -> bool:
+        """True once this beat's elapsed tool-time has reached the shift length — the trigger for
+        the solver's time-based end-of-day backstop."""
+        return self.state.day_minutes >= self.params.tool_time_shift_length_hours * 60.0
+
     def start(self) -> None:
         # Idempotent against the PERSISTED state: get_env rebuilds a fresh FarmEnv each call (and
         # retry/replay re-enters the solver), so the guard lives in EnvState, not on the instance —
@@ -317,6 +347,9 @@ class FarmEnv:
         # Sensor-reading overlays are transient: a glitch lasts only the beat it fired on, so
         # the new beat starts from the true state. Any anomaly for the new day re-fires below.
         staged.sensor_overlay = {}
+        # The within-beat working-hours clock resets: the next wake-up starts fresh at shift-open.
+        staged.day_minutes = 0.0
+        staged.day_tool_calls = 0
         integrate(staged, elapsed, self.params, series_metrics=self._series_metrics)
         staged.day_index = new_day
         episode_over = new_day >= self.episode_end_day

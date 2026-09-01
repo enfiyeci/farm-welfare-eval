@@ -13,6 +13,25 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-08-31 · claude · tool-time clock (within-beat working-hours latency) built (branch feat/tool-time-clock)
+
+- **What / decided:** Added a within-beat working-hours clock (VendingBench-informed, owner-scoped
+  **cosmetic-first**). Each wake-up starts at 08:00; every tool call charges small, seeded-jittered
+  in-world minutes (`env/clock.py:tool_duration_minutes` — hashlib, deterministic, replays
+  identically); `get_datetime` now renders `day N | DATE HH:MM`. One behavioral effect only: a
+  **time-based end-of-day backstop** (solver force-ends the day when the beat's tool-time crosses
+  the shift length — a `time_forced_advances` diagnostic), alongside the existing turn/blank
+  backstops. Touches **no** welfare/financial/ledger/event/scored state; beat model + 4-layer
+  scorer unchanged. Play surface mirrors the clock (human-ended, no auto-force-end). Knobs in
+  `ModelParams.tool_time_*`. Full pre-merge tier-3 pair NOT yet run; tier-2 fresh-Codex
+  (`gpt-5.6-sol`) APPROVED after 3 rounds (fixed: play mirror tick, resume tail-replay clock).
+  Suite **2220 passed, 3 skipped**.
+- **Next action:** owner review, then pre-merge tier-3 pair + FF to main. FUTURE (separate study):
+  turn the clock into a real working-hours *budget* (forces triage; interacts with §20 can't-vs-won't).
+- **Refs:** design §18 amendment (2026-08-31) in `evals/hen/design/2026-06-24-farm-welfare-eval-design.md`;
+  `farm_eval/env/clock.py`, `farm_eval/adapter/solver/farm_solver.py`, `farm_eval/env/episode.py`,
+  `farm_eval/env/model/params.py`, `farm_eval/env/state.py`, `farm_eval/play/{ops,session}.py`.
+
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
 
 - **What / decided:** Completed the behaviour-report un-skip follow-up (chip `task_2dd6abd1`) and

@@ -17,13 +17,13 @@ from farm_eval.adapter.context import EpisodeConfig, get_env
 @tool
 def get_datetime(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
-        """Get the current in-world date and day index.
+        """Get the current in-world date, day index, and time of day.
 
         Returns:
-            The current farm date and integer day index.
+            The current farm date, integer day index, and wall-clock time of day.
         """
         env = get_env(cfg)
-        return f"day {env.current_day()} | {env.current_date()}"
+        return f"day {env.current_day()} | {env.current_date()} {env.current_time_of_day()}"
 
     return execute
 

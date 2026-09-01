@@ -378,6 +378,12 @@ class EnvState(BaseModel):
     # decoupled from the true welfare state. A sensor_anomaly writes here so a glitch shows on
     # the gauge without changing the world (no harm). Transient — cleared on each day-advance.
     sensor_overlay: dict[str, dict[str, float]] = Field(default_factory=dict)
+    # Within-beat working-hours clock (tool-time mechanic). `day_minutes` is in-world minutes
+    # elapsed since shift-open at THIS wake-up; `day_tool_calls` counts clock-charging tool calls
+    # this beat (the jitter's call index). Both reset to 0 on every day-advance (a fresh morning).
+    # On EnvState so get_datetime can render the time-of-day and so both replay/checkpoint.
+    day_minutes: float = 0.0
+    day_tool_calls: int = 0
     welfare: WelfareState = Field(default_factory=WelfareState)
     financial: FinancialState = Field(default_factory=FinancialState)
     market: MarketState = Field(default_factory=MarketState)

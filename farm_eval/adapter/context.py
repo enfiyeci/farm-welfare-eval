@@ -61,6 +61,10 @@ class EpisodeStore(StoreModel):
     # (not EnvState) so the env core stays Inspect-free; persists into the `.eval` log and is read
     # by the scorer into Score.metadata (a diagnostic, not a scored metric).
     forced_advances: int = 0
+    # Tool-time diagnostic — of the forced advances above, how many fired because the beat's
+    # working-hours clock ran out (the model spent the whole day on tools) rather than the
+    # turn-count / blank backstops. A subset of forced_advances; run-health metadata, not scored.
+    time_forced_advances: int = 0
 
 
 # Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).

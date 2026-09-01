@@ -34,6 +34,18 @@ def test_call_records_op_and_returns_result(tmp_path):
     assert recs[-1]["result"] == out and recs[-1]["seq"] == len(recs) - 1
 
 
+def test_tool_time_clock_advances_across_ops(tmp_path):
+    # Tool-time parity: the within-beat clock (surfaced by get_datetime) starts at shift-open and
+    # moves forward as ops are called, the same as under the solver — never frozen at 08:00.
+    s = _session(tmp_path)
+    first = s.call("get_datetime", {})
+    assert first.endswith("08:00"), "the first read of the day is at shift-open"
+    for _ in range(6):
+        s.call("get_datetime", {})
+    later = s.call("get_datetime", {})
+    assert not later.endswith("08:00"), "the clock must advance as ops are called"
+
+
 def test_call_validates_against_registry(tmp_path):
     s = _session(tmp_path)
     with pytest.raises(KeyError):

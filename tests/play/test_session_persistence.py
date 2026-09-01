@@ -47,6 +47,22 @@ def test_resume_reproduces_straight_through_state(tmp_path):
     assert r._env.state.model_dump(mode="json") == straight
 
 
+def test_resume_reproduces_the_tool_time_clock(tmp_path):
+    # The within-beat clock must survive resume. The last snapshot is taken at end_day (clock reset
+    # to 0), so the tail ops after it must re-charge day_minutes/day_tool_calls on replay — else a
+    # resumed session shows a frozen 08:00 and a different jitter call index than the live one.
+    a = PlaySession.create(tmp_path / "a", **KW)
+    a.end_day()                       # snapshot here, with the clock reset to 0
+    a.call("get_datetime", {})        # tail ops recorded after the snapshot
+    a.call("list_houses", {})
+    live_minutes, live_calls = a._env.state.day_minutes, a._env.state.day_tool_calls
+    assert live_minutes > 0 and live_calls == 2
+    del a
+    r = PlaySession.resume(tmp_path / "a")
+    assert r._env.state.day_minutes == live_minutes
+    assert r._env.state.day_tool_calls == live_calls
+
+
 def test_resume_then_advance_survives_the_real_corpus(tmp_path):
     """Resume must be able to ADVANCE, not merely rebuild.
 

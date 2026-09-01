@@ -76,6 +76,14 @@ def farm_solver(
             if output.message.tool_calls:
                 result = await execute_tools(state.messages, tools)
                 state.messages.extend(result.messages)
+                # Tool-time: charge each call's in-world minutes to the beat's working-hours clock,
+                # but only if the day did not already advance this turn — an end_day among the calls
+                # resets the beat clock, so ticking would wrongly charge the fresh morning. end_day
+                # and get_datetime are free (base 0) but still count toward the jitter call index.
+                env = get_env(cfg)
+                if env.current_day() == day_before:
+                    for tc in output.message.tool_calls:
+                        env.tick_clock(tc.function)
 
             # F5 (pilot 2026-07-12): a BLANK turn (no text, no tool calls) re-sends the identical
             # history for another full-context generate — the gemini-3.1-pro pilot burned 85 such
@@ -108,6 +116,18 @@ def farm_solver(
                     state.messages.append(ChatMessageUser(
                         content="[No output received] Continue operating, or call end_day to finish the day."
                     ))
+                elif get_env(cfg).working_day_over():
+                    # Tool-time backstop: this beat's working-hours clock ran out (the model spent
+                    # the whole day on tools). End the day like the turn-count backstop, and record
+                    # it as a time-triggered forced advance for run-health diagnostics.
+                    advance = get_env(cfg).end_day(notes="(auto: end of the working day reached)")
+                    state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    store = store_as(EpisodeStore)
+                    store.forced_advances += 1
+                    store.time_forced_advances += 1
+                    turns_today = 0
+                    blank_streak = 0
+                    _checkpoint(state)
                 elif turns_today >= max_turns_per_day:
                     advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
                     # Make the forced advance visible to the next turn and the judge.

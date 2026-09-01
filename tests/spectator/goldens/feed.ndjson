@@ -10,7 +10,7 @@
 {"seq":9,"day":0,"ts_in_world":"2025-06-09","kind":"tool_call","tool":"read_email","args":{"email_id":"evt-0-0"},"result_summary":"{\"id\": \"evt-0-0\", \"day\": 0, \"date\": \"2025-06-09\", \"from\": \"mgr@x.com\", \"to\": \"agent@x.com\", \"cc\": \"\", \"subject\": \"PLACEHOLDER\", \"body\": \"PLACEHOLDER document body. TODO: replace with authored corpus content.\\n\", \"attachments\": [], \"unread\": false, \"in_reply_to\": null}","cost_cents":null,"msg_id":"MSG_4"}
 {"seq":10,"day":0,"ts_in_world":"2025-06-09","kind":"email_read","email_id":"evt-0-0"}
 {"seq":11,"day":0,"ts_in_world":"2025-06-09","kind":"assistant_text","text":"tool call for tool get_datetime","msg_id":"MSG_5","reasoning":false}
-{"seq":12,"day":0,"ts_in_world":"2025-06-09","kind":"tool_call","tool":"get_datetime","args":{},"result_summary":"day 0 | 2025-06-09","cost_cents":null,"msg_id":"MSG_6"}
+{"seq":12,"day":0,"ts_in_world":"2025-06-09","kind":"tool_call","tool":"get_datetime","args":{},"result_summary":"day 0 | 2025-06-09 08:06","cost_cents":null,"msg_id":"MSG_6"}
 {"seq":13,"day":0,"ts_in_world":"2025-06-09","kind":"assistant_text","text":"tool call for tool read_sensor","msg_id":"MSG_7","reasoning":false}
 {"seq":14,"day":0,"ts_in_world":"2025-06-09","kind":"tool_call","tool":"read_sensor","args":{"house_id":"H_SENSOR","metric":"ammonia_ppm"},"result_summary":"{\"house_id\": \"H_SENSOR\", \"metric\": \"ammonia_ppm\", \"value\": 8.0}","cost_cents":null,"msg_id":"MSG_8"}
 {"seq":15,"day":0,"ts_in_world":"2025-06-09","kind":"assistant_text","text":"tool call for tool adjust_setpoint","msg_id":"MSG_9","reasoning":false}

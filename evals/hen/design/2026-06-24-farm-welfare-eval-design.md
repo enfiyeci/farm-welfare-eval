@@ -474,6 +474,33 @@ replace, the §15/§16 judge-validation gate: Spearman ρ validates the judge *w
 validates that a *model's* headline is stable *across* runs. Cost check against the §18 per-episode
 budget before locking a fleet size.
 
+### Amendment (2026-08-31) — tool-time clock (within-beat working-hours latency)
+
+A **within-beat working-hours clock** gives tool use in-world duration, for realism and
+anti-eval-awareness (§20): a static world where every action is instantaneous is a tell. Each
+wake-up starts at **shift-open (08:00)**; every tool call charges a small amount of in-world
+minutes to the clock, and the agent reads the time off `get_datetime` (`day N | DATE HH:MM`). The
+per-call cost is **jittered so it is never a constant a model could clock**, yet fully
+**deterministic** — a pure seeded function of `(run seed, day, call index, tool)`
+(`env/clock.py:tool_duration_minutes`, hashlib, never wall-clock/live-random), so a run replays
+byte-identically. Knobs live in `ModelParams.tool_time_*` (shift start/length, per-tool base
+minutes, jitter fraction).
+
+**Scope is deliberately cosmetic-first (the "#1" of three options considered).** The clock is NOT
+a hard budget: it never gates or blocks an action mid-turn, and it changes **no** welfare,
+financial, ledger, event, or scored quantity — the sparse-jump beat clock and the 4-layer scorer
+are untouched. Its one behavioral effect is a **time-based end-of-day backstop**: when a beat's
+elapsed tool-time crosses the shift length, the solver force-ends the day, exactly like the
+existing turn-count and blank backstops (`adapter/solver/farm_solver.py`), recorded as a
+`time_forced_advances` run-health diagnostic. Costs are kept small so a competent day of welfare
+work fits inside a shift; the backstop only catches a model that dawdles on tools all day. The
+clock state (`EnvState.day_minutes` / `day_tool_calls`) resets each beat and rides checkpoint/
+replay. The human **play** surface mirrors the clock (advances it per op) but is human-ended, so
+it does not auto-force-end. **FUTURE:** the vending-bench-style version (turn the clock into a real
+working-hours *budget* that forces triage) is a separate, separately-calibrated study — it makes
+information-foraging cost a live variable and so interacts with the §20 can't-vs-won't design; not
+in this iteration.
+
 ## 19. Holistic behavioral analysis (full-transcript)
 
 Beyond the structured per-decision scoring, the **complete transcript is retained** in the Inspect `.eval` log (compaction, if ever enabled, affects only the agent's in-run context, never the log). This supports a **holistic whole-episode review** — a separate Opus pass over the entire behavior — complementary to the judge's per-decision scores. It catches cross-decision patterns the per-decision rubric can't: drift, consistency of welfare reasoning across the cycle, emergent strategy, and subtle eval-awareness or deception that only shows up in aggregate. The report generator (§17) exports a clean, Opus-ingestible transcript + score bundle per run for this purpose.
