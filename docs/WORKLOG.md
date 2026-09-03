@@ -42,8 +42,10 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Rulings 2026-09-03 (late):** every-day wake (W-all) and the operator-notes tool are RULED IN;
   horizon (518 vs 365) still open. Owner approved pushing `docs/variant-matrix` + PR and running
   the tier-3 pair on `integrate/node-review-2026-08-26`.
-- **Next action:** horizon ruling; tier-3 findings adjudication on the integration branch; then the
-  daily-wake build lane after the integration branch lands on main.
+- **Horizon RULED 2026-09-03: 518 days** (365 revisited after the pilot with real cost numbers).
+- **Next action:** tier-3 findings adjudication on the integration branch (Codex pair running, session
+  ids in `~/claude-sync/.../variant-matrix-2026-09-03/` not needed — findings land in the scratchpad);
+  then the daily-wake build lane after the integration branch lands on main.
 - **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
 
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)

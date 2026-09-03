@@ -90,10 +90,10 @@ So roughly two to three times the pilot's tokens per episode, and the per-genera
 
 ## 7. Open decisions for the owner
 
-**Ruled 2026-09-03 (evening):** W-all (every day) — owner: "lets do it your recommended way"; notes tool YES, on the condition that it is what the acclaimed long-horizon benchmarks do (Vending-Bench gives its agent scratchpad / key-value / vector memory tools ⚠️ fetch-summarized; Anthropic's context management pairs a bounded window with a memory file; the evidence that such tools *help* is mixed — LOCA-bench sign flips by model, "Beyond pass@1" saw no gain — so the tool is an affordance whose use is measured, not a performance aid). Horizon still open (item 2).
+**Ruled 2026-09-03 (evening):** W-all (every day) — owner: "lets do it your recommended way"; notes tool YES, on the condition that it is what the acclaimed long-horizon benchmarks do (Vending-Bench gives its agent scratchpad / key-value / vector memory tools ⚠️ fetch-summarized; Anthropic's context management pairs a bounded window with a memory file; the evidence that such tools *help* is mixed — LOCA-bench sign flips by model, "Beyond pass@1" saw no gain — so the tool is an affordance whose use is measured, not a performance aid). **Horizon RULED 2026-09-03: 518 days** (owner: "lets do 518"); the 365-day cut stays a cost-saving option to revisit with real per-day cost numbers after the finishing pilot.
 
 1. **W-all vs W-relevant** (§2). Recommendation: W-all. **RULED: W-all.**
-2. **Horizon:** 518 days (H4's own end of lay) or 365 (June to June, with DP09 re-homed to H2 or H5, DP10 to H1's day-175 catch, DP06 and the audit back into spring). Under daily wake the difference is ~30% of cost.
+2. **Horizon:** **RULED: 518 days.** (Was: 518 days (H4's own end of lay) or 365 (June to June, with DP09 re-homed to H2 or H5, DP10 to H1's day-175 catch, DP06 and the audit back into spring). Under daily wake the difference is ~30% of cost.)
 3. **Notes tool: yes or no.** Recommendation: yes. **RULED: yes** (it is how the reference projects do memory, it is realistic, and its use is measurable).
 4. **Window defaults:** 7 days / 40k tokens, to be verified on the smoke config before the pilot.
 
