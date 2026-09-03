@@ -24,8 +24,17 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   `docs/research/2026-09-03-variant-matrix-research/` (delegated, ⚠️-marked, not re-read at
   source). **Owner rulings 2026-09-03:** land in a fresh worktree; variant arms start on
   Gemini models (out-of-family grader mandatory).
-- **Next action:** owner review of the matrix (§8 open questions: I2 admissibility, finance
-  merge order, Welfare Footprint contact); Tier A arms run only after the finishing pilot.
+- **Owner rulings 2026-09-03 (later the same day):** dashboard/index language stays welfare-avoidant
+  (production + profit register only); the finance branch merges BEFORE the pilot; Welfare
+  Footprint contact deferred. Start set chosen (corners, disclosure pair, thinking on/off,
+  post-run debrief). Pilot readiness assessed: NOT yet — integration branch (29 nodes) → main,
+  respace, finance merge, FY26 number, then pilot. Respace calendar proposal written:
+  `evals/hen/design/2026-09-03-respace-calendar-proposal.md` (measured 92 wake days / 518,
+  45% seven-day gaps, peak 11 open windows on day 252; moves DPD/DP23 EARLY because the H6
+  pullet order must precede the day-266 placement by a rearing cycle — the 2026-08-11 spec's
+  294–322 would land after placement).
+- **Next action:** owner go on the respace proposal (windows, wake-day density option A/B/C,
+  DP13's 118.5 anchor); then the tier-3 pair on the integration branch.
 - **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
 
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
