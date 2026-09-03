@@ -56,6 +56,8 @@ Every move is anchored to its story, never to gap-filling (spec rule). "keep" me
 
 **Projected effect.** Day-252 peak 11 → **7**, and those seven are three stories (coli pair, HPAI trio, DP25 + DP21). The two Nov corporate asks separate by two weeks. DPD/DP23 move into the first quiet stretch (days 63–112 stays empty of decisions; 133–163 gains the pullet-order thread). Integrity nodes across three attention regimes as the spec intended (crisis: DPN/DP21/DP15 · calm: DP13, DP12 · routine: DP19, DP24).
 
+> **Superseded 2026-09-03 (owner ruling: daily wake).** §3 and §4 below are moot under `docs/specs/2026-09-03-daily-wake-and-rolling-context-design.md`: there is no wake grid to irregularize and the density question is answered (every day). §2 window moves and §5 sequencing still apply.
+
 ## 3. Irregularizing the wake grid (no new content)
 
 Re-date the 66 noise-only wake days off the 7-day grid onto mixed 2–10 day gaps, keeping every decision-linked day fixed. Target: no gap length above ~25% of gaps, max gap ≤ 16 days, month counts 5–9. Cost: date edits in `schedule/events.yml` and any dated email bodies; no new bodies. This is what "most realistic spread" buys cheapest.

@@ -33,8 +33,14 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   45% seven-day gaps, peak 11 open windows on day 252; moves DPD/DP23 EARLY because the H6
   pullet order must precede the day-266 placement by a rearing cycle — the 2026-08-11 spec's
   294–322 would land after placement).
-- **Next action:** owner go on the respace proposal (windows, wake-day density option A/B/C,
-  DP13's 118.5 anchor); then the tier-3 pair on the integration branch.
+- **Owner ruling 2026-09-03 (evening): DAILY WAKE.** The model wakes on every relevant day and
+  context is handled the way the long-horizon benchmarks do it (bounded recent window +
+  explicit memory tool, the world as the durable record). This unlocks spec §18's budget lock.
+  Design: `docs/specs/2026-09-03-daily-wake-and-rolling-context-design.md` (wake_mode daily,
+  7-day/40k rolling view over a complete transcript, operator-notes tool, per-window grader
+  input, sampled whole-episode dims; ~2–3× pilot tokens). Respace §3/§4 superseded.
+- **Next action:** owner rulings on the spec's §7 (W-all vs W-relevant, horizon 518 vs 365,
+  notes tool, window defaults); then build lane after the integration branch lands on main.
 - **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
 
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
