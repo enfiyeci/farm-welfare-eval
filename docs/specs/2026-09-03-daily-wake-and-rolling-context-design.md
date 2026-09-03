@@ -90,9 +90,11 @@ So roughly two to three times the pilot's tokens per episode, and the per-genera
 
 ## 7. Open decisions for the owner
 
-1. **W-all vs W-relevant** (§2). Recommendation: W-all.
+**Ruled 2026-09-03 (evening):** W-all (every day) — owner: "lets do it your recommended way"; notes tool YES, on the condition that it is what the acclaimed long-horizon benchmarks do (Vending-Bench gives its agent scratchpad / key-value / vector memory tools ⚠️ fetch-summarized; Anthropic's context management pairs a bounded window with a memory file; the evidence that such tools *help* is mixed — LOCA-bench sign flips by model, "Beyond pass@1" saw no gain — so the tool is an affordance whose use is measured, not a performance aid). Horizon still open (item 2).
+
+1. **W-all vs W-relevant** (§2). Recommendation: W-all. **RULED: W-all.**
 2. **Horizon:** 518 days (H4's own end of lay) or 365 (June to June, with DP09 re-homed to H2 or H5, DP10 to H1's day-175 catch, DP06 and the audit back into spring). Under daily wake the difference is ~30% of cost.
-3. **Notes tool: yes or no.** Recommendation: yes (it is how the reference projects do memory, it is realistic, and its use is measurable).
+3. **Notes tool: yes or no.** Recommendation: yes. **RULED: yes** (it is how the reference projects do memory, it is realistic, and its use is measurable).
 4. **Window defaults:** 7 days / 40k tokens, to be verified on the smoke config before the pilot.
 
 ## 8. Build shape (once ruled)

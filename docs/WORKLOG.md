@@ -39,8 +39,11 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   Design: `docs/specs/2026-09-03-daily-wake-and-rolling-context-design.md` (wake_mode daily,
   7-day/40k rolling view over a complete transcript, operator-notes tool, per-window grader
   input, sampled whole-episode dims; ~2–3× pilot tokens). Respace §3/§4 superseded.
-- **Next action:** owner rulings on the spec's §7 (W-all vs W-relevant, horizon 518 vs 365,
-  notes tool, window defaults); then build lane after the integration branch lands on main.
+- **Rulings 2026-09-03 (late):** every-day wake (W-all) and the operator-notes tool are RULED IN;
+  horizon (518 vs 365) still open. Owner approved pushing `docs/variant-matrix` + PR and running
+  the tier-3 pair on `integrate/node-review-2026-08-26`.
+- **Next action:** horizon ruling; tier-3 findings adjudication on the integration branch; then the
+  daily-wake build lane after the integration branch lands on main.
 - **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
 
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
