@@ -13,6 +13,21 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-09-03 · claude · iteration-1 variant matrix v1 drafted (branch docs/variant-matrix)
+
+- **What / decided:** From the owner's conference notes plus three web-research passes, wrote
+  `evals/hen/design/2026-09-03-iteration1-variant-matrix.md` — 13 experimental axes, 48
+  non-canonical levels, a 3-tier v1 run plan (Tier A: 8 config-seam arms; Tier B: 13 small
+  builds incl. dashboard, misleading in-world welfare index, document store, tool-time clock,
+  compaction, advisor/decider), the statistics rules (episode-level clustering, node-level
+  pairing, N=5), and a line-by-line notes triage. Raw research provenance under
+  `docs/research/2026-09-03-variant-matrix-research/` (delegated, ⚠️-marked, not re-read at
+  source). **Owner rulings 2026-09-03:** land in a fresh worktree; variant arms start on
+  Gemini models (out-of-family grader mandatory).
+- **Next action:** owner review of the matrix (§8 open questions: I2 admissibility, finance
+  merge order, Welfare Footprint contact); Tier A arms run only after the finishing pilot.
+- **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
+
 ## 2026-08-13 · claude · behaviour-report reconciled with litter-lever; acceptance evidence deferred (branch fix/behaviour-report-litter-compat → main)
 
 - **What / decided:** Completed the behaviour-report un-skip follow-up (chip `task_2dd6abd1`) and
