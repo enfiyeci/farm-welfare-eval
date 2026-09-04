@@ -16,8 +16,10 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   house-only vet-visit matcher — the owner-flagged scope choice already recorded in
   `docs/final_to_do_list.md` (sol#1), veto still open). Suite 2933 passed / 3 skipped; corpus
   guards 0/0; mutation guard clean through both Codex runs.
-- **Next action:** Codex round-2 re-verify (resume the terra adversarial session), then owner
-  sign-off and fast-forward to `main`.
+- **Round 2 (terra, resumed session 01a06998-d473…): APPROVED, 0 findings, ~382k tokens** — F2 and
+  F3 confirmed closed, no regression from the applies_if/tripwire interaction. Mutation guard clean.
+- **Next action:** owner sign-off (and the F1 veto call), push, fast-forward to `main`; then the
+  respace + daily-wake lane, then the finance merge.
 - **Refs:** findings `scratchpad/tier3-integration/adversarial-terra.json` (session-local);
   this commit.
 
