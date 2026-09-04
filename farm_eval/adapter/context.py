@@ -14,6 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from inspect_ai.util import StoreModel, store_as
+from pydantic import Field
 
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import (
@@ -50,6 +51,17 @@ class EpisodeConfig:
     # Any run with overrides set is EXPERIMENTAL — stamped by the scorer, refused by
     # comparable-sweep ranking (spec 2026-07-05 §6.3). Never set in a comparable sweep.
     ablation_overrides: dict[str, str] | None = None
+    # Daily-wake design (2026-09-03, spec docs/specs/2026-09-03-daily-wake-and-rolling-context-design.md).
+    # `sparse` keeps the beat-jump (every existing test, the pilot replay); `daily` convenes a
+    # session every in-world day. The comparable arm sets `daily` in config.yml.
+    wake_mode: str = "sparse"
+    # Rolling context view: keep the last N day-blocks of the transcript (0 = unlimited, i.e.
+    # today's full-history behaviour) and cap them at M estimated tokens (0 = no cap). The
+    # logged transcript is never truncated — only what the model is shown per call.
+    context_window_days: int = 0
+    context_window_tokens: int = 0
+    # Size cap on the operator-notes file (characters). Rejected in-world above the cap.
+    notes_max_chars: int = 6000
 
 
 class EpisodeStore(StoreModel):
@@ -61,6 +73,11 @@ class EpisodeStore(StoreModel):
     # (not EnvState) so the env core stays Inspect-free; persists into the `.eval` log and is read
     # by the scorer into Score.metadata (a diagnostic, not a scored metric).
     forced_advances: int = 0
+    # Daily-wake design: index into `state.messages` at which each new day's block begins
+    # (the assistant turn whose end_day advanced the day, or the harness "[Time passes]"
+    # message on a forced advance). The solver's context view keeps whole day-blocks so a
+    # tool call is never separated from its result. Persists into the .eval log.
+    day_starts: list[int] = Field(default_factory=list)
 
 
 # Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).
@@ -102,4 +119,6 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
         cfg.episode_end_day,
         params,
         enabled_nodes=cfg.enabled_nodes,
+        wake_mode=cfg.wake_mode,
+        notes_max_chars=cfg.notes_max_chars,
     )

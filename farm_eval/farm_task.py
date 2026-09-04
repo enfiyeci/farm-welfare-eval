@@ -29,10 +29,8 @@ def _load_config(config_path: str | Path) -> dict:
     return yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
 
 
-@task
-def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = None) -> Task:
-    cfg = config if config is not None else _load_config(config_path)
-    episode = EpisodeConfig(
+def _episode_config_from(cfg: dict) -> EpisodeConfig:
+    return EpisodeConfig(
         corpus_path=cfg["corpus_path"],
         schedule_path=cfg["schedule_path"],
         episode_end_day=int(cfg["episode_end_day"]),
@@ -46,7 +44,18 @@ def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = N
         # D2: opt-in per-beat checkpointing. Key-absent / null = off (no behavior change).
         checkpoint_dir=cfg.get("checkpoint_dir"),
         ablation_overrides=(dict(cfg["ablation_overrides"]) if cfg.get("ablation_overrides") else None),
+        # Daily-wake keys: absent = today's behaviour.
+        wake_mode=str(cfg.get("wake_mode", "sparse")),
+        context_window_days=int(cfg.get("context_window_days", 0)),
+        context_window_tokens=int(cfg.get("context_window_tokens", 0)),
+        notes_max_chars=int(cfg.get("notes_max_chars", 6000)),
     )
+
+
+@task
+def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = None) -> Task:
+    cfg = config if config is not None else _load_config(config_path)
+    episode = _episode_config_from(cfg)
     briefing = load_briefing(cfg["briefing_path"])
     return Task(
         dataset=[Sample(input=briefing)],
