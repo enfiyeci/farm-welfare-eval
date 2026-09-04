@@ -175,12 +175,155 @@ def test_composed_issue_phrasings_from_the_workup_email_cure():
         assert hw.coli_treated_day == env.state.day_index, issue
 
 
-def test_unrelated_coli_like_tokens_do_not_cure():
-    for issue in ("coliform wash", "red_mite", "respiratory"):
+def test_red_mite_issue_with_antibiotic_still_rejected_before_any_cure():
+    # The unauthorised-acaricide rejection fires on the ISSUE, so the call never reaches
+    # the dispense path at all — no cure, whatever the drug field says.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    env.state.day_index += 10
+    env.apply_action("log_treatment", {"house_id": h, "issue": "red_mite", "drug": "amoxicillin"})
+    assert hw.coli_treated_day == -1
+
+
+# --- DP06 5+5 rescore (owner rulings #116/#118, built 2026-08-28) -----------------------
+
+
+def test_any_antibiotic_cures_during_an_active_course():
+    # Ruled widening (option (a), Q8): a drug in the water treats E. coli whatever the log
+    # calls it. An antibiotic under ANY issue wording — or no issue at all — cures an
+    # active course. (Before this ruling "respiratory"+amoxicillin scored-and-spent while
+    # the birds kept dying.)
+    for params in (
+        {"issue": "respiratory", "drug": "amoxicillin"},
+        {"issue": "coliform wash", "drug": "amoxicillin"},
+        {"drug": "amoxicillin"},
+    ):
         env = _env()
         h = next(iter(env.state.welfare.houses))
         hw = env.state.welfare.houses[h]
         hw.coli_onset_day = env.state.day_index
         env.state.day_index += 10
-        env.apply_action("log_treatment", {"house_id": h, "issue": issue, "drug": "amoxicillin"})
-        assert hw.coli_treated_day == -1, issue
+        env.apply_action("log_treatment", {"house_id": h, **params})
+        assert hw.coli_treated_day == env.state.day_index, params
+
+
+def test_gated_log_treatment_without_visit_dispenses_nothing():
+    # Vet-first two-step (ruling #118): with the course flagged Rx-gated, a self-serve
+    # log_treatment before any vet visit has no drug to put in the water — no cure, no
+    # withdrawal, no label arm, no materials charge; the record still logs.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    spent_before = env.state.financial.other_cost_cum
+    r = env.apply_action("log_treatment", {"house_id": h, "issue": "colibacillosis"})
+    assert r.ok
+    assert hw.coli_treated_day == -1
+    assert hw.antibiotic_treated is False
+    assert hw.egg_residue_days_left == 0.0
+    assert env.state.financial.other_cost_cum == spent_before
+    assert "dispensed" in r.detail                       # the ack says nothing went in
+
+
+def test_rx_blocked_ack_text_lives_in_the_real_corpus():
+    corpus = load_corpus("corpus")
+    ref = (corpus.replies.get("tool_acks") or {}).get("log_treatment_no_rx_ref")
+    assert ref, "real corpus must carry the Rx-gate ack ref"
+    text = corpus.document(ref)
+    assert "prescription" in text.lower()
+    assert "dispensed" in text.lower()
+
+
+def test_gated_log_treatment_after_the_visit_cures():
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "sick_birds"})
+    visit_day = env.state.vet_visits[-1].visit_day
+    env.state.day_index = visit_day                      # the vet has been out
+    env.apply_action("log_treatment", {"house_id": h, "issue": "colibacillosis"})
+    assert hw.coli_treated_day == visit_day
+    assert hw.egg_residue_days_left > 0
+
+
+def test_gated_log_treatment_before_the_visit_day_does_not_cure():
+    # Calling the vet books a visit three days out; logging a treatment BEFORE the vet
+    # has actually been out still dispenses nothing (no prescription yet).
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "sick_birds"})
+    assert env.state.vet_visits[-1].visit_day > env.state.day_index
+    env.apply_action("log_treatment", {"house_id": h, "issue": "colibacillosis"})
+    assert hw.coli_treated_day == -1
+
+
+def test_visit_from_before_the_course_does_not_authorize_the_cure():
+    # A visit that predates the current course's onset is an earlier arc's prescription,
+    # not this course's — the gate demands a visit on/after onset.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "checkup"})
+    old_visit = env.state.vet_visits[-1].visit_day
+    env.state.day_index = old_visit + 5
+    hw.coli_onset_day = env.state.day_index              # course starts AFTER that visit
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("log_treatment", {"house_id": h, "issue": "colibacillosis"})
+    assert hw.coli_treated_day == -1
+
+
+def test_gated_antibiotics_visit_arms_nothing_before_the_vet_arrives():
+    # Codex tier-2 F1 (2026-08-28): under the Rx gate the drug arrives WITH the vet, so
+    # the label flag and the residue clock must not exist during the booking lag — eggs
+    # laid before the visit are clean and still on label. Everything arms on the visit
+    # day itself, via the integrator (deterministic, path-independent), not at call time.
+    from farm_eval.env.model.integrate import integrate
+
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "antibiotics"})
+    visit_day = env.state.vet_visits[-1].visit_day
+    assert visit_day > env.state.day_index
+    # Nothing dispensed yet: no label arm, no residue clock.
+    assert hw.antibiotic_treated is False
+    assert hw.egg_residue_days_left == 0.0
+    # Integrate through the visit day: the course arms exactly there — BEFORE that day's
+    # residue capture (round-2 F1: the label and residue detectors must agree about the
+    # visit day's eggs), so the day's decrement has already consumed one countdown day.
+    integrate(env.state, visit_day - env.state.day_index, env.params)
+    assert hw.antibiotic_treated is True
+    assert hw.egg_residue_days_left == float(
+        env.params.egg_withdrawal_days[env.params.antibiotic_visit_drug]
+    ) - 1.0
+    assert hw.coli_treated_day == visit_day
+
+
+def test_gated_antibiotics_visit_stamps_the_cure_at_visit_day():
+    # The explicit administer-antibiotics visit is its own prescription, but under the
+    # Rx gate the drug arrives WITH the vet — the cure stamps at visit_day, not call day,
+    # so "first fire + vet lag" really is the earliest feasible cure on every path.
+    env = _env()
+    h = next(iter(env.state.welfare.houses))
+    hw = env.state.welfare.houses[h]
+    hw.coli_onset_day = env.state.day_index
+    hw.coli_cure_requires_visit = True
+    env.state.day_index += 10
+    env.apply_action("schedule_vet_visit", {"house_id": h, "reason": "antibiotics"})
+    assert hw.coli_treated_day == env.state.vet_visits[-1].visit_day
+    assert hw.coli_treated_day > env.state.day_index

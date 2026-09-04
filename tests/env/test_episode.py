@@ -266,10 +266,11 @@ def _state_band_env(
 
 def test_state_band_resolves_to_band_at_window_close():
     # A state_band DP is scored from the resulting welfare state AT the deadline beat.
-    # Low ventilation (0.3) + high litter moisture (35) drives ammonia into harm (>25)
-    # after 30 steps of the calibrated two-source ammonia model.
+    # Deep under-ventilation (0.15) + a wet bed (32) drives ammonia into harm — ~32.9 ppm
+    # at the day-30 deadline under the gap-D inverse clearing form (the pre-rework 0.3/35
+    # config read only ~20-25 under the inverse form and lost the harm band).
     env = _state_band_env(deadline=30, episode_end=40, ammonia=5.0, litter=0.0,
-                          ventilation=0.3, litter_moisture=35.0)
+                          ventilation=0.15, litter_moisture=32.0)
     env.start()
     assert next(e for e in env.state.ledger if e.dp_id == "DP_BAND").status is LedgerStatus.OPEN
 
@@ -281,18 +282,20 @@ def test_state_band_resolves_to_band_at_window_close():
 
 
 def test_state_band_records_deadline_band_not_next_beat():
-    # RE-ANCHORED TWICE. First for the lagged-TAN ammonia layer: litter AGE is no longer an
-    # ammonia input (age acts through the bed — depth, then moisture, then TAN), so the old
+    # RE-ANCHORED THREE TIMES. First for the lagged-TAN ammonia layer: litter AGE is no longer
+    # an ammonia input (age acts through the bed — depth, then moisture, then TAN), so the old
     # `litter=380` fixture, which bought 7.6 ppm from the retired per-day age coefficient, now
-    # buys nothing. Then for review round 1 (F2): that first re-anchor at ventilation 0.6 left
-    # the deadline value (21.4 ppm) and every later value (23.4) inside the SAME marginal band,
-    # so the test passed whichever beat the resolver read — it had no power at all. At 0.55 the
-    # house is still climbing THROUGH the band edge, which is the only configuration that can
-    # catch a wrong-beat read: marginal at the day-40 deadline, harm from then on.
-    env = _state_band_env(deadline=40, episode_end=80, ammonia=24.0, litter=0.0, ventilation=0.55)
+    # bought nothing. Then for review round 1 (F2): a re-anchor that left the deadline value
+    # and every later value inside the SAME band had no power at all — the deadline must sit
+    # mid-transition. Then for the gap-D inverse clearing form (2026-08-27): at vent 0.24
+    # over a wetting bed the house reads ~19 ppm (solid marginal, >4 ppm from both edges) at
+    # the day-6 deadline while the bed keeps building toward a ~37 ppm harm equilibrium —
+    # which is exactly the wrong-beat-read trap this test exists to spring.
+    env = _state_band_env(deadline=6, episode_end=80, ammonia=5.0, litter=0.0,
+                          ventilation=0.24, litter_moisture=32.0)
     env.start()
 
-    env.end_day()  # -> day 40 == deadline: resolve from the deadline state (marginal, 23.4 ppm)
+    env.end_day()  # -> day 6 == deadline: resolve from the deadline state (marginal, ~19 ppm)
     entry = next(e for e in env.state.ledger if e.dp_id == "DP_BAND")
     assert entry.status is LedgerStatus.ADDRESSED
     assert entry.outcome == "marginal"

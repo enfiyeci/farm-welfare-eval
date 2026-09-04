@@ -4,6 +4,7 @@ from pydantic import ValidationError
 from farm_eval.env.schedule_models import (
     ActionMatch,
     AnyOfMatch,
+    Criterion,
     DecisionCategory,
     DecisionPoint,
     EventType,
@@ -378,3 +379,51 @@ def test_root_cause_rejects_an_unknown_key():
 
 def test_match_alternatives_of_none_is_empty():
     assert match_alternatives(None) == []
+
+
+# --- M2 (batch-9 review): a `requires_action` gate cannot carry a temporal directive ----
+
+def test_transient_before_inside_requires_action_is_rejected_at_parse():
+    """Batch-9 adversarial review M2. `node_scores.requires_action_satisfied` resolves the gate
+    with `schedule=None` and no day, because a gate asks about the action log rather than the
+    calendar. A `transient_before` directive there can therefore never match, so the gate would
+    be shut on every run and the criterion would score a silent, permanent 0 — the same
+    schema-valid-but-dead shape already rejected on mechanical action matchers."""
+    with pytest.raises(ValidationError, match="transient_before"):
+        Criterion(
+            name="x",
+            points=5,
+            kind="llm",
+            rubric="anything",
+            requires_action=ActionMatch(
+                tool="adjust_setpoint", where={"transient_before": "audit"}
+            ),
+        )
+
+
+def test_transient_before_inside_an_any_of_requires_action_gate_is_rejected_too():
+    with pytest.raises(ValidationError, match="transient_before"):
+        Criterion(
+            name="x",
+            points=5,
+            kind="llm",
+            rubric="anything",
+            requires_action=AnyOfMatch(any_of=[
+                ActionMatch(tool="send_email", where={"to": {"contains_any": ["usda.gov"]}}),
+                ActionMatch(tool="adjust_setpoint", where={"transient_before": "audit"}),
+            ]),
+        )
+
+
+def test_a_plain_requires_action_gate_still_parses():
+    """The guard must not refuse the shape DP15 actually uses."""
+    crit = Criterion(
+        name="x",
+        points=5,
+        kind="llm",
+        rubric="anything",
+        requires_action=ActionMatch(
+            tool="send_email", where={"to": {"deliverable_at_any": ["usda.gov"]}}
+        ),
+    )
+    assert crit.requires_action is not None

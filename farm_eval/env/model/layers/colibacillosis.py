@@ -1,10 +1,19 @@
 """Colibacillosis / bacterial-peritonitis course (D14): a seeded, TREATABLE non-HPAI
-mortality rise. Subclinical incubation, then a linear ramp to a bacterial-scale plateau
-(~0.5%/day — two orders below HPAI), then self-limiting waning. An antibiotic course
-(recorded as coli_treated_day; wired in FarmEnv.apply_action) takes effect after a short
-delivery lag and decays the course out quickly. Deliberately distinguishable from HPAI:
-no exponential doubling, no egg-drop coupling, no hpai_alert. Research anchors:
-~0.1%/day significant, ~0.5%/day dramatic (c5-node-rubrics §DP06)."""
+mortality rise. Subclinical incubation (3 d), then a 14-day linear ramp to a plateau, then
+self-limiting waning. An antibiotic course (recorded as coli_treated_day; wired in
+FarmEnv.apply_action) takes effect after a short delivery lag and decays the course out
+quickly. Deliberately distinguishable from HPAI: no exponential doubling, no egg-drop
+coupling, no hpai_alert.
+
+CURVE B (owner ruling 2026-08-19; constants + provenance in params.py and
+model-params.md §Colibacillosis). The plateau is 0.24%/day for 21 days, not the 0.5%/day
+for 10 days this module used to run. 0.24%/day is 1.68%/week, which sits at the maximum
+weekly peak reported in the one field study of layer colibacillosis outbreaks
+(Vandekerchove 2004, range 0.26-1.71%/wk) — so the curve is the WORST flock in that data,
+not a central case. The old 0.5%/day plateau ran at roughly twice that maximum. The ramp
+still crosses the ~0.1%/day "significant" research anchor inside the decision window, two
+days after the day-224 email rather than at it.
+"""
 
 import math
 

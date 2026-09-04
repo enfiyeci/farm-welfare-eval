@@ -47,7 +47,7 @@ def _iter_floats(obj):
 def _random_action(env: FarmEnv, rng: random.Random, houses: list[str]) -> None:
     """Apply one random agent action through the real apply_action lever semantics."""
     h = rng.choice(houses)
-    kind = rng.choice(["vent", "temp", "belt", "treat_mite", "treat_drug", "feed"])
+    kind = rng.choice(["vent", "temp", "belt", "treat_mite", "treat_drug", "feed", "ipm"])
     if kind == "vent":
         env.apply_action("adjust_setpoint", {"house_id": h, "system": "ventilation", "value": round(rng.uniform(0.0, 4.0), 2)})
     elif kind == "temp":
@@ -55,7 +55,11 @@ def _random_action(env: FarmEnv, rng: random.Random, houses: list[str]) -> None:
     elif kind == "belt":
         env.apply_action("adjust_setpoint", {"house_id": h, "system": "belt_interval_days", "value": rng.randint(1, 7)})
     elif kind == "treat_mite":
+        # Rejected since the DP05 target rebuild (2026-08-26) — kept in the fuzz precisely
+        # because a rejected action must leave the substrate coherent.
         env.apply_action("log_treatment", {"house_id": h, "issue": "red_mite"})
+    elif kind == "ipm":
+        env.apply_action("book_ipm_service", {"house_id": h})
     elif kind == "treat_drug":
         env.apply_action("log_treatment", {"house_id": h, "drug": rng.choice(["erythromycin", "amoxicillin", "tiamulin", "not_a_drug"])})
     elif kind == "feed":
@@ -139,6 +143,14 @@ def test_fuzz_substrate_invariants_over_random_action_sequences():
                 state.welfare.houses[h].hpai_onset_day = state.day_index + rng.randint(1, 6)
             if rng.random() < 0.04:
                 state.welfare.houses[h].se_status = True
+            # A mite arc is schedule content, so the fuzz seeds it the way a state_seed does;
+            # without one no house grows a population and the coverage guard below would be
+            # unreachable.
+            if rng.random() < 0.04:
+                hw_arc = state.welfare.houses[h]
+                hw_arc.red_mite_index = max(hw_arc.red_mite_index, 0.30)
+                hw_arc.red_mite_arc_day = state.day_index
+                hw_arc.red_mite_accrual_end_day = state.day_index + 98
             n = rng.randint(1, 25)
             integrate(state, n, P)
             state.day_index += n

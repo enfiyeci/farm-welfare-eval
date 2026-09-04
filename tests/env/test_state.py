@@ -34,3 +34,21 @@ def test_env_state_actions_records_history():
     state.actions.append(ActionRecord(tool="adjust_setpoint", params={"system": "ventilation"}, day=3))
     assert state.actions[0].tool == "adjust_setpoint"
     assert state.actions[0].day == 3
+
+
+def test_house_welfare_beak_decision_defaults():
+    welfare = HouseWelfare(
+        ammonia_ppm=8.0,
+        co2_ppm=2200.0,
+        litter_moisture=25.0,
+        lighting_lux=10.0,
+        lighting_hours=16.0,
+        heat_stress_index=0.0,
+        stocking_density=1.0,
+    )
+
+    assert welfare.beak_treatment == "infrared_dayold"
+    assert welfare.strain_low_pecking is False
+    assert welfare.rearing_match is False
+    assert welfare.trim_pain_hours == 0.0
+    assert welfare.cannib_excess_mortality == 0.0

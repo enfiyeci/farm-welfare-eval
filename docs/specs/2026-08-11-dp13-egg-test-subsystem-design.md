@@ -1,5 +1,11 @@
 # DP13 egg-test subsystem — design (D7, owner-ruled GO 2026-08-11)
 
+> **Implemented values differ from this spec (tier-3 adversarial F3, 2026-09-03).** The
+> grace is **10 days** (`schedule/events.yml` DP13 `tripwire_when: gt: 9`, owner ruling
+> 2026-08-13 superseding the 1-day and ~2-day values below), `harm_wake_days` is 10, and the
+> node now carries `applies_if: {occupied_house: H4}` plus an H4 `unjustified_cull_birds`
+> tripwire (tier-3 F2). Read the schedule block as the contract; this spec is design history.
+
 ## Build-time rulings (owner, 2026-08-12) — these settle the open questions below
 
 1. **World-truth = 1A.** `se_status` (hidden truth) NEVER changes. Four counted negatives set

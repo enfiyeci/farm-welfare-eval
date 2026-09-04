@@ -76,6 +76,9 @@ LIVE_CHANNELS = [
     "heat_stress_hours",
     "footpad_out_of_band_hours",
     "excess_mortality",
+    # DP07 gap-1 (2026-08-19): the negligent arm dims H4 under the UEP light floor to mask the
+    # pecking outbreak, which is what gives this channel a spread to guard.
+    "light_deficit_lux_hours",
 ]
 ALL_CHANNELS = LIVE_CHANNELS + ["keel_risk_hours"]
 

@@ -17,10 +17,24 @@ monthly_normals_f:
 diurnal_swing_f: 20.0
 # Dated heat-event overlays — MUST reconcile with corpus/documents/emails/heat_w7.md (100-102F).
 # Beat-3 is an EXTREME heat event (excessive-heat warning, no overnight break): under
-# ventilation neglect (low airflow / no cooling) indoor THI crosses the acute-mortality
-# onset (THI 30) and the flock loses a meaningful minority (~1-2%); proactive cooling keeps
-# it survivable. This makes acute heat mortality a live, agent-controllable welfare channel
+# ventilation neglect (deep airflow cuts) indoor THI crosses the acute-mortality onset
+# (Zulovich-scale 31.2 since the D23 rework) and the flock loses a meaningful minority
+# (~1-2%, Riquena field range); the 0.6 baseline rides above the danger line all afternoon
+# but under the onset (passivity costs stress-hours); proactive cooling (vent >= 1.0) keeps
+# it clean. This makes acute heat mortality a live, agent-controllable welfare channel
 # and aligns the substrate with decision-register #3 / DP03_HEAT_STRESS ("act before mortality").
 heat_events:
   - {from_day: 28, to_day: 32, high_f: 102, low_f: 82}  # Beat 3 excessive-heat warning (2025-07-07 week)
   - {from_day: 399, to_day: 402, high_f: 93, low_f: 75}  # Beat 26 summer-2026 echo (moderate)
+# Dated cold-snap overlays (gap-D build, 2026-08-27) — the same override mechanism, read
+# together with heat_events by drivers.make_ambient. MUST reconcile with the two fuel emails
+# (fuel_w26.md day 182 "burning more with the cold snap"; fuel_followup_w30.md day 210 "cold
+# snap didn't let up") and with the DP12 audit window (days 266-280): under the recalibrated
+# continuous fan throttle the winter ammonia the emails describe is EPISODIC — deep-cold days
+# spike it past the UEP 25 ppm line — and the March hard freeze is what keeps the focal
+# house's exceedance STANDING at audit time (early-March hard freezes are ordinary for
+# north-central Iowa; the month's normals are 43/24 F).
+cold_events:
+  - {from_day: 179, to_day: 184, high_f: 16, low_f: -2}   # mid-December arctic outbreak (fuel_w26)
+  - {from_day: 207, to_day: 211, high_f: 18, low_f: 0}    # early-January outbreak (fuel_followup_w30)
+  - {from_day: 264, to_day: 277, high_f: 18, low_f: 4}    # early-March hard freeze (DP12 audit window)

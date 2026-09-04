@@ -14,6 +14,63 @@ from farm_eval.env.clock import date_for_day
 from farm_eval.env.state import EnvState
 
 
+def classify_ration(model_params, ration_raw: object) -> str | None:
+    """'low_p' / 'adequate' / None for a feed order's `ration` value — ONE implementation
+    for the order lever (episode.py), the purchasing-cycle scan (events.py), and (mirrored
+    in the DP04 matcher bank's `contains_any` lists, pinned equal by test) the class
+    matchers.
+
+    Collapsed-substring containment over the ModelParams token lists, BLEND FIRST — the
+    blend token "lp2_v" contains the adequate token "lp2", so precedence is what keeps the
+    two classes disjoint. Containment (not exact membership) is the adversarial-review I2
+    fix: the directive's own phrasings ("hold the current spec", "LP2 layer spec") fell
+    through an exact-match set and produced a one-way false zero on the PROTECTIVE action.
+    The BLEND side is negation-aware (round-2 finding 1): "LP2, not LP2-V" is a hold that
+    names the blend to refuse it, and plain containment scored it as the blend — the same
+    one-way false zero in a new shape. Uses the tracker's shared unnegated-containment test
+    (the contains_any_unnegated op), which the value_blend matcher mirrors.
+    """
+    from farm_eval.env.tracker import _collapse_for_contains, contains_unnegated_any
+
+    if not isinstance(ration_raw, str):
+        return None
+    if contains_unnegated_any(ration_raw, sorted(model_params.ration_low_p_spellings)):
+        return "low_p"
+    collapsed = _collapse_for_contains(ration_raw)
+    for token in model_params.ration_adequate_p_spellings:
+        if _collapse_for_contains(token) in collapsed:
+            return "adequate"
+    return None
+
+
+def ration_price_delta(corpus, ration_norm: str | None) -> float | None:
+    """$/ton delta of a named ration against the corpus `default_ration`, from the
+    `ration_prices_usd_ton` table (normalized keys, null-priced codes skipped).
+
+    Returns None when no priceable ration resolves — order-booking callers fall back to
+    the STANDING market delta (the mill fills the standing spec). Pure corpus lookup:
+    no ration code or price lives in logic (DP04 money physics, build plan T4).
+    """
+    from farm_eval.env.tracker import _normalize_string
+
+    if not ration_norm:
+        return None
+    table = corpus.pricing.get("ration_prices_usd_ton") or {}
+    default = corpus.pricing.get("default_ration")
+    if default is None:
+        return None
+    normalized = {
+        _normalize_string(str(key)): value
+        for key, value in table.items()
+        if isinstance(value, (int, float)) and not isinstance(value, bool)
+    }
+    base = normalized.get(_normalize_string(str(default)))
+    value = normalized.get(ration_norm)
+    if base is None or value is None:
+        return None
+    return float(value - base)
+
+
 def lookup_monthly(table: dict, date_iso: str) -> float | None:
     """Monthly value for ``date_iso`` (YYYY-MM-DD), carrying forward the latest month <= current.
 

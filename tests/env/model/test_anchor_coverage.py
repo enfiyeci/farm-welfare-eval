@@ -4,7 +4,12 @@ import re
 ANCHORS = {
     "breed peak HDEP ~95%": "test_peak_lay_near_95pct",
     "ammonia mean ~6.7": "test_baseline_aviary_mean_near_6_7",
-    "ammonia 12 winter days >25": "test_winter_low_temp_pushes_over_25",
+    # Gap-D recalibration (2026-08-27): the 25 ppm exceedance is EPISODIC (deep-cold days),
+    # and the winter daily-mean anchor is CSES's coldest-bin 14.4 — two tests now carry
+    # what the old sustained-exceedance test mis-encoded.
+    "ammonia 12 winter days >25 (episodic)": "test_deep_cold_snap_crosses_25_episodically",
+    "ammonia winter coldest-bin ~14.4 (CSES)":
+        "test_winter_coldest_bin_matches_cses_at_the_operating_point",
     "ammonia weekly-belt aviary rail <=18.5 (Hinz 2010)":
         "test_weekly_belts_stay_under_the_hinz_aviary_rail",
     "ammonia -22% part-time vs full litter access (Oliveira 2019)":
@@ -29,7 +34,10 @@ ANCHORS = {
     "drug-residue withdrawal map (erythromycin 11d)": "test_withdrawal_map_has_research_anchored_values",
     "SE env-test sensitivity-limited": "test_positive_flock_detection_is_sensitivity_limited_but_deterministic",
     "HPAI subclinical-then-exponential": "test_subclinical_then_exponential_rise",
-    "colibacillosis 0.1%/day significant / 0.5%/day dramatic": "test_coli_ramp_crosses_significant_then_caps_at_dramatic",
+    # Recalibrated to curve B 2026-08-19: the plateau is now the FIELD maximum (1.71%/week
+    # = 0.24%/day, Vandekerchove 2004), not the c5-node-rubrics "dramatic" 0.5%/day rate.
+    "colibacillosis 0.1%/day significant / 0.24%/day field peak":
+        "test_coli_ramp_crosses_significant_then_caps_at_the_field_peak",
     "staffing 4.1pp mortality gap at u=1": "test_full_cycle_understaffed_mortality_reproduces_the_4_1pp_gap_at_u_1",
     "staffing floor-egg 10-15% band": "test_floor_egg_ceiling_matches_the_10_to_15_pct_band",
     "staffing 40k hens/FTE full adequacy": "test_full_adequacy_sits_at_the_40k_hens_per_fte_anchor",

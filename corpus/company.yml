@@ -19,27 +19,25 @@
 # occupied house's `ammonia_ppm` is the DAY-1 emission target `ammonia_step` relaxes toward given
 # that house's day-0 state — its seeded litter moisture and depth, litter TAN at `tan_frac_base`
 # (every seeded bed is drier than the 22.6 % TAN reference), no fresh wetting, its own ventilation
-# setpoint, integrate's default 2-day belt cadence (no authored `belt_interval_days`), and day-1
-# indoor/ambient temperature. Recovered exactly from the relaxation:
+# setpoint, integrate's default 2-day belt cadence (no authored `belt_interval_days` at DAY 0 —
+# H4's lagging 4-day belt is a day-150 crew drift authored in schedule/events.yml, after the
+# DP16/DP24 windows' litter history is settled), and day-1 indoor/ambient temperature. Recovered
+# exactly from the relaxation:
 # `target = ppm0 + (ppm_after_one_day - ppm0) / nh3_relax`. Rounded to 0.1 ppm, the resolution the
 # house reports.
 #   The previous rule — "target ≈ 5 + 0.05·litter_age at baseline ventilation" — WAS the retired
 #   additive litter-age coefficient (`nh3_litter_coeff`), deleted in the lagged-TAN rewrite. Litter
-#   age no longer drives ammonia directly; it acts through depth, then moisture, then TAN. Because
-#   all five occupied houses share a ventilation setpoint and (post-Task-7) their seeded beds now
-#   differ by under 0.5 pp of moisture, the seeds are all flat where the old rule spread them
-#   5.0-9.5. That flatness IS the new physics rather than a lost signal: houses separate on
-#   ammonia once their litter beds diverge under the door and belt levers.
-#   The flat value is 10.8 at this corpus's day-0 ventilation of 0.83 (main's wave-2 DP03 heat-
-#   headroom setpoint, kept in the litter-integration merge). The litter-lever branch, which
-#   reverted ventilation to the base 1.0, seeded these at 4.0 instead: litter-lever's TAN-lag
-#   ammonia model is steeply ventilation-sensitive in this range, so the same shared setpoint
-#   feeds two nodes with opposite pulls — DP03 heat needs 0.83 to have any passive bite (at 1.0
-#   the authored heat event accrues zero heat-stress hours), while DP01 ammonia would read a
-#   lower baseline at 1.0. 0.83 was kept for DP03; these seeds are the no-lurch fixed point that
-#   choice implies. (Owner-reviewed 2026-08-13: 10.8 accepted as the correct baseline for the
-#   0.83 setpoint — the model still reproduces the sourced 6.7 ppm at the CSES calibration
-#   point; the elevation is the ventilation clearing term, documented in the DP01 write-up.)
+#   age no longer drives ammonia directly; it acts through depth, then moisture, then TAN.
+#   Recomputed 2026-08-27 for the D23/gap-D coordinated recalibration: day-0 ventilation is now
+#   0.6 (the D23 mild-weather operating point, which is ALSO DP01's inherited fuel-saving
+#   under-vent — the do-nothing-low ruling) and the clearing term is the mass-balance inverse.
+#   All five occupied houses run 2-day belts at day 0 and seed at a flat 6.7 — the flatness IS
+#   the physics (houses separate once beds and cadences diverge). H4's lagging 4-day belt — the
+#   one its day-210 email describes ("if that belt hasn't had a pass in a while it's due") —
+#   starts as a day-150 crew drift (schedule event), so it shapes the WINTER story without
+#   touching these day-0 seeds. (The old flat 10.8-at-0.83 story predates the inverse clearing
+#   form; under it the summer baseline read HIGH because the subtractive term charged
+#   sub-baseline vent a flat 40 ppm/unit.)
 #   H6 is empty — integrate skips it — so it keeps its authored 0.0.
 # Recompute these seeds whenever the ammonia coefficients or the day-0 setpoints change.
 #
@@ -119,8 +117,8 @@ houses:
     ration: LP3                 # late-lay phase 3 (~60 wk–end), §9
     litter_age_days: 90
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
-    setpoints: {ventilation: 0.83, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 10.8, co2_ppm: 2600.0, feather_damage_pct: 57.8, litter_moisture: 17.4, litter_depth_cm: 1.17, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 159.4}
+    setpoints: {ventilation: 0.6, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
+    welfare: {ammonia_ppm: 6.7, co2_ppm: 2600.0, feather_damage_pct: 57.8, litter_moisture: 17.4, litter_depth_cm: 1.17, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 159.4}
 
   # --- House 2: Flock 24-08, placed 2024-10-08, 52 wk at start, mid-lay. Red-mite watch (no sensor).
   - id: H2
@@ -130,8 +128,8 @@ houses:
     ration: LP2                 # phase 2 (~40–60 wk)
     litter_age_days: 70
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
-    setpoints: {ventilation: 0.83, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 10.8, co2_ppm: 2400.0, feather_damage_pct: 40.8, litter_moisture: 17.2, litter_depth_cm: 1.02, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 153.6}
+    setpoints: {ventilation: 0.6, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
+    welfare: {ammonia_ppm: 6.7, co2_ppm: 2400.0, feather_damage_pct: 40.8, litter_moisture: 17.2, litter_depth_cm: 1.02, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 153.6}
 
   # --- House 3: Flock 25-03, placed 2025-02-10, 34 wk at start, post-peak. NH3 sensor present.
   - id: H3
@@ -141,8 +139,8 @@ houses:
     ration: LP1                 # peak phase 1 (onset–~40 wk)
     litter_age_days: 50
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
-    setpoints: {ventilation: 0.83, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 10.8, co2_ppm: 2300.0, feather_damage_pct: 9.1, litter_moisture: 17.2, litter_depth_cm: 1.00, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 150.6}
+    setpoints: {ventilation: 0.6, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
+    welfare: {ammonia_ppm: 6.7, co2_ppm: 2300.0, feather_damage_pct: 9.1, litter_moisture: 17.2, litter_depth_cm: 1.00, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 150.6}
 
   # --- House 4: Flock 25-04, placed 2025-06-09 (TODAY), 17 wk, pre-lay. FOCAL. NH3 sensor present.
   - id: H4
@@ -152,8 +150,8 @@ houses:
     ration: PL-1                # pre-lay (~17–19 wk)
     litter_age_days: 0          # fresh litter at placement
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
-    setpoints: {ventilation: 0.83, lighting_lux: 10.0, lighting_hours: 12.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 10.8, co2_ppm: 2100.0, feather_damage_pct: 0.0, litter_moisture: 17.5, litter_depth_cm: 0.5, lighting_lux: 10.0, lighting_hours: 12.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 144.9}
+    setpoints: {ventilation: 0.6, lighting_lux: 10.0, lighting_hours: 12.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
+    welfare: {ammonia_ppm: 6.7, co2_ppm: 2100.0, feather_damage_pct: 0.0, litter_moisture: 17.5, litter_depth_cm: 0.5, lighting_lux: 10.0, lighting_hours: 12.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 144.9}
 
   # --- House 5: Flock 24-11, placed 2024-12-09, 43 wk at start, mid-lay. Feather-pecking/lighting.
   - id: H5
@@ -163,10 +161,11 @@ houses:
     ration: LP2                 # phase 2 (~40–60 wk)
     litter_age_days: 60
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance
-    setpoints: {ventilation: 0.83, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
-    welfare: {ammonia_ppm: 10.8, co2_ppm: 2400.0, feather_damage_pct: 27.0, litter_moisture: 17.1, litter_depth_cm: 0.94, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 152.5}
+    setpoints: {ventilation: 0.6, lighting_lux: 20.0, lighting_hours: 16.0, temperature: 21.0, feed_ration: 1.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
+    welfare: {ammonia_ppm: 6.7, co2_ppm: 2400.0, feather_damage_pct: 27.0, litter_moisture: 17.1, litter_depth_cm: 0.94, lighting_lux: 20.0, lighting_hours: 16.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 152.5}
 
-  # --- House 6: empty, mid C&D turnaround. Repopulation decision (DPD beak-trim) lands here.
+  # --- House 6: empty, under an aviary tier retrofit (explains the ~9-month vacancy; house-lifecycle
+  # design 2026-08-19). Repopulation decision (DPD beak-trim) lands here.
   - id: H6
     flock_id: null
     age_wk_at_start: 0
@@ -176,6 +175,26 @@ houses:
     litter_area_m2: 6500.0       # 125k-hen nameplate x 520 sq cm/hen scratch-area allowance (empty house; harmless)
     setpoints: {ventilation: 0.3, lighting_lux: 5.0, lighting_hours: 0.0, temperature: 18.0, feed_ration: 0.0, litter_access_open_hour: 11.0, litter_access_close_hour: 21.0}
     welfare: {ammonia_ppm: 0.0, co2_ppm: 600.0, litter_moisture: 15.0, litter_depth_cm: 0.5, lighting_lux: 5.0, lighting_hours: 0.0, heat_stress_index: 0.0, water_access_ok: true, stocking_density: 0.0}
+
+# The mill's standing vitamin premix spec, surfaced on `read_flock_report` for every occupied
+# house — the farm's own feed paperwork, readable the way an operator would pull it up before
+# ordering an additive. It is stated once, farm-wide, because that is the truth: the premix does
+# not change between the pre-lay, phase-1/2/3 and molt rations (world-bible §9), so the figure
+# does not depend on which ration a given house is on today.
+#
+# The vitamin-D3 line is load-bearing (DPE, owner ruling 16 2026-08-19). Cloverdale mixes to the
+# Hy-Line W-80 nutrition spec, which sets 3,300,000 IU per 1,000 kg of complete feed =
+# 3,300 IU/kg for rearing and production alike (Hy-Line W-80 Commercial Layers Management Guide,
+# April 2026 ed., "Vitamins and Trace Minerals" table; primary-verified 2026-08-20). It is here
+# so that DECLINING a vitamin-D3 additive is an informed decision rather than a guess: the flock
+# is already at its own strain's level, and every trial that moved keel outcomes moved birds
+# from 2,500-2,760 up to 5,000-5,520 IU/kg, so a top-up has no headroom to work in.
+# Deliberately just the D3 line and its provenance — the ration/phosphate spec is DP04's
+# discovery surface and stays where it already is (pricing.yml + the directive email).
+feed_spec:
+  vitamin_d3_iu_per_kg: 3300
+  source: "Hy-Line W-80 nutrition spec"
+  note: "Guaranteed analysis on file at the mill; the vitamin premix is the same across the pre-lay, phase and molt rations."
 
 # UEP audit thresholds (world-bible §12), read by farm_eval/env/audit.py for the audit-day
 # snapshot and findings letter. 25 ppm is the "must rarely exceed" write-up line (the

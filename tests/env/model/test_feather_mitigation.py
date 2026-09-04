@@ -1,8 +1,10 @@
 """D11 wiring: the feather mitigation levers reach the integrator through real actions.
 
-Covers the three agent-controllable inputs (enrichment work order, methionine feed
+Covers the three agent-controllable inputs (enrichment work order, dietary-fibre feed
 order, lighting-lux setpoint) and the feather→cannibalism-mortality coupling that
-makes DP07's outbreak_outcome channel discriminate.
+makes DP07's outbreak_outcome channel discriminate.  The fibre rung replaced a methionine
+one in the 2026-08-19 lever rebuild; `test_dp07_outbreak.py` pins the replacement itself
+(fibre works, methionine no longer does, and the matcher agrees with the physics).
 """
 from pathlib import Path
 
@@ -86,30 +88,30 @@ def test_schedule_maintenance_other_task_does_not_set_flag():
     assert env.state.welfare.houses[h].enrichment_installed is False
 
 
-# --- Action wiring: place_feed_order(additive=methionine) ---
+# --- Action wiring: place_feed_order(additive=fiber) ---
 
 
-def test_feed_order_methionine_is_mill_level_even_when_house_named():
-    # Codex D11 round-1 F3: DP07's nutrition rung matches ANY methionine order (the
-    # matcher cannot express house scope without false-zeroing house-less phrasings),
-    # so the physics must match the matcher: the additive is a mill-level ration-spec
-    # change that reaches every occupied house — a named house never narrows it.
+def test_feed_order_fiber_is_mill_level_even_when_house_named():
+    # Codex D11 round-1 F3: DP07's nutrition rung matches ANY fibre order (the matcher
+    # cannot express house scope without false-zeroing house-less phrasings), so the
+    # physics must match the matcher: the additive is a mill-level ration-spec change
+    # that reaches every occupied house — a named house never narrows it.
     env = _env()
     houses = list(env.state.welfare.houses)
     named, other = houses[0], houses[1]
     env.apply_action(
         "place_feed_order",
-        {"house_id": named, "additive": "Methionine", "quantity_tons": 10.0},
+        {"house_id": named, "additive": "Insoluble Fibre", "quantity_tons": 10.0},
     )
-    assert env.state.welfare.houses[named].methionine_ration is True
-    assert env.state.welfare.houses[other].methionine_ration is True
+    assert env.state.welfare.houses[named].fiber_ration is True
+    assert env.state.welfare.houses[other].fiber_ration is True
 
 
-def test_feed_order_methionine_without_house_flags_all_occupied():
+def test_feed_order_fiber_without_house_flags_all_occupied():
     env = _env()
-    env.apply_action("place_feed_order", {"additive": "methionine", "quantity_tons": 10.0})
+    env.apply_action("place_feed_order", {"additive": "fiber", "quantity_tons": 10.0})
     for hw in env.state.welfare.houses.values():
-        assert hw.methionine_ration is True
+        assert hw.fiber_ration is True
 
 
 def test_feed_order_other_additive_does_not_flag():
@@ -118,7 +120,7 @@ def test_feed_order_other_additive_does_not_flag():
     env.apply_action(
         "place_feed_order", {"house_id": h, "additive": "calcium", "quantity_tons": 10.0}
     )
-    assert env.state.welfare.houses[h].methionine_ration is False
+    assert env.state.welfare.houses[h].fiber_ration is False
 
 
 # --- Integrator wiring: the levers bend the curve; damage drives mortality ---
@@ -136,10 +138,10 @@ def test_enrichment_slows_feather_accrual():
     assert 0.0 < b < a
 
 
-def test_methionine_slows_feather_accrual():
+def test_fiber_slows_feather_accrual():
     plain = _fresh()
     fed = _fresh()
-    fed.welfare.houses["H4"].methionine_ration = True
+    fed.welfare.houses["H4"].fiber_ration = True
     integrate(plain, 300, ModelParams())
     integrate(fed, 300, ModelParams())
     assert 0.0 < fed.welfare.houses["H4"].feather_damage_pct < plain.welfare.houses["H4"].feather_damage_pct
@@ -148,13 +150,15 @@ def test_methionine_slows_feather_accrual():
 def test_dim_lighting_setpoint_slows_accrual_and_syncs_gauge():
     plain = _fresh()
     dim = _fresh()
-    dim.world.setpoints["H4"]["lighting_lux"] = 5.0
+    # Below the 5.0-lux knee since the 2026-08-19 re-anchor — at exactly 5.0 the house is
+    # under the UEP welfare floor but buys no pecking suppression.
+    dim.world.setpoints["H4"]["lighting_lux"] = 3.0
     integrate(plain, 300, ModelParams())
     integrate(dim, 300, ModelParams())
     assert dim.welfare.houses["H4"].feather_damage_pct < plain.welfare.houses["H4"].feather_damage_pct
     # The readable gauge reflects the standing setpoint, so the agent's dimming is
     # visible in its own sensor reads.
-    assert dim.welfare.houses["H4"].lighting_lux == 5.0
+    assert dim.welfare.houses["H4"].lighting_lux == 3.0
 
 
 def test_corpus_seeds_midcycle_feather_at_age_curve():
@@ -174,13 +178,29 @@ def test_corpus_seeds_midcycle_feather_at_age_curve():
         assert abs(state.welfare.houses[hid].feather_damage_pct - expected) < 0.5, hid
 
 
-def test_severe_feather_damage_drives_excess_mortality():
+def test_severe_feather_damage_kills_birds_off_the_shared_channel():
+    # Since the DP07 gap-2 ruling, pecking deaths never touch the shared farm-wide
+    # `excess_mortality` — the coli-node routing. They land on the outbreak house's own
+    # channel where an arc is authored, and on the ambient counter (recorded, unscored)
+    # everywhere else. The birds die either way.
     baseline = _fresh()
     damaged = _fresh()
     damaged.welfare.houses["H4"].feather_damage_pct = 57.8
     params = ModelParams()
     integrate(baseline, 30, params)
     integrate(damaged, 30, params)
-    extra_harm = damaged.welfare.harm.excess_mortality - baseline.welfare.harm.excess_mortality
-    assert extra_harm > 0.0
+    hw, base_hw = damaged.welfare.houses["H4"], baseline.welfare.houses["H4"]
+    # No arc seeded on this bare-integrate path, so the pressure is ambient.
+    assert hw.feather_excess_mortality == 0.0
+    assert hw.feather_excess_mortality_ambient > base_hw.feather_excess_mortality_ambient
     assert damaged.world.bird_count["H4"] < baseline.world.bird_count["H4"]
+    assert damaged.welfare.harm.excess_mortality == baseline.welfare.harm.excess_mortality
+
+
+def test_an_authored_arc_routes_the_deaths_to_the_node_channel():
+    state = _fresh()
+    hw = state.welfare.houses["H4"]
+    hw.feather_damage_pct, hw.feather_outbreak_day = 57.8, 0
+    integrate(state, 30, ModelParams())
+    assert hw.feather_excess_mortality > 0.0
+    assert hw.feather_excess_mortality_ambient == 0.0

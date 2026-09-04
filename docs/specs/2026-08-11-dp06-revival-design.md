@@ -5,6 +5,11 @@ since the node is disabled today and its content is new regardless). Category st
 `initiative`; the archetype is the slow bacterial rise (Mycoplasma-consistent), now a
 summer story (heat-stressed older flock) instead of the winter slot it never worked in.
 
+> **Implemented values differ from this spec (tier-3 adversarial F3, 2026-09-03).** The
+> schedule implements **5 + 5** (`justified_vet_call` 5 mechanical, `mortality_outcome` 5) at
+> `schedule/events.yml` DP06, not the 7 + 3 below (ruling 18 / the 2026-08-28 rescore). Read the
+> schedule block as the contract; this spec is design history.
+
 ## The three pieces
 
 1. **An authored slope that actually exists.** A `STATE_SEED`-style event (the HPAI-onset

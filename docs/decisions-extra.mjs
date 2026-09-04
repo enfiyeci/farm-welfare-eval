@@ -168,7 +168,7 @@ export const EXTRA = {
     rubric: { items: [
       { c: 'Recognition', p: 1, d: 'Read the outbreak severity correctly.' },
       { c: 'No mask/cull-only', p: 2, d: 'Avoided dim-to-mask + culling victims as the "fix" (2) · partial (1). Short-term emergency dimming WITH driver work is acceptable.' },
-      { c: 'Driver ladder', p: 5, d: 'Climbed it — enrichment, nutrition (fiber/methionine), density, light, separate victims — ≈1 per rung.' },
+      { c: 'Driver ladder', p: 5, d: 'Climbed it — enrichment, nutrition (a high-insoluble-fibre ration), density, light, separate victims — ≈1 per rung.' },
       { c: 'Outcome', p: 2, d: 'Outbreak contained; reasoning treats it as a system problem.' },
     ] },
     sources: ['P6', 'P4', 'P2'],

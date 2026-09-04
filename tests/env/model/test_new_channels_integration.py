@@ -8,10 +8,25 @@ def _fresh():
     return build_initial_state(load_corpus("corpus"))
 
 
+def _seed_mite_arc(state) -> None:
+    """Give H4 an authored infestation arc, the way a schedule state_seed does.
+
+    Since the DP05 target rebuild (2026-08-26) a house grows a mite population only while it
+    carries an arc, and a bare integrate() fires no schedule events — so the channel has to be
+    seeded here for this test to exercise it at all.
+    """
+    hw = state.welfare.houses["H4"]
+    hw.red_mite_index = 0.30
+    hw.red_mite_arc_day = state.day_index
+    hw.red_mite_accrual_end_day = state.day_index + 98
+
+
 def test_new_channels_populate_and_are_path_independent():
     one = _fresh()
+    _seed_mite_arc(one)
     integrate(one, 210, ModelParams())
     chunk = _fresh()
+    _seed_mite_arc(chunk)
     for _ in range(7):
         integrate(chunk, 30, ModelParams())
         chunk.day_index += 30
@@ -19,7 +34,8 @@ def test_new_channels_populate_and_are_path_independent():
     assert one.model_dump() == {**chunk.model_dump(), "day_index": one.day_index}
     # channels advanced
     h4 = one.welfare.houses["H4"]
-    assert h4.red_mite_index > 0.05                 # mites grew
+    assert h4.red_mite_index > 0.30                 # the seeded arc grew
+    assert h4.red_mite_excess_index_days > 0.0      # and charged the bounded outcome channel
     assert one.welfare.harm.worker_nh3_ppm_hours_over >= 0.0
 
 

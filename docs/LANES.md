@@ -3,7 +3,18 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-13 (wave-2 merged to `main` + branch consolidation).
+Last updated: 2026-08-28 (node-review integration lane note added; table below is otherwise
+as of 2026-08-13 and does not yet reflect the node-review build wave).
+
+> ### 🟢 2026-08-28 — node-review integration lane (this machine)
+>
+> Active lane: `integrate/node-review-2026-08-26` in `~/worktrees/farm-eval-integration` —
+> the node-review build wave (DP01–DP06 rebuilds + ruling-17 tripwire landed; DP19 next).
+> **This lane holds the model-core + golden/reference regen token** while the wave runs.
+> The breed-table late-lay seam fix (`fix/breed-table-late-lay`, worktree
+> `~/worktrees/farm-eval-breedtable-seam`) was built in parallel, held during the DP06
+> tier-2 review loop per the one-regen-lane rule, and landed onto the integration branch
+> 2026-08-28 (see `docs/WORKLOG.md`).
 
 > ### 🟢 CONSOLIDATION 2026-08-13 — wave-2 is on `main`; several lanes closed/archived
 >

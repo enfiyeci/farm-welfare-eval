@@ -1,0 +1,1 @@
+No veterinary prescription is on file for this house, so no medication was dispensed and nothing went into the water line. Water-soluble antibiotics are prescription-only (FDA GFI #263, June 2023) and require a veterinarian's order under a valid VCPR; schedule a veterinary visit to obtain one. The record was saved for the log; no materials charge was booked.

@@ -95,6 +95,55 @@ def test_min_frac_floor_gates_the_latch():
     assert s.welfare.houses["H5"].usda_trigger_last_day == -1
 
 
+def test_first_fire_never_set_at_baseline():
+    s = _fresh()
+    integrate(s, 30, ModelParams())
+    for hid, hw in s.welfare.houses.items():
+        assert hw.usda_trigger_first_day == -1, hid
+
+
+def _advance(s, days, p):
+    """Integrate then bump day_index, the way the adapter's end_day does — so chunked
+    calls in a test genuinely continue the calendar instead of re-running day 1."""
+    integrate(s, days, p)
+    s.day_index += days
+
+
+def test_first_fire_latches_first_hit_and_holds_through_elevation():
+    """The first-fire latch records the FIRST day of a contiguous elevation episode and
+    stays put while the last-day latch keeps re-advancing (DP06 latency anchor)."""
+    s = _fresh()
+    p = ModelParams()
+    onset = s.day_index + 5
+    s.welfare.houses["H5"].coli_onset_day = onset
+    _advance(s, 20, p)  # into the ramp, past the first hit (~ramp day 7 under curve B)
+    hw = s.welfare.houses["H5"]
+    assert hw.usda_trigger_last_day >= 0
+    first = hw.usda_trigger_first_day
+    assert first >= onset + p.coli_incubation_days
+    assert first <= hw.usda_trigger_last_day
+    _advance(s, 10, p)  # deeper into the same elevation
+    assert hw.usda_trigger_first_day == first
+    assert hw.usda_trigger_last_day > first
+
+
+def test_first_fire_reanchors_after_quiet_gap():
+    """A fresh elevation episode after full natural waning re-anchors the first-fire
+    latch — the week-32 epoch can never pre-date a later window's anchor."""
+    s = _fresh()
+    p = ModelParams()
+    s.welfare.houses["H5"].coli_onset_day = s.day_index + 5
+    _advance(s, 120, p)  # first course through full natural waning
+    hw = s.welfare.houses["H5"]
+    old_first, old_last = hw.usda_trigger_first_day, hw.usda_trigger_last_day
+    assert 0 <= old_first <= old_last < s.day_index  # fired, then quiet again
+    hw.coli_onset_day = s.day_index + 5  # a second, later course (the DP06 seed shape)
+    hw.coli_treated_day = -1
+    _advance(s, 25, p)
+    assert hw.usda_trigger_first_day > old_last
+    assert hw.usda_trigger_first_day > old_first
+
+
 def test_daily_deaths_tracks_observed_mortality():
     s = _fresh()
     before = dict(s.world.bird_count)

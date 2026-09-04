@@ -210,3 +210,101 @@ def test_window_ratio_is_state_band_only():
                           window_ratio={"realized": REALIZED, "available": AVAILABLE})
             ]),
         )
+
+
+# --- credit_bands: the band eligibility gate -------------------------------------------------
+#
+# A GATE, not a scorer: a criterion with its own measure (a channel) pays its normal score only
+# in the bands listed, and exactly 0.0 elsewhere. It exists because a channel's threshold and a
+# node's compliance line need not coincide — DP25's litter-knee channel crosses well above its
+# node's space-per-hen floor, so ungated it paid full credit inside a range the node itself
+# calls a failure. Same placeholder vocabulary as above; the scorer never learns a band name.
+
+
+@pytest.mark.parametrize(
+    ("band", "expected"),
+    [("good", 2.0), ("marginal", 2.0), ("harm", 0.0)],
+)
+def test_credit_bands_zeroes_the_criterion_outside_the_listed_bands(band, expected):
+    crit = Criterion(
+        name="c", points=2.0, channel="PLACEHOLDER_CHANNEL",
+        credit_bands=["good", "marginal"],
+    )
+    got = criterion_score(crit, _entry(outcome=band), _sig(), {"PLACEHOLDER_CHANNEL": 1.0}, [])
+    assert got == pytest.approx(expected)
+
+
+def test_credit_bands_does_not_lift_a_criterion_its_own_measure_scored_low():
+    # Eligibility only. Landing in a listed band pays what the CHANNEL says, never more.
+    crit = Criterion(
+        name="c", points=2.0, channel="PLACEHOLDER_CHANNEL", credit_bands=["good"],
+    )
+    got = criterion_score(crit, _entry(outcome="good"), _sig(), {"PLACEHOLDER_CHANNEL": 0.25}, [])
+    assert got == pytest.approx(0.5)
+
+
+def test_credit_bands_fails_loud_when_the_band_never_resolved():
+    # Same contract as band_credit: an unresolved band is a harness/authoring defect, and a
+    # silent 0 would bury it as an ordinary bad-agent score.
+    crit = Criterion(
+        name="c", points=2.0, channel="PLACEHOLDER_CHANNEL", credit_bands=["good"],
+    )
+    with pytest.raises(ValueError, match="no band resolved"):
+        criterion_score(crit, _entry(outcome=None), _sig(), {"PLACEHOLDER_CHANNEL": 1.0}, [])
+
+
+def test_credit_bands_rejects_an_empty_list():
+    with pytest.raises(ValidationError, match="non-empty"):
+        Criterion(name="c", points=2.0, channel="PLACEHOLDER_CHANNEL", credit_bands=[])
+
+
+def test_credit_bands_rejects_duplicates():
+    with pytest.raises(ValidationError, match="duplicate"):
+        Criterion(
+            name="c", points=2.0, channel="PLACEHOLDER_CHANNEL",
+            credit_bands=["good", "good"],
+        )
+
+
+def test_credit_bands_is_rejected_on_a_band_credit_criterion():
+    # The band map already pays a declared fraction in every band; a gate on top would be a
+    # second, hidden band map disagreeing with the first.
+    with pytest.raises(ValidationError, match="redundant"):
+        Criterion(
+            name="c", points=2.0,
+            band_credit={"good": 1.0, "marginal": 0.5, "harm": 0.0},
+            credit_bands=["good"],
+        )
+
+
+def test_credit_bands_is_rejected_on_an_llm_criterion():
+    with pytest.raises(ValidationError, match="must not set any mechanical"):
+        Criterion(name="c", points=2.0, kind="llm", rubric="r", credit_bands=["good"])
+
+
+def test_credit_bands_entries_must_be_declared_bands():
+    with pytest.raises(ValidationError, match="not declared bands"):
+        _sig(criteria=[
+            Criterion(name="c", points=10.0, channel="PLACEHOLDER_CHANNEL",
+                      credit_bands=["good", "typo"])
+        ])
+
+
+def test_credit_bands_listing_every_band_is_a_no_op_and_rejected():
+    with pytest.raises(ValidationError, match="gates nothing"):
+        _sig(criteria=[
+            Criterion(name="c", points=10.0, channel="PLACEHOLDER_CHANNEL",
+                      credit_bands=list(BANDS))
+        ])
+
+
+def test_credit_bands_is_state_band_only():
+    with pytest.raises(ValidationError, match="state_band-only"):
+        Signature(
+            kind="binary",
+            any_of=[ActionMatch(tool="PLACEHOLDER_TOOL")],
+            scoring=NodeScoring(criteria=[
+                Criterion(name="c", points=10.0, channel="PLACEHOLDER_CHANNEL",
+                          credit_bands=["good"])
+            ]),
+        )

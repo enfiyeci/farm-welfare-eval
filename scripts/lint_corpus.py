@@ -76,6 +76,20 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for row in vet.get("report_classes") or []:
             for ref in row.get("refs") or []:
                 assign(ref, vet.get("from", ""))
+        # DP05 red-mite control correspondence (2026-08-26): the vet writes the treatment order
+        # and the post-course trap round, the applicator writes the work order — two voices in
+        # one section, so each ref is assigned to the sender that actually sends it.
+        mite = replies.get("mite_control") or {}
+        for key in ("approval_ref", "follow_up_controlled_ref", "follow_up_persisting_ref"):
+            if mite.get(key):
+                assign(mite[key], mite.get("from", ""))
+        if mite.get("provider_ref"):
+            assign(mite["provider_ref"], mite.get("provider_from", ""))
+        # DPE mobility retrofit (2026-08-19): the maintenance lead closes out the work order.
+        retro = replies.get("retrofit") or {}
+        for key in ("approval_ref", "approval_empty_ref"):
+            if retro.get(key):
+                assign(retro[key], retro.get("from", ""))
         for cls in ((replies.get("conflict") or {}).get("classes") or {}).values():
             voice = cls.get("voice", "")
             banks = [cls.get("default_refs") or [], cls.get("repeat_refs") or [],
@@ -90,6 +104,15 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
         for key in ("nh3_refs", "space_refs"):
             for ref in audit.get(key) or []:
                 assign(ref, audit.get("voice", ""))
+        # DP15 responding world (2026-08-27): the animal-health authority's authorization
+        # letter, delivered by `farm_eval/env/state_response.py` rather than through a bank
+        # rotation — it is a one-shot consequence of a filed report, not a reply that repeats.
+        auth = replies.get("hpai_authorization") or {}
+        if auth.get("ref"):
+            # Keyed by `voice` (the agency-mailbox persona, a domain string) rather than by the
+            # `from` mailbox, exactly as the domain banks above are: the letter is the agency
+            # voice, and the specific mailbox it arrives from is an addressing detail.
+            assign(auth["ref"], auth.get("voice", ""))
         if replies.get("bounce_ref"):
             assign(replies["bounce_ref"], replies.get("bounce_from", ""))
     return senders, conflicts
@@ -145,7 +168,11 @@ def run_lint(root: pathlib.Path) -> list[str]:
 
         n_emdash = sum(body.count(c) for c in DASH_CHARS)
         total_emdash += n_emdash
-        allowance = max(1, words // g["em_dash_per_file_words_per"])
+        allowance = max(
+            1,
+            words // g["em_dash_per_file_words_per"],
+            (g.get("em_dash_file_allowances") or {}).get(rel, 0),
+        )
         if n_emdash > allowance:
             findings.append(f"{rel}: em_dash: {n_emdash} em dashes (allowance {allowance} for {words} words)")
 

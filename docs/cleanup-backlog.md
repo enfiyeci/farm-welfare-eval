@@ -65,6 +65,18 @@ For the future eval-awareness-reduction authoring pass, NOT this branch:
   original implementation was on a branch 292 commits behind, now deleted — re-implement fresh on current
   main with a test, not a cherry-pick.
 
+## Source-reconciliation nits (from the 2026-08-18 Set-A research pass)
+
+- **DP12 citations [17]/[18] still bundle snippet-only sources.** The WFCF and UC Small Farm pages were
+  read in full this pass, but FoodSafetyTech, ISO22000, FoodDocs, and the PAACO certification page bundled
+  under the same two citation numbers remain WebSearch/WebFetch snippets, not full-text reads (flagged ⚠️
+  in `docs/design-review/nodes/DP12_AUDIT_MASKING.md`). The gap-4 PAACO/QA-lead claim rests on FoodDocs +
+  the PAACO page specifically — those two are the load-bearing ones to read in a future pass.
+- **DPD shares DP07's now-corrected Riber & Hinrichsen 2017 framing.** DP07's source [6] was corrected this
+  pass (the 14.2 vs 8.6% figure is all-cause mortality at P=0.06, not a cannibalism-specific coefficient).
+  `DPD_*.md` cites the same paper with the same imprecise framing and is still ⚠️ stale-flagged there —
+  whoever next touches DPD should inherit the correction.
+
 ## Broader next-phase work (tracked elsewhere, listed for completeness)
 
 The eval-awareness-reduction project (`evals/hen/research/eval-awareness-reduction-notes.md`, pilot-gated)

@@ -14,7 +14,7 @@ import math
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
 from farm_eval.env.state import (
@@ -52,6 +52,87 @@ class Schedule(BaseModel):
             days.add(dp.opens_day)
             days.add(dp.deadline_day)
         return sorted(days)
+
+    @model_validator(mode="after")
+    def _check_variant_keys(self) -> "Schedule":
+        """Every `variants` key must name something the resolver can actually select.
+
+        `addressed`/`unaddressed` are the two statuses; a ladder rung name or a classified
+        class name selects the OUTCOME-specific body (DP07's three-way follow-up, gap-3 ruling
+        2026-08-19 — see `farm_eval.env.events._resolve_body`). A key that is none of those can
+        never be chosen, so an author's typo would silently serve the generic body forever
+        instead of the one they wrote. Only checked against DPs the schedule actually declares:
+        an event pointing at an undeclared DP already degrades to `unaddressed` by design, and
+        directly-constructed test schedules must stay constructible.
+
+        `variant_on_state` (2026-08-27) adds the second half: a key may be composed as
+        ``"<base>@<band>"``, where `<band>` must be one of the event's declared bands and
+        `<base>` is validated exactly as above. A state-only event's keys are bare band names,
+        and it must cover EVERY band — with no `variant_on_dp` there is nothing to fall back
+        to, so an uncovered band would raise mid-episode instead of at load. `var` is checked
+        against the numeric `HouseWelfare` fields here for the same reason: a typo'd metric name
+        is an author error that must not wait for a live run to surface.
+        """
+        by_id = {dp.id: dp for dp in self.decision_points}
+        bad: list[str] = []
+        bad_bands: list[str] = []
+        bad_vars: list[str] = []
+        uncovered: list[str] = []
+        numeric_house_fields = {
+            name
+            for name, f in HouseWelfare.model_fields.items()
+            if f.annotation in (float, int)
+        }
+        for ev in self.events:
+            vos = ev.variant_on_state
+            band_keys = {b.key for b in vos.bands} if vos else set()
+            if vos is not None:
+                if vos.var not in numeric_house_fields:
+                    bad_vars.append(f"day {ev.on_day}:{vos.var}")
+                if ev.variant_on_dp is None:
+                    missing = sorted(band_keys - set(ev.variants))
+                    if missing:
+                        uncovered.append(f"day {ev.on_day}:{','.join(missing)}")
+            dp = by_id.get(ev.variant_on_dp or "")
+            allowed = {"addressed", "unaddressed"}
+            if dp is not None:
+                allowed |= {rung.name for rung in (dp.signature.rungs or [])}
+                allowed |= set(dp.signature.classes or {})
+            label = dp.id if dp is not None else f"day {ev.on_day}"
+            for k in ev.variants:
+                base, sep, band = k.partition("@")
+                if sep and band not in band_keys:
+                    bad_bands.append(f"{label}:{k}")
+                    continue
+                if not sep and vos is not None and ev.variant_on_dp is None:
+                    # A state-only event's keys ARE band keys.
+                    if base not in band_keys:
+                        bad_bands.append(f"{label}:{k}")
+                    continue
+                # `dp is None` = an event pointing at an undeclared DP; skipped by design.
+                if dp is not None and base not in allowed:
+                    bad.append(f"{dp.id}:{k}")
+        if bad:
+            raise ValueError(
+                "variant key(s) name no status, rung or class of their decision point: "
+                + ", ".join(sorted(set(bad)))
+            )
+        if bad_bands:
+            raise ValueError(
+                "variant key(s) name no declared variant_on_state band: "
+                + ", ".join(sorted(set(bad_bands)))
+            )
+        if bad_vars:
+            raise ValueError(
+                "variant_on_state var(s) name no numeric HouseWelfare field: "
+                + ", ".join(sorted(set(bad_vars)))
+            )
+        if uncovered:
+            raise ValueError(
+                "state-only variant event(s) leave a band with no body: "
+                + ", ".join(sorted(set(uncovered)))
+            )
+        return self
 
 
 def _read_yaml(path: Path) -> dict:
@@ -198,6 +279,26 @@ def validate_reply_refs(corpus: Corpus) -> None:
                     "protocol_counted", "protocol_offschedule", "cleared_line"):
             if not egg.get(key):
                 raise ValueError(f"corpus replies.yml egg_test section missing required key {key!r}")
+    # DP05 red-mite control correspondence (2026-08-26): the vet's treatment order, the
+    # applicator's work order, and the post-course trap round. Same fail-loud rule as the vet
+    # section — a missing body must surface at load, not at first delivery.
+    if "mite_control" in corpus.replies:
+        mite = corpus.replies.get("mite_control") or {}
+        for key in ("from", "provider_from", "approval_subject", "provider_subject",
+                    "follow_up_subject"):
+            if not mite.get(key):
+                raise ValueError(
+                    f"corpus replies.yml mite_control section missing required key {key!r}"
+                )
+        for key in ("approval_ref", "provider_ref", "follow_up_controlled_ref",
+                    "follow_up_persisting_ref"):
+            ref = mite.get(key)
+            if not isinstance(ref, str) or not ref:
+                raise ValueError(
+                    f"corpus replies.yml mite_control section missing required key {key!r}"
+                )
+            if ref not in corpus.documents:
+                missing.append(ref)
     audit_cfg = corpus.replies.get("audit") or {}
     for key in ("frame_ref", "clean_ref"):
         if audit_cfg and audit_cfg.get(key) not in corpus.documents:
@@ -205,6 +306,15 @@ def validate_reply_refs(corpus: Corpus) -> None:
     if "audit" in corpus.replies:
         for key in ("nh3_refs", "space_refs"):
             ref_bank(audit_cfg, key, "audit section")
+    tool_acks = corpus.replies.get("tool_acks") or {}
+    if tool_acks:
+        ref = tool_acks.get("log_treatment_withdrawal_ref")
+        if not isinstance(ref, str) or not ref:
+            raise ValueError(
+                "replies.yml tool_acks missing required key 'log_treatment_withdrawal_ref'"
+            )
+        if ref not in corpus.documents:
+            missing.append(ref)
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 
@@ -298,6 +408,21 @@ def build_initial_state(
         nh3_sensor_houses=[str(h) for h in company.get("nh3_sensor_houses", [])],
         nae_program_houses=[
             str(h) for h in (corpus.pricing.get("nae_program") or {}).get("houses", [])
+        ],
+        # DP15: the indemnity rates + age bands the integrator pays an authorized depop at.
+        # Copied rather than looked up live for the same reason nae_program_houses is —
+        # `integrate()` never sees the corpus.
+        indemnity_usd_head={
+            str(k): float(v)
+            for k, v in (corpus.pricing.get("aphis_indemnity_usd_head") or {}).items()
+            if v is not None
+        },
+        indemnity_age_bands=[
+            dict(band) for band in (corpus.pricing.get("aphis_indemnity_age_bands") or [])
+        ],
+        indemnity_age_bands_molted=[
+            dict(band)
+            for band in (corpus.pricing.get("aphis_indemnity_age_bands_molted") or [])
         ],
         welfare=welfare,
         financial=FinancialState(),

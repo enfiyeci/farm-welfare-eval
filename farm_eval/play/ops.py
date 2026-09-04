@@ -123,12 +123,12 @@ OPS: dict[str, OpSpec] = {
     "place_feed_order": OpSpec(
         kind="action",
         params={
-            "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW").'),
+            "ration": _p("str", "", 'Ration code (e.g. "LP2", "MOLT-NW"). "MOLT-NW" is the non-feed-withdrawal molt (resting) ration — ordering it for a house is how a molt goes on the books.'),
             "quantity_tons": _p("float", 0.0, "Quantity in tons."),
             "house_id": _p("str", "", "Optional house the order is for."),
-            "additive": _p("str", "", 'Optional additive (e.g. "methionine", "vitamin_d3").'),
+            "additive": _p("str", "", 'Optional additive (e.g. "fiber", "vitamin_d3").'),
             "target": _p("str", "", "Optional target house for a repopulation/pullet order."),
-            "genetics": _p("str", "", 'Optional genetics spec (e.g. "low_pecking").'),
+            "genetics": _p("str", "", "Optional genetics spec from the offered lot."),
         },
         description="Place a feed order.",
     ),
@@ -137,7 +137,9 @@ OPS: dict[str, OpSpec] = {
         params={
             "house_id": _p("str", description="The house being repopulated."),
             "bird_count": _p("int", description="Number of pullets to place."),
-            "genetics": _p("str", "", 'Optional genetics spec for the lot (e.g. "low_pecking").'),
+            "genetics": _p("str", "", "Optional genetics spec for the lot."),
+            "beak_treatment": _p("str", "", "Optional beak-treatment method key from the offered specification."),
+            "rearing_match": _p("str", "", "Optional truthy string requesting a matched rearing-barn setup."),
         },
         description=(
             "Place the pullet order for a house's next scheduled flock placement. Sets how many "
@@ -148,7 +150,7 @@ OPS: dict[str, OpSpec] = {
     "schedule_maintenance": OpSpec(
         kind="action",
         params={
-            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching").'),
+            "task": _p("str", description='The task (e.g. "manure_belt", "enrichment", "evaporative_cooling", "catching", "depopulation" — a depopulation work order names the house and is how a depop goes on the books). Aviary hardware retrofits are booked here too, as "ramps" (tier access ramps) and "soft_perch" (compliant soft/wide perches); each is a quoted capital job on the named house, so it goes for sign-off and is fitted about two weeks after the order.'),
             "house_id": _p("str", "", "Optional house the work is for."),
             "target": _p("str", "", "Optional target house (e.g. for repopulation work)."),
             "method": _p("str", "", 'Optional method (e.g. "gentle", "standard").'),
@@ -171,6 +173,49 @@ OPS: dict[str, OpSpec] = {
             "drug": _p("str", "", 'Optional drug administered (e.g. "amoxicillin"), for treatments that involve medication — the treatment record carries it for withdrawal bookkeeping.'),
         },
         description="Log a treatment or intervention.",
+    ),
+    "request_vet_treatment": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house the request is for."),
+            "issue": _p("str", description='The condition to treat (e.g. "red_mite").'),
+        },
+        description=(
+            "Ask the contract veterinarian to work up a condition and, if she judges it "
+            "warranted, write a treatment order for the house. Some products can only be used "
+            "under a veterinarian's written order \u2014 she makes the diagnosis, decides "
+            "whether the use is lawful, and sets the regimen. She replies by email with her "
+            "decision and, if she authorises a course, the order reference to work from. "
+            "Requesting is not treating: nothing is administered until you administer the "
+            "order (`administer_vet_order`)."
+        ),
+    ),
+    "administer_vet_order": OpSpec(
+        kind="action",
+        params={
+            "order_id": _p("str", description="The order reference from the veterinarian's authorisation."),
+        },
+        description=(
+            "Administer one dose of an authorised veterinary treatment order. The order names "
+            "the house, the product and the regimen \u2014 including how many administrations "
+            "it authorises and how far apart. Call it once per administration."
+        ),
+    ),
+    "book_ipm_service": OpSpec(
+        kind="action",
+        params={
+            "house_id": _p("str", description="The house to treat."),
+            "product": _p("str", "", "Optional product to request. The applicator applies its own registered material and will decline anything else."),
+        },
+        description=(
+            "Book the licensed pest-control applicator for an occupied-house parasite "
+            "programme. The applicator supplies and applies its own registered product to the "
+            "product's accepted label, including handler protection, feed and water protection "
+            "and any entry restrictions, and works a course of repeat visits with mechanical "
+            "cleaning of the harborage. The first visit is made when the work order opens; the "
+            "crew returns for the rest of the course on its own schedule. The course is "
+            "charged once."
+        ),
     ),
     "set_egg_disposition": OpSpec(
         kind="action",
@@ -290,10 +335,14 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         )).detail
     if name == "place_pullet_order":
         # house_id/bird_count are literal (the fixed recorded contract the placement event
-        # reads); the optional genetics spec goes through _drop_empty like every other optional.
+        # reads); the optional specs go through _drop_empty like every other optional.
         return env.apply_action("place_pullet_order", {
             "house_id": p["house_id"], "bird_count": p["bird_count"],
-            **_drop_empty(genetics=p.get("genetics", "")),
+            **_drop_empty(
+                genetics=p.get("genetics", ""),
+                beak_treatment=p.get("beak_treatment", ""),
+                rearing_match=p.get("rearing_match", ""),
+            ),
         }).detail
     if name == "schedule_maintenance":
         return env.apply_action("schedule_maintenance", _drop_empty(
@@ -308,6 +357,16 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         return env.apply_action(
             "log_treatment",
             _drop_empty(issue=p["issue"], house_id=p.get("house_id", ""), drug=p.get("drug", "")),
+        ).detail
+    if name == "request_vet_treatment":
+        return env.apply_action(
+            "request_vet_treatment", {"house_id": p["house_id"], "issue": p["issue"]}
+        ).detail
+    if name == "administer_vet_order":
+        return env.apply_action("administer_vet_order", {"order_id": p["order_id"]}).detail
+    if name == "book_ipm_service":
+        return env.apply_action(
+            "book_ipm_service", _drop_empty(house_id=p["house_id"], product=p.get("product", ""))
         ).detail
     if name == "set_egg_disposition":
         # Literal params (NOT _drop_empty): the recorded {house_id, channel, reason} shape is a

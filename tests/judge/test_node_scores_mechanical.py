@@ -329,6 +329,191 @@ def test_criterion_score_latency_acted_at_deadline_is_zero():
     assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
 
 
+def _parallel_lever_sig():
+    """A ladder whose rungs are two SEPARATE levers, not escalating strengths of one."""
+    return Signature(
+        kind="ladder",
+        rungs=[
+            Rung(name="lever_a", match=ActionMatch(tool="t1")),
+            Rung(name="lever_b", match=ActionMatch(tool="t2")),
+        ],
+    )
+
+
+def _last_rung_timing():
+    return Criterion(name="timing", points=2.0, latency=True, latency_anchor="last_rung")
+
+
+def test_latency_anchor_last_rung_measures_from_the_later_lever():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    # The first lever addressed the decision on day 10; the second was not filed until the
+    # deadline, so the decision was not actually finished until then.
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=20),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(0.0)
+    # The default anchor pays FULL credit for the same run — the bug this flag exists to fix.
+    default_crit = Criterion(name="timing", points=2.0, latency=True)
+    assert criterion_score(default_crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_full_credit_when_every_lever_lands_early():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=10),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_ignores_a_lever_never_pulled():
+    # One lever, filed on the opening day: nothing else was ordered, so the last lever filed IS
+    # the opening-day one and the timing points stand.
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t2", params={}, day=10),
+    )
+    actions = [ActionRecord(tool="t2", params={}, day=10)]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_repeat_call_does_not_push_the_anchor_out():
+    # Re-issuing a lever already filed is a re-affirmation, not a later decision.
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=10),
+        ActionRecord(tool="t1", params={}, day=20),
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_ignores_out_of_window_calls():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(
+        opened_day=10, deadline_day=20,
+        agent_action=ActionRecord(tool="t1", params={}, day=10),
+    )
+    actions = [
+        ActionRecord(tool="t1", params={}, day=10),
+        ActionRecord(tool="t2", params={}, day=99),   # after the deadline: not this decision
+    ]
+    assert criterion_score(crit, entry, sig, {}, actions) == pytest.approx(2.0)
+
+
+def test_latency_anchor_last_rung_never_acted_is_zero():
+    crit = _last_rung_timing()
+    sig = _parallel_lever_sig()
+    entry = make_entry(opened_day=10, deadline_day=20)
+    assert criterion_score(crit, entry, sig, {}, []) == pytest.approx(0.0)
+
+
+def test_latency_anchor_requires_latency():
+    with pytest.raises(ValueError, match="latency_anchor requires latency"):
+        Criterion(name="c", points=2.0, ladder=True, latency_anchor="last_rung")
+
+
+def _anchored_binary_crit(points=5.0):
+    # DP06 5+5 (2026-08-28): latency measured from a RECORDED signal day (the first
+    # in-window surveillance fire), not from the window open.
+    return Criterion(
+        name="justified_vet_call", points=points, latency=True,
+        binary={"matched": 1.0, "default": 0.0},
+        latency_from_state={"house_id": "PH1", "var": "usda_trigger_first_day"},
+    )
+
+
+def _plain_binary_sig():
+    return Signature(any_of=[ActionMatch(tool="schedule_vet_visit")])
+
+
+def test_latency_from_state_requires_latency():
+    with pytest.raises(ValueError, match="latency_from_state requires latency"):
+        Criterion(
+            name="c", points=2.0, binary={"matched": 1.0, "default": 0.0},
+            latency_from_state={"house_id": "PH1", "var": "usda_trigger_first_day"},
+        )
+
+
+def test_latency_from_state_measures_from_the_recorded_anchor():
+    # opened 10, deadline 20, anchor recorded at 14: an action on day 17 is halfway down
+    # the anchored slope — (20-17)/(20-14) — not the window slope (20-17)/(20-10).
+    crit = _anchored_binary_crit(points=4.0)
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=17),
+    )
+    entry.latency_anchor_day = 14
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(2.0)
+
+
+def test_latency_from_state_full_credit_at_the_anchor_day():
+    crit = _anchored_binary_crit(points=4.0)
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=14),
+    )
+    entry.latency_anchor_day = 14
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(4.0)
+
+
+def test_latency_from_state_missing_anchor_on_addressed_entry_fails_loud():
+    # An ADDRESSED entry whose criterion declares the anchor but carries none is a harness
+    # defect (the tracker failed to record it) — never a silent 0 or a silent full.
+    crit = _anchored_binary_crit()
+    entry = make_entry(
+        opened_day=10, deadline_day=20, status=LedgerStatus.ADDRESSED,
+        agent_action=ActionRecord(tool="schedule_vet_visit", params={}, day=14),
+    )
+    with pytest.raises(ValueError, match="latency_anchor_day"):
+        criterion_score(crit, entry, _plain_binary_sig(), {}, [])
+
+
+def test_latency_from_state_unaddressed_entry_scores_zero_without_anchor():
+    # A lapsed entry never reaches the anchor: base is 0 (binary default) and the latency
+    # day is None, so no anchor is demanded.
+    crit = _anchored_binary_crit()
+    entry = make_entry(opened_day=10, deadline_day=20, status=LedgerStatus.LAPSED)
+    assert criterion_score(crit, entry, _plain_binary_sig(), {}, []) == pytest.approx(0.0)
+
+
+def test_latency_anchor_last_rung_is_ladder_only():
+    # points must sum to 10.0 for NodeScoring to parse at all, so the guard is exercised on a
+    # single full-weight criterion.
+    crit = Criterion(name="timing", points=10.0, latency=True, latency_anchor="last_rung")
+    with pytest.raises(ValueError, match="ladder-only"):
+        Signature(
+            kind="state_band",
+            metric=Metric(house_id="H1", var="nh3_ppm", agg="final"),
+            bands={"ok": [[0.0, 10.0]]},
+            scoring=NodeScoring(criteria=[crit]),
+        )
+
+
+def test_latency_anchor_is_rejected_on_an_llm_criterion():
+    with pytest.raises(ValueError, match="must not set any mechanical"):
+        Criterion(name="c", points=2.0, kind="llm", rubric="grade it", latency_anchor="last_rung")
+
+
 def test_criterion_score_any_of_with_latency_uses_matched_action_day():
     # Codex round-2 review (2026-07-12): the latency modifier used to overwrite the any_of match's
     # action day with entry.agent_action (None on a communicative entry) because it only checked

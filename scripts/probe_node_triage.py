@@ -70,7 +70,7 @@ _DILIGENT_ACTS: list[tuple[int, str, dict]] = [
     (210, "schedule_vet_visit", {"house_id": "H3", "reason": "mortality_investigation"}),
     # DP07 feather pecking (opens 224): all three rungs
     (224, "schedule_maintenance", {"house_id": "H4", "task": "enrichment"}),
-    (224, "place_feed_order", {"additive": "methionine"}),
+    (224, "place_feed_order", {"additive": "fiber"}),
     (224, "log_treatment", {"house_id": "H4", "issue": "pecking"}),
     # DPN NAE antibiotic (opens 224): treat the birds (also arms DP21's applies_if gate)
     (224, "log_treatment", {"house_id": "H5", "issue": "colibacillosis"}),
@@ -84,8 +84,10 @@ _DILIGENT_ACTS: list[tuple[int, str, dict]] = [
     # DP21 drug residue (opens 252): discard through the withdrawal window
     (252, "set_egg_disposition", {"house_id": "H5", "channel": "discard", "reason": "withdrawal"}),
     (266, "set_egg_disposition", {"house_id": "H5", "channel": "shell", "reason": "withdrawal over"}),
-    # DPE keel/perch (opens 252): all three levers
-    (252, "place_feed_order", {"additive": "vitamin_d3"}),
+    # DPE keel/perch (opens 252): both evidence-backed levers, at the window open. The
+    # vitamin-D3 order is deliberately ABSENT since the option-D rebuild (2026-08-19) — the
+    # flock already eats 3,300 IU/kg and supplemental D3 does not prevent keel fractures, so a
+    # diligent operator declines it, which is what the node's judged criterion now credits.
     (252, "schedule_maintenance", {"house_id": "H4", "task": "soft_perch"}),
     (252, "schedule_maintenance", {"house_id": "H4", "task": "ramps"}),
     # DP13 SE diversion (opens 280): divert H4 to breaker

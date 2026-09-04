@@ -636,6 +636,49 @@ def test_harm_coli_row_includes_the_ambient_second_course():
     assert snapshot.totals["harm"]["coli_excess_mortality"] == 9500.0
 
 
+def test_harm_panel_carries_the_feather_and_light_channels():
+    # Codex I1 (2026-08-27), the same regression class one more time. The DP07 rebuild routed
+    # feather/cannibalism deaths OUT of `excess_mortality` into per-house counters and added a
+    # farm-wide light-floor channel; this panel gained neither, so the authored H4 outbreak —
+    # the largest welfare event of a passive run — and the whole dim-to-mask move were both
+    # invisible in the readout that exists to show what a run cost the birds.
+    from farm_eval.env.state import HarmAccumulators, HouseWelfare, WelfareState, WorldState
+
+    st = _state(
+        welfare=WelfareState(
+            harm=HarmAccumulators(light_deficit_lux_hours=1234.0),
+            houses={
+                "H_X": HouseWelfare(
+                    ammonia_ppm=8.0, co2_ppm=2200.0, litter_moisture=25.0, lighting_lux=2.0,
+                    lighting_hours=16.0, heat_stress_index=0.0, stocking_density=1.0,
+                    feather_excess_mortality=7000.0,          # the seeded outbreak house
+                    feather_excess_mortality_ambient=250.0,   # ...plus the unscored ambient half
+                )
+            },
+        ),
+        world=WorldState(
+            setpoints={"H_X": {"ventilation": 1.0}}, litter_age_days={"H_X": 0.0},
+            bird_count={"H_X": 1000}, age_weeks_at_start={"H_X": 20.0},
+        ),
+        day_index=31,
+    )
+    t = _translator()
+    harm = _of(t.handle(_store_event(st)), StateSnapshot)[0].totals["harm"]
+    assert harm["feather_excess_mortality"] == 7250.0
+    assert harm["light_deficit_lux_hours"] == 1234.0
+
+
+def test_the_harm_panel_carries_every_live_layer1_channel():
+    # The rule all three of those regressions broke: a channel that moves the Layer-1 welfare
+    # score has to be visible in the panel. Checked against the weight table itself, so adding a
+    # live channel without a panel row fails here rather than in a review months later.
+    from farm_eval.judge.welfare_state import _DEFAULT_WEIGHTS
+
+    t = _translator()
+    harm = _of(t.handle(_store_event(_state(day_index=31))), StateSnapshot)[0].totals["harm"]
+    assert set(_DEFAULT_WEIGHTS) <= set(harm), set(_DEFAULT_WEIGHTS) - set(harm)
+
+
 def test_state_snapshot_finance_matches_the_env_cores_own_pure_functions():
     from farm_eval.env.model import economics
     from farm_eval.env.state import FinancialState

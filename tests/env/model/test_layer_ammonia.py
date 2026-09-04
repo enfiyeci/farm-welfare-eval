@@ -150,13 +150,41 @@ def test_the_operating_point_is_the_cses_one_not_an_invented_one():
 
 
 # ------------------------------------------------------------------------------------------
-# Anchor 2 — winter
+# Anchor 2 — winter, RECALIBRATED to the field (gap D, owner-ruled 2026-08-19)
 # ------------------------------------------------------------------------------------------
-def test_winter_low_temp_pushes_over_25():
-    # "daily mean NH3 concentrations exceeded 25 ppm on 12 winter days of flock 1 in the AV
-    # house" (Zhao Part I).  Cold throttles the fans (nh3_cold_vent_penalty) and equilibrium
-    # climbs past the UEP 25 ppm ceiling at the SAME litter state as the 6.7 ppm anchor.
-    assert _equilibrium(PART_SHARE, ambient_c=WINTER_AMBIENT_C)["ppm"] > 25.0
+# The pre-gap-D layer put the operating point at a SUSTAINED 25+ ppm all winter — the exact
+# miscalibration the 2026-08-19 ventilation research measured against CSES (field winter
+# daily-mean ~12–14 ppm; 25 ppm crossed on only 12 days of one flock, on the cold days).
+# The winter anchors are now the field's own numbers.
+
+def test_winter_coldest_bin_matches_cses_at_the_operating_point():
+    # CSES Table 5: daily-mean ~14.4 ppm in the coldest ambient bin (<−10 °C) at the source
+    # house's own management (vent 1.0). The throttle slope is derived from this pin.
+    got = _equilibrium(PART_SHARE, ambient_c=-12.0)["ppm"]
+    assert got == pytest.approx(14.4, abs=1.5)
+
+
+def test_ordinary_winter_stays_in_the_field_daily_mean_band():
+    # An ordinary winter day (−8 °C): the 12–14 ppm field band, NOT the old flat 27.
+    got = _equilibrium(PART_SHARE, ambient_c=WINTER_AMBIENT_C)["ppm"]
+    assert 9.0 < got < 16.0
+
+
+def test_deep_cold_snap_crosses_25_episodically():
+    # The throttle floor binds on deep-cold days and equilibrium crosses the UEP 25 ppm
+    # line — the mechanism behind CSES's "12 winter days > 25 ppm", now EPISODIC (driven
+    # by the ambient series) instead of a season-long plateau.
+    assert _equilibrium(PART_SHARE, ambient_c=-22.0)["ppm"] > 25.0
+
+
+def test_an_underventilated_setpoint_is_chronically_harmful_in_winter():
+    # The DP01 do-nothing-low ruling: the fuel-cut setpoint separates good from bad. At the
+    # same winter ambient where good management reads ~12–14 ppm, a deep fuel-saving cut
+    # reads chronically above the 15 ppm exposure threshold and toward the UEP line.
+    good = _equilibrium(PART_SHARE, ambient_c=-12.0, ventilation=1.0)["ppm"]
+    cut = _equilibrium(PART_SHARE, ambient_c=-12.0, ventilation=0.5)["ppm"]
+    assert cut == pytest.approx(good * 2.0, rel=0.05)   # the sourced 1/vent mass balance
+    assert cut > 25.0
 
 
 # ------------------------------------------------------------------------------------------

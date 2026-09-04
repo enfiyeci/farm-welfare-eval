@@ -45,7 +45,7 @@ def make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[f
     ----------
     weather:
         The ``Corpus.weather`` dict (keys: ``monthly_normals_f``,
-        ``diurnal_swing_f``, optional ``heat_events``).
+        ``diurnal_swing_f``, optional ``heat_events``, optional ``cold_events``).
     start_date:
         ISO date string from ``Corpus.company["start_date"]`` (e.g. "2025-06-09").
         Used to derive day-0 day-of-year — parsing a fixed corpus string is
@@ -65,7 +65,10 @@ def make_ambient(weather: dict, start_date: str) -> Callable[[int, int], tuple[f
     jan_mean = (normals[1]["high"] + normals[1]["low"]) / 2.0
     annual_mean_f = (jul_mean + jan_mean) / 2.0
     annual_amp_f = (jul_mean - jan_mean) / 2.0
-    events = weather.get("heat_events", [])
+    # Dated overlays override the day's high/low. Heat and cold events share one mechanism;
+    # the two keys are corpus semantics (heat events reconcile with the heat-warning email,
+    # cold events with the winter fuel emails and the DP12 audit window — D23/gap-D build).
+    events = list(weather.get("heat_events", [])) + list(weather.get("cold_events", []))
 
     def ambient(day: int, hour: int) -> tuple[float, float]:
         doy = (day0_doy + day) % 365

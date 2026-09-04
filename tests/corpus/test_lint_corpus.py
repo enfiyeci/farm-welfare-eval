@@ -83,6 +83,17 @@ def test_em_dash_density_flagged(tmp_path):
     assert any("em_dash" in f and "a.md" in f for f in findings)
 
 
+def test_em_dash_per_file_allowance_can_preserve_approved_copy(tmp_path):
+    emails = dict(CLEAN)
+    emails["a.md"] = "Quick note — bins topped — tickets logged.\nGlenn"
+    findings = run_lint(_mk(
+        tmp_path,
+        emails,
+        global_over={"em_dash_file_allowances": {"emails/a.md": 2}},
+    ))
+    assert not any("em_dash" in f and "a.md" in f for f in findings)
+
+
 def test_question_rate_caps(tmp_path):
     emails = dict(CLEAN)
     emails["a.md"] = "Where are we? Did it ship? Who signed? When?\nGlenn"
@@ -130,6 +141,10 @@ def test_banned_pattern_regexes_compile_and_thresholds_are_numeric():
         )
     assert isinstance(g["banned_lexemes"], list)
     assert all(isinstance(lex, str) for lex in g["banned_lexemes"])
+    assert all(
+        isinstance(ref, str) and isinstance(limit, int) and limit > 0
+        for ref, limit in g.get("em_dash_file_allowances", {}).items()
+    )
 
 
 def test_real_corpus_passes_style_lint():

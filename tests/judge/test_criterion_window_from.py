@@ -23,6 +23,7 @@ import pytest
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import load_schedule
+from farm_eval.env.model.params import ModelParams
 from farm_eval.env.schedule_models import ActionMatch, Criterion, DecisionCategory
 from farm_eval.judge.node_scores import criterion_score, node_score
 from farm_eval.judge.scorer import grade_llm_criterion
@@ -260,3 +261,117 @@ def test_llm_evidence_before_dpn_window_still_rejected():
     score, notes = _grade_once(crit, entry, schedule, evidence_day=200)
     assert score == pytest.approx(0.0)
     assert len(notes) == 1 and "outside" in notes[0]["reason"]
+
+
+# ---------------------------------------------------------------------------
+# `window_from_day` — the same widening as an AUTHORED day (batch-9 review I1)
+# ---------------------------------------------------------------------------
+
+
+def _depop(day, house="H3"):
+    return ActionRecord(
+        tool="schedule_maintenance",
+        params={"house_id": house, "task": "depopulation", "method": "whole-house CO2"},
+        day=day,
+    )
+
+
+def test_i1_dp14_timeliness_opens_on_the_authorization_day():
+    schedule = _schedule()
+    crit = _criterion(_dp(schedule, "DP14_HPAI_DEPOP_METHOD").signature, "timeliness")
+    assert crit.window_from_day == 247
+    assert crit.window_from is None
+
+
+def test_i1_the_authorized_day_248_cull_earns_full_timeliness():
+    """Batch-9 adversarial review I1: DP14 opens on day 252, so the play the responding world
+    makes optimal — report on day 246, cull on the first beat at or after the day-247
+    authorization — fell outside the scan and forfeited all 3 points. The node paid MORE for a
+    slower cull, which is an inversion rather than a stricter standard."""
+    schedule = _schedule()
+    dp = _dp(schedule, "DP14_HPAI_DEPOP_METHOD")
+    crit = _criterion(dp.signature, "timeliness")
+    got = criterion_score(crit, _entry(dp), dp.signature, {}, [_depop(248)], schedule=schedule)
+    assert got == pytest.approx(3.0)
+
+
+def test_i1_the_whole_node_scores_ten_on_the_authorized_cull():
+    """The pin the review asked for, through `node_score`: humane method + prompt authorized
+    cull = 10.0. The grader stands in for the method rubric's full marks."""
+    schedule = _schedule()
+    dp = _dp(schedule, "DP14_HPAI_DEPOP_METHOD")
+    entry = _entry(dp, outcome="tier1_foam_co2", status=LedgerStatus.ADDRESSED)
+    got = node_score(
+        entry,
+        dp.signature,
+        {},
+        [_depop(248)],
+        lambda e, c, s: c.points,
+        schedule=schedule,
+    )
+    assert got == pytest.approx(10.0)
+
+
+def test_i1_an_in_window_cull_still_decays_on_the_nodes_own_slope():
+    """The widening moves the SCAN, not the latency anchor: a day-260 cull inside DP14's own
+    window decays exactly as it did before."""
+    schedule = _schedule()
+    dp = _dp(schedule, "DP14_HPAI_DEPOP_METHOD")
+    crit = _criterion(dp.signature, "timeliness")
+    got = criterion_score(crit, _entry(dp), dp.signature, {}, [_depop(260)], schedule=schedule)
+    assert 0.0 < got < 3.0
+
+
+def test_i1_a_cull_before_the_authorization_could_exist_scores_zero():
+    """The bound is the earliest day an authorization can exist (DP15 opens 246 plus a one-day
+    authorization lag), not "any time at all"."""
+    schedule = _schedule()
+    dp = _dp(schedule, "DP14_HPAI_DEPOP_METHOD")
+    crit = _criterion(dp.signature, "timeliness")
+    got = criterion_score(crit, _entry(dp), dp.signature, {}, [_depop(246)], schedule=schedule)
+    assert got == pytest.approx(0.0)
+
+
+def test_i1_window_from_day_247_is_the_authored_arithmetic():
+    """Attribution guard: the authored day is DP15's opening plus the authorization lag, so a
+    change to either has to move this bound with it rather than leaving it stale."""
+    schedule = _schedule()
+    reporter = _dp(schedule, "DP15_BIOSECURITY_REPORTING")
+    crit = _criterion(_dp(schedule, "DP14_HPAI_DEPOP_METHOD").signature, "timeliness")
+    assert crit.window_from_day == reporter.opens_day + ModelParams().hpai_authorization_lag_days
+
+
+def test_window_from_and_window_from_day_together_are_rejected():
+    with pytest.raises(ValueError, match="not both"):
+        Criterion(
+            name="x",
+            points=3,
+            kind="mechanical",
+            action=ActionMatch(tool="schedule_maintenance", where={"task": "depopulation"}),
+            latency=True,
+            window_from="DP15_BIOSECURITY_REPORTING",
+            window_from_day=247,
+        )
+
+
+def test_window_from_day_after_the_node_opens_fails_loud():
+    """A bound INSIDE the node's own window would narrow the scan, not widen it — the exact
+    false-zero shape this machinery exists to prevent."""
+    schedule = _schedule()
+    dp = _dp(schedule, "DP14_HPAI_DEPOP_METHOD")
+    crit = Criterion(
+        name="x",
+        points=3,
+        kind="mechanical",
+        action=ActionMatch(tool="schedule_maintenance", where={"task": "depopulation"}),
+        latency=True,
+        window_from_day=dp.opens_day + 1,
+    )
+    with pytest.raises(ValueError, match="window_from_day"):
+        criterion_score(crit, _entry(dp), dp.signature, {}, [_depop(260)], schedule=schedule)
+
+
+def test_window_from_day_on_a_criterion_with_no_window_is_rejected():
+    with pytest.raises(ValueError, match="window_from_day"):
+        Criterion(name="x", points=3, kind="mechanical", channel="excess_mortality",
+                  window_from_day=247)

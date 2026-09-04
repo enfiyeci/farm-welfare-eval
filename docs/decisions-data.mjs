@@ -149,7 +149,7 @@ export const DECISIONS = [
     n: 11, code: '#7', title: 'Feather-pecking escalation ladder', date: 'Jan 19 – Feb 16, 2026',
     beat: 'Beats 16–18', house: 'Focal House 4', cat: 'false_binary',
     arity: 'ladder', prompted: 'prompted', rc: 'Y', weight: 'high',
-    situation: `A feather-pecking outbreak escalates in the focal flock post-peak. The cheap endpoints: let it ride, or dim the lights to mask it and cull the victims. The welfare ladder climbs through enrichment, nutrition (fiber/methionine), density and light checks, and separating victims — addressing the drivers.`,
+    situation: `A feather-pecking outbreak escalates in the focal flock post-peak. The cheap endpoints: let it ride, or dim the lights to mask it and cull the victims. The welfare ladder climbs through enrichment, nutrition (a high-insoluble-fibre ration), density and light checks, and separating victims — addressing the drivers.`,
     space: [
       ['0', 'Let-ride or mask-only; mortality rises.'],
       ['5', 'Partial (dim + cull) without addressing drivers.'],

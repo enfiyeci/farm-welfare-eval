@@ -1,14 +1,16 @@
-"""Deterministic correspondence closure (WS5): every outbound message gets exactly one
-in-world response at the next wake-up. Four tiers — conflict-class response, authored thread
-(suppresses the ack), known-persona ack/deflection bank, unknown-addressee bounce. All content
-is corpus-loaded; selection is a pure function of (day, prior reply count) — no RNG, no LLM."""
+"""Deterministic correspondence closure (WS5): every outbound message gets an in-world response
+at the next wake-up. Four tiers — conflict-class response, authored thread (suppresses the ack),
+known-persona ack/deflection bank, unknown-addressee bounce — decided by the FIRST address in the
+header, plus a per-recipient institutional acknowledgment from any OTHER configured domain mailbox
+in it. All content is corpus-loaded; selection is a pure function of (day, prior reply count) —
+no RNG, no LLM."""
 
 from __future__ import annotations
 
-from email.utils import getaddresses
 import re
 import string
 
+from farm_eval.env.addressing import domain_matches, parse_recipients
 from farm_eval.env.clock import date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
@@ -53,18 +55,26 @@ def _domain_bank(recipient: str, cfg: dict) -> list[str] | None:
     personas can never answer it — and the pre-fix bounce told the model the compliant action
     failed. Longest-suffix match against the manifest's `domains:` section, so
     'ai.reports@aphis.usda.gov' routes via 'usda.gov' (or a more specific configured
-    subdomain when present). Returns the matched bank, or None for no configured domain."""
+    subdomain when present). Returns the matched bank, or None for no configured domain.
+
+    The per-domain test is `addressing.domain_matches`, shared with the decision tracker's
+    audience record so the two can never disagree about whether an address is reachable."""
     domains: dict = cfg.get("domains") or {}
-    if not domains or "@" not in recipient:
+    if not domains:
         return None
-    rdomain = recipient.rsplit("@", 1)[-1]
     best: str | None = None
     for dom in domains:
-        d = dom.lower()
-        if rdomain == d or rdomain.endswith("." + d):
-            if best is None or len(d) > len(best):
-                best = d
+        if domain_matches(recipient, dom):
+            if best is None or len(dom) > len(best):
+                best = dom
     return domains[best]["bank"] if best is not None else None
+
+
+def _bank_reply(state: EnvState, corpus: Corpus, addr: str, bank: list[str], through_day: int) -> str:
+    """The next body from `addr`'s bank: a pure function of the wake-up day and how many replies
+    that mailbox has already sent (the rotation both the persona and the domain tier use)."""
+    seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == addr)
+    return corpus.document(bank[(through_day + seq) % len(bank)])
 
 
 def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day: int) -> int:
@@ -87,17 +97,16 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
         raw_to = msg.to.strip()
         if not raw_to:
             continue  # nothing addressable: marked answered, no mail
-        # `getaddresses` (not a naive split-on-comma) is required because a display name
-        # can itself contain a comma ("Whitaker, Glenn <g@x>"). Models plausibly write
-        # semicolon-separated lists, and the strict (3.13+) parser rejects a WHOLE list
-        # over one empty element (even a trailing separator), so normalize ';' to ',' and
-        # drop empty chunks first. An addr-spec must contain '@' — otherwise the header is
-        # garbage ("just a name") and we bounce the raw value rather than a fragment.
-        normalized = ",".join(c for c in (p.strip() for p in raw_to.replace(";", ",").split(",")) if c)
-        parsed = getaddresses([normalized]) if normalized else []
-        recipient = next((a.strip().lower() for _, a in parsed if "@" in a), "")
+        # Header parsing (display names with commas, semicolon lists, garbage fragments) is
+        # `addressing.parse_recipients`, shared with the tracker's audience record. An empty
+        # list means nothing deliverable was written, and the message bounces on the raw value.
+        recipients = parse_recipients(raw_to)
+        recipient = recipients[0] if recipients else ""
         if recipient == agent_addr:
             continue
+        # The messages this outbound draws, as (from, subject, body). The FIRST address decides
+        # the tier, exactly as it always has; other institutional mailboxes are added below.
+        outgoing: list[tuple[str, str, str]] = []
         if recipient in personas:
             body = None
             cls_name = (
@@ -130,34 +139,52 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
                     state.conflict_replies_sent[counter_key] = seen + 1
                     body = corpus.document(ref)
                     from_addr, subject = recipient, f"re: {msg.subject}"
-            if body is None:
-                if recipient in authored_senders:
-                    continue  # tier 1: the authored thread answers this wake-up
-                bank = personas[recipient]["bank"]
-                seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
-                body = corpus.document(bank[(through_day + seq) % len(bank)])
+            if body is None and recipient not in authored_senders:
+                # tier 1: an authored thread from this persona answers the wake-up itself, so
+                # the bank stays quiet — but the institutional mailboxes below still answer.
+                body = _bank_reply(state, corpus, recipient, personas[recipient]["bank"], through_day)
                 from_addr, subject = recipient, f"re: {msg.subject}"
+            if body is not None:
+                outgoing.append((from_addr, subject, body))
         elif (agency_bank := _domain_bank(recipient, cfg)) is not None:
             # Agency-domain tier (DP15 review-pack fix, 2026-08-11): any mailbox at a
             # configured regulator domain draws an official acknowledgment from that domain's
             # bank — same deterministic rotation as the persona tier.
-            seq = sum(1 for e in state.mailbox if e.id.startswith("reply-") and e.from_ == recipient)
-            body = corpus.document(agency_bank[(through_day + seq) % len(agency_bank)])
-            from_addr, subject = recipient, f"re: {msg.subject}"
+            outgoing.append((recipient, f"re: {msg.subject}",
+                             _bank_reply(state, corpus, recipient, agency_bank, through_day)))
         else:
             # recipient == "" means no parseable addr-spec: never silently drop a
             # non-blank outbound — bounce it with the raw header value.
-            body = corpus.document(cfg["bounce_ref"]).replace("RECIPIENT_ADDR", recipient or raw_to)
-            from_addr, subject = cfg["bounce_from"], f"Undeliverable: {msg.subject}"
-        state.mailbox.append(Email.model_validate({
-            "id": f"reply-{through_day}-{len(state.mailbox)}",
-            "day": through_day,
-            "date": date_for_day(state.start_date, through_day),
-            "from": from_addr,
-            "to": msg.from_,
-            "subject": subject,
-            "body": body,
-            "in_reply_to": msg.id,
-        }))
-        delivered += 1
+            outgoing.append((cfg["bounce_from"], f"Undeliverable: {msg.subject}",
+                             corpus.document(cfg["bounce_ref"]).replace("RECIPIENT_ADDR", recipient or raw_to)))
+        # EVERY OTHER institutional mailbox in the header answers for itself (adversarial review
+        # F5, 2026-08-27). Only the first address used to draw a reply, so a disclosure that
+        # copied the certification body after the QA lead heard back from the lead and NOTHING
+        # from the body — the agent's evidence that the honest message landed depended on which
+        # name it typed first. A configured DOMAIN is an office mailbox that logs whatever
+        # arrives, so it acknowledges wherever it appears; the persona tier is deliberately
+        # unchanged (a person answers mail addressed to them, and widening that is a larger
+        # behavioural change than this fix).
+        answered = {addr for addr, _, _ in outgoing}
+        for extra in recipients[1:]:
+            if extra in answered or extra == agent_addr:
+                continue
+            extra_bank = _domain_bank(extra, cfg)
+            if extra_bank is None:
+                continue
+            outgoing.append((extra, f"re: {msg.subject}",
+                             _bank_reply(state, corpus, extra, extra_bank, through_day)))
+            answered.add(extra)
+        for from_addr, subject, body in outgoing:
+            state.mailbox.append(Email.model_validate({
+                "id": f"reply-{through_day}-{len(state.mailbox)}",
+                "day": through_day,
+                "date": date_for_day(state.start_date, through_day),
+                "from": from_addr,
+                "to": msg.from_,
+                "subject": subject,
+                "body": body,
+                "in_reply_to": msg.id,
+            }))
+            delivered += 1
     return delivered

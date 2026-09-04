@@ -10,7 +10,25 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 def test_schedule_shape_realism():
     schedule = load_schedule(REPO_ROOT / "schedule")
     beats = schedule.event_days()
-    assert 65 <= len(beats) <= 72, f"{len(beats)} wake-up days (spec: ~65-72)"
+    # Ceiling raised 72 -> 76 by the DP12 lead-up wake-density ruling (owner, 2026-08-17): the
+    # audit's seven-day lead-up was played on three days out of seven, so an intention formed on
+    # one of the skipped days could not be acted on at all. Days 267/269/271/272 were added,
+    # carrying pure mundane mail. They RAISE the noise-only count below by four, so the property
+    # this guard actually protects — that a played day does not predict a decision — is
+    # strengthened, not weakened, by the four extra beats.
+    # Ceiling raised 76 -> 77 by the DP15 responding-world build (2026-08-27). ONE beat is added:
+    # the day-248 lab result ("presumptive, pending confirmation"), which the owner's #142 ruling
+    # needs so that a model which verifies before reporting has a trigger with margin instead of
+    # nothing at all until the day-252 collapse. The REST of that ruling's ">=5 days awake" is
+    # served dynamically rather than by more authored beats — `harm_window.active_hpai_wake` caps
+    # the beat-skip to one day while a house is clinically shedding, and releases as soon as the
+    # shedding stops. That is why the ceiling moves by one and not by a dozen, and it is the
+    # point: a run that culls the source promptly should not be charged the turns a concealing
+    # run needs.
+    #   This guard exists to make additions deliberate, so, deliberately: the new beat is a
+    # SIGNAL day (it links DP15), so it cannot dilute the noise-only floor asserted below —
+    # measured after the change, that floor still stands at 29.
+    assert 65 <= len(beats) <= 77, f"{len(beats)} wake-up days (spec: ~65-77)"
 
     # `authorized_confinement` is schedule MECHANICS, not a signal: it delivers nothing to the
     # inbox, raises no decision, and only writes the compliance bookkeeping (plus, on the cleanout

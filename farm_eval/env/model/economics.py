@@ -42,6 +42,24 @@ def downgrade_frac(age_weeks: float, stress: float, params: ModelParams) -> floa
     return max(0.0, min(0.95, base + params.downgrade_stress_coeff * stress))
 
 
+def mite_downgrade_frac(index: float, params: ModelParams) -> float:
+    """Extra downgraded fraction from a red-mite burden: 0 at the onset, rising linearly to
+    `mite_downgrade_max_frac` at the carrying capacity.
+
+    Its OWN additive term rather than a share of the saturating heat-stress figure (DP05
+    target rebuild, 2026-08-26): sharing one saturation let a hot day and an infestation stand
+    in for each other, and it charged a fixed penalty the moment the burden crossed a
+    threshold instead of one that grows with severity. Mites move egg GRADE only — there is
+    deliberately no second lay-rate penalty, because the field literature mixes laying and
+    grade effects and charging both would double-count the same production harm.
+    """
+    span = params.red_mite_carrying - params.red_mite_excess_onset
+    if span <= 0.0:
+        return 0.0
+    ramp = (index - params.red_mite_excess_onset) / span
+    return params.mite_downgrade_max_frac * max(0.0, min(1.0, ramp))
+
+
 def revenue_step(hen_day_pct: float, bird_count: int, egg_price_usd_doz: float,
                  dgrade_frac: float, params: ModelParams, disposition_channel: str = "shell",
                  nae_premium_usd_doz: float = 0.0, on_program: bool = False) -> dict:

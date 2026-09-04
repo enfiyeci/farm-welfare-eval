@@ -195,12 +195,13 @@ def test_dp21_has_applies_if_bound_to_h5_treatment():
 
 
 @pytestmark_real
-def test_dpn_treat_credit_not_earned_by_diagnostic_vet_visit():
-    # Same review finding, DPN side: the 5-pt treat_the_birds credit must not be earned by a
-    # diagnostic visit (reason=sick_birds); an explicit antibiotics visit or log_treatment must
-    # still earn it (the F12 recall case).
+def test_dpt_treat_credit_not_earned_by_diagnostic_vet_visit():
+    # Same review finding, welfare side: the 5-pt treat_the_birds credit must not be earned
+    # by a diagnostic visit (reason=sick_birds); an explicit antibiotics visit or
+    # log_treatment must still earn it (the F12 recall case). The criterion moved from DPN
+    # to DPT in the 2026-08-18 split; the matcher and this guard are unchanged.
     dps = _real_dps()
-    dpn = dps["DPN_NAE_ANTIBIOTIC"]
+    dpn = dps["DPT_COLI_TREATMENT"]
     crit = next(c for c in dpn.signature.scoring.criteria if c.name == "treat_the_birds")
     matchers = [crit.action] if crit.action is not None else list(crit.any_of or [])
     vet = [am for am in matchers if am.tool == "schedule_vet_visit"]

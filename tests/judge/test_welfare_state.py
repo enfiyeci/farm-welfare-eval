@@ -29,11 +29,14 @@ def test_monotone_between_anchors():
 
 
 def test_channels_reported():
-    # Five Layer-1 channels plus the anchored node-only mite channel (D5, 2026-08-11).
+    # Seven Layer-1 channels: the DPE option-D build (2026-08-19) added
+    # mobility_access_hours and the DP07 gap-1 ruling added light_deficit_lux_hours; the
+    # anchored node-only channels stay outside this composite.
     out = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(out["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
+        "light_deficit_lux_hours",
     }
 
 
@@ -111,36 +114,153 @@ def test_node_only_subscores_are_house_scoped_and_normalized():
     assert out["red_mite_index_hours_over[H1]"] == 0.0   # at the negligent anchor
 
 
-def test_node_only_subscores_neutral_when_unanchored():
-    # Pinned pilot-replay references predate the channel: every demanded key still exists
-    # (so criterion_score never raises) but scores neutral 1.0.
+def test_dpd_node_only_channels_are_emitted_and_one_sided_anchors_fail():
+    house = _house(0.0)
+    house.cannib_excess_mortality = 40.0
+    house.trim_pain_hours = 20.0
+    houses = {"H6": house}
+    reference = {
+        "good": {
+            "cannib_excess_mortality[H6]": 10.0,
+            "trim_pain_hours[H6]": 0.0,
+        },
+        "negligent": {
+            "cannib_excess_mortality[H6]": 70.0,
+            "trim_pain_hours[H6]": 40.0,
+        },
+    }
+
+    out = node_only_channel_subscores(houses, reference)
+    assert out["cannib_excess_mortality[H6]"] == 0.5
+    assert out["trim_pain_hours[H6]"] == 0.5
+
+    one_sided = {
+        "good": {"cannib_excess_mortality[H6]": 10.0},
+        "negligent": {},
+    }
+    with pytest.raises(ValueError, match="one-sided"):
+        node_only_channel_subscores(houses, one_sided)
+
+
+def test_node_only_subscores_omit_unanchored_keys():
+    # Pinned pilot-replay references predate the channel, so nothing anchors it and there is
+    # no honest subscore to serve: the key is simply absent. It used to score neutral 1.0,
+    # which is full marks in disguise — a criterion reading it was paid in full for a run
+    # nobody measured (Codex wave-2 review F2). Those replays are unaffected, because their
+    # signatures declare no criterion on a node-only channel; a criterion that DOES declare
+    # one now raises in criterion_score instead of scoring full.
     houses = {"H2": _house(12345.0)}
     out = node_only_channel_subscores(houses, {"good": {}, "negligent": {}})
-    assert out["red_mite_index_hours_over[H2]"] == 1.0
+    assert "red_mite_index_hours_over[H2]" not in out
 
 
 def test_node_only_subscores_never_touch_the_composite():
     composite = welfare_state_score(_harm(**REF["good"]), REF)
     assert set(composite["channels"]) == {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
-        "keel_risk_hours", "footpad_out_of_band_hours",
+        "keel_risk_hours", "footpad_out_of_band_hours", "mobility_access_hours",
+        "light_deficit_lux_hours",
     }
 
 
+# --- DPE option D: the mobility channel joins Layer-1 (owner ruling 16, 2026-08-19) --------
+
+def test_channel_weights_include_mobility_and_sum_to_one():
+    from farm_eval.judge.welfare_state import _DEFAULT_WEIGHTS
+    assert _DEFAULT_WEIGHTS["mobility_access_hours"] == 0.05
+    # Two live channels have now been funded out of degenerate keel, 0.05 each: mobility
+    # (DPE option D) and the UEP light floor (DP07 gap-1). Taking the weight from a channel the
+    # degeneracy guard zeroes anyway is what keeps every other DECLARED weight where it was.
+    # Their EFFECTIVE shares still fell, and the comment here used to deny it (corrected
+    # 2026-08-27): the composite renormalizes over the LIVE weight sum, so each live channel's
+    # share drops by the new weight over the new sum — 0.05/0.95, about 5.26 %, when the light
+    # channel joined. That is the intended price of pricing a new harm; what keel funds is the
+    # avoidance of a second redistribution on top of it.
+    assert _DEFAULT_WEIGHTS["light_deficit_lux_hours"] == 0.05
+    assert _DEFAULT_WEIGHTS["keel_risk_hours"] == 0.05
+    assert math.isclose(sum(_DEFAULT_WEIGHTS.values()), 1.0, abs_tol=1e-9)
+    # The dilution, measured rather than asserted in prose: keel is degenerate, so the live sum
+    # is 0.95, and excess_mortality's effective share is 0.25/0.95 rather than its declared 0.25.
+    live_sum = sum(v for k, v in _DEFAULT_WEIGHTS.items() if k != "keel_risk_hours")
+    assert math.isclose(live_sum, 0.95, abs_tol=1e-9)
+    assert math.isclose(_DEFAULT_WEIGHTS["excess_mortality"] / live_sum, 0.2632, abs_tol=5e-5)
+    assert math.isclose(0.05 / live_sum, 0.0526, abs_tol=5e-5)
+
+
+def test_mobility_channel_is_live_not_degenerate():
+    # keel stays degenerate by design (age-only, so both anchors agree and the guard zeroes its
+    # weight); mobility is what replaced it as the ramp/perch signal, so ITS anchors must
+    # diverge or the whole option-D build is inert again.
+    assert REF["good"]["keel_risk_hours"] == REF["negligent"]["keel_risk_hours"]
+    assert REF["good"]["mobility_access_hours"] < REF["negligent"]["mobility_access_hours"]
+
+
+def test_mobility_channel_moves_the_layer1_score():
+    worse = dict(REF["good"])
+    worse["mobility_access_hours"] = REF["negligent"]["mobility_access_hours"]
+    assert (
+        welfare_state_score(_harm(**worse), REF)["score"]
+        < welfare_state_score(_harm(**REF["good"]), REF)["score"]
+    )
+
+
+# --- DP07 gap-1: the UEP light-floor channel has to RESOLVE, not saturate (Codex I3) --------
+
+# One house's lit hours over the DP07 window to the end of the episode: 16 h/day for the 294
+# days from the day-224 beat. This is the exposure the negligent anchor's own deep dim accrues
+# over, so a run dimmed for the same span lands on the same scale as the anchor.
+_LIT_HOURS = 16.0 * 294
+
+
+def _light_harm(lux: float):
+    """The good reference with ONLY the light channel moved, by the integrator's own formula."""
+    from farm_eval.env.model.accumulators import accrue_light_deficit
+
+    harm = _harm(**REF["good"])
+    harm.light_deficit_lux_hours = 0.0
+    accrue_light_deficit(harm, lux, _LIT_HOURS, 10.0)
+    return harm
+
+
+@pytest.mark.parametrize("lux", [9.9, 8.0, 5.01, 4.99, 2.0, 0.0])
+def test_every_dim_below_the_floor_scores_strictly_worse_than_the_one_above_it(lux):
+    # Regression pin for the saturation bug. The negligent arm used to dim only to 7 lux, so
+    # its deficit rate was 3 lux and EVERY run that dimmed harder clamped to a subscore of 0.0:
+    # 4.99 lux and a total blackout scored identically while the blackout did twice the raw
+    # harm, and 4.99 also bought the pecking suppression (it is under the 5-lux knee). The
+    # anchor now carries a deep dim on a non-outbreak house, so the channel has ~48k lux-hours
+    # of range and resolves across the whole reachable band.
+    ladder = [9.9, 8.0, 5.01, 4.99, 2.0, 0.0]
+    scores = [
+        welfare_state_score(_light_harm(v), REF)["channels"]["light_deficit_lux_hours"]
+        for v in ladder
+    ]
+    assert all(a > b for a, b in zip(scores, scores[1:])), dict(zip(ladder, scores))
+    # ...and specifically the pair the bug collapsed: a hair under the physics knee is not the
+    # same as darkness, and nothing clamps.
+    assert scores[ladder.index(4.99)] != scores[ladder.index(0.0)]
+    assert all(s > 0.0 for s in scores)
+
+
+def test_the_light_channel_is_live_not_degenerate():
+    assert REF["good"]["light_deficit_lux_hours"] < REF["negligent"]["light_deficit_lux_hours"]
+
+
 def test_node_only_one_sided_or_inconsistent_anchors_fail_loudly():
-    # Codex round-2 F1 (2026-08-11): neutral-1.0 exists ONLY for true legacy references
-    # (no bracketed keys for the attribute anywhere). A key present on one side, or
-    # bracketed keys present for the attribute but missing this house's, is a malformed
-    # regeneration and must raise — not silently award DP05's outcome points.
+    # Codex round-2 F1 (2026-08-11): a key present on one side, or bracketed keys present for
+    # the attribute but missing this house's, is a malformed regeneration and must raise —
+    # not silently award DP05's outcome points.
     houses = {"H2": _house(9000.0)}
     one_sided = {"good": {"red_mite_index_hours_over[H2]": 500.0}, "negligent": {}}
     with pytest.raises(ValueError):
         node_only_channel_subscores(houses, one_sided)
-    # Keys missing from BOTH sides stay neutral at runtime (fixture farms score against
-    # real-farm references legitimately); the misspelled-regeneration case is guarded at
-    # generation time instead — see test_regen_guard_catches_missing_scheduled_anchor.
+    # Keys missing from BOTH sides emit NOTHING here rather than raising (fixture farms score
+    # against real-farm references legitimately, and most such keys no criterion ever asks
+    # for). Demanding one that is missing fails in criterion_score, and the
+    # misspelled-regeneration case is guarded at generation time — see
+    # test_regen_guard_catches_missing_scheduled_anchor.
     both_missing = {
         "good": {"red_mite_index_hours_over[H3]": 500.0},
         "negligent": {"red_mite_index_hours_over[H3]": 9000.0},
     }
-    assert node_only_channel_subscores(houses, both_missing)["red_mite_index_hours_over[H2]"] == 1.0
+    assert "red_mite_index_hours_over[H2]" not in node_only_channel_subscores(houses, both_missing)

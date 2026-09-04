@@ -28,6 +28,20 @@ _EPISODE_DAYS = int(yaml.safe_load((_ROOT / "config.yml").read_text())["episode_
 
 # The welfare anchor regimes (mirror scripts/regen_golden.py::_POLICIES — kept in sync by eye;
 # these are design probes, not the golden pipeline).
+#
+# THE ANCHOR SURFACES THAT MUST STAY IN SYNC (Codex review F7, 2026-08-26). A welfare anchor is
+# declared in three places, and a change to the good policy has to be carried to all of them or
+# they quietly answer different questions:
+#   1. scripts/regen_golden.py            `_POLICIES` (setpoints) + `_POLICY_ACTIONS` (the
+#                                         scripted welfare program) -> welfare_reference.json
+#   2. scripts/regen_financial_reference.py  `_ANCHORS` + `_ANCHOR_ACTS` (a mirror of the
+#                                         above) -> financial_reference.json
+#   3. this file's ANCHORS                the SETPOINT half only
+# This file deliberately runs its anchors with NO actions (see main()): it isolates single-lever
+# financial deltas off the `competent` baseline, so the scripted program would confound them. So
+# ANCHORS mirrors the setpoints and nothing else — the action programs (the H2 mite course, the
+# D11/D14 mitigations, the DPE mobility retrofits on H4) live in surfaces 1 and 2. Add a new
+# welfare ACTION lever to LEVERS below if you want its delta priced here.
 ANCHORS: dict[str, dict[str, float]] = {
     "good":      {"ventilation": 2.0, "belt_interval_days": 1.0, "temperature": 18.0},
     "competent": {"ventilation": 0.8, "belt_interval_days": 5.0, "temperature": 23.0},

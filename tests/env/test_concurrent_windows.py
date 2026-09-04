@@ -18,8 +18,12 @@ def test_stats_on_real_schedule_match_known_landmarks():
     # rides the H6 order thread through the gauntlet; +1 in the litter-integration merge:
     # DP25_PLACEMENT_DENSITY (231-273), the H6 placement-density node, also spans day 252 —
     # both deliberately low-urgency supplier/placement threads whose load contribution the
-    # covariate exists to record).
-    assert stats["DP21_DRUG_RESIDUE"]["peak_concurrent"] == 10
+    # covariate exists to record; +1 on 2026-08-19: DPT_COLI_TREATMENT (224-252), the
+    # welfare twin split off DPN, which shares DPN's window exactly. That last one adds NO
+    # real agent load — it is the SAME decision counted on a second scoring axis, with no new
+    # email and no new wake day — so read this landmark as 10 authored threads, one of which
+    # is now scored twice.
+    assert stats["DP21_DRUG_RESIDUE"]["peak_concurrent"] == 11
     # DP09 (455-497) opens in the quiet end-of-cycle tail: only DP10 (476-511) overlaps.
     assert stats["DP09_RIDE_VS_DEPOP"]["overlapping_nodes"] == 1
     assert stats["DP09_RIDE_VS_DEPOP"]["peak_concurrent"] == 2

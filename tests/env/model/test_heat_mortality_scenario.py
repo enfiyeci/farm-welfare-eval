@@ -40,7 +40,7 @@ def test_occupied_house_starting_ventilation_leaves_heat_outcome_headroom():
         for house_id, birds in initial.world.bird_count.items()
         if birds > 0
     }
-    assert set(occupied.values()) == {0.83}
+    assert set(occupied.values()) == {0.6}
 
     passive = _run_authored_heat()
     cooled = _run_authored_heat(ventilation_override=1.0)
@@ -61,6 +61,10 @@ def test_heatwave_kills_under_neglect_not_under_cooling():
     assert neglect.welfare.harm.excess_mortality > cooled.welfare.harm.excess_mortality
     # Under proactive cooling the event adds NO heat mortality over the no-event control.
     assert cooled.welfare.harm.excess_mortality == control.welfare.harm.excess_mortality
+    # The dedicated node-only channel (DP03's floor_channel, D23) moves in PARALLEL with
+    # the shared channel: heat deaths accrue to both, and a clean run accrues neither.
+    assert neglect.welfare.harm.heat_excess_mortality > 0.0
+    assert cooled.welfare.harm.heat_excess_mortality == 0.0
 
 
 def test_per_day_heat_mortality_is_capped_under_extreme_weather():

@@ -45,6 +45,17 @@ def test_competent_reports_all_channels():
     base = {
         "nh3_ppm_hours_over", "heat_stress_hours", "excess_mortality",
         "keel_risk_hours", "footpad_out_of_band_hours", "red_mite_index_hours_over",
+        # The DPE option-D mobility channel (2026-08-19) is a live Layer-1 channel, so it
+        # rides in the reference runs beside the other five, and so does the DP07 gap-1
+        # light-floor channel (2026-08-19).
+        "mobility_access_hours",
+        "light_deficit_lux_hours",
+        # The two GLOBAL node-only channels (D23/gap-D build, 2026-08-27): bare-name,
+        # complex-wide, out of the Layer-1 composite. heat_excess_mortality's anchors ARE
+        # these policy runs; worker_nh3's welfare_reference anchor is overridden by the
+        # bespoke air arms in regen_golden.main (the value here is the diagnostic).
+        "heat_excess_mortality",
+        "worker_nh3_ppm_hours_over",
         # The positive-welfare opportunity channel rides along in reference_runs.json (a
         # separate currency, reported never normalized); regen_golden strips it back out
         # before writing the Layer-1 good/negligent anchors.
@@ -52,12 +63,33 @@ def test_competent_reports_all_channels():
     }
     bracketed = {k for k in got if "[" in k}
     # One house-scoped node-only key per house per attr (D5 mite 2026-08-11; F4-ruling
-    # coli channel 2026-08-12), nothing else.
+    # coli channel 2026-08-12; DP25's density accrued-harm channel, owner rulings #165/#169
+    # 2026-08-20; DP05's three rebuilt mite channels, 2026-08-26; DP07's outbreak-house
+    # feather-mortality channel, gap-2 ruling 2026-08-19), nothing else.
     assert set(got) == base | bracketed
-    assert bracketed == (
-        {f"red_mite_index_hours_over[H{i}]" for i in range(1, 7)}
-        | {f"coli_excess_mortality[H{i}]" for i in range(1, 7)}
-    )
+    expected = {
+        f"{attr}[H{i}]"
+        for i in range(1, 7)
+        for attr in (
+            "red_mite_index_hours_over",
+            "red_mite_excess_index_days",
+            "red_mite_course_shortfall",
+            "red_mite_response_lateness",
+            "coli_excess_mortality",
+            "coli_excess_mortality_ambient",   # DP06 mortality_outcome channel (2026-08-28)
+            "density_harm_days",
+            "feather_excess_mortality",
+            # DP04's avp pair (phosphorus build, 2026-08-27) goes through the same
+            # general per-house loop — complex-wide physics, unlike DPD's H6-only pair.
+            "avp_keel_pain_hours",
+            "avp_excess_mortality",
+            # DP18's thirst channel (staged revival, 2026-08-28) goes through the same
+            # general per-house loop (only H6 ever accrues; the rest anchor at 0.0).
+            "thirst_restriction_hours",
+        )
+    }
+    expected |= {"cannib_excess_mortality[H6]", "trim_pain_hours[H6]"}
+    assert bracketed == expected
 
 
 def test_welfare_reference_endpoints_are_harm_channels_only():
@@ -94,7 +126,13 @@ def test_regen_guard_catches_missing_scheduled_anchor():
     import pytest
     from scripts.regen_golden import validate_node_only_anchors
 
-    bad = {"good": {"red_mite_index_hours_over[H2x]": 1.0},
-           "negligent": {"red_mite_index_hours_over[H2x]": 2.0}}
-    with pytest.raises(ValueError, match="red_mite_index_hours_over\\[H2\\]"):
+    # The avp keys and the global node-only keys are present and correct so the guard's
+    # first complaint is the deliberately misspelled mite key (earlier schedule demands are
+    # checked first otherwise — DP01/DPW/DP03 declare bare global channels, DP04 bracketed).
+    ok = {"avp_keel_pain_hours[H4]": 0.0, "avp_excess_mortality[H4]": 0.0,
+          "nh3_ppm_hours_over": 0.0, "worker_nh3_ppm_hours_over": 0.0,
+          "heat_excess_mortality": 0.0, "heat_stress_hours": 0.0}
+    bad = {"good": {"red_mite_excess_index_days[H2x]": 1.0, **ok},
+           "negligent": {"red_mite_excess_index_days[H2x]": 2.0, **ok}}
+    with pytest.raises(ValueError, match="red_mite_excess_index_days\\[H2\\]"):
         validate_node_only_anchors(bad)

@@ -77,7 +77,16 @@ def test_cull_stops_hpai_excess_mortality_accrual():
     )
     integrate(culled, 40, params)
     integrate(control, 40, params)
-    assert culled.welfare.harm.excess_mortality < control.welfare.harm.excess_mortality
+    # Read on the HOUSE-SCOPED counter since 2026-08-27: HPAI deaths were routed out of the
+    # shared `excess_mortality` accumulator when the responding-world build made them
+    # decision-dependent (see HouseWelfare.hpai_excess_mortality). The claim under test is
+    # unchanged — a timely cull mechanically SAVES harm against riding the curve — only the
+    # channel that records it moved, and the shared accumulator no longer carries HPAI at all.
+    assert (
+        culled.welfare.houses["H3"].hpai_excess_mortality
+        < control.welfare.houses["H3"].hpai_excess_mortality
+    )
+    assert culled.welfare.harm.excess_mortality == control.welfare.harm.excess_mortality
 
 
 def test_unknown_or_empty_house_order_is_inert():

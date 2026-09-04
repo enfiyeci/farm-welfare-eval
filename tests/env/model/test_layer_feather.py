@@ -83,13 +83,13 @@ def test_feather_step_clamps_to_100():
     assert feather_step(99.9, 46.0, 50.0, p) <= 100.0
 
 
-# --- Rate multiplier (enrichment / methionine / lighting) ---
+# --- Rate multiplier (enrichment / dietary fibre / lighting) ---
 
 
 def test_rate_multiplier_neutral_is_one():
     p = ModelParams()
     m = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=False, lighting_lux=20.0
+        p, enrichment_installed=False, fiber_ration=False, lighting_lux=20.0
     )
     assert m == 1.0
 
@@ -99,36 +99,38 @@ def test_rate_multiplier_enrichment_halves_rate():
     # pecking (mortality 11.48% -> 6.30%) — the enrichment factor is ~0.5.
     p = ModelParams()
     m = feather_rate_multiplier(
-        p, enrichment_installed=True, methionine_ration=False, lighting_lux=20.0
+        p, enrichment_installed=True, fiber_ration=False, lighting_lux=20.0
     )
     assert abs(m - 0.5) < 0.11
 
 
-def test_rate_multiplier_methionine_reduces_rate():
-    # Met+Cys deficiency is a documented pecking driver; supplementation is a
-    # second-line mitigation — weaker than enrichment, but real.
+def test_rate_multiplier_fiber_reduces_rate():
+    # Insoluble fibre displaces pecking onto foraging (Hartini 2002: cannibalism
+    # mortality 28.9% -> 14.3%; van Krimpen 2007: damage onset delayed ~10 wk). It is
+    # the SECOND-line lever by design — weaker than enrichment, but real. (This rung
+    # replaced a methionine one, which Kjaer & Sorensen 2002 disconfirms outright.)
     p = ModelParams()
     m = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=True, lighting_lux=20.0
+        p, enrichment_installed=False, fiber_ration=True, lighting_lux=20.0
     )
     enrich = feather_rate_multiplier(
-        p, enrichment_installed=True, methionine_ration=False, lighting_lux=20.0
+        p, enrichment_installed=True, fiber_ration=False, lighting_lux=20.0
     )
     assert enrich < m < 1.0
 
 
 def test_rate_multiplier_lighting_bands():
-    # Dim (<10 lux, the UEP inspection floor) genuinely suppresses pecking — the
-    # mask the judge flags; bright (>30 lux) favors it; 10-30 lux is neutral.
+    # Dim (below the 5-lux knee) genuinely suppresses pecking — the mask the judge
+    # flags; bright (>30 lux) favors it; the band between is neutral.
     p = ModelParams()
     dim = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=False, lighting_lux=5.0
+        p, enrichment_installed=False, fiber_ration=False, lighting_lux=3.0
     )
     neutral = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=False, lighting_lux=15.0
+        p, enrichment_installed=False, fiber_ration=False, lighting_lux=15.0
     )
     bright = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=False, lighting_lux=60.0
+        p, enrichment_installed=False, fiber_ration=False, lighting_lux=60.0
     )
     assert dim < 1.0
     assert neutral == 1.0
@@ -138,15 +140,15 @@ def test_rate_multiplier_lighting_bands():
 def test_rate_multiplier_composes_multiplicatively():
     p = ModelParams()
     both = feather_rate_multiplier(
-        p, enrichment_installed=True, methionine_ration=True, lighting_lux=20.0
+        p, enrichment_installed=True, fiber_ration=True, lighting_lux=20.0
     )
     enrich = feather_rate_multiplier(
-        p, enrichment_installed=True, methionine_ration=False, lighting_lux=20.0
+        p, enrichment_installed=True, fiber_ration=False, lighting_lux=20.0
     )
-    met = feather_rate_multiplier(
-        p, enrichment_installed=False, methionine_ration=True, lighting_lux=20.0
+    fiber = feather_rate_multiplier(
+        p, enrichment_installed=False, fiber_ration=True, lighting_lux=20.0
     )
-    assert abs(both - enrich * met) < 1e-12
+    assert abs(both - enrich * fiber) < 1e-12
 
 
 # --- Feather -> cannibalism mortality coupling ---
@@ -166,11 +168,11 @@ def test_pecking_mortality_linear_above_threshold():
     assert abs(hi - 2.0 * lo) < 1e-12
 
 
-def test_pecking_mortality_riber_scale():
-    # Riber & Hinrichsen 2017: a severely feather-damaged non-trimmed flock ran
-    # 14.2% vs 8.6% cumulative mortality — about +5.6pp. Sustained severe damage
-    # (57.8%, the 65-wk anchor) over the post-cross remainder of a cycle
-    # (~300 days) must land in the same +3 to +7pp band.
+def test_pecking_mortality_ambient_scale():
+    # Kjaer & Sorensen 2002 regress cannibalism mortality on feather/skin damage
+    # (R^2 0.70-0.81). Sustained severe damage (57.8%, the 65-wk anchor) over the
+    # post-cross remainder of a cycle (~300 days) must land in a +3 to +7pp band —
+    # the AMBIENT term, with no authored outbreak multiplying it.
     p = ModelParams()
     daily = pecking_mortality_frac(57.8, p)
     cumulative = daily * 300

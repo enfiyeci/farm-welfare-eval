@@ -428,6 +428,17 @@ So:
 
 ### 2c. Keel becomes a live channel `[owner: integrate hazard over the cycle]`
 
+> **⚠ SUPERSEDED FOR DPE 2026-08-19 (ruling 16 / §9.15, owner).** The prevalence-increment
+> prevention modifier pinned in this section (`ramp × perch × ration` on the daily prevalence
+> increment, window [20,65]) is NOT what DPE will use. The owner chose option D: model the levers'
+> **late-lay mobility/collision benefit** on a new welfare channel instead, because at the 53-wk DPE
+> beat fractures are already formed — prevention is the wrong mechanism there. The §2c architecture
+> below stays valid as *reference* for any node that acts inside the fracture-forming window
+> (e.g. an earlier-beat variant), and the age-only prevalence backbone is unchanged. The build of
+> the mobility/collision channel is deferred to the general wave. Read §2d and §9.15 for the DPE-specific
+> decisions.
+
+
 **The convergence problem, verified at source.** Every real intervention separates mid-cycle and then
 converges by end of lay. Stratmann 2015 soft perches: "at the end of the experiment (64 weeks of age)
 no difference between the treatment groups regarding number of fractured keel bones was detected
@@ -691,6 +702,32 @@ found delaying photostimulation by 2 weeks moved age at first egg by only 4 days
 photostimulation delay overstates the effect roughly 3×. Since this sim has no photostimulation lever
 (lighting is inert and staying that way), the cleanest resolution is to mark these as documented-but-
 unreachable rather than wire them.
+
+#### DPE build tasks — option D, QUEUED to the general wave (owner 2026-08-19, ruling 16)
+
+The DPE (keel/perch) rebuild is folded into this wave. A full task-by-task TDD implementation plan is
+`evals/hen/design/2026-08-19-dpe-keel-perch-option-d-implementation-plan.md`. Concrete tasks, in one place
+so a builder need not reassemble them from §2c/§2d/§9.15:
+
+1. **New welfare channel — late-lay mobility / nest-access** (option D; supersedes §2c's
+   prevalence-increment modifier for DPE). Ramps/perches installed at the day-252 beat reduce falls and
+   collisions and improve nest-tier access; anchor the magnitude to Stratmann 2015 (−45 % falls, −59 %
+   collisions, +44 % controlled movements) and Toscano 2024 (lower fracture severity, ramps-in-lay,
+   P<0.001). Decide the channel's welfare-currency anchor (a WFP mobility/collision proxy — the keel
+   fracture track is prevalence, not mobility) and whether it feeds Layer-1 only (`keel_risk_hours` stays
+   age-only diagnostic) or a new named channel.
+2. **Rubric reweight** (§2d) in `schedule/events.yml`: ramps 4.0 · soft_perch 3.0 · timing 2.0 (keyed on
+   ramps/perch only, never D3) · `bone_nutrition_judgment` 1.0 (judged). Add the judged criterion + its
+   judge prompt.
+3. **World-bible §9 vitamin-D line** at 3,300 IU/kg (Hy-Line W-80; re-verify at the current guide before
+   writing it in) on the feed guaranteed-analysis note, so the D3 null is discoverable.
+4. **Retrofit as a costed work order** with a ~14-day approval lag (reuse the `VetVisit`
+   requested→acked→reported shape, §6.1); only an installed retrofit moves the channel.
+5. **Discoverability / matcher** (DPE §9.15 comments #155/#158): enumerate `soft_perch`/`ramps` in the
+   `schedule_maintenance` docstring; the judged `bone_nutrition_judgment` removes the D3-string dependency.
+6. **Flip promptedness** `prompted: false`/`semi` → prompted in the DPE block.
+7. **Reference policies** must install ramps+perches on H4 at day 252 in the "good" run (§2c warning), or
+   the channel cannot separate. Then regen goldens + re-pilot; write the pack up (ruling 15).
 
 ---
 
@@ -1334,3 +1371,20 @@ deleted, because each records why the blocker existed. Items **14 and 15 are new
     inside the evidence-supported window — which fixes the mismatch without stretching either the
     evidence or the node. §2c's argument establishes only that [20,50] and the *current* beat timing
     cannot both stand; it does not establish that the window is the side that must move.
+
+    **✅ RESOLVED 2026-08-19 (owner, during the DPE node-review comment loop) — NOT one of (a)/(b)/(c): the
+    owner chose to change the MECHANISM (call it option D) — keep the day-252 beat and model the levers'
+    LATE-LAY mobility/collision benefit on a new channel, rather than the §2c prevalence-increment prevention
+    modifier at all.** The window question dissolves because the modifier is no longer prevalence-increment.
+    Reasoning (build cost set aside at owner instruction): by the 53-wk beat fractures are mostly formed and
+    largely irreversible, so crediting *prevention* is the weakest biological claim; the honest late-lay effect
+    of ramps/perches is mobility/collision reduction — ramps −45 % falls, −59 % collisions, +44 % controlled
+    movements (Stratmann 2015 AABS) and lower fracture *severity* with ramps-in-lay (Toscano 2024, P<0.001).
+    This matches the authored email, which is entirely about mobility (slow to perch, heavy drops, floor eggs,
+    not reaching nest tiers). The reframe that lowered the stakes still holds: `keel_risk_hours` is a Layer-1
+    `welfare_state` channel (0.15 weight), **never read by the node scorer** (`farm_eval/judge/scorer.py` has
+    no keel reference — verified 2026-08-19), so none of this moves the DPE headline (the §2d action rubric).
+    **Consequence for §2c:** the pinned prevalence-increment modifier (ramp/perch/ration × daily increment,
+    window [20,65]) is SUPERSEDED for DPE — see the §2c banner. The new mobility/collision channel is a larger
+    build than §2c as pinned and is deferred to the general wave (owner: "add it to the general build wave for
+    later"). See ruling 16.

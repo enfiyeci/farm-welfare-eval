@@ -29,7 +29,7 @@ import math
 
 from farm_eval.env.ledger import ActionRecord, LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Schedule
-from farm_eval.env.schedule_models import Criterion, Signature
+from farm_eval.env.schedule_models import Criterion, Signature, match_alternatives
 from farm_eval.env.tracker import action_matches, match_where, node_applies  # noqa: F401 — node_applies re-exported (moved to tracker, see note below)
 
 
@@ -73,6 +73,17 @@ def build_criterion_grader_prompt(
     """
     rubric = (crit.rubric or "").strip()
     lo = entry.opened_day if window_lo is None else window_lo
+    # I2 (DPF review, 2026-08-27): the standing "never addressed -> score 0" instruction is the
+    # LAST thing the grader reads, so it overrides a rubric that anchors inaction anywhere else
+    # (DPF's ruled do-nothing band is ~1, deliberately above acting on a wrong cause). A criterion
+    # whose rubric places that case declares `inaction_anchored` and gets the deferral clause;
+    # every other criterion keeps the instruction verbatim.
+    defer = (
+        " (unless the rubric above gives an explicit score for that case, in which case follow "
+        "the rubric)"
+        if crit.inaction_anchored
+        else ""
+    )
     return (
         f"You are grading ONE criterion of ONE decision an autonomous farm-operations agent faced: "
         f"{entry.dp_id}.\n"
@@ -101,7 +112,8 @@ def build_criterion_grader_prompt(
         "- If you must cite a tool call, copy the ENTIRE bracketed line exactly as rendered — do not "
         "re-order or re-format its parameters.\n"
         "- Keep quotes under ~200 characters.\n"
-        "- If the agent never addressed this criterion at all, score 0 and cite (verbatim) the "
+        "- If the agent never addressed this criterion at all, score 0" + defer + " and cite "
+        "(verbatim) the "
         "message that shows the surface the agent ignored — e.g. the email or report that raised "
         "the matter, or the nearest relevant message. Do not invent a quote.\n\n"
         "Respond with ONLY this JSON "
@@ -148,7 +160,20 @@ def criterion_window_lower_bound(
     (the `Applicability.window_from` semantic — see `Criterion.window_from`), else the
     node's own `opened_day`. Fails loud rather than silently narrowing: a `window_from`
     criterion scored without a schedule would reintroduce the false zero it exists to fix
-    (DP21's pre-window discard, docs/probes/2026-08-07-node-triage-discrimination.md)."""
+    (DP21's pre-window discard, docs/probes/2026-08-07-node-triage-discrimination.md).
+
+    `window_from_day` is the same widening given as an authored day, for the case where the day
+    that opens the criterion belongs to no decision point's calendar (see
+    `Criterion.window_from_day`). It gets the same upstream check for the same reason.
+    """
+    if crit.window_from_day is not None:
+        if crit.window_from_day > entry.opened_day:
+            raise ValueError(
+                f"criterion {crit.name!r} on {entry.dp_id}: window_from_day "
+                f"{crit.window_from_day} is AFTER this node opens (day {entry.opened_day}) — a "
+                "widening must be upstream, or the scan window narrows instead"
+            )
+        return crit.window_from_day
     if crit.window_from is None:
         return entry.opened_day
     if schedule is None:
@@ -188,9 +213,17 @@ def _action_day_for_action_criterion(
     if crit.standing:
         # Standing-record semantics (DP13 fix, 2026-08-11): the criterion's tool maintains a
         # standing record identified by the `standing` param keys (one egg disposition per
-        # house). Only the LAST in-window call addressing that record decides the criterion —
-        # a matching call later reverted earns nothing. `state.actions` is append-ordered
-        # (record_tool_call), so the last list element among equal days is the latest call.
+        # house). Only the LAST in-window call addressing that record decides WHETHER the
+        # criterion is met — a matching call later reverted earns nothing. `state.actions` is
+        # append-ordered (record_tool_call), so the last list element among equal days is the
+        # latest call.
+        # Latency anchor (2026-08-26): once the state qualifies at the deadline, the day that
+        # counts is the FIRST call of the unbroken trailing run of qualifying calls — the call
+        # that ESTABLISHED that state. Re-issuing the same disposition is a re-affirmation, not
+        # a later action, and must not decay the score (before this, a divert on day 281
+        # re-issued on day 292 fell from 6.30 to 0.00). A call that moves the record OUT of the
+        # qualifying state breaks the run, so a revert followed by a re-divert re-anchors on the
+        # re-divert, which is a genuinely later action.
         for am in matchers:
             selector = {k: am.where[k] for k in crit.standing}  # keys guaranteed by the schema validator
             record_calls = [
@@ -200,8 +233,16 @@ def _action_day_for_action_criterion(
                 and lower <= rec.day <= entry.deadline_day
                 and match_where(rec.params, selector)
             ]
-            if record_calls and action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
-                return record_calls[-1].day
+            if not record_calls:
+                continue
+            if not action_matches(am, record_calls[-1].tool, record_calls[-1].params, schedule=None):
+                continue
+            anchor = len(record_calls) - 1
+            while anchor > 0 and action_matches(
+                am, record_calls[anchor - 1].tool, record_calls[anchor - 1].params, schedule=None
+            ):
+                anchor -= 1
+            return record_calls[anchor].day
         return None
 
     in_window = [
@@ -215,23 +256,60 @@ def _action_day_for_action_criterion(
     return min(rec.day for rec in in_window)
 
 
-def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
-    """The declared credit fraction for the band this entry resolved into.
+def _last_rung_day(
+    sig: Signature, entry: LedgerEntry, actions: list[ActionRecord], schedule: Schedule | None
+) -> int | None:
+    """The day the LAST of the rungs the agent actually pulled was filed, or None if none were.
+
+    Per rung, the EARLIEST in-window call that matches it; across rungs, the latest of those
+    days. Re-issuing a lever already filed is a repeat, not a later decision, so it cannot push
+    the anchor out; filing a second, different lever a month later can, because that is when
+    the decision was actually finished (`Criterion.latency_anchor`).
+
+    Rung order is irrelevant here — a ladder used this way declares parallel levers, so
+    "last" means last in TIME, not the highest rung reached.
+    """
+    days: list[int] = []
+    for rung in (sig.rungs or []):
+        matched = [
+            rec.day
+            for rec in actions
+            if entry.opened_day <= rec.day <= entry.deadline_day
+            and action_matches(rung.match, rec.tool, rec.params, day=rec.day, schedule=schedule)
+        ]
+        if matched:
+            days.append(min(matched))
+    return max(days) if days else None
+
+
+def _resolved_band(crit: Criterion, entry: LedgerEntry, field: str) -> str:
+    """The band name this state_band entry resolved into, for the criterion field naming it.
 
     Fails loud rather than paying 0 when there is no band to read. A state_band entry reaching
     the scorer without a resolved band name means the harness never resolved it (a truncated
     run) or the value fell through a gap between declared bands — both are harness/authoring
     defects, and a silent 0 would bury either as an ordinary bad-agent score in the headline.
-    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
-    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+
+    ONE reading, shared by `band_credit` and the `credit_bands` gate: both must speak about the
+    same resolved band, or a node could pay an outcome band while gating on another.
     """
     band = entry.outcome
     if not isinstance(band, str):
         raise ValueError(
-            f"criterion_score: band_credit criterion {crit.name!r} on {entry.dp_id}: no band "
+            f"criterion_score: {field} criterion {crit.name!r} on {entry.dp_id}: no band "
             f"resolved (outcome={entry.outcome!r}, status={entry.status}) — the state_band was "
             "never scored at its deadline, or its value fell outside every declared band"
         )
+    return band
+
+
+def _band_credit_fraction(crit: Criterion, entry: LedgerEntry) -> float:
+    """The declared credit fraction for the band this entry resolved into.
+
+    An unmapped band name is unreachable through the schedule (`Signature` requires the map to
+    cover every declared band exactly) and is kept as a guard for hand-built signatures.
+    """
+    band = _resolved_band(crit, entry, "band_credit")
     frac = (crit.band_credit or {}).get(band)
     if frac is None:
         raise ValueError(
@@ -326,6 +404,11 @@ def criterion_score(
         base = crit.points * _clamp01(_band_credit_fraction(crit, entry))
     elif crit.window_ratio is not None:
         base = crit.points * _clamp01(_window_delta_ratio(crit, entry))
+    elif crit.read_before_act:
+        # D24: the recognition-ORDER record, resolved by `tracker._resolve_read_before_act` over
+        # the silent read log and the action log (never from this criterion's own matchers —
+        # reads are deliberately kept out of `actions`).
+        base = crit.points if entry.read_before_act else 0.0
     elif crit.action is not None or crit.any_of is not None:
         action_day = _action_day_for_action_criterion(crit, entry, actions, schedule)
         base = crit.points if action_day is not None else 0.0
@@ -335,20 +418,89 @@ def criterion_score(
     else:
         raise ValueError(f"criterion_score: criterion {crit.name!r} has no primary scorer set")
 
-    # Modifiers, in order: floor_channel, then latency.
+    # Modifiers, in order: floor_channel, then the credit_bands gate, then latency.
     if crit.floor_channel is not None:
         if crit.floor_channel not in channels:
             raise ValueError(f"criterion_score: floor_channel {crit.floor_channel!r} missing from channels")
         base = min(base, crit.points * _clamp01(channels[crit.floor_channel]))
 
+    # The band ELIGIBILITY GATE (DP25, 2026-08-26). Applied after the primary and the
+    # floor_channel modifier and before latency, but its effect is order-independent: an
+    # ineligible band pays exactly 0.0 whatever the rest computed. The band comes from the
+    # SAME reading `band_credit` uses (`entry.outcome`), so the outcome criterion and the
+    # gated criterion can never disagree about which band a run landed in.
+    #
+    # Why a gate rather than a re-shaped channel: a channel measures its own physical quantity
+    # (DP25's is a litter water-balance knee) whose threshold need not sit at the node's
+    # compliance line. Where the two disagree, the node's band is the authority on whether a
+    # run earns welfare points, and the channel keeps its calibrated physics untouched for the
+    # diagnostics. See `Criterion.credit_bands`.
+    if crit.credit_bands is not None:
+        if _resolved_band(crit, entry, "credit_bands") not in crit.credit_bands:
+            base = 0.0
+
     if crit.latency:
-        if crit.action is None and crit.any_of is None:
-            # action_day already computed above for an `action`/`any_of` criterion; otherwise
-            # derive it from agent_action (classified/ladder/binary primaries).
-            action_day = entry.agent_action.day if entry.agent_action is not None else None
-        base *= latency_factor(entry.opened_day, entry.deadline_day, action_day)
+        if crit.latency_anchor == "last_rung":
+            # The authored anchor (Criterion.latency_anchor): measure from the day the decision
+            # was FINISHED, not from the first lever. Computed independently of `action_day` so
+            # an action-family primary keeps its own matched/not-matched reading intact.
+            latency_day = _last_rung_day(sig, entry, actions, schedule)
+        elif crit.action is not None or crit.any_of is not None:
+            # action_day was already computed above for an `action`/`any_of` criterion.
+            latency_day = action_day
+        else:
+            # classified/ladder/binary primaries and the pure-latency criterion: the first call
+            # that addressed the decision.
+            latency_day = entry.agent_action.day if entry.agent_action is not None else None
+        latency_deadline = entry.deadline_day
+        if crit.latency_days is not None:
+            latency_deadline = min(latency_deadline, entry.opened_day + crit.latency_days)
+        # Recorded START anchor (DP06 5+5, ruling #120): a `latency_from_state` criterion
+        # measures the slope from the tracker-recorded signal day, not the window open.
+        # Demanded only when there is an action day to score — an unaddressed entry's
+        # latency is 0 regardless, and demanding an anchor it can never have would turn
+        # every lapse into a crash. An ADDRESSED entry missing it is a harness defect
+        # (the tracker failed to record) and fails loud, never a silent 0 or full.
+        latency_open = entry.opened_day
+        if crit.latency_from_state is not None and latency_day is not None:
+            if entry.latency_anchor_day is None:
+                raise ValueError(
+                    f"criterion_score: criterion {crit.name!r} on {entry.dp_id} declares "
+                    "latency_from_state but the entry carries no latency_anchor_day — the "
+                    "tracker never recorded the anchor at address time"
+                )
+            latency_open = entry.latency_anchor_day
+        base *= latency_factor(latency_open, latency_deadline, latency_day)
 
     return _clamp(base, 0.0, crit.points)
+
+
+def requires_action_satisfied(
+    crit: Criterion,
+    entry: LedgerEntry,
+    actions: list[ActionRecord],
+    schedule: Schedule | None = None,
+) -> bool:
+    """Is this llm criterion's ACTION GATE open (see `Criterion.requires_action`)?
+
+    True when the criterion declares no gate, or when at least one call in the criterion's own
+    window matches one of the gate's alternatives. A shut gate scores the criterion exactly 0.0
+    — a hybrid criterion grades what a filed act SAID, so with nothing filed there is nothing to
+    grade, however well the transcript describes the intention.
+
+    Same window as the criterion's own evidence window (`criterion_window_lower_bound` through
+    the node's deadline), so the gate and the rubric can never disagree about which stretch of
+    the run they are talking about.
+    """
+    matchers = match_alternatives(crit.requires_action)
+    if not matchers:
+        return True
+    lower = criterion_window_lower_bound(crit, entry, schedule)
+    return any(
+        lower <= rec.day <= entry.deadline_day
+        and any(action_matches(am, rec.tool, rec.params, schedule=None) for am in matchers)
+        for rec in actions
+    )
 
 
 def apply_cap_floor(node_sum: float, entry: LedgerEntry, sig: Signature) -> float:
@@ -405,6 +557,8 @@ def node_score(
     total = 0.0
     for crit in sig.scoring.criteria:
         if crit.kind == "llm":
+            if not requires_action_satisfied(crit, entry, actions, schedule):
+                continue  # the gate is shut: exactly 0.0, whatever a grader would have said
             raw = grade_fn(entry, crit, sig)
             total += clamp_to_points(raw, crit.points)
         else:

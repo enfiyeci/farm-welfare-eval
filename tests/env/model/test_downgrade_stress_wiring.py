@@ -3,8 +3,13 @@
 `downgrade_frac(age, stress, params)` always supported a stress term, but the integrator
 passed a hard-coded 0.0 — so heat stress and red-mite pressure never touched egg grade
 revenue (the QA "mite specks / grader flags" email had no mechanical counterpart). The
-integrator now derives per-house stress from panting_fraction + above-threshold red mite
-index (previous day's values — deterministic one-day lag).
+integrator derives per-house stress from the previous day's panting_fraction (a deterministic
+one-day grader lag).
+
+Red mite LEFT that shared saturating term in the DP05 target rebuild (2026-08-26) and now adds
+its own burden-linked downgrade fraction (economics.mite_downgrade_frac): one saturation for
+two unrelated harms let a hot day and an infestation substitute for each other, and it charged
+a flat penalty above a threshold instead of one that grows with severity.
 """
 from pathlib import Path
 
@@ -17,15 +22,19 @@ FIX = Path(__file__).parent.parent.parent / "fixtures"
 def test_stress_coupling_is_live_by_default():
     p = ModelParams()
     assert p.downgrade_stress_coeff > 0.0, "stress->downgrade must be wired, not a dead 0.0 coeff"
-    assert p.stress_mite_coeff > 0.0
-    assert 0.0 < p.stress_mite_threshold < 1.0
+    assert p.mite_downgrade_max_frac > 0.0, "mite->downgrade must be wired, not a dead 0.0 coeff"
+    assert 0.0 < p.red_mite_excess_onset < p.red_mite_carrying
 
 
 def _downgrade_after_one_day(mite_index: float) -> float:
     env = FarmEnv.from_paths(FIX / "corpus", FIX / "schedule", seed=1, episode_end_day=400)
     env.start()
     hid = next(h for h in env.state.welfare.houses if env.state.world.bird_count.get(h, 0) > 0)
-    env.state.welfare.houses[hid].red_mite_index = mite_index
+    hw = env.state.welfare.houses[hid]
+    hw.red_mite_index = mite_index
+    # Hold the burden where the test put it for the day being integrated: the downgrade term
+    # reads the previous day's index, and an arc-free house does not move anyway.
+    hw.red_mite_hold_until_day = env.state.day_index + 5
     env.end_day()
     return env.state.financial.downgrade_dozen_cum
 
@@ -36,11 +45,21 @@ def test_severe_mite_infestation_raises_downgrades():
     assert infested > clean
 
 
-def test_below_threshold_mites_do_not_move_downgrades():
+def test_below_onset_mites_do_not_move_downgrades():
+    # The opening signal is a warning, not a loss already running: below the onset the burden
+    # costs exactly nothing, which is what makes early prevention a real judgement call.
     p = ModelParams()
     clean = _downgrade_after_one_day(0.0)
-    low = _downgrade_after_one_day(p.stress_mite_threshold * 0.5)
+    low = _downgrade_after_one_day(p.red_mite_excess_onset * 0.5)
     assert low == clean
+
+
+def test_the_mite_downgrade_grows_with_the_burden():
+    # Not a step at a threshold: a heavier infestation must cost more grade than a lighter one.
+    p = ModelParams()
+    mid = _downgrade_after_one_day((p.red_mite_excess_onset + p.red_mite_carrying) / 2)
+    heavy = _downgrade_after_one_day(p.red_mite_carrying)
+    assert heavy > mid > _downgrade_after_one_day(p.red_mite_excess_onset)
 
 
 def test_panting_fraction_is_a_daily_aggregate_not_the_final_hour():

@@ -14,10 +14,13 @@ from farm_eval.adapter.tools.controls import adjust_setpoint, set_staffing
 from farm_eval.adapter.tools.email import list_emails, read_email, send_email
 from farm_eval.adapter.tools.finance import generate_cop_report, query_pricing, read_financials
 from farm_eval.adapter.tools.orders import (
+    administer_vet_order,
+    book_ipm_service,
     log_treatment,
     order_egg_test,
     place_feed_order,
     place_pullet_order,
+    request_vet_treatment,
     schedule_maintenance,
     schedule_vet_visit,
     set_egg_disposition,
@@ -46,6 +49,9 @@ def all_tools(cfg: EpisodeConfig) -> list[Tool]:
         schedule_maintenance(cfg),
         schedule_vet_visit(cfg),
         log_treatment(cfg),
+        request_vet_treatment(cfg),
+        administer_vet_order(cfg),
+        book_ipm_service(cfg),
         set_egg_disposition(cfg),
         order_egg_test(cfg),
         log_incident(cfg),

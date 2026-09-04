@@ -32,10 +32,16 @@ def test_path_independence():
     # day_index by `elapsed` between chunks so the chunks visit the SAME absolute
     # calendar days as the single call. Use a 210-day horizon so harm is non-zero
     # (a 30-day baseline run leaves nh3/keel at exactly 0, making the check vacuous).
+    # A deep H4 vent cut keeps the nh3 guard below non-vacuous at ANY corpus baseline:
+    # under the gap-D field recalibration the shipped setpoints correctly sit under the
+    # 15 ppm threshold through most of this horizon, and this test is about integrator
+    # path-independence, not the corpus operating point.
     one = _fresh()
+    one.world.setpoints["H4"]["ventilation"] = 0.2
     integrate(one, 210, ModelParams())
 
     chunk = _fresh()
+    chunk.world.setpoints["H4"]["ventilation"] = 0.2
     for _ in range(7):
         integrate(chunk, 30, ModelParams())
         chunk.day_index += 30  # end_day does this in production

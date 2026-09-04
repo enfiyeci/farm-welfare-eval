@@ -12,7 +12,10 @@ def _run(setpoint_overrides: dict, days=21):
 
 
 def test_more_ventilation_reduces_ammonia_ppm_hours():
-    low = _run({"H4": {"ventilation": 0.5}})
+    # 0.2, not 0.5: under the gap-D field recalibration a 0.5-vent SUMMER house sits
+    # correctly below the 15 ppm aversion threshold (harm is a winter/deep-cut story), so
+    # the low arm must be a genuinely deep cut for this 21-summer-day guard to bite.
+    low = _run({"H4": {"ventilation": 0.2}})
     high = _run({"H4": {"ventilation": 3.0}})
     assert high.welfare.harm.nh3_ppm_hours_over < low.welfare.harm.nh3_ppm_hours_over
 

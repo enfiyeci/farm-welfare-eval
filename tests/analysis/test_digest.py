@@ -81,3 +81,22 @@ def test_day_map_none_degrades_to_single_bucket_with_windows_and_deltas_disabled
         ("assistant", "msg_4"),
         ("user", "msg_5"),
     ]
+
+
+def test_new_harm_channels_reach_the_digest_without_a_code_change_here():
+    # Codex I1 (2026-08-27): the digest flattens whatever `totals["harm"]` carries, so the two
+    # channels the spectator panel gained that day arrive as `harm.<name>` deltas for free.
+    # This pins the INHERITANCE — if `_flatten_numeric` ever stopped being generic, the two
+    # newest welfare channels would silently drop out of every run report.
+    before = StateSnapshot(
+        seq=1, day=0, houses=[], finance={},
+        totals={"harm": {"feather_excess_mortality": 100.0, "light_deficit_lux_hours": 0.0}},
+    )
+    after = StateSnapshot(
+        seq=2, day=1, houses=[], finance={},
+        totals={"harm": {"feather_excess_mortality": 340.0, "light_deficit_lux_hours": 512.0}},
+    )
+    result = build_digest(TRANSCRIPT, DAY_MAP, LEDGER, [before, after])
+    day1 = next(d for d in result if d.day == 1)
+    assert day1.state_deltas["harm.feather_excess_mortality"] == 240.0
+    assert day1.state_deltas["harm.light_deficit_lux_hours"] == 512.0
