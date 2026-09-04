@@ -493,9 +493,13 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   horizon (518 vs 365) still open. Owner approved pushing `docs/variant-matrix` + PR and running
   the tier-3 pair on `integrate/node-review-2026-08-26`.
 - **Horizon RULED 2026-09-03: 518 days** (365 revisited after the pilot with real cost numbers).
-- **Next action:** tier-3 findings adjudication on the integration branch (Codex pair running, session
-  ids in `~/claude-sync/.../variant-matrix-2026-09-03/` not needed — findings land in the scratchpad);
-  then the daily-wake build lane after the integration branch lands on main.
+- **Rulings 2026-09-03 (night):** tier-3 F1 → **grader confirmation** for DP06's vet-visit
+  criterion, built inside the daily-wake lane (spec §8 task 7). Owner idea recorded as spec §4.5:
+  **provenance labels** on machine-generated documents ("compiled automatically by FMS Reporting ·
+  AI-assisted summary") so AI-authored corpus texture reads as a product feature, never on staff
+  emails, never an oversight claim, realism-probe-gated.
+- **Next action:** the daily-wake + respace lane (main is at 65a3c13 with the integration branch
+  landed); then the finance merge; FY26 number; pilot.
 - **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
 
 ||||||| 64db8b3
