@@ -463,6 +463,46 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Refs:** <files / commit SHAs / spec paths>
 ```
 
+## 2026-09-03 · claude · iteration-1 variant matrix v1 drafted (branch docs/variant-matrix)
+
+- **What / decided:** From the owner's conference notes plus three web-research passes, wrote
+  `evals/hen/design/2026-09-03-iteration1-variant-matrix.md` — 13 experimental axes, 48
+  non-canonical levels, a 3-tier v1 run plan (Tier A: 8 config-seam arms; Tier B: 13 small
+  builds incl. dashboard, misleading in-world welfare index, document store, tool-time clock,
+  compaction, advisor/decider), the statistics rules (episode-level clustering, node-level
+  pairing, N=5), and a line-by-line notes triage. Raw research provenance under
+  `docs/research/2026-09-03-variant-matrix-research/` (delegated, ⚠️-marked, not re-read at
+  source). **Owner rulings 2026-09-03:** land in a fresh worktree; variant arms start on
+  Gemini models (out-of-family grader mandatory).
+- **Owner rulings 2026-09-03 (later the same day):** dashboard/index language stays welfare-avoidant
+  (production + profit register only); the finance branch merges BEFORE the pilot; Welfare
+  Footprint contact deferred. Start set chosen (corners, disclosure pair, thinking on/off,
+  post-run debrief). Pilot readiness assessed: NOT yet — integration branch (29 nodes) → main,
+  respace, finance merge, FY26 number, then pilot. Respace calendar proposal written:
+  `evals/hen/design/2026-09-03-respace-calendar-proposal.md` (measured 92 wake days / 518,
+  45% seven-day gaps, peak 11 open windows on day 252; moves DPD/DP23 EARLY because the H6
+  pullet order must precede the day-266 placement by a rearing cycle — the 2026-08-11 spec's
+  294–322 would land after placement).
+- **Owner ruling 2026-09-03 (evening): DAILY WAKE.** The model wakes on every relevant day and
+  context is handled the way the long-horizon benchmarks do it (bounded recent window +
+  explicit memory tool, the world as the durable record). This unlocks spec §18's budget lock.
+  Design: `docs/specs/2026-09-03-daily-wake-and-rolling-context-design.md` (wake_mode daily,
+  7-day/40k rolling view over a complete transcript, operator-notes tool, per-window grader
+  input, sampled whole-episode dims; ~2–3× pilot tokens). Respace §3/§4 superseded.
+- **Rulings 2026-09-03 (late):** every-day wake (W-all) and the operator-notes tool are RULED IN;
+  horizon (518 vs 365) still open. Owner approved pushing `docs/variant-matrix` + PR and running
+  the tier-3 pair on `integrate/node-review-2026-08-26`.
+- **Horizon RULED 2026-09-03: 518 days** (365 revisited after the pilot with real cost numbers).
+- **Rulings 2026-09-03 (night):** tier-3 F1 → **grader confirmation** for DP06's vet-visit
+  criterion, built inside the daily-wake lane (spec §8 task 7). Owner idea recorded as spec §4.5:
+  **provenance labels** on machine-generated documents ("compiled automatically by FMS Reporting ·
+  AI-assisted summary") so AI-authored corpus texture reads as a product feature, never on staff
+  emails, never an oversight claim, realism-probe-gated.
+- **Next action:** the daily-wake + respace lane (main is at 65a3c13 with the integration branch
+  landed); then the finance merge; FY26 number; pilot.
+- **Refs:** the two paths above; `docs/future-work.md` §2×2 corners; ruling 6.
+
+||||||| 64db8b3
 ## 2026-08-26 · codex · DP13 10-day decaying grace and economics re-anchor (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Built the owner-ruled DP13 trio: `gt:9` 10-day grace with latency decay
