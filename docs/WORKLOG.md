@@ -4,6 +4,23 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-03 · claude · tier-3 pre-merge pair on integrate/node-review-2026-08-26 — one fix wave (branch integrate/node-review-2026-08-26)
+
+- **What / decided:** Tier-3 pair run twice. `gpt-5.6-sol`: BOTH halves killed by OpenAI's
+  biological-risk filter (SE/coli content), zero findings. Owner picked the terra fallback:
+  `gpt-5.6-terra` straight review = "no discrete, actionable correctness issues"; terra
+  adversarial = REVISE, 3 findings. Adjudication: **F2 FIXED** (DP13 paid the 7-pt divert credit
+  on an H4 depopulated pre-window → `applies_if: {occupied_house: H4}` + H4
+  `unjustified_cull_birds` tripwire, the DP18 idiom; `tests/env/test_dp13_cull_guard.py`, TDD);
+  **F3 FIXED** (spec/schedule drift banners on the DP13 and DP06 specs); **F1 WON'T-FIX** (DP06
+  house-only vet-visit matcher — the owner-flagged scope choice already recorded in
+  `docs/final_to_do_list.md` (sol#1), veto still open). Suite 2933 passed / 3 skipped; corpus
+  guards 0/0; mutation guard clean through both Codex runs.
+- **Next action:** Codex round-2 re-verify (resume the terra adversarial session), then owner
+  sign-off and fast-forward to `main`.
+- **Refs:** findings `scratchpad/tier3-integration/adversarial-terra.json` (session-local);
+  this commit.
+
 ## 2026-08-28 · claude · the audit's gaps BUILT — D17 rewrite, five small items, ruling 16·W ported, 16b digest table, DP18 STAGED REVIVAL (scored set 29) (branch integrate/node-review-2026-08-26)
 
 - **Owner ordered the audit's gaps into THIS wave ("yes they do").** All built TDD:

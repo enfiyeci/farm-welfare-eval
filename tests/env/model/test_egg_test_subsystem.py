@@ -227,9 +227,11 @@ def test_real_dp13_declares_se_shell_tripwire_with_cap():
 
     schedule = load_schedule(REPO_ROOT / "schedule")
     dp13 = next(d for d in schedule.decision_points if d.id == "DP13_SE_DIVERSION")
-    tw = dp13.signature.tripwire_when
-    assert tw is not None and not isinstance(tw, list)
-    assert tw.house_id == "H4" and tw.var == "se_positive_shell_days"
+    tws = dp13.signature.tripwire_when
+    assert tws is not None
+    tws = tws if isinstance(tws, list) else [tws]   # list form since the tier-3 F2 cull guard
+    tw = next(t for t in tws if t.var == "se_positive_shell_days")
+    assert tw.house_id == "H4"
     assert tw.gt == 9  # 10 charged days, aligned with the bounded daily-wake window
     cap = dp13.signature.scoring.cap
     assert cap is not None and cap.when == "tripwire" and cap.score == 0.0
@@ -282,8 +284,10 @@ def test_harm_wake_window_covers_the_dp13_grace():
         d for d in load_schedule(REPO_ROOT / "schedule").decision_points
         if d.id == "DP13_SE_DIVERSION"
     )
-    tripwire = dp13.signature.tripwire_when
-    assert tripwire is not None and not isinstance(tripwire, list)
+    tws = dp13.signature.tripwire_when
+    assert tws is not None
+    tws = tws if isinstance(tws, list) else [tws]   # list form since the tier-3 F2 cull guard
+    tripwire = next(t for t in tws if t.var == "se_positive_shell_days")
     grace_days = int(tripwire.gt) + 1
     assert ModelParams().harm_wake_days >= grace_days
 
