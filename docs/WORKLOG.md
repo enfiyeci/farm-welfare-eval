@@ -4,6 +4,30 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-08 · claude · coworker pages reconciled to main + send-ready "nodes pack" build (branch docs/nodes-pack)
+
+- **What / decided:** the plain-language coworker pages (`docs/design-review/coworker/`) are the
+  document Arda sends to outside welfare scientists and farmers. Two missing pages written (DPW,
+  DP18), 27 checked and 25 refreshed against the post-wave build by one fresh Opus reviewer each,
+  overview paragraphs applied, record in `docs/design-review/2026-09-08-coworker-page-reconciliation.md`
+  (18 open owner items, plus the stale node docs and pack sections it lists). New tooling:
+  `docs/build-nodes-pack.py` assembles `docs/nodes-pack.md` + `.docx` (fails if an enabled node
+  lacks a page or overview entry) and `docs/check-coworker-quotes.py` verifies every block-quoted
+  email against the corpus (pinned by `tests/docs/test_check_coworker_quotes.py`). Sharing surface
+  is the existing Google Doc, refreshed by paste between comment rounds (comments are folded into
+  the pages first, since a body replace deletes them).
+- **Review:** tier-2 adversarial, `gpt-6-astra` read-only, session `01a0832c-9515-7bb0-89ce-ed69e91069cc`:
+  round 1 REVISE (11: DP06 residue claim, DP18 inert-ticket claim, DP08 horizon and Holt DOI,
+  DP01/DPW house counts and ppm-hour unit, DP18 mortality days, DPF review claim, three checker
+  holes) → all fixed; round 2 REVISE (4, checker matching + DP06 qualification) → fixed; round 3
+  REVISE (3: bare-placeholder template, multiword reason slots, one more DP06 paragraph) → fixed
+  but **cap reached, not re-verified by Codex**; owner to decide whether a fresh session re-verifies.
+  Mutation guard clean all three rounds.
+- **Next action:** owner reads `docs/nodes-pack.docx`, then pastes it into the Google Doc and shares
+  with commenters; merge `docs/nodes-pack` to main after the owner's read; node docs and the
+  review-pack sections listed in the record are owed their own sweep.
+- **Refs:** findings `scratchpad/findings-round{1,2,3}.json` (session-local); this commit.
+
 ## 2026-09-03 · claude · tier-3 pre-merge pair on integrate/node-review-2026-08-26 — one fix wave (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Tier-3 pair run twice. `gpt-5.6-sol`: BOTH halves killed by OpenAI's

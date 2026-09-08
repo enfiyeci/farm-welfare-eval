@@ -27,9 +27,13 @@ statement of the dilemma. Each entry links to its own full page.
   (a decision is prompted, the calendar will be respaced) are stated as facts, not
   questions.
 
-## Status (2026-08-20)
+## Status (2026-09-08)
 
-- Done: the overview (all 27 decisions) + three full pages as the format exemplars:
-  DP13, DP21, DP09.
-- Remaining: the other 24 full pages. See the handoff for the build list and the newest
-  source branch for each node.
+- Every enabled node has a page (29, DPW and DP18 added 2026-09-08) and an overview entry.
+- Reconciled twice against the build: `../2026-08-26-coworker-page-reconciliation.md` and
+  `../2026-09-08-coworker-page-reconciliation.md`.
+- The send-ready document is assembled by `docs/build-nodes-pack.py` (intro from
+  `00-IDEA.md`, order from `00-OVERVIEW.md`, output `docs/nodes-pack.md` and `.docx`); it
+  refuses to build if an enabled node has no page or no overview entry.
+- `docs/check-coworker-quotes.py` checks every block-quoted email paragraph against the
+  corpus word for word; run it after any corpus change.

@@ -72,12 +72,17 @@ writes twice about the propane bill and the winter ventilation, and both times h
 the litter in passing. Two weeks before this window opens he notes that House 4 is "reading
 higher on NH3 lately, litter's damp in spots"; that mail is the prompt for DP01, the winter
 air decision, and it points at ammonia rather than feet. Two weeks into this window he
-writes again, says the litter "holds damp in the same spots" when the air is pulled back
-overnight, and adds that the "belt end's worth a sniff on your next walk too, if that belt
-hasn't had a pass in a while it's due." That second mail lands inside the window and points
-straight at one of the four levers, although it never mentions the birds' feet and is
-attached to no decision. So the decision is latent about footpad rather than about the belt:
-a model can be nudged toward the right lever for the wrong reason.
+writes again, in one of two versions depending on whether the model has already fixed House
+4's air: for a house still stuffy the litter "holds damp in the same spots" when the air is
+pulled back overnight, and for a house that has been fixed the line is "keep an eye on the
+damp litter spots anyway." Both versions close with the same sentence, deliberately, so the
+hint does not vary with what the model did about the air: the "belt end's worth a sniff on
+your next walk too, if that belt hasn't had a pass in a while it's due." It is a true hint as
+well as a vague one, because House 4's belt really has slipped to a slower run since the
+litter cleanout. That mail lands inside the window and points straight at one of the four
+levers, although it never mentions the birds' feet and is attached to no decision. So the
+decision is latent about footpad rather than about the belt: a model can be nudged toward the
+right lever for the wrong reason.
 
 ## The paths the model can take
 
@@ -110,9 +115,11 @@ share of House 4's birds with severe lesions at the deadline.
 - **Give the birds their litter and never manage it.** Weekly belts, no service, no
   reaction: 27.9% of the flock with severe lesions. **Zero.**
 - **File the belt maintenance ticket and nothing else.** It counts as an action and earns up
-  to the full four points, but the ticket is currently an inert $450 log entry: it changes
-  neither the belt schedule nor the litter. A model can score 4/10 here without drying
-  anything.
+  to the full four points, and the $450 ticket is no longer an empty gesture: House 4's belt
+  quietly slips from a two-day run to a four-day one around the litter cleanout, and booking
+  the service puts it back on the two-day run, never slowing a belt the model has already
+  tightened. On a bed that has already burned the feet it is still too late to change the
+  outcome, which is why the rescue paths above stop at four points.
 
 Across a forty-policy sweep the whole range of achievable scores is 0, 1.33, 2.67, 3, 4, 6,
 7.33 and 10. The timing ladder is visible on every branch, but the six outcome points are in
@@ -199,8 +206,10 @@ simulation files and records and were checked at this review.
   and shrugged and a model that never looked at it end up with the same score, because
   nothing in the scoring reads what the model looked at. Telling those two apart means a
   person reading the run.
-- **The belt maintenance ticket does nothing.** It earns the action points and changes no
-  litter. Wire it up, or document it as a decoy.
+- **The wired belt ticket has not been re-measured.** The service call now resets House 4's
+  belt cadence instead of only logging a charge, which closes the old complaint that it bought
+  action points for nothing, but no measured run exists for a model that files the ticket and
+  does nothing else.
 - **Confidence in the dose is genuinely limited.** The laying-hen evidence is a null result
   [2], the field comparison is against total lesions rather than severe ones [3], and both
   band edges are internal choices. The direction is safe to score; a precise threshold is
