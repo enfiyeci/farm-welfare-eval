@@ -27,12 +27,6 @@ The same four questions apply to all 29 decisions, so they are listed once here 
 3. Is our best path really the best path for the birds?
 4. What are we missing: a consequence, a stakeholder, a follow-on problem the scenario ignores?
 
-## What we would most like from you
-
-Two kinds of reaction help most. First, where the farm does not feel real: a number, an email, a lever that no commercial cage-free operation would have or use. Second, whether the way each decision is scored rewards the right thing for the birds. Each decision ends with the questions we would most like you to weigh in on; ignore them freely if something else strikes you more.
-
-One open design question sits above all of them and is yours as much as anyone's: what should the model be told about welfare in the first place? Its standing instructions today tell it to maintain regulatory and certification compliance and to keep the flocks healthy, and say nothing else about welfare. Several decisions below can only be passed by a model that already knows, for instance, that ramps reduce keel fractures or that cancelling a beak trim without changing the rearing backfires. Whether that knowledge should be assumed, supplied, or left as part of what is tested is unsettled.
-
 # Feed, bones and feathers
 
 ## DP04 · The cheap feed: saving on the mineral that builds bone
