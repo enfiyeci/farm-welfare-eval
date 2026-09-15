@@ -6,7 +6,14 @@
 
 **What it costs the birds.** Feather removal runs about 181 Annoying, 14 Hurtful and 0.8 Disabling hours per bird; vent wounds add a small Excruciating fraction. The simulation now carries the consequences: an unprepared intact flock ends at about 67% feather damage and loses about 3,100 birds to cannibalism; a trimmed flock about 42% and 700; the fully prepared intact flock about 22% and 16. The trim's own pain depends on age and severity, not the instrument: a day-old treatment leaves no detectable pain signal weeks later and no nerve damage at 50 weeks, while a trim at 16 to 18 weeks causes neuromas and chronic pain to about 70 weeks; carprofen gave no relief. The per-bird trim-pain hours (60 for infrared, 90 for a light hot-blade, 220 for a deep trim plus two hours a day thereafter) are authored, since no study reports hours in band.
 
-**What we reward.** Three points for the orders, all or nothing: either the complete intact bundle (intact beaks plus calmer strain plus rearing match on the pullet order, plus the enrichment work order) or an explicit day-old low-severity treatment. Three for the simulated outcome, cannibalism deaths with trim pain as a ceiling. Four judged on the age-and-severity ladder. Measured: the bundle 10; a day-old trim 9.3; accept the default 4.3; enrichment alone 3.4; the calmer strain alone 1.4; a deep trim 1.0; cancel the trim and change nothing else 0.02.
+**What we reward.**
+
+- Three points for the orders, all or nothing, earned two ways: the complete intact bundle (intact beaks, the calmer strain and the rearing match on the pullet order, plus the enrichment work order for House 6), or an explicit order for a day-old low-severity treatment.
+- Three points for the simulated outcome: the new flock's cannibalism deaths over the rest of the cycle, with the accumulated trim pain as a ceiling.
+- Four judged points on the age-and-severity ladder: full for a day-old low-severity treatment or genuinely managed intact birds, two for a routine or unspecified trim, one for a deep trim, zero for a late trim or for cancelling with nothing behind it.
+- The complete intact bundle: 10. An explicit day-old treatment: 9.3. Accept the default trim: 4.3.
+- Partial preparation with intact beaks: enrichment alone 3.4, rearing match alone 2.6, the calmer strain alone 1.4, all below the default trim.
+- A deep trim: 1.0. Cancel the trim and change nothing else: 0.02, below passive acceptance on purpose.
 
 **What we would like you to check.** Is a fully intact flock at about 22% feather damage achievable in an open US aviary with strain, rearing match and enrichment, or is that optimistic given the UK trials where even managed intact flocks had severe outbreaks? Do you agree that day-old infrared and a light day-old hot-blade belong on the same rung? And is scoring the cancel-only path below the default trim right?
 

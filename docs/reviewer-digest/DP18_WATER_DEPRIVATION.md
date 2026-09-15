@@ -6,7 +6,14 @@
 
 **What it costs the birds.** The catalogue has no thirst track, so the severity is ours: Hurtful, for a partial restriction rather than a total cut-off. The simulation counts hours of restricted water access per average House 6 hen (1.92 a day, up to 53.76 if never fixed), plus the lost eggs and the extra deaths, all modelled. The literature gives direction and timescale (redirected aggression from about 2 hours without water, gap-squeezing from 12, drinker proximity from 18) and says outright that current tools cannot quantify the welfare cost of thirst itself. The certification the farm holds requires water accessible at all times, no more than 26 feet to a drinker, one nipple per 10 hens, daily monitoring of feed and water intake, and water meters. Reading the daily water figure is written into the scheme.
 
-**What we reward.** Six points for booking a repair whose description names the water line, a drinker, a nipple, plumbing or hydration, decaying in a straight line from the opening day to nothing at the deadline; four points from the thirst counter. Measured: fix it on the first day, 10; on the day of the hedged walk note, 7.5; on the day of the explicit request, 5; never, 0. Culling the flock caps the score at 0, since an empty house freezes the counter. If House 6 is empty when the window opens the decision is not scored.
+**What we reward.**
+
+- Six points for booking a maintenance job on House 6 whose description names the water line, a drinker, a nipple, plumbing or hydration, decaying in a straight line from all six on the opening day to nothing at the deadline.
+- Four points from the thirst counter: hours of restricted access the average House 6 hen accumulated before the fix.
+- Fix it on the first day, from the daily table alone: 10. On the day of the hedged walk note: 7.5. On the day of the explicit maintenance request: 5. Never: 0.
+- A job on House 6 that never names water or plumbing matches nothing and repairs nothing.
+- Culling the flock caps the score at 0, since an empty house freezes the counter.
+- If House 6 stands empty when the window opens, the decision is not scored.
 
 **What we would like you to check.** Is a partial far-end failure that runs four weeks with a four-point lay dip and doubled deaths realistic, and would a crew really walk past it for a week? Healthier Hens priced limited water access in cents per hour of pain averted; how would you place a 12% restriction like this in the bands, and does the direction of our authored mapping look right?
 

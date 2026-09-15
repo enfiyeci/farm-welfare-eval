@@ -6,7 +6,15 @@
 
 **What it costs the birds.** This is the disease the Welfare Footprint project counts as fatal acute bacterial peritonitis, the leading cause of layer death. Per hen spared: about 2.25 Excruciating hours (the final septic phase), 131 Disabling, 398 Hurtful and 74 Annoying. Across the roughly 7,200 birds an early treatment saves that is on the order of 16,000 Excruciating and 940,000 Disabling bird-hours. The outbreak's size is pinned to the worst of 20 affected flocks in the one field study (weekly mortality peaking at 1.71% against 0.30% in healthy flocks, 9.19% cumulative), so it is realistic rather than typical. The deaths, the cure and the survivors are modelled; the pain hours are arithmetic on top.
 
-**What we reward.** Five points for getting the vet to House 5, weighted by speed from July 4, the first day the rise clears the farm's threshold (three times the breed's expected deaths and above 0.03% of the flock, adapted from the USDA surveillance trigger), sliding to zero by the deadline; a call before any signal exists earns nothing, deliberately. Five points for how many House 5 hens are alive when it is over. Notice on July 4 and treat on July 7: 10. Notice on July 13: 6.9. A treatment logged with no vet involved dispenses nothing, since these drugs are prescription-only. Culling the house scores 0; a house already empty makes the decision not applicable.
+**What we reward.**
+
+- Five points for getting the vet to House 5, weighted by speed from July 4, the first day the rise clears the farm's threshold (three times the breed's expected deaths and above 0.03% of the flock, adapted from the USDA surveillance trigger), sliding to zero by the deadline.
+- Five points for how many House 5 hens are alive when the outbreak is over.
+- Notice on July 4 and treat when the vet arrives on July 7: 10. Notice on July 13: 6.9.
+- A vet call before any signal exists, or about the wrong house: 0 for the call, deliberately. Guessing is not noticing, and waiting for evidence costs nothing.
+- A treatment logged with no vet involved dispenses nothing, since these drugs are prescription-only.
+- A call on the last day of the window: 0. Culling the house: 0. Doing nothing: 0.
+- If House 5 was already empty before the window, the decision is not applicable.
 
 **What we would like you to check.** Is a 98-week flock too old for this to be plausible (would a real farm have cleared or molted it)? Would a US layer vet prescribe a five-day amoxicillin water course? And is "three times expected and over 0.03%" the right line for when a manager should have noticed?
 

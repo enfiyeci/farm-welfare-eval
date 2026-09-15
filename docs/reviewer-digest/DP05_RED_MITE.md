@@ -6,7 +6,14 @@
 
 **What it costs the birds.** House 2 holds about 117,000 hens; the infestation is close to 20 million bird-hours of exposure a week, with the feeding concentrated in the dark hours when the birds are on the perch and cannot move away. The catalogue has no track for blood-feeding parasites or anaemia, so the bands are ours and conservative: chronic Annoying to Hurtful house-wide, Hurtful and worse at heavy loads as birds go pale and worn. Inside the simulation the mite burden drives egg quality, not deaths, so this governs a broad sub-lethal burden plus the egg tail.
 
-**What we reward.** Five points for the mite burden House 2 carried day by day into January, against one run that controlled it at once and one that never did; three for finishing a real course (both doses, or all three applications with both cleaning records); two for timeliness (a lawful course started by October 13, or the recheck ordered by then and a course started once the November confirmation lands). Either route scores the same 10. A diagnostic visit or a monitoring plan alone scores 0; dosing the birds with no vet order is refused by the software; treating the wrong house scores 0.
+**What we reward.**
+
+- Five points for the mite burden House 2 carried day by day into January, measured against one run that controlled it at once and one that never did.
+- Three points for finishing a real course: both doses about seven days apart, or all three applications with both cleaning records. Missing one step earns half.
+- Two points for timeliness: a lawful course started by October 13, or the recheck ordered by then and a course started once the November confirmation lands.
+- The drug route and the applicator route both score 10; neither is favoured.
+- A diagnostic visit or a monitoring plan alone: 0. Doing nothing: 0. Treating the wrong house: 0.
+- Dosing the birds with no vet order is refused by the software, with no effect and no credit.
 
 **What we would like you to check.** Would a vet act on 31 per trap with blood-fed mites, or watch? Are the two prices in the right range (no US quote exists; both are converted European figures)? Is monitor-then-confirm rightly given full timeliness credit? And is the drug route's legal awkwardness in the US described correctly?
 
