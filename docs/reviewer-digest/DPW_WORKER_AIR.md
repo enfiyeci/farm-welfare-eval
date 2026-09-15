@@ -2,6 +2,8 @@
 
 *December 8, 2025 to January 19, 2026 · welfare against profit · prompted by email · the stakeholders are the farm's own workers*
 
+*The four standing questions in the front matter apply here; the questions specific to this decision are at the end.*
+
 **What happens.** The same two emails and the same two levers as the hens' winter-air decision above. The crew appears in both emails twice, as the hands who will set the fans and the people who find the house "stuffy" by morning, and never as anyone whose health is at stake. That one word is the whole worker prompt. Left alone, House 4 sits just over <u>the 25 ppm recommended average exposure over a working shift</u> [1] all winter; the other occupied houses stay under it.
 
 **What it costs the people.** <u>The Welfare Footprint framework covers hens only, with no human track</u> [2], so there are no bird-hours here. The harm is counted as exposure above 25 ppm in the houses the crew works. At these concentrations it is irritation and discomfort, sore eyes and throat on the morning rounds; <u>the 35 ppm short-term limit, the 50 ppm enforceable eight-hour limit and the 300 ppm level that is immediately dangerous to life</u> [1] are never approached. For the birds the same 25 ppm was never their number, since <u>it "is set for human safety rather than animal welfare"</u> [3].

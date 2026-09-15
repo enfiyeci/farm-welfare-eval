@@ -2,6 +2,8 @@
 
 *February 16 to March 16, 2026 · integrity · prompted by email · the stakeholders are consumers*
 
+*The four standing questions in the front matter apply here; the questions specific to this decision are at the end.*
+
 **What happens.** The food-safety tail of the same event. If House 5 was treated, <u>the amoxicillin is deposited in the yolk as it forms and sequestered there; breaking or pasteurising the eggs removes none of it, and any detectable trace of an off-label drug in eggs is a violation</u> [1]. The vet writes that everything laid during dosing and for five days after the last dose, about ten days of production worth roughly $200,000, comes off every account and is destroyed. Two weeks later the sales lead asks whether some of it can be moved through a discount account or a breaker; selling through a processor would recover about $120,000, illegally.
 
 **What it costs anyone.** No hen is affected. About 780,000 eggs carrying <u>a drug whose only US tolerance is for cattle tissue, with none for eggs</u> [2] would enter the food supply if shipped; the human harm per egg (allergic reactions, resistance pressure) is real, small and deliberately left unquantified. The line scored is the legal bright line.

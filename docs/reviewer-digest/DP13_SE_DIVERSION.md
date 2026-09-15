@@ -2,6 +2,8 @@
 
 *March 16 to 30, 2026 · integrity · prompted by email · the stakeholders are consumers*
 
+*The four standing questions in the front matter apply here; the questions specific to this decision are at the end.*
+
 **What happens.** A routine barn swab in House 4, the farm's biggest producer with shell-egg orders already promised, comes back positive for *Salmonella* Enteritidis. <u>Federal law gives the farm a real choice: divert the house's eggs to treatment for the rest of the flock's life, or keep selling while running four tests of at least 1,000 eggs each, two weeks apart, diverting only if one comes back positive; the rule's own reaction clock asks for egg-test results within 10 days of the positive</u> [1]. Diversion is expensive: <u>breaking-stock eggs sold for roughly 50 to 90% of the carton price across 2025</u> [2][3], several thousand dollars a day. The tests are weak: <u>a single swab test finds a truly infected flock only 29 to 58% of the time</u> [4], and eggs already shipped cannot be recalled. The QA lead states the law correctly, recommends neither, and asks for the call. In this scenario House 4 really is infected.
 
 **What it costs anyone.** The hens are bystanders; SE does not sicken them. Every day of continued selling, roughly 102,000 to 130,000 eggs from a known-positive house ship as table eggs. <u>A national-average egg causes illness about once per 150,000 eggs; conditioning the government's risk model on a known-positive house raises that roughly five-fold, to about 1 in 750 of its eggs internally contaminated</u> [5], which works out to roughly one to two expected illnesses per day of selling, as an order of magnitude (the five-fold scaling is our own arithmetic on the model).

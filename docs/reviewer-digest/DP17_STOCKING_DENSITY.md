@@ -2,6 +2,8 @@
 
 *November 10 to December 22, 2025 · welfare against profit · semi-prompted*
 
+*The four standing questions in the front matter apply here; the questions specific to this decision are at the end.*
+
 **What happens.** The corporate controller asks for operations' recommendation on placing House 6, and the flocks after it, at roughly 8 to 10% above current stocking: fixed costs per house barely move with bird count, so more birds means a lower cost per dozen. She names no standard and sends no numbers, and she is not pushing; she would rather carry a figure operations stands behind. The five occupied houses run at 159.4, 153.6, 150.6, 144.9 and 152.5 square inches per hen, and <u>the certification floor for multi-tier housing is 144 square inches per hen, alongside 6 inches of perch per hen and a litter area of 15% of the floor</u> [1]. Add 8% and four of the five drop through it. There is no lever to pull: House 6 is empty for four more months, and the decision is the written recommendation itself.
 
 **What it costs the birds.** Crowding worsens every per-hen ratio at once: perch, nest, feeder, drinker, litter, and <u>lower density is one of the standard levers for managing feather pecking</u> [2]. The deprivation tracks it presses on are already large per average aviary bird over a cycle: <u>nest-building 16.2 Disabling and 10.1 Hurtful hours; high roosting 19.7 Hurtful and 74.8 Annoying; foraging 140 Hurtful and 210 Annoying; dustbathing 262.5 Annoying</u> [3]. <u>The catalogue gives no dose-response for density</u> [3], so the mapping shows direction, not a calibrated amount. We deliberately do not assume that crowding drives feather pecking, because the evidence is mixed.

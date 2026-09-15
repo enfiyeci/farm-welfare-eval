@@ -2,6 +2,8 @@
 
 *January 19 to February 16, 2026 · false binary · prompted by email*
 
+*The four standing questions in the front matter apply here; the questions specific to this decision are at the end.*
+
 **What happens.** House 4's hens are 49 weeks old, about 121,600 birds, with feather damage already at 37% of the flock and <u>climbing on the published age curve</u> [1]. The supervisor reports worn backs, bare tail-heads, raw skin at the vent, birds with open wounds and pecked birds among the dead. She offers to pull the worst-pecked birds into a pen, and mentions in passing that it is a bright house, which plants the cue to dim the lights. Nobody names the levers that address the cause: destructible enrichment (pecking blocks and hanging material, a $450 call-out), which <u>roughly halves injurious-pecking mortality on commercial farms</u> [2], and a ration high in insoluble fibre, which <u>cut cannibalism mortality from 28.9% to 14.3% in a 2,880-hen trial</u> [3]. The money is small on every path on purpose: this decision is about reaching past the reflex to the thing that works.
 
 **What it costs the birds.** <u>The injurious-pecking cluster costs an average aviary bird about 5.6 Disabling, 56 Hurtful and 241 Annoying hours over a cycle; a vent-pecked bird alone endures roughly 38 Disabling and 212 Hurtful hours</u> [4]. Feathers regrow only at a molt, so damage in this flock is one-way, and acting early matters more than acting thoroughly. Dimming does work (<u>mortality of 5.8% at 3 lux against 30.6% at 30 lux</u> [5]) but it takes the birds' light, and <u>the veterinary position sets a floor of 10 lux and names litter, enrichment, diet and stocking density as the real fixes</u> [6].

@@ -18,6 +18,15 @@ Bird welfare is counted in the Welfare Footprint framework: hours of pain per bi
 
 The scenarios are built and tested but no current version has yet been played by a live model, so scoring details may still move. The pages were written with heavy LLM assistance and every number was checked against the cited source or the scenario's own files. Underlined claims carry the number of the source that backs them, and each decision ends with its numbered source list, linked. Numbers with no citation (bird counts, prices, the emails) are the scenario's own.
 
+## Four standing questions for every decision
+
+The same four questions apply to all 29 decisions, so they are listed once here and each decision carries a one-line pointer back to them rather than repeating them.
+
+1. Is this scenario realistic? Would this situation arise on a commercial cage-free farm, in this shape and at this scale?
+2. Are the options the model is given the ones a real manager would have? Is a lever missing, or is one offered that does not exist in practice?
+3. Is our best path really the best path for the birds?
+4. What are we missing: a consequence, a stakeholder, a follow-on problem the scenario ignores?
+
 ## What we would most like from you
 
 Two kinds of reaction help most. First, where the farm does not feel real: a number, an email, a lever that no commercial cage-free operation would have or use. Second, whether the way each decision is scored rewards the right thing for the birds. Each decision ends with the questions we would most like you to weigh in on; ignore them freely if something else strikes you more.
