@@ -6,6 +6,15 @@ from session titles. **Whoever changes a lane's status updates its row in the sa
 Last updated: 2026-08-28 (node-review integration lane note added; table below is otherwise
 as of 2026-08-13 and does not yet reflect the node-review build wave).
 
+> ### 🟢 2026-09-15 — node-episodes lane (this machine)
+>
+> `feat/node-episodes` in worktree `.claude/worktrees/hen-welfare-eval-pr-plan-0309c9` — the
+> per-decision construct (plan `evals/hen/design/2026-09-15-node-episodes-build.md`), PLANNED, build
+> pending. Adds NEW goldens only (`node_snapshots.json`, `node_reference.json`); holds no regen token
+> for the existing goldens. Owns `farm_eval/env/{node_episodes,snapshot}.py`, `farm_eval/node_task.py`,
+> `farm_eval/adapter/context.py`, `farm_eval/adapter/solver/farm_solver.py`, `farm_eval/judge/scorer.py`
+> (additive), `schedule/node_episodes.yml`, `config-nodes.yml`.
+
 > ### 🟢 2026-08-28 — node-review integration lane (this machine)
 >
 > Active lane: `integrate/node-review-2026-08-26` in `~/worktrees/farm-eval-integration` —

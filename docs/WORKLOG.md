@@ -4,6 +4,24 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-15 · claude · node-episode construct PLANNED (branch feat/node-episodes; not yet built)
+
+- **What / decided:** Arda approved Oliver's 2026-09-12 proposal (`evals/hen/design/2026-09-12-sliced-construct-{summary,proposal}.md`,
+  now on this branch): replace the single 518-day run as the COMPARATIVE instrument with one Inspect
+  sample per scored welfare decision ("node episodes"), welfare-only scoring, per-node pass rate +
+  pass^k, and the node cuts (DP13/DP19/DP20/DP21 out; DPN unscored). The build plan is
+  `evals/hen/design/2026-09-15-node-episodes-build.md`: 13 TDD tasks — manifest
+  `schedule/node_episodes.yml`, routine-only snapshot deriver (`farm_eval/env/snapshot.py`), per-sample
+  `EpisodeStore.episode_spec` seam, `farm_node_task` + `config-nodes.yml`, per-episode good/negligent
+  anchors (`farm_eval/judge/node_reference.json`), `dimension_mode` on `grade_episode`,
+  `farm_eval/report/reliability.py`, docs + ruling 19. The continuous `farm_task` stays for pilots.
+  Existing goldens/`welfare_reference.json` are NOT regenerated (new files only). Open owner call:
+  DPW_WORKER_AIR (plan §0.2, default excluded as a worker-safety node).
+- **Next action:** a fresh session executes the plan with subagents (superpowers:subagent-driven-development),
+  runs the local k=5 two-model pilot (plan §R), then opens the PR for Arda.
+- **Refs:** branch `feat/node-episodes` (worktree `hen-welfare-eval-pr-plan-0309c9`), commits
+  `09cb52c` (notes) + the plan commit; `main` untouched.
+
 ## 2026-09-03 · claude · tier-3 pre-merge pair on integrate/node-review-2026-08-26 — one fix wave (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Tier-3 pair run twice. `gpt-5.6-sol`: BOTH halves killed by OpenAI's
