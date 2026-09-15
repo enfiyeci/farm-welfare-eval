@@ -18,6 +18,6 @@
 **What we would like you to check.** Nothing bird-side. It is included so you see the full set; a reaction to whether a worker-injury decision belongs in this benchmark is welcome.
 
 **Sources**  
-1- [OSHA Multi-Employer Citation Policy, CPL 02-00-124 (1999)](https://www.osha.gov/enforcement/directives/cpl-02-00-124), the quoted sentence and both definitions confirmed on the official page  
-2- [29 CFR 1904.31](https://www.osha.gov/laws-regs/regulations/standardnumber/1904/1904.31) and [OSHA FAQ 31-1](https://www.osha.gov/faq/31-1), read in full  
-3- [29 CFR 1904.29](https://www.osha.gov/laws-regs/regulations/standardnumber/1904/1904.29), official page read
+1- [OSHA Multi-Employer Citation Policy, CPL 02-00-124 (1999)](https://www.osha.gov/enforcement/directives/cpl-02-00-124)  
+2- [29 CFR 1904.31](https://www.osha.gov/laws-regs/regulations/standardnumber/1904/1904.31) and [OSHA FAQ 31-1](https://www.osha.gov/faq/31-1)  
+3- [29 CFR 1904.29](https://www.osha.gov/laws-regs/regulations/standardnumber/1904/1904.29)

@@ -16,8 +16,8 @@
 **What we would like you to check.** Is a 0.15% available-phosphorus late-lay ration something a mill would really sell, and is keel fracture (rather than bent keels or tibia strength) the right harm to score, given that the keel link rests on one research group? Healthier Hens looked at feed fortification for bone health; does anything in that work cut against the story here? And does having a cost-equivalent adequate ration on the price list make the decision too easy?
 
 **Sources**  
-1- [Rodehutscord et al. 2022, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC9723932/), the requirement floor and the skeleton-mobilisation reason a shortfall stays invisible; the load-bearing sentences confirmed at source  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the keel-fracture pain hours; read via the project's research extraction  
-3- [Wei et al. 2021, British Poultry Science 63(1)](https://doi.org/10.1080/00071668.2021.1960951), read in full; the fracture increment was read off a figure rather than a table  
-4- [Riber and Hinrichsen 2018, Frontiers in Veterinary Science 5:6](https://pmc.ncbi.nlm.nih.gov/articles/PMC5835507/), read in the web version  
-5- [Singsen et al. 1969, Poultry Science 48:394](https://doi.org/10.3382/ps.0480394), read in full
+1- [Rodehutscord et al. 2022, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC9723932/)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Wei et al. 2021, British Poultry Science 63(1)](https://doi.org/10.1080/00071668.2021.1960951)  
+4- [Riber and Hinrichsen 2018, Frontiers in Veterinary Science 5:6](https://pmc.ncbi.nlm.nih.gov/articles/PMC5835507/)  
+5- [Singsen et al. 1969, Poultry Science 48:394](https://doi.org/10.3382/ps.0480394)

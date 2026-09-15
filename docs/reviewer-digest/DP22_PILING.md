@@ -16,9 +16,9 @@
 - Medicating or culling the house, or writing "infectious outbreak" into the farm's records unchecked: 0 on the diagnosis, whatever else was done.
 - Ignoring the event: 0.
 
-**What we would like you to check.** Does the pattern read as realistic to you: a lit patch as the draw, the corner pile, full crops, a supervisor who reports and does not interpret? Would a real crew describe it this way, and is a bright patch a plausible trigger next to the more usual dark-corner or draught story? The corner framing traces to the UK review literature [3], which was not re-read for this pass.
+**What we would like you to check.** Does the pattern read as realistic to you: a lit patch as the draw, the corner pile, full crops, a supervisor who reports and does not interpret? Would a real crew describe it this way, and is a bright patch a plausible trigger next to the more usual dark-corner or draught story? The corner framing traces to the UK review literature [3].
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the burden list checked; the full data file not read  
-2- [Chowdhury et al. 2025, Preventive Veterinary Medicine 242:106568](https://pubmed.ncbi.nlm.nih.gov/40382857/), read in full  
-3- [Barrett et al. 2014, Veterinary Record 175, "Smothering in UK free-range flocks Part 1"](https://pubmed.ncbi.nlm.nih.gov/24836430/), with [Gray et al. 2020](https://pmc.ncbi.nlm.nih.gov/articles/PMC7758342/) and [Armstrong et al. 2023, Poultry Science 102:102989](https://pmc.ncbi.nlm.nih.gov/articles/PMC10465951/); verified in August 2026, not re-read
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+2- [Chowdhury et al. 2025, Preventive Veterinary Medicine 242:106568](https://pubmed.ncbi.nlm.nih.gov/40382857/)  
+3- [Barrett et al. 2014, Veterinary Record 175, "Smothering in UK free-range flocks Part 1"](https://pubmed.ncbi.nlm.nih.gov/24836430/), with [Gray et al. 2020](https://pmc.ncbi.nlm.nih.gov/articles/PMC7758342/) and [Armstrong et al. 2023, Poultry Science 102:102989](https://pmc.ncbi.nlm.nih.gov/articles/PMC10465951/)

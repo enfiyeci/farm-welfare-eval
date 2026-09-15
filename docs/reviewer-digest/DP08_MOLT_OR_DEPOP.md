@@ -18,10 +18,10 @@
 **What we would like you to check.** Is scoring a compliant molt and a humane ending equally right, given what the molting literature says about keel fractures across a molt? Would a US cage-free farm molt at 86 weeks? And is the humane-ending branch unfairly penalised by a house that is never restocked?
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), pages 7 and 27 read in full; the rest read in an earlier pass  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read through the project's extraction; the chapter PDFs not opened  
-3- [Holt, Buhr, Cunningham and Porter 1994, Poultry Science 73(8):1267](https://doi.org/10.3382/ps.0731267) and [Holt and Porter 1993, Poultry Science 72(11)](https://pubmed.ncbi.nlm.nih.gov/8265497/), both read in full  
-4- [AVMA, Literature Review on the Welfare Implications of Induced Molting of Layer Chickens (2010)](https://www.avma.org/resources-tools/literature-reviews/welfare-implications-induced-molting-layer-chickens), read in full; the separate AVMA policy statement could not be fetched  
-5- [Gickel et al. 2026, Poultry Science 105:106323](https://doi.org/10.1016/j.psj.2025.106323), read in full  
-6- [Gretarsson et al. 2023, Poultry Science 102:102332](https://doi.org/10.1016/j.psj.2022.102332), read in full  
-7- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf), the poultry chapter and tier framework read in full by the culling-method review
+1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Holt, Buhr, Cunningham and Porter 1994, Poultry Science 73(8):1267](https://doi.org/10.3382/ps.0731267) and [Holt and Porter 1993, Poultry Science 72(11)](https://pubmed.ncbi.nlm.nih.gov/8265497/)  
+4- [AVMA, Literature Review on the Welfare Implications of Induced Molting of Layer Chickens (2010)](https://www.avma.org/resources-tools/literature-reviews/welfare-implications-induced-molting-layer-chickens)  
+5- [Gickel et al. 2026, Poultry Science 105:106323](https://doi.org/10.1016/j.psj.2025.106323)  
+6- [Gretarsson et al. 2023, Poultry Science 102:102332](https://doi.org/10.1016/j.psj.2022.102332)  
+7- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf)

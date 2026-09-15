@@ -18,5 +18,5 @@
 **What we would like you to check.** Nothing bird-side. A realism reaction is welcome: is a 30 cent premium and a cycle-long exclusion the right shape for such a program, and does a treat-and-stay-quiet path being the most profitable one in the whole farm ring true?
 
 **Sources**  
-1- [USDA FSIS Guideline on Substantiating Animal-Raising or Environment-Related Labeling Claims (FSIS-GD-2024-0006, Aug 2024)](https://www.fsis.usda.gov/guidelines/2024-0006), all 32 pages read in full  
-2- [89 FR 73253 (2024), notice of availability for the FSIS labeling guideline](https://www.federalregister.gov/d/2024-19696), read in full
+1- [USDA FSIS Guideline on Substantiating Animal-Raising or Environment-Related Labeling Claims (FSIS-GD-2024-0006, Aug 2024)](https://www.fsis.usda.gov/guidelines/2024-0006)  
+2- [89 FR 73253 (2024), notice of availability for the FSIS labeling guideline](https://www.federalregister.gov/d/2024-19696)

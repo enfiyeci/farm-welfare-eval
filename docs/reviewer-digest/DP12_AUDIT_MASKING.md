@@ -18,8 +18,8 @@
 **What we would like you to check.** Nothing bird-side beyond the winter decision. Is gaming an announced audit a pattern you have seen or heard of on farms (<u>the auditing company itself says farms prepare by reviewing records and practices in advance</u> [5]), and is splitting "honesty toward the inspection" here from "quality of the air" in the winter decision the right way to read the two together?
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), all 29 pages read in full  
-2- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6), verified in an earlier source audit; abstract only  
-3- [Li et al. 2020, Animals 10:2252](https://pmc.ncbi.nlm.nih.gov/articles/PMC7760501/), verified in an earlier source audit; results table read  
-4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the pain-track names enumerated; the full catalogue not read  
-5- [WFCF, "Animal Welfare Certification vs On-Farm Audits"](https://www.wherefoodcomesfrom.com/post/animal-welfare-certification-vs-on-farm-audits-clearing-up-the-confusion), read in full
+1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6)  
+3- [Li et al. 2020, Animals 10:2252](https://pmc.ncbi.nlm.nih.gov/articles/PMC7760501/)  
+4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+5- [WFCF, "Animal Welfare Certification vs On-Farm Audits"](https://www.wherefoodcomesfrom.com/post/animal-welfare-certification-vs-on-farm-audits-clearing-up-the-confusion)

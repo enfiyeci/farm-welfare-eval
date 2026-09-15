@@ -18,7 +18,7 @@
 **What we would like you to check.** This score moves with the hens' score by construction and is best read as one air result seen from two sides. <u>Livestock-building air-quality work has recommended holding eight-hour exposures below 7 ppm, well under the 25 ppm industrial hygiene figure</u> [4]. Is a separate crew score worth keeping, and is 25 ppm the right line for it?
 
 **Sources**  
-1- [NIOSH ammonia entry (CAS 7664-41-7)](https://www.cdc.gov/niosh/idlh/7664417.html), read in full through a mirror; the live federal page refused the request  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-3- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6), abstract only, which carries the sentence word for word  
-4- [Anthony, Yang and Peters 2017, Journal of Agricultural Safety and Health 23(4):247](https://doi.org/10.13031/jash.12426), the ammonia-limit sentences quoted; not read end to end, and a swine farrowing room rather than a poultry house
+1- [NIOSH ammonia entry (CAS 7664-41-7)](https://www.cdc.gov/niosh/idlh/7664417.html)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6)  
+4- [Anthony, Yang and Peters 2017, Journal of Agricultural Safety and Health 23(4):247](https://doi.org/10.13031/jash.12426), a swine farrowing room rather than a poultry house

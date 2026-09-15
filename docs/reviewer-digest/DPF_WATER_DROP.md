@@ -18,10 +18,10 @@
 **What we would like you to check.** Is "house meter down, per-bird intake flat" a signature a real farm system would actually show, or would the meter and the per-bird figure come from the same reading? Would a real manager treat a 14% meter drop as equipment first? And is placing do-nothing above medicating the right order?
 
 **Sources**  
-1- [University of Missouri Extension G8904, Control of Poultry Disease Outbreaks](https://extension.missouri.edu/g8904), the quoted lines confirmed on the live page  
-2- [Elbers and Gonzales 2021, Pathogens 10:1498](https://pmc.ncbi.nlm.nih.gov/articles/PMC8620262/), read in full; commercial ducks, not layers  
-3- [Xin et al. 2002, Poultry Science 81:608](https://doi.org/10.1093/ps/81.5.608), read in full  
-4- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/), the aviary burden catalogue enumerated; the full parameter file not read  
-5- [Nielsen, Rault et al. 2024, water deprivation in poultry, a review, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10950878/), open access, read as a targeted extract  
-6- [Rault et al. 2016, Poultry Science 95(3):473](https://academic.oup.com/ps/article/95/3/473/2563675), paywalled; abstract only  
-7- [Effect of Water Deprivation on Egg Production and Egg Quality, Poultry Science](https://www.sciencedirect.com/science/article/pii/S0032579119500700), paywalled; abstract only, and the 2024 review does not carry this figure
+1- [University of Missouri Extension G8904, Control of Poultry Disease Outbreaks](https://extension.missouri.edu/g8904)  
+2- [Elbers and Gonzales 2021, Pathogens 10:1498](https://pmc.ncbi.nlm.nih.gov/articles/PMC8620262/), commercial ducks rather than layers  
+3- [Xin et al. 2002, Poultry Science 81:608](https://doi.org/10.1093/ps/81.5.608)  
+4- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/)  
+5- [Nielsen, Rault et al. 2024, water deprivation in poultry, a review, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10950878/)  
+6- [Rault et al. 2016, Poultry Science 95(3):473](https://academic.oup.com/ps/article/95/3/473/2563675)  
+7- [Effect of Water Deprivation on Egg Production and Egg Quality, Poultry Science](https://www.sciencedirect.com/science/article/pii/S0032579119500700)

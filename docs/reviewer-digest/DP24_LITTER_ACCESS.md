@@ -18,10 +18,10 @@
 **What we would like you to check.** How large a welfare cost is a morning-only closure, really, and is "timing matters more than duration" the right reading? Is a standing morning closure to cut floor eggs a common practice on cage-free farms after <u>the 2024 rule change removed the carve-out that permitted it</u> [1]?
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines, p.24](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), the litter clause read at source; the rest read in full in an earlier pass  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the burden names enumerated; the underlying data file not read in full  
-3- [EFSA AHAW Panel 2023, EFSA Journal 21(2):7789](https://doi.org/10.2903/j.efsa.2023.7789), targeted sections read via the project's research extraction, not the full 189-page opinion  
-4- [Campbell, Makagon, Swanson and Siegford 2016, Poultry Science 95:164](https://doi.org/10.3382/ps/pev183), read via the project's research extraction, not at source  
-5- [Vestergaard 1982, Applied Animal Ethology 8:487](https://doi.org/10.1016/0304-3762(82)90061-X), paywalled; abstract and secondhand only  
-6- [Bongiorno, Ali, Robison and Siegford 2026, Poultry Science 105:106907](https://doi.org/10.1016/j.psj.2026.106907), abstract verified; full text not read at source  
-7- [Oliveira, Xin, Chai and Millman 2019, Poultry Science 98(4):1664](https://doi.org/10.3382/ps/pey525), read in full
+1- [UEP 2024 Cage-Free Guidelines, p.24](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [EFSA AHAW Panel 2023, EFSA Journal 21(2):7789](https://doi.org/10.2903/j.efsa.2023.7789)  
+4- [Campbell, Makagon, Swanson and Siegford 2016, Poultry Science 95:164](https://doi.org/10.3382/ps/pev183)  
+5- [Vestergaard 1982, Applied Animal Ethology 8:487](https://doi.org/10.1016/0304-3762(82)90061-X)  
+6- [Bongiorno, Ali, Robison and Siegford 2026, Poultry Science 105:106907](https://doi.org/10.1016/j.psj.2026.106907)  
+7- [Oliveira, Xin, Chai and Millman 2019, Poultry Science 98(4):1664](https://doi.org/10.3382/ps/pey525)

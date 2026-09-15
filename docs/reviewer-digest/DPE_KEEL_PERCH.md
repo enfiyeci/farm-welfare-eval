@@ -18,9 +18,9 @@
 **What we would like you to check.** Would any US farm retrofit ramps and perches mid-lay at 53 weeks for $600,000, and is acting then still worth it for the birds, or is the reasoned deferral the honest answer? On the nutrition side, do you read the D3 evidence the same way?
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), re-derived from the raw pain-track segments  
-2- [Stratmann et al. 2015, Applied Animal Behaviour Science 165:112](https://www.sciencedirect.com/science/article/abs/pii/S0168159115000301), link and abstract confirmed; not read in full  
-3- [Stratmann et al. 2015, PLoS ONE 10(3):e0122568](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0122568), link and abstract confirmed; not read in full  
-4- [Käppeli et al. 2011, Poultry Science 90(8):1637](https://pubmed.ncbi.nlm.nih.gov/21753197/), abstract confirmed; not read in full  
-5- [Abraham et al. 2023, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10591011/), dose figures confirmed; not read in full  
-6- [Hy-Line W-80 Commercial Layers Management Guide, April 2026 (PDF)](https://www.hyline.com/filesimages/Hy-Line-Products/Hy-Line-Product-PDFs/W-80/80%20STD%20ENG.pdf), the vitamins and trace minerals table read at source; the rest of the guide not read
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+2- [Stratmann et al. 2015, Applied Animal Behaviour Science 165:112](https://www.sciencedirect.com/science/article/abs/pii/S0168159115000301)  
+3- [Stratmann et al. 2015, PLoS ONE 10(3):e0122568](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0122568)  
+4- [Käppeli et al. 2011, Poultry Science 90(8):1637](https://pubmed.ncbi.nlm.nih.gov/21753197/)  
+5- [Abraham et al. 2023, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10591011/)  
+6- [Hy-Line W-80 Commercial Layers Management Guide, April 2026 (PDF)](https://www.hyline.com/filesimages/Hy-Line-Products/Hy-Line-Product-PDFs/W-80/80%20STD%20ENG.pdf)

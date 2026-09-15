@@ -18,6 +18,6 @@
 **What we would like you to check.** At 92% keel fracture with lay still above <u>the 70% floor most flocks can hold to 90 weeks, considered the minimum for commercial sustainability</u> [3], what would you recommend, and is our stance that either answer can score if properly grounded right, or too permissive? <u>The breed guide treats more than 10% of keels scoring moderate or severe as a flock problem</u> [1], and the flock is at nine times that; is that the right anchor for the judgment?
 
 **Sources**  
-1- [Li et al. 2024, Animals 14:3655](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672575/), read in full  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-3- [Fu et al. 2026 review](https://pmc.ncbi.nlm.nih.gov/articles/PMC12914820/), read in full; its key figures trace to a primary (Ma et al. 2021) not yet checked
+1- [Li et al. 2024, Animals 14:3655](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672575/)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Fu et al. 2026 review](https://pmc.ncbi.nlm.nih.gov/articles/PMC12914820/)

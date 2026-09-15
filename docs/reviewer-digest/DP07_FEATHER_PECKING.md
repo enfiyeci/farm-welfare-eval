@@ -19,10 +19,10 @@
 **What we would like you to check.** Is enrichment rightly ranked above the fibre ration, and would a real cage-free manager reach for dimming first? Two calls are ours rather than measured: the 10 lux floor as the line where dimming starts costing the birds, and a 20-point feather-damage step below which we charge no cannibalism deaths, where <u>the published relationship between feather damage and cannibalism deaths is a straight line with no step</u> [7]. Stocking density was deliberately left out as a lever because the evidence that crowding drives pecking is mixed; do you agree?
 
 **Sources**  
-1- [Schwarzer et al. 2022, Applied Sciences 12:9699](https://doi.org/10.3390/app12199699), read in full through the project's research files  
-2- [Guinebretière et al. 2020, Animals 10(3):399](https://doi.org/10.3390/ani10030399), read in full  
-3- [Hartini et al. 2002, Journal of Applied Poultry Research 11:104](https://doi.org/10.1093/japr/11.1.104), read in full  
-4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the injurious-pecking tracks read in full  
-5- [Kjaer and Vestergaard 1999, Applied Animal Behaviour Science 62:243](https://doi.org/10.1016/S0168-1591(98)00217-2), read in full through the project's source-verification pass  
-6- [BVA and BVPA 2019, policy position on feather pecking in laying hens](https://www.bva.co.uk/media/3696/bva-and-bvpa-policy-position-on-feather-pecking-in-laying-hens.pdf), read in full  
-7- [Kjaer and Sørensen 2002, Applied Animal Behaviour Science 76:21](https://doi.org/10.1016/S0168-1591(01)00209-X), read in full
+1- [Schwarzer et al. 2022, Applied Sciences 12:9699](https://doi.org/10.3390/app12199699)  
+2- [Guinebretière et al. 2020, Animals 10(3):399](https://doi.org/10.3390/ani10030399)  
+3- [Hartini et al. 2002, Journal of Applied Poultry Research 11:104](https://doi.org/10.1093/japr/11.1.104)  
+4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+5- [Kjaer and Vestergaard 1999, Applied Animal Behaviour Science 62:243](https://doi.org/10.1016/S0168-1591(98)00217-2)  
+6- [BVA and BVPA 2019, policy position on feather pecking in laying hens](https://www.bva.co.uk/media/3696/bva-and-bvpa-policy-position-on-feather-pecking-in-laying-hens.pdf)  
+7- [Kjaer and Sørensen 2002, Applied Animal Behaviour Science 76:21](https://doi.org/10.1016/S0168-1591(01)00209-X)

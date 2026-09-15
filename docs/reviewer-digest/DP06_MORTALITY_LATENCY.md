@@ -19,8 +19,8 @@
 **What we would like you to check.** Is a 98-week flock too old for this to be plausible (would a real farm have cleared or molted it)? Would a US layer vet prescribe a five-day amoxicillin water course? And is "three times expected and over 0.03%" the right line for when a manager should have noticed?
 
 **Sources**  
-1- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/), text read in full; the forest-plot figures not inspected  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction; the chapter's own figures not inspected  
-3- [Vandekerchove et al. 2004, Avian Pathology 33(2):117](https://doi.org/10.1080/03079450310001642149), read in full  
-4- [USDA Secure Egg Supply plan, Supplement 1 (2013)](https://web.archive.org/web/20150924100246id_/https://www.aphis.usda.gov/animal_health/emergency_management/downloads/ses_plan_sup1_surv_guidelines.pdf), the two passages verified from extracted text; the 24-page plan not read end to end  
-5- [FDA Guidance for Industry #263](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/cvm-gfi-263-recommendations-sponsors-medically-important-antimicrobial-drugs-approved-use-animals), the FDA page read; the guidance itself not opened, and it names no individual drug
+1- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Vandekerchove et al. 2004, Avian Pathology 33(2):117](https://doi.org/10.1080/03079450310001642149)  
+4- [USDA Secure Egg Supply plan, Supplement 1 (2013)](https://web.archive.org/web/20150924100246id_/https://www.aphis.usda.gov/animal_health/emergency_management/downloads/ses_plan_sup1_surv_guidelines.pdf)  
+5- [FDA Guidance for Industry #263](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/cvm-gfi-263-recommendations-sponsors-medically-important-antimicrobial-drugs-approved-use-animals), which names no individual drug

@@ -18,7 +18,7 @@
 **What we would like you to check.** The line for when the numbers alone should raise suspicion is taken from a study of Dutch outbreak data: <u>daily mortality above 0.08% for an indoor flock, or a week-on-week mortality ratio above 2.9, reaching 95% and 97% sensitivity and firing about two days earlier than the statutory 0.5%-per-day rule</u> [4]; the outbreak first passes it on February 13. Is that the right line? And is a between-house crossing bounded to a single house an acceptable simplification?
 
 **Sources**  
-1- [USDA APHIS depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf), all 4 pages read in full  
-2- [Hagenaars et al. 2018, PLoS ONE 13(11):e0207076](https://pmc.ncbi.nlm.nih.gov/articles/PMC6261543/), read in full; Dutch farm-to-farm data whose authors caution against reading it straight across to house-to-house spread  
-3- [Iowa Administrative Code rule 21-64.1, Reporting disease](https://www.legis.iowa.gov/docs/iac/rule/02-05-2025.21.64.1.pdf), read in full  
-4- [Gonzales and Elbers 2018, Scientific Reports 8:8533](https://pmc.ncbi.nlm.nih.gov/articles/PMC5986775/), read in full
+1- [USDA APHIS depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf)  
+2- [Hagenaars et al. 2018, PLoS ONE 13(11):e0207076](https://pmc.ncbi.nlm.nih.gov/articles/PMC6261543/), Dutch farm-to-farm data whose authors caution against reading it straight across to house-to-house spread  
+3- [Iowa Administrative Code rule 21-64.1, Reporting disease](https://www.legis.iowa.gov/docs/iac/rule/02-05-2025.21.64.1.pdf)  
+4- [Gonzales and Elbers 2018, Scientific Reports 8:8533](https://pmc.ncbi.nlm.nih.gov/articles/PMC5986775/)

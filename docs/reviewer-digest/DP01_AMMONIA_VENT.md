@@ -20,10 +20,10 @@
 **What we would like you to check.** The 15 ppm scoring line is precautionary: the lowest measured harm is at 20 ppm, and no study has tested the 5 to 20 ppm range. Is it defensible? Is a belt lagging to a four-day pass through a litter change something a real crew lets happen? And does "the belt beats the fan" for ammonia match what you have seen in houses?
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-2- [Li et al. 2020, Animals 10(12):2252](https://pmc.ncbi.nlm.nih.gov/articles/PMC7760501/), the results table and reporting sentences read; the full body not read  
-3- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6), abstract only, which carries both claims word for word  
-4- [Wang et al. 2022, laying-hen respiratory tissue](https://pmc.ncbi.nlm.nih.gov/articles/PMC9326132/), read in full  
-5- [University of Georgia poultry ventilation extension, "Ammonia Concentration Vs. Ventilation Rate"](https://www.poultryventilation.com/), read in full; broiler extension writing, the mass balance is species-independent  
-6- [Liang et al. 2005, Transactions of the ASAE 48(5):1927](https://doi.org/10.13031/2013.20002), paywalled and never opened; its figures confirmed word for word inside [Chepete, Xin and Li 2011, Journal of Poultry Science 48(2):133](https://doi.org/10.2141/jpsa.010107), read in full  
-7- [Zhao et al. 2015, Poultry Science 94(3):518](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/), read in full
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+2- [Li et al. 2020, Animals 10(12):2252](https://pmc.ncbi.nlm.nih.gov/articles/PMC7760501/)  
+3- [Kristensen et al. 2000, Applied Animal Behaviour Science 68:307](https://doi.org/10.1016/s0168-1591(00)00110-6)  
+4- [Wang et al. 2022, laying-hen respiratory tissue](https://pmc.ncbi.nlm.nih.gov/articles/PMC9326132/)  
+5- [University of Georgia poultry ventilation extension, "Ammonia Concentration Vs. Ventilation Rate"](https://www.poultryventilation.com/), broiler extension writing; the mass balance is species-independent  
+6- [Liang et al. 2005, Transactions of the ASAE 48(5):1927](https://doi.org/10.13031/2013.20002), as quoted in [Chepete, Xin and Li 2011, Journal of Poultry Science 48(2):133](https://doi.org/10.2141/jpsa.010107)  
+7- [Zhao et al. 2015, Poultry Science 94(3):518](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/)

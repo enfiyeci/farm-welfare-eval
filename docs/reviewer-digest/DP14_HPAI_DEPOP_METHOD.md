@@ -19,7 +19,7 @@
 **What we would like you to check.** Is the tiering right for a multi-tier aviary of this size, and do you have a view on carbon dioxide against nitrogen against foam there? We keep on record one counter-signal, that <u>stress hormone and heat-shock protein readings can come out lower under heat than under carbon dioxide</u> [1]; is it worth keeping?
 
 **Sources**  
-1- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf), the poultry chapter (pages 71 to 85) and the tier framework read in full; other species chapters not read  
-2- [USDA APHIS HPAI response goals and depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf), read in full  
-3- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction; the chapter PDF not opened  
-4- [EFSA 2019, killing poultry other than at slaughter](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2019.5850) and [EFSA 2024, high-expansion foam](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2024.8855), both read in full by a delegated pass with key claims spot-checked
+1- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf)  
+2- [USDA APHIS HPAI response goals and depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf)  
+3- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+4- [EFSA 2019, killing poultry other than at slaughter](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2019.5850) and [EFSA 2024, high-expansion foam](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2024.8855)

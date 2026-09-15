@@ -18,7 +18,7 @@
 **What we would like you to check.** Is a partial far-end failure that runs four weeks with a four-point lay dip and doubled deaths realistic, and would a crew really walk past it for a week? Healthier Hens priced limited water access in cents per hour of pain averted; how would you place a 12% restriction like this in the bands, and does the direction of our authored mapping look right? The 12% size and the stage days are authored choices.
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/), carried from the project's own enumeration of the catalogue  
-2- [Nielsen, Rault et al. 2024, water deprivation in poultry, a review, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10950878/), open access, read as a targeted extract rather than end to end  
-3- [Rault et al. 2016, Poultry Science 95(3):473](https://academic.oup.com/ps/article/95/3/473/2563675), paywalled; known at abstract level and through the 2024 review  
-4- [UEP 2024 Cage-Free Housing Animal Welfare Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), the feed and water, health and biosecurity, and multi-tier sections read in full; the rest searched
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/)  
+2- [Nielsen, Rault et al. 2024, water deprivation in poultry, a review, Poultry Science](https://pmc.ncbi.nlm.nih.gov/articles/PMC10950878/)  
+3- [Rault et al. 2016, Poultry Science 95(3):473](https://academic.oup.com/ps/article/95/3/473/2563675)  
+4- [UEP 2024 Cage-Free Housing Animal Welfare Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)

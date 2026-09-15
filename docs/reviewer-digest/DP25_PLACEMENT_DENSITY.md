@@ -16,10 +16,10 @@
 - Under-fill the house: full outcome credit, since more space is never scored worse. A token flock earning full credit is a known and accepted gap.
 - Only the last order before the trucks arrive counts.
 
-**What we would like you to check.** Is a threshold rather than a slope the right shape for density harm in your reading of the literature? Does 144 square inches feel marginal from what you saw on cage-free farms? And would a supplier plausibly hold 100,000 surplus birds of the same hatch week? The threshold study has known weaknesses (water access tangled with density, gas measured at the litter, one end-of-trial reading, four pens per group), and a thirteen-source sweep on slope-versus-threshold was read at abstract level only.
+**What we would like you to check.** Is a threshold rather than a slope the right shape for density harm in your reading of the literature? Does 144 square inches feel marginal from what you saw on cage-free farms? And would a supplier plausibly hold 100,000 surplus birds of the same hatch week? The threshold study has known weaknesses: water access tangled with density, gas measured at the litter, one end-of-trial reading, four pens per group.
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), read in full during an earlier pass  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-3- [Kang et al. 2018, European Poultry Science 82](https://doi.org/10.1399/eps.2018.245), read in full via the project's research extraction; the archived PDF not re-opened  
-4- [Groot Koerkamp 1998 PhD thesis, Ammonia Emission from Aviary Housing Systems for Laying Hens](https://edepot.wur.nl/210633), read at source by the earlier litter work; not re-opened
+1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Kang et al. 2018, European Poultry Science 82](https://doi.org/10.1399/eps.2018.245)  
+4- [Groot Koerkamp 1998 PhD thesis, Ammonia Emission from Aviary Housing Systems for Laying Hens](https://edepot.wur.nl/210633)

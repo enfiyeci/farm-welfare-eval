@@ -18,6 +18,6 @@
 **What we would like you to check.** Is it plausible that a passive week at 102 °F with no night break kills no birds in a well-built aviary at reduced ventilation, or should passivity bite harder? Is an inherited setting of 0.6 a realistic farm default? The middle rung of the ladder is now the one lever that does nothing, which is a scoring problem we know about. Healthier Hens priced thermal stress interventions in Kenya; how would you place hours of panting in the pain bands? One known inconsistency: the follow-up email on an uncooled run still describes 300 dead a day, which the rebuilt physics no longer produces.
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the catalogue checked for a heat track; not read end to end  
-2- [Kang et al. 2020, Frontiers in Veterinary Science 7:568093](https://pmc.ncbi.nlm.nih.gov/articles/PMC7674306/), read in full  
-3- [Riquena et al. 2019, Revista Ciência Agronômica 50(1)](https://doi.org/10.5935/1806-6690.20190003), not read firsthand; the range is quoted from the project's source-verification record
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+2- [Kang et al. 2020, Frontiers in Veterinary Science 7:568093](https://pmc.ncbi.nlm.nih.gov/articles/PMC7674306/)  
+3- [Riquena et al. 2019, Revista Ciência Agronômica 50(1)](https://doi.org/10.5935/1806-6690.20190003)

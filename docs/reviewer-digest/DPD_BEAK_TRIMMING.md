@@ -18,9 +18,9 @@
 **What we would like you to check.** Is a fully intact flock at about 22% feather damage achievable in an open US aviary with strain, rearing match and enrichment, or is that optimistic given <u>the UK trials where even well managed intact flocks produced severe outbreaks, two of twenty badly enough that one needed an emergency trim</u> [3]? Do you agree that day-old infrared and a light day-old hot-blade belong on the same rung? And is scoring the cancel-only path below the default trim right?
 
 **Sources**  
-1- [Riber and Hinrichsen 2017, Frontiers in Veterinary Science 4:222](https://doi.org/10.3389/fvets.2017.00222), read in full in an earlier pass; not re-read  
-2- [Sepeur et al. 2015, European Poultry Science 79](https://doi.org/10.1399/eps.2015.116), read in full  
-3- [DEFRA Beak Trimming Action Group 2015 final report](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/480111/Beak-Trimming-Action-Group-Review.pdf), all 40 pages read in full  
-4- [Nicol 2018, "Can we really stop beak trimming?", Advances in Poultry Welfare](https://doi.org/10.1016/B978-0-08-100915-4.00009-9), read in full  
-5- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the pain-track values read; the full data file not read end to end  
-6- Pain by age, severity and method, all read in full: [Marchant-Forde et al. 2008](https://doi.org/10.3382/ps.2006-00360), [Dennis and Cheng 2012](https://doi.org/10.3382/ps.2011-01651), [McKeegan and Philbey 2012](https://doi.org/10.7120/09627286.21.2.207), [Li et al. 2020](https://doi.org/10.1111/asj.13405), [Freire et al. 2008](https://doi.org/10.5713/ajas.2008.70039), [FAWC 2007](https://assets.publishing.service.gov.uk/media/5a7cfb3eed915d28e9f3954e/FAWC_opinion_on_beak_trimming_of_laying_hens.pdf); one study used a broiler breed
+1- [Riber and Hinrichsen 2017, Frontiers in Veterinary Science 4:222](https://doi.org/10.3389/fvets.2017.00222)  
+2- [Sepeur et al. 2015, European Poultry Science 79](https://doi.org/10.1399/eps.2015.116)  
+3- [DEFRA Beak Trimming Action Group 2015 final report](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/480111/Beak-Trimming-Action-Group-Review.pdf)  
+4- [Nicol 2018, "Can we really stop beak trimming?", Advances in Poultry Welfare](https://doi.org/10.1016/B978-0-08-100915-4.00009-9)  
+5- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+6- Pain by age, severity and method: [Marchant-Forde et al. 2008](https://doi.org/10.3382/ps.2006-00360), [Dennis and Cheng 2012](https://doi.org/10.3382/ps.2011-01651), [McKeegan and Philbey 2012](https://doi.org/10.7120/09627286.21.2.207), [Li et al. 2020](https://doi.org/10.1111/asj.13405), [Freire et al. 2008](https://doi.org/10.5713/ajas.2008.70039), [FAWC 2007](https://assets.publishing.service.gov.uk/media/5a7cfb3eed915d28e9f3954e/FAWC_opinion_on_beak_trimming_of_laying_hens.pdf); one study used a broiler breed

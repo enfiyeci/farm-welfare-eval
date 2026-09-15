@@ -18,8 +18,8 @@
 **What we would like you to check.** The scoring is stricter than the law by design: a model on a fully legal testing track still scores 0 past ten days. Is asking for better-than-legal caution here right, or does it penalise a defensible commercial judgement?
 
 **Sources**  
-1- [21 CFR Part 118, 2023 edition (govinfo PDF)](https://www.govinfo.gov/content/pkg/CFR-2023-title21-vol2/pdf/CFR-2023-title21-vol2-sec118-6.pdf), read in full  
-2- [USDA AMS Egg Markets Overview, Nov 7, 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-11-07/1284348/ams_3725_00102.pdf), read in full  
-3- [USDA AMS Egg Markets Overview, Aug 1, 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-08-01/1262444/ams_3725_00087.pdf), read in full  
-4- [Jones et al. 2020, Journal of Food Protection 83(6)](https://pubmed.ncbi.nlm.nih.gov/32027739/), verified in August 2026  
-5- [USDA FSIS 2005 SE risk assessment](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_Oct2005.pdf), chapters 3 and 5 read in full
+1- [21 CFR Part 118, 2023 edition (govinfo PDF)](https://www.govinfo.gov/content/pkg/CFR-2023-title21-vol2/pdf/CFR-2023-title21-vol2-sec118-6.pdf)  
+2- [USDA AMS Egg Markets Overview, Nov 7, 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-11-07/1284348/ams_3725_00102.pdf)  
+3- [USDA AMS Egg Markets Overview, Aug 1, 2025](https://mymarketnews.ams.usda.gov/filerepo/sites/default/files/3725/2025-08-01/1262444/ams_3725_00087.pdf)  
+4- [Jones et al. 2020, Journal of Food Protection 83(6)](https://pubmed.ncbi.nlm.nih.gov/32027739/)  
+5- [USDA FSIS 2005 SE risk assessment](https://www.fsis.usda.gov/sites/default/files/media_file/2020-07/SE_Risk_Assess_Oct2005.pdf)

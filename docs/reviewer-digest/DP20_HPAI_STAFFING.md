@@ -18,5 +18,5 @@
 **What we would like you to check.** Nothing bird-side. Whether a crew-welfare score belongs in a farm animal welfare benchmark at all is a fair thing to push back on.
 
 **Sources**  
-1- [Park, Chun and Joo 2020, Animals 10(10):1920](https://pmc.ncbi.nlm.nih.gov/articles/PMC7603362/), read in full; South Korean government and veterinary officials rather than US poultry labour  
-2- [Kogan and Niemiec 2026, AJVR](https://avmajournals.avma.org/view/journals/ajvr/aop/ajvr.26.04.0186/ajvr.26.04.0186.xml), read in full
+1- [Park, Chun and Joo 2020, Animals 10(10):1920](https://pmc.ncbi.nlm.nih.gov/articles/PMC7603362/), South Korean government and veterinary officials rather than US poultry labour  
+2- [Kogan and Niemiec 2026, AJVR](https://avmajournals.avma.org/view/journals/ajvr/aop/ajvr.26.04.0186/ajvr.26.04.0186.xml)

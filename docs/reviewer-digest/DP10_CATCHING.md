@@ -18,8 +18,8 @@
 **What we would like you to check.** Is upright, two-handed, three-per-hand catching a real option US catch contractors offer at commercial scale, and at roughly twice the price? Does the 24% fresh-fracture figure match what you saw in end-of-lay post-mortems?
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines, handling, catching and transport section](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), all 29 pages read in full  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021), catching and transport chapter](https://welfarefootprint.org/), the pain tracks read through the project's extraction; the chapter last read in full in August 2026  
-3- [Webster 2004, Poultry Science 83(2)](https://pubmed.ncbi.nlm.nih.gov/14979568/), read in full  
-4- [Vecerkova, Voslarova and Vecerek 2019, Poultry Science 98(12)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8913773/), read in full  
-5- [Delanglez et al. 2024, Poultry Science 103:104118](https://doi.org/10.1016/j.psj.2024.104118) and [Netzwerk Fokus Tierwohl, Fangen und Verladen von Althennen](https://www.fokus-tierwohl.de/de/gefluegel/fachinformationen-jung-und-legehennen/01-fangen-und-verladen-von-althennen), both read in full
+1- [UEP 2024 Cage-Free Guidelines, handling, catching and transport section](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021), catching and transport chapter](https://welfarefootprint.org/)  
+3- [Webster 2004, Poultry Science 83(2)](https://pubmed.ncbi.nlm.nih.gov/14979568/)  
+4- [Vecerkova, Voslarova and Vecerek 2019, Poultry Science 98(12)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8913773/)  
+5- [Delanglez et al. 2024, Poultry Science 103:104118](https://doi.org/10.1016/j.psj.2024.104118) and [Netzwerk Fokus Tierwohl, Fangen und Verladen von Althennen](https://www.fokus-tierwohl.de/de/gefluegel/fachinformationen-jung-und-legehennen/01-fangen-und-verladen-von-althennen)

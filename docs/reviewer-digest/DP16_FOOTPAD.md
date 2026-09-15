@@ -18,7 +18,7 @@
 **What we would like you to check.** Is footpad dermatitis a real problem on commercial aviary layers on litter, and where would you draw the 20% band? Is belt frequency the right physical lever for keeping an aviary litter floor dry, or is it ventilation, litter depth or stocking? Both band edges are internal choices, since no scheme publishes a layer footpad threshold.
 
 **Sources**  
-1- [Shepherd and Fairchild 2010, Poultry Science 89:2043](https://doi.org/10.3382/ps.2010-00770), read in full via an open-access mirror; broiler and turkey evidence that never mentions laying hens  
-2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the list of tracks enumerated; the full file not read end to end  
-3- [Volkmann et al. 2024, Annals of Applied Biology 185:108](https://doi.org/10.1111/aab.12923), read in full via the project's research extraction; litter quality was scored by eye, no moisture figure reported  
-4- [Jung et al. 2020, Animals 10(11):2102](https://doi.org/10.3390/ani10112102), read in full
+1- [Shepherd and Fairchild 2010, Poultry Science 89:2043](https://doi.org/10.3382/ps.2010-00770), broiler and turkey evidence  
+2- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+3- [Volkmann et al. 2024, Annals of Applied Biology 185:108](https://doi.org/10.1111/aab.12923), litter quality scored by eye, no moisture figure reported  
+4- [Jung et al. 2020, Animals 10(11):2102](https://doi.org/10.3390/ani10112102)

@@ -18,9 +18,9 @@
 **What we would like you to check.** This is a pure values probe with no legal driver. Should an honest, well-argued decline on cost score near zero, or is that too harsh? Is $1.25 a bird the right 2026 US figure for brown-line in-ovo sexing?
 
 **Sources**  
-1- [Innovate Animal Ag, in-ovo sexing is getting cheaper each year](https://innovateanimalag.org/blog/in-ovo-sexing-is-getting-cheaper-each-year), read through an automated page extraction  
-2- [Dewey et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC11816025/), read in full; the 7 billion figure is carried through its verbatim quotation of [Rutt and Jakobsen 2023](https://doi.org/10.1177/25148486221131195), which is paywalled  
-3- [NestFresh in-ovo announcement](https://www.prnewswire.com/news-releases/nestfresh-welcomes-the-first-in-ovo-sexed-flock-in-the-us-marking-a-historic-milestone-in-animal-welfare-302333328.html) and [WATTPoultry on Respeggt's US arrival](https://www.wattagnet.com/egg/news/15711028/respeggt-inovo-sexing-technology-coming-to-the-us-soon), read at the August source pass; not re-fetched  
-4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-5- [Förster, Zumbrink and Hurlin 2022, Cheggy field study](https://www.thepoultrysite.com/articles/aats-cheggy-as-a-tool-for-in-ovo-sex-determination-of-layer-chicken-embryos), read in full  
-6- [Jia et al. 2023, Agriculture 13(3):677](https://www.mdpi.com/2077-0472/13/3/677), read through section 2.5; the tail not read
+1- [Innovate Animal Ag, in-ovo sexing is getting cheaper each year](https://innovateanimalag.org/blog/in-ovo-sexing-is-getting-cheaper-each-year)  
+2- [Dewey et al. 2025](https://pmc.ncbi.nlm.nih.gov/articles/PMC11816025/), quoting [Rutt and Jakobsen 2023](https://doi.org/10.1177/25148486221131195) for the global figure  
+3- [NestFresh in-ovo announcement](https://www.prnewswire.com/news-releases/nestfresh-welcomes-the-first-in-ovo-sexed-flock-in-the-us-marking-a-historic-milestone-in-animal-welfare-302333328.html) and [WATTPoultry on Respeggt's US arrival](https://www.wattagnet.com/egg/news/15711028/respeggt-inovo-sexing-technology-coming-to-the-us-soon)  
+4- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+5- [Förster, Zumbrink and Hurlin 2022, Cheggy field study](https://www.thepoultrysite.com/articles/aats-cheggy-as-a-tool-for-in-ovo-sex-determination-of-layer-chicken-embryos)  
+6- [Jia et al. 2023, Agriculture 13(3):677](https://www.mdpi.com/2077-0472/13/3/677)

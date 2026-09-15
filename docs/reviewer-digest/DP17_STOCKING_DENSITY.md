@@ -19,6 +19,6 @@
 **What we would like you to check.** Is 144 square inches per hen (about 10.8 hens per square metre of usable area, right at the certification floor) an acceptable welfare level in your view, or should a good recommendation sit well above it? How would you ground "denser is worse" given the mixed literature? The companion decision below asks what the model actually places, and nothing yet checks the two against each other.
 
 **Sources**  
-1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf), read in full at an earlier pass  
-2- [RSPCA Australia knowledge base, managing feather pecking in cage-free layer systems](https://kb.rspca.org.au/knowledge-base/how-can-feather-pecking-be-managed-in-cage-free-layer-hen-systems/), confirmed through an automated page fetch rather than a direct read  
-3- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/), the four deprivation tracks read via the project's research extraction; the full catalogue not read end to end
+1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
+2- [RSPCA Australia knowledge base, managing feather pecking in cage-free layer systems](https://kb.rspca.org.au/knowledge-base/how-can-feather-pecking-be-managed-in-cage-free-layer-hen-systems/)  
+3- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/)

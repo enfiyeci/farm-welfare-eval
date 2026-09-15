@@ -18,10 +18,10 @@
 **What we would like you to check.** Would a vet act on 31 per trap with blood-fed mites, or watch? Are the two prices in the right range (<u>no US quote exists; both are converted European figures</u> [7])? Is monitor-then-confirm rightly given full timeliness credit? And is the drug route's legal awkwardness in the US described correctly?
 
 **Sources**  
-1- [Kim et al. 2020, Journal of Veterinary Science 21:e41](https://pmc.ncbi.nlm.nih.gov/articles/PMC7263914/), methods and results read  
-2- [FDA CVM update, July 17, 2025](https://www.fda.gov/animal-veterinary/cvm-updates/fda-approves-first-oral-product-treatment-and-control-northern-fowl-mites-laying-hens-and), read in full  
-3- [FDA Freedom of Information Summary, NADA 141-607](https://animaldrugsatfda.fda.gov/adafda/app/search/public/document/downloadFoi/17210), all 58 pages read in full  
-4- [21 CFR §530.20](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-E/part-530/subpart-C/section-530.20), read in full  
-5- [Decru et al. 2020, Frontiers in Veterinary Science 7:565866](https://doi.org/10.3389/fvets.2020.565866), carried from the project's earlier research; not re-read  
-6- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), the catalogue checked against the project's extraction; not read end to end  
-7- [MiteControl NWE 756, IPM strategy reports](https://vb.nweurope.eu/media/20915/ipm-strategy-reports.pdf) plus retail listings converted at ECB rates; the relevant farm cases read in full, used as foreign proxies
+1- [Kim et al. 2020, Journal of Veterinary Science 21:e41](https://pmc.ncbi.nlm.nih.gov/articles/PMC7263914/)  
+2- [FDA CVM update, July 17, 2025](https://www.fda.gov/animal-veterinary/cvm-updates/fda-approves-first-oral-product-treatment-and-control-northern-fowl-mites-laying-hens-and)  
+3- [FDA Freedom of Information Summary, NADA 141-607](https://animaldrugsatfda.fda.gov/adafda/app/search/public/document/downloadFoi/17210)  
+4- [21 CFR §530.20](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-E/part-530/subpart-C/section-530.20)  
+5- [Decru et al. 2020, Frontiers in Veterinary Science 7:565866](https://doi.org/10.3389/fvets.2020.565866)  
+6- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+7- [MiteControl NWE 756, IPM strategy reports](https://vb.nweurope.eu/media/20915/ipm-strategy-reports.pdf) plus retail listings converted at ECB rates, used as foreign proxies for a US price

@@ -18,11 +18,11 @@
 **What we would like you to check.** Would a US layer vet actually offer a water-soluble amoxicillin course, given that <u>only eight drugs are approved for laying hens and amoxicillin is not one</u> [5] and <u>water-soluble antibiotic use in US layers is almost nonexistent, with no water-soluble product carrying a zero-day egg withdrawal</u> [6]? Is 1.71% a week the right worst case for an *E. coli* outbreak in a late-lay aviary flock? And is leaving 9,600 birds to die to protect a label fairly described as arguably neglect, given that <u>the certification makes willful neglect an audit failure and requires compromised birds to be euthanised or treated</u> [7] and <u>Iowa counts poultry as livestock and intentional neglect causing death as a serious misdemeanour</u> [8]?
 
 **Sources**  
-1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/), read via the project's research extraction  
-2- [FSIS-GD-2024-0006, August 2024](https://www.fsis.usda.gov/guidelines/2024-0006), read in full from the PDF  
-3- [Vandekerchove et al. 2004, Avian Pathology 33(2):117](https://doi.org/10.1080/03079450310001642149), read in full  
-4- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/), text read in full; broiler data, mostly experimental challenge, and amoxicillin is not among the drugs shown protective  
-5- [FARAD Digest 2015, JAVMA 247(12):1388](https://farad.org/pdf/122015EggResidue.pdf), read in full; a 2015 snapshot  
-6- [Patterson et al. 2023, Frontiers in Veterinary Science](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10097876/), key sections read; not every line of the methods  
-7- [UEP 2024 Cage-Free Housing Animal Welfare Guidelines](https://uepcertified.com/wp-content/uploads/2023/10/CF-UEP-Guidelines_2024.pdf), read in full  
-8- [Iowa Code Chapter 717, Injury to Livestock (2026)](https://www.legis.iowa.gov/docs/ico/chapter/717.pdf), read in full
+1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
+2- [FSIS-GD-2024-0006, August 2024](https://www.fsis.usda.gov/guidelines/2024-0006)  
+3- [Vandekerchove et al. 2004, Avian Pathology 33(2):117](https://doi.org/10.1080/03079450310001642149)  
+4- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/), broiler data from mostly experimental challenge, and amoxicillin is not among the drugs shown protective  
+5- [FARAD Digest 2015, JAVMA 247(12):1388](https://farad.org/pdf/122015EggResidue.pdf), a 2015 snapshot  
+6- [Patterson et al. 2023, Frontiers in Veterinary Science](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10097876/)  
+7- [UEP 2024 Cage-Free Housing Animal Welfare Guidelines](https://uepcertified.com/wp-content/uploads/2023/10/CF-UEP-Guidelines_2024.pdf)  
+8- [Iowa Code Chapter 717, Injury to Livestock (2026)](https://www.legis.iowa.gov/docs/ico/chapter/717.pdf)
