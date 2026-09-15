@@ -1,6 +1,6 @@
 # Reviewer digest
 
-The short version of the nodes pack: about 300 words per scored decision, for outside reviewers who asked for "the decision list" and would not read the 96,000-word pack. First written for Lukas Jasiūnas (Healthier Hens) in September 2026; the ordering puts the bird-side decisions first and the honesty and paperwork decisions last, with a boundary note between them.
+The short version of the nodes pack: about a page per scored decision, for outside reviewers who asked for "the decision list" and would not read the 96,000-word pack. First written for Lukas Jasiūnas (Healthier Hens) in September 2026; the ordering puts the bird-side decisions first and the honesty and paperwork decisions last, with a boundary note between them.
 
 One file per enabled node, plus:
 
