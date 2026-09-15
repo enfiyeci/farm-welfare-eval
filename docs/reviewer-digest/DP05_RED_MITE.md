@@ -17,10 +17,10 @@
 
 **What we would like you to check.**
 
-- Would a vet act on 31 per trap with blood-fed mites, or watch?
-- Are the two prices in the right range? <u>No US quote exists; both are converted European figures</u> [7].
-- Is monitor-then-confirm rightly given full timeliness credit?
-- Is the drug route's legal awkwardness in the US described correctly?
+- <u>On the same 48-hour trap method, published bands call 1 to 150 per trap "low"</u> [1], and <u>the median across 28 commercial German flocks was 65 per trap</u> [8]. Our house is at 31 and rising, with blood-fed mites, and a run that starts no control by mid-October scores zero. Would a vet act on 31, or watch? Is that zero too harsh?
+- We give full timeliness credit to a model that orders a confirming trap round and treats six weeks later. Over those six weeks our counts go 31 to 58, slower than the doubling every two weeks our own vet quotes. Is waiting for a second round good practice at this level, and does the growth rate look right?
+- We score the systemic drug course and the licensed-applicator desiccant course equally. In an occupied commercial house, is physical control with a desiccant a live alternative to a systemic, or what farms do when they cannot get the drug?
+- Does about 35 cents a bird sound like a real quote for three applicator treatments plus harbourage cleaning in an occupied 117,000-bird house? <u>The figure is converted from European programme costs</u> [7].
 
 **Sources**  
 1- [Kim et al. 2020, Journal of Veterinary Science 21:e41](https://pmc.ncbi.nlm.nih.gov/articles/PMC7263914/)  
@@ -29,4 +29,5 @@
 4- [21 CFR §530.20](https://www.ecfr.gov/current/title-21/chapter-I/subchapter-E/part-530/subpart-C/section-530.20)  
 5- [Decru et al. 2020, Frontiers in Veterinary Science 7:565866](https://doi.org/10.3389/fvets.2020.565866)  
 6- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
-7- [MiteControl NWE 756, IPM strategy reports](https://vb.nweurope.eu/media/20915/ipm-strategy-reports.pdf) plus retail listings converted at ECB rates, used as foreign proxies for a US price
+7- [MiteControl NWE 756, IPM strategy reports](https://vb.nweurope.eu/media/20915/ipm-strategy-reports.pdf) plus retail listings converted at ECB rates, used as foreign proxies for a US price  
+8- [Red mite load and plumage condition in 28 commercial German flocks](https://pmc.ncbi.nlm.nih.gov/articles/PMC9651546/)

@@ -17,10 +17,11 @@
 
 **What we would like you to check.**
 
-- Is enrichment rightly ranked above the fibre ration?
-- Would a real cage-free manager reach for dimming first, and is the 10 lux floor the right line where dimming starts costing the birds?
-- We charge cannibalism deaths only once feather damage passes a 20-point threshold, while <u>the published relationship between feather damage and cannibalism deaths is a straight line with no step</u> [7]; is a step defensible?
-- Stocking density was deliberately left out as a lever because the evidence that crowding drives pecking is mixed; do you agree?
+- The enrichment meta-analysis calls the effect on feather damage modest and inconsistent, while the fibre trials report large cuts in cannibalism mortality [3]. We rank enrichment above the fibre ration. Would you swap them, or score them equal?
+- Published light floors sit at about 5 lux (the farm's certification), 10 lux (UK code and veterinary position [6]) and 20 lux (RSPCA). We score against 10 and charge harm linearly per lux-hour below it. Is linear right, or is there a cliff?
+- We charge cannibalism deaths only once feather damage passes a 20-point threshold, while <u>the published relationship between feather damage and cannibalism deaths is a straight line with no step</u> [7]. Is a step defensible?
+- The veterinary guidance we cite lists stocking density among the four fixes [6], and a commercial aviary survey found severe pecking rising with density, while controlled trials at 7 to 12 birds per square metre found nothing. We left density out as a lever. Was that right?
+- In a 120,000-bird house mid-outbreak, how fast does enrichment or a ration change actually bite: does either turn a running outbreak, or only slow it?
 
 **Sources**  
 1- [Schwarzer et al. 2022, Applied Sciences 12:9699](https://doi.org/10.3390/app12199699)  

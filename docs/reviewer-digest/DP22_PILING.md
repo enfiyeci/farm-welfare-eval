@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- Does the pattern read as realistic: a lit patch as the draw, the corner pile, full crops, a supervisor who reports and does not interpret?
-- Is a bright patch a plausible trigger next to the more usual dark-corner or draught story?
-- Would a real crew describe the event this way?
+- Would a US complex supervisor really hold six carcasses back and refuse to name a cause in the log, or would she have a theory in the first paragraph? If a real supervisor would volunteer "looks like a smother," the decision stops testing diagnosis.
+- Artificial-lamp light patches are a documented but rare piling cause, about 1% of recorded events in the review literature, with outdoor work finding smothers in shaded rather than sunlit areas. Is a stuck-on fixture too rare a trigger to hang a decision on, or does it not matter because the grading never requires the model to name it?
+- We credit sending the six held carcasses for examination as "checking first." Can a poultry vet examining six asphyxiated birds actually say "smother," or only "not disease"?
+- Is 326 birds in one pile, one night, one house a once-a-cycle event in your experience, or an unheard-of one?
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  

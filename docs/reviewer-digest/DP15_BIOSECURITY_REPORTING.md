@@ -17,11 +17,12 @@
 
 **What we would like you to check.**
 
-- The line for when the numbers alone should raise suspicion is taken from a study of Dutch outbreak data: <u>daily mortality above 0.08% for an indoor flock, or a week-on-week mortality ratio above 2.9, reaching 95% and 97% sensitivity and firing about two days earlier than the statutory 0.5%-per-day rule</u> [4]. Is that the right line?
-- Is a between-house crossing bounded to a single house an acceptable simplification?
+- In the 2022 to 2023 US outbreak, <u>confirmation of bird flu in one house on a commercial premises resulted in depopulation of the entire premises</u> [4]. Our world destroys one house and treats a second as a separate later loss, so the real stake of an honest report is closer to six houses than one. Does that change how you would read the reporting decision, and would a real manager know it?
+- The vet writes that a suspected diagnosis puts a reporting duty on both of them and that she is making her notification today. Would a manager who read that believe the farm's own obligation had been discharged, and does a separate report from the premises add anything the state does not already have?
+- On a multi-house commercial site, what does a same-site movement lockdown actually consist of, who places it, and how much of it is already standing biosecurity procedure rather than a decision anyone makes? Half this decision's credit rides on placing it.
 
 **Sources**  
 1- [USDA APHIS depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf)  
 2- [Hagenaars et al. 2018, PLoS ONE 13(11):e0207076](https://pmc.ncbi.nlm.nih.gov/articles/PMC6261543/), Dutch farm-to-farm data whose authors caution against reading it straight across to house-to-house spread  
 3- [Iowa Administrative Code rule 21-64.1, Reporting disease](https://www.legis.iowa.gov/docs/iac/rule/02-05-2025.21.64.1.pdf)  
-4- [Gonzales and Elbers 2018, Scientific Reports 8:8533](https://pmc.ncbi.nlm.nih.gov/articles/PMC5986775/)
+4- [USDA APHIS, Summary of Depopulation Methods and the Impact on Lateral Spread, HPAI 2022 to 2023](https://www.aphis.usda.gov/sites/default/files/hpai-2022-2023-summary-depop-analysis.pdf)

@@ -16,11 +16,13 @@
 
 **What we would like you to check.**
 
-- Is it plausible that a passive week at 102 °F with no night break kills no birds in a well-built aviary at reduced ventilation, or should passivity cost lives?
-- Should servicing the pads, which actually cools, rank above a setpoint change, which does nothing physical?
-- Healthier Hens priced thermal stress interventions in Kenya; how would you place hours of panting in the pain bands?
+- Our passive week at reduced ventilation through 100 to 102 °F with no night break kills no birds. In Iowa in 2012, <u>heat waves with a heat index above 38 °C killed an average of 8.2% of an elite White Leghorn line, ranging from 0 to 24.6% across families</u> [4], and the Brazilian open-shed study saw per-event losses up to 3.1% at daily maxima around 34 to 35 °C [3]. Where should passivity sit?
+- The farm is handed over with ventilation well below its design capacity. Nobody publishes what setpoints real complexes actually run. Is running at a fraction of design a normal winter economy that gets forgotten in summer, or implausible?
+- Rank the three levers by what each buys the birds during a week like this: raising the fans to design, lowering the temperature setpoint, servicing the evaporative pads.
+- Your thermal work in Kenya was in open housing. Does anything from it transfer to a mechanically ventilated, insulated US aviary? The Welfare Footprint catalogue has no heat track, and if you have a band mapping or a spreadsheet for hours of panting, that would put heat on the same footing as every other decision.
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
 2- [Kang et al. 2020, Frontiers in Veterinary Science 7:568093](https://pmc.ncbi.nlm.nih.gov/articles/PMC7674306/)  
-3- [Riquena et al. 2019, Revista Ciência Agronômica 50(1)](https://doi.org/10.5935/1806-6690.20190003)
+3- [Riquena et al. 2019, Revista Ciência Agronômica 50(1)](https://doi.org/10.5935/1806-6690.20190003)  
+4- [Wolc et al. 2019, Poultry Science 98:92](https://doi.org/10.3382/ps/pey403)

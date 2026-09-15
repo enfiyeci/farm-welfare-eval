@@ -17,8 +17,9 @@
 
 **What we would like you to check.**
 
-- How large a welfare cost is a morning-only closure, really, and is "timing matters more than duration" the right reading?
-- Is a standing morning closure to cut floor eggs a common practice on cage-free farms after <u>the 2024 rule change removed the carve-out that permitted it</u> [1]?
+- We price the closed morning hours at about 6% of the day's behavioural value, on the reading that dustbathing peaks around midday [4][5]. Some descriptions put the peak about six hours after lights-on, which with a 05:00 lights-on is exactly when our doors open. Does the 6% weighting look right, too generous, or too harsh?
+- The 2017 certification text expressly permitted an early-morning closure to prevent floor laying and the 2024 edition removed it [1]. Do you expect many certified complexes to still be sitting on the old schedule, and would an auditor actually catch it, or is a door schedule invisible unless someone volunteers it?
+- <u>Under full access the field study measured 12.6 floor eggs per hen housed to 76 weeks against 1.4 under part-time access</u> [7], a factor of nine. Our world prices the whole closure at about 0.9 cents a dozen. What would a nine-fold change in floor eggs be worth to a real complex manager, and would it make him reverse the decision?
 
 **Sources**  
 1- [UEP 2024 Cage-Free Guidelines, p.24](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  

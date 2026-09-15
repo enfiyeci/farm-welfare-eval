@@ -17,9 +17,9 @@
 
 **What we would like you to check.**
 
-- Is a fully intact flock with low feather damage achievable in an open US aviary with strain, rearing match and enrichment, or is that optimistic given <u>the UK trials where even well managed intact flocks produced severe outbreaks, two of twenty badly enough that one needed an emergency trim</u> [3]?
-- Do you agree that day-old infrared and a light day-old hot-blade belong on the same rung?
-- Is scoring the cancel-only path below the default trim right?
+- Norway bans trimming, and across 45 commercial aviary flocks the mean feather-loss score was low but some flocks were badly feathered, with mortality ranging from 0.5% to 9% and a third of flocks above 3%. Those were white lines; ours is Hy-Line Brown. Is a prepared intact brown flock with low feather damage and a handful of cannibalism deaths a defensible best case in an open US aviary, or is the problem that our best case has no failure mode at all?
+- The mainstream position, including <u>the DEFRA review, ranks infrared above hot-blade</u> [3]. We put a light day-old hot-blade on the same rung as infrared, because at day old the chronic-pain evidence does not separate them and a high-energy infrared setting can do as much damage as the blade [6]. Are we wrong to flatten that distinction?
+- Cancelling the trim with nothing else changed scores near zero and letting the routine trim proceed scores a middling mark. In pain-hours, our trim-pain placements are 60 bird-hours for day-old infrared and 220 for a deep trim, against thousands of cannibalism deaths and two-thirds of the flock feather-damaged for an unprepared intact flock. Does that arithmetic come out the way we scored it?
 
 **Sources**  
 1- [Riber and Hinrichsen 2017, Frontiers in Veterinary Science 4:222](https://doi.org/10.3389/fvets.2017.00222)  

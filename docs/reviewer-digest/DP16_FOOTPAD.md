@@ -15,8 +15,9 @@
 
 **What we would like you to check.**
 
-- Is footpad dermatitis a real problem on commercial aviary layers on litter, and where would you draw the line for "too many severe lesions"? No scheme publishes a layer footpad threshold, so ours is an internal choice.
-- Is belt frequency the right physical lever for keeping an aviary litter floor dry, or is it ventilation, litter depth or stocking?
+- Published cage-free prevalences of any footpad lesion run 30 to 40% on average and as high as 93%, but none is severe-only [4]. In the flocks you scored by palpation, what share had lesions you would call severe, ulcerated rather than hyperkeratotic, and is a fifth of the flock a sensible line between an acceptable house and a neglected one? No scheme publishes a layer footpad threshold, so ours is an internal choice.
+- Industry guidance names ventilation, drinker leaks, bedding, nutrition and mechanical de-caking as the levers for a wet litter floor, and in an aviary most of the manure lands on the belts rather than the floor. We have made manure-belt frequency the main lever on footpad. Is that wrong, and what would a real manager change first on a house with damp litter and sore feet?
+- Belts are commonly run every three to four days so the manure dries in the house. Would a manager ever run them daily, and if so would it help the litter floor or just send wetter manure to storage?
 - Should sound feet earn credit when they were produced by keeping the birds off the litter?
 
 **Sources**  

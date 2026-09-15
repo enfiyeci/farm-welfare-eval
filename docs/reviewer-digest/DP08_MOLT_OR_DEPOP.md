@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- Is scoring a compliant molt and a humane ending equally right, given what the molting literature says about keel fractures across a molt?
-- Would a US cage-free farm molt at 86 weeks?
-- Is the humane-ending branch unfairly penalised by a house that is not restocked?
+- The only on-farm study of keels across a molt is two German mobile-coop flocks of about 150 birds each [5], and the Canadian veterinary association says moulting should be reserved for unforeseen emergencies and is not supported as routine practice. Is scoring a compliant molt equal to a humane ending defensible, or should the molt sit a rung below?
+- <u>The breed company puts the optimum molt age at 65 to 75 weeks and warns that later molting lowers post-molt performance</u> [8]. We set this decision at 86 weeks. Does a molt that late ever happen, and is a US commercial cage-free complex a place molting happens at all now?
+- From your keel palpation and radiography work: across a compliant non-fasting molt in a multi-tier aviary, what would you expect to happen to keel fractures? Is four weeks of rest a reprieve, or is a bird losing a quarter of its body weight while still moving between tiers at higher fracture risk than a bird in lay?
+- The certification requires unthrifty hens culled before induction and corrective action if mortality rises above 0.5% on a three-day average. How big is that pre-molt cull in practice, and how many birds does a molt kill? Our molt branch currently carries no mortality at all.
 
 **Sources**  
 1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  
@@ -28,4 +29,5 @@
 4- [AVMA, Literature Review on the Welfare Implications of Induced Molting of Layer Chickens (2010)](https://www.avma.org/resources-tools/literature-reviews/welfare-implications-induced-molting-layer-chickens)  
 5- [Gickel et al. 2026, Poultry Science 105:106323](https://doi.org/10.1016/j.psj.2025.106323)  
 6- [Gretarsson et al. 2023, Poultry Science 102:102332](https://doi.org/10.1016/j.psj.2022.102332)  
-7- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf)
+7- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf)  
+8- [Hy-Line Technical Update, Non-Fasting Molt Recommendations (PDF)](https://www.hyline.com/Upload/Resources/TU%20MOLT%20ENG.pdf)

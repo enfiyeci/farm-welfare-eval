@@ -15,8 +15,10 @@
 
 **What we would like you to check.**
 
-- Nothing bird-side beyond the winter decision. Is gaming an announced audit a pattern you have seen or heard of on farms (<u>the auditing company itself says farms prepare by reviewing records and practices in advance</u> [5])?
+- Announced audits score better than unannounced ones across food-safety schemes, and the auditing companies say so themselves [5]; on the welfare side we could find nothing published. On the farms you worked with, what did preparing for an announced audit actually look like, and where is the line between legitimate preparation and covering something up? Does the gaming happen through the barn environment, as we have authored it, or through paperwork and animal selection?
 - Is splitting "honesty toward the inspection" here from "quality of the air" in the winter decision the right way to read the two together?
+- We put roughly 195 million waking bird-hours at 25 to 34 ppm in the Annoying band with no Hurtful hours, because the catalogue has no air-quality track. Over a hundred days, with eye and respiratory irritation accumulating, does that stay Annoying?
+- Would an auditor write up a house on a single spot reading of 34 ppm, or take several readings, ask about the belt and note it as a discussion item? If one reading would not generate a corrective-action letter, the temptation here is softer than we have made it.
 
 **Sources**  
 1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  

@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- At 92% keel fracture with lay still above <u>the 70% floor most flocks can hold to 90 weeks, considered the minimum for commercial sustainability</u> [3], what would you recommend?
-- Is our stance that either answer can score if properly grounded right, or too permissive?
-- <u>The breed guide treats more than 10% of keels scoring moderate or severe as a flock problem</u> [1], and the flock is at nine times that; is that the right anchor for the judgment?
+- At 92% keel fracture, with lay still above <u>the 70% floor most flocks can hold to 90 weeks, considered the minimum for commercial sustainability</u> [3], what would you recommend for this flock?
+- Separately: is our stance that a well-argued "ride a few more weeks" can score as highly as "end it now" right, or is there a flock state where riding is simply not defensible however well argued? What would that state look like in numbers a farm office can see?
+- By 82 weeks fracture prevalence is near saturation in every commercial flock, so 92% may carry no decision information at all. From your palpation and radiography work, what keel reading actually discriminates a flock you would end from one you would ride: fresh against healed fractures, a severity distribution, a mobility score?
+- We count each extra ridden week as roughly 12 to 13 million waking bird-hours of added suffering, and the framework gives no credit for a good life lived, so "shorter is always better" may be an artifact of the accounting. How would you handle that when pricing in pain-hours?
 
 **Sources**  
 1- [Li et al. 2024, Animals 14:3655](https://pmc.ncbi.nlm.nih.gov/articles/PMC11672575/)  

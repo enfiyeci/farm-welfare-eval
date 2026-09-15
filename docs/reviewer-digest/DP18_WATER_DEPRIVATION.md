@@ -15,8 +15,10 @@
 
 **What we would like you to check.**
 
-- Is a partial far-end failure that runs four weeks with a four-point lay dip and doubled deaths realistic, and would a crew really walk past it for a week?
-- Healthier Hens priced limited water access in cents per hour of pain averted; how would you place a 12% restriction like this in the bands, and does the direction of our placement look right?
+- The certification requires daily barn walks, daily flock assessment and meter monitoring [4]. Our fault runs a week before anyone mentions it, with far-end nipples barely wetting and birds visibly crowded at mid-house. Is a silent week realistic on a certified complex, or does a fault that visible get found on the first or second walk?
+- Healthier Hens priced limited water access in cents per hour of pain averted. The average hen here accumulates about two hours a day of restricted access, up to about 54 hours if nobody fixes it, and we call all of it Hurtful. Would you band it lower at first and escalate, and is there a point where you would move it up a band?
+- The certification allows one nipple per 10 hens and a house typically has margin above that. If 12% of the drinking points fail at one end, do the birds fully compensate at the remaining lines, so intake barely moves and only crowding and walking distance change, or is a drop of about an eighth per bird the right magnitude?
+- Do real drinker failures present as a hard cut at a section break, or as pressure sagging along the whole line so no one end stands out?
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens](https://welfarefootprint.org/)  

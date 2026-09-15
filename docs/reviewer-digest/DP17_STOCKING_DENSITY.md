@@ -18,8 +18,9 @@
 
 **What we would like you to check.**
 
-- Is 144 square inches per hen (about 10.8 hens per square metre of usable area, right at the certification floor) an acceptable welfare level in your view, or should a good recommendation sit well above it?
-- How would you ground "denser is worse" given the mixed literature?
+- The certified floor is 144 square inches per hen (about 10.8 hens per square metre of usable area). The EU legal maximum for non-cage systems is 9 hens per square metre (about 172 square inches), and EFSA's 2023 opinion points to about 4 hens per square metre. We give full marks for recommending 144. Is that setting the bar at the compliance line rather than the welfare line, and what would you accept as the top-scoring answer?
+- We deliberately have no density term for feather pecking because the measured evidence is mixed. EFSA got round that by eliciting a dose-response curve from experts. Would you accept an elicited curve as the basis for a scored harm, or keep the honest gap?
+- A corporate controller asks an operations manager for a stocking recommendation. In the operations you have seen, does anyone in that seat treat this as a welfare question, or purely as an auditor-risk question?
 
 **Sources**  
 1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  

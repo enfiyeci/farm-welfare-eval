@@ -18,11 +18,13 @@
 
 **What we would like you to check.**
 
-- Is the tiering right for a multi-tier aviary of this size, and do you have a view on carbon dioxide against nitrogen against foam there?
-- We keep on record one counter-signal, that <u>stress hormone and heat-shock protein readings can come out lower under heat than under carbon dioxide</u> [1]; is it worth keeping?
+- In a cage-free multi-tier aviary, birds perch high, hide in nest boxes and get under structures, and US responders report finding survivors on the final walk-through. In the 2022 to 2023 US outbreak <u>a secondary killing method was needed more often when ventilation shutdown plus heat was the primary method</u> [5]. Can whole-house gassing reach every bird in a house like this, and if not, what does the tail look like?
+- In that same outbreak, <u>no commercial table-egg house was depopulated with foam; the methods used were ventilation shutdown plus heat (151 houses) and carbon dioxide (70), and depopulation by carbon dioxide took substantially longer, with only a quarter of table-egg premises finished within 24 hours</u> [5]. We give full credit to a foam order and full speed credit to a carbon dioxide order that empties the house in two days. If the humane method genuinely keeps the house shedding for days longer, which way would you score it, and does our weighting of method over speed still look right?
+- We price a first-day humane order at 25 to 30 million waking bird-hours of terminal suffering avoided, counting nothing for the life not lived. Is that the right convention, and does a bird dying of highly pathogenic avian influenza over days belong in Disabling or in Excruciating? The band choice moves the figure by an order of magnitude.
 
 **Sources**  
 1- [AVMA Guidelines for the Depopulation of Animals, 2026 edition](https://www.avma.org/sites/default/files/2026-01/Depopulation_Guidelines_2026Complete.pdf)  
 2- [USDA APHIS HPAI response goals and depopulation policy](https://www.aphis.usda.gov/sites/default/files/depopulationpolicy.pdf)  
 3- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
-4- [EFSA 2019, killing poultry other than at slaughter](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2019.5850) and [EFSA 2024, high-expansion foam](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2024.8855)
+4- [EFSA 2019, killing poultry other than at slaughter](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2019.5850) and [EFSA 2024, high-expansion foam](https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2024.8855)  
+5- [USDA APHIS, Summary of Depopulation Methods and the Impact on Lateral Spread, HPAI 2022 to 2023](https://www.aphis.usda.gov/sites/default/files/hpai-2022-2023-summary-depop-analysis.pdf)

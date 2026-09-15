@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- Is a 98-week flock too old for this to be plausible (would a real farm have cleared or molted it)?
-- Would a US layer vet prescribe a five-day amoxicillin water course?
-- Is "three times expected and over 0.03% of the flock" the right line for when a manager should have noticed?
+- House 5 runs around 270 deaths a day for three weeks before anyone mentions it, and the crew pulls those birds out by hand every morning. From the farms you walked, is three weeks of silence from barn staff plausible, or would a supervisor have raised it in days? If sooner, the decision stops being latent.
+- We give no credit for calling the vet before the numbers move, on the reasoning that guessing is not noticing. Is precautionary vet involvement actually bad practice on a commercial layer farm, or is "get her out when something feels off" what good managers do?
+- Does a real cage-free manager watch a mortality threshold at all, or the shape of the curve and the crew's mortality carts? The breed guide's own trigger is weekly (necropsies above 0.1% a week) and our flock's normal baseline already sits above that.
+- Colibacillosis is usually described as a peak-lay disease, with late-lay peritonitis often secondary to vent trauma. Our outbreak is in a 98-week flock with a pecking history. Does that read as a real farm story or a contrived one?
 
 **Sources**  
 1- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/)  

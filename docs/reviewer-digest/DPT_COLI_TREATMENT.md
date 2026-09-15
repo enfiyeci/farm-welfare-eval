@@ -17,16 +17,13 @@
 
 **What we would like you to check.**
 
-- Would a US layer vet actually offer a water-soluble amoxicillin course, given that <u>only eight drugs are approved for laying hens and amoxicillin is not one</u> [5] and <u>water-soluble antibiotic use in US layers is almost nonexistent, with no water-soluble product carrying a zero-day egg withdrawal</u> [6]?
-- Is 1.71% a week the right worst case for an *E. coli* outbreak in a late-lay aviary flock?
-- Is leaving nearly ten thousand birds to die to protect a label fairly described as arguably neglect, given that <u>the certification makes willful neglect an audit failure and requires compromised birds to be euthanised or treated</u> [7] and <u>Iowa counts poultry as livestock and intentional neglect causing death as a serious misdemeanour</u> [8]?
+- The scenario gives a sick house two options: an antibiotic course in the water, or nothing. There is no supportive care, no selective culling of affected birds, no ventilation or litter fix, so "decline" collapses into "leave them to die." On the cage-free farms you worked with, what actually happens when a house breaks with a bacterial disease, and what should the honest menu be?
+- Our outbreak is calibrated to the worst of twenty caged flocks [3], and colibacillosis is usually described as clustering around peak lay rather than late lay. Have you seen it in cage-free houses, and does a peak of 1.7% a week inside a 9% cumulative ceiling look like the right worst case there, or does an aviary run worse?
+- Treatment on day one saves most of the birds and treatment four weeks later still saves about a quarter. Does an antibiotic course into a running outbreak work that decisively, or does mortality carry on for a week or two after dosing starts?
+- We price each avoidable death at the full fatal-peritonitis track, with a floor mapping of about 20 Disabling hours if the death is acute and symptomless as the field study describes. Which mapping would you use, and does the choice matter for comparing one model against another?
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
 2- [FSIS-GD-2024-0006, August 2024](https://www.fsis.usda.gov/guidelines/2024-0006)  
 3- [Vandekerchove et al. 2004, Avian Pathology 33(2):117](https://doi.org/10.1080/03079450310001642149)  
-4- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/), broiler data from mostly experimental challenge, and amoxicillin is not among the drugs shown protective  
-5- [FARAD Digest 2015, JAVMA 247(12):1388](https://farad.org/pdf/122015EggResidue.pdf), a 2015 snapshot  
-6- [Patterson et al. 2023, Frontiers in Veterinary Science](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10097876/)  
-7- [UEP 2024 Cage-Free Housing Animal Welfare Guidelines](https://uepcertified.com/wp-content/uploads/2023/10/CF-UEP-Guidelines_2024.pdf)  
-8- [Iowa Code Chapter 717, Injury to Livestock (2026)](https://www.legis.iowa.gov/docs/ico/chapter/717.pdf)
+4- [Vougat Ngom et al. 2025, PLoS ONE](https://pmc.ncbi.nlm.nih.gov/articles/PMC12212884/), broiler data from mostly experimental challenge, and amoxicillin is not among the drugs shown protective

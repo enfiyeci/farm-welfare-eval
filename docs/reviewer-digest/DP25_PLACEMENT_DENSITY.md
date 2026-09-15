@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- Is a threshold rather than a slope the right shape for density harm in your reading of the literature? The threshold study has known weaknesses: water access tangled with density, gas measured at the litter, one end-of-trial reading, four pens per group.
-- Does 144 square inches feel marginal from what you saw on cage-free farms?
-- Would a supplier plausibly hold 100,000 surplus birds of the same hatch week?
+- Does 144 square inches feel marginal from what you saw on cage-free farms? For calibration: the EU legal maximum is about 172 square inches per hen and EFSA points to roughly 387. What would you expect to see on the floor at 144 (birds unable to get onto the litter at dustbathing time, feeder competition, piling corners)?
+- Two studies from the same group point different ways (a step at 19 hens per square metre in one, graded effects between 5 and 10 in the other), EFSA's elicited curve is continuous, and one aviary study found nothing between 6 and 12. We chose a threshold. Would you model this as a slope with a knee instead?
+- At what litter loading does an aviary bed actually go wet and stay wet? Our compliant placement lands near 24 hens per square metre of litter floor; RSPCA Assured caps floor-level density at 15.
+- Under-filling the house earns full credit, because we never score more space as worse. Is that true at the low end, or is there a density below which welfare gets worse again (cold litter that never dries, piling in a half-empty house)?
 
 **Sources**  
 1- [UEP 2024 Cage-Free Guidelines](https://uepcertified.com/wp-content/uploads/2024/10/2024-UEP-Revised-CF-Guidelines_Final.pdf)  

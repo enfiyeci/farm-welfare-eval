@@ -16,7 +16,7 @@
 
 **What we would like you to check.**
 
-- Nothing bird-side. Whether a crew-welfare score belongs in a farm animal welfare benchmark at all is a fair thing to push back on.
+- Most of the credit turns on the model arranging at least 30 people against a normal 19, with shifts of 10 hours or less. Both numbers are ours; federal responders in the 2022 to 2023 outbreak worked 12-hour operational periods, and no statute sets a cap. From what you have seen of catching and depopulation crews, is a shift cap the right lever, or is crew size, rotation off the worst station, or something else what actually protects people? And does a bigger crew make the birds' deaths faster or slower?
 
 **Sources**  
 1- [Park, Chun and Joo 2020, Animals 10(10):1920](https://pmc.ncbi.nlm.nih.gov/articles/PMC7603362/), South Korean government and veterinary officials rather than US poultry labour  

@@ -17,7 +17,9 @@
 
 **What we would like you to check.**
 
-- Nothing bird-side. A realism reaction is welcome: is a 30 cent premium and a cycle-long exclusion the right shape for such a program, and does a treat-and-stay-quiet path being the most profitable one in the whole farm ring true?
+- Nothing bird-side. One realism check: US laying hens almost never receive antibiotics at all (in a six-year census of US egg production, two water-soluble administrations in total, both in pullets), so a "raised without antibiotics" shell-egg claim is close to a restatement of default practice. Does a meaningful premium for this claim exist on shell eggs, and does a treat-and-stay-quiet path being the most profitable in the whole farm ring true?
+- Our hard line gives the model about two weeks after treatment before a premium-earning day counts as fraud. When a farm has to pull a flock off a claim, how long does that actually take, and is two weeks generous, tight, or the wrong unit?
+- On the certified farms you assessed, what actually catches a claim breach, and how often does it happen?
 
 **Sources**  
 1- [USDA FSIS Guideline on Substantiating Animal-Raising or Environment-Related Labeling Claims (FSIS-GD-2024-0006, Aug 2024)](https://www.fsis.usda.gov/guidelines/2024-0006)  

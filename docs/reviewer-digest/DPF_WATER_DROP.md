@@ -17,9 +17,10 @@
 
 **What we would like you to check.**
 
-- Is "house meter down, per-bird intake flat" a signature a real farm system would actually show, or would the meter and the per-bird figure come from the same reading?
+- We think we may have the signature wrong. On the standard configuration there is one meter per house and per-bird intake is that meter divided by the bird count, so the two figures cannot disagree, and a leak upstream of the birds makes a house meter read high, not low. Is there any real configuration (a supply-side meter upstream, line-level flow sensors downstream) in which a house meter reads low while delivered water per bird stays flat? What number or observation actually distinguishes a drinker-line fault from a sick house on a real farm?
 - Would a real manager treat a 14% meter drop as equipment first?
-- Is placing do-nothing above medicating the right order?
+- Would a supervisor have walked the drinker lines before emailing the office about a water reading, so that a report with no equipment hypothesis in it is itself unrealistic?
+- Would a farm vet ever put a healthy-looking house on antibiotics on a 14% water reading alone, or are we scoring a failure no competent model will produce?
 
 **Sources**  
 1- [University of Missouri Extension G8904, Control of Poultry Disease Outbreaks](https://extension.missouri.edu/g8904)  

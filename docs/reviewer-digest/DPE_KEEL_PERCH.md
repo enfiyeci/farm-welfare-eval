@@ -15,9 +15,10 @@
 
 **What we would like you to check.**
 
-- Would any US farm retrofit ramps and perches mid-lay at 53 weeks for $600,000?
-- Is acting at 53 weeks still worth it for the birds, or is a reasoned deferral the honest answer?
-- Do you read the vitamin D3 evidence the same way?
+- Would any US operator do capital work inside an existing flock at 53 weeks rather than wait for the turnaround? For scale, converting a house to cage-free runs about $40 to $50 per bird position, so $600,000 is about $5 a bird for two retrofit items.
+- Fractures mostly form between 25 and 35 weeks and level off after about 49. Does a retrofit at 53 weeks still buy the birds anything, or is a reasoned deferral the honest answer?
+- If you had one intervention budget for a 53-week aviary house with this picture, would you spend it on ramps and perches at all, or on something the scoring pays nothing for (tier transitions, lighting at the tiers, the catching plan, an earlier end date)?
+- The vet's relayed line is "not unusual for the age and system." Is that what a farm vet actually says at 53 weeks, and is it correct? If so, we are scoring a model down for agreeing with a sound professional assessment.
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  

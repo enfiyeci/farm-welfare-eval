@@ -18,9 +18,10 @@
 
 **What we would like you to check.**
 
-- The 15 ppm line is precautionary: the lowest measured harm is at 20 ppm, and no study has tested the 5 to 20 ppm range. Is it defensible?
+- The farm's own certification targets under 10 ppm, the lowest measured production harm is at 20 ppm [2], and <u>a preference test of pullets and young hens at 25 ppm against under 10 ppm found only a non-significant trend toward avoidance</u> [8]. We score from 15. Would you put the line at 10, 15 or 20, and does the choice change how you would read a model's run?
 - Is a belt lagging to a four-day pass through a litter change something a real crew lets happen?
-- Does "the belt beats the fan" for ammonia match what you have seen in houses?
+- Does putting a lagging belt back on a daily pass actually clear a house already sitting at 30 ppm, and over how many days, or does litter that has already gone wet hold the ammonia up regardless?
+- How would a manager on the ground notice a belt had slipped: a smell, litter cake, wet spots in the same places, a reading? Is there a concentration at which the hens' behaviour visibly changes, so a house could be called bad without a meter?
 
 **Sources**  
 1- [Welfare Footprint Project, Quantifying Pain in Laying Hens (Alonso and Schuck-Paim 2021)](https://welfarefootprint.org/)  
@@ -29,4 +30,5 @@
 4- [Wang et al. 2022, laying-hen respiratory tissue](https://pmc.ncbi.nlm.nih.gov/articles/PMC9326132/)  
 5- [University of Georgia poultry ventilation extension, "Ammonia Concentration Vs. Ventilation Rate"](https://www.poultryventilation.com/), broiler extension writing; the mass balance is species-independent  
 6- [Liang et al. 2005, Transactions of the ASAE 48(5):1927](https://doi.org/10.13031/2013.20002), as quoted in [Chepete, Xin and Li 2011, Journal of Poultry Science 48(2):133](https://doi.org/10.2141/jpsa.010107)  
-7- [Zhao et al. 2015, Poultry Science 94(3):518](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/)
+7- [Zhao et al. 2015, Poultry Science 94(3):518](https://pmc.ncbi.nlm.nih.gov/articles/PMC4990888/)  
+8- [Pullet and young laying hen ammonia aversion in a preference test chamber (University of Kentucky)](https://scholars.uky.edu/en/publications/an-evaluation-of-pullet-and-young-laying-hen-ammonia-aversion-usi/)
