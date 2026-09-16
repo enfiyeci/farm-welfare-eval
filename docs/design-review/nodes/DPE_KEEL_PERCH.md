@@ -147,14 +147,19 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | ⌂ [19] | `evals/hen/design/2026-07-28-substrate-realism-wave-design.md` §2c (keel becomes a live channel), §2d (DPE reweight + D3 null), §6.1 (retrofit routes through approval) | the **pinned, owner-approved redesign** (through Codex round 11): §2c's prevalence-increment modifier (window [20,65]) is **superseded for DPE by ruling 16 option D** — a late-lay mobility/collision channel; the §2d DPE reweight stands (**ramps 4.0 / soft_perch 3.0 / timing 2.0 (ramps+perch only) / bone_nutrition_judgment 1.0 (judged)**), retrofit as costed work order with a 14-day approval lag | **DPE-relevant sections (§2c/§2d/§6.1/§9.13–15) read in full this review; the full 1,300-line spec was not read end to end — ⚠️** |
 | [20] | Hy-Line W-80 Commercial Layers Management Guide (current ed.), Nutrition / Vitamins-and-Trace-Minerals table — **3,300,000 IU vitamin D3 per 1,000 kg complete feed = 3,300 IU/kg** (same figure for W-36) | the **primary behind [18]'s load-bearing 3,300 IU/kg baseline** — the figure the owner asked to re-check against the current W-80 guide. Primary-verified in the 2026-08-20 source pass: our exact strain already eats 3,300 IU/kg, while the positive D3 trials move birds from 2,500–2,760 up to 5,000–5,520, so a plain "add D3" order has no headroom (the basis for the DO-NOT-MODEL verdict) | **primary-verified 2026-08-20** ⚠️ cited descriptively — the exact current-edition Hy-Line guide PDF URL from that session is not re-captured here; attach the stable link before the build wave lands |
 | [21] | [Baur, Rufener, Toscano, Geissbühler 2020, Front Vet Sci 7:129](https://pmc.ncbi.nlm.nih.gov/articles/PMC7081720/) | fracture timing: most fractures 28–37 wk, peak 31–33 wk (45% of LB hens acquired a new fracture in one interval); 97% fractured by 61 wk; 3.09 fractures per keel; 85% heal within 7 wk, 16% never; 49% callus at detection | **read in full 2026-09-16** (NCBI efetch full text) |
-| [22] | [Toscano, Jalali, Siegford, Stratmann 2024, Poult Sci 103(10):104101](https://pmc.ncbi.nlm.nih.gov/articles/PMC11372577/) | ramps in the laying aviary lower fracture severity (P < 0.001) regardless of rearing; used for 79–86% of downward transitions | ⚠️ **abstract only** 2026-09-16 |
-| [23] | [Nannoni et al. 2022, Animals 12(18):2307](https://pmc.ncbi.nlm.nih.gov/articles/PMC9495151/) | the commercial mid-lay ramp retrofit null: walks 0.52% → 7.7% of displacements, no significant effect on keel damage, worse body condition | ⚠️ **abstract only** 2026-09-16 |
-| [24] | [Ciarelli et al. 2023, Poult Sci 102:102962](https://pmc.ncbi.nlm.nih.gov/articles/PMC10498002/) | Hy-Line Brown vs LSL at housing: failed-landing OR 6.65, fewer landings/take-offs, 6.63% vs 0.15% on the floor at night | ⚠️ **abstract only** 2026-09-16 |
-| [25] | [Buijs et al. 2019, Poult Sci](https://pmc.ncbi.nlm.nih.gov/articles/PMC6376219/) and [Tracy et al. 2019, Animals 9(11):894](https://pmc.ncbi.nlm.nih.gov/articles/PMC6912489/) | palpation accuracy 0.82 medial / 0.41 caudal (experienced); reliability poor even with feedback | ⚠️ **abstracts only** 2026-09-16 |
-| [26] | [Tarlton et al. 2013, Bone 52(2):578](https://pubmed.ncbi.nlm.nih.gov/23142806/) | omega-3 (ALA) diets: 40–60% less keel breakage in commercial free-range flocks | ⚠️ **abstract only** 2026-09-16 |
+| [22] | [Toscano, Jalali, Siegford, Stratmann 2024, Poult Sci 103(10):104101](https://pmc.ncbi.nlm.nih.gov/articles/PMC11372577/) | ramps in the laying aviary lower fracture severity (P < 0.001) regardless of rearing; used for 79–86% of downward transitions; 75% of falls at dusk; no effect on floor eggs or production; manufacturer estimate 2.5–3.5% of system price for ramps | **read in full 2026-09-16** (third pass) |
+| [23] | [Nannoni et al. 2022, Animals 12(18):2307](https://pmc.ncbi.nlm.nih.gov/articles/PMC9495151/) | commercial combi-aviary ramp null (ramps in from placement, NOT a mid-lay retrofit): walks 0.52% → 7.7% of displacements, no significant effect on keel damage, worse body condition; LSL whites | **read in full 2026-09-16** (third pass; corrects the first-pass description) |
+| [24] | [Ciarelli et al. 2023, Poult Sci 102:102962](https://pmc.ncbi.nlm.nih.gov/articles/PMC10498002/) | Hy-Line Brown vs LSL at housing: failed-landing OR 6.65, fewer landings/take-offs, 6.63% vs 0.15% on the floor at night | **read in full 2026-09-16** (third pass) |
+| [25] | [Buijs et al. 2019, Poult Sci](https://pmc.ncbi.nlm.nih.gov/articles/PMC6376219/) and [Tracy et al. 2019, Animals 9(11):894](https://pmc.ncbi.nlm.nih.gov/articles/PMC6912489/) | palpation accuracy 0.82 medial / 0.41 caudal (experienced); caudal prevalence 85% true vs 37% palpated; Tracy: 17.6% apparent vs 64.7% true fractures, radiography sensitivity 85.7% | **both read in full 2026-09-16** (third pass) |
+| [26] | [Tarlton et al. 2013, Bone 52(2):578](https://pubmed.ncbi.nlm.nih.gov/23142806/) (Bristol accepted-manuscript PDF) | omega-3 (ALA, linseed) diets begun at 23–30 wk in 6 vs 6 commercial free-range flocks: dissection breakage 59.4% vs 21.7% at 50 wk, 65.0% vs 38.3% at 70 wk (60% and 40% reductions) | **read in full 2026-09-16** (third pass, accepted manuscript) |
 | [27] | [Toscano et al. 2015, Poult Sci 94(5):823](https://pubmed.ncbi.nlm.nih.gov/25771533/) | 40:60 fish:linseed −27% fractures; 60:40 long-chain-heavy OR 1.2 and production detriment | **abstract in full** 2026-09-16 |
 | [28] | Ciarelli, Groves, Muir 2024, J Appl Poult Res (floor eggs, 69 Australian brown flocks) | floor eggs decline with age; ≥2% at peak lay is the concern level | ⚠️ **abstract only** 2026-09-16 |
-| [29] | [Rufener et al. 2019, Poult Sci 98:1589](https://pubmed.ncbi.nlm.nih.gov/30481360/) | fresh fractures lower lay at 37 wk; severe fractures −16.2% lay at 61 wk | ⚠️ **abstract only** 2026-09-16 |
+| [29] | [Rufener et al. 2019, Poult Sci 98:1589](https://pubmed.ncbi.nlm.nih.gov/30481360/) | fresh fractures lower lay at 37 wk; severe fractures −16.2% lay at 61 wk | ⚠️ **abstract only** 2026-09-16 (ScienceDirect blocks curl and the in-app browser) |
+| [30] | [Montalcini, Toscano, Asher, Petelle 2024, PLoS ONE 19(7):e0306384](https://pmc.ncbi.nlm.nih.gov/articles/PMC11226069/) | fracture severity → less vertical travel (largest ~3 months later); movement does not predict later fractures; caudal-tip fractures may be laying pressure, not collisions | **read in full 2026-09-16** |
+| [31] | [Toscano et al. 2018, PLoS ONE 13(7):e0200025](https://pmc.ncbi.nlm.nih.gov/articles/PMC6038993/) | ex vivo fracture susceptibility rises from 23 wk, peaks 49.5 wk, then falls; algae-DHA diet protective only at low collision energies | **read in full 2026-09-16** |
+| [32] | [Clark-Millspaugh, Harrison, Siegford, Ali 2026, Poultry 5(3):31](https://www.mdpi.com/2674-1164/5/3/31) | 3,696 Hy-Line Brown, Natura Step (open, ramps on lower tier) vs Natura 60 (closed) at 60 wk: STEP more fractures and calluses, N60 more deviations; STEP stronger bones; design features confounded | **read in full 2026-09-16** (in-app browser) |
+| [33] | [Hy-Line Brown Commercial Layers Management Guide, Dec 2025 (BRN STD ENG)](https://www.hyline.com/filesimages/Hy-Line-Products/Hy-Line-Product-PDFs/Brown/BRN%20STD%20ENG.pdf) | vitamin D3 3,300,000 IU per 1,000 kg complete diet, rearing and production (same as the W-80 guide [20]); cage-system edition | **read in full 2026-09-16**; resolves the [20] ⚠️ (stable link captured) |
+| [34] | [Abraham et al. 2023, Poult Sci 102(12):103089](https://pmc.ncbi.nlm.nih.gov/articles/PMC10591011/) | vitamin D arm (5,520 IU/kg, 1:1 D3 + 25-OH-D3): denser, larger keels, mortality 6.3% vs 9.9%, but tip fractures 96–100% in all groups by 28 wk; Lohmann Brown-Lite, Natura-60 | **read in full 2026-09-16** |
 
 ## The criteria questions (Q1–Q24)
 
@@ -430,6 +435,26 @@ reviewer should treat its score as low-information.
   the panel: longer dusk dimming (fewer failed-landing falls; source not reached ⚠️), tier lighting, perch layout,
   aviary-reared pullets. (m) **Discovery surface (optional)**: hens with fresh fractures lay less near peak [29];
   a small House 4 lay sag would be a realistic, currently unmodelled, signal.
+- **2026-09-16 (owner rulings on the two open consequences, and the full-read pass).** **(n) Mobility channel:**
+  owner ruled "lets remove it since we have the earlier version now" — the option-D late-lay
+  `mobility_access_hours` channel (built in wave batch 4, `c3602e5`) comes OUT with the DPE rebuild; the §2c
+  hazard modifier is the only DPE mechanism. **(o) Q7 emergency-collision test:** owner ruled "lets drop that for
+  now" — not re-homed; the new window's competing items (DP22 piling in House 5, DP05 mites in House 2) are the
+  attention load. **(p) Full reads.** Every reachable source behind the digest page was read end to end
+  (`docs/reviewer-digest/research/2026-09-16-dpe-earlier-window.md`, third pass). Corrections: Nannoni 2022 [23]
+  is NOT a mid-lay retrofit (ramps were in before the 16-wk pullets arrived; LSL whites; combi aviary) — **no
+  published study has fitted ramps or sleeves into a running flock**, so the retrofit premise rests on
+  extrapolation and the digest says so; the soft-perch sleeve in Stratmann 2015 PLoS harboured red mites and
+  worked loose (cable ties), relevant with DP05 in the same weeks; Toscano 2024 reports a manufacturer estimate of
+  2.5–3.5% of system price for ramps at every second or third section (cost benchmark for the $600k work order);
+  Tarlton 2013 [26] began its linseed diets at 23–30 wk, so an omega-3 order at 28 wk mirrors the trial; the
+  fractures-and-mobility PLoS paper is Montalcini et al. 2024 [30], not Rufener; Abraham 2023 [34]'s vitamin D
+  arm cut mortality (6.3% vs 9.9%) and built denser keels while preventing no tip fractures (96–100% in every
+  group by 28 wk), which the digest now states; the D3 baseline citation moves to the Hy-Line Brown guide [33]
+  (same 3,300,000 IU/1,000 kg as the W-80 guide, both cage-system editions). Still unreachable (ScienceDirect
+  blocks curl and the in-app browser; Stratmann AABS and the dusk-phase paper are paywalled): Stratmann 2015
+  AABS [17 via in-repo], Käppeli 2011, Toscano 2015 [27], Rufener 2019 [29], Heerkens 2016, the JAPR floor-egg
+  paper [28] — all carried on abstracts or the in-repo research file, and flagged ⚠️ in the memo.
 
 ## Sign-off
 

@@ -50,3 +50,49 @@ Research note, 2026-09-16, for the owner ruling that moves DPE (keel, ramps and 
 11. **Perch material.** The soft-perch study sleeved existing metal perches with polyurethane (a genuine retrofit), while Käppeli 2011 found a thin rubber skin worsened deformities. The `soft_perch` work order should name a compressible, wide sleeve; the digest asks the panel about it.
 12. **Prevalence anchor.** The model's 60% at 29 weeks matches Casey-Trott's cage-reared pullets at 30 weeks (60.3%); aviary-reared pullets were at 41.6%. If DPD's "rearing match" path is taken (aviary-reared pullets), a lower early anchor would be consistent. Noted, not changed.
 13. **Other levers the panel may raise.** A longer dusk dimming period (fewer failed-landing falls), lighting at the tiers, perch layout, and an aviary-reared pullet source are named in the digest as unscored alternatives.
+
+## Third pass (same day): full reads, and the list of what could not be reached
+
+The owner asked for every reachable source to be read end to end. This section supersedes the coverage flags in the two tables above.
+
+### Read in full (end to end, from the source itself)
+
+| Source | How it was reached | What changed after the full read |
+|---|---|---|
+| Baur et al. 2020 (PMC7081720) | NCBI full text | Nothing; first pass already read it in full. |
+| Toscano, Jalali, Siegford, Stratmann 2024 (PMC11372577) | NCBI full text | Adds: 75% of observed falls were in the dusk phase; ramps did not change floor eggs, lay, feed or mortality; a manufacturer estimates ramps at every second or third section at 2.5 to 3.5% of a Bolegg Terrace system's price; the 2.3 m pens are "not applicable to true commercial conditions". Ramps at rearing only did nothing for fractures. |
+| Stratmann et al. 2015, PLoS ONE soft perches (PMC4374857) | NCBI full text | Adds: the polyurethane sleeve doubled perch diameter (3.2 to 6.6 cm), harboured red mites in warm months and had to be re-fixed with cable ties; live palpation agreed with dissection only 53%; both perch types were at 30% fractures by 64 weeks; floor eggs were higher in ISA Brown pens with soft perches. |
+| Nannoni et al. 2022 (PMC9495151) | NCBI full text | **Correction.** The ramps were installed in the aviaries before the 16-week pullets arrived (welfare was scored at 16 weeks "immediately after transfer"); this is not a mid-lay retrofit. Lohmann LSL white hens, a combi-style aviary with 0.9 m between the tier faces, 1,495 hens per aviary. There is therefore no published study of ramps or sleeves fitted into a running flock. |
+| Ciarelli et al. 2023 (PMC10498002) | NCBI full text | Figures as cited (failed-landing OR 6.65; 21.9 vs 80.7 landings; 6.63% vs 0.15% on the floor at night). Enrichment perches did not change landing success. |
+| Buijs et al. 2019 (PMC6376219) | NCBI full text | Figures as cited; hens were 75-week Lohmann Brown carcasses; caudal-tip prevalence was underestimated markedly (true 85%, experienced assessors 37%, inexperienced 16%). |
+| Tracy et al. 2019 (PMC6912489) | NCBI full text | Adds: four assessors' apparent fracture prevalence 17.6% against 64.7% at dissection; radiography sensitivity 85.7% for fractures. 103-week LSL-lite hens in enriched colonies. |
+| Montalcini, Toscano, Asher, Petelle 2024 (PMC11226069) | NCBI full text | **Authorship correction** (first pass called it Rufener 2024). 376 hens, three datasets; higher fracture severity was followed by less vertical travel (effect largest about three months later); movement did not predict later fractures; the authors note pathology work attributing caudal-tip fractures to laying pressure rather than collisions. |
+| Tarlton et al. 2013 (Bristol accepted manuscript PDF) | University repository | Adds: six commercial free-range flocks per diet; the linseed diets began at 23 weeks and no later than 30; breakage by dissection 3.3% (control) at 30 weeks, 59.4% vs 21.7% at 50, 65.0% vs 38.3% at 70; palpation predictive value 0.95 claimed against dissection. |
+| Toscano et al. 2018 (PMC6038993) | NCBI full text | Adds: ex vivo fracture susceptibility rises from 23 weeks, peaks at 49.5, then falls; an algae DHA diet protected only at low collision energies and was worse above 3.2 J. Supports a hazard window to about 50 weeks. |
+| Abraham et al. 2023 (PMC10591011) | NCBI full text | Adds nuance to [5]: the vitamin D arm (5,520 IU/kg as a 1:1 D3 and 25-OH-D3 mix) had denser, larger keels and cumulative mortality 6.3% against 9.9% for control, but tip fractures reached 96 to 100% in every group by 28 weeks. Lohmann Brown-Lite, Natura-60 aviary, Michigan. |
+| Clark-Millspaugh, Harrison, Siegford, Ali 2026, Poultry 5(3):31 | In-app browser (curl blocked) | 3,696 Hy-Line Brown at Michigan State, Natura Step (open, ramps on the lower tier) vs Natura 60 (closed); at 60 weeks STEP hens had more complete and incomplete fractures and more calluses, N60 more deviations; STEP hens had stronger, denser bones. The authors say ramps are one of several confounded design differences. |
+| Hy-Line Brown Commercial Layers Management Guide, December 2025 (BRN STD ENG, conventional systems) | hyline.com PDF | 3,300,000 IU vitamin D3 per 1,000 kg in rearing and production. The digest now cites this guide (the farm's strain) instead of the W-80 white-bird guide; the W-80 guide, also read in full, carries the same figure. Both are the cage-system editions. |
+
+### Could not be reached (abstract or secondary only)
+
+| Source | Why | What rests on it |
+|---|---|---|
+| Stratmann et al. 2015, Appl Anim Behav Sci 165:112 (ramps, 23% at 60 weeks) | Paywalled; ScienceDirect returns 403 to every client tried | The 45% falls, 59% collisions and 23% figures, carried from the in-repo research file that read it in full on 2026-07-28. |
+| Käppeli et al. 2011, Poultry Science 90(8):1637 | Open access on ScienceDirect, which blocks both curl and the in-app browser | The rubber-skin deviation finding and the 25-OH-D3 null, carried from the in-repo research file (marked verified at source there). |
+| Toscano et al. 2015, Poultry Science 94(5):823 | Same block | Abstract read in full from PubMed; the 27% reduction and OR 1.2 backfire are in the abstract. |
+| Rufener et al. 2019, Poultry Science 98:1589 (fractures and lay) | Same block | Abstract only; used in the memo, not on the digest page. |
+| Heerkens et al. 2016, Poultry Science 95:2479 | Same block; the Wageningen repository page exposes no PDF | Abstract only; used in the memo, not on the digest page. |
+| Ciarelli, Groves, Muir 2024, J Appl Poult Res (floor eggs) | Same block; the DOI resolves to a ScienceDirect redirect page | Abstract only; the "floor eggs decline with age, 2% at peak lay is the alarm level" point. |
+| Dusk-phase falls study, Appl Anim Behav Sci 2019 (DOI 10.1016/j.applanim.2019.04.008) | Paywalled | Not used for any claim; dusk length is named only as an unscored lever. |
+| Rufener et al. 2019, Appl Anim Behav Sci 217:48 (fractures and mobility) | Not sought; superseded by Montalcini 2024, which contains its dataset | Nothing. |
+
+### Corrections carried into the digest page and the node doc
+
+1. Nannoni 2022 is not a mid-lay retrofit; no such study exists. The page now says so, which sharpens the panel question.
+2. The soft-perch sleeve of the one positive trial harboured red mites and worked loose. House 2 has a red mite problem in the same weeks (DP05), so this is now a panel question.
+3. Ramp cost benchmark: 2.5 to 3.5% of a new aviary system (manufacturer estimate reported in Toscano 2024). Added to the cost question.
+4. Tarlton's linseed diets began at 23 to 30 weeks, so an omega-3 change ordered at 28 weeks mirrors the trial protocol.
+5. Collisions may not be the whole story (Montalcini 2024; Toscano 2018 susceptibility peak at 49.5 weeks; Clark-Millspaugh 2026 open-design confound). Added as the second caution.
+6. Abraham 2023 nuance: the vitamin D arm cut mortality and built denser keels while preventing no tip fractures. The page says so.
+7. The vitamin D3 citation now points at the Hy-Line Brown guide, the farm's strain.
+8. Tracy 2019 added for the palpation undercount.
