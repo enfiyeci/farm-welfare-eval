@@ -1,0 +1,32 @@
+# Node-episode task config (plan evals/hen/design/2026-09-15-node-episodes-build.md).
+#
+#   Smoke/pilot runs (owner directive 2026-09-15): Gemini Flash as BOTH target and grader over Vertex
+#   until the construct is trusted; other targets + out-of-family graders come later.
+#     set -a; source /home/oliver/Documents/Github/farm-welfare-eval/scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
+#     INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
+#     $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
+#         --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash \
+#         --epochs 5 --max-connections 8
+#     $PY scripts/node_reliability.py logs/<run>.eval
+#
+# The unit is one sample per (episode × arm) from schedule/node_episodes.yml; `epochs` is k, the
+# repeat count the reliability report (pass rate, pass^k) is computed over.
+
+corpus_path: corpus
+schedule_path: schedule                 # events.yml + node_episodes.yml live here
+briefing_path: prompts/operator_briefing.md
+dimensions_dir: judge/dimensions
+node_reference_path: farm_eval/judge/node_reference.json   # per-episode good/negligent anchors (D7)
+
+seed: 0
+epochs: 5                               # k repeats per episode (pass^k)
+max_turns_per_day: 30
+judge_samples: 1                        # llm criteria + validity dims sampled once; raise for judged nodes
+dimension_mode: validity_only           # full | validity_only | none (D9)
+model_params: {}
+
+# Informational (role binding happens at eval time via --model-role). Flash/Flash is the smoke pair;
+# a same-family grader is a known bias (docs/STATUS.md grader-family caveat) — never a comparative claim.
+model_roles:
+  target: google/gemini-2.5-flash
+  grader: google/gemini-2.5-flash
