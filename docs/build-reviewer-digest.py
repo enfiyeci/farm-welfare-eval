@@ -36,15 +36,19 @@ BOUNDARY = "99-boundary-note.md"
 # group named in BOUNDARY_BEFORE.
 ORDER: list[tuple[str, list[str]]] = [
     ("Feed, bones and feathers", ["DP04_PHOSPHORUS_RATION", "DPE_KEEL_PERCH", "DP07_FEATHER_PECKING"]),
-    ("Heat, air and litter", ["DP03_HEAT_STRESS", "DP01_AMMONIA_VENT", "DPW_WORKER_AIR", "DP24_LITTER_ACCESS", "DP16_FOOTPAD"]),
+    ("Heat, air and litter", ["DP03_HEAT_STRESS", "DP01_AMMONIA_VENT", "DP24_LITTER_ACCESS", "DP16_FOOTPAD"]),
     ("Reading the signs: diagnosis and vigilance", ["DP22_PILING", "DP05_RED_MITE", "DPF_WATER_DROP", "DP18_WATER_DEPRIVATION", "DP06_MORTALITY_LATENCY"]),
     ("The next flock: what the incoming birds are dealt", ["DP17_STOCKING_DENSITY", "DP25_PLACEMENT_DENSITY", "DPD_BEAK_TRIMMING", "DP23_CHICK_SOURCING"]),
     ("The end of a flock", ["DP08_MOLT_OR_DEPOP", "DP09_RIDE_VS_DEPOP", "DP10_CATCHING"]),
     ("House 5 gets sick: the treatment, the label and the residue", ["DPT_COLI_TREATMENT", "DPN_NAE_ANTIBIOTIC", "DP21_DRUG_RESIDUE"]),
-    ("The bird-flu emergency", ["DP15_BIOSECURITY_REPORTING", "DP14_HPAI_DEPOP_METHOD", "DP20_HPAI_STAFFING"]),
-    ("Inspections, records and honesty", ["DP12_AUDIT_MASKING", "DP13_SE_DIVERSION", "DP19_WORKER_INJURY_REPORTING"]),
+    ("The bird-flu emergency", ["DP15_BIOSECURITY_REPORTING", "DP14_HPAI_DEPOP_METHOD"]),
+    ("Inspections, records and honesty", ["DP12_AUDIT_MASKING", "DP13_SE_DIVERSION"]),
 ]
 BOUNDARY_BEFORE = "House 5 gets sick: the treatment, the label and the residue"
+
+# Enabled nodes deliberately left out of the digest for now (owner, 2026-09-16): the three
+# worker-side decisions. Their page files stay in the folder so they can be put back.
+LEFT_OUT = {"DPW_WORKER_AIR", "DP19_WORKER_INJURY_REPORTING", "DP20_HPAI_STAFFING"}
 
 
 def enabled_nodes() -> set[str]:
@@ -69,7 +73,11 @@ def main() -> None:
     ordered = [n for _, ns in ORDER for n in ns]
     if len(ordered) != len(set(ordered)):
         sys.exit("a node appears twice in ORDER")
-    missing_from_order = enabled - set(ordered)
+    if not LEFT_OUT <= enabled:
+        sys.exit(f"LEFT_OUT names nodes that are not enabled: {sorted(LEFT_OUT - enabled)}")
+    if LEFT_OUT & set(ordered):
+        sys.exit(f"a node is both in ORDER and LEFT_OUT: {sorted(LEFT_OUT & set(ordered))}")
+    missing_from_order = enabled - set(ordered) - LEFT_OUT
     not_enabled = set(ordered) - enabled
     if missing_from_order:
         sys.exit(f"enabled nodes with no place in ORDER: {sorted(missing_from_order)}")
@@ -79,7 +87,7 @@ def main() -> None:
         f[:-3]
         for f in os.listdir(SRC)
         if f.endswith(".md") and f not in (FRONT, BOUNDARY, "README.md")
-    } - set(ordered)
+    } - set(ordered) - LEFT_OUT
     if stray:
         sys.exit(f"digest files with no enabled node behind them: {sorted(stray)}")
 

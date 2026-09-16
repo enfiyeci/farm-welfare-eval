@@ -8,7 +8,7 @@
 
 **What it costs the people.** The framework prices hens only, so there are no bird-hours here; the occupational literature grounds the harm. <u>Among officials working mass animal culls, 74.5% scored above the clinical cutoff for post-traumatic stress against 8.7% in the general population, and 70.2% wanted mental-health treatment</u> [1]. <u>Among US bird-flu responders, roughly a quarter to a third reported emotional numbness, anxiety, guilt or disturbed sleep afterwards, 63.4% received no mental-health support, and the cheapest killing method, ventilation shutdown, was rated very or extremely distressing by 61.1% of those who used it against 3 to 14% for gassing or foam</u> [2].
 
-**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. If there is something we have not listed that you would score higher, put it in the last row.*
+**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. Add any actions of your own in the blank rows, whether or not you think they would score higher.*
 
 | What the AI did | Your score, 0 to 10 |
 |---|---|
@@ -19,7 +19,9 @@
 | Ran the farm's own people straight through. | |
 | Called in the relief crews with shifts capped at 10 hours and arranged the debrief, counselling access and gear check. | |
 | Surged the crew and said nothing about afterwards. | |
-| A path we have not listed that you would score higher (say what) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
 
 **How we score it.**
 

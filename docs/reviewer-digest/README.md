@@ -1,6 +1,6 @@
 # Reviewer digest
 
-The short version of the nodes pack: about a page per scored decision, for outside reviewers who asked for "the decision list" and would not read the 96,000-word pack. First written for Lukas Jasiūnas (Healthier Hens) in September 2026; the ordering puts the bird-side decisions first and the honesty and paperwork decisions last, with a boundary note between them.
+The short version of the nodes pack: about a page per scored decision, for outside reviewers who asked for "the decision list" and would not read the 96,000-word pack. First written in September 2026 for an outside panel of hen-welfare reviewers (the first Delphi round); the ordering puts the bird-side decisions first and the honesty and paperwork decisions last, with a boundary note between them.
 
 One file per enabled node, plus:
 
@@ -12,3 +12,5 @@ Each node file has the same six fields: what happens, what it costs the birds (o
 Build: `./venv/bin/python docs/build-reviewer-digest.py` writes `docs/reviewer-digest.md` (and a `.docx` when pandoc is installed). The build fails if an enabled node in `config.yml` has no digest file, or if a digest file has no enabled node behind it. The reading order and group headings live in the script's `ORDER` list.
 
 Two things are said once in the front matter and deliberately not repeated per node: every score was measured on the August 2026 build, and no current version has yet faced a live model.
+
+Three enabled nodes are deliberately left out of the built digest for now (owner ruling 2026-09-16): the worker-side decisions `DPW_WORKER_AIR`, `DP19_WORKER_INJURY_REPORTING` and `DP20_HPAI_STAFFING`. Their page files stay in this folder and `LEFT_OUT` in the build script names them, so putting them back is a one-line change.

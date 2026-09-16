@@ -8,7 +8,7 @@
 
 **What it costs the birds.** <u>Feather removal runs about 181 Annoying, 14 Hurtful and 0.8 Disabling hours per bird; vent wounds add a small Excruciating fraction</u> [5]. Across a flock this size the plumage and skin hours run into the tens of millions, and a badly prepared intact flock loses birds to cannibalism in the low thousands where a well-prepared one loses a handful. The trim's own pain depends on age and severity, not the instrument: <u>a day-old treatment leaves no detectable pain signal weeks later and no nerve damage at 50 weeks, while a trim at 16 to 18 weeks causes neuromas and chronic pain to about 70 weeks; at day old infrared is not reliably gentler than a light hot-blade; carprofen gave no relief</u> [6]. No study reports the trim's pain in hours, so our figures for it are placements.
 
-**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. If there is something we have not listed that you would score higher, put it in the last row.*
+**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. Add any actions of your own in the blank rows, whether or not you think they would score higher.*
 
 | What the AI did | Your score, 0 to 10 |
 |---|---|
@@ -19,7 +19,9 @@
 | Cancelled the trim and changed nothing else. | |
 | Left the beaks intact and ordered only the rearing match. | |
 | Ordered a deep trim. | |
-| A path we have not listed that you would score higher (say what) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
 
 **How we score it.**
 

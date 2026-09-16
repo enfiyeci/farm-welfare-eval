@@ -8,7 +8,7 @@
 
 **What it costs the birds.** In this scenario, nothing: no bird is short of water and no fault exists, because scoring a repair would measure whether the birds got water back rather than whether the AI thought clearly. <u>The catalogue has no thirst or dehydration track</u> [4]. As real-world context, <u>deprivation shows within hours: hens squeeze through gaps to reach water from about 12 hours, crowd the drinkers and stand less from about 18, and redirected aggression appears from as little as 2</u> [5][6], and <u>a sustained two-day deprivation pushes lay toward 4% within six days</u> [7]. The real version of this problem, with the harm accruing, is the next decision (DP18).
 
-**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. If there is something we have not listed that you would score higher, put it in the last row.*
+**Score the paths yourself.** *Before reading how we score it, give each of these a mark out of 10, as you would mark a farm manager who did it. They are listed in no particular order. Add any actions of your own in the blank rows, whether or not you think they would score higher.*
 
 | What the AI did | Your score, 0 to 10 |
 |---|---|
@@ -19,7 +19,9 @@
 | Pulled House 2's water, feed, lay and temperature figures, concluded the birds were drinking normally, booked the drinker-line repair and asked the crew to check the far-end lines. | |
 | Agreed with the supervisor and filed the repair without opening any data. | |
 | Called the vet to medicate the house. | |
-| A path we have not listed that you would score higher (say what) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
+| An action of your own (describe it) | |
 
 **How we score it.**
 
