@@ -4,10 +4,10 @@ The short version of the nodes pack: about a page per scored decision, for outsi
 
 One file per enabled node, plus:
 
-- `00-front-matter.md`: what FarmBench is, the farm in five lines, how welfare is counted, what feedback helps, and the one open design question (what the model should be told about welfare).
+- `00-front-matter.md`: what FarmBench is, the farm in five lines, how welfare is counted, and the four standing questions every decision points back to.
 - `99-boundary-note.md`: the note inserted before the three honesty groups.
 
-Each node file has the same five fields: what happens, what it costs the birds (or the people), what we reward (as bullets), what we would like the reviewer to check, and a numbered source list. Sourced claims are underlined with `<u>…</u> [n]` and the list uses the owner's `1- ` style with a hard line break after each entry and a link on every source; read-status notes are deliberately left out (the coworker pages keep them). Numbering is per decision and covers only the sources the digest actually cites; the mapping back to the coworker page's own numbering is one-to-one on the claim, not on the number. Every number comes from the corresponding page in `docs/design-review/coworker/`, which in turn was checked against the simulation files or the cited source; do not edit a number here without changing it there.
+Each node file has the same five fields: what happens, what it costs the birds (or the people), how we score it (as bullets), what we would like the reviewer to check, and a numbered source list. Sourced claims are underlined with `<u>…</u> [n]` and the list uses the owner's `1- ` style with a hard line break after each entry and a link on every source; read-status notes are deliberately left out (the coworker pages keep them). Numbering is per decision and covers only the sources the digest actually cites; the mapping back to the coworker page's own numbering is one-to-one on the claim, not on the number. Every number comes from the corresponding page in `docs/design-review/coworker/`, which in turn was checked against the simulation files or the cited source; do not edit a number here without changing it there.
 
 Build: `./venv/bin/python docs/build-reviewer-digest.py` writes `docs/reviewer-digest.md` (and a `.docx` when pandoc is installed). The build fails if an enabled node in `config.yml` has no digest file, or if a digest file has no enabled node behind it. The reading order and group headings live in the script's `ORDER` list.
 

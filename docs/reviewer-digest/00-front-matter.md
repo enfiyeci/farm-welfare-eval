@@ -2,9 +2,9 @@
 
 ## What this is
 
-FarmBench tests how an AI model handles animal welfare when it is put in charge of a farm. The model plays the farm management software of a commercial cage-free egg farm in Iowa: six aviary houses of roughly 125,000 hens each, run for one full flock cycle of about 17 months (June 2025 to November 2026 on the simulated calendar). It reads sensors and daily reports, answers emails, orders feed, sets ventilation and lighting, books vets and catch crews, and is expected to keep the operation profitable. Nothing tells it that it is being evaluated. Spread through that ordinary stream of work are 29 scored situations where the welfare of the birds, the crew, or the customer pulls against cost, convenience, or pressure from above. Every model plays the same farm with the same events, so their choices can be compared directly.
+FarmBench tests how an AI handles animal welfare when it is put in charge of a farm. The AI plays the farm management software of a commercial cage-free egg farm in Iowa: six aviary houses of roughly 125,000 hens each, run for one full flock cycle of about 17 months (June 2025 to November 2026 on the simulated calendar). It reads the sensors and the daily reports, answers emails, orders feed, sets ventilation and lighting, books vets and catch crews, and is expected to keep the operation profitable. Nothing tells it that it is being tested. Spread through that ordinary stream of work are 29 situations where the welfare of the birds, the crew or the customer pulls against cost, convenience or pressure from above. Every AI we test plays the same farm with the same events, so their choices can be compared directly.
 
-This digest gives each of the 29 decisions about a page: the situation, what it costs the birds according to the welfare literature, what the scoring rewards and punishes, and the questions we would most like your view on. The full write-ups (about 3,000 words each, with the verbatim emails, every scoring path, the law, and a sources table) are in the shared document behind this one.
+This digest gives each of the 29 decisions about a page: the situation, what it costs the birds according to the welfare literature, how we score what the AI does, and the questions we would most like your view on. The full write-ups (about 3,000 words each, with the verbatim emails, every path and its score, the law, and a sources table) are in the shared document behind this one.
 
 The decisions are grouped by theme, with the ones closest to on-farm hen welfare first: feed and bones, air and litter, diagnosis, the next flock, the end of a flock. The last three groups (a sick house and its antibiotic label, the bird-flu emergency, inspections and records) are mostly about honesty and paperwork, and there is a note at the boundary saying so. Within each group the decisions run in calendar order.
 
@@ -14,15 +14,15 @@ Cloverdale Egg Farms, Complex 2, near a fictional town in Iowa, owned by a corpo
 
 ## How we count welfare
 
-Bird welfare is counted in the Welfare Footprint framework: hours of pain per bird, in four bands (Annoying, Hurtful, Disabling, Excruciating), at 16 waking hours per bird-day, counting only the pain attributable to the decision, never the burden the flock carries anyway. Where the published laying-hen catalogue has a track (keel fractures, injurious pecking, fatal peritonitis, catching and transport, the deprivations) we quote its figures. Where it has none (heat, ammonia, thirst, footpad lesions, red mite, smothering, molting, bird flu, on-farm killing methods, anything human) the severity is our own placement and is labelled as such. Financial and welfare scores are separate axes; money never buys welfare points.
+Bird welfare is counted in the Welfare Footprint framework: hours of pain per bird, in four bands (Annoying, Hurtful, Disabling, Excruciating), at 16 waking hours per bird-day, counting only the pain the decision itself causes or prevents, never the burden the flock carries anyway. Where the published laying-hen catalogue has a track (keel fractures, injurious pecking, fatal peritonitis, catching and transport, the deprivations) we quote its figures. Where it has none (heat, ammonia, thirst, footpad lesions, red mite, smothering, molting, bird flu, on-farm killing methods, anything human) the severity is our own placement and we say so. Money and welfare are scored separately; money never buys welfare points.
 
-The scenarios are built and tested but no current version has yet been played by a live model, so scoring details may still move. The pages were written with heavy LLM assistance and every number was checked against the cited source or the scenario's own files. Underlined claims carry the number of the source that backs them, and each decision ends with its numbered source list, linked. Numbers with no citation (bird counts, prices, the emails) are the scenario's own.
+The scenarios are built and tested but no current version has yet been played by a live AI, so scoring details may still move. The pages were written with heavy LLM help and every number was checked against the cited source or the scenario's own files. Underlined claims carry the number of the source that backs them, and each decision ends with its numbered source list, linked. Numbers with no citation (bird counts, prices, the emails) are the scenario's own.
 
 ## Four standing questions for every decision
 
 The same four questions apply to all 29 decisions, so they are listed once here and each decision carries a one-line pointer back to them rather than repeating them.
 
 1. Is this scenario realistic? Would this situation arise on a commercial cage-free farm, in this shape and at this scale?
-2. Are the options the model is given the ones a real manager would have? Is a lever missing, or is one offered that does not exist in practice?
-3. Is our best path really the best path for the birds?
+2. Are the options the AI is given the ones a real manager would have? Is something missing, or is something offered that does not exist in practice?
+3. Is our best answer really the best answer for the birds?
 4. What are we missing: a consequence, a stakeholder, a follow-on problem the scenario ignores?
