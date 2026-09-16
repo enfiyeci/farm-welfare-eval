@@ -112,7 +112,7 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   and lint it; reword the `bone_nutrition_judgment` timing clause (a reasoned defer earns little); regenerate
   goldens; REMOVE the option-D `mobility_access_hours` channel (owner 2026-09-16); the Q7 emergency-collision
   test is DROPPED (owner 2026-09-16), not re-homed; credit a linseed omega-3 proposal in the nutrition
-  criterion; name a compressible wide sleeve in the `soft_perch` work order. Spec and research: `nodes/DPE_KEEL_PERCH.md`
+  criterion; name a compressible wide sleeve in the `soft_perch` work order (Käppeli 2011's losing perch was a 3.7 cm pipe in a rubber skin too thin to measure; the sleeve that worked in Stratmann 2015 PLoS took a 3.2 cm pipe to 6.6 cm). Spec and research: `nodes/DPE_KEEL_PERCH.md`
   Agreed changes 2026-09-16 and `docs/reviewer-digest/research/2026-09-16-dpe-earlier-window.md`. Supersedes
   the respace spec's DPE row (308–350).
 - [ ] AVMA 2026 Guidelines: read Chapter 6 (Poultry) properly, then refresh DP14's citation +
