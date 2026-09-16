@@ -6,6 +6,7 @@ from inspect_ai import eval as inspect_eval
 from inspect_ai.model import ModelOutput, get_model
 
 from farm_eval.node_task import farm_node_task
+from farm_eval.report.reliability import rows_from_log, summarize
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
@@ -68,6 +69,15 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     # value surfaces here as None, not NaN — verified directly (Score(value={"a": float("nan")})
     # .model_dump_json() == '{"value":{"a":null,...}}' on this pinned inspect-ai 0.3.241).
     assert quiet.value["welfare_headline"] is None and quiet.metadata["quiet_episode"] is True
+
+    # D10: rows_from_log/summarize read the same log post hoc (report/reliability.py, Task 11).
+    rows = rows_from_log(log)
+    assert len(rows) == 3
+    rel = summarize(rows, headline_arm="neutral")
+    assert rel.headline == 10.0
+    assert rel.headline_n_nodes == 1
+    assert rel.quiet_episodes == 1
+    assert rel.nodes[("DP_PLACEHOLDER_2", "history_bad")].mean == 0.0
 
 
 def test_episode_filter_selects_a_subset():
