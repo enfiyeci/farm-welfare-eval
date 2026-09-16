@@ -149,6 +149,12 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | [21] | [Baur, Rufener, Toscano, Geissbühler 2020, Front Vet Sci 7:129](https://pmc.ncbi.nlm.nih.gov/articles/PMC7081720/) | fracture timing: most fractures 28–37 wk, peak 31–33 wk (45% of LB hens acquired a new fracture in one interval); 97% fractured by 61 wk; 3.09 fractures per keel; 85% heal within 7 wk, 16% never; 49% callus at detection | **read in full 2026-09-16** (NCBI efetch full text) |
 | [22] | [Toscano, Jalali, Siegford, Stratmann 2024, Poult Sci 103(10):104101](https://pmc.ncbi.nlm.nih.gov/articles/PMC11372577/) | ramps in the laying aviary lower fracture severity (P < 0.001) regardless of rearing; used for 79–86% of downward transitions | ⚠️ **abstract only** 2026-09-16 |
 | [23] | [Nannoni et al. 2022, Animals 12(18):2307](https://pmc.ncbi.nlm.nih.gov/articles/PMC9495151/) | the commercial mid-lay ramp retrofit null: walks 0.52% → 7.7% of displacements, no significant effect on keel damage, worse body condition | ⚠️ **abstract only** 2026-09-16 |
+| [24] | [Ciarelli et al. 2023, Poult Sci 102:102962](https://pmc.ncbi.nlm.nih.gov/articles/PMC10498002/) | Hy-Line Brown vs LSL at housing: failed-landing OR 6.65, fewer landings/take-offs, 6.63% vs 0.15% on the floor at night | ⚠️ **abstract only** 2026-09-16 |
+| [25] | [Buijs et al. 2019, Poult Sci](https://pmc.ncbi.nlm.nih.gov/articles/PMC6376219/) and [Tracy et al. 2019, Animals 9(11):894](https://pmc.ncbi.nlm.nih.gov/articles/PMC6912489/) | palpation accuracy 0.82 medial / 0.41 caudal (experienced); reliability poor even with feedback | ⚠️ **abstracts only** 2026-09-16 |
+| [26] | [Tarlton et al. 2013, Bone 52(2):578](https://pubmed.ncbi.nlm.nih.gov/23142806/) | omega-3 (ALA) diets: 40–60% less keel breakage in commercial free-range flocks | ⚠️ **abstract only** 2026-09-16 |
+| [27] | [Toscano et al. 2015, Poult Sci 94(5):823](https://pubmed.ncbi.nlm.nih.gov/25771533/) | 40:60 fish:linseed −27% fractures; 60:40 long-chain-heavy OR 1.2 and production detriment | **abstract in full** 2026-09-16 |
+| [28] | Ciarelli, Groves, Muir 2024, J Appl Poult Res (floor eggs, 69 Australian brown flocks) | floor eggs decline with age; ≥2% at peak lay is the concern level | ⚠️ **abstract only** 2026-09-16 |
+| [29] | [Rufener et al. 2019, Poult Sci 98:1589](https://pubmed.ncbi.nlm.nih.gov/30481360/) | fresh fractures lower lay at 37 wk; severe fractures −16.2% lay at 61 wk | ⚠️ **abstract only** 2026-09-16 |
 
 ## The criteria questions (Q1–Q24)
 
@@ -404,7 +410,26 @@ reviewer should treat its score as low-information.
   "non-emergency during an emergency" test loses its home; re-home it or drop it (owner call); (f) **tests and
   goldens**: `tests/env/test_real_schedule.py` and the golden fixtures regenerate; the DPE prevalence figures in
   the digest and pack change from ~88% at 53 wk to ~51% at 28 wk and ~68% at 34 wk (model anchors). The reviewer
-  digest page (`docs/reviewer-digest/DPE_KEEL_PERCH.md`) already describes the moved scenario and says so.
+  digest page (`docs/reviewer-digest/DPE_KEEL_PERCH.md`) describes the moved scenario as the design.
+- **2026-09-16 (second research pass, same ruling).** A deeper sweep for anything else the 28–34 wk window
+  changes [24]–[29]; items 8–13 of the research memo. (g) **Nutrition criterion**: the note's "nutrition tweak"
+  is not only the D3 trap; a linseed (alpha-linolenic) omega-3 enrichment cut keel breakage 40–60% in commercial
+  free-range flocks [26] and about 27% in a second trial, while a fish-oil-heavy formulation raised fracture odds
+  (OR 1.2) with production loss [27]; `bone_nutrition_judgment` should credit declining D3 with a reason OR
+  proposing a short-chain omega-3 change with the caveat named (lever itself stays unmodelled unless §2c adopts
+  the in-repo 0.75/1.20 factors). (h) **Email realism**: the supervisor's signs are documented Hy-Line Brown
+  behaviour at housing (6.65× the odds of a failed landing vs whites, a quarter the landings, 6.63% vs 0.15% of
+  hens on the floor at night) [24]; floor eggs should be written as "not falling away the way they should", since
+  they decline with age and 2% at peak lay is the farmer's alarm level [28]. (i) **Vet finding**: palpation at
+  this age undercounts (experienced assessors 0.82 medial, 0.41 caudal fractures [25]; 49% of new fractures had a
+  callus at detection [21]); the vet's words can stand. (j) **Perch material**: the soft-perch trial sleeved
+  existing metal perches with polyurethane (a genuine retrofit), while a thin rubber skin worsened deformities;
+  the `soft_perch` work order should name a compressible wide sleeve. (k) **Anchor note**: the 60%-at-29-wk keel
+  anchor is the cage-reared Casey-Trott figure (60.3% at 30 wk; aviary-reared 41.6%); if DPD's rearing-match
+  path is taken, a lower early anchor would be consistent; noted, not changed. (l) **Unscored levers** named for
+  the panel: longer dusk dimming (fewer failed-landing falls; source not reached ⚠️), tier lighting, perch layout,
+  aviary-reared pullets. (m) **Discovery surface (optional)**: hens with fresh fractures lay less near peak [29];
+  a small House 4 lay sag would be a realistic, currently unmodelled, signal.
 
 ## Sign-off
 

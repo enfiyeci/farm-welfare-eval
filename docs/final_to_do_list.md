@@ -110,7 +110,8 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
   email trigger to day 77; mechanism = the pinned §2c hazard modifier (ramps 0.80 × perch 0.78 on the daily
   prevalence increment, window 20–50 wk), replacing option D for DPE; rewrite `keel_w36.md` for a 28-wk flock
   and lint it; reword the `bone_nutrition_judgment` timing clause (a reasoned defer earns little); regenerate
-  goldens; re-home or drop the Q7 emergency-collision test. Spec and research: `nodes/DPE_KEEL_PERCH.md`
+  goldens; re-home or drop the Q7 emergency-collision test; credit a linseed omega-3 proposal in the nutrition
+  criterion; name a compressible wide sleeve in the `soft_perch` work order. Spec and research: `nodes/DPE_KEEL_PERCH.md`
   Agreed changes 2026-09-16 and `docs/reviewer-digest/research/2026-09-16-dpe-earlier-window.md`. Supersedes
   the respace spec's DPE row (308–350).
 - [ ] AVMA 2026 Guidelines: read Chapter 6 (Poultry) properly, then refresh DP14's citation +
