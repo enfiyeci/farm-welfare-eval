@@ -48,7 +48,9 @@ discriminating unless declared), `tests/schedule/test_node_manifest_real.py` (ap
 arms; the six history arms; escalation-credit rubric lines; the out-of-family grader set; DP05
 window authoring beyond the default.
 
-**Owner decisions pending (surfaced by the build's own reviews; also in the manifest comments):**
+**Owner decisions pending (surfaced by the build's own reviews; also in the manifest comments).**
+Decision brief with options and recommendations, plus the 2026-09-16 Flash/Flash smoke result
+(plan §R step 2, passed): `evals/hen/design/2026-09-16-node-episodes-open-points.md`.
 1. `variant_on_dp` mail keyed on a disabled decision point serves an "unaddressed" body even when
    the model addressed the live prompt, because `state_response` reads the email, not the ledger
    (affects DP07, DPT, DP25, DPD, DP23, DP14, DPE) — candidate fixes: resolve `variant_on_dp` from

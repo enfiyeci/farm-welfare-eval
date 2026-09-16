@@ -37,10 +37,23 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   smaller build-review notes (report `_day_map` mis-anchoring on node logs, no provenance caveat
   for `[Session opens]` in the per-criterion grader prompt, `ablation_overrides` re-applying the
   corpus every tool call, and an un-shared `_ACTIVE_AIR_SETPOINTS` constant) — see `docs/STATUS.md`.
-- **Next action:** run the Flash/Flash k=5 plumbing pilot (plan §R) — results (reliability table,
-  wall time, tokens) to be appended here as a "Pilot results" sub-bullet. Then open the PR for
-  Arda, title "Node-episode construct: per-decision samples, per-episode anchors, pass^k
-  reliability". Owner decisions 1–4 above still need a call before the arm-content pass.
+- **Smoke result (plan §R step 2, 2026-09-16, Flash/Flash over Vertex):** PASSED. DP05_RED_MITE,
+  1 epoch, `dimension_mode=none`: `[Session opens]` digest is the second user message, the day-112
+  mite mail is in the opening inbox, sessions ran 112→126→154→168→211, score
+  `{DP05_RED_MITE: 10.00}` (= the one-dose good anchor, owner decision 3), 6 min 48 s, 3.0 M
+  tokens (2.81 M cache reads, 166 k fresh input, 3.4 k output, 0 grader). Log:
+  `logs/node-smoke/2026-09-16T19-12-40-00-00_farm-node-task_WBUvjGpw46rMy7uvdYUxXP.eval`.
+  The run first FAILED on a path bug: Inspect chdirs into `farm_eval/` for file-based tasks, so
+  the documented relative `config_path` and the config's relative corpus/schedule paths did not
+  resolve — `farm_eval/node_task.py` now anchors relative paths to the repo root (test added;
+  `farm_task.py` shares the latent behaviour, untouched). Full write-up + the owner's decision
+  brief (what the construct is, each open point, options, recommendations):
+  `evals/hen/design/2026-09-16-node-episodes-open-points.md`.
+- **Next action:** owner reads the decision brief and calls items 3.1–3.4; run the Flash/Flash
+  k=5 pilot (plan §R step 3; command in `config-nodes.yml`) and append its reliability table
+  here; then open the PR for Arda, title "Node-episode construct: per-decision samples,
+  per-episode anchors, pass^k reliability". Fast-forward the stale local `feat/node-episodes`
+  (planning worktree, at `a71c42b`) to the pushed head first.
 - **Refs:** branch `feat/node-episodes` (built in worktree `node-episodes-build-bf5123`), plan
   `evals/hen/design/2026-09-15-node-episodes-build.md`, probe report
   `evals/hen/runs/2026-09-16-node-snapshot-probe.md`, manifest `schedule/node_episodes.yml`.
