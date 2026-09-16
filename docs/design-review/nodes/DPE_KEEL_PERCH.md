@@ -154,7 +154,7 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | [26] | [Tarlton et al. 2013, Bone 52(2):578](https://pubmed.ncbi.nlm.nih.gov/23142806/) (Bristol accepted-manuscript PDF) | omega-3 (ALA, linseed) diets begun at 23–30 wk in 6 vs 6 commercial free-range flocks: dissection breakage 59.4% vs 21.7% at 50 wk, 65.0% vs 38.3% at 70 wk (60% and 40% reductions) | **read in full 2026-09-16** (third pass, accepted manuscript) |
 | [27] | [Toscano et al. 2015, Poult Sci 94(5):823](https://doi.org/10.3382/ps/pev048) | Lohmann Brown, 24,000 hens per experiment. Exp 1 (60:40 fish oil:linseed, n3:n6 1.35, from 16 wk): palpation OR 1.34, mortality 11.6% vs 5.5%, 84% of control eggs, diet pulled at 55 wk. Exp 2 (40:60, n3:n6 0.77, from 27 wk): control 1.18× more fractures by palpation, dissection gap peaking at 27.1% at 57 wk, 96% of control eggs | **read in full 2026-09-16** (fourth pass, owner-supplied PDF) |
 | [28] | [Ciarelli, Groves, Muir 2024, J Appl Poult Res 33:100464](https://doi.org/10.1016/j.japr.2024.100464) (floor eggs, 69 Australian brown flocks, 47 Hy-Line Brown) | floor eggs at peak lay 1 to 28%, median 3%; farmers concerned from about 2% (median 4%), unconcerned at median 1.4%; 21.3% of Hy-Line Brown flocks at or above 2%. Does NOT say floor eggs decline with age (that is Heerkens 2016 Table 1 [37]) | **read in full 2026-09-16** (fourth pass; open access) |
-| [29] | [Rufener et al. 2019, Poult Sci 98:1589](https://pubmed.ncbi.nlm.nih.gov/30481360/) | fresh fractures lower lay at 37 wk; severe fractures −16.2% lay at 61 wk | ⚠️ **abstract only** 2026-09-16 (ScienceDirect blocks curl and the in-app browser) |
+| [29] | [Rufener, Baur, Stratmann, Toscano 2019, Poult Sci 98:1589](https://doi.org/10.3382/ps/pey544) | same 150 focal hens as [21]; fresh fractures 93.4% vs inactive 96.9% lay at 37 wk (P = 0.02), reversed by 61 wk; severity 10 vs 0 = 80.6% vs 96.8% at 61 wk (−16.2%, P = 0.005); no severity effect at 37 wk; egg quality unaffected; LB severity 5.3 vs LSL 3.8 | **read in full 2026-09-16** (fourth pass, owner-supplied PDF) |
 | [30] | [Montalcini, Toscano, Asher, Petelle 2024, PLoS ONE 19(7):e0306384](https://pmc.ncbi.nlm.nih.gov/articles/PMC11226069/) | fracture severity → less vertical travel (largest ~3 months later); movement does not predict later fractures; caudal-tip fractures may be laying pressure, not collisions | **read in full 2026-09-16** |
 | [31] | [Toscano et al. 2018, PLoS ONE 13(7):e0200025](https://pmc.ncbi.nlm.nih.gov/articles/PMC6038993/) | ex vivo fracture susceptibility rises from 23 wk, peaks 49.5 wk, then falls; algae-DHA diet protective only at low collision energies | **read in full 2026-09-16** |
 | [32] | [Clark-Millspaugh, Harrison, Siegford, Ali 2026, Poultry 5(3):31](https://www.mdpi.com/2674-1164/5/3/31) | 3,696 Hy-Line Brown, Natura Step (open, ramps on lower tier) vs Natura 60 (closed) at 60 wk: STEP more fractures and calluses, N60 more deviations; STEP stronger bones; design features confounded | **read in full 2026-09-16** (in-app browser) |
@@ -473,7 +473,9 @@ reviewer should treat its score as low-information.
   real in a brown flock. The memo's "floor eggs decline with age" claim is re-sourced to Heerkens Table 1; the JAPR
   paper does not say it. **(s) Build note for the `soft_perch` work order:** the losing perch in [36] was a 3.7 cm
   pipe in a skin too thin to measure, the winning sleeve in [3-PLoS] took a 3.2 cm pipe to 6.6 cm; "compressible,
-  wide" is the spec. Only Rufener 2019 [29] remains abstract-only, and it is not on the digest page.
+  wide" is the spec. Rufener 2019 [29] was then supplied too and read in full: the memo's item 13(m) figures hold
+  (fresh fractures 93.4% vs 96.9% lay at 37 wk; severity 10 vs 0 costs 16.2% at 61 wk), egg quality is untouched, and
+  the realistic House 4 peak-lay signal is a dip of a point or two. Every source behind the node is now read in full.
 
 ## Sign-off
 
