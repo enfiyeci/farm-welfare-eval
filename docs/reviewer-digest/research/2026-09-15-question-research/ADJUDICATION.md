@@ -105,3 +105,18 @@ questions for the top of each node are pending the owner's choice.
 15. DP20: the 30-person and 10-hour thresholds are authored; federal responders worked 12-hour periods.
 16. DP19: a repaired hazard earns nothing anywhere in the benchmark.
 17. Internal inconsistency: DP15 gives House 3 as 113,700 birds, DP14 as about 119,500.
+
+## Owner rulings, 2026-09-16
+
+Six of the seventeen items were judged to change the kind of answer the panel would give (items 3, 6, 8,
+7, 1 with 2, and 10); a research pass on each is under way in this folder's sibling
+`docs/reviewer-digest/research/` before any page is edited. Two rulings were given ahead of the reports:
+
+- **Item 3 (drugs, DP06 / DPT / DP21):** keep a water-given antibiotic but a realistic one, so the egg
+  waiting period and the residue decision survive. The research is to find the product a US layer vet
+  would actually use, its FARAD withdrawal and the depletion data behind it. Switching to in-feed
+  chlortetracycline (which would delete the residue decision) is not the chosen path.
+- **Item 6 (density, DP17 / DP25):** full marks move to an evidence-based density; the UEP certification
+  floor (144 sq in per hen) earns partial credit. The research is to pin the line (or slope), the score
+  ladder, the harm the simulation must show above the line, and the profit cost of the full-marks density.
+  This moves the welfare headline, since the headline is the mean of node scores.
