@@ -53,11 +53,10 @@ per-node dominance arithmetic (DPT, DP04, DP05, DP06); compliant-but-cruel edits
 the eight-to-ten salience-ladder arms; the six history arms; escalation-credit rubric lines;
 the out-of-family grader set; the DP05 `end_day`/`sessions` authoring beyond the default (§D6).
 
-**0.2 Owner call flagged, default chosen:** `DPW_WORKER_AIR` is a worker-safety node (NIOSH
-25 ppm axis) and falls under the proposal's "human-welfare nodes leave the headline" principle even
-though the approved list names only DP13/DP19/DP20/DP21. **Default in this plan: excluded** from
-the manifest, with a one-line comment so it can be re-added. If Oliver or Arda want it kept, add
-the manifest entry in Task 9 and change "23" to "24" everywhere below.
+**0.2 Node set (owner ruled 2026-09-15):** every non-animal-welfare node is out of the scored
+set — DP13, DP19, DP20, DP21 (the approved list) **and `DPW_WORKER_AIR`** (worker air on the NIOSH
+25 ppm axis; same principle). DPN stays in `events.yml` unscored as DPT's pressure. 23 scored
+episodes. Not an open question any more.
 
 ---
 
@@ -1713,10 +1712,14 @@ def farm_node_task(
 ```yaml
 # Node-episode task config (plan evals/hen/design/2026-09-15-node-episodes-build.md).
 #
-#   inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-#       --model-role target=anthropic/claude-sonnet-5 --model-role grader=anthropic/claude-opus-5 \
-#       --epochs 5 --max-connections 8
-#   $PY scripts/node_reliability.py logs/<run>.eval
+#   Smoke/pilot runs (owner directive 2026-09-15): Gemini Flash as BOTH target and grader over Vertex
+#   until the construct is trusted; other targets + out-of-family graders come later.
+#     set -a; source /home/oliver/Documents/Github/farm-welfare-eval/scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
+#     INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
+#     $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
+#         --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash \
+#         --epochs 5 --max-connections 8
+#     $PY scripts/node_reliability.py logs/<run>.eval
 #
 # The unit is one sample per (episode × arm) from schedule/node_episodes.yml; `epochs` is k, the
 # repeat count the reliability report (pass rate, pass^k) is computed over.
@@ -1734,10 +1737,11 @@ judge_samples: 1                        # llm criteria + validity dims sampled o
 dimension_mode: validity_only           # full | validity_only | none (D9)
 model_params: {}
 
-# Informational (role binding happens at eval time via --model-role).
+# Informational (role binding happens at eval time via --model-role). Flash/Flash is the smoke pair;
+# a same-family grader is a known bias (docs/STATUS.md grader-family caveat) — never a comparative claim.
 model_roles:
-  target: anthropic/claude-sonnet-5
-  grader: anthropic/claude-opus-5
+  target: google/gemini-2.5-flash
+  grader: google/gemini-2.5-flash
 ```
 
 - [ ] **Step 5: After Task 10 lands, run the test**
@@ -1874,8 +1878,8 @@ with the snippet under the file (they MUST contain `deadline_day` and end with `
 #
 # NOT here, by ruling (proposal §3, approved 2026-09): DP13_SE_DIVERSION, DP19_WORKER_INJURY_REPORTING,
 # DP20_HPAI_STAFFING, DP21_DRUG_RESIDUE (human welfare / food safety), DPN_NAE_ANTIBIOTIC (kept in
-# events.yml as the pressure on DPT, unscored), and — plan §0.2, owner call pending — DPW_WORKER_AIR
-# (worker air; re-add `- {id: DPW_WORKER_AIR, dp_id: DPW_WORKER_AIR}` to keep it).
+# events.yml as the pressure on DPT, unscored), and DPW_WORKER_AIR (worker air; owner ruled it out
+# 2026-09-15 under the same principle — plan §0.2).
 # Their events still fire inside other episodes' windows: they are world, not score.
 #
 # Defaults (D6): start_day = opens_day, end_day = deadline_day + 1, sessions = schedule beats strictly
@@ -2653,8 +2657,8 @@ The unit of evaluation is the **node episode**: one Inspect sample per scored we
 started from the environment-derived routine-only snapshot of its window, played over its own
 sessions, scored on that node, repeated k times; per-node pass rate and pass^k are reported beside
 the equal-mean headline. Welfare only is scored; economics stays as authored pressure. Cut from the
-scored set: DP13, DP19, DP20, DP21; DPN unscored (pressure on DPT). DPW: owner call pending (plan
-§0.2, default excluded). The continuous 518-day `farm_task` remains runnable for pilots and
+scored set: DP13, DP19, DP20, DP21 and DPW (every non-animal-welfare node, owner ruled 2026-09-15);
+DPN unscored (pressure on DPT). The continuous 518-day `farm_task` remains runnable for pilots and
 holistic review but is no longer the comparative instrument. Spec §18's single-run loop is
 superseded for comparison runs. Record: `2026-09-12-sliced-construct-{summary,proposal}.md`,
 build plan `2026-09-15-node-episodes-build.md`.
@@ -2685,13 +2689,13 @@ Then run `wc -c CLAUDE.md` — must print < 8192. Trim the "Read these first" ta
 
 - [ ] **Step 4: `docs/STATUS.md`** — new `**LATEST — 2026-09-XX (node-episode construct BUILT on feat/node-episodes).**`
 paragraph above the 2026-08-13 one: what landed (files from §F), the scored set (23 + 3 quiet),
-the guards (snapshot golden, anchor guard, manifest tests), and the open owner call (DPW), plus the
-follow-ups list from §0.1. Also add to "Pending gates": *"node-episode pilot: run k=5 on two
-models, hand-check three transcripts for the opening-digest voice (system, never model) before any
-comparative claim."*
+the guards (snapshot golden, anchor guard, manifest tests), plus the follow-ups list from §0.1.
+Also add to "Pending gates": *"node-episode pilot: Flash/Flash k=5 plumbing run done; before any
+comparative claim run ≥2 targets with an out-of-family grader and hand-check three transcripts for
+the opening-digest voice (system, never model)."*
 
 - [ ] **Step 5: `docs/WORKLOG.md`** — new top entry `## 2026-09-XX · claude · node-episode construct BUILT (branch feat/node-episodes)`
-with What/decided · Next action (local k=5 pilot on two models; open the PR for Arda) · Refs.
+with What/decided · Next action (Flash/Flash k=5 run per §R; open the PR for Arda) · Refs.
 `docs/LANES.md` — add a row: `ACTIVE · node-episodes · @hen-welfare-eval-pr-plan-0309c9` (branch `feat/node-episodes`); this lane holds no golden-regen token for the EXISTING goldens (it adds new ones only).
 
 - [ ] **Step 6: `README.md` §Running** — add the two commands from `config-nodes.yml`'s header and
@@ -2713,30 +2717,45 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## R. Local test run (before opening the PR)
 
-1. Keyless smoke: `$PY -m pytest tests/adapter/test_node_task.py tests/adapter/test_solver_node_episode.py -q`.
-2. One cheap real episode, one epoch, no dimension pass — checks auth, tools, snapshot, scoring:
+**Models (owner directive 2026-09-15): `google/gemini-2.5-flash` as BOTH target and grader for every
+smoke run, over Vertex.** Other targets and out-of-family graders are a later pass; a Flash-judging-Flash
+number is a plumbing check, never a comparative claim (grader-family caveat, `docs/STATUS.md`).
+
+Auth + paths — this worktree has no venv and no git-ignored env file, so do NOT use
+`scripts/run_pilot.sh` (it resolves both relative to itself). Once per shell:
 
 ```bash
-inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml -T episode_ids=DP05_RED_MITE \
-  -T dimension_mode=none --model-role target=anthropic/claude-sonnet-5 --model-role grader=anthropic/claude-opus-5 --epochs 1
+set -a; source /home/oliver/Documents/Github/farm-welfare-eval/scripts/pilot-vertex.env; set +a
+unset GOOGLE_API_KEY
+gcloud auth application-default print-access-token >/dev/null || gcloud auth application-default login
+INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
+```
+
+1. Keyless smoke: `$PY -m pytest tests/adapter/test_node_task.py tests/adapter/test_solver_node_episode.py -q`.
+2. One cheap real episode, one epoch, no dimension pass — checks Vertex auth, tools, snapshot, scoring:
+
+```bash
+$INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml -T episode_ids=DP05_RED_MITE \
+  -T dimension_mode=none --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash --epochs 1
 ```
 
    (`-T dimension_mode=none` requires `farm_node_task` to accept a `dimension_mode` kwarg override — add it
    as `dimension_mode: str | None = None` falling back to the config; one line.) Read the transcript in
-   `inspect view`: the second user message must be the `[Session opens]` digest in the software's voice; the
+   `$INSPECT view`: the second user message must be the `[Session opens]` digest in the software's voice; the
    model must see the day-112 mite mail; the episode must end at day 211 with `node_scores == {DP05_RED_MITE: x}`.
-3. The real sweep, two models, k=5, validity axes on:
+3. The full manifest, k=5, validity axes on, still Flash/Flash:
 
 ```bash
-inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-  --model-role target=anthropic/claude-sonnet-5 --model-role grader=anthropic/claude-opus-5 --epochs 5 --max-connections 8
+$INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
+  --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash --epochs 5 --max-connections 8
 ```
 
-   then `$PY scripts/node_reliability.py logs/<file>.eval`. Repeat with a second target. Wall time
-   should be minutes, not hours (proposal §1); record tokens and wall time in the WORKLOG entry.
+   then `$PY scripts/node_reliability.py logs/<file>.eval`. Wall time should be minutes, not hours
+   (proposal §1); record wall time, token counts and the reliability table in the WORKLOG entry. Do
+   NOT run other targets or graders yet.
 4. Open the PR against `main` from `feat/node-episodes` (title: "Node-episode construct: per-decision
-   samples, per-episode anchors, pass^k reliability"), body = §0 scope table + §0.1 follow-ups + §0.2
-   DPW question + the reliability tables from step 3. End the body with the generated-with line.
+   samples, per-episode anchors, pass^k reliability"), body = §0 scope table + §0.1 follow-ups + the
+   Flash/Flash reliability table labelled as a plumbing check. End the body with the generated-with line.
 
 ---
 
