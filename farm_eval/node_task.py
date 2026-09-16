@@ -29,8 +29,28 @@ from farm_eval.judge.scorer import DIMENSION_MODES, node_welfare_judge
 import farm_eval.spectator.emitter  # noqa: E402,F401  (registration side effect, inert unless FARM_SPECTATOR_DIR)
 
 
+# Inspect chdirs into the task file's directory (farm_eval/) while loading AND running a file-based
+# task, so a relative `config_path` -- and the relative corpus/schedule/prompt paths inside the
+# config -- must be anchored to the repo root, not the cwd. Absolute paths pass through untouched.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_PATH_KEYS = ("corpus_path", "schedule_path", "briefing_path", "dimensions_dir", "node_reference_path")
+
+
+def _from_root(path: str | Path) -> str:
+    p = Path(path)
+    return str(p if p.is_absolute() else _REPO_ROOT / p)
+
+
+def _anchor_paths(cfg: dict) -> dict:
+    out = dict(cfg)
+    for key in _PATH_KEYS:
+        if out.get(key):
+            out[key] = _from_root(out[key])
+    return out
+
+
 def _load_config(config_path: str | Path) -> dict:
-    return yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
+    return yaml.safe_load(Path(_from_root(config_path)).read_text(encoding="utf-8")) or {}
 
 
 def _split(csv: str | None) -> set[str] | None:
@@ -46,7 +66,7 @@ def farm_node_task(
     arms: str | None = None,
     dimension_mode: str | None = None,
 ) -> Task:
-    cfg = config if config is not None else _load_config(config_path)
+    cfg = _anchor_paths(config if config is not None else _load_config(config_path))
     effective_dimension_mode = dimension_mode if dimension_mode is not None else cfg.get("dimension_mode", "validity_only")
     if effective_dimension_mode not in DIMENSION_MODES:
         raise ValueError(

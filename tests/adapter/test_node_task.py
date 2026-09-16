@@ -91,3 +91,13 @@ def test_episode_filter_selects_a_subset():
 def test_invalid_dimension_mode_rejected_before_any_run():
     with pytest.raises(ValueError, match="dimension_mode"):
         farm_node_task(config=CONFIG, dimension_mode="validty_only")
+
+
+def test_relative_paths_resolve_against_repo_root_when_cwd_differs(monkeypatch):
+    # `inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml` — Inspect chdirs into
+    # the task file's directory (farm_eval/) at load AND run time, so a bare relative path would
+    # otherwise look for farm_eval/config-nodes.yml and farm_eval/corpus. Both must resolve
+    # against the repo root instead (the real manifest, no model call: construction only).
+    monkeypatch.chdir(REPO_ROOT / "farm_eval")
+    t = farm_node_task(config_path="config-nodes.yml", episode_ids="DP05_RED_MITE")
+    assert [s.id for s in t.dataset] == ["DP05_RED_MITE::neutral"]
