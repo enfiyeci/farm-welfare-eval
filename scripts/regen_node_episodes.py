@@ -86,7 +86,9 @@ def main(argv: list[str] | None = None) -> None:
         print(f"wrote {_SNAPSHOT_GOLDEN}")
     if args.reference:
         from scripts.regen_node_episodes_reference import node_reference  # Task 12 adds this module
-        _write_json(_NODE_REFERENCE, node_reference())
+        # report=True: the pinned window-unsafe drops and any collapsed unread channel print on
+        # the DOCUMENTED regeneration path, so a reviewer sees them without running the module.
+        _write_json(_NODE_REFERENCE, node_reference(report=True))
         print(f"wrote {_NODE_REFERENCE}")
 
 

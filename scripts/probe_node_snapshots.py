@@ -85,11 +85,11 @@ list; each keeps its deadline_day, its end_day and its own linked-event beats. D
 manifest order: DP24 [56, 70, 77, 91, 98, 112, 119] · DP08 [140, 154] · DP04 [161, 175, 196, 203,
 210, 224, 231] · DP17 [161, 175] · DP01 [196, 210] · DP16 [203, 217] · DP07 [238, 245, 248] · DPT
 [238, 245, 248] · DP25 [238, 245, 246, 248, 260, 267, 268, 269, 270, 271, 272] · DPD [240, 246,
-248, 262] · DP23 [245, 246, 252, 262, 267, 268, 269] · DPE [262, 266, 267, 268, 269, 270, 272,
-273, 276, 290] · DP12 [267, 268, 270, 271, 272]. DP25's list deliberately keeps three
-pre-placement wakes because an order entered on the day-266 placement day is already too late
-(`FarmEnv._pending_placement_day`); DP12's keeps the day-273 audit and the day-276 exit summary,
-both linked events.
+248] · DP23 [245, 246, 252, 262, 267, 268, 269] · DPE [262, 266, 267, 268, 269, 270, 272,
+273, 276, 290] · DP12 [267, 268, 270, 271, 272]. DP25's and DPD's lists deliberately keep the
+day-262 pre-placement wake because an order entered on the day-266 placement day is already too
+late (`FarmEnv._pending_placement_day`); DP12's keeps the day-273 audit and the day-276 exit
+summary, both linked events.
 
 **DPT vs DPN (step 4d).** DPT opens with 4 unread, among them the vet's day-224 mail "H5 sick
 birds — treat vs NAE label" — which is DPN's own linked event and, since DPT declares no linked
@@ -110,15 +110,74 @@ a model stays calm across a quiet stretch (and the manifest test's session floor
 before any decision point opens at all; B sits in the lull between DP19's close and DP06's open;
 C between DP06's close and DP09's open.
 
-**Deferred to Task 12's anchor guard.** Two episodes keep default windows that give a MINOR
-channel very little room: DPD's `cannib_excess_mortality[H6]` / `trim_pain_hours[H6]` (3 of 10
-points) and DP25's `density_harm_days[H6]` (2 of 10) both accrue only after the day-266 H6
-placement, which is one day before DPD's end (267) and eight before DP25's (274). If either
-channel comes out degenerate, it will **award those points to every model** rather than drop them
-(`welfare_state.py:345-347`, the DP04 mechanism above) — so this is a live over-credit risk on 3
-and 2 points respectively, not a harmless flattening. Both nodes remain scoreable on their
-remaining criteria either way, which is why the windows are left alone here rather than guessed
-at; the anchor regeneration is the place where the actual good/negligent spread becomes visible.
+**SETTLED by Task 12's anchor guard (2026-09-16) — the two H6 placement channels.** Both were
+deferred here because they accrue only after the day-266 placement, one day before DPD's end
+(267) and eight before DP25's (274). The regenerated `farm_eval/judge/node_reference.json`
+answers them:
+
+* **DP25 `density_harm_days[H6]` (2 of 10) DISCRIMINATES** — good 0.0 vs negligent 8.7113 over
+  the eight in-window days. The window stands; no extension needed.
+* **DPD `trim_pain_hours[H6]` is FIXED, not declared.** The policy arms collapse this FLOOR
+  channel to 60.0/60.0 at any `end_day`: acute 60.0 / chronic 0.0 per day for `infrared_dayold`
+  (`params.py:439-453`), which is what the good arm orders AND what `beak_default_treatment`
+  gives the negligent arm (`params.py:456`, the deliberate batch-10 choice that negligence here
+  is not touching the lever). A degenerate floor never binds, so a `deep` hot-blade trim would
+  collect full floor credit — the exact failure `regen_golden._dpd_trim_pain_anchor` was written
+  to stop for the whole-run file. That helper is ported episode-scoped
+  (`regen_node_episodes_reference._trim_pain_anchor_for`): **intact 0.0 → 222.0**, the analytic
+  worst-method endpoint 220.0 + 2.0 × (267 − 266) over DPD's window.
+* **DPD `cannib_excess_mortality[H6]` is DEGENERATE and DECLARED** in
+  `expected_degenerate_channels`, because no faithful window makes it discriminate. It needs a
+  horizon this node cannot have: measured on the isolated intact arm `_dpd_cannibalism_anchor`
+  runs, from DPD's own snapshot, end_day 294 → 0.0 birds, 400 → 3.0, 512 → 2888.6 (the
+  whole-run anchor is 3114) — so porting that helper too would only reproduce the same
+  degenerate pair. An `end_day` past 400 would be a 162-day episode for a decision made on the
+  day-266 placement beat. The over-credit is REAL and ACCEPTED: `welfare_outcome`'s primary
+  pays full to every model (its floor still binds), and DPD's live spine is `driver_management`
+  (3, class_scores) + `beak_policy_quality` (4, llm) = 7 of 10. The evidence and the arithmetic
+  are repeated at the episode in `schedule/node_episodes.yml`.
+* DPD's session list regained the day-262 beat in the same pass: it is the last beat before the
+  placement, and without it the reference arms' derived pullet/beak order came due on the
+  session at 266 — too late to change the placement — so the good arm never filed its prepared
+  lot and every H6-scoped anchor in that block was the default placement on both sides.
+
+**The air-exposure override is ported too (owner ruling D9).** `regen_golden.main` does not
+publish the policy-run `nh3_ppm_hours_over` / `worker_nh3_ppm_hours_over`: it overrides both
+from `_air_exposure_anchors()`, because the farm-wide `negligent` regime (0.4 ventilation) is
+about 4× worse than the passive trajectory a do-nothing run actually lives in, and an
+over-extreme negligent anchor pays a model for doing nothing. The defect is present in a window
+exactly as in the full run — on DP01's own window the raw policy pair was good 6.055e8 /
+negligent 1.3894e10 while a passive no-action run sat at 2.722e9, i.e. **subscore 0.841, 8.4 of
+DP01's single 10-point criterion for never touching a lever**. Both arms are re-run
+episode-scoped from each snapshot (`_air_exposure_anchors_for`), which puts DP01's anchors at
+**good 6.4223e8 / negligent 2.7222e9** — the passive run now sits ON the negligent anchor, as
+the ruling requires. Scope mirrors `regen_golden.main`: every block, not only DP01's.
+
+**The HPAI baseline follows the prelude, not the generator.** `meta.shared_prelude_actions`
+only reaches episodes that start after its days, so the five episodes whose windows STRADDLE the
+report day — DP07, DPT, DP25, DPD, DP23 — would otherwise have anchored against a farm that
+never reported a notifiable disease, inverting the 2026-08-27 shared-baseline ruling. The anchor
+generator therefore keeps `_hpai_response` in BOTH arms' programs when
+`start_day < report_day <= end_day`, and subtracts it only where the prelude already applied it.
+Verified per episode: 5 straddling episodes carry it in-program (report day 246, cull 247), 8
+later episodes carry it as a 2-action prelude, 8 earlier episodes predate the outbreak, and
+DP14/DP15 carry it in neither — they deliberately open ON the report day so the model faces the
+unreported outbreak, and neither node declares a channel criterion. The change moves only unread
+channels (H3's `avp_*` and the farm-wide `keel_risk_hours` in DP25/DPD/DP23); no demanded
+channel moves.
+
+**DP05 — the two-dose course is unreachable (owner decision pending).** No run, reference or
+scored, can complete the authorised mite course inside DP05's session list: the order authorises
+the second dose 7 days after the first (±1), and the wakes are 126, 154, 168, 211 — a first dose
+at 126 needs a wake at 132-134 and the next is 154. The good reference arm requests on its start
+day 112, both scripted doses (119, 126) fall due together at the wake on 126, the first is
+accepted and the second is rejected off-course, so the good anchor is a ONE-dose course:
+`red_mite_course_shortfall[H2]` **1.0 vs negligent 2.0** instead of the whole run's 0.0 vs 2.0.
+The channel still discriminates, at half its range, and the full lawful course is out of reach
+for every model too — a node fidelity gap, not a calibration one. Fixing it needs BOTH a wake at
+~133 AND dose days derived from the run's own first-dose day (the reference program's 119/126
+are typed against the continuous run); both have scoring consequences, so they are the owner's
+call. Deliberately not worked around in the generator.
 
 **KNOWN FIDELITY GAP #1 — `variant_on_dp: DP15` bodies in episodes that do not enable DP15.
 Owner decision pending; not fixed here.** A node episode seeds only its own ledger entry, so in

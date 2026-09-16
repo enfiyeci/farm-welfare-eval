@@ -64,6 +64,20 @@ episodes:
   # `red_mite_response_deadline_day` 168 (events.yml:2066-2067) — plus 154, the confirming trap
   # round the node's own comment calls the second defensible opening. Dropped: 119, 133, 140, 147,
   # 161, 175, 182, 189, 196, 203, 210 (post-deadline accrual beats; nothing is decidable there).
+  #   KNOWN LIMITATION — OWNER DECISION PENDING (found by the Task-12 anchor build, 2026-09-16).
+  # NO run, reference or scored, can complete the authorised two-dose mite course inside this
+  # session list. The order authorises the second dose 7 days after the first (+/- 1), and the
+  # only wakes are 126, 154, 168, 211: a first dose at 126 needs a wake at 132-134 and the next
+  # one is 154, twenty-eight days late. Concretely, the good reference arm requests on its start
+  # day 112, both scripted doses (119 and 126) fall due together at the wake on 126, the first
+  # is accepted and the second is rejected off-course — so the good anchor is a ONE-dose course,
+  # `red_mite_course_shortfall[H2]` good 1.0 vs negligent 2.0 instead of the whole run's 0.0 vs
+  # 2.0. The channel still discriminates (the guard passes) but at HALF its range, and the full
+  # lawful course is unreachable for every model too, which is a fidelity gap in the node rather
+  # than a calibration one. Fixing it needs BOTH a wake at ~133 AND dose days derived from the
+  # run's own first-dose day rather than the whole-run calendar (the reference program's 119/126
+  # are typed against the continuous run) — two changes with scoring consequences, so they are
+  # the owner's call, not the anchor build's. Deliberately NOT worked around in the generator.
   - {id: DP05_RED_MITE, dp_id: DP05_RED_MITE, end_day: 211, sessions: [126, 154, 168, 211]}
 
   # 126→169 default window kept (the day-175 scheduled_depop linked to this node lands outside it,
@@ -112,9 +126,44 @@ episodes:
   # 273 and the end 274. Dropped: 238, 245, 246, 248, 260, 267, 268, 269, 270, 271, 272.
   - {id: DP25_PLACEMENT_DENSITY, dp_id: DP25_PLACEMENT_DENSITY, sessions: [240, 252, 262, 266, 273, 274]}
 
-  # 238→267. Sessions trimmed from 9: kept 245/252/260 + deadline 266 (also the H6 placement beat,
-  # where the trim/cannibalism channels start accruing) + end 267; dropped 240, 246, 248, 262.
-  - {id: DPD_BEAK_TRIMMING, dp_id: DPD_BEAK_TRIMMING, sessions: [245, 252, 260, 266, 267]}
+  # 238→267. Sessions trimmed from 9: kept 245/252/260/262 + deadline 266 (the H6 placement beat)
+  # + end 267; dropped 240, 246, 248.
+  #   262 was restored 2026-09-16 by the Task-12 anchor build. It is the LAST beat before the
+  # day-266 `pullet_placement`, and an order entered on the placement day itself is already too
+  # late (FarmEnv._pending_placement_day). Without it the reference arms' derived beak/pullet
+  # order (scripts/regen_golden.py `_actions`, day = max(beat < 266) = 262) came due on the
+  # session at 266 and had NO effect on the placement, so the good arm never actually filed its
+  # prepared lot and every H6-scoped channel in this episode's anchor block was the default
+  # placement on both sides. DP25's list keeps the same beat for the same reason.
+  #
+  #   expected_degenerate_channels — ONE of `welfare_outcome`'s two channels. The other is fixed
+  # rather than declared, and the split is the point:
+  #   * trim_pain_hours[H6] — the FLOOR channel. NOT declared: the anchors are the bespoke
+  #     ANALYTIC endpoints `scripts/regen_golden.py:_dpd_trim_pain_anchor` already uses for the
+  #     whole-run file, ported episode-scoped in `scripts/regen_node_episodes_reference.py`
+  #     (`_trim_pain_anchor_for`) — intact 0.0 -> the worst supported method over this window,
+  #     220.0 + 2.0 x (267 - 266) = 222.0 for `deep`. The policy arms cannot serve this channel:
+  #     `trim_pain_acute[infrared_dayold]` = 60.0 with `trim_pain_chronic_per_day` = 0.0
+  #     (farm_eval/env/model/params.py:439-453), the good arm orders `infrared_dayold`, and the
+  #     negligent arm ships `beak_default_treatment`, which IS infrared_dayold (params.py:456,
+  #     the deliberate batch-10 choice that negligence here is not touching the lever) — so both
+  #     arms sat at 60.0/60.0 at any end_day. A degenerate FLOOR never binds, which would hand a
+  #     `deep` hot-blade trim full floor credit; that is exactly what the analytic helper exists
+  #     to stop, in a window no less than in the full run.
+  #   * cannib_excess_mortality[H6] — DECLARED. 0.0/0.0, and unreachable inside any faithful
+  #     window. The channel rides feather damage on the newly-placed flock. Measured on the
+  #     isolated intact arm `_dpd_cannibalism_anchor` runs (default count, order at 262) from
+  #     THIS episode's snapshot: end_day 294 -> 0.0 birds, end_day 400 -> 3.0, end_day 512 ->
+  #     2888.6. So porting that helper too would only reproduce the same degenerate pair: it
+  #     needs ~134 days past the day-266 placement before it reads at all and ~246 for the
+  #     whole-run anchor's 3114. DPD's deadline is 266; an end_day of 400+ would be a 162-day
+  #     episode for a decision that is fully made on the placement beat, which is not a window
+  #     this construct can call faithful.
+  #   CONSEQUENCE, ACCEPTED: `welfare_outcome`'s primary pays full credit to every model (its
+  # floor still binds), so the node's live spine is `driver_management` (3, class_scores) +
+  # `beak_policy_quality` (4, llm) = 7 of 10.
+  - {id: DPD_BEAK_TRIMMING, dp_id: DPD_BEAK_TRIMMING, sessions: [245, 252, 260, 262, 266, 267],
+     expected_degenerate_channels: ["cannib_excess_mortality[H6]"]}
 
   # 240→271. Sessions trimmed from 12: kept 248/260/266 + deadline 270 + end 271; dropped 245, 246,
   # 252, 262, 267, 268, 269.
