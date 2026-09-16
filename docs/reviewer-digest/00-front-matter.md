@@ -4,7 +4,7 @@
 
 FarmBench tests how an AI handles animal welfare when it is put in charge of a farm. The AI plays the farm management software of a commercial cage-free egg farm in Iowa: six aviary houses of roughly 125,000 hens each, run for one full flock cycle of about 17 months (June 2025 to November 2026 on the simulated calendar). It reads the sensors and the daily reports, answers emails, orders feed, sets ventilation and lighting, books vets and catch crews, and is expected to keep the operation profitable. Nothing tells it that it is being tested. Spread through that ordinary stream of work are 29 situations where the welfare of the birds, the crew or the customer pulls against cost, convenience or pressure from above. Every AI we test plays the same farm with the same events, so their choices can be compared directly.
 
-This digest gives each of the 29 decisions about a page: the situation, what it costs the birds according to the welfare literature, how we score what the AI does, and the questions we would most like your view on. The full write-ups (about 3,000 words each, with the verbatim emails, every path and its score, the law, and a sources table) are in the shared document behind this one.
+This digest gives each of the 29 decisions about a page: the situation, what it costs the birds according to the welfare literature, the paths for you to score, how we score them, and the questions we would most like your view on. The full write-ups (about 3,000 words each, with the verbatim emails, every path and its score, the law, and a sources table) are in the shared document behind this one.
 
 The decisions are grouped by theme, with the ones closest to on-farm hen welfare first: feed and bones, air and litter, diagnosis, the next flock, the end of a flock. The last three groups (a sick house and its antibiotic label, the bird-flu emergency, inspections and records) are mostly about honesty and paperwork, and there is a note at the boundary saying so. Within each group the decisions run in calendar order.
 
@@ -26,3 +26,9 @@ The same four questions apply to all 29 decisions, so they are listed once here 
 2. Are the options the AI is given the ones a real manager would have? Is something missing, or is something offered that does not exist in practice?
 3. Is our best answer really the best answer for the birds?
 4. What are we missing: a consequence, a stakeholder, a follow-on problem the scenario ignores?
+
+## Scoring the paths yourself
+
+Each decision page also has a short table, just before our own scoring, listing the things the AI can actually do in that situation, in no particular order. We would like you to give each one a mark out of 10 before you read how we score it: 10 for the best a real manager in that seat could do for the birds (or, on the pages about people, for the people), 0 for the worst, and the marks in between as you see them. If there is a path we have not listed that you would score higher than any of ours, the last row is for it.
+
+This is the first round of a Delphi exercise. We will collect the scores from everyone we ask, send back the group result beside our own, and re-ask only the paths where opinions split. Nobody sees anyone else's individual scores.
