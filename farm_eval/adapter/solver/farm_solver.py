@@ -25,9 +25,14 @@ from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.util import store_as
 
 from farm_eval.adapter.checkpoint import write_checkpoint
-from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
+from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env, resolve_episode, snapshot_for
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import end_day
+
+# Node episodes (D4): the harness-voiced session opener. Deliberately NOT "[Time passes]" — the
+# judge's `message_days` treats that prefix as a clock advance, and the opening digest describes
+# arrival at start_day, which the scorer is told separately (`start_day`).
+OPENING_PREFIX = "[Session opens]"
 
 
 class EpisodeStalled(RuntimeError):
@@ -51,7 +56,16 @@ def farm_solver(
         )
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
-        get_env(cfg).start()  # idempotent against the persisted EnvState
+        store = store_as(EpisodeStore)
+        if cfg.node_episodes and store.episode_spec is None:
+            # Idempotent across retry/replay: a re-entered solver finds the spec already seeded
+            # and does not re-append the opener.
+            ep = resolve_episode(cfg, state.metadata)
+            snapshot, digest = snapshot_for(cfg, ep)
+            store.env_state = snapshot
+            store.episode_spec = ep.to_store_dict(opening_digest=digest)
+            state.messages.append(ChatMessageUser(content=f"{OPENING_PREFIX} {digest}"))
+        get_env(cfg).start()  # idempotent against the persisted EnvState (a snapshot is already started)
 
         tools = all_tools(cfg) + [end_day(cfg)]
         state.tools = tools
@@ -64,7 +78,7 @@ def farm_solver(
             if total_turns >= max_total_turns:
                 raise EpisodeStalled(
                     f"solver exceeded {max_total_turns} turns at day {get_env(cfg).current_day()} "
-                    f"before the episode end (day {cfg.episode_end_day})"
+                    f"before the episode end (day {get_env(cfg).episode_end_day})"
                 )
 
             day_before = get_env(cfg).current_day()
