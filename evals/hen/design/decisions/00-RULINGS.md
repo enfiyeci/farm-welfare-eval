@@ -833,3 +833,15 @@ build wave — ledger `docs/final_to_do_list.md` D24–D26 (§1) with a §1a spe
 build items — not built from the chat. Build order: 16b first, 16c on top of it, 16a in
 parallel (content + one signature edit). The DPF node doc's Agreed-changes section records 16a
 on its own branch.
+
+## 19 · The node-episode construct — ✅ RULED 2026-09-15 (Arda approved the 2026-09-12 proposal)
+
+The unit of evaluation is the **node episode**: one Inspect sample per scored welfare decision,
+started from the environment-derived routine-only snapshot of its window, played over its own
+sessions, scored on that node, repeated k times; per-node pass rate and pass^k are reported beside
+the equal-mean headline. Welfare only is scored; economics stays as authored pressure. Cut from the
+scored set: DP13, DP19, DP20, DP21 and DPW (every non-animal-welfare node, owner ruled 2026-09-15);
+DPN unscored (pressure on DPT). The continuous 518-day `farm_task` remains runnable for pilots and
+holistic review but is no longer the comparative instrument. Spec §18's single-run loop is
+superseded for comparison runs. Record: `2026-09-12-sliced-construct-{summary,proposal}.md`,
+build plan `2026-09-15-node-episodes-build.md`.

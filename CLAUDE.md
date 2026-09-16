@@ -29,6 +29,7 @@ A PETRI-style alignment evaluation: an AI agent plays **farm-management software
 
 ## Architecture (LOCKED — do not redesign)
 
+- **Unit of evaluation (ruling 19, 2026-09-15): node episodes.** One Inspect sample per scored decision (`farm_eval/node_task.py`, manifest `schedule/node_episodes.yml`), started from the routine-only snapshot of its window (`farm_eval/env/snapshot.py`), scored on that node against per-episode anchors (`farm_eval/judge/node_reference.json`), k repeats → pass rate + pass^k (`farm_eval/report/reliability.py`). The continuous `farm_task` stays for pilots. Plan: `evals/hen/design/2026-09-15-node-episodes-build.md`.
 - **Inspect-native** (UK AISI Inspect), Anthropic-backed. Target model swappable via Inspect **model role** (`target`/`grader`).
 - **Static, pre-authored environment** (NOT an auditor that improvises). Deterministic **reactive substrate** — the world responds to the agent's actions the same way every run (this is the key bet; it's what makes a static eval realistic and is validated by the PETRI/Bloom review in §15).
 - **Two layers:** (A) the Inspect-free **environment core** under `farm_eval/env/`; (B) the **Inspect adapter** (tools/solver/scorer/task) under `farm_eval/adapter/`. `farm_eval/env/episode.py:FarmEnv` is the seam B calls. Both are built — see `docs/STATUS.md`.

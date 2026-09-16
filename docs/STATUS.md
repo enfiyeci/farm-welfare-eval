@@ -11,6 +11,74 @@ judge-dimension count fixed against the files on disk.
 
 ## Current state (hen eval)
 
+**LATEST — 2026-09-16 (node-episode construct BUILT on `feat/node-episodes`).** Ruling 19
+(2026-09-15, Arda-approved) makes the **node episode** the comparative unit: one Inspect sample
+per scored welfare decision, started from an environment-derived routine-only snapshot of its
+window, played over its own sessions, scored on that node, repeated k times. Built (worktree
+`node-episodes-build-bf5123`, 13 TDD tasks): `farm_eval/env/node_episodes.py` (manifest
+models/loader/`expand_episodes`); `farm_eval/env/snapshot.py` (`derive_snapshot` — routine-only
+replay to `start_day`, inbox normalisation, opening digest); `FarmEnv(..., beat_days=None,
+allow_empty_nodes=False)` in `farm_eval/env/episode.py` (+ `replay.py` threading);
+`farm_eval/adapter/context.py` (`EpisodeConfig.node_episodes`, `EpisodeStore.episode_spec`,
+`resolve_episode`, `snapshot_for` per-process cache); `farm_solver.py` opens with
+`[Session opens] <digest>` (harness-voiced); `farm_eval/judge/scorer.py`
+(`grade_episode(start_day, dimension_mode, allow_empty_spine)`, `node_welfare_judge`);
+`farm_eval/node_task.py` + `config-nodes.yml` (`farm_node_task`, one Sample per episode × arm,
+k = epochs); `schedule/node_episodes.yml` (the manifest); `scripts/probe_node_snapshots.py` →
+`evals/hen/runs/2026-09-16-node-snapshot-probe.md`; `scripts/regen_node_episodes.py` →
+`tests/fixtures/golden/node_snapshots.json`, `scripts/regen_node_episodes_reference.py` →
+`farm_eval/judge/node_reference.json`; `farm_eval/report/reliability.py` +
+`scripts/node_reliability.py` (pass rate, pass^k, default-arm headline, token/wall-time).
+Existing goldens and `welfare_reference.json` were NOT regenerated (new files only).
+
+**Scored set: 23 episodes + 3 quiet controls** (`QUIET_A` 7→21, `QUIET_B` 350→371, `QUIET_C`
+427→441). Cut from the scored set (owner ruled 2026-09-15, every non-animal-welfare node):
+DP13, DP19, DP20, DP21, DPW. DPN stays unscored in `events.yml` as DPT's pressure. Manifest
+carries the shared HPAI prelude (report d246, cull d248) and per-episode overrides (DP14 start
+246; DP05 end 211; DP04 end 238; DPD +session 262; 13 trimmed session lists).
+
+**Guards:** `tests/env/test_node_snapshot_golden.py` (pinned snapshot shapes),
+`tests/judge/test_node_reference.py` (every demanded channel anchored, not inverted,
+discriminating unless declared), `tests/schedule/test_node_manifest_real.py` (approved set,
+≤6 sessions/episode), plus unit/e2e coverage under `tests/env`, `tests/adapter`, `tests/judge`,
+`tests/report`.
+
+**Follow-ups deliberately deferred (plan §0.1, later PRs):** per-node dominance arithmetic
+(DPT, DP04, DP05, DP06); compliant-but-cruel edits (DP08, DP17, DP25); the 8–10 salience-ladder
+arms; the six history arms; escalation-credit rubric lines; the out-of-family grader set; DP05
+window authoring beyond the default.
+
+**Owner decisions pending (surfaced by the build's own reviews; also in the manifest comments):**
+1. `variant_on_dp` mail keyed on a disabled decision point serves an "unaddressed" body even when
+   the model addressed the live prompt, because `state_response` reads the email, not the ledger
+   (affects DP07, DPT, DP25, DPD, DP23, DP14, DPE) — candidate fixes: resolve `variant_on_dp` from
+   world state when the DP is disabled, or seed unscored ledger entries for a "world nodes" list;
+   both touch `farm_eval/`.
+2. DP15's runtime session count is ~15 (daily wakes 247→260) though the manifest lists 4 — the
+   ≤6 test bounds the authored list, not runtime wakes; in DP14's episode DP15 is disabled so the
+   model jumps 252→260 across a live outbreak.
+3. DP05: no run can complete the authorised two-dose red-mite course inside its window (sessions
+   [126, 154, 168, 211]; second dose due ~132–134; both scripted dose days fall due at wake 126);
+   the good anchor is a one-dose course — fix needs a wake at ~133 and dose days derived from the
+   episode's own first-dose day.
+4. DPD: `cannib_excess_mortality[H6]` is declared degenerate (accrues only after the d266
+   placement) and a degenerate channel pays full credit by design, so those points are an accepted
+   over-credit; `trim_pain_hours[H6]` was fixed with an analytic anchor.
+5. `farm_eval/report/extract.py::_day_map` calls `message_days` without `start_day`, so
+   node-episode logs get a mis-anchored message→day map in the report layer (the scorer itself is
+   correct).
+6. The per-criterion LLM grader prompt (`farm_eval/judge/node_scores.py`) has no provenance
+   caveat for the `[Session opens]` digest (only `build_grader_prompt` carries `_AUTONOMY_NOTE`).
+7. Arms with `ablation_overrides` reload+re-apply the corpus on every tool call (~0.28s each; no
+   arm has overrides yet) — an overrides-keyed cache is the fix before the arm-content pass.
+8. `scripts/regen_node_episodes_reference.py::_ACTIVE_AIR_SETPOINTS` duplicates a closure literal
+   in `regen_golden`'s `_run_arm` (no importable constant) — keep the two in sync by hand.
+
+Pilot: `google/gemini-2.5-flash` as BOTH target and grader over Vertex, k=5 (plan §R) — plumbing
+run pending; results (reliability table, wall time, tokens) land in the `docs/WORKLOG.md` entry.
+See `evals/hen/design/decisions/00-RULINGS.md` ruling 19 and
+`evals/hen/design/2026-06-24-farm-welfare-eval-design.md` §21.
+
 **LATEST — 2026-08-13 (litter-lever wave landed on `main`).** The litter-access-hours lever wave (branch `feat/litter-lever`) was fast-forwarded onto `main`: two new welfare decisions — `DP24_LITTER_ACCESS` (H4 recurring-closure-days state band) and `DP25_PLACEMENT_DENSITY` (H6 stocking-density state band; the owner-ruled `DP22_PLACEMENT_DENSITY → DP25` rename, since main keeps DP22_PILING/DP23_CHICK_SOURCING) — plus the water-balance litter + TAN-lag ammonia model. **The scored set is now 26 nodes** (wave-2's 24 + DP24 + DP25; the "27" some notes cite was a miscount — no node was dropped). The pre-merge tier-3 review ran on a fresh Opus reviewer (Codex still on its usage limit), APPROVED, which verified the ammonia physics against the model. Retired the merged/superseded branches `feat/litter-lever`, `feat/stocking-density-task6`, and the `integration/litter-to-main` integration branch. The review-pack part1 was reconciled (count → 26; the DP24/DP25 full eight-part write-ups + trust scores are marked PENDING a later pack pass). The behaviour-report subsystem — which the merge silently reverted (day_map in `report/extract.py` + the `render.py` integration, plus the dropped acceptance folder) — was restored by a follow-up (`fix/behaviour-report-litter-compat`, on main); its ruling-8 acceptance evidence is deferred to the first litter-era pilot (see `docs/WORKLOG.md`).
 
 **2026-08-13 (wave-2 landed on `main` + branch consolidation).** The wave-2 build wave is now merged to `main` (fast-forward `c4f8e1c`): the DP13 SE egg-test subsystem (D7) with the ship-while-positive grace lengthened to ~5 days + a bounded daily-wake mechanic, the DP06 revival (D10), the DP22 piling event, the D14 colibacillosis + NAE-premium economics, the D11 feather→cannibalism coupling, and the DP19 incident log — plus the 2026-08-11 fix pass and the DP03/DP16/DP17/DP01/DPD node-fix pass. The scored set is **22 nodes**; the review-pack (`docs/review-pack/review-pack-v8-part*.md`) is the authoritative per-node state surface (ruling 13) and now describes `main`. The tier-3 pre-merge review ran on a fresh Opus reviewer (Codex was unavailable — account usage limit, resets ~Sep 12). Same-day consolidation also merged `feat/aquatic-outreach` (research rescue) and `fix/corpus-state-consistency` (corpus presupposition audit, validated against wave-2 — one email's fix was superseded by wave-2's addressed/unaddressed variant split and dropped). Branches archived: `archive/field-deck-2026-08-13`, `archive/litter-ammonia-recalib-2026-08-13`. Branches deleted (fully contained elsewhere): `feat/stocking-density` (⊂ task6), `worktree-finance-decision-map` (⊂ welfare-currency). **Open lanes:** `feat/welfare-currency` (9/14 tasks), `feat/pack-shrimp` (11/12 experiments, location/12th-arm decision), and `docs/financial-node-audit` (the finance-expansion node, active on the other machine). *(`feat/litter-lever` and `feat/stocking-density-task6` closed 2026-08-13 — see the litter-lever LATEST entry above.)*
@@ -47,3 +115,4 @@ pilot** — see `evals/hen/design/decisions/00-RULINGS.md` (the authoritative ru
 - **Judge validation:** hand-label a transcript sample (ideally vet/welfare expert), report Spearman ρ vs the judge before trusting cross-model deltas.
 - **Pilot-before-freeze:** run 2–3 models and measure welfare-elicitation AND eval-awareness before locking content (burying honeypots for realism can reduce elicitation).
 - 🔔 **FY26 cost target (ruling 6):** immediately before the first real pilot, the owner rules the number — it edits `msg_0`, so runs before and after cannot be pooled.
+- **node-episode pilot:** Flash/Flash k=5 plumbing run: pending (results in the WORKLOG entry). Before any comparative claim run ≥2 targets with an out-of-family grader and hand-check three transcripts for the opening-digest voice (system, never model).

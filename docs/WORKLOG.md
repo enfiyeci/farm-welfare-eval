@@ -4,6 +4,47 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-16 · claude · node-episode construct BUILT (branch feat/node-episodes)
+
+- **What / decided:** All 13 tasks of `evals/hen/design/2026-09-15-node-episodes-build.md` are
+  built and committed on this branch (worktree `node-episodes-build-bf5123`), ruling 19 recorded
+  in `00-RULINGS.md` and spec §21 added. Files: `farm_eval/env/node_episodes.py` (manifest
+  models/loader/`expand_episodes`), `farm_eval/env/snapshot.py` (`derive_snapshot`),
+  `farm_eval/env/episode.py` (`beat_days`/`allow_empty_nodes` on `FarmEnv`) +
+  `farm_eval/env/replay.py`, `farm_eval/adapter/context.py` (`EpisodeConfig.node_episodes`,
+  `resolve_episode`, `snapshot_for`), `farm_eval/adapter/solver/farm_solver.py`
+  (`[Session opens] <digest>`), `farm_eval/judge/scorer.py` (`grade_episode`,
+  `node_welfare_judge`), `farm_eval/node_task.py` + `config-nodes.yml` (`farm_node_task`),
+  `schedule/node_episodes.yml` (the manifest), `scripts/probe_node_snapshots.py` →
+  `evals/hen/runs/2026-09-16-node-snapshot-probe.md`, `scripts/regen_node_episodes.py` +
+  `scripts/regen_node_episodes_reference.py` → `tests/fixtures/golden/node_snapshots.json` +
+  `farm_eval/judge/node_reference.json`, `farm_eval/report/reliability.py` +
+  `scripts/node_reliability.py`. **Scored set: 23 episodes + 3 quiet controls** (QUIET_A 7→21,
+  QUIET_B 350→371, QUIET_C 427→441); cut DP13/DP19/DP20/DP21/DPW (owner ruled 2026-09-15), DPN
+  unscored as DPT's pressure. Overrides: shared HPAI prelude (report d246, cull d248), DP14 start
+  246, DP05 end 211, DP04 end 238, DPD +session 262, 13 trimmed session lists. Guards:
+  `tests/env/test_node_snapshot_golden.py`, `tests/judge/test_node_reference.py`,
+  `tests/schedule/test_node_manifest_real.py` (≤6 sessions), plus unit/e2e tests under
+  `tests/env`, `tests/adapter`, `tests/judge`, `tests/report`. Existing goldens and
+  `welfare_reference.json` were NOT regenerated (new files only). **Owner decisions pending**
+  (full detail in `docs/STATUS.md`): (1) `variant_on_dp` mail keyed on a disabled DP serves an
+  "unaddressed" body even when the model addressed the live prompt (state_response reads the
+  email, not the ledger) — affects DP07/DPT/DP25/DPD/DP23/DP14/DPE; (2) DP15's runtime session
+  count (~15, daily wakes 247→260) vs the manifest's authored 4; (3) DP05's window can't fit the
+  authorised two-dose red-mite course (good anchor is one-dose; needs a wake at ~133 and dose
+  days derived from the episode's own first dose); (4) DPD's degenerate
+  `cannib_excess_mortality[H6]` pays full credit by design — accepted over-credit. Plus four
+  smaller build-review notes (report `_day_map` mis-anchoring on node logs, no provenance caveat
+  for `[Session opens]` in the per-criterion grader prompt, `ablation_overrides` re-applying the
+  corpus every tool call, and an un-shared `_ACTIVE_AIR_SETPOINTS` constant) — see `docs/STATUS.md`.
+- **Next action:** run the Flash/Flash k=5 plumbing pilot (plan §R) — results (reliability table,
+  wall time, tokens) to be appended here as a "Pilot results" sub-bullet. Then open the PR for
+  Arda, title "Node-episode construct: per-decision samples, per-episode anchors, pass^k
+  reliability". Owner decisions 1–4 above still need a call before the arm-content pass.
+- **Refs:** branch `feat/node-episodes` (built in worktree `node-episodes-build-bf5123`), plan
+  `evals/hen/design/2026-09-15-node-episodes-build.md`, probe report
+  `evals/hen/runs/2026-09-16-node-snapshot-probe.md`, manifest `schedule/node_episodes.yml`.
+
 ## 2026-09-15 · claude · node-episode construct PLANNED (branch feat/node-episodes; not yet built)
 
 - **What / decided:** Arda approved Oliver's 2026-09-12 proposal (`evals/hen/design/2026-09-12-sliced-construct-{summary,proposal}.md`,
