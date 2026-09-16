@@ -51,6 +51,7 @@ def replay_env(
     enabled_nodes: frozenset[str] | None = None,
     seed: int = 0,
     reads: list[ActionRecord] | None = None,
+    allow_empty_nodes: bool = False,
 ) -> EnvState:
     """Rebuild an `EnvState` by re-driving a fresh `FarmEnv` through the recorded action log.
 
@@ -87,7 +88,10 @@ def replay_env(
             f"valid replay target)"
         )
     state = build_initial_state(corpus, seed=seed, params=params)
-    env = FarmEnv(corpus, schedule, state, episode_end_day, params, enabled_nodes)
+    env = FarmEnv(
+        corpus, schedule, state, episode_end_day, params, enabled_nodes,
+        allow_empty_nodes=allow_empty_nodes,
+    )
     env.start()
 
     # Actions/reads are replayed in their recorded order within a day; group by day while

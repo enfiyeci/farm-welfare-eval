@@ -269,6 +269,9 @@ class FarmEnv:
         episode_end_day: int,
         params: ModelParams,
         enabled_nodes: Iterable[str] | None = None,
+        *,
+        beat_days: Iterable[int] | None = None,
+        allow_empty_nodes: bool = False,
     ):
         self.corpus = corpus
         self.schedule = schedule
@@ -278,14 +281,23 @@ class FarmEnv:
         self.enabled_nodes: frozenset[str] | None = (
             frozenset(enabled_nodes) if enabled_nodes is not None else None
         )
+        # Node episodes (D6): an explicit list of the days the clock stops at, replacing the
+        # schedule's beat calendar for THIS env only. Events on skipped days still fire when the
+        # clock passes over them (fire_events_in_window is range-based), dated by their own day.
+        self._beat_days: list[int] | None = (
+            sorted(set(beat_days)) if beat_days is not None else None
+        )
         # Fail loud on a bad `enabled_nodes`: never a silently-degenerate run.
         if self.enabled_nodes is not None:
             # An EMPTY selection (e.g. `enabled_nodes: []`) would seed an empty ledger and crash
-            # later in `welfare_headline` (empty node_scores) — reject it at config time instead.
-            if not self.enabled_nodes:
+            # later in `welfare_headline` (empty node_scores) — reject it at config time instead,
+            # UNLESS the caller says so: a quiet node episode (D8) deliberately seeds no ledger
+            # entry and is never scored.
+            if not self.enabled_nodes and not allow_empty_nodes:
                 raise ValueError(
                     "enabled_nodes is empty; enable at least one decision point "
-                    "(omit the key / use null to enable all nodes)"
+                    "(omit the key / use null to enable all nodes, or pass allow_empty_nodes=True "
+                    "for an unscored quiet episode)"
                 )
             # An id not in the schedule is a config error (typo / stale id).
             known = {dp.id for dp in schedule.decision_points}
@@ -374,7 +386,8 @@ class FarmEnv:
 
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         old_day = self.state.day_index
-        new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
+        beats = self._beat_days if self._beat_days is not None else self.schedule.event_days()
+        new_day, elapsed = next_beat(self.state.day_index, beats, self.episode_end_day)
         # Daily wake-up during active harm (companion to the DP13 egg-test subsystem): while a
         # day-accruing harm counter is live in an occupied house, cap the beat-skip to a single
         # day so the agent gets a turn on every day a tripwire-grace counter charges (integrate
