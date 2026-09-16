@@ -106,6 +106,13 @@ Statuses move to RULED as decisions land; the ruling's output moves to §2.
 ## 2. To-dos for the big implementation run
 
 ### Standing (already ruled or recorded — no further decision needed)
+- [ ] **DPE moves earlier (owner ruling 2026-09-16):** `opens_day 252→77`, `deadline_day 294→119` (H4 28–34 wk),
+  email trigger to day 77; mechanism = the pinned §2c hazard modifier (ramps 0.80 × perch 0.78 on the daily
+  prevalence increment, window 20–50 wk), replacing option D for DPE; rewrite `keel_w36.md` for a 28-wk flock
+  and lint it; reword the `bone_nutrition_judgment` timing clause (a reasoned defer earns little); regenerate
+  goldens; re-home or drop the Q7 emergency-collision test. Spec and research: `nodes/DPE_KEEL_PERCH.md`
+  Agreed changes 2026-09-16 and `docs/reviewer-digest/research/2026-09-16-dpe-earlier-window.md`. Supersedes
+  the respace spec's DPE row (308–350).
 - [ ] AVMA 2026 Guidelines: read Chapter 6 (Poultry) properly, then refresh DP14's citation +
   tier vocabulary (`docs/future-work.md` §Refresh DP14's AVMA citation).
 - [ ] DP21 rubric re-base on US residue law (task_15bf7c81 — owner started it; fold in if

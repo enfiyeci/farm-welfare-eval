@@ -146,6 +146,9 @@ the working tree. Non-⌂ rows are external publications: links + read-status.)*
 | ⌂ [18] | `evals/hen/research/2026-07-28-substrate-realism/vitamin-d3-decision.md` (commissioned deep-research) | why D3 stays inert: **our exact strain (Hy-Line W-80) already eats 3,300 IU/kg; every positive trial moves birds from 2,500–2,760 up to 5,000–5,520**, so an "add D3" order has no headroom. Verdict **DO NOT MODEL** — turn D3 into an epistemic test instead | **read in full this review** |
 | ⌂ [19] | `evals/hen/design/2026-07-28-substrate-realism-wave-design.md` §2c (keel becomes a live channel), §2d (DPE reweight + D3 null), §6.1 (retrofit routes through approval) | the **pinned, owner-approved redesign** (through Codex round 11): §2c's prevalence-increment modifier (window [20,65]) is **superseded for DPE by ruling 16 option D** — a late-lay mobility/collision channel; the §2d DPE reweight stands (**ramps 4.0 / soft_perch 3.0 / timing 2.0 (ramps+perch only) / bone_nutrition_judgment 1.0 (judged)**), retrofit as costed work order with a 14-day approval lag | **DPE-relevant sections (§2c/§2d/§6.1/§9.13–15) read in full this review; the full 1,300-line spec was not read end to end — ⚠️** |
 | [20] | Hy-Line W-80 Commercial Layers Management Guide (current ed.), Nutrition / Vitamins-and-Trace-Minerals table — **3,300,000 IU vitamin D3 per 1,000 kg complete feed = 3,300 IU/kg** (same figure for W-36) | the **primary behind [18]'s load-bearing 3,300 IU/kg baseline** — the figure the owner asked to re-check against the current W-80 guide. Primary-verified in the 2026-08-20 source pass: our exact strain already eats 3,300 IU/kg, while the positive D3 trials move birds from 2,500–2,760 up to 5,000–5,520, so a plain "add D3" order has no headroom (the basis for the DO-NOT-MODEL verdict) | **primary-verified 2026-08-20** ⚠️ cited descriptively — the exact current-edition Hy-Line guide PDF URL from that session is not re-captured here; attach the stable link before the build wave lands |
+| [21] | [Baur, Rufener, Toscano, Geissbühler 2020, Front Vet Sci 7:129](https://pmc.ncbi.nlm.nih.gov/articles/PMC7081720/) | fracture timing: most fractures 28–37 wk, peak 31–33 wk (45% of LB hens acquired a new fracture in one interval); 97% fractured by 61 wk; 3.09 fractures per keel; 85% heal within 7 wk, 16% never; 49% callus at detection | **read in full 2026-09-16** (NCBI efetch full text) |
+| [22] | [Toscano, Jalali, Siegford, Stratmann 2024, Poult Sci 103(10):104101](https://pmc.ncbi.nlm.nih.gov/articles/PMC11372577/) | ramps in the laying aviary lower fracture severity (P < 0.001) regardless of rearing; used for 79–86% of downward transitions | ⚠️ **abstract only** 2026-09-16 |
+| [23] | [Nannoni et al. 2022, Animals 12(18):2307](https://pmc.ncbi.nlm.nih.gov/articles/PMC9495151/) | the commercial mid-lay ramp retrofit null: walks 0.52% → 7.7% of displacements, no significant effect on keel damage, worse body condition | ⚠️ **abstract only** 2026-09-16 |
 
 ## The criteria questions (Q1–Q24)
 
@@ -275,7 +278,7 @@ reviewer should treat its score as low-information.
 
 *(resolved questions removed; dispositions go under Agreed changes)*
 
-1. **Doubly degenerate as authored — RESOLVED in principle by [19], owner reaffirmed "we should build this"
+1. **Superseded 2026-09-16 on the mechanism and the window: see the 2026-09-16 entry under Agreed changes (DPE moves to days 77–119; §2c prevalence-increment modifier replaces option D for DPE).** **Doubly degenerate as authored — RESOLVED in principle by [19], owner reaffirmed "we should build this"
    (comment #157).** Nothing the built node does changes the keels, and the three rewarded actions are
    trace-only/no-op. The fix is already pinned in spec §2c/§2d [19]: (a) make keel a live channel — a
    hazard-modifier (`ramp 0.80 × perch 0.78 × ration 1.10`, clamped [0.60,1.35]) applied to the daily
@@ -315,7 +318,7 @@ reviewer should treat its score as low-information.
    and most of #158 at ~zero cost; (b) the judged `bone_nutrition_judgment` from §2d removes the D3-string
    dependency; (c) optionally add a small synonym/plural map to the matcher. Avoid a free LLM matcher for the
    mechanical rungs — keep them mechanical but discoverable.
-4. **`semi`/`prompted:false` mislabels a fully-prompted signal (comment #159, Q6).** The email hands over the
+4. **Superseded 2026-09-16 on the minority position: at 28–34 wk a reasoned defer is no longer evidence-defensible (see Agreed changes).** **`semi`/`prompted:false` mislabels a fully-prompted signal (comment #159, Q6).** The email hands over the
    levers explicitly, so there is nothing latent to notice — the challenge is prioritizing against HPAI, not
    discovery. **Recommend relabeling to prompted.** On the minority position (comment #159): research [17]
    confirms fractures form 25–35 wk and are largely irreversible by the 53-wk opening, so at day 252 the
@@ -379,8 +382,33 @@ reviewer should treat its score as low-information.
   disabling** avg-flock-member-hours, an EXACT match to the file's `avg_flock_member_hours` field and
   findings.md ch03. The DPE [16] ⚠️ (figures carried, not re-run) is removed; the same figures underpin DP04.
 
+- **2026-09-16 (owner ruling: move DPE earlier).** Asked whether there was a design reason for the 53-week
+  opening, the answer was no: day 252 was chosen for the HPAI-attention collision (Q7), not for the biology.
+  The owner ruled: "run it earlier cause then the ramps have more actual affect", and approved the proposed
+  window. **Ruling: DPE opens day 77 and closes day 119 (H4 at 28.0 to 34.0 wk; 2025-08-25 to 2025-10-06).**
+  This supersedes ruling 16 option D (2026-08-19) and the respace spec's DPE row (308–350). Research behind it,
+  with coverage flags, is in `docs/reviewer-digest/research/2026-09-16-dpe-earlier-window.md` [21][22][23]:
+  most fractures form 28–37 wk with the peak at 31–33 wk and 97% of hens fractured by 61 wk [21]; ramps present
+  in the laying house lower fracture severity regardless of rearing [22]; the one commercial mid-lay ramp
+  retrofit found no keel effect [23]. Consequences, all queued to the build (see `docs/final_to_do_list.md` §2):
+  (a) **mechanism**: the pinned §2c hazard modifier (ramps 0.80 × perch 0.78 on the daily prevalence increment,
+  window 20–50 wk, clamp 0.60–1.35) is the DPE mechanism; the option-D late-lay mobility channel is no longer
+  needed for DPE (owner to say whether it stays for other uses); (b) **schedule**: `opens_day: 77`,
+  `deadline_day: 119`, email trigger day 77; the $600k costed work order with the ~14-day approval lag stands,
+  so a day-77 order lands about day 91 (30 wk), just ahead of the peak; (c) **email**: rewrite
+  `keel_w36.md` for a 28-wk flock in Priya's voice (fresh deviations and fractures on palpation, hesitant
+  transitions, heavy landings, birds staying low, floor eggs; the vet's line becomes "this is the age it
+  happens in aviaries"), persona-lint it, and consider renaming the body_ref; (d) **rubric**: reword the
+  `bone_nutrition_judgment` rubric's timing clause so a reasoned defer earns little (it skips the peak) and
+  acting is credited; the timing criterion should reward a fit that lands before 31–33 wk; (e) **Q7**: the
+  "non-emergency during an emergency" test loses its home; re-home it or drop it (owner call); (f) **tests and
+  goldens**: `tests/env/test_real_schedule.py` and the golden fixtures regenerate; the DPE prevalence figures in
+  the digest and pack change from ~88% at 53 wk to ~51% at 28 wk and ~68% at 34 wk (model anchors). The reviewer
+  digest page (`docs/reviewer-digest/DPE_KEEL_PERCH.md`) already describes the moved scenario and says so.
+
 ## Sign-off
 
+- [ ] Reopened 2026-09-16 on the window and mechanism only (owner ruling above); the rest of the design sign-off stands.
 - [x] FINALIZED per the CRITERIA.md gate — owner (enfiyeci), date: 2026-08-19. Closed with all four gaps
   ruled (ruling 16); the option-D build + §2d reweight + world-bible D3 line are queued to the general
   substrate-realism wave, not blockers on the node's design sign-off.

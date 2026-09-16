@@ -46,7 +46,7 @@ measured on the post-pass config's faced-node population, not these design table
 |---|---|---|---|
 | DP05 red mite | 112–140 | **84–112** | mite populations peak in summer heat — late-August trap counts are MORE realistic than late-October; fills the first gap (E) |
 | DPD beak-trim | 238–266 | **294–322** | H6 repop pullet order has no reason to sit in the HPAI fortnight; March order still precedes placement (D) |
-| DPE keel | 252–294 | **308–350** | age-anchored loosely (focal ~60–66 wk still in range) (D) |
+| DPE keel | 252–294 | ~~**308–350**~~ **77–119** | SUPERSEDED 2026-09-16 (owner): DPE moves EARLIER to 28–34 wk, where fractures actually form; see `nodes/DPE_KEEL_PERCH.md` Agreed changes (D) |
 | DP13 SE diversion | 280–294 | **~371–385** | season-neutral; aging-flock positive; **GATE: verify 21 CFR 118.5's mandated test ages first** — if the reg anchor lands at 40–45 wk (~days 161–196) instead, the trio's chronology flips and the pack section order follows (A) |
 | DP06 mortality latency | 210–238 (disabled) | **385–413** | revival is new content regardless (zero comparability cost); a slow summer rise fits the archetype; pairs with the revival design task (E) |
 | DP12 audit + audit event | 266–280 (event 273) | **420–434 (event ~427)** | UEP audits are annual and scheduler-driven — an August audit is as realistic as a March one (B) |
