@@ -5,11 +5,11 @@
 #
 # Examples:
 #   # cheap plumbing check (truncated episode, Flash, ~pennies):
-#   scripts/run_pilot.sh config-smoke.yml google/gemini-2.5-flash google/gemini-2.5-flash
+#   scripts/run_pilot.sh config-smoke.yml google/gemini-3.8-flash google/gemini-3.8-flash
 #   # real single-model pilot (full 17-month episode, Pro target + Pro grader, ~$10-20):
 #   scripts/run_pilot.sh config.yml google/gemini-2.5-pro google/gemini-2.5-pro
 #   # sweep two targets, fixed Pro grader:
-#   scripts/run_pilot.sh config.yml google/gemini-2.5-pro google/gemini-2.5-flash google/gemini-2.5-pro
+#   scripts/run_pilot.sh config.yml google/gemini-2.5-pro google/gemini-3.8-flash google/gemini-2.5-pro
 #
 # Requires: Vertex ADC (run once: `gcloud auth application-default login`) and a Vertex env file.
 # Point PILOT_VERTEX_ENV at your Vertex config (see scripts/pilot-vertex.env.example); it defaults

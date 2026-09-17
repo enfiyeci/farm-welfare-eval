@@ -58,7 +58,7 @@ plan `evals/hen/design/2026-09-15-node-episodes-build.md`.
 
 ```bash
 inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-  --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash \
+  --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash \
   --epochs 5 --max-connections 8
 inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
   -T episode_ids=DP05_RED_MITE,DP04_PHOSPHORUS_RATION   # a subset of episodes

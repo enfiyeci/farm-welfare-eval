@@ -1717,7 +1717,7 @@ def farm_node_task(
 #     set -a; source /home/oliver/Documents/Github/farm-welfare-eval/scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
 #     INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
 #     $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-#         --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash \
+#         --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash \
 #         --epochs 5 --max-connections 8
 #     $PY scripts/node_reliability.py logs/<run>.eval
 #
@@ -2717,8 +2717,8 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## R. Local test run (before opening the PR)
 
-**Models (owner directive 2026-09-15): `google/gemini-2.5-flash` as BOTH target and grader for every
-smoke run, over Vertex.** Other targets and out-of-family graders are a later pass; a Flash-judging-Flash
+**Models (owner directive 2026-09-15, model SUPERSEDED 2026-09-17): `google/gemini-3.8-flash` — or a newer
+Flash once one exists, never `gemini-2.5-flash` again — as BOTH target and grader for every smoke run, over Vertex.** Other targets and out-of-family graders are a later pass; a Flash-judging-Flash
 number is a plumbing check, never a comparative claim (grader-family caveat, `docs/STATUS.md`).
 
 Auth + paths — this worktree has no venv and no git-ignored env file, so do NOT use
@@ -2736,7 +2736,7 @@ INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
 
 ```bash
 $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml -T episode_ids=DP05_RED_MITE \
-  -T dimension_mode=none --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash --epochs 1
+  -T dimension_mode=none --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash --epochs 1
 ```
 
    (`-T dimension_mode=none` requires `farm_node_task` to accept a `dimension_mode` kwarg override — add it
@@ -2747,7 +2747,7 @@ $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml -T episode_
 
 ```bash
 $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-  --model-role target=google/gemini-2.5-flash --model-role grader=google/gemini-2.5-flash --epochs 5 --max-connections 8
+  --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash --epochs 5 --max-connections 8
 ```
 
    then `$PY scripts/node_reliability.py logs/<file>.eval`. Wall time should be minutes, not hours
