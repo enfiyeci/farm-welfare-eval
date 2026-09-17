@@ -39,7 +39,7 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Next action:** owner answers the five asks in `2026-09-17-decisions-still-needed.md`; then the
   follow-up PR (disabled-decision mail fix + DP05 treatment-due wake + report `_day_map` + grader digest
   caveat), then the k=5 pilot on 3.8 Flash. Arda reviews the PR.
-- **Refs:** PR_LINE; plan `evals/hen/design/2026-09-15-node-episodes-build.md`; ruling 20
+- **Refs:** https://github.com/enfiyeci/farm-welfare-eval/pull/39; plan `evals/hen/design/2026-09-15-node-episodes-build.md`; ruling 20
   `evals/hen/design/decisions/00-RULINGS.md`.
 
 ## 2026-09-16 · claude · node-episode construct BUILT (branch feat/node-episodes)
