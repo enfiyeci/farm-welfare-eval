@@ -3,6 +3,7 @@ next wake-up (`no_wake`), never creating a beat of its own. WS4 skip-residue + W
 import pytest
 from pydantic import ValidationError
 
+from farm_eval.env import clock
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.events import fire_events_in_window
 from farm_eval.env.loader import Corpus, Schedule
@@ -89,6 +90,8 @@ def test_end_day_summary_carries_the_digest():
     env = _env([_ev(10, "beat mail")])
     env.start()
     result = env.end_day()
-    assert result.summary.startswith("Console session — Thursday 19 June 2025, 09:00 CDT (10 days since the previous session)")
+    assert result.summary.startswith(
+        f"Console session — Thursday 19 June 2025, {clock.session_open_text('2025-06-09', 10)} "
+        "(10 days since the previous session)")
     assert "day(s) pass" not in result.summary
     assert "Since last session" in result.summary

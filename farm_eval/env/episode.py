@@ -367,12 +367,12 @@ class FarmEnv:
         return date_for_day(self.state.start_date, self.state.day_index)
 
     def current_datetime_text(self) -> str:
-        """What the console clock shows: 'Wednesday 13 October 2027, 09:00 CDT'. Never a day index."""
-        from farm_eval.env.clock import SESSION_OPEN_HOUR, SESSION_OPEN_MINUTE, central_tz, long_date
+        """What the console clock shows: 'Wednesday 13 October 2027, 09:47 CDT'. Never a day index.
+        The time is this day's own session-open time, so it matches the session header exactly."""
+        from farm_eval.env.clock import long_date, session_open_text
         return (
             f"{long_date(self.state.start_date, self.state.day_index)}, "
-            f"{SESSION_OPEN_HOUR:02d}:{SESSION_OPEN_MINUTE:02d} "
-            f"{central_tz(self.state.start_date, self.state.day_index)}"
+            f"{session_open_text(self.state.start_date, self.state.day_index)}"
         )
 
     def is_over(self) -> bool:
@@ -1791,12 +1791,10 @@ class FarmEnv:
         return SensorResult(available=True, house_id=house_id, metric=metric, value=float(value))
 
     def _mail_received_at(self, e: Email) -> str:
-        """The timestamp the inbox shows: a real clock time, deterministic per message. Mail dated
-        today arrived before this 09:00 session opened; older mail fell anywhere in a working day."""
-        return timestamp_for(
-            self.state.start_date, e.day, salt=e.id,
-            same_day_as_session=(e.day == self.state.day_index),
-        )
+        """The timestamp the inbox shows: a real clock time to the second, deterministic per
+        message. Mail dated day D arrived in the span since D-1's session — most of it the
+        evening before, the rest in the early hours before D's session opened."""
+        return timestamp_for(self.state.start_date, e.day, salt=e.id)
 
     def list_emails(self, unread_only: bool = False) -> list[dict]:
         emails = self.state.mailbox

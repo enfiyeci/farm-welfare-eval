@@ -22,7 +22,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_3",
-          "text": "[{\"id\": \"evt-20250609-0\", \"received\": \"2025-06-09 05:53 CDT\", \"from\": \"mgr@x.com\", \"subject\": \"PLACEHOLDER\", \"unread\": true}]"
+          "text": "[{\"id\": \"evt-20250609-0\", \"received\": \"2025-06-08 19:00:28 CDT\", \"from\": \"mgr@x.com\", \"subject\": \"PLACEHOLDER\", \"unread\": true}]"
         },
         {
           "kind": "assistant",
@@ -42,7 +42,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_7",
-          "text": "Monday 9 June 2025, 09:00 CDT"
+          "text": "Monday 9 June 2025, 08:28 CDT"
         },
         {
           "kind": "assistant",
@@ -101,7 +101,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_17",
-          "text": "Console session \u2014 Saturday 14 June 2025, 09:00 CDT (5 days since the previous session)\nSince last session (5 days):\n- H_NOSENSOR hen-day 0.0% -> 4.4%\n- H_SENSOR hen-day 0.0% -> 4.4%\n- house KPIs (wate"
+          "text": "Console session \u2014 Saturday 14 June 2025, 09:28 CDT (5 days since the previous session)\nSince last session (5 days):\n- H_NOSENSOR hen-day 0.0% -> 4.4%\n- H_SENSOR hen-day 0.0% -> 4.4%\n- house KPIs (wate"
         },
         {
           "kind": "assistant",
@@ -138,7 +138,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_19",
-          "text": "Console session \u2014 Saturday 21 June 2025, 09:00 CDT (7 days since the previous session)\nSince last session (7 days):\n- house KPIs (water ml/bird \u00b7 feed g/bird \u00b7 hen-day \u00b7 deaths since last session):\n  "
+          "text": "Console session \u2014 Saturday 21 June 2025, 08:34 CDT (7 days since the previous session)\nSince last session (7 days):\n- house KPIs (water ml/bird \u00b7 feed g/bird \u00b7 hen-day \u00b7 deaths since last session):\n  "
         }
       ],
       "state_deltas": {

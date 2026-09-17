@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import clock
 from farm_eval.env.loader import load_corpus, load_schedule
 from farm_eval.env.model import ModelParams
 from farm_eval.env.node_episodes import PreludeAction, expand_episodes, load_node_manifest
@@ -39,7 +40,9 @@ def test_opening_digest_has_summary_format_and_gap():
     corpus, schedule, ep = _resolved()
     _, digest = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
     first, rest = digest.split("\n", 1)
-    assert first == "Console session — Thursday 19 June 2025, 09:00 CDT (5 days since the previous session)"   # last routine beat before 10 is 5
+    # last routine beat before 10 is day 5
+    assert first == (f"Console session — Thursday 19 June 2025, {clock.session_open_text('2025-06-09', 10)} "
+                     "(5 days since the previous session)")
     assert rest.startswith("Since last session (5 days):")
     assert "1 new message(s), 1 unread" in rest
 

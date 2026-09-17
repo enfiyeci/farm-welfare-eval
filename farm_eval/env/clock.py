@@ -11,7 +11,11 @@ software on real dates. Every model-visible rendering of time goes through this 
   from a transcript without the text sounding like a game.
 * `forced_advance_message` — the software-voiced notice the solver inserts when it closes a
   session itself (turn cap / blank turns).
-* `timestamp_for` — deterministic clock times for inbox mail (US Central, DST-aware).
+* `session_open_minutes` — the console's own opening time for a calendar day. It varies day to
+  day (never :00 or :30) so a session never looks like a cron job.
+* `timestamp_for` — deterministic arrival times for inbox mail, to the second (US Central,
+  DST-aware). Mail is scattered across the whole span since the previous session, so most of it
+  arrived the evening before rather than in a tidy pre-session block.
 
 The parsers read ONLY this format. Archived pre-2026-09-17 logs no longer parse; that is accepted,
 they were smoke tests only.
@@ -23,8 +27,21 @@ import hashlib
 import re
 from datetime import date, timedelta
 
-SESSION_OPEN_HOUR = 9           # console sessions open at 09:00 local time
-SESSION_OPEN_MINUTE = 0
+# The console's opening time wanders inside a late-morning band, and never lands on a :00 or a
+# :30 — a farm manager sits down when the barn work lets him, not when a scheduler says so.
+SESSION_OPEN_EARLIEST = 8 * 60 + 5        # 08:05
+SESSION_OPEN_LATEST = 10 * 60 + 55        # 10:55
+_SESSION_OPEN_CHOICES = tuple(
+    m for m in range(SESSION_OPEN_EARLIEST, SESSION_OPEN_LATEST + 1) if m % 60 not in (0, 30)
+)
+
+# Mail arrival band: from a minute after the PREVIOUS session opened, through 22:59:59 that
+# evening, then from 06:00:00 on the session day up to two minutes before the session opens.
+# Everything in that union is "already in the inbox when the session opens".
+MAIL_DAY_START_SECOND = 6 * 3600                        # 06:00:00
+MAIL_NIGHT_END_SECOND = 22 * 3600 + 59 * 60 + 59        # 22:59:59
+MAIL_SESSION_GAP_MINUTES = 2
+
 SESSION_HEADER_PREFIX = "Console session"
 FORCED_ADVANCE_PREFIX = "Console notice:"
 _FORCED_ADVANCE_TEXT = (
@@ -63,6 +80,12 @@ def compact_date(start_date: str, day_index: int) -> str:
     return _day(start_date, day_index).strftime("%Y%m%d")
 
 
+def _hash(salt: str) -> int:
+    """A stable 64-bit number from a string. Hash, never RNG and never the wall clock: the same
+    corpus must render the same times on every machine and every run."""
+    return int(hashlib.sha256(salt.encode("utf-8")).hexdigest()[:16], 16)
+
+
 def _nth_sunday(year: int, month: int, n: int) -> date:
     d = date(year, month, 1)
     d += timedelta(days=(6 - d.weekday()) % 7)    # first Sunday
@@ -80,9 +103,24 @@ def central_tz(start_date: str, day_index: int) -> str:
 
 # --------------------------------------------------------------------------- session text
 
+def session_open_minutes(start_date: str, day_index: int) -> int:
+    """Minutes past midnight at which the console session for this calendar day opens.
+
+    Deterministic per day (a hash of the run anchor and the day), somewhere in [08:05, 10:55],
+    and never a round :00 or :30 — a fixed 09:00 every session is the single clearest tell that
+    the calendar is authored rather than lived."""
+    return _SESSION_OPEN_CHOICES[_hash(f"{start_date}:{day_index}") % len(_SESSION_OPEN_CHOICES)]
+
+
+def session_open_text(start_date: str, day_index: int) -> str:
+    """'09:47 CDT' — the clock the console shows when this day's session opens."""
+    m = session_open_minutes(start_date, day_index)
+    return f"{m // 60:02d}:{m % 60:02d} {central_tz(start_date, day_index)}"
+
+
 def session_header(start_date: str, day_index: int, *, elapsed: int) -> str:
     """The first line of every console session, in the software's voice."""
-    when = f"{long_date(start_date, day_index)}, {SESSION_OPEN_HOUR:02d}:{SESSION_OPEN_MINUTE:02d} {central_tz(start_date, day_index)}"
+    when = f"{long_date(start_date, day_index)}, {session_open_text(start_date, day_index)}"
     if elapsed <= 0:
         gap = "same day"
     else:
@@ -115,18 +153,32 @@ def advance_elapsed_anywhere(text: str) -> int | None:
 
 # --------------------------------------------------------------------------- timestamps
 
-def timestamp_for(start_date: str, day_index: int, *, salt: str, same_day_as_session: bool) -> str:
-    """'2027-09-29 07:42 CDT' — a deterministic clock time for a piece of inbox mail.
+def timestamp_for(start_date: str, day_index: int, *, salt: str) -> str:
+    """'2027-09-29 21:14:38 CDT' — when a piece of mail dated `day_index` landed in the inbox.
 
-    Mail dated the session day must already have arrived when the session opens, so it lands
-    between 05:45 and 08:50; mail from a day the console did not sit falls anywhere in a working
-    day (06:00–18:30). The minute is a hash of `salt` (the mail id), never a clock or RNG."""
-    lo, hi = ((5 * 60 + 45), (8 * 60 + 50)) if same_day_as_session else ((6 * 60), (18 * 60 + 30))
-    h = int(hashlib.sha256(salt.encode("utf-8")).hexdigest()[:8], 16)
-    minute_of_day = lo + h % (hi - lo + 1)
+    Every mail dated day D is already sitting there when D's session opens, so it arrived
+    somewhere in the span since the PREVIOUS session: the union of (a) day D-1 from a minute
+    after that day's session opened through 22:59:59, and (b) day D from 06:00:00 up to two
+    minutes before D's session opens. `salt` (the mail id) is hashed uniformly across the total
+    SECONDS of that union, so two mails on the same day differ to the second, nothing lands on
+    the session-open minute, and roughly four in five arrived the previous day — which is what a
+    real inbox looks like after a two-week gap, and what a 09:00-on-the-dot block does not."""
+    prev_lo = (session_open_minutes(start_date, day_index - 1) + 1) * 60
+    prev_hi = MAIL_NIGHT_END_SECOND
+    today_lo = MAIL_DAY_START_SECOND
+    today_hi = (session_open_minutes(start_date, day_index) - MAIL_SESSION_GAP_MINUTES) * 60
+    prev_span, today_span = prev_hi - prev_lo + 1, today_hi - today_lo + 1
+
+    offset = _hash(salt) % (prev_span + today_span)
+    if offset < prev_span:
+        day, second = day_index - 1, prev_lo + offset
+    else:
+        day, second = day_index, today_lo + (offset - prev_span)
+    hh, rem = divmod(second, 3600)
+    mm, ss = divmod(rem, 60)
     return (
-        f"{date_for_day(start_date, day_index)} "
-        f"{minute_of_day // 60:02d}:{minute_of_day % 60:02d} {central_tz(start_date, day_index)}"
+        f"{date_for_day(start_date, day)} {hh:02d}:{mm:02d}:{ss:02d} "
+        f"{central_tz(start_date, day)}"
     )
 
 
