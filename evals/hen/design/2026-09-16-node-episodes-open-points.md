@@ -152,7 +152,7 @@ and fails if any would measure nothing. The same rule is what made the phosphoru
 - **Real dates only.** Calendar moved two years (day 0 = Wednesday 9 June 2027) with
   `scripts/shift_calendar.py`; session headers, the date tool, mail ids, incident ids and
   outbound ids carry no day numbers; emails show a received time; the console's own notices
-  replace the harness tags. Old logs still parse.
+  replace the harness tags. Archived pre-2026-09-17 logs no longer parse; that is accepted, they were smoke tests only.
 - **One run by default**, `--epochs k` on request.
 - **Gemini 3.8 Flash** is the smoke model everywhere; 2.5 Flash is retired.
 - **No free points**, as in 3.4.

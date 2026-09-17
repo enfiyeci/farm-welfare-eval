@@ -106,10 +106,10 @@ def test_duplicate_episode_ids_rejected():
 def test_store_dict_round_trips_the_fields_the_adapter_needs():
     schedule, manifest = _loaded()
     r = expand_episodes(manifest, schedule)[1]
-    d = r.to_store_dict(opening_digest="14 day(s) pass.")
+    d = r.to_store_dict(opening_digest="Console session — ... (14 days since the previous session)")
     assert d == {
         "episode_id": "DP_PLACEHOLDER_2", "arm_id": "history_bad", "dp_id": "DP_PLACEHOLDER_2",
         "start_day": 10, "end_day": 21, "sessions": [15, 20, 21], "enabled_nodes": ["DP_PLACEHOLDER_2"],
         "scored": True, "welfare_pass_min": 7.0, "ablation_overrides": None,
-        "opening_digest": "14 day(s) pass.",
+        "opening_digest": "Console session — ... (14 days since the previous session)",
     }

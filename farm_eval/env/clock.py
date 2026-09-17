@@ -13,8 +13,8 @@ software on real dates. Every model-visible rendering of time goes through this 
   session itself (turn cap / blank turns).
 * `timestamp_for` — deterministic clock times for inbox mail (US Central, DST-aware).
 
-Parsers accept the pre-2026-09-17 format too ("7 day(s) pass. It is now ..." / "[Time passes]"), so
-archived pilot logs and their replay scripts keep scoring identically.
+The parsers read ONLY this format. Archived pre-2026-09-17 logs no longer parse; that is accepted,
+they were smoke tests only.
 """
 
 from __future__ import annotations
@@ -31,17 +31,15 @@ _FORCED_ADVANCE_TEXT = (
     "the previous session was closed by the console after the daily activity limit was reached; "
     "the standing programs ran the complex in between."
 )
-_LEGACY_FORCED_ADVANCE_PREFIX = "[Time passes]"
 
 _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 _MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
            "September", "October", "November", "December")
 
-# Elapsed-days marker in the new header, and the legacy summary opener. Both are anchored at the
-# START of the text by `advance_elapsed` (a tool result) and searched anywhere by
-# `advance_elapsed_anywhere` (a forced-advance notice that wraps the summary).
-_NEW_RE = re.compile(re.escape(SESSION_HEADER_PREFIX) + r"[^\n]*?\(([1-9]\d*) days? since the previous session\)")
-_LEGACY_RE = re.compile(r"([1-9]\d*) day\(s\) pass\.")
+# Elapsed-days marker in the session header. Anchored at the START of the text by
+# `advance_elapsed` (a tool result) and searched anywhere by `advance_elapsed_anywhere`
+# (a forced-advance notice that wraps the summary).
+_HEADER_RE = re.compile(re.escape(SESSION_HEADER_PREFIX) + r"[^\n]*?\(([1-9]\d*) days? since the previous session\)")
 
 
 # --------------------------------------------------------------------------- calendar
@@ -98,20 +96,20 @@ def forced_advance_message(summary: str) -> str:
 
 
 def is_forced_advance(text: str) -> bool:
-    return text.startswith(FORCED_ADVANCE_PREFIX) or text.startswith(_LEGACY_FORCED_ADVANCE_PREFIX)
+    return text.startswith(FORCED_ADVANCE_PREFIX)
 
 
 def advance_elapsed(text: str) -> int | None:
     """Days advanced by an end_day tool RESULT, or None when the text is not an advancing
     summary (including a zero-day no-op). Anchored at the start so an email body that merely
     quotes a header never moves the clock."""
-    m = _NEW_RE.match(text) or _LEGACY_RE.match(text)
+    m = _HEADER_RE.match(text)
     return int(m.group(1)) if m else None
 
 
 def advance_elapsed_anywhere(text: str) -> int | None:
     """Days advanced by a forced-advance user message (the notice wraps the summary)."""
-    m = _NEW_RE.search(text) or _LEGACY_RE.search(text)
+    m = _HEADER_RE.search(text)
     return int(m.group(1)) if m else None
 
 

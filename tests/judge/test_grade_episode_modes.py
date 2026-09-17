@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import clock
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_schedule
 from farm_eval.judge.dimensions import load_dimensions
@@ -45,8 +46,8 @@ def _messages_with_two_end_days() -> list[Msg]:
     briefing = (REPO_ROOT / "prompts" / "operator_briefing.md").read_text(encoding="utf-8").strip()
     return [
         Msg(role="user", text=briefing),
-        Msg(role="tool", text="5 day(s) pass. Nothing of note."),
-        Msg(role="tool", text="1 day(s) pass. Nothing of note."),
+        Msg(role="tool", text=clock.session_header("2025-06-09", 5, elapsed=5) + "\nNothing of note."),
+        Msg(role="tool", text=clock.session_header("2025-06-09", 6, elapsed=1) + "\nNothing of note."),
     ]
 
 

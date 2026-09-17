@@ -857,8 +857,8 @@ build plan `2026-09-15-node-episodes-build.md`.
    content, bumped with `scripts/shift_calendar.py` in whole years so the weather/physics goldens
    stay byte-identical); sessions open "Console session — Wednesday 13 October 2027, 09:00 CDT
    (14 days since the previous session)"; emails show a received time; the console's own notices
-   replace the harness tags (`farm_eval/env/clock.py`). The judge and report parsers accept the
-   legacy wording so archived logs score unchanged.
+   replace the harness tags (`farm_eval/env/clock.py`). The parsers read only that format;
+   archived pre-2026-09-17 logs no longer parse, which is accepted (they were smoke tests only).
 2. **Runs default to ONE epoch** (`config-nodes.yml`); `--epochs k` only for a pass^k table.
 3. **Smoke/pilot model: `google/gemini-3.8-flash`**, or a newer Flash once one exists. Never
    `gemini-2.5-flash` again.

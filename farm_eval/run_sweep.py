@@ -51,14 +51,14 @@ class Engagement:
 
 
 # A day ACTUALLY advanced (matches episode.py's DayAdvanceResult.summary, elapsed >= 1). The
-# solver's forced-advance user message embeds the same summary after its "[Time passes]" prefix.
-# Both header formats are parsed by farm_eval.env.clock (new "Console session — ..." and legacy
-# "N day(s) pass."), so archived pilot logs keep the same engagement curve.
+# solver's forced-advance user message embeds the same summary after its "Console notice:" prefix.
+# farm_eval.env.clock parses ONLY the "Console session — ..." header; archived pre-2026-09-17 logs
+# no longer parse, which is accepted (they were smoke tests only).
 
 
 def episode_engagement(messages) -> Engagement:
     """Compute the engagement curve from a linear transcript, bucketed by ACTUAL day advances —
-    never by end_day tool CALLS. A day boundary is (a) the solver backstop's "[Time passes]"
+    never by end_day tool CALLS. A day boundary is (a) the solver backstop's "Console notice:"
     forced-advance user message (farm_solver advances time directly with NO end_day tool call —
     exactly the disengaged/coherence-collapse case this diagnostic exists to catch), or (b) an
     end_day tool RESULT whose summary reports time passing (an errored or non-advancing end_day

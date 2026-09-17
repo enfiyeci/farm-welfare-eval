@@ -22,8 +22,7 @@ Wednesdays instead of Mondays. The date is content (`corpus/company.yml`), bumpe
 is now 2027-10-13". The date/time tool returns the same style. Email ids, incident numbers and
 outbound-mail ids no longer embed the day index. The "[Time passes]" and "[Session opens]" tags
 are gone; when the console closes a session itself it says so as software ("Console notice: ...").
-The judge and the report layer read both the new and the old wording, so archived pilot logs
-still score the same.
+The judge and the report layer read only the new wording. Archived pre-2026-09-17 logs no longer parse; that is accepted, they were smoke tests only.
 
 **Emails carry a received time.** Deterministic per message, US Central with daylight saving
 handled; mail dated the session day arrives before the 09:00 session opens, older mail falls in

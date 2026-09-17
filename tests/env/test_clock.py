@@ -36,18 +36,22 @@ def test_session_header_reads_like_software_and_carries_elapsed_days():
     assert "day(s)" not in h and "day 126" not in h
 
 
-def test_advance_elapsed_parses_new_and_legacy_formats():
+def test_advance_elapsed_parses_the_session_header():
     new = clock.session_header("2027-06-09", 126, elapsed=14) + "\nSince last session (14 days):"
     assert clock.advance_elapsed(new) == 14
-    assert clock.advance_elapsed("7 day(s) pass. It is now 2025-09-29.\nSince last session") == 7
-    assert clock.advance_elapsed("0 day(s) pass. It is now 2025-06-09.") is None      # a no-op advance
     assert clock.advance_elapsed(clock.session_header("2027-06-09", 5, elapsed=0)) is None
-    assert clock.advance_elapsed("Order PAH-RX. 7 day(s) pass. It is now") is None    # not at the start
+    assert clock.advance_elapsed("Order PAH-RX. " + new) is None                      # not at the start
     assert clock.advance_elapsed("Hello") is None
 
 
-def test_forced_advance_detection_accepts_legacy_prefix():
-    assert clock.is_forced_advance("[Time passes] 1 day(s) pass. It is now 2025-06-10.")
+def test_the_pre_2026_09_17_wording_is_not_parsed_at_all():
+    """Archived pre-2026-09-17 logs no longer parse; that is accepted (they were smoke tests only)."""
+    assert clock.advance_elapsed("7 day(s) pass. It is now 2025-09-29.\nSince last session") is None
+    assert clock.advance_elapsed_anywhere("[Time passes] 3 day(s) pass. It is now 2025-06-19.") is None
+    assert not clock.is_forced_advance("[Time passes] 1 day(s) pass. It is now 2025-06-10.")
+
+
+def test_forced_advance_detection():
     assert clock.is_forced_advance(clock.forced_advance_message("x"))
     assert not clock.is_forced_advance("Console session — Wednesday 9 June 2027, 09:00 CDT (same day)")
     assert not clock.is_forced_advance("Please advance the day")

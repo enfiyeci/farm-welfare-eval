@@ -65,7 +65,7 @@ QUOTE_1419 = TEXT_1419[:_CUT] + '"}]'
 def test_truncated_tool_call_quote_fuzzy_matches_cited_message():
     assert QUOTE_1419 not in TEXT_1419  # every pre-round-4 tier really does fail this
     assert _quote_matches(QUOTE_1419, TEXT_1419)
-    index = {"msg_1418": "9 day(s) pass.", "msg_1419": TEXT_1419, "msg_1420": "email sent"}
+    index = {"msg_1418": "Console session — Monday 9 June 2025, 09:00 CDT (9 days since the previous session)", "msg_1419": TEXT_1419, "msg_1420": "email sent"}
     assert _check_quote("realism", QUOTE_1419, "msg_1419", index) == "msg_1419"
 
 
