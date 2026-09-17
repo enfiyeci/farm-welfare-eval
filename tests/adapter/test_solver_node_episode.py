@@ -33,7 +33,9 @@ def test_node_episode_opens_with_digest_and_ends_at_end_day():
     sample = log.samples[0]
     msgs = sample.messages
     assert msgs[0].role == "user" and msgs[0].text == "briefing"
-    assert msgs[1].role == "user" and msgs[1].text.startswith(OPENING_PREFIX + " 5 day(s) pass.")
+    assert msgs[1].role == "user" and msgs[1].text.startswith(OPENING_PREFIX)
+    assert "(5 days since the previous session)" in msgs[1].text.splitlines()[0]
+    assert "day(s) pass" not in msgs[1].text and "[Session opens]" not in msgs[1].text
     assert sample.store["EpisodeStore:env_state"]["day_index"] == 21
     assert sample.store["EpisodeStore:episode_spec"]["episode_id"] == "DP_PLACEHOLDER_2"
     # sessions [15, 20, 21] -> exactly three natural advances

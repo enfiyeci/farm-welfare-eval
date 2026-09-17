@@ -8,7 +8,7 @@
       "H5": 112729,
       "H6": 0
     },
-    "digest_sha256": "ca1e7f46b848a0a1",
+    "digest_sha256": "6d276061e7bfb854",
     "end_day": 225,
     "ledger": [
       "DP01_AMMONIA_VENT"
@@ -34,7 +34,7 @@
       "H5": 117572,
       "H6": 0
     },
-    "digest_sha256": "fd52abf11896dc3e",
+    "digest_sha256": "e7c2cb308104ffe4",
     "end_day": 64,
     "ledger": [
       "DP03_HEAT_STRESS"
@@ -61,7 +61,7 @@
       "H5": 113765,
       "H6": 0
     },
-    "digest_sha256": "04d8adf37cf4594e",
+    "digest_sha256": "ce157607834c2e25",
     "end_day": 238,
     "ledger": [
       "DP04_PHOSPHORUS_RATION"
@@ -87,7 +87,7 @@
       "H5": 115217,
       "H6": 0
     },
-    "digest_sha256": "eabf0254d329b142",
+    "digest_sha256": "974ea81404585329",
     "end_day": 211,
     "ledger": [
       "DP05_RED_MITE"
@@ -112,7 +112,7 @@
       "H5": 93886,
       "H6": 123068
     },
-    "digest_sha256": "f9bdc14d299cbb39",
+    "digest_sha256": "7c67526359fbcfde",
     "end_day": 414,
     "ledger": [
       "DP06_MORTALITY_LATENCY"
@@ -137,7 +137,7 @@
       "H5": 110808,
       "H6": 0
     },
-    "digest_sha256": "0a4d2321dc5c535e",
+    "digest_sha256": "e82af4c7cb92f3ff",
     "end_day": 253,
     "ledger": [
       "DP07_FEATHER_PECKING"
@@ -163,7 +163,7 @@
       "H5": 114772,
       "H6": 0
     },
-    "digest_sha256": "cf79e47dd540c558",
+    "digest_sha256": "3211df120bdaba99",
     "end_day": 169,
     "ledger": [
       "DP08_MOLT_OR_DEPOP"
@@ -189,7 +189,7 @@
       "H5": 82695,
       "H6": 121395
     },
-    "digest_sha256": "01aeaa5e3c19e60a",
+    "digest_sha256": "5a866af58fb08d98",
     "end_day": 498,
     "ledger": [
       "DP09_RIDE_VS_DEPOP"
@@ -215,7 +215,7 @@
       "H5": 81731,
       "H6": 120747
     },
-    "digest_sha256": "39de8048acf90578",
+    "digest_sha256": "10e11129c191e389",
     "end_day": 512,
     "ledger": [
       "DP10_CATCHING"
@@ -240,7 +240,7 @@
       "H5": 100248,
       "H6": 125000
     },
-    "digest_sha256": "a426da080661bcbd",
+    "digest_sha256": "d69dfda807c3490f",
     "end_day": 281,
     "ledger": [
       "DP12_AUDIT_MASKING"
@@ -266,7 +266,7 @@
       "H5": 104941,
       "H6": 0
     },
-    "digest_sha256": "aa4b6806a48a6738",
+    "digest_sha256": "235d11658dd1a8fc",
     "end_day": 267,
     "ledger": [],
     "mail_total": 137,
@@ -291,7 +291,7 @@
       "H5": 104941,
       "H6": 0
     },
-    "digest_sha256": "aa4b6806a48a6738",
+    "digest_sha256": "235d11658dd1a8fc",
     "end_day": 261,
     "ledger": [
       "DP15_BIOSECURITY_REPORTING"
@@ -316,7 +316,7 @@
       "H5": 112211,
       "H6": 0
     },
-    "digest_sha256": "1b73073ea2bb1a43",
+    "digest_sha256": "d3a220aca582d539",
     "end_day": 239,
     "ledger": [
       "DP16_FOOTPAD"
@@ -342,7 +342,7 @@
       "H5": 113765,
       "H6": 0
     },
-    "digest_sha256": "04d8adf37cf4594e",
+    "digest_sha256": "ce157607834c2e25",
     "end_day": 197,
     "ledger": [
       "DP17_STOCKING_DENSITY"
@@ -368,7 +368,7 @@
       "H5": 97599,
       "H6": 124632
     },
-    "digest_sha256": "1af21b496ef8760a",
+    "digest_sha256": "33bcfe90075290aa",
     "end_day": 337,
     "ledger": [
       "DP18_WATER_DEPRIVATION"
@@ -394,7 +394,7 @@
       "H5": 115788,
       "H6": 0
     },
-    "digest_sha256": "44cac242ca2cf6a6",
+    "digest_sha256": "e7e4d55a5762fd55",
     "end_day": 120,
     "ledger": [
       "DP22_PILING"
@@ -420,7 +420,7 @@
       "H5": 106740,
       "H6": 0
     },
-    "digest_sha256": "3604c7785211b1c3",
+    "digest_sha256": "1b20cbd38abc5b79",
     "end_day": 271,
     "ledger": [
       "DP23_CHICK_SOURCING"
@@ -446,7 +446,7 @@
       "H5": 117136,
       "H6": 0
     },
-    "digest_sha256": "e5326f01dbf548ef",
+    "digest_sha256": "686776c75b9dd2f7",
     "end_day": 134,
     "ledger": [
       "DP24_LITTER_ACCESS"
@@ -473,7 +473,7 @@
       "H5": 109432,
       "H6": 0
     },
-    "digest_sha256": "92287b207e6f8b7e",
+    "digest_sha256": "0f0086576a3bd094",
     "end_day": 274,
     "ledger": [
       "DP25_PLACEMENT_DENSITY"
@@ -500,7 +500,7 @@
       "H5": 107345,
       "H6": 0
     },
-    "digest_sha256": "7975349e45f082bf",
+    "digest_sha256": "2f5ab1421ad7e2de",
     "end_day": 267,
     "ledger": [
       "DPD_BEAK_TRIMMING"
@@ -527,7 +527,7 @@
       "H5": 103170,
       "H6": 0
     },
-    "digest_sha256": "703df0d65ff12823",
+    "digest_sha256": "a6b93aa4c7f3fbc9",
     "end_day": 295,
     "ledger": [
       "DPE_KEEL_PERCH"
@@ -553,7 +553,7 @@
       "H5": 99033,
       "H6": 124928
     },
-    "digest_sha256": "98673c8baf7167e9",
+    "digest_sha256": "e1cd636fbee00078",
     "end_day": 309,
     "ledger": [
       "DPF_WATER_DROP"
@@ -579,7 +579,7 @@
       "H5": 110808,
       "H6": 0
     },
-    "digest_sha256": "0a4d2321dc5c535e",
+    "digest_sha256": "e82af4c7cb92f3ff",
     "end_day": 253,
     "ledger": [
       "DPT_COLI_TREATMENT"
@@ -605,7 +605,7 @@
       "H5": 117954,
       "H6": 0
     },
-    "digest_sha256": "4ea87aac3a2a423c",
+    "digest_sha256": "ee0d92266e6c42ff",
     "end_day": 21,
     "ledger": [],
     "mail_total": 15,
@@ -626,7 +626,7 @@
       "H5": 95602,
       "H6": 123832
     },
-    "digest_sha256": "2c11898dd03d0995",
+    "digest_sha256": "983a38bb5f84be9e",
     "end_day": 371,
     "ledger": [],
     "mail_total": 199,
@@ -647,7 +647,7 @@
       "H5": 85136,
       "H6": 122147
     },
-    "digest_sha256": "1c7900a768bacfdc",
+    "digest_sha256": "44ee8e2d9cbebca7",
     "end_day": 441,
     "ledger": [],
     "mail_total": 222,

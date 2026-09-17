@@ -41,7 +41,7 @@ TWO gates, and both are load-bearing:
 from __future__ import annotations
 
 from farm_eval.env.addressing import domain_matches, parse_recipients
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.state import Email, EnvState
@@ -148,7 +148,7 @@ def deliver_authorization_mail(
     if any(e.id.startswith("hpai-auth-") for e in state.mailbox):
         return 0
     state.mailbox.append(Email.model_validate({
-        "id": f"hpai-auth-{through_day}",
+        "id": f"hpai-auth-{compact_date(state.start_date, through_day)}",
         "day": through_day,
         "date": date_for_day(state.start_date, through_day),
         "from": sender,

@@ -22,7 +22,7 @@ the vet/provider identities, lags, product and EPA registration come from `corpu
 
 from __future__ import annotations
 
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.state import Email, EnvState, HouseWelfare, MiteControlOrder
 
@@ -277,7 +277,7 @@ def _fill(text: str, order: MiteControlOrder, state: EnvState, params: ModelPara
 
 def _mail(state: EnvState, corpus, day: int, sender: str, subject: str, body: str) -> None:
     state.mailbox.append(Email.model_validate({
-        "id": f"mite-{day}-{len(state.mailbox)}",
+        "id": f"mite-{compact_date(state.start_date, day)}-{len(state.mailbox)}",
         "day": day,
         "date": date_for_day(state.start_date, day),
         "from": sender,

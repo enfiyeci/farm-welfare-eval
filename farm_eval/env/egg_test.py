@@ -10,7 +10,7 @@ no LLM. The body states the result and which test-of-four it was (or that it was
 
 from __future__ import annotations
 
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
 
@@ -27,7 +27,7 @@ def deliver_egg_test_mail(state: EnvState, corpus: Corpus, through_day: int, par
         if order.delivered or not order.resolved or order.result_day > through_day:
             continue
         state.mailbox.append(Email.model_validate({
-            "id": f"egt-{through_day}-{len(state.mailbox)}",
+            "id": f"egt-{compact_date(state.start_date, through_day)}-{len(state.mailbox)}",
             "day": through_day,
             "date": date_for_day(state.start_date, through_day),
             "from": cfg["from"],

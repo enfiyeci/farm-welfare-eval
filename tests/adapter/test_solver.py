@@ -8,6 +8,7 @@ from inspect_ai.dataset import Sample
 from inspect_ai.model import ModelOutput, get_model
 
 from farm_eval.adapter.context import EpisodeConfig
+from farm_eval.env.clock import is_forced_advance
 from farm_eval.adapter.solver.farm_solver import farm_solver
 
 FIX = Path(__file__).resolve().parents[1] / "fixtures"
@@ -54,7 +55,7 @@ def test_backstop_advance_is_visible_in_transcript():
     target = get_model("mockllm/model", custom_outputs=_reads(50))
     log = _eval(target, max_turns_per_day=3)
     msgs = log.samples[0].messages
-    assert any("Time passes" in (m.text or "") for m in msgs if m.role == "user")
+    assert any(is_forced_advance(m.text or "") for m in msgs if m.role == "user")
 
 
 def test_forced_advances_counter_zero_when_agent_always_ends_day():
@@ -102,7 +103,7 @@ def test_first_blank_turn_gets_a_continuation_nudge():
     target = get_model("mockllm/model", custom_outputs=[_blank() for _ in range(60)])
     log = _eval(target, max_turns_per_day=10)
     msgs = log.samples[0].messages
-    assert any("No output received" in (m.text or "") for m in msgs if m.role == "user")
+    assert any("no input was received" in (m.text or "") for m in msgs if m.role == "user")
 
 
 def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():

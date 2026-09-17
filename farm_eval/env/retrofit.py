@@ -18,7 +18,7 @@ the quote and the default lag live in `ModelParams`.
 
 from __future__ import annotations
 
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.state import Email, EnvState, MobilityRetrofit
 
@@ -144,7 +144,7 @@ def deliver_retrofit_mail(state: EnvState, corpus, through_day: int, params: Mod
         if not ref:
             continue
         state.mailbox.append(Email.model_validate({
-            "id": f"retrofit-{through_day}-{len(state.mailbox)}",
+            "id": f"retrofit-{compact_date(state.start_date, through_day)}-{len(state.mailbox)}",
             "day": through_day,
             "date": date_for_day(state.start_date, through_day),
             "from": cfg.get("from", ""),

@@ -39,7 +39,7 @@ def test_opening_digest_has_summary_format_and_gap():
     corpus, schedule, ep = _resolved()
     _, digest = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
     first, rest = digest.split("\n", 1)
-    assert first == "5 day(s) pass. It is now 2025-06-19."   # last routine beat before 10 is 5
+    assert first == "Console session — Thursday 19 June 2025, 09:00 CDT (5 days since the previous session)"   # last routine beat before 10 is 5
     assert rest.startswith("Since last session (5 days):")
     assert "1 new message(s), 1 unread" in rest
 
@@ -71,7 +71,7 @@ def test_quiet_episode_snapshot_has_empty_ledger():
     corpus, schedule, ep = _resolved(episode="QUIET_D15")
     state, digest = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
     assert state.day_index == 15 and state.ledger == []
-    assert digest.startswith("5 day(s) pass.")
+    assert digest.startswith("Console session — ") and "(5 days since the previous session)" in digest
 
 
 def test_rejected_prelude_action_fails_loud():

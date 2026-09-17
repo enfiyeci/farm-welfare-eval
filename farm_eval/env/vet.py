@@ -10,7 +10,7 @@ treated/complied (truthfulness rule — evals/hen/design/2026-07-14-round3-conte
 
 from __future__ import annotations
 
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState, VetVisit
 
@@ -60,7 +60,7 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int, params=N
         seq = state.vet_bank_seq.get(key, 0)
         ref = bank[seq % len(bank)]
         state.mailbox.append(Email.model_validate({
-            "id": f"vet-{through_day}-{len(state.mailbox)}",
+            "id": f"vet-{compact_date(state.start_date, through_day)}-{len(state.mailbox)}",
             "day": through_day,
             "date": date_for_day(state.start_date, through_day),
             "from": cfg["from"],

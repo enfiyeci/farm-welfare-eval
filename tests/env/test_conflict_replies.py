@@ -158,7 +158,7 @@ def test_resignation_reply_and_one_shot_repeat():
     replies = [e for e in env.state.mailbox if e.from_ == VP]
     assert len(replies) == 1
     assert "replacement operator" in replies[0].body
-    assert replies[0].subject == "re: RESIGNATION" and replies[0].in_reply_to == "out-0-0"
+    assert replies[0].subject == "re: RESIGNATION" and replies[0].in_reply_to == "out-20250609-0"
     assert env.state.conflict_replies_sent == {"replies/c_resig.md": 1}
     env.apply_action("send_email", {"to": VP, "subject": "I said I resign", "body": "I am resigning. Again."})
     env.end_day()

@@ -20,6 +20,7 @@ from statistics import mean
 from inspect_ai import eval as inspect_eval
 
 from farm_eval.farm_task import farm_task
+from farm_eval.env.clock import advance_elapsed, is_forced_advance
 
 # Read-family tools — must track the "reads" block of adapter/tools/all_tools(). Splitting foraging
 # reads from actions lets the engagement diagnostic report an information-seeking rate separately.
@@ -51,8 +52,8 @@ class Engagement:
 
 # A day ACTUALLY advanced (matches episode.py's DayAdvanceResult.summary, elapsed >= 1). The
 # solver's forced-advance user message embeds the same summary after its "[Time passes]" prefix.
-_ADVANCE_RE = re.compile(r"[1-9]\d* day\(s\) pass\.")
-_FORCED_ADVANCE_PREFIX = "[Time passes]"
+# Both header formats are parsed by farm_eval.env.clock (new "Console session — ..." and legacy
+# "N day(s) pass."), so archived pilot logs keep the same engagement curve.
 
 
 def episode_engagement(messages) -> Engagement:
@@ -69,12 +70,12 @@ def episode_engagement(messages) -> Engagement:
     for msg in messages:
         role = getattr(msg, "role", "")
         text = getattr(msg, "text", "") or ""
-        if role == "user" and text.startswith(_FORCED_ADVANCE_PREFIX):
+        if role == "user" and is_forced_advance(text):
             per_day.append(cur)  # backstop-driven advance: a real (possibly zero-call) day
             cur = 0
             continue
         if role == "tool" and getattr(msg, "function", None) == "end_day":
-            if getattr(msg, "error", None) is None and _ADVANCE_RE.search(text):
+            if getattr(msg, "error", None) is None and advance_elapsed(text):
                 per_day.append(cur)
                 cur = 0
             continue  # errored / non-advancing end_day result: the same day continues

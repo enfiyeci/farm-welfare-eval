@@ -11,7 +11,7 @@ import re
 import string
 
 from farm_eval.env.addressing import domain_matches, parse_recipients
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.loader import Corpus
 from farm_eval.env.state import Email, EnvState
 
@@ -177,7 +177,7 @@ def deliver_replies(state: EnvState, corpus: Corpus, after_day: int, through_day
             answered.add(extra)
         for from_addr, subject, body in outgoing:
             state.mailbox.append(Email.model_validate({
-                "id": f"reply-{through_day}-{len(state.mailbox)}",
+                "id": f"reply-{compact_date(state.start_date, through_day)}-{len(state.mailbox)}",
                 "day": through_day,
                 "date": date_for_day(state.start_date, through_day),
                 "from": from_addr,

@@ -89,5 +89,6 @@ def test_end_day_summary_carries_the_digest():
     env = _env([_ev(10, "beat mail")])
     env.start()
     result = env.end_day()
-    assert result.summary.startswith("10 day(s) pass. It is now 2025-06-19.")
+    assert result.summary.startswith("Console session — Thursday 19 June 2025, 09:00 CDT (10 days since the previous session)")
+    assert "day(s) pass" not in result.summary
     assert "Since last session" in result.summary

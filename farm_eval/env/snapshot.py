@@ -9,7 +9,7 @@ no model tokens - so every model starts every episode from a byte-identical stat
 
 from __future__ import annotations
 
-from farm_eval.env.clock import date_for_day, next_beat
+from farm_eval.env.clock import next_beat, session_header
 from farm_eval.env.digest import build_digest
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import Corpus, Schedule, build_initial_state
@@ -82,7 +82,7 @@ def derive_snapshot(
 
     elapsed = ep.start_day - before.day_index
     summary = (
-        f"{elapsed} day(s) pass. It is now {date_for_day(env.state.start_date, ep.start_day)}.\n"
+        f"{session_header(env.state.start_date, ep.start_day, elapsed=elapsed)}\n"
         f"{build_digest(before, env.state, corpus.digest_flavor)}"
     )
     if ep.digest_note:

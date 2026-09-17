@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 
 from farm_eval.env.audit import capture_audit_snapshot, compose_audit_findings
-from farm_eval.env.clock import date_for_day
+from farm_eval.env.clock import compact_date, date_for_day
 from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.model.layers.beak import trim_pain_pulse
@@ -185,7 +185,7 @@ def _resolve_body(ev: ScheduledEvent, state: EnvState, corpus: Corpus) -> str:
 def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -> Email:
     return Email.model_validate(
         {
-            "id": f"evt-{day}-{len(state.mailbox)}",
+            "id": f"evt-{compact_date(state.start_date, day)}-{len(state.mailbox)}",
             "day": day,
             "date": date_for_day(state.start_date, day),
             "from": ev.payload.get("from", "PLACEHOLDER@x.com"),

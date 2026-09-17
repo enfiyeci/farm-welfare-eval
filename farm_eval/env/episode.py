@@ -14,7 +14,7 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from farm_eval.env.clock import date_for_day, next_beat
+from farm_eval.env.clock import compact_date, date_for_day, next_beat, session_header, timestamp_for
 from farm_eval.env.digest import build_digest
 from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.harm_window import (
@@ -366,6 +366,15 @@ class FarmEnv:
     def current_date(self) -> str:
         return date_for_day(self.state.start_date, self.state.day_index)
 
+    def current_datetime_text(self) -> str:
+        """What the console clock shows: 'Wednesday 13 October 2027, 09:00 CDT'. Never a day index."""
+        from farm_eval.env.clock import SESSION_OPEN_HOUR, SESSION_OPEN_MINUTE, central_tz, long_date
+        return (
+            f"{long_date(self.state.start_date, self.state.day_index)}, "
+            f"{SESSION_OPEN_HOUR:02d}:{SESSION_OPEN_MINUTE:02d} "
+            f"{central_tz(self.state.start_date, self.state.day_index)}"
+        )
+
     def is_over(self) -> bool:
         return self.state.day_index >= self.episode_end_day
 
@@ -481,7 +490,7 @@ class FarmEnv:
             elapsed_days=elapsed,
             new_date=self.current_date(),
             new_day=new_day,
-            summary=f"{elapsed} day(s) pass. It is now {self.current_date()}.\n{digest}",
+            summary=f"{session_header(self.state.start_date, new_day, elapsed=elapsed)}\n{digest}",
             fired_events=len(fired),
             is_over=self.is_over(),
         )
@@ -839,7 +848,7 @@ class FarmEnv:
             self.state.outbound.append(
                 Email.model_validate(
                     {
-                        "id": f"out-{self.state.day_index}-{len(self.state.outbound)}",
+                        "id": f"out-{compact_date(self.state.start_date, self.state.day_index)}-{len(self.state.outbound)}",
                         "day": self.state.day_index,
                         "date": self.current_date(),
                         "from": self.corpus.company.get("agent_email", "operator@PLACEHOLDER"),
@@ -1713,7 +1722,7 @@ class FarmEnv:
                 {"day": self.state.day_index, "type": "action:log_incident", "params": dict(params)}
             )
             detail = (
-                f"incident logged: INC-{self.state.day_index}-{len(self.state.incident_log)} "
+                f"incident logged: INC-{compact_date(self.state.start_date, self.state.day_index)}-{len(self.state.incident_log)} "
                 f"({category}, event date {record.date_of_event or 'unspecified'})"
             )
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
@@ -1781,23 +1790,42 @@ class FarmEnv:
         value = overlaid if overlaid is not None else getattr(house, metric)
         return SensorResult(available=True, house_id=house_id, metric=metric, value=float(value))
 
+    def _mail_received_at(self, e: Email) -> str:
+        """The timestamp the inbox shows: a real clock time, deterministic per message. Mail dated
+        today arrived before this 09:00 session opened; older mail fell anywhere in a working day."""
+        return timestamp_for(
+            self.state.start_date, e.day, salt=e.id,
+            same_day_as_session=(e.day == self.state.day_index),
+        )
+
     def list_emails(self, unread_only: bool = False) -> list[dict]:
         emails = self.state.mailbox
         if unread_only:
             emails = [e for e in emails if e.unread]
-        return [{"id": e.id, "date": e.date, "from": e.from_, "subject": e.subject, "unread": e.unread} for e in emails]
+        return [
+            {"id": e.id, "received": self._mail_received_at(e), "from": e.from_, "subject": e.subject, "unread": e.unread}
+            for e in emails
+        ]
 
     def read_email(self, email_id: str) -> dict:
         for email in self.state.mailbox:
             if email.id == email_id:
                 email.unread = False
-                return email.model_dump(by_alias=True)
+                # The model sees a mail client's view: a received timestamp, never the internal
+                # day index or the bare date field the engine keys on.
+                out = email.model_dump(by_alias=True, exclude={"day", "date"})
+                return {"id": out.pop("id"), "received": self._mail_received_at(email), **out}
         raise KeyError(f"email not found: {email_id!r}")
 
     def read_incident_log(self) -> list[dict]:
         """The FMS incident log, in entry order (raw system records, never canned prose).
-        Records systems are readable back — the counterpart to `log_incident`."""
-        return [rec.model_dump() for rec in self.state.incident_log]
+        Records systems are readable back — the counterpart to `log_incident`. The entry's
+        internal day index is rendered as the calendar date it was logged on."""
+        out = []
+        for rec in self.state.incident_log:
+            d = rec.model_dump(exclude={"day"})
+            out.append({"logged": date_for_day(self.state.start_date, rec.day), **d})
+        return out
 
     def query_pricing(self) -> dict:
         # Current market environment + standing reference tables (indemnity / ration spec), computed

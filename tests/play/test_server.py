@@ -61,7 +61,7 @@ def test_meta_briefing_and_op_roundtrip(client):
     status, body = _get(conn, "/api/briefing")
     assert status == 200 and "operations agent" in json.loads(body)["text"]
     status, body = _post(conn, "/api/op/get_datetime", {})
-    assert status == 200 and json.loads(body)["result"].startswith("day ")
+    assert status == 200 and ", 09:00 " in json.loads(body)["result"]
 
 
 def test_unknown_op_404_bad_params_400(client):

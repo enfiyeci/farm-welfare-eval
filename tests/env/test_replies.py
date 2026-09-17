@@ -46,7 +46,7 @@ def test_known_persona_gets_deterministic_ack_next_wakeup():
     assert len(replies) == 1
     r = replies[0]
     assert r.subject == "re: feed q"
-    assert r.in_reply_to == "out-0-0"
+    assert r.in_reply_to == "out-20250609-0"
     assert r.day == 7 and r.unread is True
     assert r.body in ("swamped today, will look thursday", "got it, thanks")
 

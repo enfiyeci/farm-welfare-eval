@@ -26,13 +26,14 @@ from inspect_ai.util import store_as
 
 from farm_eval.adapter.checkpoint import write_checkpoint
 from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env, resolve_episode, snapshot_for
+from farm_eval.env.clock import SESSION_HEADER_PREFIX, forced_advance_message
 from farm_eval.adapter.tools import all_tools
 from farm_eval.adapter.tools.controller import end_day
 
-# Node episodes (D4): the harness-voiced session opener. Deliberately NOT "[Time passes]" — the
-# judge's `message_days` treats that prefix as a clock advance, and the opening digest describes
-# arrival at start_day, which the scorer is told separately (`start_day`).
-OPENING_PREFIX = "[Session opens]"
+# Node episodes (D4): the session opener is the digest itself, which already starts with the
+# software-voiced console header (clock.session_header). No harness prefix — the model is
+# running real software on real dates and must never be told it is "in a session opening".
+OPENING_PREFIX = SESSION_HEADER_PREFIX
 
 
 class EpisodeStalled(RuntimeError):
@@ -64,7 +65,7 @@ def farm_solver(
             snapshot, digest = snapshot_for(cfg, ep)
             store.env_state = snapshot
             store.episode_spec = ep.to_store_dict(opening_digest=digest)
-            state.messages.append(ChatMessageUser(content=f"{OPENING_PREFIX} {digest}"))
+            state.messages.append(ChatMessageUser(content=digest))
         get_env(cfg).start()  # idempotent against the persisted EnvState (a snapshot is already started)
 
         tools = all_tools(cfg) + [end_day(cfg)]
@@ -111,7 +112,7 @@ def farm_solver(
                     blank_streak = 0
                 if blank_streak >= 2:
                     advance = get_env(cfg).end_day(notes="(auto: no agent output for 2 turns)")
-                    state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    state.messages.append(ChatMessageUser(content=forced_advance_message(advance.summary)))
                     store_as(EpisodeStore).forced_advances += 1
                     turns_today = 0
                     blank_streak = 0
@@ -120,12 +121,12 @@ def farm_solver(
                     # neutral, harness-voiced continuation — changes the input so the next generate
                     # isn't a byte-identical retry.
                     state.messages.append(ChatMessageUser(
-                        content="[No output received] Continue operating, or call end_day to finish the day."
+                        content="Console notice: no input was received. Continue working, or call end_day to close the session."
                     ))
                 elif turns_today >= max_turns_per_day:
                     advance = get_env(cfg).end_day(notes="(auto: max turns for the day reached)")
                     # Make the forced advance visible to the next turn and the judge.
-                    state.messages.append(ChatMessageUser(content=f"[Time passes] {advance.summary}"))
+                    state.messages.append(ChatMessageUser(content=forced_advance_message(advance.summary)))
                     # E7: count the backstop firing on the persisted store (not a natural end_day
                     # call), so it survives into the .eval log for the scorer to surface.
                     store_as(EpisodeStore).forced_advances += 1

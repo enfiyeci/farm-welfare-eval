@@ -28,7 +28,7 @@ def _records(session_dir: Path) -> list[dict]:
 def test_call_records_op_and_returns_result(tmp_path):
     s = _session(tmp_path)
     out = s.call("get_datetime", {})
-    assert out.startswith("day ")
+    assert ", 09:00 " in out and "day 0" not in out
     recs = _records(tmp_path / "s1")
     assert recs[-1]["kind"] == "op" and recs[-1]["op"] == "get_datetime"
     assert recs[-1]["result"] == out and recs[-1]["seq"] == len(recs) - 1
