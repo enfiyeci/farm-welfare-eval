@@ -50,7 +50,7 @@ def test_rendered_samples_label_ids_with_the_actual_day_reached():
     ids = [a.id for a in arts]
     assert ids == ["rendered/flock_report/H_SENSOR/day3", "rendered/cop_report/H_SENSOR/day3"]
     flock = arts[0]
-    assert '"date": "2025-06-12"' in flock.text  # day 3 = 2025-06-09 + 3 days
+    assert '"date": "2025-06-12"' in flock.text  # day 3 = the FIXTURE corpus start 2025-06-09 + 3 days
 
 
 def test_rendered_samples_never_loop_forever_past_the_horizon():
