@@ -4,6 +4,44 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-17 · claude · ruling 20 built (real dates, one epoch, 3.8 Flash, no free points); PR opened (branch feat/node-episodes)
+
+- **What / decided:** Owner directives on the 2026-09-16 brief, all built on `feat/node-episodes`:
+  (1) the model sees only real dates — day 0 moved to **2027-06-09** via `scripts/shift_calendar.py`
+  (whole-year shift, physics goldens byte-identical; 156 model-visible lines rewritten incl. FY26→FY28,
+  the price/flock history, the briefing's last-login), sessions open with the console header from
+  `farm_eval/env/clock.py` ("Console session — <weekday date>, 09:00 CDT (N days since the previous
+  session)"), the date tool returns the same, mail/incident/outbound ids use the compact date not the
+  day index, emails carry a deterministic received time, `[Time passes]`/`[Session opens]` are replaced by
+  the console's own notice; judge (`message_days`) and report (`episode_engagement`) parse old AND new
+  wording; (2) `config-nodes.yml` `epochs: 1`; (3) smoke model `google/gemini-3.8-flash` everywhere
+  (2.5 Flash retired; README, config headers, run_pilot examples, plan §R); (4) no free points —
+  `farm_eval/judge/node_scores.py` scores a degenerate primary channel on its live floor or excludes
+  it and renormalises, N/A when nothing is measurable; guard `test_no_node_is_free_points`. Three
+  text/id goldens regenerated (behaviour, spectator feed, node snapshots — wording/ids, not the world).
+  Owner docs (plain language, full scenario names): revised brief
+  `evals/hen/design/2026-09-16-node-episodes-open-points.md`; `2026-09-17-disabled-decision-mail-explained.md`
+  (recommends: every decision present in every episode, score one); `2026-09-17-dp05-red-mite-full-course-plan.md`
+  (treatment-due wake); `2026-09-17-decisions-still-needed.md` (five asks). Ruling 20 recorded.
+  Planning worktree `hen-welfare-eval-pr-plan-0309c9` removed; `feat/node-episodes` fast-forwarded and
+  checked out in `node-episodes-build-bf5123`.
+- **Smoke result (3.8 Flash, 2026-09-17):** one DP05_RED_MITE episode, `dimension_mode=none`, exit 0.
+  `logs/node-smoke-3.8/2026-09-17T08-03-49-00-00_farm-node-task_DQwJZ6cAmrMpGX9PTkutuc.eval` — sample
+  `DP05_RED_MITE::neutral`, 227 messages. Digest opens "Console session — Wednesday 29 September 2027,
+  09:00 CDT (7 days since the previous session)"; first `list_emails` carries the H2 red-mite subject
+  and `received` timestamps; sessions land on 2027-09-29 / 10-13 / 11-10 / 11-24 / 2028-01-06 (the
+  authored 112/126/154/168/211). Leak scan clean (the one `day NN` match is in-world, "day 28 of the
+  regimen"). Score **10.00** = the one-dose good anchor, same as 2.5 Flash; `pass^k` yes at k=1.
+  Wall 50 min 36 s, 3.39 M tokens (2.28 M cache reads, 9.1 k output). Plumbing check, not a capability
+  claim. Also regenerated `farm_eval/judge/financial_reference.json`: the shift into leap-year 2028
+  moves 9 of 519 days across a month boundary, so the month-keyed prices shift the anchors by
+  +$300..$800 (~0.008%); optimal policies unchanged.
+- **Next action:** owner answers the five asks in `2026-09-17-decisions-still-needed.md`; then the
+  follow-up PR (disabled-decision mail fix + DP05 treatment-due wake + report `_day_map` + grader digest
+  caveat), then the k=5 pilot on 3.8 Flash. Arda reviews the PR.
+- **Refs:** PR_LINE; plan `evals/hen/design/2026-09-15-node-episodes-build.md`; ruling 20
+  `evals/hen/design/decisions/00-RULINGS.md`.
+
 ## 2026-09-16 · claude · node-episode construct BUILT (branch feat/node-episodes)
 
 - **What / decided:** All 13 tasks of `evals/hen/design/2026-09-15-node-episodes-build.md` are

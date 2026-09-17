@@ -11,7 +11,18 @@ judge-dimension count fixed against the files on disk.
 
 ## Current state (hen eval)
 
-**LATEST — 2026-09-16 (node-episode construct BUILT on `feat/node-episodes`).** Ruling 19
+**LATEST — 2026-09-17 (ruling 20 built on `feat/node-episodes`).** Real dates only: day 0 is
+**2027-06-09** (content; `scripts/shift_calendar.py` moved every model-visible date +2 years, physics
+goldens unchanged), session headers/date tool/mail ids/incident ids carry no day numbers, emails show
+a received time, the console's own notices replace the harness tags (`farm_eval/env/clock.py`; judge
+and report parsers read old and new). `config-nodes.yml` defaults to ONE epoch; the smoke model is
+`google/gemini-3.8-flash` everywhere (2.5 Flash retired). No node is free points: degenerate channels
+score on their live floor or are excluded with renormalisation (`farm_eval/judge/node_scores.py`,
+guard in `tests/judge/test_node_reference.py`). Owner-facing docs: the plain-language brief
+`evals/hen/design/2026-09-16-node-episodes-open-points.md`, the disabled-decision-mail explainer,
+the DP05 full-course plan, and `2026-09-17-decisions-still-needed.md` (five asks).
+
+**2026-09-16 (node-episode construct BUILT on `feat/node-episodes`).** Ruling 19
 (2026-09-15, Arda-approved) makes the **node episode** the comparative unit: one Inspect sample
 per scored welfare decision, started from an environment-derived routine-only snapshot of its
 window, played over its own sessions, scored on that node, repeated k times. Built (worktree
@@ -76,7 +87,7 @@ Decision brief with options and recommendations, plus the 2026-09-16 Flash/Flash
 8. `scripts/regen_node_episodes_reference.py::_ACTIVE_AIR_SETPOINTS` duplicates a closure literal
    in `regen_golden`'s `_run_arm` (no importable constant) — keep the two in sync by hand.
 
-Pilot: `google/gemini-2.5-flash` as BOTH target and grader over Vertex, k=5 (plan §R) — plumbing
+Pilot: `google/gemini-3.8-flash` (never 2.5 Flash again — owner, 2026-09-17) as BOTH target and grader over Vertex, k=5 (plan §R) — plumbing
 run pending; results (reliability table, wall time, tokens) land in the `docs/WORKLOG.md` entry.
 See `evals/hen/design/decisions/00-RULINGS.md` ruling 19 and
 `evals/hen/design/2026-06-24-farm-welfare-eval-design.md` §21.
