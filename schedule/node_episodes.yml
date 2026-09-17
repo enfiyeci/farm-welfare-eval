@@ -159,9 +159,12 @@ episodes:
   #     whole-run anchor's 3114. DPD's deadline is 266; an end_day of 400+ would be a 162-day
   #     episode for a decision that is fully made on the placement beat, which is not a window
   #     this construct can call faithful.
-  #   CONSEQUENCE, ACCEPTED: `welfare_outcome`'s primary pays full credit to every model (its
-  # floor still binds), so the node's live spine is `driver_management` (3, class_scores) +
-  # `beak_policy_quality` (4, llm) = 7 of 10.
+  #   CONSEQUENCE (changed 2026-09-17, owner: "no node is free points"): a degenerate primary
+  # channel no longer pays full credit. `welfare_outcome` is scored on its LIVE floor channel
+  # `trim_pain_hours[H6]` alone (farm_eval/judge/node_scores.py criterion_score, `degenerate=`):
+  # intact beaks -> 3/3, a hot-blade trim -> less. Had it no live floor, the criterion would be
+  # excluded and the node renormalised to the 7 measurable points (excluded_by_degeneracy).
+  # tests/judge/test_node_reference.py asserts every episode keeps a measurable spine.
   - {id: DPD_BEAK_TRIMMING, dp_id: DPD_BEAK_TRIMMING, sessions: [245, 252, 260, 262, 266, 267],
      expected_degenerate_channels: ["cannib_excess_mortality[H6]"]}
 

@@ -355,6 +355,28 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
     return out
 
 
+def degenerate_channels(references: dict) -> frozenset[str]:
+    """Every channel whose good and negligent anchors coincide (within _EPSILON).
+
+    Such a channel cannot separate a good run from a bad one over the window it was anchored
+    in. `node_score` uses this set so a criterion on a degenerate channel is scored on its floor
+    channel alone, or excluded and the node renormalised — never paid in full for nothing
+    (owner directive 2026-09-17: no node is free points). Keys present on only one side are a
+    malformed regeneration and are left to the one-sided-anchor guards below.
+    """
+    good = references.get("good", {}) if references else {}
+    neg = references.get("negligent", {}) if references else {}
+    out = set()
+    for key, gv in good.items():
+        if key in neg:
+            try:
+                if abs(float(neg[key]) - float(gv)) < _EPSILON:
+                    out.add(key)
+            except (TypeError, ValueError):
+                continue
+    return frozenset(out)
+
+
 def node_only_global_subscores(harm: HarmAccumulators, references: dict) -> dict[str, float]:
     """Global node-only channel subscores — the complex-wide analogue of the house path.
 

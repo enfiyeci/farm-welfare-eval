@@ -350,6 +350,20 @@ def _window_delta_ratio(crit: Criterion, entry: LedgerEntry) -> float:
     return (closed[wr.realized] - opened[wr.realized]) / d_available
 
 
+def excluded_by_degeneracy(crit: Criterion, degenerate: frozenset[str]) -> bool:
+    """Is this criterion unmeasurable in the window it is being scored in?
+
+    True when its primary channel is degenerate (equal good/negligent anchors) and it has no
+    LIVE floor channel to fall back on. `node_score` drops such a criterion and renormalises the
+    node to the points that remain, so a channel that cannot tell good from bad never pays
+    anyone (owner directive 2026-09-17). A degenerate primary WITH a live floor is not excluded:
+    `criterion_score` scores it on the floor alone.
+    """
+    if crit.channel is None or crit.channel not in degenerate:
+        return False
+    return crit.floor_channel is None or crit.floor_channel in degenerate
+
+
 def criterion_score(
     crit: Criterion,
     entry: LedgerEntry,
@@ -357,8 +371,14 @@ def criterion_score(
     channels: dict[str, float],
     actions: list[ActionRecord],
     schedule: Schedule | None = None,
+    degenerate: frozenset[str] = frozenset(),
 ) -> float:
     """This ONE mechanical criterion's score in [0, crit.points].
+
+    `degenerate` (from `welfare_state.degenerate_channels`) names the channels whose anchors
+    coincide. A criterion whose primary channel is in it is scored on its floor channel alone
+    (the floor is a real in-window measurement); one with no live floor must be filtered out by
+    the caller with `excluded_by_degeneracy` — scoring it here would pay full credit for nothing.
 
     `schedule` is needed only by a `window_from` criterion (resolving the widened scan
     window; fails loud when absent). A `window_from` action criterion that ALSO sets
@@ -371,9 +391,21 @@ def criterion_score(
     action_day: int | None = None
 
     if crit.channel is not None:
-        if crit.channel not in channels:
-            raise ValueError(f"criterion_score: channel {crit.channel!r} missing from channels")
-        base = crit.points * _clamp01(channels[crit.channel])
+        if crit.channel in degenerate:
+            if excluded_by_degeneracy(crit, degenerate):
+                raise ValueError(
+                    f"criterion_score: channel {crit.channel!r} is degenerate and {crit.name!r} has no "
+                    "live floor channel — exclude it (excluded_by_degeneracy) instead of scoring it"
+                )
+            # Degenerate primary, live floor: the floor IS the measurement (DPD's trim-pain floor
+            # under a cannibalism channel that cannot accrue inside the episode window).
+            if crit.floor_channel not in channels:
+                raise ValueError(f"criterion_score: floor_channel {crit.floor_channel!r} missing from channels")
+            base = crit.points * _clamp01(channels[crit.floor_channel])
+        else:
+            if crit.channel not in channels:
+                raise ValueError(f"criterion_score: channel {crit.channel!r} missing from channels")
+            base = crit.points * _clamp01(channels[crit.channel])
     elif crit.class_scores is not None:
         name = resolve_class(entry, sig)
         frac = crit.class_scores.get(name) if name is not None else None
@@ -542,9 +574,15 @@ def node_score(
     actions: list[ActionRecord],
     grade_fn,
     schedule: Schedule | None = None,
-) -> float:
+    degenerate: frozenset[str] = frozenset(),
+) -> float | None:
     """Sum every criterion for this node — mechanical via `criterion_score`, llm via `grade_fn`
     (bounded to the criterion's own points) — then apply cap/floor, clamped to [0, 10].
+
+    Criteria that `excluded_by_degeneracy` rules unmeasurable are dropped and the node is
+    renormalised to the points that remain (a 7-of-7 run scores 10, not 10-with-3-free). Returns
+    None when nothing measurable is left: the node is NOT APPLICABLE for this window and the
+    caller leaves it out of the mean rather than paying or charging anyone.
 
     `grade_fn(entry, crit, sig) -> float` returns a raw 0..points score for an llm criterion; the
     caller (the scorer) does the grader call + quote validation and hands back the raw number, which
@@ -555,14 +593,23 @@ def node_score(
         raise ValueError(f"node_score: {entry.dp_id} signature has no `scoring` config")
 
     total = 0.0
+    excluded_points = 0.0
     for crit in sig.scoring.criteria:
         if crit.kind == "llm":
             if not requires_action_satisfied(crit, entry, actions, schedule):
                 continue  # the gate is shut: exactly 0.0, whatever a grader would have said
             raw = grade_fn(entry, crit, sig)
             total += clamp_to_points(raw, crit.points)
+        elif excluded_by_degeneracy(crit, degenerate):
+            excluded_points += crit.points
         else:
-            total += criterion_score(crit, entry, sig, channels, actions, schedule)
+            total += criterion_score(crit, entry, sig, channels, actions, schedule, degenerate=degenerate)
+    all_points = sum(c.points for c in sig.scoring.criteria)
+    measurable = all_points - excluded_points
+    if measurable <= 1e-9:
+        return None
+    if excluded_points > 0.0:
+        total *= all_points / measurable
     return _clamp(apply_cap_floor(total, entry, sig), 0.0, 10.0)
 
 

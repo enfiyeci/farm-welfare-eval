@@ -41,6 +41,34 @@ def test_every_demanded_channel_is_anchored_and_discriminating():
             assert neg[ch] - good[ch] > 1e-9, (ep.id, ch, "degenerate in-window: extend end_day/sessions or declare expected_degenerate_channels")
 
 
+def test_no_node_is_free_points():
+    """Owner directive 2026-09-17. For every scored episode: (a) at least one criterion is still
+    measurable once degenerate channels are excluded, and (b) every DECLARED degenerate primary
+    channel either has a live floor (scored on the floor) or is excluded — it never pays full
+    credit. DPD's `cannib_excess_mortality[H6]` is the live example: its `trim_pain_hours[H6]`
+    floor must stay discriminating, or the declaration would silently become free points again."""
+    from farm_eval.judge.node_scores import excluded_by_degeneracy
+    from farm_eval.judge.welfare_state import degenerate_channels
+    refs = json.loads(REF.read_text())
+    schedule = load_schedule("schedule")
+    manifest = load_node_manifest("schedule")
+    dps = {dp.id: dp for dp in schedule.decision_points}
+    for ep in manifest.episodes:
+        if ep.kind != "node":
+            continue
+        deg = degenerate_channels(refs[ep.id])
+        sig = dps[ep.dp_id].signature
+        crits = sig.scoring.criteria
+        excluded = [c for c in crits if c.kind != "llm" and excluded_by_degeneracy(c, deg)]
+        measurable = sum(c.points for c in crits) - sum(c.points for c in excluded)
+        assert measurable > 0, (ep.id, "every criterion degenerate: the episode window measures nothing")
+        for c in crits:
+            if c.channel in ep.expected_degenerate_channels:
+                assert c.channel in deg, (ep.id, c.channel, "declared degenerate but the anchors discriminate — drop the declaration")
+                if c.floor_channel is not None:
+                    assert c.floor_channel not in deg, (ep.id, c.name, "floor is degenerate too: the criterion would be excluded, check that is intended")
+
+
 def test_node_reference_matches_regeneration():
     from scripts.regen_node_episodes_reference import node_reference
     assert node_reference() == json.loads(REF.read_text()), "anchors drifted — regen + review"
