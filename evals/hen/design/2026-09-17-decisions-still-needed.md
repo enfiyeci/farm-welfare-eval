@@ -72,9 +72,11 @@ pass touches those files.
    that. If Mondays matter to you, say so and I will do the regeneration.
 
 4. **Run the k=5 reliability pilot now?** 26 episodes × 5 runs = 130 samples on Gemini 3.8 Flash
-   as target and grader. Based on the smoke run, expect roughly 15 minutes wall time at 8
-   parallel connections and on the order of 400 M tokens billed, most of it cache reads. It is a
-   plumbing check, not a comparison. Go / wait until the two fixes above are in.
+   as target and grader. The 3.8 Flash smoke run took **50 minutes** for one episode (2.5 Flash
+   took 7 for the same result), so at 8 parallel connections expect roughly **13 hours** wall time
+   and on the order of 450 M tokens billed, most of it cache reads. A k=1 pass over all 26
+   episodes (the new default) would be about 3 hours. It is a plumbing check, not a comparison.
+   Options: k=1 now / k=5 now / wait until the two fixes above are in.
 
 5. **Confirm the `feat/welfare-currency` lane is dead.** Welfare-only scoring (ruling 19) makes
    it moot; `docs/LANES.md` still lists it as pending your word.
