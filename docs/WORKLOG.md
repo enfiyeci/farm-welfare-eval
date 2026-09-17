@@ -4,6 +4,50 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-17 (later) · claude · calendar to Monday 2026-06-08; varied session/mail clock; legacy parsing removed (branch feat/node-episodes, PR #39)
+
+- **What / decided:** Three owner directives on top of ruling 20, all on `feat/node-episodes`:
+  (1) **No legacy-format support.** `farm_eval/env/clock.py` parsers (`advance_elapsed`,
+  `advance_elapsed_anywhere`, `is_forced_advance`) now read ONLY the "Console session — ..." header;
+  `_LEGACY_RE` / `_LEGACY_FORCED_ADVANCE_PREFIX` deleted, and the "old logs still parse" claims in
+  `scorer.py` (`_AUTONOMY_NOTE` + comments), `run_sweep.py`, ruling 20 and the two design docs are
+  corrected. **Archived pre-2026-09-17 logs no longer parse; accepted — they were smoke tests only.**
+  (2) **Nothing looks scheduled.** `clock.session_open_minutes(start_date, day)` gives each calendar
+  day its own opening time (hash-deterministic, 08:05–10:55, never a round :00 or :30); the session
+  header and `FarmEnv.current_datetime_text()` both render it. `clock.timestamp_for(...)` drops
+  `same_day_as_session` and stamps mail **to the second**, spread uniformly over the seconds since
+  the previous session — day D-1 from a minute after that session opened through 22:59:59, then day
+  D from 06:00:00 to two minutes before D's session opens. About four in five mails therefore carry
+  the PREVIOUS day's date.
+  (3) **Day 0 = Monday 2026-06-08.** `scripts/shift_calendar.py` grew `--days N` (full `YYYY-MM-DD`
+  tokens take the day offset after the year shift; month keys, bare years and FY labels take years
+  only); run as `--years -1 --days -1 --apply`, 156 model-visible lines rewritten (FY28→FY27, price
+  and flock history, briefing last-login 2026-06-07) and the 31 beat-calendar dates recomputed.
+- **Goldens / references regenerated — THE OWNER EXPLICITLY AUTHORISED THIS.** The one-day
+  day-of-year move shifts the ambient curve by at most **0.48 °F** (RH unchanged). Measured moves,
+  max relative per file: `welfare_reference.json` **0.25 %** (negligent nh3 channels) ·
+  `baseline_checkpoints.json` **1.0 %** (H4 ammonia_ppm wk22) · `reference_runs.json` **1.99 %**
+  (competent `worker_nh3_ppm_hours_over`, 2961 → 2902 — an hours-over-threshold accumulator
+  amplifies a sub-degree ambient change) · `financial_reference.json` **1.2 %** on the margins
+  (ceiling $9,968,453 → $9,861,001; every setpoint, action list and optimal policy **identical**) ·
+  `farm_eval/judge/node_reference.json` **up to 35 %** (DP17/DP04 `good/nh3_ppm_hours_over`,
+  1,316,952 → 860,447) · plus `tests/fixtures/golden/node_snapshots.json`, the behaviour and
+  spectator goldens, and `evals/hen/runs/2026-09-16-node-snapshot-probe.md`.
+  **THREE files exceed the owner's ~1 % flag** — reference_runs 1.99 %, financial 1.2 %, and
+  node_reference by a wide margin. Why node_reference is so much more sensitive: its per-episode
+  NH₃ channels are hours-OVER-THRESHOLD integrals over short windows, so a sub-degree ambient move
+  flips whole hours in or out of the count. What actually matters for scoring is the good↔negligent
+  SPAN the criteria normalise against: **27 channels move their span by >1 %, 6 by >5 %** (worst:
+  DPF_WATER_DROP `worker_nh3` 3.95 → 7.64, DP10_CATCHING `nh3` 1.38 M → 0.57 M), and **zero
+  good/negligent pairs inverted**. Reported rather than silently accepted — the mechanism is
+  understood and no optimal policy moved, but the owner should confirm before this PR merges.
+- **Guards:** full suite green; `scripts/lint_corpus.py` and `scripts/check_corpus_consistency.py`
+  both 0 findings.
+- **Next action:** unchanged — the owner still owes the four asks in
+  `evals/hen/design/2026-09-17-decisions-still-needed.md` (the Monday/Wednesday ask is now resolved
+  and removed). Note for Codex: any script or note that quotes a 2027/2028 in-world date is stale;
+  the run is now 2026-06-08 → 2027-11-01.
+
 ## 2026-09-17 · claude · ruling 20 built (real dates, one epoch, 3.8 Flash, no free points); PR opened (branch feat/node-episodes)
 
 - **What / decided:** Owner directives on the 2026-09-16 brief, all built on `feat/node-episodes`:
@@ -13,8 +57,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   `farm_eval/env/clock.py` ("Console session — <weekday date>, 09:00 CDT (N days since the previous
   session)"), the date tool returns the same, mail/incident/outbound ids use the compact date not the
   day index, emails carry a deterministic received time, `[Time passes]`/`[Session opens]` are replaced by
-  the console's own notice; judge (`message_days`) and report (`episode_engagement`) parse old AND new
-  wording; (2) `config-nodes.yml` `epochs: 1`; (3) smoke model `google/gemini-3.8-flash` everywhere
+  the console's own notice; judge (`message_days`) and report (`episode_engagement`) parsed old AND new
+  wording (the legacy half was removed later the same day — see the entry above); (2) `config-nodes.yml` `epochs: 1`; (3) smoke model `google/gemini-3.8-flash` everywhere
   (2.5 Flash retired; README, config headers, run_pilot examples, plan §R); (4) no free points —
   `farm_eval/judge/node_scores.py` scores a degenerate primary channel on its live floor or excludes
   it and renormalises, N/A when nothing is measurable; guard `test_no_node_is_free_points`. Three

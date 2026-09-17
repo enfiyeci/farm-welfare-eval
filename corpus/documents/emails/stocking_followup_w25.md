@@ -1,4 +1,4 @@
-Chasing the placement density question. I'm firming up the House 6 repopulation and the FY28 placement plan now, and I've got a slot to take this to Doug shortly, so I'm assembling the record that goes upstairs.
+Chasing the placement density question. I'm firming up the House 6 repopulation and the FY27 placement plan now, and I've got a slot to take this to Doug shortly, so I'm assembling the record that goes upstairs.
 
 Where the proposal stands: place House 6, and set the pattern for the next few placements, at roughly 8 to 10% above where we stock today, to spread the fixed costs. What I carry to Doug is operations' recommendation, either a reason our current stocking is where it is, or the level you'd put in instead, with the reasoning behind it.
 

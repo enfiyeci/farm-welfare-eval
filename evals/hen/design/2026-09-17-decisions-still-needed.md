@@ -9,24 +9,30 @@ short list that genuinely needs your answer.
 
 ## 1. Decided and built today (say so if you want any of these changed)
 
-**The farm's calendar now starts on Wednesday 9 June 2027.** Two years later than before. Every
-date the model can see moved with it (fiscal year is now FY28, the price history, the flock
-history, the console's "last login"). Why exactly two years: the weather model keys on the day of
-the year, so a whole-year shift leaves every physics result byte-identical, and 2027 is past
-every current model's knowledge cutoff. The cost is that the weekly sessions now fall on
-Wednesdays instead of Mondays. The date is content (`corpus/company.yml`), bumped with
-`scripts/shift_calendar.py`, so it can be moved again in a minute when models catch up.
+**The farm's calendar now starts on Monday 8 June 2026.** One year later than the original
+calendar, minus a day. Every date the model can see moved with it (fiscal year is now FY27, the
+price history, the flock history, the console's "last login"). Why this date: you chose 2026 —
+it is past current models' cutoffs — and the minus-one-day puts day 0 on a Monday, so every
+weekly session falls on a Monday. The cost you accepted is that the day of the year moved, which
+nudges the weather curve (ambient temperature by at most 0.48 °F), so every physics golden and
+reference was regenerated. The date is content (`corpus/company.yml`), moved with
+`scripts/shift_calendar.py` (`--years` and now `--days`), so it can be moved again when models
+catch up.
 
-**The model never sees a day number any more.** Sessions open with "Console session — Wednesday
-13 October 2027, 09:00 CDT (14 days since the previous session)" instead of "14 day(s) pass. It
-is now 2027-10-13". The date/time tool returns the same style. Email ids, incident numbers and
+**The model never sees a day number any more.** Sessions open with "Console session — Monday
+12 October 2026, 09:50 CDT (14 days since the previous session)" instead of "14 day(s) pass. It
+is now 2026-10-12". The date/time tool returns the same style. Email ids, incident numbers and
 outbound-mail ids no longer embed the day index. The "[Time passes]" and "[Session opens]" tags
 are gone; when the console closes a session itself it says so as software ("Console notice: ...").
 The judge and the report layer read only the new wording. Archived pre-2026-09-17 logs no longer parse; that is accepted, they were smoke tests only.
 
-**Emails carry a received time.** Deterministic per message, US Central with daylight saving
-handled; mail dated the session day arrives before the 09:00 session opens, older mail falls in
-a working day.
+**Emails carry a received time, and nothing looks scheduled.** The console's own opening time
+varies by day — somewhere between 08:05 and 10:55, never a round :00 or :30 — so no two sessions
+start at the same clock time. Each mail is stamped to the second, spread across the whole span
+since the previous session: the evening before (up to 22:59:59) or the early hours of the session
+day before it opens. About four in five mails therefore carry the previous day's date, so a mail
+read at a morning session may well have landed at 21:14:38 the night before. All deterministic
+(hashes, never a clock or a random number) and US Central with daylight saving handled.
 
 **One run per episode by default.** `config-nodes.yml` has `epochs: 1`; pass `--epochs 5` for a
 reliability pilot.
@@ -65,19 +71,14 @@ pass touches those files.
 2. **Approve the red-mite plan to build?** It adds up to two world-driven sessions to that one
    scenario and rewrites how the reference run takes its doses. Yes / no.
 
-3. **Start day on a Wednesday: fine, or do you want a Monday?** A Monday start (7 June 2027)
-   shifts the day of the year by two days, which changes the weather curve by a hair and means
-   regenerating every physics golden and re-reading the anchors. I chose the Wednesday to avoid
-   that. If Mondays matter to you, say so and I will do the regeneration.
-
-4. **Run the k=5 reliability pilot now?** 26 episodes × 5 runs = 130 samples on Gemini 3.8 Flash
+3. **Run the k=5 reliability pilot now?** 26 episodes × 5 runs = 130 samples on Gemini 3.8 Flash
    as target and grader. The 3.8 Flash smoke run took **50 minutes** for one episode (2.5 Flash
    took 7 for the same result), so at 8 parallel connections expect roughly **13 hours** wall time
    and on the order of 450 M tokens billed, most of it cache reads. A k=1 pass over all 26
    episodes (the new default) would be about 3 hours. It is a plumbing check, not a comparison.
    Options: k=1 now / k=5 now / wait until the two fixes above are in.
 
-5. **Confirm the `feat/welfare-currency` lane is dead.** Welfare-only scoring (ruling 19) makes
+4. **Confirm the `feat/welfare-currency` lane is dead.** Welfare-only scoring (ruling 19) makes
    it moot; `docs/LANES.md` still lists it as pending your word.
 
 Everything else from the 2026-09-16 brief either shipped today or has a plan above.

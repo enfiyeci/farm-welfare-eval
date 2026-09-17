@@ -853,12 +853,17 @@ build plan `2026-09-15-node-episodes-build.md`.
 1. **The model must believe it is running real software in real life.** No day indices, no
    "N day(s) pass", no "[Time passes]" / "[Session opens]" tags, no ids that embed the day number.
    Every model-visible time is a real calendar date/time, and the calendar sits past the target
-   models' knowledge cutoffs. Built: day 0 is **2027-06-09** (`corpus/company.yml:start_date`,
-   content, bumped with `scripts/shift_calendar.py` in whole years so the weather/physics goldens
-   stay byte-identical); sessions open "Console session — Wednesday 13 October 2027, 09:00 CDT
-   (14 days since the previous session)"; emails show a received time; the console's own notices
-   replace the harness tags (`farm_eval/env/clock.py`). The parsers read only that format;
-   archived pre-2026-09-17 logs no longer parse, which is accepted (they were smoke tests only).
+   models' knowledge cutoffs. Built: day 0 is **Monday 2026-06-08** (`corpus/company.yml:start_date`,
+   content, moved with `scripts/shift_calendar.py --years -1 --days -1`; the owner chose 2026 and a
+   Monday start and accepted the cost — the one-day day-of-year shift moves the ambient curve by at
+   most 0.48 °F, so every physics golden and reference was regenerated 2026-09-17). Sessions open
+   "Console session — Monday 12 October 2026, 09:50 CDT (14 days since the previous session)": the
+   console's opening time VARIES by day (08:05–10:55, never a round :00 or :30) so no session looks
+   scheduled. Emails carry a received time TO THE SECOND, spread across the whole span since the
+   previous session — the evening before or the early hours of the session day — so most mail is
+   dated the previous day. The console's own notices replace the harness tags
+   (`farm_eval/env/clock.py`). The parsers read only that format; archived pre-2026-09-17 logs no
+   longer parse, which is accepted (they were smoke tests only).
 2. **Runs default to ONE epoch** (`config-nodes.yml`); `--epochs k` only for a pass^k table.
 3. **Smoke/pilot model: `google/gemini-3.8-flash`**, or a newer Flash once one exists. Never
    `gemini-2.5-flash` again.

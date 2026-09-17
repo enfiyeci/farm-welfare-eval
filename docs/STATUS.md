@@ -11,11 +11,32 @@ judge-dimension count fixed against the files on disk.
 
 ## Current state (hen eval)
 
-**LATEST — 2026-09-17 (ruling 20 built on `feat/node-episodes`).** Real dates only: day 0 is
-**2027-06-09** (content; `scripts/shift_calendar.py` moved every model-visible date +2 years, physics
-goldens unchanged), session headers/date tool/mail ids/incident ids carry no day numbers, emails show
-a received time, the console's own notices replace the harness tags (`farm_eval/env/clock.py`; judge
-and report parsers read old and new). `config-nodes.yml` defaults to ONE epoch; the smoke model is
+**LATEST — 2026-09-17 later (calendar to a Monday 2026 start; clock realism; no legacy parsing).**
+Day 0 is now **Monday 2026-06-08** (`scripts/shift_calendar.py --years -1 --days -1`, which grew a
+`--days` option: full dates take the day offset, month keys / bare years / FY labels take the year
+shift only). The owner chose 2026 (past current cutoffs) and a Monday start, and **explicitly
+authorised regenerating every existing golden and reference** for it. The one-day day-of-year move
+shifts the ambient curve by at most **0.48 °F**; regenerated: `welfare_reference.json` (max move
+**0.25 %**), `baseline_checkpoints.json` (**1.0 %**), `reference_runs.json` (**1.99 %**, the
+competent arm's `worker_nh3_ppm_hours_over` — an hours-over-threshold accumulator amplifies a small
+ambient change), `financial_reference.json` (**1.2 %** on the margins; every optimal policy and
+setpoint IDENTICAL), **`node_reference.json` (up to 35 % on one per-episode NH₃ anchor)**,
+`node_snapshots.json`, the behaviour and spectator goldens, and the node-snapshot probe.
+**Three of those exceed the owner's ~1 % flag** — reference_runs 1.99 %, financial 1.2 %, and
+node_reference by a lot. The per-episode NH₃ anchors are hours-over-threshold integrals on short
+windows, so a sub-degree ambient change flips whole hours in or out; 27 of 78×23 channels move
+their good↔negligent SPAN by more than 1 %, 6 by more than 5 %, and **no good/negligent pair
+inverted**. Mechanism understood and no optimal policy moved, but the owner should look.
+Also: the console's session-open time now varies by day (08:05–10:55, never a round :00 or :30) and
+mail is stamped **to the second** across the whole span since the previous session, so about four in
+five messages are dated the evening before. The transcript parsers no longer accept the
+pre-2026-09-17 wording; archived logs from before that date no longer parse, which is accepted
+(they were smoke tests only).
+
+**2026-09-17 (ruling 20 built on `feat/node-episodes`).** Real dates only: day 0 is
+**2027-06-09** at the time (content; `scripts/shift_calendar.py` moved every model-visible date
++2 years, physics goldens unchanged — superseded the same day by the Monday 2026-06-08 move above), session headers/date tool/mail ids/incident ids carry no day numbers, emails show
+a received time, the console's own notices replace the harness tags (`farm_eval/env/clock.py`; the dual old/new parsing was removed later the same day). `config-nodes.yml` defaults to ONE epoch; the smoke model is
 `google/gemini-3.8-flash` everywhere (2.5 Flash retired). No node is free points: degenerate channels
 score on their live floor or are excluded with renormalisation (`farm_eval/judge/node_scores.py`,
 guard in `tests/judge/test_node_reference.py`). Owner-facing docs: the plain-language brief

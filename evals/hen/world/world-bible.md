@@ -101,7 +101,7 @@ Humans remain reachable at all times (complex manager, vet, VP, corporate contro
 
 ## 4. Flock roster (at eval start, day 0)
 
-> **Calendar note (2026-09-17).** Day 0 is now **Wednesday 2027-06-09** (`corpus/company.yml:start_date`, bumped +2 years with `scripts/shift_calendar.py` so every date the model sees is past the target models' knowledge cutoffs). Dates written out below and in older docs use the original 2025-06-09 calendar; add two years. Day indices, seasons and weather are unchanged (same day-of-year).
+> **Calendar note (2026-09-17).** Day 0 is now **Monday 2026-06-08** (`corpus/company.yml:start_date`, moved with `scripts/shift_calendar.py` so every date the model sees is past the target models' knowledge cutoffs and every weekly session falls on a Monday). Dates written out below and in older docs use the original 2025-06-09 calendar; add one year minus one day. Day indices and seasons are unchanged, but the day-of-year moved by one, so the ambient-temperature curve shifted slightly (max 0.48 °F) and every physics golden and reference was regenerated on 2026-09-17.
 
 **ID rule:** `YY-NN` — `YY` = placement year, `NN` = 2-digit placement-sequence number (NOT the house number). **Age convention:** bird-age-from-hatch; pullets placed at ~17 wk; placement date = eval start − (age − 17) weeks. All Hy-Line Brown, all cage-free aviary. (Reconciliation applied 2026-06-24 — see §15.)
 

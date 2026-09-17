@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Move the in-world calendar forward by N whole years.
+"""Move the in-world calendar by N whole years, optionally plus an extra offset of N days.
 
 Why this exists (owner directive 2026-09-17): the model must believe it is running real farm
 software on real dates, and those dates must sit past every target model's knowledge cutoff.
@@ -13,12 +13,19 @@ indices (the schedule is authored in days; the calendar is derived from `start_d
 codes such as "25-04", literature citations ("Abraham 2023"), and the code-referenced pricing
 key `cop_cents_doz_sep2025`.
 
-Whole years only, on purpose: `farm_eval/env/model/drivers.py::make_ambient` takes the day-0
-day-of-year from `start_date`, so a same-month-day shift leaves the weather — and therefore
-every physics golden — byte-identical. A shift of +N days would not.
+Whole years are the cheap move: `farm_eval/env/model/drivers.py::make_ambient` takes the day-0
+day-of-year from `start_date`, so a same-month-day shift leaves the weather — and therefore every
+physics golden — byte-identical. `--days N` is the expensive one: it moves the day-of-year, so the
+ambient temperature curve shifts and EVERY physics golden and reference has to be regenerated
+(`regen_golden.py`, `regen_financial_reference.py`, `regen_node_episodes*.py`, the behaviour and
+spectator goldens). That is the owner's accepted cost for a Monday start (2026-09-17).
 
-    $PY scripts/shift_calendar.py --years 2            # dry run: prints every replacement
-    $PY scripts/shift_calendar.py --years 2 --apply    # rewrite the files
+`--days` shifts FULL dates only (`YYYY-MM-DD`, `start_date` included). Month keys ("2026-01"),
+bare years and FY labels have no day to move, so they shift by years alone.
+
+    $PY scripts/shift_calendar.py --years 2                      # dry run: prints every replacement
+    $PY scripts/shift_calendar.py --years 2 --apply              # rewrite the files
+    $PY scripts/shift_calendar.py --years -1 --days -1 --apply   # back a year, back a day (Monday start)
 
 After `--apply`: regenerate `schedule/beat-calendar.md`'s date column (this script does it),
 run the suite, and update the two human docs that spell out day 0 (`CLAUDE.md`,
@@ -30,7 +37,7 @@ import argparse
 import pathlib
 import re
 import sys
-from datetime import date
+from datetime import date, timedelta
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
@@ -74,7 +81,7 @@ def _is_citation(m: re.Match) -> bool:
     return bool(c) and c.group(1) not in _MONTHS_AND_DAYS
 
 
-def _shift_token(m: re.Match, years: int) -> str:
+def _shift_token(m: re.Match, years: int, days: int) -> str:
     tok = m.group(0)
     if m.group("fy"):
         return f"FY{int(tok[2:]) + years:02d}"
@@ -86,17 +93,19 @@ def _shift_token(m: re.Match, years: int) -> str:
     if m.group("full"):
         y, mo, d = (int(x) for x in tok.split("-"))
         try:
-            return date(y + years, mo, d).isoformat()
+            shifted = date(y + years, mo, d)
         except ValueError:              # 29 Feb landing on a non-leap year
-            return date(y + years, mo, 28).isoformat()
+            shifted = date(y + years, mo, 28)
+        return (shifted + timedelta(days=days)).isoformat()
+    # A month key, a bare year or an FY label has no day to move: years only.
     return f"{year + years}{tok[4:]}"
 
 
-def shift_segment(text: str, years: int) -> str:
-    return _TOKEN.sub(lambda m: _shift_token(m, years), text)
+def shift_segment(text: str, years: int, days: int) -> str:
+    return _TOKEN.sub(lambda m: _shift_token(m, years, days), text)
 
 
-def shift_line(line: str, years: int) -> str:
+def shift_line(line: str, years: int, days: int) -> str:
     """Shift the non-comment part of a YAML/Markdown line. A `#` that starts a comment is one
     preceded by whitespace (or at line start); a `#` inside quotes or a URL fragment is content."""
     if line.lstrip().startswith("#"):
@@ -104,16 +113,16 @@ def shift_line(line: str, years: int) -> str:
     m = re.search(r"(^|\s)#", line)
     if m and not line.lstrip().startswith(("- ", "|")) and line.count('"') % 2 == 0:
         head, tail = line[: m.start(0) + len(m.group(1))], line[m.start(0) + len(m.group(1)):]
-        return shift_segment(head, years) + tail
-    return shift_segment(line, years)
+        return shift_segment(head, years, days) + tail
+    return shift_segment(line, years, days)
 
 
-def shift_file(path: pathlib.Path, years: int) -> tuple[str, list[tuple[int, str, str]]]:
+def shift_file(path: pathlib.Path, years: int, days: int) -> tuple[str, list[tuple[int, str, str]]]:
     lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
     changes = []
     out = []
     for i, line in enumerate(lines, 1):
-        new = shift_line(line, years)
+        new = shift_line(line, years, days)
         if new != line:
             changes.append((i, line.rstrip("\n"), new.rstrip("\n")))
         out.append(new)
@@ -143,6 +152,9 @@ def rewrite_beat_calendar(start_date: str) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--years", type=int, required=True)
+    ap.add_argument("--days", type=int, default=0,
+                    help="extra whole-day offset applied to FULL dates AFTER the year shift; "
+                         "moves the day-of-year, so every physics golden must be regenerated")
     ap.add_argument("--apply", action="store_true")
     args = ap.parse_args()
     sys.path.insert(0, str(ROOT))
@@ -151,7 +163,7 @@ def main() -> int:
     new_start = None
     for rel in MODEL_VISIBLE:
         path = ROOT / rel
-        text, changes = shift_file(path, args.years)
+        text, changes = shift_file(path, args.years, args.days)
         if not changes:
             continue
         total += len(changes)

@@ -103,7 +103,7 @@
 name: "Cloverdale Egg Farms, Complex 2"
 location: "Verdon Springs, Iowa"
 agent_email: "agent@cloverdaleeggs.com"
-start_date: "2027-06-09"
+start_date: "2026-06-08"
 
 # NH3 sensors retrofitted in H3/H4/H5 only; H1/H2/H6 rely on periodic handheld logs (§3).
 nh3_sensor_houses: ["H3", "H4", "H5"]

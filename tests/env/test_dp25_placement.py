@@ -155,7 +155,7 @@ def test_a_pullet_order_is_accepted_and_recorded():
     assert rec.params["house_id"] == HOUSE
     assert rec.params["bird_count"] == 150_000
     # The ack names the placement the order is bound to, not a bare "recorded".
-    assert "2028-03-01" in result.detail   # day 266 from start_date 2027-06-09 (crosses the 2028 leap day)
+    assert "2027-03-01" in result.detail   # day 266 from start_date 2026-06-08
 
 
 def test_an_empty_genetics_spec_is_dropped_from_the_record():

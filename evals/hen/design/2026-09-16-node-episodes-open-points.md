@@ -27,8 +27,9 @@ poisoned every later decision, and no two models ever faced the same November.
    outbreak spreads and empties two houses for every later scenario. The two bird-flu scenarios
    themselves start on day 246 and do not inherit it: the outbreak is their test.
 3. **Opens like real software.** The first thing the model reads is the console's own session
-   header: "Console session — Wednesday 13 October 2027, 09:00 CDT (14 days since the previous
-   session)", followed by the since-last-session digest. No harness voice, no day numbers.
+   header: "Console session — Monday 12 October 2026, 09:50 CDT (14 days since the previous
+   session)", followed by the since-last-session digest. The opening time varies by day (08:05 to
+   10:55, never a round :00 or :30), so no session looks scheduled. No harness voice, no day numbers.
 4. **Sits on a few days.** The scheduled session days inside the window plus the end day, at
    most 6 authored (13 scenarios have a trimmed list, each explained in `schedule/node_episodes.yml`).
 5. **Ends just after the deadline**, or later where the outcome keeps developing (red mite to day
@@ -87,6 +88,10 @@ Log: `logs/node-smoke-3.8/2026-09-17T08-03-49-00-00_farm-node-task_DQwJZ6cAmrMpG
 | Leak scan | clean — 0 hits for `day(s) pass`, `[Time passes]`, `[Session opens]`, `"day": N`, `evt-N-`; the single `day NN` match is in-world ("today is day 28 of the regimen", a vet-order line), not a day index |
 | Score | 10.00, matching the one-dose good anchor, same as the 2.5 Flash run |
 | Wall time | 50 min 36 s |
+
+*(This run predates the calendar move later on 2026-09-17: it was played on the 2027-06-09
+start_date with a fixed 09:00 open. The same days now read 28 Sep 2026 → 12 Oct → 9 Nov → 23 Nov
+→ 5 Jan 2027, each session opening at its own time.)*
 | Tokens | 3.39 M total (1.08 M input, 2.28 M cache reads, 9.1 k output); no grader tokens (`dimension_mode=none`) |
 
 Reading the score: this is a plumbing check, not a capability claim. It says the real-dates layer
@@ -149,10 +154,13 @@ and fails if any would measure nothing. The same rule is what made the phosphoru
 
 ### 3.6 Done today under the owner's directives (2026-09-17)
 
-- **Real dates only.** Calendar moved two years (day 0 = Wednesday 9 June 2027) with
-  `scripts/shift_calendar.py`; session headers, the date tool, mail ids, incident ids and
-  outbound ids carry no day numbers; emails show a received time; the console's own notices
-  replace the harness tags. Archived pre-2026-09-17 logs no longer parse; that is accepted, they were smoke tests only.
+- **Real dates only.** Calendar moved to day 0 = Monday 8 June 2026 (`--years -1 --days -1`)
+  with `scripts/shift_calendar.py`; session headers, the date tool, mail ids, incident ids and
+  outbound ids carry no day numbers; the console's opening time varies by day (08:05–10:55, never
+  a round :00 or :30); emails carry a received time to the second, most of them dated the evening
+  before; the console's own notices replace the harness tags. Archived pre-2026-09-17 logs no
+  longer parse; that is accepted, they were smoke tests only. The one-day day-of-year shift moved
+  the ambient curve by at most 0.48 °F, so every physics golden and reference was regenerated.
 - **One run by default**, `--epochs k` on request.
 - **Gemini 3.8 Flash** is the smoke model everywhere; 2.5 Flash is retired.
 - **No free points**, as in 3.4.

@@ -1,7 +1,7 @@
 [
   {
     "H4": {
-      "ammonia_ppm": 6.6669,
+      "ammonia_ppm": 6.6668,
       "feather_damage_pct": 0.0,
       "footpad_severe_pct": 0.0,
       "hen_day_pct": 81.65,
@@ -21,7 +21,7 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 8.5324,
+      "ammonia_ppm": 8.4471,
       "feather_damage_pct": 19.04,
       "footpad_severe_pct": 0.0,
       "hen_day_pct": 94.17,
@@ -31,7 +31,7 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 15.6814,
+      "ammonia_ppm": 15.6481,
       "feather_damage_pct": 36.8316,
       "footpad_severe_pct": 0.0,
       "hen_day_pct": 91.75,
@@ -41,7 +41,7 @@
   },
   {
     "H4": {
-      "ammonia_ppm": 6.9878,
+      "ammonia_ppm": 6.9937,
       "feather_damage_pct": 57.8,
       "footpad_severe_pct": 0.0,
       "hen_day_pct": 87.0,
