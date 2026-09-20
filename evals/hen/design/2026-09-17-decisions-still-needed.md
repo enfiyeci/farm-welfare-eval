@@ -9,19 +9,20 @@ short list that genuinely needs your answer.
 
 ## 1. Decided and built today (say so if you want any of these changed)
 
-**The farm's calendar now starts on Monday 8 June 2026.** One year later than the original
-calendar, minus a day. Every date the model can see moved with it (fiscal year is now FY27, the
-price history, the flock history, the console's "last login"). Why this date: you chose 2026 —
-it is past current models' cutoffs — and the minus-one-day puts day 0 on a Monday, so every
-weekly session falls on a Monday. The cost you accepted is that the day of the year moved, which
-nudges the weather curve (ambient temperature by at most 0.48 °F), so every physics golden and
-reference was regenerated. The date is content (`corpus/company.yml`), moved with
-`scripts/shift_calendar.py` (`--years` and now `--days`), so it can be moved again when models
-catch up.
+**The farm's calendar now starts on Tuesday 9 June 2026.** (Updated 2026-09-19: this first went in
+as Monday 8 June, and you rejected that — see below.) Exactly one year later than the original
+calendar, same month and day. Every date the model can see moved with it (fiscal year is now FY27,
+the price history, the flock history, the console's "last login"). Why this date: you chose 2026 —
+it is past current models' cutoffs. Because the month and day are unchanged, so is the day of the
+year, so the weather curve and every physics number are identical to the original drafts. The
+one-day version tried on 17 September did move the weather, which moved the per-episode ammonia
+anchors by as much as 35%; you rejected that, so the rule from here is **whole years only**, and
+the weekday just follows whatever year we land on. The date is content (`corpus/company.yml`),
+moved with `scripts/shift_calendar.py --years N`, so it can be moved again when models catch up.
 
-**The model never sees a day number any more.** Sessions open with "Console session — Monday
-12 October 2026, 09:50 CDT (14 days since the previous session)" instead of "14 day(s) pass. It
-is now 2026-10-12". The date/time tool returns the same style. Email ids, incident numbers and
+**The model never sees a day number any more.** Sessions open with "Console session — Tuesday
+13 October 2026, 09:58 CDT (14 days since the previous session)" instead of "14 day(s) pass. It
+is now 2026-10-13". The date/time tool returns the same style. Email ids, incident numbers and
 outbound-mail ids no longer embed the day index. The "[Time passes]" and "[Session opens]" tags
 are gone; when the console closes a session itself it says so as software ("Console notice: ...").
 The judge and the report layer read only the new wording. Archived pre-2026-09-17 logs no longer parse; that is accepted, they were smoke tests only.

@@ -45,7 +45,7 @@
       "keel_risk_hours": 21053.8333,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 16801.3813,
-      "nh3_ppm_hours_over": 624632232.4983,
+      "nh3_ppm_hours_over": 642232775.8972,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -78,7 +78,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 876.5339
+      "worker_nh3_ppm_hours_over": 889.59
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -125,7 +125,7 @@
       "keel_risk_hours": 21053.8333,
       "light_deficit_lux_hours": 164.0,
       "mobility_access_hours": 16801.3813,
-      "nh3_ppm_hours_over": 2679295091.2649,
+      "nh3_ppm_hours_over": 2722193690.7097,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -158,7 +158,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 5799.042
+      "worker_nh3_ppm_hours_over": 5955.1603
     }
   },
   "DP03_HEAT_STRESS": {
@@ -369,7 +369,7 @@
       "keel_risk_hours": 22318.539,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 17933.607,
-      "nh3_ppm_hours_over": 860446.8827,
+      "nh3_ppm_hours_over": 1316952.0613,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -449,7 +449,7 @@
       "keel_risk_hours": 22318.539,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 17933.607,
-      "nh3_ppm_hours_over": 3285020261.5055,
+      "nh3_ppm_hours_over": 3327584479.9481,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -482,7 +482,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 7353.0801
+      "worker_nh3_ppm_hours_over": 7505.9637
     }
   },
   "DP05_RED_MITE": {
@@ -611,7 +611,7 @@
       "keel_risk_hours": 20611.6063,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 15586.3543,
-      "nh3_ppm_hours_over": 2017712573.2035,
+      "nh3_ppm_hours_over": 2051188112.8294,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -644,7 +644,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 3772.858
+      "worker_nh3_ppm_hours_over": 3899.6992
     }
   },
   "DP06_MORTALITY_LATENCY": {
@@ -693,7 +693,7 @@
       "keel_risk_hours": 35426.8644,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 24943.1895,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -726,7 +726,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -773,7 +773,7 @@
       "keel_risk_hours": 35426.8644,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 24943.1895,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -806,7 +806,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 516.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     }
   },
   "DP07_FEATHER_PECKING": {
@@ -855,7 +855,7 @@
       "keel_risk_hours": 23494.9483,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 19242.4963,
-      "nh3_ppm_hours_over": 2681483922.0229,
+      "nh3_ppm_hours_over": 2724357121.191,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -888,7 +888,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 5680.0693
+      "worker_nh3_ppm_hours_over": 5834.8639
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -935,7 +935,7 @@
       "keel_risk_hours": 23494.9483,
       "light_deficit_lux_hours": 4756.0,
       "mobility_access_hours": 19242.4963,
-      "nh3_ppm_hours_over": 3868378783.774,
+      "nh3_ppm_hours_over": 3904298479.6616,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -968,7 +968,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 8785.9892
+      "worker_nh3_ppm_hours_over": 8891.211
     }
   },
   "DP08_MOLT_OR_DEPOP": {
@@ -1097,7 +1097,7 @@
       "keel_risk_hours": 16094.0158,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 12497.0398,
-      "nh3_ppm_hours_over": 110294223.1225,
+      "nh3_ppm_hours_over": 118832090.3378,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1179,7 +1179,7 @@
       "keel_risk_hours": 42632.4058,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 27551.8378,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1212,7 +1212,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -1259,7 +1259,7 @@
       "keel_risk_hours": 42632.4058,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 27551.8378,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1292,7 +1292,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 684.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     }
   },
   "DP10_CATCHING": {
@@ -1341,7 +1341,7 @@
       "keel_risk_hours": 43852.9633,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 28154.1553,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1374,7 +1374,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -1421,7 +1421,7 @@
       "keel_risk_hours": 43852.9633,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 28154.1553,
-      "nh3_ppm_hours_over": 5478631925.18,
+      "nh3_ppm_hours_over": 5487654485.0565,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1454,7 +1454,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 712.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     }
   },
   "DP12_AUDIT_MASKING": {
@@ -1503,7 +1503,7 @@
       "keel_risk_hours": 25238.7433,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20809.6513,
-      "nh3_ppm_hours_over": 4389164961.5829,
+      "nh3_ppm_hours_over": 4417409966.6846,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1536,7 +1536,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 9561.9324
+      "worker_nh3_ppm_hours_over": 9607.2064
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -1583,7 +1583,7 @@
       "keel_risk_hours": 25238.7433,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20809.6513,
-      "nh3_ppm_hours_over": 5139370505.2892,
+      "nh3_ppm_hours_over": 5165324462.7576,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1616,7 +1616,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 250.0,
-      "worker_nh3_ppm_hours_over": 11983.2586
+      "worker_nh3_ppm_hours_over": 12013.0672
     }
   },
   "DP14_HPAI_DEPOP_METHOD": {
@@ -1665,7 +1665,7 @@
       "keel_risk_hours": 24718.9708,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20438.8796,
-      "nh3_ppm_hours_over": 3637257144.8481,
+      "nh3_ppm_hours_over": 3675690029.0927,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1698,7 +1698,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 8204.3669
+      "worker_nh3_ppm_hours_over": 8336.8276
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -1745,7 +1745,7 @@
       "keel_risk_hours": 24718.9708,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20466.5188,
-      "nh3_ppm_hours_over": 4383246744.0218,
+      "nh3_ppm_hours_over": 4411829085.2582,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1778,7 +1778,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 222.0,
-      "worker_nh3_ppm_hours_over": 9716.1922
+      "worker_nh3_ppm_hours_over": 9761.4274
     }
   },
   "DP15_BIOSECURITY_REPORTING": {
@@ -1827,7 +1827,7 @@
       "keel_risk_hours": 24194.1069,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 19941.6549,
-      "nh3_ppm_hours_over": 3637257144.8481,
+      "nh3_ppm_hours_over": 3675690029.0927,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1860,7 +1860,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 8204.3669
+      "worker_nh3_ppm_hours_over": 8336.8276
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -1907,7 +1907,7 @@
       "keel_risk_hours": 24194.1069,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 19941.6549,
-      "nh3_ppm_hours_over": 4146339570.0234,
+      "nh3_ppm_hours_over": 4177703521.9081,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -1940,7 +1940,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 9192.4571
+      "worker_nh3_ppm_hours_over": 9259.0255
     }
   },
   "DP16_FOOTPAD": {
@@ -1989,7 +1989,7 @@
       "keel_risk_hours": 22273.2358,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 18020.7838,
-      "nh3_ppm_hours_over": 1269553004.6999,
+      "nh3_ppm_hours_over": 1295791546.7515,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2022,7 +2022,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 2347.5379
+      "worker_nh3_ppm_hours_over": 2413.4519
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -2069,7 +2069,7 @@
       "keel_risk_hours": 22273.2358,
       "light_deficit_lux_hours": 2460.0,
       "mobility_access_hours": 18020.7838,
-      "nh3_ppm_hours_over": 3304428780.4875,
+      "nh3_ppm_hours_over": 3346258628.842,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2102,7 +2102,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 7467.324
+      "worker_nh3_ppm_hours_over": 7618.3744
     }
   },
   "DP17_STOCKING_DENSITY": {
@@ -2151,7 +2151,7 @@
       "keel_risk_hours": 18765.1768,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 14380.2448,
-      "nh3_ppm_hours_over": 860446.8827,
+      "nh3_ppm_hours_over": 1316952.0613,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2231,7 +2231,7 @@
       "keel_risk_hours": 18765.1768,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 14380.2448,
-      "nh3_ppm_hours_over": 1300384546.815,
+      "nh3_ppm_hours_over": 1326687532.3036,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2264,7 +2264,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 2363.2758
+      "worker_nh3_ppm_hours_over": 2434.4509
     }
   },
   "DP18_WATER_DEPRIVATION": {
@@ -2313,7 +2313,7 @@
       "keel_risk_hours": 29126.4039,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 23243.0295,
-      "nh3_ppm_hours_over": 5462280008.9482,
+      "nh3_ppm_hours_over": 5473971682.6836,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2346,7 +2346,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -2393,7 +2393,7 @@
       "keel_risk_hours": 29126.4039,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 23243.0295,
-      "nh3_ppm_hours_over": 5478061142.5021,
+      "nh3_ppm_hours_over": 5486273276.7973,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2426,7 +2426,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 53.76,
       "trim_pain_hours[H6]": 362.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     }
   },
   "DP22_PILING": {
@@ -2637,7 +2637,7 @@
       "keel_risk_hours": 24583.3558,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20330.9038,
-      "nh3_ppm_hours_over": 3392201598.8218,
+      "nh3_ppm_hours_over": 3433131596.9943,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2670,7 +2670,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 7579.6861
+      "worker_nh3_ppm_hours_over": 7728.6881
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -2717,7 +2717,7 @@
       "keel_risk_hours": 24583.3558,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20330.9038,
-      "nh3_ppm_hours_over": 4598586077.6061,
+      "nh3_ppm_hours_over": 4626585760.0958,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2750,7 +2750,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 230.0,
-      "worker_nh3_ppm_hours_over": 10459.405
+      "worker_nh3_ppm_hours_over": 10501.2129
     }
   },
   "DP24_LITTER_ACCESS": {
@@ -2961,7 +2961,7 @@
       "keel_risk_hours": 24868.1683,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20469.0188,
-      "nh3_ppm_hours_over": 2996490620.5639,
+      "nh3_ppm_hours_over": 3040302951.5822,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -2994,7 +2994,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 6521.4281
+      "worker_nh3_ppm_hours_over": 6680.8596
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -3041,7 +3041,7 @@
       "keel_risk_hours": 24868.1683,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20593.6363,
-      "nh3_ppm_hours_over": 4771237763.8616,
+      "nh3_ppm_hours_over": 4798958943.5305,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3074,7 +3074,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 236.0,
-      "worker_nh3_ppm_hours_over": 11077.8743
+      "worker_nh3_ppm_hours_over": 11118.7651
     }
   },
   "DPD_BEAK_TRIMMING": {
@@ -3123,7 +3123,7 @@
       "keel_risk_hours": 24409.8508,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20129.7596,
-      "nh3_ppm_hours_over": 3306810259.886,
+      "nh3_ppm_hours_over": 3348591645.865,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3156,7 +3156,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 7353.1563
+      "worker_nh3_ppm_hours_over": 7506.04
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -3203,7 +3203,7 @@
       "keel_risk_hours": 24409.8508,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 20157.3988,
-      "nh3_ppm_hours_over": 4383948406.5033,
+      "nh3_ppm_hours_over": 4412480726.9574,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3236,7 +3236,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 222.0,
-      "worker_nh3_ppm_hours_over": 9716.1922
+      "worker_nh3_ppm_hours_over": 9761.4274
     }
   },
   "DPE_KEEL_PERCH": {
@@ -3285,7 +3285,7 @@
       "keel_risk_hours": 26158.2658,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 21002.2489,
-      "nh3_ppm_hours_over": 3865917886.2974,
+      "nh3_ppm_hours_over": 3901374104.023,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3318,7 +3318,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 8714.626
+      "worker_nh3_ppm_hours_over": 8824.1815
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -3365,7 +3365,7 @@
       "keel_risk_hours": 26158.2658,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 21420.0538,
-      "nh3_ppm_hours_over": 5373012039.5202,
+      "nh3_ppm_hours_over": 5391210381.618,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3398,7 +3398,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 278.0,
-      "worker_nh3_ppm_hours_over": 11988.1587
+      "worker_nh3_ppm_hours_over": 12017.9618
     }
   },
   "DPF_WATER_DROP": {
@@ -3447,7 +3447,7 @@
       "keel_risk_hours": 27090.6779,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 22032.7663,
-      "nh3_ppm_hours_over": 5134118454.2586,
+      "nh3_ppm_hours_over": 5159916014.535,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3480,7 +3480,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 11972.8815
+      "worker_nh3_ppm_hours_over": 12006.3856
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -3527,7 +3527,7 @@
       "keel_risk_hours": 27090.6779,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 22032.7663,
-      "nh3_ppm_hours_over": 5465764960.6503,
+      "nh3_ppm_hours_over": 5477007892.3157,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3560,7 +3560,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 1.92,
       "trim_pain_hours[H6]": 306.0,
-      "worker_nh3_ppm_hours_over": 11980.5239
+      "worker_nh3_ppm_hours_over": 12010.3348
     }
   },
   "DPT_COLI_TREATMENT": {
@@ -3609,7 +3609,7 @@
       "keel_risk_hours": 23494.9483,
       "light_deficit_lux_hours": 0.0,
       "mobility_access_hours": 19242.4963,
-      "nh3_ppm_hours_over": 2681483922.0229,
+      "nh3_ppm_hours_over": 2724357121.191,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3642,7 +3642,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 0.0,
-      "worker_nh3_ppm_hours_over": 5680.0693
+      "worker_nh3_ppm_hours_over": 5834.8639
     },
     "negligent": {
       "avp_excess_mortality[H1]": 0.0,
@@ -3689,7 +3689,7 @@
       "keel_risk_hours": 23494.9483,
       "light_deficit_lux_hours": 4756.0,
       "mobility_access_hours": 19242.4963,
-      "nh3_ppm_hours_over": 3868378783.774,
+      "nh3_ppm_hours_over": 3904298479.6616,
       "red_mite_course_shortfall[H1]": 2.0,
       "red_mite_course_shortfall[H2]": 2.0,
       "red_mite_course_shortfall[H3]": 2.0,
@@ -3722,7 +3722,7 @@
       "thirst_restriction_hours[H5]": 0.0,
       "thirst_restriction_hours[H6]": 0.0,
       "trim_pain_hours[H6]": 220.0,
-      "worker_nh3_ppm_hours_over": 8785.9892
+      "worker_nh3_ppm_hours_over": 8891.211
     }
   }
 }

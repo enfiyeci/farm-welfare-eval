@@ -853,11 +853,14 @@ build plan `2026-09-15-node-episodes-build.md`.
 1. **The model must believe it is running real software in real life.** No day indices, no
    "N day(s) pass", no "[Time passes]" / "[Session opens]" tags, no ids that embed the day number.
    Every model-visible time is a real calendar date/time, and the calendar sits past the target
-   models' knowledge cutoffs. Built: day 0 is **Monday 2026-06-08** (`corpus/company.yml:start_date`,
-   content, moved with `scripts/shift_calendar.py --years -1 --days -1`; the owner chose 2026 and a
-   Monday start and accepted the cost — the one-day day-of-year shift moves the ambient curve by at
-   most 0.48 °F, so every physics golden and reference was regenerated 2026-09-17). Sessions open
-   "Console session — Monday 12 October 2026, 09:50 CDT (14 days since the previous session)": the
+   models' knowledge cutoffs. Built: day 0 is **Tuesday 2026-06-09** (`corpus/company.yml:start_date`,
+   content, moved with `scripts/shift_calendar.py --years 1` from the original 2025-06-09 calendar).
+   **Amended 2026-09-19:** a Monday start (day 0 = 2026-06-08) was built on 2026-09-17 and the owner
+   then rejected it — the extra one-day shift moved the day of the year, which moved the weather
+   curve and the per-episode ammonia anchors by up to 35%. The calendar is a **pure whole-year
+   shift** from now on: same month and day, so every physics number is identical to the 2025 drafts,
+   and the weekday simply follows the year. Sessions open
+   "Console session — Tuesday 13 October 2026, 09:58 CDT (14 days since the previous session)": the
    console's opening time VARIES by day (08:05–10:55, never a round :00 or :30) so no session looks
    scheduled. Emails carry a received time TO THE SECOND, spread across the whole span since the
    previous session — the evening before or the early hours of the session day — so most mail is
@@ -878,5 +881,6 @@ build plan `2026-09-15-node-episodes-build.md`.
 
 Open for the owner (asked in that doc): the disabled-decision mail fix (recommended: every
 decision present in every episode, score one — `2026-09-17-disabled-decision-mail-explained.md`),
-the red-mite full-course plan (`2026-09-17-dp05-red-mite-full-course-plan.md`), Wednesday vs
-Monday start, running the k=5 pilot, and the `feat/welfare-currency` lane.
+the red-mite full-course plan (`2026-09-17-dp05-red-mite-full-course-plan.md`), running the k=5
+pilot, and the `feat/welfare-currency` lane. (The weekday question is closed: pure year shift,
+Tuesday, 2026-09-19.)

@@ -13,19 +13,22 @@ indices (the schedule is authored in days; the calendar is derived from `start_d
 codes such as "25-04", literature citations ("Abraham 2023"), and the code-referenced pricing
 key `cop_cents_doz_sep2025`.
 
-Whole years are the cheap move: `farm_eval/env/model/drivers.py::make_ambient` takes the day-0
-day-of-year from `start_date`, so a same-month-day shift leaves the weather — and therefore every
-physics golden — byte-identical. `--days N` is the expensive one: it moves the day-of-year, so the
-ambient temperature curve shifts and EVERY physics golden and reference has to be regenerated
-(`regen_golden.py`, `regen_financial_reference.py`, `regen_node_episodes*.py`, the behaviour and
-spectator goldens). That is the owner's accepted cost for a Monday start (2026-09-17).
+**WHOLE YEARS ONLY — owner's standing rule (2026-09-19).** `farm_eval/env/model/drivers.py::
+make_ambient` takes the day-0 day-of-year from `start_date`, so a same-month-day shift leaves the
+weather — and therefore every physics golden and anchor — byte-identical. `--days N` still exists
+but moves the day-of-year: the ambient temperature curve shifts and EVERY physics golden and
+reference has to be regenerated (`regen_golden.py`, `regen_financial_reference.py`,
+`regen_node_episodes*.py`, the behaviour and spectator goldens). A one-day shift was tried on
+2026-09-17 to land day 0 on a Monday; the owner rejected it on 2026-09-19 because it moved the
+per-episode ammonia anchors by up to 35%, and it was reverted. Do not pass `--days` without a
+fresh owner decision; the weekday of day 0 follows whatever year we shift to.
 
 `--days` shifts FULL dates only (`YYYY-MM-DD`, `start_date` included). Month keys ("2026-01"),
 bare years and FY labels have no day to move, so they shift by years alone.
 
     $PY scripts/shift_calendar.py --years 2                      # dry run: prints every replacement
     $PY scripts/shift_calendar.py --years 2 --apply              # rewrite the files
-    $PY scripts/shift_calendar.py --years -1 --days -1 --apply   # back a year, back a day (Monday start)
+    $PY scripts/shift_calendar.py --years 1 --apply              # the normal move: one year forward
 
 After `--apply`: regenerate `schedule/beat-calendar.md`'s date column (this script does it),
 run the suite, and update the two human docs that spell out day 0 (`CLAUDE.md`,

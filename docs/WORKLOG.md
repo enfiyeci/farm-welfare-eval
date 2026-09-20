@@ -4,6 +4,37 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-19 · claude · calendar reverted to a PURE one-year shift: day 0 = Tuesday 2026-06-09 (branch feat/node-episodes, PR #39)
+
+- **What / why:** The owner **rejected** the extra one-day calendar move made on 2026-09-17 (day 0
+  = Monday 2026-06-08). That day-of-year change moved the weather curve, and with it the
+  per-episode NH₃ anchors in `node_reference.json` by up to 35 % — too much to pay for a Monday
+  start. The calendar is now a **pure whole-year shift** from the original 2025-06-09 drafts:
+  `start_date` = **2026-06-09**, same month and day, so the same day of the year and therefore
+  identical physics. Day 0 is a **Tuesday**; the owner accepts that the weekday follows the year.
+- **How:** `scripts/shift_calendar.py --years 0 --days 1 --apply` (14 model-visible lines: two
+  `start_date`s, the six prior-flock dates, six briefing "last login" lines) plus the 31
+  beat-calendar dates. Then regenerated in order: `regen_golden.py`,
+  `regen_financial_reference.py`, `regen_node_episodes.py --snapshots --reference`,
+  `regen_behaviour_golden.py`, `regen_spectator_golden.py`, `probe_node_snapshots.py`.
+- **Verified:** every numeric value in `welfare_reference.json`, `node_reference.json`,
+  `financial_reference.json`, `baseline_checkpoints.json`, `reference_runs.json` and
+  `node_snapshots.json` is EQUAL to the same file on the ORIGINAL 2025-06-09 calendar
+  (`2d9bdce~1`) — max abs difference 0.0 per file; only the dates inside them differ.
+- **Watch out (found while verifying):** the 2027-start calendar at `f74b63b` is NOT physics-equal
+  to a 2026 start for `financial_reference.json`. A 2027-06-09 run crosses **29 Feb 2028**, so
+  after February its day indices land one calendar day later and a few days fall in a different
+  month of the price timeline (~0.01 % on the margins). The weather model is unaffected (it works
+  off the day-0 day-of-year, not the real calendar), which is why the welfare/node/snapshot files
+  match `f74b63b` too. **When checking a future year shift, compare against a calendar with the
+  same leap-year pattern.**
+- **Standing rule from here:** move the calendar in **whole years only**. `--days` still exists in
+  `scripts/shift_calendar.py` but its docstring now says not to use it without a fresh owner
+  decision, because it invalidates every physics anchor.
+- **Docs updated:** `CLAUDE.md` (day-0 bullet, date range), `world-bible.md` calendar note,
+  ruling 20 item 1, `2026-09-17-decisions-still-needed.md` §1,
+  `2026-09-16-node-episodes-open-points.md` §1/§3.6, `docs/STATUS.md` LATEST, PR #39 body.
+
 ## 2026-09-17 (later) · claude · calendar to Monday 2026-06-08; varied session/mail clock; legacy parsing removed (branch feat/node-episodes, PR #39)
 
 - **What / decided:** Three owner directives on top of ruling 20, all on `feat/node-episodes`:
@@ -46,7 +77,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **Next action:** unchanged — the owner still owes the four asks in
   `evals/hen/design/2026-09-17-decisions-still-needed.md` (the Monday/Wednesday ask is now resolved
   and removed). Note for Codex: any script or note that quotes a 2027/2028 in-world date is stale;
-  the run is now 2026-06-08 → 2027-11-01.
+  the run is now 2026-06-09 → 2027-11-02 (corrected by the 2026-09-19 entry above — this entry's
+  one-day shift was reverted).
 
 ## 2026-09-17 · claude · ruling 20 built (real dates, one epoch, 3.8 Flash, no free points); PR opened (branch feat/node-episodes)
 

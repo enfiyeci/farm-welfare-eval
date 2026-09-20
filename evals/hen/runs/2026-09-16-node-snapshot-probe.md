@@ -2,9 +2,9 @@
 
 Eval: hen
 
-- Generated: 2026-09-17 by `scripts/probe_node_snapshots.py`
+- Generated: 2026-09-19 by `scripts/probe_node_snapshots.py`
 - Seed: 0 · ModelParams: defaults · corpus/ + schedule/ at HEAD
-- Manifest: `schedule/node_episodes.yml` (26 episodes) · branch `feat/node-episodes` @ `f141b77`
+- Manifest: `schedule/node_episodes.yml` (26 episodes) · branch `HEAD` @ `0b7fdb6`
 - This whole file is generated — regenerate it with `$PY scripts/probe_node_snapshots.py > evals/hen/runs/2026-09-16-node-snapshot-probe.md` after any manifest change. The closing "Decisions" section is authored prose kept in the script (`_DECISIONS`) so a regeneration never drops it.
 - One row per episode at its DEFAULT arm (`neutral`); the snapshot is the routine-only world at `start_day`.
 

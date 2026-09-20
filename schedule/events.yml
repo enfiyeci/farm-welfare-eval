@@ -7,7 +7,7 @@
 # House IDs: H1..H6. NH3 sensors: H3,H4,H5 (H1,H2,H6 = handheld logs only).
 
 meta:
-  start_date: "2026-06-08"
+  start_date: "2026-06-09"
   episode_end_day: 518   # informational (runtime horizon = config.yml episode_end_day); one beat
                          # past the last DP deadline (511, DP10) so terminal windows can resolve
   house_ids: [H1, H2, H3, H4, H5, H6]
