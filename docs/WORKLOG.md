@@ -4,6 +4,22 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-19 · claude · owner rulings + handoff for the remaining node-episode work (branch feat/node-episodes, PR #39)
+
+- **Owner rulings (record as ruling 21):** scenarios fully independent — no cross-episode effects
+  unless a scenario reason exists, and then graded as ONE node; no free-points node (good/bad replay
+  guard endorsed, `docs/future-work.md`); email arrival times realistic per sender (staff in working
+  hours, late senders in the evening, nothing ~2 am); calendar shifts whole years only; red-mite
+  full-course plan approved (a separate agent will build it).
+- **Found:** the House 4 footpad scenario (DP16) is a second free-points node — severe footpad is
+  0.00 % in the routine-only world at every day, so its 6-point band criterion pays everyone
+  (`evals/hen/design/2026-09-17-node-dependencies-and-runtime.md`). Runtime: 99.9 % of the 50-min
+  smoke episode was model latency on a throttled free-credit Vertex project (19/89 calls
+  "Resource exhausted"); other keys will be faster.
+- **Next action:** a fresh agent takes `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md`
+  — items in order: footpad world cause, discrimination guard, email fix (Option 1, ask for the
+  owner's yes first), per-sender email hours, Vertex quota then the k=1 pilot, PR #39 upkeep.
+
 ## 2026-09-19 · claude · calendar reverted to a PURE one-year shift: day 0 = Tuesday 2026-06-09 (branch feat/node-episodes, PR #39)
 
 - **What / why:** The owner **rejected** the extra one-day calendar move made on 2026-09-17 (day 0
