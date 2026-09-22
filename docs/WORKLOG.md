@@ -4,6 +4,29 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · solver crash on text-only model turns FIXED (branch claude/solver-text-only-nudge, off feat/node-episodes)
+
+- **Bug:** gemini-3.8-flash on Vertex sometimes closes a session with a text-only summary and no
+  tool call. The solver nudged only BLANK turns, so the next request ended on the model's turn and
+  Vertex returned 400 "Requests ending with a model turn are not supported." It killed both DP05
+  full-course runs, DP15 in the k=1 run (which then aborted: 7 of 17 samples logged, DP12/DPF
+  cancelled), and DP23 in the all-decisions run.
+- **Fix (`c037654`):** nudge after EVERY tool-less turn; two in a row take the existing forced
+  advance. The nudge now reads `Console: no command was received…` — it no longer starts with the
+  forced-advance prefix `Console notice:`, which `run_sweep.episode_engagement` and the judge note
+  read as a session close. New run-health counter `EpisodeStore.text_only_turns` (on the store
+  only, not yet surfaced by the scorer/report). `report/reliability.py` now lists an errored
+  sample with its cause instead of raising, so `scripts/node_reliability.py` works on crashed
+  logs. Behaviour-model golden regenerated (one extra nudge, msg ids shift by one).
+- **Verified:** full suite green (adapter, report, env, rest). Live DP05_RED_MITE on Flash (branch
+  `claude/dp05-nudge-verify` = red-mite branch + the fix, log
+  `logs/node-dp05-nudge-verify-2026-09-22/` in that worktree): reached scoring, status success,
+  node score 10.0, 22 min, 341k input tokens. That run happened to produce no text-only turn, so
+  the crashed DP05 history was also replayed to Vertex directly: without the nudge, the same 400;
+  with it, accepted, and Flash answered with an `end_day` call.
+- **Next action:** merge this into `feat/node-episodes` (then the red-mite and all-decisions
+  branches pick it up), and re-run the k=1 plumbing run's unfinished episodes.
+
 ## 2026-09-22 · claude · owner approved Option 1 (every decision on the ledger); build handoff written (branch feat/node-episodes, PR #39)
 
 - **Decided:** the disabled-decision mail fix is Option 1 — every decision point on the ledger in
