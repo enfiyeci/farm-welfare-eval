@@ -4,7 +4,7 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
-## 2026-09-22 · claude · BUILT: every decision on the ledger, the judge scores one (branch feat/node-episodes-all-decisions, PR #PENDING, based on feat/node-episodes)
+## 2026-09-22 · claude · BUILT: every decision on the ledger, the judge scores one (branch feat/node-episodes-all-decisions, PR #42, based on feat/node-episodes)
 
 - **What:** Option 1 of the disabled-decision mail explainer is built (ruling 21 addendum). A node
   episode's farm now carries every decision point on its ledger exactly as the continuous run does
