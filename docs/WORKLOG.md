@@ -17,8 +17,15 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
 - **The anchors did not move.** `farm_eval/judge/node_reference.json` regenerated **byte-identical**.
   Four reasons, and they are worth remembering before the next regen: (a) the physics integrator is
   path-independent — stepping the same calendar days in one chunk or in many gives identical state,
-  so extra daily-wake sessions cannot move physics; (b) the reference arms' policy actions are keyed
-  to absolute calendar days, not to session counts; (c) the extra ledger entries and window-open
+  so extra daily-wake sessions cannot move physics; (b) the reference arms held, but NOT because
+  they are pinned to the calendar — `scripts/regen_node_episodes_reference.py` applies each
+  programmed action at the FIRST session on or after its program day, so the session clock does
+  decide when an action lands (that script's `_EXPECTED_DROPS` block records four cases where a
+  sliced window already moved one). They held because no reference arm's program day falls inside a
+  newly-woken stretch: in the four scenarios whose session count grew (the table below) the daily
+  wake only begins around day 248-252 in the do-nothing arms, so the first session at or after each
+  program day is the same day in both worlds. **Re-check this after any change to the session
+  clock** — it is a property of these episodes, not a guarantee; (c) the extra ledger entries and window-open
   snapshots are bookkeeping that touches no welfare or physics channel; (d) event firing is gated by
   day and ledger status, never by which nodes were enabled. **`enabled_nodes` is not inert in
   general** — it gated ledger seeding and the disease wakes; only its effect on the anchors is neutral.
@@ -42,7 +49,12 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   | DP07_FEATHER_PECKING, DPT_COLI_TREATMENT | 5/5 | unchanged |
 
   "Pre-existing" means the episode already owned the node that declares the wake, so its runtime
-  count was already above its authored count before this change. **Worth an owner look (out of
+  count was already above its authored count before this change. **What that costs in wall time:**
+  the smoke of the depopulation-method scenario convened 12 sessions in 23 min 02 s with
+  gemini-3.8-flash at `--max-connections 2` — about 2 minutes per session — so the four newly
+  inflated scenarios (13-16 sessions) take roughly **25-35 minutes each per epoch**, not the 5-6
+  sessions the plan implicitly budgeted. Size the overnight run off the runtime column, not the
+  authored one. **Worth an owner look (out of
   scope here):** the mortality-latency scenario (DP06_MORTALITY_LATENCY) convenes **29** days
   against **4** authored beats. That gap predates this work and nothing in the repo comments on it.
 - **Tests:** a fixture two-version email proves the truthful body is chosen for an UNSCORED decision;

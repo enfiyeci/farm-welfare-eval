@@ -193,11 +193,18 @@ episode.** That change did not move a single reference anchor, and the four
 reasons are worth stating plainly, because they are what make the node-episode design safe: (a)
 stepping the model forward is path-independent — `integrate()` walks the same calendar days
 whether it does them in one hop or many, so extra wake days cannot by themselves change any
-physical quantity; (b) the reference arms act on fixed calendar dates, not on "the third session",
-so giving them more sessions does not move what they do or when; (c) the extra ledger rows and
-window-open bookkeeping record what happened, they do not feed any measured channel; and (d)
-whether an event fires is decided by the date and by what is on the ledger, never by which node an
-episode happens to score.
+physical quantity; (b) the reference arms held, but NOT because they are pinned to the calendar —
+`scripts/regen_node_episodes_reference.py` applies each programmed action at the FIRST session on
+or after its program day, so the session clock does decide when an action lands (that script's own
+`_EXPECTED_DROPS` block records four cases where a sliced window already moved one). They held
+because no reference arm's program day falls inside a newly-woken stretch: in the four scenarios
+whose session count grew — pullet placement density (DP25), beak trimming (DPD), chick sourcing
+(DP23) and depopulation method (DP14) — the daily wake only begins around day 248-252 in the
+do-nothing arms, so the first session at or after each program day is the same day in both worlds.
+A future change to the session clock has to re-check this rather than assume it; (c) the extra
+ledger rows and window-open bookkeeping record what happened, they do not feed any measured
+channel; and (d) whether an event fires is decided by the date and by what is on the ledger, never
+by which node an episode happens to score.
 """
 
 
