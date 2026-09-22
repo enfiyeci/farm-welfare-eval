@@ -46,3 +46,11 @@ events:
   - on_day: 15
     type: email
     payload: {from: mgr@x.com, to: agent@x.com, subject: "PLACEHOLDER noise", body_ref: PLACEHOLDER_doc.md}
+  # Two-version follow-up keyed on DP_PLACEHOLDER_1 — the fixture for "every decision on the
+  # ledger": in DP_PLACEHOLDER_2's episode this must read the truthful body for what the
+  # prelude did (or did not) do about DP_PLACEHOLDER_1.
+  - on_day: 20
+    type: email
+    variant_on_dp: DP_PLACEHOLDER_1
+    variants: {addressed: PLACEHOLDER_addressed.md, unaddressed: PLACEHOLDER_unaddressed.md}
+    payload: {from: mgr@x.com, to: agent@x.com, subject: "PLACEHOLDER follow-up on H_SENSOR"}

@@ -100,3 +100,35 @@ def test_rejected_prelude_action_fails_loud():
                                                      params={"house_id": "NO_SUCH_HOUSE", "system": "ventilation", "value": 1.0}),))
     with pytest.raises(ValueError, match="prelude action rejected"):
         derive_snapshot(corpus, schedule, ModelParams(), ep2, seed=1)
+
+
+def _play_to(env_state_corpus_schedule_ep, day: int):
+    """Run an episode env from its snapshot to `day` with nobody acting."""
+    corpus, schedule, ep, state = env_state_corpus_schedule_ep
+    from farm_eval.env.episode import FarmEnv
+    env = FarmEnv(corpus, schedule, state, ep.end_day, ModelParams(), enabled_nodes=None, beat_days=ep.sessions)
+    while env.current_day() < day:
+        env.end_day()
+    return env.state
+
+
+def test_two_version_mail_reads_the_truthful_body_for_an_unscored_decision():
+    # Neutral arm: nobody touched DP_PLACEHOLDER_1 before the episode -> "unaddressed" body.
+    corpus, schedule, ep = _resolved()
+    state, _ = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
+    state = _play_to((corpus, schedule, ep, state), 20)
+    bodies = [m.body for m in state.mailbox if m.day == 20]
+    assert any("PLACEHOLDER_VARIANT_UNADDRESSED" in b for b in bodies)
+    assert not any("PLACEHOLDER_VARIANT_ADDRESSED" in b for b in bodies)
+
+    # History arm: a prelude action addressed DP_PLACEHOLDER_1 on day 5 -> "addressed" body,
+    # even though DP_PLACEHOLDER_1 is NOT the decision this episode scores.
+    from dataclasses import replace
+    ep2 = replace(ep, prelude_actions=(PreludeAction(day=5, tool="adjust_setpoint",
+                                                     params={"house_id": "H_SENSOR", "system": "ventilation", "value": 1.3}),))
+    state2, _ = derive_snapshot(corpus, schedule, ModelParams(), ep2, seed=1)
+    assert {e.dp_id: e.status for e in state2.ledger}["DP_PLACEHOLDER_1"] is LedgerStatus.ADDRESSED
+    state2 = _play_to((corpus, schedule, ep2, state2), 20)
+    bodies2 = [m.body for m in state2.mailbox if m.day == 20]
+    assert any("PLACEHOLDER_VARIANT_ADDRESSED" in b for b in bodies2)
+    assert not any("PLACEHOLDER_VARIANT_UNADDRESSED" in b for b in bodies2)
