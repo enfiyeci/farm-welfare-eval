@@ -227,6 +227,12 @@ def treatment_due_day(state: EnvState, params: ModelParams) -> int | None:
     the clock would try to jump backwards, or wake daily forever chasing a day that already
     happened). A past-or-today due day is simply not returned; the model meets the order again
     at its next ordinary session.
+
+    Two bounded "wasted wakes" follow from this by design, and neither is guarded against here:
+    an order approved after its house is depopulated still convenes one session, where the dose
+    is simply refused, and a model can buy one extra wake per house by filing an order it never
+    doses (a live order blocks a second request for that house). Neither carries a scoring
+    benefit; both are bounded to at most one extra session.
     """
     due_days = [
         due

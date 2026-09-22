@@ -74,17 +74,20 @@ def application_day(order: MiteControlOrder, index_1based: int, params: ModelPar
 def planned_systemic_course(
     request_day: int, approval_lag_days: int, params: ModelParams
 ) -> list[int]:
-    """The days a systemic course requested on `request_day` may lawfully be dosed.
+    """The EARLIEST days a systemic course requested on `request_day` may lawfully be dosed.
 
-    The first dose can only fall on the day the vet's authorisation exists —
+    `administer_vet_order` does not pin these exact days: the first dose may land on any day
+    from `request_day + approval_lag_days` onward, and each later dose only has to fall within
+    `mite_systemic_dose_interval_tol` of `mite_systemic_dose_interval_days` after the one
+    before it. This function returns the earliest schedule the order allows — first dose on
     `request_day + approval_lag_days`, the same number `request_vet_treatment` writes into
-    `approved_day` — and each further dose one `mite_systemic_dose_interval_days` later, for
-    `required_doses(params)` in total. `administer_vet_order` refuses anything else, so this is
-    the ONE derivation every scripted reference program shares (`scripts/regen_golden.py`,
-    `scripts/regen_financial_reference.py`, `scripts/financial_decision_sweep.py`): they take
-    their dose days from here with the lag read from `config(corpus)`, so a change to the lag,
-    the interval or the dose count moves the reference policy with it instead of silently
-    stranding it on a calendar the order no longer allows.
+    `approved_day`, each further dose exactly `mite_systemic_dose_interval_days` later, for
+    `required_doses(params)` in total — which is the schedule every scripted reference program
+    takes (`scripts/regen_golden.py`, `scripts/regen_financial_reference.py`,
+    `scripts/financial_decision_sweep.py`): they take their dose days from here with the lag
+    read from `config(corpus)`, so a change to the lag, the interval or the dose count moves
+    the reference policy with it instead of silently stranding it on a calendar the order no
+    longer allows.
     """
     interval = params.mite_systemic_dose_interval_days
     first = request_day + approval_lag_days

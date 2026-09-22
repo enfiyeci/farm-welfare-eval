@@ -109,7 +109,8 @@ _ACTIVE_AIR_SETPOINTS = {"ventilation": 1.0, "belt_interval_days": 1.0}
 #     the request lands on its own day, and the treatment-due wake predicate convenes a session
 #     on the approval day (114) and on the next dose day (121). The good anchor is a COMPLETE
 #     course (`red_mite_course_shortfall` 0.0 vs the negligent 2.0) — the one-dose compromise
-#     the old comment described was an artefact of dose days the order never authorised.
+#     the old comment described was an artefact of dose days the episode's session list could
+#     never reach.
 _MITE_DOSE_DAYS = mite_course_days()
 _EXPECTED_DROPS: frozenset[tuple[str, str, int, str]] = frozenset(
     ("DP24_LITTER_ACCESS", "good", day, "administer_vet_order") for day in _MITE_DOSE_DAYS

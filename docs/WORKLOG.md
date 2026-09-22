@@ -24,7 +24,10 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   moved, in the mite channels and in money only; (2) a lawful 2026-10-06/2026-10-13 (119/126) course
   now scores **9.99, not 10.00**, on the in-window path table.
 - **Also seen:** the snapshot probe shows DP06 running **29** sessions at runtime against 4 authored
-  — a pre-existing daily mortality wake, now on record.
+  — a pre-existing daily mortality wake, now on record. DP22_PILING and DP24_LITTER_ACCESS also
+  each gain one runtime session (114, 128) because the good program's course now runs inside
+  their windows too; DP22's good anchor on `red_mite_excess_index_days[H2]` moved, but only as
+  diagnostic metadata, since the `red_mite_*` channels are scored by DP05's signature alone.
 - **Next action:** merge after PR #39; re-run the k=1 plumbing set with DP05 included. The text-only
   turn defect needs a fix (nudge or forced advance on a no-tool-call turn) before any Gemini k-run.
 - **Refs:** `evals/hen/runs/2026-09-22-node-snapshot-probe.md`; `docs/STATUS.md` known-gap 3;

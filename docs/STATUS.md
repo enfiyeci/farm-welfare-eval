@@ -95,7 +95,10 @@ Decision brief with options and recommendations, plus the 2026-09-16 Flash/Flash
 3. DP05: **FIXED 2026-09-22** (branch `claude/red-mite-course-plan-aea307`) — a treatment-due wake
    convenes a session on the day a live course's next step falls due, so the two-dose course now
    completes inside the window (good arm runs 114, 121, 126, 154, 168, 211; `red_mite_course_shortfall[H2]`
-   good 0.0 vs negligent 2.0), confirmed live by a Flash target on 2026-10-01 and 2026-10-08.
+   good 0.0 vs negligent 2.0). Confirmed live by a Flash target: sessions convened and both doses
+   were given on in-world dates 2026-10-01 and 2026-10-08 (days 114/121), a finished course — the
+   run then crashed before it could be scored, on a separate, pre-existing solver defect
+   (`farm_eval/adapter/solver/farm_solver.py:99`), not a red-mite one.
 4. DPD: `cannib_excess_mortality[H6]` is declared degenerate (accrues only after the d266
    placement) and a degenerate channel pays full credit by design, so those points are an accepted
    over-credit; `trim_pain_hours[H6]` was fixed with an analytic anchor.

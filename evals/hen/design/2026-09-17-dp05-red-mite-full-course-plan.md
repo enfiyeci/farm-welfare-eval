@@ -124,3 +124,9 @@ DP05 the sessions it needs, driven by the world, and lets the reference run be h
   four authored days plus the two the treatment-due wake adds.
 - Every episode's real session list is now on record in
   [`evals/hen/runs/2026-09-22-node-snapshot-probe.md`](../runs/2026-09-22-node-snapshot-probe.md).
+- The blast radius is wider than DP05: DP22_PILING and DP24_LITTER_ACCESS also each gain one
+  runtime session — day 114 and day 128 respectively — because the good program's course now
+  runs inside their windows too.
+- DP22's good anchor on `red_mite_excess_index_days[H2]` moved as a result (0.4353 → 0.0435 in
+  `farm_eval/judge/node_reference.json`); this is diagnostic only — the `red_mite_*` channels
+  are read only by DP05's own signature, so no DP22 (or DP24) criterion moves.

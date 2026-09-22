@@ -35,7 +35,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def snapshot():
-    """The real n_RED_MITE episode's opening world, derived once (the replay to day 112 is the
+    """The real DP05_RED_MITE episode's opening world, derived once (the replay to day 112 is the
     expensive part; each test plays its own deep copy)."""
     corpus, schedule = load_corpus(REPO / "corpus"), load_schedule(REPO / "schedule")
     manifest = load_node_manifest(REPO / "schedule")

@@ -139,8 +139,12 @@ _add("all houses -> discard one month", "egg_channel", DO_NOTHING,
 # Every mite program below — early and late alike — takes its dose days from
 # `mite_control.planned_systemic_course` with the approval lag read from the corpus, the same
 # derivation `scripts/regen_golden.py` and `scripts/regen_financial_reference.py` use. Typed
-# dose days went stale silently once (119/126 against a 2-day lag), and a sweep that prices a
-# course `administer_vet_order` would refuse prices nothing.
+# dose days went stale silently once: 119/126 (against a 2-day lag) was actually a lawful
+# course in the continuous run — `administer_vet_order` only gates the first dose on
+# `day >= approved_day` — but no node episode's session list ever lands on either day, so
+# pricing it there priced a course nothing could ever dose. Taking the earliest schedule the
+# order allows instead keeps the same program right in both the continuous run and the sliced
+# node episodes.
 def _mite_course(house_id: str = "H2", request_day: int = 112) -> list[tuple]:
     """The request plus every dose the vet order authorises, as (day, tool, params) triples."""
     cfg = mite_control.config(load_corpus(_ROOT / "corpus"))
