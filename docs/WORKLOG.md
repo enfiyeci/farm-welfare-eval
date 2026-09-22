@@ -12,8 +12,9 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   `feat/node-episodes` (NOT folded into #39: it moves anchors), then a Flash smoke of the
   depopulation-method scenario and an overnight run of the seven affected scenarios (DP07, DPT,
   DP25, DPD, DP23, DP14, DPE) at 4 connections.
-- **Sequencing:** this lane regenerates `node_reference.json` before the red-mite lane does
-  (LANES rule 4); the red-mite agent rebases onto it before its Task 5.
+- **Sequencing:** the red-mite lane runs IN PARALLEL off the same base and also regenerates
+  `node_reference.json` + `node_snapshots.json`. Whichever lands second rebases and RE-RUNS
+  `regen_node_episodes.py --snapshots --reference`; never hand-merge the JSON.
 - **Refs:** ruling 21 addendum; `2026-09-17-decisions-still-needed.md` item 1 answered.
 
 ## 2026-09-22 · claude · k=1 plumbing run LAUNCHED on 17 episodes (branch feat/node-episodes, PR #39)

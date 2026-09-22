@@ -28,7 +28,7 @@ Eval: hen
 - `enabled_nodes=None` means "every decision point" everywhere in `farm_eval/env/` (`events.open_due_decision_points`, `harm_window.*`). Do not invent a second convention.
 - Stage by explicit path; never `git add -A`; nothing under `logs/`. Commits end with `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`.
 - Before any commit that touches goldens or references: `$PY -m pytest -q -p no:cacheprovider` (~10 min, expect ~3020 passed), `$PY scripts/lint_corpus.py` and `$PY scripts/check_corpus_consistency.py` (0 findings each), `wc -c CLAUDE.md` < 8192.
-- Only ONE lane regenerates `farm_eval/judge/node_reference.json` at a time (LANES rule 4). The red-mite agent (`claude/red-mite-course-plan-a2e804`) also regenerates it. **This lane goes first**; tell the red-mite agent to rebase onto this branch before its Task 5.
+- **The red-mite agent is working IN PARALLEL** on `claude/red-mite-course-plan-a2e804`, also branched off `feat/node-episodes`, and its Task 5 also regenerates `farm_eval/judge/node_reference.json` and `tests/fixtures/golden/node_snapshots.json`. Both regens are deterministic functions of the code + corpus, so the rule is: **whichever lane lands second rebases onto the other and RE-RUNS `$PY scripts/regen_node_episodes.py --snapshots --reference` (and the probe), then re-checks its own anchor table. Never hand-merge either JSON file.** If you hit a conflict on those files during the rebase, take either side, finish the rebase, re-run the regen, and commit the result.
 - Plain language in every owner-facing sentence; name scenarios in full, never a bare "DP14".
 - Smoke/pilot model: `google/gemini-3.8-flash` for both target and grader. One epoch.
 
