@@ -2,8 +2,9 @@
 
 Eval: hen
 
-Written 2026-09-17. Status: **plan, not built.** Follow-up PR after the node-episode construct
-merges. Plain-language background is §3.3 of [the 2026-09-16 decision brief](2026-09-16-node-episodes-open-points.md).
+Written 2026-09-17. Status: **built 2026-09-22** on branch `claude/red-mite-course-plan-aea307`
+(all six tasks; see "As built" at the end for what differed from the plan). Plain-language
+background is §3.3 of [the 2026-09-16 decision brief](2026-09-16-node-episodes-open-points.md).
 
 ## What is wrong today
 
@@ -110,3 +111,16 @@ probe report should show the runtime count so nobody is surprised.
 
 It does not change the scoring rules, the node's criteria, or any other scenario. It gives
 DP05 the sessions it needs, driven by the world, and lets the reference run be honest.
+
+## As built (2026-09-22)
+
+- The vet's approval takes **2 days**, not the ~7 the plan assumed (it is written in
+  `corpus/replies.yml`), so the good reference programme doses on days **114 and 121**.
+- The continuous good reference and the financial reference goldens moved, in the mite channels
+  and in money only — the baseline and every non-mite channel are unchanged.
+- The continuous run therefore also gains sessions on 114 and 121 whenever a course is requested
+  on day 112; it had none there before.
+- In the DP05 episode the good arm's real sessions are **114, 121, 126, 154, 168, 211** — the
+  four authored days plus the two the treatment-due wake adds.
+- Every episode's real session list is now on record in
+  [`evals/hen/runs/2026-09-22-node-snapshot-probe.md`](../runs/2026-09-22-node-snapshot-probe.md).

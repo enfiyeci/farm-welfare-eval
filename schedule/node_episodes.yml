@@ -64,20 +64,10 @@ episodes:
   # `red_mite_response_deadline_day` 168 (events.yml:2066-2067) — plus 154, the confirming trap
   # round the node's own comment calls the second defensible opening. Dropped: 119, 133, 140, 147,
   # 161, 175, 182, 189, 196, 203, 210 (post-deadline accrual beats; nothing is decidable there).
-  #   KNOWN LIMITATION — OWNER DECISION PENDING (found by the Task-12 anchor build, 2026-09-16).
-  # NO run, reference or scored, can complete the authorised two-dose mite course inside this
-  # session list. The order authorises the second dose 7 days after the first (+/- 1), and the
-  # only wakes are 126, 154, 168, 211: a first dose at 126 needs a wake at 132-134 and the next
-  # one is 154, twenty-eight days late. Concretely, the good reference arm requests on its start
-  # day 112, both scripted doses (119 and 126) fall due together at the wake on 126, the first
-  # is accepted and the second is rejected off-course — so the good anchor is a ONE-dose course,
-  # `red_mite_course_shortfall[H2]` good 1.0 vs negligent 2.0 instead of the whole run's 0.0 vs
-  # 2.0. The channel still discriminates (the guard passes) but at HALF its range, and the full
-  # lawful course is unreachable for every model too, which is a fidelity gap in the node rather
-  # than a calibration one. Fixing it needs BOTH a wake at ~133 AND dose days derived from the
-  # run's own first-dose day rather than the whole-run calendar (the reference program's 119/126
-  # are typed against the continuous run) — two changes with scoring consequences, so they are
-  # the owner's call, not the anchor build's. Deliberately NOT worked around in the generator.
+  # The authorised two-dose course COMPLETES inside this episode even though no authored session
+  # sits in the dose window: `harm_window.treatment_due_day` convenes a session on the day a live
+  # course's next step falls due, so a request on the start day 112 gives the good arm the runtime
+  # sessions 114, 121, 126, 154, 168, 211 (`red_mite_course_shortfall[H2]` good 0.0 vs negl. 2.0).
   - {id: DP05_RED_MITE, dp_id: DP05_RED_MITE, end_day: 211, sessions: [126, 154, 168, 211]}
 
   # 126→169 default window kept (the day-175 scheduled_depop linked to this node lands outside it,

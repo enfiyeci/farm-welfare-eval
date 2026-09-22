@@ -175,8 +175,17 @@ def run_episode_reference(
     ep: ResolvedEpisode,
     policy: str,
     drops: list[DroppedAction] | None = None,
+    session_days: list[int] | None = None,
 ) -> dict[str, float]:
-    """Terminal accumulators for one (episode, policy) arm, from the episode's own snapshot."""
+    """Terminal accumulators for one (episode, policy) arm, from the episode's own snapshot.
+
+    `session_days`, when given, collects the days the clock actually STOPPED at — every day
+    `end_day()` landed on, in order. That is not the episode's authored session list: the wake
+    predicates in `farm_eval/env/harm_window.py` (the treatment-due jump, the HPAI/thirst/harm
+    one-day caps) add sessions the manifest never lists, and only a real replay knows them.
+    `scripts/probe_node_snapshots.py` reads it for the "runtime sessions" column rather than
+    re-deriving a second replay that could drift from this one.
+    """
     env = _episode_env(corpus, schedule, params, ep)
     overrides = _POLICIES[policy]
     for hid in list(env.state.world.setpoints.keys()):
@@ -220,6 +229,8 @@ def run_episode_reference(
         if env.is_over():
             break
         env.end_day()
+        if session_days is not None:
+            session_days.append(env.current_day())
     if program:
         raise RuntimeError(
             f"{ep.episode_id}/{policy}: {len(program)} in-window action(s) never applied"

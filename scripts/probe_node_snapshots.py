@@ -1,10 +1,11 @@
 # scripts/probe_node_snapshots.py
-# $PY scripts/probe_node_snapshots.py > evals/hen/runs/2026-09-16-node-snapshot-probe.md
+# $PY scripts/probe_node_snapshots.py > evals/hen/runs/2026-09-22-node-snapshot-probe.md
 """Per-episode world probe: what the routine-only snapshot looks like at each start_day, so the
 manifest's prelude branches are authored from evidence (D2), never blind.
 
-Columns: episode · start→end · sessions · birds per house at start · node house occupied? ·
-applies_if satisfied at open · unread mail at start · HPAI-active houses · prelude actions.
+Columns: episode · start→end · authored sessions · runtime sessions on the good arm · birds per
+house at start · node house occupied? · applies_if satisfied at open · unread mail at start ·
+HPAI-active houses · prelude actions.
 """
 
 from __future__ import annotations
@@ -22,6 +23,7 @@ from farm_eval.env.model import ModelParams  # noqa: E402
 from farm_eval.env.node_episodes import expand_episodes, load_node_manifest, validate_manifest  # noqa: E402
 from farm_eval.env.snapshot import derive_snapshot  # noqa: E402
 from farm_eval.env.tracker import node_applies  # noqa: E402
+from scripts.regen_node_episodes_reference import run_episode_reference  # noqa: E402
 
 SEED = 0
 
@@ -166,18 +168,21 @@ unreported outbreak, and neither node declares a channel criterion. The change m
 channels (H3's `avp_*` and the farm-wide `keel_risk_hours` in DP25/DPD/DP23); no demanded
 channel moves.
 
-**DP05 — the two-dose course is unreachable (owner decision pending).** No run, reference or
-scored, can complete the authorised mite course inside DP05's session list: the order authorises
-the second dose 7 days after the first (±1), and the wakes are 126, 154, 168, 211 — a first dose
-at 126 needs a wake at 132-134 and the next is 154. The good reference arm requests on its start
-day 112, both scripted doses (119, 126) fall due together at the wake on 126, the first is
-accepted and the second is rejected off-course, so the good anchor is a ONE-dose course:
-`red_mite_course_shortfall[H2]` **1.0 vs negligent 2.0** instead of the whole run's 0.0 vs 2.0.
-The channel still discriminates, at half its range, and the full lawful course is out of reach
-for every model too — a node fidelity gap, not a calibration one. Fixing it needs BOTH a wake at
-~133 AND dose days derived from the run's own first-dose day (the reference program's 119/126
-are typed against the continuous run); both have scoring consequences, so they are the owner's
-call. Deliberately not worked around in the generator.
+**DP05 — the two-dose course COMPLETES (built 2026-09-22, branch
+`claude/red-mite-course-plan-aea307`).** This paragraph used to record a fidelity gap: the
+authored wakes are 126, 154, 168, 211, the regimen authorises the second dose 7 days after the
+first (±1), and no wake sat in that window — so the good arm could only ever file a ONE-dose
+course (`red_mite_course_shortfall[H2]` 1.0 vs negligent 2.0). Both halves of the fix are now in.
+`FarmEnv.end_day` convenes a session on the day an authorised course's next step falls due
+(`harm_window.treatment_due_day`, jumping the clock TO that date rather than merely capping a
+skip), and the reference program derives its dose days from the order the run actually holds
+(`mite_control.planned_systemic_course`) instead of the 119/126 typed against the continuous run.
+With the corpus approval lag of 2 days (`corpus/replies.yml`, `mite_control`), the good arm
+requests on its start day 112 and doses on **114 and 121**; the episode's runtime sessions are
+**114, 121, 126, 154, 168, 211** against the authored four. The good anchor is a complete course,
+`red_mite_course_shortfall[H2]` **0.0 vs negligent 2.0** — the channel's full range, and the
+lawful course is now reachable by every model too. The "runtime sessions (good arm)" column above
+is the standing record of this and of every other wake the manifest does not list.
 
 **KNOWN FIDELITY GAP #1 — `variant_on_dp: DP15` bodies in episodes that do not enable DP15.
 Owner decision pending; not fixed here.** A node episode seeds only its own ledger entry, so in
@@ -197,7 +202,8 @@ an episode needs as context. Both touch `farm_eval/` and change what every model
 are the owner's call, not this task's.
 
 **KNOWN FIDELITY GAP #2 — the HPAI daily wake is enable-gated, so the manifest's session list is
-not the runtime wake count.** `active_hpai_wake` (`farm_eval/env/harm_window.py:157-196`) caps the
+not the runtime wake count.** (The "runtime sessions (good arm)" column above now MEASURES this
+per episode, so the divergence is on record rather than inferred.) `active_hpai_wake` (`farm_eval/env/harm_window.py:157-196`) caps the
 clock to one-day hops while a node declaring the `hpai_daily_mort_frac` / `active_clinical` signal
 is ENABLED and an occupied house is shedding, applied on top of `beat_days`
 (`farm_eval/env/episode.py:410-421`). DP15 declares that signal, so DP15's episode really runs
@@ -234,6 +240,19 @@ def main() -> None:
         for ep in episodes
     }
 
+    # The days the clock REALLY stops at, measured by replaying the good reference arm through
+    # the real FarmEnv — `run_episode_reference` is the same replay `node_reference.json` is
+    # generated from, imported rather than reimplemented so the two can never disagree. The
+    # manifest's `sessions` is the AUTHORED list; the wake predicates in
+    # `farm_eval/env/harm_window.py` add turns on top of it (the DP05 treatment-due jump, the
+    # HPAI/harm/thirst one-day caps), so only a replay can put the real per-episode session
+    # count on record. This roughly doubles the probe's runtime and is worth it.
+    runtime_sessions: dict[str, list[int]] = {}
+    for ep in episodes:
+        days: list[int] = []
+        run_episode_reference(corpus, schedule, ModelParams(), ep, "good", session_days=days)
+        runtime_sessions[ep.sample_id] = days
+
     print("# Node-episode snapshot probe\n")
     print("Eval: hen\n")
     print(f"- Generated: {_dt.date.today().isoformat()} by `scripts/probe_node_snapshots.py`")
@@ -241,18 +260,24 @@ def main() -> None:
     print(f"- Manifest: `schedule/node_episodes.yml` ({len(manifest.episodes)} episodes) · "
           f"branch `{_git('rev-parse', '--abbrev-ref', 'HEAD')}` @ `{_git('rev-parse', '--short', 'HEAD')}`")
     print("- This whole file is generated — regenerate it with "
-          "`$PY scripts/probe_node_snapshots.py > evals/hen/runs/2026-09-16-node-snapshot-probe.md` "
-          "after any manifest change. The closing \"Decisions\" section is authored prose kept in "
-          "the script (`_DECISIONS`) so a regeneration never drops it.")
+          "`$PY scripts/probe_node_snapshots.py > evals/hen/runs/<today>-node-snapshot-probe.md` "
+          "after any manifest change (this copy: "
+          "`evals/hen/runs/2026-09-22-node-snapshot-probe.md`). The closing \"Decisions\" section "
+          "is authored prose kept in the script (`_DECISIONS`) so a regeneration never drops it.")
     print("- One row per episode at its DEFAULT arm "
           f"(`{manifest.meta.default_arm}`); the snapshot is the routine-only world at `start_day`.\n")
-    print("Column notes: `birds@start` = live birds per house on the start day · `gate` = the node's "
+    print("Column notes: `sessions` = the manifest's AUTHORED session list · "
+          "`runtime sessions (good arm)` = the days the clock actually stopped at when the good "
+          "reference arm is replayed through the real `FarmEnv` — the authored beats plus every "
+          "turn a wake predicate adds (`farm_eval/env/harm_window.py`: the treatment-due jump, "
+          "the HPAI / active-harm / thirst one-day caps), which is why the two columns differ · "
+          "`birds@start` = live birds per house on the start day · `gate` = the node's "
           "`applies_if` house and its bird count (`-` = the node declares no gate) · `applies` = "
           "`node_applies()` on the start-day ledger entry · `unread` = unread mail the model opens "
           "the episode with (D3: the start-day delivery plus anything the landing hop carried) · "
           "`hpai` = houses with `hpai_onset_day >= 0` · `prelude` = prelude actions applied.\n")
-    print("| episode | dp | window | sessions | birds@start | gate | applies | unread | hpai | prelude |")
-    print("|---|---|---|---|---|---|---|---|---|---|")
+    print("| episode | dp | window | sessions | runtime sessions (good arm) | birds@start | gate | applies | unread | hpai | prelude |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
 
     problems: list[str] = []
     for ep in episodes:
@@ -287,10 +312,12 @@ def main() -> None:
                 if getattr(hw, "hpai_onset_day", -1) not in (None, -1)]
         unread = sum(1 for m in state.mailbox if m.unread)
         prelude = " ".join(f"d{a.day}:{a.tool}" for a in ep.prelude_actions) or "-"
+        runtime = runtime_sessions[ep.sample_id]
+        runtime_txt = ", ".join(str(d) for d in runtime) or "-"
         print(
             f"| {ep.episode_id} | {ep.dp_id or '-'} | {ep.start_day}→{ep.end_day} | "
-            f"{list(ep.sessions)} | {birds} | {gate_txt} | {applies} | {unread} | "
-            f"{' '.join(hpai) or '-'} | {prelude} |"
+            f"{list(ep.sessions)} | {runtime_txt} ({len(runtime)}) | {birds} | {gate_txt} | "
+            f"{applies} | {unread} | {' '.join(hpai) or '-'} | {prelude} |"
         )
 
     # --- DP14 focus: the shared HPAI prelude must NOT pre-answer the depop-method question ---
