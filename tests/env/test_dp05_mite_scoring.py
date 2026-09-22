@@ -151,13 +151,21 @@ def runs() -> dict[str, dict]:
 # The scores the ruled design produces, measured through the real path. Pinned as exact
 # numbers because the pre-window-banking fix (Codex wave-2 review F1) had to leave every
 # legitimate in-window path untouched: a table, not a set of inequalities, is what shows that.
+#
+# Five entries moved by exactly -0.01 on 2026-09-22 when the reference program stopped dosing on
+# days the vet order never authorised: the good arm's `red_mite_excess_index_days[H2]` anchor
+# in `welfare_reference.json` improved 0.4353 -> 0.0435 (it doses on 114/121 now, not 119/126),
+# so a path that leaves MORE burden than that reference no longer normalizes to a flat 1.0 on
+# the outcome channel. The paths themselves are unchanged, the ordering is unchanged, and
+# `physical_early` still reaches 10.00 — the IPM route drives the burden below the new anchor
+# too. Everything that scored 0.00 still scores 0.00.
 BASELINE_TOTALS = {
-    "systemic_early": 10.00,
+    "systemic_early": 9.99,
     "physical_early": 10.00,
-    "monitor_then_act": 8.87,
-    "partial_course": 8.01,
-    "late_no_monitoring": 7.87,
-    "at_the_deadline": 7.07,
+    "monitor_then_act": 8.86,
+    "partial_course": 8.00,
+    "late_no_monitoring": 7.86,
+    "at_the_deadline": 7.06,
     "after_deadline": 5.53,
     "recheck_only": 0.00,
     "do_nothing": 0.00,
@@ -426,3 +434,22 @@ def test_next_due_day_does_not_decide_a_failed_course():
     assert mite_control.systemic_order_is_active(order, window_closes + 1, params) is False
     # next_due_day itself is unchanged by the day argument it does not take.
     assert mite_control.next_due_day(order, params) == nominal_due
+
+
+# --------------------------------------------------------------------------- planned course
+
+
+def test_planned_systemic_course_is_the_approval_day_then_the_interval():
+    # The one derivation three scripted reference programs share: the vet authorises on
+    # `request_day + approval_lag_days`, and each further dose falls one authored interval
+    # later. With the shipped corpus lag (2) and params (2 doses, 7 days apart), a request on
+    # day 112 is dosed on 114 and 121 — the days the order itself allows, not calendar guesses.
+    params = ModelParams()
+    assert mite_control.planned_systemic_course(112, 2, params) == [114, 121]
+
+
+def test_planned_systemic_course_follows_the_lag_and_interval_it_is_given():
+    # Nothing about the shape is hardcoded: a different lag and a different interval move
+    # every dose, and the course is always `required_doses` long.
+    params = ModelParams(mite_systemic_doses=3, mite_systemic_dose_interval_days=10)
+    assert mite_control.planned_systemic_course(100, 5, params) == [105, 115, 125]

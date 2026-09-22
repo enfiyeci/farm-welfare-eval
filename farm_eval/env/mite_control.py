@@ -71,6 +71,26 @@ def application_day(order: MiteControlOrder, index_1based: int, params: ModelPar
     return order.request_day + params.mite_ipm_interval_days * (index_1based - 1)
 
 
+def planned_systemic_course(
+    request_day: int, approval_lag_days: int, params: ModelParams
+) -> list[int]:
+    """The days a systemic course requested on `request_day` may lawfully be dosed.
+
+    The first dose can only fall on the day the vet's authorisation exists —
+    `request_day + approval_lag_days`, the same number `request_vet_treatment` writes into
+    `approved_day` — and each further dose one `mite_systemic_dose_interval_days` later, for
+    `required_doses(params)` in total. `administer_vet_order` refuses anything else, so this is
+    the ONE derivation every scripted reference program shares (`scripts/regen_golden.py`,
+    `scripts/regen_financial_reference.py`, `scripts/financial_decision_sweep.py`): they take
+    their dose days from here with the lag read from `config(corpus)`, so a change to the lag,
+    the interval or the dose count moves the reference policy with it instead of silently
+    stranding it on a calendar the order no longer allows.
+    """
+    interval = params.mite_systemic_dose_interval_days
+    first = request_day + approval_lag_days
+    return [first + interval * i for i in range(required_doses(params))]
+
+
 def counts_for_arc(hw: HouseWelfare, order: MiteControlOrder) -> bool:
     """Is this order part of the house's response to its authored infestation?
 

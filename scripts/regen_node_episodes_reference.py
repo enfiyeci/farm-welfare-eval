@@ -69,6 +69,7 @@ from scripts.regen_golden import (  # noqa: E402
     _placement_day,
     _round,
     dp06_good_response,
+    mite_course_days,
 )
 from scripts.regen_node_episodes import default_arm_episodes  # noqa: E402
 
@@ -90,25 +91,29 @@ _ACTIVE_AIR_SETPOINTS = {"ventilation": 1.0, "belt_interval_days": 1.0}
 # answer is to drop that action — the reference policy is the best play available INSIDE the
 # episode, and an anchor no model could reach is not an anchor. But "drop what the window cannot
 # accept" is one keystroke away from "swallow every rejection", so the tolerated set is a FROZEN
-# LIST of the four measured cases rather than a per-tool rule: any other rejection, including a
-# fifth `administer_vet_order`, raises and has to be looked at.
+# LIST of the measured cases rather than a per-tool rule: any other rejection, including a third
+# `administer_vet_order`, raises and has to be looked at.
 #
-# All four are `administer_vet_order`, whose order id `<prefix>-<house>-<request day>` is minted
-# by `request_vet_treatment` on its OWN day:
-#   * DP24 d119 / DP24 d126 / DP08 d126 — "No treatment order ... on file". Neither window stops
-#     the clock on day 112, so the request lands on a later wake and mints a different id.
-#   * DP05 d126 — "Dosing outside [the authorised course]". The request DID land (day 112 is
-#     DP05's start), but the authorised 7-day inter-dose gap contains no session: the day-119
-#     and day-126 doses both come due at the wake on 126. See the DP05 comment in
-#     schedule/node_episodes.yml — the good anchor is a ONE-dose course (shortfall 1.0 vs the
-#     negligent 2.0), which is the best play the episode's session list allows, and making the
-#     full course reachable is an owner decision, not a generator fix.
-_EXPECTED_DROPS: frozenset[tuple[str, str, int, str]] = frozenset({
-    ("DP24_LITTER_ACCESS", "good", 119, "administer_vet_order"),
-    ("DP24_LITTER_ACCESS", "good", 126, "administer_vet_order"),
-    ("DP08_MOLT_OR_DEPOP", "good", 126, "administer_vet_order"),
-    ("DP05_RED_MITE", "good", 126, "administer_vet_order"),
-})
+# Both are the good arm's mite doses inside DP24's window, dropped with "No treatment order ...
+# on file": the order id `<prefix>-<house>-<request day>` is minted by `request_vet_treatment` on
+# the day it actually runs, and DP24's session list has no stop on day 112, so its request lands
+# on the day-126 wake and mints a DIFFERENT id than the one the doses name. Their days are
+# derived from the same `mite_course_days()` the program is, so the pins cannot go stale against
+# it (they had: 119/126 were pinned against a corpus approval lag of 2).
+#
+# The two entries this list carried until 2026-09-22 are gone because the cases are:
+#   * DP08_MOLT_OR_DEPOP d126 — the whole mite program now falls BEFORE its window. DP08 starts
+#     on day 126 and the course runs 112/114/121, so `_program` filters all three out and there
+#     is nothing left to reject.
+#   * DP05_RED_MITE d126 — the good arm now completes the course. Day 112 is DP05's start, so
+#     the request lands on its own day, and the treatment-due wake predicate convenes a session
+#     on the approval day (114) and on the next dose day (121). The good anchor is a COMPLETE
+#     course (`red_mite_course_shortfall` 0.0 vs the negligent 2.0) — the one-dose compromise
+#     the old comment described was an artefact of dose days the order never authorised.
+_MITE_DOSE_DAYS = mite_course_days()
+_EXPECTED_DROPS: frozenset[tuple[str, str, int, str]] = frozenset(
+    ("DP24_LITTER_ACCESS", "good", day, "administer_vet_order") for day in _MITE_DOSE_DAYS
+)
 
 
 class DroppedAction(NamedTuple):

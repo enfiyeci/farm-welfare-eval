@@ -102,3 +102,18 @@ def test_active_air_setpoints_match_regen_golden_source():
     assert _ACTIVE_AIR_SETPOINTS in lits, (
         "copied active-air setpoints drifted from regen_golden._air_exposure_anchors"
     )
+
+
+def test_dp05_good_anchor_completes_the_course():
+    """DP05's good anchor must run the WHOLE authorised course inside its own window.
+
+    `red_mite_course_shortfall` is 0.0 for a complete course, 1.0 for one dosed short and 2.0
+    for nothing therapeutic. The reference program doses on the days the vet order allows
+    (`request_day + approval_lag_days`, then one `mite_systemic_dose_interval_days` later) and
+    the clock convenes a session on each, so the good arm finishes the course and the negligent
+    arm still does nothing: the criterion discriminates across its full range.
+    """
+    refs = json.loads(REF.read_text())
+    dp05 = refs["DP05_RED_MITE"]
+    assert dp05["good"]["red_mite_course_shortfall[H2]"] == 0.0
+    assert dp05["negligent"]["red_mite_course_shortfall[H2]"] == 2.0
