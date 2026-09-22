@@ -53,8 +53,13 @@ def _load_config(config_path: str | Path) -> dict:
     return yaml.safe_load(Path(_from_root(config_path)).read_text(encoding="utf-8")) or {}
 
 
-def _split(csv: str | None) -> set[str] | None:
-    return {s.strip() for s in csv.split(",") if s.strip()} if csv else None
+def _split(csv: str | list[str] | tuple[str, ...] | None) -> set[str] | None:
+    """Normalise an episode/arm filter. Inspect parses ``-T episode_ids=a,b`` into a list and
+    ``-T episode_ids=a`` into a string; both forms (and an explicit list) must work."""
+    if csv is None:
+        return None
+    items = list(csv) if isinstance(csv, (list, tuple, set)) else str(csv).split(",")
+    return {str(s).strip() for s in items if str(s).strip()} or None
 
 
 @task

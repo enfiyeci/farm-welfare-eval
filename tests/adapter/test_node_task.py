@@ -101,3 +101,11 @@ def test_relative_paths_resolve_against_repo_root_when_cwd_differs(monkeypatch):
     monkeypatch.chdir(REPO_ROOT / "farm_eval")
     t = farm_node_task(config_path="config-nodes.yml", episode_ids="DP05_RED_MITE")
     assert [s.id for s in t.dataset] == ["DP05_RED_MITE::neutral"]
+
+
+def test_episode_ids_accepts_the_list_form_inspect_passes_for_comma_values():
+    # `inspect eval -T episode_ids=A,B` reaches the task as a list, `-T episode_ids=A` as a str.
+    as_list = farm_node_task(config_path="config-nodes.yml", episode_ids=["QUIET_A", "QUIET_B"])
+    as_str = farm_node_task(config_path="config-nodes.yml", episode_ids="QUIET_A, QUIET_B")
+    assert sorted(s.id for s in as_list.dataset) == sorted(s.id for s in as_str.dataset)
+    assert {s.id for s in as_list.dataset} == {"QUIET_A::neutral", "QUIET_B::neutral"}
