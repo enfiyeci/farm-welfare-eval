@@ -99,11 +99,17 @@ def test_solver_fails_loudly_when_cap_reached_before_episode_end():
 def _blank(): return ModelOutput.from_content(model="mockllm/model", content="")
 
 
+def _followers_of_toolless_turns(msgs):
+    """The message after every assistant turn that made no tool call (None if it is last)."""
+    return [msgs[i + 1] if i + 1 < len(msgs) else None
+            for i, m in enumerate(msgs) if m.role == "assistant" and not m.tool_calls]
+
+
 def test_first_blank_turn_gets_a_continuation_nudge():
     target = get_model("mockllm/model", custom_outputs=[_blank() for _ in range(60)])
     log = _eval(target, max_turns_per_day=10)
     msgs = log.samples[0].messages
-    assert any("no input was received" in (m.text or "") for m in msgs if m.role == "user")
+    assert any("no command was received" in (m.text or "") for m in msgs if m.role == "user")
 
 
 def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
@@ -120,13 +126,61 @@ def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
     assert n_assistant <= 6, f"blank turns burned {n_assistant} generates (backstop-style burn)"
 
 
-def test_nonblank_text_turn_does_not_trigger_blank_handling():
-    # A text-only (no tool call) turn is NOT blank: it must not nudge or force an advance.
-    outputs = [ModelOutput.from_content(model="mockllm/model", content="Checking the houses now."),
-               _end_day(), _end_day(), _end_day()]
-    target = get_model("mockllm/model", custom_outputs=outputs)
+# --- 2026-09-22 (DP05 full-course + k=1 runs): text-only assistant turns ------------------------
+# gemini-3.8-flash on Vertex ends a session with a text-only summary and no tool call. The old
+# solver nudged only BLANK turns, so the next generate sent a history ending in the model's own
+# turn and Vertex rejected it ("Requests ending with a model turn are not supported."), killing
+# the sample. Every turn without a tool call must be followed by a user turn.
+
+
+def _text(content="Checking the houses now."):
+    return ModelOutput.from_content(model="mockllm/model", content=content)
+
+
+def test_text_only_turn_is_followed_by_a_user_turn():
+    target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
     log = _eval(target)
     assert log.status == "success"
-    msgs = log.samples[0].messages
-    assert not any("No output received" in (m.text or "") for m in msgs if m.role == "user")
+    followers = _followers_of_toolless_turns(log.samples[0].messages)
+    assert followers, "fixture must produce at least one text-only assistant turn"
+    assert all(f is not None and f.role == "user" for f in followers)
+
+
+def test_single_text_only_turn_nudges_without_forcing_an_advance():
+    target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
+    log = _eval(target)
+    assert log.status == "success"
+    assert any("no command was received" in (m.text or "") for m in log.samples[0].messages if m.role == "user")
     assert log.samples[0].store["EpisodeStore:forced_advances"] == 0
+
+
+def test_text_only_turns_are_counted_on_the_store():
+    target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
+    log = _eval(target)
+    assert log.status == "success"
+    assert log.samples[0].store["EpisodeStore:text_only_turns"] == 1
+
+
+def test_blank_turns_are_not_counted_as_text_only():
+    target = get_model("mockllm/model", custom_outputs=[_blank(), _end_day(), _end_day(), _end_day()])
+    log = _eval(target)
+    assert log.samples[0].store.get("EpisodeStore:text_only_turns", 0) == 0
+
+
+def test_two_consecutive_text_only_turns_force_day_advance():
+    target = get_model("mockllm/model", custom_outputs=[_text("Summary.") for _ in range(60)])
+    log = _eval(target, max_turns_per_day=10)
+    assert log.status == "success"
+    sample = log.samples[0]
+    assert sample.store["EpisodeStore:env_state"]["day_index"] == 400
+    assert sum(1 for m in sample.messages if m.role == "assistant") <= 6
+
+
+def test_continuation_nudge_is_not_read_as_a_session_close():
+    # The nudge must not carry the forced-advance prefix: run_sweep.episode_engagement closes a
+    # day bucket on is_forced_advance alone, and the judge is told such messages close a session.
+    target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
+    log = _eval(target)
+    nudges = [m for m in log.samples[0].messages if m.role == "user" and "no command was received" in (m.text or "")]
+    assert nudges
+    assert not any(is_forced_advance(m.text) for m in nudges)

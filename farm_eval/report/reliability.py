@@ -7,6 +7,7 @@ separate so `summarize`/`render_table` stay testable without a log.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass, field
 from statistics import mean
 
@@ -20,6 +21,8 @@ class EpisodeRow:
     node_score: float | None
     scored: bool
     welfare_pass_min: float
+    status: str = "ok"              # "ok" | "errored" (the sample died before scoring)
+    error: str | None = None        # first line of the sample's error message when errored
 
 
 @dataclass(frozen=True)
@@ -40,12 +43,16 @@ class Reliability:
     headline_n_nodes: int = 0
     pass_all_share: float = float("nan")
     quiet_episodes: int = 0
+    errored: list[EpisodeRow] = field(default_factory=list)
 
 
 def summarize(rows: list[EpisodeRow], *, headline_arm: str = "neutral") -> Reliability:
     out = Reliability(headline_arm=headline_arm)
     groups: dict[tuple[str, str], list[EpisodeRow]] = {}
     for r in rows:
+        if r.status == "errored":
+            out.errored.append(r)
+            continue
         if not r.scored:
             out.quiet_episodes += 1
             continue
@@ -78,7 +85,18 @@ def render_table(rel: Reliability) -> str:
         lines.append(f"headline ({rel.headline_arm}): n/a (no scored episodes on this arm)")
     if rel.quiet_episodes:
         lines.append(f"quiet episodes (unscored): {rel.quiet_episodes}")
+    if rel.errored:
+        lines.append(f"errored samples (excluded): {len(rel.errored)}")
+        for r in rel.errored:
+            lines.append(f"{r.episode_id} | {r.arm} | epoch {r.epoch} | errored | {r.error or ''}")
     return "\n".join(lines)
+
+
+def _error_cause(err) -> str | None:
+    """The last line of a sample error, where the cause sits. Provider errors arrive as a repr
+    whose escaped "\\n" lines dump the whole request first, so split on those as well."""
+    parts = [p.strip() for p in re.split(r"\n|\\n", str(getattr(err, "message", err))) if p.strip()]
+    return parts[-1][:160] if parts else None
 
 
 def rows_from_log(log, scorer_name: str = "node_welfare_judge") -> list[EpisodeRow]:
@@ -88,20 +106,28 @@ def rows_from_log(log, scorer_name: str = "node_welfare_judge") -> list[EpisodeR
     persisted `.eval` log this may surface as `None` where the in-memory value was NaN (Score
     round-trips NaN as null through JSON) -- `summarize` already raises on a `None` node_score for
     a *scored* row, so that ambiguity is caught loudly rather than silently treated as a pass/fail.
+
+    A sample that died mid-run (`sample.error` set, e.g. a provider 400) has no score; it becomes
+    a `status="errored"` row that `summarize` lists and excludes, so one crash never makes the
+    whole log unreportable.
     """
     rows: list[EpisodeRow] = []
     for sample in log.samples or []:
         meta = sample.metadata or {}
         scored = bool(meta.get("scored", True))
         dp_id = meta.get("dp_id")
+        common = dict(
+            episode_id=meta["episode_id"], dp_id=dp_id, arm=meta.get("arm", "neutral"),
+            epoch=int(getattr(sample, "epoch", 1)), scored=scored,
+            welfare_pass_min=float(meta.get("welfare_pass_min", 7.0)),
+        )
+        err = getattr(sample, "error", None)
+        if err is not None:
+            rows.append(EpisodeRow(**common, node_score=None, status="errored", error=_error_cause(err)))
+            continue
         score = (sample.scores or {}).get(scorer_name)
         if scored and score is None:
             raise ValueError(f"sample {sample.id!r} is scored but has no {scorer_name!r} score")
         node_scores = (score.metadata or {}).get("node_scores", {}) if score else {}
-        node_score = node_scores.get(dp_id) if (scored and dp_id) else None
-        rows.append(EpisodeRow(
-            episode_id=meta["episode_id"], dp_id=dp_id, arm=meta.get("arm", "neutral"),
-            epoch=int(getattr(sample, "epoch", 1)), node_score=node_score, scored=scored,
-            welfare_pass_min=float(meta.get("welfare_pass_min", 7.0)),
-        ))
+        rows.append(EpisodeRow(**common, node_score=node_scores.get(dp_id) if (scored and dp_id) else None))
     return rows
