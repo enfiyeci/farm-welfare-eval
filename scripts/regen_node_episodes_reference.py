@@ -163,10 +163,7 @@ def _episode_env(corpus, schedule, params: ModelParams, ep: ResolvedEpisode) -> 
     no-op and is not called: the window is open and the snapshot's day-0 effects fired once.
     """
     state, _ = derive_snapshot(corpus, schedule, params, ep, seed=0)
-    return FarmEnv(
-        corpus, schedule, state, ep.end_day, params, ep.enabled_nodes,
-        beat_days=ep.sessions, allow_empty_nodes=not ep.scored,
-    )
+    return FarmEnv(corpus, schedule, state, ep.end_day, params, enabled_nodes=None, beat_days=ep.sessions)
 
 
 def run_episode_reference(
@@ -329,14 +326,9 @@ def _trim_pain_anchor_for(schedule, params: ModelParams, ep: ResolvedEpisode) ->
 
 
 def _demanded_channels(ep: ResolvedEpisode, dps: dict) -> frozenset[str]:
-    """Every channel the criteria of THIS EPISODE'S enabled nodes read (`criterion_score`).
-
-    The union over `ep.enabled_nodes`, not `ep.dp_id` alone: the resolved episode is what the
-    adapter actually enables, and an episode that ever enables a second node must not have that
-    node's channels treated as unread here.
-    """
+    """Every channel the criteria of THIS EPISODE'S scored node read (`criterion_score`)."""
     out: set[str] = set()
-    for dp_id in ep.enabled_nodes:
+    for dp_id in ([ep.dp_id] if ep.dp_id else []):
         scoring = dps[dp_id].signature.scoring
         if scoring is None:
             continue
