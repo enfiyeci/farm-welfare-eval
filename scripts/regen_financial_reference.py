@@ -175,10 +175,9 @@ _LUX_GRID = [3.0, 20.0, 31.0]
 # the first wake (day 7) and understates the ceiling (Codex D11 round-2 F2).
 _CEILING_ACTS = [
     # DP05 target rebuild (2026-08-26). The mite move is still +EV, but only just, and only by
-    # the vet-order route. (The +$7,285 systemic / -$2,099 physical-IPM figures once recorded
-    # here were measured against the pre-2026-09-22 119/126 course; the dose days moved to
-    # 114/121 on 2026-09-22 and the decomposition was not re-measured, so read current margins
-    # from `farm_eval/judge/financial_reference.json` rather than trusting old numbers here.)
+    # the vet-order route: `scripts/financial_decision_sweep.py` §7 (regenerated 2026-09-22 with
+    # the 114/121 course) measures the systemic course at +$34,575 and the physical IPM course
+    # at -$4,638 against no control, at default setpoints over the full cycle.
     # That is the ruled tension — early control prevents a broad burden while its production
     # payback is genuinely uncertain — so the ceiling takes the profitable route and no more.
     # Same derived course as the good anchor above: the ceiling must not price a program the

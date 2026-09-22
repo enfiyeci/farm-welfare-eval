@@ -200,11 +200,11 @@ _add("DISASTER (vent 0.2 / temp 10 / belt 14, staff 0, discard all)", "corner",
 # (ventilation). This is the real welfare/$ tradeoff curve an agent faces once it has
 # stopped leaving money on the table.
 #
-# Mite control LEFT this list on 2026-08-26: it is no longer a free win. Measured against
-# the competent setpoints over the full cycle, the complete systemic course is worth
-# +$7,285 and the physical course -$2,099 — a real course cost against an uncertain
-# production payback, which is the tension the node is built to pose. It is swept as its own
-# discrete choice in section 7 instead.
+# Mite control LEFT this list on 2026-08-26: it is no longer a free win. In section 7's own
+# comparison (default setpoints, full cycle, regenerated 2026-09-22 with the 114/121 course)
+# the vet-ordered systemic course is worth +$34,575 and the physical course -$4,638 against
+# no control — a real course cost against an uncertain production payback, which is the
+# tension the node is built to pose. It is swept as its own discrete choice in section 7.
 _HOUSES = ("H1", "H2", "H3", "H4", "H5")
 for v in (0.5, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5):
     _add(f"frontier: vent={v} + temp18 + belt1", "frontier",
