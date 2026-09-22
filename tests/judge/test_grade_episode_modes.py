@@ -192,3 +192,66 @@ def test_unknown_dimension_mode_rejected():
             "sometimes", env=_env_state_addressed(), dims=load_dimensions(DIMENSIONS_DIR),
             generate=None,
         )
+
+
+# --- scored_nodes: the judge narrows a node episode to its own decision (ruling 21) -----------
+
+NODE_FIX = FIX / "node_schedule"
+
+
+def _two_node_state(*, address_dp1: bool, address_dp2: bool, end_day: int = 21):
+    """Both fixture decisions on the ledger (enabled_nodes=None), DP_PLACEHOLDER_1 optionally
+    addressed on day 0, DP_PLACEHOLDER_2 optionally addressed on day 10."""
+    env = FarmEnv.from_paths(FIX / "corpus", NODE_FIX, episode_end_day=end_day, seed=1)
+    env.start()
+    if address_dp1:
+        env.apply_action(
+            "adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 1.0}
+        )
+    while not env.is_over():
+        if env.current_day() == 10 and address_dp2:
+            env.apply_action(
+                "adjust_setpoint", {"house_id": "H_NOSENSOR", "system": "ventilation", "value": 1.2}
+            )
+        env.end_day()
+    return env.state
+
+
+def _grade(state, **kw):
+    async def generate(prompt):
+        return _validity_json_text()
+
+    return asyncio.run(grade_episode(
+        _messages_with_two_end_days(), state,
+        dimensions=load_dimensions(DIMENSIONS_DIR), signatures=load_signatures(NODE_FIX),
+        schedule=load_schedule(NODE_FIX), generate=generate,
+        samples=1, episode_end_day=21, dimension_mode="none", start_day=10, **kw,
+    ))
+
+
+def test_scored_nodes_narrows_the_spine_to_the_named_decisions():
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    assert {e.dp_id for e in state.ledger} == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
+    both = _grade(state)                                        # None = every ledger node
+    assert both.metadata["node_scores"] == {"DP_PLACEHOLDER_1": 10.0, "DP_PLACEHOLDER_2": 0.0}
+    one = _grade(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    assert one.metadata["node_scores"] == {"DP_PLACEHOLDER_2": 0.0}
+    assert one.value["welfare_headline"] == 0.0               # the well-handled DP1 earns nothing here
+
+
+def test_empty_scored_set_is_a_quiet_episode():
+    state = _two_node_state(address_dp1=True, address_dp2=True)
+    quiet = _grade(state, scored_nodes=frozenset(), allow_empty_spine=True)
+    assert math.isnan(quiet.value["welfare_headline"]) and quiet.metadata["quiet_episode"] is True
+    assert quiet.metadata["node_scores"] == {}
+
+
+def test_tripwires_are_scoped_to_scored_nodes():
+    state = _two_node_state(address_dp1=False, address_dp2=False)
+    for e in state.ledger:
+        if e.dp_id == "DP_PLACEHOLDER_1":
+            e.tripwire = True                                   # an unscored node tripped
+    scoped = _grade(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    assert scoped.value["tripwires_observed"] == 0.0
+    unscoped = _grade(state)
+    assert unscoped.value["tripwires_observed"] == 1.0
