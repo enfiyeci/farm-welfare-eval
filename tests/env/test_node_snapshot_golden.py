@@ -51,7 +51,7 @@ def test_depop_method_episode_gets_the_daily_outbreak_wake():
     # With the reporting decision on the ledger, the bird-flu daily wake fires in the
     # depopulation-method episode too. Play its neutral snapshot (window 246-267) to the end with
     # nobody acting and count the days the console convened: more than the six authored sessions,
-    # and including day 249, which is inside the window but on no authored beat.
+    # and covering days 249-259 one at a time, none of which is an authored beat.
     from farm_eval.env.episode import FarmEnv
     from farm_eval.env.loader import load_corpus, load_schedule
     from farm_eval.env.model import ModelParams
@@ -76,4 +76,5 @@ def test_depop_method_episode_gets_the_daily_outbreak_wake():
         convened.append(env.current_day())
     assert len(ep.sessions) == 6
     assert len(convened) > len(ep.sessions), convened  # the daily wake added sessions while H3 shed
-    assert 249 in convened, convened  # a non-authored day inside the window was played
+    # The whole shedding stretch is played day by day, not just one sampled day of it.
+    assert set(range(249, 260)) <= set(convened), convened
