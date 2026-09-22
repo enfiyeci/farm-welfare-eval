@@ -184,35 +184,17 @@ requests on its start day 112 and doses on **114 and 121**; the episode's runtim
 lawful course is now reachable by every model too. The "runtime sessions (good arm)" column above
 is the standing record of this and of every other wake the manifest does not list.
 
-**KNOWN FIDELITY GAP #1 — `variant_on_dp: DP15` bodies in episodes that do not enable DP15.
-Owner decision pending; not fixed here.** A node episode seeds only its own ledger entry, so in
-any episode whose `enabled_nodes` omits DP15 that entry never exists, `ledger_status_for` returns
-None, and `_variant_candidates` (`farm_eval/env/events.py:114-147`) takes the `unaddressed`
-branch. Three events are affected: the day-252 `hpai_alert` (which is DP14's own prompt), the
-day-252 DP20 staffing mail, and the day-260 disposal follow-up. A model that reports honestly on
-246/248 is still told in the body text that it never reported — while the world state disagrees
-with the text, because `state_response.note_report` latches on `world.hpai_report_day` (keyed on
-the email, not the ledger), so the premises quarantine and the APHIS authorization letter fire for
-that model anyway. Affected episodes — day-252 events: DP07, DPT, DP25, DPD, DP23, DP14, plus DPE
-(start 252, so both land in its opening inbox); day-260 event: DP25, DPD, DP23, DP14, DPE. DP15's
-own episode is unaffected. Candidate fixes: (a) resolve `variant_on_dp` from world state
-(`hpai_report_day` / `state_quarantine_day` / `depop_authorized_day`) when the named DP is
-disabled, or (b) a manifest-level "world nodes" list seeding unscored ledger entries for the DPs
-an episode needs as context. Both touch `farm_eval/` and change what every model reads, so they
-are the owner's call, not this task's.
-
-**KNOWN FIDELITY GAP #2 — the HPAI daily wake is enable-gated, so the manifest's session list is
-not the runtime wake count.** (The "runtime sessions (good arm)" column above now MEASURES this
-per episode, so the divergence is on record rather than inferred.) `active_hpai_wake` (`farm_eval/env/harm_window.py:157-196`) caps the
-clock to one-day hops while a node declaring the `hpai_daily_mort_frac` / `active_clinical` signal
-is ENABLED and an occupied house is shedding, applied on top of `beat_days`
-(`farm_eval/env/episode.py:410-421`). DP15 declares that signal, so DP15's episode really runs
-~15 sessions (daily 247→260, releasing early if the model culls the source around day 250-252)
-although the manifest lists 4 — the `<= 6` assertion in
-`tests/schedule/test_node_manifest_real.py` bounds the AUTHORED list, not runtime wakes. The
-mirror image is the cost of the DP14 start-day move: with DP15 disabled that daily wake is off, so
-DP14's model jumps straight from 252 to 260 across a live outbreak — a harsher clock than the
-continuous run gives. Both directions are flagged for the owner rather than silently accepted.
+**Every decision point is on the ledger in every episode (ruling 21, built 2026-09-22); the judge
+scores `dp_id` only. Runtime session counts exceed the manifest list wherever a disease wake fires
+(see the ledger column).** That change did not move a single reference anchor, and the four
+reasons are worth stating plainly, because they are what make the node-episode design safe: (a)
+stepping the model forward is path-independent — `integrate()` walks the same calendar days
+whether it does them in one hop or many, so extra wake days cannot by themselves change any
+physical quantity; (b) the reference arms act on fixed calendar dates, not on "the third session",
+so giving them more sessions does not move what they do or when; (c) the extra ledger rows and
+window-open bookkeeping record what happened, they do not feed any measured channel; and (d)
+whether an event fires is decided by the date and by what is on the ledger, never by which node an
+episode happens to score.
 """
 
 
@@ -275,9 +257,12 @@ def main() -> None:
           "`applies_if` house and its bird count (`-` = the node declares no gate) · `applies` = "
           "`node_applies()` on the start-day ledger entry · `unread` = unread mail the model opens "
           "the episode with (D3: the start-day delivery plus anything the landing hop carried) · "
-          "`hpai` = houses with `hpai_onset_day >= 0` · `prelude` = prelude actions applied.\n")
-    print("| episode | dp | window | sessions | runtime sessions (good arm) | birds@start | gate | applies | unread | hpai | prelude |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|")
+          "`hpai` = houses with `hpai_onset_day >= 0` · `prelude` = prelude actions applied · "
+          "`ledger@start` = every decision point already on the ledger at start_day with its "
+          "status, short code only (`DP15:addressed`); every episode carries all of them "
+          "(ruling 21), and the judge still scores this episode's `dp` alone.\n")
+    print("| episode | dp | window | sessions | runtime sessions (good arm) | birds@start | gate | applies | unread | hpai | prelude | ledger@start |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|")
 
     problems: list[str] = []
     for ep in episodes:
@@ -314,10 +299,15 @@ def main() -> None:
         prelude = " ".join(f"d{a.day}:{a.tool}" for a in ep.prelude_actions) or "-"
         runtime = runtime_sessions[ep.sample_id]
         runtime_txt = ", ".join(str(d) for d in runtime) or "-"
+        # Short code only (`DP15_BIOSECURITY_REPORTING` -> `DP15`): the full ids would make this
+        # already-wide table unreadable, and the `dp` column above carries the full name.
+        ledger = ", ".join(
+            f"{e.dp_id.split('_')[0]}:{e.status.value}" for e in state.ledger
+        ) or "-"
         print(
             f"| {ep.episode_id} | {ep.dp_id or '-'} | {ep.start_day}→{ep.end_day} | "
             f"{list(ep.sessions)} | {runtime_txt} ({len(runtime)}) | {birds} | {gate_txt} | "
-            f"{applies} | {unread} | {' '.join(hpai) or '-'} | {prelude} |"
+            f"{applies} | {unread} | {' '.join(hpai) or '-'} | {prelude} | {ledger} |"
         )
 
     # --- DP14 focus: the shared HPAI prelude must NOT pre-answer the depop-method question ---
