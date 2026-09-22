@@ -56,12 +56,12 @@ def test_render_table_lists_nodes_and_flags_unreliable():
 
 
 def _fake_sample(id_, episode_id, arm, dp_id, scored, epoch, node_scores, welfare_pass_min=7.0,
-                  scorer_name="node_welfare_judge", has_scorer=True):
+                  scorer_name="node_welfare_judge", has_scorer=True, error=None):
     metadata = {"episode_id": episode_id, "arm": arm, "dp_id": dp_id, "scored": scored,
                 "welfare_pass_min": welfare_pass_min}
     score = SimpleNamespace(metadata={"node_scores": node_scores}) if has_scorer else None
     scores = {scorer_name: score} if has_scorer else {}
-    return SimpleNamespace(id=id_, metadata=metadata, scores=scores, epoch=epoch)
+    return SimpleNamespace(id=id_, metadata=metadata, scores=scores, epoch=epoch, error=error)
 
 
 def test_rows_from_log_extracts_one_row_per_sample():
@@ -83,3 +83,40 @@ def test_rows_from_log_raises_when_scorer_missing_on_a_scored_sample():
     ])
     with pytest.raises(ValueError, match="DP05::neutral.*node_welfare_judge"):
         rows_from_log(log)
+
+
+# 2026-09-22: a sample that died mid-run (e.g. a provider 400) carries `error` and no score. It
+# must be recorded as errored, not raise and make the whole log unreportable.
+# Shape of the real message (2026-09-22 DP05 log): a RuntimeError repr whose escaped "\\n" lines dump
+# the whole request first; the cause is the LAST segment.
+_VERTEX_400 = SimpleNamespace(message=(
+    "RuntimeError('\\nRequest:\\n{\\n  \\\"contents\\\": []\\n}\\n\\n"
+    "ClientError(\"400 INVALID_ARGUMENT. Requests ending with a model turn are not supported.\")')"
+))
+
+
+def _log_with_one_errored_sample():
+    return SimpleNamespace(samples=[
+        _fake_sample("DP05::neutral", "DP05", "neutral", "DP05", True, 1, {"DP05": 9.0}),
+        _fake_sample("DP23::neutral", "DP23", "neutral", "DP23", True, 1, {}, has_scorer=False,
+                     error=_VERTEX_400),
+    ])
+
+
+def test_rows_from_log_records_an_errored_sample_instead_of_raising():
+    rows = rows_from_log(_log_with_one_errored_sample())
+    assert [r.status for r in rows] == ["ok", "errored"]
+    errored = rows[1]
+    assert errored.episode_id == "DP23" and errored.node_score is None
+    assert "Requests ending with a model turn" in errored.error
+    assert "Request:" not in errored.error
+
+
+def test_errored_rows_are_excluded_from_stats_and_listed():
+    rel = summarize(rows_from_log(_log_with_one_errored_sample()), headline_arm="neutral")
+    assert ("DP23", "neutral") not in rel.nodes
+    assert rel.headline == 9.0 and rel.headline_n_nodes == 1
+    assert [(r.episode_id, r.arm, r.epoch) for r in rel.errored] == [("DP23", "neutral", 1)]
+    text = render_table(rel)
+    assert "errored samples (excluded): 1" in text
+    assert "DP23 | neutral | epoch 1 | errored |" in text

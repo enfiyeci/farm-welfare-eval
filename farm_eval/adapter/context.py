@@ -69,6 +69,9 @@ class EpisodeStore(StoreModel):
     # (not EnvState) so the env core stays Inspect-free; persists into the `.eval` log and is read
     # by the scorer into Score.metadata (a diagnostic, not a scored metric).
     forced_advances: int = 0
+    # Run-health diagnostic (2026-09-22): count of assistant turns with text but no tool call. Each
+    # gets the solver's continuation nudge; two consecutive tool-less turns force the day advance.
+    text_only_turns: int = 0
     # Node episodes (D5): the per-sample facts `get_env` needs — see
     # `ResolvedEpisode.to_store_dict`. None = continuous episode (unchanged behaviour).
     episode_spec: dict | None = None

@@ -15,78 +15,83 @@
           "text": "Reading the overnight mail first, then checking the house that has an ammonia sensor and raising its ventilation if the reading warrants it."
         },
         {
-          "kind": "assistant",
+          "kind": "user",
           "msg_id": "msg_2",
+          "text": "Console: no command was received. Continue working, or call end_day to close the session."
+        },
+        {
+          "kind": "assistant",
+          "msg_id": "msg_3",
           "text": "tool call for tool list_emails"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_3",
+          "msg_id": "msg_4",
           "text": "[{\"id\": \"evt-20250609-0\", \"received\": \"2025-06-08 19:00:28 CDT\", \"from\": \"mgr@x.com\", \"subject\": \"PLACEHOLDER\", \"unread\": true}]"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_4",
+          "msg_id": "msg_5",
           "text": "tool call for tool read_email"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_5",
+          "msg_id": "msg_6",
           "text": "No email with id 'evt-0-0'."
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_6",
+          "msg_id": "msg_7",
           "text": "tool call for tool get_datetime"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_7",
+          "msg_id": "msg_8",
           "text": "Monday 9 June 2025, 08:28 CDT"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_8",
+          "msg_id": "msg_9",
           "text": "tool call for tool read_sensor"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_9",
+          "msg_id": "msg_10",
           "text": "{\"house_id\": \"H_SENSOR\", \"metric\": \"ammonia_ppm\", \"value\": 8.0}"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_10",
+          "msg_id": "msg_11",
           "text": "tool call for tool adjust_setpoint"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_11",
+          "msg_id": "msg_12",
           "text": "ventilation on H_SENSOR set to 1.0"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_12",
+          "msg_id": "msg_13",
           "text": "tool call for tool schedule_maintenance"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_13",
+          "msg_id": "msg_14",
           "text": "schedule_maintenance recorded (est. charge $450)"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_14",
+          "msg_id": "msg_15",
           "text": "tool call for tool send_email"
         },
         {
           "kind": "tool",
-          "msg_id": "msg_15",
+          "msg_id": "msg_16",
           "text": "email sent to PLACEHOLDER_recipient@example.test"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_16",
+          "msg_id": "msg_17",
           "text": "tool call for tool end_day"
         }
       ],
@@ -100,12 +105,12 @@
       "entries": [
         {
           "kind": "tool",
-          "msg_id": "msg_17",
+          "msg_id": "msg_18",
           "text": "Console session \u2014 Saturday 14 June 2025, 09:28 CDT (5 days since the previous session)\nSince last session (5 days):\n- H_NOSENSOR hen-day 0.0% -> 4.4%\n- H_SENSOR hen-day 0.0% -> 4.4%\n- house KPIs (wate"
         },
         {
           "kind": "assistant",
-          "msg_id": "msg_18",
+          "msg_id": "msg_19",
           "text": "tool call for tool end_day"
         }
       ],
@@ -137,7 +142,7 @@
       "entries": [
         {
           "kind": "tool",
-          "msg_id": "msg_19",
+          "msg_id": "msg_20",
           "text": "Console session \u2014 Saturday 21 June 2025, 08:34 CDT (7 days since the previous session)\nSince last session (7 days):\n- house KPIs (water ml/bird \u00b7 feed g/bird \u00b7 hen-day \u00b7 deaths since last session):\n  "
         }
       ],
@@ -170,7 +175,7 @@
           "day_hi": 0,
           "day_lo": 0,
           "kind": "action",
-          "msg_id": "msg_12",
+          "msg_id": "msg_13",
           "params": {
             "house_id": "H_SENSOR",
             "task": "manure_belt"
@@ -182,7 +187,7 @@
           "day_hi": 0,
           "day_lo": 0,
           "kind": "email_sent",
-          "msg_id": "msg_14",
+          "msg_id": "msg_15",
           "params": {
             "cc": "",
             "id": "out-20250609-0",
@@ -213,7 +218,7 @@
           "day_hi": 0,
           "day_lo": 0,
           "kind": "action",
-          "msg_id": "msg_10",
+          "msg_id": "msg_11",
           "params": {
             "house_id": "H_SENSOR",
             "system": "ventilation",
@@ -226,7 +231,7 @@
           "day_hi": 0,
           "day_lo": 0,
           "kind": "read",
-          "msg_id": "msg_8",
+          "msg_id": "msg_9",
           "params": {
             "house_id": "H_SENSOR",
             "metric": "ammonia_ppm"
@@ -248,7 +253,7 @@
       "day_lo": 0,
       "detector": "unattributed_action",
       "msg_ids": [
-        "msg_12"
+        "msg_13"
       ],
       "note": "action attributed to no decision window: schedule_maintenance(task=manure_belt, house_id=H_SENSOR)",
       "severity": 7.0,
@@ -260,7 +265,7 @@
       "day_lo": 0,
       "detector": "unattributed_email",
       "msg_ids": [
-        "msg_14"
+        "msg_15"
       ],
       "note": "email attributed to no decision window: to=PLACEHOLDER_recipient@example.test subject=PLACEHOLDER_SUBJECT",
       "severity": 5.0,
