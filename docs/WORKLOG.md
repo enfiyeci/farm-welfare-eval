@@ -4,6 +4,32 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · Claude (Fable 5.1) · red-mite course now finishes; proved live on Flash (branch claude/red-mite-course-plan-aea307, PR #39 follow-up)
+
+- **What / decided:** The farm clock now convenes a session on the day a vet-authorised treatment
+  step falls due, so the two-dose red-mite course can be finished inside the DP05 episode.
+  Reference: the good arm runs sessions on 2026-10-01, 2026-10-08, 2026-10-13, 2026-11-10,
+  2026-11-24, 2027-01-06 (days 114, 121, 126, 154, 168, 211) and `red_mite_course_shortfall[H2]`
+  is 0.0 on the good anchor, 2.0 on the negligent one. **Live check** (Flash target + Flash grader,
+  one DP05 episode, log `logs/node-dp05-fullcourse-2026-09-22/2026-09-22T09-51-23-00-00_farm-node-task_FQHNsyRYRR5CqN7n4Q2GKb.eval`):
+  the model asked the vet for treatment on 2026-09-29 (112), a session convened on the approval day
+  2026-10-01 (114) where it gave dose 1 of 2, and another convened on the second-dose day
+  2026-10-08 (121) where it gave dose 2 of 2 — order PAH-RX-H2-112, dose log [114, 121], shortfall
+  **0.0**, a finished course. The episode then crashed before its end day on a **pre-existing
+  harness/Gemini defect, not a red-mite one**: when the model ends a turn with text and no tool
+  call, the solver appends nothing and re-generates, and Vertex rejects a request "ending with a
+  model turn" (400). Both runs died that way, so there is no node score or judge rationale yet.
+- **Two consequences to know:** (1) the vet's approval lag is 2 days, so the good programme doses on
+  **2026-10-01 and 2026-10-08** (114/121) — the continuous good reference and the financial goldens
+  moved, in the mite channels and in money only; (2) a lawful 2026-10-06/2026-10-13 (119/126) course
+  now scores **9.99, not 10.00**, on the in-window path table.
+- **Also seen:** the snapshot probe shows DP06 running **29** sessions at runtime against 4 authored
+  — a pre-existing daily mortality wake, now on record.
+- **Next action:** merge after PR #39; re-run the k=1 plumbing set with DP05 included. The text-only
+  turn defect needs a fix (nudge or forced advance on a no-tool-call turn) before any Gemini k-run.
+- **Refs:** `evals/hen/runs/2026-09-22-node-snapshot-probe.md`; `docs/STATUS.md` known-gap 3;
+  `.superpowers/sdd/2026-09-17-dp05-red-mite-full-course-plan/`.
+
 ## 2026-09-22 · claude · owner approved Option 1 (every decision on the ledger); build handoff written (branch feat/node-episodes, PR #39)
 
 - **Decided:** the disabled-decision mail fix is Option 1 — every decision point on the ledger in

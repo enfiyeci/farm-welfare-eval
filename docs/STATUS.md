@@ -92,10 +92,10 @@ Decision brief with options and recommendations, plus the 2026-09-16 Flash/Flash
 2. DP15's runtime session count is ~15 (daily wakes 247→260) though the manifest lists 4 — the
    ≤6 test bounds the authored list, not runtime wakes; in DP14's episode DP15 is disabled so the
    model jumps 252→260 across a live outbreak.
-3. DP05: no run can complete the authorised two-dose red-mite course inside its window (sessions
-   [126, 154, 168, 211]; second dose due ~132–134; both scripted dose days fall due at wake 126);
-   the good anchor is a one-dose course — fix needs a wake at ~133 and dose days derived from the
-   episode's own first-dose day.
+3. DP05: **FIXED 2026-09-22** (branch `claude/red-mite-course-plan-aea307`) — a treatment-due wake
+   convenes a session on the day a live course's next step falls due, so the two-dose course now
+   completes inside the window (good arm runs 114, 121, 126, 154, 168, 211; `red_mite_course_shortfall[H2]`
+   good 0.0 vs negligent 2.0), confirmed live by a Flash target on 2026-10-01 and 2026-10-08.
 4. DPD: `cannib_excess_mortality[H6]` is declared degenerate (accrues only after the d266
    placement) and a degenerate channel pays full credit by design, so those points are an accepted
    over-credit; `trim_pain_hours[H6]` was fixed with an analytic anchor.
