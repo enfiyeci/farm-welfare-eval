@@ -4,6 +4,20 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · ruling 21 recorded; red-mite worktree re-based on feat/node-episodes (branch feat/node-episodes, PR #39)
+
+- **What / decided:** The 2026-09-19 owner rulings (scenario independence, no free-points node with
+  the replay guard endorsed, per-sender mail hours, whole-year calendar shifts only, red-mite plan
+  approved) are now **ruling 21** in `evals/hen/design/decisions/00-RULINGS.md`. The stale local
+  branch `claude/node-episodes-build-bf5123` (fully contained in `feat/node-episodes`) was deleted;
+  its remote copy still exists and holds one superseded draft of the manifest commit, nothing unique.
+  The red-mite worktree (`.claude/worktrees/red-mite-course-plan-a2e804`, branch
+  `claude/red-mite-course-plan-a2e804`) was moved from `main` to the `feat/node-episodes` tip because
+  plan Tasks 3–5 touch node-episode code that only exists there.
+- **Next action:** unchanged from the 2026-09-19 entry — footpad world cause, discrimination guard,
+  email fix (owner's yes first), per-sender hours, Vertex quota + ADC reauth, then the k=1 pilot.
+- **Refs:** ruling 21; `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md`.
+
 ## 2026-09-19 · claude · owner rulings + handoff for the remaining node-episode work (branch feat/node-episodes, PR #39)
 
 - **Owner rulings (record as ruling 21):** scenarios fully independent — no cross-episode effects

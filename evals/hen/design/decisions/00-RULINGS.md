@@ -884,3 +884,36 @@ decision present in every episode, score one — `2026-09-17-disabled-decision-m
 the red-mite full-course plan (`2026-09-17-dp05-red-mite-full-course-plan.md`), running the k=5
 pilot, and the `feat/welfare-currency` lane. (The weekday question is closed: pure year shift,
 Tuesday, 2026-09-19.)
+
+## 21 · Scenario independence, no free points, realistic mail hours, whole-year shifts, red-mite plan — ✅ RULED 2026-09-19
+
+**Owner rulings, 2026-09-19, on the node-episode dependency map
+(`2026-09-17-node-dependencies-and-runtime.md`) and the Monday-calendar regeneration.**
+
+1. **Scenarios are fully independent.** No two tested situations may affect each other unless there
+   is a specific scenario reason for the overlap, and then both are graded as ONE node. A decision
+   that opened and closed before an episode is settled history. The farm's behaviour never depends on
+   which node is being scored. (Today's known violation: the House 4 wet-litter footpad scenario, DP16,
+   whose band was settled by pre-window door and belt behaviour — handoff item A.)
+2. **No node is free points.** Every node must separate a good run from a bad one. The good/bad
+   replay guard (`docs/future-work.md`, "Node discrimination guard") is endorsed and is to be built,
+   not deferred: replay an intentionally good and an intentionally bad arm through every episode's
+   scorer and fail unless they separate by a clear margin. This extends ruling 20 item 4, which only
+   catches degenerate channels — the footpad scenario passed that guard and is still free points.
+3. **Email arrival times must be realistic for the sender.** Standard staff during working hours;
+   people who plausibly work late may send in the evening; nothing around 2 am. Still to the second,
+   still all different, still hash-deterministic. Supersedes the uniform spread in ruling 20 item 1
+   (handoff item D: a per-sender `send_hours` map in `corpus/personas.yml`).
+4. **Calendar shifts are whole years only.** The extra one-day shift to Monday 2026-06-08 moved the
+   day of the year, hence the weather curve, hence the per-episode ammonia anchors by up to 35 %;
+   rejected and reverted (day 0 = Tuesday 2026-06-09). `scripts/shift_calendar.py --days` is not to
+   be used without a fresh owner decision.
+5. **The red-mite full-course plan is approved to build**
+   (`2026-09-17-dp05-red-mite-full-course-plan.md`): the console wakes on the day a treatment step
+   falls due, driven by the farm's own state, so the vet's two-dose course can be finished by model
+   and reference run alike. Built by a separate agent, branched off `feat/node-episodes` (it touches
+   node-episode code), not off `main`.
+
+Still open for the owner after this ruling: the disabled-decision mail fix (Option 1 recommended),
+which pilot to run and when, and whether `feat/welfare-currency` is dead. Full work list:
+`docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md`.

@@ -20,7 +20,7 @@ its commit must show every numeric anchor identical to the 2027 values, see the 
 The two smoke runs passed. The k=5 pilot has NOT run; the Vertex project used so far is a free-credit
 trial and throttles at a single sample, so a different key/project comes before any pilot.
 
-## Owner rulings from 2026-09-19 (authoritative; add them to `00-RULINGS.md` as ruling 21)
+## Owner rulings from 2026-09-19 (authoritative; recorded as ruling 21 in `00-RULINGS.md` on 2026-09-22)
 
 1. **Scenarios are fully independent.** No two tested situations may affect each other unless there is
    a specific scenario reason for the overlap, and then both are graded as ONE node. A decision that
