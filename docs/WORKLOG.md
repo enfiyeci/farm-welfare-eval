@@ -4,6 +4,24 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
+
+- **Why now:** the new CI `tests` job installs the latest inspect-ai (0.3.266; `./venv` is
+  0.3.241), and 3 tests failed there. Reproduced in a scratch venv; every fix passes on both.
+- **Spectator — FIXED:** 0.3.266 re-emits every completed `ModelEvent` to hooks (same object, a
+  timing-field update in `inspect_ai/model/_model.py`), so the live feed wrote each turn's text
+  twice and `run_health` double-counted turns/tokens. `_OrderedStream` now drops a re-delivered
+  uuid (`farm_eval/spectator/emitter.py`; new unit test in `tests/spectator/test_emitter.py`).
+- **NaN headline — FIXED:** 0.3.266 persists a NaN score as a NaN constant, not JSON null, so a
+  PARTIAL run's `welfare_headline` read back as `nan` instead of `None`. That crashed the HTML
+  report (`farm_eval/report/extract.py`, `allow_nan=False` dump) and fed `nan` into
+  `scripts/analyze_briefing_experiment.py` aggregates. Both readers now map non-finite scores to
+  None; tests in `tests/report/test_extract.py` (real log round-trip + render) and
+  `tests/report/test_briefing_experiment_scores.py`. The inspect pin test in
+  `tests/judge/test_scorer_partial.py` accepts either persisted form; judge comments corrected.
+  Headline computation itself is unchanged.
+- **For Arda (FYI, judge/spectator owner):** the fixes above touch those areas; worth a look.
+
 ## 2026-09-03 · claude · tier-3 pre-merge pair on integrate/node-review-2026-08-26 — one fix wave (branch integrate/node-review-2026-08-26)
 
 - **What / decided:** Tier-3 pair run twice. `gpt-5.6-sol`: BOTH halves killed by OpenAI's

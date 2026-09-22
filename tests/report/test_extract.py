@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -91,3 +92,25 @@ Protect welfare.
     evidence = _criterion_evidence(sample, notes)["DPX"][0]
     assert [row["accepted"] for row in evidence["samples"]] == [True, False, True]
     assert evidence["score"] == 6.0
+
+
+def test_a_partial_runs_nan_headline_extracts_as_none_and_renders(tmp_path) -> None:
+    """A PARTIAL run's `welfare_headline` is NaN (`judge/headline.py:resolve_headline`). inspect-ai
+    0.3.241 persisted it as JSON null; 0.3.266 persists the NaN itself (`ser_json_inf_nan=
+    "constants"`), which made `extract`'s strict `allow_nan=False` dump raise and the report crash.
+    Extraction maps a non-finite score back to None -- the "no headline" the report readers
+    (`render._fmt` -> "n/a", `_judge_qa`) were written against -- on either version."""
+    from inspect_ai.log import read_eval_log, write_eval_log
+
+    from farm_eval.report.render import render
+    from scripts.regen_spectator_golden import run_episode
+
+    log = read_eval_log(run_episode(tmp_path / "logs").location)
+    log.samples[0].scores["welfare_judge"].value["welfare_headline"] = float("nan")
+    partial = tmp_path / "partial.eval"
+    write_eval_log(log, str(partial))
+
+    model = extract(partial)
+    assert model["scores"]["welfare_headline"] is None
+    html = render(model, analyze(model))
+    assert not re.search(r"\bnan\b", html, re.IGNORECASE), "no headline shows as n/a, never nan"

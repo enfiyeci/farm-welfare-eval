@@ -129,16 +129,29 @@ class _OrderedStream:
     Only the kinds the translator handles pass through here (`HANDLED_EVENT_TYPES`): an unhandled
     event of the tool's own span arrives BEFORE the tool event, so letting one release the held
     stores would emit the effects ahead of their cause -- the exact inversion this class undoes.
+
+    **A re-delivered event is dropped.** From inspect-ai 0.3.266 a completed `ModelEvent` reaches
+    `on_sample_event` twice -- the same object, re-emitted once its timing fields are filled in
+    (`transcript()._event_updated` in `inspect_ai/model/_model.py`). The recorded transcript keeps
+    one event per uuid, so replay translates it once; live must too, or every turn's text is
+    written twice and `run_health` double-counts turns and tokens. The first delivery is kept: it
+    is the same object as the second, so by translation time it already carries the final fields.
     """
 
     def __init__(self) -> None:
         # Held `StoreEvent`s, in arrival order, awaiting the `ToolEvent` that may still be pending.
         self._stores: list[Any] = []
+        # uuids of the events already taken, so a re-delivery is recognized (see the docstring).
+        self._seen: set[str] = set()
 
     def push(self, event: Any) -> list[Any]:
         """Take *event*; return the events now safe to translate, in the order they belong in."""
         if not isinstance(event, HANDLED_EVENT_TYPES):
             return []
+        if event.uuid is not None:
+            if event.uuid in self._seen:
+                return []
+            self._seen.add(event.uuid)
         if isinstance(event, StoreEvent):
             self._stores.append(event)
             return []

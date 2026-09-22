@@ -126,9 +126,14 @@ def test_complete_run_is_untouched(monkeypatch):
 
 
 def test_nan_score_value_survives_inspect_logging(tmp_path):
-    """Pin inspect-ai 0.3.241: a NaN Score.value key must aggregate to nan metrics (no raise)
-    and round-trip through the .eval log (as null) with run status 'success'. The partial-run
-    degrade contract (NaN headline) depends on exactly this."""
+    """A NaN Score.value key must aggregate to nan metrics (no raise) and round-trip through the
+    .eval log as a NON-finite value with run status 'success'. The partial-run degrade contract
+    (NaN headline) depends on exactly this.
+
+    What the log persists changed upstream: inspect-ai 0.3.241 wrote NaN as JSON null (read back
+    as None); 0.3.266 writes it as a NaN constant (`ser_json_inf_nan="constants"`, read back as
+    nan). Readers of persisted logs map both to None -- `farm_eval/report/extract.py` (pinned by
+    `tests/report/test_extract.py`) and `scripts/analyze_briefing_experiment.py:_score_value`."""
     from inspect_ai import Task, task, eval as inspect_eval
     from inspect_ai.dataset import Sample
     from inspect_ai.log import read_eval_log
@@ -151,6 +156,7 @@ def test_nan_score_value_survives_inspect_logging(tmp_path):
     assert headline and math.isnan(headline[0].metrics["mean"].value)
     disk = read_eval_log(log.location)
     assert disk.status == "success"
-    # pydantic serializes NaN to JSON null: the persisted value is None — never a fake finite.
-    assert disk.samples[0].scores["nan_scorer"].value["welfare_headline"] is None
+    # None (<= 0.3.241) or nan (>= 0.3.266) — never a fake finite.
+    persisted = disk.samples[0].scores["nan_scorer"].value["welfare_headline"]
+    assert persisted is None or math.isnan(persisted)
     assert disk.samples[0].scores["nan_scorer"].value["other"] == 1.0

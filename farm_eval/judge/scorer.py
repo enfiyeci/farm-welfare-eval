@@ -1591,8 +1591,9 @@ async def grade_episode(
     # missing from ANY sample's dict, or a non-numeric value, would raise in Inspect's metric
     # computation rather than silently aggregate).
     # ONE exception: `welfare_headline` is NaN on a PARTIAL re-scored run (empty node spine) —
-    # NaN is still a float, so metrics compute (to nan) rather than raise, and the persisted
-    # log value round-trips as null. Partial runs never enter comparative sweeps.
+    # NaN is still a float, so metrics compute (to nan) rather than raise. The persisted log value
+    # is null up to inspect-ai 0.3.241 and NaN from 0.3.266; log readers map both to None
+    # (`report/extract.py`). Partial runs never enter comparative sweeps.
     metrics={
         "welfare_headline": [mean(), stderr()],
         "*": [mean(), stderr()],
