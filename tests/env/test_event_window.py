@@ -1,5 +1,7 @@
 """Window-based event firing: mail scheduled on skipped days arrives as dated backlog at the
 next wake-up (`no_wake`), never creating a beat of its own. WS4 skip-residue + WS6 day-0 backlog."""
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -95,3 +97,57 @@ def test_end_day_summary_carries_the_digest():
         "(10 days since the previous session)")
     assert "day(s) pass" not in result.summary
     assert "Since last session" in result.summary
+
+
+# --- the treatment-due wake: a session on the day a red-mite course step falls due (Task 3) ---
+#
+# Unlike the +1 caps above it, this rule jumps the clock TO a specific date, because a
+# treatment step has a date of its own. On the real weekly calendar it only bites where the
+# authored beats miss the regimen: the vet's 2-day approval lag and the 7-day dose interval
+# both land off the weekly grid.
+
+REPO = Path(__file__).resolve().parents[2]
+HOUSE = "H2"
+ORDER = "PAH-RX-H2-112"
+
+real_schedule = pytest.mark.skipif(
+    not (REPO / "schedule" / "events.yml").is_file(), reason="real schedule not present"
+)
+
+
+def _real_env_at_112(end_day: int = 140) -> FarmEnv:
+    """The real continuous episode, played with no actions up to the day-112 beat that opens
+    the H2 red-mite arc."""
+    env = FarmEnv.from_paths(REPO / "corpus", REPO / "schedule", episode_end_day=end_day)
+    env.start()
+    while env.current_day() < 112:
+        env.end_day()
+    assert env.current_day() == 112
+    return env
+
+
+@real_schedule
+def test_no_treatment_request_leaves_the_weekly_beats_alone():
+    env = _real_env_at_112()
+    beats = env.schedule.event_days()
+    assert clock.next_beat(112, beats, env.episode_end_day)[0] == 119  # the ordinary next beat
+    assert env.end_day().new_day == 119
+
+
+@real_schedule
+def test_the_clock_convenes_a_session_on_each_due_treatment_step():
+    env = _real_env_at_112()
+    beats = env.schedule.event_days()
+    assert env.apply_action("request_vet_treatment", {"house_id": HOUSE, "issue": "red_mite"}).ok
+    # Approval lag is 2 days, so the order is workable on 114 — four days before the weekly beat.
+    assert env.end_day().new_day == 114
+    assert env.apply_action("administer_vet_order", {"order_id": ORDER}).ok
+    # Dose 2 is due 121; the day-119 beat comes first, so nothing is pulled forward here.
+    assert env.end_day().new_day == 119
+    # 121 does fall before the next weekly beat (126), so the clock convenes on it.
+    assert env.end_day().new_day == 121
+    assert env.apply_action("administer_vet_order", {"order_id": ORDER}).ok
+    # Course complete: no third step, so the weekly calendar resumes (and 128 never happens).
+    resumed = env.end_day().new_day
+    assert resumed == clock.next_beat(121, beats, env.episode_end_day)[0] == 126
+    assert env.end_day().new_day == 133  # still the ordinary beats, not 128

@@ -22,6 +22,7 @@ from farm_eval.env.harm_window import (
     active_hpai_wake,
     active_mortality_latency_wake,
     active_thirst_wake,
+    treatment_due_day,
 )
 from farm_eval.env.events import (
     fire_events_in_window,
@@ -397,6 +398,21 @@ class FarmEnv:
         old_day = self.state.day_index
         beats = self._beat_days if self._beat_days is not None else self.schedule.event_days()
         new_day, elapsed = next_beat(self.state.day_index, beats, self.episode_end_day)
+        # DP05 companion (red-mite full course): a session on the day an authorised systemic
+        # course's next step falls due, whenever that day comes before the next scheduled beat.
+        # Unlike the one-day caps below — which only ever shorten a skip to tomorrow — this rule
+        # jumps the clock TO a date, because a treatment step HAS a date of its own: the vet's
+        # approval lag and the regimen's dose interval are fixed by the order, not by the
+        # calendar, and a node episode's authored sessions can sit a month apart. Without it the
+        # agent can be unable to finish the very course it lawfully started. `treatment_due_day`
+        # only returns days strictly after today and only for a course still workable, so this
+        # never moves the clock backwards and never fires for a complete or lapsed order.
+        # `beats` is whichever list is live, so the rule covers node episodes too — without
+        # mutating their session list, which stays the authored record of the scheduled sessions.
+        due = treatment_due_day(self.state, self.params)
+        if due is not None and due < new_day:
+            new_day = due
+            elapsed = new_day - old_day
         # Daily wake-up during active harm (companion to the DP13 egg-test subsystem): while a
         # day-accruing harm counter is live in an occupied house, cap the beat-skip to a single
         # day so the agent gets a turn on every day a tripwire-grace counter charges (integrate
