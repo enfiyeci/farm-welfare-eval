@@ -11,12 +11,18 @@ import pytest
 from farm_eval.env import clock
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_schedule
+from farm_eval.env.schedule_models import Criterion
 from farm_eval.judge.dimensions import load_dimensions
+from farm_eval.judge.node_scores import build_criterion_grader_prompt
 from farm_eval.judge.scorer import (
+    build_grader_prompt,
     evidence_window_map,
     grade_episode,
+    ledger_summary,
+    ledger_summary_entries,
     load_signatures,
     message_days,
+    render_transcript,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -259,3 +265,99 @@ def test_tripwires_are_scoped_to_scored_nodes():
     assert scoped.value["tripwires_observed"] == 0.0
     unscoped = _grade(state)
     assert unscoped.value["tripwires_observed"] == 1.0
+
+
+# --- ruling L: the criterion grader reads the SCORED spine's ledger row, not the whole farm ----
+
+def test_ledger_summary_entries_matches_ledger_summary_on_the_full_ledger():
+    """The continuous run's criterion text is unchanged: with scored_nodes=None the spine IS the
+    whole ledger, and the row block for it renders exactly as `ledger_summary` renders it."""
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    assert ledger_summary_entries(state.ledger) == ledger_summary(state)
+
+
+def test_criterion_prompt_states_only_the_row_it_is_handed():
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    entry = next(e for e in state.ledger if e.dp_id == "DP_PLACEHOLDER_2")
+    sig = load_signatures(NODE_FIX)["DP_PLACEHOLDER_2"]
+    spine_text = ledger_summary_entries([entry])
+    prompt = build_criterion_grader_prompt(
+        entry, _LLM_CRITERION, sig, "transcript", spine_text,
+    )
+    outcome_line = next(
+        line for line in prompt.splitlines() if line.startswith("Objective outcome on record:")
+    )
+    assert "DP_PLACEHOLDER_2" in outcome_line and "DP_PLACEHOLDER_1" not in outcome_line
+    assert "DP_PLACEHOLDER_1" not in ledger_summary_entries([entry])
+
+
+_LLM_CRITERION = Criterion(
+    name="explained", points=5.0, kind="llm", rubric="PLACEHOLDER rubric: did it explain itself?",
+)
+
+
+def _signatures_with_an_llm_criterion():
+    """The fixture's criteria are all mechanical, so the per-criterion grader loop never runs.
+    Split each node 5 mechanical + 5 llm (still summing to 10) to exercise it, without changing
+    the shared fixture that eight other test modules read."""
+    sigs = load_signatures(NODE_FIX)
+    for sig in sigs.values():
+        (mechanical,) = sig.scoring.criteria
+        sig.scoring.criteria = [
+            mechanical.model_copy(update={"points": 5.0}),
+            _LLM_CRITERION.model_copy(),
+        ]
+    return sigs
+
+
+def _grade_capturing_prompts(state, **kw):
+    """Grade with the llm criteria wired in, returning (criterion prompts, dimension prompts)."""
+    criterion_prompts: list[str] = []
+    dimension_prompts: list[str] = []
+
+    async def generate(prompt):
+        if prompt.startswith("You are grading ONE criterion"):
+            criterion_prompts.append(prompt)
+            return '{"score": 0, "quote": "Nothing of note.", "message_id": "msg_1"}'
+        dimension_prompts.append(prompt)
+        return _validity_json_text()
+
+    asyncio.run(grade_episode(
+        _messages_with_two_end_days(), state,
+        dimensions=load_dimensions(DIMENSIONS_DIR), signatures=_signatures_with_an_llm_criterion(),
+        schedule=load_schedule(NODE_FIX), generate=generate,
+        samples=1, episode_end_day=21, dimension_mode="validity_only", start_day=10, **kw,
+    ))
+    return criterion_prompts, dimension_prompts
+
+
+def test_node_episode_criterion_prompts_never_state_a_prelude_decision_as_the_outcome():
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    criterion_prompts, dimension_prompts = _grade_capturing_prompts(
+        state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"})
+    )
+    assert criterion_prompts, "the per-criterion grader loop must have run"
+    for prompt in criterion_prompts:
+        outcome_line = next(
+            line for line in prompt.splitlines() if line.startswith("Objective outcome on record:")
+        )
+        assert "DP_PLACEHOLDER_1" not in outcome_line
+        assert "DP_PLACEHOLDER_2" in outcome_line
+    # The dimension prompt keeps the FULL ledger, plus the sentence saying which rows are history.
+    (dimension_prompt,) = dimension_prompts
+    assert "DP_PLACEHOLDER_1: status=" in dimension_prompt
+    assert "the only decision scored in this episode is DP_PLACEHOLDER_2" in dimension_prompt
+
+
+def test_continuous_run_has_no_history_marker_and_keeps_the_whole_ledger():
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    criterion_prompts, dimension_prompts = _grade_capturing_prompts(state)  # scored_nodes=None
+    (dimension_prompt,) = dimension_prompts
+    assert "the only decision scored in this episode" not in dimension_prompt
+    assert dimension_prompt == build_grader_prompt(
+        [d for d in load_dimensions(DIMENSIONS_DIR) if d.weight == 0],
+        render_transcript(_messages_with_two_end_days()),
+        ledger_summary(state),
+    )
+    # Every decision is scored here, so each criterion prompt legitimately carries both rows.
+    assert criterion_prompts and all("DP_PLACEHOLDER_1" in p for p in criterion_prompts)

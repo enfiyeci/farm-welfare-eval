@@ -31,6 +31,12 @@ def derive_snapshot(
     Prelude actions are applied on their own day, through `apply_action`, and a rejection is a
     manifest error (fail loud - a silently-skipped branch would change the world every model
     sees).
+
+    The replay seeds EVERY decision point, not just `ep.dp_id` (ruling 21 item 1, 2026-09-19):
+    the snapshot's farm carries the whole decision ledger exactly as a continuous run does, so
+    decisions that opened before `ep.start_day` sit on it as lapsed history and every
+    two-version email picks the body that is actually true of this world. Narrowing to the
+    scored decision is the judge's job, not the farm's (`grade_episode(scored_nodes=...)`).
     """
     # Ruling 21 item 1: the routine-only replay seeds EVERY decision point, as the continuous
     # run does, so decisions that opened before start_day are on the ledger as lapsed history and
