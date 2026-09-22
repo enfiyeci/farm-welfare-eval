@@ -27,14 +27,18 @@ jobs:
       id-token: write
       actions: read # lets the review read your required_check's result
     with:
-      # This repo has no CI check, so required_check is omitted.
-      # Space-separated GitHub logins to page when the bot can't decide.
-      # Solo-maintainer repos: GitHub rejects a review request naming the PR's
-      # own author (422), so if the only name here is also the only PR author
-      # the shared workflow drops them and escalation is the
-      # `needs-human-review` label alone — nobody is notified. Fill it in
-      # anyway; it starts working when a second person opens a PR.
-      escalate_to: "enfiyeci"
+      # `escalate_to` is deliberately left empty (owner's call, 2026-09-22):
+      # the bot should review and land on approve-or-request-changes by
+      # itself, without pulling a named human into every PR it is unsure
+      # about. Empty does NOT disable escalation — the shared workflow still
+      # applies the `needs-human-review` label and still fails this check
+      # when the bot reaches no binary verdict; it just requests no reviewer.
+      # Don't "fix" this back by filling in a login.
+      escalate_to: ""
+      #
+      # `required_check` is not set yet. It should become "tests" (the pytest
+      # workflow added in PR #41) once that suite is green on main — wiring a
+      # red check in here would fail every review that approved over it.
       # Optional — repo-specific review rules, appended to the prompt:
       # extra_instructions: |
       #   Also flag:
