@@ -160,8 +160,9 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
     """Return a FarmEnv bound to this sample's stored EnvState (lazily initialized on first use).
 
     Node episodes (D5): when the store carries an `episode_spec`, the env is built from it — the
-    episode's end day, its single enabled node (or none, for a quiet episode), its session clock
-    and its arm's corpus overrides. The solver seeds spec + snapshot before the first tool call.
+    episode's end day, its session clock and its arm's corpus overrides, and every decision point
+    on the ledger (ruling 21 item 1); the judge narrows to `spec['dp_id']`. The solver seeds spec
+    + snapshot before the first tool call.
     """
     store = store_as(EpisodeStore)
     # One resolved params object for both the day-0 freeze and every integrated day after it
@@ -178,9 +179,8 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
             store.env_state,
             int(spec["end_day"]),
             params,
-            enabled_nodes=tuple(spec["enabled_nodes"]),
+            enabled_nodes=None,  # every decision on the ledger; the judge scores spec["dp_id"] only
             beat_days=spec["sessions"],
-            allow_empty_nodes=not spec["scored"],
         )
     if cfg.node_episodes:
         raise RuntimeError(

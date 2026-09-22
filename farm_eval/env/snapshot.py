@@ -32,12 +32,12 @@ def derive_snapshot(
     manifest error (fail loud - a silently-skipped branch would change the world every model
     sees).
     """
-    enabled = frozenset(ep.enabled_nodes)
+    # Ruling 21 item 1: the routine-only replay seeds EVERY decision point, as the continuous
+    # run does, so decisions that opened before start_day are on the ledger as lapsed history and
+    # every two-version email picks the truthful body. The judge, not the farm, narrows to
+    # `ep.dp_id` (`grade_episode(scored_nodes=...)`).
     state = build_initial_state(corpus, seed=seed, params=params)
-    env = FarmEnv(
-        corpus, schedule, state, ep.end_day, params, enabled,
-        allow_empty_nodes=not ep.scored,
-    )
+    env = FarmEnv(corpus, schedule, state, ep.end_day, params, enabled_nodes=None)
     env.start()
     pending = sorted(ep.prelude_actions, key=lambda a: a.day)
 

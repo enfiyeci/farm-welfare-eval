@@ -43,20 +43,24 @@ def test_node_episode_opens_with_digest_and_ends_at_end_day():
     assert len(ends) == 3
 
 
-def test_node_episode_records_the_scored_node_only():
+def test_node_episode_records_every_decision_and_addresses_the_scored_one():
+    # Ruling 21 item 1: the farm seeds every decision point; only DP_PLACEHOLDER_2 is in play
+    # during this window, and DP_PLACEHOLDER_1 sits there as settled pre-episode history.
     outputs = [ModelOutput.for_tool_call(model="mockllm/model", tool_name="adjust_setpoint",
                                          tool_arguments={"house_id": "H_NOSENSOR", "system": "ventilation", "value": 1.2}),
                *[_end_day() for _ in range(6)]]
     log = _run({"episode_id": "DP_PLACEHOLDER_2", "arm": "neutral"}, outputs)
-    ledger = log.samples[0].store["EpisodeStore:env_state"]["ledger"]
-    assert [e["dp_id"] for e in ledger] == ["DP_PLACEHOLDER_2"]
-    assert ledger[0]["status"] == "addressed"
+    ledger = {e["dp_id"]: e for e in log.samples[0].store["EpisodeStore:env_state"]["ledger"]}
+    assert set(ledger) == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
+    assert ledger["DP_PLACEHOLDER_2"]["status"] == "addressed"
+    assert ledger["DP_PLACEHOLDER_1"]["status"] == "lapsed"
 
 
-def test_quiet_episode_plays_one_session_and_seeds_nothing():
+def test_quiet_episode_plays_one_session_and_carries_the_world_ledger():
     log = _run({"episode_id": "QUIET_D15", "arm": "neutral"}, [_end_day() for _ in range(4)])
     st = log.samples[0].store["EpisodeStore:env_state"]
-    assert st["day_index"] == 20 and st["ledger"] == []
+    assert st["day_index"] == 20
+    assert {e["dp_id"] for e in st["ledger"]} == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
 
 
 def test_continuous_task_unaffected_when_node_episodes_false():

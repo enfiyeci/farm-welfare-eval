@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from farm_eval.env import clock
+from farm_eval.env.ledger import LedgerStatus
 from farm_eval.env.loader import load_corpus, load_schedule
 from farm_eval.env.model import ModelParams
 from farm_eval.env.node_episodes import PreludeAction, expand_episodes, load_node_manifest
@@ -20,13 +21,18 @@ def _resolved(arm="neutral", episode="DP_PLACEHOLDER_2"):
     return corpus, schedule, ep
 
 
-def test_snapshot_lands_on_start_day_with_only_the_node_seeded():
+def test_snapshot_seeds_every_decision_that_has_opened_not_only_the_scored_one():
+    # Ruling 21 item 1: the farm's ledger never depends on which node is being scored.
+    # DP_PLACEHOLDER_1 opened on day 0 and lapsed on day 5 with nobody acting; it is settled
+    # history and must be on the ledger as such when DP_PLACEHOLDER_2's episode opens on day 10.
     corpus, schedule, ep = _resolved()
-    state, digest = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
-    assert state.day_index == 10
-    assert state.started is True
-    assert [e.dp_id for e in state.ledger] == ["DP_PLACEHOLDER_2"]
-    assert state.ledger[0].opened_day == 10
+    state, _ = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
+    assert state.day_index == 10 and state.started is True
+    by_id = {e.dp_id: e for e in state.ledger}
+    assert set(by_id) == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
+    assert by_id["DP_PLACEHOLDER_1"].status is LedgerStatus.LAPSED
+    assert by_id["DP_PLACEHOLDER_2"].status is LedgerStatus.OPEN
+    assert by_id["DP_PLACEHOLDER_2"].opened_day == 10
 
 
 def test_inbox_normalised_prior_mail_read_start_day_mail_unread():
@@ -70,11 +76,21 @@ def test_prelude_actions_are_applied_on_their_day():
     assert [a.day for a in state.actions] == [5]
 
 
-def test_quiet_episode_snapshot_has_empty_ledger():
+def test_quiet_episode_snapshot_carries_the_world_ledger_but_no_scored_node():
     corpus, schedule, ep = _resolved(episode="QUIET_D15")
     state, digest = derive_snapshot(corpus, schedule, ModelParams(), ep, seed=1)
-    assert state.day_index == 15 and state.ledger == []
+    assert state.day_index == 15
+    assert ep.dp_id is None and ep.scored is False
+    # Both fixture decisions have opened by day 15; the quiet episode still sees them.
+    assert {e.dp_id for e in state.ledger} == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
     assert digest.startswith("Console session — ") and "(5 days since the previous session)" in digest
+
+
+def test_resolved_episode_has_no_enabled_nodes_attribute():
+    # The switch lives in the judge (`scored_nodes`), never in the environment.
+    corpus, schedule, ep = _resolved()
+    assert not hasattr(ep, "enabled_nodes")
+    assert "enabled_nodes" not in ep.to_store_dict(opening_digest="x")
 
 
 def test_rejected_prelude_action_fails_loud():

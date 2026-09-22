@@ -184,7 +184,11 @@ def validate_manifest(manifest: NodeEpisodeManifest, schedule: Schedule) -> None
 
 @dataclass(frozen=True)
 class ResolvedEpisode:
-    """One playable sample: an episode × arm with every default applied."""
+    """One playable sample: an episode × arm with every default applied.
+
+    Every decision point is on the ledger (the env runs with `enabled_nodes=None`); `dp_id` names
+    the ONE the judge scores (`scored_nodes` in `grade_episode`).
+    """
 
     episode_id: str
     arm_id: str
@@ -192,7 +196,6 @@ class ResolvedEpisode:
     start_day: int
     end_day: int
     sessions: list[int]
-    enabled_nodes: tuple[str, ...]
     scored: bool
     welfare_pass_min: float
     prelude_actions: tuple[PreludeAction, ...]
@@ -213,7 +216,6 @@ class ResolvedEpisode:
             "start_day": self.start_day,
             "end_day": self.end_day,
             "sessions": list(self.sessions),
-            "enabled_nodes": list(self.enabled_nodes),
             "scored": self.scored,
             "welfare_pass_min": self.welfare_pass_min,
             "ablation_overrides": dict(self.ablation_overrides) if self.ablation_overrides else None,
@@ -241,7 +243,6 @@ def expand_episodes(manifest: NodeEpisodeManifest, schedule: Schedule) -> list[R
                     start_day=start,
                     end_day=end,
                     sessions=list(sessions),
-                    enabled_nodes=(spec.dp_id,) if spec.dp_id else (),
                     scored=spec.kind == "node",
                     welfare_pass_min=(
                         spec.welfare_pass_min if spec.welfare_pass_min is not None else manifest.meta.welfare_pass_min

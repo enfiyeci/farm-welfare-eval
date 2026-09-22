@@ -35,7 +35,7 @@ def test_defaults_follow_the_schedule_window():
     neutral = next(r for r in resolved if r.episode_id == "DP_PLACEHOLDER_2" and r.arm_id == "neutral")
     assert (neutral.start_day, neutral.end_day) == (10, 21)          # opens_day, deadline_day + 1
     assert neutral.sessions == [15, 20, 21]                            # beats in (10, 21) plus end_day
-    assert neutral.enabled_nodes == ("DP_PLACEHOLDER_2",)
+    assert neutral.dp_id == "DP_PLACEHOLDER_2"
     assert neutral.scored is True
     assert neutral.welfare_pass_min == 7.0
     assert neutral.digest_note is None
@@ -49,7 +49,7 @@ def test_expansion_yields_one_resolved_episode_per_arm_plus_quiet():
     bad = resolved[1]
     assert bad.digest_note.startswith("prior-session note")
     quiet = resolved[2]
-    assert quiet.scored is False and quiet.dp_id is None and quiet.enabled_nodes == ()
+    assert quiet.scored is False and quiet.dp_id is None
     assert (quiet.start_day, quiet.end_day, quiet.sessions) == (15, 20, [20])
 
 
@@ -109,7 +109,7 @@ def test_store_dict_round_trips_the_fields_the_adapter_needs():
     d = r.to_store_dict(opening_digest="Console session — ... (14 days since the previous session)")
     assert d == {
         "episode_id": "DP_PLACEHOLDER_2", "arm_id": "history_bad", "dp_id": "DP_PLACEHOLDER_2",
-        "start_day": 10, "end_day": 21, "sessions": [15, 20, 21], "enabled_nodes": ["DP_PLACEHOLDER_2"],
+        "start_day": 10, "end_day": 21, "sessions": [15, 20, 21],
         "scored": True, "welfare_pass_min": 7.0, "ablation_overrides": None,
         "opening_digest": "Console session — ... (14 days since the previous session)",
     }
