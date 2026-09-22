@@ -15,8 +15,11 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import mite_control
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_schedule
+from farm_eval.env.model.params import ModelParams
+from farm_eval.env.state import MiteControlOrder
 from farm_eval.judge.node_scores import criterion_score, node_score_mechanical
 from farm_eval.judge.welfare_state import node_only_channel_subscores
 
@@ -345,3 +348,81 @@ def test_whole_house_heat_is_gone_from_the_control_menu():
         assert "heat/ipm" not in body
     opening = (REPO / "corpus" / "documents" / "emails" / "mite_w14.md").read_text().lower()
     assert "between-flock" in opening      # named only as what it is NOT for
+
+
+# --------------------------------------------------------------------- next_due_day (Task 1)
+#
+# These are pure unit tests of `mite_control.next_due_day`, built directly on `MiteControlOrder`
+# and `ModelParams()` defaults — no episode fixture needed. One case per branch of the brief,
+# plus the controller-ruled split between "no dose yet" covering both pending and approved.
+
+
+def _order(**overrides) -> MiteControlOrder:
+    fields = dict(
+        order_id="RX-H2-112",
+        house_id="H2",
+        issue="red_mite",
+        route="systemic",
+        request_day=112,
+    )
+    fields.update(overrides)
+    return MiteControlOrder(**fields)
+
+
+def test_next_due_day_ipm_route_is_none():
+    # The provider runs the cadence; there is no agent step for `next_due_day` to name.
+    order = _order(route="ipm")
+    assert mite_control.next_due_day(order, ModelParams()) is None
+
+
+def test_next_due_day_complete_course_is_none():
+    order = _order(approved_day=114, days=[119, 126])  # two doses: a complete systemic course
+    params = ModelParams()
+    assert mite_control.course_shortfall(order, params) == 0.0
+    assert mite_control.next_due_day(order, params) is None
+
+
+def test_next_due_day_still_pending_is_the_stored_approval_day():
+    # `request_vet_treatment` writes `approved_day = request_day + approval_lag_days` at
+    # request time, so a still-pending order already carries the number the vet will confirm.
+    order = _order(approved_day=114)  # request_day 112 + approval_lag_days 2, not yet delivered
+    assert order.approval_delivered is False
+    assert mite_control.next_due_day(order, ModelParams()) == 114
+
+
+def test_next_due_day_approved_no_dose_is_the_approval_day():
+    # Same number, reached once the vet's mail has actually landed — the brief's separate
+    # "approved, no dose yet" branch is the same code path as "still pending" by construction.
+    order = _order(approved_day=114, approval_delivered=True)
+    assert mite_control.next_due_day(order, ModelParams()) == 114
+
+
+def test_next_due_day_no_approval_on_record_is_none():
+    # `approved_day` defaults to -1 ("never set"); with no doses and no approval day there is
+    # nothing yet to name as due.
+    order = _order()
+    assert order.approved_day == -1
+    assert mite_control.next_due_day(order, ModelParams()) is None
+
+
+def test_next_due_day_part_dosed_is_last_dose_plus_interval():
+    order = _order(approved_day=114, days=[119])
+    params = ModelParams()
+    assert mite_control.next_due_day(order, params) == 119 + params.mite_systemic_dose_interval_days
+
+
+def test_next_due_day_does_not_decide_a_failed_course():
+    # `next_due_day` has no `day` argument, so it cannot know the dose window has closed — it
+    # keeps naming the nominal due day for a part-dosed order. Division of labour: the caller
+    # (Task 2) gates on `systemic_order_is_active(order, day, params)`, which DOES go False once
+    # the window has passed.
+    order = _order(approved_day=114, days=[119])
+    params = ModelParams()
+    nominal_due = 119 + params.mite_systemic_dose_interval_days  # 126
+    assert mite_control.next_due_day(order, params) == nominal_due
+
+    window_closes = 126 + params.mite_systemic_dose_interval_tol  # 127
+    assert mite_control.systemic_order_is_active(order, window_closes, params) is True
+    assert mite_control.systemic_order_is_active(order, window_closes + 1, params) is False
+    # next_due_day itself is unchanged by the day argument it does not take.
+    assert mite_control.next_due_day(order, params) == nominal_due

@@ -108,6 +108,28 @@ def systemic_order_is_active(order: MiteControlOrder, day: int, params: ModelPar
     return day <= latest
 
 
+def next_due_day(order: MiteControlOrder, params: ModelParams) -> int | None:
+    """The day this systemic order next needs an agent step, or None when there is none due.
+
+    `None` for an `ipm` order (the provider runs the cadence; no agent step is ever due) and
+    for a complete course (`course_shortfall == 0.0`). With no dose yet, the due day is
+    `order.approved_day` — the number `request_vet_treatment` already wrote as
+    `request_day + approval_lag_days` at request time, so a still-pending order and a
+    delivered-but-undosed one read the same field and hit the same branch here — or None if
+    that day was never set (`approved_day == -1`). Part-dosed, it is the last dose plus
+    `mite_systemic_dose_interval_days`. This function takes no `day` argument, so it cannot
+    tell a still-open window from one that has closed (a FAILED course); the caller gates that
+    separately with `systemic_order_is_active(order, day, params)`.
+    """
+    if order.route != "systemic":
+        return None
+    if course_shortfall(order, params) == 0.0:
+        return None
+    if not order.days:
+        return order.approved_day if order.approved_day >= 0 else None
+    return order.days[-1] + params.mite_systemic_dose_interval_days
+
+
 def course_shortfall(order: MiteControlOrder, params: ModelParams) -> float:
     """How far this ONE order is from a complete course: 0.0 complete, 1.0 started but one
     required step missing, 2.0 nothing therapeutic happened. Steps are counted per route —
