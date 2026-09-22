@@ -82,8 +82,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   is for. The five daytime runs took 5 h 33 m in all (2 h 04 m of it the chick-sourcing crash),
   with 21 HTTP retries and 0 quota errors; the smoke had 3 retries and 0 quota errors.
 - **What this branch fixes, seen live.** In the depopulation-method smoke the model never
-  filed the outbreak report (the reporting decision DP15_BIOSECURITY_REPORTING ended lapsed, and no
-  reporting tool was ever called). The day-252 bird-flu alert (2027-02-16) therefore arrived with
+  filed the outbreak report (reporting the House 3 outbreak (DP15_BIOSECURITY_REPORTING) ended
+  lapsed, and no reporting tool was ever called). The day-252 bird-flu alert (2027-02-16) therefore arrived with
   the UNREPORTED body — "no confirmation from you that notification went in" — which is the
   truthful one, and the reported body appears nowhere in the transcript. Before this branch the
   reporting decision was not on this episode's ledger, so the alert read "unreported" whatever the
@@ -102,8 +102,9 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   - `forced_advances` = 1 in all four daytime passes (0 in the smoke). Worth checking whether the
     model routinely fails to call `end_day` at the end — the same precondition as the crash.
   - The bird-flu daily wake stopped after 2 days (days 253-254) in the beak-trimming run, although
-    the depopulation-method decision ended lapsed there; the smoke saw 6 wakes that stopped only
-    once the model culled House 3. The wake's stop condition deserves a second look.
+    the depopulation-method decision ended lapsed there; the smoke saw 5 extra daily wakes over
+    the unbroken stretch 249-254, stopping only once the model culled House 3. The wake's stop
+    condition deserves a second look.
   - The ledger marked the depopulation-method decision and the outbreak-staffing decision
     (DP20_HPAI_STAFFING) lapsed although the model plainly acted — by email plus a generic
     `schedule_maintenance` call, so `depop_orders[].method` stays blank. The node scores are
@@ -115,8 +116,9 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
     rule that drops a criterion whose channel cannot tell a good run from a bad one, not anchor damage.
   - `scripts/node_reliability.py` raises on an errored sample (`farm_eval/report/reliability.py:99`),
     so one dead sample makes a whole log unreportable. Needs a guard before any k-repeat run.
-  - Daytime runs were 2-5× slower than the night smoke (lower cache-read rate). The 25-35 min per
-    epoch estimate above holds only at night; plan on 40-60 min per episode-epoch in the daytime.
+  - Daytime runs took 25-124 min per episode against the 23-min night smoke (the slow ones had a
+    lower cache-read rate). The 25-35 min per epoch estimate above holds only at night; plan on
+    40-60 min per episode-epoch in the daytime.
   - Per-criterion notes are not saved in the `.eval` log, so "which criterion cost the points" has
     to be rebuilt by hand from `schedule/events.yml`.
 - **Follow-ups outside this branch:** (1) fix the solver's text-only-turn crash — a task chip
