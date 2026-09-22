@@ -4,6 +4,23 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · k=1 plumbing run LAUNCHED on 17 episodes (branch feat/node-episodes, PR #39)
+
+- **What / decided:** Owner asked to skip the nodes known to need work and run the rest overnight.
+  Running (Flash judging Flash, `dimension_mode=validity_only`, 2 connections, throttled trial
+  project): DP03, DP24, DP22, DP08, DP04, DP17, DP01, DP15, DP12, DPF, DP18, DP06, DP09, DP10,
+  QUIET_A/B/C. **Skipped** (waiting on known fixes, so a run would only re-find them): DP16 footpad
+  (free points), DP05 red mite (course cannot finish; plan approved), and the seven scenarios the
+  disabled-decision mail defect touches (DP07, DPT, DP25, DPD, DP23, DP14, DPE). Log dir
+  `logs/node-k1-2026-09-22/` (launcher `launch.sh`, `console.log`, `pid`). Plumbing check only.
+- **Two launch bugs fixed on the way:** (1) the venv's editable `farm_eval` install points at the
+  MAIN checkout, so `inspect eval` from a worktree imports main's code — set `PYTHONPATH` to the
+  worktree (the launcher does); (2) `-T episode_ids=A,B` reaches the task as a list and `_split`
+  crashed — fixed in `farm_eval/node_task.py` with a regression test (`43dadd6`).
+- **Next action:** in the morning, `scripts/node_reliability.py logs/node-k1-2026-09-22/*.eval`,
+  read the per-sample errors, append the table + wall time + tokens here and to the PR body.
+- **Refs:** `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md` item F.
+
 ## 2026-09-22 · claude · ruling 21 recorded; red-mite worktree re-based on feat/node-episodes (branch feat/node-episodes, PR #39)
 
 - **What / decided:** The 2026-09-19 owner rulings (scenario independence, no free-points node with
