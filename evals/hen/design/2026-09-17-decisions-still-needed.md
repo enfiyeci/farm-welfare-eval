@@ -65,9 +65,8 @@ pass touches those files.
 
 ## 2. Still needs you
 
-1. **Approve the email fix (Option 1 in the explainer)?** It changes what every model reads in
-   seven scenarios and will move the reference anchors slightly for those episodes. Yes / no /
-   prefer another option.
+1. ~~**Approve the email fix (Option 1 in the explainer)?**~~ **Answered 2026-09-22: yes,
+   Option 1.** Build plan: [handoff-2026-09-22-all-decisions-on-ledger.md](../../../docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md).
 
 2. **Approve the red-mite plan to build?** It adds up to two world-driven sessions to that one
    scenario and rewrites how the reference run takes its doses. Yes / no.

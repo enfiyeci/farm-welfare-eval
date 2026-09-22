@@ -914,6 +914,12 @@ Tuesday, 2026-09-19.)
    and reference run alike. Built by a separate agent, branched off `feat/node-episodes` (it touches
    node-episode code), not off `main`.
 
-Still open for the owner after this ruling: the disabled-decision mail fix (Option 1 recommended),
-which pilot to run and when, and whether `feat/welfare-currency` is dead. Full work list:
+**Addendum 2026-09-22 — the disabled-decision mail fix is RULED: Option 1.** Every decision point
+sits on the ledger in every episode, exactly as in the continuous run; the judge scores the
+episode's one decision (`grade_episode(scored_nodes=...)`). Build plan:
+`docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md`, as its own PR stacked on
+`feat/node-episodes`, then the seven affected scenarios run overnight.
+
+Still open for the owner after this ruling: which further pilot to run and when, and whether
+`feat/welfare-currency` is dead. Full work list:
 `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md`.

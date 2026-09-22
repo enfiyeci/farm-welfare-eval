@@ -4,6 +4,18 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · owner approved Option 1 (every decision on the ledger); build handoff written (branch feat/node-episodes, PR #39)
+
+- **Decided:** the disabled-decision mail fix is Option 1 — every decision point on the ledger in
+  every episode, the judge scores one (ruling 21 addendum). Build plan for a fresh agent:
+  `docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md` — 7 TDD tasks, own PR stacked on
+  `feat/node-episodes` (NOT folded into #39: it moves anchors), then a Flash smoke of the
+  depopulation-method scenario and an overnight run of the seven affected scenarios (DP07, DPT,
+  DP25, DPD, DP23, DP14, DPE) at 4 connections.
+- **Sequencing:** this lane regenerates `node_reference.json` before the red-mite lane does
+  (LANES rule 4); the red-mite agent rebases onto it before its Task 5.
+- **Refs:** ruling 21 addendum; `2026-09-17-decisions-still-needed.md` item 1 answered.
+
 ## 2026-09-22 · claude · k=1 plumbing run LAUNCHED on 17 episodes (branch feat/node-episodes, PR #39)
 
 - **What / decided:** Owner asked to skip the nodes known to need work and run the rest overnight.

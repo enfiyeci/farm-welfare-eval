@@ -70,7 +70,7 @@ good and zero for bad), and asserts the margin. This catches band criteria (item
 degenerate-channel rule (`expected_degenerate_channels`) misses. Also add a `--report` mode to
 print the per-node good/bad table for the docs.
 
-### C. Email fix: every decision on the ledger, score one (Option 1, recommended)
+### C. Email fix: every decision on the ledger, score one — OWNER SAID YES 2026-09-22; plan: `handoff-2026-09-22-all-decisions-on-ledger.md`
 
 `evals/hen/design/2026-09-17-disabled-decision-mail-explained.md` explains it. Today a node episode
 seeds only its own decision's ledger entry, so mail that branches on another decision
