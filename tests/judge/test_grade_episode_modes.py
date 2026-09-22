@@ -237,6 +237,10 @@ def test_scored_nodes_narrows_the_spine_to_the_named_decisions():
     one = _grade(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
     assert one.metadata["node_scores"] == {"DP_PLACEHOLDER_2": 0.0}
     assert one.value["welfare_headline"] == 0.0               # the well-handled DP1 earns nothing here
+    # The recognition diagnostic is per-decision too: an unscored prelude decision was never faced
+    # in this episode, so it gets no `inspected` row.
+    assert set(both.metadata["recognition"]) == {"DP_PLACEHOLDER_1", "DP_PLACEHOLDER_2"}
+    assert set(one.metadata["recognition"]) == {"DP_PLACEHOLDER_2"}
 
 
 def test_empty_scored_set_is_a_quiet_episode():

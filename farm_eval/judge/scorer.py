@@ -1193,6 +1193,7 @@ def assemble_score_metadata(
     dimension_notes: list[dict] | None = None,
     criterion_notes: list[dict] | None = None,
     welfare_references: dict | None = None,
+    spine: list[LedgerEntry] | None = None,
 ) -> dict:
     """Build the Score metadata dict: the node-spine breakouts, the Layer-1 welfare_state, and the
     audit highlights.
@@ -1233,7 +1234,10 @@ def assemble_score_metadata(
         # None when nothing was ever on offer (no occupied house / no day advanced).
         "opportunity_realized_frac": opportunity_realized_frac(env_state.welfare),
         # C5 recognition axis (DIAGNOSTIC): per-node inspected flag, reported never headline.
-        "recognition": recognition_slice(env_state.ledger),
+        # Reads the SPINE (`None` = the whole ledger): this is a per-decision profile of the agent's
+        # own behaviour on the decisions being scored, like node_scores — a node episode's prelude
+        # decision was never faced by the model, so an `inspected: False` row for it would lie.
+        "recognition": recognition_slice(env_state.ledger if spine is None else spine),
         "forced_advances": forced_advances,
         "discarded_evidence": {
             "dimension_samples": len(dimension_sample_discards),
@@ -1617,6 +1621,7 @@ async def grade_episode(
         dimension_notes=dimension_notes,
         criterion_notes=criterion_notes,
         welfare_references=welfare_references,
+        spine=spine,
     )
     span_counts = axis_span_counts(sample_scores, active_dims) if active_dims else {}
     if span_counts:
