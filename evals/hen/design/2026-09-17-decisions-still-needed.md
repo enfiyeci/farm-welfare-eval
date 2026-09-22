@@ -66,7 +66,10 @@ pass touches those files.
 ## 2. Still needs you
 
 1. ~~**Approve the email fix (Option 1 in the explainer)?**~~ **Answered 2026-09-22: yes,
-   Option 1.** Build plan: [handoff-2026-09-22-all-decisions-on-ledger.md](../../../docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md).
+   Option 1 — and BUILT the same day** on `feat/node-episodes-all-decisions`. Every decision point
+   sits on the ledger in every episode; the judge scores the episode's one decision. The reference
+   anchors in `farm_eval/judge/node_reference.json` came out unchanged. Build plan and what it
+   touched: [handoff-2026-09-22-all-decisions-on-ledger.md](../../../docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md).
 
 2. **Approve the red-mite plan to build?** It adds up to two world-driven sessions to that one
    scenario and rewrites how the reference run takes its doses. Yes / no.

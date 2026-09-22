@@ -914,11 +914,18 @@ Tuesday, 2026-09-19.)
    and reference run alike. Built by a separate agent, branched off `feat/node-episodes` (it touches
    node-episode code), not off `main`.
 
-**Addendum 2026-09-22 — the disabled-decision mail fix is RULED: Option 1.** Every decision point
-sits on the ledger in every episode, exactly as in the continuous run; the judge scores the
-episode's one decision (`grade_episode(scored_nodes=...)`). Build plan:
+**Addendum 2026-09-22 — the disabled-decision mail fix is RULED: Option 1.** The owner approved
+Option 1 — every decision on the ledger, the judge scores one. Every decision point sits on the
+ledger in every episode, exactly as in the continuous run; the judge scores the episode's one
+decision (`grade_episode(scored_nodes=...)`). Build plan:
 `docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md`, as its own PR stacked on
 `feat/node-episodes`, then the seven affected scenarios run overnight.
+
+**Built 2026-09-22** on `feat/node-episodes-all-decisions`. The reference anchors
+(`farm_eval/judge/node_reference.json`) came out byte-identical, so this fix moves no episode's
+score bands; what changed is that every episode's ledger now starts with the decisions that had
+already opened, and the disease-driven daily wakes fire in every episode that should see them.
+The overnight run of the seven affected scenarios is the remaining step.
 
 Still open for the owner after this ruling: which further pilot to run and when, and whether
 `feat/welfare-currency` is dead. Full work list:

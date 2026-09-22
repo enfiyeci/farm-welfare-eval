@@ -4,6 +4,63 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-22 · claude · BUILT: every decision on the ledger, the judge scores one (branch feat/node-episodes-all-decisions, PR #PENDING, based on feat/node-episodes)
+
+- **What:** Option 1 of the disabled-decision mail explainer is built (ruling 21 addendum). A node
+  episode's farm now carries every decision point on its ledger exactly as the continuous run does
+  (`FarmEnv(..., enabled_nodes=None)` in `farm_eval/env/snapshot.py`, `farm_eval/adapter/context.py`
+  and the regen script); `ResolvedEpisode` keeps only `dp_id`, and `grade_episode(scored_nodes=...)`
+  is the one thing that narrows the judge — node spine, per-criterion loop, stakeholder/category
+  maps, ledger tripwires and the `recognition` diagnostic. The grader's ledger summary and the
+  concurrent-window contention stats deliberately still read the FULL ledger. The reference arms
+  replay the same all-decisions world.
+- **The anchors did not move.** `farm_eval/judge/node_reference.json` regenerated **byte-identical**.
+  Four reasons, and they are worth remembering before the next regen: (a) the physics integrator is
+  path-independent — stepping the same calendar days in one chunk or in many gives identical state,
+  so extra daily-wake sessions cannot move physics; (b) the reference arms' policy actions are keyed
+  to absolute calendar days, not to session counts; (c) the extra ledger entries and window-open
+  snapshots are bookkeeping that touches no welfare or physics channel; (d) event firing is gated by
+  day and ledger status, never by which nodes were enabled. **`enabled_nodes` is not inert in
+  general** — it gated ledger seeding and the disease wakes; only its effect on the anchors is neutral.
+- **Golden:** `tests/fixtures/golden/node_snapshots.json` changed in the `ledger` lists only, for all
+  26 episodes; each list is now exactly the decisions that had OPENED by that episode's start day
+  (checked against the schedule). No bird counts, mail counts, digests or authored session lists moved.
+- **Runtime sessions now convened with nobody acting** (authored/runtime, probe column `sessions a/r`
+  in `evals/hen/runs/2026-09-22-node-snapshot-probe.md`). This table exists nowhere else:
+
+  | scenario | a/r | new or pre-existing |
+  |---|---|---|
+  | DP25_PLACEMENT_DENSITY (pullets placed in House 6) | 6/14 | NEW with this change |
+  | DPD_BEAK_TRIMMING (House 6 pullets) | 6/13 | NEW with this change |
+  | DP23_CHICK_SOURCING (House 6 pullets) | 5/16 | NEW with this change |
+  | DP14_HPAI_DEPOP_METHOD (House 3 depopulation method) | 6/16 | NEW with this change |
+  | DP15_BIOSECURITY_REPORTING (report the House 3 outbreak) | 4/14 | pre-existing |
+  | DPE_KEEL_PERCH (keel-bone protection) | 5/15 | pre-existing |
+  | DPF_WATER_DROP | 5/14 | pre-existing |
+  | DP18_WATER_DEPRIVATION | 5/13 | pre-existing |
+  | DP06_MORTALITY_LATENCY | 4/29 | pre-existing |
+  | DP07_FEATHER_PECKING, DPT_COLI_TREATMENT | 5/5 | unchanged |
+
+  "Pre-existing" means the episode already owned the node that declares the wake, so its runtime
+  count was already above its authored count before this change. **Worth an owner look (out of
+  scope here):** the mortality-latency scenario (DP06_MORTALITY_LATENCY) convenes **29** days
+  against **4** authored beats. That gap predates this work and nothing in the repo comments on it.
+- **Tests:** a fixture two-version email proves the truthful body is chosen for an UNSCORED decision;
+  two real-corpus tests pin the keel-perch episode's opening inbox (the reporting decision is
+  ADDRESSED and the day-252 alert carries the "reported" body) and the depopulation-method episode's
+  daily bird-flu wake. Suite 3029 passed, 3 skipped, 0 failed; `scripts/lint_corpus.py` and
+  `scripts/check_corpus_consistency.py` 0 findings.
+- **Next action:** Task 7 of the handoff — a Flash smoke of the depopulation-method scenario, then
+  the overnight run of the seven affected scenarios (DP07, DPT, DP25, DPD, DP23, DP14, DPE); results
+  get appended to the PR body and to this log.
+- **Next action (red-mite lane, running in parallel):** that lane also regenerates
+  `node_reference.json` and `node_snapshots.json`. Whichever lane lands second rebases onto the other
+  and **re-runs** `$PY scripts/regen_node_episodes.py --snapshots --reference` plus the probe — never
+  hand-merge the JSON. This lane's regen left `node_reference.json` unchanged, so their rebase should
+  see ledger-list changes in the golden and nothing else.
+- **Refs:** ruling 21 addendum; `docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md`;
+  `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md` item C (done).
+
 ## 2026-09-22 · claude · solver crash on text-only model turns FIXED (branch claude/solver-text-only-nudge, off feat/node-episodes)
 
 - **Bug:** gemini-3.8-flash on Vertex sometimes closes a session with a text-only summary and no
