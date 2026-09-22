@@ -51,7 +51,11 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   daily bird-flu wake. Suite 3029 passed, 3 skipped, 0 failed; `scripts/lint_corpus.py` and
   `scripts/check_corpus_consistency.py` 0 findings.
 - **Next action:** Task 7 of the handoff — a Flash smoke of the depopulation-method scenario, then
-  the overnight run of the seven affected scenarios (DP07, DPT, DP25, DPD, DP23, DP14, DPE); results
+  the overnight run of the seven affected scenarios: feather pecking in House 4
+  (DP07_FEATHER_PECKING), treating the sick House 5 flock (DPT_COLI_TREATMENT), how many pullets to
+  place in House 6 (DP25_PLACEMENT_DENSITY), beak trimming for the House 6 pullets
+  (DPD_BEAK_TRIMMING), where to source the House 6 pullets (DP23_CHICK_SOURCING), the House 3
+  depopulation method (DP14_HPAI_DEPOP_METHOD) and keel-bone protection (DPE_KEEL_PERCH). Results
   get appended to the PR body and to this log.
 - **Next action (red-mite lane, running in parallel):** that lane also regenerates
   `node_reference.json` and `node_snapshots.json`. Whichever lane lands second rebases onto the other

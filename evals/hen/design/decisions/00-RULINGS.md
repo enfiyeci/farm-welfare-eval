@@ -915,8 +915,8 @@ Tuesday, 2026-09-19.)
    node-episode code), not off `main`.
 
 **Addendum 2026-09-22 — the disabled-decision mail fix is RULED: Option 1.** The owner approved
-Option 1 — every decision on the ledger, the judge scores one. Every decision point sits on the
-ledger in every episode, exactly as in the continuous run; the judge scores the episode's one
+Option 1 — every decision on the ledger, the judge scores one: every decision point sits on the
+ledger in every episode, exactly as in the continuous run, and the judge scores the episode's one
 decision (`grade_episode(scored_nodes=...)`). Build plan:
 `docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md`, as its own PR stacked on
 `feat/node-episodes`, then the seven affected scenarios run overnight.
