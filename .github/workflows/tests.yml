@@ -18,11 +18,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # A pull_request run checks out the PR merged onto its base; HEAD^1
+          # is that base, so depth 2 is enough to diff the PR's own changes.
+          fetch-depth: 2
+
+      # Docs-only PRs skip the suite. The skip lives INSIDE the job, not in an
+      # `on: paths-ignore` filter: a workflow filtered out entirely reports no
+      # check at all, so once "tests" is required, a docs PR would wait on it
+      # forever. Skipped steps still end in a green "tests" check.
+      #
+      # "Docs" is deliberately narrow: markdown under docs/, evals/, .claude/,
+      # or at the repo root. Markdown elsewhere is load-bearing (the judge
+      # rubric in judge/dimensions/*.md, corpus/, prompts/, schedule/), and
+      # non-markdown under docs/ is too (tests read the .eval logs in
+      # docs/probes/). --no-renames lists both sides of a move, so a file moved
+      # OUT of a load-bearing directory still counts as a code change.
+      # Pushes to main always run the full suite.
+      - name: Detect a docs-only change
+        id: scope
+        if: github.event_name == 'pull_request'
+        run: |
+          changed=$(git diff --name-only --no-renames HEAD^1 HEAD)
+          echo "Changed files:"; echo "$changed" | sed 's/^/  /'
+          code=$(echo "$changed" | grep -vE '^((docs|evals|\.claude)/.*|[^/]+)\.md$' | grep -v '^$' || true)
+          if [ -z "$code" ]; then
+            echo "docs_only=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Docs-only change: skipping the test suite."
+          else
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.scope.outputs.docs_only != 'true'
         with:
           python-version: "3.14"
       - name: Install the package and its test extra
+        if: steps.scope.outputs.docs_only != 'true'
         run: pip install -e ".[dev]"
       - name: Run pytest
+        if: steps.scope.outputs.docs_only != 'true'
         # -q and testpaths come from [tool.pytest.ini_options] in pyproject.
-        run: pytest
+        # -n auto runs one pytest-xdist worker per runner core (billing is per
+        # minute, so idle cores are paid for anyway). --dist loadfile keeps each
+        # test file on one worker, so the module-scoped fixtures that run whole
+        # episodes are built once, as in a serial run, not once per worker.
+        # Parallelism is CI-only: local runs stay serial on a 16 GB machine.
+        run: |
+          echo "Runner cores: $(nproc)"
+          pytest -n auto --dist loadfile

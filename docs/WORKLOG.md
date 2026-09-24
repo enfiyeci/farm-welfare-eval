@@ -4,6 +4,16 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-24 · claude · CI tests run in parallel; docs-only PRs skip the suite (branch ci/parallel-tests)
+
+- **What:** `.github/workflows/tests.yml` now runs `pytest -n auto --dist loadfile` (pytest-xdist,
+  added to the `dev` extra). Measured locally with 2 workers (the private-repo runner's core
+  count): 6:08 vs 10:31 serial, 2937 passed. Local `./venv` runs stay serial.
+- **Docs-only skip:** a PR whose changed files are ALL markdown under `docs/`, `evals/`, `.claude/`
+  or the repo root skips the suite inside the job, so the `tests` check still reports green.
+  Markdown elsewhere (judge/dimensions, corpus, prompts, schedule) and anything non-markdown
+  (e.g. `docs/probes/*.eval`) still runs it. Pushes to `main` always run everything.
+
 ## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
 
 - **Why now:** the new CI `tests` job installs the latest inspect-ai (0.3.266; `./venv` is
