@@ -1,0 +1,28 @@
+name: tests
+# The repo's pytest suite, run on every pull request. This is the check the
+# Claude review bot reads: without it the reviewer is told "this repository
+# has no designated check" and reviews the diff with no idea whether the
+# suite passes. Wire it into the reviewer by setting `required_check: "tests"`
+# in claude-pr-review.caller.yml — the two belong together.
+#
+# Python 3.14 matches the interpreter the suite is developed against; the
+# package itself declares `requires-python = ">=3.11"`, so widen this to a
+# matrix if the older floor ever needs to be proven.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  tests: # branch protection and required_check both see this check as "tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install the package and its test extra
+        run: pip install -e ".[dev]"
+      - name: Run pytest
+        # -q and testpaths come from [tool.pytest.ini_options] in pyproject.
+        run: pytest

@@ -34,6 +34,7 @@ with --control-briefing / --treatment-briefing, or pass --no-verify-briefing to 
 from __future__ import annotations
 
 import argparse
+import math
 import pathlib
 import statistics
 import sys
@@ -78,9 +79,11 @@ def _score_value(sample, key: str) -> float | None:
     if score is None or not isinstance(score.value, dict) or key not in score.value:
         return None
     try:
-        return float(score.value[key])
+        value = float(score.value[key])
     except (TypeError, ValueError):
         return None
+    # A partial run's NaN headline persists as NaN from inspect-ai 0.3.266 (null before): absent.
+    return value if math.isfinite(value) else None
 
 
 def _score_meta(sample, key: str):

@@ -228,6 +228,14 @@ def extract(path: str | Path) -> dict[str, Any]:
     if score is None:
         raise ValueError("eval sample has no welfare_judge score")
     scores = dict(score.value) if isinstance(score.value, dict) else {"welfare_headline": score.value}
+    # A PARTIAL run's `welfare_headline` is NaN ("no headline", `judge/headline.py`). inspect-ai
+    # <= 0.3.241 persisted NaN as JSON null; 0.3.266 persists the NaN itself, which the strict
+    # `allow_nan=False` dump below rejects. Map any non-finite score back to None -- the "absent"
+    # every report reader handles -- so the model is identical on either version.
+    scores = {
+        key: None if isinstance(value, float) and not math.isfinite(value) else value
+        for key, value in scores.items()
+    }
     metadata = dict(score.metadata or {})
     messages = list(sample.messages or [])
     reads = list(state.get("reads") or [])
