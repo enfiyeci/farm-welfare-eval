@@ -137,13 +137,19 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   lands, run the two scenarios still without a result — where to source the House 6 pullets
   (DP23_CHICK_SOURCING) and keel-bone protection (DPE_KEEL_PERCH) — one at a time, k=1, same
   settings. PR #42 is ready for owner review now; the runs do not block it.
-- **Next action (red-mite lane):** `claude/red-mite-course-plan-aea307` (pushed at `cc4d80d`, no PR
-  yet) carries its own regenerated `node_reference.json` (5 anchor lines change). PR #42 was up
-  first, so the red-mite lane rebases onto `feat/node-episodes-all-decisions` (or onto
-  `feat/node-episodes` once #42 merges) and **re-runs**
-  `$PY scripts/regen_node_episodes.py --snapshots --reference` plus the probe — never hand-merge the
-  JSON. This lane left `node_reference.json` unchanged, so after their re-run the diff should be
-  their 5 anchor lines plus ledger-list changes in the golden.
+- **Rebased 2026-09-25 onto `feat/node-episodes` at `040ab47`** (the red-mite lane and the solver
+  text-only-turn fix landed there first, so this lane rebased and re-ran
+  `scripts/regen_node_episodes.py --snapshots --reference` plus the probe): `node_reference.json`
+  came out byte-identical to `feat/node-episodes` (DP05's full-course anchors 0.0/2.0 kept, zero
+  other moves) and the snapshot golden differs from it in the `ledger` lists only (24 of 26
+  episodes; DP03_HEAT_STRESS and QUIET_A open with the same ledger either way, so the "all 26"
+  above is really 24). In the probe, the red-mite lane's good-arm session column now shows the
+  bird-flu daily wake too: DP25 and DPD gain days 253-254, DP23 gains 249-250, DP14 runs 16
+  sessions instead of 6; no anchor moves with it. One red-mite test
+  (`tests/env/test_treatment_due_wake_clock.py`) still read the removed
+  `ResolvedEpisode.enabled_nodes`; it now plays the every-decision world (`enabled_nodes=None`) and
+  passes unchanged otherwise. The solver fix is now in this branch, so the paused runs can resume
+  on the owner's go-ahead.
 - **Refs:** ruling 21 addendum; `docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md`;
   `docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md` item C (done).
 
