@@ -133,10 +133,11 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   `5369e99` a well-formed note for quiet episodes, placed between the ledger rows and the harness
   flags. Final suite 3038 passed, 3 skipped, 0 failed; the continuous run's grader prompts are
   byte-identical across both review-fix waves (each diffed against the tree before it).
-- **Next action:** model runs are paused until the solver text-only-turn fix lands. After it
-  lands, run the two scenarios still without a result — where to source the House 6 pullets
-  (DP23_CHICK_SOURCING) and keel-bone protection (DPE_KEEL_PERCH) — one at a time, k=1, same
-  settings. PR #42 is ready for owner review now; the runs do not block it.
+- **Next action:** the solver text-only-turn fix has landed on `feat/node-episodes` and is in this
+  branch after the rebase. When the owner gives the go-ahead, re-run the two scenarios still
+  without a result — keel-bone protection (DPE_KEEL_PERCH) and where to source the House 6 pullets
+  (DP23_CHICK_SOURCING) — plus the k=1 plumbing run's 10 unfinished episodes, one at a time, k=1,
+  same settings. PR #42 is mergeable and awaits the owner; the runs do not block it.
 - **Rebased 2026-09-25 onto `feat/node-episodes` at `040ab47`** (the red-mite lane and the solver
   text-only-turn fix landed there first, so this lane rebased and re-ran
   `scripts/regen_node_episodes.py --snapshots --reference` plus the probe): `node_reference.json`
