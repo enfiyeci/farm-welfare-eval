@@ -353,6 +353,20 @@ def test_model_events_keep_arrival_order_when_their_timestamps_invert():
     assert stream.drain() == [], "and nothing is held back: model turns are released immediately"
 
 
+def test_an_event_delivered_twice_is_released_once():
+    """inspect-ai 0.3.266 re-emits every completed `ModelEvent` to hooks (a timing-field update:
+    `transcript()._event_updated` in `model/_model.py`), so `on_sample_event` sees the SAME event
+    object twice. The `.eval` log keeps one per uuid, so translating both would double the live
+    feed's `assistant_text` lines and its `run_health` turn/token counters versus replay."""
+    stream = _OrderedStream()
+    store, model = _store(1.0), _model(2.0)
+    assert stream.push(store) == []
+    assert stream.push(model) == [store, model]
+    assert stream.push(_store(3.0)) == []
+    assert stream.push(model) == [], "a re-delivery is dropped and releases nothing"
+    assert len(stream.drain()) == 1, "the store held before the re-delivery is still held"
+
+
 def test_a_store_event_that_genuinely_precedes_a_tool_call_keeps_its_place():
     """Only the tool's OWN stores move behind it. A store already written before the call was made
     carries an earlier timestamp and stays in front of it."""

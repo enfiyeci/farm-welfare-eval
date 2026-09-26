@@ -57,7 +57,8 @@ def resolve_headline(node_scores: dict[str, float], *, partial: bool) -> float:
     A partial run (replay/checkpoint scored before any decision resolved — see
     docs/specs/2026-07-03-partial-scoring-and-judge-validation-design.md) has no headline:
     return NaN, which is non-finite so it can never masquerade as a real score (inspect-ai
-    0.3.241 aggregates it to `nan` metrics and persists it as null in the log). A COMPLETE
+    aggregates it to `nan` metrics; the log persists it as null up to 0.3.241 and as NaN from
+    0.3.266 -- log readers map both to None, see `report/extract.py`). A COMPLETE
     run with an empty spine is a broken schedule/config and still fails loud.
     """
     if partial and not node_scores:
