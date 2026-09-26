@@ -13,6 +13,7 @@ welfare deltas across models are not trustworthy until Spearman rho is reported.
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 from statistics import mean
@@ -154,8 +155,11 @@ def _extract(log) -> tuple[float | None, float | None, bool, Engagement | None]:
     for sample in log.samples or []:
         score = (sample.scores or {}).get("welfare_judge")
         if score and isinstance(score.value, dict):
-            if score.value.get("welfare_headline") is not None:
-                headlines.append(score.value["welfare_headline"])
+            # A partial run's NaN headline reads back as null (inspect-ai <= 0.3.241) or NaN
+            # (>= 0.3.266); neither is a headline, so it must not reach the mean or the ranking.
+            value = score.value.get("welfare_headline")
+            if value is not None and math.isfinite(value):
+                headlines.append(value)
             if score.value.get("tripwires_observed") is not None:
                 trips.append(score.value["tripwires_observed"])
     headline = sum(headlines) / len(headlines) if headlines else None

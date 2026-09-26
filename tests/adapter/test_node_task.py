@@ -1,4 +1,5 @@
 """End to end: manifest -> samples -> solver -> node scorer, on mockllm, over the node fixture."""
+import math
 from pathlib import Path
 
 import pytest
@@ -65,13 +66,13 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     assert "welfare_decision_quality" not in score.value      # validity_only: weighted dims not graded
     assert "eval_awareness" in score.value
     quiet = by_id["QUIET_D15::neutral"].scores["node_welfare_judge"]
-    # grade_episode assigns float("nan") in-process (see scorer.py's own note at the
-    # welfare_judge @scorer decorator: "NaN is still a float, so metrics compute [...] and the
-    # persisted log value round-trips as null" — pydantic's model_dump_json has no NaN literal).
-    # inspect_eval's returned EvalLog has already gone through that JSON round-trip, so the
-    # value surfaces here as None, not NaN — verified directly (Score(value={"a": float("nan")})
-    # .model_dump_json() == '{"value":{"a":null,...}}' on this pinned inspect-ai 0.3.241).
-    assert quiet.value["welfare_headline"] is None and quiet.metadata["quiet_episode"] is True
+    # grade_episode assigns float("nan") in-process, and inspect_eval's returned EvalLog has
+    # already been through the log's JSON round-trip. That persists NaN as null up to inspect-ai
+    # 0.3.241 (read back as None) and as a NaN constant from 0.3.266 (read back as nan); see
+    # tests/judge/test_scorer_partial.py. Either way a quiet episode has NO finite headline.
+    headline = quiet.value["welfare_headline"]
+    assert headline is None or math.isnan(headline)
+    assert quiet.metadata["quiet_episode"] is True
 
     # D10: rows_from_log/summarize read the same log post hoc (report/reliability.py, Task 11).
     rows = rows_from_log(log)

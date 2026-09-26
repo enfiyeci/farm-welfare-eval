@@ -4,6 +4,18 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-25 · claude · PR #39's first CI run: NaN-headline follow-ups FIXED (branch feat/node-episodes, PR #39)
+
+- **Why:** merging `main` brought the CI `tests` job to this branch. It installs inspect-ai
+  0.3.269, where a NaN score persists as NaN rather than null (the 2026-09-22 entry below). 1 of
+  3072 tests failed: `tests/adapter/test_node_task.py` pinned a quiet episode's headline as `None`.
+- **Fixed:** that pin now accepts either persisted form, like `tests/judge/test_scorer_partial.py`.
+  One real bug came from the same cause: `run_sweep._extract` dropped only `None` headlines, so on
+  0.3.266+ a partial run's NaN reached the mean and ranked as comparable, printing "nan" instead of
+  "n/a". It now drops non-finite headlines (new test in `tests/adapter/test_run_sweep.py`). The
+  node-episode reliability report was already safe: it reads `node_scores` metadata with an
+  `isfinite` guard and never reads the headline.
+
 ## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
 
 - **Why now:** the new CI `tests` job installs the latest inspect-ai (0.3.266; `./venv` is

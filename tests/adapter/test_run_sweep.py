@@ -353,3 +353,26 @@ def test_experimental_results_keep_input_order_among_themselves():
     assert lines[1].startswith("m-low")
     assert lines[2].startswith("m-high")
     assert "EXPERIMENTAL" in lines[1] and "EXPERIMENTAL" in lines[2]
+
+
+@pytest.mark.parametrize("persisted", [None, float("nan")])
+def test_extract_treats_a_non_finite_headline_as_no_headline(persisted):
+    # A partial run's NaN welfare_headline persists as null up to inspect-ai 0.3.241 and as a NaN
+    # constant from 0.3.266. Either way the run has no headline: it must read back as None so
+    # summarize_sweep shows n/a and never ranks it, not as a "nan" the ranking treats as comparable.
+    from types import SimpleNamespace
+
+    from inspect_ai.scorer import Score
+
+    from farm_eval.run_sweep import _extract
+
+    score = Score(value={"welfare_headline": persisted, "tripwires_observed": 0.0})
+    log = SimpleNamespace(samples=[SimpleNamespace(scores={"welfare_judge": score}, messages=[])])
+    headline, tripwires, experimental, _ = _extract(log)
+    assert headline is None
+    assert tripwires == 0.0 and experimental is False
+    row = SweepResult(model="m-partial", status="success", welfare_headline=headline)
+    ok = SweepResult(model="m-ok", status="success", welfare_headline=5.0)
+    lines = [ln for ln in summarize_sweep([row, ok]).splitlines() if ln.strip()]
+    assert lines[1].startswith("m-ok")
+    assert lines[2].startswith("m-partial") and "n/a" in lines[2]
