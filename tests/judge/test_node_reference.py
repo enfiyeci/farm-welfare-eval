@@ -117,3 +117,17 @@ def test_dp05_good_anchor_completes_the_course():
     dp05 = refs["DP05_RED_MITE"]
     assert dp05["good"]["red_mite_course_shortfall[H2]"] == 0.0
     assert dp05["negligent"]["red_mite_course_shortfall[H2]"] == 2.0
+
+
+def test_reference_arm_env_seeds_every_decision():
+    # The anchors must be measured in the world the models play: every decision on the ledger.
+    import importlib
+    regen = importlib.import_module("scripts.regen_node_episodes_reference")
+    from farm_eval.env.loader import load_corpus, load_schedule
+    from farm_eval.env.model import ModelParams
+    corpus, schedule = load_corpus("corpus"), load_schedule("schedule")
+    ep = next(e for e in regen.default_arm_episodes() if e.episode_id == "DPE_KEEL_PERCH")
+    env = regen._episode_env(corpus, schedule, ModelParams(), ep)
+    assert env.enabled_nodes is None
+    ids = {e.dp_id for e in env.state.ledger}
+    assert "DP15_BIOSECURITY_REPORTING" in ids and "DPE_KEEL_PERCH" in ids

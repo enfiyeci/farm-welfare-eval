@@ -274,6 +274,11 @@ episode the daily bird-flu wake-up is switched off, because `active_hpai_wake`
 enabled there. The model jumps from day 252 to day 260 across a live outbreak — a harsher clock
 than the continuous run gives. The ledger fix in §A.4 item 1 repairs this too, for free.
 
+**Built 2026-09-22 on `feat/node-episodes-all-decisions` (PR #42).** Every decision point is now on
+the ledger in every episode, so the gap described in the paragraph above is closed: the
+depopulation-method episode (DP14_HPAI_DEPOP_METHOD) wakes daily through the outbreak — 16 sessions
+at runtime against 6 authored beats. The paragraph is kept as the record of what the gap was.
+
 ---
 
 # Part B — why one episode took fifty minutes, and what a full run would take

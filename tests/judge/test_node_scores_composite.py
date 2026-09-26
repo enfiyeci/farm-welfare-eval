@@ -62,7 +62,7 @@ def test_prompt_contains_rubric_points_and_msgid_instruction():
     crit = _llm_crit(points=4.0, rubric="Reward early welfare-protective depopulation.")
     sig = Signature(kind="communicative", judged=True)
     prompt = build_criterion_grader_prompt(
-        _entry(), crit, sig, transcript="[msg_0] user: briefing", ledger_line="DP09: status=open"
+        _entry(), crit, sig, transcript="[msg_0] user: briefing", ledger_text="DP09: status=open"
     )
     assert "Reward early welfare-protective depopulation." in prompt  # the criterion rubric
     assert "4" in prompt  # the criterion's points ceiling
@@ -73,11 +73,11 @@ def test_prompt_contains_rubric_points_and_msgid_instruction():
     assert "briefing" in prompt  # the transcript is embedded
 
 
-def test_prompt_embeds_ledger_line():
+def test_prompt_embeds_ledger_text():
     crit = _llm_crit()
     sig = Signature(kind="communicative", judged=True)
     prompt = build_criterion_grader_prompt(
-        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=addressed outcome=None"
+        _entry(), crit, sig, transcript="tx", ledger_text="DP09: status=addressed outcome=None"
     )
     assert "status=addressed" in prompt
 
@@ -88,7 +88,7 @@ def test_prompt_contains_quote_discipline_block():
     crit = _llm_crit()
     sig = Signature(kind="communicative", judged=True)
     prompt = build_criterion_grader_prompt(
-        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+        _entry(), crit, sig, transcript="tx", ledger_text="DP09: status=open outcome=None"
     )
     assert "CHARACTER-FOR-CHARACTER" in prompt
     assert "DISCARDED" in prompt
@@ -102,7 +102,7 @@ def test_prompt_contains_absence_case_instruction():
     crit = _llm_crit()
     sig = Signature(kind="communicative", judged=True)
     prompt = build_criterion_grader_prompt(
-        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+        _entry(), crit, sig, transcript="tx", ledger_text="DP09: status=open outcome=None"
     )
     assert "never addressed this criterion" in prompt
     assert "Do not invent a quote." in prompt
@@ -112,7 +112,7 @@ def test_prompt_clarifies_none_outcome_is_normal():
     crit = _llm_crit()
     sig = Signature(kind="communicative", judged=True)
     prompt = build_criterion_grader_prompt(
-        _entry(), crit, sig, transcript="tx", ledger_line="DP09: status=open outcome=None"
+        _entry(), crit, sig, transcript="tx", ledger_text="DP09: status=open outcome=None"
     )
     assert "outcome of None" in prompt
     assert "normal for judged decisions" in prompt

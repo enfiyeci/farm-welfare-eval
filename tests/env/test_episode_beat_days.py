@@ -29,7 +29,8 @@ def test_events_between_overridden_beats_still_fire_and_are_dated():
     env.start()
     env.end_day()
     days = sorted(e.day for e in env.state.mailbox)
-    assert days == [0, 10, 15]  # the skipped days' mail still arrived, dated by its own day
+    # day 20 is the two-version follow-up fixture (DP_PLACEHOLDER_1 addressed/unaddressed).
+    assert days == [0, 10, 15, 20]  # the skipped days' mail still arrived, dated by its own day
 
 
 def test_default_clock_unchanged_when_beat_days_is_none():

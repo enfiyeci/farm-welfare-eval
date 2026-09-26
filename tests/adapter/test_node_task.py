@@ -58,6 +58,9 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     score = neutral.scores["node_welfare_judge"]
     assert score.value["welfare_headline"] == 10.0
     assert score.metadata["node_scores"] == {"DP_PLACEHOLDER_2": 10.0}
+    # Ruling 21: the farm carried BOTH fixture decisions (DP_PLACEHOLDER_1 lapsed on day 5 before
+    # this episode opened); the judge scored only the episode's own.
+    assert "DP_PLACEHOLDER_1" not in score.metadata["node_scores"]
     assert score.metadata["episode_id"] == "DP_PLACEHOLDER_2" and score.metadata["arm"] == "neutral"
     assert "welfare_decision_quality" not in score.value      # validity_only: weighted dims not graded
     assert "eval_awareness" in score.value

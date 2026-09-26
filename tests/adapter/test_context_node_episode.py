@@ -51,7 +51,8 @@ def test_get_env_uses_store_spec_for_end_day_nodes_and_clock():
     store.episode_spec = ep.to_store_dict(opening_digest=digest)
     env = get_env(CFG)
     assert env.episode_end_day == 21
-    assert env.enabled_nodes == frozenset({"DP_PLACEHOLDER_2"})
+    # Ruling 21 item 1: every decision is on the ledger; the judge narrows to the scored node.
+    assert env.enabled_nodes is None
     assert env.end_day().new_day == 15   # first session
     assert env.current_day() == 15
 

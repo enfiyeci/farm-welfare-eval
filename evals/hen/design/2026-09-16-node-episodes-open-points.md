@@ -107,22 +107,28 @@ Flash run for the same result.
 
 ### 3.1 Emails keyed on a decision that is not being scored tell the model it did nothing
 
-**Status: explained, not built. Needs the owner's yes.** Plain-language write-up with the file
-list per option: [disabled-decision-mail-explained.md](2026-09-17-disabled-decision-mail-explained.md).
-Recommended: run the whole farm with every decision present and score only one. Affected
-scenarios: feather pecking in House 4 (DP07), treating the sick House 5 flock (DPT), how many
-pullets to place in House 6 (DP25), beak trimming for the House 6 pullets (DPD), where to source
-the House 6 pullets (DP23), the House 3 depopulation method (DP14) and keel-bone protection (DPE).
+**Status: BUILT 2026-09-22 (Option 1, owner-approved) on `feat/node-episodes-all-decisions`.**
+Plain-language write-up with the file list per option:
+[disabled-decision-mail-explained.md](2026-09-17-disabled-decision-mail-explained.md). What was
+built is the recommendation: the farm runs with every decision present and the judge scores only
+one (`grade_episode(scored_nodes=...)`). Affected scenarios: feather pecking in House 4
+(DP07_FEATHER_PECKING), treating the sick House 5 flock (DPT_COLI_TREATMENT), how many pullets to
+place in House 6 (DP25_PLACEMENT_DENSITY), beak trimming for the House 6 pullets
+(DPD_BEAK_TRIMMING), where to source the House 6 pullets (DP23_CHICK_SOURCING), the House 3
+depopulation method (DP14_HPAI_DEPOP_METHOD) and keel-bone protection (DPE_KEEL_PERCH).
 
 ### 3.2 The bird-flu clock: reporting wakes daily, the depopulation scenario does not
 
-**Status: decided, not built; resolved by the 3.1 fix.** In "DP15 — report the House 3 outbreak
-promptly", the console wakes every day while birds are shedding (about 15 sessions, not the 4
-listed) because that is what a live outbreak should do. In "DP14 — choose the depopulation
-method", the same outbreak does not wake the console because the reporting decision is missing
-from the ledger, so the model jumps from day 252 to 260 across a live outbreak. Letting every
-decision exist in every episode (3.1, option 1) turns the daily wake back on. The authored-session
-cap stays a cap on what we author; the probe report will show the real count.
+**Status: BUILT 2026-09-22 by the 3.1 fix.** In the reporting scenario
+(DP15_BIOSECURITY_REPORTING), the console wakes every day while birds are shedding because that is
+what a live outbreak should do. In the depopulation-method scenario (DP14_HPAI_DEPOP_METHOD), the
+same outbreak used not to wake the console, because the reporting decision was missing from the
+ledger, so the model jumped from day 252 to day 260 across a live outbreak. Letting every decision
+exist in every episode turned the daily wake back on: the depopulation-method window (days
+246→267) now convenes on 16 days — 248 to 260 daily, then 262, 266 and 267 — against the 6 beats
+we author. The authored-session cap stays a cap on what we author; the `sessions a/r` column in
+[the probe report](../runs/2026-09-22-node-snapshot-probe.md) gives the real count for every
+episode.
 
 ### 3.3 The red-mite course cannot be finished (DP05 — rising red-mite counts in House 2)
 

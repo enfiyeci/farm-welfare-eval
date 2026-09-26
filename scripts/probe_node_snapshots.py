@@ -3,9 +3,10 @@
 """Per-episode world probe: what the routine-only snapshot looks like at each start_day, so the
 manifest's prelude branches are authored from evidence (D2), never blind.
 
-Columns: episode · start→end · authored sessions · runtime sessions on the good arm · birds per
-house at start · node house occupied? · applies_if satisfied at open · unread mail at start ·
-HPAI-active houses · prelude actions.
+Columns: episode · start→end · sessions authored/runtime (nobody acting) · runtime sessions on
+the good arm · birds per house at start · node house occupied? · applies_if satisfied at open ·
+unread mail at start · HPAI-active houses · prelude actions · ledger@start (every decision
+already opened, grouped by status).
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ import sys
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
 
+from farm_eval.env.episode import FarmEnv  # noqa: E402
 from farm_eval.env.loader import load_corpus, load_schedule  # noqa: E402
 from farm_eval.env.model import ModelParams  # noqa: E402
 from farm_eval.env.node_episodes import expand_episodes, load_node_manifest, validate_manifest  # noqa: E402
@@ -184,36 +186,57 @@ requests on its start day 112 and doses on **114 and 121**; the episode's runtim
 lawful course is now reachable by every model too. The "runtime sessions (good arm)" column above
 is the standing record of this and of every other wake the manifest does not list.
 
-**KNOWN FIDELITY GAP #1 — `variant_on_dp: DP15` bodies in episodes that do not enable DP15.
-Owner decision pending; not fixed here.** A node episode seeds only its own ledger entry, so in
-any episode whose `enabled_nodes` omits DP15 that entry never exists, `ledger_status_for` returns
-None, and `_variant_candidates` (`farm_eval/env/events.py:114-147`) takes the `unaddressed`
-branch. Three events are affected: the day-252 `hpai_alert` (which is DP14's own prompt), the
-day-252 DP20 staffing mail, and the day-260 disposal follow-up. A model that reports honestly on
-246/248 is still told in the body text that it never reported — while the world state disagrees
-with the text, because `state_response.note_report` latches on `world.hpai_report_day` (keyed on
-the email, not the ledger), so the premises quarantine and the APHIS authorization letter fire for
-that model anyway. Affected episodes — day-252 events: DP07, DPT, DP25, DPD, DP23, DP14, plus DPE
-(start 252, so both land in its opening inbox); day-260 event: DP25, DPD, DP23, DP14, DPE. DP15's
-own episode is unaffected. Candidate fixes: (a) resolve `variant_on_dp` from world state
-(`hpai_report_day` / `state_quarantine_day` / `depop_authorized_day`) when the named DP is
-disabled, or (b) a manifest-level "world nodes" list seeding unscored ledger entries for the DPs
-an episode needs as context. Both touch `farm_eval/` and change what every model reads, so they
-are the owner's call, not this task's.
-
-**KNOWN FIDELITY GAP #2 — the HPAI daily wake is enable-gated, so the manifest's session list is
-not the runtime wake count.** (The "runtime sessions (good arm)" column above now MEASURES this
-per episode, so the divergence is on record rather than inferred.) `active_hpai_wake` (`farm_eval/env/harm_window.py:157-196`) caps the
-clock to one-day hops while a node declaring the `hpai_daily_mort_frac` / `active_clinical` signal
-is ENABLED and an occupied house is shedding, applied on top of `beat_days`
-(`farm_eval/env/episode.py:410-421`). DP15 declares that signal, so DP15's episode really runs
-~15 sessions (daily 247→260, releasing early if the model culls the source around day 250-252)
-although the manifest lists 4 — the `<= 6` assertion in
-`tests/schedule/test_node_manifest_real.py` bounds the AUTHORED list, not runtime wakes. The
-mirror image is the cost of the DP14 start-day move: with DP15 disabled that daily wake is off, so
-DP14's model jumps straight from 252 to 260 across a live outbreak — a harsher clock than the
-continuous run gives. Both directions are flagged for the owner rather than silently accepted.
+**Every decision point is on the ledger in every episode (ruling 21, built 2026-09-22); the judge
+scores `dp_id` only. Runtime session counts exceed the manifest list wherever a disease wake fires
+— the `sessions a/r` column gives the authored and the real count side by side for every
+episode.** That change did not move a single reference anchor, and the four
+reasons are worth stating plainly, because they are what make the node-episode design safe: (a)
+stepping the model forward is path-independent — `integrate()` walks the same calendar days
+whether it does them in one hop or many, so extra wake days cannot by themselves change any
+physical quantity; (b) the reference arms held, but NOT because they are pinned to the calendar —
+`scripts/regen_node_episodes_reference.py` applies each programmed action at the FIRST session on
+or after its program day, so the session clock does decide when an action lands (that script's own
+`_EXPECTED_DROPS` block records four cases where a sliced window already moved one). They held
+because no reference arm's program day falls inside a newly-woken stretch: in the four scenarios
+whose session count grew — pullet placement density (DP25), beak trimming (DPD), chick sourcing
+(DP23) and depopulation method (DP14) — the daily wake only begins around day 248-252 in the
+do-nothing arms, so the first session at or after each program day is the same day in both worlds.
+A future change to the session clock has to re-check this rather than assume it; (c) the extra
+ledger rows and window-open bookkeeping record what happened, they do not feed any measured
+channel; and (d) whether an event fires is decided by the date and by what is on the ledger, never
+by which node an episode happens to score.
 """
+
+
+def _runtime_sessions(corpus, schedule, state, ep) -> int:
+    """How many days the console ACTUALLY convenes on, with nobody acting.
+
+    The manifest's `sessions` list is the authored beat budget; a latent-signal wake (the daily
+    bird-flu one, `farm_eval/env/harm_window.py`) can insert extra days on top of it. Replaying on
+    a deep copy keeps the shared snapshot pristine for the sections below, which read it again.
+    """
+    env = FarmEnv(
+        corpus, schedule, state.model_copy(deep=True), ep.end_day, ModelParams(),
+        enabled_nodes=None, beat_days=ep.sessions,
+    )
+    n = 0
+    while not env.is_over():
+        env.end_day()
+        n += 1
+    return n
+
+
+def _ledger_by_status(state) -> str:
+    """`addressed: DP24, DP01; lapsed: ...; open: ...` — short codes, grouped to stay readable.
+
+    One cell per episode listing every entry separately ran to ~600 characters on the late
+    episodes; the statuses repeat far more than the ids do, so grouping carries the same
+    information in about a third of the width.
+    """
+    groups: dict[str, list[str]] = {}
+    for e in state.ledger:
+        groups.setdefault(e.status.value, []).append(e.dp_id.split("_")[0])
+    return "; ".join(f"{st}: {', '.join(ids)}" for st, ids in groups.items()) or "-"
 
 
 def _git(*args: str) -> str:
@@ -266,18 +289,24 @@ def main() -> None:
           "is authored prose kept in the script (`_DECISIONS`) so a regeneration never drops it.")
     print("- One row per episode at its DEFAULT arm "
           f"(`{manifest.meta.default_arm}`); the snapshot is the routine-only world at `start_day`.\n")
-    print("Column notes: `sessions` = the manifest's AUTHORED session list · "
-          "`runtime sessions (good arm)` = the days the clock actually stopped at when the good "
-          "reference arm is replayed through the real `FarmEnv` — the authored beats plus every "
-          "turn a wake predicate adds (`farm_eval/env/harm_window.py`: the treatment-due jump, "
-          "the HPAI / active-harm / thirst one-day caps), which is why the two columns differ · "
+    print("Column notes: `runtime sessions (good arm)` = the days the clock actually stopped at "
+          "when the good reference arm is replayed through the real `FarmEnv` — the authored beats "
+          "plus every turn a wake predicate adds (`farm_eval/env/harm_window.py`: the treatment-due "
+          "jump, the HPAI / active-harm / thirst one-day caps), which is why it differs from the "
+          "authored list in `sessions a/r` · "
           "`birds@start` = live birds per house on the start day · `gate` = the node's "
           "`applies_if` house and its bird count (`-` = the node declares no gate) · `applies` = "
           "`node_applies()` on the start-day ledger entry · `unread` = unread mail the model opens "
           "the episode with (D3: the start-day delivery plus anything the landing hop carried) · "
-          "`hpai` = houses with `hpai_onset_day >= 0` · `prelude` = prelude actions applied.\n")
-    print("| episode | dp | window | sessions | runtime sessions (good arm) | birds@start | gate | applies | unread | hpai | prelude |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|")
+          "`hpai` = houses with `hpai_onset_day >= 0` · `prelude` = prelude actions applied · "
+          "`sessions a/r` = AUTHORED beats in the manifest / days the console actually convenes on "
+          "when the episode is replayed to its end with nobody acting — they differ wherever a "
+          "latent-signal wake inserts extra days · `ledger@start` = the decisions that had already "
+          "OPENED by this episode's start day, with their status, short codes grouped by status "
+          "(so the earliest episodes carry few or none); the judge still scores this episode's "
+          "`dp` alone.\n")
+    print("| episode | dp | window | sessions a/r | runtime sessions (good arm) | birds@start | gate | applies | unread | hpai | prelude | ledger@start |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|")
 
     problems: list[str] = []
     for ep in episodes:
@@ -312,12 +341,16 @@ def main() -> None:
                 if getattr(hw, "hpai_onset_day", -1) not in (None, -1)]
         unread = sum(1 for m in state.mailbox if m.unread)
         prelude = " ".join(f"d{a.day}:{a.tool}" for a in ep.prelude_actions) or "-"
-        runtime = runtime_sessions[ep.sample_id]
-        runtime_txt = ", ".join(str(d) for d in runtime) or "-"
+        # Short codes only (`DP15_BIOSECURITY_REPORTING` -> `DP15`): the full ids would make this
+        # already-wide table unreadable, and the `dp` column above carries the full name.
+        ledger = _ledger_by_status(state)
+        idle_n = _runtime_sessions(corpus, schedule, state, ep)
+        good_days = runtime_sessions[ep.sample_id]
+        good_txt = ", ".join(str(d) for d in good_days) or "-"
         print(
             f"| {ep.episode_id} | {ep.dp_id or '-'} | {ep.start_day}→{ep.end_day} | "
-            f"{list(ep.sessions)} | {runtime_txt} ({len(runtime)}) | {birds} | {gate_txt} | "
-            f"{applies} | {unread} | {' '.join(hpai) or '-'} | {prelude} |"
+            f"{len(ep.sessions)}/{idle_n} {list(ep.sessions)} | {good_txt} ({len(good_days)}) | {birds} | {gate_txt} | "
+            f"{applies} | {unread} | {' '.join(hpai) or '-'} | {prelude} | {ledger} |"
         )
 
     # --- DP14 focus: the shared HPAI prelude must NOT pre-answer the depop-method question ---

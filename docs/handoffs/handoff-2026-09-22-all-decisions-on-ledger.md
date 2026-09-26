@@ -2,6 +2,8 @@
 
 Eval: hen
 
+Status: Tasks 1–6 built and reviewed; Task 7: 5 of 7 scenarios passed, runs paused 2026-09-22 pending the solver text-only-turn fix.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 > Written 2026-09-22. Owner approved Option 1 of the disabled-decision mail explainer on 2026-09-22

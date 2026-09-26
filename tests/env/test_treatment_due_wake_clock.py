@@ -48,7 +48,7 @@ def _env(snapshot) -> FarmEnv:
     corpus, schedule, ep, state = snapshot
     env = FarmEnv(
         corpus, schedule, copy.deepcopy(state), ep.end_day, ModelParams(),
-        enabled_nodes=tuple(ep.enabled_nodes), beat_days=ep.sessions,
+        enabled_nodes=None, beat_days=ep.sessions,  # every decision on the ledger (ruling 21)
     )
     env.start()
     return env

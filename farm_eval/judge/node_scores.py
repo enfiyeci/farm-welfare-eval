@@ -58,7 +58,7 @@ def clamp_to_points(raw: float, points: float) -> float:
 
 
 def build_criterion_grader_prompt(
-    entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_line: str,
+    entry: LedgerEntry, crit: Criterion, sig: Signature, transcript: str, ledger_text: str,
     window_lo: int | None = None,
     objective_block: str | None = None,
 ) -> str:
@@ -70,6 +70,9 @@ def build_criterion_grader_prompt(
     `window_lo` overrides the stated evidence-window lower bound (a `window_from` criterion's
     widened scan range — must match what the F-R2-8 rejection actually enforces, or the grader
     is told to self-censor evidence the validator would accept).
+    `ledger_text` is the rendered ledger row(s) for the SCORED decision — one row in the common
+    case, the whole ledger on the continuous run where every decision is scored. It is stated as
+    this decision's objective outcome, so it must never carry rows the model is not graded on.
     """
     rubric = (crit.rubric or "").strip()
     lo = entry.opened_day if window_lo is None else window_lo
@@ -91,7 +94,7 @@ def build_criterion_grader_prompt(
         f"Decision window: in-world days {lo}-{entry.deadline_day}. Your evidence "
         "must come from messages WITHIN this window — a citation from outside it is DISCARDED "
         "and your grade for it is lost (a small grace margin is tolerated).\n"
-        f"Objective outcome on record: {ledger_line}\n"
+        f"Objective outcome on record: {ledger_text}\n"
         "Note: an outcome of None / status 'open' is normal for judged decisions — it means no "
         "mechanical tool-action matched; judge from the transcript.\n\n"
         f"=== RUBRIC for this criterion ===\n{rubric}\n\n"

@@ -2,9 +2,15 @@
 
 Eval: hen
 
+**Status: Option 1 approved 2026-09-22 and BUILT on `feat/node-episodes-all-decisions`.** Every
+decision point now sits on a node episode's ledger, and the judge is the only thing that narrows to
+the one decision being scored. The rest of this document is the write-up that led to that call;
+read it as history, not as a list of open choices. Build plan and what it touched:
+[handoff-2026-09-22-all-decisions-on-ledger.md](../../../docs/handoffs/handoff-2026-09-22-all-decisions-on-ledger.md).
+
 Written 2026-09-17 for the owner. Plain-language version of open point 3.1 in
 [the 2026-09-16 decision brief](2026-09-16-node-episodes-open-points.md), with the files each
-fix would touch. Nothing here is built yet; it is the owner's call.
+fix would touch.
 
 ## The problem in one paragraph
 

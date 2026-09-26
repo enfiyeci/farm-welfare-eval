@@ -70,7 +70,17 @@ good and zero for bad), and asserts the margin. This catches band criteria (item
 degenerate-channel rule (`expected_degenerate_channels`) misses. Also add a `--report` mode to
 print the per-node good/bad table for the docs.
 
-### C. Email fix: every decision on the ledger, score one — OWNER SAID YES 2026-09-22; plan: `handoff-2026-09-22-all-decisions-on-ledger.md`
+### C. Email fix: every decision on the ledger, score one — ✅ DONE 2026-09-22 on `feat/node-episodes-all-decisions`
+
+**Built.** Node-episode farms now seed every decision point (`FarmEnv(..., enabled_nodes=None)`),
+`ResolvedEpisode` carries only `dp_id`, and `grade_episode(scored_nodes=...)` is what narrows the
+judge to the episode's one decision. The reference arms replay the same all-decisions world, and
+`farm_eval/judge/node_reference.json` came out byte-identical. The bird-flu daily wake now fires in
+the depopulation-method scenario (DP14_HPAI_DEPOP_METHOD) as it already did in the reporting
+scenario (DP15_BIOSECURITY_REPORTING). Remaining: the smoke and overnight runs of the seven
+affected scenarios. Plan: `handoff-2026-09-22-all-decisions-on-ledger.md`.
+
+The original statement of the item, for the record:
 
 `evals/hen/design/2026-09-17-disabled-decision-mail-explained.md` explains it. Today a node episode
 seeds only its own decision's ledger entry, so mail that branches on another decision
