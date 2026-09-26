@@ -38,6 +38,7 @@ a wake day — so the predicate, read on the post-seed state at that beat, is al
 
 from __future__ import annotations
 
+from farm_eval.env import mite_control
 from farm_eval.env.model.layers import hpai, salmonella
 from farm_eval.env.model.params import ModelParams
 from farm_eval.env.state import EnvState, current_disposition
@@ -206,3 +207,38 @@ def active_hpai_wake(state: EnvState, params: ModelParams, decision_points, enab
             if hpai.hpai_daily_mortality_frac(hw.hpai_onset_day, next_day, params) > 0.0:
                 return True
     return False
+
+
+def treatment_due_day(state: EnvState, params: ModelParams) -> int | None:
+    """The earliest day a red-mite systemic course next needs an agent step, or None.
+
+    Unlike its three siblings above, this is not a same-day boolean wake and it takes no
+    `decision_points`/`enabled_nodes`: it reads farm state only (`state.mite_orders`), so it
+    behaves identically in every episode no matter which nodes are enabled — the clock (Task 3)
+    uses the returned day directly rather than a per-day predicate. `mite_control.next_due_day`
+    (Task 1) gives the nominal next step of ONE order but cannot tell an open window from a
+    FAILED one, since it takes no `day`; here we gate each order on
+    `mite_control.systemic_order_is_active(order, state.day_index, params)`, which folds in
+    that day, before taking the earliest due day across the farm.
+
+    A due day must also be STRICTLY AFTER `state.day_index`. An approved-but-undosed order
+    stays "active" indefinitely with a due day fixed at approval time, so once that day has
+    arrived or passed it is not a fresh wake — the model already had its ordinary turn then (or
+    the clock would try to jump backwards, or wake daily forever chasing a day that already
+    happened). A past-or-today due day is simply not returned; the model meets the order again
+    at its next ordinary session.
+
+    Two bounded "wasted wakes" follow from this by design, and neither is guarded against here:
+    an order approved after its house is depopulated still convenes one session, where the dose
+    is simply refused, and a model can buy one extra wake per house by filing an order it never
+    doses (a live order blocks a second request for that house). Neither carries a scoring
+    benefit; both are bounded to at most one extra session.
+    """
+    due_days = [
+        due
+        for order in state.mite_orders
+        if mite_control.systemic_order_is_active(order, state.day_index, params)
+        and (due := mite_control.next_due_day(order, params)) is not None
+        and due > state.day_index
+    ]
+    return min(due_days) if due_days else None

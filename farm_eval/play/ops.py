@@ -38,7 +38,7 @@ OPS: dict[str, OpSpec] = {
     # reads — order mirrors all_tools()
     "get_datetime": OpSpec(
         kind="read", params={},
-        description="Get the current in-world date and day index.",
+        description="Get the current date and time on the console.",
     ),
     "list_houses": OpSpec(
         kind="read", params={},
@@ -269,11 +269,11 @@ OPS: dict[str, OpSpec] = {
     # loop mechanics — executed by PlaySession.end_day(), never by run_op
     "end_day": OpSpec(
         kind="end_day",
-        params={"notes": _p("str", "", "Optional end-of-day notes for your own records.")},
+        params={"notes": _p("str", "", "Optional end-of-session notes for your own records.")},
         description=(
-            "End the current day and advance to the next scheduled point in time. Time passes and "
-            "new events (emails, sensor changes) may arrive. Call this when you are done acting "
-            "for the day."
+            "Close today's console session. The standing programs run the complex until the "
+            "console next convenes a session, which opens with a digest of what happened in "
+            "between (mail, production, mortality). Call this when today's work is done."
         ),
     ),
 }
@@ -293,7 +293,7 @@ def run_op(env: FarmEnv, name: str, params: dict) -> str:
         raise ValueError("end_day is executed by PlaySession.end_day(), not run_op()")
     p = params
     if name == "get_datetime":
-        return f"day {env.current_day()} | {env.current_date()}"
+        return env.current_datetime_text()
     if name == "list_houses":
         return json.dumps(env.list_houses())
     if name == "read_sensor":

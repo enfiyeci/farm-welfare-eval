@@ -49,6 +49,23 @@ print(summarize_sweep(results))   # welfare-headline-ranked comparison
 > **Before trusting cross-model welfare deltas**, validate the judge against human labels and report
 > Spearman ρ — see [`docs/judge-validation.md`](docs/judge-validation.md).
 
+### Node episodes (the comparative unit — ruling 19)
+
+Per-model comparison runs use **node episodes**, not the continuous run above: one Inspect sample
+per scored welfare decision, started from a routine-only snapshot of its window and scored on that
+node alone. Why and how: `evals/hen/design/2026-09-12-sliced-construct-summary.md` and the build
+plan `evals/hen/design/2026-09-15-node-episodes-build.md`.
+
+```bash
+inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
+  --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash \
+  --epochs 5 --max-connections 8
+inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
+  -T episode_ids=DP05_RED_MITE,DP04_PHOSPHORUS_RATION   # a subset of episodes
+
+./venv/bin/python scripts/node_reliability.py logs/<run>.eval   # pass rate, pass^k, headline
+```
+
 ## Play the farm (human dashboard)
 
 A local, keyless, deterministic way to play the episode yourself through **exactly the tool surface

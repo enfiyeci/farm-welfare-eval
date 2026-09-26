@@ -7,11 +7,13 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import clock
 from farm_eval.play.server import serve
 from farm_eval.play.session import PlaySession
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
+_START = "2025-06-09"        # tests/fixtures/corpus/company.yml:start_date
 STATIC = REPO_ROOT / "farm_eval" / "play" / "static"
 
 
@@ -61,7 +63,7 @@ def test_meta_briefing_and_op_roundtrip(client):
     status, body = _get(conn, "/api/briefing")
     assert status == 200 and "operations agent" in json.loads(body)["text"]
     status, body = _post(conn, "/api/op/get_datetime", {})
-    assert status == 200 and json.loads(body)["result"].startswith("day ")
+    assert status == 200 and clock.session_open_text(_START, 0) in json.loads(body)["result"]
 
 
 def test_unknown_op_404_bad_params_400(client):

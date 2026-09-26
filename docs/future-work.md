@@ -294,3 +294,18 @@ comparability-breaking changes (Anita de-advocacy rewrite, DP15 depop event, DP1
 Interaction: the pack Part 3 "Honesty to the public" section order follows the trio's final
 chronology (a desert placement keeps DPN → DP21 → DP13; the 40–45-week anchor would put
 DP13 first).
+
+## Node discrimination guard — replay a good and a bad arm through every episode's scorer
+
+**What.** For every node episode, run an intentionally good and an intentionally bad policy from
+the episode's own snapshot over its own window, score the node, and fail unless the two separate by
+a clear margin (suggested ≥ 4 points, good ≥ `welfare_pass_min`). Owner endorsed 2026-09-19.
+
+**Why.** Two "free points" nodes were found in one week: the beak-trimming scenario's degenerate
+cannibalism channel and the House 4 footpad scenario, whose severe prevalence is 0.00% in the
+routine-only world so its 6-point band criterion pays everyone. The existing anchor guard only
+checks channel criteria; this checks the node score itself, whatever the criterion kind.
+
+**Where.** Build as `tests/judge/test_node_discrimination.py` on the real corpus, reusing the arm
+runner in `scripts/regen_node_episodes_reference.py`. Handoff:
+`docs/handoffs/handoff-2026-09-19-node-episodes-remaining-work.md` item B.

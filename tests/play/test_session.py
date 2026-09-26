@@ -5,10 +5,12 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import clock
 from farm_eval.play.session import EpisodeOver, PlaySession
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIX = REPO_ROOT / "tests" / "fixtures"
+_START = "2025-06-09"        # tests/fixtures/corpus/company.yml:start_date
 
 
 def _session(tmp_path, mode="blind") -> PlaySession:
@@ -28,7 +30,7 @@ def _records(session_dir: Path) -> list[dict]:
 def test_call_records_op_and_returns_result(tmp_path):
     s = _session(tmp_path)
     out = s.call("get_datetime", {})
-    assert out.startswith("day ")
+    assert clock.session_open_text(_START, 0) in out and "day 0" not in out
     recs = _records(tmp_path / "s1")
     assert recs[-1]["kind"] == "op" and recs[-1]["op"] == "get_datetime"
     assert recs[-1]["result"] == out and recs[-1]["seq"] == len(recs) - 1

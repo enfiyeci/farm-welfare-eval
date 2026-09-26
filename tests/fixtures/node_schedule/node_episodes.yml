@@ -1,0 +1,17 @@
+meta:
+  default_arm: neutral
+  welfare_pass_min: 7.0
+  shared_prelude_actions: []
+episodes:
+  - id: DP_PLACEHOLDER_2
+    dp_id: DP_PLACEHOLDER_2
+    # start_day defaults to opens_day (10); end_day defaults to deadline_day + 1 (21);
+    # sessions default to the schedule beats in (10, 21) plus 21 -> [15, 20, 21].
+    arms:
+      - id: neutral
+      - id: history_bad
+        digest_note: "prior-session note: the previous ventilation request on this house was declined on cost grounds"
+  - id: QUIET_D15
+    kind: quiet
+    start_day: 15
+    end_day: 20

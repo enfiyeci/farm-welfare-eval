@@ -13,6 +13,7 @@ welfare deltas across models are not trustworthy until Spearman rho is reported.
 
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 from statistics import mean
@@ -20,6 +21,7 @@ from statistics import mean
 from inspect_ai import eval as inspect_eval
 
 from farm_eval.farm_task import farm_task
+from farm_eval.env.clock import advance_elapsed, is_forced_advance
 
 # Read-family tools — must track the "reads" block of adapter/tools/all_tools(). Splitting foraging
 # reads from actions lets the engagement diagnostic report an information-seeking rate separately.
@@ -50,14 +52,14 @@ class Engagement:
 
 
 # A day ACTUALLY advanced (matches episode.py's DayAdvanceResult.summary, elapsed >= 1). The
-# solver's forced-advance user message embeds the same summary after its "[Time passes]" prefix.
-_ADVANCE_RE = re.compile(r"[1-9]\d* day\(s\) pass\.")
-_FORCED_ADVANCE_PREFIX = "[Time passes]"
+# solver's forced-advance user message embeds the same summary after its "Console notice:" prefix.
+# farm_eval.env.clock parses ONLY the "Console session — ..." header; archived pre-2026-09-17 logs
+# no longer parse, which is accepted (they were smoke tests only).
 
 
 def episode_engagement(messages) -> Engagement:
     """Compute the engagement curve from a linear transcript, bucketed by ACTUAL day advances —
-    never by end_day tool CALLS. A day boundary is (a) the solver backstop's "[Time passes]"
+    never by end_day tool CALLS. A day boundary is (a) the solver backstop's "Console notice:"
     forced-advance user message (farm_solver advances time directly with NO end_day tool call —
     exactly the disengaged/coherence-collapse case this diagnostic exists to catch), or (b) an
     end_day tool RESULT whose summary reports time passing (an errored or non-advancing end_day
@@ -69,12 +71,12 @@ def episode_engagement(messages) -> Engagement:
     for msg in messages:
         role = getattr(msg, "role", "")
         text = getattr(msg, "text", "") or ""
-        if role == "user" and text.startswith(_FORCED_ADVANCE_PREFIX):
+        if role == "user" and is_forced_advance(text):
             per_day.append(cur)  # backstop-driven advance: a real (possibly zero-call) day
             cur = 0
             continue
         if role == "tool" and getattr(msg, "function", None) == "end_day":
-            if getattr(msg, "error", None) is None and _ADVANCE_RE.search(text):
+            if getattr(msg, "error", None) is None and advance_elapsed(text):
                 per_day.append(cur)
                 cur = 0
             continue  # errored / non-advancing end_day result: the same day continues
@@ -153,8 +155,11 @@ def _extract(log) -> tuple[float | None, float | None, bool, Engagement | None]:
     for sample in log.samples or []:
         score = (sample.scores or {}).get("welfare_judge")
         if score and isinstance(score.value, dict):
-            if score.value.get("welfare_headline") is not None:
-                headlines.append(score.value["welfare_headline"])
+            # A partial run's NaN headline reads back as null (inspect-ai <= 0.3.241) or NaN
+            # (>= 0.3.266); neither is a headline, so it must not reach the mean or the ranking.
+            value = score.value.get("welfare_headline")
+            if value is not None and math.isfinite(value):
+                headlines.append(value)
             if score.value.get("tripwires_observed") is not None:
                 trips.append(score.value["tripwires_observed"])
     headline = sum(headlines) / len(headlines) if headlines else None

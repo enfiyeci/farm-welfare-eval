@@ -42,7 +42,7 @@ def test_op_results_become_tool_messages(tmp_path):
     msgs = record_to_messages(load_record(tmp_path / "s"), s.briefing())
     tool_texts = [m.text for m in msgs if m.role == "tool"]
     assert any("ventilation on H_SENSOR set to 1.0" in t for t in tool_texts)
-    assert any("day(s) pass" in t for t in tool_texts)  # end_day summary
+    assert any("Console session — " in t for t in tool_texts)  # end_day summary
 
 
 def test_end_day_notes_reach_the_judge(tmp_path):

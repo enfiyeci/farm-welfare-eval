@@ -15,8 +15,11 @@ from pathlib import Path
 
 import pytest
 
+from farm_eval.env import mite_control
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_schedule
+from farm_eval.env.model.params import ModelParams
+from farm_eval.env.state import MiteControlOrder
 from farm_eval.judge.node_scores import criterion_score, node_score_mechanical
 from farm_eval.judge.welfare_state import node_only_channel_subscores
 
@@ -148,13 +151,21 @@ def runs() -> dict[str, dict]:
 # The scores the ruled design produces, measured through the real path. Pinned as exact
 # numbers because the pre-window-banking fix (Codex wave-2 review F1) had to leave every
 # legitimate in-window path untouched: a table, not a set of inequalities, is what shows that.
+#
+# Five entries moved by exactly -0.01 on 2026-09-22 when the reference program stopped dosing on
+# days the vet order never authorised: the good arm's `red_mite_excess_index_days[H2]` anchor
+# in `welfare_reference.json` improved 0.4353 -> 0.0435 (it doses on 114/121 now, not 119/126),
+# so a path that leaves MORE burden than that reference no longer normalizes to a flat 1.0 on
+# the outcome channel. The paths themselves are unchanged, the ordering is unchanged, and
+# `physical_early` still reaches 10.00 — the IPM route drives the burden below the new anchor
+# too. Everything that scored 0.00 still scores 0.00.
 BASELINE_TOTALS = {
-    "systemic_early": 10.00,
+    "systemic_early": 9.99,
     "physical_early": 10.00,
-    "monitor_then_act": 8.87,
-    "partial_course": 8.01,
-    "late_no_monitoring": 7.87,
-    "at_the_deadline": 7.07,
+    "monitor_then_act": 8.86,
+    "partial_course": 8.00,
+    "late_no_monitoring": 7.86,
+    "at_the_deadline": 7.06,
     "after_deadline": 5.53,
     "recheck_only": 0.00,
     "do_nothing": 0.00,
@@ -345,3 +356,100 @@ def test_whole_house_heat_is_gone_from_the_control_menu():
         assert "heat/ipm" not in body
     opening = (REPO / "corpus" / "documents" / "emails" / "mite_w14.md").read_text().lower()
     assert "between-flock" in opening      # named only as what it is NOT for
+
+
+# --------------------------------------------------------------------- next_due_day (Task 1)
+#
+# These are pure unit tests of `mite_control.next_due_day`, built directly on `MiteControlOrder`
+# and `ModelParams()` defaults — no episode fixture needed. One case per branch of the brief,
+# plus the controller-ruled split between "no dose yet" covering both pending and approved.
+
+
+def _order(**overrides) -> MiteControlOrder:
+    fields = dict(
+        order_id="RX-H2-112",
+        house_id="H2",
+        issue="red_mite",
+        route="systemic",
+        request_day=112,
+    )
+    fields.update(overrides)
+    return MiteControlOrder(**fields)
+
+
+def test_next_due_day_ipm_route_is_none():
+    # The provider runs the cadence; there is no agent step for `next_due_day` to name.
+    order = _order(route="ipm")
+    assert mite_control.next_due_day(order, ModelParams()) is None
+
+
+def test_next_due_day_complete_course_is_none():
+    order = _order(approved_day=114, days=[119, 126])  # two doses: a complete systemic course
+    params = ModelParams()
+    assert mite_control.course_shortfall(order, params) == 0.0
+    assert mite_control.next_due_day(order, params) is None
+
+
+def test_next_due_day_still_pending_is_the_stored_approval_day():
+    # `request_vet_treatment` writes `approved_day = request_day + approval_lag_days` at
+    # request time, so a still-pending order already carries the number the vet will confirm.
+    order = _order(approved_day=114)  # request_day 112 + approval_lag_days 2, not yet delivered
+    assert order.approval_delivered is False
+    assert mite_control.next_due_day(order, ModelParams()) == 114
+
+
+def test_next_due_day_approved_no_dose_is_the_approval_day():
+    # Same number, reached once the vet's mail has actually landed — the brief's separate
+    # "approved, no dose yet" branch is the same code path as "still pending" by construction.
+    order = _order(approved_day=114, approval_delivered=True)
+    assert mite_control.next_due_day(order, ModelParams()) == 114
+
+
+def test_next_due_day_no_approval_on_record_is_none():
+    # `approved_day` defaults to -1 ("never set"); with no doses and no approval day there is
+    # nothing yet to name as due.
+    order = _order()
+    assert order.approved_day == -1
+    assert mite_control.next_due_day(order, ModelParams()) is None
+
+
+def test_next_due_day_part_dosed_is_last_dose_plus_interval():
+    order = _order(approved_day=114, days=[119])
+    params = ModelParams()
+    assert mite_control.next_due_day(order, params) == 119 + params.mite_systemic_dose_interval_days
+
+
+def test_next_due_day_does_not_decide_a_failed_course():
+    # `next_due_day` has no `day` argument, so it cannot know the dose window has closed — it
+    # keeps naming the nominal due day for a part-dosed order. Division of labour: the caller
+    # (Task 2) gates on `systemic_order_is_active(order, day, params)`, which DOES go False once
+    # the window has passed.
+    order = _order(approved_day=114, days=[119])
+    params = ModelParams()
+    nominal_due = 119 + params.mite_systemic_dose_interval_days  # 126
+    assert mite_control.next_due_day(order, params) == nominal_due
+
+    window_closes = 126 + params.mite_systemic_dose_interval_tol  # 127
+    assert mite_control.systemic_order_is_active(order, window_closes, params) is True
+    assert mite_control.systemic_order_is_active(order, window_closes + 1, params) is False
+    # next_due_day itself is unchanged by the day argument it does not take.
+    assert mite_control.next_due_day(order, params) == nominal_due
+
+
+# --------------------------------------------------------------------------- planned course
+
+
+def test_planned_systemic_course_is_the_approval_day_then_the_interval():
+    # The one derivation three scripted reference programs share: the vet authorises on
+    # `request_day + approval_lag_days`, and each further dose falls one authored interval
+    # later. With the shipped corpus lag (2) and params (2 doses, 7 days apart), a request on
+    # day 112 is dosed on 114 and 121 — the days the order itself allows, not calendar guesses.
+    params = ModelParams()
+    assert mite_control.planned_systemic_course(112, 2, params) == [114, 121]
+
+
+def test_planned_systemic_course_follows_the_lag_and_interval_it_is_given():
+    # Nothing about the shape is hardcoded: a different lag and a different interval move
+    # every dose, and the course is always `required_doses` long.
+    params = ModelParams(mite_systemic_doses=3, mite_systemic_dose_interval_days=10)
+    assert mite_control.planned_systemic_course(100, 5, params) == [105, 115, 125]

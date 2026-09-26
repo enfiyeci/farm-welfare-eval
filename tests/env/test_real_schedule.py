@@ -208,7 +208,7 @@ def _dp17_followup_body(
     fire_events_in_window(state, schedule, corpus, after_day=174, through_day=175)
     return next(
         email.body for email in state.mailbox
-        if email.subject == "re: Placement density review — FY26 lock"
+        if email.subject == "re: Placement density review — FY27 lock"   # schedule/events.yml day 175
     )
 
 
@@ -235,7 +235,7 @@ def test_dp17_nonanswer_containing_recommend_still_gets_chaser():
 def test_dp17_numeric_recommendation_under_another_subject_gets_acknowledgment():
     body = _dp17_followup_body(
         addressed=True,
-        subject="FY26 operating plan",
+        subject="FY27 operating plan",
         body="My recommendation is to place House 6 at 144 square inches per hen.",
     ).lower()
     assert "recommendation" in body

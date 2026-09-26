@@ -7,7 +7,7 @@ DP21's withdrawal_accuracy on a single-call arithmetic misread that repeats woul
 out. Fixes under test:
 
 - `message_days(messages)` maps every msg_N to its in-world day (advancing end_day tool results
-  and forced-advance "[Time passes]" user messages move the clock; errored / non-advancing
+  and forced-advance "Console notice:" user messages move the clock; errored / non-advancing
   end_day results do not — same boundary semantics as the engagement diagnostic).
 - `grade_llm_criterion(..., message_days=...)` rejects (scores 0 + notes) evidence whose cited
   message falls outside `[opened_day - GRACE, deadline_day + GRACE]`.
@@ -16,6 +16,7 @@ out. Fixes under test:
 """
 import asyncio
 
+from farm_eval.env import clock
 from farm_eval.env.ledger import LedgerEntry
 from farm_eval.env.schedule_models import Criterion, DecisionCategory, NodeScoring, Signature
 from farm_eval.judge.scorer import EVIDENCE_WINDOW_GRACE_DAYS, grade_llm_criterion, message_days
@@ -39,9 +40,13 @@ class _PlayMsg:
         self.tool_calls = []
 
 
+def _digest(elapsed):
+    """The session-opening digest the model sees — the only wording the parsers accept."""
+    return clock.session_header("2025-06-09", elapsed, elapsed=elapsed) + "\nSince last session:"
+
+
 def _advance(elapsed):
-    return _Msg("tool", function="end_day",
-                text=f"{elapsed} day(s) pass. It is now 2025-06-16.\nSince last session:")
+    return _Msg("tool", function="end_day", text=_digest(elapsed))
 
 
 # --- message_days -----------------------------------------------------------------------------
@@ -55,8 +60,8 @@ def test_message_days_tracks_advances_forced_advances_and_ignores_errors():
         _Msg("tool", function="end_day", error="boom",
              text="error: could not advance"),                      # msg_4 errored: still day 7
         _Msg("tool", function="end_day",
-             text="0 day(s) pass. It is now 2025-06-16."),          # msg_5 non-advancing: day 7
-        _Msg("user", "[Time passes] 3 day(s) pass. It is now 2025-06-19."),  # msg_6 -> day 10
+             text=clock.session_header("2025-06-09", 7, elapsed=0)),  # msg_5 non-advancing: day 7
+        _Msg("user", clock.forced_advance_message(_digest(3))),       # msg_6 -> day 10
         _Msg("assistant", "late work"),                             # msg_7 day 10
     ]
     days = message_days(msgs)
@@ -70,8 +75,8 @@ def test_message_days_handles_play_session_message_shape():
     msgs = [
         _PlayMsg("user", "briefing"),                                        # msg_0 day 0
         _PlayMsg("assistant", "work"),                                       # msg_1 day 0
-        _PlayMsg("tool", "7 day(s) pass. It is now 2025-06-16.\nSince last session:"),  # msg_2 -> 7
-        _PlayMsg("tool", '{"emails": [{"body": "note: 3 day(s) pass. quoted text"}]}'),  # msg_3: a
+        _PlayMsg("tool", _digest(7)),                                        # msg_2 -> 7
+        _PlayMsg("tool", '{"emails": [{"body": "note: ' + _digest(3) + '"}]}'),  # msg_3: a
         # NON-advance tool result that merely CONTAINS the phrase (start-anchored match only)
         _PlayMsg("assistant", "later"),                                      # msg_4 day 7
     ]
@@ -84,7 +89,7 @@ def test_message_days_never_advances_on_other_tools_matching_text():
     # pattern must not move the clock (function is known and is not end_day).
     msgs = [
         _Msg("user", "briefing"),
-        _Msg("tool", "7 day(s) pass. (an email body echoed verbatim)", function="read_email"),
+        _Msg("tool", _digest(7) + " (an email body echoed verbatim)", function="read_email"),
     ]
     assert message_days(msgs) == {"msg_0": 0, "msg_1": 0}
 

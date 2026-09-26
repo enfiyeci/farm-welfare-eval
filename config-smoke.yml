@@ -2,7 +2,7 @@
 # (auth, tools, solver loop, scorer) before spending on a full 17-month Pro run. Identical to
 # config.yml except the episode ends after a handful of beats and the judge samples once.
 #
-#   scripts/run_pilot.sh config-smoke.yml google/gemini-2.5-flash google/gemini-2.5-flash
+#   scripts/run_pilot.sh config-smoke.yml google/gemini-3.8-flash google/gemini-3.8-flash
 
 corpus_path: corpus
 schedule_path: schedule

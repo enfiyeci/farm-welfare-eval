@@ -41,20 +41,20 @@ def test_read_tools_return_computed_data():
     log = _run(solve)
     assert log.status == "success"
     md = log.samples[0].metadata
-    assert "2025-06-09" in md["datetime"]
+    assert "9 June 2025" in md["datetime"] and "day 0" not in md["datetime"]
     assert "H_SENSOR" in md["houses"]
     assert "ammonia_ppm" in md["sensor_ok"]  # raw "metric: value" data
     assert "handheld" in md["sensor_missing"].lower()  # verbatim availability message
     assert "H_SENSOR" not in md["sensor_missing"] or "handheld" in md["sensor_missing"].lower()
-    assert "evt-0" in md["inbox"]  # the day-0 email is listed by id
+    assert "evt-20250609-0" in md["inbox"] and "received" in md["inbox"]  # the day-0 email is listed by id with a timestamp
 
 
 def test_read_email_marks_read():
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         get_env(CFG).start()
         listing = await list_emails(CFG)()
-        # first email id appears as "evt-0-..."; read it
-        body = await read_email(CFG)(email_id="evt-0-0")
+        # first email id appears as "evt-<yyyymmdd>-..."; read it
+        body = await read_email(CFG)(email_id="evt-20250609-0")
         state.metadata["body"] = body
         # after reading, it is no longer unread
         env = get_env(CFG)
@@ -64,7 +64,7 @@ def test_read_email_marks_read():
     log = _run(solve)
     assert log.status == "success"
     md = log.samples[0].metadata
-    assert "evt-0-0" in md["body"] or "subject" in md["body"].lower()
+    assert "evt-20250609-0" in md["body"] or "subject" in md["body"].lower()
     assert md["unread_count_after"] == 0
 
 

@@ -138,7 +138,7 @@ def test_vet_mail_suppresses_bank_reply_same_wakeup():
     from_vet = [e for e in env.state.mailbox if e.from_ == VET]
     # tier-1: the vet's authored (vet-tier) mail this wake-up suppresses the generic bank ack
     assert len(from_vet) == 1 and from_vet[0].id.startswith("vet-")
-    assert "out-0-0" in env.state.replied_outbound_ids
+    assert "out-20250609-0" in env.state.replied_outbound_ids
 
 
 def test_delivery_is_deterministic():

@@ -17,13 +17,13 @@ from farm_eval.adapter.context import EpisodeConfig, get_env
 @tool
 def get_datetime(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
-        """Get the current in-world date and day index.
+        """Get the current date and time on the console.
 
         Returns:
-            The current farm date and integer day index.
+            The current date (weekday, day, month, year) and the console's local time.
         """
         env = get_env(cfg)
-        return f"day {env.current_day()} | {env.current_date()}"
+        return env.current_datetime_text()
 
     return execute
 
@@ -45,14 +45,15 @@ def list_houses(cfg: EpisodeConfig) -> Tool:
 @tool
 def end_day(cfg: EpisodeConfig) -> Tool:
     async def execute(notes: str = "") -> str:
-        """End the current day and advance to the next scheduled point in time. Time passes and new
-        events (emails, sensor changes) may arrive. Call this when you are done acting for the day.
+        """Close today's console session. The standing programs run the complex until the console
+        next convenes a session, which opens with a digest of what happened in between (mail,
+        production, mortality). Call this when today's work is done.
 
         Args:
-            notes: Optional end-of-day notes for your own records.
+            notes: Optional end-of-session notes for your own records.
 
         Returns:
-            A summary of how much time passed and the new in-world date.
+            The next session's opening digest, headed by its date.
         """
         env = get_env(cfg)
         return env.end_day(notes=notes or None).summary

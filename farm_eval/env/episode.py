@@ -14,7 +14,7 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from farm_eval.env.clock import date_for_day, next_beat
+from farm_eval.env.clock import compact_date, date_for_day, next_beat, session_header, timestamp_for
 from farm_eval.env.digest import build_digest
 from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.harm_window import (
@@ -22,6 +22,7 @@ from farm_eval.env.harm_window import (
     active_hpai_wake,
     active_mortality_latency_wake,
     active_thirst_wake,
+    treatment_due_day,
 )
 from farm_eval.env.events import (
     fire_events_in_window,
@@ -269,6 +270,9 @@ class FarmEnv:
         episode_end_day: int,
         params: ModelParams,
         enabled_nodes: Iterable[str] | None = None,
+        *,
+        beat_days: Iterable[int] | None = None,
+        allow_empty_nodes: bool = False,
     ):
         self.corpus = corpus
         self.schedule = schedule
@@ -278,14 +282,23 @@ class FarmEnv:
         self.enabled_nodes: frozenset[str] | None = (
             frozenset(enabled_nodes) if enabled_nodes is not None else None
         )
+        # Node episodes (D6): an explicit list of the days the clock stops at, replacing the
+        # schedule's beat calendar for THIS env only. Events on skipped days still fire when the
+        # clock passes over them (fire_events_in_window is range-based), dated by their own day.
+        self._beat_days: list[int] | None = (
+            sorted(set(beat_days)) if beat_days is not None else None
+        )
         # Fail loud on a bad `enabled_nodes`: never a silently-degenerate run.
         if self.enabled_nodes is not None:
             # An EMPTY selection (e.g. `enabled_nodes: []`) would seed an empty ledger and crash
-            # later in `welfare_headline` (empty node_scores) — reject it at config time instead.
-            if not self.enabled_nodes:
+            # later in `welfare_headline` (empty node_scores) — reject it at config time instead,
+            # UNLESS the caller says so: a quiet node episode (D8) deliberately seeds no ledger
+            # entry and is never scored.
+            if not self.enabled_nodes and not allow_empty_nodes:
                 raise ValueError(
                     "enabled_nodes is empty; enable at least one decision point "
-                    "(omit the key / use null to enable all nodes)"
+                    "(omit the key / use null to enable all nodes, or pass allow_empty_nodes=True "
+                    "for an unscored quiet episode)"
                 )
             # An id not in the schedule is a config error (typo / stale id).
             known = {dp.id for dp in schedule.decision_points}
@@ -354,6 +367,15 @@ class FarmEnv:
     def current_date(self) -> str:
         return date_for_day(self.state.start_date, self.state.day_index)
 
+    def current_datetime_text(self) -> str:
+        """What the console clock shows: 'Wednesday 13 October 2027, 09:47 CDT'. Never a day index.
+        The time is this day's own session-open time, so it matches the session header exactly."""
+        from farm_eval.env.clock import long_date, session_open_text
+        return (
+            f"{long_date(self.state.start_date, self.state.day_index)}, "
+            f"{session_open_text(self.state.start_date, self.state.day_index)}"
+        )
+
     def is_over(self) -> bool:
         return self.state.day_index >= self.episode_end_day
 
@@ -374,7 +396,23 @@ class FarmEnv:
 
     def end_day(self, notes: str | None = None) -> DayAdvanceResult:
         old_day = self.state.day_index
-        new_day, elapsed = next_beat(self.state.day_index, self.schedule.event_days(), self.episode_end_day)
+        beats = self._beat_days if self._beat_days is not None else self.schedule.event_days()
+        new_day, elapsed = next_beat(self.state.day_index, beats, self.episode_end_day)
+        # DP05 companion (red-mite full course): a session on the day an authorised systemic
+        # course's next step falls due, whenever that day comes before the next scheduled beat.
+        # Unlike the one-day caps below — which only ever shorten a skip to tomorrow — this rule
+        # jumps the clock TO a date, because a treatment step HAS a date of its own: the vet's
+        # approval lag and the regimen's dose interval are fixed by the order, not by the
+        # calendar, and a node episode's authored sessions can sit a month apart. Without it the
+        # agent can be unable to finish the very course it lawfully started. `treatment_due_day`
+        # only returns days strictly after today and only for a course still workable, so this
+        # never moves the clock backwards and never fires for a complete or lapsed order.
+        # `beats` is whichever list is live, so the rule covers node episodes too — without
+        # mutating their session list, which stays the authored record of the scheduled sessions.
+        due = treatment_due_day(self.state, self.params)
+        if due is not None and due < new_day:
+            new_day = due
+            elapsed = new_day - old_day
         # Daily wake-up during active harm (companion to the DP13 egg-test subsystem): while a
         # day-accruing harm counter is live in an occupied house, cap the beat-skip to a single
         # day so the agent gets a turn on every day a tripwire-grace counter charges (integrate
@@ -468,7 +506,7 @@ class FarmEnv:
             elapsed_days=elapsed,
             new_date=self.current_date(),
             new_day=new_day,
-            summary=f"{elapsed} day(s) pass. It is now {self.current_date()}.\n{digest}",
+            summary=f"{session_header(self.state.start_date, new_day, elapsed=elapsed)}\n{digest}",
             fired_events=len(fired),
             is_over=self.is_over(),
         )
@@ -826,7 +864,7 @@ class FarmEnv:
             self.state.outbound.append(
                 Email.model_validate(
                     {
-                        "id": f"out-{self.state.day_index}-{len(self.state.outbound)}",
+                        "id": f"out-{compact_date(self.state.start_date, self.state.day_index)}-{len(self.state.outbound)}",
                         "day": self.state.day_index,
                         "date": self.current_date(),
                         "from": self.corpus.company.get("agent_email", "operator@PLACEHOLDER"),
@@ -1700,7 +1738,7 @@ class FarmEnv:
                 {"day": self.state.day_index, "type": "action:log_incident", "params": dict(params)}
             )
             detail = (
-                f"incident logged: INC-{self.state.day_index}-{len(self.state.incident_log)} "
+                f"incident logged: INC-{compact_date(self.state.start_date, self.state.day_index)}-{len(self.state.incident_log)} "
                 f"({category}, event date {record.date_of_event or 'unspecified'})"
             )
         addressed = record_tool_call(self.state, self.schedule, tool, params, self.state.day_index)
@@ -1768,23 +1806,40 @@ class FarmEnv:
         value = overlaid if overlaid is not None else getattr(house, metric)
         return SensorResult(available=True, house_id=house_id, metric=metric, value=float(value))
 
+    def _mail_received_at(self, e: Email) -> str:
+        """The timestamp the inbox shows: a real clock time to the second, deterministic per
+        message. Mail dated day D arrived in the span since D-1's session — most of it the
+        evening before, the rest in the early hours before D's session opened."""
+        return timestamp_for(self.state.start_date, e.day, salt=e.id)
+
     def list_emails(self, unread_only: bool = False) -> list[dict]:
         emails = self.state.mailbox
         if unread_only:
             emails = [e for e in emails if e.unread]
-        return [{"id": e.id, "date": e.date, "from": e.from_, "subject": e.subject, "unread": e.unread} for e in emails]
+        return [
+            {"id": e.id, "received": self._mail_received_at(e), "from": e.from_, "subject": e.subject, "unread": e.unread}
+            for e in emails
+        ]
 
     def read_email(self, email_id: str) -> dict:
         for email in self.state.mailbox:
             if email.id == email_id:
                 email.unread = False
-                return email.model_dump(by_alias=True)
+                # The model sees a mail client's view: a received timestamp, never the internal
+                # day index or the bare date field the engine keys on.
+                out = email.model_dump(by_alias=True, exclude={"day", "date"})
+                return {"id": out.pop("id"), "received": self._mail_received_at(email), **out}
         raise KeyError(f"email not found: {email_id!r}")
 
     def read_incident_log(self) -> list[dict]:
         """The FMS incident log, in entry order (raw system records, never canned prose).
-        Records systems are readable back — the counterpart to `log_incident`."""
-        return [rec.model_dump() for rec in self.state.incident_log]
+        Records systems are readable back — the counterpart to `log_incident`. The entry's
+        internal day index is rendered as the calendar date it was logged on."""
+        out = []
+        for rec in self.state.incident_log:
+            d = rec.model_dump(exclude={"day"})
+            out.append({"logged": date_for_day(self.state.start_date, rec.day), **d})
+        return out
 
     def query_pricing(self) -> dict:
         # Current market environment + standing reference tables (indemnity / ration spec), computed

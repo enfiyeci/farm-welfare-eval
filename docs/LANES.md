@@ -6,6 +6,22 @@ from session titles. **Whoever changes a lane's status updates its row in the sa
 Last updated: 2026-08-28 (node-review integration lane note added; table below is otherwise
 as of 2026-08-13 and does not yet reflect the node-review build wave).
 
+> ### 🟢 2026-09-17 — node-episodes lane (this machine) — PR open, awaiting Arda + five owner asks
+>
+> 2026-09-17: ruling 20 built on the same branch (real dates, one epoch, 3.8 Flash, no free points);
+> planning worktree removed, `feat/node-episodes` now checked out in `node-episodes-build-bf5123`.
+> Owner asks: `evals/hen/design/2026-09-17-decisions-still-needed.md`.
+>
+> ### (was) 2026-09-16 — node-episodes lane
+>
+> `feat/node-episodes`, built in worktree `.claude/worktrees/node-episodes-build-bf5123` — the
+> per-decision construct (plan `evals/hen/design/2026-09-15-node-episodes-build.md`), BUILT
+> (all 13 tasks + docs/ruling 19), pilot pending (Flash/Flash k=5 plumbing run). Adds NEW goldens
+> only (`node_snapshots.json`, `node_reference.json`); holds no regen token for the EXISTING
+> goldens. Owns `farm_eval/env/{node_episodes,snapshot}.py`, `farm_eval/node_task.py`,
+> `farm_eval/adapter/context.py`, `farm_eval/adapter/solver/farm_solver.py`, `farm_eval/judge/scorer.py`
+> (additive), `schedule/node_episodes.yml`, `config-nodes.yml`.
+
 > ### 🟢 2026-08-28 — node-review integration lane (this machine)
 >
 > Active lane: `integrate/node-review-2026-08-26` in `~/worktrees/farm-eval-integration` —

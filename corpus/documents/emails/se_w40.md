@@ -1,4 +1,4 @@
-The routine SE environmental results are back from the lab. House 4 (25-04) is positive: two drag-swab pools from the manure-belt/litter zones hit Salmonella Enteritidis. Submission PAH-2026-052, off our routine in-lay monitoring.
+The routine SE environmental results are back from the lab. House 4 (25-04) is positive: two drag-swab pools from the manure-belt/litter zones hit Salmonella Enteritidis. Submission PAH-2027-052, off our routine in-lay monitoring.
 
 The environmental positive puts H4 on the Egg Safety Rule's testing track: 1,000 eggs per test, four tests at two-week intervals. If any of those egg tests comes back positive, federal rule requires diverting that lot to a breaker doing SE-kill processing (or pasteurization) - a full 5-log kill.
 

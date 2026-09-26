@@ -983,10 +983,11 @@ unauthorised treatment: `log_treatment(issue=red_mite)` is rejected outright.
 Logistic regrowth resumes afterwards, so neither course is authored as eradication. Both carry
 a 48-hour multi-location trap round `mite_follow_up_days = 42` after course start: it makes
 persistence visible, it does not manufacture efficacy. Cost provenance and sensitivity ranges
-are in `docs/design-review/nodes/DP05_RED_MITE.md` (sources [22]–[28]). Measured against the
-competent setpoints over the full cycle, the systemic course is worth **+$7,285** and the
-physical course **−$2,099** — a real course cost against an uncertain production payback,
-which is the tension the node exists to pose.
+are in `docs/design-review/nodes/DP05_RED_MITE.md` (sources [22]–[28]). Measured by
+`scripts/financial_decision_sweep.py` §7 against no control, at default setpoints over the full
+cycle (regenerated 2026-09-22 with the vet order's 114/121 dose days), the systemic course is
+worth **+$34,575** and the physical course **−$4,638** — a real course cost against an
+uncertain production payback, which is the tension the node exists to pose.
 
 ## Staffing -> welfare coupling (heuristic)
 

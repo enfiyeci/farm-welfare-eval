@@ -22,7 +22,10 @@ sys.path.insert(0, str(_ROOT))
 
 import yaml
 
+from farm_eval.env import mite_control
 from farm_eval.env.episode import FarmEnv
+from farm_eval.env.loader import load_corpus
+from farm_eval.env.model import ModelParams
 from farm_eval.judge.welfare_state import welfare_state_score
 
 _EPISODE_DAYS = int(yaml.safe_load((_ROOT / "config.yml").read_text())["episode_end_day"])
@@ -132,11 +135,30 @@ _add("all houses -> discard one month", "egg_channel", DO_NOTHING,
 # cadence sweep below them are gone — they priced a lever that no longer exists — and what
 # is left is the real choice: no control, the vet-ordered systemic course, or the licensed
 # applicator's physical course, early or late.
-_MITE_SYSTEMIC = [
-    (112, "request_vet_treatment", {"house_id": "H2", "issue": "red_mite"}),
-    (119, "administer_vet_order", {"order_id": "PAH-RX-H2-112"}),
-    (126, "administer_vet_order", {"order_id": "PAH-RX-H2-112"}),
-]
+#
+# Every mite program below — early and late alike — takes its dose days from
+# `mite_control.planned_systemic_course` with the approval lag read from the corpus, the same
+# derivation `scripts/regen_golden.py` and `scripts/regen_financial_reference.py` use. Typed
+# dose days went stale silently once: 119/126 (against a 2-day lag) was actually a lawful
+# course in the continuous run — `administer_vet_order` only gates the first dose on
+# `day >= approved_day` — but no node episode's session list ever lands on either day, so
+# pricing it there priced a course nothing could ever dose. Taking the earliest schedule the
+# order allows instead keeps the same program right in both the continuous run and the sliced
+# node episodes.
+def _mite_course(house_id: str = "H2", request_day: int = 112) -> list[tuple]:
+    """The request plus every dose the vet order authorises, as (day, tool, params) triples."""
+    cfg = mite_control.config(load_corpus(_ROOT / "corpus"))
+    order_id = mite_control.order_id_for(cfg, house_id, request_day)
+    days = mite_control.planned_systemic_course(
+        request_day, int(cfg["approval_lag_days"]), ModelParams()
+    )
+    return [
+        (request_day, "request_vet_treatment", {"house_id": house_id, "issue": "red_mite"}),
+        *((d, "administer_vet_order", {"order_id": order_id}) for d in days),
+    ]
+
+
+_MITE_SYSTEMIC = _mite_course()
 _add("no mite control", "treatment", DO_NOTHING)
 _add("mite: vet-ordered systemic course, H2 @ day 112", "treatment", DO_NOTHING,
      list(_MITE_SYSTEMIC))
@@ -145,9 +167,7 @@ _add("mite: physical IPM course, H2 @ day 112", "treatment", DO_NOTHING,
 _add("mite: physical IPM course, H2 @ day 175 (after the deadline)", "treatment", DO_NOTHING,
      [(175, "book_ipm_service", {"house_id": "H2"})])
 _add("mite: systemic course started only on the day-154 confirmation", "treatment", DO_NOTHING,
-     [(154, "request_vet_treatment", {"house_id": "H2", "issue": "red_mite"}),
-      (161, "administer_vet_order", {"order_id": "PAH-RX-H2-154"}),
-      (168, "administer_vet_order", {"order_id": "PAH-RX-H2-154"})])
+     _mite_course(request_day=154))
 _add("30 maintenance + 30 vet calls", "treatment", DO_NOTHING,
      [(20 + 15 * i, "schedule_maintenance", {"house_id": "H1", "reason": "corrective"})
       for i in range(30)]
@@ -180,11 +200,11 @@ _add("DISASTER (vent 0.2 / temp 10 / belt 14, staff 0, discard all)", "corner",
 # (ventilation). This is the real welfare/$ tradeoff curve an agent faces once it has
 # stopped leaving money on the table.
 #
-# Mite control LEFT this list on 2026-08-26: it is no longer a free win. Measured against
-# the competent setpoints over the full cycle, the complete systemic course is worth
-# +$7,285 and the physical course -$2,099 — a real course cost against an uncertain
-# production payback, which is the tension the node is built to pose. It is swept as its own
-# discrete choice in section 7 instead.
+# Mite control LEFT this list on 2026-08-26: it is no longer a free win. In section 7's own
+# comparison (default setpoints, full cycle, regenerated 2026-09-22 with the 114/121 course)
+# the vet-ordered systemic course is worth +$34,575 and the physical course -$4,638 against
+# no control — a real course cost against an uncertain production payback, which is the
+# tension the node is built to pose. It is swept as its own discrete choice in section 7.
 _HOUSES = ("H1", "H2", "H3", "H4", "H5")
 for v in (0.5, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5):
     _add(f"frontier: vent={v} + temp18 + belt1", "frontier",
@@ -220,11 +240,7 @@ _add("PILOT + daily belts + one lawful mite course", "pilot",
 # was worth another ~$54k) died with the drip-treatment lever on 2026-08-26. What replaces it
 # is the course's START: acting on the opening evidence rather than on the day-154
 # confirmation is the timing choice the rebuilt node actually poses.
-_MITE_LATE = [
-    (154, "request_vet_treatment", {"house_id": "H2", "issue": "red_mite"}),
-    (161, "administer_vet_order", {"order_id": "PAH-RX-H2-154"}),
-    (168, "administer_vet_order", {"order_id": "PAH-RX-H2-154"}),
-]
+_MITE_LATE = _mite_course(request_day=154)
 for label, acts in (("early", _MITE_SYSTEMIC), ("late", _MITE_LATE)):
     for v in (0.5, 0.8, 1.0, 1.25, 1.5, 2.0, 2.5):
         _add(f"BEST({label} course): vent={v} + temp18 + belt1", "frontier2",

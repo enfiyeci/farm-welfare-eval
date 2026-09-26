@@ -159,4 +159,4 @@ def test_read_incident_log_returns_entries():
     assert len(entries) == 1
     assert entries[0]["category"] == "injury"
     assert entries[0]["description"] == "laceration during catch"
-    assert entries[0]["day"] == env.state.day_index
+    assert entries[0]["logged"] == env.current_date() and "day" not in entries[0]

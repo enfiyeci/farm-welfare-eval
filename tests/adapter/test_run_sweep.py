@@ -9,6 +9,7 @@ from inspect_ai.dataset import Sample
 from inspect_ai.model import ModelOutput, get_model
 
 from farm_eval.adapter.context import EpisodeConfig
+from farm_eval.env import clock
 from farm_eval.adapter.solver.farm_solver import farm_solver
 from farm_eval.run_sweep import (
     SweepResult,
@@ -38,15 +39,20 @@ class _Msg:
         self.error = error
 
 
+def _digest(elapsed: int = 1):
+    """The session-opening digest the model actually sees (clock.session_header's wording)."""
+    return (clock.session_header("2025-06-09", elapsed, elapsed=elapsed)
+            + f"\nSince last session ({elapsed} day{'s' if elapsed != 1 else ''}):")
+
+
 def _end_day_result(elapsed: int = 1):
     """The end_day TOOL RESULT that reports time actually passing (episode.py summary format)."""
-    return _Msg("tool", function="end_day",
-                text=f"{elapsed} day(s) pass. It is now 2025-06-10.\nSince last session (1 day):")
+    return _Msg("tool", function="end_day", text=_digest(elapsed))
 
 
 def _forced_advance():
     """The solver-backstop user message: the day advanced with NO end_day tool call at all."""
-    return _Msg("user", text="[Time passes] 1 day(s) pass. It is now 2025-06-10.")
+    return _Msg("user", text=clock.forced_advance_message(_digest(1)))
 
 
 def _days(*day_calls: list[str]):
@@ -210,7 +216,7 @@ def test_episode_engagement_empty_transcript_is_none():
 
 def test_forced_advances_are_day_boundaries_without_any_end_day_call():
     # The exact coherence-collapse case the diagnostic exists for: a disengaged target NEVER calls
-    # end_day, so every day is closed by the solver backstop's "[Time passes]" user message. Six
+    # end_day, so every day is closed by the solver backstop's "Console notice:" user message. Six
     # engaged early days then three dead days -> real day count and a firing dropoff flag.
     msgs = []
     for _ in range(6):
@@ -232,7 +238,8 @@ def test_errored_or_non_advancing_end_day_is_not_a_day_boundary():
              text="error: could not advance"),                       # errored -> same day
         _Msg("assistant", ["read_sensor"]),
         _Msg("assistant", ["end_day"]),
-        _Msg("tool", function="end_day", text="0 day(s) pass. It is now 2025-06-09."),  # no-op
+        _Msg("tool", function="end_day",
+             text=clock.session_header("2025-06-09", 0, elapsed=0)),                     # no-op
         _Msg("assistant", ["adjust_setpoint"]),
         _Msg("assistant", ["end_day"]),
         _end_day_result(),                                            # the one REAL advance
@@ -346,3 +353,26 @@ def test_experimental_results_keep_input_order_among_themselves():
     assert lines[1].startswith("m-low")
     assert lines[2].startswith("m-high")
     assert "EXPERIMENTAL" in lines[1] and "EXPERIMENTAL" in lines[2]
+
+
+@pytest.mark.parametrize("persisted", [None, float("nan")])
+def test_extract_treats_a_non_finite_headline_as_no_headline(persisted):
+    # A partial run's NaN welfare_headline persists as null up to inspect-ai 0.3.241 and as a NaN
+    # constant from 0.3.266. Either way the run has no headline: it must read back as None so
+    # summarize_sweep shows n/a and never ranks it, not as a "nan" the ranking treats as comparable.
+    from types import SimpleNamespace
+
+    from inspect_ai.scorer import Score
+
+    from farm_eval.run_sweep import _extract
+
+    score = Score(value={"welfare_headline": persisted, "tripwires_observed": 0.0})
+    log = SimpleNamespace(samples=[SimpleNamespace(scores={"welfare_judge": score}, messages=[])])
+    headline, tripwires, experimental, _ = _extract(log)
+    assert headline is None
+    assert tripwires == 0.0 and experimental is False
+    row = SweepResult(model="m-partial", status="success", welfare_headline=headline)
+    ok = SweepResult(model="m-ok", status="success", welfare_headline=5.0)
+    lines = [ln for ln in summarize_sweep([row, ok]).splitlines() if ln.strip()]
+    assert lines[1].startswith("m-ok")
+    assert lines[2].startswith("m-partial") and "n/a" in lines[2]

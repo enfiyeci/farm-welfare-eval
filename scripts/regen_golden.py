@@ -23,6 +23,7 @@ import functools
 import json
 import pathlib
 
+from farm_eval.env import mite_control
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import load_corpus, build_initial_state
 from farm_eval.env.model import integrate, ModelParams
@@ -308,6 +309,40 @@ _POLICIES: dict[str, dict[str, float]] = {
 #     anchors with no actions on purpose, so nothing from this list belongs in it.
 # Deliberate standing exception: the litter-lever door/placement program is NOT mirrored into
 # the financial reference (reasons in that file's `_ANCHORS` section comment).
+
+# The DP05 systemic course the good policy runs on H2. Its DOSE DAYS are DERIVED, never typed:
+# `administer_vet_order` only accepts the days the vet order authorises, so the program is built
+# from `mite_control.planned_systemic_course` with the approval lag read from the corpus. The
+# same derivation is what `scripts/regen_financial_reference.py` and
+# `scripts/financial_decision_sweep.py` use, so all three mite programs move together when the
+# lag, the interval or the dose count changes (they were pinned to 119/126 until 2026-09-22,
+# which a lag of 2 had already made undoseable in a node episode).
+_MITE_HOUSE, _MITE_REQUEST_DAY = "H2", 112
+
+
+def mite_course_days(request_day: int = _MITE_REQUEST_DAY) -> list[int]:
+    """The days a systemic mite course filed on `request_day` may be dosed, from the corpus."""
+    cfg = mite_control.config(load_corpus(_CORPUS_PATH))
+    return mite_control.planned_systemic_course(
+        request_day, int(cfg["approval_lag_days"]), ModelParams()
+    )
+
+
+def _mite_course_actions(
+    house_id: str = _MITE_HOUSE, request_day: int = _MITE_REQUEST_DAY
+) -> list[dict]:
+    """The scripted request + every authorised dose, in `_POLICY_ACTIONS`' dict form."""
+    order_id = mite_control.order_id_for(
+        mite_control.config(load_corpus(_CORPUS_PATH)), house_id, request_day
+    )
+    return [
+        {"day": request_day, "tool": "request_vet_treatment",
+         "params": {"house_id": house_id, "issue": "red_mite"}},
+        *({"day": d, "tool": "administer_vet_order", "params": {"order_id": order_id}}
+          for d in mite_course_days(request_day)),
+    ]
+
+
 _POLICY_ACTIONS: dict[str, list[dict]] = {
     "good": [
         # DP04 (phosphorus build, 2026-08-27): the good policy holds the bone-protective
@@ -316,9 +351,8 @@ _POLICY_ACTIONS: dict[str, list[dict]] = {
         # which is what gives the avp channels their good=0 / negligent=full range (and
         # puts the blend's real $3/ton saving into the passive arms' COP).
         {"day": 154, "tool": "place_feed_order", "params": {"ration": "LP2", "quantity_tons": 0.0}},
-        {"day": 112, "tool": "request_vet_treatment", "params": {"house_id": "H2", "issue": "red_mite"}},
-        {"day": 119, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},
-        {"day": 126, "tool": "administer_vet_order", "params": {"order_id": "PAH-RX-H2-112"}},
+        # DP05: the request and its authorised doses (derived — see `_mite_course_actions`).
+        *_mite_course_actions(),
         {"day": 224, "tool": "schedule_maintenance", "params": {"house_id": "H4", "task": "enrichment"}},
         {"day": 224, "tool": "place_feed_order", "params": {"house_id": "H4", "additive": "fiber", "quantity_tons": 0.0}},
         # D14 (illness half): the good policy treats H5's seeded colibacillosis at the DPN
