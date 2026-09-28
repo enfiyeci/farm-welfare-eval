@@ -4,6 +4,25 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-28 · claude · written version of each node: design DRAFTED, awaiting the owner (branch feat/written-version, off docs/reviewer-digest)
+
+- **What / decided:** design spec `evals/hen/design/2026-09-28-written-version-design.md`. One
+  YAML card per node (`schedule/written/<NODE_ID>.yml`) feeds two things: a blind expert form
+  (path marks 0 to 10, a band check, and three ratio questions for the Welfare Footprint pain
+  bands) and a tool-free Inspect task where a model chooses a path (stated preference), compared
+  with its node-episode score (revealed preference). Owner-decided: experts and models both
+  answer; own worktree. Everything else in the spec is a default awaiting the owner, listed in
+  its section 10. Nothing is built.
+- **Review:** tier-2 adversarial, `gpt-6-astra` read-only, session
+  `01a0e6e3-8fd0-71f1-9925-eda3a6f17e5b`: round 1 REVISE (13), round 2 REVISE (4 new, from the
+  rewrite), round 3 APPROVED. All 17 accepted and fixed; table in the spec's section 13. Mutation
+  guard clean all three rounds.
+- **Next action:** owner reads the spec and rules on section 10 (eight items). Then the phase 1
+  implementation plan (cards and expert form). Phase 1 needs the node-episode definitions, which
+  are on `feat/node-episodes-all-decisions` and not on this branch.
+- **Refs:** the spec; digest lane handoff of 2026-09-16; rulings 19 to 21 on
+  `origin/feat/node-episodes-all-decisions`.
+
 ## 2026-09-08 · claude · coworker pages reconciled to main + send-ready "nodes pack" build (branch docs/nodes-pack)
 
 - **What / decided:** the plain-language coworker pages (`docs/design-review/coworker/`) are the
