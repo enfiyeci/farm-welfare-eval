@@ -3,12 +3,21 @@
 #   Smoke/pilot runs: Gemini 3.8 Flash (or a NEWER Flash once one exists — never gemini-2.5-flash
 #   again, owner directive 2026-09-17) as BOTH target and grader over Vertex until the construct is
 #   trusted; other targets + out-of-family graders come later.
-#     set -a; source /home/oliver/Documents/Github/farm-welfare-eval/scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
-#     INSPECT=/home/oliver/Documents/Github/farm-welfare-eval/venv/bin/inspect
+#   From the repo root (the main checkout; worktrees have no ./venv):
+#     set -a; source scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
+#     INSPECT=./venv/bin/inspect PY=./venv/bin/python
 #     $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
 #         --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash \
-#         --epochs 5 --max-connections 8          # k=5 for a reliability pilot; the default is ONE run
+#         --epochs 5 --max-connections 8 --retry-on-error 1
 #     $PY scripts/node_reliability.py logs/<run>.eval
+#
+#   --epochs 5 is k=5 for a reliability pilot; the default is ONE run. --retry-on-error 1 is
+#   optional: it re-runs an errored sample ONCE, from scratch, so a retry costs a whole episode
+#   again (up to ~2 h and ~8M tokens for the longest); drop it to keep a run's spend bounded.
+#
+#   Errors are isolated per sample (`fail_on_error: false` below, B4): one episode that errors is
+#   logged with its error and listed by node_reliability.py; the other episodes keep running and
+#   are scored. Pass `--fail-on-error` on the CLI only to get the old stop-everything behaviour.
 #
 # The unit is one sample per (episode × arm) from schedule/node_episodes.yml; `epochs` is k, the
 # repeat count the reliability report (pass rate, pass^k) is computed over.
@@ -22,6 +31,7 @@ node_reference_path: farm_eval/judge/node_reference.json   # per-episode good/ne
 seed: 0
 epochs: 1                               # default ONE run per episode (owner directive 2026-09-17); pass --epochs k for pass^k
 max_turns_per_day: 30
+fail_on_error: false                    # B4: isolate per-sample errors (see header); a float in (0,1) or a count > 1 = threshold
 judge_samples: 1                        # llm criteria + validity dims sampled once; raise for judged nodes
 dimension_mode: validity_only           # full | validity_only | none (D9)
 model_params: {}

@@ -117,4 +117,10 @@ def farm_node_task(
             node_reference_path=cfg.get("node_reference_path"),
         ),
         epochs=int(cfg.get("epochs", 1)),
+        # B4 (k=1 run, 2026-09-22): Inspect's default fail_on_error=True let ONE sample's
+        # provider 400 cancel every other in-flight episode. A node sample is a self-contained
+        # episode, so an error is isolated to it (logged on the sample, listed by the
+        # reliability report) and the rest still run and score. Key absent = False; a float in
+        # (0, 1) or a count > 1 restores a threshold. The CLI `--fail-on-error` still overrides.
+        fail_on_error=cfg.get("fail_on_error", False),
     )
