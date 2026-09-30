@@ -164,8 +164,9 @@ Then wait. Don't push a change to a disputed point before the user answers. If s
   and `review / claude-review` (the Claude reviewer). The reviewer cannot read
   test results while it reviews; afterwards its verify step fails
   `review / claude-review` if it approved a commit whose `tests` run failed —
-  but it waits only 90s for that run, so a green review usually means the
-  approval was never checked against CI. Read the `tests` check itself. Red
+  but until sentfutures/devops#7 lands it waits only 90s for that run, so a
+  green review usually means the approval was never checked against CI. Read
+  the `tests` check itself. Red
   `review / claude-review` means the bot posted no binary verdict or approved
   over a failing suite; the PR then carries `needs-human-review`. No reviewer
   is requested (`escalate_to` is empty by the owner's choice), so that label is

@@ -15,6 +15,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   (they still said the repo had no CI).
 - **Limit to know:** the cross-check waits only 90s after the review, and the suite takes 7–12
   min, so most approvals are left unchecked (a notice, not a failure). Read `tests` itself.
+  Upstream fix proposed in sentfutures/devops#7 (wait for the check to finish, cap 20 min);
+  once it merges, drop the "until #7" caveat from the caller and the skill.
 
 ## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
 

@@ -40,10 +40,11 @@ jobs:
       escalate_to: ""
       #
       # The pytest job in tests.yml. After the review, the verify step fails
-      # this check if the bot approved a commit whose `tests` run failed. It
-      # waits only 90s for that run, and the suite usually outlasts the
-      # review, so a slow run leaves the approval unchecked (a notice, not a
-      # failure) — read the `tests` check itself before merging.
+      # this check if the bot approved a commit whose `tests` run failed.
+      # Until sentfutures/devops#7 lands, it waits only 90s for that run, and
+      # the suite usually outlasts the review, so a slow run leaves the
+      # approval unchecked (a notice, not a failure) — read the `tests` check
+      # itself before merging. After #7 it waits for the suite to finish.
       required_check: "tests"
       # Optional — repo-specific review rules, appended to the prompt:
       # extra_instructions: |
