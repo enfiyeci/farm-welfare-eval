@@ -181,6 +181,9 @@ def get_env(cfg: EpisodeConfig) -> FarmEnv:
             params,
             enabled_nodes=None,  # every decision on the ledger; the judge scores spec["dp_id"] only
             beat_days=spec["sessions"],
+            # Absent in a store written before the wake-scope proposal: None keeps that run's
+            # original clock (every node may wake).
+            wake_nodes=spec.get("wake_nodes"),
         )
     if cfg.node_episodes:
         raise RuntimeError(

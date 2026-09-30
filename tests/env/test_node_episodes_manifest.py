@@ -111,5 +111,6 @@ def test_store_dict_round_trips_the_fields_the_adapter_needs():
         "episode_id": "DP_PLACEHOLDER_2", "arm_id": "history_bad", "dp_id": "DP_PLACEHOLDER_2",
         "start_day": 10, "end_day": 21, "sessions": [15, 20, 21],
         "scored": True, "welfare_pass_min": 7.0, "ablation_overrides": None,
+        "wake_nodes": ["DP_PLACEHOLDER_2"],
         "opening_digest": "Console session — ... (14 days since the previous session)",
     }

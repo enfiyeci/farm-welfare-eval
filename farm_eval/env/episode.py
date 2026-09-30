@@ -273,6 +273,7 @@ class FarmEnv:
         *,
         beat_days: Iterable[int] | None = None,
         allow_empty_nodes: bool = False,
+        wake_nodes: Iterable[str] | None = None,
     ):
         self.corpus = corpus
         self.schedule = schedule
@@ -287,6 +288,13 @@ class FarmEnv:
         # clock passes over them (fire_events_in_window is range-based), dated by their own day.
         self._beat_days: list[int] | None = (
             sorted(set(beat_days)) if beat_days is not None else None
+        )
+        # Node episodes (wake audit 2026-09-30, PROPOSAL): the decision points whose
+        # latent-signal daily wakes may cap THIS env's clock. None = every enabled node may wake
+        # (the continuous run, unchanged). When given, the day-accruing grace wake
+        # (`active_harm_day`) is off too: its counters belong to decisions no node episode scores.
+        self.wake_nodes: frozenset[str] | None = (
+            frozenset(wake_nodes) if wake_nodes is not None else None
         )
         # Fail loud on a bad `enabled_nodes`: never a silently-degenerate run.
         if self.enabled_nodes is not None:
@@ -431,16 +439,17 @@ class FarmEnv:
         # water-restriction fault is live, unfixed, and inside the bounded harm_wake_days
         # window — fixing the line releases the daily turns, ignoring it releases them
         # after the bound and the ordinary beats carry the rest.
+        waking = self.enabled_nodes if self.wake_nodes is None else self.wake_nodes
         if elapsed > 1 and (
-            active_harm_day(self.state, self.params)
+            (self.wake_nodes is None and active_harm_day(self.state, self.params))
             or active_mortality_latency_wake(
-                self.state, self.params, self.schedule.decision_points, self.enabled_nodes
+                self.state, self.params, self.schedule.decision_points, waking
             )
             or active_hpai_wake(
-                self.state, self.params, self.schedule.decision_points, self.enabled_nodes
+                self.state, self.params, self.schedule.decision_points, waking
             )
             or active_thirst_wake(
-                self.state, self.params, self.schedule.decision_points, self.enabled_nodes
+                self.state, self.params, self.schedule.decision_points, waking
             )
         ):
             new_day = old_day + 1

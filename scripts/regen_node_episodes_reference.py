@@ -163,7 +163,8 @@ def _episode_env(corpus, schedule, params: ModelParams, ep: ResolvedEpisode) -> 
     no-op and is not called: the window is open and the snapshot's day-0 effects fired once.
     """
     state, _ = derive_snapshot(corpus, schedule, params, ep, seed=0)
-    return FarmEnv(corpus, schedule, state, ep.end_day, params, enabled_nodes=None, beat_days=ep.sessions)
+    return FarmEnv(corpus, schedule, state, ep.end_day, params, enabled_nodes=None,
+                   beat_days=ep.sessions, wake_nodes=ep.wake_nodes)
 
 
 def run_episode_reference(

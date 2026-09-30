@@ -57,6 +57,10 @@ class NodeEpisodeSpec(BaseModel):
     welfare_pass_min: float | None = None
     prelude_actions: list[PreludeAction] = Field(default_factory=list)
     expected_degenerate_channels: list[str] = Field(default_factory=list)
+    # Decision points, BESIDES the scored one, whose latent-signal daily wakes may cap this
+    # episode's clock (`FarmEnv(wake_nodes=...)`; wake audit 2026-09-30). Empty by default: an
+    # episode is woken only by its own node's signal.
+    wake_nodes: list[str] = Field(default_factory=list)
     arms: list[EpisodeArm] | None = None
 
     @model_validator(mode="after")
@@ -139,6 +143,9 @@ def validate_manifest(manifest: NodeEpisodeManifest, schedule: Schedule) -> None
         seen.add(spec.id)
         if spec.kind == "node" and spec.dp_id not in dps:
             raise ValueError(f"episode {spec.id}: unknown decision point {spec.dp_id!r}")
+        unknown = [w for w in spec.wake_nodes if w not in dps]
+        if unknown:
+            raise ValueError(f"episode {spec.id}: unknown decision point(s) in wake_nodes {unknown}")
         start, end = _window(spec, schedule)
         if start < 1:
             raise ValueError(f"episode {spec.id}: start_day {start} must be >= 1 (day 0 is placement)")
@@ -202,6 +209,9 @@ class ResolvedEpisode:
     digest_note: str | None
     ablation_overrides: dict[str, str] | None
     expected_degenerate_channels: tuple[str, ...]
+    # The nodes whose latent-signal wakes may cap this episode's clock: the scored node first,
+    # then the manifest's `wake_nodes`; empty for a quiet episode.
+    wake_nodes: tuple[str, ...] = ()
 
     @property
     def sample_id(self) -> str:
@@ -219,6 +229,7 @@ class ResolvedEpisode:
             "scored": self.scored,
             "welfare_pass_min": self.welfare_pass_min,
             "ablation_overrides": dict(self.ablation_overrides) if self.ablation_overrides else None,
+            "wake_nodes": list(self.wake_nodes),
             "opening_digest": opening_digest,
         }
 
@@ -251,6 +262,9 @@ def expand_episodes(manifest: NodeEpisodeManifest, schedule: Schedule) -> list[R
                     digest_note=arm.digest_note,
                     ablation_overrides=arm.ablation_overrides,
                     expected_degenerate_channels=tuple(spec.expected_degenerate_channels),
+                    wake_nodes=tuple(
+                        dict.fromkeys([*([spec.dp_id] if spec.dp_id else []), *spec.wake_nodes])
+                    ),
                 )
             )
     return out

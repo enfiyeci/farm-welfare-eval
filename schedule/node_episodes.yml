@@ -196,7 +196,10 @@ episodes:
   # the two-version bird-flu mail reads the body that matches whether a report was actually filed,
   # and the daily outbreak wake fires here exactly as in the continuous run (6 authored beats, 16
   # convened with nobody acting). The judge scores this episode's dp_id only.
-  - {id: DP14_HPAI_DEPOP_METHOD, dp_id: DP14_HPAI_DEPOP_METHOD, start_day: 246}
+  # wake_nodes (wake audit 2026-09-30, PROPOSAL): the same House 3 outbreak DP15 declares, so the
+  # daily bird-flu wake stays on here; every other episode is woken by its own node only.
+  - {id: DP14_HPAI_DEPOP_METHOD, dp_id: DP14_HPAI_DEPOP_METHOD, start_day: 246,
+     wake_nodes: [DP15_BIOSECURITY_REPORTING]}
 
   # 252→295. Sessions trimmed from 15: kept 260/271/280 + deadline 294 + end 295; dropped 262, 266,
   # 267, 268, 269, 270, 272, 273, 276, 290.

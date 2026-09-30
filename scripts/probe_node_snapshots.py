@@ -217,7 +217,7 @@ def _runtime_sessions(corpus, schedule, state, ep) -> int:
     """
     env = FarmEnv(
         corpus, schedule, state.model_copy(deep=True), ep.end_day, ModelParams(),
-        enabled_nodes=None, beat_days=ep.sessions,
+        enabled_nodes=None, beat_days=ep.sessions, wake_nodes=ep.wake_nodes,
     )
     n = 0
     while not env.is_over():
