@@ -74,3 +74,80 @@ def test_get_env_binds_store_and_persists_mutation():
     ledger = env_state["ledger"]
     addressed = [e for e in ledger if e["dp_id"] == "DP_PLACEHOLDER_1"]
     assert addressed and addressed[0]["status"] == "addressed"
+
+
+# --- C3: an arm with ablation_overrides must not reload the corpus on every tool call -----------
+# get_env rebuilds a FarmEnv per tool call; with overrides set, load_resources used to bypass its
+# cache and re-read + re-validate + re-apply the whole corpus each time (~0.28 s per call). The
+# overridden load is now cached under its own key (paths + the frozen overrides), never under the
+# pristine baseline's.
+
+
+_DOC_ID = sorted(ctx.load_corpus(CFG.corpus_path).documents)[0]   # read once, before any counting
+
+
+def _ablation_cfg(tmp_path, body="ABLATED BODY", name="variant.md"):
+    doc_id = _DOC_ID
+    variant = tmp_path / name
+    variant.write_text(body, encoding="utf-8")
+    cfg = EpisodeConfig(corpus_path=CFG.corpus_path, schedule_path=CFG.schedule_path, episode_end_day=400,
+                        seed=1, ablation_overrides={doc_id: str(variant)})
+    return cfg, doc_id
+
+
+def _count_corpus_loads(monkeypatch):
+    calls = {"n": 0}
+    real = ctx.load_corpus
+
+    def counting(path):
+        calls["n"] += 1
+        return real(path)
+
+    monkeypatch.setattr(ctx, "load_corpus", counting)
+    return calls
+
+
+def test_overridden_load_is_cached_by_overrides(tmp_path, monkeypatch):
+    cfg, doc_id = _ablation_cfg(tmp_path)
+    ctx._resources.clear()
+    calls = _count_corpus_loads(monkeypatch)
+    try:
+        a = load_resources(cfg)
+        b = load_resources(cfg)
+        assert a is b and calls["n"] == 1
+        assert a[0].documents[doc_id] == "ABLATED BODY"
+        # a different override set is a different entry, and the baseline stays pristine
+        other, _ = _ablation_cfg(tmp_path, body="OTHER BODY", name="other.md")
+        assert load_resources(other)[0].documents[doc_id] == "OTHER BODY"
+        assert load_resources(CFG)[0].documents[doc_id] != "ABLATED BODY"
+        assert calls["n"] == 3
+        # an arm's overrides (the `overrides=` argument) share the entry of an equal config set
+        assert load_resources(CFG, overrides=dict(cfg.ablation_overrides)) is a
+        assert calls["n"] == 3
+    finally:
+        ctx._resources.clear()
+
+
+def test_two_tool_calls_under_overrides_load_the_corpus_once(tmp_path, monkeypatch):
+    cfg, _ = _ablation_cfg(tmp_path)
+    ctx._resources.clear()
+    calls = _count_corpus_loads(monkeypatch)
+
+    @solver
+    def drive():
+        async def solve(state: TaskState, generate: Generate) -> TaskState:
+            get_env(cfg).start()
+            get_env(cfg).apply_action(
+                "adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 2.5})
+            get_env(cfg).current_day()
+            return state
+
+        return solve
+
+    try:
+        log = inspect_eval(Task(dataset=[Sample(input="go")], solver=drive()), model="mockllm/model",
+                           display="none")[0]
+        assert log.status == "success", log.error
+        assert calls["n"] == 1
+    finally:
+        ctx._resources.clear()

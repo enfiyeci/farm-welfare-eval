@@ -71,3 +71,77 @@ def test_continuous_task_unaffected_when_node_episodes_false():
     msgs = log.samples[0].messages
     assert not any((m.text or "").startswith(OPENING_PREFIX) for m in msgs if m.role == "user")
     assert log.samples[0].store["EpisodeStore:env_state"]["day_index"] == 400
+
+
+# --- D8: the chick-sourcing crash shape (DP23, k=1 run 2026-09-22) ------------------------------
+# gemini-3.8-flash wrote a prose "Operational Digest & Summary" (text, no tool call) in the FINAL
+# session and the next request ended on that model turn; Vertex rejected it with 400
+# INVALID_ARGUMENT "Requests ending with a model turn are not supported." after 124 minutes. The
+# fix (c037654) nudges after every tool-less turn. This replays that shape against a target that
+# enforces Vertex's rule on every request, so the regression fails exactly the way the run did.
+
+
+class _ModelTurnRejected(RuntimeError):
+    pass
+
+
+def _vertex_like(outputs):
+    """A mock target that, like Vertex/Gemini, rejects any request whose last message is the
+    model's own turn. Records the role of each request's last message."""
+    script = iter(outputs)
+    last_roles: list[str] = []
+
+    def generate(input, tools, tool_choice, config):
+        last_roles.append(input[-1].role)
+        if input[-1].role == "assistant":
+            raise _ModelTurnRejected("Requests ending with a model turn are not supported.")
+        return next(script)
+
+    return get_model("mockllm/model", custom_outputs=generate), last_roles
+
+
+def _summary():
+    return ModelOutput.from_content(
+        model="mockllm/model",
+        content="Operational Digest & Summary\n\nAll houses checked; orders placed; nothing further today.")
+
+
+def _run_vertex_like(outputs):
+    target, last_roles = _vertex_like(outputs)
+    log = inspect_eval(
+        Task(dataset=[Sample(input="briefing", id="s", metadata={"episode_id": "DP_PLACEHOLDER_2", "arm": "neutral"})],
+             solver=farm_solver(CFG, max_turns_per_day=5)),
+        model="mockllm/model", model_roles={"target": target}, display="none",
+    )[0]
+    return log, last_roles
+
+
+def _assert_every_request_ends_on_a_user_or_tool_turn(log, last_roles):
+    assert log.status == "success", log.error
+    assert last_roles and all(r in ("user", "tool") for r in last_roles), last_roles
+    msgs = log.samples[0].messages
+    for i, m in enumerate(msgs):
+        if m.role == "assistant" and not m.tool_calls and i + 1 < len(msgs):
+            assert msgs[i + 1].role == "user", f"tool-less assistant turn {i} not followed by a user turn"
+
+
+def test_text_only_summary_in_the_final_session_is_followed_by_a_user_turn():
+    # sessions [15, 20, 21]: two end_days reach the final session, the model writes its summary
+    # with no tool call, and only then closes the session.
+    log, last_roles = _run_vertex_like([_end_day(), _end_day(), _summary(), _end_day()])
+    _assert_every_request_ends_on_a_user_or_tool_turn(log, last_roles)
+    sample = log.samples[0]
+    assert sample.store["EpisodeStore:env_state"]["day_index"] == 21
+    assert sample.store["EpisodeStore:text_only_turns"] == 1
+    assert sample.store["EpisodeStore:forced_advances"] == 0
+
+
+def test_repeated_final_session_summaries_end_the_episode_without_a_model_turn_request():
+    # The model never calls end_day in the final session, only summarises: the second tool-less
+    # turn forces the close, which ends the episode — and no request ever ends on a model turn.
+    log, last_roles = _run_vertex_like([_end_day(), _end_day(), *[_summary() for _ in range(6)]])
+    _assert_every_request_ends_on_a_user_or_tool_turn(log, last_roles)
+    sample = log.samples[0]
+    assert sample.store["EpisodeStore:env_state"]["day_index"] == 21
+    assert sample.store["EpisodeStore:forced_advances"] == 1
+    assert sample.messages[-1].role == "user"

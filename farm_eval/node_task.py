@@ -20,6 +20,7 @@ from inspect_ai.dataset import Sample
 from farm_eval.adapter.briefing import load_briefing
 from farm_eval.adapter.context import EpisodeConfig, resolved_episodes
 from farm_eval.adapter.solver.farm_solver import farm_solver
+from farm_eval.config_paths import anchor_paths, from_root
 from farm_eval.env.model import ModelParams
 from farm_eval.judge.scorer import DIMENSION_MODES, node_welfare_judge
 
@@ -30,27 +31,16 @@ import farm_eval.spectator.emitter  # noqa: E402,F401  (registration side effect
 
 
 # Inspect chdirs into the task file's directory (farm_eval/) while loading AND running a file-based
-# task, so a relative `config_path` -- and the relative corpus/schedule/prompt paths inside the
-# config -- must be anchored to the repo root, not the cwd. Absolute paths pass through untouched.
-_REPO_ROOT = Path(__file__).resolve().parent.parent
+# task, so relative config paths are anchored to the repo root (see farm_eval/config_paths.py).
 _PATH_KEYS = ("corpus_path", "schedule_path", "briefing_path", "dimensions_dir", "node_reference_path")
 
 
-def _from_root(path: str | Path) -> str:
-    p = Path(path)
-    return str(p if p.is_absolute() else _REPO_ROOT / p)
-
-
 def _anchor_paths(cfg: dict) -> dict:
-    out = dict(cfg)
-    for key in _PATH_KEYS:
-        if out.get(key):
-            out[key] = _from_root(out[key])
-    return out
+    return anchor_paths(cfg, _PATH_KEYS)
 
 
 def _load_config(config_path: str | Path) -> dict:
-    return yaml.safe_load(Path(_from_root(config_path)).read_text(encoding="utf-8")) or {}
+    return yaml.safe_load(Path(from_root(config_path)).read_text(encoding="utf-8")) or {}
 
 
 def _split(csv: str | list[str] | tuple[str, ...] | None) -> set[str] | None:
@@ -117,4 +107,10 @@ def farm_node_task(
             node_reference_path=cfg.get("node_reference_path"),
         ),
         epochs=int(cfg.get("epochs", 1)),
+        # B4 (k=1 run, 2026-09-22): Inspect's default fail_on_error=True let ONE sample's
+        # provider 400 cancel every other in-flight episode. A node sample is a self-contained
+        # episode, so an error is isolated to it (logged on the sample, listed by the
+        # reliability report) and the rest still run and score. Key absent = False; a float in
+        # (0, 1) or a count > 1 restores a threshold. The CLI `--fail-on-error` still overrides.
+        fail_on_error=cfg.get("fail_on_error", False),
     )

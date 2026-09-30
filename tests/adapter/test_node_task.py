@@ -113,3 +113,58 @@ def test_episode_ids_accepts_the_list_form_inspect_passes_for_comma_values():
     as_str = farm_node_task(config_path="config-nodes.yml", episode_ids="QUIET_A, QUIET_B")
     assert sorted(s.id for s in as_list.dataset) == sorted(s.id for s in as_str.dataset)
     assert {s.id for s in as_list.dataset} == {"QUIET_A::neutral", "QUIET_B::neutral"}
+
+
+# --- B4 (k=1 run, 2026-09-22): one errored sample must not cancel the batch -----------------------
+# Inspect's default `fail_on_error=True` turned DP15's provider 400 into a cancel of every other
+# in-flight sample (DP12, DPF) and ended the 17-sample task at 7. A node run isolates per-sample
+# errors: the errored sample is recorded with its error, the others still run and score.
+
+
+class _ProviderError(RuntimeError):
+    """Stands in for a provider rejection (e.g. Vertex 400 INVALID_ARGUMENT)."""
+
+
+def _target_failing_first_call():
+    script = iter([*[_end() for _ in range(8)]] * 3)
+    calls = {"n": 0}
+
+    def generate(input, tools, tool_choice, config):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise _ProviderError("Requests ending with a model turn are not supported.")
+        return next(script)
+
+    return get_model("mockllm/model", custom_outputs=generate)
+
+
+def test_one_errored_sample_does_not_cancel_the_others():
+    grader = get_model("mockllm/model", custom_outputs=[_validity_json() for _ in range(3)])
+    # max_samples=1 forces dataset order: the first sample (neutral) takes the provider error.
+    log = inspect_eval(farm_node_task(config=CONFIG), model="mockllm/model",
+                       model_roles={"target": _target_failing_first_call(), "grader": grader},
+                       display="none", max_samples=1)[0]
+    assert log.status == "success", log.error
+    by_id = {s.id: s for s in log.samples}
+    assert set(by_id) == {"DP_PLACEHOLDER_2::neutral", "DP_PLACEHOLDER_2::history_bad", "QUIET_D15::neutral"}
+    errored = by_id["DP_PLACEHOLDER_2::neutral"]
+    assert errored.error is not None and "model turn" in errored.error.message
+    for sid in ("DP_PLACEHOLDER_2::history_bad", "QUIET_D15::neutral"):
+        assert by_id[sid].error is None
+        assert "node_welfare_judge" in (by_id[sid].scores or {})
+    # the reliability report lists the errored sample instead of raising (report/reliability.py)
+    rows = rows_from_log(log)
+    assert len(rows) == 3
+
+
+def test_node_config_file_isolates_sample_errors():
+    # The shipped config carries the setting, so a launch line without --fail-on-error is safe.
+    import yaml
+    cfg = yaml.safe_load((REPO_ROOT / "config-nodes.yml").read_text(encoding="utf-8"))
+    assert cfg["fail_on_error"] is False
+    assert farm_node_task(config_path="config-nodes.yml", episode_ids="QUIET_A").fail_on_error is False
+
+
+def test_fail_on_error_is_configurable():
+    assert farm_node_task(config={**CONFIG, "fail_on_error": 0.5}).fail_on_error == 0.5
+    assert farm_node_task(config=CONFIG).fail_on_error is False   # key absent: still isolated

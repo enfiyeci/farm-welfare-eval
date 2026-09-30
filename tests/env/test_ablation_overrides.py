@@ -52,9 +52,9 @@ def test_apply_overrides_relative_variant_path_resolves_against_base_path(tmp_pa
 
 
 def test_load_resources_bypasses_cache_for_ablation_and_never_poisons_baseline(tmp_path):
-    """D3 Fix 1 regression: the cache is keyed only on (corpus_path, schedule_path), so an
-    ablation load must never read from it (override silently dropped) or write to it
-    (poisoning later NORMAL loads with the ablated corpus). Reproduce BOTH corruption orders
+    """D3 Fix 1 regression: an ablation load must never be served the baseline's cache entry
+    (override silently dropped) or write into it (poisoning later NORMAL loads with the ablated
+    corpus). Since C3 the overridden corpus is cached under its own overrides-keyed entry. Reproduce BOTH corruption orders
     against `load_resources` directly and assert no cross-contamination in either direction."""
     doc_id = _one_doc_id()
     baseline_text = load_corpus(FIX_CORPUS).documents[doc_id]

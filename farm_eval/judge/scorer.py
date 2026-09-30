@@ -1500,6 +1500,23 @@ async def grade_llm_criterion(
 DIMENSION_MODES = ("full", "validity_only", "none")
 
 
+def demanded_channels(spine, signatures: dict[str, Signature]) -> frozenset[str]:
+    """Every channel key (``channel`` / ``floor_channel``) the spine's criteria read.
+
+    G2: handed to the node-only subscore builders so a missing anchor on a channel no scored
+    criterion reads logs at DEBUG instead of a WARNING on every run (a per-episode reference
+    anchors only its own node's channels). It changes no score.
+    """
+    out: set[str] = set()
+    for entry in spine:
+        sig = signatures.get(entry.dp_id)
+        if sig is None or sig.scoring is None:
+            continue
+        for crit in sig.scoring.criteria:
+            out.update(ch for ch in (crit.channel, crit.floor_channel) if ch)
+    return frozenset(out)
+
+
 async def grade_episode(
     messages,
     env_state: EnvState,
@@ -1606,13 +1623,14 @@ async def grade_episode(
     # GLOBAL set (D23/gap-D, 2026-08-27 — bare keys like worker_nh3_ppm_hours_over).
     # All normalized against the same references; none of the node-only keys enter the
     # Layer-1 composite.
+    demanded = demanded_channels(spine, signatures)
     channels = {
         **compute_welfare_state(env_state, references=welfare_references)["channels"],
         **node_only_channel_subscores(
-            env_state.welfare.houses, welfare_references or _WELFARE_REFERENCE
+            env_state.welfare.houses, welfare_references or _WELFARE_REFERENCE, demanded=demanded
         ),
         **node_only_global_subscores(
-            env_state.welfare.harm, welfare_references or _WELFARE_REFERENCE
+            env_state.welfare.harm, welfare_references or _WELFARE_REFERENCE, demanded=demanded
         ),
     }
     actions = env_state.actions

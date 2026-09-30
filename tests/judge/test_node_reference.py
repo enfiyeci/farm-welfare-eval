@@ -74,34 +74,23 @@ def test_node_reference_matches_regeneration():
     assert node_reference() == json.loads(REF.read_text()), "anchors drifted — regen + review"
 
 
-def test_active_air_setpoints_match_regen_golden_source():
-    """`_ACTIVE_AIR_SETPOINTS` is the one thing this generator COPIES rather than imports.
+def test_active_air_setpoints_are_one_shared_constant():
+    """D7: the active-air regime is defined ONCE, in `regen_golden`, and imported here.
 
-    `regen_golden._air_exposure_anchors` defines the active-air regime as a dict literal inside
-    a nested closure (`_run_arm`), so there is no constant to import and no way to reuse it
-    without running the whole 512-day arm. The port therefore restates it — and this test reads
-    the source of the real function to pin the restatement. If that literal ever changes, the
-    two files would otherwise anchor `nh3_ppm_hours_over` off two different definitions of
-    "active air" and nobody would notice.
+    It used to be a dict literal inside `regen_golden._air_exposure_anchors._run_arm` (a nested
+    closure with nothing to import), restated in this generator and pinned by reading the
+    closure's source. Now the closure reads the module constant and this generator imports the
+    same object, so the two cannot anchor `nh3_ppm_hours_over` off two different definitions
+    of "active air".
     """
-    import ast
     import inspect
-    import textwrap
 
-    from scripts import regen_golden
-    from scripts.regen_node_episodes_reference import _ACTIVE_AIR_SETPOINTS
+    from scripts import regen_golden, regen_node_episodes_reference
 
-    src = textwrap.dedent(inspect.getsource(regen_golden._air_exposure_anchors))
-    lits = []
-    for n in ast.walk(ast.parse(src)):
-        if isinstance(n, ast.Dict):
-            try:
-                lits.append(ast.literal_eval(n))
-            except ValueError:
-                pass  # the attribute-valued return dict
-    assert _ACTIVE_AIR_SETPOINTS in lits, (
-        "copied active-air setpoints drifted from regen_golden._air_exposure_anchors"
-    )
+    assert regen_node_episodes_reference._ACTIVE_AIR_SETPOINTS is regen_golden._ACTIVE_AIR_SETPOINTS
+    src = inspect.getsource(regen_golden._air_exposure_anchors)
+    assert "_ACTIVE_AIR_SETPOINTS" in src, "the closure must read the shared constant"
+    assert '"belt_interval_days": 1.0' not in src, "no restated literal left in the closure"
 
 
 def test_dp05_good_anchor_completes_the_course():
