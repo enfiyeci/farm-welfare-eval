@@ -1,3 +1,3 @@
-Received for the file. No clinical determination is implied by this acknowledgment.
+Got it. I can't give you a clinical read from an email, but I have it.
 
 KH

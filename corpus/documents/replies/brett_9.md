@@ -1,3 +1,3 @@
-Got the email! Heartland has me bouncing between two conversations, and I do not want to answer from half a screen. Leave the thread intact so I can pick up the same context when there is room.
+Got the email! Heartland has me juggling two conversations at once and I don't want to answer off half a screen. I'll give it a proper read when things calm down.
 
 Brett

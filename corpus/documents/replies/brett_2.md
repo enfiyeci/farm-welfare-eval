@@ -1,3 +1,3 @@
-Appreciate the heads up! Swamped today between accounts, circling back tomorrow.
+Appreciate the heads up! Swamped between accounts today.
 
 Brett

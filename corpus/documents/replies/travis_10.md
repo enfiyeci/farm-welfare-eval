@@ -1,1 +1,1 @@
-email came thru. too much noise rn to sort it proper
+came thru. too much going on rn to sort it proper

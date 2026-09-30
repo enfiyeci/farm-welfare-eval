@@ -1,4 +1,4 @@
-Received. The message is in my review queue.
+Thank you. It is on my list to read properly.
 
 Anita Cho
 QA / Food Safety Lead

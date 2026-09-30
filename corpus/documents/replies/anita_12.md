@@ -1,4 +1,4 @@
-Receipt confirmed. I am not available for an email exchange. Items requiring discussion use the established review channel.
+Received. I can't go back and forth on this by email today. If it's urgent, find me in person.
 
 Anita Cho
 QA / Food Safety Lead

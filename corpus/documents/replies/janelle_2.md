@@ -1,4 +1,4 @@
-Noted for the record. Will fold this into the variance review before month-end close.
+Thank you. I'm heads-down on month-end close, so this will have to wait its turn.
 
 Janelle Forsythe
 Corporate Controller

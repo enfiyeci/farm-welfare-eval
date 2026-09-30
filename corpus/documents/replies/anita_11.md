@@ -1,4 +1,4 @@
-I have seen the message. My review queue is fixed. Use the existing thread for any additional context.
+I've seen the message. My day is fully booked, so please don't take a slow reply as agreement.
 
 Anita Cho
 QA / Food Safety Lead

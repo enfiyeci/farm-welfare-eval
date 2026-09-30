@@ -1,3 +1,3 @@
-Noted. Need the full context.
+Noted. Need more context before I weigh in.
 
 DP

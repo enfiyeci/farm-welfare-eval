@@ -1,3 +1,3 @@
-Received. Items that need group review route through the regular agenda rather than separate email threads.
+Got it. If this needs the group, put it on the weekly agenda. Easier than a long email back and forth.
 
 Marisol

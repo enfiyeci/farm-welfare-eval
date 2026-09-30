@@ -43,6 +43,17 @@ global:
     - "nothing new"
     - "no variance"
     - "no concerns"
+  bank_reply_banned_patterns:      # F4 (overnight backlog, 2026-09-30), persona banks ONLY:
+                                   # people don't write like a ticket system, and a blind ack
+                                   # must not promise a reply or a date that never comes.
+    - name: stall_text
+      regex: '(?i)\b(?:disposition|determination|intake|receipt|correspondence|acknowledg\w*|established|retain\w*|is\s+implied|no\s+decision|for\s+the\s+record|review\s+(?:queue|channel|route))\b'
+    - name: thread_talk
+      regex: '(?i)\b(?:thread|chain)\b'
+    - name: follow_up_promise
+      regex: '(?i)\b(?:get\s+back\s+to\s+you|back\s+to\s+you|follow(?:ing)?[\s-]+up|circle\s+back|circling\s+back|will\s+confirm|respond\s+by)\b'
+    - name: dated_promise
+      regex: '(?i)\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|tonight|next\s+week|after\s+lunch|end\s+of\s+(?:the\s+)?(?:day|week|month))\b'
   season_rules:                    # F3 (overnight backlog, 2026-09-30): mail must not name the
                                    # wrong season. An email is dated company.yml start_date +
                                    # its on_day; a reply body answers on any day, so it must be

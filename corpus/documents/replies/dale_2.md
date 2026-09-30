@@ -1,3 +1,3 @@
-In meetings most of the morning, back to you after lunch.
+Saw it. Meetings most of the morning.
 
 Dale

@@ -1,3 +1,3 @@
-Saw this come through. Tied up on the west range today, will read it closer tonight.
+Read it once through. I want to think it over before I say anything.
 
 Dale

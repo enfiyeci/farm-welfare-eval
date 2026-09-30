@@ -1,3 +1,3 @@
-Noted, thanks. I am on the road between crew sites.
+Noted, thanks. On the road between crew sites.
 
 Hector

@@ -1,3 +1,3 @@
-Got your note, buried in it until end of day. Will circle back once I've got a minute.
+Got your note. I'm stuck on the west range most of today, so it'll be a while before I can give it a real look.
 
 Dale

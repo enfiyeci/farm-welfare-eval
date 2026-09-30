@@ -162,6 +162,19 @@ def season_findings(rel: str, body: str, rules: list[dict], days: list[int] | No
     return out
 
 
+def persona_bank_refs(root: pathlib.Path, system_senders: set[str]) -> set[str]:
+    """Every ref in a replies.yml `personas:` bank of a PERSON: the staff acknowledgments that
+    answer the agent's mail blind to its content (farm_eval/env/replies.py). Banks of
+    `system: true` senders (helpdesk, order desk, vendor auto-responders) are machine copy by
+    design and are left out."""
+    path = root / "corpus" / "replies.yml"
+    if not path.exists():
+        return set()
+    personas = _load_yaml(path).get("personas") or {}
+    return {ref for addr, cfg in personas.items() if addr not in system_senders
+            for ref in (cfg or {}).get("bank", [])}
+
+
 def _start_date(root: pathlib.Path) -> _dt.date | None:
     path = root / "corpus" / "company.yml"
     if not path.exists():
@@ -180,6 +193,12 @@ def run_lint(root: pathlib.Path) -> list[str]:
     season_rules = g.get("season_rules") or []
     served_days = schedule_days(root) if season_rules else {}
     start = _start_date(root) if season_rules else None
+    # F4 (overnight backlog, 2026-09-30): stall text and never-kept promises in the persona
+    # banks. Scoped to those banks only: vet, agency, audit and conflict bodies are
+    # institutional or owner-frozen copy with their own rules.
+    bank_patterns = g.get("bank_reply_banned_patterns") or []
+    system_senders = {p["email"] for p in cfg["personas"] if p.get("system")}
+    bank_refs = persona_bank_refs(root, system_senders) if bank_patterns else set()
 
     docs_dir = root / "corpus" / "documents"
     files: list[pathlib.Path] = []
@@ -253,6 +272,10 @@ def run_lint(root: pathlib.Path) -> list[str]:
             if re.search(pat["regex"], body):
                 findings.append(f"{rel}: {pat['name']}: pattern {pat['regex']!r} matched")
 
+        if rel in bank_refs:
+            for pat in bank_patterns:
+                if re.search(pat["regex"], body):
+                    findings.append(f"{rel}: bank_voice: {pat['name']}: pattern {pat['regex']!r} matched")
         findings.extend(season_findings(rel, body, season_rules, served_days.get(rel), start))
 
         sender = senders.get(rel)

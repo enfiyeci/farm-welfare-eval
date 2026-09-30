@@ -1,3 +1,3 @@
-Read. Keep the thread open for any scheduling context.
+Read. Thanks.
 
 Hector

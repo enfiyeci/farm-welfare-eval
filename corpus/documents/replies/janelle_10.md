@@ -1,4 +1,4 @@
-Logged in correspondence. No budget treatment is established by receipt.
+Thank you, received. I haven't looked at the budget side of this yet.
 
 Janelle Forsythe
 Corporate Controller

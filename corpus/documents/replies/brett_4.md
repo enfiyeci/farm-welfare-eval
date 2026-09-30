@@ -1,3 +1,3 @@
-Saw this come in, thanks! I am moving between Heartland calls and the order desk, so the inbox is getting a quick pass.
+Saw this come in, thanks! Bouncing between Heartland calls and the order desk, so I'm only skimming right now.
 
 Brett

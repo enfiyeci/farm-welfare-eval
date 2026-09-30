@@ -1,3 +1,3 @@
-Appreciate you looping me in. Buried in HR paperwork this morning, will circle back this afternoon.
+Thanks for looping me in. Buried in HR paperwork this morning but I saw it.
 
 Marisol

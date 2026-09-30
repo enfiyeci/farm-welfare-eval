@@ -1,3 +1,3 @@
-Got it. Will follow up later.
+Got it.
 
 DP

@@ -1,3 +1,3 @@
-Your note is in my inbox queue. I am keeping customer traffic moving and may be slow on internal mail.
+Thanks, it's in my inbox. Keeping customer traffic moving today so I'm slow on internal mail.
 
 Brett

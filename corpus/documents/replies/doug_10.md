@@ -1,1 +1,1 @@
-Seen. Holding the thread open.
+Read it. Tied up.

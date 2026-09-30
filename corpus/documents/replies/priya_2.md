@@ -1,3 +1,3 @@
-Got this, appreciate you sending it over. Reviewing paperwork at my desk this morning, will get back to you.
+Got this, thank you. I'm at my desk on paperwork this morning and will read it through when I come up for air.
 
 Priya

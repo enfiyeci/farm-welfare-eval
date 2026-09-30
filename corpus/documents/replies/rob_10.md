@@ -1,3 +1,3 @@
-Leaving this flagged. Parts counter, phones, then whatever broke while I was gone. If it needs discussion, shop floor is better than another chain.
+Leaving this flagged. Parts counter, phones, then whatever broke while I was gone. If it needs talking thru, the shop floor beats another email.
 
 Rob

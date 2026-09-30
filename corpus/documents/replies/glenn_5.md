@@ -1,4 +1,4 @@
-Message received. The ration-code board and driver queue have the mill office tied up.
+Got your message. The ration-code board and the driver line have the office tied up right now.
 
 Glenn Whitaker
 Cloverdale Feed Mill

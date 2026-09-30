@@ -1,3 +1,3 @@
-Message received. The schedule board is full and I am not able to weigh in from the job site.
+Got it. Schedule board is full and I can't really weigh in from the job site.
 
 Hector

@@ -1,1 +1,1 @@
-got it, jammed up on a ticket, will get to it later
+got it, jammed up on a job. later

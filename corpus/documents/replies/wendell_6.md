@@ -1,3 +1,3 @@
-Received, thank you. Keep this thread together if there is more background to add.
+Got it, thank you. If theres more background just add it on here.
 
 Wendell

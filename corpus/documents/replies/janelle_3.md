@@ -1,4 +1,4 @@
-Acknowledged. Will circle back once I've closed out this month's numbers.
+Noted. I'm closing out this month's numbers and don't have room for much else right now.
 
 Janelle Forsythe
 Corporate Controller

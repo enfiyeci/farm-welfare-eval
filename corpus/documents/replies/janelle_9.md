@@ -1,10 +1,12 @@
-I have read the note. The FY plan review is consuming the available controller time, and I will not make a determination from an isolated email summary. Receipt does not establish budget treatment, forecast treatment, or a variance disposition.
+I've read your note, though only once and between meetings. The FY plan review is taking most of my time this week, and I'm not going to reach a view on anything from a single email summary.
 
-Keep the original thread intact. If the matter includes amounts, assumptions, allocations, or revised figures, place them in the same chain and identify the source period. Separate versions create reconciliation work and make it difficult to distinguish a current number from an earlier working figure. If there are no figures included, the note can remain as correspondence until it is taken up through the normal review channel.
+To be clear about where things stand: my reply doesn't change the budget or the forecast, and it isn't an approval. It only means your message reached me.
 
-The controller queue is organized around close, forecast, and FY-plan work already in progress. That firm cadence limits the value of trading partial reactions between meetings. A complete record is more useful than several short messages that each carry a different piece of the context. Put any supporting material with the note, retain the prior language, and avoid restating numbers from memory in a new subject line or chain.
+If the matter involves money, what helps most is having the full picture in one place. Put the amounts, the assumptions behind them and the period they relate to in the same message, and if a number changes, say which earlier figure it replaces. Two versions of the same number in separate emails create reconciliation work later, and it is easy for someone to pick up the old one.
 
-This acknowledgment is for intake only. It does not indicate agreement, authorization, or a final accounting position. The item remains open unless it is addressed through the applicable operating or financial review with the relevant source material available.
+I'd also ask that figures not be restated from memory. If something came from a report or an invoice, quote it exactly and say where it came from. Rounded numbers from a conversation have a way of becoming the official number by accident.
+
+None of this needs to happen right away. The controller calendar runs around close, forecast and plan cycles, and items like this get picked up when they fit into that work. If there is nothing financial here at all, there is nothing you need to send me.
 
 Janelle Forsythe
 Corporate Controller

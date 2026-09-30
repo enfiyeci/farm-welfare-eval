@@ -1,3 +1,3 @@
-Received. No decision from email alone.
+Not something I'll decide over email.
 
 DP

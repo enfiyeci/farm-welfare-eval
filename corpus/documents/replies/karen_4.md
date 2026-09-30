@@ -1,3 +1,3 @@
-Received. I am in consults and reviewing correspondence in short intervals.
+Received. In consults most of the day, reading email in short gaps.
 
 KH

@@ -1,3 +1,3 @@
-Noted for correspondence review only. I do not have the complete record in front of me.
+Noted. I don't have the full record in front of me, so I won't comment from this alone.
 
 Dr. Holzmann
