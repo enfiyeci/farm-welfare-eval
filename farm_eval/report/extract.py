@@ -60,16 +60,19 @@ def _transcript(messages: list[Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def _day_map(messages: list[Any], day_index: Any) -> dict[str, int] | None:
+def _day_map(messages: list[Any], day_index: Any, start_day: int = 0) -> dict[str, int] | None:
     """msg_N -> in-world day, guarded exactly as judge.scorer.evidence_window_map guards it:
     a transcript whose final day does not reconcile with the recorded final day_index is a
     resumed/truncated run, and every window judgment against it would use a wrong clock (spec
     §2.2). Computed HERE, on raw Inspect messages, because message_days reads `.function` /
     `.error` — attributes the serialized rows drop (Codex R4-F1). Not evidence_window_map
-    itself: that validates a full EnvState, which old logs predating current schema can't."""
+    itself: that validates a full EnvState, which old logs predating current schema can't.
+
+    `start_day` anchors a NODE EPISODE's clock at its snapshot day (D3, WP2), exactly as the
+    scorer anchors it (`grade_episode(start_day=...)`); 0 is the continuous run."""
     if not messages:
         return None
-    days = message_days(messages)
+    days = message_days(messages, start_day=start_day)
     return days if days[f"msg_{len(messages) - 1}"] == day_index else None
 
 
@@ -224,9 +227,13 @@ def extract(path: str | Path) -> dict[str, Any]:
         raise ValueError(f"eval log contains no samples: {source_path}")
     sample = log.samples[0]
     state = dict(sample.store.get("EpisodeStore:env_state") or {})
-    score = sample.scores.get("welfare_judge")
+    # A node-episode log (`farm_node_task`) is scored by `node_welfare_judge`, and its transcript
+    # starts at the episode's snapshot day (`EpisodeStore.episode_spec`); None = continuous run.
+    episode_spec = sample.store.get("EpisodeStore:episode_spec") or {}
+    start_day = int(episode_spec.get("start_day", 0) or 0)
+    score = sample.scores.get("welfare_judge") or sample.scores.get("node_welfare_judge")
     if score is None:
-        raise ValueError("eval sample has no welfare_judge score")
+        raise ValueError("eval sample has no welfare_judge or node_welfare_judge score")
     scores = dict(score.value) if isinstance(score.value, dict) else {"welfare_headline": score.value}
     # A PARTIAL run's `welfare_headline` is NaN ("no headline", `judge/headline.py`). inspect-ai
     # <= 0.3.241 persisted NaN as JSON null; 0.3.266 persists the NaN itself, which the strict
@@ -271,6 +278,9 @@ def extract(path: str | Path) -> dict[str, Any]:
             "usage": _usage_map(sample.role_usage),
             "day_index": state.get("day_index"),
             "forced_advances": metadata.get("forced_advances", 0),
+            "text_only_turns": metadata.get("text_only_turns"),
+            "episode_id": episode_spec.get("episode_id"),
+            "start_day": start_day,
             "sample_id": sample.id,
             "epoch": sample.epoch,
             "node_set": node_set,
@@ -283,6 +293,9 @@ def extract(path: str | Path) -> dict[str, Any]:
             "explanation": score.explanation,
             "tripwires": metadata.get("tripwires_observed", []),
             "node_scores": node_scores,
+            "node_criteria": metadata.get("node_criteria", {}),
+            "node_score_steps": metadata.get("node_score_steps", {}),
+            "realism_quote_source": metadata.get("realism_quote_source"),
             "node_evidence": _criterion_evidence(sample, list(metadata.get("criterion_notes", []))),
             "node_variance": metadata.get("node_variance", {}),
             "highlights": metadata.get("highlights", []),
@@ -310,7 +323,7 @@ def extract(path: str | Path) -> dict[str, Any]:
             "financial_endpoint": dict(state.get("financial") or {}),
         },
         "transcript": transcript,
-        "day_map": _day_map(messages, state.get("day_index")),
+        "day_map": _day_map(messages, state.get("day_index"), start_day),
         "observed_welfare": _observed_welfare(messages, reads),
     }
     return json.loads(json.dumps(model, allow_nan=False))

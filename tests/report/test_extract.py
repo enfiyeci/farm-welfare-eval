@@ -114,3 +114,56 @@ def test_a_partial_runs_nan_headline_extracts_as_none_and_renders(tmp_path) -> N
     assert model["scores"]["welfare_headline"] is None
     html = render(model, analyze(model))
     assert not re.search(r"\bnan\b", html, re.IGNORECASE), "no headline shows as n/a, never nan"
+
+
+def test_a_node_episode_log_extracts_with_its_day_map_anchored_at_the_episode_start(tmp_path) -> None:
+    """D3 (WP2): a node episode's transcript starts at its snapshot day, not day 0. The report's
+    day map must anchor there (as the scorer's `evidence_window_map` does), or it never reconciles
+    with the final day and is dropped as a 'truncated run'. Real contract: a mockllm run of the
+    node fixture through `farm_node_task`, written to disk and read back by `extract`."""
+    from inspect_ai import eval as inspect_eval
+    from inspect_ai.model import ModelOutput, get_model
+
+    from farm_eval.node_task import farm_node_task
+
+    repo = Path(__file__).resolve().parents[2]
+    fix = repo / "tests" / "fixtures"
+    config = {
+        "corpus_path": str(fix / "corpus"), "schedule_path": str(fix / "node_schedule"),
+        "briefing_path": str(repo / "prompts" / "operator_briefing.md"),
+        "dimensions_dir": str(repo / "judge" / "dimensions"), "seed": 1, "epochs": 1,
+        "max_turns_per_day": 10, "judge_samples": 1, "dimension_mode": "validity_only",
+    }
+    gates = ["realism", "eval_awareness", "assistant_persona_bleed", "helplessness_resignation"]
+    validity = "{" + ", ".join(f'"{d}": {{"score": 0, "quote": "", "message_id": ""}}' for d in gates) + "}"
+    end = ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={})
+    act = ModelOutput.for_tool_call(
+        model="mockllm/model", tool_name="adjust_setpoint",
+        tool_arguments={"house_id": "H_NOSENSOR", "system": "ventilation", "value": 1.2},
+    )
+    # Two samples (the neutral and history_bad arms), run in dataset order (max_samples=1).
+    target = get_model("mockllm/model", custom_outputs=[act, *[end for _ in range(8)]] * 2)
+    grader = get_model("mockllm/model", custom_outputs=[ModelOutput.from_content(model="mockllm/model", content=validity)] * 2)
+    log = inspect_eval(
+        farm_node_task(config=config, episode_ids="DP_PLACEHOLDER_2"), model="mockllm/model",
+        model_roles={"target": target, "grader": grader}, display="none", max_samples=1,
+        epochs=1, log_dir=str(tmp_path / "logs"),
+    )[0]
+    assert log.status == "success"
+    from inspect_ai.log import read_eval_log
+
+    first = read_eval_log(log.location).samples[0]  # the sample `extract` reports on
+    spec = first.store["EpisodeStore:episode_spec"]
+    node = first.scores["node_welfare_judge"].metadata["node_scores"]["DP_PLACEHOLDER_2"]
+    assert spec["start_day"] > 0, "the fixture episode must start mid-flock for this to mean anything"
+
+    model = extract(log.location)
+    day_map = model["day_map"]
+    assert day_map is not None, "an unanchored day map never reconciles and is dropped"
+    assert day_map["msg_0"] == spec["start_day"]
+    assert day_map[f"msg_{len(model['transcript']) - 1}"] == model["run"]["day_index"]
+    assert model["run"]["start_day"] == spec["start_day"]
+    assert model["scores"]["welfare_headline"] == node
+    assert model["judge"]["node_scores"] == {"DP_PLACEHOLDER_2": node}
+    assert [r["name"] for r in model["judge"]["node_criteria"]["DP_PLACEHOLDER_2"]] == ["addressed"]
+    json.dumps(model, allow_nan=False)
