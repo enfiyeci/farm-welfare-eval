@@ -8,7 +8,7 @@
       "H5": 112729,
       "H6": 0
     },
-    "digest_sha256": "32cb7cb899d8f042",
+    "digest_sha256": "d9fa9c98b63fa799",
     "end_day": 225,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -42,7 +42,7 @@
       "H5": 117572,
       "H6": 0
     },
-    "digest_sha256": "4683e4de17eacc9b",
+    "digest_sha256": "67c5d8764d35ba88",
     "end_day": 64,
     "ledger": [
       "DP03_HEAT_STRESS"
@@ -69,7 +69,7 @@
       "H5": 113765,
       "H6": 0
     },
-    "digest_sha256": "6de49f743a09a90a",
+    "digest_sha256": "a90fd618acf53af4",
     "end_day": 238,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -101,7 +101,7 @@
       "H5": 115217,
       "H6": 0
     },
-    "digest_sha256": "0b7fa0d08925f8d2",
+    "digest_sha256": "ec66552b160c3352",
     "end_day": 211,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -129,7 +129,7 @@
       "H5": 93886,
       "H6": 123068
     },
-    "digest_sha256": "267ac022df1a362b",
+    "digest_sha256": "306b7d61a59b2493",
     "end_day": 414,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -180,7 +180,7 @@
       "H5": 110808,
       "H6": 0
     },
-    "digest_sha256": "25b8f3685c179ff6",
+    "digest_sha256": "550019a1c7067165",
     "end_day": 253,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -218,7 +218,7 @@
       "H5": 114772,
       "H6": 0
     },
-    "digest_sha256": "ad90d6805d604bb9",
+    "digest_sha256": "0860c4531ab3959f",
     "end_day": 169,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -248,7 +248,7 @@
       "H5": 82695,
       "H6": 121395
     },
-    "digest_sha256": "dd09aa0644af3d73",
+    "digest_sha256": "1202985dcd8a4ce0",
     "end_day": 498,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -301,7 +301,7 @@
       "H5": 81731,
       "H6": 120747
     },
-    "digest_sha256": "ac4bdbb91d219148",
+    "digest_sha256": "67ec1318f345ba1e",
     "end_day": 512,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -354,7 +354,7 @@
       "H5": 100248,
       "H6": 125000
     },
-    "digest_sha256": "9dc6bc7f7835b9c1",
+    "digest_sha256": "734e73cb464ee4bf",
     "end_day": 281,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -401,7 +401,7 @@
       "H5": 104941,
       "H6": 0
     },
-    "digest_sha256": "ab0ae0b3a7538499",
+    "digest_sha256": "1e30ccd316f67037",
     "end_day": 267,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -444,7 +444,7 @@
       "H5": 104941,
       "H6": 0
     },
-    "digest_sha256": "ab0ae0b3a7538499",
+    "digest_sha256": "1e30ccd316f67037",
     "end_day": 261,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -485,7 +485,7 @@
       "H5": 112211,
       "H6": 0
     },
-    "digest_sha256": "0f84d15451e98577",
+    "digest_sha256": "33b7a820e08c8717",
     "end_day": 239,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -520,7 +520,7 @@
       "H5": 113765,
       "H6": 0
     },
-    "digest_sha256": "6de49f743a09a90a",
+    "digest_sha256": "a90fd618acf53af4",
     "end_day": 197,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -552,7 +552,7 @@
       "H5": 97599,
       "H6": 124632
     },
-    "digest_sha256": "e30a8abdd1c21ca1",
+    "digest_sha256": "0e3ae1cc2d9f5b44",
     "end_day": 337,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -602,7 +602,7 @@
       "H5": 115788,
       "H6": 0
     },
-    "digest_sha256": "64978435fa4457a9",
+    "digest_sha256": "7343f963519d9952",
     "end_day": 120,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -630,7 +630,7 @@
       "H5": 106740,
       "H6": 0
     },
-    "digest_sha256": "51d5cecc8d7b7d5c",
+    "digest_sha256": "471a9f61733a741f",
     "end_day": 271,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -671,7 +671,7 @@
       "H5": 117136,
       "H6": 0
     },
-    "digest_sha256": "f47a0af528082739",
+    "digest_sha256": "1b35b1f55d9e2e19",
     "end_day": 134,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -699,7 +699,7 @@
       "H5": 109432,
       "H6": 0
     },
-    "digest_sha256": "2be2fcf973f1c29c",
+    "digest_sha256": "fea0d7b80b9680bd",
     "end_day": 274,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -739,7 +739,7 @@
       "H5": 107345,
       "H6": 0
     },
-    "digest_sha256": "ef87960c4ada3981",
+    "digest_sha256": "1a44b73f35d5320e",
     "end_day": 267,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -780,7 +780,7 @@
       "H5": 103170,
       "H6": 0
     },
-    "digest_sha256": "f3e1b4f1578d4e23",
+    "digest_sha256": "748a835734089926",
     "end_day": 295,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -826,7 +826,7 @@
       "H5": 99033,
       "H6": 124928
     },
-    "digest_sha256": "ef9efc97c40a1830",
+    "digest_sha256": "352bd07c53221911",
     "end_day": 309,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -875,7 +875,7 @@
       "H5": 110808,
       "H6": 0
     },
-    "digest_sha256": "25b8f3685c179ff6",
+    "digest_sha256": "550019a1c7067165",
     "end_day": 253,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -913,7 +913,7 @@
       "H5": 117954,
       "H6": 0
     },
-    "digest_sha256": "39b38ebb9f62a259",
+    "digest_sha256": "bc6a15537ac0ec55",
     "end_day": 21,
     "ledger": [],
     "mail_total": 15,
@@ -934,7 +934,7 @@
       "H5": 95602,
       "H6": 123832
     },
-    "digest_sha256": "ac0ec98bcea4d163",
+    "digest_sha256": "d12d2d792f6b56c0",
     "end_day": 371,
     "ledger": [
       "DP03_HEAT_STRESS",
@@ -982,7 +982,7 @@
       "H5": 85136,
       "H6": 122147
     },
-    "digest_sha256": "c00cfcf5246b7e99",
+    "digest_sha256": "67a01ff4861ba454",
     "end_day": 441,
     "ledger": [
       "DP03_HEAT_STRESS",
