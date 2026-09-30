@@ -24,7 +24,15 @@ import pytest
 
 from farm_eval.env.loader import load_schedule
 from farm_eval.env.node_episodes import load_node_manifest
-from farm_eval.judge.discrimination import CHECKS, DO_NOTHING, GOOD, NEGLIGENT
+from farm_eval.judge.discrimination import (
+    CHECK_FREE,
+    CHECK_GOOD_MIN,
+    CHECK_MARGIN,
+    CHECKS,
+    DO_NOTHING,
+    GOOD,
+    NEGLIGENT,
+)
 from farm_eval.judge.welfare_state import degenerate_channels
 
 pytestmark = pytest.mark.skipif(
@@ -80,6 +88,36 @@ def test_every_pin_names_its_owner(report):
         assert check in CHECKS, (episode_id, check)
         head = tag.split()[0]
         assert re.fullmatch(r"[A-H]\d+b?", head) or head in labels, (episode_id, check, tag)
+
+
+def test_label_pins_hold_their_premise(results, report):
+    """A pin keyed on (episode, check) cannot see a node get WORSE under the same check, so each
+    non-backlog label is held to the claim it makes — otherwise a label is a blanket exemption:
+
+      * `arm-lacks-action` excuses only the checks that read the GOOD arm (margin, good_min).
+        The do-nothing arm does not depend on the reference program, so a free-points flag can
+        never be blamed on the good arm's coverage.
+      * `llm-only` holds only while every criterion of the node is LLM-graded.
+      * `llm-ungated` excuses only `do_nothing_free`, and only while the do-nothing run's
+        CERTAIN score (llm at 0) stays 0 — the flag must come from ungated LLM upper bounds alone.
+    """
+    schedule = load_schedule("schedule")
+    kinds = {dp.id: {c.kind for c in dp.signature.scoring.criteria}
+             for dp in schedule.decision_points if dp.signature.scoring is not None}
+    by_id = {r.episode_id: r for r in results}
+    for (episode_id, check), tag in report.KNOWN_FAILURES.items():
+        head = tag.split()[0]
+        r = by_id[episode_id]
+        if head == "arm-lacks-action":
+            assert check in (CHECK_MARGIN, CHECK_GOOD_MIN), (episode_id, check, tag)
+        elif head == "llm-only:":
+            assert kinds[r.dp_id] == {"llm"}, (episode_id, kinds[r.dp_id])
+        elif head == "llm-ungated:":
+            assert check == CHECK_FREE, (episode_id, check, tag)
+            assert (r.do_nothing.lower or 0.0) == pytest.approx(0.0, abs=1e-9), (
+                episode_id, "do-nothing now earns certain points; the llm-ungated pin no longer "
+                "explains the flag", r.do_nothing.lower,
+            )
 
 
 def test_reference_arms_reproduce_their_anchors(results):
