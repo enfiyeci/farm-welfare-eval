@@ -78,6 +78,7 @@ from __future__ import annotations
 
 import logging
 import math
+from collections.abc import Collection
 
 from farm_eval.env.state import HarmAccumulators, WelfareState
 
@@ -277,7 +278,16 @@ def welfare_state_score(
     }
 
 
-def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
+def _missing_anchor_level(key: str, demanded: Collection[str] | None) -> int:
+    """G2: an unanchored channel no scored criterion reads is expected (per-episode references
+    anchor only what the episode's node needs), so it is DEBUG; a demanded one, or an unknown
+    demand, stays a WARNING."""
+    return logging.WARNING if demanded is None or key in demanded else logging.DEBUG
+
+
+def node_only_channel_subscores(
+    houses, references: dict, *, demanded: Collection[str] | None = None
+) -> dict[str, float]:
     """House-scoped node-only channel subscores for per-decision outcome criteria.
 
     For every house and every attribute in ``NODE_ONLY_CHANNEL_ATTRS``, emits a key
@@ -300,6 +310,11 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
     references:
         The same good/negligent reference dict welfare_state_score takes; bracketed
         per-house keys are looked up in it.
+    demanded:
+        The channel keys the scored criteria read (``channel`` / ``floor_channel``), or None
+        when the caller does not know. Only sets the log level of the missing-anchor notice
+        (G2): WARNING for a demanded key or when unknown, DEBUG for a key nobody reads. It
+        never changes what is emitted.
     """
     good_ref = references.get("good", {})
     neg_ref = references.get("negligent", {})
@@ -331,7 +346,8 @@ def node_only_channel_subscores(houses, references: dict) -> dict[str, float]:
                 # The misspelled-regeneration case is guarded at GENERATION time instead:
                 # scripts/regen_golden.py validates the emitted anchors against every
                 # bracketed channel the schedule demands.
-                logger.warning(
+                logger.log(
+                    _missing_anchor_level(key, demanded),
                     "node-only channel %s has no reference anchor: no subscore emitted; any "
                     "criterion reading it will fail rather than score full", key
                 )
@@ -377,14 +393,17 @@ def degenerate_channels(references: dict) -> frozenset[str]:
     return frozenset(out)
 
 
-def node_only_global_subscores(harm: HarmAccumulators, references: dict) -> dict[str, float]:
+def node_only_global_subscores(
+    harm: HarmAccumulators, references: dict, *, demanded: Collection[str] | None = None
+) -> dict[str, float]:
     """Global node-only channel subscores — the complex-wide analogue of the house path.
 
     For every name in ``NODE_ONLY_GLOBAL_CHANNELS``, emits the BARE key with the same
     normalization, finite/inverted-anchor guards, one-sided-anchor error, and
     absent-from-both-sides omission semantics as ``node_only_channel_subscores`` (see that
     docstring for why omission — not a neutral 1.0 — is the correct missing-anchor
-    behavior). Served ONLY to node scoring; never enters welfare_state_score's composite.
+    behavior), and the same ``demanded`` log-level rule. Served ONLY to node scoring; never
+    enters welfare_state_score's composite.
     """
     good_ref = references.get("good", {})
     neg_ref = references.get("negligent", {})
@@ -400,7 +419,8 @@ def node_only_global_subscores(harm: HarmAccumulators, references: dict) -> dict
                 f"good has key: {in_good}, negligent has key: {in_neg}"
             )
         if not in_good:
-            logger.warning(
+            logger.log(
+                _missing_anchor_level(key, demanded),
                 "node-only global channel %s has no reference anchor: no subscore emitted; "
                 "any criterion reading it will fail rather than score full", key
             )
