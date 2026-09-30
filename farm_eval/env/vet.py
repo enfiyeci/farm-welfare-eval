@@ -54,7 +54,7 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int, params=N
         return 0
     delivered = 0
 
-    def _append(bank: list[str], subject_tpl: str, visit: VetVisit) -> None:
+    def _append(bank: list[str], subject_tpl: str, visit: VetVisit, *, report: bool = False) -> None:
         nonlocal delivered
         key = bank[0]
         seq = state.vet_bank_seq.get(key, 0)
@@ -67,6 +67,8 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int, params=N
             "to": corpus.company.get("agent_email", ""),
             "subject": _fill(subject_tpl, visit, state),
             "body": _fill(corpus.document(ref), visit, state),
+            # Visit notes describe the visit: never stamped before its day (backlog F2).
+            "not_before_day": visit.visit_day if report else None,
         }))
         state.vet_bank_seq[key] = seq + 1
         delivered += 1
@@ -87,9 +89,9 @@ def deliver_vet_mail(state: EnvState, corpus: Corpus, through_day: int, params=N
                 _append(cfg["ack_refs"], cfg["ack_subject"], visit)
                 visit.stage = "acked"
             else:
-                _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit)
+                _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit, report=True)
                 visit.stage = "reported"
         if visit.stage == "acked" and through_day >= visit.visit_day:
-            _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit)
+            _append(_report_refs(cfg, visit.reason, state, visit.house_id, through_day, params), cfg["report_subject"], visit, report=True)
             visit.stage = "reported"
     return delivered

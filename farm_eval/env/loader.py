@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
+from farm_eval.env import clock
 from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
 from farm_eval.env.state import (
     EnvState,
@@ -35,6 +36,10 @@ class Corpus(BaseModel):
     digest_flavor: list[str] = Field(default_factory=list)
     replies: dict = Field(default_factory=dict)
     history: dict = Field(default_factory=dict)
+    # Per-sender mail hours (ruling 21 item 3), built from `personas.yml` by `_mail_hours`:
+    # {default, system, senders: {address-or-domain: windows}, system_senders: [...]}. Empty =
+    # the clock's pre-ruling band (fixture corpora). Read by `clock.send_windows_for`.
+    mail_hours: dict = Field(default_factory=dict)
 
     def document(self, ref: str) -> str:
         if ref not in self.documents:
@@ -161,10 +166,51 @@ def load_corpus(path: str | Path) -> Corpus:
     replies = _read_yaml(replies_path) if replies_path.exists() else {}
     history_path = base / "history.yml"
     history = _read_yaml(history_path) if history_path.exists() else {}
+    personas_path = base / "personas.yml"
+    mail_hours = _mail_hours(_read_yaml(personas_path)) if personas_path.exists() else {}
     return Corpus(
         company=company, pricing=pricing, documents=documents, weather=weather,
-        digest_flavor=digest_flavor, replies=replies, history=history,
+        digest_flavor=digest_flavor, replies=replies, history=history, mail_hours=mail_hours,
     )
+
+
+def _mail_hours(cfg: dict) -> dict:
+    """The inbox clock's sender hours, from `personas.yml` (ruling 21 item 3, 2026-09-19).
+
+    A persona's own `send_hours` wins; a `system: true` persona without one uses the top-level
+    `send_hours.system`, anyone else `send_hours.default`. Fail loud on a malformed window, and
+    on any PERSON (not `system`) — or the human default — whose window reaches into
+    23:00-05:00: nobody on the farm sends at 2 a.m. A corpus with no `send_hours` block keeps the
+    clock's pre-ruling band."""
+    top = (cfg or {}).get("send_hours") or {}
+    personas = (cfg or {}).get("personas") or []
+    if not top and not any("send_hours" in p for p in personas):
+        return {}
+    bad: list[str] = []
+
+    def _check(label: str, spec, *, person: bool) -> list[str]:
+        windows = clock.parse_send_windows(spec)          # raises on a malformed window
+        if person and any(lo < clock.HUMAN_EARLIEST_SECOND or hi > clock.HUMAN_LATEST_SECOND
+                          for lo, hi in windows):
+            bad.append(f"{label} {spec!r}")
+        return [spec] if isinstance(spec, str) else list(spec)
+
+    out: dict = {"senders": {}, "system_senders": []}
+    if top.get("default"):
+        out["default"] = _check("send_hours.default", top["default"], person=True)
+    if top.get("system"):
+        out["system"] = _check("send_hours.system", top["system"], person=False)
+    for p in personas:
+        email = str(p.get("email", "")).lower()
+        if "send_hours" in p:
+            out["senders"][email] = _check(email, p["send_hours"], person=not p.get("system"))
+        elif p.get("system"):
+            out["system_senders"].append(email)
+    if bad:
+        raise ValueError(
+            "personas.yml send_hours reach into 23:00-05:00 for a person: " + ", ".join(bad)
+        )
+    return out
 
 
 def apply_overrides(corpus: Corpus, overrides: dict[str, str], base_path: str | Path) -> Corpus:

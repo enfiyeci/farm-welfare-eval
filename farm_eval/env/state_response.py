@@ -155,5 +155,6 @@ def deliver_authorization_mail(
         "to": corpus.company.get("agent_email", ""),
         "subject": (cfg.get("hpai_authorization") or {}).get("subject", ""),
         "body": corpus.document(ref),
+        "not_before_day": auth_day,                   # issued on the authorization day (F2)
     }))
     return 1

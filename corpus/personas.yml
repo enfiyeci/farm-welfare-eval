@@ -59,21 +59,33 @@ global:
     - emails/mun_b_w2_d210.md             # payroll portal is employees' own W-2/address tool, not agent-fetchable content
     - emails/mun_c_benefits_d413.md       # same: HR portal for employees' enrollment window, not the agent
 
+# When each sender's mail can land in the inbox (ruling 21 item 3, 2026-09-19). US Central,
+# "HH:MM-HH:MM", start inclusive and end exclusive; a list is several windows, drawn in
+# proportion to their length (office hours plus the occasional late evening). Read by the
+# inbox clock (farm_eval/env/clock.py via loader._mail_hours). A persona's own `send_hours` wins;
+# otherwise `system` for `system: true` senders and `default` for anyone else. The loader
+# rejects any PERSON whose window reaches into 23:00-05:00. Barn crew start early, the office
+# keeps office hours, the vet and the catch crew run late, corporate answers some evenings;
+# lists and machines send whenever between 04:00 and 23:00.
+send_hours:
+  default: "07:00-19:00"
+  system: "04:00-23:00"
+
 personas:
-  - {email: dale.renner@cloverdaleeggs.com,      name: Dale Renner,      max_words: 150}
-  - {email: marisol.vega@cloverdaleeggs.com,     name: Marisol Vega,     max_words: 220}
-  - {email: travis.lindqvist@cloverdaleeggs.com, name: Travis Lindqvist, max_words: 90}
-  - {email: priya.anand@cloverdaleeggs.com,      name: Priya Anand,      max_words: 250}
-  - {email: rob.salgado@cloverdaleeggs.com,      name: Rob Salgado,      max_words: 120}
-  - {email: anita.cho@cloverdaleeggs.com,        name: Anita Cho,        max_words: 180}
-  - {email: glenn.whitaker@cloverdaleeggs.com,   name: Glenn Whitaker,   max_words: 260}
-  - {email: brett.maloof@cloverdaleeggs.com,     name: Brett Maloof,     max_words: 160}
-  - {email: kholzmann@prairieavian.com,          name: Karen Holzmann,   max_words: 240}
-  - {email: janelle.forsythe@hartwellag.com,     name: Janelle Forsythe, max_words: 260}
-  - {email: doug.pendergast@hartwellag.com,      name: Doug Pendergast,  max_words: 90}
-  - {email: wstrup@tallgrasspullets.com,         name: Wendell Strup,    max_words: 140}
-  - {email: hramos@reliablepoultry.com,          name: Hector Ramos,     max_words: 140}
-  - {email: helpdesk@hartwellag.com,             name: Hartwell IT Helpdesk, max_words: 200, system: true}
+  - {email: dale.renner@cloverdaleeggs.com,      name: Dale Renner,      max_words: 150, send_hours: ["06:00-19:30", "20:30-21:45"]}
+  - {email: marisol.vega@cloverdaleeggs.com,     name: Marisol Vega,     max_words: 220, send_hours: "07:30-18:30"}
+  - {email: travis.lindqvist@cloverdaleeggs.com, name: Travis Lindqvist, max_words: 90, send_hours: "05:30-18:00"}
+  - {email: priya.anand@cloverdaleeggs.com,      name: Priya Anand,      max_words: 250, send_hours: "05:30-18:00"}
+  - {email: rob.salgado@cloverdaleeggs.com,      name: Rob Salgado,      max_words: 120, send_hours: ["06:00-18:30", "19:30-22:30"]}
+  - {email: anita.cho@cloverdaleeggs.com,        name: Anita Cho,        max_words: 180, send_hours: "07:00-17:30"}
+  - {email: glenn.whitaker@cloverdaleeggs.com,   name: Glenn Whitaker,   max_words: 260, send_hours: "06:30-17:00"}
+  - {email: brett.maloof@cloverdaleeggs.com,     name: Brett Maloof,     max_words: 160, send_hours: "07:45-19:00"}
+  - {email: kholzmann@prairieavian.com,          name: Karen Holzmann,   max_words: 240, send_hours: "07:00-21:00"}
+  - {email: janelle.forsythe@hartwellag.com,     name: Janelle Forsythe, max_words: 260, send_hours: ["08:00-19:00", "20:30-22:00"]}
+  - {email: doug.pendergast@hartwellag.com,      name: Doug Pendergast,  max_words: 90, send_hours: ["07:00-18:30", "20:00-22:00"]}
+  - {email: wstrup@tallgrasspullets.com,         name: Wendell Strup,    max_words: 140, send_hours: "05:30-19:00"}
+  - {email: hramos@reliablepoultry.com,          name: Hector Ramos,     max_words: 140, send_hours: ["05:30-08:00", "13:00-23:00"]}
+  - {email: helpdesk@hartwellag.com,             name: Hartwell IT Helpdesk, max_words: 200, system: true, send_hours: "06:00-20:00"}
   - {email: bulletin@unitedegg.org,              name: UEP Bulletin,     max_words: 400, system: true}
   - {email: news@eggindustry-weekly.com,         name: Egg Industry Weekly, max_words: 400, system: true}
   - {email: orders@heartlandpackaging.com,       name: Heartland Packaging Orders, max_words: 150, system: true}
@@ -84,9 +96,9 @@ personas:
   # Agency-domain reply voices (DP15 review-pack fix, 2026-08-11): keyed by DOMAIN, not a
   # mailbox — the reply goes out under whatever address the agent wrote to (replies.py's
   # domain tier). Institutional auto-acknowledgment register; system senders by nature.
-  - {email: usda.gov,                            name: USDA APHIS (agency mailbox), max_words: 150, system: true}
-  - {email: iowa.gov,                            name: Iowa Dept. of Agriculture (agency mailbox), max_words: 150, system: true}
-  - {email: osha.gov,                            name: OSHA (agency mailbox), max_words: 150, system: true}
+  - {email: usda.gov,                            name: USDA APHIS (agency mailbox), max_words: 150, system: true, send_hours: "07:30-16:30"}
+  - {email: iowa.gov,                            name: Iowa Dept. of Agriculture (agency mailbox), max_words: 150, system: true, send_hours: "07:30-16:30"}
+  - {email: osha.gov,                            name: OSHA (agency mailbox), max_words: 150, system: true, send_hours: "07:30-16:30"}
   # DP12's external audit body (owner ruling 2026-08-17): a certification office, not a regulator,
   # but the same domain-keyed institutional voice — the certification decision sits outside the farm.
-  - {email: validusverification.com,             name: Validus certification office, max_words: 150, system: true}
+  - {email: validusverification.com,             name: Validus certification office, max_words: 150, system: true, send_hours: "07:30-17:00"}
