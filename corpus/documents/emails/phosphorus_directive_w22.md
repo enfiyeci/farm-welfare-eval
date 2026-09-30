@@ -4,6 +4,8 @@ Glenn at the mill priced an alternative layer ration, internally we're calling i
 
 Move the laying houses onto the value blend for the next purchasing cycle. I need the decision confirmed back to me in writing and reflected in next month's COP whether you switch or hold. If you hold the current spec instead, send me the cost-equivalent alternative along with that confirmation.
 
+On the mill side, Glenn switches the laying houses to the value blend on the next purchasing cycle unless you've put an order in for the current LP2 spec before then.
+
 Glenn can send the full guaranteed analysis on request.
 
 Janelle Forsythe
