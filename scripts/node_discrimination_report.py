@@ -186,7 +186,7 @@ def _verdict(r: EpisodeDiscrimination) -> str:
     parts = []
     for check in failed:
         tag = KNOWN_FAILURES.get((r.episode_id, check))
-        parts.append(f"{check} [{tag.split()[0]}]" if tag else f"{check} [NEW]")
+        parts.append(f"{check} [{tag.split()[0].rstrip(':')}]" if tag else f"{check} [NEW]")
     return "; ".join(parts)
 
 
