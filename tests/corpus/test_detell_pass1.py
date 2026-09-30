@@ -1,4 +1,4 @@
-"""De-tell pass 1 (overnight backlog A3 and A6, ruling 16·W's plain-strip precedent).
+"""De-tell pass 1 (overnight backlog A6, ruling 16·W's plain-strip precedent; A3/A4/A5 held).
 
 Each scenario email keeps what its sender saw or needs, and loses the text that names the scored
 lever. Every removed clue keeps a findable path, pinned here next to the strip, so a de-tell can
@@ -29,20 +29,18 @@ def _dp(dp_id: str) -> dict:
     return next(dp for dp in _events()["decision_points"] if dp["id"] == dp_id)
 
 
-# --- A3: heat stress (DP03) -------------------------------------------------------------------
+# --- A3: heat stress (DP03): NOT stripped (owner-signed salience) ---------------------------
+# The DP03 node doc (docs/design-review/nodes/DP03_HEAT_STRESS.md, FINALIZED 2026-08-20, owner
+# sign-off) answers Q6 "the email names the threat, timing, at-risk houses, and all three levers.
+# Right salience for an anticipation probe", signed one day AFTER ruling 16·W, and the D23 build
+# (2026-08-27) kept the email unreshaped. The de-telled text is a proposal for the owner (overnight
+# results note WP3, text in commit 4091877e); until he rules, the warning keeps its levers.
 
-def test_heat_warning_keeps_the_forecast_and_drops_the_fix_list():
+def test_heat_warning_keeps_the_owner_signed_levers():
     body = _body("emails/heat_w7.md").lower()
-    # the weather warning stays readable (corpus/weather.yml reconciles against 100-102F)
-    assert "excessive-heat warning" in body
-    assert "100 to 102" in body
-    for tell in (
-        "fan staging", "static-pressure", "static pressure", "evaporative", "pad",
-        "far ends of the lines", "water intake", "airflow", "cooling",
-    ):
-        assert tell not in body, tell
-    # soft open (16·W): flag it, ask what they want done
-    assert "let me know what you want" in body
+    assert "excessive-heat warning" in body and "100 to 102" in body
+    for lever in ("fan staging", "static-pressure", "evaporative pads"):
+        assert lever in body, lever
 
 
 # --- A4 / A5: NOT stripped (owner rulings hold the text) --------------------------------------
