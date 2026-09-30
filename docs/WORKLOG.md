@@ -4,6 +4,53 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-30 · claude · overnight session: guard, observability, hygiene, cost, realism — all on one integration branch, nothing merged (branch overnight/integration-2026-09-30)
+
+- **What:** eleven packages (WP1–WP11) built the FREE items of the 2026-09-29 backlog with no model
+  calls, each on its own `overnight/*` branch, then merged onto `overnight/integration-2026-09-30`
+  (off `feat/node-episodes` `6859f6f`). All tests pass there (non-env 1483 passed / 3 skipped;
+  `tests/env` 1788 passed, run as `tests/env/model`, `test_[a-d]*`, `test_[e-l]*`, `test_[m-z]*` —
+  the env half alone now runs right at the 10-minute Bash cap). Every regen script reproduces the
+  committed goldens; only `node_snapshots.json`'s `digest_sha256` values moved (the feed line).
+  Full summary: `docs/STATUS.md` LATEST 2026-09-30.
+- **Headline numbers:** Flash costs **$1.22 and ~40 min per episode**; a one-epoch sweep of 26 is
+  ~$37 and ~20 h one at a time; prices double on 2027-01-01. The offline guard says DP16 pays 6.00 to
+  every arm, DP25 pays 6.00–10.00 for doing nothing, DPD 2.19–6.19; 7 scenarios need key-act arms to be
+  testable. Authored sessions 122 vs 220 at runtime (nobody acting); DP06 alone adds 25.
+- **Stopped for the owner (not built):** the heat, piling and molt de-tells (each reverses a signed
+  decision; texts in `4091877e`); the `scope14` wake fix (on `overnight/wake-audit-scope14-proposal`,
+  NOT merged); Karen's visit vs the day-248 lab mail (T24b); everything tagged OWNER or GO.
+- **New conventions a later session must know:**
+  - Per-sender mail hours live in `corpus/personas.yml` `send_hours`; engine mail is anchored with
+    `Email.not_before_day`, and a scheduled email opts in with `mail_same_day: true` in
+    `schedule/events.yml` (all mill delivery mail now does).
+  - Node samples render the banner's `last login` from the episode's previous session
+    (`farm_eval/adapter/briefing.py::with_last_login`).
+  - Feed on hand = ordered stock + the mill's Monday/Thursday cover (`corpus/company.yml`
+    `feed_supply`); if a whole-year calendar shift makes Glenn's "Next delivery" weekdays stale,
+    `test_every_next_delivery_the_mill_announces_is_the_real_next_drop` fails: fix the emails.
+  - `tests/judge/test_node_discrimination.py` has a frozen list of known failures; it may only
+    shrink, and each entry needs a backlog ID. Re-run `scripts/node_discrimination_report.py` after any
+    scenario change.
+  - Tests write Inspect logs to a temp dir (`tests/conftest.py`), so `logs/` holds only real runs.
+- **What's next (in order):**
+  1. Owner: merge PR #39 (`feat/node-episodes` → `main`), then open a PR
+     `overnight/integration-2026-09-30` → `main`; the review bot runs on it. Owner rules on scope14;
+     if yes, merge `overnight/wake-audit-scope14-proposal` and regenerate the snapshot probe.
+  2. Owner: check the Vertex login and quota, then pick the first paid run. Recommended: one smoke of
+     phosphorus ration (DP04), ~$1, ~30 min. **Runs go one episode per `inspect eval`, confirm each
+     before the next, `google/gemini-3.8-flash`, one epoch.**
+  3. GO list, with estimates: re-run the de-telled scenarios (~$1.30 each); finish the 12 never-scored
+     episodes (~$15–25, 8–12 h); the measurement run on Haiku 4.5 + Opus 5.5 (~$50–60, ~11 h); an
+     out-of-family re-grade (~$3–5); a k=5 pilot only after the quota is raised (~$183, ~100 h serial).
+  4. After the owner's saturation rulings: build the chosen redesigns, each checked by the guard,
+     the tell audit and one Flash run.
+- **Refs:** `docs/handoffs/2026-09-30-overnight-owner-questions.md` (59 questions + paid-run menu),
+  `docs/handoffs/2026-09-30-overnight-backlog.md` (77 items with status),
+  `docs/handoffs/2026-09-30-overnight-notes/` (per-package notes and recon),
+  `evals/hen/design/2026-09-30-saturation-redesign-proposals.md`, and the five 2026-09-30 reports in
+  `evals/hen/runs/`.
+
 ## 2026-09-25 · claude · PR #39's first CI run: NaN-headline follow-ups FIXED (branch feat/node-episodes, PR #39)
 
 - **Why:** merging `main` brought the CI `tests` job to this branch. It installs inspect-ai
@@ -168,6 +215,8 @@ Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or
   without a result — keel-bone protection (DPE_KEEL_PERCH) and where to source the House 6 pullets
   (DP23_CHICK_SOURCING) — plus the k=1 plumbing run's 10 unfinished episodes, one at a time, k=1,
   same settings. PR #42 is mergeable and awaits the owner; the runs do not block it.
+  *(Update 2026-09-30: PR #42 merged into `feat/node-episodes` on 2026-09-26. The runs are still
+  pending; see the 2026-09-30 entry.)*
 - **Rebased 2026-09-25 onto `feat/node-episodes` at `040ab47`** (the red-mite lane and the solver
   text-only-turn fix landed there first, so this lane rebased and re-ran
   `scripts/regen_node_episodes.py --snapshots --reference` plus the probe): `node_reference.json`

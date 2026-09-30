@@ -3,8 +3,43 @@
 The index for running several Claude sessions on this repo at once. Open this instead of guessing
 from session titles. **Whoever changes a lane's status updates its row in the same breath.**
 
-Last updated: 2026-08-28 (node-review integration lane note added; table below is otherwise
-as of 2026-08-13 and does not yet reflect the node-review build wave).
+Last updated: 2026-09-30 (overnight lanes added; the node-episodes sub-lanes of 2026-09-22 marked
+done). The older blocks and tables below are history as of their own dates.
+
+> ### 🟡 2026-09-30 — overnight lanes (this machine): ALL DONE, pushed, nothing merged, awaiting the owner
+>
+> Eleven packages ran with no model calls. Each has its own worktree under `.claude/worktrees/`
+> and a branch on origin. **`overnight/integration-2026-09-30`** (worktree `integration`) merges all
+> of them except the scope14 proposal, plus two fixes of its own (WP11) and the docs refresh (WP10).
+> Suggested path: merge PR #39, then PR integration → `main`. Questions:
+> `docs/handoffs/2026-09-30-overnight-owner-questions.md`.
+>
+> | branch | package | state |
+> |---|---|---|
+> | `overnight/node-discrimination-guard` | WP1 good/negligent/do-nothing guard + saturation report | done, in integration |
+> | `overnight/score-observability` | WP2 per-criterion breakdown, grader reasons, run health | done, in integration |
+> | `overnight/detell-pass-1` | WP3 tell audit + de-tells (3 of 5 stopped for the owner) | done, in integration |
+> | `overnight/run-hygiene` | WP4 error isolation, test logs, path fix, caches | done, in integration |
+> | `overnight/cost-and-cache` | WP5 cost report, prompt-cache investigation | done, in integration |
+> | `overnight/feed-digest` | WP6 + WP6b feed on hand never 0 t | done, in integration |
+> | `overnight/mail-clock` | WP7 per-sender mail hours, no mail before its event | done, in integration |
+> | `overnight/voice-and-leaks` | WP8 staff reply voice, season lint, leak scan | done, in integration |
+> | `overnight/wake-audit` | WP9 wake audit (report and test only) | done, in integration |
+> | `overnight/wake-audit-scope14-proposal` | WP9 fix proposal (changes session counts) | **held for the owner's ruling; NOT in integration** |
+> | `overnight/difficulty-proposals` | saturation redesign proposals (doc) | done, in integration |
+> | `overnight/integration-2026-09-30` | merges + WP11 (banner, mill-mail stamps) + WP10 docs | done; no PR yet |
+>
+> The overnight worktrees can be removed once the owner has merged or dropped their branches.
+>
+> ### ✅ 2026-09-22 → 09-26 — node-episodes sub-lanes: DONE
+>
+> All landed on `feat/node-episodes` (PR #39, still open against `main`): every decision on the
+> ledger (`feat/node-episodes-all-decisions`, PR #42, merged 2026-09-26); the red-mite full course
+> (`claude/red-mite-course-plan-aea307`); the solver text-only-turn fix
+> (`claude/solver-text-only-nudge`). Their worktrees (`node-episodes-build-bf5123`,
+> `red-mite-course-plan-a2e804`, `determined-kare-755f03`) still exist and hold the only real
+> `.eval` logs; copy those before deleting (owner-questions Q57). `feat/welfare-currency` is still
+> waiting on the owner's "is it dead?" (Q58). Open PRs: #39, #38, #44, #45.
 
 > ### 🟢 2026-09-17 — node-episodes lane (this machine) — PR open, awaiting Arda + five owner asks
 >
