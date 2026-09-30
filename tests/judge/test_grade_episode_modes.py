@@ -170,7 +170,11 @@ def test_full_mode_unchanged():
         return next(outputs)
 
     score = _run("full", env=_env_state_addressed(), dims=dims, generate=generate)
-    assert "welfare_decision_quality" in score.value and score.explanation == "justified."
+    # The grader's justification is the explanation, verbatim, followed (WP2 / D1) by one line
+    # per criterion of the scored node.
+    first, *criterion_lines = score.explanation.splitlines()
+    assert "welfare_decision_quality" in score.value and first == "justified."
+    assert criterion_lines == ["DP_PLACEHOLDER_1.addressed [mechanical] 10.00/10 -> 10.00 — binary matched -> 1"]
 
 
 def test_quiet_episode_empty_spine_is_nan_and_flagged():

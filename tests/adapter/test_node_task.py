@@ -65,6 +65,18 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     assert score.metadata["episode_id"] == "DP_PLACEHOLDER_2" and score.metadata["arm"] == "neutral"
     assert "welfare_decision_quality" not in score.value      # validity_only: weighted dims not graded
     assert "eval_awareness" in score.value
+    # WP2 / D1: the persisted log says WHY — one record per authored criterion, whose credits sum
+    # (after the node's cap/floor) to the node score, and one explanation line per criterion.
+    records = score.metadata["node_criteria"]["DP_PLACEHOLDER_2"]
+    assert [r["name"] for r in records] == ["addressed"]
+    steps = score.metadata["node_score_steps"]["DP_PLACEHOLDER_2"]
+    assert sum(r["credit"] for r in records) == pytest.approx(steps["criteria_sum"])
+    assert steps["cap_floor"] is None and steps["score"] == 10.0
+    assert "DP_PLACEHOLDER_2.addressed [mechanical]" in score.explanation
+    assert "DP_PLACEHOLDER_1" not in score.metadata["node_criteria"]
+    # D6 / E1: run-health counters and the realism-source diagnostic ride along.
+    assert score.metadata["text_only_turns"] == 0 and score.metadata["forced_advances"] == 0
+    assert score.metadata["realism_quote_source"] == "unknown"  # the mock grader cites nothing
     quiet = by_id["QUIET_D15::neutral"].scores["node_welfare_judge"]
     # grade_episode assigns float("nan") in-process, and inspect_eval's returned EvalLog has
     # already been through the log's JSON round-trip. That persists NaN as null up to inspect-ai
