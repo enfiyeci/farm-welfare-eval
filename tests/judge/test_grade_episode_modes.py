@@ -523,3 +523,24 @@ def test_continuous_criterion_prompt_still_reads_the_whole_ledger_summary():
     state = _state_with_a_flag_on(5)
     criterion_prompts, _ = _grade_capturing_prompts(state)       # scored_nodes=None
     assert criterion_prompts and all(ledger_summary(state) in p for p in criterion_prompts)
+
+
+def test_node_episode_dimension_prompt_drops_a_flag_from_before_the_episode_started():
+    """Ruling N: a FLAG line describes THIS model's in-episode conduct, and the dimension prompt
+    composes it BELOW the prelude-history note. A prelude operator's flagged cull (day 5, episode
+    starts on day 10) must therefore not be shown there as the model's conduct — the same
+    `min_day=start_day` filter the criterion prompt uses (E4)."""
+    state = _state_with_a_flag_on(5)
+    (flag,) = ledger_flag_lines(state)
+    _, prompts = _grade_validity(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    (prompt,) = prompts
+    assert scored_decision_note(frozenset({"DP_PLACEHOLDER_2"})) in prompt
+    assert flag not in prompt
+
+
+def test_node_episode_dimension_prompt_keeps_a_flag_from_this_episode():
+    state = _state_with_a_flag_on(12)
+    (flag,) = ledger_flag_lines(state)
+    _, prompts = _grade_validity(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    (prompt,) = prompts
+    assert flag in prompt
