@@ -14,7 +14,9 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from farm_eval.env.clock import compact_date, date_for_day, long_date, next_beat, session_header, timestamp_for
+from farm_eval.env.clock import (
+    compact_date, date_for_day, long_date, next_beat, send_windows_for, session_header, timestamp_for,
+)
 from farm_eval.env.digest import build_digest, feed_next_delivery_day, feed_on_hand_tons
 from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.harm_window import (
@@ -1820,29 +1822,51 @@ class FarmEnv:
         value = overlaid if overlaid is not None else getattr(house, metric)
         return SensorResult(available=True, house_id=house_id, metric=metric, value=float(value))
 
-    def _mail_received_at(self, e: Email) -> str:
-        """The timestamp the inbox shows: a real clock time to the second, deterministic per
-        message. Mail dated day D arrived in the span since D-1's session — most of it the
-        evening before, the rest in the early hours before D's session opened."""
-        return timestamp_for(self.state.start_date, e.day, salt=e.id)
+    def _mailbox_stamps(self) -> list[str]:
+        """The timestamp the inbox shows for every mailbox entry, in mailbox order: a real clock
+        time to the second, deterministic per message. Mail dated day D arrived in the span since
+        D-1's session — most of it the evening before, the rest in the early hours before D's
+        session opened — inside its SENDER's working hours (corpus `personas.yml`, ruling 21
+        item 3) and never before the day of the event it describes (`Email.not_before_day`,
+        backlog F2).
+
+        Stamps are distinct to the second across the inbox: a collision is re-drawn from a
+        derived salt. The mailbox is append-only and walked in order, so an earlier mail keeps
+        its stamp whatever arrives later, and every rebuild of the env renders the same inbox."""
+        taken: set[str] = set()
+        out: list[str] = []
+        for e in self.state.mailbox:
+            windows = send_windows_for(e.from_, self.corpus.mail_hours)
+            salt, attempt = e.id, 0
+            while True:
+                stamp = timestamp_for(self.state.start_date, e.day, salt=salt,
+                                      windows=windows, not_before_day=e.not_before_day)
+                if stamp not in taken:
+                    break
+                attempt += 1
+                if attempt > 1000:
+                    raise ValueError(f"no free inbox second left for mail {e.id!r}")
+                salt = f"{e.id}#{attempt}"
+            taken.add(stamp)
+            out.append(stamp)
+        return out
 
     def list_emails(self, unread_only: bool = False) -> list[dict]:
-        emails = self.state.mailbox
-        if unread_only:
-            emails = [e for e in emails if e.unread]
+        stamps = self._mailbox_stamps()
         return [
-            {"id": e.id, "received": self._mail_received_at(e), "from": e.from_, "subject": e.subject, "unread": e.unread}
-            for e in emails
+            {"id": e.id, "received": stamp, "from": e.from_, "subject": e.subject, "unread": e.unread}
+            for e, stamp in zip(self.state.mailbox, stamps)
+            if e.unread or not unread_only
         ]
 
     def read_email(self, email_id: str) -> dict:
-        for email in self.state.mailbox:
+        for index, email in enumerate(self.state.mailbox):
             if email.id == email_id:
                 email.unread = False
                 # The model sees a mail client's view: a received timestamp, never the internal
-                # day index or the bare date field the engine keys on.
-                out = email.model_dump(by_alias=True, exclude={"day", "date"})
-                return {"id": out.pop("id"), "received": self._mail_received_at(email), **out}
+                # day index, the bare date field the engine keys on, or the event anchor.
+                out = email.model_dump(by_alias=True, exclude={"day", "date", "not_before_day"})
+                return {"id": out.pop("id"), "received": self._mailbox_stamps()[index], **out}
         raise KeyError(f"email not found: {email_id!r}")
 
     def read_incident_log(self) -> list[dict]:

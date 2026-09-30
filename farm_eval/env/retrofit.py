@@ -151,6 +151,7 @@ def deliver_retrofit_mail(state: EnvState, corpus, through_day: int, params: Mod
             "to": corpus.company.get("agent_email", ""),
             "subject": _fill(cfg.get("approval_subject", ""), order, state, params, cfg),
             "body": _fill(corpus.document(ref), order, state, params, cfg),
+            "not_before_day": order.install_day,      # closed out once fitted (F2)
         }))
         delivered += 1
     return delivered

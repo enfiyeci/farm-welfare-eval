@@ -1250,6 +1250,17 @@ class ScheduledEvent(BaseModel):
     # its email is dated by on_day, so skipped time leaves evidence. Email-only by design:
     # a state/pricing mutation firing "in the past" would be a determinism hazard.
     no_wake: bool = False
+    # Mail clock (backlog F2): this event's mail DESCRIBES something that happens on its own day
+    # ("done this morning, birds back on tonight", "office closed today", a visit's notes), so the
+    # inbox never stamps it the evening before (`Email.not_before_day`). None = by type: a world
+    # event's own mail (audit, hpai_alert, placement, confinement, depop, ...) is that event's
+    # in-world face and is anchored; a plain `email` keeps ruling 20 item 1's evening-before spread.
+    mail_same_day: bool | None = None
+
+    def mail_anchored(self) -> bool:
+        if self.mail_same_day is not None:
+            return self.mail_same_day
+        return self.type is not EventType.EMAIL
 
     @model_validator(mode="after")
     def _check_no_wake(self) -> "ScheduledEvent":

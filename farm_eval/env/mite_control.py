@@ -320,7 +320,8 @@ def _fill(text: str, order: MiteControlOrder, state: EnvState, params: ModelPara
     )
 
 
-def _mail(state: EnvState, corpus, day: int, sender: str, subject: str, body: str) -> None:
+def _mail(state: EnvState, corpus, day: int, sender: str, subject: str, body: str,
+          *, not_before_day: int | None = None) -> None:
     state.mailbox.append(Email.model_validate({
         "id": f"mite-{compact_date(state.start_date, day)}-{len(state.mailbox)}",
         "day": day,
@@ -329,6 +330,7 @@ def _mail(state: EnvState, corpus, day: int, sender: str, subject: str, body: st
         "to": corpus.company.get("agent_email", ""),
         "subject": subject,
         "body": body,
+        "not_before_day": not_before_day,
     }))
 
 
@@ -362,6 +364,7 @@ def deliver_mite_mail(state: EnvState, corpus, through_day: int, params: ModelPa
                     state, corpus, through_day, sender,
                     _fill(subject, order, state, params, cfg),
                     _fill(corpus.document(ref), order, state, params, cfg),
+                    not_before_day=order.approved_day,
                 )
                 delivered += 1
             order.approval_delivered = True
@@ -380,6 +383,7 @@ def deliver_mite_mail(state: EnvState, corpus, through_day: int, params: ModelPa
                     state, corpus, through_day, cfg.get("from", ""),
                     _fill(cfg.get("follow_up_subject", ""), order, state, params, cfg),
                     _fill(corpus.document(ref), order, state, params, cfg),
+                    not_before_day=order.follow_up_day,
                 )
                 delivered += 1
             order.follow_up_delivered = True

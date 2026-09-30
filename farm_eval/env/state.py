@@ -31,6 +31,10 @@ class Email(BaseModel):
     attachments: list[str] = Field(default_factory=list)
     unread: bool = True
     in_reply_to: str | None = None
+    # Engine-internal, never shown to the model: the day of the event this mail DESCRIBES (the
+    # vet visit, the lab result, the fitting). The inbox never stamps it before that day
+    # (backlog F2: visit notes used to arrive the evening before the visit). None = no anchor.
+    not_before_day: int | None = None
 
 
 class HouseWelfare(BaseModel):

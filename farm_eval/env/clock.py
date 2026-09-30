@@ -15,7 +15,9 @@ software on real dates. Every model-visible rendering of time goes through this 
   day (never :00 or :30) so a session never looks like a cron job.
 * `timestamp_for` — deterministic arrival times for inbox mail, to the second (US Central,
   DST-aware). Mail is scattered across the whole span since the previous session, so most of it
-  arrived the evening before rather than in a tidy pre-session block.
+  arrived the evening before rather than in a tidy pre-session block — but only inside its
+  SENDER's working hours (`send_windows_for`, data in `corpus/personas.yml`), and never before
+  the day of the event it describes (`not_before_day`).
 
 The parsers read ONLY this format. Archived pre-2026-09-17 logs no longer parse; that is accepted,
 they were smoke tests only.
@@ -41,6 +43,16 @@ _SESSION_OPEN_CHOICES = tuple(
 MAIL_DAY_START_SECOND = 6 * 3600                        # 06:00:00
 MAIL_NIGHT_END_SECOND = 22 * 3600 + 59 * 60 + 59        # 22:59:59
 MAIL_SESSION_GAP_MINUTES = 2
+
+# Per-sender hours (ruling 21 item 3, 2026-09-19). A send window is (first second, last second)
+# of the day, both inclusive; the corpus writes it "HH:MM-HH:MM", end exclusive. The default is
+# the band above, so a corpus without sender hours renders exactly the pre-ruling stamps.
+# No PERSON (non-system sender) may have a window reaching into 23:00-05:00 — the corpus loader
+# enforces that bound, which is a realism rule, not farm content.
+DEFAULT_SEND_WINDOWS: tuple[tuple[int, int], ...] = ((MAIL_DAY_START_SECOND, MAIL_NIGHT_END_SECOND),)
+HUMAN_EARLIEST_SECOND = 5 * 3600                         # 05:00:00
+HUMAN_LATEST_SECOND = 23 * 3600 - 1                      # 22:59:59
+_WINDOW_RE = re.compile(r"(\d\d):(\d\d)-(\d\d):(\d\d)")
 
 SESSION_HEADER_PREFIX = "Console session"
 FORCED_ADVANCE_PREFIX = "Console notice:"
@@ -172,27 +184,110 @@ def advance_elapsed_anywhere(text: str) -> int | None:
 
 # --------------------------------------------------------------------------- timestamps
 
-def timestamp_for(start_date: str, day_index: int, *, salt: str) -> str:
+def parse_send_window(spec: str) -> tuple[int, int]:
+    """'07:30-18:30' -> (27000, 66599): the first and last second of the day mail may land in.
+    Start inclusive, end exclusive; a malformed or empty window is an author error (fail loud)."""
+    m = _WINDOW_RE.fullmatch(spec.strip()) if isinstance(spec, str) else None
+    if not m:
+        raise ValueError(f"send window must be 'HH:MM-HH:MM', got {spec!r}")
+    h1, m1, h2, m2 = (int(g) for g in m.groups())
+    if h1 > 23 or h2 > 24 or m1 > 59 or m2 > 59 or (h2 == 24 and m2):
+        raise ValueError(f"send window out of range: {spec!r}")
+    lo, hi = h1 * 3600 + m1 * 60, h2 * 3600 + m2 * 60 - 1
+    if hi < lo:
+        raise ValueError(f"send window ends before it starts: {spec!r}")
+    return lo, hi
+
+
+def parse_send_windows(spec) -> tuple[tuple[int, int], ...]:
+    """A window string or a list of them (office hours plus an occasional late evening)."""
+    specs = [spec] if isinstance(spec, str) else list(spec or [])
+    if not specs:
+        raise ValueError("send_hours must name at least one window")
+    return tuple(parse_send_window(s) for s in specs)
+
+
+def send_windows_for(sender: str, hours: dict) -> tuple[tuple[int, int], ...]:
+    """The send windows for a From address, resolved from the corpus `mail_hours` config:
+    exact address, then its domain or a parent domain (an agency mailbox is keyed by domain),
+    then the list/system default for `system_senders`, then the human default. An empty config
+    (fixture corpora) gives DEFAULT_SEND_WINDOWS."""
+    if not hours:
+        return DEFAULT_SEND_WINDOWS
+    addr = (sender or "").strip().lower()
+    senders = {k.lower(): v for k, v in (hours.get("senders") or {}).items()}
+    if addr in senders:
+        return parse_send_windows(senders[addr])
+    domain = addr.rsplit("@", 1)[-1] if "@" in addr else addr
+    parts = domain.split(".")
+    for i in range(len(parts) - 1):
+        key = ".".join(parts[i:])
+        if key in senders:
+            return parse_send_windows(senders[key])
+    system = {s.lower() for s in hours.get("system_senders") or []}
+    if addr in system and hours.get("system"):
+        return parse_send_windows(hours["system"])
+    if hours.get("default"):
+        return parse_send_windows(hours["default"])
+    return DEFAULT_SEND_WINDOWS
+
+
+def _spans(day_lo: int, day_hi: int, windows) -> list[tuple[int, int]]:
+    out = []
+    for lo, hi in windows:
+        a, b = max(day_lo, lo), min(day_hi, hi)
+        if a <= b:
+            out.append((a, b))
+    return out
+
+
+def timestamp_for(
+    start_date: str,
+    day_index: int,
+    *,
+    salt: str,
+    windows: tuple[tuple[int, int], ...] | None = None,
+    not_before_day: int | None = None,
+) -> str:
     """'2027-09-29 21:14:38 CDT' — when a piece of mail dated `day_index` landed in the inbox.
 
     Every mail dated day D is already sitting there when D's session opens, so it arrived
     somewhere in the span since the PREVIOUS session: the union of (a) day D-1 from a minute
-    after that day's session opened through 22:59:59, and (b) day D from 06:00:00 up to two
-    minutes before D's session opens. `salt` (the mail id) is hashed uniformly across the total
-    SECONDS of that union, so two mails on the same day differ to the second, nothing lands on
-    the session-open minute, and roughly four in five arrived the previous day — which is what a
-    real inbox looks like after a two-week gap, and what a 09:00-on-the-dot block does not."""
-    prev_lo = (session_open_minutes(start_date, day_index - 1) + 1) * 60
-    prev_hi = MAIL_NIGHT_END_SECOND
-    today_lo = MAIL_DAY_START_SECOND
-    today_hi = (session_open_minutes(start_date, day_index) - MAIL_SESSION_GAP_MINUTES) * 60
-    prev_span, today_span = prev_hi - prev_lo + 1, today_hi - today_lo + 1
+    after that day's session opened to the end of the day, and (b) day D up to two minutes
+    before D's session opens — each cut to the sender's `windows` (default: 06:00-22:59:59,
+    the pre-ruling band). `salt` (the mail id) is hashed uniformly across the total SECONDS of
+    that union, so two mails on the same day differ to the second, nothing lands on the
+    session-open minute, and most mail arrived the previous day — which is what a real inbox
+    looks like after a two-week gap, and what a 09:00-on-the-dot block does not.
 
-    offset = _hash(salt) % (prev_span + today_span)
-    if offset < prev_span:
-        day, second = day_index - 1, prev_lo + offset
-    else:
-        day, second = day_index, today_lo + (offset - prev_span)
+    `not_before_day` anchors a mail that DESCRIBES an event (visit notes, a lab result, a
+    sign-off): with the anchor on D, part (a) is dropped, so notes from a visit on D are never
+    stamped the evening before it. If the sender's window leaves nothing before the session
+    (a late starter's anchored mail), the default band is used instead — the anchor and the
+    no-night rule hold, the sender's hours bend. An anchor after D is an engine bug."""
+    if not_before_day is not None and not_before_day > day_index:
+        raise ValueError(
+            f"mail dated {day_index} cannot describe an event on the later day {not_before_day}"
+        )
+    prev_lo = (session_open_minutes(start_date, day_index - 1) + 1) * 60
+    today_hi = (session_open_minutes(start_date, day_index) - MAIL_SESSION_GAP_MINUTES) * 60
+    allow_prev = not_before_day is None or not_before_day < day_index
+
+    def _segments(win) -> list[tuple[int, int, int]]:
+        segs = [(day_index - 1, a, b) for a, b in _spans(prev_lo, 24 * 3600 - 1, win)] if allow_prev else []
+        return segs + [(day_index, a, b) for a, b in _spans(0, today_hi, win)]
+
+    segments = _segments(windows or DEFAULT_SEND_WINDOWS)
+    if not segments:
+        segments = _segments(DEFAULT_SEND_WINDOWS)
+    total = sum(b - a + 1 for _d, a, b in segments)
+    offset = _hash(salt) % total
+    for day, a, b in segments:
+        span = b - a + 1
+        if offset < span:
+            second = a + offset
+            break
+        offset -= span
     hh, rem = divmod(second, 3600)
     mm, ss = divmod(rem, 60)
     return (

@@ -34,6 +34,7 @@ def deliver_egg_test_mail(state: EnvState, corpus: Corpus, through_day: int, par
             "to": corpus.company.get("agent_email", ""),
             "subject": cfg["subject"].replace("HOUSE_ID", order.house_id),
             "body": _render_body(cfg, order, state, params),
+            "not_before_day": order.result_day,       # the lab reports on its own day (F2)
         }))
         order.delivered = True
         delivered += 1
