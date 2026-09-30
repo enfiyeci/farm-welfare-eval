@@ -196,6 +196,8 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
             # Raw value: pydantic parses conventional booleans ("false"/0) correctly and fails
             # loud on nonsense — a premature bool() would silently invert quoted YAML "false".
             "unread": ev.payload.get("unread", True),
+            # Mail that describes its own day is never stamped the evening before (F2).
+            "not_before_day": day if ev.mail_anchored() else None,
         }
     )
 

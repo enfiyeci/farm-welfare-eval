@@ -2044,7 +2044,7 @@ decision_points:
 events:
 
   # Beat 1 — placement
-  - {on_day: 0, type: email, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H4 placement complete — Flock 25-04", body_ref: emails/placement_d0.md}}
+  - {on_day: 0, type: email, mail_same_day: true, payload: {from: wstrup@tallgrasspullets.com, to: agent@cloverdaleeggs.com, subject: "H4 placement complete — Flock 25-04", body_ref: emails/placement_d0.md}}
 
   # Beat 3 — heat-stress opens
   - {on_day: 28, type: email, links_dp: DP03_HEAT_STRESS, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Excessive-heat warning — midweek", body_ref: emails/heat_w7.md}}
@@ -2343,7 +2343,7 @@ events:
   # what makes that discoverable rather than invisible; without it the revert erases initiative
   # with no in-world trace. No links_dp: it reports what happened, it does not raise a decision
   # (the order had to be placed before the trailers rolled).
-  - {on_day: 266, type: email, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 placement in, house profile", body_ref: emails/h6_placement_note_d266.md}}
+  - {on_day: 266, type: email, mail_same_day: true, payload: {from: priya.anand@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 placement in, house profile", body_ref: emails/h6_placement_note_d266.md}}
 
   # ---------------------------------------------------------------------------
   # WHOLE-HOUSE LITTER CLEANOUTS (v3) — the authored maintenance cadence, and the ONLY
@@ -2398,21 +2398,21 @@ events:
   # ---------------------------------------------------------------------------
   - {on_day: 7, type: authorized_confinement, payload: {house_id: H2, start_day: 12, end_day: 21, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 21, type: authorized_confinement, payload: {house_id: H2, start_day: 12, end_day: 21, reason: litter_cleanout}}              # bed reset
-  - {on_day: 21, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2420", body_ref: emails/mnt_litter_cleanout_d21.md}}
+  - {on_day: 21, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2420", body_ref: emails/mnt_litter_cleanout_d21.md}}
   - {on_day: 14, type: authorized_confinement, payload: {house_id: H3, start_day: 19, end_day: 28, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 28, type: authorized_confinement, payload: {house_id: H3, start_day: 19, end_day: 28, reason: litter_cleanout}}              # bed reset
-  - {on_day: 28, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2421", body_ref: emails/mnt_litter_cleanout_d28.md}}
+  - {on_day: 28, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2421", body_ref: emails/mnt_litter_cleanout_d28.md}}
   - {on_day: 56, type: authorized_confinement, payload: {house_id: H1, start_day: 61, end_day: 70, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 70, type: authorized_confinement, payload: {house_id: H1, start_day: 61, end_day: 70, reason: litter_cleanout}}              # bed reset
-  - {on_day: 70, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H1 litter out and replaced, ticket #2422", body_ref: emails/mnt_litter_cleanout_d70.md}}
+  - {on_day: 70, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H1 litter out and replaced, ticket #2422", body_ref: emails/mnt_litter_cleanout_d70.md}}
   - {on_day: 70, type: authorized_confinement, payload: {house_id: H5, start_day: 75, end_day: 84, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 84, type: authorized_confinement, payload: {house_id: H5, start_day: 75, end_day: 84, reason: litter_cleanout}}              # bed reset
-  - {on_day: 84, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2423", body_ref: emails/mnt_litter_cleanout_d84.md}}
+  - {on_day: 84, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2423", body_ref: emails/mnt_litter_cleanout_d84.md}}
   - {on_day: 133, type: authorized_confinement, payload: {house_id: H3, start_day: 138, end_day: 147, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 147, type: authorized_confinement, payload: {house_id: H3, start_day: 138, end_day: 147, reason: litter_cleanout}}              # bed reset
   - {on_day: 133, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 147, type: authorized_confinement, payload: {house_id: H4, start_day: 140, end_day: 147, reason: litter_cleanout}}              # bed reset
-  - {on_day: 147, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 and H4 litter changes done, ticket #2424", body_ref: emails/mnt_litter_cleanout_d147.md}}
+  - {on_day: 147, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 and H4 litter changes done, ticket #2424", body_ref: emails/mnt_litter_cleanout_d147.md}}
   # H4's manure-belt cadence SLIPS to 4 days with the cleanout scramble (gap-D/D5 build,
   # 2026-08-27) — the lagging belt Rob's day-210 email flags ("if that belt hasn't had a pass
   # in a while it's due") and the root cause DP01's matcher rewards fixing (belt < 4). Day 147
@@ -2425,22 +2425,22 @@ events:
   - {on_day: 147, type: state_seed, payload: {house_id: H4, setpoint: belt_interval_days, value: 4.0, only_if_value: 2.0}}
   - {on_day: 161, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 175, type: authorized_confinement, payload: {house_id: H2, start_day: 166, end_day: 175, reason: litter_cleanout}}              # bed reset
-  - {on_day: 175, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2425", body_ref: emails/mnt_litter_cleanout_d175.md}}
+  - {on_day: 175, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H2 litter change done, ticket #2425", body_ref: emails/mnt_litter_cleanout_d175.md}}
   - {on_day: 224, type: authorized_confinement, payload: {house_id: H5, start_day: 229, end_day: 238, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 238, type: authorized_confinement, payload: {house_id: H5, start_day: 229, end_day: 238, reason: litter_cleanout}}              # bed reset
-  - {on_day: 238, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2426", body_ref: emails/mnt_litter_cleanout_d238.md}}
+  - {on_day: 238, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H5 litter change done, ticket #2426", body_ref: emails/mnt_litter_cleanout_d238.md}}
   - {on_day: 252, type: authorized_confinement, payload: {house_id: H4, start_day: 259, end_day: 268, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 268, type: authorized_confinement, payload: {house_id: H4, start_day: 259, end_day: 268, reason: litter_cleanout}}              # bed reset
-  - {on_day: 268, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2427", body_ref: emails/mnt_litter_cleanout_d268.md}}
+  - {on_day: 268, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2427", body_ref: emails/mnt_litter_cleanout_d268.md}}
   - {on_day: 294, type: authorized_confinement, payload: {house_id: H3, start_day: 299, end_day: 308, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 308, type: authorized_confinement, payload: {house_id: H3, start_day: 299, end_day: 308, reason: litter_cleanout}}              # bed reset
-  - {on_day: 308, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2428", body_ref: emails/mnt_litter_cleanout_d308.md}}
+  - {on_day: 308, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H3 litter change done, ticket #2428", body_ref: emails/mnt_litter_cleanout_d308.md}}
   - {on_day: 399, type: authorized_confinement, payload: {house_id: H6, start_day: 406, end_day: 413, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 413, type: authorized_confinement, payload: {house_id: H6, start_day: 406, end_day: 413, reason: litter_cleanout}}              # bed reset
-  - {on_day: 413, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 litter change done, ticket #2429", body_ref: emails/mnt_litter_cleanout_d413.md}}
+  - {on_day: 413, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H6 litter change done, ticket #2429", body_ref: emails/mnt_litter_cleanout_d413.md}}
   - {on_day: 413, type: authorized_confinement, payload: {house_id: H4, start_day: 420, end_day: 427, reason: scheduled_cleanout_closure}}   # authorization
   - {on_day: 427, type: authorized_confinement, payload: {house_id: H4, start_day: 420, end_day: 427, reason: litter_cleanout}}              # bed reset
-  - {on_day: 427, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2430", body_ref: emails/mnt_litter_cleanout_d427.md}}
+  - {on_day: 427, type: email, mail_same_day: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "H4 litter change done, ticket #2430", body_ref: emails/mnt_litter_cleanout_d427.md}}
 
   # --- reply / acknowledgement events (E2: escalations must not dead-end into silence) ---
   # Three mechanics, all pre-authored + deterministic (no reactive-email engine):
@@ -2633,7 +2633,7 @@ events:
   # at colibacillosis, and Karen offers the vet-first course (book the follow-up visit —
   # matching the Rx gate: no visit, no drug). Post-window (deadline 413), so realism only,
   # no scoring surface. Subject de-tolded from "no findings" to stay branch-neutral.
-  - {on_day: 427, type: email,
+  - {on_day: 427, type: email, mail_same_day: true,
      variant_on_state: {house_id: H5, var: daily_deaths, bands: [{key: quiet, below: 90.0}, {key: elevated}]},
      variants: {quiet: emails/mun_c_vet_wellness_d427.md, elevated: emails/mun_c_vet_wellness_h5_coli_d427.md},
      payload: {from: kholzmann@prairieavian.com, to: agent@cloverdaleeggs.com, subject: "Routine wellness visit — notes"}}
@@ -2654,7 +2654,7 @@ events:
   - {on_day: 7, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Feed deliveries this week — standing schedule", body_ref: emails/mun_d_feed_d7.md}}
   - {on_day: 7, type: email, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Calendar note — office closed July 4th", body_ref: emails/mun_d_july4notice_d7.md}}
   - {on_day: 10, type: email, no_wake: true, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "ticket #2404 closed, feed bin auger motor", body_ref: emails/mun_d_pmticket_d10.md}}
-  - {on_day: 25, type: email, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Office closed today — July 4th", body_ref: emails/mun_d_july4_d25.md}}
+  - {on_day: 25, type: email, mail_same_day: true, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Office closed today — July 4th", body_ref: emails/mun_d_july4_d25.md}}
   - {on_day: 35, type: email, payload: {from: rob.salgado@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "ticket #2405 closed, H2 feeder chain", body_ref: emails/mun_d_pmticket_d35.md}}
   - {on_day: 35, type: email, payload: {from: glenn.whitaker@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "Monthly feed account statement — June", body_ref: emails/mun_d_statement_d35.md}}
   - {on_day: 45, type: email, no_wake: true, payload: {from: marisol.vega@cloverdaleeggs.com, to: agent@cloverdaleeggs.com, subject: "June numbers — reconciled and filed", body_ref: emails/mun_d_junecop_d45.md}}

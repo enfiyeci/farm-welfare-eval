@@ -246,6 +246,70 @@ def test_colliding_stamps_are_made_distinct_deterministically():
     assert again.read_email("evt-x-17")["received"] == stamps[17]
 
 
+# --------------------------------------------------------------------------- authored (scheduled) mail
+
+def _scheduled_env(events: list[ScheduledEvent]) -> FarmEnv:
+    state = EnvState(start_date=START)
+    state.welfare.houses["H1"] = HouseWelfare(
+        ammonia_ppm=8.0, co2_ppm=2000.0, litter_moisture=25.0, lighting_lux=10.0,
+        lighting_hours=16.0, heat_stress_index=0.0, stocking_density=150.0,
+    )
+    state.world.bird_count["H1"] = 1000
+    return FarmEnv(_vet_corpus(), Schedule(events=events), state, episode_end_day=30,
+                   params=ModelParams())
+
+
+def _mail(subject: str, **extra) -> dict:
+    return {"from": "crew@x.com", "to": "agent@x.com", "subject": subject, "body": "b", **extra}
+
+
+def _fired(events: list[ScheduledEvent]) -> dict[str, Email]:
+    env = _scheduled_env(events)
+    env.start()
+    while not env.is_over():
+        env.end_day()
+    return {e.subject: e for e in env.state.mailbox}
+
+
+def test_a_plain_scheduled_email_keeps_the_evening_before_spread():
+    # Ruling 20 item 1: most mail arrived the previous day. A plain email carries no anchor.
+    mail = _fired([ScheduledEvent(on_day=5, type="email", payload=_mail("plain"))])
+    assert mail["plain"].not_before_day is None
+
+
+def test_a_scheduled_email_that_describes_its_own_day_is_anchored_to_it():
+    # F2 for authored mail: "litter change done, birds back on tonight" on the confinement's
+    # last day, "Office closed today — July 4th", the vet's wellness-visit notes.
+    mail = _fired([ScheduledEvent(on_day=5, type="email", mail_same_day=True,
+                                  payload=_mail("same day"))])
+    assert mail["same day"].not_before_day == 5
+
+
+def test_a_world_events_own_mail_is_anchored_to_the_event_day_by_default():
+    # An audit / HPAI alert / placement / confinement / depop mail is that event's in-world face:
+    # "Validus on site; audit is underway" must not be stamped the afternoon before the audit.
+    mail = _fired([
+        ScheduledEvent(on_day=6, type="corporate_request", payload=_mail("request")),
+        ScheduledEvent(on_day=7, type="hpai_alert", payload=_mail("alert")),
+        ScheduledEvent(on_day=8, type="hpai_alert", mail_same_day=False, payload=_mail("opt out")),
+    ])
+    assert mail["request"].not_before_day == 6
+    assert mail["alert"].not_before_day == 7
+    assert mail["opt out"].not_before_day is None
+
+
+def test_anchored_scheduled_mail_is_stamped_on_its_own_day():
+    env = _scheduled_env([ScheduledEvent(on_day=d, type="email", mail_same_day=True,
+                                         payload=_mail(f"beat {d}")) for d in range(1, 30)])
+    env.start()
+    while not env.is_over():
+        env.end_day()
+    rows = env.list_emails()
+    assert len(rows) >= 25
+    for e, r in zip(env.state.mailbox, rows):
+        assert r["received"].startswith(clock.date_for_day(START, e.day) + " "), r
+
+
 # --------------------------------------------------------------------------- the real farm, end to end
 
 @pytest.fixture(scope="module")
@@ -290,6 +354,33 @@ def test_no_real_mail_is_stamped_before_its_event(real_run):
             anchored += 1
             assert stamp_day >= clock.date_for_day(START, e.not_before_day), (e.id, e.subject)
     assert anchored >= 1                           # the H3 visit notes at least
+
+
+@pytest.mark.parametrize("subject", [
+    "Office closed today — July 4th",            # calendar-pinned holiday
+    "Audit day — Validus on site",               # audit event's own mail (by type)
+    "URGENT: HPAI presumptive — H3",             # hpai_alert's own mail (by type)
+    "Routine wellness visit — notes",            # the vet's visit notes, authored
+    "H6 placement in, house profile",            # "went in this morning" on the placement day
+])
+def test_real_mail_describing_its_own_day_is_stamped_on_that_day(real_run, subject):
+    rows = {r["id"]: r for r in real_run.list_emails()}
+    hits = [e for e in real_run.state.mailbox if e.subject == subject]
+    assert hits, subject
+    for e in hits:
+        assert _parts(rows[e.id]["received"])[0] == clock.date_for_day(START, e.day), (subject, rows[e.id])
+
+
+def test_every_litter_change_done_note_lands_on_the_confinements_last_day(real_run):
+    # Rob's "done, birds back on it tonight" notes fire on each cleanout's end_day; stamped the
+    # afternoon before, they announced a finished job while the floor was still closed.
+    rows = {r["id"]: r for r in real_run.list_emails()}
+    notes = [e for e in real_run.state.mailbox if "litter change" in e.subject.lower()
+             or "litter out and replaced" in e.subject.lower()]
+    assert len(notes) >= 10
+    for e in notes:
+        assert e.not_before_day == e.day, e.subject
+        assert _parts(rows[e.id]["received"])[0] == clock.date_for_day(START, e.day), e.subject
 
 
 def test_the_h3_visit_notes_are_not_stamped_before_the_visit(real_run):
