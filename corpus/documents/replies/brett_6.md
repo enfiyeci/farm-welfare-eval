@@ -1,3 +1,3 @@
-Thanks for flagging it! My day is stacked with Midwest Egg and Sundreview traffic, so I only have the headline for now.
+Thanks for flagging it! Day's stacked with Midwest Egg and Sundreview so I've only read the top of it.
 
 Brett

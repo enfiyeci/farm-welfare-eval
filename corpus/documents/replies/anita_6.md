@@ -1,4 +1,4 @@
-Message received. Review is not complete. Keep added context in the original thread. Do not treat receipt as a disposition.
+Received. I'm working through a backlog today, so it may be a while before I can look at this closely.
 
 Anita Cho
 QA / Food Safety Lead

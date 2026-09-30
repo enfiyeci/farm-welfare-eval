@@ -1,4 +1,4 @@
-Message received. I am between forecast and close work, with limited capacity for an email exchange.
+Received. I'm between forecast and close work, with limited time for email this week.
 
 Janelle Forsythe
 Corporate Controller

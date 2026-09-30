@@ -1,5 +1,3 @@
-EMAIL FLAGGED / WO QUEUE FULL
-
-Bench buried. Radio nonstop. Not making a call from the truck screen.
+Bench is BURIED today, radio nonstop. Not going to make a call on this from the truck screen.
 
 Rob

@@ -1,1 +1,1 @@
-got it, prob get to it later today
+got it. prob wont get a real look til later

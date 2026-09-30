@@ -1,3 +1,3 @@
-I have the note. Please keep any additional records on this thread so the sequence remains clear.
+I have the note. If you're sending records, one email with everything in it is easiest for me to work from.
 
 Dr. Holzmann

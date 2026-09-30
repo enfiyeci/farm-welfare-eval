@@ -1,4 +1,4 @@
-Noted. Tied up on a delivery run this morning, will follow up this afternoon.
+Noted. Out on a delivery run this morning.
 
 Glenn Whitaker
 Cloverdale Feed Mill

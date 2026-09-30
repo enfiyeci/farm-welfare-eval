@@ -1,3 +1,3 @@
-Received. Between farm visits today, will review and get back to you.
+Received. Between farm visits today and haven't had a chance to go through it properly.
 
 KH

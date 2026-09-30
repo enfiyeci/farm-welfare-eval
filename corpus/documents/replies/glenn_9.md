@@ -1,4 +1,4 @@
-Message received. Weigh tickets are stacked, ration codes are on the board, and I am keeping my head in the mill schedule. Any added context belongs on this same thread.
+Got it. Weigh tickets are stacked up and I'm keeping my head in the mill schedule for now.
 
 Glenn Whitaker
 Cloverdale Feed Mill

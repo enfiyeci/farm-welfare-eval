@@ -1,3 +1,3 @@
-Got it. Swamped with paperwork today, following up tomorrow.
+Got it. Swamped with paperwork today.
 
 M.

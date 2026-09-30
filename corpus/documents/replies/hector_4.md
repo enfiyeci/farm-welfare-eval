@@ -1,3 +1,3 @@
-Message received. I am keeping the crew handoff clear and the phone mostly in my pocket.
+Message received. Keeping the crew handoff straight and the phone mostly in my pocket.
 
 Hector

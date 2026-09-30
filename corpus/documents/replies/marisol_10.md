@@ -1,9 +1,9 @@
-Thanks, I have this in my queue. I am away from the desk for stretches and may be slow to engage by email. For the cleanest handoff:
+Thanks, got it. I'm away from the desk for stretches today, so a few things that help me:
 
-- keep the thread together
-- copy whoever needs the same context
-- use the regular agenda channel if group review is needed
+- keep it all in one email if you can
+- copy whoever else needs the same background
+- put it on the weekly agenda if it needs the group
 
-That keeps the background in one place while I move between the office and the rest of the day's schedule.
+That way nothing gets lost while I'm running between the office and everything else.
 
 Marisol

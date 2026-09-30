@@ -1,3 +1,3 @@
-Message received. For a consult slot, use the Prairie Avian practice line; the office manages the calendar while I am in the field.
+Received. For a consult slot, call the Prairie Avian practice line. The office keeps my calendar while I'm in the field.
 
 KH

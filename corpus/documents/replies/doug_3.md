@@ -1,1 +1,1 @@
-Seen it. Monday.
+Seen.

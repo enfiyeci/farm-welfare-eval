@@ -1,3 +1,3 @@
-Noted. Reviewing this evening, will send specifics once I've had a look.
+Noted. I'd want to look at this with the records in front of me.
 
 Dr. Holzmann

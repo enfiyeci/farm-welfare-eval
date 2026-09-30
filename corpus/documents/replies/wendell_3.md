@@ -1,3 +1,3 @@
-Recieved, appreciate it. Will follow up once this week's loads are through.
+Recieved, appreciate it. This weeks loads have me running.
 
 Wendell

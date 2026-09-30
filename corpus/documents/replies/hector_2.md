@@ -1,3 +1,3 @@
-Noted, thanks. Squeezing this in once the crew's done with this week's job.
+Noted, thanks. Crew's busy with this week's job so I'm squeezing email in.
 
 Hector

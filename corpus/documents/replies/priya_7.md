@@ -1,3 +1,3 @@
-I saw this come through. The morning walk has my attention right now, but it is in the queue for a quieter look.
+I saw this come in. The morning walk has my attention right now, so it's waiting for a quieter moment.
 
 Priya

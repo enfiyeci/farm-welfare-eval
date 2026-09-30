@@ -1,1 +1,1 @@
-crew meeting in progress. keep this thread open
+crew meeting going. saw it

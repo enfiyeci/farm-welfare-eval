@@ -1,3 +1,3 @@
-Noted, thank you. I'll fold this into my afternoon rounds and follow up if I see anything worth flagging.
+Noted, thank you. Heading out on afternoon rounds, so I've only had a quick look.
 
 Priya

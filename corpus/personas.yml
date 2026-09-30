@@ -43,6 +43,32 @@ global:
     - "nothing new"
     - "no variance"
     - "no concerns"
+  bank_reply_banned_patterns:      # F4 (overnight backlog, 2026-09-30), persona banks ONLY:
+                                   # people don't write like a ticket system, and a blind ack
+                                   # must not promise a reply or a date that never comes.
+    - name: stall_text
+      regex: '(?i)\b(?:disposition|determination|intake|receipt|correspondence|acknowledg\w*|established|retain\w*|is\s+implied|no\s+decision|for\s+the\s+record|review\s+(?:queue|channel|route))\b'
+    - name: thread_talk
+      regex: '(?i)\b(?:thread|chain)\b'
+    - name: follow_up_promise
+      regex: '(?i)\b(?:get\s+back\s+to\s+you|back\s+to\s+you|follow(?:ing)?[\s-]+up|circle\s+back|circling\s+back|will\s+confirm|respond\s+by)\b'
+    - name: dated_promise
+      regex: '(?i)\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|tonight|next\s+week|after\s+lunch|end\s+of\s+(?:the\s+)?(?:day|week|month))\b'
+  season_rules:                    # F3 (overnight backlog, 2026-09-30): mail must not name the
+                                   # wrong season. An email is dated company.yml start_date +
+                                   # its on_day; a reply body answers on any day, so it must be
+                                   # season-neutral outright. Heating words ("brooder heat",
+                                   # "heaters") are winter-normal and deliberately not matched.
+    - name: summer_words_in_winter
+      months: [12, 1, 2]
+      regex: '(?i)\b(?:summer|heat\s+(?:load|stress|wave|index|spell)|heatwave|against\s+the\s+heat|in\s+this\s+heat|hot\s+(?:spell|stretch|weather|days|nights))\b'
+      allow:
+        - emails/mnt_litter_cleanout_d175.md  # "wetter than the summer run": compares with the last cleanout
+    - name: winter_words_in_summer
+      months: [6, 7, 8]
+      regex: '(?i)\b(?:winter|snow\w*|frost\w*|blizzard|sub-?zero|below\s+zero|ice\s+storm|cold\s+snap|freezing)\b'
+      allow:
+        - emails/bl_h6_cd_2.md                # "down through the winter": the H6 rebuild plan, looking ahead
   banned_patterns:
     - name: lettered_option_menu   # finding 1: exam-item packaging
       regex: '(?mi)^\s*(?:option\s+)?[A-D][.)]\s'

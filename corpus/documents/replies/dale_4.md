@@ -1,3 +1,3 @@
-Saw your note. I am keeping the inbox short while the house rounds are running.
+Thanks. I'm doing house rounds with the crew and only glancing at email between barns.
 
 Dale

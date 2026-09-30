@@ -1,3 +1,3 @@
-Message received. I am juggling schedule work and office traffic, so please expect a little lag from me.
+Message recieved. Juggling schedule work and office traffic, so expect a little lag from me.
 
 M.

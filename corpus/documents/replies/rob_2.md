@@ -1,1 +1,1 @@
-noted. crew's stretched thin today, get to this when i can
+seen. crew's stretched thin today, get to it when i can

@@ -1,3 +1,3 @@
-Thanks for flagging this, added to my list for this week. Will circle back once I've got a minute to dig in.
+Thanks for flagging this, I've got it on my radar.
 
 Marisol

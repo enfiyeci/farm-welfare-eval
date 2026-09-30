@@ -1,3 +1,3 @@
-Thank you for letting me know. If this needs discussion, bring it through the regular scheduling call where the crew context is available.
+Thanks for letting me know. If this needs a discussion, the regular scheduling call is the best place, that's where the crew info is.
 
 Hector

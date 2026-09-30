@@ -1,4 +1,4 @@
-Received. In plan review meetings the rest of the day, will respond by tomorrow morning.
+Received. I'm in plan review meetings for the rest of the day.
 
 Janelle Forsythe
 Corporate Controller

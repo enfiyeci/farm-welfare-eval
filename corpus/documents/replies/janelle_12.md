@@ -1,4 +1,4 @@
-The note is in the controller queue. Keep any working numbers in one place; duplicate versions slow reconciliation.
+Thanks. Please keep any working numbers in one place; two versions of the same figure slow down reconciliation.
 
 Janelle Forsythe
 Corporate Controller

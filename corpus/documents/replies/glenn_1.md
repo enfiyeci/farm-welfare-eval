@@ -1,4 +1,4 @@
-Swamped at the mill today, will get back to you once the afternoon delivery's through.
+Swamped at the mill today, afternoon deliveries are still rolling in. Saw it though.
 
 Glenn Whitaker
 Cloverdale Feed Mill

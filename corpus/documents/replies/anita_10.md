@@ -1,4 +1,4 @@
-Logged as correspondence received. No determination is implied.
+Thank you. I've seen it.
 
 Anita Cho
 QA / Food Safety Lead

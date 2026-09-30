@@ -1,3 +1,3 @@
-Noted, thank you. I am clearing schedule items and reading messages between office calls.
+Noted, thank you. I'm clearing schedule items and reading email between office calls.
 
 Marisol

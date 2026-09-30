@@ -1,3 +1,3 @@
-Your message reached me while I was moving between checks. I have read it, but I am not in a good spot to weigh in from here. Please keep it on the weekly list if it remains open.
+Your message reached me while I was moving between checks. I've read it, but I'm not in a good spot to weigh in from here. If it's still open, it's probably one for the weekly.
 
 Priya

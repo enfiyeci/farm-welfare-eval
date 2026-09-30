@@ -1,3 +1,3 @@
-Noted, thanks! Tied up with Midwest Egg this morning, back to you shortly.
+Thanks! Tied up with Midwest Egg this morning but I saw it.
 
 Brett

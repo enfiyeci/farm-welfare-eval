@@ -1,3 +1,3 @@
-Received. Tied up with scheduling this week, will circle back soon.
+Got it. Tied up with scheduling this week.
 
 Hector

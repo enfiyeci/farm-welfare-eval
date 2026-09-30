@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import pathlib
 import re
 import statistics
@@ -118,11 +119,86 @@ def sender_map(root: pathlib.Path) -> tuple[dict[str, str], list[tuple[str, str,
     return senders, conflicts
 
 
+def schedule_days(root: pathlib.Path) -> dict[str, list[int]]:
+    """body_ref -> every `on_day` a schedule event serves it on (body_ref and all variants)."""
+    days: dict[str, list[int]] = {}
+    sched = _load_yaml(root / "schedule" / "events.yml")
+    for ev in sched.get("events", []):
+        day = ev.get("on_day")
+        if not isinstance(day, int):
+            continue
+        refs = [(ev.get("payload") or {}).get("body_ref"), *(ev.get("variants") or {}).values()]
+        for ref in refs:
+            if ref:
+                days.setdefault(ref, []).append(day)
+    return days
+
+
+def season_findings(rel: str, body: str, rules: list[dict], days: list[int] | None,
+                    start: _dt.date | None) -> list[str]:
+    """Season lint (overnight backlog F3, 2026-09-30). A scheduled email is flagged when a rule's
+    regex matches and ANY day it is served on falls in the rule's months (the calendar is
+    `company.yml:start_date` + `on_day`, so a whole-year shift keeps every finding). A reply body
+    has no scheduled day (it answers whatever the agent sent, in any month), so it is flagged
+    whenever a rule matches: reply copy must be season-neutral outright."""
+    out: list[str] = []
+    for rule in rules:
+        if rel in (rule.get("allow") or []):
+            continue
+        m = re.search(rule["regex"], body)
+        if not m:
+            continue
+        if rel.startswith("replies/"):
+            out.append(f"{rel}: season: {rule['name']}: {m.group(0)!r} in a reply body (served any day)")
+            continue
+        if start is None:
+            continue
+        months = set(rule.get("months") or [])
+        for day in sorted(set(days or [])):
+            when = start + _dt.timedelta(days=day)
+            if when.month in months:
+                out.append(f"{rel}: season: {rule['name']}: {m.group(0)!r} in mail dated {when.isoformat()}")
+                break
+    return out
+
+
+def persona_bank_refs(root: pathlib.Path, system_senders: set[str]) -> set[str]:
+    """Every ref in a replies.yml `personas:` bank of a PERSON: the staff acknowledgments that
+    answer the agent's mail blind to its content (farm_eval/env/replies.py). Banks of
+    `system: true` senders (helpdesk, order desk, vendor auto-responders) are machine copy by
+    design and are left out."""
+    path = root / "corpus" / "replies.yml"
+    if not path.exists():
+        return set()
+    personas = _load_yaml(path).get("personas") or {}
+    return {ref for addr, cfg in personas.items() if addr not in system_senders
+            for ref in (cfg or {}).get("bank", [])}
+
+
+def _start_date(root: pathlib.Path) -> _dt.date | None:
+    path = root / "corpus" / "company.yml"
+    if not path.exists():
+        return None
+    raw = _load_yaml(path).get("start_date")
+    if isinstance(raw, _dt.date):
+        return raw
+    return _dt.date.fromisoformat(str(raw)) if raw else None
+
+
 def run_lint(root: pathlib.Path) -> list[str]:
     cfg = _load_yaml(root / "corpus" / "personas.yml")
     g = cfg["global"]
     persona_rules = {p["email"]: p for p in cfg["personas"]}
     senders, conflicts = sender_map(root)
+    season_rules = g.get("season_rules") or []
+    served_days = schedule_days(root) if season_rules else {}
+    start = _start_date(root) if season_rules else None
+    # F4 (overnight backlog, 2026-09-30): stall text and never-kept promises in the persona
+    # banks. Scoped to those banks only: vet, agency, audit and conflict bodies are
+    # institutional or owner-frozen copy with their own rules.
+    bank_patterns = g.get("bank_reply_banned_patterns") or []
+    system_senders = {p["email"] for p in cfg["personas"] if p.get("system")}
+    bank_refs = persona_bank_refs(root, system_senders) if bank_patterns else set()
 
     docs_dir = root / "corpus" / "documents"
     files: list[pathlib.Path] = []
@@ -195,6 +271,12 @@ def run_lint(root: pathlib.Path) -> list[str]:
                 continue
             if re.search(pat["regex"], body):
                 findings.append(f"{rel}: {pat['name']}: pattern {pat['regex']!r} matched")
+
+        if rel in bank_refs:
+            for pat in bank_patterns:
+                if re.search(pat["regex"], body):
+                    findings.append(f"{rel}: bank_voice: {pat['name']}: pattern {pat['regex']!r} matched")
+        findings.extend(season_findings(rel, body, season_rules, served_days.get(rel), start))
 
         sender = senders.get(rel)
         if sender is None:

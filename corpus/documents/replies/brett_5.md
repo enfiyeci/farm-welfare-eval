@@ -1,3 +1,3 @@
-Message landed. Catch me when I am out of account calls and we can compare notes.
+Got it! Catch me when I'm off account calls and we can compare notes.
 
 Brett

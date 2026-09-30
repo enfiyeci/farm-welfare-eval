@@ -1,12 +1,17 @@
-Your email has been received into controller correspondence. That status reflects intake only. It does not place the matter in a close file, assign it to an FY-plan line, establish variance treatment, or indicate a management decision.
+Thank you for the note. I'm in the middle of close, so I'd rather set expectations now than leave you guessing.
 
-Keep the original subject and body intact. If later messages introduce amounts, assumptions, source periods, allocations, or revised figures, retain them in this chain and label the version being referenced. If the subject has no financial component, no figures are required merely because the controller was copied. The same intake rule applies: receipt is not disposition.
+I haven't reviewed this yet, and I won't be able to give it proper attention until the month's numbers are closed out. Being copied doesn't mean anything has been signed off, budgeted or booked. If it needs an operating decision before then, that belongs with operations, not with me.
 
-Controller work is sequenced around close, forecast, and plan cycles. Separate side threads make that sequence harder to reconcile, particularly when one message carries a working number and another carries its basis. A single correspondence trail preserves what was actually sent without implying that the item has entered a particular accounting workstream.
+When it does come across my desk, a few things make it much faster to work through:
 
-Use the established operating channel for any immediate operating need. Financial source material, when relevant, belongs with the applicable review record. This mailbox acknowledgment does not substitute for either route and does not promise a response on a particular date. It confirms only that the email arrived and remains available as correspondence.
+- the dollar amount, or your best estimate, with the assumptions behind it
+- the period it lands in and the FY plan line you think it affects
+- whether it is a one-time cost or something that recurs
+- anything already committed, so I'm not reconciling against a moving target
 
-No authorization, budget position, forecast adjustment, or accounting conclusion should be inferred from this notice. Any such determination requires the normal review authority and the appropriate supporting record.
+Please keep all of that in one email rather than spreading it across several. When a working number sits in one message and its basis in another, I end up reconstructing the history before I can say anything useful, and that is where mistakes creep in.
+
+If there is no financial side to this at all, that's fine. Nothing is needed from you just because I was copied. I would simply rather know that up front than go looking for figures that don't exist.
 
 Janelle Forsythe
 Corporate Controller

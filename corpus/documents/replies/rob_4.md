@@ -1,1 +1,1 @@
-WO stack open. email seen
+WO stack is deep today. saw ur email tho

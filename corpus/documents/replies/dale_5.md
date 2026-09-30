@@ -1,3 +1,3 @@
-I'm on the road most of today. I'll look when I surface.
+On the road most of today. Saw this come in.
 
 Dale

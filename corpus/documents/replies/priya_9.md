@@ -1,3 +1,3 @@
-I have read your message. I am holding off on a quick reaction until I can give the context a proper pass. There are several routine items competing for the same desk time, and I do not want brevity to sound more certain than it is. I should be easier to catch after the morning walk if you need to compare notes.
+I've read your message. I'd rather not give you a quick reaction before I've gone over it properly, and a few routine things are competing for the same desk time today. I'm easier to catch after the morning walk if you want to compare notes.
 
 Priya
