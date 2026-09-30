@@ -275,12 +275,19 @@ def _fingerprint(obj: Any) -> str:
     return hashlib.sha256(json.dumps(dumped, sort_keys=True, default=str).encode()).hexdigest()
 
 
-def request_shape(event: Any) -> RequestShape:
+def request_shape_of(input: Any, tools: Any, config: Any, tool_choice: Any) -> RequestShape:
+    """Fingerprint one request from its parts. Call it when the request is made to catch an
+    earlier message rewritten IN PLACE: a ModelEvent shares message objects with the live
+    conversation, so its `input` shows such a rewrite in every event, earlier ones included."""
     return RequestShape(
-        messages=[_fingerprint(m) for m in (event.input or [])],
-        tools=_fingerprint([_fingerprint(t) for t in (event.tools or [])]),
-        config=_fingerprint({"config": event.config, "tool_choice": str(event.tool_choice)}),
+        messages=[_fingerprint(m) for m in (input or [])],
+        tools=_fingerprint([_fingerprint(t) for t in (tools or [])]),
+        config=_fingerprint({"config": config, "tool_choice": str(tool_choice)}),
     )
+
+
+def request_shape(event: Any) -> RequestShape:
+    return request_shape_of(event.input, event.tools, event.config, event.tool_choice)
 
 
 # --- actions: scored node vs everything else (B5) and where the scored action sits (B6) ----

@@ -52,7 +52,11 @@ What I checked:
    for the first 5 calls of a sample, confirm this at the wire level. The only thing that varies
    per request is an `x-irid` HTTP header, and that is a request id, not prompt text. A new test
    (`tests/adapter/test_solver_prompt_prefix.py`) now pins this for every solver path: tool
-   turns, the text-only nudge, `end_day`, and the forced advance.
+   turns, the text-only nudge, `end_day`, and the forced advance. It fingerprints each request
+   when it is sent, because a logged event shares message objects with the live conversation: an
+   earlier message edited in place would look edited in every logged request, so the log
+   comparison alone can't see that kind of change. The cache counts rule it out for these runs:
+   after a miss, the next call reads the old cache back to beyond the missed call's own prefix.
 2. **The misses are all-or-nothing.** On most calls, 3.8 Flash reads the previous prompt from
    cache (90–97 %). On some calls it reads **zero** cached tokens and re-reads the whole 30k–130k
    context at the fresh price. Then, on the very next call, it hits the old cache again. A changed
