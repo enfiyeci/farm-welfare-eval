@@ -4,6 +4,20 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-09-29 · claude · review bot checked against upstream sentfutures/devops@v1 (branch ci/review-bot-sync-upstream)
+
+- **Upstream:** v1 moved on 2026-09-29 (the shared job now inherits the caller's permissions).
+  No caller change needed; both callers still match `sentfutures/devops/callers/` apart from
+  this repo's own fills. `escalate_to: ""` stays (owner's call, 2026-09-22).
+- **Changed:** `required_check: "tests"` is now wired, since `tests` has been green on `main`
+  since 834da3e. The `actions: read` comment now uses upstream's wording, and the
+  `pr-review-watch` skill's "In this repo" bullets now describe the `tests` check
+  (they still said the repo had no CI).
+- **Limit to know:** the cross-check waits only 90s after the review, and the suite takes 7–12
+  min, so most approvals are left unchecked (a notice, not a failure). Read `tests` itself.
+  Upstream fix proposed in sentfutures/devops#7 (wait for the check to finish, cap 20 min);
+  once it merges, drop the "until #7" caveat from the caller and the skill.
+
 ## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
 
 - **Why now:** the new CI `tests` job installs the latest inspect-ai (0.3.266; `./venv` is

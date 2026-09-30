@@ -158,14 +158,19 @@ Then wait. Don't push a change to a disputed point before the user answers. If s
 ## In this repo
 
 - **Tests**: `./venv/bin/python -m pytest -q` — note the venv is `./venv`, not
-  `.venv`. Run it after every change and before every push; it is the only
-  automated check this repo has.
-- **Checks on every PR**: `review / claude-review` (the Claude reviewer) is the
-  only check. There is no CI workflow running the test suite, so the reviewer
-  cannot read test results and reviews the code on its merits — a green
-  `review / claude-review` says nothing about whether pytest passes, so run it
-  yourself. Red means the bot posted no binary verdict, and a
-  `needs-human-review` label means a human has been asked to review.
+  `.venv`. Run it after every change and before every push; CI runs the same
+  suite, but it takes 7–12 minutes to report.
+- **Checks on every PR**: `tests` (the pytest suite, `.github/workflows/tests.yml`)
+  and `review / claude-review` (the Claude reviewer). The reviewer cannot read
+  test results while it reviews; afterwards its verify step fails
+  `review / claude-review` if it approved a commit whose `tests` run failed —
+  but until sentfutures/devops#7 lands it waits only 90s for that run, so a
+  green review usually means the approval was never checked against CI. Read
+  the `tests` check itself. Red
+  `review / claude-review` means the bot posted no binary verdict or approved
+  over a failing suite; the PR then carries `needs-human-review`. No reviewer
+  is requested (`escalate_to` is empty by the owner's choice), so that label is
+  the only signal.
 - **Merge gate**: `main` has no branch protection today, so nothing formally
   blocks a merge and the bot's approval gates nothing. Never merge on a bot
   approval alone; merge only when the user asks.

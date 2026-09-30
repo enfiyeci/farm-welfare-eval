@@ -25,7 +25,10 @@ jobs:
       pull-requests: write
       issues: write
       id-token: write
-      actions: read # lets the review read your required_check's result
+      # Only used when required_check is set: the verify step reads that
+      # check's result to refuse an approval over a red suite. Without this
+      # line the cross-check is skipped with a warning in the run log.
+      actions: read
     with:
       # `escalate_to` is deliberately left empty (owner's call, 2026-09-22):
       # the bot should review and land on approve-or-request-changes by
@@ -36,9 +39,13 @@ jobs:
       # Don't "fix" this back by filling in a login.
       escalate_to: ""
       #
-      # `required_check` is not set yet. It should become "tests" (the pytest
-      # workflow added in PR #41) once that suite is green on main — wiring a
-      # red check in here would fail every review that approved over it.
+      # The pytest job in tests.yml. After the review, the verify step fails
+      # this check if the bot approved a commit whose `tests` run failed.
+      # Until sentfutures/devops#7 lands, it waits only 90s for that run, and
+      # the suite usually outlasts the review, so a slow run leaves the
+      # approval unchecked (a notice, not a failure) — read the `tests` check
+      # itself before merging. After #7 it waits for the suite to finish.
+      required_check: "tests"
       # Optional — repo-specific review rules, appended to the prompt:
       # extra_instructions: |
       #   Also flag:
