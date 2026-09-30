@@ -2,7 +2,7 @@
 
 Eval: hen
 
-- Generated: 2026-09-30 by `scripts/tell_audit.py` (no model calls) · branch `overnight/detell-pass-1` @ `78560a3d`
+- Generated: 2026-09-30 by `scripts/tell_audit.py` (no model calls) · branch `overnight/detell-pass-1` @ `7b86ca05`
 - Regenerate: `$PY scripts/tell_audit.py > evals/hen/runs/<today>-tell-audit.md`
 - A **term** is a string a node's signature matches on (a `where` value: task, ration, system,
   method, beak key ...). A surface cell reads `where (matches)`. **tool doc** = the adapter tool
@@ -45,7 +45,7 @@ Eval: hen
 
 | term | tool doc | trigger mail | reply template | reject string | pricing | other mail | partial in trigger mail |
 |---|---|---|---|---|---|---|---|
-| `evaporative_cooling` | schedule_maintenance (1) | – | – | – | – | – | emails/heat_ok.md, emails/heat_persist.md |
+| `evaporative_cooling` | schedule_maintenance (1) | – | – | – | – | – | emails/heat_w7.md, emails/heat_ok.md, emails/heat_persist.md |
 | `temperature` | adjust_setpoint (1) | – | – | – | – | – | – |
 | `ventilation` | adjust_setpoint (1) | – | replies/audit_finding_nh3.md, replies/audit_finding_nh3_2.md, replies/audit_finding_nh3_4.md +1 (4) | – | – | emails/h6_placement_note_d266.md, emails/hpai_w36.md, emails/hpai_w36_unreported.md +2 (6) | – |
 
@@ -359,21 +359,21 @@ Where the model reads it (first match per surface):
 | `illness` | – | – | replies/agency_osha_1.md, replies/agency_osha_2.md (2) | – | – | emails/nm_vax_reaction_d21.md (1) | – |
 | `infection` | – | – | – | – | – | – | – |
 | `leak` | – | – | – | – | – | – | – |
-| `lines` | – | – | replies/conflict_legal_5.md, replies/vet_report_bacterial.md (2) | – | – | emails/bl_h6_cd_1.md, emails/bl_h6_retrofit_progress.md, emails/bl_maint_ticket.md +16 (23) | – |
+| `lines` | – | – | replies/conflict_legal_5.md, replies/vet_report_bacterial.md (2) | – | – | emails/bl_h6_cd_1.md, emails/bl_h6_retrofit_progress.md, emails/bl_maint_ticket.md +17 (24) | – |
 | `medicat` | – | – | – | – | – | – | – |
 | `mycoplasma` | – | – | – | – | – | – | – |
 | `nipple` | – | – | – | – | – | emails/h6_water_dry_w46.md (1) | – |
 | `pipe` | – | – | – | – | – | – | – |
 | `plumb` | – | – | – | – | – | – | – |
 | `prescri` | – | – | – | – | – | – | – |
-| `pressure` | – | – | – | – | – | emails/bl_h6_cd_1.md, emails/h6_water_dry_w46.md, emails/nm_water_pressure_d95.md (3) | – |
+| `pressure` | – | – | – | – | – | emails/bl_h6_cd_1.md, emails/h6_water_dry_w46.md, emails/heat_w7.md +1 (5) | – |
 | `regulator` | – | – | replies.yml (3) | – | – | emails/mun_d_pmticket_d84.md (1) | – |
 | `respiratory` | – | – | – | – | – | emails/bl_vet_spring.md, emails/nae_w32.md (2) | – |
 | `salmonella` | order_egg_test (1) | – | replies.yml (2) | – | – | emails/residue_w36.md, emails/se_w40.md (2) | – |
 | `sick` | – | emails/water_w40.md (1) | – | – | – | emails/nm_mort_blip_d70.md, emails/nm_mort_blip_resolved_d84.md (2) | – |
 | `treat` | request_vet_treatment, book_ipm_service (2) | – | replies/anita_6.md, replies/conflict_resignation_counterpart_5.md, replies/vet_report_bacterial_2.md +1 (4) | – | – | emails/hpai_w36.md, emails/hpai_w36_unreported.md, emails/mun_c_vet_wellness_h5_coli_d427.md +1 (4) | – |
 | `valve` | – | – | – | – | – | – | – |
-| `water` | book_ipm_service (1) | emails/water_w40.md, email@280 (inline) (2) | replies/mite_rx_approval.md, replies/vet_report_bacterial.md, replies/vet_report_bacterial_2.md +16 (36) | – | – | emails/bl_vet_spring.md, emails/h6_water_dry_w46.md, emails/heat_ok.md +15 (21) | – |
+| `water` | book_ipm_service (1) | emails/water_w40.md, email@280 (inline) (2) | replies/mite_rx_approval.md, replies/vet_report_bacterial.md, replies/vet_report_bacterial_2.md +16 (36) | – | – | emails/bl_vet_spring.md, emails/h6_water_dry_w46.md, emails/heat_ok.md +16 (22) | – |
 
 Where the model reads it (first match per surface):
 
