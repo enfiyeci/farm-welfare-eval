@@ -130,3 +130,98 @@ def test_a_prior_day_stamp_is_dated_the_day_before_and_uses_that_day_tz():
     priors = [s for s in priors if s.startswith(yesterday)]
     assert priors
     assert all(s.endswith(" " + clock.central_tz(start, day - 1)) for s in priors)
+
+
+# --------------------------------------------------------------------------- per-sender hours
+# Ruling 21 item 3 (2026-09-19): mail lands inside its SENDER's working window; a mail that
+# describes an event (a vet visit, a lab result) is never stamped before that event's day.
+
+def test_parse_send_window_is_start_inclusive_end_exclusive_to_the_second():
+    assert clock.parse_send_window("07:30-18:30") == (7 * 3600 + 30 * 60, 18 * 3600 + 30 * 60 - 1)
+    assert clock.parse_send_window("06:00-23:00") == clock.DEFAULT_SEND_WINDOWS[0]
+    for bad in ("7:30-18:30x", "18:30-07:30", "07:30", "25:00-26:00", "07:30-07:30"):
+        with pytest.raises(ValueError):
+            clock.parse_send_window(bad)
+
+
+def test_default_window_reproduces_the_pre_sender_band_exactly():
+    # No sender config (fixture corpora) must render the SAME stamps as before the change.
+    for i in range(200):
+        assert clock.timestamp_for("2026-06-09", 112, salt=f"m{i}") == clock.timestamp_for(
+            "2026-06-09", 112, salt=f"m{i}", windows=clock.DEFAULT_SEND_WINDOWS
+        )
+
+
+def test_stamps_stay_inside_the_senders_window():
+    office = (clock.parse_send_window("07:30-18:30"),)
+    for day in range(1, 61):
+        for i in range(20):
+            _d, sec, _tz = _parts(clock.timestamp_for("2026-06-09", day, salt=f"m{i}", windows=office))
+            assert 7 * 3600 + 30 * 60 <= sec < 18 * 3600 + 30 * 60
+
+
+def test_split_windows_draw_from_both_parts_weighted_by_length():
+    # Corporate: office hours plus the occasional late evening.
+    windows = tuple(clock.parse_send_window(w) for w in ("08:00-19:00", "20:30-22:00"))
+    late = 0
+    for day in range(1, 61):
+        for i in range(20):
+            _d, sec, _tz = _parts(clock.timestamp_for("2026-06-09", day, salt=f"m{i}", windows=windows))
+            assert 8 * 3600 <= sec < 19 * 3600 or 20 * 3600 + 30 * 60 <= sec < 22 * 3600
+            late += sec >= 20 * 3600 + 30 * 60
+    assert 0 < late < 400                         # occasional, not never and not mostly
+
+
+def test_not_before_the_mail_day_drops_the_previous_evening():
+    start = "2026-06-09"
+    for day in range(1, 61):
+        today = clock.date_for_day(start, day)
+        open_today = clock.session_open_minutes(start, day) * 60
+        for i in range(20):
+            stamp = clock.timestamp_for(start, day, salt=f"m{i}", not_before_day=day)
+            d, sec, _tz = _parts(stamp)
+            assert d == today
+            assert 6 * 3600 <= sec <= open_today - 120
+
+
+def test_not_before_an_earlier_day_changes_nothing():
+    for i in range(50):
+        assert clock.timestamp_for("2026-06-09", 112, salt=f"m{i}", not_before_day=100) == (
+            clock.timestamp_for("2026-06-09", 112, salt=f"m{i}")
+        )
+
+
+def test_not_before_a_later_day_is_an_engine_error():
+    with pytest.raises(ValueError):
+        clock.timestamp_for("2026-06-09", 112, salt="m", not_before_day=113)
+
+
+def test_window_that_misses_the_open_span_falls_back_to_the_default_band():
+    # A sender whose day starts after the session opened cannot have written an anchored mail
+    # in time; the stamp still honours the anchor and the no-night rule.
+    late_starter = (clock.parse_send_window("12:00-17:00"),)
+    start, day = "2026-06-09", 112
+    open_today = clock.session_open_minutes(start, day) * 60
+    for i in range(50):
+        d, sec, _tz = _parts(clock.timestamp_for(start, day, salt=f"m{i}", windows=late_starter,
+                                                 not_before_day=day))
+        assert d == clock.date_for_day(start, day)
+        assert 6 * 3600 <= sec <= open_today - 120
+
+
+def test_send_windows_resolve_by_address_then_domain_then_system_then_default():
+    hours = {
+        "default": ["07:00-19:00"],
+        "system": ["04:00-23:00"],
+        "senders": {"a@farm.com": ["05:30-19:00"], "usda.gov": ["07:30-16:30"]},
+        "system_senders": ["list@news.org"],
+    }
+    w = clock.send_windows_for
+    assert w("a@farm.com", hours) == (clock.parse_send_window("05:30-19:00"),)
+    assert w("A@Farm.com", hours) == (clock.parse_send_window("05:30-19:00"),)
+    assert w("avic@aphis.usda.gov", hours) == (clock.parse_send_window("07:30-16:30"),)
+    assert w("x@usda.gov", hours) == (clock.parse_send_window("07:30-16:30"),)
+    assert w("x@notusda.gov", hours) == (clock.parse_send_window("07:00-19:00"),)
+    assert w("list@news.org", hours) == (clock.parse_send_window("04:00-23:00"),)
+    assert w("stranger@x.com", hours) == (clock.parse_send_window("07:00-19:00"),)
+    assert w("stranger@x.com", {}) == clock.DEFAULT_SEND_WINDOWS
