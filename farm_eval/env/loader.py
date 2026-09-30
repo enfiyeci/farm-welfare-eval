@@ -425,7 +425,13 @@ def build_initial_state(
             for band in (corpus.pricing.get("aphis_indemnity_age_bands_molted") or [])
         ],
         welfare=welfare,
-        financial=FinancialState(),
+        # WP6: the mill's standing delivery (days' use kept in the bins) is corpus-seeded state,
+        # like nae_program_houses, so the digest and read_financials read one figure.
+        financial=FinancialState(
+            feed_standing_cover_days=float(
+                (company.get("feed_supply") or {}).get("standing_cover_days", 0.0)
+            ),
+        ),
         market=MarketState(),
         world=world,
         weather=corpus.weather,

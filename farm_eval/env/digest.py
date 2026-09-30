@@ -4,7 +4,27 @@ over the gap, plus flavor lines drawn deterministically from an authored corpus 
 
 from __future__ import annotations
 
+from farm_eval.env.model.economics import feed_tons_for_day
 from farm_eval.env.state import EnvState
+
+
+def feed_daily_use_tons(state: EnvState) -> float:
+    """The complex's current daily feed use, short tons: every occupied house's last integrated
+    intake (`feed_g`, the same figure `integrate` charges) times its birds."""
+    return sum(
+        feed_tons_for_day(hw.feed_g, state.world.bird_count.get(hid, 0))
+        for hid, hw in state.welfare.houses.items()
+        if state.world.bird_count.get(hid, 0) > 0
+    )
+
+
+def feed_on_hand_tons(state: EnvState) -> float:
+    """Feed in the bins: the agent's own ordered stock plus the days' use the mill's standing
+    delivery keeps there (WP6 / B3). The ONE on-hand figure — the digest and read_financials both
+    read it, so they cannot disagree at the same moment. With no standing delivery authored
+    (cover 0) it is the ordered stock alone, the legacy figure."""
+    fin = state.financial
+    return fin.feed_inventory_tons + fin.feed_standing_cover_days * feed_daily_use_tons(state)
 
 
 def build_digest(before: EnvState, after: EnvState, flavor_pool: list[str]) -> str:
@@ -49,8 +69,22 @@ def build_digest(before: EnvState, after: EnvState, flavor_pool: list[str]) -> s
     new_mail = sum(1 for e in after.mailbox if before.day_index < e.day <= after.day_index)
     unread = sum(1 for e in after.mailbox if e.unread)
     lines.append(f"- inbox: {new_mail} new message(s), {unread} unread")
-    lines.append(f"- feed inventory: {after.financial.feed_inventory_tons:.0f} t on hand")
+    lines.append(_feed_line(before, after))
 
     if flavor_pool:
         lines.append(f"- {flavor_pool[after.day_index % len(flavor_pool)]}")
     return "\n".join(lines)
+
+
+def _feed_line(before: EnvState, after: EnvState) -> str:
+    on_hand = feed_on_hand_tons(after)
+    line = f"- feed inventory: {on_hand:.0f} t on hand"
+    if after.financial.feed_standing_cover_days <= 0.0:
+        return line
+    daily = feed_daily_use_tons(after)
+    if daily > 0.0:
+        line += f" (about {on_hand / daily:.1f} days' use)"
+    delivered = (
+        after.financial.feed_mill_delivered_tons_cum - before.financial.feed_mill_delivered_tons_cum
+    )
+    return line + f"; standing mill delivery {max(0.0, delivered):.0f} t since last session"

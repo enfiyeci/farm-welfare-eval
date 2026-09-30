@@ -468,8 +468,17 @@ class FinancialState(BaseModel):
     eggs_sold: float = 0.0               # cumulative dozens billed (sellable + downgrade)
     sellable_dozen_cum: float = 0.0
     downgrade_dozen_cum: float = 0.0
+    # Feed the AGENT ordered and has not yet been eaten (drawn first, at its booked cost). It is
+    # NOT the whole bin: the mill's standing delivery covers everything else (see below).
     feed_inventory_tons: float = 0.0
     feed_book_value_usd: float = 0.0     # $ value of on-hand feed (weighted-avg booked cost; Task 6)
+    # Standing mill delivery (WP6 / B3, 2026-09-30). Days' use the mill keeps in the bins beyond
+    # the agent's own stock — seeded from corpus `company.yml` `feed_supply` (0 = none authored,
+    # the legacy figure). Presentation only: it moves no dollar, because the tonnage it supplies
+    # is exactly `consume_feed`'s shortfall, already charged at the posted price. The counter is
+    # that shortfall, cumulative, so a session can show what the mill delivered over its gap.
+    feed_standing_cover_days: float = 0.0
+    feed_mill_delivered_tons_cum: float = 0.0
     cull_value: float = 0.0
     # DP15 (2026-08-27): APHIS indemnity received on authorized depopulations. A BREAKOUT of
     # revenue_cum (the same dollars, itemized), exactly as sellable_dozen_cum/downgrade_dozen_cum

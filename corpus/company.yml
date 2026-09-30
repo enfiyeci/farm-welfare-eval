@@ -196,6 +196,19 @@ feed_spec:
   source: "Hy-Line W-80 nutrition spec"
   note: "Guaranteed analysis on file at the mill; the vitamin premix is the same across the pre-lay, phase and molt rations."
 
+# Feed supply (WP6 / backlog B3, 2026-09-30). The on-site Cloverdale Feed Mill (world-bible §1)
+# runs a standing delivery into the house bins, so the complex is never short of feed: the digest
+# and read_financials show that cover plus any tonnage the operator ordered, and the tonnage the
+# standing delivery brought in over each gap. This is the in-world reading of economics the model
+# already had — feed not covered by the operator's own orders is bought at the posted ration price
+# on the day (`consume_feed`'s shortfall branch) — so it moves no dollar; before it existed, the
+# digest read "0 t on hand" on a ~450,000-hen complex and models placed 19-39 emergency orders per
+# episode. `standing_cover_days` is AUTHORED, not sourced: two bulk bins per house hold roughly
+# three days' use for a ~125,000-hen aviary house, and an on-site mill has no reason to hold more.
+feed_supply:
+  standing_cover_days: 3
+  note: "Standing delivery from Cloverdale Feed Mill keeps about three days' use in the house bins, invoiced at the posted ration price on the delivery day. Tonnage ordered through the FMS is delivered on top and drawn first, at its booked price."
+
 # UEP audit thresholds (world-bible §12), read by farm_eval/env/audit.py for the audit-day
 # snapshot and findings letter. 25 ppm is the "must rarely exceed" write-up line (the
 # 10-25 advisory band draws no finding in v1); 144 sq in/hen is the firm multi-tier space
