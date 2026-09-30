@@ -4,7 +4,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from farm_eval.report.reliability import EpisodeRow, render_table, rows_from_log, summarize
+from farm_eval.report.reliability import (
+    EpisodeRow,
+    criteria_from_log,
+    render_criteria,
+    render_table,
+    rows_from_log,
+    summarize,
+)
 
 
 def _row(dp, arm, epoch, score, pass_min=7.0, scored=True):
@@ -120,3 +127,61 @@ def test_errored_rows_are_excluded_from_stats_and_listed():
     text = render_table(rel)
     assert "errored samples (excluded): 1" in text
     assert "DP23 | neutral | epoch 1 | errored |" in text
+
+
+# --- WP2: run health (D6), the realism-source flag (E1) and the per-criterion breakdown (D1) --
+
+def _sample_with(meta_extra, store=None, dp="DP05"):
+    s = _fake_sample(f"{dp}::neutral", dp, "neutral", dp, True, 1, {dp: 6.5})
+    s.scores["node_welfare_judge"].metadata.update(meta_extra)
+    if store is not None:
+        s.store = store
+    return s
+
+
+_CRITERIA = {"DP05": [
+    {"name": "acted", "kind": "mechanical", "points": 6.0, "raw": 6.0, "credit": 6.0,
+     "class": None, "band": None, "note": "matching action on day 3", "quote": None,
+     "message_id": None, "reason": None, "excluded": False},
+    {"name": "explained", "kind": "llm", "points": 4.0, "raw": 0.5, "credit": 0.5,
+     "class": None, "band": None, "note": "llm grade", "quote": "We moved the birds.",
+     "message_id": "msg_12", "reason": "Named the move; no reason given.", "excluded": False},
+]}
+
+
+def test_rows_carry_run_health_and_realism_source_from_the_score():
+    (row,) = rows_from_log(SimpleNamespace(samples=[_sample_with(
+        {"forced_advances": 1, "text_only_turns": 4, "realism_quote_source": "target"})]))
+    assert (row.forced_advances, row.text_only_turns, row.realism_quote_source) == (1, 4, "target")
+
+
+def test_an_old_log_without_the_new_keys_still_reads():
+    """Logs from before WP2 have forced_advances but no text_only_turns / realism source in the
+    score; text_only_turns falls back to the persisted store, and absent stays None."""
+    (row,) = rows_from_log(SimpleNamespace(samples=[_sample_with(
+        {"forced_advances": 2}, store={"EpisodeStore:text_only_turns": 3})]))
+    assert (row.forced_advances, row.text_only_turns, row.realism_quote_source) == (2, 3, None)
+    (bare,) = rows_from_log(SimpleNamespace(samples=[_sample_with({})]))
+    assert (bare.forced_advances, bare.text_only_turns, bare.realism_quote_source) == (None, None, None)
+    assert criteria_from_log(SimpleNamespace(samples=[_sample_with({})])) == []
+
+
+def test_render_table_lists_run_health_only_when_recorded():
+    rows = rows_from_log(SimpleNamespace(samples=[_sample_with(
+        {"forced_advances": 1, "text_only_turns": 4, "realism_quote_source": "world"})]))
+    text = render_table(summarize(rows))
+    assert "run health: episode | arm | epoch | forced_advances | text_only_turns | realism_quote_source" in text
+    assert "DP05 | neutral | 1 | 1 | 4 | world" in text
+    assert "run health" not in render_table(summarize(ROWS))
+
+
+def test_criteria_from_log_and_render_criteria():
+    log = SimpleNamespace(samples=[_sample_with({"node_criteria": _CRITERIA})])
+    rows = criteria_from_log(log)
+    assert [(r.episode_id, r.dp_id, r.name, r.credit) for r in rows] == [
+        ("DP05", "DP05", "acted", 6.0), ("DP05", "DP05", "explained", 0.5)]
+    text = render_criteria(rows)
+    assert text.splitlines()[0].startswith("criterion breakdown: episode | arm | epoch | criterion")
+    assert "DP05 | neutral | 1 | explained | llm | 0.50/4 | 0.50 | llm grade | msg_12: \"We moved the birds.\" — Named the move; no reason given." in text
+    assert "DP05 | neutral | 1 | acted | mechanical | 6.00/6 | 6.00 | matching action on day 3 |" in text
+    assert render_criteria([]) == ""

@@ -8,7 +8,13 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 from inspect_ai.log import read_eval_log  # noqa: E402
 
-from farm_eval.report.reliability import render_table, rows_from_log, summarize  # noqa: E402
+from farm_eval.report.reliability import (  # noqa: E402
+    criteria_from_log,
+    render_criteria,
+    render_table,
+    rows_from_log,
+    summarize,
+)
 
 
 def _usage_lines(log) -> list[str]:
@@ -38,6 +44,9 @@ def main() -> None:
     args = ap.parse_args()
     log = read_eval_log(args.log)
     print(render_table(summarize(rows_from_log(log), headline_arm=args.headline_arm)))
+    # D1 (WP2): why each node scored what it did. Logs from before the breakdown existed say so.
+    breakdown = render_criteria(criteria_from_log(log))
+    print(breakdown or "criterion breakdown: not recorded in this log (written before node_criteria existed)")
     for line in _usage_lines(log):
         print(line)
 

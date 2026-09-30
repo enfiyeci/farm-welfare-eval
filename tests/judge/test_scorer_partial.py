@@ -60,7 +60,8 @@ def _score_state():
 
 def _run_score(monkeypatch, env_state, *, episode_end_day):
     grader = FakeGrader()
-    store = SimpleNamespace(env_state=env_state, forced_advances=0)
+    # Mirrors EpisodeStore's run-health counters (both default to 0 on the real store).
+    store = SimpleNamespace(env_state=env_state, forced_advances=0, text_only_turns=0)
     monkeypatch.setattr(scorer_mod, "get_model", lambda role=None, required=False: grader)
     monkeypatch.setattr(scorer_mod, "store_as", lambda cls: store)
     score_fn = welfare_judge(
