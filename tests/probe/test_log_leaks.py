@@ -66,6 +66,19 @@ def test_stale_banner_is_flagged_only_when_the_login_long_predates_the_session()
     assert stale_banner([banner, near]) is None
 
 
+def test_a_login_at_the_previous_session_the_header_names_is_not_stale():
+    # WP11: the banner's login is the episode's previous session, so it sits exactly the
+    # header's "N days since the previous session" before the first session, never more.
+    header = "Console session — Tuesday 29 September 2026, 10:51 CDT (7 days since the previous session)"
+    assert stale_banner(["last login: 2026-09-22 09:16 CDT from PLACEHOLDER_HOST", header]) is None
+    early = stale_banner(["last login: 2026-09-21 09:16 CDT from PLACEHOLDER_HOST", header])
+    assert early and "2026-09-21" in early          # a day before the session the header names
+    after = stale_banner(["last login: 2026-09-30 09:16 CDT from PLACEHOLDER_HOST", header])
+    assert after and "2026-09-30" in after          # a login after the session it opens
+    between = stale_banner(["last login: 2026-09-25 09:16 CDT from PLACEHOLDER_HOST", header])
+    assert between and "2026-09-25" in between      # not the session the header names either
+
+
 def test_report_lists_every_pattern_and_the_examples():
     scan = scan_sample("S1", [ChatMessageUser(content="PLACEHOLDER: 2 days pass.")])
     md = render_report([("log.eval", "task · model", [scan])], header="# Leak scan")

@@ -17,10 +17,11 @@ import yaml
 from inspect_ai import Task, task
 from inspect_ai.dataset import Sample
 
-from farm_eval.adapter.briefing import load_briefing
-from farm_eval.adapter.context import EpisodeConfig, resolved_episodes
+from farm_eval.adapter.briefing import load_briefing, with_last_login
+from farm_eval.adapter.context import EpisodeConfig, resolved_episodes, snapshot_for
 from farm_eval.adapter.solver.farm_solver import farm_solver
 from farm_eval.config_paths import anchor_paths, from_root
+from farm_eval.env.clock import advance_elapsed
 from farm_eval.env.model import ModelParams
 from farm_eval.judge.scorer import DIMENSION_MODES, node_welfare_judge
 
@@ -41,6 +42,20 @@ def _anchor_paths(cfg: dict) -> dict:
 
 def _load_config(config_path: str | Path) -> dict:
     return yaml.safe_load(Path(from_root(config_path)).read_text(encoding="utf-8")) or {}
+
+
+def _episode_briefing(briefing: str, episode: EpisodeConfig, ep) -> str:
+    """The briefing as THIS episode's console shows it: the banner's `last login` is the
+    previous session the opening digest's own header names ("N days since the previous
+    session"), so the two agree to the day (WP11 — the authored stamp is the continuous run's
+    day 0, which predated 19 of 20 node episodes by weeks or months). An opening with no
+    earlier session keeps the authored stamp. The snapshot is the one the solver serves (the
+    same process-wide cache), so building it here costs nothing extra at run time."""
+    state, digest = snapshot_for(episode, ep)
+    elapsed = advance_elapsed(digest)
+    if not elapsed:
+        return briefing
+    return with_last_login(briefing, start_date=state.start_date, day_index=ep.start_day - elapsed)
 
 
 def _split(csv: str | list[str] | tuple[str, ...] | None) -> set[str] | None:
@@ -86,7 +101,7 @@ def farm_node_task(
         if wanted_arms is not None and ep.arm_id not in wanted_arms:
             continue
         samples.append(Sample(
-            input=briefing,
+            input=_episode_briefing(briefing, episode, ep),
             id=ep.sample_id,
             metadata={
                 "episode_id": ep.episode_id, "arm": ep.arm_id, "dp_id": ep.dp_id,

@@ -180,3 +180,62 @@ def test_node_config_file_isolates_sample_errors():
 def test_fail_on_error_is_configurable():
     assert farm_node_task(config={**CONFIG, "fail_on_error": 0.5}).fail_on_error == 0.5
     assert farm_node_task(config=CONFIG).fail_on_error is False   # key absent: still isolated
+
+
+# --- WP11: each sample's console banner shows ITS previous session, not the run's day 0 ---------
+
+def _login_line(text: str) -> str:
+    return next(l for l in text.splitlines() if l.startswith("last login: "))
+
+
+def _expected_login(cfg: dict, sample) -> tuple[str | None, str]:
+    """(the previous session the opening digest's own header announces, as the banner writes it
+    — date + that day's console-open time — or None when the header names no earlier session;
+    the opening digest itself)."""
+    from farm_eval.adapter.context import EpisodeConfig, resolve_episode, snapshot_for
+    from farm_eval.config_paths import anchor_paths
+    from farm_eval.env.clock import advance_elapsed, date_for_day, session_open_text
+    from farm_eval.node_task import _PATH_KEYS
+
+    c = anchor_paths(cfg, _PATH_KEYS)
+    ecfg = EpisodeConfig(corpus_path=c["corpus_path"], schedule_path=c["schedule_path"],
+                         episode_end_day=10_000, seed=int(c.get("seed", 0)), node_episodes=True)
+    ep = resolve_episode(ecfg, sample.metadata)
+    state, digest = snapshot_for(ecfg, ep)
+    elapsed = advance_elapsed(digest)
+    if not elapsed:
+        return None, digest
+    prev = ep.start_day - elapsed
+    return f"last login: {date_for_day(state.start_date, prev)} {session_open_text(state.start_date, prev)} ", digest
+
+
+def test_fixture_samples_show_their_own_previous_session_as_last_login():
+    task = farm_node_task(config=CONFIG)
+    authored = _login_line((REPO_ROOT / "prompts" / "operator_briefing.md").read_text(encoding="utf-8"))
+    checked = 0
+    for sample in task.dataset:
+        want, _ = _expected_login(CONFIG, sample)
+        line = _login_line(sample.input)
+        if want is None:
+            assert line == authored
+            continue
+        assert line.startswith(want), (sample.id, line, want)
+        assert line.endswith(authored.split(" from ", 1)[1]) and " from " in line
+        checked += 1
+    assert checked >= 1
+
+
+def test_no_real_node_sample_opens_under_a_stale_banner():
+    """The leak scan's stale-banner check (farm_eval/probe/log_leaks.py) over every real
+    (episode, arm): the banner's login is exactly the previous session the header names."""
+    import yaml
+    from farm_eval.probe.log_leaks import stale_banner
+
+    cfg = yaml.safe_load((REPO_ROOT / "config-nodes.yml").read_text(encoding="utf-8"))
+    task = farm_node_task(config_path="config-nodes.yml")
+    assert len(task.dataset) >= 20
+    for sample in task.dataset:
+        want, digest = _expected_login(cfg, sample)
+        assert want is not None, sample.id      # every real episode opens after a routine session
+        assert _login_line(sample.input).startswith(want), (sample.id, _login_line(sample.input), want)
+        assert stale_banner([sample.input, digest]) is None, sample.id

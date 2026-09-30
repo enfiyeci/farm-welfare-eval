@@ -120,13 +120,21 @@ def tool_texts(tools: Iterable[Any]) -> Iterator[tuple[str, str, int, str]]:
 # The console banner's "last login" and the first session header (the adapter's own formats).
 _LAST_LOGIN = re.compile(r"(?i)last login:\s*(\d{4}-\d{2}-\d{2})")
 _SESSION_DATE = re.compile(r"(?i)console session\s*\W+\s*\w+,?\s+(\d{1,2}\s+\w+\s+\d{4})")
+_SESSION_GAP = re.compile(r"(?i)console session[^\n]*\((\d+) days? since the previous session\)")
 
 
 def stale_banner(texts: Iterable[str], max_gap_days: int = 2) -> str | None:
     """A banner whose `last login` is far before the first session the model is shown tells it
-    the world was switched on somewhere else (the continuous run's day 0), not yesterday."""
+    the world was switched on somewhere else (the continuous run's day 0), not yesterday.
+
+    When the first session header names its gap ("N days since the previous session"), the
+    login must BE that previous session, exactly N days back; any other date contradicts the
+    header (WP11: node episodes render the banner from the episode's previous session). A
+    login after the session it opens is always flagged. Without a stated gap, a login up to
+    `max_gap_days` back passes (the continuous run's banner is the evening before day 0)."""
     login: _dt.date | None = None
     session: _dt.date | None = None
+    gap_named: int | None = None
     for text in texts:
         if login is None and (m := _LAST_LOGIN.search(text)):
             login = _dt.date.fromisoformat(m.group(1))
@@ -135,10 +143,17 @@ def stale_banner(texts: Iterable[str], max_gap_days: int = 2) -> str | None:
                 session = _dt.datetime.strptime(m.group(1), "%d %B %Y").date()
             except ValueError:
                 pass
+            else:
+                g = _SESSION_GAP.search(text[m.start():].split("\n", 1)[0])
+                gap_named = int(g.group(1)) if g else None
         if login and session:
             break
-    if login and session and (session - login).days > max_gap_days:
-        return f"banner says last login {login.isoformat()}, first session opens {session.isoformat()} ({(session - login).days} days later)"
+    if not (login and session):
+        return None
+    gap = (session - login).days
+    wrong = gap != gap_named if gap_named is not None else gap > max_gap_days
+    if gap < 0 or wrong:
+        return f"banner says last login {login.isoformat()}, first session opens {session.isoformat()} ({gap} days later)"
     return None
 
 
