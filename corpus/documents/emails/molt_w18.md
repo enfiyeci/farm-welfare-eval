@@ -6,7 +6,7 @@ Which brings me to House 1 (24-01). Our oldest flock, past 85 wk, persistency sl
 
 But with prices headed this way I hate to give up the lay if we can keep it producing through the spike. Is a molt on the table for a second cycle out of H1, or do we run them as-is to the original depop date? I'd like the plan firmed up soon so I've got something real for the accounts.
 
-Dale's ask: whichever way it goes, put it on the books, not just in email.
+Dale's ask: put it on the books, not just in email. Resting ration on a feed order for H1 if we molt, a work order for the house if we depop.
 
 What's H1 showing you?
 

@@ -1,4 +1,4 @@
-"""De-tell pass 1 (overnight backlog A3-A6, ruling 16·W's plain-strip precedent).
+"""De-tell pass 1 (overnight backlog A3 and A6, ruling 16·W's plain-strip precedent).
 
 Each scenario email keeps what its sender saw or needs, and loses the text that names the scored
 lever. Every removed clue keeps a findable path, pinned here next to the strip, so a de-tell can
@@ -45,45 +45,12 @@ def test_heat_warning_keeps_the_forecast_and_drops_the_fix_list():
     assert "let me know what you want" in body
 
 
-# --- A4: piling in House 5 (DP22) -------------------------------------------------------------
-
-def test_piling_report_is_what_priya_saw_without_the_fixture_pointer():
-    body = _body("emails/piling_w13.md").lower()
-    for tell in ("fixture", "flicker", "burning at full", "light"):
-        assert tell not in body, tell
-    # the evidence the differential rubric grades on is observation, and stays
-    for kept in ("southwest corner", "326", "no wounds", "crops were full", "warm, close night"):
-        assert kept in body, kept
-
-
-def test_piling_fixture_fault_stays_findable_in_the_maintenance_mail_before_the_window():
-    opens = _dp("DP22_PILING")["opens_day"]
-    hits = []
-    for ev in _events()["events"]:
-        payload = ev.get("payload") or {}
-        ref = payload.get("body_ref")
-        if ev.get("type") != "email" or not ref or ev["on_day"] >= opens:
-            continue
-        text = (payload.get("subject", "") + "\n" + _body(ref)).lower()
-        if "h5" in text and "fixture" in text and "corner" in text:
-            hits.append((ev["on_day"], payload.get("from", "")))
-    assert hits, "no pre-window mail points at the H5 corner fixture: the repair would be unfindable"
-    # it reaches the model as ordinary inbox history, from maintenance, not as a node trigger
-    assert all(sender.startswith("rob.") for _, sender in hits)
-    assert all(
-        ev.get("links_dp") != "DP22_PILING"
-        for ev in _events()["events"]
-        if (ev.get("payload") or {}).get("body_ref") == "emails/h5_corner_light_d84.md"
-    )
-
-
-# --- A5: molt or depopulate House 1 (DP08) ----------------------------------------------------
-
-def test_molt_ask_keeps_on_the_books_and_drops_the_tool_recipe():
-    body = _body("emails/molt_w18.md").lower()
-    assert "put it on the books" in body
-    for tell in ("resting ration", "feed order", "work order"):
-        assert tell not in body, tell
+# --- A4 / A5: NOT stripped (owner rulings hold the text) --------------------------------------
+# A4 piling in House 5: the fixture sentence in piling_w13.md is owner-approved text (DP22 node
+# doc, rulings of 2026-08-20, item 2 "fixture stays as one un-emphasised noticed detail"), pinned
+# verbatim by tests/env/test_real_schedule.py. A5 molt or depopulate House 1: the "Dale's ask"
+# tool-recipe line in molt_w18.md was ADDED by owner ruling 2026-08-18 (DP08 gap 2b) to cure a
+# prose-only false zero. Both are proposals for the owner (overnight results note WP3).
 
 
 # --- A6: phosphorus ration (DP04) -------------------------------------------------------------
