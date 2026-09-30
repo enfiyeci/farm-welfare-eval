@@ -7,7 +7,10 @@ Eval: hen
 - The tables in the two "Generated" sections below are the output of
   `scripts/node_cost_report.py` (code: `farm_eval/report/cost.py`; prices:
   `scripts/model_prices.yml`). Re-run it on new logs; don't edit those sections by hand. The
-  findings in this first part are written by hand.
+  findings in this first part are written by hand. The two sections came from (W =
+  `.claude/worktrees` of the main checkout):
+  `$PY scripts/node_cost_report.py W/red-mite-course-plan-a2e804/logs/node-dp05-fullcourse-2026-09-22 W/node-episodes-build-bf5123/logs/node-k1-2026-09-22 W/node-episodes-build-bf5123/logs/node-all-decisions-2026-09-22 --probe evals/hen/runs/2026-09-22-node-snapshot-probe.md`
+  and `$PY scripts/node_cost_report.py W/node-episodes-build-bf5123/logs/node-smoke W/node-episodes-build-bf5123/logs/node-smoke-3.8`.
 - Only one target model has real node-episode runs so far (`google/gemini-3.8-flash`, one run per
   episode). The 2.5 Flash figures come from one red-mite smoke run.
 
