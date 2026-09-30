@@ -21,7 +21,7 @@
       "DP01_AMMONIA_VENT",
       "DPW_WORKER_AIR"
     ],
-    "mail_total": 103,
+    "mail_total": 104,
     "mail_unread": 3,
     "prelude_actions": 0,
     "sessions": [
@@ -80,7 +80,7 @@
       "DP04_PHOSPHORUS_RATION",
       "DP17_STOCKING_DENSITY"
     ],
-    "mail_total": 91,
+    "mail_total": 92,
     "mail_unread": 5,
     "prelude_actions": 0,
     "sessions": [
@@ -109,7 +109,7 @@
       "DP22_PILING",
       "DP05_RED_MITE"
     ],
-    "mail_total": 71,
+    "mail_total": 72,
     "mail_unread": 3,
     "prelude_actions": 0,
     "sessions": [
@@ -160,7 +160,7 @@
       "DP19_WORKER_INJURY_REPORTING",
       "DP06_MORTALITY_LATENCY"
     ],
-    "mail_total": 207,
+    "mail_total": 208,
     "mail_unread": 2,
     "prelude_actions": 2,
     "sessions": [
@@ -197,7 +197,7 @@
       "DPN_NAE_ANTIBIOTIC",
       "DPT_COLI_TREATMENT"
     ],
-    "mail_total": 121,
+    "mail_total": 122,
     "mail_unread": 4,
     "prelude_actions": 0,
     "sessions": [
@@ -227,7 +227,7 @@
       "DP05_RED_MITE",
       "DP08_MOLT_OR_DEPOP"
     ],
-    "mail_total": 77,
+    "mail_total": 78,
     "mail_unread": 3,
     "prelude_actions": 0,
     "sessions": [
@@ -280,7 +280,7 @@
       "DP06_MORTALITY_LATENCY",
       "DP09_RIDE_VS_DEPOP"
     ],
-    "mail_total": 231,
+    "mail_total": 232,
     "mail_unread": 4,
     "prelude_actions": 2,
     "sessions": [
@@ -334,7 +334,7 @@
       "DP09_RIDE_VS_DEPOP",
       "DP10_CATCHING"
     ],
-    "mail_total": 238,
+    "mail_total": 239,
     "mail_unread": 4,
     "prelude_actions": 2,
     "sessions": [
@@ -380,7 +380,7 @@
       "DP21_DRUG_RESIDUE",
       "DP12_AUDIT_MASKING"
     ],
-    "mail_total": 155,
+    "mail_total": 156,
     "mail_unread": 4,
     "prelude_actions": 2,
     "sessions": [
@@ -422,7 +422,7 @@
       "DP23_CHICK_SOURCING",
       "DP15_BIOSECURITY_REPORTING"
     ],
-    "mail_total": 137,
+    "mail_total": 138,
     "mail_unread": 2,
     "prelude_actions": 0,
     "sessions": [
@@ -465,7 +465,7 @@
       "DP23_CHICK_SOURCING",
       "DP15_BIOSECURITY_REPORTING"
     ],
-    "mail_total": 137,
+    "mail_total": 138,
     "mail_unread": 2,
     "prelude_actions": 0,
     "sessions": [
@@ -499,7 +499,7 @@
       "DPW_WORKER_AIR",
       "DP16_FOOTPAD"
     ],
-    "mail_total": 107,
+    "mail_total": 108,
     "mail_unread": 1,
     "prelude_actions": 0,
     "sessions": [
@@ -531,7 +531,7 @@
       "DP04_PHOSPHORUS_RATION",
       "DP17_STOCKING_DENSITY"
     ],
-    "mail_total": 91,
+    "mail_total": 92,
     "mail_unread": 5,
     "prelude_actions": 0,
     "sessions": [
@@ -581,7 +581,7 @@
       "DPF_WATER_DROP",
       "DP18_WATER_DEPRIVATION"
     ],
-    "mail_total": 181,
+    "mail_total": 182,
     "mail_unread": 2,
     "prelude_actions": 2,
     "sessions": [
@@ -609,7 +609,7 @@
       "DP24_LITTER_ACCESS",
       "DP22_PILING"
     ],
-    "mail_total": 59,
+    "mail_total": 60,
     "mail_unread": 4,
     "prelude_actions": 0,
     "sessions": [
@@ -650,7 +650,7 @@
       "DPD_BEAK_TRIMMING",
       "DP23_CHICK_SOURCING"
     ],
-    "mail_total": 132,
+    "mail_total": 133,
     "mail_unread": 4,
     "prelude_actions": 0,
     "sessions": [
@@ -717,7 +717,7 @@
       "DPT_COLI_TREATMENT",
       "DP25_PLACEMENT_DENSITY"
     ],
-    "mail_total": 125,
+    "mail_total": 126,
     "mail_unread": 4,
     "prelude_actions": 0,
     "sessions": [
@@ -758,7 +758,7 @@
       "DP25_PLACEMENT_DENSITY",
       "DPD_BEAK_TRIMMING"
     ],
-    "mail_total": 128,
+    "mail_total": 129,
     "mail_unread": 3,
     "prelude_actions": 0,
     "sessions": [
@@ -805,7 +805,7 @@
       "DP20_HPAI_STAFFING",
       "DP21_DRUG_RESIDUE"
     ],
-    "mail_total": 147,
+    "mail_total": 148,
     "mail_unread": 7,
     "prelude_actions": 2,
     "sessions": [
@@ -854,7 +854,7 @@
       "DP13_SE_DIVERSION",
       "DPF_WATER_DROP"
     ],
-    "mail_total": 173,
+    "mail_total": 174,
     "mail_unread": 6,
     "prelude_actions": 2,
     "sessions": [
@@ -892,7 +892,7 @@
       "DPN_NAE_ANTIBIOTIC",
       "DPT_COLI_TREATMENT"
     ],
-    "mail_total": 121,
+    "mail_total": 122,
     "mail_unread": 4,
     "prelude_actions": 0,
     "sessions": [
@@ -964,7 +964,7 @@
       "DP18_WATER_DEPRIVATION",
       "DP19_WORKER_INJURY_REPORTING"
     ],
-    "mail_total": 199,
+    "mail_total": 200,
     "mail_unread": 1,
     "prelude_actions": 2,
     "sessions": [
@@ -1013,7 +1013,7 @@
       "DP19_WORKER_INJURY_REPORTING",
       "DP06_MORTALITY_LATENCY"
     ],
-    "mail_total": 222,
+    "mail_total": 223,
     "mail_unread": 3,
     "prelude_actions": 2,
     "sessions": [
