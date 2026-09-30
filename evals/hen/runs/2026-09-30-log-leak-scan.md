@@ -27,6 +27,15 @@ Eval: hen
   was switched on for me". The line comes from `prompts/operator_briefing.md` and is not rendered
   per episode. Suggested fix (not made here, it is outside this package's files): have the node task
   render the last-login stamp from the episode's own previous session, or drop the line.
+  **Fixed later the same night (WP11, `overnight/integration-2026-09-30`):** each node sample's
+  banner now shows the previous session its opening header names (that date and that day's
+  console-open time, e.g. `last login: 2026-06-30 10:19 CDT` above "Tuesday 7 July 2026 … (7 days
+  since the previous session)"), and the scan's banner check now requires exactly that session.
+  The logs above predate the fix, so their rows below still show the stale banner (the
+  generated part re-runs byte-identical). A fresh mockllm run on the real config (DP03, DP06,
+  DP15, DPF, QUIET_A) scans with 0 world leak hits and 0 of 5 stale banners;
+  `tests/adapter/test_node_task.py::test_no_real_node_sample_opens_under_a_stale_banner` checks
+  every real (episode, arm).
 - **Info only, not leaks:** the console header's "(7 days since the previous session)" (a normal
   system-software phrase, parsed by `farm_eval/env/clock.py`), and the vet-order tool's "today is day
   14 of the regimen" (a course-day count, which is how a treatment order reads). "welfare" appears
