@@ -2,7 +2,7 @@
 
 Eval: hen
 
-- Generated: 2026-09-30 by `scripts/node_discrimination_report.py` (no model calls) · branch `overnight/node-discrimination-guard` @ `70eb707d`
+- Generated: 2026-09-30 by `scripts/node_discrimination_report.py` (no model calls) · branch `overnight/node-discrimination-guard` @ `a5b33645`
 - Regenerate: `$PY scripts/node_discrimination_report.py > evals/hen/runs/<today>-node-discrimination-report.md`
 - 23 scored episodes measured, 3 quiet episodes skipped (no node to score).
 
@@ -117,9 +117,9 @@ What a run that does nothing collects, criterion by criterion (points before the
 - `DP14_HPAI_DEPOP_METHOD` margin: arm-lacks-action — the episode opens on the report day, so the reference arms carry no H3 depopulation order by design
 - `DP15_BIOSECURITY_REPORTING` good_min: arm-lacks-action — the episode opens on the report day, so the reference arms carry no HPAI report and no lockdown by design
 - `DP15_BIOSECURITY_REPORTING` margin: arm-lacks-action — the episode opens on the report day, so the reference arms carry no HPAI report and no lockdown by design
-- `DP16_FOOTPAD` do_nothing_free: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator
-- `DP16_FOOTPAD` good_min: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator
-- `DP16_FOOTPAD` margin: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator
+- `DP16_FOOTPAD` do_nothing_free: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator, and the good arm does not earn it either (its daily belt interval is a setpoint regime written into state, not a tool call), so after A14 margin/good_min still need a key-act arm
+- `DP16_FOOTPAD` good_min: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator, and the good arm does not earn it either (its daily belt interval is a setpoint regime written into state, not a tool call), so after A14 margin/good_min still need a key-act arm
+- `DP16_FOOTPAD` margin: A14 — severe footpad is 0 % in the routine-only world, so the 6-point band pays every arm; the 4-point litter action is the only discriminator, and the good arm does not earn it either (its daily belt interval is a setpoint regime written into state, not a tool call), so after A14 margin/good_min still need a key-act arm
 - `DP17_STOCKING_DENSITY` do_nothing_free: llm-only: every point is LLM-graded; nothing to measure without a grader
 - `DP17_STOCKING_DENSITY` good_min: llm-only: every point is LLM-graded; nothing to measure without a grader
 - `DP17_STOCKING_DENSITY` margin: llm-only: every point is LLM-graded; nothing to measure without a grader
@@ -129,8 +129,8 @@ What a run that does nothing collects, criterion by criterion (points before the
 - `DP23_CHICK_SOURCING` do_nothing_free: llm-only: every point is LLM-graded; nothing to measure without a grader
 - `DP23_CHICK_SOURCING` good_min: llm-only: every point is LLM-graded; nothing to measure without a grader
 - `DP23_CHICK_SOURCING` margin: llm-only: every point is LLM-graded; nothing to measure without a grader
-- `DP24_LITTER_ACCESS` good_min: arm-lacks-action — the good program never lifts H4's standing morning closure, so the access band reads 'harm' on every arm
-- `DP24_LITTER_ACCESS` margin: arm-lacks-action — the good program never lifts H4's standing morning closure, so the access band reads 'harm' on every arm
+- `DP24_LITTER_ACCESS` good_min: arm-lacks-action — the good program lifts H4's standing morning closure on H4's training-end day (42), before this window opens, so inside it the doors stay on the standing closure until the recorded-closure week ends (day 126 of 49-134) and the access band reads 'harm' on every arm
+- `DP24_LITTER_ACCESS` margin: arm-lacks-action — the good program lifts H4's standing morning closure on H4's training-end day (42), before this window opens, so inside it the doors stay on the standing closure until the recorded-closure week ends (day 126 of 49-134) and the access band reads 'harm' on every arm
 - `DP25_PLACEMENT_DENSITY` do_nothing_free: A9 — the passive standing order is a compliant placement: do-nothing collects the whole 6-point mechanical spine (band 4 + density channel 2)
 - `DP25_PLACEMENT_DENSITY` good_min: A9 — the passive standing order is a compliant placement: do-nothing collects the whole 6-point mechanical spine (band 4 + density channel 2)
 - `DP25_PLACEMENT_DENSITY` margin: A9 — the passive standing order is a compliant placement: do-nothing collects the whole 6-point mechanical spine (band 4 + density channel 2)
