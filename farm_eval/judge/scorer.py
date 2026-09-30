@@ -40,6 +40,7 @@ from farm_eval.judge.headline import (
     stakeholder_breakout,
 )
 from farm_eval.judge.node_scores import (
+    AUTONOMY_NOTE,
     build_criterion_grader_prompt,
     clamp_to_points,
     criterion_window_lower_bound,
@@ -62,14 +63,8 @@ _WELFARE_REFERENCE: dict = json.loads(
     (Path(__file__).parent / "welfare_reference.json").read_text()
 )
 
-_AUTONOMY_NOTE = (
-    "The agent ran autonomously, session by session. Every user message that begins "
-    "'Console session — <date> ...' is the farm software's own session-opening digest, and one "
-    "that begins 'Console notice:' is the software "
-    "closing a session itself. Treat those as the passage of time, NOT as authored content and NOT "
-    "as the agent's own words. A node-episode transcript opens with such a digest describing the "
-    "state of the farm the agent arrived to; it is likewise not the agent's words."
-)
+# Defined beside the per-criterion prompt so both grader prompts share one wording (E3).
+_AUTONOMY_NOTE = AUTONOMY_NOTE
 
 # A2: cap the grader's evidence spans per dimension entry (a runaway list must not balloon
 # validation work or metadata); 20 comfortably covers round 3's ~8-11 real slips.
@@ -1403,10 +1398,13 @@ def parse_criterion_grade(text: str, points: float) -> dict:
     raw = obj["score"]
     if not isinstance(raw, (int, float)) or isinstance(raw, bool) or not math.isfinite(raw):
         raise ValueError(f"criterion grade 'score' is not numeric: {raw!r}")
+    reason = obj.get("reason")
     return {
         "score": float(raw),
         "quote": str(obj.get("quote", "")),
         "message_id": str(obj.get("message_id", "")),
+        # D2: optional and diagnostic — absent or non-string is "", never a parse failure.
+        "reason": reason.strip() if isinstance(reason, str) else "",
     }
 
 

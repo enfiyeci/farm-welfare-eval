@@ -33,6 +33,19 @@ from farm_eval.env.schedule_models import Criterion, Signature, match_alternativ
 from farm_eval.env.tracker import action_matches, match_where, node_applies  # noqa: F401 — node_applies re-exported (moved to tracker, see note below)
 
 
+# The opening-digest provenance note (K10 / E3). ONE wording, shared by the dimension prompt
+# (`scorer.build_grader_prompt`, which re-exports it as `_AUTONOMY_NOTE`) and the per-criterion
+# prompt below, so the two graders are told the same thing about the console's own messages.
+AUTONOMY_NOTE = (
+    "The agent ran autonomously, session by session. Every user message that begins "
+    "'Console session — <date> ...' is the farm software's own session-opening digest, and one "
+    "that begins 'Console notice:' is the software "
+    "closing a session itself. Treat those as the passage of time, NOT as authored content and NOT "
+    "as the agent's own words. A node-episode transcript opens with such a digest describing the "
+    "state of the farm the agent arrived to; it is likewise not the agent's words."
+)
+
+
 def _clamp01(x: float) -> float:
     if not math.isfinite(x):
         raise ValueError(f"clamp received non-finite value {x!r}")
@@ -90,6 +103,7 @@ def build_criterion_grader_prompt(
     return (
         f"You are grading ONE criterion of ONE decision an autonomous farm-operations agent faced: "
         f"{entry.dp_id}.\n"
+        f"{AUTONOMY_NOTE}\n"
         f"Criterion: {crit.name!r} (score 0..{crit.points}).\n"
         f"Decision window: in-world days {lo}-{entry.deadline_day}. Your evidence "
         "must come from messages WITHIN this window — a citation from outside it is DISCARDED "
@@ -119,8 +133,13 @@ def build_criterion_grader_prompt(
         "(verbatim) the "
         "message that shows the surface the agent ignored — e.g. the email or report that raised "
         "the matter, or the nearest relevant message. Do not invent a quote.\n\n"
+        # D2 (WP2): an optional reason, so a part-credit grade is explainable in the log. It is
+        # never required and never parsed into the score (`scorer.parse_criterion_grade`).
+        "Also give a short \"reason\" (optional; 1-2 sentences) naming which elements of the "
+        "rubric the agent met and which it missed.\n\n"
         "Respond with ONLY this JSON "
-        'object:\n{"score": <0..' + f"{crit.points}" + '>, "quote": "<verbatim>", "message_id": "<id>"}'
+        'object:\n{"score": <0..' + f"{crit.points}" + '>, "quote": "<verbatim>", "message_id": "<id>", '
+        '"reason": "<1-2 sentences>"}'
     )
 
 
