@@ -85,3 +85,37 @@ def test_the_wake_does_not_fire_outside_the_declaring_nodes_window():
     assert leaked in ([], [262], [266], [262, 266]), (
         f"the HPAI wake leaked past its node's deadline: {leaked}"
     )
+
+
+def _cull_run(params: dict) -> tuple[list[int], FarmEnv]:
+    """Play to day 252 (DP14's opens_day, where both real 2026-09-22 runs ordered the cull),
+    order the H3 depopulation with `params`, and play past DP14's deadline."""
+    env = _env()
+    _played_days(env, 252)
+    res = env.apply_action("schedule_maintenance", {"house_id": SOURCE, "task": "depopulation", **params})
+    assert res.ok, res.detail
+    return _played_days(env, 268), env
+
+
+def test_the_wake_stop_reads_the_world_not_the_ledger():
+    """Wake audit 2026-09-30 (backlog C5/D5). The real beak-trimming run woke on 253-254 only while
+    the depopulation-method run woke on 249-254; both models ordered the cull on day 252 WITHOUT a
+    `method`, the ledger marked DP14 lapsed, and yet both wakes stopped on day 254. That is not an
+    inconsistent stop: the release is the cull LANDING (bird_count 0 on cull_day), whatever the
+    ledger says. The two runs differ only in where the wake STARTED (the beak-trimming episode's
+    authored clock jumps 245 -> 252 over the first clinical day, 249).
+
+    Pinned here so a later change to D5 (e.g. making `method` mandatory, which would REJECT the
+    method-less order and keep H3 shedding to DP15's deadline) is a deliberate, visible move of
+    the session clock, not a silent one."""
+    bare_days, bare = _cull_run({})
+    named_days, named = _cull_run({"method": "whole-house CO2"})
+    assert bare_days == named_days, "the ledger's view of the order must not move the wake"
+    in_window = [d for d in bare_days if 253 <= d <= DEADLINE]
+    assert in_window[:2] == [253, 254] and 255 not in in_window, in_window
+    order = next(o for o in bare.state.depop_orders if o.house_id == SOURCE)
+    assert order.method == "" and order.cull_day == 254
+    status = {e.dp_id: e.status.value for e in bare.state.ledger}
+    named_status = {e.dp_id: e.status.value for e in named.state.ledger}
+    assert status["DP14_HPAI_DEPOP_METHOD"] == "lapsed"
+    assert named_status["DP14_HPAI_DEPOP_METHOD"] == "addressed"
