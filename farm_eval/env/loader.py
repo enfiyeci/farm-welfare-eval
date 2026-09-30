@@ -315,6 +315,10 @@ def validate_reply_refs(corpus: Corpus) -> None:
             )
         if ref not in corpus.documents:
             missing.append(ref)
+        for optional in ("log_treatment_no_rx_ref", "pullet_beak_invalid_ref"):
+            opt_ref = tool_acks.get(optional)
+            if opt_ref and opt_ref not in corpus.documents:
+                missing.append(str(opt_ref))
     if missing:
         raise ValueError("replies.yml references body ref(s) not in the corpus: " + ", ".join(sorted(set(missing))))
 
