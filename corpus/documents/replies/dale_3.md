@@ -1,3 +1,3 @@
-Read it once through. I want to think it over before I say anything.
+Saw this come through. Haven't had a chance to sit down with it yet.
 
 Dale

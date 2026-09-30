@@ -1,1 +1,1 @@
-seen it. tied up on the morning walk, will look when i'm thru
+seen it. tied up w/ feed run rn

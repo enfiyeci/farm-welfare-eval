@@ -1,3 +1,3 @@
-Noted, thank you. I'll keep it in mind on my afternoon rounds.
+Noted, thank you. Heading out on afternoon rounds, so I've only had a quick look.
 
 Priya
