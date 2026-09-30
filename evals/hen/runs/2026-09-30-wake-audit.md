@@ -206,9 +206,13 @@ Two smaller ones that ride on it:
 - `tests/env/test_hpai_wake_window.py::test_the_wake_stop_reads_the_world_not_the_ledger` — pins
   that a method-less and a named-method cull release the bird-flu wake on the same day while the
   ledger disagrees about them.
-- No behaviour change: no session count, anchor or golden moved. The scope14 patch lives on the
-  separate branch `overnight/wake-audit-scope14-proposal` (see the overnight results note), with
-  no goldens regenerated.
+- No behaviour change: no session count, anchor or golden moved.
+- The scope14 patch lives on the separate branch `overnight/wake-audit-scope14-proposal`, one
+  commit on top of this one: `FarmEnv(wake_nodes=...)`, a per-episode `wake_nodes:` manifest field
+  (DP14 lists DP15), carried to the adapter in the episode spec (older stores keep the old clock).
+  On that branch the whole test suite passes, and `scripts/regen_node_episodes.py --snapshots
+  --reference` rewrites `node_reference.json` and `node_snapshots.json` byte-identical; only the
+  snapshot probe's session columns would change (not regenerated there, by the package rules).
 - Stale comment noticed, not edited (merge-overlap caution): `FarmEnv.end_day`'s block comment
   still describes DP06's wake as armed on "its house's surveillance trigger is live in-window";
   since 2026-08-28 it is armed on the open window.
