@@ -1,0 +1,47 @@
+# Model prices for the cost report (farm_eval/report/cost.py, scripts/node_cost_report.py).
+#
+# This is DATA, not logic: update the numbers here, with the page you read them from and the
+# date you checked it. Prices are US$ per 1M tokens. "cached_input" is the implicit-cache read
+# price (Gemini implicit caching has no write or storage charge, so cache_write is 0).
+#
+# bill_reasoning_as_extra_output: Inspect's Google provider reports thinking tokens in
+# `reasoning_tokens`, SEPARATE from `output_tokens` (sample total_tokens = input + cache_read +
+# output + reasoning). Google bills thinking at the output rate, so the report adds them on top.
+# For providers that fold reasoning into output_tokens (OpenAI-style), set this to false.
+#
+# Check the Vertex page before budgeting anything large: these were read from Google's Gemini
+# API pricing page, which the project's own backlog (2026-09-29) matched against the Vertex page.
+
+models:
+  google/gemini-3.8-flash:
+    source: https://ai.google.dev/gemini-api/docs/pricing
+    checked: 2026-09-30
+    bill_reasoning_as_extra_output: true
+    notes: >-
+      Paid tier, standard (text) rates; page last updated 2026-09-24. The introductory rate runs
+      through 2026-12-31; from 2027-01-01 every price doubles, cached input included ($0.15; the
+      overnight work-package note assumed cached input stays at $0.075). Vertex pricing page
+      (https://cloud.google.com/vertex-ai/generative-ai/pricing) could not be read in full on
+      2026-09-30; the backlog's figures from it match the intro rate.
+    rates:
+      - name: intro
+        until: 2026-12-31
+        input_per_mtok: 0.75
+        cached_input_per_mtok: 0.075
+        output_per_mtok: 3.75
+      - name: "2027"
+        from: 2027-01-01
+        input_per_mtok: 1.50
+        cached_input_per_mtok: 0.15
+        output_per_mtok: 7.50
+
+  google/gemini-2.5-flash:
+    source: https://ai.google.dev/gemini-api/docs/pricing
+    checked: 2026-09-30
+    bill_reasoning_as_extra_output: true
+    notes: Paid tier, standard (text) rates; page last updated 2026-09-24. One rate, no periods.
+    rates:
+      - name: standard
+        input_per_mtok: 0.30
+        cached_input_per_mtok: 0.03
+        output_per_mtok: 2.50
