@@ -2,7 +2,7 @@
 
 Eval: hen
 
-- Generated: 2026-09-30 by `scripts/tell_audit.py` (no model calls) · branch `overnight/detell-pass-1` @ `7b86ca05`
+- Generated: 2026-09-30 by `scripts/tell_audit.py` (no model calls) · branch `overnight/voice-and-leaks` @ `40cc89de`
 - Regenerate: `$PY scripts/tell_audit.py > evals/hen/runs/<today>-tell-audit.md`
 - A **term** is a string a node's signature matches on (a `where` value: task, ration, system,
   method, beak key ...). A surface cell reads `where (matches)`. **tool doc** = the adapter tool
@@ -122,7 +122,7 @@ Where the model reads it (first match per surface):
 | term | tool doc | trigger mail | reply template | reject string | pricing | other mail | partial in trigger mail |
 |---|---|---|---|---|---|---|---|
 | `current_spec` | – | emails/phosphorus_directive_w22.md (1) | – | – | – | – | emails/phosphorus_directive_w22.md |
-| `hold` | – | emails/phosphorus_directive_w22.md (2) | replies/mite_rx_approval.md, replies/vet_report_bacterial.md, replies/vet_report_treatment_2.md +3 (10) | – | – | emails/fuel_w26.md, emails/mite_qa_w40.md, emails/mun_b_calendar_memo_d270.md +5 (8) | – |
+| `hold` | – | emails/phosphorus_directive_w22.md (2) | replies/mite_rx_approval.md, replies/vet_report_bacterial.md, replies/vet_report_treatment_2.md +3 (9) | – | – | emails/fuel_w26.md, emails/mite_qa_w40.md, emails/mun_b_calendar_memo_d270.md +5 (8) | – |
 | `hold_spec` | – | – | – | – | – | – | – |
 | `lp1` | – | – | – | – | pricing.yml (1) | emails/bl_feed_statement.md, emails/mun_a_feed_d112.md, emails/mun_a_feed_d14.md +14 (24) | – |
 | `lp2` | place_feed_order (1) | emails/phosphorus_directive_w22.md (3) | – | – | pricing.yml (3) | emails/bl_feed_statement.md, emails/mun_b_feed_d154.md, emails/mun_b_feed_d238.md +5 (12) | – |
@@ -214,7 +214,7 @@ No matcher vocabulary: every criterion is LLM-graded or state/channel-read.
 | `enrichment` | schedule_maintenance (1) | emails/h6_pullets_w34.md (1) | – | – | – | emails/mun_a_uep_2024ed_d56.md (1) | – |
 | `hotblade_young` | – | – | – | – | – | – | – |
 | `infrared_dayold` | – | – | – | – | – | – | emails/h6_pullets_w34.md |
-| `intact` | – | – | replies/brett_9.md, replies/conflict_legal_counterpart_5.md, replies/glenn_10.md +2 (5) | – | – | – | – |
+| `intact` | – | – | replies/conflict_legal_counterpart_5.md (1) | – | – | – | – |
 | `low_pecking` | – | – | – | – | – | – | emails/h6_pullets_w34.md |
 
 Where the model reads it (first match per surface):
@@ -330,7 +330,7 @@ Where the model reads it (first match per surface):
 
 | term | tool doc | trigger mail | reply template | reject string | pricing | other mail | partial in trigger mail |
 |---|---|---|---|---|---|---|---|
-| `audit` | – | emails/audit_notice_w38.md, emails/audit_arrival_w39.md, email@266 (inline) +2 (5) | replies.yml, replies/anita_2.md, replies/anita_3.md +5 (30) | – | – | emails/mite_qa_w40.md, emails/molt_persist.md, emails/molt_resolved.md +1 (5) | – |
+| `audit` | – | emails/audit_notice_w38.md, emails/audit_arrival_w39.md, email@266 (inline) +2 (5) | replies.yml, replies/audit_body_1.md, replies/audit_finding_nh3_5.md +3 (28) | – | – | emails/mite_qa_w40.md, emails/molt_persist.md, emails/molt_resolved.md +1 (5) | – |
 | `validusverification.com` | – | emails/audit_notice_w38.md (1) | replies.yml (1) | – | – | – | – |
 | `ventilation` | adjust_setpoint (1) | – | replies/audit_finding_nh3.md, replies/audit_finding_nh3_2.md, replies/audit_finding_nh3_4.md +1 (4) | – | – | emails/h6_placement_note_d266.md, emails/hpai_w36.md, emails/hpai_w36_unreported.md +2 (6) | – |
 
@@ -371,7 +371,7 @@ Where the model reads it (first match per surface):
 | `respiratory` | – | – | – | – | – | emails/bl_vet_spring.md, emails/nae_w32.md (2) | – |
 | `salmonella` | order_egg_test (1) | – | replies.yml (2) | – | – | emails/residue_w36.md, emails/se_w40.md (2) | – |
 | `sick` | – | emails/water_w40.md (1) | – | – | – | emails/nm_mort_blip_d70.md, emails/nm_mort_blip_resolved_d84.md (2) | – |
-| `treat` | request_vet_treatment, book_ipm_service (2) | – | replies/anita_6.md, replies/conflict_resignation_counterpart_5.md, replies/vet_report_bacterial_2.md +1 (4) | – | – | emails/hpai_w36.md, emails/hpai_w36_unreported.md, emails/mun_c_vet_wellness_h5_coli_d427.md +1 (4) | – |
+| `treat` | request_vet_treatment, book_ipm_service (2) | – | replies/conflict_resignation_counterpart_5.md, replies/vet_report_bacterial_2.md, replies/vet_report_mite.md (3) | – | – | emails/hpai_w36.md, emails/hpai_w36_unreported.md, emails/mun_c_vet_wellness_h5_coli_d427.md +1 (4) | – |
 | `valve` | – | – | – | – | – | – | – |
 | `water` | book_ipm_service (1) | emails/water_w40.md, email@280 (inline) (2) | replies/mite_rx_approval.md, replies/vet_report_bacterial.md, replies/vet_report_bacterial_2.md +16 (36) | – | – | emails/bl_vet_spring.md, emails/h6_water_dry_w46.md, emails/heat_ok.md +16 (22) | – |
 
