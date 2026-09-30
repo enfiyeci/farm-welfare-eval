@@ -11,7 +11,7 @@ Been meaning to ask, once H6 is back in rotation you'll want starter feed lined 
 
 Marco mentioned your gravel road's rough going right now, said the trailer bounced around more than he liked coming in. Nothing he can't handle but figured I'd pass it along in case you want to grade it before fall gets any wetter.
 
-Next standing delivery Monday.
+Next standing delivery Thursday.
 
 Glenn Whitaker
 Cloverdale Feed Mill

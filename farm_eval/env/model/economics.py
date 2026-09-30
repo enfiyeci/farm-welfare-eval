@@ -199,8 +199,5 @@ def consume_feed(financial, feed_tons: float, spot_ration_usd_ton: float) -> flo
     financial.feed_inventory_tons = on_hand - from_inventory
     financial.feed_book_value_usd = max(0.0, financial.feed_book_value_usd - inv_cost)
     shortfall = feed_tons - from_inventory
-    # The shortfall is what the mill's standing delivery supplied (WP6): counted for the
-    # session digest, priced exactly as before.
-    financial.feed_mill_delivered_tons_cum += shortfall
     spot_cost = shortfall * spot_ration_usd_ton
     return inv_cost + spot_cost

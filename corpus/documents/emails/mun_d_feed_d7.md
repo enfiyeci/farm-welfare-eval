@@ -8,7 +8,7 @@ Luis, truck 7. Scale tickets logged in the mill system under WB-30581/82/83. Ana
 
 H4's just starting to come into lay this week so that bin's still drawing light, don't read anything into it, she'll pick up steam over the next month same as the others did.
 
-Next delivery Monday same as usual.
+Next delivery Thursday same as usual.
 
 Glenn Whitaker
 Cloverdale Feed Mill
