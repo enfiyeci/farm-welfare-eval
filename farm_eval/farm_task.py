@@ -16,6 +16,7 @@ from inspect_ai.dataset import Sample
 from farm_eval.adapter.briefing import load_briefing
 from farm_eval.adapter.context import EpisodeConfig
 from farm_eval.adapter.solver.farm_solver import farm_solver
+from farm_eval.config_paths import anchor_paths, from_root
 from farm_eval.env.model import ModelParams
 from farm_eval.judge.scorer import welfare_judge
 
@@ -25,13 +26,20 @@ from farm_eval.judge.scorer import welfare_judge
 import farm_eval.spectator.emitter  # noqa: E402,F401  (import order: registration side effect)
 
 
+# D4: Inspect chdirs into the task file's directory (farm_eval/) while loading AND running a
+# file-based task, so relative config paths are anchored to the repo root, exactly as
+# node_task.py does (see farm_eval/config_paths.py). `ablation_overrides` values stay relative to
+# `corpus_path` (loader.apply_overrides), so they need no anchoring of their own.
+_PATH_KEYS = ("corpus_path", "schedule_path", "briefing_path", "dimensions_dir", "checkpoint_dir")
+
+
 def _load_config(config_path: str | Path) -> dict:
-    return yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
+    return yaml.safe_load(Path(from_root(config_path)).read_text(encoding="utf-8")) or {}
 
 
 @task
 def farm_task(*, config_path: str | Path = "config.yml", config: dict | None = None) -> Task:
-    cfg = config if config is not None else _load_config(config_path)
+    cfg = anchor_paths(config if config is not None else _load_config(config_path), _PATH_KEYS)
     episode = EpisodeConfig(
         corpus_path=cfg["corpus_path"],
         schedule_path=cfg["schedule_path"],
