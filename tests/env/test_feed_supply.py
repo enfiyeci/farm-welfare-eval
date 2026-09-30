@@ -235,6 +235,62 @@ def test_every_next_delivery_the_mill_announces_is_the_real_next_drop():
     assert not wrong, "\n".join(wrong)
 
 
+# The corpus note says the standing drops come in on Monday and Thursday AFTERNOONS; by 18:00
+# the truck has certainly been. A mill mail stamped on a drop day before then cannot know that
+# day's drop happened, so it can neither report it nor name the drop after it as "next".
+_DROP_IN_BY_SECOND = 18 * 3600
+
+
+@pytest.fixture(scope="module")
+def real_inbox() -> FarmEnv:
+    """The real corpus and schedule over the whole cycle: every scheduled mill mail, stamped by
+    the real inbox clock (per-sender hours, anchors), exactly as the model's mail client shows it."""
+    env = FarmEnv.from_paths(REPO_ROOT / "corpus", REPO_ROOT / "schedule", episode_end_day=510)
+    env.start()
+    while not env.is_over():
+        env.end_day()
+    return env
+
+
+def test_every_mill_delivery_mail_agrees_with_its_own_stamp(real_inbox):
+    """WP11: the mill's weekly delivery mail is authored on its session day (a Tuesday: "this
+    week's deliveries went out", "Next delivery Thursday"), but plain mail is stamped anywhere
+    since the previous day's session — and the previous day is Monday, a drop day. Stamped
+    Monday morning, before that afternoon's drop, "Next delivery Thursday" was false (2 of 13
+    in the 2026-09-30 integration run). Every mill mail that reports a delivery (tickets) or
+    names the next one must be stamped when the drop it reports is in, and its "next delivery"
+    must be the real next drop after that STAMP on the real calendar."""
+    from datetime import date
+
+    company = yaml.safe_load((REPO_ROOT / "corpus" / "company.yml").read_text())
+    cadence = {_WEEKDAYS.index(d) for d in company["feed_supply"]["delivery_weekdays"]}
+    claim = re.compile(rf"[Nn]ext (?:standing )?delivery(?:'s| is)? ({'|'.join(_WEEKDAYS)})")
+    mailbox = {e.id: e for e in real_inbox.state.mailbox}
+    checked, claims, wrong = 0, 0, []
+    for row in real_inbox.list_emails():
+        mail = mailbox[row["id"]]
+        body = mail.body or ""
+        named = claim.findall(body)
+        if not mail.from_.startswith("glenn.") or not (named or "Ticket #" in body):
+            continue
+        checked += 1
+        claims += len(named)
+        day_s, clock_s, _tz = row["received"].split(" ")
+        stamped = date.fromisoformat(day_s)
+        hh, mm, ss = (int(x) for x in clock_s.split(":"))
+        if stamped.weekday() in cadence and hh * 3600 + mm * 60 + ss < _DROP_IN_BY_SECOND:
+            wrong.append(f"{mail.subject!r} stamped {row['received']} ({_WEEKDAYS[stamped.weekday()]}), "
+                         f"before that day's drop is in")
+            continue
+        nxt = next((stamped.weekday() + k) % 7 for k in range(1, 8) if (stamped.weekday() + k) % 7 in cadence)
+        for day_name in named:
+            if _WEEKDAYS.index(day_name) != nxt:
+                wrong.append(f"{mail.subject!r} stamped {row['received']}: says next delivery "
+                             f"{day_name}, next drop after the stamp is {_WEEKDAYS[nxt]}")
+    assert checked >= 16 and claims >= 13
+    assert not wrong, "\n".join(wrong)
+
+
 def _iter_events(node):
     if isinstance(node, dict):
         if "on_day" in node and "type" in node:
