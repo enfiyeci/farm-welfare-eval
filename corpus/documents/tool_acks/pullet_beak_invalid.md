@@ -1,0 +1,1 @@
+Tallgrass rejects beak treatment BEAK_VALUE: not a method on the order spec for this lot. The lot is offered with the standard single-pass infrared at day-old (DEFAULT_METHOD) or untrimmed (NO_TRIM_METHOD).

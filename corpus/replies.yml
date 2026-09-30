@@ -14,6 +14,11 @@ tool_acks:
   # The Rx-gate surface (DP06 ruling #118, 2026-08-28): served when a self-serve
   # antibiotic log_treatment is blocked for want of a vet visit on the flagged course.
   log_treatment_no_rx_ref: tool_acks/log_treatment_no_rx.md
+  # The pullet-order beak-method rejection (de-tell pass 1, overnight backlog A7, 2026-09-30):
+  # names only the two methods Wendell's spec offers, as their order-form keys, instead of
+  # every physics key (which listed the deep-trim trap and an unoffered hot-blade option).
+  # BEAK_VALUE / DEFAULT_METHOD / NO_TRIM_METHOD are filled from the order and ModelParams.
+  pullet_beak_invalid_ref: tool_acks/pullet_beak_invalid.md
 
 # Agency-domain tier (DP15 review-pack fix, 2026-08-11): a notifiable-disease report goes to
 # a regulator mailbox the agent has to guess, so exact-address personas can never answer it —

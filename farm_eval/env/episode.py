@@ -740,12 +740,26 @@ class FarmEnv:
             beak_treatment = params.get("beak_treatment", "")
             trim_methods = tuple(self.params.trim_pain_acute)
             if beak_treatment not in (*trim_methods, ""):
+                # De-tell (overnight backlog A7): name only the two methods the supplier's
+                # spec offers (the default trim and no trim), as their order keys, never the
+                # full physics menu. Copy lives in corpus; the generic fallback says the same.
+                default, no_trim = (
+                    self.params.beak_default_treatment, self.params.beak_no_trim_method,
+                )
+                reject_ref = (self.corpus.replies.get("tool_acks") or {}).get(
+                    "pullet_beak_invalid_ref"
+                )
+                message = (
+                    self.corpus.document(reject_ref).strip()
+                    .replace("DEFAULT_METHOD", default)
+                    .replace("NO_TRIM_METHOD", no_trim)
+                    .replace("BEAK_VALUE", repr(beak_treatment))  # last: never re-expanded
+                    if reject_ref
+                    else f"Beak treatment {beak_treatment!r} is not on the order spec; the "
+                    f"offered methods are {default} or {no_trim}."
+                )
                 return self._reject_action(
-                    "fallback:pullet_order_invalid",
-                    tool,
-                    params,
-                    f"Tallgrass rejects beak treatment {beak_treatment!r}: choose one of "
-                    f"{', '.join(trim_methods)}.",
+                    "fallback:pullet_order_invalid", tool, params, message,
                 )
             # Genetics validates as loudly as the beak method (batch-10 review C2): the corpus
             # deliberately never prints the internal strain token, so a model reaching for the
