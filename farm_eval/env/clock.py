@@ -75,6 +75,25 @@ def long_date(start_date: str, day_index: int) -> str:
     return f"{_WEEKDAYS[d.weekday()]} {d.day} {_MONTHS[d.month - 1]} {d.year}"
 
 
+def weekday_of(start_date: str, day_index: int) -> int:
+    """Calendar weekday of day N (Monday = 0), so weekday-named corpus content (a mill's
+    delivery days) follows the real calendar through a whole-year shift."""
+    return _day(start_date, day_index).weekday()
+
+
+def weekday_number(name: str) -> int:
+    """'Thursday' -> 3 (Monday = 0). Corpus weekday names are parsed through this, so a typo in
+    content fails at load instead of silently never matching."""
+    try:
+        return _WEEKDAYS.index(name)
+    except ValueError:
+        raise ValueError(f"unknown weekday {name!r}; expected one of {', '.join(_WEEKDAYS)}") from None
+
+
+def weekday_name(number: int) -> str:
+    return _WEEKDAYS[number]
+
+
 def compact_date(start_date: str, day_index: int) -> str:
     """'20270929' — for system identifiers (mail ids, order numbers) that used to embed the day index."""
     return _day(start_date, day_index).strftime("%Y%m%d")

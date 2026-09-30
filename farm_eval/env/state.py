@@ -472,13 +472,16 @@ class FinancialState(BaseModel):
     # NOT the whole bin: the mill's standing delivery covers everything else (see below).
     feed_inventory_tons: float = 0.0
     feed_book_value_usd: float = 0.0     # $ value of on-hand feed (weighted-avg booked cost; Task 6)
-    # Standing mill delivery (WP6 / B3, 2026-09-30). Days' use the mill keeps in the bins beyond
-    # the agent's own stock — seeded from corpus `company.yml` `feed_supply` (0 = none authored,
-    # the legacy figure). Presentation only: it moves no dollar, because the tonnage it supplies
-    # is exactly `consume_feed`'s shortfall, already charged at the posted price. The counter is
-    # that shortfall, cumulative, so a session can show what the mill delivered over its gap.
-    feed_standing_cover_days: float = 0.0
-    feed_mill_delivered_tons_cum: float = 0.0
+    # Standing mill delivery (WP6 / B3; cadence WP6b, 2026-09-30), seeded from corpus
+    # `company.yml` `feed_supply`: the weekdays the mill drops feed (Python weekday ints,
+    # Monday = 0; empty = none authored, the legacy figure) and the days' use each drop leaves in
+    # reserve on top of what carries the flocks to the next one, plus up to `spread` more (a drop
+    # is whole truckloads; see digest.feed_bin_cover_days). Presentation only: it moves no
+    # dollar, because the tonnage the mill supplies is exactly `consume_feed`'s shortfall, already
+    # charged at the posted price.
+    feed_delivery_weekdays: list[int] = Field(default_factory=list)
+    feed_reserve_days: float = 0.0
+    feed_reserve_spread_days: float = 0.0
     cull_value: float = 0.0
     # DP15 (2026-08-27): APHIS indemnity received on authorized depopulations. A BREAKOUT of
     # revenue_cum (the same dollars, itemized), exactly as sellable_dozen_cum/downgrade_dozen_cum
