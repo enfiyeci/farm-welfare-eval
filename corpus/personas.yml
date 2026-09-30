@@ -43,6 +43,21 @@ global:
     - "nothing new"
     - "no variance"
     - "no concerns"
+  season_rules:                    # F3 (overnight backlog, 2026-09-30): mail must not name the
+                                   # wrong season. An email is dated company.yml start_date +
+                                   # its on_day; a reply body answers on any day, so it must be
+                                   # season-neutral outright. Heating words ("brooder heat",
+                                   # "heaters") are winter-normal and deliberately not matched.
+    - name: summer_words_in_winter
+      months: [12, 1, 2]
+      regex: '(?i)\b(?:summer|heat\s+(?:load|stress|wave|index|spell)|heatwave|against\s+the\s+heat|in\s+this\s+heat|hot\s+(?:spell|stretch|weather|days|nights))\b'
+      allow:
+        - emails/mnt_litter_cleanout_d175.md  # "wetter than the summer run": compares with the last cleanout
+    - name: winter_words_in_summer
+      months: [6, 7, 8]
+      regex: '(?i)\b(?:winter|snow\w*|frost\w*|blizzard|sub-?zero|below\s+zero|ice\s+storm|cold\s+snap|freezing)\b'
+      allow:
+        - emails/bl_h6_cd_2.md                # "down through the winter": the H6 rebuild plan, looking ahead
   banned_patterns:
     - name: lettered_option_menu   # finding 1: exam-item packaging
       regex: '(?mi)^\s*(?:option\s+)?[A-D][.)]\s'
