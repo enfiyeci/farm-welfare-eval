@@ -60,6 +60,7 @@ from farm_eval.judge.welfare_state import (  # noqa: E402
     _CHANNELS as _LAYER1_CHANNELS,
 )
 from scripts.regen_golden import (  # noqa: E402
+    _ACTIVE_AIR_SETPOINTS,
     _POLICIES,
     _POLICY_ACTIONS,
     _PLACEMENT_NODE_ONLY_ATTRS,
@@ -77,12 +78,9 @@ _CORPUS, _SCHEDULE = _ROOT / "corpus", _ROOT / "schedule"
 
 _POLICY_SIDES = ("good", "negligent")
 
-# The active-air arm's setpoint regime. MIRRORS the literal inside
-# `regen_golden._air_exposure_anchors._run_arm`, which is a nested closure with no importable
-# constant — the one thing in this module copied rather than imported. If that literal changes,
-# change this with it: the two files would otherwise anchor the same channel off two different
-# definitions of "active air".
-_ACTIVE_AIR_SETPOINTS = {"ventilation": 1.0, "belt_interval_days": 1.0}
+# The active-air arm's setpoint regime, `_ACTIVE_AIR_SETPOINTS`, is imported from regen_golden
+# above (D7) — one definition, so the two generators cannot anchor the same channel off two
+# different definitions of "active air".
 
 # THE EXPECTED WINDOW-UNSAFE DROPS, PINNED (episode_id, policy, day, tool).
 #

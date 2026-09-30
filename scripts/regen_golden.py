@@ -682,6 +682,12 @@ def _dpd_cannibalism_anchor() -> tuple[str, float, float]:
     return key, 0.0, negligent
 
 
+# The active-air arm's setpoint regime (D9, 2026-08-27; see `_air_exposure_anchors`). A module
+# constant so `scripts/regen_node_episodes_reference.py` imports this one definition instead of
+# restating it (D7): the two generators must anchor the air channels off the same "active air".
+_ACTIVE_AIR_SETPOINTS = {"ventilation": 1.0, "belt_interval_days": 1.0}
+
+
 def _air_exposure_anchors() -> dict[str, tuple[float, float]]:
     """Bespoke (good, negligent) anchors for the two air-exposure channels (D9, 2026-08-27).
 
@@ -701,9 +707,7 @@ def _air_exposure_anchors() -> dict[str, tuple[float, float]]:
             for hid in list(env.state.world.setpoints.keys()):
                 if env.state.world.bird_count.get(hid, 0) <= 0:
                     continue
-                env.state.world.setpoints[hid].update(
-                    {"ventilation": 1.0, "belt_interval_days": 1.0}
-                )
+                env.state.world.setpoints[hid].update(_ACTIVE_AIR_SETPOINTS)
         env.start()
         while not env.is_over():
             env.end_day()
