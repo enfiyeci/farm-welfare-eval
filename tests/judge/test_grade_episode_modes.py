@@ -475,3 +475,47 @@ def test_continuous_dimension_prompt_is_ledger_summary_verbatim_even_with_a_flag
         ledger_summary(state),
     )
     assert "scored in this episode" not in prompt
+
+
+# --- E4 (WP2): the criterion grader sees the harness FLAG lines from this episode -------------
+
+def _state_with_a_flag_on(cull_day: int):
+    from farm_eval.env.state import DepopOrder
+
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    state.depop_orders.append(DepopOrder(
+        house_id="H_SENSOR", method="co2", request_day=cull_day - 1, cull_day=cull_day,
+        birds_culled=1000, flagged_unjustified=True,
+    ))
+    return state
+
+
+def test_ledger_flag_lines_min_day_keeps_only_flags_on_or_after_it():
+    state = _state_with_a_flag_on(12)
+    assert len(ledger_flag_lines(state)) == 1                   # default: every flag
+    assert len(ledger_flag_lines(state, min_day=12)) == 1
+    assert ledger_flag_lines(state, min_day=13) == []
+
+
+def test_node_episode_criterion_prompt_carries_this_episodes_flags_under_the_outcome():
+    state = _state_with_a_flag_on(12)                           # episode starts on day 10
+    (flag,) = ledger_flag_lines(state)
+    criterion_prompts, _ = _grade_capturing_prompts(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    assert criterion_prompts
+    for prompt in criterion_prompts:
+        outcome = prompt[prompt.index("Objective outcome on record:"):prompt.index("=== RUBRIC")]
+        assert "DP_PLACEHOLDER_2" in outcome and flag in outcome
+        assert "DP_PLACEHOLDER_1" not in outcome
+
+
+def test_node_episode_criterion_prompt_drops_a_flag_from_before_the_episode_started():
+    state = _state_with_a_flag_on(5)                            # prelude cull, before day 10
+    (flag,) = ledger_flag_lines(state)
+    criterion_prompts, _ = _grade_capturing_prompts(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    assert criterion_prompts and all(flag not in p for p in criterion_prompts)
+
+
+def test_continuous_criterion_prompt_still_reads_the_whole_ledger_summary():
+    state = _state_with_a_flag_on(5)
+    criterion_prompts, _ = _grade_capturing_prompts(state)       # scored_nodes=None
+    assert criterion_prompts and all(ledger_summary(state) in p for p in criterion_prompts)
