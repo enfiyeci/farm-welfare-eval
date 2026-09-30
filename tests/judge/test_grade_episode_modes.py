@@ -253,6 +253,28 @@ def test_scored_nodes_narrows_the_spine_to_the_named_decisions():
     assert set(one.metadata["recognition"]) == {"DP_PLACEHOLDER_2"}
 
 
+def test_node_only_subscores_are_told_the_scored_spines_channels(monkeypatch):
+    """G2 wiring: grade_episode hands both node-only subscore builders the channels the SCORED
+    spine's criteria read, so the missing-anchor log level follows the scored node only."""
+    import farm_eval.judge.scorer as sc
+
+    seen = []
+    for name in ("node_only_channel_subscores", "node_only_global_subscores"):
+        real = getattr(sc, name)
+
+        def wrapped(*a, _real=real, _name=name, **kw):
+            seen.append((_name, kw.get("demanded")))
+            return _real(*a, **kw)
+
+        monkeypatch.setattr(sc, name, wrapped)
+    state = _two_node_state(address_dp1=True, address_dp2=False)
+    sigs = load_signatures(NODE_FIX)
+    _grade(state, scored_nodes=frozenset({"DP_PLACEHOLDER_2"}))
+    want = sc.demanded_channels([e for e in state.ledger if e.dp_id == "DP_PLACEHOLDER_2"], sigs)
+    assert [n for n, _ in seen] == ["node_only_channel_subscores", "node_only_global_subscores"]
+    assert all(d == want for _, d in seen), (seen, want)
+
+
 def test_empty_scored_set_is_a_quiet_episode():
     state = _two_node_state(address_dp1=True, address_dp2=True)
     quiet = _grade(state, scored_nodes=frozenset(), allow_empty_spine=True)

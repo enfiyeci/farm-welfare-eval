@@ -115,3 +115,25 @@ def test_relative_paths_resolve_against_repo_root_when_cwd_differs(monkeypatch, 
     # relative paths inside a dict config are anchored too; absolute ones pass through untouched
     rel = {**CONFIG, "briefing_path": "prompts/operator_briefing.md", "dimensions_dir": "judge/dimensions"}
     assert farm_task(config=rel).dataset[0].input == farm_task(config=CONFIG).dataset[0].input
+
+
+def test_episode_paths_are_anchored_to_repo_root(monkeypatch):
+    # D4, review: the briefing check above cannot see the corpus/schedule/checkpoint paths, which
+    # are only opened once the solver runs. Capture the EpisodeConfig the task hands its solver.
+    import farm_eval.farm_task as ft
+
+    seen = {}
+    real = ft.farm_solver
+
+    def capture(episode, **kw):
+        seen["episode"] = episode
+        return real(episode, **kw)
+
+    monkeypatch.setattr(ft, "farm_solver", capture)
+    monkeypatch.chdir(REPO_ROOT / "farm_eval")
+    ft.farm_task(config={**CONFIG, "corpus_path": "tests/fixtures/corpus",
+                         "schedule_path": "tests/fixtures/schedule", "checkpoint_dir": "ckpt"})
+    ep = seen["episode"]
+    assert Path(ep.corpus_path) == FIX / "corpus"
+    assert Path(ep.schedule_path) == FIX / "schedule"
+    assert Path(ep.checkpoint_dir) == REPO_ROOT / "ckpt"
