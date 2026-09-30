@@ -77,8 +77,10 @@ class EpisodeStore(StoreModel):
     episode_spec: dict | None = None
 
 
-# Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path).
-_resources: dict[tuple[str, str], tuple[Corpus, Schedule]] = {}
+# Read-only resources, identical across samples — load once, keyed by (corpus_path, schedule_path,
+# frozen effective overrides). `()` is the pristine baseline; an ablated corpus lives under its own
+# key, so it can never be served for, or overwrite, a normal load.
+_resources: dict[tuple[str, str, tuple[tuple[str, str], ...]], tuple[Corpus, Schedule]] = {}
 
 
 def load_resources(cfg: EpisodeConfig, overrides: dict[str, str] | None = None) -> tuple[Corpus, Schedule]:
@@ -90,21 +92,20 @@ def load_resources(cfg: EpisodeConfig, overrides: dict[str, str] | None = None) 
     `cfg.ablation_overrides` instead — so an arm with no overrides of its own still picks up
     a config-level ablation, same as the continuous (non-node-episode) path always did.
     """
-    key = (str(cfg.corpus_path), str(cfg.schedule_path))
     effective = overrides or cfg.ablation_overrides
-    if effective:
-        # Bypass the cache entirely: an overridden load must never be read from (a stale
-        # baseline would silently drop the override) or written to (it would poison later
-        # NORMAL loads with the ablated corpus). The cache holds only pristine baselines.
-        corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
-        validate_body_refs(schedule, corpus)
-        validate_reply_refs(corpus)
-        corpus = apply_overrides(corpus, effective, cfg.corpus_path)
-        return corpus, schedule
+    # C3: the overrides are part of the key, so an overridden load is cached under its own entry
+    # instead of bypassing the cache (which re-read, re-validated and re-applied the corpus on
+    # every tool call, ~0.28 s each). It still can never be read for a normal load (a stale
+    # baseline would silently drop the override) or overwrite one (poisoning later NORMAL loads
+    # with the ablated corpus): the pristine baseline's key carries `()`.
+    frozen = tuple(sorted((str(k), str(v)) for k, v in effective.items())) if effective else ()
+    key = (str(cfg.corpus_path), str(cfg.schedule_path), frozen)
     if key not in _resources:
         corpus, schedule = load_corpus(cfg.corpus_path), load_schedule(cfg.schedule_path)
         validate_body_refs(schedule, corpus)
         validate_reply_refs(corpus)
+        if effective:
+            corpus = apply_overrides(corpus, effective, cfg.corpus_path)
         _resources[key] = (corpus, schedule)
     return _resources[key]
 
@@ -137,8 +138,8 @@ def snapshot_for(cfg: EpisodeConfig, ep: ResolvedEpisode) -> tuple[EnvState, str
     """The episode's starting state (a fresh deep copy each call) and its opening digest.
 
     Cached per process by (paths, episode, arm, seed, params, EFFECTIVE overrides); arms with
-    corpus overrides bypass the shared corpus cache the same way ablation runs do (see
-    `load_resources`). The effective overrides — the arm's, falling back to the config's when
+    corpus overrides load through `load_resources`, which caches an overridden corpus under its
+    own overrides-keyed entry, apart from the pristine baseline. The effective overrides — the arm's, falling back to the config's when
     the arm has none — must be part of the key: two configs differing only in
     `ablation_overrides` must not share a cached snapshot.
     """
