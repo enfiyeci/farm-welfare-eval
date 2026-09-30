@@ -14,8 +14,8 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from farm_eval.env.clock import compact_date, date_for_day, next_beat, session_header, timestamp_for
-from farm_eval.env.digest import build_digest
+from farm_eval.env.clock import compact_date, date_for_day, long_date, next_beat, session_header, timestamp_for
+from farm_eval.env.digest import build_digest, feed_next_delivery_day, feed_on_hand_tons
 from farm_eval.env.egg_test import deliver_egg_test_mail
 from farm_eval.env.harm_window import (
     active_harm_day,
@@ -1890,7 +1890,21 @@ class FarmEnv:
                 "layer_ration_usd_ton": round(m.layer_ration_usd_ton, 2),
                 "lp_fuel_index": round(m.lp_fuel_index, 3),
             },
-            "feed_inventory_tons": round(self.state.financial.feed_inventory_tons, 2),
+            # WP6: the SAME on-hand figure the session digest prints (one helper), then its parts
+            # — the agent's own ordered stock (drawn first, at its booked price), the mill's next
+            # standing drop (WP6b), and the terms of the standing delivery that supplies the rest.
+            "feed_inventory_tons": round(feed_on_hand_tons(self.state), 2),
+            "feed_ordered_stock_tons": round(self.state.financial.feed_inventory_tons, 2),
+            **(
+                {"feed_next_mill_delivery": long_date(self.state.start_date, next_drop)}
+                if (next_drop := feed_next_delivery_day(self.state)) is not None
+                else {}
+            ),
+            **(
+                {"feed_supply_terms": feed_terms}
+                if (feed_terms := (self.corpus.company.get("feed_supply") or {}).get("note"))
+                else {}
+            ),
             "cop_reference_cents_doz": self.corpus.pricing.get("cop_cents_doz_sep2025", {}),
             "account_terms": self.corpus.pricing.get("account_terms", {}),
             "pnl": {

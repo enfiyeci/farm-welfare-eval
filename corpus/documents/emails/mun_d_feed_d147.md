@@ -8,7 +8,7 @@ Luis, truck 7. WB-31000/01/02 in your inbox. Analysis unchanged from last lot.
 
 Corn's mostly in from the fields now, basis has settled where I expected, no change to per-ton on our blends.
 
-Next delivery Monday.
+Next delivery Thursday.
 
 Glenn Whitaker
 Cloverdale Feed Mill

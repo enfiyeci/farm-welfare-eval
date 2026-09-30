@@ -8,7 +8,7 @@ Luis, truck 7. WB-30950/51/52 in your inbox. Analysis unchanged.
 
 Nothing new to flag this week, quiet one.
 
-Next delivery Monday.
+Next delivery Thursday.
 
 Glenn Whitaker
 Cloverdale Feed Mill

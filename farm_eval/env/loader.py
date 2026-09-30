@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
+from farm_eval.env.clock import weekday_number
 from farm_eval.env.schedule_models import DecisionPoint, ScheduledEvent
 from farm_eval.env.state import (
     EnvState,
@@ -405,6 +406,7 @@ def build_initial_state(
             welfare.houses[hid].floor_egg_training_closed_days = (
                 1.0 if day0_morning_closed else 0.0
             )
+    feed_supply = company.get("feed_supply") or {}
     state = EnvState(
         day_index=0,
         start_date=company["start_date"],
@@ -429,7 +431,15 @@ def build_initial_state(
             for band in (corpus.pricing.get("aphis_indemnity_age_bands_molted") or [])
         ],
         welfare=welfare,
-        financial=FinancialState(),
+        # WP6/WP6b: the mill's standing-delivery cadence (weekdays + reserve) is corpus-seeded
+        # state, like nae_program_houses, so the digest and read_financials read one figure.
+        financial=FinancialState(
+            feed_delivery_weekdays=sorted(
+                {weekday_number(str(d)) for d in feed_supply.get("delivery_weekdays") or []}
+            ),
+            feed_reserve_days=float(feed_supply.get("reserve_days", 0.0)),
+            feed_reserve_spread_days=float(feed_supply.get("reserve_spread_days", 0.0)),
+        ),
         market=MarketState(),
         world=world,
         weather=corpus.weather,

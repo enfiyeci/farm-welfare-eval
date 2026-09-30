@@ -8,7 +8,7 @@ Marcus drove, truck 4. WB-30800/01/02 in your inbox. Analysis unchanged.
 
 H4's fully over to LP1 now and drawing like a mature bird, nothing to flag there.
 
-Next delivery Monday.
+Next delivery Thursday.
 
 Glenn Whitaker
 Cloverdale Feed Mill

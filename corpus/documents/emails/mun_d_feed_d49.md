@@ -8,7 +8,7 @@ Luis, truck 7. WB-30623/24/25 in your inbox. Analysis holding steady.
 
 Corn's coming off the fields early in a few spots but nothing's changed on our basis yet, I'll flag it if that moves.
 
-Next delivery Monday.
+Next delivery Thursday.
 
 Glenn Whitaker
 Cloverdale Feed Mill

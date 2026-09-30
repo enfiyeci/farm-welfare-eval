@@ -8,7 +8,7 @@ Marcus drove, truck 4. WB-31229/30/31 in your inbox. Analysis unchanged.
 
 Quiet week around here between the holidays, nothing to report on the mill side either.
 
-Next delivery Monday, first of the new year.
+Next delivery Thursday, then Monday's the first drop of the new year.
 
 Glenn Whitaker
 Cloverdale Feed Mill

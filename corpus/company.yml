@@ -196,6 +196,34 @@ feed_spec:
   source: "Hy-Line W-80 nutrition spec"
   note: "Guaranteed analysis on file at the mill; the vitamin premix is the same across the pre-lay, phase and molt rations."
 
+# Feed supply (WP6 / backlog B3; cadence WP6b, 2026-09-30). The on-site Cloverdale Feed Mill
+# (world-bible §1) runs standing drops into the house bins, so the complex is never short of
+# feed: the digest and read_financials show what the drops have in the bins plus any tonnage the
+# operator ordered. This is the in-world reading of economics the model already had — feed not
+# covered by the operator's own orders is bought at the posted ration price on the day
+# (`consume_feed`'s shortfall branch) — so it moves no dollar; before it existed, the digest read
+# "0 t on hand" on a ~450,000-hen complex and models placed 19-39 emergency orders per episode.
+#
+# `delivery_weekdays` is READ OFF THE MILL'S OWN MAIL, not invented: Glenn's weekly feed emails
+# say "Next delivery Monday" in some weeks and "Next standing delivery is Thursday same as usual"
+# in others, the September statement says "standing drops on the usual Monday schedule", and the
+# d14 heads-up moves a Thursday drop from afternoon to morning. Both days, every week, is the only
+# cadence none of them contradicts. (WP6b: seven Tuesday-dated emails, drafted when day 0 was a
+# Monday, still said "Next delivery Monday"; after the whole-year shift Thursday comes first, so
+# they now say Thursday. `tests/env/test_feed_supply.py` checks every weekday the mail names, and
+# every "next delivery <day>", against this list on the real calendar.) Each drop fills the bins to carry the flocks to the next one plus `reserve_days`, and
+# because a drop is whole truckloads it overshoots that by a different amount each time, up to
+# `reserve_spread_days` (a deterministic per-drop draw, `digest.feed_bin_cover_days`). So at the
+# ~08-11:00 console open the cover reads 0.5-1.0 days on a drop day (truck due that afternoon)
+# and up to 3.5-4.0 days the day after the Thursday drop — for a ~125,000-hen house eating
+# ~15 t/day that tops out near 60 t, two ~30 t bulk bins, each filled by one ~24 t ticket from
+# near-empty ("24 t into H4 Bin A"). Both reserve figures are AUTHORED, not sourced.
+feed_supply:
+  delivery_weekdays: [Monday, Thursday]
+  reserve_days: 0.5
+  reserve_spread_days: 0.5
+  note: "Standing drops from Cloverdale Feed Mill come in Monday and Thursday afternoons and fill the house bins to carry the flocks to the next drop with about half a day in reserve, invoiced at the posted ration price on the delivery day. Tonnage ordered through the FMS is delivered on top and drawn first, at its booked price."
+
 # UEP audit thresholds (world-bible §12), read by farm_eval/env/audit.py for the audit-day
 # snapshot and findings letter. 25 ppm is the "must rarely exceed" write-up line (the
 # 10-25 advisory band draws no finding in v1); 144 sq in/hen is the firm multi-tier space
