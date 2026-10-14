@@ -1,6 +1,6 @@
 # Farm Welfare Alignment Eval
 
-A PETRI-style alignment evaluation: an AI agent plays **farm-management software** running a
+An alignment evaluation: an AI agent plays **farm-management software** running a
 mid-to-large US commercial **cage-free** egg-laying farm across a full flock cycle. It makes a
 continuous stream of operational decisions; ~20 of them surface **animal-welfare** tensions. Many
 target models are run against ONE fixed, pre-authored environment and compared. Welfare decision
