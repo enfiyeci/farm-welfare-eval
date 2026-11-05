@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hen Cost Assessment</title>
+<!-- Eval: hen. Written 2026-11-05. Assessment only: no code, schedule or config was changed. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDEFF1; --sheet:#F8F9FA; --ink:#15191E; --muted:#56606B; --rule:#C9D0D7;
+  --accent:#0B6B66; --accent-soft:#D6E9E7; --warn:#8A5A00; --warn-soft:#F3E7CF;
+  --bar:#0B6B66; --bar-faint:#A9CFCB; --on-accent:#F8F9FA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+    --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+    --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+  --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+  --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214;
+}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 "Source Serif 4",Georgia,serif}
+.wrap{max-width:1240px;margin:0 auto;padding:40px 32px 120px}
+h1,h2,h3,.label,.tag,th,button,.chip{font-family:"Schibsted Grotesk",system-ui,sans-serif}
+h1{font-size:44px;line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:8px 0 18px}
+h1 em{font-style:normal;color:var(--accent)}
+h2{font-size:26px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:18px;font-weight:700;margin:22px 0 6px}
+.mono,td.n,.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14px}
+.meta{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted)}
+p{margin:0 0 12px}
+a{color:var(--accent)}
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:start;padding-bottom:36px;border-bottom:3px solid var(--ink)}
+.lede{font-size:19px}
+.lede b{font-weight:600}
+.panel{background:var(--sheet);padding:22px 24px}
+.section{display:grid;grid-template-columns:220px 1fr;gap:32px;padding:40px 0;border-bottom:1px solid var(--rule)}
+.section > div{min-width:0}
+.section > .label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-top:8px}
+.section > .label b{display:block;font-size:44px;line-height:1;color:var(--accent);letter-spacing:0;margin-bottom:8px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:700;padding:8px 10px;border-bottom:2px solid var(--ink)}
+td{padding:10px;border-bottom:1px solid var(--rule);vertical-align:top}
+.tablebox{overflow-x:auto}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;background:var(--accent-soft);color:var(--accent)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.plain{background:transparent;color:var(--muted);padding-left:0}
+.warnline{border-left:3px solid var(--warn);padding:2px 0 2px 12px;color:var(--ink);margin:12px 0}
+/* waterfall */
+.wf{width:100%}
+.wf-row{display:grid;grid-template-columns:150px 1fr 92px;gap:10px;align-items:center;margin:7px 0;font-size:14px}
+.wf-row .k{font-family:"Schibsted Grotesk",sans-serif;font-weight:700;font-size:13px;line-height:1.25}
+.wf-track{position:relative;height:22px}
+.wf-bar{position:absolute;top:0;height:22px;background:var(--bar)}
+.wf-faint{position:absolute;top:0;height:22px;background:var(--bar-faint)}
+.wf-cut{position:absolute;top:0;height:22px;border:2px dashed var(--bar);opacity:.7}
+.wf-row .v{font-family:"IBM Plex Mono",monospace;font-size:13px;text-align:right}
+.wf-axis{display:grid;grid-template-columns:150px 1fr 92px;gap:10px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+.wf-axis div:nth-child(2){display:flex;justify-content:space-between}
+.minibar{display:inline-block;height:9px;background:var(--bar);vertical-align:middle;margin-right:6px}
+.minibar.faint{background:var(--bar-faint)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+ol.steps{padding-left:22px;margin:8px 0}
+ol.steps li{margin-bottom:6px}
+/* picker */
+.q{background:var(--sheet);padding:20px 22px;margin:0 0 14px;border-left:3px solid var(--rule)}
+.q.first{border-left-color:var(--accent)}
+.q h3{margin-top:0}
+.q .why{color:var(--muted);font-size:15px;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip span{display:inline-block;padding:7px 12px;border:1px solid var(--rule);font-size:14px;font-weight:500;cursor:pointer;background:var(--paper)}
+.chip input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.rec{font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-left:6px;opacity:.8}
+.q textarea{width:100%;margin-top:10px;min-height:42px;font:14px/1.4 "Source Serif 4",serif;background:var(--paper);color:var(--ink);border:1px solid var(--rule);padding:8px}
+.bar-fixed{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:12px 32px;display:flex;gap:16px;align-items:center;justify-content:space-between;z-index:5}
+.bar-fixed span{font-family:"Schibsted Grotesk",sans-serif;font-size:14px}
+.bar-fixed button{font-size:14px;font-weight:700;padding:9px 16px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer}
+footer{margin-top:32px}
+@media (max-width:900px){
+  .wrap{padding:24px 16px 120px}
+  .hero,.grid2{grid-template-columns:1fr}
+  .section{grid-template-columns:1fr;gap:10px}
+  h1{font-size:32px}
+  .wf-row,.wf-axis{grid-template-columns:96px 1fr 72px}
+  .bar-fixed{padding:10px 16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div>
+    <div class="meta">FarmBench · Eval: hen · assessment written Thursday, November 5, 2026 · branch <code>docs/hen-cost-analysis</code> off <code>overnight/integration-2026-09-30</code> @ 9c3d17a9</div>
+    <h1>The hen sweep can drop from about $37 to about <em>$15–19</em> without cutting a single scored decision.</h1>
+    <p class="lede">Most of an episode's bill is not the scored decision. It is <b>cache misses on Google's side</b> (about a quarter of the bill), <b>daily wake-ups that the episode doesn't score</b> (29 of 222 sessions), and <b>the long tail after the scored act</b> (42–82% of each transcript). Four of the five levers are already written up as owner questions from September 30. This page puts them in one place with their validity cost, and adds the two finance questions you raised.</p>
+    <p class="lede">On money, <b>the hen eval tests far less financial skill than the long-horizon business benchmarks</b>. Vending-Bench, CoffeeBench, EnterpriseArena and RetailBench give the agent a cash balance, bills that settle late, a way to go broke, and a score on what is left. The hen eval has only a running margin that nobody scores. Five of their design elements fit FarmBench at almost no run cost, and three of those are already in the August 7 cash-and-credit design, which is half built on an unmerged branch.</p>
+    <p class="meta">Assessment only. No code, schedule or config was changed. Every number cites its source in the table at the end.</p>
+  </div>
+  <div class="panel">
+    <div class="label" style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">One k=1 sweep of all 26 episodes, Gemini 3.8 Flash, today's price</div>
+    <div class="wf" role="img" aria-label="Waterfall: $36.55 today; about $26.80 after a fixed Vertex region; about $24 after scoping wakes; about $15 to $19 after ending episodes once the scored decision resolves.">
+      <div class="wf-row"><div class="k">Today (measured)</div><div class="wf-track"><div class="wf-bar" style="left:0;width:91.4%"></div></div><div class="v">$36.55</div></div>
+      <div class="wf-row"><div class="k">Fixed Vertex region</div><div class="wf-track"><div class="wf-bar" style="left:0;width:67%"></div><div class="wf-cut" style="left:67%;width:24.4%"></div></div><div class="v">≈ $26.80</div></div>
+      <div class="wf-row"><div class="k">Wake only the scored node (scope14)</div><div class="wf-track"><div class="wf-bar" style="left:0;width:60.3%"></div><div class="wf-cut" style="left:60.3%;width:6.7%"></div></div><div class="v">≈ $24.10</div></div>
+      <div class="wf-row"><div class="k">End after the scored act resolves</div><div class="wf-track"><div class="wf-bar" style="left:0;width:37.5%"></div><div class="wf-faint" style="left:37.5%;width:10%"></div><div class="wf-cut" style="left:47.5%;width:12.8%"></div></div><div class="v">≈ $15–19</div></div>
+      <div class="wf-axis"><div></div><div><span>$0</span><span>$10</span><span>$20</span><span>$30</span><span>$40</span></div><div></div></div>
+    </div>
+    <p class="meta" style="margin-top:14px">Solid bar: what is left. Dashed box: what the lever removes. Faint bar: the range. Only the top row is measured; the rest are my estimates from the measured figures (method in section 2). From January 1, 2027 every row doubles: $73 today, about $29–37 after the levers.</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="label"><b>1</b>The framing today</div>
+  <div>
+    <p>One <b>node episode</b> (one scored sample per welfare decision) starts from a "nobody decided anything" snapshot of the farm on the decision's opening day and runs to one day past its deadline. The model is the farm-management software's operations agent (<code>prompts/operator_briefing.md</code>). Five features of the framing set the cost:</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Feature</th><th>What it does to cost</th><th>Why it is there</th></tr></thead>
+      <tbody>
+        <tr><td><b>Standing duties in the briefing</b>: flock reports, environment checks, feed orders, correspondence, reports to corporate</td><td>89–100% of state-changing actions in each episode belong to no scored decision. Before the WP6 feed-digest fix, feed orders alone ran up to 34 an episode.</td><td>Realism and cover. A model that only touches the scored problem is being told where the test is.</td></tr>
+        <tr><td><b>Every decision on the ledger, every scenario's mail in every episode</b> (ruling 21, built September 22)</td><td>5–11 other decisions are live in each episode. In the bird-flu depopulation episode, most of 143 model calls went to them.</td><td>The farm must behave the same whichever decision is scored (your requirement 1, September 17).</td></tr>
+        <tr><td><b>Authored wake days, plus five "harm is live" rules</b> that cap the clock at one day</td><td>122 authored sessions become 220 when nobody acts. DP06 alone goes from 4 to 29.</td><td>Rulings #120 (DP06 "experience most of these days") and #142 (bird flu, at least 5 awake days).</td></tr>
+        <tr><td><b>Episode runs to deadline + 1</b>, and some run longer so an outcome can accrue (DP04 to day 238, DP05 to day 211)</td><td>42–82% of each transcript comes after the first scored action. Each call re-reads the whole growing context, so the tail costs more than its share of messages.</td><td>Outcome channels need days to accrue; follow-through (DP05's two-dose course) needs sessions.</td></tr>
+        <tr><td><b>Money is unscored pressure</b> (ruling 19). The welfare headline is the mean of node scores only.</td><td>No direct cost, but it means financial realism buys tension, not score. That limits how much the finance work below can be worth to the headline.</td><td>Welfare is the spine; profit is one of several tension sources (<code>CLAUDE.md</code>).</td></tr>
+      </tbody>
+    </table></div>
+    <p class="warnline">The measured cost figures come from one model (Gemini 3.8 Flash), one run per episode, on September 22. Twelve episodes scored; six errored. The 34-feed-order figure predates the WP6 feed fix, so off-node action counts after that fix are unmeasured.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="label"><b>2</b>What to cut, and what each cut costs</div>
+  <div>
+    <p>Ranked by dollars saved per unit of validity risk. "Owner Q" is the question number in <code>docs/handoffs/2026-09-30-overnight-owner-questions.md</code>; the ruling itself goes in the picker below.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Lever</th><th>Saves per k=1 sweep (today's price)</th><th>Validity cost</th><th>Owner Q</th><th>My call</th></tr></thead>
+      <tbody>
+        <tr><td><b>Fixed Vertex region</b> instead of <code>global</code> (a run-config change)</td><td class="n"><span class="minibar" style="width:70px"></span>≈ $9.70<br><span class="meta">$0.32 of each $1.12 target bill</span></td><td>None: the model sees byte-identical prompts. ⚠️ The cause is a community forum report, not verified; one smoke settles it.</td><td class="n">6</td><td><span class="tag">do first</span></td></tr>
+        <tr><td><b>scope14</b>: disease wakes fire only in the episode that scores that disease (bird flu also in DP14)</td><td class="n"><span class="minibar" style="width:19px"></span>≈ $2.70–4.50<br><span class="meta">25–29 sessions; 220 → 175 nobody-acts</span></td><td>No reference anchor moves (all 26 × 2 arms replayed). Reverses the September 22 addendum's "fire in every episode".</td><td class="n">4</td><td><span class="tag">yes</span></td></tr>
+        <tr><td><b>End the episode once the scored decision resolves</b>, after one confirmation session, unless new mail needs a reply</td><td class="n"><span class="minibar" style="width:38px"></span><span class="minibar faint" style="width:24px"></span>≈ $5–10<br><span class="meta">my estimate: 25–45% of what is left</span></td><td>Real for nodes that need follow-through: DP05 (two doses), DP07 (restock), DP14 (escalate, order, confirm), DP04 (the order must stand to day 189). Safe for one-shot nodes: the world runs on to end_day with the model's settings standing, so outcome channels still accrue.</td><td class="n">36</td><td><span class="tag">yes, one-shot nodes only</span></td></tr>
+        <tr><td><b>Drop the six unscored decisions' mail</b> from node episodes (DP13, DP19, DP20, DP21, DPN, DPW), keeping their world events</td><td class="n"><span class="minibar faint" style="width:10px"></span>unmeasured, small<br><span class="meta">25 event appearances across the 23 windows</span></td><td>Breaks requirement 1 slightly: the same day reads differently depending on which episode you are in. DPN's mail is DPT's pressure, so it must stay in DPT.</td><td class="n">37 (new option c)</td><td><span class="tag plain">only if cheap to build</span></td></tr>
+        <tr><td><b>Hold back all other scenarios' mail</b> (seed their ledger rows only)</td><td class="n"><span class="minibar faint" style="width:30px"></span>unmeasured, possibly large<br><span class="meta">off-node work is most of each episode</span></td><td>High. The scored problem becomes the only thing happening, which is a tell, and the cross-decision pressure goes.</td><td class="n">37 (b)</td><td><span class="tag warn">no</span></td></tr>
+        <tr><td><b>Cut routine mail</b> (582 of 718 event appearances in the scored windows are routine)</td><td class="n"><span class="minibar faint" style="width:20px"></span>unmeasured</td><td>High. Routine mail is the cover layer that hides which day is the test. The September 30 tell audit already found telegraphed nodes; thinning the cover makes that worse.</td><td class="n">—</td><td><span class="tag warn">no</span></td></tr>
+        <tr><td><b>DP06 cadence</b>: 29 daily sessions today</td><td class="n"><span class="minibar faint" style="width:22px"></span>≈ $2–4 (extrapolated)<br><span class="meta">never run; 29 → about 16</span></td><td>Every-second-day as is collapses DP06's good anchor onto the negligent one. Needs the good program re-derived first. DP06's last calls may also outgrow a 200k-token context.</td><td class="n">35</td><td><span class="tag plain">re-derive, then cut</span></td></tr>
+        <tr><td><b>Fewer episodes</b>: DP16 out of the scored set, DP17 merged into DP25</td><td class="n"><span class="minibar" style="width:13px"></span>≈ $1.70<br><span class="meta">about 10 sessions</span></td><td>None: DP16 pays 6.00 to every arm; DP17 and DP25 are one thread (ruling 21.1).</td><td class="n">9, 19</td><td><span class="tag">yes</span></td></tr>
+        <tr><td><b>Quiet episodes</b>: three unscored controls, 6 sessions</td><td class="n"><span class="minibar faint" style="width:8px"></span>≈ $1.40 for all three</td><td>They are the only eval-awareness check on dull days. One keeps the check.</td><td class="n">new</td><td><span class="tag plain">keep one</span></td></tr>
+        <tr><td><b>Run before January 1</b>, when every Flash price doubles</td><td class="n"><span class="minibar" style="width:100px"></span>halves every number on this page</td><td>None.</td><td class="n">new</td><td><span class="tag">yes</span></td></tr>
+      </tbody>
+    </table></div>
+    <h3>How the estimates were made</h3>
+    <ol class="steps">
+      <li>Start from the measured $36.55 k=1 sweep: 222 sessions at a mean $0.153 of target cost per session, plus $0.10 of grading per episode ($2.60).</li>
+      <li>Fixed region: the cost report measures $0.32 lost to full cache misses per episode against a $1.12 target bill, so 28.6% of the target cost. Applied to $33.95 that leaves $24.24, plus grading, about $26.80.</li>
+      <li>scope14: the good-arm session count drops 196 → 171 (25 sessions, 11% of 222). Woken sessions sit late in the context, so they cost more than the mean; I bound the saving at 25–29 sessions.</li>
+      <li>Early stop: transcripts run 42–82% past the first scored action (median about 74% over the eight with a scored action). I apply 25–45% to the remaining target cost, not 74%, because follow-through nodes keep their sessions and the confirmation session stays. This is the weakest number on the page; a replay of the existing logs cut at the resolution point would measure it for free.</li>
+    </ol>
+    <p class="warnline">Cuts that change when the model is awake must re-run the discrimination report (good, negligent and do-nothing arms) before they are trusted. On September 30 one cadence change silently gave DP06's good and negligent arms the same score.</p>
+  </div>
+</section>
+
+<section class="section" id="finance-a">
+  <div class="label"><b>3</b>How other benchmarks test financial decision-making</div>
+  <div>
+    <p>You clarified that "long-horizon financial data" means <b>the structure and design other benchmarks use to test financial decision-making skill</b>. Every long-horizon business benchmark below is built from the same four parts: <b>decisions that move cash</b>, <b>money that feeds back with a delay</b>, <b>a way for the run to end badly</b>, and <b>a score on what is left</b>. The hen eval has the first part, a weak version of the second, and neither of the last two.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Benchmark</th><th>Decisions the agent makes</th><th>How money feeds back</th><th>What ends a run</th><th>How the skill is scored</th></tr></thead>
+      <tbody>
+        <tr><td><b>Vending-Bench</b><br><span class="meta">arXiv 2502.15840 · up to 2,000 messages, about 18–222 days</span></td><td>Order stock from suppliers by email, set prices, restock the machine, collect its cash</td><td>$500 start. Daily sales land in the machine and must be collected. A $2 daily fee. Deliveries arrive days after ordering</td><td>The fee goes unpaid 10 days running, or the message cap</td><td>Net worth: cash, machine cash, unsold stock at wholesale</td></tr>
+        <tr><td><b>Vending-Bench 2</b> ⚠️<br><span class="meta">Andon Labs page · one simulated year</span></td><td>As above, against adversarial suppliers (bait-and-switch, delays, supplier bankruptcies) and customers who demand refunds</td><td>$500, $2 a day, plus a charge per million output tokens. Card sales settle within a day</td><td>Fee unpaid 10 days running</td><td>End bank balance only; stock counts for nothing</td></tr>
+        <tr><td><b>CoffeeBench</b><br><span class="meta">arXiv 2606.16613 · 90 days, six firms, the model is one roaster</span></td><td>Post listings, make offers, set prices, roast, message trading partners, pay invoices</td><td>$15,000 start, $30 a day fixed cost. <b>Sales, costs and spoilage settle overnight.</b> Trade on net-30 credit with 0.1% a day late interest; shipments arrive a day late or get lost</td><td>Cash below zero: bankrupt and removed</td><td>Cumulative net income</td></tr>
+        <tr><td><b>EnterpriseArena</b><br><span class="meta">arXiv 2603.23638 · 132 monthly steps</span></td><td><b>One action a month</b>: close the books, request funding, or pass. Up to 20 look-up calls a month (cash, records, market data, a cash-flow projection)</td><td>$15M start. A funding request succeeds with a probability set by the market and the firm's state, pays 70–100% of the ask, and <b>arrives 1–6 months later</b></td><td>Cash below zero at any month: score 0. Only 15.4% of trials survive</td><td>Survival first, then revenue × 5 + cash, <b>minus $5,000 per look-up call</b></td></tr>
+        <tr><td><b>RetailBench</b><br><span class="meta">arXiv 2606.15862 · 180 days</span></td><td>Prices, reorders, which of 5 suppliers (quality hidden), which products go on the shelf</td><td>$30,000 start, $600 a day rent. Delivery lag, expiry, returns and reviews arrive later</td><td>10 days of negative funds (the paper's oracle rule)</td><td>Net worth and days survived</td></tr>
+        <tr><td><b>StockBench</b><br><span class="meta">arXiv 2510.02209 · 82 trading days</span></td><td>Buy, sell or hold 20 stocks each day</td><td>$100,000; positions marked to market daily</td><td>Never</td><td>Return, drawdown, Sortino ratio</td></tr>
+        <tr><td><b>Beer game</b> ⚠️<br><span class="meta">arXiv 2605.17036 · weekly</span></td><td>Weekly orders in a four-tier supply chain</td><td>Shipments take about two weeks; no cash account</td><td>Never</td><td>Holding plus backlog cost</td></tr>
+        <tr style="background:var(--accent-soft)"><td><b>FarmBench hen, today</b><br><span class="meta">node episodes 2–16 sessions; continuous run 518 days</span></td><td>Feed orders and ration, ventilation and heat (energy), staffing, treatments, egg disposition, molt or depopulate</td><td>A running margin, read through <code>read_financials</code>. Feed is booked at the day's price. No cash, no bills, no settlement</td><td>Never</td><td>Not scored (ruling 19). Money is pressure on welfare decisions</td></tr>
+      </tbody>
+    </table></div>
+    <p class="meta">Vending-Bench was read in full; CoffeeBench, EnterpriseArena, RetailBench and StockBench in part; Vending-Bench 2 only through a summarizing tool; the beer-game paper only its abstract and excerpts. Details in section 6.</p>
+
+    <h3>What FarmBench should adopt, and what each costs</h3>
+    <p>"Build" is the work to add it. "Run" is the extra model cost per sweep. Sizes are my estimates: S is about a day of implementer work with review, M a few days, L a week or more.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Design element</th><th>Taken from</th><th>Where it fits in FarmBench</th><th>Build</th><th>Run</th><th>Validity risk</th><th>My call</th></tr></thead>
+      <tbody>
+        <tr><td><b>A cash account with an operating credit line</b>, so every purchase draws cash and shortfalls cost interest</td><td>All five business benchmarks</td><td>Every episode, as visible state. This is the August 7 design's core; its first task (cash and credit line) is built on <code>docs/financial-node-audit</code></td><td><span class="tag plain">M</span> the rest of the August 7 plan. Its wiring step waited on the litter lane; not re-checked</td><td>≈ $0: no new sessions, a few more finance reads</td><td>Low, if the August 7 neutrality test holds (welfare state byte-identical across every money choice)</td><td><span class="tag">adopt</span></td></tr>
+        <tr><td><b>A monthly close</b>: corporate's statement with cash, receivables, credit used, cost per dozen against plan</td><td>EnterpriseArena's monthly step and book closing</td><td>Continuous run and broiler run; node episodes see the latest one. The briefing already promises reports "on corporate's usual cadence"</td><td><span class="tag plain">S</span> one templated email per in-world month, delivered on existing wake days</td><td>≈ $0: 17 emails over the hen cycle, none in most node episodes</td><td>Low; one more piece of routine mail</td><td><span class="tag">adopt</span></td></tr>
+        <tr><td><b>Settlement delays</b>: egg checks on Net 15 and Net 30, feed bills with an early-payment discount, late interest</td><td>CoffeeBench (overnight settlement, net-30, late interest); EnterpriseArena (money arrives months later)</td><td>Every episode. The corpus already lists Net 15 and Net 30 customer terms. The discount is the August 7 design's Move 3</td><td><span class="tag plain">M</span> receivables and payables in the cash ledger, terms printed on bills</td><td>≈ $0</td><td>Low</td><td><span class="tag">adopt</span></td></tr>
+        <tr><td><b>Checkable paperwork</b>: some invoices with errors, a few vendor offers good and bad</td><td>Vending-Bench 2's adversarial suppliers</td><td>Continuous run mostly; the August 7 design's Moves 4 and 5. Offers touch only hen-neutral things</td><td><span class="tag plain">M</span> authored mail plus a dispute action</td><td>Small: a few more emails to read</td><td>Medium: every error must be checkable from the farm's own records, or it is a false zero</td><td><span class="tag">adopt, after the core</span></td></tr>
+        <tr><td><b>Feed that is a real buying decision</b>: a wider price band and a storage cap</td><td>RetailBench (supplier and reorder choices); the August 7 design's Move 6</td><td>Every episode; today the best feed-timing strategy is worth 0.12% of margin</td><td><span class="tag plain">S</span> corpus prices plus a storage cap</td><td>≈ $0, or less if fewer orders</td><td>Low; regenerate the financial reference</td><td><span class="tag">adopt</span></td></tr>
+        <tr><td><b>Survival pressure</b>: a fixed drain and a consequence when cash runs out</td><td>Vending-Bench, CoffeeBench, EnterpriseArena, RetailBench</td><td>Long runs only. The consequence should be in-world (the lender freezes the line, corporate steps in), <b>not</b> the end of the run</td><td><span class="tag plain">M</span> lender covenant rules and their mail</td><td>≈ $0</td><td>High: it pulls money toward the centre of the eval, against ruling 19. An ended run has no welfare decisions left to score</td><td><span class="tag plain">owner decision; not before Nov 13</span></td></tr>
+        <tr><td><b>Score money on net worth</b> at the end</td><td>Vending-Bench, CoffeeBench, RetailBench</td><td>—</td><td><span class="tag plain">S</span></td><td>≈ $0</td><td>High: in the hen world perfect welfare costs about 3.3% of margin (August 3 sweep), so net worth would mark down the welfare-best model</td><td><span class="tag warn">don't adopt</span>; use the August 7 move-by-move finance index</td></tr>
+        <tr><td><b>Charge for looking</b> (EnterpriseArena's $5,000 per look-up)</td><td>EnterpriseArena</td><td>—</td><td>S</td><td>≈ $0</td><td>High: it punishes the checking that welfare decisions need</td><td><span class="tag warn">don't adopt</span></td></tr>
+        <tr><td><b>Agent-chosen waiting</b> (<code>wait_for_next_day</code>)</td><td>Vending-Bench, CoffeeBench</td><td>—</td><td>M</td><td>Unpredictable</td><td>High: CoffeeBench's Claude Haiku 4.5 idled about 40 of 90 days; Vending-Bench agents with no fee looped on waiting</td><td><span class="tag warn">don't adopt</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="warnline">Node episodes run for 2–16 sessions, which is too short for cash to run low. So in node episodes these elements work as visible pressure and as moves on the finance index. Survival pressure can only bite in the continuous hen run and the broiler full-cycle run. The broiler world is still being designed for the November 13 submission, so a cash account built into it now could cost less than adding one to the hen eval later.</p>
+  </div>
+</section>
+
+<section class="section" id="finance-b">
+  <div class="label"><b>4</b>Appendix: authored prices against real data</div>
+  <div>
+    <details>
+      <summary style="cursor:pointer;font-family:'Schibsted Grotesk',sans-serif;font-weight:700">Earlier check of reading B, kept for reference (click to open)</summary>
+      <p style="margin-top:12px">You first answered "both" to the question of what "long-horizon financial data" meant, so the research also compared the authored prices with real US data. Your later clarification puts this out of scope. It matters here in one place: the "feed that is a real buying decision" row in section 3 needs a realistic price band.</p>
+
+    <p>The authored story (an HPAI spike in winter, then normal) is the right shape, but <b>it is milder and smoother than what really happened</b>, and the feed band is far too narrow. Free monthly data exists for retail egg prices, feed grains and propane. The one series the farm actually sells at, cage-free wholesale, is paid (Expana) or was not retrievable as numbers.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>Item</th><th>Authored in <code>corpus/pricing.yml</code></th><th>Real history</th><th>Free source</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><b>Egg price spike</b></td><td class="n">$1.66 → $3.10 (1.87×), peak Jan 2027, back to ~$1.70 by May</td><td>Retail: $1.79 (Dec 2021) → <b>$4.82</b> (Jan 2023), 2.7×; $2.52 (Jan 2024) → <b>$6.23</b> (Mar 2025), 2.5×. Wholesale national white Large hit $7.34 (Feb 7, 2025) and $8.07 (Feb 21, 2025).</td><td>BLS via FRED <code>APU0000708111</code>, monthly since 1980; USDA AMS Egg Markets Overview, weekly PDF</td><td><span class="tag warn">too mild</span></td></tr>
+        <tr><td><b>After the spike</b></td><td class="n">Smooth return to baseline</td><td>Real prices overshot far below cost: national wholesale white Large <b>$0.35 a dozen</b> on October 30, 2026 (Midwest $0.54), against an authored cost of production of 96.2¢.</td><td>USDA AMS, October 30, 2026 edition</td><td><span class="tag warn">missing</span></td></tr>
+        <tr><td><b>Cage-free premium</b></td><td class="n">Cage-free wholesale only; $0.30 NAE premium on H5</td><td>Retail ads, October 30, 2026: cage-free $2.98 against conventional $1.42.</td><td>USDA AMS weekly (retail ads); wholesale cage-free index is paid (Expana, weekly from December 2021)</td><td><span class="tag plain">no free wholesale series</span></td></tr>
+        <tr><td><b>Layer feed</b></td><td class="n">$277–291 a ton ($14 spread)</td><td>Midwest layer feed $229–308 a ton within 2023 (a 34% swing); $173–201 in 2017–18. ⚠️ From the August 7 delegated research, which read the Egg Industry Center tables directly; I did not re-read them, and today the Egg Industry Center site rejected the agent's connection.</td><td>Egg Industry Center monthly reports; corn and soybean meal monthly via FRED (<code>PMAIZMTUSDM</code>, <code>PSMEAUSDM</code>) or USDA ERS Feed Grains</td><td><span class="tag warn">5× too narrow</span></td></tr>
+        <tr><td><b>Propane index</b></td><td class="n">1.00–1.35 in winter</td><td>Iowa residential propane, computed from EIA weekly data: winter peaks about 1.0–1.39 times a ~$1.55 base (2022–2026).</td><td>EIA weekly residential propane, Iowa and Midwest, XLS</td><td><span class="tag">fits</span></td></tr>
+        <tr><td><b>HPAI indemnity</b></td><td class="n">$18.68 a head for a first-lay layer</td><td>A Congressional Research Service report says the layer rate rose from about $7 to nearly $17 a bird in March 2025. ⚠️ The APHIS table itself did not load, so the age ladder is unchecked.</td><td>APHIS indemnity page (updated yearly)</td><td><span class="tag plain">close; ladder unchecked</span></td></tr>
+        <tr><td><b>Feed share of cost</b></td><td class="n">44.7 of 96.2¢ (46%)</td><td>⚠️ Only a dated search snippet ("above 60%"); the August 7 research gives 44% for this farm and 54% industry-wide, unsourced here.</td><td>Egg Industry Center cost study (site unreachable today)</td><td><span class="tag plain">unchecked</span></td></tr>
+      </tbody>
+    </table></div>
+    <h3>Why I recommend recalibrating rather than replaying a real window</h3>
+    <ol class="steps">
+      <li><b>A real 2024–26 window is recognizable.</b> The 2025 egg shortage, with wholesale prices above $8 a dozen, was national news. Relabeled dates would not hide its shape, and a model that recognizes it can guess the price path that follows.</li>
+      <li><b>The crash would swamp the welfare tensions.</b> At $0.35 a dozen every house loses money, so every decision becomes a money decision. The hen eval's spine is welfare; profit is one pressure among several.</li>
+      <li><b>The series the farm sells at is not free.</b> Replaying "real data" would mean retail prices scaled to a guessed wholesale level, which is an authored series with extra steps.</li>
+      <li><b>Recalibrating keeps the story and adds what is missing:</b> a steeper spike (toward 2.5×), a faster fall, an overshoot below baseline after it, and a feed band near the real Midwest range, each number cited in the corpus comment. This is a corpus edit plus a neutrality test (welfare state must not move) and a regenerated financial reference; any email that quotes a price must be checked.</li>
+    </ol>
+    <p class="warnline">A wider feed band changes how much feed timing matters. The August 3 sweep found feed timing worth at most 0.12% of margin at today's narrow band; a 34% swing makes it a real decision, which is what the August 7 design wanted (with a storage cap so it can't be gamed by stacking orders).</p>
+  
+    </details>
+  </div>
+</section>
+
+<section class="section" id="picker">
+  <div class="label"><b>5</b>Your rulings</div>
+  <div>
+    <p>My recommendation is preselected in each. Change any, add a note, then press "Copy my choices" and paste the text back to me. Where a question duplicates one from September 30, its number is given so one answer settles both.</p>
+    <form id="rulings">
+      <div class="q first" data-id="R1 fixed Vertex region (Sept 30 Q6)"><h3>R1 · Try a fixed Vertex region (for example <code>us-central1</code>) on the next smoke?</h3><div class="why">About $9.70 a sweep, no change to what the model sees. Needs the region's quota checked first, which only Oliver or you can do.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r1" value="yes" checked><span>Yes<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r1" value="no"><span>No</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R2 scope14 wakes (Sept 30 Q4)"><h3>R2 · Wake each episode only for its own scored disease (scope14)?</h3><div class="why">220 → 175 sessions when nobody acts, no anchor moves. The patch exists on <code>overnight/wake-audit-scope14-proposal</code>.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r2" value="yes, merge scope14" checked><span>Yes<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r2" value="no"><span>No</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R3 early stop (Sept 30 Q36)"><h3>R3 · End an episode once its scored decision has resolved, after one confirmation session?</h3><div class="why">The largest lever after the cache. The world still runs to end_day with the model's settings standing, so outcomes still accrue. Follow-through nodes (DP04, DP05, DP07, DP14) would keep their full sessions.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r3" value="yes, one-shot nodes only" checked><span>Yes, one-shot nodes only<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r3" value="yes, every node"><span>Yes, every node</span></label>
+        <label class="chip"><input type="radio" name="r3" value="measure first by replaying the logs cut at the resolution point"><span>Measure first, offline</span></label>
+        <label class="chip"><input type="radio" name="r3" value="no"><span>No</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R4 other scenarios' mail (Sept 30 Q37)"><h3>R4 · Which mail from other decisions stays in each episode?</h3><div class="why">All of it (today), all but the six unscored decisions' mail (DPN stays in DPT), or none (ledger rows only).</div><div class="chips">
+        <label class="chip"><input type="radio" name="r4" value="a: keep all (as now)" checked><span>Keep all<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r4" value="c: drop only the six unscored decisions' mail, keep DPN in DPT"><span>Drop unscored decisions' mail</span></label>
+        <label class="chip"><input type="radio" name="r4" value="b: ledger rows only, hold back other scenarios' mail"><span>Ledger rows only</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R5 DP06 cadence (Sept 30 Q35)"><h3>R5 · DP06 (House 5 deaths creeping up): keep 29 daily sessions?</h3><div class="why">DP06 has never run. Every second day halves it but breaks the good anchor unless the good program is re-derived on the new clock.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r5" value="re-derive the good program, then every second day (after Nov 13)" checked><span>Re-derive, then halve<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r5" value="keep 29 daily sessions"><span>Keep 29</span></label>
+        <label class="chip"><input type="radio" name="r5" value="run it once as is to measure, then decide"><span>Run once as is, then decide</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R6 fewer episodes (Sept 30 Q9, Q19)"><h3>R6 · Cut episodes: DP16 out, DP17 merged into DP25, and how many quiet controls?</h3><div class="why">DP16 pays 6.00 to every arm; DP17 and DP25 are one thread. The quiet episodes are the only dull-day eval-awareness check.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r6" value="DP16 out, DP17 into DP25, keep one quiet episode" checked><span>Both cuts, keep 1 quiet<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r6" value="DP16 out, DP17 into DP25, keep all three quiet episodes"><span>Both cuts, keep 3 quiet</span></label>
+        <label class="chip"><input type="radio" name="r6" value="no episode cuts"><span>No cuts</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R7 cut depth (handoff open question 2)"><h3>R7 · How deep may cuts go in general?</h3><div class="why">Inside episodes (fewer sessions and mail), fewer episodes, or a shorter continuous run. My reading of the numbers: inside episodes first, because that is where the off-node work is.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r7" value="inside episodes, plus the two episode cuts in R6" checked><span>Inside episodes + R6<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r7" value="also fewer episodes beyond R6"><span>Also fewer episodes</span></label>
+        <label class="chip"><input type="radio" name="r7" value="also a shorter continuous run"><span>Also a shorter continuous run</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R8 run timing"><h3>R8 · Plan the paid hen sweeps to finish before January 1, 2027?</h3><div class="why">Every Flash price doubles on that day. The Claude runs in the incubator plan are on the $200 credit and are not affected.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r8" value="yes" checked><span>Yes<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r8" value="no"><span>No</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R9 which benchmark designs to adopt"><h3>R9 · Which financial-decision designs should the hen eval adopt?</h3><div class="why">Section 3's adopt list: a cash account with a credit line, a monthly close, settlement delays, checkable paperwork, and feed as a real buying decision. Most of it is the August 7 design.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r9" value="a: the five adopt rows, built after Nov 13 by finishing the Aug 7 axis" checked><span>All five, after Nov 13<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r9" value="b: core only (cash and credit line, monthly close, settlement delays), after Nov 13"><span>Core three only</span></label>
+        <label class="chip"><input type="radio" name="r9" value="c: build the cash account into the broiler world now, hen later"><span>Broiler first, now</span></label>
+        <label class="chip"><input type="radio" name="r9" value="d: none for now"><span>None for now</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+
+      <div class="q" data-id="R10 survival pressure and scoring"><h3>R10 · Survival pressure and how financial skill is scored</h3><div class="why">Running out of cash fits only the long runs. Net worth as a score would mark down the welfare-best model by about 3.3% of margin.</div><div class="chips">
+        <label class="chip"><input type="radio" name="r10" value="a: no survival pressure; score with the Aug 7 move-by-move finance index, separate from welfare" checked><span>No survival pressure; finance index<span class="rec">recommended</span></span></label>
+        <label class="chip"><input type="radio" name="r10" value="b: in-world survival pressure (credit freeze) in the long runs, plus the finance index"><span>Credit freeze in long runs + index</span></label>
+        <label class="chip"><input type="radio" name="r10" value="c: Vending-Bench style: run ends on insolvency, scored on net worth"><span>Vending-Bench style</span></label></div><textarea placeholder="Note (optional)"></textarea></div>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="label"><b>6</b>Sources and what was read</div>
+  <div class="tablebox"><table>
+    <thead><tr><th>Source</th><th>Used for</th><th>How it was read</th></tr></thead>
+    <tbody>
+      <tr><td><code>evals/hen/runs/2026-09-30-cost-report.md</code></td><td>Every cost, cache and off-node figure</td><td>Read in full</td></tr>
+      <tr><td><code>evals/hen/runs/2026-09-30-wake-audit.md</code></td><td>Session counts, scope14, DP06</td><td>Read in full</td></tr>
+      <tr><td><code>evals/hen/design/2026-09-30-saturation-redesign-proposals.md</code></td><td>DP16, DP17/DP25, the existing questions</td><td>Read in full</td></tr>
+      <tr><td><code>docs/handoffs/2026-09-30-overnight-owner-questions.md</code></td><td>Question numbers</td><td>Read in full</td></tr>
+      <tr><td><code>evals/hen/design/2026-09-17-node-dependencies-and-runtime.md</code></td><td>Framing, cross-episode links, runtime</td><td>Read in full</td></tr>
+      <tr><td><code>schedule/node_episodes.yml</code>, <code>corpus/pricing.yml</code>, <code>prompts/operator_briefing.md</code>, <code>CLAUDE.md</code>, <code>AGENTS.md</code></td><td>Episode windows, authored prices, the briefing</td><td>Read in full</td></tr>
+      <tr><td><code>schedule/events.yml</code></td><td>Event counts per episode window (582 of 718 routine)</td><td>Counted by script, not read; the count treats any event without <code>links_dp</code> as routine</td></tr>
+      <tr><td><code>evals/hen/design/financial-decision-map-2026-08-03.md</code>, <code>financial-lever-map.md</code></td><td>Feed timing worth 0.12% of margin; money traps</td><td>Read in full. ⚠️ Partly outdated: its "no depopulation or molt mechanism" was fixed later (indemnity and molt ladders, August 27)</td></tr>
+      <tr><td>Backlog rows B3, B5–B8 and C6 in <code>docs/handoffs/2026-09-30-overnight-backlog.md</code></td><td>What is done and what is open</td><td>⚠️ Those rows only, found by search</td></tr>
+      <tr><td>Branch <code>docs/financial-node-audit</code>: the plain report and <code>03-feed-procurement-and-egg-marketing.md</code>; ruling text in <code>00-RULINGS.md</code></td><td>The August 7 design, its build state, the real feed range</td><td>Read in full. The feed memo is a delegated Sonnet report with its own ⚠️ marks</td></tr>
+      <tr><td>Time-skip research (handoff artifacts, November 5)</td><td>Idle drift, wait loops</td><td>Read in full; raw and partly unverified, as its README says</td></tr>
+      <tr><td>Research agent, today (Claude Sonnet): Vending-Bench, CoffeeBench, EnterpriseArena, RetailBench, StockBench, InvestorBench, a beer-game paper; BLS, FRED, EIA, USDA AMS, CRS</td><td>Sections 3 and 4</td><td>The agent's report, with its coverage statement: Vending-Bench read in full; CoffeeBench, EnterpriseArena, RetailBench and StockBench read in part; Vending-Bench 2 only through a summarizer ⚠️. I re-checked against its downloaded text: Vending-Bench's $500, $2 a day and 10-day rule; CoffeeBench's $15,000, net-30 and bankruptcy rule; EnterpriseArena's 132 months, 15.4% and anonymized data; RetailBench's Dominick's data; the BLS peaks; the USDA $0.35. ⚠️ Not reachable by the agent: the APHIS indemnity table, the Egg Industry Center site, any free cage-free wholesale series, AMS report 2843</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<footer class="meta">Assessment only, written for Arda to rule on. Nothing here changes code, schedule or config. The cuts that move wake days need the discrimination report re-run before they count.</footer>
+</div>
+
+<div class="bar-fixed"><span id="count">0 of 0 answered</span><button type="button" id="copy">Copy my choices</button></div>
+
+<script>
+(function(){
+  var form=document.getElementById('rulings');
+  var qs=[].slice.call(form.querySelectorAll('.q'));
+  function update(){
+    var n=qs.filter(function(q){return q.querySelector('input:checked');}).length;
+    document.getElementById('count').textContent=n+' of '+qs.length+' answered';
+  }
+  form.addEventListener('change',update); update();
+  document.getElementById('copy').addEventListener('click',function(){
+    var lines=['Hen cost and finance rulings, '+new Date().toISOString().slice(0,10)+':'];
+    qs.forEach(function(q){
+      var c=q.querySelector('input:checked'); var note=q.querySelector('textarea').value.trim();
+      lines.push(q.dataset.id+': '+(c?c.value:'(skipped)')+(note?' | note: '+note:''));
+    });
+    var text=lines.join('\n'); var btn=this;
+    function done(){btn.textContent='Copied';setTimeout(function(){btn.textContent='Copy my choices';},1600);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,function(){prompt('Copy this:',text);});}
+    else{prompt('Copy this:',text);}
+  });
+})();
+</script>
+</body>
+</html>
