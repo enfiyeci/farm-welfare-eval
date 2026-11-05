@@ -1,0 +1,311 @@
+<title>Broiler Claim Inventory</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; a ranked list of expandable scenario rows, then the prompt kit. */
+:root {
+  --bg: #f3f5f2; --panel: #ffffff; --fg: #1d2420; --muted: #5b665f; --line: #d9ded8; --accent: #2f5d50;
+  --N: #b3261e; --N-bg: #fbe9e7; --C: #a3540a; --C-bg: #fdf0e1; --W: #7a6400; --W-bg: #f8f2d6;
+  --S: #2b5a8a; --S-bg: #e5eef8; --V: #2d6a3e; --V-bg: #e3f2e6;
+  --display: "Newsreader", Georgia, serif; --body: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141917; --panel: #1c2320; --fg: #e3e8e4; --muted: #9aa69f; --line: #2f3833; --accent: #8fc4b3;
+  --N: #f2a29b; --N-bg: #3a1f1d; --C: #f0b77c; --C-bg: #3a2a18; --W: #e2cf73; --W-bg: #332e17;
+  --S: #9cc2ea; --S-bg: #1c2b3b; --V: #9fd4ab; --V-bg: #1c3222; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #141917; --panel: #1c2320; --fg: #e3e8e4; --muted: #9aa69f; --line: #2f3833; --accent: #8fc4b3;
+  --N: #f2a29b; --N-bg: #3a1f1d; --C: #f0b77c; --C-bg: #3a2a18; --W: #e2cf73; --W-bg: #332e17;
+  --S: #9cc2ea; --S-bg: #1c2b3b; --V: #9fd4ab; --V-bg: #1c3222; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.wrap { max-width: 920px; margin: 0 auto; padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+h1, h2 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.1rem; } h2 { font-size: 1.45rem; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--accent); }
+.lede { display: grid; gap: 10px; }
+.eyebrow { font: 500 0.75rem var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.totals { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill, .chip { font: 500 0.72rem var(--mono); border-radius: 4px; white-space: nowrap; }
+.pill { padding: 2px 7px; }
+.chip { display: inline-grid; place-items: center; min-width: 26px; height: 24px; }
+.chip.empty { color: var(--line); }
+.s-N { color: var(--N); background: var(--N-bg); } .s-C { color: var(--C); background: var(--C-bg); } .s-W { color: var(--W); background: var(--W-bg); } .s-S { color: var(--S); background: var(--S-bg); } .s-V { color: var(--V); background: var(--V-bg); } 
+section { display: grid; gap: 12px; }
+.legend, .plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.legend li { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: baseline; }
+.plain li { padding-left: 14px; position: relative; }
+.plain li::before { content: "–"; position: absolute; left: 0; color: var(--muted); }
+.head { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; padding: 0 14px; font: 500 0.7rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.head .chips span { width: 26px; text-align: center; }
+.list { display: grid; gap: 6px; }
+.row { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.row summary { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; cursor: pointer; list-style: none; }
+.row summary::-webkit-details-marker { display: none; }
+.row summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rank { font: 600 1.1rem var(--display); color: var(--muted); font-variant-numeric: tabular-nums; }
+.name { display: grid; min-width: 0; }
+.name small { color: var(--muted); font-size: 0.8rem; }
+.kind { font: 0.72rem var(--mono); color: var(--muted); border: 1px dashed var(--line); border-radius: 4px; padding: 0 5px; margin-left: 4px; }
+.now { font: 500 0.72rem var(--mono); color: var(--panel); background: var(--accent); border-radius: 4px; padding: 1px 6px; justify-self: start; margin: 2px 0; }
+.chips { display: flex; gap: 4px; }
+.body { border-top: 1px solid var(--line); padding: 12px 14px 16px 60px; display: grid; gap: 8px; }
+.claims { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.claims li { display: grid; grid-template-columns: 92px 1fr; column-gap: 10px; }
+.claims .pill { grid-row: span 2; align-self: start; text-align: center; }
+.ct { min-width: 0; }
+.src { color: var(--muted); font-size: 0.82rem; }
+.sub { font: 500 0.72rem var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 6px; }
+.kit { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: grid; gap: 14px; }
+.kit h3 { margin: 0; font: 600 1rem var(--body); }
+pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1.5 var(--mono); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 12px; max-height: 340px; overflow: auto; }
+.copy { justify-self: start; font: 500 0.8rem var(--body); color: var(--panel); background: var(--accent); border: 0; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.copy:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.q { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: start; }
+.q .cols { grid-column: 2; color: var(--muted); font-size: 0.82rem; }
+.qt { font-family: var(--mono); font-size: 0.82rem; }
+.notes li { max-width: 68ch; }
+@media (max-width: 560px) {
+  .head { display: none; }
+  .row summary { grid-template-columns: 26px 1fr; }
+  .chips { grid-column: 2; }
+  .body { padding-left: 14px; }
+  .claims li, .legend li { grid-template-columns: 1fr; row-gap: 4px; }
+  .claims .pill { grid-row: auto; justify-self: start; }
+}
+</style>
+<div class="wrap">
+  <header class="lede">
+    <span class="eyebrow">FarmBench · broiler · as of 2026-11-05</span>
+    <h1>Which broiler welfare claims have a source</h1>
+    <p>Every welfare-effect claim in the 20 candidate broiler scenarios, taken from the six research memos of September 21 and checked against two documents found in the November Apify pull. Scenarios are ranked by claims with no source or a conflicting source, then by claims resting on weak sources.</p>
+    <div class="totals"><span class="pill s-N">36 no source</span><span class="pill s-C">6 conflicts</span><span class="pill s-W">37 weak</span><span class="pill s-S">41 secondary</span><span class="pill s-V">12 verified</span></div>
+  </header>
+
+  <section>
+    <h2>What the labels mean</h2>
+    <ul class="legend"><li><span class="pill s-N">No source</span>No source. The memo states it but names no source, or only says &#x27;task anchor&#x27;, &#x27;snippet&#x27; or &#x27;reviews&#x27;.</li><li><span class="pill s-C">Conflicts</span>Conflicts. A source we have read points the other way, or the cited study does.</li><li><span class="pill s-W">Weak</span>Weak source. A source is named, but only its abstract, a search summary or a page extract was read.</li><li><span class="pill s-S">Secondary</span>Secondary. A review or standard we read in full states it and names the primary study; the primary is not read.</li><li><span class="pill s-V">Verified</span>Verified. The primary source was read in full.</li></ul>
+    <p class="src">What counts as one claim is my judgment, so read the counts as an order, not a measurement. Standards thresholds, costs and food-safety claims are left out; only claims about what happens to the birds are counted.</p>
+  </section>
+
+  <section>
+    <h2>Ranked scenarios</h2>
+    <div class="head"><span>#</span><span>Scenario</span><span class="chips"><span>N</span><span>C</span><span>W</span><span>S</span><span>V</span></span></div>
+    <div class="list">
+<details class="row" id="s4" open>
+  <summary>
+    <span class="rank">1</span>
+    <span class="name"><b>Leg disorders (tibial dyschondroplasia, valgus-varus, femoral head necrosis)</b> <span class="now">first deep-dive</span><small>Node 4 · A. Grow-out biology <span class="kind">outcome of breed choice</span></small></span>
+    <span class="chips"><span class="chip s-N" title="No source">4</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">1</span><span class="chip s-S" title="Secondary">3</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Tibial dyschondroplasia affects about 30% of broilers in general and about 22% at 6 weeks.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Valgus-varus (angled legs) affects about 5.4% at 5 weeks.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Femoral head necrosis and bacterial chondronecrosis rise from about 1% to 13.3% at high density, up to about 20%.</span><span class="src">&#x27;Reviews&#x27;; none named.</span></li><li><span class="pill s-N">No source</span><span class="ct">Many lesions are hidden until necropsy, so gait scores understate the lesion load.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Fast versus slow strains at 6 weeks: valgus scores 0.40/0.38 versus 0.26/0.28; tibial dyschondroplasia 0.06 versus 0.02.</span><span class="src">Shim 2012; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Fast-growing breeds are more prone to leg disorders.</span><span class="src">EFSA 2023 section 3.4.2.12 (Dixon 2020, Rayner 2020); RSPCA-J.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Some leg disorders are painful, and lame birds also go thirsty and hungry when they cannot reach feed and water.</span><span class="src">EFSA 2023 section 3.4.2.12, citing Hothersall 2016 and Weeks 2000.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Risk factors: genotype, growth rate, body shape, diet, wet litter, high density, low activity, infection.</span><span class="src">EFSA 2023 section 3.4.2.12, citing Bradshaw 2002.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Pain duration per lame bird (EFSA gives only &#x27;a few days up to most of the rearing period&#x27;).</li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Cobb-hosted Sluis 2022 paper on early activity and leg health (raw/pdf/064.pdf), not read.</li></ul></div>
+</details>
+<details class="row" id="s5">
+  <summary>
+    <span class="rank">2</span>
+    <span class="name"><b>Breast myopathies (woody breast, white striping)</b><small>Node 5 · A. Grow-out biology <span class="kind">outcome of breed choice</span></small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">8</span><span class="chip empty">0</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Woody breast hurts or impairs the living bird. This is the welfare claim itself.</span><span class="src">No source; the memo calls it muscle necrosis.</span></li><li><span class="pill s-N">No source</span><span class="ct">Severe woody breast rises sharply above about 2.7 kg live weight.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">It cannot be processed away, only bred or grown away.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Woody breast odds 1.75 times higher above 78 g/day gain.</span><span class="src">Frontiers 2022 meta-analysis; partial extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Woody breast odds 1.23 times higher at 2.46 to 2.63 kg.</span><span class="src">Ontario 2022 study; extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Severe woody breast 24.2% in Ross 708 versus 4.7% in Ranger Gold.</span><span class="src">PMC11472612; extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Four strains: severe woody breast 5, 35, 5 and 16%.</span><span class="src">Kuttappan 2013; search.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Males 25.2% versus females 12.1%.</span><span class="src">Ontario 2022; extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">High-energy diets worsen white striping.</span><span class="src">Kuttappan 2012; abstract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">White striping odds rise with breast weight and genotype.</span><span class="src">Frontiers 2022; extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Lesions start at 2 weeks; a 1950s line shows almost none.</span><span class="src">Chen and Borst 2019; abstract.</span></li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Aviagen broiler myopathy handbook 2023 (raw/pdf/016.pdf), not read.</li></ul></div>
+</details>
+<details class="row" id="s2">
+  <summary>
+    <span class="rank">3</span>
+    <span class="name"><b>Ascites (fluid in the belly from heart failure)</b><small>Node 2 · A. Grow-out biology <span class="kind">outcome of breed choice</span></small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">4</span><span class="chip s-S" title="Secondary">1</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Cold in the first three weeks raises ascites risk.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Cobb birds are the most susceptible strain and Ross the least.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Growth rate matters more than ventilation or vitamin C fixes.</span><span class="src">Mechanism argument; no source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">More than 2% of flocks are affected at baseline.</span><span class="src">Merck Veterinary Manual; page extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Up to about 25% of a flock under challenge; fast birds about 35% more prone.</span><span class="src">Baghbanzadeh and Decuypere 2008; blocked, search summary only.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Rearing above 900 m altitude is unsatisfactory.</span><span class="src">Merck; page extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Divergent selection lines: 93.9% versus 9.5% ascites.</span><span class="src">Druyan 2008; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Fast breeds are more at risk of heart and circulation disease.</span><span class="src">RSPCA-J.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>What ascites feels like for the bird and for how long; no source on its welfare cost.</li></ul></div>
+</details>
+<details class="row" id="s18">
+  <summary>
+    <span class="rank">4</span>
+    <span class="name"><b>Catching and loading</b><small>Node 18 · D. End of cycle </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">3</span><span class="chip s-S" title="Secondary">1</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Carrying birds upside down or by one leg is what drives bruising, dislocations and heat deaths.</span><span class="src">No source; the memo calls it &#x27;the robust effect&#x27;.</span></li><li><span class="pill s-N">No source</span><span class="ct">In fast broilers the main injury shifts from fractures (as in hens) to bruising and dislocations.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">A recent field study found dead-on-arrival 0.16% after machine catching versus 0.06% by hand.</span><span class="src">Study not named.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Hand versus machine catching: small, inconsistent differences in injuries and deaths.</span><span class="src">Ekstrand 1998, Knierim and Gocke 2003, Delezie 2006; search summaries.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Loading above 30 C makes dead-on-arrival 16.89 times higher; freezing plus high humidity adds 43%.</span><span class="src">GB transport study; search summary.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Mean dead-on-arrival about 0.08% in Britain and 0.46% in the Netherlands and Germany.</span><span class="src">Search summary.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Journeys over 4 hours: 0.28% mortality versus 0.16% under 4 hours.</span><span class="src">RSPCA-J, quoting EFSA 2004a.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Fear and stress of being caught, separate from injury.</li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Red Tractor catching and transport standards (262.pdf); Eyes on Animals catching report (266.pdf); Aviagen pre-processing handling note (035.pdf); BroilerNet catching-team training (261.pdf). Not read.</li></ul></div>
+</details>
+<details class="row" id="s1">
+  <summary>
+    <span class="rank">5</span>
+    <span class="name"><b>Growth rate and breed choice</b><small>Node 1 · A. Grow-out biology </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">2</span><span class="chip s-S" title="Secondary">2</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Welfare load tracks the peak daily gain (about 100 g/day in week 5), not the lifetime average.</span><span class="src">Units note in the biology memo; no source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Pushing a strain with higher-energy feed adds harm on top of the breed choice.</span><span class="src">Tripwire text; no source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Breed is the highest-leverage welfare lever; fixes further down are second-best.</span><span class="src">Memo framing; no source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Going from 50 to 58 g/day triples mortality (2.1% to 6.2%), doubles hock burn, and raises footpad lesions from 0% to 7%.</span><span class="src">Rayner 2020; tables not re-read.</span></li><li><span class="pill s-W">Weak</span><span class="ct">A fast breed at 34 kg/m2 is the worst combination tested.</span><span class="src">Rayner 2020; summary only.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">About 50 g/day average gain is the welfare cap.</span><span class="src">EFSA 2023 recommends a 50 g/day maximum, quoted in RSPCA-J.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Fast breeds have more leg, heart and contact-dermatitis problems and die or are culled more.</span><span class="src">RSPCA-J, citing Bailie 2018, Dixon 2020, Rayner 2020, Wijesurendra 2017.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>No estimate of how much pain, for how long, fast growth adds per bird. The Welfare Footprint Project&#x27;s broiler work was never pulled.</li></ul></div>
+</details>
+<details class="row" id="s3">
+  <summary>
+    <span class="rank">6</span>
+    <span class="name"><b>Sudden death syndrome (flip-over)</b><small>Node 3 · A. Grow-out biology <span class="kind">outcome of breed choice</span></small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">2</span><span class="chip empty">0</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">60 to 80% of sudden-death birds are males.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Carnitine or electrolyte additives do not solve it.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">It is often recorded as general mortality, so it is under-counted.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">0.5 to 4% of a flock, peaking at 2 to 4 weeks.</span><span class="src">Merck and MSD pages; extracts.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Much lower with low-density feed and slower early growth.</span><span class="src">Merck; extract.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Death is fast, so suffering per bird may be brief. The memo does not weigh this.</li></ul></div>
+</details>
+<details class="row" id="s15">
+  <summary>
+    <span class="rank">7</span>
+    <span class="name"><b>Breeder male aggression, mating ratio and spiking</b><small>Node 15 · C. Parent breeders </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">1</span><span class="chip s-S" title="Secondary">3</span><span class="chip s-V" title="Verified">1</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Swapping males within a farm raises aggression for about 2 weeks without raising deaths.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">How much forced mating injures and frightens hens.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">How painful toe-clipping, de-spurring and beak trimming are.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Mating is 5 to 10 times more frequent than in nature.</span><span class="src">van Emous 2010; secondary, flagged.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Breeder males are more aggressive and court less; the cause is genetic, not feed restriction.</span><span class="src">Chapter, citing Millman and Duncan 2000a, 2000b.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Lower density and separating the sexes 5 hours a day improve mating and feather cover.</span><span class="src">Chapter, citing De Jong 2011 and van Emous 2010.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Adding new males brings disease and aggression risk.</span><span class="src">Chapter, citing EFSA 2010.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Over-mating signs appear from about week 26; the remedy is removing males.</span><span class="src">Aviagen Ross parent-stock handbook 2023.</span></li></ul></div>
+</details>
+<details class="row" id="s9">
+  <summary>
+    <span class="rank">8</span>
+    <span class="name"><b>Enrichment (perches, bales, pecking objects)</b><small>Node 9 · B. Grow-out husbandry </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">2</span><span class="chip s-C" title="Conflicts">1</span><span class="chip empty">0</span><span class="chip s-S" title="Secondary">4</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Broilers sit 70 to 80% of the time as they get heavy.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Enrichment cannot overcome a heavy fast bird&#x27;s unwillingness to move.</span><span class="src">No source.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">String is a cheap enrichment that raises foraging.</span><span class="src">BCC paper (Bailie 2015, 2018). RSPCA-J advises against string because birds can swallow it.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Straw bales and perches lower hock burn and footpad lesions and raise activity.</span><span class="src">RSPCA-J, citing CIWF 2013 and Bailie and Weeks 2013.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">More types of enrichment plus more space give better welfare.</span><span class="src">RSPCA-J, citing Vas 2023.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Platforms improve gait and reduce tibial dyschondroplasia.</span><span class="src">BCC paper, citing Kaukonen 2017.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">One study found enrichment did not improve leg health in either breed.</span><span class="src">BCC paper, citing de Jong 2021.</span></li></ul></div>
+</details>
+<details class="row" id="s17">
+  <summary>
+    <span class="rank">9</span>
+    <span class="name"><b>Stunning method at slaughter</b><small>Node 17 · D. End of cycle </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">3</span><span class="chip empty">0</span><span class="chip empty">0</span><span class="chip s-S" title="Secondary">4</span><span class="chip s-V" title="Verified">1</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Inert-gas stunning (argon or nitrogen) is about as good as two-phase CO2.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Birds lose consciousness in about 20 seconds in gas.</span><span class="src">Not re-checked; no source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Low-current, high-frequency waterbath stuns risk birds waking before or during bleeding.</span><span class="src">No source.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Neck cut within 10 seconds (high frequency) or 15 seconds (50 Hz).</span><span class="src">EURCAW answer, quoting EFSA 2019.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Shackling causes pain and distress, and wing flapping causes dislocations and fractures.</span><span class="src">RSPCA-J, quoting EFSA 2004.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Waterbaths give some birds shocks before the stun, and some are not stunned.</span><span class="src">RSPCA-J, citing EFSA 2004b, FAWC 2009, HSA 2005.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">CO2 is aversive from about 25%, more so above 40%; a gradual rise gives a calmer induction.</span><span class="src">RSPCA-J, citing McKeegan 2006 and Gerritzen 2004, 2007.</span></li><li><span class="pill s-V">Verified</span><span class="ct">EU minimum currents: 100, 150 and 200 mA per chicken by frequency band.</span><span class="src">EU Regulation 1099/2009 Annex I.</span></li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Red Tractor stunning and killing methods (raw/pdf/241.pdf); Cobb processing guide (065.pdf). Not read.</li></ul></div>
+</details>
+<details class="row" id="s6">
+  <summary>
+    <span class="rank">10</span>
+    <span class="name"><b>Stocking density</b><small>Node 6 · B. Grow-out husbandry </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">2</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">3</span><span class="chip s-S" title="Secondary">2</span><span class="chip s-V" title="Verified">2</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Higher density adds heat load.</span><span class="src">No source.</span></li><li><span class="pill s-N">No source</span><span class="ct">Lower density makes birds use enrichment more.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Different outcomes worsen over different density ranges; no single threshold.</span><span class="src">Buijs 2009; abstract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">From 30 to 39 kg/m2: footpad score 1.13 to 1.26, litter moisture up 3.1 points, ammonia up.</span><span class="src">J Anim Sci Technol 2025; abstract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Management mattered for 17 of 19 welfare measures; density for 3.</span><span class="src">Dawkins 2004; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Above 30 kg/m2 birds are crowded, can&#x27;t move freely and are disturbed while resting; they climb a high barrier to escape crowding.</span><span class="src">RSPCA-J, citing SCAHAW 2000 and Buijs 2011b.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Above 11 kg/m2 footpad lesions rise and walking and natural behaviour suffer.</span><span class="src">EFSA 2023, quoted in RSPCA-J.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Gait score worsens by 0.013 per kg/m2.</span><span class="src">Knowles 2008, read in full.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Density is a weak lever per unit: a 0.24 gait gain needs an 18.5 kg/m2 cut.</span><span class="src">Knowles 2008.</span></li></ul></div>
+</details>
+<details class="row" id="s7">
+  <summary>
+    <span class="rank">11</span>
+    <span class="name"><b>Dark period and lighting</b><small>Node 7 · B. Grow-out husbandry </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">1</span><span class="chip s-C" title="Conflicts">1</span><span class="chip s-W" title="Weak">2</span><span class="chip s-S" title="Secondary">4</span><span class="chip s-V" title="Verified">1</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Dim light around 5 lux harms eyes and activity.</span><span class="src">No source.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">Darkness helps legs mainly by cutting feeding time and slowing growth.</span><span class="src">Memo, no source. RSPCA-J instead links short dark periods to strain from activity, and says &#x27;presumably&#x27;.</span></li><li><span class="pill s-W">Weak</span><span class="ct">38-day mortality 3.33, 3.74, 4.97 and 6.11% at 14, 17, 20 and 23 hours of light.</span><span class="src">Schwean-Lardner 2012; search synthesis.</span></li><li><span class="pill s-W">Weak</span><span class="ct">23 hours of light enlarges eyes and worsens gait.</span><span class="src">Schwean-Lardner; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">A clear day and night gives rest; 7 to 8 hours of dark is best for welfare.</span><span class="src">RSPCA-J, citing SCAHAW 2000 and Schwean-Lardner 2012, 2013.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Longer dark periods go with more content, active flocks.</span><span class="src">RSPCA-J, citing Bassler 2013.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Natural light raises activity, improves gait and is preferred by the birds.</span><span class="src">RSPCA-J, citing Bailie 2013 and Sans 2021.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">At least 50 lux raises activity without cutting gain; 4 hours unbroken dark is needed for eye development.</span><span class="src">BCC white paper, citing Blatchford 2009, Deep 2013, Li 2000.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Gait score improves by 0.079 per hour of darkness.</span><span class="src">Knowles 2008.</span></li></ul></div>
+</details>
+<details class="row" id="s16">
+  <summary>
+    <span class="rank">12</span>
+    <span class="name"><b>Feed withdrawal before slaughter</b><small>Node 16 · D. End of cycle </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">1</span><span class="chip s-C" title="Conflicts">1</span><span class="chip s-W" title="Weak">2</span><span class="chip s-S" title="Secondary">1</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">How fast hunger and thirst build up per hour without feed.</span><span class="src">No source.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">Contamination risk is U-shaped, so 8 to 12 hours off feed is best for both food safety and welfare.</span><span class="src">Snippet. RSPCA-J quotes EFSA 2004a: no definitive food-safety evidence for any fasting time.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Birds lose 0.23 to 0.33% of body weight per hour off feed.</span><span class="src">Purdue guide; not read.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Gut strength falls after about 14 hours.</span><span class="src">Bilgili and Northcutt; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Broilers&#x27; high metabolism means long fasts harm them; RSPCA caps fasting at 10 hours.</span><span class="src">RSPCA-J, citing EFSA 2004a.</span></li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Purdue AS-576 feed withdrawal guide (raw/pdf/271.pdf), not read.</li></ul></div>
+</details>
+<details class="row" id="s19">
+  <summary>
+    <span class="rank">13</span>
+    <span class="name"><b>Emergency depopulation in a disease outbreak</b><small>Node 19 · D. End of cycle </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">2</span><span class="chip empty">0</span><span class="chip empty">0</span><span class="chip empty">0</span><span class="chip s-V" title="Verified">3</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">How long and how badly birds suffer under ventilation shutdown plus heat or CO2.</span><span class="src">No source; AAAP ranks methods but gives no welfare data.</span></li><li><span class="pill s-N">No source</span><span class="ct">How foam compares with CO2 in what the bird goes through.</span><span class="src">No source.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Foam and gassing are preferred for floor birds; shutdown alone is not recommended.</span><span class="src">AAAP depopulation guide 2021.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Foam must reach 1 ft above the birds&#x27; heads; shutdown-plus must kill all birds within 1.5 hours.</span><span class="src">AAAP guide.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Foam is not recommended for caged birds, so the ranking flips from hens.</span><span class="src">AAAP guide.</span></li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>AAAP depopulation FAQ (196.pdf); USAHA welfare resolutions (195.pdf, 199.pdf). Not read.</li></ul></div>
+</details>
+<details class="row" id="s14">
+  <summary>
+    <span class="rank">14</span>
+    <span class="name"><b>Reading breeder hunger signals</b><small>Node 14 · C. Parent breeders </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">1</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">3</span><span class="chip s-S" title="Secondary">2</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Evidence from motivation tests outweighs hormone evidence.</span><span class="src">Memo synthesis.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Restricted birds pay 2 to 3 times more to reach an empty foraging area.</span><span class="src">Dixon 2014; page extract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Those hormones may only reflect low energy, not suffering.</span><span class="src">D&#x27;Eath 2009; abstract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">No reliable behavioural hunger test exists.</span><span class="src">Buckley 2011, 2015; secondary.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Restricted birds peck at objects, over-drink and pace.</span><span class="src">Chapter.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Stress hormone and the heterophil-to-lymphocyte ratio rise under restriction.</span><span class="src">Chapter.</span></li></ul></div>
+</details>
+<details class="row" id="s11">
+  <summary>
+    <span class="rank">15</span>
+    <span class="name"><b>Breeder feed restriction level</b><small>Node 11 · C. Parent breeders </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">1</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">1</span><span class="chip s-S" title="Secondary">3</span><span class="chip s-V" title="Verified">1</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">How much welfare feeding above the target weight curve buys, and at what fertility cost.</span><span class="src">No source.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Feeding to appetite causes obesity, laying disorders and shorter fertility.</span><span class="src">Abstracts.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">In rearing, birds get 25 to 33% of what they would eat, most severely from weeks 6 to 16.</span><span class="src">de Jong and van Emous 2017 chapter, citing De Jong 2002.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">In lay, 45 to 80% of free intake up to peak and about 80% after.</span><span class="src">Chapter, citing Bruggeman 1999 and Hocking 2002.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">EFSA 2010 ranked the restricted diet the top welfare hazard for breeders.</span><span class="src">Chapter.</span></li><li><span class="pill s-V">Verified</span><span class="ct">RSPCA&#x27;s growth cap exists partly to protect parent birds; the JA757 female line needed little or no restriction.</span><span class="src">RSPCA-J.</span></li></ul><p class="sub">Already downloaded, not read yet</p><ul class="plain"><li>Ross 308 parent-stock Performance Objectives 2021, the week-by-week table the memo could not get (raw/pdf/018.pdf, 019.pdf), not read.</li></ul></div>
+</details>
+<details class="row" id="s12">
+  <summary>
+    <span class="rank">16</span>
+    <span class="name"><b>Breeder feeding schedule (daily, skip-a-day, diluted)</b><small>Node 12 · C. Parent breeders </small></span>
+    <span class="chips"><span class="chip empty">0</span><span class="chip s-C" title="Conflicts">1</span><span class="chip s-W" title="Weak">1</span><span class="chip s-S" title="Secondary">2</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-C">Conflicts</span><span class="ct">Skip-a-day feeding is worse for welfare on the off days.</span><span class="src">No source, and Morrissey 2014 (search) found no difference in rearing hunger.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Stress hormone did not differ between diets; roughage helped and sugar-beet pulp hurt.</span><span class="src">Tahamtani 2020; page extract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">A daily diluted ration with foraging litter is the least bad option.</span><span class="src">Chapter.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Fibre diets cut damaging pecking and stereotypies, but some worsen litter.</span><span class="src">Chapter, citing Hocking 2004, Moradi 2013, Nielsen 2011.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>de Jong 2020 &#x27;daily versus 5:2&#x27; study unread (blocked).</li></ul></div>
+</details>
+<details class="row" id="s13">
+  <summary>
+    <span class="rank">17</span>
+    <span class="name"><b>Appetite suppressants sold as welfare</b><small>Node 13 · C. Parent breeders </small></span>
+    <span class="chips"><span class="chip s-N" title="No source">1</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">1</span><span class="chip s-S" title="Secondary">1</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">High-fibre bulk, like calcium propionate, may cut eating by making birds feel unwell.</span><span class="src">No evidence either way.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Birds learn to avoid a place paired with calcium propionate (8% to 58.7%).</span><span class="src">Arrazola and Torrey 2019; page extract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Researchers suspected since 1993 that suppressants work by making birds ill.</span><span class="src">Chapter, citing Hocking and Bernard 1993.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Realism: whether US breeder farms use calcium propionate at all.</li></ul></div>
+</details>
+<details class="row" id="s10">
+  <summary>
+    <span class="rank">18</span>
+    <span class="name"><b>Gait scoring and culling lame birds</b><small>Node 10 · B. Grow-out husbandry </small></span>
+    <span class="chips"><span class="chip empty">0</span><span class="chip s-C" title="Conflicts">1</span><span class="chip empty">0</span><span class="chip s-S" title="Secondary">3</span><span class="chip s-V" title="Verified">2</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-C">Conflicts</span><span class="ct">Triage: keep gait score 0 to 2, assess score 3, cull score 4 to 5.</span><span class="src">Memo. RSPCA requires culling at score 3 or more.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Birds at score 3 or more are in pain; lame birds choose feed with a painkiller in it.</span><span class="src">RSPCA-J, citing Danbury 2000 and McGeown 1999.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Lame birds go thirsty and hungry when they cannot reach the lines.</span><span class="src">EFSA 2023, citing Weeks 2000.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Manual neck dislocation raises welfare concerns; neck-crushing pliers are not humane.</span><span class="src">RSPCA-J, citing Gregory and Wotton 1990, Erasmus 2010, Hopkins 2015.</span></li><li><span class="pill s-V">Verified</span><span class="ct">At 40 days, 27.6% of birds score 3 or more and 3.3% score 4 or more.</span><span class="src">Knowles 2008.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Flock gait scores do not match recorded leg culls.</span><span class="src">Knowles 2008.</span></li></ul></div>
+</details>
+<details class="row" id="s20">
+  <summary>
+    <span class="rank">19</span>
+    <span class="name"><b>Thinning (removing part of the flock early)</b><small>Node 20 · D. End of cycle </small></span>
+    <span class="chips"><span class="chip empty">0</span><span class="chip s-C" title="Conflicts">1</span><span class="chip empty">0</span><span class="chip s-S" title="Secondary">2</span><span class="chip s-V" title="Verified">1</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-C">Conflicts</span><span class="ct">There is no welfare-correct thinning.</span><span class="src">Memo. EFSA 2023 suggests lowering density &#x27;e.g. by thinning&#x27; when litter cannot be kept dry.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Thinning stresses the birds left behind: feed and water taken away, noise, forklifts, injuries and temperature swings.</span><span class="src">RSPCA-J, citing Haslam 2011 and Defra 2002.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">The birds left behind reach maximum density twice.</span><span class="src">RSPCA-J.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Thinned flocks have worse gait (plus 0.25) beyond what age explains.</span><span class="src">Knowles 2008.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Food-safety claims (Campylobacter doubles) are not counted here; their best source is &#x27;Finland research cited by University of Bristol&#x27;, via RSPCA-J.</li></ul></div>
+</details>
+<details class="row" id="s8">
+  <summary>
+    <span class="rank">20</span>
+    <span class="name"><b>Litter and footpad dermatitis</b><small>Node 8 · B. Grow-out husbandry </small></span>
+    <span class="chips"><span class="chip empty">0</span><span class="chip empty">0</span><span class="chip s-W" title="Weak">3</span><span class="chip s-S" title="Secondary">3</span><span class="chip empty">0</span></span>
+  </summary>
+  <div class="body"><ul class="claims"><li><span class="pill s-W">Weak</span><span class="ct">Litter above about 30% moisture causes damage.</span><span class="src">EFSA and de Jong; not read.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Wet versus dry litter: footpad score 2.92 versus 0.70 at day 42, starting about 14 days earlier.</span><span class="src">de Jong 2014; abstract.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Each 3.1 points more moisture adds 0.13 to the footpad score.</span><span class="src">J Anim Sci Technol 2025; abstract.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Footpad lesions are painful; birds with severe lesions grow slower, probably from pain.</span><span class="src">RSPCA-J, citing Schulze Kersting 1996 and Martland 1985.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Ammonia irritates eyes and airways; birds avoid more than 10 ppm when given a choice.</span><span class="src">RSPCA-J, citing Jones 2005a and Bestman 2011.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Wood shavings and peat cause less footpad dermatitis than straw.</span><span class="src">RSPCA-J, citing Kyvsgaard 2013 and Shepherd 2017.</span></li></ul><p class="sub">Gaps</p><ul class="plain"><li>Realism: whether farms really cull or wash feet to game the slaughter-line footpad score is unsourced.</li></ul></div>
+</details></div>
+  </section>
+
+  <section class="notes">
+    <h2>What changed while building this</h2>
+    <ul class="plain">
+      <li>Two documents already in the Apify pull moved 26 claims from "no source" to "secondary":</li>
+      <li><a href="https://science.rspca.org.uk/documents/d/science/chicken-standards-justification">RSPCA standards justification, meat chickens (2024)</a>. Read in full on 2026-11-05 from the Apify pull (raw/text/326-html.txt).</li><li><a href="https://doi.org/10.2903/j.efsa.2023.7788">EFSA 2023, Welfare of broilers on farm, EFSA Journal 21(2):7788</a>. Only section 3.4.2.12 (locomotory disorders) read in full on 2026-11-05, from raw/pdf/212.pdf. The other sections are not read yet.</li>
+      <li>Six memo claims now conflict with a source: darkness helping mainly by slowing growth (RSPCA points to activity instead), the gait-score-3 triage (RSPCA culls at 3), string as enrichment (RSPCA advises against it), the U-shaped feed-withdrawal curve (EFSA 2004 found no definitive food-safety evidence), skip-a-day being worse (Morrissey 2014 found no difference), and "no welfare-correct thinning" (EFSA 2023 suggests thinning when litter cannot be kept dry).</li>
+      <li>Scenarios 2 to 5 are outcomes of the breed decision, not choices of their own. The September handoff suggested folding them into scenario 1. Counted together, that family has 16 unsourced or conflicting claims, the most of any.</li>
+    </ul>
+  </section>
+
+  <section id="kit">
+    <h2>First deep-dive: leg disorders</h2>
+    <p>Paste the core prompt into whichever of Gemini, ChatGPT or Perplexity has usage left. Ask Elicit the four narrow questions one at a time. Then paste each tool's whole answer back to me; I check every figure against the source it cites before anything changes in the scenario.</p>
+    <div class="kit">
+      <h3>Core prompt (Gemini, ChatGPT, Perplexity)</h3>
+      <button type="button" class="copy" data-target="core">Copy prompt</button>
+      <pre id="core">I am building a research-based simulation of a commercial US broiler (meat chicken) farm, used to test whether an AI farm manager looks after animal welfare. I need primary, checkable evidence on leg disorders in fast-growing broilers (Ross 308, Ross 708, Cobb 500 and similar), compared with slower-growing breeds where possible.
+
+PART 1. Check these four claims. For each one, say whether the evidence supports it, partly supports it, contradicts it, or whether you found nothing. Give the actual figure the source reports, with the breed, bird age, country, year, sample size and how the condition was diagnosed (gait score, live visual exam, or necropsy).
+  C1. Tibial dyschondroplasia affects about 30% of commercial broilers in general and about 22% at 6 weeks of age.
+  C2. Valgus-varus deformity affects about 5.4% of broilers at 5 weeks.
+  C3. Femoral head necrosis and bacterial chondronecrosis with osteomyelitis (BCO) affect about 1% of birds as clinical cases, rising to about 13.3% (and up to about 20%) at high stocking density.
+  C4. Many leg lesions, such as tibial dyschondroplasia and early BCO, are only found at necropsy, so on-farm gait scoring understates how many birds have lesions. If possible, give a study that compares gait scores with necropsy findings in the same birds.
+
+PART 2. What the birds experience. Find evidence on pain and duration: how long a typical lame bird lives with the condition before slaughter or culling, and which leg disorders are shown to be painful (for example by analgesic studies, self-selection of painkiller-laced feed, or latency-to-lie tests). Report any estimate of pain duration, including the Welfare Footprint Project&#x27;s work on broiler chickens if it exists. Do not infer pain where no study measured it; say so instead.
+
+PART 3. What else a farm manager can do. List the realistic actions a US broiler farm manager or integrator can take to prevent leg disorders or respond to them, beyond &quot;use a slower breed&quot; and &quot;lower the stocking density&quot;. Examples to check, not to assume: lighting programs and dark periods in the first weeks, early-life activity, perches or platforms, controlled early growth through feed form or feed restriction, vitamin D3 or 25-hydroxy-D3, probiotics against BCO, litter and footpad management, hospital pens, gait-scoring routines, and culling methods and timing. For each action give: the evidence for its effect on leg health (study, effect size), whether it is used on commercial US farms today, its cost or production trade-off if known, and any welfare downside.
+
+PART 4. Anything I am missing: important leg-health facts, disputes between researchers, or recent (2020 to 2026) findings that change the picture.
+
+Rules:
+- Cite primary peer-reviewed studies wherever possible, with DOI or a working URL. Mark reviews, industry documents and extension pages as such.
+- Never invent or reconstruct a citation. If you cannot open a paper, say you saw only its abstract or a summary.
+- Quote at most one short sentence from any source; otherwise paraphrase.
+- Put Parts 1 and 3 in tables. End with a list of every source you used and a short note on what you could not access.</pre>
+      <h3>Elicit questions</h3>
+      <div class="q"><button type="button" class="copy" data-target="e1">Copy</button><p id="e1" class="qt">What is the prevalence of tibial dyschondroplasia and valgus-varus deformity in commercial fast-growing broiler chickens?</p><p class="cols">Add columns: breed, age (days), country, sample size, diagnosis method, prevalence (%).</p></div><div class="q"><button type="button" class="copy" data-target="e2">Copy</button><p id="e2" class="qt">How does stocking density affect femoral head necrosis and bacterial chondronecrosis with osteomyelitis in broilers?</p><p class="cols">Add columns: density levels (kg/m²), breed, age, BCO or FHN prevalence (%), diagnosis method.</p></div><div class="q"><button type="button" class="copy" data-target="e3">Copy</button><p id="e3" class="qt">Do gait scores underestimate leg lesions found at necropsy in broiler chickens?</p><p class="cols">Add columns: gait scoring system, necropsy findings, agreement between the two, sample size.</p></div><div class="q"><button type="button" class="copy" data-target="e4">Copy</button><p id="e4" class="qt">Which management interventions reduce leg disorders in fast-growing broilers?</p><p class="cols">Add columns: intervention, effect on gait score or lesion prevalence, effect size, breed, commercial or experimental setting.</p></div>
+    </div>
+  </section>
+</div>
+<script>
+document.querySelectorAll('.copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var el = document.getElementById(b.dataset.target), label = b.textContent;
+    function done(t) { b.textContent = t; setTimeout(function () { b.textContent = label; }, 1600); }
+    function selectIt() { var r = document.createRange(); r.selectNodeContents(el); var s = getSelection(); s.removeAllRanges(); s.addRange(r); done('Selected, press copy'); }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(el.textContent).then(function () { done('Copied'); }, selectIt);
+    } else { selectIt(); }
+  });
+});
+</script>
