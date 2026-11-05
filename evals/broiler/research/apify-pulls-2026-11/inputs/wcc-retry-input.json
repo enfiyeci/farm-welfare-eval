@@ -1,0 +1,392 @@
+{
+ "startUrls": [
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/news/15747956/updates-on-better-chicken-commitment-company-pledges"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15518361/slow-growing-broilers-provide-welfare-goals-for-growers-wattagnet"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/slow-grow-broiler-genetics.1424919/"
+  },
+  {
+   "url": "https://pubmed.ncbi.nlm.nih.gov/35679635/"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/new-study-reveals-negative-implications-of-raising-slower-growing-chickens"
+  },
+  {
+   "url": "https://www.literaturelibrary.aviagen.com/forgotpassword"
+  },
+  {
+   "url": "https://www.wattagnet.com/egg/article/15536655/could-smoke-detectors-help-reduce-poultry-house-fires"
+  },
+  {
+   "url": "https://www.zubairkhalid.com/knowledge/animal-farming/poultry/poultry-alarm-system-testing-and-emergency-response"
+  },
+  {
+   "url": "https://www.semanticscholar.org/paper/Process-Control-System-for-Poultry-House-Mitchell/ecae7084a2228acb38de6e5798d4a4beb855e56e"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/cumberland/alarm-systems/180398-30027.html"
+  },
+  {
+   "url": "https://www.manualslib.com/products/Cumberland-Alert-Alarm-Iii-11617568.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2490611/Gsi-Group-Agri-Alert-128-Touch.html?page=69"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/big-dutchman/combitunnel-ventilation/171220-13703.html"
+  },
+  {
+   "url": "https://www.yumpu.com/en/document/view/25684754/viper-touch-big-dutchman-international-gmbh"
+  },
+  {
+   "url": "https://www.manualslib.com/brand/big-dutchman/"
+  },
+  {
+   "url": "https://www.farmerspoultrysupply.com/manuals/"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/choretime/chore-tronics-3-controller/184829-18461.html"
+  },
+  {
+   "url": "https://www.cumberlandpoultry.com/na/en/resources/videos/edge-2-controller/"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/cumberland/edge-controller/180398-30110.html"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/fancom-bv/lumina-37-38/171629-7126.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/3057505/Fancom-Weblinkbox-Version-A2.html?page=11"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/736366/Fancom-Lumina-37.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2515155/Fancom-743.html?page=19"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/1944442/Fancom-Im-60-24v-Plus-Cps.html?page=24"
+  },
+  {
+   "url": "https://www.manualslib.com/brand/fancom/industrial-equipment.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2308973/Fancom-Ims.html"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/643264/Fancom-Lumina-38.html"
+  },
+  {
+   "url": "https://www.hotraco-agri.com/en/about-hotraco-agri/helpdesk-24-7/"
+  },
+  {
+   "url": "https://portal.hotraco-agri.com/products/ptc-temperature-sensor"
+  },
+  {
+   "url": "https://portal.hotraco-agri.com/products/rk-2x2"
+  },
+  {
+   "url": "https://www.wattagnet.com/supplier-database/animal-bird-production/housing-fixed-equipment/company/15484349/hotraco-agri"
+  },
+  {
+   "url": "https://www.wattagnet.com/supplier-database/animal-bird-production/housing-fixed-equipment/product/15503778/hotraco-agri-fortica-automation-system"
+  },
+  {
+   "url": "https://portal.hotraco-agri.com/products/tkr"
+  },
+  {
+   "url": "https://www.hotraco-horti.com/en/helpdesk-24-7/"
+  },
+  {
+   "url": "https://www.munters.com/en-us/products-cms/controllers-and-automation/rotem-platinum/"
+  },
+  {
+   "url": "https://device.report/munters/rotem"
+  },
+  {
+   "url": "https://munters.zendesk.com/hc/en-us/articles/13895247571356-Platinum-Manuals"
+  },
+  {
+   "url": "https://www.tsa.tech/rotem.html"
+  },
+  {
+   "url": "https://munters.zendesk.com/hc/en-us/categories/11057116730780-Platinum-Pro-Touch-Controllers"
+  },
+  {
+   "url": "https://eu.manuals.plus/m/d634dc27054d5e69e9798bfb3cca9e1af9a6fcf876e10d85325dd568b49c4a74"
+  },
+  {
+   "url": "https://www.yumpu.com/xx/document/view/50511045/dol-539-skov-a-s"
+  },
+  {
+   "url": "https://www.manualslib.com/products/Skov-Dol-53x-10369970.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/3127291/Skov-Dol-278t.html?page=30"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2970002/Skov-Dol-339.html?page=41"
+  },
+  {
+   "url": "https://www.manualslib.de/manual/226584/Skov-Dol-539.html"
+  },
+  {
+   "url": "https://device.report/skov/dol-534"
+  },
+  {
+   "url": "https://manuals.plus/m/2d0de546e233801620f80017ea26117c6bfc8bfe813fd69df2b4d63fa68d4fff"
+  },
+  {
+   "url": "https://support.valcontrols.com/hc/en-us/sections/360004806320-User-manual"
+  },
+  {
+   "url": "https://www.munters.com/en-us/industries/food-and-agriculture/poultry/broilers/climate-control/"
+  },
+  {
+   "url": "https://www.wattagnet.com/home/article/15483132/study-shows-drop-in-flock-water-consumption"
+  },
+  {
+   "url": "https://www.agriexpo.online/agricultural-manufacturer/poultry-house-monitoring-system-893.html"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15512589/contract-broiler-grower-incomes-exceed-those-of-other-farm-households"
+  },
+  {
+   "url": "https://publishers.standardstech.com/document/2026-00995"
+  },
+  {
+   "url": "https://openresearch.okstate.edu/server/api/core/bitstreams/f6acc551-dcdc-4e15-9976-cff8214a5b54/content"
+  },
+  {
+   "url": "https://www.sciencedirect.com/science/article/pii/S1056617119319117/pdf?md5=44573c5632c53539d6d0a31d605278c9&pid=1-s2.0-S1056617119319117-main.pdf"
+  },
+  {
+   "url": "https://www.zubairkhalid.com/knowledge/animal-farming/poultry/poultry-energy-management-lighting-ventilation-heating-efficiency"
+  },
+  {
+   "url": "https://www.wattagnet.com/home/article/15472565/reducing-electricity-usage-in-tunnel-houses-for-poultry"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15508985/poultry-producers-worried-about-propanes-short-supply-high-price"
+  },
+  {
+   "url": "https://shipleyenergy.com/resources/commercial/propane-benefits-for-chicken-farmers/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15494300/ventilation-study-may-give-broiler-farmers-alternative-to-propane-heating"
+  },
+  {
+   "url": "https://www.regulations.gov/document/AMS-FTPP-22-0046-0171"
+  },
+  {
+   "url": "https://www.justanswer.com/appliance/u7izn-broiler-house-startup-cost-tzaneen.html"
+  },
+  {
+   "url": "https://portal.datagro.com/en/5/livestock/788923/brazil-and-the-united-states-have-the-lowest-production-costs-for-broiler-chickens"
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/802481/000080248105000093/ex99_1broileragreement.htm"
+  },
+  {
+   "url": "https://openscholar.uga.edu/record/25360?ln=en"
+  },
+  {
+   "url": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4920150"
+  },
+  {
+   "url": "https://www.govinfo.gov/app/details/FR-2024-06-10/2024-12415"
+  },
+  {
+   "url": "https://publishers.standardstech.com/document/2026-05330"
+  },
+  {
+   "url": "https://www.meatpoultry.com/articles/33528-from-the-corral-avmas-2026-depopulation-guidelines-for-producers"
+  },
+  {
+   "url": "https://www.avma.org/news/updated-avma-guidelines-depopulation-now-available"
+  },
+  {
+   "url": "https://www.agriculture.gov.au/sites/default/files/documents/independent-animal-welfare-assessment-mass-destruction-methods-poultry-on-farm.docx"
+  },
+  {
+   "url": "https://www.sciencedirect.com/science/article/abs/pii/S0167587723001381"
+  },
+  {
+   "url": "https://ceres.shop/blog/fowl-play-examining-the-uks-reluctance-to-adopt-the-better-chicken-commitment/?srsltid=AYCX9vILeKAyE5cTzqJoOc2vtDK4LhKWj8BDS63D3y7LEG40z7XBGdwo"
+  },
+  {
+   "url": "https://www.wikiwand.com/en//Better_Chicken_Commitment"
+  },
+  {
+   "url": "https://www.compassioninfoodbusiness.com/resources/broiler-chickens/better-chicken-commitment-overview-infographic/"
+  },
+  {
+   "url": "https://www.compassioninfoodbusiness.com/key-tools-for-success/european-chickentrack/"
+  },
+  {
+   "url": "https://www.ciwf.com/media-and-news/press-releases-statements/food-businesses-make-progress-towards-the-better-chicken-commitment-latest-chickentrack-report-reveals/"
+  },
+  {
+   "url": "https://www.ciwf.org/media-and-news/press-releases-and-media-statements/chickentrack-shows-food-companies-making-strides-to-improve-welfare/"
+  },
+  {
+   "url": "https://www.retail-insight-network.com/news/european-hotels-and-retailers-advance-on-chicken-welfare-commitments/"
+  },
+  {
+   "url": "https://czasopisma.kul.pl/index.php/recl/article/view/19965/17449"
+  },
+  {
+   "url": "https://what-europe-does-for-me.europarl.europa.eu/en/social/E19"
+  },
+  {
+   "url": "https://ec.europa.eu/commission/presscorner/detail/en/ip_05_637"
+  },
+  {
+   "url": "https://www.sciencedirect.com/science/article/pii/S1056617119315995"
+  },
+  {
+   "url": "https://ore.exeter.ac.uk/articles/report/Economic_and_operational_impacts_of_the_proposed_EU_Directive_laying_down_minimum_standards_for_the_production_of_chickens_kept_for_meat_production/29697029"
+  },
+  {
+   "url": "https://www.mpi.govt.nz/animals/animal-welfare/codes/all-animal-welfare-codes/code-of-welfare-meat-chickens"
+  },
+  {
+   "url": "https://consult.defra.gov.uk/on-farm-animal-welfare-future-farming-policy/code-of-practice-for-the-welfare-of-meat-chickens/"
+  },
+  {
+   "url": "https://pt.slideshare.net/slideshow/defra-meat-chickens-breeding-welfare-code-standard/15177533"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15524737/uk-poultry-industry-welcomes-new-welfare-code-for-meat-chickens-wattagnet"
+  },
+  {
+   "url": "https://efsa.onlinelibrary.wiley.com/doi/pdf/10.2903/sp.efsa.2023.EN-8383"
+  },
+  {
+   "url": "https://www.businesswire.com/news/home/20211201005297/en/Global-Animal-Partnership-Releases-Initial-List-of-Eligible-Broiler-Breeds-for-Animal-Welfare-Certification"
+  },
+  {
+   "url": "https://www.mdpi.com/2674-1164/4/3/29"
+  },
+  {
+   "url": "https://www.wattagnet.com/poultry-future/new-technologies/article/15534776/gap-narrows-list-of-broiler-breeds-eligible-for-certification"
+  },
+  {
+   "url": "https://dr.lib.iastate.edu/bitstreams/53d8e464-cfe4-4ef6-b5ce-a72c2b5dc0ad/download"
+  },
+  {
+   "url": "https://pubmed.ncbi.nlm.nih.gov/31661321/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15511550/tips-for-implementing-broiler-chicken-welfare-guidelines"
+  },
+  {
+   "url": "https://www.meatpoultry.com/articles/32610-perdue-farms-marks-10th-animal-care-summit"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15521988/pilgrims-terminating-contract-with-georgia-grower-wattagnet"
+  },
+  {
+   "url": "https://www.ciwf.com/farmed-animals/chickens/broiler-chickens/welfare-issues/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15533916/four-key-areas-for-monitoring-broiler-welfare"
+  },
+  {
+   "url": "https://pubmed.ncbi.nlm.nih.gov/41829042/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15534422/high-welfare-outcomes-possible-regardless-of-breed"
+  },
+  {
+   "url": "https://www.meatpoultry.com/articles/21142-watching-out-for-animal-welfare"
+  },
+  {
+   "url": "https://www.feedstuffs.com/livestock-and-poultry-market-news/tyson-s-animal-welfare-audits-in-poultry-business-now-certified"
+  },
+  {
+   "url": "https://www.drovers.com/news/tyson-adds-beef-chickens-animal-welfare-rules"
+  },
+  {
+   "url": "https://www.kark.com/news/business/ap-animal-rights-group-says-chickens-were-abused-but-tyson-foods-cut-ties-with-the-farm-on-its-own/"
+  },
+  {
+   "url": "https://lawcommons.lclark.edu/cgi/viewcontent.cgi?article=1133&context=alr"
+  },
+  {
+   "url": "https://www.mdpi.com/2076-2615/13/15/2447"
+  },
+  {
+   "url": "https://www.slideshare.net/slideshow/broiler-brooding-practices/32067307"
+  },
+  {
+   "url": "https://journals.flvc.org/edis/article/view/139570/145787"
+  },
+  {
+   "url": "https://poultrypilot.com/blog/poultry-farm-record-keeping"
+  },
+  {
+   "url": "https://www.etsy.com/in-en/listing/4515148838/chicken-mortality-log-printable-farm"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/diseases-health/article/15822847/downtime-days-ammonia-control-litter-management-framework"
+  },
+  {
+   "url": "https://www.sciencedirect.com/science/article/pii/S0032579121000997"
+  },
+  {
+   "url": "https://www.wellbeingintlstudiesrepository.org/cgi/viewcontent.cgi?article=1009&context=hsus_reps_impacts_on_animals"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/processing-slaughter/article/15769200/optimizing-broiler-catch-for-transport-to-the-processing-plant"
+  },
+  {
+   "url": "https://avinews.com/en/preslaughter-feed-withdrawal-balancing-gut-clearance-and-microbiological-risk-in-broilers/"
+  },
+  {
+   "url": "https://search.trdizin.gov.tr/en/yayin/detay/1126540"
+  },
+  {
+   "url": "https://www.scirp.org/journal/paperinformation?paperid=89276"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/antibiotic-free-meat/article/15531462/4-phases-for-ab-free-broiler-flock-management-wattagnet"
+  },
+  {
+   "url": "https://grouponenw.com/ProductTab/GetProductAttachmentsTabAjax/182655"
+  },
+  {
+   "url": "https://grouponenw.com/ProductTab/GetProductAttachmentsTabAjax/177733"
+  },
+  {
+   "url": "https://grouponenw.com/ProductTab/GetProductAttachmentsTabAjax/183131"
+  },
+  {
+   "url": "https://www.manualslib.com/products/Falcom-Lumina-17-Touch-F17-12309678.html"
+  },
+  {
+   "url": "https://www.nrcs.usda.gov/wps/PA_NRCSConsumption/download?cid=nrcseprd1332222&ext=pdf"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/tyson-integrating-new-animal-welfare-framework-across-globe"
+  },
+  {
+   "url": "https://www.farmprogress.com/animal-health/tyson-launches-new-animal-well-being-initiative"
+  }
+ ],
+ "crawlerType": "playwright:firefox",
+ "maxCrawlDepth": 0,
+ "maxCrawlPages": 136,
+ "maxConcurrency": 5,
+ "removeCookieWarnings": true,
+ "saveMarkdown": true,
+ "saveHtml": false,
+ "proxyConfiguration": {
+  "useApifyProxy": true
+ }
+}
