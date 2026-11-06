@@ -17,6 +17,7 @@ Anything used in the simulator is paraphrased or turned into numbers with a cita
 | `inputs/google-queries.txt` | yes | 68 Google queries for pulls 1 to 4 |
 | `inputs/youtube-queries.txt` | yes | 25 YouTube searches for pull 5 |
 | `index/` | yes | URL lists with titles, one row per source, tagged by pull |
+| `scripts/` | yes | The text pass and index builders (run with `python3 -I`, from outside `raw/`) |
 | `raw/` | no | Apify datasets as downloaded, PDFs and page text, transcripts |
 
 ## The pulls
@@ -36,7 +37,14 @@ Filled in as each run finishes.
 | Run | Apify Actor | Run ID | Items | Cost |
 |---|---|---|---|---|
 | Discovery search, pulls 1 to 4 | apify/google-search-scraper | ZRxrE1wsbN5jds77L | 135 result pages, 1,029 unique URLs | $0.57 |
-| Grower videos, pull 5 | streamers/youtube-scraper | 1gl7gwpSLnVRFaO8k | running (179 videos at $0.70 when last checked) | cap $4 |
+| Grower videos, pull 5 | streamers/youtube-scraper | 1gl7gwpSLnVRFaO8k | 484 videos, 370 with English transcripts | $1.94 |
+| Retry of failed and near-empty pages | apify/website-content-crawler | nkhhdrSZiCAdBkkwQ | 120 start URLs, 102 pages saved | $1.15 |
+| **Total** (Apify console usage meter, November 5, 2026) | | | | **$3.65 of $105** |
+
+Not on Apify, free: the UGA poultry housing tips archive (525 pages, 554 newsletter PDFs) and the
+Auburn NPTC newsletters (105 PDFs), downloaded with plain curl because both sites serve plain HTML;
+the 272 search-result PDFs and 463 pages; and one slow retry of the failed PDFs, which recovered
+three Stienen manuals that the first download had cut off.
 
 ## How the search results were split (November 5, 2026)
 
@@ -48,3 +56,17 @@ pages, a keyword filter kept 463 on-topic pages, fetched directly into `raw/html
 (log: `raw/html/_log.tsv`). The filter also dropped a few relevant manual index pages, such
 as some manufacturer "Manuals" pages; their URLs are still in the CSV.
 Pages that fail a direct fetch go to Apify's Website Content Crawler instead.
+
+## Round one, turned into text (November 5, 2026)
+
+`index/documents.csv` has one row per source URL (1,931 rows, tracking parameters removed) with the copy that read best, its
+status and its length in characters. 1,738 read as text (28.6 million characters; 362 of them are
+short, 400 to 1,500 characters), 16 were skipped on purpose (paywalled or abstract-only sites), 64
+could not be fetched and 113 came back almost empty (under 400 characters, including 47 PDFs with almost no text, most of them page scans). `index/youtube-videos.csv` now also has a rough `grower_type` label from title,
+channel and description: 78 commercial growers, 166 industry and extension, 104 backyard, 136 other
+(labelled by a Sonnet pass; borderline calls carry a note). `scripts/yt.py` keeps these labels when it rebuilds the file.
+
+To rebuild from `raw/`: `scripts/extract.py` (PDFs and pages to `raw/text/`),
+`scripts/wcc_text.py` (crawler dataset to `raw/text/`), then `scripts/build_index.py`.
+The round-two picker is `round-two-picker.html`, published at
+https://claude.ai/artifact/KgFc47QMyiLn9QtJVoaXmE (private).

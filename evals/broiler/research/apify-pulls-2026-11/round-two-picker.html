@@ -1,9 +1,4 @@
-<!doctype html>
-<!-- Eval: broiler. Written 2026-11-05. Round-two Apify picker; round-one numbers true when written. -->
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Eval: broiler. Written 2026-11-05. Round-two Apify picker; round-one numbers true as of 2026-11-05 16:00 Pacific. -->
 <title>Apify Round Two</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,12 +14,12 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#141618; --panel:#1F2225; --ink:#ECEDEA; --muted:#A3A8AD; --rule:#34383C;
   --accent:#FF7B5E; --accent-bg:#3A1E18; --ok:#86C993; --ok-bg:#1B2E1F; --warn:#E3B65C; --warn-bg:#33290F;
-  --bar:#C9CCC8; --bar-soft:#4A4F54;
+  --bar:#C9CCC8; --bar-soft:#4A4F54; color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --paper:#141618; --panel:#1F2225; --ink:#ECEDEA; --muted:#A3A8AD; --rule:#34383C;
   --accent:#FF7B5E; --accent-bg:#3A1E18; --ok:#86C993; --ok-bg:#1B2E1F; --warn:#E3B65C; --warn-bg:#33290F;
-  --bar:#C9CCC8; --bar-soft:#4A4F54;
+  --bar:#C9CCC8; --bar-soft:#4A4F54; color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--paper);color:var(--ink)}
@@ -69,6 +64,15 @@ td.num,th.num{text-align:right;font-family:var(--mono);white-space:nowrap;paddin
 td:first-child,th:first-child{padding-left:10px}
 .tbl-scroll{overflow-x:auto}
 
+.vol-cell{white-space:nowrap}
+.vol{display:inline-block;height:9px;background:var(--bar);vertical-align:0;margin-right:10px}
+.mono{font-family:var(--mono);font-size:14px}
+tr.tot td{border-top:2px solid var(--ink);border-bottom:0}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--unit)*1.5) calc(var(--unit)*5);margin-top:calc(var(--unit)*3);max-width:none}
+.notes p{margin:0}
+.notes .small{grid-column:1/-1}
+@media (max-width:820px){.notes{grid-template-columns:1fr} .tbl-scroll table{min-width:760px}}
+
 /* options */
 .opt{display:grid;grid-template-columns:56px minmax(0,1fr) 230px;gap:calc(var(--unit)*3);padding:calc(var(--unit)*2.5) 0;border-bottom:1px solid var(--rule)}
 .opt:first-of-type{border-top:0}
@@ -108,15 +112,13 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   table{font-size:14.5px}
 }
 </style>
-</head>
-<body>
 <div class="wrap">
 
 <div class="meta">FarmBench · broiler world · Apify free credit · written November 5, 2026</div>
 <h1>Apify round two</h1>
 
 <div class="hero">
-  <p class="lede">Round one is in: <strong>__R1_HEADLINE__</strong>, for <strong>__R1_COST__</strong> of the $105. About __LEFT__ is left and it expires on November 12. Pick what to pull next; the recommended set is preselected and costs about <strong><span class="js-total">$0</span></strong>.</p>
+  <p class="lede">Round one is in: <strong>2,108 sources and video transcripts read as text</strong>, for <strong>$3.65</strong> of the $105. About $101 is left and it expires on November 12. Pick what to pull next; the recommended set is preselected and costs about <strong><span class="js-total">$0</span></strong>.</p>
   <div class="side">
     <h4>How it works</h4>
     <dl>
@@ -133,7 +135,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   <div class="left" id="m-left">left</div>
 </div>
 <div class="meter-key">
-  <span>Spent so far <b id="k-spent">__SPENT__</b></span>
+  <span>Spent so far <b id="k-spent">$3.65</b></span>
   <span>Your round-two picks <b class="js-total">$0</b></span>
   <span>Left after that <b id="k-left">$0</b></span>
   <span>Credit <b>$105.00</b>, period ends November 12, 2026 (UTC)</span>
@@ -142,9 +144,25 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <section>
   <h2>What round one got</h2>
   <div class="tbl-scroll">
-  __R1_TABLE__
+  <table>
+  <thead><tr><th>Pull</th><th>What</th><th>Came in</th><th class="num">Read as text</th><th class="num">Unread</th><th>Text, characters</th></tr></thead><tbody>
+  <tr><td class="num">1</td><td>Breed handbooks and performance targets</td><td>159 sources</td><td class="num">155 <span class="muted">(15 short)</span></td><td class="num">3</td><td class="vol-cell"><span class="vol" style="width:98px"></span><span class="mono">5.4 M</span></td></tr>
+  <tr><td class="num">2</td><td>Controller manuals and alarm guidance, from search</td><td>194 sources</td><td class="num">165 <span class="muted">(30 short)</span></td><td class="num">26</td><td class="vol-cell"><span class="vol" style="width:111px"></span><span class="mono">6.1 M</span></td></tr>
+  <tr><td class="num">2</td><td>UGA poultry housing tips archive, plain download</td><td>1,066: 525 tip pages and their newsletter PDFs</td><td class="num">966 <span class="muted">(304 short)</span></td><td class="num">100</td><td class="vol-cell"><span class="vol" style="width:96px"></span><span class="mono">5.3 M</span></td></tr>
+  <tr><td class="num">2</td><td>Auburn poultry engineering newsletters, plain download</td><td>105 PDFs</td><td class="num">105</td><td class="num">0</td><td class="vol-cell"><span class="vol" style="width:31px"></span><span class="mono">1.7 M</span></td></tr>
+  <tr><td class="num">3</td><td>Grow-out economics</td><td>127 sources</td><td class="num">107 <span class="muted">(5 short)</span></td><td class="num">17</td><td class="vol-cell"><span class="vol" style="width:65px"></span><span class="mono">3.6 M</span></td></tr>
+  <tr><td class="num">4</td><td>Company and standards documents</td><td>280 sources</td><td class="num">240 <span class="muted">(8 short)</span></td><td class="num">31</td><td class="vol-cell"><span class="vol" style="width:119px"></span><span class="mono">6.6 M</span></td></tr>
+  <tr><td class="num">5</td><td>Grower videos on YouTube</td><td>484 videos</td><td class="num">370 transcripts</td><td class="num">114</td><td class="vol-cell"><span class="vol" style="width:94px"></span><span class="mono">5.1 M</span></td></tr>
+  <tr class="tot"><td></td><td><b>All of round one</b></td><td>2,415 sources and videos</td><td class="num"><b>2,108</b></td><td class="num"><b>291</b></td><td class="vol-cell"><span class="mono"><b>33.8 M</b></span></td></tr>
+  </tbody></table>
   </div>
-  __R1_NOTES__
+  <div class="notes">
+    <p><b>Short</b> means 400 to 1,500 characters of text: mostly product pages and one-paragraph tips, kept because the numbers in them still count. 16 pages were skipped on purpose (ScienceDirect, PubMed, MDPI, SSRN and similar abstract-only or paywalled sites); the research memos already cover that science.</p>
+    <p><b>64 web sources could not be fetched</b> after every free retry. The main ones: Compassion in World Farming PDFs (rate-limited), Munters' own manual downloads (refused), UGA OpenScholar and AgEcon Search bulletins (bot check), two USDA APHIS PDFs (refused), the Australian poultry standards (timeout) and one Hubbard file that no longer exists. Option K below is one more try at them. Another <b>113 came back almost empty</b> (under 400 characters): 59 UGA tip pages that only link to their PDF, 47 PDFs with almost no text (most of them page scans), and a few script-only pages. Option L reads the scanned PDFs.</p>
+    <p><b>Controller coverage is uneven.</b> Chore-Time, Cumberland, Stienen and Agri-Alert are well covered, including three full Stienen manuals. Munters has 4 readable sources of 12, Fancom and Hotraco are short product pages, and Valco has one page. Option J targets that.</p>
+    <p><b>The videos</b>, sorted roughly by title and channel: 78 commercial broiler growers (51 with transcripts), 166 industry and extension channels, 104 backyard keepers and 136 other. The breed pull also got both Ross 308 parent-stock performance objectives (2021, standard and European); the research register listed that as blocked.</p>
+    <p class="muted small">Spent: Google search $0.57, YouTube $1.94, Website Content Crawler $1.15. The tips archives and all PDFs were plain downloads, free.</p>
+  </div>
 </section>
 
 <section>
@@ -285,7 +303,68 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 
   <div class="opt-group">Filling the gaps round one left</div>
 
-  __GAP_OPTIONS__
+  <div class="opt" data-id="I" data-name="Transcripts for the 114 videos without them">
+    <div class="id">I</div>
+    <div>
+      <h3>Transcripts for the 114 videos without them <span class="tag t-ok">recommended</span></h3>
+      <p class="what">Round one got English subtitles for 370 of 484 videos. A transcript Actor can fetch the rest, including 27 of the 78 commercial-grower videos.</p>
+      <dl>
+        <dt>Feeds</dt><dd>More grower voice for the daily routine, alarms and catch day.</dd>
+        <dt>Actor</dt><dd>johnvc/YoutubeTranscripts, about $0.31 for all 114.</dd>
+      </dl>
+    </div>
+    <div class="choose">
+      <label><input type="radio" name="I" data-cost="0.5" data-label="yes, cap $0.50" checked><span>Yes, cap $0.50<span class="rec">rec</span></span></label>
+      <label><input type="radio" name="I" data-cost="0" data-label="no"><span>No</span></label>
+    </div>
+  </div>
+
+  <div class="opt" data-id="J" data-name="Controller manual libraries, second pass">
+    <div class="id">J</div>
+    <div>
+      <h3>Controller manual libraries, second pass <span class="tag t-ok">recommended</span></h3>
+      <p class="what">Crawl the manual and support libraries of the thin makers (Munters and Rotem, Fancom, Hotraco, Valco), saving the PDFs they link. Round one mostly found their product pages, not their manuals.</p>
+      <dl>
+        <dt>Feeds</dt><dd>Alarm settings, delays and nuisance alarms across more than the four well-covered brands, so the simulator's controller isn't one maker's.</dd>
+        <dt>Actor</dt><dd>Website Content Crawler with file saving, about 150 pages.</dd>
+      </dl>
+    </div>
+    <div class="choose">
+      <label><input type="radio" name="J" data-cost="2" data-label="yes, cap $2" checked><span>Yes, cap $2<span class="rec">rec</span></span></label>
+      <label><input type="radio" name="J" data-cost="0" data-label="no"><span>No</span></label>
+    </div>
+  </div>
+
+  <div class="opt" data-id="K" data-name="One more try at the 64 unfetched sources">
+    <div class="id">K</div>
+    <div>
+      <h3>One more try at the 64 unfetched sources <span class="tag t-ok">recommended</span></h3>
+      <p class="what">Send the 64 sources that refused plain downloads through the crawler's full browser, which gets past most rate limits and bot checks. The Hubbard file is gone and is left out.</p>
+      <dl>
+        <dt>Feeds</dt><dd>Mainly the CIWF ChickenTrack reports and audit checklist, the Munters manuals and the UGA and AgEcon economics bulletins.</dd>
+        <dt>Actor</dt><dd>Website Content Crawler with file saving.</dd>
+      </dl>
+    </div>
+    <div class="choose">
+      <label><input type="radio" name="K" data-cost="1" data-label="yes, cap $1" checked><span>Yes, cap $1<span class="rec">rec</span></span></label>
+      <label><input type="radio" name="K" data-cost="0" data-label="no"><span>No</span></label>
+    </div>
+  </div>
+<div class="opt" data-id="L" data-name="Read the scanned PDFs with OCR">
+    <div class="id">L</div>
+    <div>
+      <h3>Read the scanned PDFs with OCR <span class="tag t-ok">recommended</span> <span class="tag t-plain">no Apify</span></h3>
+      <p class="what">47 downloaded PDFs have almost no text, most of them page scans; 41 are UGA housing newsletters. Run OCR (tesseract, already on the MacBook) over them. Free.</p>
+      <dl>
+        <dt>Feeds</dt><dd>The same alarm and ventilation guidance as the rest of the UGA archive, from the older issues.</dd>
+        <dt>Actor</dt><dd>None, runs on the MacBook.</dd>
+      </dl>
+    </div>
+    <div class="choose">
+      <label><input type="radio" name="L" data-cost="0" data-label="yes (free)" checked><span>Yes, free<span class="rec">rec</span></span></label>
+      <label><input type="radio" name="L" data-cost="0" data-label="no"><span>No</span></label>
+    </div>
+  </div>
   </form>
 </section>
 
@@ -309,7 +388,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 </div>
 
 <script>
-const SPENT = __SPENT_NUM__, CREDIT = 105;
+const SPENT = 3.65, CREDIT = 105;
 const form = document.getElementById('picks');
 const fmt = n => '$' + n.toFixed(2);
 function update(){
@@ -342,5 +421,3 @@ document.getElementById('copy').addEventListener('click', async () => {
 });
 update();
 </script>
-</body>
-</html>
