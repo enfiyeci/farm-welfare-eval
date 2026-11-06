@@ -180,6 +180,7 @@ pre {{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1
       <li>Two documents already in the Apify pull moved 26 claims from "no source" to "secondary":</li>
       {new_src}
       <li>Six memo claims now conflict with a source: darkness helping mainly by slowing growth (RSPCA points to activity instead), the gait-score-3 triage (RSPCA culls at 3), string as enrichment (RSPCA advises against it), the U-shaped feed-withdrawal curve (EFSA 2004 found no definitive food-safety evidence), skip-a-day being worse (Morrissey 2014 found no difference), and "no welfare-correct thinning" (EFSA 2023 suggests thinning when litter cannot be kept dry).</li>
+      <li>Later on 2026-11-05 the rest of EFSA 2023 was read in full, and every status change was checked against its text. It moved 13 more claims: nine to "secondary" and four to "conflicts" (the single density threshold, damage above 30% litter moisture, sitting 70 to 80% of the time, and high-fibre bulk making birds ill). Details are in efsa-2023-full-read/checked-findings.md.</li>
       <li>Scenarios 2 to 5 are outcomes of the breed decision, not choices of their own. The September handoff suggested folding them into scenario 1. Counted together, that family has 16 unsourced or conflicting claims, the most of any.</li>
     </ul>
   </section>

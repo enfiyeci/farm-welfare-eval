@@ -4,7 +4,8 @@ Eval: broiler
 
 One pass per broiler scenario (the 20 candidate nodes in `../README.md`) to source each
 welfare-effect claim and find more levers a farm manager has. Started 2026-11-05 at Arda's
-request. The scenario files themselves are not edited until Arda approves the format.
+request. Arda approved this format on 2026-11-05 ("Yes, format approved"), so a scenario's memo
+and the register may be edited once its `adjudicated.md` exists.
 
 ## What is here
 
@@ -13,6 +14,7 @@ request. The scenario files themselves are not edited until Arda approves the fo
 | `claims.json` | Every welfare-effect claim per scenario with its source status. The single source of truth for the inventory. |
 | `build_inventory.py` | Builds `inventory.html` from `claims.json` and the prompt files. Run `python3 build_inventory.py`. |
 | `inventory.html` | The ranked inventory page Arda reads. |
+| `efsa-2023-full-read/` | The full EFSA 2023 read: raw subagent sweep and the checked findings. |
 | `NN-<scenario>/prompts.md` | The deep-research prompts for one scenario. |
 | `NN-<scenario>/raw/` | Research-tool answers pasted back, unedited. **Unverified; never cite these.** One file per tool run: `YYYY-MM-DD-<tool>.md`. |
 | `NN-<scenario>/verified.md` | Each claim from the raw answers checked against the source it cites (opened and read, or flagged with ⚠️). |
@@ -42,5 +44,5 @@ narrow questions for Elicit.
 Two documents already in `../apify-pulls-2026-11/raw/` (not in git) moved many claims from N to S
 before any prompting:
 - RSPCA standards justification for meat chickens (2024), read in full.
-- EFSA 2023 opinion on broiler welfare on farm; only section 3.4.2.12 read so far. Reading the rest
-  is the next cheapest way to source more claims.
+- EFSA 2023 opinion on broiler welfare on farm, read in full on 2026-11-05 (section 3.4.2.12 by hand,
+  the rest by five subagents with every status change checked). See `efsa-2023-full-read/`.
