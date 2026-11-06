@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-05",
+  "as_of": "2026-11-06",
   "status_key": {
     "N": "No source. The memo states it but names no source, or only says 'task anchor', 'snippet' or 'reviews'.",
     "C": "Conflicts. A source we have read points the other way, or the cited study does.",
@@ -9,7 +9,9 @@
   },
   "new_sources": [
     {"key": "RSPCA-J", "name": "RSPCA standards justification, meat chickens (2024)", "url": "https://science.rspca.org.uk/documents/d/science/chicken-standards-justification", "read": "Read in full on 2026-11-05 from the Apify pull (raw/text/326-html.txt)."},
-    {"key": "EFSA-2023", "name": "EFSA 2023, Welfare of broilers on farm, EFSA Journal 21(2):7788", "url": "https://doi.org/10.2903/j.efsa.2023.7788", "read": "Section 3.4.2.12 read in full on 2026-11-05, from raw/pdf/212.pdf. The rest of the main text and Appendices A to E were read in full the same day by five Sonnet subagents, and every finding that changed a claim's status was checked against the EFSA text (efsa-2023-full-read/checked-findings.md). The reference list was used only for lookups."}
+    {"key": "EFSA-2023", "name": "EFSA 2023, Welfare of broilers on farm, EFSA Journal 21(2):7788", "url": "https://doi.org/10.2903/j.efsa.2023.7788", "read": "Section 3.4.2.12 read in full on 2026-11-05, from raw/pdf/212.pdf. The rest of the main text and Appendices A to E were read in full the same day by five Sonnet subagents, and every finding that changed a claim's status was checked against the EFSA text (efsa-2023-full-read/checked-findings.md). The reference list was used only for lookups."},
+    {"key": "WFP-BROILER-CH2", "name": "Welfare Footprint Project, Quantifying the welfare impacts of lameness in broiler chickens (Schuck-Paim, Hartcher, Wagner and Alonso 2022)", "url": "https://welfarefootprint.org/publications/broilers-ch02.html", "read": "PDF (52 pages) read in full on 2026-11-06 by a subagent; the hour figures used were re-checked in the text. Tables 1 to 3 and most figures are images and were not extracted."},
+    {"key": "RIBER-2021", "name": "Riber et al. 2021, Post-mortem examination of fast-growing broilers with different degrees of identifiable gait defects, Veterinary Record, doi 10.1002/vetr.454", "url": "https://pure.sruc.ac.uk/ws/files/35677844/vetrec_2020_106310.R1_Proof_hi.pdf", "read": "Author proof read in full on 2026-11-06 by a subagent; Table 2 re-checked from the page image."}
   ],
   "scenarios": [
     {"no": 1, "title": "Growth rate and breed choice", "family": "A. Grow-out biology", "kind": "decision", "claims": [
@@ -42,16 +44,20 @@
      "gaps": ["Death is fast, so suffering per bird may be brief. The memo does not weigh this."],
      "leads": []},
     {"no": 4, "title": "Leg disorders (tibial dyschondroplasia, valgus-varus, femoral head necrosis)", "family": "A. Grow-out biology", "kind": "outcome", "claims": [
-      {"s": "N", "t": "Tibial dyschondroplasia affects about 30% of broilers in general and about 22% at 6 weeks.", "src": "No source."},
-      {"s": "N", "t": "Valgus-varus (angled legs) affects about 5.4% at 5 weeks.", "src": "No source."},
-      {"s": "N", "t": "Femoral head necrosis and bacterial chondronecrosis rise from about 1% to 13.3% at high density, up to about 20%.", "src": "'Reviews'; none named."},
-      {"s": "N", "t": "Many lesions are hidden until necropsy, so gait scores understate the lesion load.", "src": "No source. EFSA 2023 section 3.4.2.21 partly supports it: gait and leg pathology are not strongly related (Riber 2021a). It does not mention necropsy."},
-      {"s": "W", "t": "Fast versus slow strains at 6 weeks: valgus scores 0.40/0.38 versus 0.26/0.28; tibial dyschondroplasia 0.06 versus 0.02.", "src": "Shim 2012; abstract."},
+      {"s": "C", "t": "Tibial dyschondroplasia affects about 30% of broilers in general and about 22% at 6 weeks.", "src": "The 22% is Shi 2024's 6-week rate in Chinese yellow-feathered cockerels (X-ray), not a commercial white broiler. Dinev 2012 review (read in full) gives 24 to 28% at necropsy in Ross 308, Cobb 500 and Pureline, first lesions at about 24 days (citing unpublished data). 'About 30%' is only a secondary citation. 04-leg-disorders/verified.md"},
+      {"s": "S", "t": "Valgus-varus (angled legs) affects about 5.4% at 5 weeks.", "src": "Tang 2020 and Chen 2022 (read in full) state 0.4% at 1 week rising to 5.4% at 5 weeks, citing Cruickshank and Sim 1986 (abstract only). Riber 2021 (read in full): 5.0% in Ross 308 at 38 days. Counting mild angles gives much more: valgus 30 to 40% in Leterrier and Nys 1992 (abstract). 04-leg-disorders/verified.md"},
+      {"s": "C", "t": "Femoral head necrosis and bacterial chondronecrosis rise from about 1% to 13.3% at high density, up to about 20%.", "src": "No source for a density rise. 13.3% is the share of BCO lesions culturing E. coli or mixed bacteria (Thorp 1993, via Dinev 2012); 20% traces to a human hip-fracture paper. The ~1% fits McNamee and Smyth 2000 (abstract): 0.75% of male birds placed. 04-leg-disorders/verified.md"},
+      {"s": "V", "t": "Many lesions are hidden until necropsy, so gait scores understate the lesion load.", "src": "Riber 2021 (author proof read in full): 15 of 19 normally walking (GS0) birds had a leg pathology at necropsy, 9 of 19 femoral head necrosis; no difference by gait score (P = 0.23). Fernandes 2012 (read in full) agrees. 04-leg-disorders/verified.md"},
+      {"s": "W", "t": "Fast versus slow strains at 6 weeks: valgus scores 0.40/0.38 versus 0.26/0.28; tibial dyschondroplasia 0.06 versus 0.02.", "src": "Shim 2012; abstract. These are mean lesion scores, not prevalences, and the abstract gives 6 weeks for TD only. Full text is behind a bot check."},
       {"s": "S", "t": "Fast-growing breeds are more prone to leg disorders.", "src": "EFSA 2023 section 3.4.2.12 (Dixon 2020, Rayner 2020); RSPCA-J."},
-      {"s": "S", "t": "Some leg disorders are painful, and lame birds also go thirsty and hungry when they cannot reach feed and water.", "src": "EFSA 2023 section 3.4.2.12, citing Hothersall 2016 and Weeks 2000."},
-      {"s": "S", "t": "Risk factors: genotype, growth rate, body shape, diet, wet litter, high density, low activity, infection.", "src": "EFSA 2023 section 3.4.2.12, citing Bradshaw 2002."}],
-     "gaps": ["Pain duration per lame bird (EFSA gives only 'a few days up to most of the rearing period').", "EFSA 2023 section 3.6 adds that lame birds may stay at the feeder, skip the drinker, dehydrate and sometimes die of it (no primary cited)."],
-     "leads": ["Cobb-hosted Sluis 2022 paper on early activity and leg health (raw/pdf/064.pdf), not read."]},
+      {"s": "S", "t": "Some leg disorders are painful, and lame birds also go thirsty and hungry when they cannot reach feed and water.", "src": "EFSA 2023 section 3.4.2.12, citing Hothersall 2016 and Weeks 2000. Analgesic studies (McGeown 1999, Danbury 2000, Caplen 2013a, Hothersall 2016) hold at abstract level, all in moderately or more lame birds; none tests subclinical TD, valgus-varus or gait score 1 to 2. 04-leg-disorders/verified.md"},
+      {"s": "S", "t": "Risk factors: genotype, growth rate, body shape, diet, wet litter, high density, low activity, infection.", "src": "EFSA 2023 section 3.4.2.12, citing Bradshaw 2002."},
+      {"s": "S", "t": "Lameness pain, modelled: an average fast-growing bird has about 54 hours of Disabling pain from lameness versus about 16 in a slower breed; gait score 3 begins at 10 to 31 days in fast birds; unculled birds that stop eating and drinking take 5 to 25 days to die.", "src": "WFP-BROILER-CH2, read in full. The onset windows are the authors' assumptions; they say no data on lameness progression exist. 04-leg-disorders/verified.md"},
+      {"s": "W", "t": "Clinical BCO: losses of 0.75% of male birds placed; present in 17.3% of lame birds; cases from 14 to 70 days, most around 35; visible to the naked eye in only 40 to 67% of cases.", "src": "McNamee and Smyth 2000; abstract."},
+      {"s": "W", "t": "Higher stocking density worsens gait and footpad and hock burns but did not change tibial dyschondroplasia or hock angulation.", "src": "Sorensen, Su and Kestin 2000; abstract."},
+      {"s": "W", "t": "Lame birds lie 86% of the time versus 76% for sound birds, and eat lying down for almost half their feeding time.", "src": "Weeks 2000; abstract."}],
+      "gaps": ["Measured (not modelled) duration of lameness per bird; the WFP chapter says no progression data exist.", "EFSA 2023 section 3.6 adds that lame birds may stay at the feeder, skip the drinker, dehydrate and sometimes die of it (no primary cited).", "Four sources need Arda at the browser: Shim 2012 (ScienceDirect bot check), Leterrier and Nys 1992 and McNamee and Smyth 2000 (Taylor and Francis), the Animal Biotechnology 2023 leg-disorders review.", "New options to weigh: early feed restriction, dark periods from day 4, prompt culling of gait score 4 and 5 birds, hatchery incubation profile. See 04-leg-disorders/adjudicated.md."],
+      "leads": ["Cobb-hosted Sluis 2022 paper on early activity and leg health (raw/pdf/064.pdf), not read."]},
     {"no": 5, "title": "Breast myopathies (woody breast, white striping)", "family": "A. Grow-out biology", "kind": "outcome", "claims": [
       {"s": "N", "t": "Woody breast hurts or impairs the living bird. This is the welfare claim itself.", "src": "No source; the memo calls it muscle necrosis."},
       {"s": "N", "t": "Severe woody breast rises sharply above about 2.7 kg live weight.", "src": "No source."},

@@ -17,6 +17,7 @@ and the register may be edited once its `adjudicated.md` exists.
 | `efsa-2023-full-read/` | The full EFSA 2023 read: raw subagent sweep and the checked findings. |
 | `NN-<scenario>/prompts.md` | The deep-research prompts for one scenario. |
 | `NN-<scenario>/raw/` | Research-tool answers pasted back, unedited. **Unverified; never cite these.** One file per tool run: `YYYY-MM-DD-<tool>.md`. |
+| `NN-<scenario>/verifier-reports-raw.md` | The checking subagents' unedited reports, with coverage statements. **Unverified; never cite.** |
 | `NN-<scenario>/verified.md` | Each claim from the raw answers checked against the source it cites (opened and read, or flagged with ⚠️). |
 | `NN-<scenario>/adjudicated.md` | What changes in the scenario: sources added, claims fixed or dropped, new options. Cite this layer, not `raw/`. |
 

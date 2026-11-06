@@ -53,9 +53,9 @@ for rank, sc in enumerate(scenarios, 1):
         extra += '<p class="sub">Already downloaded, not read yet</p><ul class="plain">' + "".join(
             f"<li>{esc(g)}</li>" for g in sc["leads"]) + "</ul>"
     kind = '<span class="kind">outcome of breed choice</span>' if sc["kind"] == "outcome" else ""
-    first = ' <span class="now">first deep-dive</span>' if rank == 1 else ""
+    first = ' <span class="now">first deep-dive</span>' if sc["no"] == 4 else ""
     rows.append(f"""
-<details class="row" id="s{sc['no']}"{' open' if rank == 1 else ''}>
+<details class="row" id="s{sc['no']}"{' open' if sc['no'] == 4 else ''}>
   <summary>
     <span class="rank">{rank}</span>
     <span class="name"><b>{esc(sc['title'])}</b>{first}<small>Node {sc['no']} · {esc(sc['family'])} {kind}</small></span>
@@ -181,6 +181,7 @@ pre {{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1
       {new_src}
       <li>Six memo claims now conflict with a source: darkness helping mainly by slowing growth (RSPCA points to activity instead), the gait-score-3 triage (RSPCA culls at 3), string as enrichment (RSPCA advises against it), the U-shaped feed-withdrawal curve (EFSA 2004 found no definitive food-safety evidence), skip-a-day being worse (Morrissey 2014 found no difference), and "no welfare-correct thinning" (EFSA 2023 suggests thinning when litter cannot be kept dry).</li>
       <li>Later on 2026-11-05 the rest of EFSA 2023 was read in full, and every status change was checked against its text. It moved 13 more claims: nine to "secondary" and four to "conflicts" (the single density threshold, damage above 30% litter moisture, sitting 70 to 80% of the time, and high-fibre bulk making birds ill). Details are in efsa-2023-full-read/checked-findings.md.</li>
+      <li>On 2026-11-06 the Gemini Deep Research report on leg disorders was checked claim by claim (twelve subagents, every status change re-checked against raw source text). Scenario 4 lost all four of its unsourced claims: two now conflict, one is secondary and one is verified, and four new claims were added. See 04-leg-disorders/verified.md and adjudicated.md.</li>
       <li>Scenarios 2 to 5 are outcomes of the breed decision, not choices of their own. The September handoff suggested folding them into scenario 1. Counted together, that family has 16 unsourced or conflicting claims, the most of any.</li>
     </ul>
   </section>
