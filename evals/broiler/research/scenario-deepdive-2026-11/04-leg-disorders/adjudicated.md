@@ -28,9 +28,9 @@ V; abstract-level confirmations count as W.
 
 ## New farm-manager options
 
-These are leads for the scenario's option list. None is added to the memo yet.
+These are leads for the scenario's option list. On 2026-11-07 they were listed in the memo as option leads (Node 4 (g)), not yet ruled into the option list.
 
-1. **Early feed restriction or meal feeding.** Robinson 1992, three experiments: full-fed birds had three times the skeletal disease of birds restricted in week 2 (Sahraei 2014 review, read in full). The cost is lower body weight unless slaughter is later. The welfare cost is hunger; see scenario 13.
+1. **Early feed restriction or meal feeding.** Robinson 1992, three experiments: full-fed birds had three times the skeletal disease of birds restricted in week 2 (Sahraei 2014 review, read in full). The cost is lower body weight unless slaughter is later. The welfare cost is hunger; compare scenarios 11 and 14.
 2. **Dark periods from day 4.** More than 20 hours of light a day raises skeletal problems and TD (van der Pol 2015 introduction, citing Classen 1991 and Renden 1991; ⚠️ read from the thesis reprint). Overlaps scenario 7.
 3. **Prompt culling of gait score 4 and 5 birds.** The Welfare Footprint model runs culled and unculled scenarios for each gait score; culled birds carry far less Disabling pain (a subagent read about 49 versus 318 hours for a fast bird at gait score 4 from the chapter's Figure 6; I did not re-check the figure). The culling delay of 1 to 5 days is the authors' assumption, and they say how often and how fast farms cull is unknown.
 4. **Hatchery incubation profile** (integrator, not farm manager). A slower incubation profile cut severe TD from 17.0% to 4.3 to 10.3% in Cobb 500 with no loss of hatchability (Groves and Muir 2016, read in full).
@@ -47,4 +47,4 @@ source).
   abstract.
 - No measured (not modelled) duration of lameness per bird was found.
 - No second research tool (ChatGPT, Perplexity, Elicit) has run the prompt yet.
-- The node 4 memo and the decision register still state the old figures; they can now be edited.
+- Done 2026-11-07: the node 4 memo (`../../2026-09-21-growout-biology-genetics.md`), the register row in `../../README.md` and the two corrected claim texts in `../claims.json` now match this file.

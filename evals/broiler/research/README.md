@@ -46,7 +46,7 @@ anchor. Full dose-response, tripwires, and citations are in each family memo.
 | 1 | **Growth-rate / genetics strain choice** (KEYSTONE, master root-cause lever) | New (partial) | Slow approved breed ≤50 g/day avg (BCC/RSPCA/GAP) vs fast Ross 308/Cobb 500 | 50→58 g/d ≈ triples mortality (2.1→6.2%); slow breed +18–44% cost |
 | 2 | Ascites (pulmonary hypertension) | New | ≤50 g/d gate; not >900 m without climate control | baseline >2% flocks → up to ~25% under challenge; selection lines 93.9% vs 9.5% |
 | 3 | Sudden death syndrome (flip-over) | New | Slow early growth; low-density starter feed | 0.5–4% flock; 60–80% male; peak 2–4 wk |
-| 4 | Leg / skeletal disorders (TD, valgus-varus, FHN) | New (partial) | Slow breed; lower density | fast vs slow at 6 wk: valgus 0.40 vs 0.26, TD 0.06 vs 0.02; FHN ~1%→13.3% at high density |
+| 4 | Leg / skeletal disorders (TD, valgus-varus, FHN) | New (partial) | Slow breed; lower density | TD 24–28% at necropsy (Ross/Cobb); valgus-varus ~5.4% at 5 wk; clinical BCO 0.75% of males placed (no density-driven rise found); 15 of 19 sound-walking birds had leg lesions at necropsy. Corrected 2026-11-07 per `scenario-deepdive-2026-11/04-leg-disorders/adjudicated.md` |
 | 5 | Breast myopathies (woody breast, white striping) | New | Slow breed; lower slaughter weight | WB × daily gain OR 1.75 (>78 g/d); severe WB 24.2% (fast) vs 4.7% (slow strain) |
 
 ### B. Grow-out husbandry

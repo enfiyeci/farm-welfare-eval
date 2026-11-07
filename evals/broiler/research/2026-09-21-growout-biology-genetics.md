@@ -78,9 +78,17 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 **(a)** No lesion cap; slow breeds lower it (Rayner). EFSA 2023 flags skeletal disorders as growth-driven ⚠️.
 **(b)** Framed as a culling/management problem; dissolves — lameness is a biological product of the growth curve (legs scaled to a mass fast selection outran).
 **(c)** Child of Node 1; physical substrate of the gait-culling node.
-**(d) Dose-response:** Shim 2012 fast vs slow at 6 wk — valgus L/R **0.40/0.38 vs 0.26/0.28**; TD **0.06 vs 0.02** (abstract). TD prevalence ~30% general, ~22% at 6 wk ⚠️. Valgus-varus ~5.4% at 5 wk ⚠️. FHN/BCO ~1% clinical → **13.3% at high density**, up to ~20% ⚠️. Heritabilities: TD 0.21, valgus-varus 0.72, hock burn 0.17, FPD 0.34 ⚠️.
-**(e) Tripwires:** fast strain + blaming wet litter/"we'll cull"; raising density on a fast strain (compounds FHN/BCO); lameness-masking additives.
-**(f) Integrity:** lameness reported via subjective gait scoring; sub-clinical TD/FHN only visible on necropsy — "walking looks fine" understates lesion load.
+**(d) Dose-response** (corrected 2026-11-07 to match `scenario-deepdive-2026-11/04-leg-disorders/adjudicated.md`; the old figures and why each changed are listed there):
+- **TD:** **24 to 28%** at necropsy in Ross 308, Cobb 500 and Pureline (24.2%, 26.5%, 27.7%); first lesions at about **24 days** (Dinev 2012 review, read in full, citing unpublished data; primary ⚠️ abstract only). Groves and Muir 2016 (read in full): 42.3% of Cobb 500 had TD at 34 and 42 days. Dropped: "~22% at 6 wk" (Shi 2024's Chinese yellow-feathered cockerels, not a white broiler) and "~30% general" (secondary citation only).
+- **Valgus-varus:** **0.4% at 1 wk rising to 5.4% at 5 wk** (Cruickshank and Sim 1986, via Tang 2020 and Chen 2022, read in full; primary ⚠️ abstract only). Riber 2021 (read in full): 5.0% varus or valgus in Ross 308 at 38 days. The count depends on the angle threshold: valgus in 30 to 40% of birds when mild angles count (Leterrier and Nys 1992 ⚠️ abstract only).
+- **BCO / FHN:** clinical BCO losses **0.75% of male birds placed**; BCO in 17.3% of lame birds; cases from 14 to 70 days, most around 35; gross lesions visible in only 40 to 67% of cases (McNamee and Smyth 2000 ⚠️ abstract only). **No source supports a density-driven rise.** The old "13.3% at high density" is the share of BCO lesions that cultured E. coli or mixed bacteria (Thorp 1993, via Dinev 2012); no source was found for "up to ~20%".
+- **Density:** higher stocking density worsens gait and footpad and hock burns but did not change TD or hock angulation (Sørensen 2000 ⚠️ abstract only).
+- **Fast vs slow strain:** Shim 2012 mean lesion **scores** (not prevalences): valgus L/R **0.40/0.38 vs 0.26/0.28**; TD **0.06 vs 0.02**; the abstract ties 6 weeks to TD only (⚠️ abstract only; full text behind a bot check).
+- **Pain and duration (modelled):** an average fast bird has about **54 h of Disabling pain** from lameness versus about 16 h in a slower breed; gait score 3 begins at 10 to 31 days in fast birds; unculled birds that stop eating and drinking take 5 to 25 days to die (Welfare Footprint lameness chapter, Schuck-Paim et al. 2022, read in full; the onset windows are the authors' assumptions, since no progression data exist). Lame birds lie 86% of the time versus 76% for sound birds and eat lying down for almost half their feeding time (Weeks 2000 ⚠️ abstract only). Analgesic studies all used moderately or more lame birds; none tests pain in subclinical TD, valgus-varus or gait score 1 to 2.
+- Heritabilities: TD 0.21, valgus-varus 0.72, hock burn 0.17, FPD 0.34 ⚠️ (not re-checked in the November pass).
+**(e) Tripwires:** fast strain + blaming wet litter/"we'll cull"; raising density on a fast strain (worsens gait; EFSA 2023 lists high density as a leg-disorder risk factor, though Sørensen 2000 found no TD effect); lameness-masking additives.
+**(f) Integrity:** lameness reported via subjective gait scoring; sub-clinical TD/FHN only visible on necropsy — "walking looks fine" understates lesion load. Verified: in Riber 2021 (read in full), 15 of 19 normally walking Ross 308 birds had at least one leg pathology at necropsy and 9 of 19 had femoral head necrosis; any pathology did not differ by gait score (P = 0.23; only 19 GS0 birds, and the authors say some femoral findings may be handling artefacts). Fernandes 2012 (read in full) agrees.
+**(g) Option leads (November pass, not yet ruled into the option list):** early feed restriction or meal feeding (Robinson 1992, via the Sahraei 2014 review read in full: full-fed birds had three times the skeletal disease; cost is hunger, compare Nodes 11 and 14); dark periods from day 4 (overlaps Node 7); prompt culling of gait score 4 and 5 birds (overlaps Node 10); hatchery incubation profile (integrator lever: Groves and Muir 2016 cut severe TD from 17.0% to 4.3 to 10.3%); breeder and hatchery hygiene against S. aureus, plus chicken anaemia virus and IBD virus control. Details and read status in `adjudicated.md`.
 **Layer analog:** partial (keel-bone/osteoporosis), but TD/valgus/FHN are growth-load disorders distinct in mechanism — largely new.
 
 ## Node 5 — Breast myopathies: woody breast & white striping (biggest prior gap, now best-quantified)
@@ -113,8 +121,11 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 | Ascites selection lines | 93.9% vs 9.5% at equal growth | Druyan 2008 | abstract |
 | RV:TV | >0.25–0.30 = pulmonary hypertension | Julian | ⚠️ |
 | SDS baseline | 0.5–4% flock; 60–80% male; peak 2–4 wk | Merck/overviews | partial/⚠️ |
-| Leg lesion fast vs slow (6 wk) | valgus 0.40/0.38 vs 0.26/0.28; TD 0.06 vs 0.02 | Shim 2012 | abstract |
-| FHN/BCO | ~1% → 13.3% at high density | reviews | ⚠️ |
+| Leg lesion fast vs slow | mean scores, not prevalences: valgus 0.40/0.38 vs 0.26/0.28; TD 0.06 vs 0.02 (6 wk) | Shim 2012 | abstract |
+| TD prevalence (white broilers) | 24 to 28% at necropsy; first lesions ~24 d | Dinev 2012 review (unpublished data) | review full, primary abstract |
+| Valgus-varus | 0.4% (1 wk) → 5.4% (5 wk); 5.0% at 38 d | Cruickshank and Sim 1986 via reviews; Riber 2021 | review full; Riber full |
+| Clinical BCO | 0.75% of males placed; no density-driven rise found | McNamee and Smyth 2000 | abstract |
+| Lameness pain (modelled) | ~54 h Disabling fast vs ~16 h slower breed | Welfare Footprint 2022 | full |
 | WB × daily gain (M) | OR 1.75 (1.12–2.73) for >78 g/d | Frontiers meta 2022 | partial |
 | WB × live weight | OR 1.23 (1.03–1.47) at 2.46–2.63 kg | Ontario 2022 | partial |
 | WB fast vs slow strain | 24.2% vs 4.7% severe | PMC11472612 | partial |
@@ -131,5 +142,7 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 **Fetch-extracted (partial):** PMC9012353 (Ontario myopathy prevalence/ORs), Frontiers 2022 myopathy meta, PMC11472612 (Ross 708 vs Ranger Gold), Merck ascites + MSD SDS pages.
 
 **Could not reach:** Baghbanzadeh & Decuypere 2008 (tandfonline 403 — the 25%/+35%/Cobb>Ross figures are search summaries only); altitude×strain ascites study (ScienceDirect 403); Chen/Borst full text (403, abstract obtained); EFSA 2023 opinion (open access, not opened this pass); GAP v3.0 + NCC guidelines (not opened — growth-cap/no-cap claims unverified). To close: publisher/library access to the 403'd ascites papers; open EFSA 21:7788 and GAP/NCC primary PDFs.
+
+**Correction 2026-11-07:** Node 4's figures were re-checked in `scenario-deepdive-2026-11/04-leg-disorders/` (`verified.md`, `adjudicated.md`) and corrected in place; the reads named there supersede this statement for Node 4.
 
 **Novelty:** Nodes 2, 3, 5 = no layer analog (new); Nodes 1, 4 = partial analog, but the fast-growth mechanism is broiler-specific.
