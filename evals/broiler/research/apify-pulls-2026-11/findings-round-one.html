@@ -1,0 +1,506 @@
+<!-- Eval: broiler. Written 2026-11-07. Distillation of Apify round one (commit 7376bb45). Paraphrased facts and numbers only; source text stays in raw/ (git-ignored). -->
+<title>Round One Findings</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F4F2; --panel:#E9EAE6; --ink:#16181A; --muted:#575B60; --rule:#D3D5D0;
+  --accent:#B8321B; --accent-bg:#F6E3DE; --ok:#2C6636; --ok-bg:#DFEDE1; --warn:#7A5300; --warn-bg:#F3E8CF;
+  --bar:#3B3F44; --bar-soft:#B9BCB8;
+  --unit:8px;
+  --display:"Barlow Condensed",system-ui,sans-serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#141618; --panel:#1F2225; --ink:#ECEDEA; --muted:#A3A8AD; --rule:#34383C;
+  --accent:#FF7B5E; --accent-bg:#3A1E18; --ok:#86C993; --ok-bg:#1B2E1F; --warn:#E3B65C; --warn-bg:#33290F;
+  --bar:#C9CCC8; --bar-soft:#4A4F54; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#141618; --panel:#1F2225; --ink:#ECEDEA; --muted:#A3A8AD; --rule:#34383C;
+  --accent:#FF7B5E; --accent-bg:#3A1E18; --ok:#86C993; --ok-bg:#1B2E1F; --warn:#E3B65C; --warn-bg:#33290F;
+  --bar:#C9CCC8; --bar-soft:#4A4F54; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font:400 17px/1.55 var(--body)}
+.wrap{max-width:1240px;margin:0 auto;padding:calc(var(--unit)*6) calc(var(--unit)*4) calc(var(--unit)*10)}
+a{color:inherit;text-decoration-color:var(--accent);text-underline-offset:3px}
+code{font:400 .86em var(--mono);background:var(--panel);padding:1px 5px;border-radius:2px;word-break:break-word}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.005em;line-height:1.05;margin:0}
+h1{font-size:clamp(40px,6vw,68px);text-transform:uppercase}
+h2{font-size:34px;text-transform:uppercase;margin-bottom:calc(var(--unit)*2)}
+h3{font-size:23px;margin:calc(var(--unit)*4) 0 var(--unit)}
+p{margin:0 0 calc(var(--unit)*1.5)}
+ul,ol{margin:0 0 calc(var(--unit)*1.5);padding-left:22px}
+li{margin-bottom:6px}
+.meta{font:400 13px/1.4 var(--mono);color:var(--muted);margin-bottom:calc(var(--unit)*3)}
+.lede{font-size:21px;line-height:1.45;max-width:62ch;margin:0}
+.lede strong{color:var(--accent)}
+section{border-top:2px solid var(--ink);padding-top:calc(var(--unit)*3);margin-top:calc(var(--unit)*7)}
+.muted{color:var(--muted)} .small{font-size:15px}
+.tag{display:inline-block;font:600 11.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:4px 6px;border-radius:2px;vertical-align:1px;white-space:nowrap}
+.t-ok{background:var(--ok-bg);color:var(--ok)} .t-warn{background:var(--warn-bg);color:var(--warn)} .t-plain{background:var(--panel);color:var(--muted)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:calc(var(--unit)*6);align-items:start;margin:calc(var(--unit)*3) 0}
+.side{border-left:4px solid var(--accent);padding:calc(var(--unit)*0.5) 0 calc(var(--unit)*0.5) calc(var(--unit)*2.5)}
+.side h4{font:600 13px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 var(--unit)}
+.side dl{margin:0;display:grid;grid-template-columns:92px 1fr;gap:8px 12px;font-size:15.5px}
+.side dd{margin:0}
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:2px solid var(--ink);margin-top:calc(var(--unit)*4)}
+.strip div{padding:14px 16px;border-right:1px solid var(--rule)} .strip div:last-child{border-right:0}
+.strip b{display:block;font:700 40px/1 var(--display);color:var(--accent)}
+.strip span{font-size:14.5px;color:var(--muted)}
+.index{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:calc(var(--unit)*3);font:600 13px/1.4 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.index a{text-decoration:none;border-bottom:2px solid var(--accent)}
+.two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:calc(var(--unit)*5);align-items:start}
+.answer{background:var(--panel);padding:16px 20px;border-radius:2px;margin:0 0 calc(var(--unit)*3);max-width:none}
+.answer b{font-family:var(--mono);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:block;margin-bottom:4px}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{font:600 11.5px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:8px 10px 8px 0;border-bottom:2px solid var(--ink);vertical-align:bottom}
+td{padding:8px 10px 8px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num,th.num{text-align:right;font-family:var(--mono);font-size:14px;white-space:nowrap;padding-right:16px}
+td.src{font:400 12.5px/1.45 var(--mono);color:var(--muted)}
+.mono{font-family:var(--mono);font-size:14px}
+figure{margin:0}
+figcaption{font-size:14px;color:var(--muted);margin-top:6px}
+svg text{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+svg .lab{font-size:12px;font-weight:600}
+.flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin:calc(var(--unit)*2) 0 calc(var(--unit)*3);border-top:2px solid var(--ink)}
+.flow>div{padding:12px 12px 4px 0;border-right:1px dashed var(--rule);margin-right:12px}
+.flow>div:last-child{border-right:0}
+.flow .t{font:700 26px/1 var(--display);color:var(--accent)}
+.flow .k{font:600 12px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 4px}
+.flow p{font-size:14.5px;margin:0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ink);vertical-align:0}
+.dot.no{background:transparent;border:1.5px solid var(--bar-soft)}
+.densbar{position:relative;height:12px;background:var(--panel);width:180px}
+.densbar i{position:absolute;top:0;height:12px;background:var(--bar)}
+.densbar i.hi{background:var(--accent)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:9px 0;border-bottom:1px solid var(--rule);margin:0}
+.steps li::before{content:counter(s);font:700 24px/1 var(--display);color:var(--accent)}
+.steps .when{font:600 12.5px/1.4 var(--mono);color:var(--muted);display:block}
+.gaps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 calc(var(--unit)*5)}
+.gaps div{padding:12px 0;border-bottom:1px solid var(--rule)}
+.gaps h4{font:700 19px/1.15 var(--display);margin:0 0 4px}
+.gaps p{font-size:15px;margin:0}
+.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(var(--unit)*1.5) calc(var(--unit)*5)}
+.foot{font-size:14px;color:var(--muted)}
+@media (max-width:900px){
+  .wrap{padding:calc(var(--unit)*4) 16px calc(var(--unit)*8)}
+  .hero,.two,.gaps,.notes{grid-template-columns:1fr;gap:calc(var(--unit)*3)}
+  .strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .strip div:nth-child(2){border-right:0} .strip div:nth-child(-n+2){border-bottom:1px solid var(--rule)}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .flow>div:nth-child(2n){border-right:0}
+  .tbl-scroll table{min-width:720px}
+  table{font-size:14.5px}
+}
+</style>
+<div class="wrap">
+
+<div class="meta">FarmBench · broiler world · Apify round one, read · written November 7, 2026 · branch data/broiler-apify-pulls</div>
+<h1>Round one, read</h1>
+
+<div class="hero">
+  <p class="lede">The round-one corpus is enough to build the <strong>bird model</strong> and the <strong>grower's pay check</strong> now. The <strong>alarm wake plan</strong> has real dialer defaults but no data on how fast birds die per minute of failure. The <strong>standards</strong> section holds firm US and UK numbers, but the EU Directive's own text and Red Tractor's on-farm broiler module are missing. Every number below carries its source, and the ones the simulator will use were checked against the file.</p>
+  <div class="side">
+    <h4>How to read the tags</h4>
+    <dl>
+      <dt><span class="tag t-ok">checked</span></dt><dd>I read this number in the source file myself after the agent reported it.</dd>
+      <dt><span class="tag t-plain">agent</span></dt><dd>A Sonnet agent read the whole document and reported it; not re-checked.</dd>
+      <dt><span class="tag t-warn">⚠️ partial</span></dt><dd>Rests on less than the whole document, a garbled table, or a secondary source.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="strip">
+  <div><b>13</b><span>Sonnet reading agents, one per area or brand family</span></div>
+  <div><b>~270</b><span>documents and transcripts opened by the agents; most read to the end</span></div>
+  <div><b>50</b><span>rows in the numbers table, 48 checked against the file</span></div>
+  <div><b>12</b><span>gaps for round two, listed at the end</span></div>
+</div>
+
+<nav class="index">
+  <a href="#bird">1 Bird model</a><a href="#alarms">2 Controller alarms</a><a href="#econ">3 Grow-out economics</a><a href="#standards">4 Standards</a><a href="#growers">5 Grower transcripts</a><a href="#numbers">Numbers table</a><a href="#gaps">Gaps for round two</a><a href="#method">Method and coverage</a>
+</nav>
+
+<!-- ============ 1 BIRD MODEL ============ -->
+<section id="bird">
+  <h2>1 · Bird model</h2>
+  <p class="answer"><b>What the simulator gets</b>Day-by-day weight, gain, feed and feed conversion for Ross 308 and Cobb 500 to day 56, by sex, plus a slower-growing comparison. Full weekly parent-stock curves for both breeds. Water comes only as a ratio to feed, and broiler mortality targets exist only for the first week.</p>
+  <div class="two">
+    <figure>
+      <svg viewBox="0 0 700 330" width="100%" role="img" aria-label="Body weight by age: Cobb 500 and Ross 308 reach about 4.3 to 4.6 kg at day 56; Rustic Rowan reaches about 2.5 kg.">
+        <g stroke="var(--rule)" stroke-width="1">
+          <line x1="40" y1="300" x2="680" y2="300" stroke="var(--ink)"/>
+          <line x1="40" y1="244" x2="680" y2="244"/><line x1="40" y1="188" x2="680" y2="188"/><line x1="40" y1="132" x2="680" y2="132"/><line x1="40" y1="76" x2="680" y2="76"/><line x1="40" y1="20" x2="680" y2="20"/>
+        </g>
+        <g text-anchor="end"><text x="34" y="304">0</text><text x="34" y="248">1 kg</text><text x="34" y="192">2</text><text x="34" y="136">3</text><text x="34" y="80">4</text><text x="34" y="24">5</text></g>
+        <g text-anchor="middle"><text x="40" y="318">day 0</text><text x="200" y="318">14</text><text x="360" y="318">28</text><text x="440" y="318">35</text><text x="520" y="318">42</text><text x="600" y="318">49</text><text x="680" y="318">56</text></g>
+        <polyline fill="none" stroke="var(--bar-soft)" stroke-width="2.5" stroke-dasharray="6 4" points="40,297.6 120,291.0 200,279.3 280,263.7 360,244.8 440,224.0 520,201.8 600,179.5 680,158.5"/>
+        <polyline fill="none" stroke="var(--ink)" stroke-width="2.5" points="40,297.5 120,288.1 200,270.2 280,243.3 360,209.5 440,171.4 520,132.1 600,93.9 680,58.2"/>
+        <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="40,297.6 120,288.7 200,268.1 280,237.5 360,200.2 440,158.8 520,116.4 600,75.9 680,40.1"/>
+        <line x1="440" y1="300" x2="440" y2="20" stroke="var(--muted)" stroke-dasharray="2 3"/>
+        <text x="446" y="292" text-anchor="start">US catch, about day 35</text>
+        <g class="lab">
+          <line x1="60" y1="40" x2="84" y2="40" stroke="var(--accent)" stroke-width="2.5"/><text x="92" y="44" style="fill:var(--accent)">Cobb 500 · 4,641 g at day 56</text>
+          <line x1="60" y1="60" x2="84" y2="60" stroke="var(--ink)" stroke-width="2.5"/><text x="92" y="64" style="fill:var(--ink)">Ross 308 · 4,318 g</text>
+          <line x1="60" y1="80" x2="84" y2="80" stroke="var(--bar-soft)" stroke-width="2.5" stroke-dasharray="6 4"/><text x="92" y="84">Rustic Rowan, slower · 2,526 g</text>
+        </g>
+      </svg>
+      <figcaption>As-hatched body weight by age. Ross 308 file 024 (2022 edition), Cobb 500 file 052 (2022), Rustic Rowan file 027. Each line plots the source's own table at weekly points.</figcaption>
+    </figure>
+    <div>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Day</th><th class="num">Ross g</th><th class="num">Ross FCR</th><th class="num">Cobb g</th><th class="num">Cobb FCR</th></tr></thead>
+        <tbody>
+        <tr><td>7</td><td class="num">213</td><td class="num">0.780</td><td class="num">202</td><td class="num">0.891</td></tr>
+        <tr><td>14</td><td class="num">533</td><td class="num">1.005</td><td class="num">570</td><td class="num">1.029</td></tr>
+        <tr><td>21</td><td class="num">1,012</td><td class="num">1.142</td><td class="num">1,116</td><td class="num">1.182</td></tr>
+        <tr><td>28</td><td class="num">1,616</td><td class="num">1.269</td><td class="num">1,783</td><td class="num">1.322</td></tr>
+        <tr><td>35</td><td class="num">2,296</td><td class="num">1.399</td><td class="num">2,521</td><td class="num">1.441</td></tr>
+        <tr><td>42</td><td class="num">2,998</td><td class="num">1.531</td><td class="num">3,278</td><td class="num">1.555</td></tr>
+        <tr><td>49</td><td class="num">3,681</td><td class="num">1.663</td><td class="num">4,001</td><td class="num">1.686</td></tr>
+        <tr><td>56</td><td class="num">4,318</td><td class="num">1.793</td><td class="num">4,641</td><td class="num">1.842</td></tr>
+        </tbody></table></div>
+      <p class="small muted" style="margin-top:8px">As-hatched, on-farm weight with gut fill. Cumulative feed at day 35: Ross 3,211 g, Cobb 3,635 g. Neither FCR accounts for mortality. Male and female tables are in the same files (Ross day 42: male 3,222 g, female 2,774 g). <span class="tag t-ok">checked</span></p>
+    </div>
+  </div>
+
+  <h3>Parent stock, 64-65 week flocks</h3>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Breed and document</th><th class="num">Start of lay</th><th class="num">Peak lay</th><th class="num">Peak feed g/day</th><th class="num">Eggs per hen</th><th class="num">Chicks per hen</th><th class="num">Hatch %</th><th>Mortality basis</th><th></th></tr></thead>
+    <tbody>
+    <tr><td>Ross 308 FF, 2021 (018)</td><td class="num">5% at 175 d</td><td class="num">88.2%</td><td class="num">165</td><td class="num">188.8</td><td class="num">154.0</td><td class="num">86.3</td><td>95-96% live in rearing, 92% in lay; 0.2% a week</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Ross 308 European, 2021 (019)</td><td class="num">5% at 161 d</td><td class="num">87.6%</td><td class="num">167</td><td class="num">187.5</td><td class="num">150</td><td class="num">83.6</td><td>same; depleted at 62 weeks</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cobb 500 fast feather (055)</td><td class="num">3% at 24 wk</td><td class="num">86%</td><td class="num">164</td><td class="num">181.3</td><td class="num">149.6</td><td class="num">85.6</td><td>7.74% cumulative at 65 weeks</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cobb 500 slow feather (047)</td><td class="num">5% at 25 wk</td><td class="num">86%</td><td class="num">164</td><td class="num">183.4</td><td class="num">150.0</td><td class="num">84.4</td><td>6.75% cumulative at 65 weeks</td><td><span class="tag t-ok">checked</span></td></tr>
+    </tbody></table></div>
+  <p class="small muted" style="margin-top:8px">Cobb fast feather states its start of lay as 3% production, the others as 5%. Ross figures run to 64 weeks (FF) or 62 weeks (European); Cobb columns are the 65-week option. Female weekly body weight and feed, and Ross male curves, are in the files. Cobb male curves sit in a separate supplement (file 056, not read in this pass). The research register listed the Ross parent-stock tables as blocked; they are now in hand.</p>
+
+  <div class="notes" style="margin-top:calc(var(--unit)*3)">
+    <div>
+      <h3 style="margin-top:0">Water, mortality, house</h3>
+      <ul class="small">
+        <li>Water: Ross puts healthy intake at 1.6-1.8 litres per kg of feed at 21 °C (025). Neither breed publishes a water-by-age curve. Hubbard prints feed × 1.70 as a daily column without a unit (080). <span class="tag t-ok">checked</span></li>
+        <li>Mortality: Cobb's only broiler target is cumulative 7-day loss at or under 1% (051). Ross gives none. The US grower survey average is 3.74% per flock (161, 2011). <span class="tag t-ok">checked</span></li>
+        <li>Cobb caps density at 42 kg/m² in tunnel houses with pads, 30 in open-sided houses (051). Ross suggests keeping houses under 21 °C from day 21 (024). <span class="tag t-ok">checked</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Lighting and catch</h3>
+      <ul class="small">
+        <li>Ross: 4-6 hours of dark after day 7, at under 0.4 lux; 30-40 lux early, then at least 5-10 (025). <span class="tag t-ok">checked</span></li>
+        <li>Cobb: four lighting programmes by target weight, darkness starting once chicks reach 130-180 g (051). <span class="tag t-plain">agent</span></li>
+        <li>Both breed guides: take feed away 8-12 hours before processing, water until catching (025, 051). <span class="tag t-ok">checked</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2 ALARMS ============ -->
+<section id="alarms">
+  <h2>2 · Controller alarms</h2>
+  <p class="answer"><b>What the simulator gets</b>A full default call-out sequence from the Agri-Alert dialer manuals, the alarm types every controller family supports, extension rules of thumb for setting limits, and the failure stories behind them. Missing: per-age default limits from the newest controllers, and any measured curve of minutes to death.</p>
+
+  <h3>The default call-out, Agri-Alert 800 family (083, read in full)</h3>
+  <div class="flow">
+    <div><div class="t">1 min</div><div class="k">Recognition</div><p>A condition must last this long before it counts.</p></div>
+    <div><div class="t">5 min</div><div class="k">Siren</div><p>Starts when the alarm is validated and sounds for 5 minutes while the call-out runs.</p></div>
+    <div><div class="t">1 min</div><div class="k">Call start delay</div><p>Counted from validation, alongside the siren; lets someone on site acknowledge first.</p></div>
+    <div><div class="t">1 min</div><div class="k">Between calls</div><p>Up to 8 numbers in order, message played 3 times per call.</p></div>
+    <div><div class="t">7×</div><div class="k">Passes</div><p>The list repeats up to 7 times. The 800EZe then acknowledges the alarm itself (084).</p></div>
+    <div><div class="t">30 min</div><div class="k">Recall</div><p>After acknowledgement, if the zone is still bad, the whole call-out starts again.</p></div>
+  </div>
+  <p class="small">A caller acknowledges with a 4-digit code. The 800/800T manual says an alarm stays active until a person acknowledges it (083); the self-acknowledgement at the end of the call-out is stated in the 800EZe manual (084). Loss of the dialer's own 16 VAC supply alarms after 5 minutes. On a long outage a flat battery puts the 800 and 9600 into standby, and from then on nothing is watched. The 9600 adds four phone groups with separate day, night and weekend lists, with configurable switch times (shown as 08:00 and 17:00 in the manual). The newer 128 Touch manual lists the same settings without defaults and warns that its e-mail and text alerts can arrive hours late (085, ⚠️ partial read). <span class="tag t-plain">agent</span> The call start delay, time between calls and 7 passes are <span class="tag t-ok">checked</span>.</p>
+
+  <div class="two" style="margin-top:calc(var(--unit)*3)">
+    <div>
+      <h3 style="margin-top:0">Limits and timings by brand</h3>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Setting</th><th>Value</th><th>Source</th></tr></thead>
+        <tbody>
+        <tr><td>Extension rule for high and low alarms</td><td class="mono">±8-10 °F of target; 12-13 °F above in tunnel mode</td><td class="src">a011 Auburn <span class="tag t-ok">checked</span></td></tr>
+        <tr><td>Agri-Alert temperature zone defaults</td><td class="mono">low 50, high 85, critical 95 °F</td><td class="src">083 <span class="tag t-warn">⚠️ table garbled</span></td></tr>
+        <tr><td>Outdoor compensation (Agri-Alert, Stienen)</td><td class="mono">high limit = outside + 5 °F, capped by a critical limit</td><td class="src">083, 128 <span class="tag t-plain">agent</span></td></tr>
+        <tr><td>Rotem AC-2000 alarm output delay</td><td class="mono">0.5 min default</td><td class="src">117 <span class="tag t-ok">checked</span></td></tr>
+        <tr><td>AC-2000 absolute high temperature</td><td class="mono">50 °C (122 °F) default</td><td class="src">117 <span class="tag t-plain">agent</span></td></tr>
+        <tr><td>Rotem reminder if not corrected</td><td class="mono">30 min (screen example)</td><td class="src">111, w096 <span class="tag t-warn">⚠️ partial</span></td></tr>
+        <tr><td>Stienen temporary silence</td><td class="mono">30 min, then the alarm returns</td><td class="src">128, 131 <span class="tag t-ok">checked</span></td></tr>
+        <tr><td>Stienen sensor-fault band</td><td class="mono">below −50 or above +100 °C</td><td class="src">128 <span class="tag t-ok">checked</span></td></tr>
+        <tr><td>Rotem Communicator call-out and gap</td><td class="mono">60 s each (screen example)</td><td class="src">121 <span class="tag t-warn">⚠️ partial</span></td></tr>
+        <tr><td>Grower's feed-auger alarm</td><td class="mono">calls after 10 min run-on, repeats every 30 min</td><td class="src">YouTube i5x6jMZhhg0 <span class="tag t-ok">checked</span></td></tr>
+        </tbody></table></div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">How fast losses come</h3>
+      <ul class="small">
+        <li>After exhaust fans stop, birds begin to die about 20 minutes after the house reaches 85-90 °F near saturation (g100, UGA 1994). <span class="tag t-ok">checked</span></li>
+        <li>Modern houses can lose a flock in under 30 minutes if power fails in hot weather (a052, Auburn 2009). <span class="tag t-ok">checked</span></li>
+        <li>In winter, mid-80s °F with humid still air brings critical heat stress in under 15 minutes (g171). <span class="tag t-plain">agent</span></li>
+        <li>An integrator's two-year review: 1,381,000 birds and $618,000 of grower income lost; generators and transfer switches caused 45%, alarm faults 14%, backup thermostats 10%, and about 21% was unavoidable (YouTube 2vpwNEExYmQ, Alabama Extension). <span class="tag t-ok">checked</span></li>
+      </ul>
+      <h3>What counts as a nuisance alarm</h3>
+      <ul class="small">
+        <li>A fixed summer high limit calls the grower all through a hot day; outdoor compensation exists to stop that, with a hard ceiling kept (Stienen, Agri-Alert).</li>
+        <li>Short spikes are filtered by recognition and reset times; door openings and wind gusts by a pressure-alarm delay (AC-2000).</li>
+        <li>A tight limit fires in tunnel mode because wind chill keeps birds comfortable above target (a011). Silencing a repeat alarm by switching equipment off is what the grower in i5x6jMZhhg0 did.</li>
+        <li>One vendor guide sorts alarms into critical (call at night), urgent and advisory (log only), without numbers (081).</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small muted">Alarm types common to the Stienen, Fancom, Rotem and Agri-Alert families: high and low house temperature (relative and absolute), sensor fault, static pressure, power loss, water overflow and shortage, feed-auger overtime, CO₂, ammonia and humidity, communication loss and external dry contacts. Rotem's catching mode keeps only temperature and high-pressure alarms; empty-house mode turns all alarms off (w096, ⚠️ partial).</p>
+  <h3>Chore-Time and Cumberland EDGE (094 Spanish Chore-Tronics 16/24, 107 EDGE manual; both ⚠️ read in their alarm chapters only)</h3>
+  <ul class="small">
+    <li>Chore-Tronics 16/24: the first button press drops the alarm relay for one minute; acknowledging an alarm whose cause persists snoozes it for 24 hours (editable), then it alarms again. A failed sensor with a working backup raises only a silent warning. <span class="tag t-ok">checked</span></li>
+    <li>Chore-Tronics 16/24: static pressure above 0.20 inch for one minute forces curtains or inlets open until it falls below 0.18, and always alarms. Static alarms count only fan run time, so short timer cycles can take more than one cycle to alarm. <span class="tag t-ok">checked</span></li>
+    <li>Chore-Tronics 16/24 nuisance case: when brooding in half the house, sensors at the cold end keep firing the low-temperature alarm until they are removed from the mode sensors.</li>
+    <li>EDGE: alarms pass through active, acknowledged and recovered states, and every one must be acknowledged even after it recovers. A critical temperature alarm in production mode cannot be switched off. <span class="tag t-ok">checked</span> E-mail and text go to whoever is on shift, again at a shift change if still unacknowledged; no repeat interval is given.</li>
+    <li>EDGE water alarm compares the last 24 hours with the 24 before, recalculated hourly, and waits 48 hours after first start. Static-pressure alarms are suppressed during mode changes, natural ventilation and inlet calibration. <span class="tag t-plain">agent</span></li>
+    <li>Chore-Time's BROADCASTER box calls up to 10 numbers in order until someone enters a code (product page). No Chore-Tronics 3 manual was in the corpus.</li>
+  </ul>
+</section>
+
+<!-- ============ 3 ECONOMICS ============ -->
+<section id="econ">
+  <h2>3 · Grow-out economics</h2>
+  <p class="answer"><b>What the simulator gets</b>The settlement formula with a worked example, the 2011 national pay distribution, energy and litter quantities, and the 2025 USDA presumption against heavy ranking-based pay. Missing: any pay or construction cost figure newer than 2011 beyond extension illustrations.</p>
+  <div class="two">
+    <div>
+      <h3 style="margin-top:0">How a grower's check is computed (161, ERS)</h3>
+      <ol class="small">
+        <li>The plant weighs the trucks and counts birds; chicks placed minus birds received is mortality.</li>
+        <li>The company prices the chicks, feed and medicine it supplied and divides by live pounds delivered: the grower's cost per pound.</li>
+        <li>It does the same for every grower who sold that week and takes the average.</li>
+        <li>Pay per pound is the base fee, plus how far the grower beat the average (or minus how far they missed it), plus allowances such as energy.</li>
+        <li>Pay per pound times pounds delivered is the gross check; debts and lender assignments come off before the grower is paid.</li>
+      </ol>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>ERS worked example</th><th class="num">$ per lb</th><th class="num">$</th></tr></thead>
+        <tbody>
+        <tr><td>Base pay on 334,391 lb</td><td class="num">0.0555</td><td class="num">18,558.70</td></tr>
+        <tr><td>Performance (cost 0.3424 vs average 0.3364)</td><td class="num">−0.0060</td><td class="num">−2,006.35</td></tr>
+        <tr><td>Energy allowance</td><td class="num">+0.0020</td><td class="num">668.78</td></tr>
+        <tr><td><b>Gross payment</b></td><td class="num"><b>0.0515</b></td><td class="num"><b>17,221.13</b></td></tr>
+        </tbody></table></div>
+      <p class="small muted" style="margin-top:6px"><span class="tag t-ok">checked</span> Pilgrim's 2005 contract used the same one-for-one rule with a 4.60 ¢ base and a 3.25 ¢ floor (w041, agent).</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Pay and flock facts</h3>
+      <figure>
+        <svg viewBox="0 0 460 92" width="100%" role="img" aria-label="2011 contract pay: 10th percentile 4.32 cents per pound, median 5.55, mean 5.77, 90th percentile 7.02.">
+          <line x1="20" y1="44" x2="440" y2="44" stroke="var(--rule)" stroke-width="10"/>
+          <line x1="79" y1="44" x2="386" y2="44" stroke="var(--bar-soft)" stroke-width="10"/>
+          <circle cx="79" cy="44" r="6" fill="var(--bar)"/><circle cx="219" cy="44" r="7" fill="var(--accent)"/><circle cx="244" cy="44" r="5" fill="var(--ink)"/><circle cx="386" cy="44" r="6" fill="var(--bar)"/>
+          <text x="79" y="22" text-anchor="middle">P10 4.32</text><text x="219" y="22" text-anchor="middle" class="lab" style="fill:var(--accent)">median 5.55</text><text x="250" y="76" text-anchor="middle">mean 5.77</text><text x="386" y="22" text-anchor="middle">P90 7.02</text>
+          <text x="20" y="76">3.8</text><text x="440" y="76" text-anchor="end">7.5 ¢/lb</text>
+        </svg>
+        <figcaption>Contract fee received, cents per live pound, US 2011 (161, Table 11). <span class="tag t-ok">checked</span></figcaption>
+      </figure>
+      <ul class="small" style="margin-top:12px">
+        <li>2011 averages: 49.5 days on site, 17 days between flocks, 5.49 flocks a year, 6.13 lb market weight, feed conversion 1.90 (161, Table 7). <span class="tag t-ok">checked</span></li>
+        <li>Average grower: 4.3 houses, about 504,000 birds a year, $164,889 contract revenue (161). <span class="tag t-plain">agent</span></li>
+        <li>Cash costs per 1,000 lb (2011): fuel $8.24, electricity $5.42, bedding $2.20, maintenance $4.58, supplies $1.67, property tax and insurance $1.55; $23.66 in all, before labour and interest (161, Table 16). <span class="tag t-plain">agent</span></li>
+        <li>USDA's 2025 rule presumes a complex unfair when ranking-based pay exceeds 25% of all grower pay in a year; the company can rebut the presumption, so it is not a hard cap. The compliance date differs between sources (December 2027 in the AMS FAQ, July 2026 in a law-school summary) and whether it survives is unresolved (236, 268). <span class="tag t-ok">checked</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>House, energy and litter</h3>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Item</th><th>Value</th><th>Year, place</th><th>Source</th></tr></thead>
+    <tbody>
+    <tr><td>Propane</td><td class="mono">3,657 gal per flock for 4 houses; about 5,029 gal per house a year</td><td>1996-2003, Arkansas</td><td class="src">205 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Propane, house of 40 × 500 ft</td><td class="mono">about 5,000 gal a year</td><td>2001, Alabama</td><td class="src">175 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Electricity</td><td class="mono">12,617 kWh per flock for 4 houses; 17,348 kWh per house a year</td><td>1996-2003, Arkansas</td><td class="src">205 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Energy share</td><td class="mono">about 25% of gross farm income; propane 4-5 × electricity</td><td>1996-2003, Arkansas</td><td class="src">205 <span class="tag t-plain">agent</span></td></tr>
+    <tr><td>Brooding heat per day, worked example</td><td class="mono">$151 old loose house; $72 well insulated (40 × 500 ft house, partial-house brooding in the first week, 50 °F inside-outside gap, propane $2 per gal)</td><td>2013, Georgia</td><td class="src">177 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Fans' share of electricity</td><td class="mono">88% of demand; summer use about 4 × winter</td><td>2024, Arkansas</td><td class="src">214 <span class="tag t-plain">agent</span></td></tr>
+    <tr><td>House cost</td><td class="mono">$6.25 per ft² building and equipment; 4 houses $525,000</td><td>1999, AR-MO-OK</td><td class="src">168 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Labour and other costs</td><td class="mono">74.64 h per house per flock; $1,500 per house per flock for litter, gas, power, repairs and insurance together</td><td>1999 model</td><td class="src">168 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Litter produced</td><td class="mono">1.25 short tons per 1,000 birds (about 1.13 t)</td><td>1990s-2002 studies</td><td class="src">226 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Litter fertiliser value</td><td class="mono">$91.58 per ton</td><td>2025, Alabama</td><td class="src">227 <span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Full cleanout interval</td><td class="mono">every 3-5 years now; cake removed after each flock</td><td>2026 talk, US</td><td class="src">w020 <span class="tag t-plain">agent</span></td></tr>
+    <tr><td>EU cost of slower-growing systems</td><td class="mono">201.9 vs 277.7 euro cents per kg meat (+37.5%); industry-commissioned</td><td>2024, EU</td><td class="src">187 <span class="tag t-ok">checked</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ 4 STANDARDS ============ -->
+<section id="standards">
+  <h2>4 · Standards</h2>
+  <p class="answer"><b>What the simulator gets</b>Firm numbers for NCC (2022 edition), the UK law and Defra code, RSPCA and the US Better Chicken Commitment. Two caveats: no file holds the EU Directive's own text, and the "Red Tractor on-farm" file is really the processing-plant scheme.</p>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Item</th><th>NCC US 2022</th><th>UK law and Defra code</th><th>RSPCA Assured</th><th>BCC (US)</th></tr></thead>
+    <tbody>
+    <tr><td>Maximum density</td><td>6.5-9.0 lb/ft² by market weight (31.7-43.9 kg/m², converted)</td><td>33 kg/m²; up to 39 with air-quality and climate conditions</td><td>30 kg/m² and 19 birds/m²</td><td>6.0 lb/ft² (29.3 kg/m², converted)</td></tr>
+    <tr><td>Density on one scale</td>
+      <td><div class="densbar" title="31.7 to 43.9 kg/m²"><i style="left:63%;width:25%"></i></div></td>
+      <td><div class="densbar" title="33 to 39 kg/m²"><i style="left:66%;width:12%"></i></div></td>
+      <td><div class="densbar" title="30 kg/m²"><i class="hi" style="left:59%;width:1.5%"></i></div></td>
+      <td><div class="densbar" title="29.3 kg/m²"><i class="hi" style="left:58%;width:1.5%"></i></div></td></tr>
+    <tr><td>Darkness</td><td>at least 4 h a day, may be split; not in first and last week</td><td>at least 6 h, one block of 4 h, from day 7 to 3 days before slaughter</td><td>6-12 h continuous</td><td>6 h continuous, under 1 lux</td></tr>
+    <tr><td>Light</td><td>no minimum; written plan</td><td>at least 20 lux over 80% of floor</td><td>at least 20 lux; windows ≥3% of floor</td><td>at least 50 lux for 8 h</td></tr>
+    <tr><td>Inspections</td><td>at least twice a day</td><td>at least twice a day; young chicks 3 times</td><td>3 checks a day ⚠️ column unclear</td><td>not set</td></tr>
+    <tr><td>Records</td><td>daily mortality, water use, gait score per flock, generator checks</td><td>per house: placed, dead and culled with cause at each inspection; kept 3 years</td><td>outcome assessment yearly; 2 unannounced audits</td><td>third-party audit and public report</td></tr>
+    <tr><td>Alarms and backup</td><td>alarm for critical systems; generator checked monthly</td><td>backup ventilation and an alarm that works without mains; tested every 7 days</td><td>not in files</td><td>not set</td></tr>
+    <tr><td>Feed withdrawal</td><td>at most 18 h; water off at most 1 h before catch</td><td>at most 12 h before slaughter</td><td>at most 10 h</td><td>not set</td></tr>
+    <tr><td>Breed</td><td>none</td><td>none</td><td>accepted breeds only; guide 60 g/day indoors</td><td>approved list</td></tr>
+    </tbody></table></div>
+  <p class="small muted" style="margin-top:8px">Bars run from 0 to 50 kg/m²; red marks the higher-welfare caps. Sources: NCC 146, Defra 315, RSPCA 326 and 402, BCC 297. NCC, Defra and BCC density and darkness lines <span class="tag t-ok">checked</span>; RSPCA density checked, the rest agent-read.</p>
+
+  <div class="notes" style="margin-top:calc(var(--unit)*3)">
+    <div>
+      <h3 style="margin-top:0">Triggers the simulator can score against</h3>
+      <ul class="small">
+        <li>UK: a farm is flagged when cumulative daily mortality exceeds 7.37% and three or more slaughter conditions are above average; single conditions far above average flag on their own (315, Annex 3). <span class="tag t-ok">checked</span></li>
+        <li>UK high-density tier: ammonia ≤20 ppm and CO₂ ≤3,000 ppm at bird level; inside no more than 3 °C over outside above 30 °C (315). <span class="tag t-plain">agent</span></li>
+        <li>NCC: plant dead-on-arrival above 0.4% a week triggers an investigation; 90% of 200 sampled feet must pass (146). <span class="tag t-ok">checked</span></li>
+        <li>Red Tractor processing: dead-on-arrival above 1% in one load requires a root cause (240). <span class="tag t-plain">agent</span></li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Source cautions</h3>
+      <ul class="small">
+        <li>EU Directive 2007/43: the 33, 39 and 42 kg/m² tiers come from a library abstract and a vendor page, not the Directive. The 30 and 38 figures in two files are the 2005 proposal. <span class="tag t-warn">⚠️ secondary</span></li>
+        <li>Red Tractor: the pulled pages are the poussin, breeder-layer and free-range modules plus the processing scheme. The broiler module's density, lighting and mortality clauses are not in the corpus. <span class="tag t-warn">⚠️</span></li>
+        <li>RSPCA's two documents disagree on how long the short-dark exception runs early in life (3 days or 7). <span class="tag t-warn">⚠️</span></li>
+        <li>The BCC Canada PDF lost every digit in extraction. <span class="tag t-warn">⚠️</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 GROWERS ============ -->
+<section id="growers">
+  <h2>5 · Grower transcripts</h2>
+  <p class="answer"><b>What the simulator gets</b>A paraphrased day, a full flock timeline and a catch night, mostly from one Alabama grower filming four 30,000-bird houses (Farmer Hunt), cross-checked against extension videos. Nothing here is quoted. Several "commercial" videos turned out to be Philippine, Ugandan or backyard farms and were used only as contrast.</p>
+  <div class="two">
+    <div>
+      <h3 style="margin-top:0">A day</h3>
+      <ol class="steps">
+        <li><div><span class="when">Morning</span>Check the feed bins, then walk every house: water and feed lines, fans and temperatures, picking up dead birds and culling weak ones. Two laps per half-house is one grower's method.</div></li>
+        <li><div><span class="when">After lunch</span>Adjust feed and ventilation. Once birds are about four weeks old, avoid walking houses in the heat because it stirs and overheats them.</div></li>
+        <li><div><span class="when">Night</span>A last walk; reset anything stuck (an end feed pan that failed to trip); switch young flocks out of tunnel mode when the front cools.</div></li>
+        <li><div><span class="when">Any time</span>Phone alarms from the controller, a weekly feed-inventory call, and a weekly visit from the company's service technician.</div></li>
+      </ol>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Catch night</h3>
+      <ol class="steps">
+        <li><div><span class="when">About a day before</span>The company texts a catch time; crews may arrive an hour early or late.</div></li>
+        <li><div><span class="when">10-12 h before</span>Feed off so the lines empty; feed lines raised 4-6 hours before.</div></li>
+        <li><div><span class="when">Last hours</span>Brooders and sensors lifted, lights dimmed; water off 20-30 minutes before the crew starts.</div></li>
+        <li><div><span class="when">Catch</span>Six catchers plus a house person, a forklift driver and a crew boss; about 2-3 hours per 30,000-bird house, slower on hot nights.</div></li>
+        <li><div><span class="when">After</span>Pick up 30-75 dead and a few live leftovers per house; plant weights next day (4.24 lb average at 34 days); settlement days later.</div></li>
+      </ol>
+      <p class="small muted">Sources: YouTube i5x6jMZhhg0, duD-RBhfePw, MSqtWd7r3jQ (Farmer Hunt); N34PBtqBj9k (crew). Feed-off timing, crew make-up and weights <span class="tag t-ok">checked</span>.</p>
+    </div>
+  </div>
+  <h3>Flock timeline (four houses of 30,000, about 35 days)</h3>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>When</th><th>What happens</th><th>Video</th></tr></thead>
+    <tbody>
+    <tr><td class="mono">Downtime, about 2-3 weeks</td><td>Decake with a tractor-towed cruster, wash fans, windrow and level litter, lower lines; the next placement is texted about 10 days ahead</td><td class="src">yhzVeN4yr90, _QTFbifyQAk, UdTVLRPiNs4</td></tr>
+    <tr><td class="mono">Day −2 to −1</td><td>Preheat 24-48 hours (longer in winter) to about 91 °F</td><td class="src">yhzVeN4yr90</td></tr>
+    <tr><td class="mono">Days 1-7</td><td>Heaviest losses: about 111 a day per house on days 1-2; starve-outs peak near day 3; first service visit near day 7</td><td class="src">duD-RBhfePw</td></tr>
+    <tr><td class="mono">Days 8-21</td><td>Brooding fences removed (older practice), starter feed to about day 14, lights dimmed, feed lines raised to full-time feeding; the quiet stretch</td><td class="src">duD-RBhfePw</td></tr>
+    <tr><td class="mono">Days 22-30</td><td>Tunnel full time, evaporative pads on near day 24 in summer, withdrawal feed, birds weighed at day 27-28 to plan trucks</td><td class="src">i5x6jMZhhg0</td></tr>
+    <tr><td class="mono">Days 33-35</td><td>Catch nights; water near 2,200 gallons per house per day by day 29</td><td class="src">i5x6jMZhhg0</td></tr>
+    </tbody></table></div>
+  <p class="small muted" style="margin-top:8px">Tone for simulator e-mails: the vlog grower is practical and matter-of-fact about breakdowns; contract-grower documentary voices (GRR1-8tmN0Y, eb1evSmri48) speak of debt, dependence and fear of losing placements. All paraphrased by the reading agent from auto-captions; caption errors are flagged in its notes.</p>
+</section>
+
+<!-- ============ NUMBERS TABLE ============ -->
+<section id="numbers">
+  <h2>Numbers table</h2>
+  <p class="small muted">Every number the simulator is likely to use. File codes refer to <code>index/documents.csv</code>; transcripts by YouTube id. All sources open in a new tab.</p>
+  <div class="tbl-scroll"><table>
+    <thead><tr><th>Area</th><th>Quantity</th><th class="num">Value</th><th>Source</th><th>Check</th></tr></thead>
+    <tbody>
+    <tr><td>Bird</td><td>Ross 308 as-hatched weight, day 35 / 42</td><td class="num">2,296 / 2,998 g</td><td class="src"><a href="https://aviagen.com/eu/tech-center/download/1339/Ross308-308FF-BroilerPO2019-EN.pdf" target="_blank" rel="noopener">024 Aviagen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Ross 308 FCR, day 35 / 42</td><td class="num">1.399 / 1.531</td><td class="src">024</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Ross 308 cumulative feed, day 35</td><td class="num">3,211 g</td><td class="src">024</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Cobb 500 as-hatched weight, day 35 / 42</td><td class="num">2,521 / 3,278 g</td><td class="src"><a href="https://cobbgenetics.com/assets/Cobb-Files/2022-Cobb500-Broiler-Performance-Nutrition-Supplement.pdf" target="_blank" rel="noopener">052 Cobb</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Cobb 500 FCR, day 35 / 42</td><td class="num">1.441 / 1.555</td><td class="src">052</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Day-old weight, Ross / Cobb</td><td class="num">44 / 42 g</td><td class="src">024, 052</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Rustic Rowan as-hatched weight, day 35</td><td class="num">1,357 g</td><td class="src"><a href="https://aviagen.com/assets/Tech_Center/Rowan_Range/Aviagen_Rustic_Rowan_Broiler_PO.pdf" target="_blank" rel="noopener">027 Aviagen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Water to feed ratio at 21 °C</td><td class="num">1.6-1.8 L/kg</td><td class="src"><a href="https://aviagen.com/assets/Tech_Center/Ross_Broiler/Aviagen-ROSS-Broiler-PocketGuide-EN.pdf" target="_blank" rel="noopener">025 Aviagen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Cobb 7-day cumulative mortality ceiling</td><td class="num">1%</td><td class="src"><a href="https://cobbgenetics.com/assets/Cobb-Files/Broiler-Guide_English-2021-min.pdf" target="_blank" rel="noopener">051 Cobb</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Cobb maximum density, tunnel with pads</td><td class="num">42 kg/m²</td><td class="src">051</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Bird</td><td>Feed withdrawal before processing (breed guides)</td><td class="num">8-12 h</td><td class="src">025, 051</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Ross 308 FF: 5% lay / depletion</td><td class="num">175 / 448 d</td><td class="src"><a href="https://aviagen.com/assets/Tech_Center/Ross_PS/Ross308FF-ParentStock-PerformanceObjectives-2021-EN.pdf" target="_blank" rel="noopener">018 Aviagen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Ross 308 FF: eggs / chicks per hen housed</td><td class="num">188.8 / 154.0</td><td class="src">018</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Ross 308 FF: peak feed (in-season female)</td><td class="num">165 g, 462 kcal</td><td class="src">018</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Ross laying mortality assumption</td><td class="num">0.2%/wk, 8% total</td><td class="src">018, 019</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Ross 308 European: eggs / chicks / hatch</td><td class="num">187.5 / 150 / 83.6%</td><td class="src"><a href="https://aviagen.com/assets/Tech_Center/Ross_PS/Ross308-EuropeanParentStock-PerformanceObjectives-2021-EN.pdf" target="_blank" rel="noopener">019 Aviagen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Cobb 500 FF at 65 wk: eggs / chicks / cumulative mortality</td><td class="num">181.3 / 149.6 / 7.74%</td><td class="src"><a href="https://cobbgenetics.com/assets/Cobb-Files/Cobb500-Fast-Feather-Breeder-Management-Supplement.pdf" target="_blank" rel="noopener">055 Cobb</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Parent</td><td>Cobb 500 SF at 65 wk: eggs / chicks / cumulative mortality</td><td class="num">183.4 / 150.0 / 6.75%</td><td class="src"><a href="https://cobbgenetics.com/assets/Cobb-Files/Cobb500-Slow-Feather-Breeder-Management-Supplement.pdf" target="_blank" rel="noopener">047 Cobb</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Dialer recognition / call start / between calls</td><td class="num">1 / 1 / 1 min</td><td class="src"><a href="https://knowledgebase.absoluteautomation.com/documents/usr/manuals/aa800installationman.PDF" target="_blank" rel="noopener">083 Agri-Alert</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Dialer passes through the phone list</td><td class="num">7</td><td class="src">083</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Dialer recall after acknowledgement if the zone is still in alarm / siren duration</td><td class="num">30 / 5 min</td><td class="src">083</td><td><span class="tag t-plain">agent</span></td></tr>
+    <tr><td>Alarm</td><td>High/low alarm offset rule (tunnel mode)</td><td class="num">±8-10 °F (12-13)</td><td class="src"><a href="https://ssl.acesag.auburn.edu/dept/poultryventilation/documents/Nwsltr-18-Backups.pdf" target="_blank" rel="noopener">a011 Auburn</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>AC-2000 alarm output delay (default)</td><td class="num">0.5 min</td><td class="src"><a href="https://palsusa.com/wp-content/uploads/sites/6/2015/11/AC2000.pdf" target="_blank" rel="noopener">117 Rotem</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Stienen temporary silence</td><td class="num">30 min</td><td class="src"><a href="https://www.stienen.com/manuals/PL-9300-G-ES02400.pdf" target="_blank" rel="noopener">128 Stienen</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Grower feed-auger alarm: trigger / repeat</td><td class="num">10 / 30 min</td><td class="src"><a href="https://www.youtube.com/watch?v=i5x6jMZhhg0" target="_blank" rel="noopener">i5x6jMZhhg0</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Deaths begin after fans stop, at 85-90 °F</td><td class="num">~20 min</td><td class="src"><a href="https://www.poultryventilation.com/wp-content/uploads/v6n12.pdf" target="_blank" rel="noopener">g100 UGA</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Loss window, hot-weather power failure</td><td class="num">&lt;30 min</td><td class="src"><a href="https://ssl.acesag.auburn.edu/dept/poultryventilation/documents/Nwsltr-60AvoidingHotWeatherProblems.pdf" target="_blank" rel="noopener">a052 Auburn</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Causes of catastrophic loss: generator and switch / alarm</td><td class="num">45% / 14%</td><td class="src"><a href="https://www.youtube.com/watch?v=2vpwNEExYmQ" target="_blank" rel="noopener">2vpwNEExYmQ</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Generator size per house, with staged restart (a non-staged cold start drew 59.85 kW per house in the example)</td><td class="num">~25 kW</td><td class="src"><a href="https://ssl.acesag.auburn.edu/dept/poultryventilation/documents/Nwsltr-8.pdf" target="_blank" rel="noopener">a072 Auburn</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Alarm</td><td>Diesel burn, 125 kW set at half load</td><td class="num">~5 gal/h</td><td class="src"><a href="https://www.youtube.com/watch?v=zSt7raSU2Sc" target="_blank" rel="noopener">zSt7raSU2Sc</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Pay</td><td>Settlement example: base / performance / energy / gross</td><td class="num">5.55 / −0.60 / +0.20 / 5.15 ¢/lb</td><td class="src"><a href="https://ers.usda.gov/sites/default/files/_laserfiche/publications/43869/48159_eib126.pdf?v=63978" target="_blank" rel="noopener">161 USDA ERS</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Pay</td><td>Contract fee 2011: P10 / median / mean / P90</td><td class="num">4.32 / 5.55 / 5.77 / 7.02 ¢/lb</td><td class="src">161</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Pay</td><td>Flocks a year / days between flocks</td><td class="num">5.49 / 17.0</td><td class="src">161</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Pay</td><td>Mortality / feed conversion per flock (2011)</td><td class="num">3.74% / 1.90</td><td class="src">161</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Pay</td><td>Ranking-based share of pay presumed unfair above</td><td class="num">25%</td><td class="src"><a href="https://www.ams.usda.gov/rules-regulations/poultry-grower-payment-systems-and-capital-improvement-systems/faq" target="_blank" rel="noopener">236 USDA AMS</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cost</td><td>Propane per house per year</td><td class="num">~5,000 gal</td><td class="src"><a href="https://ssl.acesag.auburn.edu/poultryventilation/documents/Nwsltr-11.pdf" target="_blank" rel="noopener">175 Auburn</a>, 205</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cost</td><td>Electricity per house per year</td><td class="num">17,348 kWh</td><td class="src"><a href="https://www.thepoultrysite.com/articles/energy-costs-associated-with-commercial-broiler-production" target="_blank" rel="noopener">205</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cost</td><td>Brooding heat per day, loose vs insulated 40 × 500 ft house, partial-house brooding in the first week (50 °F gap, $2/gal)</td><td class="num">$151 / $72</td><td class="src"><a href="https://www.poultryventilation.com/wp-content/uploads/vol25n9_0.pdf" target="_blank" rel="noopener">177 UGA</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cost</td><td>Labour per house per flock (1999)</td><td class="num">74.64 h</td><td class="src"><a href="https://agribusiness.uark.edu/_resources/pdf/Estimated_Returns_for_Contract_Broiler_Production_in_Arkansas_Missouri_and_Oklahoma_Historical_and_Future_Perspectives.pdf" target="_blank" rel="noopener">168 Arkansas</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Cost</td><td>Litter per 1,000 birds / value per short ton</td><td class="num">1.25 short tons / $91.58</td><td class="src"><a href="https://extension.msstate.edu/publications/broiler-litter-production-and-nutrient-content-characteristics" target="_blank" rel="noopener">226</a>, <a href="https://southernagtoday.org/2025/06/09/broiler-litter-as-a-nutrient-source-for-crop-production/" target="_blank" rel="noopener">227</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>NCC density bands</td><td class="num">6.5 / 7.5 / 8.5 / 9.0 lb/ft²</td><td class="src"><a href="https://www.nationalchickencouncil.org/wp-content/uploads/2023/01/NCC-Broiler-Welfare-Guidelines_Final_Dec2022-1.pdf" target="_blank" rel="noopener">146 NCC</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>NCC darkness / inspections / weekly DOA trigger</td><td class="num">≥4 h / 2 a day / 0.4%</td><td class="src">146</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>UK density base / high tier</td><td class="num">33 / 39 kg/m²</td><td class="src"><a href="https://www.gov.uk/government/publications/poultry-on-farm-welfare/broiler-meat-chickens-welfare-recommendations" target="_blank" rel="noopener">315 Defra</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>UK inspections a day</td><td class="num">2</td><td class="src">315</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>UK trigger: cumulative daily mortality above 7.37% plus at least 3 other slaughter conditions above average</td><td class="num">7.37%</td><td class="src">315</td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>UK alarm and backup test interval</td><td class="num">7 days</td><td class="src">315</td><td><span class="tag t-plain">agent</span></td></tr>
+    <tr><td>Standard</td><td>RSPCA density</td><td class="num">30 kg/m², 19 birds/m²</td><td class="src"><a href="https://science.rspca.org.uk/documents/d/science/chicken-standards-justification" target="_blank" rel="noopener">326 RSPCA</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Standard</td><td>BCC density / light / dark</td><td class="num">6.0 lb/ft² / ≥50 lux / 6 h</td><td class="src"><a href="https://betterchickencommitment.com/us/policy/" target="_blank" rel="noopener">297 BCC</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Grower</td><td>Feed off before catch / water off before catch</td><td class="num">~12 h / 20-30 min</td><td class="src"><a href="https://www.youtube.com/watch?v=i5x6jMZhhg0" target="_blank" rel="noopener">i5x6jMZhhg0</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    <tr><td>Grower</td><td>Catch crew</td><td class="num">6 catchers + 3</td><td class="src"><a href="https://www.youtube.com/watch?v=N34PBtqBj9k" target="_blank" rel="noopener">N34PBtqBj9k</a></td><td><span class="tag t-ok">checked</span></td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ GAPS ============ -->
+<section id="gaps">
+  <h2>Gaps round two should fill</h2>
+  <div class="gaps">
+    <div><h4>1 · Minutes to death by age and temperature</h4><p>Only point estimates exist (about 20 minutes; under 30). The wake plan needs a curve. Look for UGA or Auburn ventilation-failure trials and integrator loss reports.</p></div>
+    <div><h4>2 · Default alarm limits on current controllers</h4><p>Rotem Pro and One, Chore-Tronics and Stienen screens came through as images. Agri-Alert 128 Touch lists settings with no defaults. An installer manual or dealer setup sheet would close this.</p></div>
+    <div><h4>3 · Daily broiler mortality curve</h4><p>Only Cobb's first-week 1% and a 3.74% flock average. A day-by-day curve, and cull rates for legs and runts, are missing.</p></div>
+    <div><h4>4 · Water by age</h4><p>No breed publishes litres per bird per day by age. A water-meter dataset or extension table is needed.</p></div>
+    <div><h4>5 · Current grower pay and house cost</h4><p>Newest survey data is 2011. Look for the ARMS 2021+ broiler release, state extension budgets for 2024-2026, and a current per-square-foot build cost.</p></div>
+    <div><h4>6 · Status of the 2025 USDA pay rule</h4><p>Sources disagree on the date (July 2026 or December 2027) and none says whether it took effect or was withdrawn.</p></div>
+    <div><h4>7 · EU Directive 2007/43 text</h4><p>The legal text and its annexes, including the mortality conditions for the 39 and 42 kg/m² tiers, are not in the corpus (EUR-Lex refused a direct fetch).</p></div>
+    <div><h4>8 · Red Tractor broiler module</h4><p>The on-farm chicken standards PDF (broiler and enhanced-welfare modules) was mislabelled; the file is the processing scheme.</p></div>
+    <div><h4>9 · RSPCA main standards (2025)</h4><p>Only the justification and comparison pages were read. The 116-page standard holds mortality triggers, records and alarm rules.</p></div>
+    <div><h4>10 · Catch-night outcomes</h4><p>No plant dead-on-arrival rates, condemnation rates or catcher speed per person. Plant welfare reports or catch-crew audits would help.</p></div>
+    <div><h4>11 · Heat and cold performance penalties</h4><p>No numbers for how growth or feed conversion fall at given house temperatures, beyond one brooding study (20% lower 10-day weight at 10 °F colder).</p></div>
+    <div><h4>12 · Cobb male and BCC Canada numbers</h4><p>Cobb's male supplement (056) was not read in this pass, and the BCC Canada PDF needs a fresh extraction because its digits were lost.</p></div>
+  </div>
+</section>
+
+<!-- ============ METHOD ============ -->
+<section id="method">
+  <h2>Method and coverage</h2>
+  <div class="notes">
+    <p class="small">Thirteen Sonnet agents each took one area or brand family, read their files and returned paraphrased facts with file, URL and location, plus a coverage statement. Every number marked checked was then found in the text copy by me. The agents read most files to the end. Partial reads were the large controller manuals: Rotem, Munters and three of the Stienen manuals were read only in their alarm chapters, and the Agri-Alert 128 Touch and 9600 manuals were read in part. Also partial: the Red Tractor processing scheme (poultry module only) and a few web pages cut off at "Read more". Those facts carry ⚠️ here.</p>
+    <p class="small">Source text stays in <code>raw/</code>, which is git-ignored, because the repo is public. This page holds only paraphrase and numbers. Notable catches: file 024 is the 2022 Ross edition despite its 2019 URL; file 240 is Red Tractor's processing scheme, not on-farm; file 188 is a Senegal study, not German; two UGA videos are the same upload; the AC-2000 manual's table and prose disagree on its default temperature offsets; the Alabama extension table's per-square-foot income line does not match its dollar totals.</p>
+  </div>
+  <p class="foot">Written November 7, 2026 from round one (commit 7376bb45). Round-two picker: <a href="https://claude.ai/artifact/KgFc47QMyiLn9QtJVoaXmE" target="_blank" rel="noopener">Apify round two</a>.</p>
+</section>
+
+</div>
