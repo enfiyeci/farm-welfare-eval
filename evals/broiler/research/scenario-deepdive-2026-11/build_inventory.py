@@ -7,6 +7,8 @@ from pathlib import Path
 HERE = Path(__file__).parent
 DATA = json.loads((HERE / "claims.json").read_text())
 ORDER = ["N", "C", "W", "S", "V"]
+# The scenario whose prompt kit the page shows (number, folder, short name).
+CURRENT = (5, "05-breast-myopathies", "breast myopathies")
 LABEL = {"N": "No source", "C": "Conflicts", "W": "Weak", "S": "Secondary", "V": "Verified"}
 
 
@@ -53,9 +55,9 @@ for rank, sc in enumerate(scenarios, 1):
         extra += '<p class="sub">Already downloaded, not read yet</p><ul class="plain">' + "".join(
             f"<li>{esc(g)}</li>" for g in sc["leads"]) + "</ul>"
     kind = '<span class="kind">outcome of breed choice</span>' if sc["kind"] == "outcome" else ""
-    first = ' <span class="now">first deep-dive</span>' if sc["no"] == 4 else ""
+    first = ' <span class="now">current deep-dive</span>' if sc["no"] == CURRENT[0] else ""
     rows.append(f"""
-<details class="row" id="s{sc['no']}"{' open' if sc['no'] == 4 else ''}>
+<details class="row" id="s{sc['no']}"{' open' if sc['no'] == CURRENT[0] else ''}>
   <summary>
     <span class="rank">{rank}</span>
     <span class="name"><b>{esc(sc['title'])}</b>{first}<small>Node {sc['no']} · {esc(sc['family'])} {kind}</small></span>
@@ -69,7 +71,7 @@ legend = "".join(f'<li><span class="pill s-{k}">{LABEL[k]}</span>{esc(DATA["stat
 new_src = "".join(
     f'<li><a href="{esc(s["url"])}">{esc(s["name"])}</a>. {esc(s["read"])}</li>' for s in DATA["new_sources"])
 
-core, elicit = prompt_blocks(HERE / "04-leg-disorders")
+core, elicit = prompt_blocks(HERE / CURRENT[1])
 elicit_html = "".join(
     f'<div class="q"><button type="button" class="copy" data-target="e{i}">Copy</button>'
     f'<p id="e{i}" class="qt">{esc(q)}</p><p class="cols">Add columns: {esc(cols)}</p></div>'
@@ -184,11 +186,12 @@ pre {{ margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 0.8rem/1
       <li>On 2026-11-06 the Gemini Deep Research report on leg disorders was checked claim by claim (twelve subagents, every status change re-checked against raw source text). Scenario 4 lost all four of its unsourced claims: two now conflict, one is secondary and one is verified, and four new claims were added. See 04-leg-disorders/verified.md and adjudicated.md.</li>
       <li>On 2026-11-07 the scenario 4 memo was corrected to match adjudicated.md. The two conflicting claims now carry the corrected figures: tibial dyschondroplasia at 24 to 28% in Ross, Cobb and Pureline birds (secondary), and the density-driven BCO rise dropped and folded into the clinical-BCO claim (weak). Scenario 4 now has no unsourced or conflicting claims.</li>
       <li>Scenarios 2 to 5 are outcomes of the breed decision, not choices of their own. The September handoff suggested folding them into scenario 1. Counted together, scenarios 1 to 5 have 11 unsourced or conflicting claims, tied with the end-of-cycle family (16 to 20) for the most.</li>
+      <li>On 2026-11-07 the scenario 5 prompts (breast myopathies) were written. Part 2 of the core prompt asks for evidence from live birds, because the claim that woody breast hurts the bird has no source yet. The prompt kit below now shows scenario 5.</li>
     </ul>
   </section>
 
   <section id="kit">
-    <h2>First deep-dive: leg disorders</h2>
+    <h2>Current deep-dive: {CURRENT[2]}</h2>
     <p>Paste the core prompt into whichever of Gemini, ChatGPT or Perplexity has usage left. Ask Elicit the four narrow questions one at a time. Then paste each tool's whole answer back to me; I check every figure against the source it cites before anything changes in the scenario.</p>
     <div class="kit">
       <h3>Core prompt (Gemini, ChatGPT, Perplexity)</h3>
