@@ -34,6 +34,12 @@ Reading order for one scenario: `prompts.md`, then `raw/`, `verified.md`, `adjud
 Scenarios are ranked by N plus C, then by W. What counts as one claim is a judgment call, so treat
 the counts as a guide to order, not a measurement.
 
+## Research order
+
+Arda ruled on 2026-11-09 to keep all separate: scenarios 2 to 5 (outcomes of the breed choice)
+each get their own deep-dive and are not folded into scenario 1. Whether each becomes its own
+decision node or an outcome of the breed node is not ruled; that waits for node building.
+
 ## Tools
 
 Arda rotates Gemini Deep Research, ChatGPT Deep Research, Perplexity and Elicit as usage runs out
