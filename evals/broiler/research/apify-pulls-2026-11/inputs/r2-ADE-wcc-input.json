@@ -1,0 +1,494 @@
+{
+ "startUrls": [
+  {
+   "url": "https://www.delmarvanow.com/story/news/local/maryland/2021/04/19/27-000-chickens-dead-crisfield-poultry-house-fire/7282192002/"
+  },
+  {
+   "url": "https://www.delmarvanow.com/story/news/local/maryland/2023/12/20/fire-destroys-chickenhouse-in-pocomoke-city-with-18000-chickens/71992547007/"
+  },
+  {
+   "url": "https://www.farminglife.com/country-and-farming/6000-chickens-killed-in-ni-farm-fire-2970607"
+  },
+  {
+   "url": "https://www.wthr.com/article/news/local/indiana-poultry-owners-urged-to-protect-their-flock-amid-mysterious-bird-deaths/531-c5331f43-ac54-422c-ab68-b6881c7ce0ae"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/chicks-die-in-power-outage.1233626/"
+  },
+  {
+   "url": "https://www.nwahomepage.com/news/chicken-farm-loses-30000-chickens-in-fire/"
+  },
+  {
+   "url": "https://www.nwahomepage.com/knwa/12000-chickens-die-in-fire-leaving-the-owners-business-in-ashes/"
+  },
+  {
+   "url": "https://www.ndtv.com/india-news/5-300-chickens-die-in-odisha-poultry-farm-after-being-trapped-in-heat-amid-powercut-11508268"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/help-i-think-my-chicken-died-from-the-heat.540223/"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/my-brooder-caught-on-fire.1089166/"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/heat-lamp-fire.1512765/"
+  },
+  {
+   "url": "https://www.11alive.com/article/news/community/thousands-of-chickens-killed-in-walton-county-poultry-house-fire/85-4659ca58-7628-4869-b087-044744bc242a"
+  },
+  {
+   "url": "https://newsinfo.inquirer.net/1345095/43000-chickens-die-of-heatstroke-in-laguna-poultry-farm"
+  },
+  {
+   "url": "https://www.itv.com/news/central/2022-04-28/company-fined-44k-after-27000-chickens-die-due-to-ventilation-failure"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/chicks-lightning-and-fire-oh-my.1409208/"
+  },
+  {
+   "url": "https://www.reuters.com/business/environment/record-heat-causes-mass-poultry-deaths-france-2026-06-24/"
+  },
+  {
+   "url": "https://www.nytimes.com/2026/07/06/climate/dead-chickens-heat-wave-france.html"
+  },
+  {
+   "url": "https://www.swtimes.com/story/news/2026/01/29/winter-storm-collapses-roughly-70-poultry-houses-in-yell-county/88415118007/"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/snow-load-go-brace-your-coop-and-run-before-they-are-flattened.262355/"
+  },
+  {
+   "url": "https://journals.sagepub.com/doi/10.1177/1420326X9900800312"
+  },
+  {
+   "url": "https://www.wattagnet.com/home/article/15477112/22000-chickens-die-in-farm-fire"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15526358/sanderson-farms-loses-17-million-chickens-to-hurricane-wattagnet"
+  },
+  {
+   "url": "https://avinews.com/en/avian-influenza-outbreaks-in-the-uk-forces-new-farm-restrictions/"
+  },
+  {
+   "url": "https://www.wjtv.com/video/chicken-farm-catches-fire-in-jones-county/7650442/"
+  },
+  {
+   "url": "https://www.aphis.usda.gov/livestock-poultry-disease/avian/avian-influenza/hpai-detections/commercial-backyard-flocks"
+  },
+  {
+   "url": "https://www.congress.gov/crs-product/R48518"
+  },
+  {
+   "url": "https://www.nationalhogfarmer.com/farming-equipment/reliable-back-up-systems-are-not-an-accident"
+  },
+  {
+   "url": "https://www.wusa9.com/article/weather/hurricanes/hurricane-florence/17-million-chickens-drowned-in-florence-flooding/65-596095747"
+  },
+  {
+   "url": "https://www.jacksonville.com/story/news/2018/09/18/17-million-chickens-drown-in-north-carolina-flooding-from-florence/10267843007/"
+  },
+  {
+   "url": "https://www.ncanchor.org/anchor/floyd-and-agriculture"
+  },
+  {
+   "url": "https://www.wattagnet.com/home/article/15499765/uk-egg-producer-loses-over-100000-birds-in-fire"
+  },
+  {
+   "url": "https://www.newsletter.co.uk/news/thousands-of-chickens-killed-at-ni-farm-3413890"
+  },
+  {
+   "url": "https://www.westerninvestor.com/national-business/27000-chickens-killed-in-british-columbia-fire-that-destroyed-two-barns-10886324"
+  },
+  {
+   "url": "https://www.modernghana.com/videonews/cnn/1/312445"
+  },
+  {
+   "url": "https://www.12news.com/video/syndication/ott/12news-plus/egg-farmer-blames-feds-for-the-death-of-6-million-chickens/75-d9c7ae93-8bd6-4ec3-98d8-bea5f1a70e8f"
+  },
+  {
+   "url": "https://www.krem.com/article/news/local/grant-county/lawsuit-100000-moses-lake-chickens-died-when-alarm-failed/293-125724022"
+  },
+  {
+   "url": "https://www.wattagnet.com/egg/egg-production/article/15511914/willamette-egg-farms-sues-installer-over-dead-hens"
+  },
+  {
+   "url": "https://www.charlotteobserver.com/news/business/article291363600.html"
+  },
+  {
+   "url": "https://whistleblower.org/in-the-news/the-progressive-pulse-perdue-farms-allegedly-retaliated-against-robeson-county-chicken-farmer-for-publicizing-sick-dying-birds/"
+  },
+  {
+   "url": "https://www.wfaa.com/article/news/local/investigates/sanderson-farms-the-smell-is-putrid-death-they-had-a-nice-place-in-the-country-until-hundreds-of-thousands-of-chickens-moved-in-next-door/287-e9b55b0b-97e6-4ab4-95ff-c500c252339e"
+  },
+  {
+   "url": "https://stacks.cdc.gov/view/cdc/165067"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/24hrs-power-outage-and-my-last-egg-to-hatch.1658181/"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/power-went-out.1385855/"
+  },
+  {
+   "url": "https://www.khou.com/video/life/animals/texas-farmers-are-losing-their-chickens-due-to-the-extreme-heat/285-9f2db046-2db0-4050-ab16-502d8c2f42f1"
+  },
+  {
+   "url": "https://www.5newsonline.com/article/news/local/the-fayetteville-fire-department-is-responding-to-a-structure-fire-this-afternoon-off-rose-cemetery-road-in-prairie-grove/527-dd6adc0e-14dd-4d22-962b-5663fad0f34a"
+  },
+  {
+   "url": "https://www.myarklamiss.com/news/arkansas-news/fire-crews-battle-chicken-house-fire-in-southern-arkansas/"
+  },
+  {
+   "url": "https://www.nwahomepage.com/news/state-news/report-finds-arkansas-poultry-industry-suffered-200m-in-damages-from-january-winter-storm/"
+  },
+  {
+   "url": "https://cloudflare.egyptindependent.com/dead-chickens-and-decomposing-bodies-inside-south-africas-power-blackout-pandemic/"
+  },
+  {
+   "url": "https://www.desmoinesregister.com/story/money/agriculture/2023/11/10/bird-flu-hits-a-commercial-flock-with-1-2-million-birds/71535266007/"
+  },
+  {
+   "url": "https://www.wattagnet.com/home/article/15484734/georgia-poultry-farm-fire-kills-chickens"
+  },
+  {
+   "url": "https://www.manufacturing.net/home/video/13188572/poultry-farms-destroyed-in-tornado"
+  },
+  {
+   "url": "https://www.yourerie.com/video/approximately-100000-chickens-killed-in-bozrah-farm-fire/8346842/"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/will-my-chickens-get-struck-by-lightning.378219/"
+  },
+  {
+   "url": "https://www.wcnc.com/article/news/local/60000-chickens-die-after-fan-goes-out-at-shelby-farm/275-374223605"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/additional-commercial-flocks-in-iowa-delaware-report-hpai"
+  },
+  {
+   "url": "https://phys.org/news/2024-01-avian-flu-food-chain.html"
+  },
+  {
+   "url": "https://www.agriculture.com/livestock/poultry/avian-influenza-confirmed-in-commercial-and-backyard-iowa-flocks"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/losses-reported-in-north-carolina-due-to-flooding"
+  },
+  {
+   "url": "https://awionline.org/news/usda-sued-to-compel-humane-handling-of-birds-at-slaughter/"
+  },
+  {
+   "url": "https://www.fresnobee.com/news/local/article316430837.html"
+  },
+  {
+   "url": "https://www.farmprogress.com/poultry-news/300-000-laying-hens-die-in-michigan-barn-fire"
+  },
+  {
+   "url": "https://motomco.com/broiler-farm-barn-destroyed-by-fire-500000-in-damage/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15529946/perdue-grower-loses-barn-chickens-in-fire-wattagnet"
+  },
+  {
+   "url": "https://www.backyardchickens.com/threads/did-carbon-minoxide-kill-my-chicks.474492/"
+  },
+  {
+   "url": "https://www.charlotteobserver.com/news/local/crime/article12071900.html"
+  },
+  {
+   "url": "https://www.nytimes.com/1985/02/06/us/around-the-nation-national-guard-to-help-clean-up-dead-chickens.html"
+  },
+  {
+   "url": "https://www.washingtonpost.com/news/animalia/wp/2016/10/11/flooded-north-carolina-farms-are-likely-littered-with-drowned-livestock/"
+  },
+  {
+   "url": "https://www.ecowatch.com/hurricane-florence-animals-killed-flooding-2606280756.html"
+  },
+  {
+   "url": "https://qz.com/1395700/hurricane-florence-drowns-3-4-million-poultry-birds-and-5500-pigs-in-north-carolina"
+  },
+  {
+   "url": "https://www.cdc.gov/bird-flu/situation-summary/index.html"
+  },
+  {
+   "url": "https://www.wattagnet.com/poultry-meat/diseases-health/avian-influenza/news/15736708/avian-flu-confirmed-in-maryland-broiler-flock"
+  },
+  {
+   "url": "https://www.gfbinsurance.com/news/georgia-farm-bureau/2021/03/17/georgia-farm-bureau-ruling-the-roost-in-poultry-insurance"
+  },
+  {
+   "url": "https://researchbriefings.files.parliament.uk/documents/CBP-9688/CBP-9688.pdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/dl7-9fb-potters-farm-production-epr-bp3923um-a001/supporting_documents/noise-management-planpdf"
+  },
+  {
+   "url": "https://www.planningresource.co.uk/article/1310086/poultry-sheds-harm-future-living-conditions"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/ip22-2sp-crown-chicken-limited-epr-dp3447qs-v004/supporting_documents/application-variation-v004-odour-management-plan-odour-assessment-30072026pdf"
+  },
+  {
+   "url": "https://www.fwi.co.uk/news/environment/so-you-want-to-draw-up-an-environmental-impact-assessment"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/ng34-8xy-leasingham-poultry-farm-ltd-a001/supporting_documents/application-bespoke-a001-supporting-information-26-08-25-odour-management-planpdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/wr10-2jh-e-c-drummond-son-epr-dp3937mg-v008/supporting_documents/application-variation-v008-supporting-information-05-12-2025-odour-management-planpdf"
+  },
+  {
+   "url": "https://www.rogerparry.net/consultation-area"
+  },
+  {
+   "url": "https://plota.co.uk/planning-applications/agricultural/"
+  },
+  {
+   "url": "https://www.crowdjustice.com/case/save-lincolnshire-from-factory-farming/"
+  },
+  {
+   "url": "https://www.lincolnshireworld.com/country-and-farming/plans-for-large-scale-chicken-farm-could-bring-noise-and-disruption-to-rural-village-campaigners-warn-8642658"
+  },
+  {
+   "url": "https://planning.northdevon.gov.uk/Document/Download?module=PLA&recordNumber=101185&planId=1251935&imageId=76&isPlan=False&fileName=Comments%2816%29.pdf"
+  },
+  {
+   "url": "https://planningregister.cherwell.gov.uk/Document/Download?module=PLA&recordNumber=67566&planId=1358857&imageId=336&isPlan=False&fileName=9389819.pdf"
+  },
+  {
+   "url": "https://www.iclr.co.uk/document/2025034707/2025ewhc1497admin_TNA/html"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/wr10-2jh-e-c-drummond-son-epr-dp3937mg-v008/supporting_documents/application-variation-v008-supporting-information-05-12-2025-noise-management-plan-2-1pdf"
+  },
+  {
+   "url": "https://ouci.dntb.gov.ua/en/works/4gZyN0L7/"
+  },
+  {
+   "url": "https://planning.northdevon.gov.uk/Document/Download?module=PLA&recordNumber=101185&planId=1240611&imageId=27&isPlan=False&fileName=Design%20and%20Access%20Statement%20-%2020260821.pdf"
+  },
+  {
+   "url": "https://business.senedd.wales/documents/s129886/Research%20Brief.html?CT=2"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/dn14-7yd-metham-poultry-limited-epr-mp3320mz-a001/supporting_documents/environmental-statementpdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/ex32-7qn-higher-meadows-poultry-ltd-epr-fp3722ma/consultation/view_respondent?uuId=426565472"
+  },
+  {
+   "url": "https://www.northernirelandworld.com/news/politics/council/plans-lodged-for-two-poultry-sheds-at-draperstown-farm-4139442"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/dl7-9fb-potters-farm-production-epr-bp3923um-a001/supporting_documents/planning-notice-of-decisionpdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/dn14-7gx-annyalla-chicks-uk-broilers-kp3206bk-v003/supporting_documents/application-formpdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/cm6-3td-gst-limited-epr-ep3228la-a001/supporting_documents/application-bespoke-a001-form-part-35-redacted-02122025pdf"
+  },
+  {
+   "url": "https://committees.parliament.uk/writtenevidence/39876/html/"
+  },
+  {
+   "url": "https://plota.co.uk/application/pj44mvwp"
+  },
+  {
+   "url": "https://planning.northdevon.gov.uk/Document/Download?module=PLA&recordNumber=100895&planId=1257104&imageId=148&isPlan=False&fileName=Transport%20Statement%20-%20REV%20A%282%29.pdf"
+  },
+  {
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2024-01-08/8617/"
+  },
+  {
+   "url": "https://questions-statements.parliament.uk/written-questions/detail/2024-01-05/7829"
+  },
+  {
+   "url": "https://plota.co.uk/application/73235"
+  },
+  {
+   "url": "https://planning.northdevon.gov.uk/Planning/Display/82141"
+  },
+  {
+   "url": "https://planningtrack.co.uk/authorities/borough-council-of-king-s-lynn-and-west-norfolk/applications/26-01645-eiascr"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15742181/cranswick-refused-planning-permission-for-site-redevelopment"
+  },
+  {
+   "url": "https://publicaccess.braintree.gov.uk/online-applications/applicationDetails.do?activeTab=documents&keyVal=M8HSPRBF0CY00&documentOrdering.orderBy=date&documentOrdering.orderDirection=ascending"
+  },
+  {
+   "url": "https://www.planningresource.co.uk/article/1712989/poultry-sheds-confirmed-development"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/ip22-2sp-crown-chicken-limited-epr-dp3447qs-v004/supporting_documents/application-variation-v004-environmental-management-system-summary-1-30072026pdf"
+  },
+  {
+   "url": "https://www.planningresource.co.uk/article/1729958/odour-emission-poultry-unit-questioned-environment-agency"
+  },
+  {
+   "url": "https://publicaccess.iow.gov.uk/online-applications/files/CF26FE1E968059BE8C1FEF6CB17F2CDD/pdf/21_01782_HOU-POLYTUNNEL_BARN_OWL_FARM_COTTAGE_LOCATION_PLAN-3013709.pdf"
+  },
+  {
+   "url": "https://democracy.chorley.gov.uk/documents/s14933/Enf%20report%20-%20Yew%20Tree%20Farm.pdf"
+  },
+  {
+   "url": "https://baberghmidsuffolk.moderngov.co.uk/documents/s28751/DC2106824%20Comments.pdf"
+  },
+  {
+   "url": "https://consult.environment-agency.gov.uk/psc/ln9-5rz-poolham-poultry-limited-epr-wp3325lk-a001/supporting_documents/Application%20Bespoke%20A001%20Revised%20Noise%20and%20Vibration%20%2002062025.pdf"
+  },
+  {
+   "url": "https://bassetlaw.moderngov.co.uk/documents/s13563/23-01457-FUL%20DRAFT%201.0%20ACRev2%20comments.pdf"
+  },
+  {
+   "url": "https://planning.n-somerset.gov.uk/online-applications/files/4614D74CC85B6B1031654E8F4C71D496/pdf/26_P_1261_FUL-1214-1024-FARM_HOUSE_-_PROPOSED_GF___FF_PLANS-P02-3607989.pdf"
+  },
+  {
+   "url": "https://edemocracy.northyorks.gov.uk/Data/Ryedale%20-%20Planning%20Committee/201207241800/Agenda/5%20Design%20and%20access.pdf"
+  },
+  {
+   "url": "https://monaghan.ie/wp-content/uploads/2021/08/Baseline%20Study%20Poultry%20Sector%20Co.Monaghan%20July%202021.pdf"
+  },
+  {
+   "url": "https://democracy.monmouthshire.gov.uk/documents/s39821/DM%202023%2001198%20Coombe%20Farm.pdf"
+  },
+  {
+   "url": "https://edemocracy.northyorks.gov.uk/documents/s63794/HGTZC2403441EIAMAJ%20Ouseburn%20Farm%20Carr%20Field%20Lane%20Upper%20Dunsforth%20York.pdf"
+  },
+  {
+   "url": "https://edemocracy.northyorks.gov.uk/Data/Ryedale%20-%20Planning%20Committee/201007061800/Agenda/5-Design%20and%20access.pdf"
+  },
+  {
+   "url": "https://docs.eaap.org/2024/m221/S34T01.pdf"
+  },
+  {
+   "url": "https://business.senedd.wales/documents/s115799/Correspondence%20from%20the%20Chair%20Petitions%20Committee%20-%2021%20February%202019.pdf"
+  },
+  {
+   "url": "https://www.hbsslaw.com/cases/broiler-chicken-antitrust-litigation"
+  },
+  {
+   "url": "https://www.foodmanufacturing.com/supply-chain/news/21198204/pilgrims-pride-will-pay-110m-to-settle-pricefixing-charges"
+  },
+  {
+   "url": "https://www.just-food.com/news/hefty-fine-for-pilgrims-pride-after-price-fixing-plea-agreement/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15536128/koch-foods-offers-settlement-in-suit-filed-by-growers"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/justice-department-files-lawsuit-against-koch-foods"
+  },
+  {
+   "url": "https://www.meatpoultry.com/articles/29877-chicken-purchasers-settle-with-more-processors-in-price-fixing-case"
+  },
+  {
+   "url": "https://www.just-food.com/news/pilgrims-pride-agrees-to-price-fixing-settlement/"
+  },
+  {
+   "url": "https://www.ft.com/content/ca82af5d-5544-42fb-853a-3a67ffcdd7b4"
+  },
+  {
+   "url": "https://www.forbes.com/sites/jordanstrickler/2021/01/12/pilgrims-pride-agrees-to-75-million-settlement-for-price-fixing-claims/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15529608/settlement-reached-in-pilgrims-pride-investor-lawsuit-wattagnet"
+  },
+  {
+   "url": "https://www.weareiowa.com/article/news/nation-world/sanderson-farms-sold-for-4-billion/507-81c4c040-1d8c-4a83-821a-5ab4c4b2148b"
+  },
+  {
+   "url": "https://www.wattagnet.com/latest-news/press-release/15769063/waynesanderson-farms-releases-report"
+  },
+  {
+   "url": "https://www.wbir.com/article/news/nation-world/sanderson-farms-sold-for-4-billion/507-81c4c040-1d8c-4a83-821a-5ab4c4b2148b"
+  },
+  {
+   "url": "https://www.fox61.com/article/news/nation-world/sanderson-farms-sold-for-4-billion/507-81c4c040-1d8c-4a83-821a-5ab4c4b2148b"
+  },
+  {
+   "url": "https://www.wabe.org/feds-suing-poultry-producers-over-unfair-worker-practices/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15537979/making-sense-of-poultry-class-action-suits-settlements"
+  },
+  {
+   "url": "https://caselaw.findlaw.com/court/us-7th-circuit/117452254.html"
+  },
+  {
+   "url": "https://law.justia.com/cases/federal/district-courts/illinois/ilndce/1:2016cv08637/330954/7272/"
+  },
+  {
+   "url": "https://www.feedstuffs.com/policy/rule-institutes-fairness-in-poultry-tournament-system"
+  },
+  {
+   "url": "https://www.farmprogress.com/poultry-news/poultry-rule-receives-varied-feedback"
+  },
+  {
+   "url": "https://law.justia.com/cases/federal/district-courts/illinois/ilndce/1:2016cv08637/330954/7501/"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/broilers/article/15638307/usda-contracting-and-tournaments-transparency-rule-finalized"
+  },
+  {
+   "url": "https://www.usda.gov/media/press-releases/2024/06/03/usda-proposes-next-steps-promote-fairer-poultry-markets-protect"
+  },
+  {
+   "url": "https://researchrepository.wvu.edu/cgi/viewcontent.cgi?article=3978&context=etd"
+  },
+  {
+   "url": "https://www.hbsslaw.com/cases/poultry-chicken-processing-wage-fixing-antitrust"
+  },
+  {
+   "url": "https://www.farmprogress.com/livestock/8-things-to-know-about-contract-poultry-growing"
+  },
+  {
+   "url": "https://www.feedstuffs.com/agribusiness-news/tyson-foods-establishes-contract-farmers-bill-of-rights"
+  },
+  {
+   "url": "https://www.newsfromthestates.com/article/usdas-tyson-foods-investigation-collected-thousands-documents-would-donald-trump-end-it"
+  },
+  {
+   "url": "https://www.wattagnet.com/broilers-turkeys/article/15533760/tyson-near-legal-settlement-with-contract-growers"
+  },
+  {
+   "url": "https://caselaw.findlaw.com/court/tx-supreme-court/116245159.html"
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/812128/000081212822000009/safm-20220430.htm"
+  },
+  {
+   "url": "https://www.reuters.com/world/us/us-settles-claims-against-poultry-producers-over-worker-treatment-2022-07-25/"
+  },
+  {
+   "url": "https://quizlet.com/study-guides/proposed-regulations-for-poultry-grower-compensation-systems-4d41c639-d42b-44ca-9c12-ec7f66ccecc3"
+  },
+  {
+   "url": "http://www.uspoultry.org/files/2013InjuryIllnessRateChartPoultryProcessing.pdf"
+  },
+  {
+   "url": "https://openscholar.uga.edu/record/26306/files/C953.pdf"
+  },
+  {
+   "url": "https://www.usda.gov/sites/default/files/documents/130308_12-0123_DO_Tyson%20farms%20Inc.pdf"
+  },
+  {
+   "url": "https://ageconsearch.umn.edu/record/34031/files/ae990777.pdf"
+  }
+ ],
+ "crawlerType": "playwright:firefox",
+ "maxCrawlDepth": 0,
+ "maxCrawlPages": 169,
+ "maxConcurrency": 5,
+ "removeCookieWarnings": true,
+ "saveMarkdown": true,
+ "saveHtml": false,
+ "saveContentTypes": "application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+ "proxyConfiguration": {
+  "useApifyProxy": true
+ },
+ "respectRobotsTxtFile": true,
+ "maxRequestRetries": 1
+}
