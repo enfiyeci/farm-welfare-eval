@@ -1,5 +1,6 @@
-"""OCR the near-empty PDFs (status too-short in index/documents.csv) into raw/text/*-ocr.txt
-and write raw/text/_ocr-log.csv, which build_index.py reads alongside the other text logs.
+"""OCR the near-empty PDFs (status too-short in raw/text/_extract-log.csv) into raw/text/*-ocr.txt
+and add them to raw/text/_ocr-log.csv, which build_index.py reads alongside the other text logs.
+PDFs already in that log are not read again, so a rerun only OCRs new ones.
 
 Usage: python3 -I ocr.py <pull-folder>
 Needs pdftoppm (poppler) and tesseract on PATH.
@@ -9,9 +10,11 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 out = root / "raw" / "text"
-rows = []
-for r in csv.DictReader(open(root / "index/documents.csv")):
-    if r["status"] != "too-short" or not r["kind"].endswith("pdf"):
+log = out / "_ocr-log.csv"
+rows = list(csv.DictReader(open(log))) if log.exists() else []
+done = {r["file"] for r in rows}
+for r in csv.DictReader(open(out / "_extract-log.csv")):
+    if r["status"] != "too-short" or not r["file"].endswith(".pdf") or r["file"] in done:
         continue
     src = root / "raw" / r["file"]
     text, status = "", "ok"

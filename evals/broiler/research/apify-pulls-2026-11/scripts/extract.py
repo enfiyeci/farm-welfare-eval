@@ -60,7 +60,10 @@ def read_log(path):
 
 
 results = []
-for kind in ("pdf", "html", "html-rescue", "uga-tips", "uga-pdf", "auburn-pdf"):
+KINDS = ("pdf", "html", "html-rescue", "uga-tips", "uga-pdf", "auburn-pdf",
+         "r2-A-html", "r2-A-pdf", "r2-B-html", "r2-B-pdf", "r2-D-html", "r2-D-pdf",
+         "r2-E-html", "r2-E-pdf", "r2-J-pdf", "r2-J-search-pdf", "r2-K-files", "r2-J-files")
+for kind in KINDS:
     log = read_log(root / "raw" / kind / "_log.tsv")
     for name, (code, ctype, url) in sorted(log.items()):
         src = root / "raw" / kind / name
@@ -79,6 +82,10 @@ for kind in ("pdf", "html", "html-rescue", "uga-tips", "uga-pdf", "auburn-pdf"):
                     status = "ok" if r.returncode == 0 else f"pdftotext-error-{r.returncode}"
                 elif kind.endswith("pdf"):
                     text, status = "", "not-a-pdf"
+                elif src.suffix == ".docx":  # crawler-saved Word files; textutil ships with macOS
+                    r = subprocess.run(["textutil", "-convert", "txt", "-stdout", str(src)], capture_output=True, timeout=120)
+                    text = r.stdout.decode("utf-8", "replace")
+                    status = "ok" if r.returncode == 0 else f"textutil-error-{r.returncode}"
                 else:
                     p = Text()
                     p.feed(src.read_bytes().decode("utf-8", "replace"))

@@ -1,14 +1,21 @@
 """Website Content Crawler dataset (raw/wcc/*.json) -> raw/text/*-wcc.txt plus raw/text/_wcc-log.csv.
 
-Usage: python3 -I wcc_text.py <pull-folder> <dataset.json>
+Usage: python3 -I wcc_text.py <pull-folder> <dataset.json> [<prefix> <kind>]
+Round one used the defaults (prefix w, kind wcc). Round two passes its own, for example
+`kw r2-K-wcc`, which writes kw001-r2-K-wcc.txt and raw/text/_r2-K-wcc-log.csv.
 Pages from sites we chose to skip (paywalls, abstract-only, off-topic) are left out.
+Bot-check pages (Anubis, Cloudflare) count as failed. Rows that only saved a file
+(PDF or DOCX) have no text here; that file goes through extract.py instead.
 """
 import csv, json, re, sys
 from pathlib import Path
 from urllib.parse import urlparse
 
 SKIP = ("sciencedirect.", "pubmed.", "mdpi.", "ssrn.", "yumpu.", "zubairkhalid", "porkcheckoff.")
+BOT = ("Making sure you're not a bot", "Verify you are human", "Just a moment...")
 root = Path(sys.argv[1]); items = json.load(open(sys.argv[2]))
+prefix, kind = (sys.argv[3], sys.argv[4]) if len(sys.argv) > 4 else ("w", "wcc")
+log = "_wcc-log.csv" if kind == "wcc" else f"_{kind}-log.csv"
 out = root / "raw" / "text"
 rows = []
 for n, x in enumerate(items, 1):
@@ -19,16 +26,16 @@ for n, x in enumerate(items, 1):
     text = re.sub(r"\n{3,}", "\n\n", text)
     if any(s in host for s in SKIP):
         status = "skipped"
-    elif len(text) < 400:
+    elif len(text) < 400 or any(b in text[:600] for b in BOT):
         status = "failed"
     else:
         status = "ok" if len(text) >= 1500 else "thin"
-    name = f"w{n:03d}"
+    name = f"{prefix}{n:03d}"
     if status in ("ok", "thin"):
-        (out / f"{name}-wcc.txt").write_text(f"SOURCE: {url}\n\n{text}\n")
-    rows.append({"file": f"wcc/{name}", "kind": "wcc", "http": (x.get("crawl") or {}).get("httpStatusCode", ""),
+        (out / f"{name}-{kind}.txt").write_text(f"SOURCE: {url}\n\n{text}\n")
+    rows.append({"file": f"{kind}/{name}", "kind": kind, "http": (x.get("crawl") or {}).get("httpStatusCode", ""),
                  "status": status, "chars": len(text), "title": title, "url": url})
-with open(out / "_wcc-log.csv", "w", newline="") as f:
+with open(out / log, "w", newline="") as f:
     w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 from collections import Counter
 print(len(rows), Counter(r["status"] for r in rows))
