@@ -4,7 +4,8 @@ Usage: python3 -I wcc_text.py <pull-folder> <dataset.json> [<prefix> <kind>]
 Round one used the defaults (prefix w, kind wcc). Round two passes its own, for example
 `kw r2-K-wcc`, which writes kw001-r2-K-wcc.txt and raw/text/_r2-K-wcc-log.csv.
 Pages from sites we chose to skip (paywalls, abstract-only, off-topic) are left out.
-Bot-check pages (Anubis, Cloudflare) count as failed. Rows that only saved a file
+Bot-check pages (Anubis, Cloudflare) and pages served with an HTTP error code (400 or
+higher, such as a site's own "404 - Not Found" page) count as failed. Rows that only saved a file
 (PDF or DOCX) have no text here; that file goes through extract.py instead.
 """
 import csv, json, re, sys
@@ -24,8 +25,11 @@ for n, x in enumerate(items, 1):
     title = " ".join(((x.get("metadata") or {}).get("title") or "").split())[:150]
     text = (x.get("markdown") or x.get("text") or "").strip()
     text = re.sub(r"\n{3,}", "\n\n", text)
+    http = (x.get("crawl") or {}).get("httpStatusCode")
     if any(s in host for s in SKIP):
         status = "skipped"
+    elif isinstance(http, int) and http >= 400:
+        status = "failed"
     elif len(text) < 400 or any(b in text[:600] for b in BOT):
         status = "failed"
     else:

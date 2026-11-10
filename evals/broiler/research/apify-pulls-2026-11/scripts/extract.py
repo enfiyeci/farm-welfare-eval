@@ -62,7 +62,7 @@ def read_log(path):
 results = []
 KINDS = ("pdf", "html", "html-rescue", "uga-tips", "uga-pdf", "auburn-pdf",
          "r2-A-html", "r2-A-pdf", "r2-B-html", "r2-B-pdf", "r2-D-html", "r2-D-pdf",
-         "r2-E-html", "r2-E-pdf", "r2-J-pdf", "r2-J-search-pdf", "r2-K-files", "r2-J-files")
+         "r2-E-html", "r2-E-pdf", "r2-J-pdf", "r2-J-search-pdf", "r2-K-files", "r2-J-files", "r2-ADE-files")
 for kind in KINDS:
     log = read_log(root / "raw" / kind / "_log.tsv")
     for name, (code, ctype, url) in sorted(log.items()):

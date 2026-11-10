@@ -93,14 +93,21 @@ curl could not get.
 | J | Controller manuals: manual pages | apify/website-content-crawler | xvOI8ntiX5HdKefXB | 24 start URLs, 6 pages saved, 18 blocked; aborted after 12 minutes | $0.320 |
 | K | Retry of the 63 unfetched sources | apify/website-content-crawler | KAq1mUK5DDp8CRWSI | 63 start URLs, 46 rows, 18 saved files | $0.542 |
 | L | OCR of scanned PDFs | none (pdftoppm and tesseract) | | 47 of 48 round-one scans and 6 of 9 round-two scans now read | free |
-| **Total** | (Apify console usage meter, November 10, 2026; round two's runs add up to $4.60) | | | | **$8.27 of $105** |
+| A, D, E | Crawler retry of the pages curl could not get | apify/website-content-crawler | z0T3doLAfR3vMD3Rw | 159 start URLs, 109 rows, 2 saved files; stopped at its $1.50 cap with 19 URLs not reached | $1.512 |
+| **Total** | (Apify console usage meter, November 10, 2026; round two's runs add up to $6.11) | | | | **$9.84 of $105** |
 
 What each pick got:
 
 - **A, B, D, E:** curl got A 219 of 291 pages, D 101 of 137 pages and 48 of 61 PDFs, E 113 of 148
-  pages and 32 of 36 PDFs. The rest (about 160 URLs, the non-200 rows in each folder's
-  `_log.tsv`) were not sent to the crawler. Their rows are in `index/search-results.csv` as
-  `r2-A` to `r2-E`, and their text status is in `index/documents.csv`.
+  pages and 32 of 36 PDFs. The rest of A, D and E (159 URLs, `inputs/r2-ADE-retry-urls.txt`)
+  went to the crawler on November 10, 2026, with one retry per page and a $1.50 cap (Arda
+  approved the run). 89 of them now read as text: A 54 of 73, D 9 of 49, E 26 of 37 (two of
+  E's from saved PDFs in `raw/r2-ADE-files/`). D did worst: 12 of its 13 Environment Agency
+  consultation links now return "404 - Not Found", and most council planning portals answered
+  403 (blocked). The run stopped at its cap with 19 URLs not reached. Two crawled rows count as
+  text but are not the article: the FT page is a paywall stub and the WJTV page is a video
+  player with only a headline. B's unfetched pages had no crawler retry. The rows of all four are in
+  `index/search-results.csv` as `r2-A` to `r2-E`, and their text status is in `index/documents.csv`.
 - **C:** since 2020 most condemned birds are logged as "Unknown" (24.5 million of about 9.58
   billion in 2025), so per-cause counts undercount. "Miscellaneous" is NASS footnote 1:
   inflammatory process (cellulitis), plant rejects, missing viscera or ascites.
@@ -125,10 +132,12 @@ What each pick got:
   in `raw/r2-K-files/`, the rest from crawled pages). One saved PDF is a scan.
 
 To rebuild round two's text from `raw/`: `scripts/extract.py`, `scripts/wcc_text.py` once per
-crawler dataset (round one with no extra arguments; K with `kw r2-K-wcc`; J with `jw r2-J-wcc`),
-`scripts/ocr.py`, then `scripts/build_index.py`. The crawler marks bot-check pages as failed.
+crawler dataset (round one with no extra arguments; K with `kw r2-K-wcc`; J with `jw r2-J-wcc`;
+the A, D, E retry with `aw r2-ADE-wcc`), `scripts/ocr.py`, then `scripts/build_index.py`.
+`scripts/wcc_text.py` marks bot-check pages and pages served with an HTTP error code (400 or
+higher) as failed.
 
-`index/documents.csv` now has 2,957 rows across both rounds: 2,545 read as text (2,130 of them
-1,500 characters or more), 240 could not be fetched, 93 are almost empty and 40 J search PDFs are
-marked off-topic. The `pull` column is the topic a source was found for; K's retries keep their
+`index/documents.csv` now has 2,957 rows across both rounds: 2,634 read as text (2,200 of them
+1,500 characters or more), 131 could not be fetched, 37 crawler pages came back as error pages,
+bot-check pages or under 400 characters, 93 are almost empty and 40 J search PDFs are marked off-topic. The `pull` column is the topic a source was found for; K's retries keep their
 round-one pull, and tracking parameters are removed from the URLs.
