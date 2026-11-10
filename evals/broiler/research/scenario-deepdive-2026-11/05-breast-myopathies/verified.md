@@ -141,3 +141,39 @@ what they would settle for the memo.
 7. Kuttappan et al. 2012a, *Poult Sci* 91:2677, https://doi.org/10.3382/ps.2012-02259, or the author's thesis at https://scholarworks.uark.edu/etd/530. Settles the C8 percentages.
 8. Ross et al. 2020, *Appl Anim Sci* 36:447, https://doi.org/10.15232/aas.2019-01953.
 9. Lever papers, lower priority: Cruz 2017 (https://doi.org/10.3382/ps/pew310, UFRGS copy http://hdl.handle.net/10183/302618); Meloche 2018 (*Poult Sci* 97:1786 and 97:1794); Zhang 2018 (https://doi.org/10.22175/rmc2018.111); de Souza 2021 (https://doi.org/10.1016/j.livsci.2021.104659); Maynard 2023 (*J Appl Poult Res* 32:100324); Petracci 2013 and Lorenzi 2014.
+
+## Browser pass, 2026-11-09
+
+Sources 1 to 8 on the preceding list opened in Arda's Chrome (Claude in Chrome), with his
+authorization. No bot check was clicked, nothing was bought, no file was saved to disk. Reading
+notes, one file per source, are in
+`~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/artifacts/handoff-2026-11-09-broiler-deepdive-s5-browser-apply/`
+(outside git).
+"Read in full" means the article from abstract to end, from the publisher page or the author
+manuscript.
+
+| # | Source | Read | What it settles |
+|---|---|---|---|
+| 1 | Kuttappan 2013a, *Poult Sci* 92:811 | In full (ScienceDirect, open access), plus Figure 2 viewed | **C6:** the "5, 35, 5, 16%" are Table 1 **counts** of severe white-striping fillets per strain (A 5, B 35, C 5, D 16 of 189, 184, 173, 193), misread as percentages. The true shares are 2.6, 19.0, 2.9 and 8.3%; 61 of 739 = 8.3% overall. Strains are unnamed; Cobb-Vantress supported the work. **C1:** the paper never states "2.7 kg". Figure 2 plots modelled severe-WS probability against **ready-to-cook carcass weight**, not live weight: about 2 to 8% up to about 2.55 kg, then about 11% at 2.65, 17% at 2.85 and 37% at 3.13 kg (read by eye). Mean carcass weight of severe fillets was 2.77 kg. Both figures are white striping, 59 to 63-day birds. |
+| 2 | Norring 2019, *Animal* 13:1690 | In full (Helsinki author manuscript, extracted with pdf.js) | Males only, five unnamed hybrids, Finland. 266 birds analysed of over 340 housed; WB by palpation after death in 100 (38%). Gait 2.9 vs 2.6 (P = 0.001); fewer movements while lying, 2.0 vs 3.2 per 10 min (P = 0.046), in a video subset of 24 birds. **No per-age gait result:** the age-by-WB interaction was not significant and was dropped. **Body weight was not controlled** (WB birds 2,774 vs 2,620 g); the authors say the effects are "difficult to tease apart". Latency to lie did not differ. Pain "remains to be studied". |
+| 3 | Gall 2019, *Avian Dis* 63:514 | ⚠️ Abstract only. BioOne full text needs a sign-in or a $20 purchase; Unpaywall and Europe PMC list no open copy. | Nothing new. Stays W. |
+| 4 | Hisasaga, Orlowski-Workman and Tarrant 2025, *J Appl Poult Res* 35:100633 | In full (ScienceDirect, open access; no bot check appeared) | 210 straight-run Ross 708 at 49 days, Fresno. Live palpation agreed with the after-death severity score in 104 of 210 birds (49.5%). For presence alone, 27.1% were misclassified: 20.5% scored normal alive but had WB after death, 6.7% the reverse. From the counts, sensitivity is about 76% and specificity about 59% (my arithmetic). Live scoring over-called severe WB (31% vs 9%). One person did both scorings; blinding is not stated. Authors: live palpation is "not an accurate indicator of WB severity". |
+| 5 | Chen 2019, *Avian Pathol* 48:319 | In full (Taylor and Francis free access). ⚠️ Table 1 (body weight by week and strain) did not load. | **C10 holds.** Histology, scored blind, 608 sections from 960 birds (three unnamed commercial strains plus ACRB). Lesions from 2 weeks, worst at 8. WB score vs body weight by week rs = 0.29, 0.40, 0.41, 0.47; vs lymphocytic phlebitis rs = 0.68. No ACRB section scored above 2 of 4, and ACRB lesions did not progress; ACRB birds were also far lighter, so the authors draw no genetic conclusion. No sex or incubation effect. Gemini's author "Sarsour" is on this paper (Albarra H. Sarsour), not on Gall 2019. |
+| 6 | Papah 2017, *Avian Pathol* 46:623 | ⚠️ Not read. Taylor and Francis showed a Cloudflare "verify you are human" checkbox, which I may not click. The tab is left open in Arda's Chrome. | Open. |
+| 7 | Kuttappan 2012a, *Poult Sci* 91:2677 | In full (ScienceDirect, open access) | **C8 confirmed in full.** 280 straight-run Cobb 500, 54 days. Table 2: severe WS 12 of 138 (8.70%) on the high-energy diet vs 2 of 137 (1.46%) on the low-energy diet; normal 25.4% vs 47.5% (both P < 0.05). Live weight 3,042 vs 2,787 g; FCR 2.08 vs 2.28. |
+| 8 | Ross 2020, *Appl Anim Sci* 36:447 | In full, abstract to acknowledgments (ScienceDirect) | **E5 confirmed, now from full text.** 25 Ross 708 cockerels in single pens, slaughtered at 55 days (mean 3.5 kg); WB scores 0/1/2 = 6/14/5. WB had no effect on activity (P > 0.05), measured only as tracked movement from 05:30 to 09:30. No histology, no pain behaviours. The results mention a "restrictive feeding protocol" that the methods never describe. |
+| 9 | Lever papers (Cruz 2017, Meloche 2018, Zhang 2018, de Souza 2021, Maynard 2023, Petracci 2013, Lorenzi 2014) | Not started | Open. |
+
+What this changes, for `adjudicated.md` and `claims.json` (applied to both on 2026-11-09, and the
+same day to the memo, register row 5 and the inventory page):
+
+- C1 and C6: the dropped "2.7 kg" and "5/35/5/16%" figures are now traced to their source. Both
+  are severe **white striping**, and the 2.7 kg is carcass weight. The four strain figures are
+  counts. Per the handoff, note this in the src notes of the Aguirre 2020 and Hisasaga 2024
+  claims and in the memo; do not restore them as WB claims.
+- C8 (Kuttappan 2012a) and E5 (Ross 2020) move from abstract-level to a full primary read.
+- C10 (Chen 2019) moves to a full primary read.
+- E1 to E4 (Norring 2019) move to a full read, with two corrections: no per-age result, and body
+  weight not controlled.
+- F3 gains a second, larger accuracy study (Hisasaga 2025): live palpation detects presence
+  moderately and severity poorly.
