@@ -164,8 +164,8 @@ manuscript.
 | 8 | Ross 2020, *Appl Anim Sci* 36:447 | In full, abstract to acknowledgments (ScienceDirect) | **E5 confirmed, now from full text.** 25 Ross 708 cockerels in single pens, slaughtered at 55 days (mean 3.5 kg); WB scores 0/1/2 = 6/14/5. WB had no effect on activity (P > 0.05), measured only as tracked movement from 05:30 to 09:30. No histology, no pain behaviours. The results mention a "restrictive feeding protocol" that the methods never describe. |
 | 9 | Lever papers (Cruz 2017, Meloche 2018, Zhang 2018, de Souza 2021, Maynard 2023, Petracci 2013, Lorenzi 2014) | Not started | Open. |
 
-What this changes, for `adjudicated.md` and `claims.json` (applied to both on 2026-11-09; not yet
-to the memo, register row or inventory page):
+What this changes, for `adjudicated.md` and `claims.json` (applied to both on 2026-11-09, and the
+same day to the memo, register row 5 and the inventory page):
 
 - C1 and C6: the dropped "2.7 kg" and "5/35/5/16%" figures are now traced to their source. Both
   are severe **white striping**, and the 2.7 kg is carcass weight. The four strain figures are

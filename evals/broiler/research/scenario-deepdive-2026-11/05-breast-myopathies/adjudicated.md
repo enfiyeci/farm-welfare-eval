@@ -113,6 +113,6 @@ the opposite).
   option leads in Node 5 (g)), the register row in `../../README.md` and `../claims.json` now
   match this file. The two conflicting claims (2.7 kg and the four strains) were dropped from the
   memo and folded into the verified weight and strain claims.
-- Not yet carried over: the browser-pass changes (5.9, 5.11, Norring, the palpation claim and the
-  two traced figures) are in this file and `../claims.json` only. The memo, register row 5 and the
-  inventory page still show the earlier state.
+- Done later on 2026-11-09: the browser-pass changes (5.9, 5.11, Norring, the palpation claim and
+  the two traced figures) were carried into the memo (Node 5 and the cross-node table), register
+  row 5 and the republished inventory page.
