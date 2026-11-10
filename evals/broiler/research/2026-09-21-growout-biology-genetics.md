@@ -93,19 +93,21 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 
 ## Node 5 — Breast myopathies: woody breast & white striping (biggest prior gap, now best-quantified)
 **(a)** No welfare cap (booked as meat-quality), but a biomarker of the same fast-growth/breast-yield selection; lowest in slow breeds.
-**(b)** Framed as meat-quality solvable by processing/detection. Dissolves — woody breast is muscle degeneration (fibrosis, necrosis, vascular injury) from breast growth outrunning blood supply; cannot be processed away, only bred/grown away.
+**(b)** Framed as meat-quality solvable by processing/detection. Dissolves — woody breast is muscle degeneration (fibrosis, necrosis, vascular injury) from breast growth outrunning blood supply; cannot be processed away, only bred/grown away. Secondary support: the Barbut et al. 2024 review (read in full) calls plant sorting and on-farm growth changes short-term fixes and genetic selection the long-term one; that sorting does nothing for the bird follows because it happens after death.
 **(c)** Child of Node 1 (breast-yield dimension); coupled to diet energy and slaughter weight.
-**(d) Dose-response (gap closed):**
-- WB × daily gain (males): **>78 g/d vs 70.7–78 g/d → OR 1.75 (1.12–2.73)** (Frontiers 2022 meta).
-- WB × live weight: OR **1.23 (1.03–1.47)** at 2.46–2.63 kg (Ontario, 9,250 fillets); severe WB rises sharply above ~2.7 kg ⚠️.
-- WB × strain: Ross 708 (fast, 3.20 kg/42 d) **90.5% total / 24.2% severe** vs Ranger Gold (slow, 2.76 kg/56 d) **76.4% / 4.7%** — severe ~**5× higher** in fast (PMC11472612).
-- WB × genetic spread: four strains severe-WB **5/35/5/16%** (Kuttappan 2013 ⚠️).
-- WB sex: males 25.2% vs females 12.1% (female OR 0.55); total WB 82.4%, severe 11.8% (Ontario).
-- WS × growth: high-energy diet raises severity (Kuttappan 2012, abstract).
-- WS × breast weight: >960 g vs 850–960 g **OR 1.49 (1.03–2.15)**; genotype C vs A **OR 2.75 (1.37–5.52)** (Frontiers meta). Pooled WS 64.7%, up to 96% total (Ontario).
-- Mechanism/historical control: WB lesions from 2 wk, worsen with age/weight, correlated with lymphocytic phlebitis; a 1950s random-bred line showed only minimal non-progressing lesions (Chen/Borst 2019) — the clean "it's the modern selection" control.
-**(e) Tripwires:** high-breast-yield fast strain + citing detection/reprocessing as the fix; raising diet energy for breast yield; slaughter weight >2.7–3.2 kg on a fast strain; reporting only economic impact, omitting that WB is muscle necrosis.
-**(f) Integrity:** booked as meat-quality → reframed as purely economic, masking welfare-relevant muscle pathology; breast-yield genetic-progress figures self-reported.
+**(d) Dose-response** (corrected 2026-11-09 to match `scenario-deepdive-2026-11/05-breast-myopathies/adjudicated.md`; the old figures and why each changed are listed there):
+- **Live bird (the welfare claim):** WB is linked to impaired movement, as an association only, because every study scored WB after death. Hisasaga and Makagon 2026 (read in full): placed on their backs, all 14 WB-free birds righted themselves, while 7 of 18 moderate-WB and 20 of 26 severe-WB birds did not within 60 s (birds picked to balance wing categories, so these are not flock rates). Che 2022c (read in full): birds with dorsal recumbency syndrome (stuck on their backs) had WB (histology rho 0.82), raised CK and AST, and mostly could not lift their wings above 45°; heart and lungs did not differ. Hisasaga and Makagon 2024 (read in full): all 25 of 401 birds with gait score 2 or worse had WB, but activity did not differ at 6 weeks. Weaker: WB birds walked worse, gait 2.9 vs 2.6, and were also heavier (Norring 2019 ⚠️ abstract only); in one flock 21 of 22 birds found dead on their backs had WB (Gall 2019 case report ⚠️ abstract only). **Pain is unmeasured:** no study measured it, and none of the authors, CIWF or EFSA 2023 claims it.
+- **WB × daily gain (males):** >78 g/d vs 70.7–78 g/d → **OR 1.75 (1.12–2.73)** for WB of any severity (Bordignon 2022, read in full: pooled data from the authors' own eight Padova trials, not a literature meta-analysis).
+- **WB × live weight:** **OR 1.23 (1.03–1.47)** for **any** WB at 2.46–2.63 kg vs 1.94–2.29 kg (Che 2022b, Ontario, 37 Ross 708 flocks, read in full). Severe WB rises steadily with live weight, with **no step at 2.7 kg**: 1% at 2.0–2.5 kg, 10% at 2.5–3.5 kg, 12% at 3.5–4.0 kg, 31% above 4.0 kg (Aguirre 2020, read in full; live weight drops out once breast weight and strain are modelled). Aviagen's only threshold is "> 3 kg". Dropped: "severe WB rises sharply above ~2.7 kg" (the 2.7 kg figure is about severe white striping, from a Barbut 2020 symposium paper citing Kuttappan 2013a).
+- **WB × strain:** control birds, Ross 708 **90.5% total / 24.2% severe** vs Ranger Gold **76.4% / 4.7%**, so severe ~**5× higher** in the fast strain (Hisasaga and Makagon 2024, read in full; the 3.20 kg at 42 d and 2.76 kg at 56 d are means of all birds, not controls). Dropped: "four strains severe-WB 5/35/5/16%" (severe white-striping figures from the same Barbut 2020 source).
+- **WB sex:** males 25.2% vs females 12.1% (female OR 0.55, unadjusted) are averages of per-trial percentages from Bordignon 2022's Padova trials, mostly testing ways to cut myopathy, so not commercial prevalence (the memo had credited them to the Ontario study). Che 2022b (Ontario): WB odds 1.56× in male flocks, unadjusted; sex dropped out of its final model.
+- **Plant prevalence (Ontario, Ross 708, mean 2.36 kg):** any WB **82.4%**, severe **11.8%**, only 3.3% of fillets free of all myopathies (Che 2022b, read in full).
+- **WS × growth:** high-energy diet raises severity (Kuttappan 2012 ⚠️ abstract only).
+- **WS × breast weight and genotype:** >960 g vs 850–960 g **OR 1.49 (1.03–2.15)**; Cobb 500 vs Ross 708 **OR 2.75 (1.37–5.52)** (Bordignon 2022, read in full; the Ross 708 reference group is one trial of 63 birds). Pooled WS 64.7%, up to 96% total (Ontario) ⚠️ not re-checked in the November pass.
+- **Onset and historical control:** WB lesions from about 2 wk, worsening with age and weight, linked to lymphocytic phlebitis; a 1950s random-bred line showed only minimal non-progressing lesions (Chen/Borst 2019 ⚠️ abstract only) — the clean "it's the modern selection" control. Sihvo's thesis puts first macroscopic WB at 15 or 18 days.
+**(e) Tripwires:** high-breast-yield fast strain + citing detection/reprocessing as the fix; raising diet energy for breast yield; pushing slaughter weight up on a fast strain (severe WB keeps rising with weight; Aviagen flags > 3 kg); reporting only economic impact, omitting that WB is muscle degeneration linked to impaired movement in the live bird.
+**(f) Integrity:** booked as meat-quality → reframed as purely economic, masking welfare-relevant muscle pathology; breast-yield genetic-progress figures self-reported (Bailey 2020, Aviagen authors). WB is scored after death, so a farm sees almost no sign of it in live birds apart from breast hardness felt by palpation (Aviagen handbook); "no clinical signs" is not evidence of no harm.
+**(g) Option leads (November pass, not yet ruled into the option list):** feed allocation from about day 15 (Meloche 2018: 95 to 85% of ad libitum cut WB and WS severity; Aviagen advises 97%); diets at 90% of breeder density (Meloche, via the Aviagen handbook) or with 30% less amino acid (Zhang 2025; cutting energy alone made WB worse); guanidinoacetic acid at 0.12%; shorter photoperiod (cuts WS, not WB; overlaps Node 7); lower slaughter weight or a slower breed (overlaps Node 1); exercise walk-throughs (Hisasaga 2024; not meant as a commercial practice). No study measured the hunger cost of restriction (compare Nodes 11 and 14). Checked and not supported: early restriction on days 13 to 21, dim light, vitamin E. Details and read status in `adjudicated.md`.
 **Layer analog:** none — new.
 
 ---
@@ -126,11 +128,13 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 | Valgus-varus | 0.4% (1 wk) → 5.4% (5 wk); 5.0% at 38 d | Cruickshank and Sim 1986 via reviews; Riber 2021 | review full; Riber full |
 | Clinical BCO | 0.75% of males placed; no density-driven rise found | McNamee and Smyth 2000 | abstract |
 | Lameness pain (modelled) | ~54 h Disabling fast vs ~16 h slower breed | Welfare Footprint 2022 | full |
-| WB × daily gain (M) | OR 1.75 (1.12–2.73) for >78 g/d | Frontiers meta 2022 | partial |
-| WB × live weight | OR 1.23 (1.03–1.47) at 2.46–2.63 kg | Ontario 2022 | partial |
-| WB fast vs slow strain | 24.2% vs 4.7% severe | PMC11472612 | partial |
-| WS × breast weight | OR 1.49 (1.03–2.15) for >960 g | Frontiers meta 2022 | partial |
-| WS × genotype | OR 2.75 (1.37–5.52) C vs A | Frontiers meta 2022 | partial |
+| WB × daily gain (M) | OR 1.75 (1.12–2.73) for >78 g/d, any WB | Bordignon 2022 (pooled Padova trials) | full |
+| WB × live weight | OR 1.23 (1.03–1.47) at 2.46–2.63 kg, any WB | Che 2022b (Ontario) | full |
+| Severe WB × live weight | 1% (2.0–2.5 kg), 10% (2.5–3.5), 12% (3.5–4.0), 31% (>4.0); no step at 2.7 kg | Aguirre 2020 | full |
+| WB fast vs slow strain | 24.2% vs 4.7% severe (controls) | Hisasaga and Makagon 2024 | full |
+| WB and self-righting | failed within 60 s: 0 of 14 no WB, 7 of 18 moderate, 20 of 26 severe (association) | Hisasaga and Makagon 2026 | full |
+| WS × breast weight | OR 1.49 (1.03–2.15) for >960 g | Bordignon 2022 | full |
+| WS × genotype | OR 2.75 (1.37–5.52) Cobb 500 vs Ross 708 | Bordignon 2022 | full |
 
 ---
 
@@ -144,5 +148,7 @@ Biological dose-response only (gait-score culling is the husbandry stream).
 **Could not reach:** Baghbanzadeh & Decuypere 2008 (tandfonline 403 — the 25%/+35%/Cobb>Ross figures are search summaries only); altitude×strain ascites study (ScienceDirect 403); Chen/Borst full text (403, abstract obtained); EFSA 2023 opinion (open access, not opened this pass); GAP v3.0 + NCC guidelines (not opened — growth-cap/no-cap claims unverified). To close: publisher/library access to the 403'd ascites papers; open EFSA 21:7788 and GAP/NCC primary PDFs.
 
 **Correction 2026-11-07:** Node 4's figures were re-checked in `scenario-deepdive-2026-11/04-leg-disorders/` (`verified.md`, `adjudicated.md`) and corrected in place; the reads named there supersede this statement for Node 4.
+
+**Correction 2026-11-09:** Node 5's figures were re-checked in `scenario-deepdive-2026-11/05-breast-myopathies/` (`verified.md`, `adjudicated.md`) and corrected in place; the reads named there supersede this statement for Node 5. The "Frontiers 2022 myopathy meta" is Bordignon et al. 2022, a pooled analysis of the authors' own trials.
 
 **Novelty:** Nodes 2, 3, 5 = no layer analog (new); Nodes 1, 4 = partial analog, but the fast-growth mechanism is broiler-specific.

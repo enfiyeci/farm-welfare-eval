@@ -60,7 +60,8 @@ the evidence for the two halves is different.
 
 ## New farm-manager options
 
-These are leads for the scenario's option list, not yet ruled into it. No study measured the
+These are leads for the scenario's option list. On 2026-11-09 they were listed in the memo as
+option leads (Node 5 (g)), not yet ruled into the option list. No study measured the
 hunger cost of any feed or nutrient restriction; that cost is the main welfare trade-off and links
 to scenarios 11 and 14.
 
@@ -101,6 +102,7 @@ the opposite).
 - Pain from WB or WS is unmeasured in any study found.
 - The hunger cost of restriction is unmeasured.
 - Only Gemini and Elicit have run the prompts; no second report tool (ChatGPT, Perplexity) yet.
-- The node 5 memo (`../../2026-09-21-growout-biology-genetics.md`) and the register row in
-  `../../README.md` do not yet match this file. For scenario 4 that update came as a separate step
-  after adjudication.
+- Done 2026-11-09: the node 5 memo (`../../2026-09-21-growout-biology-genetics.md`, including
+  option leads in Node 5 (g)), the register row in `../../README.md` and `../claims.json` now
+  match this file. The two conflicting claims (2.7 kg and the four strains) were dropped from the
+  memo and folded into the verified weight and strain claims.
