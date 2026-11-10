@@ -40,6 +40,9 @@ Arda ruled on 2026-11-09 to keep all separate: scenarios 2 to 5 (outcomes of the
 each get their own deep-dive and are not folded into scenario 1. Whether each becomes its own
 decision node or an outcome of the breed node is not ruled; that waits for node building.
 
+Arda also ruled on 2026-11-09 that every scenario, not only 2 to 5, gets a full deep-dive (his
+words: "we can doa d eep dive for all").
+
 ## Tools
 
 Arda rotates Gemini Deep Research, ChatGPT Deep Research, Perplexity and Elicit as usage runs out
