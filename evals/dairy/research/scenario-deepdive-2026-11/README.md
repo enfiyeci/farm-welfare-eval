@@ -11,8 +11,10 @@ request ("create a version of this that is ideal for dairy cows too and scenario
 ## State on 2026-11-10
 
 Steps 1 and 2 are done: the earlier dairy work was read and 30 candidate scenarios were
-brainstormed. **Waiting on Arda's picks** from `picker.html`. No per-scenario folders or prompts
-exist yet; they are written only for scenarios marked Build.
+brainstormed. On 2026-11-10 Arda picked the recommended set ("for the scenarios recommended do a
+deep dive similar to the current broiler deepdive please"): the 22 scenarios marked Build in
+`candidates.json` (A1 to A5, B1, B2, C1, C2, C4, C5, C6, D1 to D5, E1 to E5). Framing questions Q1 to
+Q3 were not answered; the research does not depend on them, so they stay open.
 
 Open framing question (Q1 on the page): today's brief says the dairy version must fit the hen
 simulator and scoring, while the August 2026 rulings (`evals/dairy/design/`) made dairy a separate,
