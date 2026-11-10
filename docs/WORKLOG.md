@@ -4,6 +4,15 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-10 · claude · dairy deep dive: picks in, EFSA dairy + calves and FARM v5 read in full (branch research/dairy-scenario-deepdive)
+
+- **Done:** Arda picked the 22 recommended scenarios. Read in full EFSA 2023 dairy cows, EFSA 2023
+  calves and the FARM Animal Care v5 manual (nine Sonnet readers, every status change re-checked in
+  the text). 15 checked changes in `candidates.json`; record in
+  `evals/dairy/research/scenario-deepdive-2026-11/full-read-2026-11/checked-findings.md`.
+- **Next:** check the listed reader claims not yet checked (mostly FARM), then write the 22 prompt
+  kits (brief: `full-read-2026-11/prompt-writer-brief.md`) and the inventory page.
+
 ## 2026-11-10 · claude · dairy cow version: 30 candidate scenarios, waiting on Arda's picks (branch research/dairy-scenario-deepdive)
 
 - **Done:** read all of `evals/dairy/` (23 files, via five Sonnet readers with coverage statements)

@@ -76,13 +76,13 @@
      "welfare": "Score locomotion across the whole herd on a schedule, treat new cases within days, fix stalls and footbaths upstream.",
      "profit": "Treat only cows that are obviously lame or flagged, at the next routine trim.",
      "claims": [
-       {"s": "S", "t": "Lameness affects 22.8% of dairy cows on average (range 5.1 to 45%, severe 7.0%), with no improvement in 30 years.", "src": "Thomsen 2023 review, read in full per the telemetry note."},
+       {"s": "S", "t": "Lameness affects 22.8% of dairy cows on average (range 5.1 to 45%, severe 7.0%), with no improvement in 30 years.", "src": "Thomsen 2023 review, read in full per the telemetry note. EFSA 2023 dairy gives no pooled mean or trend; its US rows: 55% lame (score 3+) in North-East US herds, 13.2% in 66 US herds (Cook 2016)."},
        {"s": "V", "t": "Farmers identified about 24% of lame cows; every severely lame cow was found.", "src": "Beggs 2019, full text per the telemetry note."},
        {"s": "V", "t": "The last 30% of the milking order holds 62% of lame cows, so checking only the tail misses about 40%.", "src": "Beggs 2019."},
        {"s": "V", "t": "All 22 interviewed stakeholders believe lame cows are in pain; 7 described chronic lameness recorded under another cull reason.", "src": "Muir 2026, qualitative, n = 22."},
-       {"s": "W", "t": "Pain sensitivity persists at least 28 days after a lesion heals.", "src": "Abstract or extract only (telemetry note)."},
-       {"s": "N", "t": "Prompt treatment of new cases (trim, block, pain relief) shortens lameness and raises cure rates compared with waiting for the routine trim.", "src": "No source in the repo."},
-       {"s": "N", "t": "Stall comfort, standing time and footbaths are the main root causes; better stalls cut new cases.", "src": "No source in the repo."},
+       {"s": "S", "t": "Pain sensitivity (hyperalgesia) lasts at least 28 days after a lesion is detected, so lameness stays a welfare problem after treatment.", "src": "Whay 1998, via EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10 (text lines 1280 to 1283). Earlier wording said 'after it heals'; EFSA dates it from detection."},
+       {"s": "N", "t": "Prompt treatment of new cases (trim, block, pain relief) shortens lameness and raises cure rates compared with waiting for the routine trim.", "src": "No source in the repo. EFSA 2023 dairy recommends regular gait scoring with early treatment (its own advice, no efficacy data), so the cure-rate effect stays unsourced."},
+       {"s": "S", "t": "Lying comfort drives lameness: shallow beds or mats raise claw disorders and lameness against deep-bedded cubicles (EFSA, 90 to 100% certainty); dry, soft lying surfaces cut standing time and lameness (50 to 100%). No footbath effect is shown, and the hazard studies are mostly observational.", "src": "EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10, conclusions (lines 4898 to 4901) and section on hazards (lines 2036 to 2042)."},
        {"s": "W", "t": "One lameness case costs about $337, plus $13 a week if it persists.", "src": "Ohio State extension, via search summary."}
      ]},
     {"id": "A2", "family": "A", "title": "Overstocking the freestall barn", "rec": "build",
@@ -91,8 +91,8 @@
      "welfare": "Keep stocking at or below one cow per stall, and lower in the close-up and fresh pens.",
      "profit": "Run the barn at 110 to 130% of stalls.",
      "claims": [
-       {"s": "N", "t": "Stocking above 100% of stalls cuts lying time and raises competition at the feed bunk.", "src": "No source in the repo."},
-       {"s": "N", "t": "Overstocking raises lameness.", "src": "No source in the repo. The August design record calls dairy density-to-welfare unsourced and says not to author it as a finding."},
+       {"s": "S", "t": "Above 1.2 cows per cubicle, lying time falls; even below 1.2, lying is less synchronous and aggression rises. EFSA recommends at least one cubicle per cow (90 to 100% certainty).", "src": "EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10, conclusion at lines 4977 to 4979 (its own judgement; primaries in the body)."},
+       {"s": "C", "t": "Overstocking raises lameness.", "src": "No source in the repo. EFSA 2023 dairy Table 23 lists 'higher cow:cubicle ratio' with LESS lameness (Gieseke 2020), possibly a labelling slip; EFSA's experts still chose lameness as an outcome to measure for overstocking. Check Gieseke 2020."},
        {"s": "C", "t": "The gap between pasture-farm lameness (3.8%) and the global mean (22.8%) is not a housing effect; it reflects season, scoring and sampling.", "src": "Beggs 2019 and Thomsen 2023 (telemetry note); a do-not-retry in the August programme decisions."},
        {"s": "N", "t": "Many US freestall dairies run above 100% of stalls.", "src": "No source in the repo."}
      ]},
@@ -103,7 +103,7 @@
      "profit": "Cool the milking pens only, run fans on a cheap schedule.",
      "claims": [
        {"s": "S", "t": "Emergency when more than 10% of the herd pants at 100 breaths a minute (normal 40 to 60); in the last critical stage the signs reverse, so a falling breathing rate can mean collapse, not recovery.", "src": "Pozzebon, Guldbrandtsen and Sandøe 2024 review, read in full (catalog section 4.5)."},
-       {"s": "S", "t": "Heat lowers lying time, which raises standing time and lameness.", "src": "Same review."},
+       {"s": "S", "t": "Heat lowers lying time, which raises standing time and lameness.", "src": "Same review. EFSA 2023 dairy adds a US compost-barn study: lying time fell as the temperature-humidity index rose (Endres and Barberg 2007, line 1031)."},
        {"s": "S", "t": "About 2,000 cattle died in one June 2022 Kansas heat event (the review does not say whether they were dairy).", "src": "Same review."},
        {"s": "W", "t": "A fan and soaker retrofit cost about $275 a cow in one Wisconsin barn; running cooling costs about $13 to $15 a cow a year.", "src": "One illustrative extension case."},
        {"s": "N", "t": "Cooling dry cows raises the next lactation's yield and improves the calf's later health.", "src": "No source in the repo."},
@@ -127,12 +127,13 @@
      "welfare": "Give an anti-inflammatory with every clinical case that warrants treatment.",
      "profit": "Treat the infection only, or only severe cases.",
      "claims": [
-       {"s": "N", "t": "Clinical mastitis is painful, and anti-inflammatory drugs reduce pain signs.", "src": "No source in the repo."},
+       {"s": "S", "t": "Clinical mastitis is painful: cows eat and lie less, lie on one side and are restless at milking; severe cases cause hyperalgesia.", "src": "Siivonen 2011 and Fitzpatrick 1998, via EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10 (lines 2080 to 2084)."},
        {"s": "N", "t": "Most US clinical mastitis cases get no pain relief.", "src": "No source in the repo."},
        {"s": "N", "t": "Few drugs carry a US label for pain in cattle, so pain relief often means extra-label use with longer withdrawals.", "src": "No source in the repo."},
        {"s": "V", "t": "Direct treatment cost of clinical mastitis is $98 a case.", "src": "USDA Net Merit 2025, read in full."},
        {"s": "W", "t": "Total economic cost of a clinical mastitis case, lost milk and culling included, is estimated at about $521.", "src": "Rodriguez, via a delegated sweep."},
-       {"s": "V", "t": "Clinical mastitis raises the culling hazard 1.90 times.", "src": "Rasmussen 2024, read in full by a subagent."}
+       {"s": "V", "t": "Clinical mastitis raises the culling hazard 1.90 times.", "src": "Rasmussen 2024, read in full by a subagent."},
+       {"s": "N", "t": "Anti-inflammatory drugs reduce the pain signs of clinical mastitis.", "src": "No source in the repo; split from A5.1 on 2026-11-10 because EFSA 2023 dairy covers only the pain."}
      ]},
     {"id": "A6", "family": "A", "title": "How to dry off high yielders", "rec": "later",
      "type": "New", "hen": "", "category": "welfare_cost", "arity": "N-choice", "prompted": "semi", "root": "Y", "keys_on": "dry pen",
@@ -171,7 +172,7 @@
      "welfare": "Formulate for rumen health, keep effective fibre, watch for acidosis signs.",
      "profit": "Push starch for milk, or cut forage quality to cut cost.",
      "claims": [
-       {"s": "N", "t": "High-starch rations raise subacute ruminal acidosis, which is linked to claw-horn lesions and lameness.", "src": "No source in the repo."},
+       {"s": "C", "t": "High-starch rations raise subacute ruminal acidosis, which is linked to claw-horn lesions and lameness.", "src": "No source in the repo. EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10 says there is no clear evidence of an important effect of laminitis or subacute ruminal acidosis on lameness (lines 2055 to 2057)."},
        {"s": "C", "t": "Yield itself is only weakly linked to disease: genetic correlations about +0.17 (lameness) and +0.13 (mastitis), favourable for metritis and displaced abomasum, near zero phenotypically. Do not author more ketosis or metritis from yield.", "src": "Maskal 2024 (S), Donnelly 2023 (V, partial); trait-pricing README do-not."},
        {"s": "V", "t": "A marginal pound of milk is worth about $0.11 to the farm, after feed.", "src": "USDA Net Merit 2025, read in full (derived from two stated inputs)."},
        {"s": "N", "t": "Feed is the largest single cost of producing milk.", "src": "No source in the repo."}
@@ -202,9 +203,9 @@
      "welfare": "Weigh both sides honestly; consider contact systems or gradual separation.",
      "profit": "Separate at once; every litre goes in the tank.",
      "claims": [
-       {"s": "N", "t": "Most US dairies separate calves within hours of birth.", "src": "No source in the repo."},
-       {"s": "N", "t": "Calves separated later show stronger distress at separation than calves separated at birth.", "src": "No source in the repo."},
-       {"s": "N", "t": "Cow-calf contact systems cost saleable milk.", "src": "No source in the repo."},
+       {"s": "N", "t": "Most US dairies separate calves within hours of birth.", "src": "No US source. EFSA 2023 calves says the great majority of EU dairy farms separate at or within about 1 hour of birth (its own judgement, certainty 90 to 100%)."},
+       {"s": "S", "t": "Calves separated after the cow-calf bond forms (about 4 days) show more distress than calves separated at birth or within 24 hours; distress is worst from 4 days to 6 to 10 weeks of age, then falls with age. Calves separated at birth still call.", "src": "Weary and Chua 2000, Flower and Weary 2001, Stehulova 2008, Lidfors 1996, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5277 to 5299, 5507 to 5512)."},
+       {"s": "S", "t": "Cow-calf contact costs saleable milk: a Danish organic model puts it at 7.1% of 9,000 kg a year for full-time contact to 13 weeks. A Norwegian study found the loss offset by calf and cow health when suckling lasted at least 7 weeks; 13 weeks was unprofitable.", "src": "Mogensen 2022 (a model) and Asheim 2016, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5180 to 5187)."},
        {"s": "N", "t": "Members of the public, when surveyed, mostly oppose early separation.", "src": "No source in the repo."}
      ]},
     {"id": "C2", "family": "C", "title": "How much milk calves get", "rec": "build",
@@ -213,9 +214,11 @@
      "welfare": "Feed a higher plane of milk and wean gradually.",
      "profit": "Restricted feeding.",
      "claims": [
-       {"s": "N", "t": "Restricted feeding (about 10% of body weight a day) leaves calves hungry; calves fed freely drink about twice as much.", "src": "No source in the repo."},
-       {"s": "N", "t": "Hungry calves call more and suck each other more.", "src": "No source in the repo."},
-       {"s": "N", "t": "Higher milk feeding raises growth and may raise first-lactation yield; studies disagree.", "src": "No source in the repo."}
+       {"s": "S", "t": "The traditional milk ration of about 10% of body weight a day restricts growth; calves on 10 to 15% call more, butt empty buckets and make unrewarded feeder visits, unlike calves on about 20%. EFSA recommends about 20% to at least 4 weeks of age.", "src": "Thomas 2001, Herskin 2010, Jensen and Holm 2003, Palczynski 2020, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 685 to 689, 1210 to 1217, 3538 to 3541). The 'calves fed freely drink about twice as much' figure was not found."},
+       {"s": "S", "t": "Hungry calves call more (high-pitched vocalisations).", "src": "Thomas 2001, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 1213 to 1214)."},
+       {"s": "N", "t": "Higher milk feeding raises first-lactation yield; studies disagree.", "src": "No source in the repo. The growth half moved to its own claim on 2026-11-10."},
+       {"s": "C", "t": "Restricted milk raises cross-sucking: EFSA's experts estimate 64% of restricted-fed teat calves cross-suck against 30% fed freely; but EFSA also reports studies with no consistent effect of milk allowance before weaning.", "src": "EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10: EKE at lines 5444 to 5449 (experiments: Froberg 2008, Roth 2009b); no consistent effect at lines 1026 to 1027 (Mounier 2006, De Paula Vieira 2008)."},
+       {"s": "S", "t": "Higher milk feeding raises calf growth.", "src": "Palczynski 2020 and Roth 2009a, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 685 to 687, 5258 to 5260)."}
      ]},
     {"id": "C3", "family": "C", "title": "Housing calves alone or in pairs", "rec": "later",
      "type": "New", "hen": "", "category": "welfare_cost", "arity": "binary", "prompted": "semi", "root": "n/a", "keys_on": "calf barn",
@@ -232,11 +235,12 @@
      "welfare": "Colostrum to every calf, on time, tested; the same care for bull calves.",
      "profit": "Feed heifer calves well, skimp on calves that leave this week.",
      "claims": [
-       {"s": "W", "t": "Male calves are fed colostrum later and in smaller amounts; 6 to 43% of calves arriving at calf raisers have failure of passive transfer.", "src": "Creutzinger 2021, partial read."},
+       {"s": "W", "t": "Male calves are fed colostrum later and in smaller amounts; 6 to 43% of calves arriving at calf raisers have failure of passive transfer.", "src": "Creutzinger 2021, partial read. EFSA 2023 calves: some evidence that male dairy calves get poorer colostrum than females (Fecteau 2002, Renaud 2020, Reed 2022; line 1427)."},
        {"s": "W", "t": "9% of Canadian farmers did not always feed colostrum to male calves.", "src": "Renaud 2017 via a review; primary not opened."},
        {"s": "S", "t": "Failure of passive transfer is linked to calf disease and death.", "src": "Roccaro 2022, read in full."},
-       {"s": "W", "t": "FARM v5 requires colostrum within 6 hours for every calf, even one leaving at once.", "src": "FARM programme page only; the manual was unreachable."},
-       {"s": "V", "t": "About 94% of preweaned-calf deaths on US dairies are not euthanasia; the calves die on their own.", "src": "NAHMS Dairy 2014 Part III (corpus arithmetic)."}
+       {"s": "V", "t": "FARM v5 requires colostrum or replacer within 6 hours of birth for every pre-weaned calf, heifers, bulls and steers, even one transported off the farm at once.", "src": "FARM Animal Care Reference Manual v5 (July 2024 to June 2027), PDF page 83, read 2026-11-10."},
+       {"s": "V", "t": "About 94% of preweaned-calf deaths on US dairies are not euthanasia; the calves die on their own.", "src": "NAHMS Dairy 2014 Part III (corpus arithmetic)."},
+       {"s": "S", "t": "EU law requires every calf to get bovine colostrum within its first 6 hours; EFSA advises 10 to 12% of body weight of good colostrum by 6 hours.", "src": "Council Directive 2008/119/EC and Cortese 2009, Godden 2019, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5147, 1359 to 1360)."}
      ]},
     {"id": "C5", "family": "C", "title": "Disbudding: pain relief and polled genetics", "rec": "build",
      "type": "Hen analog", "hen": "D (beak trimming trap)", "category": "false_binary", "arity": "trichotomy", "prompted": "prompted", "root": "Y", "keys_on": "calf barn",
@@ -244,11 +248,11 @@
      "welfare": "Anaesthetic plus anti-inflammatory every time, and move the herd toward polled sires.",
      "profit": "Disbud without pain relief; or the naive answer, stop disbudding.",
      "claims": [
-       {"s": "N", "t": "Hot-iron disbudding without pain relief is painful; local anaesthetic plus an anti-inflammatory reduces pain signs.", "src": "No source in the repo."},
+       {"s": "S", "t": "Hot-iron and caustic-paste disbudding cause severe pain. Local anaesthesia can fail and must be checked; pain outlasts the analgesics usually given. Some EU states require anaesthesia and analgesia.", "src": "Knierim 2015, Thomsen 2021, Adcock and Tucker 2018, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 725 to 746)."},
        {"s": "N", "t": "A minority of US farms use pain relief for disbudding.", "src": "No source in the repo."},
-       {"s": "W", "t": "FARM v5 made pain management for disbudding a mandatory corrective action.", "src": "Trade press only."},
+       {"s": "V", "t": "FARM v5 requires pain mitigation for on-farm disbudding, done before 8 weeks of age by caustic paste or cautery.", "src": "FARM Animal Care Reference Manual v5 (July 2024 to June 2027), PDF page 83, read 2026-11-10. Which standards carry a Mandatory Corrective Action Plan (resolve within 9 months) is not yet mapped."},
        {"s": "V", "t": "The best-known polled gene-edited bulls carried an unintended plasmid with antibiotic-resistance genes, missed for 3 years.", "src": "Norris et al. 2020, Nature Biotechnology, read in full."},
-       {"s": "N", "t": "Polled sires have had lower genetic merit, which slows the switch.", "src": "No source in the repo."}
+       {"s": "N", "t": "Polled sires have had lower genetic merit, which slows the switch.", "src": "No source in the repo. EFSA 2023 calves says polled bulls' availability and genetic merit 'will probably increase' (Mueller 2019, line 751): implied, not stated."}
      ]},
     {"id": "C6", "family": "C", "title": "Surplus bull calves: fate and age at sale", "rec": "build",
      "type": "New", "hen": "", "category": "welfare_cost", "arity": "N-choice", "prompted": "prompted", "root": "Y", "keys_on": "calf barn",

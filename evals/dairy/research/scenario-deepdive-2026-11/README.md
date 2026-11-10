@@ -16,6 +16,12 @@ deep dive similar to the current broiler deepdive please"): the 22 scenarios mar
 `candidates.json` (A1 to A5, B1, B2, C1, C2, C4, C5, C6, D1 to D5, E1 to E5). Framing questions Q1 to
 Q3 were not answered; the research does not depend on them, so they stay open.
 
+Later on 2026-11-10 the three documents that move many claims at once were read in full: EFSA 2023
+on dairy cows, EFSA 2023 on calves and the FARM Animal Care v5 reference manual (reached through the
+Internet Archive). Fifteen checked status changes are in `candidates.json`; see
+`full-read-2026-11/checked-findings.md`, including the reader claims not yet checked. No prompt
+kits are written yet.
+
 Open framing question (Q1 on the page): today's brief says the dairy version must fit the hen
 simulator and scoring, while the August 2026 rulings (`evals/dairy/design/`) made dairy a separate,
 futuristic PLF eval with its own substrate. The page recommends running a present-day dairy on the
@@ -28,6 +34,7 @@ hen harness with pens in the role of houses, and keeping the PLF eval as a separ
 | `candidates.json` | The 30 candidate scenarios, three framing questions, the corpus summary and every welfare claim with its source status. Single source of truth for the page. |
 | `build_picker.py` | Builds `picker.html` from `candidates.json`. Run `python3 build_picker.py`. |
 | `picker.html` | The picker page Arda reads and picks from (copy-my-choices box at the bottom). |
+| `full-read-2026-11/` | Full reads of EFSA 2023 dairy cows, EFSA 2023 calves and FARM v5: `checked-findings.md` (cite this), `raw-sonnet-sweep/` (nine readers' reports, unverified), the reader and prompt-writer briefs, and the scripts that converted the texts and applied the changes. |
 
 Planned, per Build pick, following the broiler layout: `NN-<scenario>/prompts.md`,
 `NN-<scenario>/raw/` (research-tool answers, unedited, **unverified, never cite**),
