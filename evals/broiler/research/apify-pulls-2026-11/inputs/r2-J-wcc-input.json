@@ -1,0 +1,87 @@
+{
+ "startUrls": [
+  {
+   "url": "https://www.poultryventilation.com/resources/guidelines-for-operating-tunnel-ventilated-broiler-houses/"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/4646368/Fancom-Lumina-41.html?page=53"
+  },
+  {
+   "url": "https://www.manualslib.com/products/Fancom-Lumina-35-Touch-12776107.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/3057505/Fancom-Weblinkbox-Version-A2.html?page=8"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/1899506/Fancom-Intellitek.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2515155/Fancom-743.html?page=19"
+  },
+  {
+   "url": "https://pdf.agriexpo.online/pdf/fancom-bv/lumina-71/171629-7131.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/1745349/Fancom-Lumina-16.html?page=61"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2073618/Fancom-Lumina-47.html?page=31"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/2453137/Fancom-750.html?page=17"
+  },
+  {
+   "url": "https://device.report/manual/4632617"
+  },
+  {
+   "url": "https://eu.manuals.plus/munters/rotem-one-climate-controllers-manual-pdf"
+  },
+  {
+   "url": "https://eu.manuals.plus/munters/platinum-touch-green-rtu-configuration-manual"
+  },
+  {
+   "url": "https://www.manualslib.es/manual/195998/Munters-Platinum-Pro.html"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/1249863/Rotem-Platinum-Plus.html?page=10"
+  },
+  {
+   "url": "https://www.manualslib.com/manual/1318641/Rotem-Platinum-Junior-Xl.html"
+  },
+  {
+   "url": "https://www.choretime.com/tomecontrol/"
+  },
+  {
+   "url": "https://www.pigtek.net/manual/chore-tronics-model-4-and-8-controls-install-operate-instruction-manual/"
+  },
+  {
+   "url": "https://www.pigtek.net/manual/chore-tronics-expanded-backup-control-install-operate/"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/460799/Fancom-Fct.html"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/554566/Fancom-Lumina-38.html?page=39"
+  },
+  {
+   "url": "https://www.manualslib.de/manual/1386339/Fancom-Lumina-38.html"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/435424/Fancom-Ims.html"
+  },
+  {
+   "url": "https://www.manualslib.fr/manual/736366/Fancom-Lumina-37.html"
+  }
+ ],
+ "crawlerType": "playwright:firefox",
+ "maxCrawlDepth": 0,
+ "maxCrawlPages": 34,
+ "maxConcurrency": 5,
+ "removeCookieWarnings": true,
+ "saveMarkdown": true,
+ "saveHtml": false,
+ "saveContentTypes": "application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+ "proxyConfiguration": {
+  "useApifyProxy": true
+ }
+}
