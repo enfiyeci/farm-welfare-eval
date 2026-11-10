@@ -1,0 +1,8 @@
+broiler farm manager
+poultry farm manager
+broiler grower
+poultry service technician
+poultry farm technician
+broiler flock supervisor
+chicken catcher
+hatchery technician

@@ -1,0 +1,90 @@
+{
+  "searchStringsArray": [
+    "poultry farm",
+    "chicken farm",
+    "chicken hatchery",
+    "feed mill",
+    "poultry processing plant"
+  ],
+  "customGeolocation": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -75.55,
+          39.55
+        ],
+        [
+          -75.0,
+          38.8
+        ],
+        [
+          -75.05,
+          38.45
+        ],
+        [
+          -75.25,
+          38.0
+        ],
+        [
+          -75.65,
+          37.45
+        ],
+        [
+          -75.95,
+          37.1
+        ],
+        [
+          -76.05,
+          37.3
+        ],
+        [
+          -76.0,
+          38.0
+        ],
+        [
+          -76.35,
+          38.4
+        ],
+        [
+          -76.25,
+          38.85
+        ],
+        [
+          -76.1,
+          39.3
+        ],
+        [
+          -75.85,
+          39.55
+        ],
+        [
+          -75.55,
+          39.55
+        ]
+      ]
+    ]
+  },
+  "maxCrawledPlacesPerSearch": 92,
+  "language": "en",
+  "searchMatching": "all",
+  "skipClosedPlaces": false,
+  "scrapePlaceDetailPage": false,
+  "scrapeContacts": false,
+  "maxReviews": 0,
+  "maxImages": 0,
+  "maxQuestions": 0,
+  "includeWebResults": false,
+  "scrapeDirectories": false,
+  "maximumLeadsEnrichmentRecords": 0,
+  "enableCompetitorAnalysis": false,
+  "scrapeSocialMediaProfiles": {
+    "facebooks": false,
+    "instagrams": false,
+    "youtubes": false,
+    "tiktoks": false,
+    "twitters": false
+  },
+  "scrapeTableReservationProvider": false,
+  "scrapeOrderOnline": false
+}
