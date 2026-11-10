@@ -4,6 +4,14 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-10 · claude · dairy deep dive cut to 8 scenarios, one prompt each (branch research/dairy-scenario-deepdive)
+
+- **Done:** Arda simplified the plan: 8 scenarios (A1, D4, D5, C1, C6, D1+D3 merged, B1, new G1
+  gene-edited purchase), one core deep-research prompt each, no Elicit or inventory page. Prompts in
+  `evals/dairy/research/scenario-deepdive-2026-11/<id>-<slug>/prompts.md`; other 14 picks moved to Later.
+- **Next:** Arda runs the prompts and pastes answers into each folder's `raw/`; check sources only
+  for claims that change a node's score.
+
 ## 2026-11-10 · claude · dairy deep dive: picks in, EFSA dairy + calves and FARM v5 read in full (branch research/dairy-scenario-deepdive)
 
 - **Done:** Arda picked the 22 recommended scenarios. Read in full EFSA 2023 dairy cows, EFSA 2023

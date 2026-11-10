@@ -19,8 +19,26 @@ Q3 were not answered; the research does not depend on them, so they stay open.
 Later on 2026-11-10 the three documents that move many claims at once were read in full: EFSA 2023
 on dairy cows, EFSA 2023 on calves and the FARM Animal Care v5 reference manual (reached through the
 Internet Archive). Fifteen checked status changes are in `candidates.json`; see
-`full-read-2026-11/checked-findings.md`, including the reader claims not yet checked. No prompt
-kits are written yet.
+`full-read-2026-11/checked-findings.md`, including the reader claims not yet checked.
+
+Still on 2026-11-10 Arda simplified the plan (his choices in a question dialog: "Fewer scenarios",
+and "Yes, as a scenario" for the gene-edited cattle purchase). The deep dive now covers **8
+scenarios**: A1 lame cows, D4 down cow, D5 H5N1, C1 cow-calf separation, C6 surplus bull calves,
+D1 and D3 as one scenario (keeping a sick cow for her value: cull timing plus the drug-withdrawal
+hold), B1 rbST, and a new G1, buying gene-edited cattle (from entry 4 of the August technology
+catalog). The other 14 picks moved to Later in `candidates.json`. Each scenario gets **one core
+deep-research prompt** (the broiler Parts 1 to 4) and no Elicit questions or inventory page. When
+answers come back, sources are checked only for claims that would change how a decision is scored;
+every other claim keeps its current status. The same rule covers the reader findings listed as
+"Not yet checked" in `full-read-2026-11/checked-findings.md`: check one only when a scenario's score
+depends on it.
+
+The eight prompts are written (one `prompts.md` per folder: `A1-lame-cows/`, `D4-down-cow/`,
+`D5-h5n1/`, `C1-cow-calf-separation/`, `C6-surplus-bull-calves/`, `D13-sick-cow-kept-for-value/`,
+`B1-rbst/`, `G1-gene-edited-purchase/`). Each header maps the prompt's claim numbers to the ids in
+`candidates.json`. G1's claims are relayed from the August catalog and trait-pricing README at the
+read depth those files record. In `candidates.json` D1 and D3 stay two rows, so the picker counts 9
+Build rows for 8 scenarios.
 
 Open framing question (Q1 on the page): today's brief says the dairy version must fit the hen
 simulator and scoring, while the August 2026 rulings (`evals/dairy/design/`) made dairy a separate,
@@ -36,10 +54,11 @@ hen harness with pens in the role of houses, and keeping the PLF eval as a separ
 | `picker.html` | The picker page Arda reads and picks from (copy-my-choices box at the bottom). |
 | `full-read-2026-11/` | Full reads of EFSA 2023 dairy cows, EFSA 2023 calves and FARM v5: `checked-findings.md` (cite this), `raw-sonnet-sweep/` (nine readers' reports, unverified), the reader and prompt-writer briefs, and the scripts that converted the texts and applied the changes. |
 
-Planned, per Build pick, following the broiler layout: `NN-<scenario>/prompts.md`,
-`NN-<scenario>/raw/` (research-tool answers, unedited, **unverified, never cite**),
-`NN-<scenario>/verifier-reports-raw.md` (checking subagents' reports, unverified),
-`NN-<scenario>/verified.md` and `NN-<scenario>/adjudicated.md` (the layer to cite).
+Per scenario, a folder named by scenario id (`A1-lame-cows/`, `D13-sick-cow-kept-for-value/` and so
+on; ids, not ranks, because ranks shift as statuses move): `prompts.md` now; later,
+`raw/` (research-tool answers, unedited, **unverified, never cite**),
+`verifier-reports-raw.md` (checking subagents' reports, unverified),
+`verified.md` and `adjudicated.md` (the layer to cite).
 
 ## Source status
 

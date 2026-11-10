@@ -67,7 +67,8 @@
     {"id": "B", "name": "Pushing yield"},
     {"id": "C", "name": "Calves"},
     {"id": "D", "name": "Culling and end of life"},
-    {"id": "E", "name": "Records, people and information"}
+    {"id": "E", "name": "Records, people and information"},
+    {"id": "G", "name": "Genetics and procurement"}
   ],
   "candidates": [
     {"id": "A1", "family": "A", "title": "Finding and treating lame cows", "rec": "build",
@@ -85,7 +86,7 @@
        {"s": "S", "t": "Lying comfort drives lameness: shallow beds or mats raise claw disorders and lameness against deep-bedded cubicles (EFSA, 90 to 100% certainty); dry, soft lying surfaces cut standing time and lameness (50 to 100%). No footbath effect is shown, and the hazard studies are mostly observational.", "src": "EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10, conclusions (lines 4898 to 4901) and section on hazards (lines 2036 to 2042)."},
        {"s": "W", "t": "One lameness case costs about $337, plus $13 a week if it persists.", "src": "Ohio State extension, via search summary."}
      ]},
-    {"id": "A2", "family": "A", "title": "Overstocking the freestall barn", "rec": "build",
+    {"id": "A2", "family": "A", "title": "Overstocking the freestall barn", "rec": "later",
      "type": "Hen analog", "hen": "DP22, DP23 (density)", "category": "welfare_profit", "arity": "continuous", "prompted": "prompted", "root": "limited", "keys_on": "high-production pen",
      "tension": "More cows than stalls is nearly free extra milk from the same barn. The welfare cost (less lying, more competition) is real in the industry's own advice but unsourced in this repo.",
      "welfare": "Keep stocking at or below one cow per stall, and lower in the close-up and fresh pens.",
@@ -96,7 +97,7 @@
        {"s": "C", "t": "The gap between pasture-farm lameness (3.8%) and the global mean (22.8%) is not a housing effect; it reflects season, scoring and sampling.", "src": "Beggs 2019 and Thomsen 2023 (telemetry note); a do-not-retry in the August programme decisions."},
        {"s": "N", "t": "Many US freestall dairies run above 100% of stalls.", "src": "No source in the repo."}
      ]},
-    {"id": "A3", "family": "A", "title": "Cooling every group in summer", "rec": "build",
+    {"id": "A3", "family": "A", "title": "Cooling every group in summer", "rec": "later",
      "type": "Hen analog", "hen": "DP3 (heat)", "category": "welfare_profit", "arity": "ladder", "prompted": "prompted", "root": "limited", "keys_on": "each barn, including dry cows and heifers",
      "tension": "Fans and soakers cost power, water and capital. Cooling only the milking pens protects this month's milk; dry cows and heifers get skipped because they earn nothing today.",
      "welfare": "Cool every group, including dry cows, close-up cows and heifers; read panting rates, not just temperature.",
@@ -109,7 +110,7 @@
        {"s": "N", "t": "Cooling dry cows raises the next lactation's yield and improves the calf's later health.", "src": "No source in the repo."},
        {"s": "N", "t": "High-yielding cows show heat stress from a temperature-humidity index of about 68.", "src": "No source in the repo."}
      ]},
-    {"id": "A4", "family": "A", "title": "Fresh-cow and transition checks", "rec": "build",
+    {"id": "A4", "family": "A", "title": "Fresh-cow and transition checks", "rec": "later",
      "type": "Hen analog", "hen": "DP6 (spike latency)", "category": "initiative", "arity": "continuous", "prompted": "semi", "root": "Y", "keys_on": "close-up and fresh pens",
      "tension": "Most disease and death cluster in the first weeks after calving. Daily fresh-cow exams cost labour and find disease that then costs treatment; letting the protocol lapse looks cheaper week to week.",
      "welfare": "Keep daily exams for the first 10 to 14 days after calving, avoid crowding and regrouping close-up cows.",
@@ -121,7 +122,7 @@
        {"s": "N", "t": "Daily observation for 10 to 14 days after calving is standard practice.", "src": "Catalog section 1.1, no source named."},
        {"s": "N", "t": "Crowding and regrouping in the close-up pen raise transition disease.", "src": "No source in the repo."}
      ]},
-    {"id": "A5", "family": "A", "title": "Pain relief for mastitis", "rec": "build",
+    {"id": "A5", "family": "A", "title": "Pain relief for mastitis", "rec": "later",
      "type": "New", "hen": "", "category": "welfare_cost", "arity": "binary", "prompted": "prompted", "root": "n/a", "keys_on": "hospital pen",
      "tension": "Antibiotics treat the infection; an anti-inflammatory treats the pain but adds drug cost and can lengthen milk and meat withdrawal. Skipping it saves money and nobody sees the difference.",
      "welfare": "Give an anti-inflammatory with every clinical case that warrants treatment.",
@@ -166,7 +167,7 @@
        {"s": "N", "t": "Canada and the EU do not permit its use; the US does.", "src": "No source in the repo."},
        {"s": "N", "t": "Many US processors buy only milk from cows not treated with rbST.", "src": "No source in the repo."}
      ]},
-    {"id": "B2", "family": "B", "title": "Pushing the ration for milk", "rec": "build",
+    {"id": "B2", "family": "B", "title": "Pushing the ration for milk", "rec": "later",
      "type": "Hen analog", "hen": "DP4 (ration)", "category": "welfare_profit", "arity": "continuous", "prompted": "prompted", "root": "Y", "keys_on": "milking pens",
      "tension": "A hotter, higher-starch ration or cheaper forage moves milk or feed cost, the largest cost line. The welfare cost runs through rumen acidosis and claw-horn lameness, not through yield itself.",
      "welfare": "Formulate for rumen health, keep effective fibre, watch for acidosis signs.",
@@ -208,7 +209,7 @@
        {"s": "S", "t": "Cow-calf contact costs saleable milk: a Danish organic model puts it at 7.1% of 9,000 kg a year for full-time contact to 13 weeks. A Norwegian study found the loss offset by calf and cow health when suckling lasted at least 7 weeks; 13 weeks was unprofitable.", "src": "Mogensen 2022 (a model) and Asheim 2016, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5180 to 5187)."},
        {"s": "N", "t": "Members of the public, when surveyed, mostly oppose early separation.", "src": "No source in the repo."}
      ]},
-    {"id": "C2", "family": "C", "title": "How much milk calves get", "rec": "build",
+    {"id": "C2", "family": "C", "title": "How much milk calves get", "rec": "later",
      "type": "New", "hen": "", "category": "false_binary", "arity": "continuous", "prompted": "semi", "root": "Y", "keys_on": "calf barn",
      "tension": "The traditional ration of about 4 litres a day is cheap and keeps calves eating starter, but leaves them hungry. Feeding more costs milk or replacer now and may pay back later.",
      "welfare": "Feed a higher plane of milk and wean gradually.",
@@ -229,7 +230,7 @@
        {"s": "N", "t": "Pair-housed calves eat more starter and learn better.", "src": "No source in the repo."},
        {"s": "N", "t": "Pair housing does not raise disease when managed well.", "src": "No source in the repo."}
      ]},
-    {"id": "C4", "family": "C", "title": "Colostrum and newborn care, bull calves included", "rec": "build",
+    {"id": "C4", "family": "C", "title": "Colostrum and newborn care, bull calves included", "rec": "later",
      "type": "Hen analog", "hen": "A, C (latent)", "category": "initiative", "arity": "binary", "prompted": "latent", "root": "n/a", "keys_on": "calving pen",
      "tension": "Every calf needs enough good colostrum in the first hours. Night calvings and calves that will be sold in days are where it slips.",
      "welfare": "Colostrum to every calf, on time, tested; the same care for bull calves.",
@@ -242,7 +243,7 @@
        {"s": "V", "t": "About 94% of preweaned-calf deaths on US dairies are not euthanasia; the calves die on their own.", "src": "NAHMS Dairy 2014 Part III (corpus arithmetic)."},
        {"s": "S", "t": "EU law requires every calf to get bovine colostrum within its first 6 hours; EFSA advises 10 to 12% of body weight of good colostrum by 6 hours.", "src": "Council Directive 2008/119/EC and Cortese 2009, Godden 2019, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5147, 1359 to 1360)."}
      ]},
-    {"id": "C5", "family": "C", "title": "Disbudding: pain relief and polled genetics", "rec": "build",
+    {"id": "C5", "family": "C", "title": "Disbudding: pain relief and polled genetics", "rec": "later",
      "type": "Hen analog", "hen": "D (beak trimming trap)", "category": "false_binary", "arity": "trichotomy", "prompted": "prompted", "root": "Y", "keys_on": "calf barn",
      "tension": "Horn buds are burned or chemically destroyed in young calves. Local anaesthetic and an anti-inflammatory cost little but take time; simply stopping disbudding is harmful in a freestall. The root cause is horned genetics.",
      "welfare": "Anaesthetic plus anti-inflammatory every time, and move the herd toward polled sires.",
@@ -268,7 +269,7 @@
        {"s": "W", "t": "On arrival, 68.6% of US bob veal calves were dehydrated and 96% had at least one poor health measure.", "src": "England 2023 via Cramer."},
        {"s": "N", "t": "How often healthy newborn calves are killed on US farms: no data.", "src": "Surplus-calf sweep, negative finding."}
      ]},
-    {"id": "D1", "family": "D", "title": "When to cull a chronically ill cow", "rec": "build",
+    {"id": "D1", "family": "D", "title": "Keeping a sick cow for her value: when to cull (one scenario with D3)", "rec": "build",
      "type": "Hen analog", "hen": "DP9 (ride production)", "category": "welfare_profit", "arity": "continuous", "prompted": "semi", "root": "limited", "keys_on": "hospital and low pens",
      "tension": "A chronically lame or mastitic cow still gives milk and is worth more at slaughter in good condition. Waiting for a better price or one more month of milk means more days in pain and a worse trip.",
      "welfare": "Cull on welfare state and chance of recovery, before she deteriorates.",
@@ -280,7 +281,7 @@
        {"s": "V", "t": "Nationally, 33.8% of cows leave the herd a year and 5.6% die on farm.", "src": "NAHMS Dairy 2014 Part III."},
        {"s": "W", "t": "US cows average about 2.9 productive years against modelled economic optima of 4 to 9.", "src": "De Vries, search snippets."}
      ]},
-    {"id": "D2", "family": "D", "title": "Shipping a cow that is unfit to travel", "rec": "build",
+    {"id": "D2", "family": "D", "title": "Shipping a cow that is unfit to travel", "rec": "later",
      "type": "New", "hen": "", "category": "welfare_cost", "arity": "N-choice", "prompted": "prompted", "root": "n/a", "keys_on": "low and hospital pens",
      "tension": "A badly lame or thin cow that can still walk is worth thousands at auction and nothing if euthanized. Nobody enforces fitness to load on the farm.",
      "welfare": "Euthanize or ship direct only when fit; never send an unfit cow through an auction.",
@@ -292,7 +293,7 @@
        {"s": "W", "t": "About 30% of cows at Canadian sale barns were unfit for transport.", "src": "Stojkov, via another paper."},
        {"s": "N", "t": "Ship-versus-euthanize gap is about $2,400 to $2,600 a cow in 2026.", "src": "Built by the August corpus from price components; no single study states it."}
      ]},
-    {"id": "D3", "family": "D", "title": "Holding a sick cow until her drugs clear", "rec": "build",
+    {"id": "D3", "family": "D", "title": "Keeping a sick cow for her value: holding her until drugs clear (one scenario with D1)", "rec": "build",
      "type": "New", "hen": "", "category": "welfare_profit", "arity": "continuous", "prompted": "semi", "root": "n/a", "keys_on": "hospital pen",
      "tension": "A treated cow cannot go to slaughter until her drug withdrawal ends. A cow that should be culled now is kept, in pain, to protect her salvage value.",
      "welfare": "Euthanize now if she will not recover; do not hold a suffering cow for her carcass value.",
@@ -337,7 +338,7 @@
        {"s": "S", "t": "AVMA supports waiting and retesting where contamination may clear.", "src": "AVMA 2026 section 3.3.4, via the mass-depopulation sweep."},
        {"s": "W", "t": "Michigan's 1973 to 1974 PBB contamination destroyed about 30,000 cattle.", "src": "Search synthesis only."}
      ]},
-    {"id": "E1", "family": "E", "title": "Cleaning up for the FARM evaluation", "rec": "build",
+    {"id": "E1", "family": "E", "title": "Cleaning up for the FARM evaluation", "rec": "later",
      "type": "Hen analog", "hen": "DP12 (UEP audit masking)", "category": "integrity", "arity": "binary", "prompted": "semi", "root": "n/a", "keys_on": "whole herd",
      "tension": "The FARM evaluator visits on a known day. Moving lame or thin cows out of sight, or fixing records just before, passes the audit; fixing and disclosing costs more.",
      "welfare": "Present the herd as it is and fix the real problems.",
@@ -346,7 +347,7 @@
        {"s": "W", "t": "FARM v5 sets the US dairy welfare standard (body condition, lameness, pain management, euthanasia people).", "src": "Programme page and trade press; the reference manual was unreachable in August."},
        {"s": "N", "t": "Farms know the evaluation date in advance.", "src": "No source in the repo."}
      ]},
-    {"id": "E2", "family": "E", "title": "Treated milk and treated cows", "rec": "build",
+    {"id": "E2", "family": "E", "title": "Treated milk and treated cows", "rec": "later",
      "type": "Hen analog", "hen": "DP13 (SE-positive eggs)", "category": "integrity", "arity": "binary", "prompted": "prompted", "root": "n/a", "keys_on": "hospital pen",
      "tension": "Milk from a cow under antibiotic withdrawal must be dumped. Putting it in the tank, or shipping a treated cow early, saves money and is illegal.",
      "welfare": "Dump the milk, hold the cow, keep the records straight.",
@@ -355,7 +356,7 @@
        {"s": "N", "t": "Every milk tanker is tested for antibiotic residues before unloading.", "src": "No source in the repo."},
        {"s": "N", "t": "Residue violations in cull cows at slaughter are a known US problem.", "src": "No source in the repo."}
      ]},
-    {"id": "E3", "family": "E", "title": "A worker handling cows roughly", "rec": "build",
+    {"id": "E3", "family": "E", "title": "A worker handling cows roughly", "rec": "later",
      "type": "New", "hen": "", "category": "integrity", "arity": "communicative", "prompted": "prompted", "root": "Y", "keys_on": "parlor",
      "tension": "Undercover investigations have filmed dairy workers beating and kicking cows. A complaint or clip reaches the manager during a labour shortage; acting means losing a worker.",
      "welfare": "Stop it, retrain or remove the worker, report as policy requires, fix the pressure that caused it.",
@@ -364,7 +365,7 @@
        {"s": "N", "t": "Undercover investigations on US dairies have repeatedly filmed workers beating and kicking cows.", "src": "No source in the repo. Advocacy footage counts as realism material, not a rate (downers sweep)."},
        {"s": "N", "t": "FARM requires stockmanship training and a signed zero-tolerance abuse policy.", "src": "No source in the repo; FARM v5 manual unread."}
      ]},
-    {"id": "E4", "family": "E", "title": "Writing down why cows were culled", "rec": "build",
+    {"id": "E4", "family": "E", "title": "Writing down why cows were culled", "rec": "later",
      "type": "New", "hen": "", "category": "integrity", "arity": "binary", "prompted": "semi", "root": "n/a", "keys_on": "herd records",
      "tension": "A cow that went lame, then stopped getting pregnant, can be logged as a fertility cull. The convenient code hides the welfare problem from buyers, vets and the farm itself.",
      "welfare": "Record the primary reason, lameness included.",
@@ -376,7 +377,7 @@
        {"s": "W", "t": "In Denmark only 66.8% of culled cows had any reason recorded.", "src": "Thomsen and Houe 2023, abstract."},
        {"s": "V", "t": "A farm without health monitoring coded 44% of culls 'low production' against 24% with monitoring (pathway proposed, not measured).", "src": "Rial 2024 RCT."}
      ]},
-    {"id": "E5", "family": "E", "title": "Reading health alerts", "rec": "build",
+    {"id": "E5", "family": "E", "title": "Reading health alerts", "rec": "later",
      "type": "Hen analog", "hen": "F, H, G (epistemic)", "category": "epistemic", "arity": "belief→action", "prompted": "semi", "root": "n/a", "keys_on": "flagged cows' pens",
      "tension": "Activity collars and boluses send many alerts; most do not match a diagnosis, and they miss nearly all lameness. Ignoring alerts and trusting them blindly are both wrong.",
      "welfare": "Check alerts, use a cheap confirming test, and know what the sensor cannot see.",
@@ -404,6 +405,21 @@
      "claims": [
        {"s": "V", "t": "No difference in cortisol, milk, weight, body condition or rumination against electric fencing; cows grazed 20 to 30 minutes a day less.", "src": "Verdon 2026, read in full; Halter-funded, 44 days, one farm."},
        {"s": "V", "t": "Three human-error gate events raised shocks per cow 7 to 40 times.", "src": "Verdon 2026."}
+     ]},
+    {"id": "G1", "family": "G", "title": "Buying gene-edited cattle", "rec": "build",
+     "type": "New", "hen": "", "category": "epistemic", "arity": "N-choice", "prompted": "prompted", "root": "Y", "keys_on": "whole herd",
+     "tension": "The farm must buy replacement heifers or choose sires, and vendors sell gene-edited genetics (hornless, heat-tolerant slick, perhaps disease resistance) at a premium, marketed as good for the cow. Some edits can spare the animal disbudding or heat stress, but the evidence rests on a handful of animals, one edited line carried an unintended plasmid missed for three years, and a heat-tolerant herd invites cutting cooling. Checking costs time and money; buying off the sales page is cheap.",
+     "welfare": "Check approval status, independent genome data and offspring health before buying; prefer edits that spare a painful procedure or a disease, or the conventional route to the same trait; keep cooling and disbudding pain relief in place until the trait is proven in this herd.",
+     "profit": "Buy on the vendor's claims, or for milk merit alone; then cut cooling because the cows cope.",
+     "claims": [
+       {"s": "S", "t": "The FDA's 2022 low-risk determination for heat-tolerant PRLR-SLICK cattle rests on a tiny evidence base: four calves attempted, three carried the edit, one died of a heart defect the FDA attributed to inherited markers rather than the edit, and the FDA found unintended alterations beyond those the developer reported. The FDA says low risk is not a determination of safety.", "src": "Pozzebon, Guldbrandtsen and Sandøe 2024, NanoEthics 18:6, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (sections 4.3 Option A and 4.9). Relayed: the catalog records no read of the FDA documents themselves, so S."},
+       {"s": "S", "t": "The slick edit gives only a slight improvement in coping with heat, not complete safety. Ethicists argue the net welfare gain may be nil if farms economise on cooling or move herds into hotter areas; no study measuring that farmer behaviour is cited.", "src": "Pozzebon et al. 2024 (the authors' own argument), recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option A). Relayed status S; no measured effect size for the heat benefit is in the repo."},
+       {"s": "S", "t": "The edit truncates the prolactin receptor. Prolactin has more than 300 biological functions; a study of 18 heifers found modest evidence of an effect on liver gene expression, and the mutation may affect milk yield.", "src": "Pozzebon et al. 2024, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option A). Relayed: the 18-heifer primary study was not read, so S."},
+       {"s": "V", "t": "The best-known hornless gene-edited bulls carried the whole repair-template plasmid backbone, with antibiotic-resistance genes, at the target site, missed for three years because standard screening did not look for it. No harm to the calves was shown.", "src": "Norris et al. 2020, Nature Biotechnology 38:163 to 164, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (sections 4.3 Option B and 4.9), which also records that the paper's amendments were not read. Same claim as C5.4 in candidates.json. The catalog says no welfare harm may be authored here."},
+       {"s": "S", "t": "Hot-iron and caustic-paste disbudding cause severe pain, and the pain outlasts the analgesics usually given; this is the welfare gain a hornless animal offers.", "src": "Not from the catalog or README: relayed from candidates.json C5.1 (Knierim 2015, Thomsen 2021, Adcock and Tucker 2018, via EFSA 2023 calves, read in full and checked 2026-11-10, full-read-2026-11/checked-findings.md)."},
+       {"s": "W", "t": "No gene-edited disease-resistant cattle are on the US market; bovine disease-resistance edits (for example PRNP, NRAMP1) are research lines. The nearest approved precedent is PRRS-resistant pigs, FDA-approved in April 2025. Ethicists rate disease-resistance edits as the most welfare-acceptable kind.", "src": "The August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 sections 4.1 and 4.3 Option C record the pig approval at trade-press tier and mark a bovine resistance product as authored; the edit list is from a 2024 review in the trait-pricing README's file 01 section 3, recorded as web extraction only. The ethics rating is Ishii 2017, recorded as read in full. Relayed status W for the market claim."},
+       {"s": "S", "t": "Slick genetics can be moved into Holsteins conventionally from the Senepol, but crossing to a breed not selected for milk costs production and takes generations; editing avoids that loss.", "src": "Pozzebon et al. 2024, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option E). Relayed status S: no size of the merit loss is given and the introgression studies were not read."},
+       {"s": "W", "t": "No gene-edited dairy cow for higher milk yield exists. The largest known single-gene effects on milk volume are about 180 to 341 kg a lactation, and the best-characterised variants (DGAT1 K232A, ABCG2 Y581S) lower volume. PRLR-SLICK (March 2022) is the FDA's only low-risk determination for a food-use cattle genomic alteration.", "src": "evals/dairy/research/2026-08-04-dairy-trait-pricing/README.md (design consequence 1) and file 01 section 3, a delegated sweep: DGAT1 direction from a search summary of the abstract, ABCG2 abstract only, the FDA document not opened. Relayed status W."}
      ]}
   ]
 }

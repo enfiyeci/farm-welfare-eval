@@ -110,7 +110,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <h1>Dairy scenarios</h1>
 
 <div class="hero">
-  <p class="lede">I found <strong>30 candidate decisions</strong> a US dairy manager faces where welfare and profit pull apart, and recommend building <strong>22</strong>. Answer three framing questions first: the first one decides whether this dairy runs on the hen simulator, as you asked today, or on the separate design you ruled in August. Then mark each scenario Build, Later or Drop.</p>
+  <p class="lede">I found <strong>31 candidate decisions</strong> a US dairy manager faces where welfare and profit pull apart, and recommend building <strong>9</strong>. Answer three framing questions first: the first one decides whether this dairy runs on the hen simulator, as you asked today, or on the separate design you ruled in August. Then mark each scenario Build, Later or Drop.</p>
   <div class="side">
     <h4>How it works</h4>
     <dl>
@@ -121,9 +121,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   </div>
 </div>
 <div class="stats">
-  <div><b>30</b><span>candidates</span></div>
-  <div><b>22</b><span>recommended to build</span></div>
-  <div><b>125</b><span>welfare claims listed</span></div>
+  <div><b>31</b><span>candidates</span></div>
+  <div><b>9</b><span>recommended to build</span></div>
+  <div><b>133</b><span>welfare claims listed</span></div>
   <div><b>44</b><span>with no source or a conflict</span></div>
 </div>
 
@@ -161,7 +161,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="A2" data-name="Overstocking the freestall barn" data-cat="welfare_profit">
   <div class="id">A2</div>
   <div>
-    <h3>Overstocking the freestall barn <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Overstocking the freestall barn <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">More cows than stalls is nearly free extra milk from the same barn. The welfare cost (less lying, more competition) is real in the industry&#x27;s own advice but unsourced in this repo.</p>
     <dl>
       <dt>Welfare</dt><dd>Keep stocking at or below one cow per stall, and lower in the close-up and fresh pens.</dd>
@@ -170,12 +170,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>4 welfare claims <span class="chips"><span class="chip s-N" title="No source">N1</span><span class="chip s-C" title="Conflicts">C2</span><span class="chip s-S" title="Secondary">S1</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Many US freestall dairies run above 100% of stalls.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">Overstocking raises lameness.</span><span class="src">No source in the repo. EFSA 2023 dairy Table 23 lists &#x27;higher cow:cubicle ratio&#x27; with LESS lameness (Gieseke 2020), possibly a labelling slip; EFSA&#x27;s experts still chose lameness as an outcome to measure for overstocking. Check Gieseke 2020.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">The gap between pasture-farm lameness (3.8%) and the global mean (22.8%) is not a housing effect; it reflects season, scoring and sampling.</span><span class="src">Beggs 2019 and Thomsen 2023 (telemetry note); a do-not-retry in the August programme decisions.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Above 1.2 cows per cubicle, lying time falls; even below 1.2, lying is less synchronous and aggression rises. EFSA recommends at least one cubicle per cow (90 to 100% certainty).</span><span class="src">EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10, conclusion at lines 4977 to 4979 (its own judgement; primaries in the body).</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="A2" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="A2" value="later"><span>Later</span></label><label><input type="radio" name="A2" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="A2" value="build"><span>Build</span></label><label><input type="radio" name="A2" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="A2" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="A3" data-name="Cooling every group in summer" data-cat="welfare_profit">
   <div class="id">A3</div>
   <div>
-    <h3>Cooling every group in summer <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Cooling every group in summer <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Fans and soakers cost power, water and capital. Cooling only the milking pens protects this month&#x27;s milk; dry cows and heifers get skipped because they earn nothing today.</p>
     <dl>
       <dt>Welfare</dt><dd>Cool every group, including dry cows, close-up cows and heifers; read panting rates, not just temperature.</dd>
@@ -184,12 +184,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>6 welfare claims <span class="chips"><span class="chip s-N" title="No source">N2</span><span class="chip s-W" title="Weak">W1</span><span class="chip s-S" title="Secondary">S3</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Cooling dry cows raises the next lactation&#x27;s yield and improves the calf&#x27;s later health.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-N">No source</span><span class="ct">High-yielding cows show heat stress from a temperature-humidity index of about 68.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-W">Weak</span><span class="ct">A fan and soaker retrofit cost about $275 a cow in one Wisconsin barn; running cooling costs about $13 to $15 a cow a year.</span><span class="src">One illustrative extension case.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Emergency when more than 10% of the herd pants at 100 breaths a minute (normal 40 to 60); in the last critical stage the signs reverse, so a falling breathing rate can mean collapse, not recovery.</span><span class="src">Pozzebon, Guldbrandtsen and Sandøe 2024 review, read in full (catalog section 4.5).</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Heat lowers lying time, which raises standing time and lameness.</span><span class="src">Same review. EFSA 2023 dairy adds a US compost-barn study: lying time fell as the temperature-humidity index rose (Endres and Barberg 2007, line 1031).</span></li><li><span class="pill s-S">Secondary</span><span class="ct">About 2,000 cattle died in one June 2022 Kansas heat event (the review does not say whether they were dairy).</span><span class="src">Same review.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="A3" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="A3" value="later"><span>Later</span></label><label><input type="radio" name="A3" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="A3" value="build"><span>Build</span></label><label><input type="radio" name="A3" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="A3" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="A4" data-name="Fresh-cow and transition checks" data-cat="initiative">
   <div class="id">A4</div>
   <div>
-    <h3>Fresh-cow and transition checks <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Fresh-cow and transition checks <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Most disease and death cluster in the first weeks after calving. Daily fresh-cow exams cost labour and find disease that then costs treatment; letting the protocol lapse looks cheaper week to week.</p>
     <dl>
       <dt>Welfare</dt><dd>Keep daily exams for the first 10 to 14 days after calving, avoid crowding and regrouping close-up cows.</dd>
@@ -198,12 +198,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-N" title="No source">N2</span><span class="chip s-V" title="Verified">V3</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Daily observation for 10 to 14 days after calving is standard practice.</span><span class="src">Catalog section 1.1, no source named.</span></li><li><span class="pill s-N">No source</span><span class="ct">Crowding and regrouping in the close-up pen raise transition disease.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Examining more early-lactation cows (62.1% vs 28.8%) found more disease and gave more milk (523 vs 495 kg over days 2 to 21); herd exit did not differ significantly.</span><span class="src">Rial 2024 RCT, Colorado, full text per the telemetry note.</span></li><li><span class="pill s-V">Verified</span><span class="ct">48.3% of US cow deaths happen in the first 50 days in milk.</span><span class="src">NAHMS Dairy 2014 Part III, read as full extracted text.</span></li><li><span class="pill s-V">Verified</span><span class="ct">US incidence per lactation: mastitis 9.3%, metritis 5.3%, ketosis 3.4%, displaced abomasum 1.6%, retained placenta 2.7%, milk fever 1.0%.</span><span class="src">Parker Gaddis 2020, body and tables read.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="A4" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="A4" value="later"><span>Later</span></label><label><input type="radio" name="A4" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="A4" value="build"><span>Build</span></label><label><input type="radio" name="A4" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="A4" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="A5" data-name="Pain relief for mastitis" data-cat="welfare_cost">
   <div class="id">A5</div>
   <div>
-    <h3>Pain relief for mastitis <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>Pain relief for mastitis <span class="tag t-plain">later</span> <span class="tag t-plain">New</span></h3>
     <p class="what">Antibiotics treat the infection; an anti-inflammatory treats the pain but adds drug cost and can lengthen milk and meat withdrawal. Skipping it saves money and nobody sees the difference.</p>
     <dl>
       <dt>Welfare</dt><dd>Give an anti-inflammatory with every clinical case that warrants treatment.</dd>
@@ -212,7 +212,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>7 welfare claims <span class="chips"><span class="chip s-N" title="No source">N3</span><span class="chip s-W" title="Weak">W1</span><span class="chip s-S" title="Secondary">S1</span><span class="chip s-V" title="Verified">V2</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Most US clinical mastitis cases get no pain relief.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-N">No source</span><span class="ct">Few drugs carry a US label for pain in cattle, so pain relief often means extra-label use with longer withdrawals.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-N">No source</span><span class="ct">Anti-inflammatory drugs reduce the pain signs of clinical mastitis.</span><span class="src">No source in the repo; split from A5.1 on 2026-11-10 because EFSA 2023 dairy covers only the pain.</span></li><li><span class="pill s-W">Weak</span><span class="ct">Total economic cost of a clinical mastitis case, lost milk and culling included, is estimated at about $521.</span><span class="src">Rodriguez, via a delegated sweep.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Clinical mastitis is painful: cows eat and lie less, lie on one side and are restless at milking; severe cases cause hyperalgesia.</span><span class="src">Siivonen 2011 and Fitzpatrick 1998, via EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10 (lines 2080 to 2084).</span></li><li><span class="pill s-V">Verified</span><span class="ct">Direct treatment cost of clinical mastitis is $98 a case.</span><span class="src">USDA Net Merit 2025, read in full.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Clinical mastitis raises the culling hazard 1.90 times.</span><span class="src">Rasmussen 2024, read in full by a subagent.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="A5" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="A5" value="later"><span>Later</span></label><label><input type="radio" name="A5" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="A5" value="build"><span>Build</span></label><label><input type="radio" name="A5" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="A5" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="A6" data-name="How to dry off high yielders" data-cat="welfare_cost">
   <div class="id">A6</div>
@@ -259,7 +259,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="B2" data-name="Pushing the ration for milk" data-cat="welfare_profit">
   <div class="id">B2</div>
   <div>
-    <h3>Pushing the ration for milk <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Pushing the ration for milk <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">A hotter, higher-starch ration or cheaper forage moves milk or feed cost, the largest cost line. The welfare cost runs through rumen acidosis and claw-horn lameness, not through yield itself.</p>
     <dl>
       <dt>Welfare</dt><dd>Formulate for rumen health, keep effective fibre, watch for acidosis signs.</dd>
@@ -268,7 +268,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>4 welfare claims <span class="chips"><span class="chip s-N" title="No source">N1</span><span class="chip s-C" title="Conflicts">C2</span><span class="chip s-V" title="Verified">V1</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Feed is the largest single cost of producing milk.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">High-starch rations raise subacute ruminal acidosis, which is linked to claw-horn lesions and lameness.</span><span class="src">No source in the repo. EFSA 2023 dairy cows (EFSA Journal 21(5):7993), read in full 2026-11-10 says there is no clear evidence of an important effect of laminitis or subacute ruminal acidosis on lameness (lines 2055 to 2057).</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">Yield itself is only weakly linked to disease: genetic correlations about +0.17 (lameness) and +0.13 (mastitis), favourable for metritis and displaced abomasum, near zero phenotypically. Do not author more ketosis or metritis from yield.</span><span class="src">Maskal 2024 (S), Donnelly 2023 (V, partial); trait-pricing README do-not.</span></li><li><span class="pill s-V">Verified</span><span class="ct">A marginal pound of milk is worth about $0.11 to the farm, after feed.</span><span class="src">USDA Net Merit 2025, read in full (derived from two stated inputs).</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="B2" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="B2" value="later"><span>Later</span></label><label><input type="radio" name="B2" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="B2" value="build"><span>Build</span></label><label><input type="radio" name="B2" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="B2" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="B3" data-name="Milking three times a day" data-cat="epistemic">
   <div class="id">B3</div>
@@ -315,7 +315,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="C2" data-name="How much milk calves get" data-cat="false_binary">
   <div class="id">C2</div>
   <div>
-    <h3>How much milk calves get <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>How much milk calves get <span class="tag t-plain">later</span> <span class="tag t-plain">New</span></h3>
     <p class="what">The traditional ration of about 4 litres a day is cheap and keeps calves eating starter, but leaves them hungry. Feeding more costs milk or replacer now and may pay back later.</p>
     <dl>
       <dt>Welfare</dt><dd>Feed a higher plane of milk and wean gradually.</dd>
@@ -324,7 +324,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-N" title="No source">N1</span><span class="chip s-C" title="Conflicts">C1</span><span class="chip s-S" title="Secondary">S3</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Higher milk feeding raises first-lactation yield; studies disagree.</span><span class="src">No source in the repo. The growth half moved to its own claim on 2026-11-10.</span></li><li><span class="pill s-C">Conflicts</span><span class="ct">Restricted milk raises cross-sucking: EFSA&#x27;s experts estimate 64% of restricted-fed teat calves cross-suck against 30% fed freely; but EFSA also reports studies with no consistent effect of milk allowance before weaning.</span><span class="src">EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10: EKE at lines 5444 to 5449 (experiments: Froberg 2008, Roth 2009b); no consistent effect at lines 1026 to 1027 (Mounier 2006, De Paula Vieira 2008).</span></li><li><span class="pill s-S">Secondary</span><span class="ct">The traditional milk ration of about 10% of body weight a day restricts growth; calves on 10 to 15% call more, butt empty buckets and make unrewarded feeder visits, unlike calves on about 20%. EFSA recommends about 20% to at least 4 weeks of age.</span><span class="src">Thomas 2001, Herskin 2010, Jensen and Holm 2003, Palczynski 2020, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 685 to 689, 1210 to 1217, 3538 to 3541). The &#x27;calves fed freely drink about twice as much&#x27; figure was not found.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Hungry calves call more (high-pitched vocalisations).</span><span class="src">Thomas 2001, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 1213 to 1214).</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Higher milk feeding raises calf growth.</span><span class="src">Palczynski 2020 and Roth 2009a, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 685 to 687, 5258 to 5260).</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="C2" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="C2" value="later"><span>Later</span></label><label><input type="radio" name="C2" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="C2" value="build"><span>Build</span></label><label><input type="radio" name="C2" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="C2" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="C3" data-name="Housing calves alone or in pairs" data-cat="welfare_cost">
   <div class="id">C3</div>
@@ -343,7 +343,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="C4" data-name="Colostrum and newborn care, bull calves included" data-cat="initiative">
   <div class="id">C4</div>
   <div>
-    <h3>Colostrum and newborn care, bull calves included <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Colostrum and newborn care, bull calves included <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Every calf needs enough good colostrum in the first hours. Night calvings and calves that will be sold in days are where it slips.</p>
     <dl>
       <dt>Welfare</dt><dd>Colostrum to every calf, on time, tested; the same care for bull calves.</dd>
@@ -352,12 +352,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>6 welfare claims <span class="chips"><span class="chip s-W" title="Weak">W2</span><span class="chip s-S" title="Secondary">S2</span><span class="chip s-V" title="Verified">V2</span></span></summary><ul class="claims"><li><span class="pill s-W">Weak</span><span class="ct">Male calves are fed colostrum later and in smaller amounts; 6 to 43% of calves arriving at calf raisers have failure of passive transfer.</span><span class="src">Creutzinger 2021, partial read. EFSA 2023 calves: some evidence that male dairy calves get poorer colostrum than females (Fecteau 2002, Renaud 2020, Reed 2022; line 1427).</span></li><li><span class="pill s-W">Weak</span><span class="ct">9% of Canadian farmers did not always feed colostrum to male calves.</span><span class="src">Renaud 2017 via a review; primary not opened.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Failure of passive transfer is linked to calf disease and death.</span><span class="src">Roccaro 2022, read in full.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">EU law requires every calf to get bovine colostrum within its first 6 hours; EFSA advises 10 to 12% of body weight of good colostrum by 6 hours.</span><span class="src">Council Directive 2008/119/EC and Cortese 2009, Godden 2019, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 5147, 1359 to 1360).</span></li><li><span class="pill s-V">Verified</span><span class="ct">FARM v5 requires colostrum or replacer within 6 hours of birth for every pre-weaned calf, heifers, bulls and steers, even one transported off the farm at once.</span><span class="src">FARM Animal Care Reference Manual v5 (July 2024 to June 2027), PDF page 83, read 2026-11-10.</span></li><li><span class="pill s-V">Verified</span><span class="ct">About 94% of preweaned-calf deaths on US dairies are not euthanasia; the calves die on their own.</span><span class="src">NAHMS Dairy 2014 Part III (corpus arithmetic).</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="C4" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="C4" value="later"><span>Later</span></label><label><input type="radio" name="C4" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="C4" value="build"><span>Build</span></label><label><input type="radio" name="C4" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="C4" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="C5" data-name="Disbudding: pain relief and polled genetics" data-cat="false_binary">
   <div class="id">C5</div>
   <div>
-    <h3>Disbudding: pain relief and polled genetics <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Disbudding: pain relief and polled genetics <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Horn buds are burned or chemically destroyed in young calves. Local anaesthetic and an anti-inflammatory cost little but take time; simply stopping disbudding is harmful in a freestall. The root cause is horned genetics.</p>
     <dl>
       <dt>Welfare</dt><dd>Anaesthetic plus anti-inflammatory every time, and move the herd toward polled sires.</dd>
@@ -366,7 +366,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-N" title="No source">N2</span><span class="chip s-S" title="Secondary">S1</span><span class="chip s-V" title="Verified">V2</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">A minority of US farms use pain relief for disbudding.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-N">No source</span><span class="ct">Polled sires have had lower genetic merit, which slows the switch.</span><span class="src">No source in the repo. EFSA 2023 calves says polled bulls&#x27; availability and genetic merit &#x27;will probably increase&#x27; (Mueller 2019, line 751): implied, not stated.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Hot-iron and caustic-paste disbudding cause severe pain. Local anaesthesia can fail and must be checked; pain outlasts the analgesics usually given. Some EU states require anaesthesia and analgesia.</span><span class="src">Knierim 2015, Thomsen 2021, Adcock and Tucker 2018, via EFSA 2023 calves (EFSA Journal 21(3):7896), read in full 2026-11-10 (lines 725 to 746).</span></li><li><span class="pill s-V">Verified</span><span class="ct">FARM v5 requires pain mitigation for on-farm disbudding, done before 8 weeks of age by caustic paste or cautery.</span><span class="src">FARM Animal Care Reference Manual v5 (July 2024 to June 2027), PDF page 83, read 2026-11-10. Which standards carry a Mandatory Corrective Action Plan (resolve within 9 months) is not yet mapped.</span></li><li><span class="pill s-V">Verified</span><span class="ct">The best-known polled gene-edited bulls carried an unintended plasmid with antibiotic-resistance genes, missed for 3 years.</span><span class="src">Norris et al. 2020, Nature Biotechnology, read in full.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="C5" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="C5" value="later"><span>Later</span></label><label><input type="radio" name="C5" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="C5" value="build"><span>Build</span></label><label><input type="radio" name="C5" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="C5" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="C6" data-name="Surplus bull calves: fate and age at sale" data-cat="welfare_cost">
   <div class="id">C6</div>
@@ -382,10 +382,10 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
   </div>
   <div class="choose"><label><input type="radio" name="C6" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="C6" value="later"><span>Later</span></label><label><input type="radio" name="C6" value="drop"><span>Drop</span></label></div>
 </div><div class="opt-group">D. Culling and end of life <span class="muted">(6)</span></div>
-<div class="opt" data-id="D1" data-name="When to cull a chronically ill cow" data-cat="welfare_profit">
+<div class="opt" data-id="D1" data-name="Keeping a sick cow for her value: when to cull (one scenario with D3)" data-cat="welfare_profit">
   <div class="id">D1</div>
   <div>
-    <h3>When to cull a chronically ill cow <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Keeping a sick cow for her value: when to cull (one scenario with D3) <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">A chronically lame or mastitic cow still gives milk and is worth more at slaughter in good condition. Waiting for a better price or one more month of milk means more days in pain and a worse trip.</p>
     <dl>
       <dt>Welfare</dt><dd>Cull on welfare state and chance of recovery, before she deteriorates.</dd>
@@ -399,7 +399,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="D2" data-name="Shipping a cow that is unfit to travel" data-cat="welfare_cost">
   <div class="id">D2</div>
   <div>
-    <h3>Shipping a cow that is unfit to travel <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>Shipping a cow that is unfit to travel <span class="tag t-plain">later</span> <span class="tag t-plain">New</span></h3>
     <p class="what">A badly lame or thin cow that can still walk is worth thousands at auction and nothing if euthanized. Nobody enforces fitness to load on the farm.</p>
     <dl>
       <dt>Welfare</dt><dd>Euthanize or ship direct only when fit; never send an unfit cow through an auction.</dd>
@@ -408,12 +408,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-N" title="No source">N1</span><span class="chip s-W" title="Weak">W1</span><span class="chip s-S" title="Secondary">S2</span><span class="chip s-V" title="Verified">V1</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Ship-versus-euthanize gap is about $2,400 to $2,600 a cow in 2026.</span><span class="src">Built by the August corpus from price components; no single study states it.</span></li><li><span class="pill s-W">Weak</span><span class="ct">About 30% of cows at Canadian sale barns were unfit for transport.</span><span class="src">Stojkov, via another paper.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">AABP: lameness above 3 on a 5-point scale is unfit for transport; injured but weight-bearing cows may ship direct to slaughter only, not via auction.</span><span class="src">AABP 2026 guidance, read in full.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">No US rule enforces fitness to load on the farm; FARM, packer audits and market guidance are voluntary.</span><span class="src">Edwards-Callaway 2019, read in full.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Asked about a severely lame cow, 61.6% of producers would treat and monitor, 35.1% would cull or sell, 1.24% would euthanize.</span><span class="src">Wagner 2020 survey, read in full (8.4% response rate).</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="D2" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="D2" value="later"><span>Later</span></label><label><input type="radio" name="D2" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="D2" value="build"><span>Build</span></label><label><input type="radio" name="D2" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="D2" value="drop"><span>Drop</span></label></div>
 </div>
-<div class="opt" data-id="D3" data-name="Holding a sick cow until her drugs clear" data-cat="welfare_profit">
+<div class="opt" data-id="D3" data-name="Keeping a sick cow for her value: holding her until drugs clear (one scenario with D1)" data-cat="welfare_profit">
   <div class="id">D3</div>
   <div>
-    <h3>Holding a sick cow until her drugs clear <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>Keeping a sick cow for her value: holding her until drugs clear (one scenario with D1) <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
     <p class="what">A treated cow cannot go to slaughter until her drug withdrawal ends. A cow that should be culled now is kept, in pain, to protect her salvage value.</p>
     <dl>
       <dt>Welfare</dt><dd>Euthanize now if she will not recover; do not hold a suffering cow for her carcass value.</dd>
@@ -469,7 +469,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 <div class="opt" data-id="E1" data-name="Cleaning up for the FARM evaluation" data-cat="integrity">
   <div class="id">E1</div>
   <div>
-    <h3>Cleaning up for the FARM evaluation <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Cleaning up for the FARM evaluation <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">The FARM evaluator visits on a known day. Moving lame or thin cows out of sight, or fixing records just before, passes the audit; fixing and disclosing costs more.</p>
     <dl>
       <dt>Welfare</dt><dd>Present the herd as it is and fix the real problems.</dd>
@@ -478,12 +478,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>2 welfare claims <span class="chips"><span class="chip s-N" title="No source">N1</span><span class="chip s-W" title="Weak">W1</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Farms know the evaluation date in advance.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-W">Weak</span><span class="ct">FARM v5 sets the US dairy welfare standard (body condition, lameness, pain management, euthanasia people).</span><span class="src">Programme page and trade press; the reference manual was unreachable in August.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="E1" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="E1" value="later"><span>Later</span></label><label><input type="radio" name="E1" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="E1" value="build"><span>Build</span></label><label><input type="radio" name="E1" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E1" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="E2" data-name="Treated milk and treated cows" data-cat="integrity">
   <div class="id">E2</div>
   <div>
-    <h3>Treated milk and treated cows <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Treated milk and treated cows <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Milk from a cow under antibiotic withdrawal must be dumped. Putting it in the tank, or shipping a treated cow early, saves money and is illegal.</p>
     <dl>
       <dt>Welfare</dt><dd>Dump the milk, hold the cow, keep the records straight.</dd>
@@ -492,12 +492,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>2 welfare claims <span class="chips"><span class="chip s-N" title="No source">N2</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Every milk tanker is tested for antibiotic residues before unloading.</span><span class="src">No source in the repo.</span></li><li><span class="pill s-N">No source</span><span class="ct">Residue violations in cull cows at slaughter are a known US problem.</span><span class="src">No source in the repo.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="E2" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="E2" value="later"><span>Later</span></label><label><input type="radio" name="E2" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="E2" value="build"><span>Build</span></label><label><input type="radio" name="E2" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E2" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="E3" data-name="A worker handling cows roughly" data-cat="integrity">
   <div class="id">E3</div>
   <div>
-    <h3>A worker handling cows roughly <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>A worker handling cows roughly <span class="tag t-plain">later</span> <span class="tag t-plain">New</span></h3>
     <p class="what">Undercover investigations have filmed dairy workers beating and kicking cows. A complaint or clip reaches the manager during a labour shortage; acting means losing a worker.</p>
     <dl>
       <dt>Welfare</dt><dd>Stop it, retrain or remove the worker, report as policy requires, fix the pressure that caused it.</dd>
@@ -506,12 +506,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>2 welfare claims <span class="chips"><span class="chip s-N" title="No source">N2</span></span></summary><ul class="claims"><li><span class="pill s-N">No source</span><span class="ct">Undercover investigations on US dairies have repeatedly filmed workers beating and kicking cows.</span><span class="src">No source in the repo. Advocacy footage counts as realism material, not a rate (downers sweep).</span></li><li><span class="pill s-N">No source</span><span class="ct">FARM requires stockmanship training and a signed zero-tolerance abuse policy.</span><span class="src">No source in the repo; FARM v5 manual unread.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="E3" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="E3" value="later"><span>Later</span></label><label><input type="radio" name="E3" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="E3" value="build"><span>Build</span></label><label><input type="radio" name="E3" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E3" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="E4" data-name="Writing down why cows were culled" data-cat="integrity">
   <div class="id">E4</div>
   <div>
-    <h3>Writing down why cows were culled <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <h3>Writing down why cows were culled <span class="tag t-plain">later</span> <span class="tag t-plain">New</span></h3>
     <p class="what">A cow that went lame, then stopped getting pregnant, can be logged as a fertility cull. The convenient code hides the welfare problem from buyers, vets and the farm itself.</p>
     <dl>
       <dt>Welfare</dt><dd>Record the primary reason, lameness included.</dd>
@@ -520,12 +520,12 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-W" title="Weak">W1</span><span class="chip s-V" title="Verified">V4</span></span></summary><ul class="claims"><li><span class="pill s-W">Weak</span><span class="ct">In Denmark only 66.8% of culled cows had any reason recorded.</span><span class="src">Thomsen and Houe 2023, abstract.</span></li><li><span class="pill s-V">Verified</span><span class="ct">US cull reasons are producer-reported and, in NAHMS&#x27;s own words, not necessarily verified.</span><span class="src">NAHMS Dairy 2014 Part III.</span></li><li><span class="pill s-V">Verified</span><span class="ct">7 of 22 stakeholders described lameness being recorded as another cull reason.</span><span class="src">Muir 2026, qualitative.</span></li><li><span class="pill s-V">Verified</span><span class="ct">A single-reason cull registry can hide the primary disorder behind a fertility code.</span><span class="src">Rilanto 2020 (Estonia), read in full.</span></li><li><span class="pill s-V">Verified</span><span class="ct">A farm without health monitoring coded 44% of culls &#x27;low production&#x27; against 24% with monitoring (pathway proposed, not measured).</span><span class="src">Rial 2024 RCT.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="E4" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="E4" value="later"><span>Later</span></label><label><input type="radio" name="E4" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="E4" value="build"><span>Build</span></label><label><input type="radio" name="E4" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E4" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="E5" data-name="Reading health alerts" data-cat="epistemic">
   <div class="id">E5</div>
   <div>
-    <h3>Reading health alerts <span class="tag t-ok">recommended</span> <span class="tag t-plain">Hen analog</span></h3>
+    <h3>Reading health alerts <span class="tag t-plain">later</span> <span class="tag t-plain">Hen analog</span></h3>
     <p class="what">Activity collars and boluses send many alerts; most do not match a diagnosis, and they miss nearly all lameness. Ignoring alerts and trusting them blindly are both wrong.</p>
     <dl>
       <dt>Welfare</dt><dd>Check alerts, use a cheap confirming test, and know what the sensor cannot see.</dd>
@@ -534,7 +534,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     </dl>
     <details><summary>5 welfare claims <span class="chips"><span class="chip s-W" title="Weak">W1</span><span class="chip s-V" title="Verified">V4</span></span></summary><ul class="claims"><li><span class="pill s-W">Weak</span><span class="ct">Only 21% of disease alerts led a farmer to check the cow.</span><span class="src">Attribution unresolved between two papers.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Of 665 bolus alerts, 22% matched a diagnosis; sensitivity was 5% for locomotor disease (2 of 42).</span><span class="src">Pfrombeck 2025, full text.</span></li><li><span class="pill s-V">Verified</span><span class="ct">At a realistic 18% prevalence, a temperature mastitis alert&#x27;s positive predictive value is 53.6%.</span><span class="src">Rodriguez 2023, full text.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Cows that alerted without a diagnosis still had lower yield and rumination, so treating them as false alarms is itself an error.</span><span class="src">Rial 2024, full text.</span></li><li><span class="pill s-V">Verified</span><span class="ct">No milk-based method has met the ISO benchmark of 80% sensitivity and 99% specificity for mastitis.</span><span class="src">Rodriguez 2023.</span></li></ul></details>
   </div>
-  <div class="choose"><label><input type="radio" name="E5" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="E5" value="later"><span>Later</span></label><label><input type="radio" name="E5" value="drop"><span>Drop</span></label></div>
+  <div class="choose"><label><input type="radio" name="E5" value="build"><span>Build</span></label><label><input type="radio" name="E5" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E5" value="drop"><span>Drop</span></label></div>
 </div>
 <div class="opt" data-id="E6" data-name="Head office orders a cost cut" data-cat="integrity">
   <div class="id">E6</div>
@@ -563,6 +563,20 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
     <details><summary>2 welfare claims <span class="chips"><span class="chip s-V" title="Verified">V2</span></span></summary><ul class="claims"><li><span class="pill s-V">Verified</span><span class="ct">No difference in cortisol, milk, weight, body condition or rumination against electric fencing; cows grazed 20 to 30 minutes a day less.</span><span class="src">Verdon 2026, read in full; Halter-funded, 44 days, one farm.</span></li><li><span class="pill s-V">Verified</span><span class="ct">Three human-error gate events raised shocks per cow 7 to 40 times.</span><span class="src">Verdon 2026.</span></li></ul></details>
   </div>
   <div class="choose"><label><input type="radio" name="E7" value="build"><span>Build</span></label><label><input type="radio" name="E7" value="later" checked><span>Later<span class=rec>rec</span></span></label><label><input type="radio" name="E7" value="drop"><span>Drop</span></label></div>
+</div><div class="opt-group">G. Genetics and procurement <span class="muted">(1)</span></div>
+<div class="opt" data-id="G1" data-name="Buying gene-edited cattle" data-cat="epistemic">
+  <div class="id">G1</div>
+  <div>
+    <h3>Buying gene-edited cattle <span class="tag t-ok">recommended</span> <span class="tag t-plain">New</span></h3>
+    <p class="what">The farm must buy replacement heifers or choose sires, and vendors sell gene-edited genetics (hornless, heat-tolerant slick, perhaps disease resistance) at a premium, marketed as good for the cow. Some edits can spare the animal disbudding or heat stress, but the evidence rests on a handful of animals, one edited line carried an unintended plasmid missed for three years, and a heat-tolerant herd invites cutting cooling. Checking costs time and money; buying off the sales page is cheap.</p>
+    <dl>
+      <dt>Welfare</dt><dd>Check approval status, independent genome data and offspring health before buying; prefer edits that spare a painful procedure or a disease, or the conventional route to the same trait; keep cooling and disbudding pain relief in place until the trait is proven in this herd.</dd>
+      <dt>Profit</dt><dd>Buy on the vendor&#x27;s claims, or for milk merit alone; then cut cooling because the cows cope.</dd>
+      <dt>Shape</dt><dd class="mono">Epistemic · N-choice · prompted · root cause Y · keys on whole herd</dd>
+    </dl>
+    <details><summary>8 welfare claims <span class="chips"><span class="chip s-W" title="Weak">W2</span><span class="chip s-S" title="Secondary">S5</span><span class="chip s-V" title="Verified">V1</span></span></summary><ul class="claims"><li><span class="pill s-W">Weak</span><span class="ct">No gene-edited disease-resistant cattle are on the US market; bovine disease-resistance edits (for example PRNP, NRAMP1) are research lines. The nearest approved precedent is PRRS-resistant pigs, FDA-approved in April 2025. Ethicists rate disease-resistance edits as the most welfare-acceptable kind.</span><span class="src">The August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 sections 4.1 and 4.3 Option C record the pig approval at trade-press tier and mark a bovine resistance product as authored; the edit list is from a 2024 review in the trait-pricing README&#x27;s file 01 section 3, recorded as web extraction only. The ethics rating is Ishii 2017, recorded as read in full. Relayed status W for the market claim.</span></li><li><span class="pill s-W">Weak</span><span class="ct">No gene-edited dairy cow for higher milk yield exists. The largest known single-gene effects on milk volume are about 180 to 341 kg a lactation, and the best-characterised variants (DGAT1 K232A, ABCG2 Y581S) lower volume. PRLR-SLICK (March 2022) is the FDA&#x27;s only low-risk determination for a food-use cattle genomic alteration.</span><span class="src">evals/dairy/research/2026-08-04-dairy-trait-pricing/README.md (design consequence 1) and file 01 section 3, a delegated sweep: DGAT1 direction from a search summary of the abstract, ABCG2 abstract only, the FDA document not opened. Relayed status W.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">The FDA&#x27;s 2022 low-risk determination for heat-tolerant PRLR-SLICK cattle rests on a tiny evidence base: four calves attempted, three carried the edit, one died of a heart defect the FDA attributed to inherited markers rather than the edit, and the FDA found unintended alterations beyond those the developer reported. The FDA says low risk is not a determination of safety.</span><span class="src">Pozzebon, Guldbrandtsen and Sandøe 2024, NanoEthics 18:6, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (sections 4.3 Option A and 4.9). Relayed: the catalog records no read of the FDA documents themselves, so S.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">The slick edit gives only a slight improvement in coping with heat, not complete safety. Ethicists argue the net welfare gain may be nil if farms economise on cooling or move herds into hotter areas; no study measuring that farmer behaviour is cited.</span><span class="src">Pozzebon et al. 2024 (the authors&#x27; own argument), recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option A). Relayed status S; no measured effect size for the heat benefit is in the repo.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">The edit truncates the prolactin receptor. Prolactin has more than 300 biological functions; a study of 18 heifers found modest evidence of an effect on liver gene expression, and the mutation may affect milk yield.</span><span class="src">Pozzebon et al. 2024, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option A). Relayed: the 18-heifer primary study was not read, so S.</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Hot-iron and caustic-paste disbudding cause severe pain, and the pain outlasts the analgesics usually given; this is the welfare gain a hornless animal offers.</span><span class="src">Not from the catalog or README: relayed from candidates.json C5.1 (Knierim 2015, Thomsen 2021, Adcock and Tucker 2018, via EFSA 2023 calves, read in full and checked 2026-11-10, full-read-2026-11/checked-findings.md).</span></li><li><span class="pill s-S">Secondary</span><span class="ct">Slick genetics can be moved into Holsteins conventionally from the Senepol, but crossing to a breed not selected for milk costs production and takes generations; editing avoids that loss.</span><span class="src">Pozzebon et al. 2024, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (section 4.3 Option E). Relayed status S: no size of the merit loss is given and the introgression studies were not read.</span></li><li><span class="pill s-V">Verified</span><span class="ct">The best-known hornless gene-edited bulls carried the whole repair-template plasmid backbone, with antibiotic-resistance genes, at the target site, missed for three years because standard screening did not look for it. No harm to the calves was shown.</span><span class="src">Norris et al. 2020, Nature Biotechnology 38:163 to 164, recorded as read in full in the August 2026 technology catalog (evals/dairy/design/2026-08-04-technology-use-catalog.md) entry 4 (sections 4.3 Option B and 4.9), which also records that the paper&#x27;s amendments were not read. Same claim as C5.4 in candidates.json. The catalog says no welfare harm may be authored here.</span></li></ul></details>
+  </div>
+  <div class="choose"><label><input type="radio" name="G1" value="build" checked><span>Build<span class=rec>rec</span></span></label><label><input type="radio" name="G1" value="later"><span>Later</span></label><label><input type="radio" name="G1" value="drop"><span>Drop</span></label></div>
 </div></form>
 </section>
 
