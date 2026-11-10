@@ -94,6 +94,6 @@ improving feed conversion (no growth effect); vitamin E in feed (Akşit 2008: mo
 - Pain and the time from first sign to death are unmeasured in any source found.
 - The hunger cost of restriction is unmeasured.
 - Only Gemini and Elicit have run the prompts; no second report tool yet.
-- `claims.json` and `inventory.html` are not yet updated from this file, and the node 2 memo
-  (`../../2026-09-21-growout-biology-genetics.md`) and the register row in `../../README.md` do not
-  yet match it.
+- Done 2026-11-10: `claims.json`, `inventory.html`, the node 2 memo
+  (`../../2026-09-21-growout-biology-genetics.md`) and the register row in `../../README.md` now
+  match this file.
