@@ -4,6 +4,17 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-10 · claude · dairy cow version: 30 candidate scenarios, waiting on Arda's picks (branch research/dairy-scenario-deepdive)
+
+- **Done:** read all of `evals/dairy/` (23 files, via five Sonnet readers with coverage statements)
+  and the broiler deep-dive format; brainstormed 30 dairy scenarios with every welfare claim's source
+  status. Page: `evals/dairy/research/scenario-deepdive-2026-11/picker.html` (built from
+  `candidates.json` by `build_picker.py`).
+- **Open for Arda:** the picks, plus framing Q1: today's brief puts dairy on the hen harness (pens as
+  houses); the August rulings made it a separate PLF substrate. Recommended: hen harness, PLF later.
+- **Next:** per Build pick, prompts.md in the broiler layout, unsourced claims first. No per-scenario
+  files yet by instruction.
+
 ## 2026-09-22 · claude · inspect-ai 0.3.266 breaks — spectator + report NaN FIXED (branch ci/pr-review-watch-skill, PR #41)
 
 - **Why now:** the new CI `tests` job installs the latest inspect-ai (0.3.266; `./venv` is
