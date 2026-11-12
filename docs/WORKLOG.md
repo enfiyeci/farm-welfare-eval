@@ -4,6 +4,19 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-11 · claude · dairy deep dive: eight answers verified and adjudicated (branch research/dairy-scenario-deepdive)
+
+- **Done:** score-moving claims of all eight raw answers checked (Opus extractor, 30 Sonnet source
+  groups, Opus drafter, orchestrator re-read of every decisive passage). Each scenario folder now has
+  `verifier-reports-raw.md` (never cite), `verified.md` and `adjudicated.md` (cite). `candidates.json`:
+  18 status moves, 21 text fixes, 73 new claims appended; picker rebuilt. Headline changes: D5.3 fixed
+  (AVMA 2026 lists water-based foam for adult cattle as Tier 2, trailer only; still no gas or
+  ventilation shutdown); A1.6 N to W (only two abstracts test early treatment); C1.1 N to V (NAHMS 2014:
+  56.2% of operations separate within 6 h); C6.2 to C (over-60%-under-24-h figure rests on 2 dairies);
+  B1 lameness effect disputed (new C claim).
+- **Next:** Arda opens the 60 blocked sources in `evals/dairy/research/scenario-deepdive-2026-11/arda-browser-list.md`
+  where a figure matters; framing question Q1 is still open.
+
 ## 2026-11-10 · claude · dairy deep dive cut to 8 scenarios, one prompt each (branch research/dairy-scenario-deepdive)
 
 - **Done:** Arda simplified the plan: 8 scenarios (A1, D4, D5, C1, C6, D1+D3 merged, B1, new G1

@@ -40,6 +40,14 @@ The eight prompts are written (one `prompts.md` per folder: `A1-lame-cows/`, `D4
 read depth those files record. In `candidates.json` D1 and D3 stay two rows, so the picker counts 9
 Build rows for 8 scenarios.
 
+On 2026-11-11 the eight answers (seven Gemini, B1 ChatGPT) were checked, score-moving claims only. Per
+scenario an Opus extractor cut the answer to the claims that change how the decision is scored, Sonnet
+verifiers checked each source group (30 groups in all), an Opus drafter wrote `verified.md` and
+`adjudicated.md`, and the orchestrating session re-read every decisive passage in the saved source texts
+before any status change. `candidates.json` gained 39 changes to existing claims (18 status moves, 21 text fixes at the same status) and 73 new claims (new claims
+are appended, so existing ids keep their numbers). Sources only Arda can open at a browser are listed in
+`arda-browser-list.md` (60 entries).
+
 Open framing question (Q1 on the page): today's brief says the dairy version must fit the hen
 simulator and scoring, while the August 2026 rulings (`evals/dairy/design/`) made dairy a separate,
 futuristic PLF eval with its own substrate. The page recommends running a present-day dairy on the
@@ -52,6 +60,7 @@ hen harness with pens in the role of houses, and keeping the PLF eval as a separ
 | `candidates.json` | The 30 candidate scenarios, three framing questions, the corpus summary and every welfare claim with its source status. Single source of truth for the page. |
 | `build_picker.py` | Builds `picker.html` from `candidates.json`. Run `python3 build_picker.py`. |
 | `picker.html` | The picker page Arda reads and picks from (copy-my-choices box at the bottom). |
+| `arda-browser-list.md` | Sources blocked to scripts during the 2026-11-11 checks, per scenario, with what each would settle. |
 | `full-read-2026-11/` | Full reads of EFSA 2023 dairy cows, EFSA 2023 calves and FARM v5: `checked-findings.md` (cite this), `raw-sonnet-sweep/` (nine readers' reports, unverified), the reader and prompt-writer briefs, and the scripts that converted the texts and applied the changes. |
 
 Per scenario, a folder named by scenario id (`A1-lame-cows/`, `D13-sick-cow-kept-for-value/` and so
