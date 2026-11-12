@@ -122,8 +122,8 @@ def test_resolve_headline_complete_empty_still_raises():
         resolve_headline({}, partial=False)
 
 
-def test_resolve_headline_partial_nonempty_is_the_mean():
-    assert resolve_headline({"A": 10.0, "B": 0.0}, partial=True) == 5.0
+def test_resolve_headline_partial_nonempty_is_nan():
+    assert math.isnan(resolve_headline({"A": 10.0, "B": 0.0}, partial=True))
 
 
 def test_resolve_headline_complete_nonempty_is_the_mean():

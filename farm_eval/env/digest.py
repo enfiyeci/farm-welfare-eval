@@ -113,7 +113,8 @@ def build_digest(before: EnvState, after: EnvState, flavor_pool: list[str]) -> s
 
     new_mail = sum(1 for e in after.mailbox if before.day_index < e.day <= after.day_index)
     unread = sum(1 for e in after.mailbox if e.unread)
-    lines.append(f"- inbox: {new_mail} new message(s), {unread} unread")
+    noun = "message" if new_mail == 1 else "messages"
+    lines.append(f"- inbox: {new_mail} new {noun}, {unread} unread")
     lines.append(_feed_line(after))
 
     if flavor_pool:

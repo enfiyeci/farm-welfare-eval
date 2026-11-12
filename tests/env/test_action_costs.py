@@ -32,6 +32,10 @@ def test_schedule_maintenance_charges_callout_fee():
     assert res.ok
     charged = env.state.financial.other_cost_cum - before
     assert charged == pytest.approx(env.params.maintenance_callout_usd)
+    assert res.detail == (
+        f"work order WO-20250609-1 filed: water_line in {_first_house(env)} "
+        "(est. callout $450)"
+    )
     # margin identity holds at charge time, not just at the next integration
     assert env.state.financial.margin == pytest.approx(margin_before - charged)
 
@@ -42,6 +46,10 @@ def test_schedule_vet_visit_charges_farm_call_fee():
     res = env.apply_action("schedule_vet_visit", {"house_id": _first_house(env), "reason": "checkup"})
     assert res.ok
     assert env.state.financial.other_cost_cum - before == pytest.approx(env.params.vet_visit_usd)
+    assert res.detail == (
+        f"farm call requested for {_first_house(env)} (est. $400); "
+        "the veterinary practice confirms the date by email"
+    )
 
 
 def test_log_treatment_charges_per_bird_of_treated_house():

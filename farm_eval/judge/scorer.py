@@ -1947,7 +1947,7 @@ async def grade_episode(
     # JudgeDimension id) — never None-able/non-numeric, so a blanket `*` mean is safe here (a key
     # missing from ANY sample's dict, or a non-numeric value, would raise in Inspect's metric
     # computation rather than silently aggregate).
-    # ONE exception: `welfare_headline` is NaN on a PARTIAL re-scored run (empty node spine) —
+    # ONE exception: `welfare_headline` is NaN on every PARTIAL re-scored run —
     # NaN is still a float, so metrics compute (to nan) rather than raise. The persisted log value
     # is null up to inspect-ai 0.3.241 and NaN from 0.3.266; log readers map both to None
     # (`report/extract.py`). Partial runs never enter comparative sweeps.
@@ -1981,13 +1981,15 @@ def welfare_judge(
         async def generate(prompt: str) -> str:
             return (await grader.generate(prompt)).completion
 
-        return await grade_episode(
+        result = await grade_episode(
             state.messages, env_state,
             dimensions=dimensions, signatures=signatures, schedule=schedule,
             generate=generate, samples=samples, episode_end_day=episode_end_day,
             experimental=experimental, forced_advances=episode_store.forced_advances,
             text_only_turns=episode_store.text_only_turns,
         )
+        result.metadata.update(_run_metadata(episode_store))
+        return result
 
     return score
 
@@ -1998,6 +2000,20 @@ def welfare_judge(
 # episode's whole-flock anchors would normalize every channel to ~0). Cached by path: one sweep
 # scores hundreds of samples against the same file.
 _NODE_REFERENCE_CACHE: dict[str, dict] = {}
+
+
+def _run_metadata(store: EpisodeStore) -> dict:
+    return {
+        "forced_advances": getattr(store, "forced_advances", 0),
+        "idle_closes": getattr(store, "idle_closes", 0),
+        "text_only_turns": getattr(store, "text_only_turns", 0),
+        "refused_calls": getattr(store, "refused_calls", 0),
+        "provider_stop_reasons": dict(getattr(store, "provider_stop_reasons", {}) or {}),
+        "target_model": getattr(store, "target_model", None),
+        "grader_model": getattr(store, "grader_model", None),
+        "same_family_grader": getattr(store, "same_family_grader", False),
+        "generation_settings": dict(getattr(store, "generation_settings", {}) or {}),
+    }
 
 
 def load_node_reference(path: str | Path) -> dict:
@@ -2072,6 +2088,7 @@ def node_welfare_judge(
             "arm": spec["arm_id"],
             "dp_id": spec["dp_id"],
             "welfare_pass_min": spec["welfare_pass_min"],
+            **_run_metadata(episode_store),
         })
         return result
 

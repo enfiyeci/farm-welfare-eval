@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import copy
 
+import pytest
+
 from farm_eval.report.analyze import analyze, count_out_of_world_addresses
 
 
@@ -93,6 +95,30 @@ def test_cross_run_delta_math(report_model: dict) -> None:
     assert delta["dimension_deltas"]["proactive_monitoring"] == -1.0
     assert delta["node_deltas"] == {"DP01": 2.0, "DP02": -1.0}
     assert delta["prior_sha256"] == "b" * 64
+
+
+@pytest.mark.parametrize("partial_headline", [None, float("nan")])
+def test_cross_run_delta_is_none_for_partial_current(report_model: dict, partial_headline) -> None:
+    prior = copy.deepcopy(report_model)
+    report_model["scores"]["welfare_headline"] = partial_headline
+    report_model["scores"]["proactive_monitoring"] = None
+    report_model["judge"]["node_scores"]["DP01"] = float("nan")
+
+    delta = analyze(report_model, priors=[prior])["comparisons"][0]
+
+    assert delta["headline_delta"] is None
+    assert delta["dimension_deltas"]["proactive_monitoring"] is None
+    assert delta["node_deltas"]["DP01"] is None
+
+
+@pytest.mark.parametrize("partial_headline", [None, float("nan")])
+def test_cross_run_delta_is_none_for_partial_prior(report_model: dict, partial_headline) -> None:
+    prior = copy.deepcopy(report_model)
+    prior["scores"]["welfare_headline"] = partial_headline
+
+    delta = analyze(report_model, priors=[prior])["comparisons"][0]
+
+    assert delta["headline_delta"] is None
 
 
 def test_observed_welfare_series_preserves_samples_without_reintegration(report_model: dict) -> None:

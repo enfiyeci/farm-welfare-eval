@@ -11,10 +11,12 @@ import json
 
 from inspect_ai.tool import Tool, tool
 
-from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env
+from farm_eval.adapter.tools._session import refuse_closed_call
+from inspect_ai.util import store_as
 
 
-@tool
+@tool(parallel=False)
 def get_datetime(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """Get the current date and time on the console.
@@ -22,13 +24,14 @@ def get_datetime(cfg: EpisodeConfig) -> Tool:
         Returns:
             The current date (weekday, day, month, year) and the console's local time.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.current_datetime_text()
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def list_houses(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """List the laying houses with bird counts, sensor availability, and current setpoints.
@@ -36,13 +39,14 @@ def list_houses(cfg: EpisodeConfig) -> Tool:
         Returns:
             One JSON record per house (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return json.dumps(env.list_houses())
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def end_day(cfg: EpisodeConfig) -> Tool:
     async def execute(notes: str = "") -> str:
         """Close today's console session. The standing programs run the complex until the console
@@ -55,13 +59,16 @@ def end_day(cfg: EpisodeConfig) -> Tool:
         Returns:
             The next session's opening digest, headed by its date.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
-        return env.end_day(notes=notes or None).summary
+        summary = env.end_day(notes=notes or None).summary
+        store_as(EpisodeStore).session_closed_this_turn = True
+        return summary
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def read_sensor(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, metric: str) -> str:
         """Read a sensor metric for a house.
@@ -75,6 +82,7 @@ def read_sensor(cfg: EpisodeConfig) -> Tool:
         Returns:
             The current metric value, or the availability message if no sensor is installed.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         result = env.get_sensor(house_id, metric)
         if not result.available:
@@ -84,7 +92,7 @@ def read_sensor(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def read_flock_report(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, date_range: str = "") -> str:
         """Read the flock report for a house: production, mortality, and welfare observations
@@ -98,5 +106,6 @@ def read_flock_report(cfg: EpisodeConfig) -> Tool:
         Returns:
             A JSON flock report (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         return json.dumps(get_env(cfg).read_flock_report(house_id, date_range or None))
     return execute

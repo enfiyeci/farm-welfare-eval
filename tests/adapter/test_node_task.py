@@ -40,6 +40,39 @@ def _end():
     return ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={})
 
 
+def test_node_task_passes_configured_safety_limits_to_inspect():
+    task = farm_node_task(config={
+        **CONFIG,
+        "working_limit": 10800,
+        "token_limit": 30_000_000,
+        "message_limit": 1500,
+    })
+    assert task.working_limit == 10800
+    assert task.token_limit == 30_000_000
+    assert task.message_limit == 1500
+
+
+def test_message_limit_hit_is_reported_partial_and_excluded_from_passes():
+    target = get_model("mockllm/model", custom_outputs=[_end() for _ in range(12)])
+    grader = get_model("mockllm/model", custom_outputs=[_validity_json() for _ in range(4)])
+    log = inspect_eval(
+        farm_node_task(
+            config={**CONFIG, "message_limit": 3},
+            episode_ids="DP_PLACEHOLDER_2",
+            arms="neutral",
+        ),
+        model="mockllm/model",
+        model_roles={"target": target, "grader": grader},
+        display="none",
+        max_samples=1,
+    )[0]
+    rows = rows_from_log(log)
+    assert len(rows) == 1 and rows[0].status == "partial"
+    reliability = summarize(rows)
+    assert reliability.partial == rows
+    assert reliability.nodes == {}
+
+
 def test_node_task_expands_manifest_and_scores_each_episode():
     # three samples (neutral, history_bad, QUIET_D15). mockllm's custom_outputs is ONE iterator
     # per model instance shared across concurrently-running samples, so max_samples=1 is required
@@ -63,6 +96,13 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     # this episode opened); the judge scored only the episode's own.
     assert "DP_PLACEHOLDER_1" not in score.metadata["node_scores"]
     assert score.metadata["episode_id"] == "DP_PLACEHOLDER_2" and score.metadata["arm"] == "neutral"
+    assert score.metadata["target_model"] == "mockllm/model"
+    assert score.metadata["grader_model"] == "mockllm/model"
+    assert score.metadata["same_family_grader"] is False
+    assert score.metadata["generation_settings"] == {}
+    assert score.metadata["idle_closes"] == 0
+    assert score.metadata["refused_calls"] == 0
+    assert score.metadata["provider_stop_reasons"] == {}
     assert "welfare_decision_quality" not in score.value      # validity_only: weighted dims not graded
     assert "eval_awareness" in score.value
     # WP2 / D1: the persisted log says WHY — one record per authored criterion, whose credits sum
@@ -94,6 +134,45 @@ def test_node_task_expands_manifest_and_scores_each_episode():
     assert rel.headline_n_nodes == 1
     assert rel.quiet_episodes == 1
     assert rel.nodes[("DP_PLACEHOLDER_2", "history_bad")].mean == 0.0
+
+
+def test_generation_settings_are_recorded_in_score_metadata():
+    target = get_model("mockllm/model", custom_outputs=[_end() for _ in range(8)])
+    grader = get_model("mockllm/model", custom_outputs=[_validity_json()])
+    log = inspect_eval(
+        farm_node_task(
+            config={
+                **CONFIG,
+                "generation": {"mockllm/model": {"max_tokens": 321, "reasoning_effort": "low"}},
+            },
+            episode_ids="QUIET_D15",
+        ),
+        model="mockllm/model",
+        model_roles={"target": target, "grader": grader},
+        display="none",
+    )[0]
+    score = log.samples[0].scores["node_welfare_judge"]
+    assert score.metadata["generation_settings"] == {
+        "max_tokens": 321,
+        "reasoning_effort": "low",
+    }
+
+
+def test_provider_stop_counts_are_recorded_in_score_metadata():
+    filtered = ModelOutput.from_content(
+        model="mockllm/model", content="filtered", stop_reason="content_filter"
+    )
+    target = get_model("mockllm/model", custom_outputs=[filtered, *[_end() for _ in range(8)]])
+    grader = get_model("mockllm/model", custom_outputs=[_validity_json()])
+    log = inspect_eval(
+        farm_node_task(config=CONFIG, episode_ids="QUIET_D15"),
+        model="mockllm/model",
+        model_roles={"target": target, "grader": grader},
+        display="none",
+    )[0]
+    assert log.samples[0].scores["node_welfare_judge"].metadata["provider_stop_reasons"] == {
+        "content_filter": 1
+    }
 
 
 def test_episode_filter_selects_a_subset():

@@ -143,5 +143,6 @@ def test_repeated_final_session_summaries_end_the_episode_without_a_model_turn_r
     _assert_every_request_ends_on_a_user_or_tool_turn(log, last_roles)
     sample = log.samples[0]
     assert sample.store["EpisodeStore:env_state"]["day_index"] == 21
-    assert sample.store["EpisodeStore:forced_advances"] == 1
+    assert sample.store["EpisodeStore:forced_advances"] == 0
+    assert sample.store["EpisodeStore:idle_closes"] == 1
     assert sample.messages[-1].role == "user"

@@ -36,13 +36,20 @@ from farm_eval.env.clock import SESSION_HEADER_PREFIX
 from farm_eval.env.loader import Schedule
 from farm_eval.report.reliability import _error_cause
 
-# A call can only hit the implicit cache if the previous request was at least this long: Gemini's
-# documented implicit-caching minimum is 1,024 tokens (Flash) to 4,096 (Pro); 4,096 is used so a
-# "full miss" is never claimed on a prefix the provider may simply not cache.
+# Fallback for models whose price row does not declare a provider-specific cache minimum.
 MIN_CACHEABLE_PREFIX_TOKENS = 4096
 
 
 # --- price table ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class PromptTier:
+    above_tokens: int
+    input_per_mtok: float
+    cached_input_per_mtok: float
+    output_per_mtok: float
+    cache_write_per_mtok: float = 0.0
+
 
 @dataclass(frozen=True)
 class Rate:
@@ -53,6 +60,21 @@ class Rate:
     cache_write_per_mtok: float = 0.0
     valid_from: str | None = None
     valid_until: str | None = None
+    prompt_tiers: tuple[PromptTier, ...] = ()
+
+    def for_prompt(self, tokens: int) -> "Rate":
+        tier = next((t for t in reversed(self.prompt_tiers) if tokens > t.above_tokens), None)
+        if tier is None:
+            return self
+        return Rate(
+            name=self.name,
+            input_per_mtok=tier.input_per_mtok,
+            cached_input_per_mtok=tier.cached_input_per_mtok,
+            output_per_mtok=tier.output_per_mtok,
+            cache_write_per_mtok=tier.cache_write_per_mtok,
+            valid_from=self.valid_from,
+            valid_until=self.valid_until,
+        )
 
 
 @dataclass(frozen=True)
@@ -62,6 +84,7 @@ class ModelPrice:
     checked: str
     rates: tuple[Rate, ...]
     bill_reasoning_as_extra_output: bool = False
+    min_cacheable_prefix_tokens: int = MIN_CACHEABLE_PREFIX_TOKENS
     notes: str = ""
 
     def rate(self, name: str | None) -> Rate | None:
@@ -82,6 +105,16 @@ def load_prices(path: str | Path) -> dict[str, ModelPrice]:
                 raise ValueError(f"price table {path}: model {model!r} has no {key!r}")
         rates = []
         for r in spec["rates"]:
+            tiers = tuple(
+                PromptTier(
+                    above_tokens=int(t["above_tokens"]),
+                    input_per_mtok=float(t["input_per_mtok"]),
+                    cached_input_per_mtok=float(t["cached_input_per_mtok"]),
+                    output_per_mtok=float(t["output_per_mtok"]),
+                    cache_write_per_mtok=float(t.get("cache_write_per_mtok", 0.0)),
+                )
+                for t in (r.get("prompt_tiers") or [])
+            )
             rates.append(Rate(
                 name=str(r["name"]),
                 input_per_mtok=float(r["input_per_mtok"]),
@@ -90,11 +123,15 @@ def load_prices(path: str | Path) -> dict[str, ModelPrice]:
                 cache_write_per_mtok=float(r.get("cache_write_per_mtok", 0.0)),
                 valid_from=str(r["from"]) if r.get("from") is not None else None,
                 valid_until=str(r["until"]) if r.get("until") is not None else None,
+                prompt_tiers=tiers,
             ))
         out[model] = ModelPrice(
             model=model, source=str(spec["source"]), checked=str(spec["checked"]),
             rates=tuple(rates),
             bill_reasoning_as_extra_output=bool(spec.get("bill_reasoning_as_extra_output", False)),
+            min_cacheable_prefix_tokens=int(
+                spec.get("min_cacheable_prefix_tokens", MIN_CACHEABLE_PREFIX_TOKENS)
+            ),
             notes=str(spec.get("notes", "")).strip(),
         )
     return out
@@ -158,6 +195,46 @@ def usage_cost_parts(u: RoleUsage, rate: Rate, *, bill_reasoning_as_extra_output
     }
 
 
+def _request_cost(
+    aggregate: RoleUsage,
+    requests: tuple[RoleUsage, ...],
+    rate: Rate,
+    *,
+    bill_reasoning_as_extra_output: bool,
+) -> float:
+    if not rate.prompt_tiers or not requests:
+        return usage_cost(aggregate, rate, bill_reasoning_as_extra_output=bill_reasoning_as_extra_output)
+    return sum(
+        usage_cost(
+            request,
+            rate.for_prompt(request.total_input),
+            bill_reasoning_as_extra_output=bill_reasoning_as_extra_output,
+        )
+        for request in requests
+    )
+
+
+def _request_cost_parts(
+    aggregate: RoleUsage,
+    requests: tuple[RoleUsage, ...],
+    rate: Rate,
+    *,
+    bill_reasoning_as_extra_output: bool,
+) -> dict[str, float]:
+    if not rate.prompt_tiers or not requests:
+        return usage_cost_parts(aggregate, rate, bill_reasoning_as_extra_output=bill_reasoning_as_extra_output)
+    parts = {"fresh_input": 0.0, "cached_input": 0.0, "output": 0.0}
+    for request in requests:
+        one = usage_cost_parts(
+            request,
+            rate.for_prompt(request.total_input),
+            bill_reasoning_as_extra_output=bill_reasoning_as_extra_output,
+        )
+        for key, value in one.items():
+            parts[key] += value
+    return parts
+
+
 # --- per-call cache diagnostics (B2) -------------------------------------------------------
 
 @dataclass(frozen=True)
@@ -166,10 +243,23 @@ class CallUsage:
     cached_input: int
     working_time: float | None
     errored: bool
+    output: int = 0
+    reasoning: int = 0
+    cache_write: int = 0
 
     @property
     def prompt(self) -> int:
-        return self.fresh_input + self.cached_input
+        return self.fresh_input + self.cached_input + self.cache_write
+
+    @property
+    def role_usage(self) -> RoleUsage:
+        return RoleUsage(
+            fresh_input=self.fresh_input,
+            cached_input=self.cached_input,
+            output=self.output,
+            reasoning=self.reasoning,
+            cache_write=self.cache_write,
+        )
 
 
 @dataclass(frozen=True)
@@ -404,6 +494,9 @@ class EpisodeCost:
     messages: int
     tool_calls: int
     cache: CacheDiagnostics
+    cache_minimum: int = MIN_CACHEABLE_PREFIX_TOKENS
+    target_requests: tuple[RoleUsage, ...] = ()
+    grader_requests: tuple[RoleUsage, ...] = ()
     prefix_changes: list[tuple[int, str]] = field(default_factory=list)
     actions: ActionSplit | None = None
     first_scored_message: int | None = None   # 1-based message position
@@ -421,7 +514,7 @@ def _role_of(event: Any) -> str:
 
 def episodes_from_log(
     log: Any, schedule: Schedule, *, target_model: str | None = None, grader_model: str | None = None,
-    log_name: str = "",
+    log_name: str = "", prices: dict[str, ModelPrice] | None = None,
 ) -> list[EpisodeCost]:
     roles = getattr(log.eval, "model_roles", None) or {}
     target_model = target_model or (roles["target"].model if "target" in roles else log.eval.model)
@@ -439,15 +532,20 @@ def episodes_from_log(
         else:  # older logs: sum the events
             target_u = sum((role_usage_from(e.output.usage if e.output else None) for e in target_events), RoleUsage())
             grader_u = sum((role_usage_from(e.output.usage if e.output else None) for e in grader_events), RoleUsage())
-        calls = [
-            CallUsage(
-                fresh_input=role_usage_from(e.output.usage if e.output else None).fresh_input,
-                cached_input=role_usage_from(e.output.usage if e.output else None).cached_input,
+        def call_usage(e: Any) -> CallUsage:
+            usage = role_usage_from(e.output.usage if e.output else None)
+            return CallUsage(
+                fresh_input=usage.fresh_input,
+                cached_input=usage.cached_input,
                 working_time=getattr(e, "working_time", None),
                 errored=getattr(e, "error", None) is not None,
+                output=usage.output,
+                reasoning=usage.reasoning,
+                cache_write=usage.cache_write,
             )
-            for e in target_events
-        ]
+
+        calls = [call_usage(e) for e in target_events]
+        grader_call_usage = [call_usage(e) for e in grader_events]
         answered = [e for e in target_events if getattr(e, "error", None) is None and e.output and e.output.usage]
         messages = list(s.messages or [])
         env_state = (s.store or {}).get("EpisodeStore:env_state") or {}
@@ -462,6 +560,11 @@ def episodes_from_log(
                 pos = action_message_positions(actions, messages)[split.first_scored_action]
                 first_msg = pos + 1 if pos is not None else None
         err = getattr(s, "error", None)
+        cache_minimum = (
+            prices[target_model].min_cacheable_prefix_tokens
+            if prices and target_model in prices
+            else MIN_CACHEABLE_PREFIX_TOKENS
+        )
         rows.append(EpisodeCost(
             log=log_name, sample_id=str(s.id), episode_id=str(meta.get("episode_id", s.id)), dp_id=dp_id,
             scored=scored, status="errored" if err is not None else "ok",
@@ -472,7 +575,10 @@ def episodes_from_log(
             wall_s=getattr(s, "total_time", None),
             sessions=count_sessions(messages), messages=len(messages),
             tool_calls=sum(len(getattr(m, "tool_calls", None) or []) for m in messages if getattr(m, "role", None) == "assistant"),
-            cache=cache_diagnostics(calls),
+            cache=cache_diagnostics(calls, min_cacheable=cache_minimum),
+            cache_minimum=cache_minimum,
+            target_requests=tuple(c.role_usage for c in calls if not c.errored and c.prompt),
+            grader_requests=tuple(c.role_usage for c in grader_call_usage if not c.errored and c.prompt),
             prefix_changes=prefix_changes([request_shape(e) for e in answered]),
             actions=split, first_scored_message=first_msg,
         ))
@@ -481,15 +587,23 @@ def episodes_from_log(
 
 def row_cost(row: EpisodeCost, prices: dict[str, ModelPrice], *, rate_name: str | None) -> tuple[float | None, float | None]:
     """($ target, $ grader) at the named rate; None where the model has no price on file."""
-    def one(model: str | None, u: RoleUsage) -> float | None:
+    def one(model: str | None, u: RoleUsage, requests: tuple[RoleUsage, ...]) -> float | None:
         mp = prices.get(model or "")
         if mp is None:
             return None if (u.total_input or u.output) else 0.0
         rate = mp.rate(rate_name)
         if rate is None:
             return None
-        return usage_cost(u, rate, bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output)
-    return one(row.target_model, row.target), one(row.grader_model, row.grader)
+        return _request_cost(
+            u,
+            requests,
+            rate,
+            bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output,
+        )
+    return (
+        one(row.target_model, row.target, row.target_requests),
+        one(row.grader_model, row.grader, row.grader_requests),
+    )
 
 
 # --- sweep projection ----------------------------------------------------------------------
@@ -609,7 +723,12 @@ def render_markdown(
         mp = prices.get(r.target_model or "")
         rate = mp.rate(first) if (mp and first) else None
         if rate is not None and t:
-            share = usage_cost_parts(r.target, rate, bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output)["fresh_input"] / t
+            share = _request_cost_parts(
+                r.target,
+                r.target_requests,
+                rate,
+                bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output,
+            )["fresh_input"] / t
         status = "ok" if r.status == "ok" else f"errored: {r.error or ''}"
         lines.append(
             f"| {r.episode_id} | {_cell(status)} | {r.target_model} | {_fmt_usd(t)} | {_fmt_usd(g)} | {' · '.join(per_rate) or 'n/a'} "
@@ -637,8 +756,15 @@ def render_markdown(
                     continue
                 totals = [t + g for t, g in costs]
                 tsum = sum(t for t, _ in costs)
-                fresh = sum(usage_cost_parts(r.target, mp.rate(rn), bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output)["fresh_input"]
-                            for r in scored_ok)
+                fresh = sum(
+                    _request_cost_parts(
+                        r.target,
+                        r.target_requests,
+                        mp.rate(rn),
+                        bill_reasoning_as_extra_output=mp.bill_reasoning_as_extra_output,
+                    )["fresh_input"]
+                    for r in scored_ok
+                )
                 lines.append(
                     f"| {_rate_label(prices, model, rn)} | {_fmt_usd(mean(t for t, _ in costs))} "
                     f"| {_fmt_usd(mean(g for _, g in costs))} | {_fmt_usd(mean(totals))} | {_fmt_usd(min(totals))} "
@@ -713,15 +839,15 @@ def render_markdown(
     lines.append("## Prompt cache (B2)")
     lines.append("")
     lines.append("A full miss is a call that read zero cached tokens although the previous prompt was cacheable "
-                 f"(>= {MIN_CACHEABLE_PREFIX_TOKENS} tokens). Prefix changes counts requests that were NOT the "
+                 "at that target model's declared provider minimum. Prefix changes counts requests that were NOT the "
                  "previous request plus appended messages (tools, config, or an earlier message changed).")
     lines.append("")
     lines.append("'Hit rate if misses hit' assumes each full miss had read the previous call's prompt from cache; "
                  "'$ lost to misses' prices those re-read tokens at the fresh minus the cached rate (first rate).")
     lines.append("")
-    lines.append("| episode | target model | cache hit | full misses | fresh input in full misses | hit rate if misses hit "
+    lines.append("| episode | target model | cache minimum | cache hit | full misses | fresh input in full misses | hit rate if misses hit "
                  "| $ lost to misses | median fresh on hits | median call s (hit / miss) | prefix changes |")
-    lines.append("|---|---|---|---|---|---|---|---|---|---|")
+    lines.append("|---|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         c = r.cache
         wt = f"{_fmt_s(c.median_wt_hit)} / {_fmt_s(c.median_wt_miss)}"
@@ -729,7 +855,7 @@ def render_markdown(
         names = _rates_for(prices, r.target_model, rate_names)
         rate = mp.rate(names[0]) if (mp and names) else None
         lost = None if rate is None else c.reprefilled_in_full_misses * (rate.input_per_mtok - rate.cached_input_per_mtok) / 1e6
-        lines.append(f"| {r.episode_id} | {r.target_model} | {_fmt_pct(r.target.cache_hit_rate)} | {c.full_misses}/{c.calls} "
+        lines.append(f"| {r.episode_id} | {r.target_model} | {r.cache_minimum} | {_fmt_pct(r.target.cache_hit_rate)} | {c.full_misses}/{c.calls} "
                      f"| {_fmt_pct(c.miss_fresh_share)} | {_fmt_pct(c.hit_rate_if_misses_hit)} | {_fmt_usd(lost)} | {'n/a' if c.median_fresh_on_hits is None else f'{c.median_fresh_on_hits:.0f}'} "
                      f"| {wt} | {len(r.prefix_changes)} |")
     lines.append("")

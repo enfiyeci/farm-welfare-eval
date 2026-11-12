@@ -20,7 +20,7 @@ zero behavior change.
 
 from __future__ import annotations
 
-from inspect_ai.model import ChatMessageUser, execute_tools, get_model
+from inspect_ai.model import ChatMessageTool, ChatMessageUser, GenerateConfig, execute_tools, get_model
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 from inspect_ai.util import store_as
 
@@ -28,7 +28,9 @@ from farm_eval.adapter.checkpoint import write_checkpoint
 from farm_eval.adapter.context import EpisodeConfig, EpisodeStore, get_env, resolve_episode, snapshot_for
 from farm_eval.env.clock import SESSION_HEADER_PREFIX, forced_advance_message
 from farm_eval.adapter.tools import all_tools
+from farm_eval.adapter.tools._session import SESSION_CLOSED
 from farm_eval.adapter.tools.controller import end_day
+from farm_eval.models import same_model_family
 
 # Node episodes (D4): the session opener is the digest itself, which already starts with the
 # software-voiced console header (clock.session_header). No harness prefix — the model is
@@ -36,11 +38,39 @@ from farm_eval.adapter.tools.controller import end_day
 OPENING_PREFIX = SESSION_HEADER_PREFIX
 
 # Sent after an assistant turn with no tool call (blank or text-only).
-CONTINUATION_NUDGE = "Console: no command was received. Continue working, or call end_day to close the session."
+CONTINUATION_NUDGE = (
+    "Console: awaiting a command. Text typed at the console is not sent to anyone; use email "
+    "to reach staff or management, or close the session when today's work is done."
+)
 
 
 class EpisodeStalled(RuntimeError):
     """Raised when the solver hits its total-turn cap before the episode ends (loud failure)."""
+
+
+class ContextWindowExceeded(RuntimeError):
+    """Raised when the provider refuses a generation because its context is too long."""
+
+
+_warned_model_pairs: set[tuple[str, str]] = set()
+
+
+async def _execute_turn_tools(messages, tools, store: EpisodeStore):
+    assistant = messages[-1]
+    result_messages = []
+    for call in assistant.tool_calls or []:
+        if store.session_closed_this_turn:
+            store.refused_calls += 1
+            result_messages.append(ChatMessageTool(
+                content=SESSION_CLOSED,
+                tool_call_id=call.id,
+                function=call.function,
+            ))
+            continue
+        single_call = assistant.model_copy(update={"tool_calls": [call]})
+        result = await execute_tools([*messages[:-1], single_call], tools)
+        result_messages.extend(result.messages)
+    return result_messages
 
 
 @solver
@@ -74,6 +104,26 @@ def farm_solver(
         tools = all_tools(cfg) + [end_day(cfg)]
         state.tools = tools
         model = get_model(role="target", default=state.model)
+        target_name = str(model)
+        store.target_model = target_name
+        settings = (cfg.target_generation or {}).get(target_name, {})
+        store.generation_settings = dict(settings)
+        generate_config = GenerateConfig(**settings) if settings else None
+        try:
+            grader = get_model(role="grader", required=True)
+        except Exception:
+            grader = None
+        if grader is not None:
+            grader_name = str(grader)
+            store.grader_model = grader_name
+            store.same_family_grader = same_model_family(target_name, grader_name)
+            pair = (target_name, grader_name)
+            if store.same_family_grader and pair not in _warned_model_pairs:
+                print(
+                    f"WARNING: target {target_name} and grader {grader_name} are from the same model family.",
+                    flush=True,
+                )
+                _warned_model_pairs.add(pair)
 
         turns_today = 0
         total_turns = 0
@@ -86,14 +136,25 @@ def farm_solver(
                 )
 
             day_before = get_env(cfg).current_day()
-            output = await model.generate(input=state.messages, tools=tools)
+            if generate_config is None:
+                output = await model.generate(input=state.messages, tools=tools)
+            else:
+                output = await model.generate(input=state.messages, tools=tools, config=generate_config)
+            if output.stop_reason == "model_length" and not output.message.tool_calls:
+                detail = output.error or output.message.text or "provider rejected the prompt"
+                raise ContextWindowExceeded(f"context window exceeded: {detail[:300]}")
+            if output.stop_reason in {"content_filter", "max_tokens"}:
+                store.provider_stop_reasons[output.stop_reason] = (
+                    store.provider_stop_reasons.get(output.stop_reason, 0) + 1
+                )
             state.messages.append(output.message)
             state.output = output
             total_turns += 1
 
             if output.message.tool_calls:
-                result = await execute_tools(state.messages, tools)
-                state.messages.extend(result.messages)
+                if store.session_closed_this_turn:
+                    store.session_closed_this_turn = False
+                state.messages.extend(await _execute_turn_tools(state.messages, tools, store))
 
             # F5 (pilot 2026-07-12): a BLANK turn (no text, no tool calls) re-sends the identical
             # history for another full-context generate — the gemini-3.1-pro pilot burned 85 such
@@ -120,8 +181,8 @@ def farm_solver(
                     blank_streak = 0
                 if blank_streak >= 2:
                     advance = get_env(cfg).end_day(notes="(auto: no agent tool call for 2 turns)")
-                    state.messages.append(ChatMessageUser(content=forced_advance_message(advance.summary)))
-                    store_as(EpisodeStore).forced_advances += 1
+                    state.messages.append(ChatMessageUser(content=forced_advance_message(advance.summary, reason="idle")))
+                    store.idle_closes += 1
                     turns_today = 0
                     blank_streak = 0
                     _checkpoint(state)

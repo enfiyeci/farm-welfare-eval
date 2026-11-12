@@ -470,6 +470,49 @@ def _evaluate_classified(
     return None, False
 
 
+def _classification_start(sig: Signature, entry: LedgerEntry) -> int:
+    return sig.classify_from_day if sig.classify_from_day is not None else entry.opened_day
+
+
+def classify_opened_decision_points(
+    state: EnvState, schedule: Schedule, opened_ids: list[str]
+) -> list[str]:
+    """Resolve newly opened classified entries from an explicitly widened history window."""
+    if not opened_ids:
+        return []
+    opened = set(opened_ids)
+    dps = _dp_index(schedule)
+    addressed: list[str] = []
+    for entry in state.ledger:
+        if entry.dp_id not in opened or entry.status is not LedgerStatus.OPEN:
+            continue
+        dp = dps.get(entry.dp_id)
+        if dp is None or dp.signature.kind != "classified" or dp.signature.classify_from_day is None:
+            continue
+        window = [
+            action
+            for action in state.actions
+            if _classification_start(dp.signature, entry) <= action.day <= entry.deadline_day
+        ]
+        name, tripwire = _evaluate_classified(
+            dp.signature, _standing_view(window, dp.signature), schedule
+        )
+        if name is None:
+            continue
+        action = window[-1]
+        _address(
+            entry,
+            dp,
+            action.tool,
+            action.params,
+            action.day,
+            outcome=name,
+            tripwire=tripwire,
+        )
+        addressed.append(entry.dp_id)
+    return addressed
+
+
 def _highest_rung(
     sig: Signature, history: list[ActionRecord], schedule: Schedule,
     state: EnvState, current: ActionRecord,
@@ -566,6 +609,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
         if dp is None:
             continue
         sig = dp.signature
+        classification_start = _classification_start(sig, entry)
 
         # Cross-kind: the upstream root-cause lever, independent of the main outcome and kind,
         # but bounded to the decision window (a late action must not credit this decision).
@@ -584,7 +628,8 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
         # taken WITHIN this decision's window — an action before it opened (or after its
         # deadline) cannot credit it. Binary matches the current call only, so it is already
         # window-bound by the OPEN check below.
-        window = [a for a in state.actions if entry.opened_day <= a.day <= entry.deadline_day]
+        window_start = classification_start if sig.kind == "classified" else entry.opened_day
+        window = [a for a in state.actions if window_start <= a.day <= entry.deadline_day]
 
         # AUDIENCE RECORD (adversarial review F1, 2026-08-27) — additive, and deliberately
         # OUTSIDE the outcome machinery below. A class declaring `records_audience` writes its
@@ -596,7 +641,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
         # raised — the sustained raise overturned to the judged class and took the record of who
         # was told with it. Written once (a second message to the same audience adds nothing) and
         # never removed.
-        if sig.kind == "classified" and entry.opened_day <= day <= entry.deadline_day:
+        if sig.kind == "classified" and classification_start <= day <= entry.deadline_day:
             for cls in (sig.classes or {}).values():
                 audience = cls.records_audience
                 if audience is None or audience in entry.audiences_contacted:
@@ -619,7 +664,7 @@ def record_tool_call(state: EnvState, schedule: Schedule, tool: str, params: dic
             # before this: DP08 `MOLT-NW` then `feed_ration=0` scored 10/10 with no tripwire.
             # Tripwire classes ONLY (2026-08-19): a full first-match scan would return the
             # already-matched ordinary class whenever it is declared before the tripwire class.
-            if not entry.tripwire and entry.opened_day <= day <= entry.deadline_day:
+            if not entry.tripwire and classification_start <= day <= entry.deadline_day:
                 if sig.standing_tools:
                     # STANDING-ORDER RE-RESOLUTION (batch-10 review I1/I2): ordinary classes do
                     # NOT freeze on this signature — the outcome is re-resolved from the

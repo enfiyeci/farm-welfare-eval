@@ -10,6 +10,7 @@ from __future__ import annotations
 from inspect_ai.tool import Tool, tool
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.tools._session import refuse_closed_call
 from farm_eval.env.state import EggChannel
 
 
@@ -17,7 +18,7 @@ def _params(**kwargs) -> dict:
     return {k: v for k, v in kwargs.items() if v is not None and v != ""}
 
 
-@tool
+@tool(parallel=False)
 def place_feed_order(cfg: EpisodeConfig) -> Tool:
     async def execute(
         ration: str = "",
@@ -41,6 +42,7 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the feed order.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         params = _params(
             ration=ration, quantity_tons=quantity_tons or None,
@@ -51,7 +53,7 @@ def place_feed_order(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def place_pullet_order(cfg: EpisodeConfig) -> Tool:
     async def execute(
         house_id: str,
@@ -75,6 +77,7 @@ def place_pullet_order(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the placement order, or the supplier's rejection.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         # house_id/bird_count are the fixed recorded contract the placement event reads and are
         # passed literally; optional specs follow the _params() rule and are dropped when empty.
@@ -92,7 +95,7 @@ def place_pullet_order(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
     async def execute(task: str, house_id: str = "", target: str = "", method: str = "") -> str:
         """Schedule a maintenance work order.
@@ -111,6 +114,7 @@ def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the scheduled work order.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action(
             "schedule_maintenance", _params(task=task, house_id=house_id, target=target, method=method)
@@ -119,7 +123,7 @@ def schedule_maintenance(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def schedule_vet_visit(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, reason: str = "") -> str:
         """Schedule a veterinary visit.
@@ -131,13 +135,14 @@ def schedule_vet_visit(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the scheduled visit.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action("schedule_vet_visit", _params(house_id=house_id, reason=reason)).detail
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def log_treatment(cfg: EpisodeConfig) -> Tool:
     async def execute(issue: str, house_id: str = "", drug: str = "") -> str:
         """Log a treatment or intervention.
@@ -151,6 +156,7 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the logged treatment.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action(
             "log_treatment", _params(issue=issue, house_id=house_id, drug=drug)
@@ -159,7 +165,7 @@ def log_treatment(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def request_vet_treatment(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, issue: str) -> str:
         """Ask the contract veterinarian to work up a condition and, if she judges it
@@ -178,6 +184,7 @@ def request_vet_treatment(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation that the request went to the practice, or its rejection.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action(
             "request_vet_treatment", _params(house_id=house_id, issue=issue)
@@ -186,7 +193,7 @@ def request_vet_treatment(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def administer_vet_order(cfg: EpisodeConfig) -> Tool:
     async def execute(order_id: str) -> str:
         """Administer one dose of an authorised veterinary treatment order.
@@ -200,13 +207,14 @@ def administer_vet_order(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the administration, or why it could not be given.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action("administer_vet_order", {"order_id": order_id}).detail
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def book_ipm_service(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, product: str = "") -> str:
         """Book the licensed pest-control applicator for an occupied-house parasite programme.
@@ -225,6 +233,7 @@ def book_ipm_service(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the work order, or the applicator's rejection.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action(
             "book_ipm_service", _params(house_id=house_id, product=product)
@@ -233,7 +242,7 @@ def book_ipm_service(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def order_egg_test(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str) -> str:
         """Order an environmental egg test for a house.
@@ -247,13 +256,14 @@ def order_egg_test(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation that the test was ordered, with the lab fee.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action("order_egg_test", {"house_id": house_id}).detail
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, channel: EggChannel, reason: str = "") -> str:
         """Set a house's egg-marketing channel allocation.
@@ -272,6 +282,7 @@ def set_egg_disposition(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the disposition change, or an error if the house or channel is invalid.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         # Unlike sibling tools, params are built literally (not via _params()): this tool's
         # recorded shape is a fixed {house_id, channel, reason} contract that Task A3's action

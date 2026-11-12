@@ -26,7 +26,14 @@ def test_digest_reports_gap_mortality_mail_and_feed():
     assert "14 day" in text
     assert "10 birds" in text
     assert "2 new message" in text
+    assert "2 new messages" in text and "message(s)" not in text
     assert "42 t" in text
+
+
+def test_digest_uses_singular_message_for_one_new_email():
+    before, after = _state(0), _state(1)
+    after.mailbox = [_mail(1)]
+    assert "1 new message, 1 unread" in build_digest(before, after, [])
 
 
 def test_digest_is_deterministic_and_flavor_cycles_by_day_index():

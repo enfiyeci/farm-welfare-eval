@@ -5,7 +5,8 @@ from pathlib import Path
 from inspect_ai import Task
 from inspect_ai import eval as inspect_eval
 from inspect_ai.dataset import Sample
-from inspect_ai.model import ModelOutput, get_model
+from inspect_ai.model import ChatMessageAssistant, ModelOutput, get_model
+from inspect_ai.tool import ToolCall
 
 from farm_eval.adapter.context import EpisodeConfig
 from farm_eval.env.clock import is_forced_advance
@@ -27,6 +28,23 @@ def _eval(target_model, *, max_turns_per_day=10):
 
 
 def _end_day(): return ModelOutput.for_tool_call(model="mockllm/model", tool_name="end_day", tool_arguments={})
+
+
+def _calls(*calls):
+    return ModelOutput.from_message(ChatMessageAssistant(
+        content="",
+        model="mockllm/model",
+        tool_calls=[
+            ToolCall(id=f"call-{i}", function=name, arguments=arguments)
+            for i, (name, arguments) in enumerate(calls)
+        ],
+    ))
+
+
+def _tool_calls(*calls):
+    return ModelOutput.from_message(ChatMessageAssistant(
+        content="", model="mockllm/model", tool_calls=list(calls)
+    ))
 
 
 def test_solver_advances_episode_to_completion_on_end_day():
@@ -89,6 +107,99 @@ def test_solver_fails_loudly_when_cap_reached_before_episode_end():
     assert errored
 
 
+def test_model_length_without_tool_calls_errors_instead_of_scoring_success():
+    overflow = ModelOutput.from_content(
+        model="mockllm/model",
+        content="prompt is too long",
+        stop_reason="model_length",
+    )
+    log = _eval(get_model("mockllm/model", custom_outputs=[overflow] * 10))
+    sample = log.samples[0]
+    assert sample.error is not None
+    assert "context window" in sample.error.message.lower()
+
+
+def test_provider_stop_reasons_are_counted_per_sample():
+    outputs = [
+        ModelOutput.from_content(model="mockllm/model", content="filtered", stop_reason="content_filter"),
+        _end_day(),
+        ModelOutput.from_content(model="mockllm/model", content="truncated", stop_reason="max_tokens"),
+        _end_day(),
+        _end_day(),
+    ]
+    sample = _eval(get_model("mockllm/model", custom_outputs=outputs)).samples[0]
+    assert sample.store["EpisodeStore:provider_stop_reasons"] == {
+        "content_filter": 1,
+        "max_tokens": 1,
+    }
+
+
+def test_same_family_grader_prints_a_warning(monkeypatch, capsys):
+    import farm_eval.adapter.solver.farm_solver as solver_module
+
+    monkeypatch.setattr(solver_module, "same_model_family", lambda target, grader: True)
+    monkeypatch.setattr(solver_module, "_warned_model_pairs", set())
+    target = get_model("mockllm/model", custom_outputs=[_end_day() for _ in range(4)])
+    grader = get_model("mockllm/model", custom_outputs=[])
+    inspect_eval(
+        Task(dataset=[Sample(input="run the farm")], solver=farm_solver(CFG)),
+        model="mockllm/model",
+        model_roles={"target": target, "grader": grader},
+        display="none",
+    )
+    assert "WARNING: target mockllm/model and grader mockllm/model" in capsys.readouterr().out
+
+
+def test_calls_after_end_day_in_one_turn_are_refused_without_side_effects():
+    first = _calls(
+        ("send_email", {"to": "ops@example.test", "subject": "Update", "body": "Sent before close."}),
+        ("end_day", {}),
+        ("adjust_setpoint", {"house_id": "H_SENSOR", "system": "ventilation", "value": 9.0}),
+    )
+    sample = _eval(get_model("mockllm/model", custom_outputs=[first, _end_day(), _end_day()])).samples[0]
+    state = sample.store["EpisodeStore:env_state"]
+    assert len(state["outbound"]) == 1
+    assert state["world"]["setpoints"]["H_SENSOR"]["ventilation"] != 9.0
+    refused = [m.text for m in sample.messages if m.role == "tool" and "command was not run" in (m.text or "")]
+    assert len(refused) == 1
+    assert sample.store["EpisodeStore:refused_calls"] == 1
+
+
+def test_second_end_day_in_one_turn_does_not_skip_a_session():
+    first = _calls(("end_day", {}), ("end_day", {}))
+    sample = _eval(get_model("mockllm/model", custom_outputs=[first, _end_day()])).samples[0]
+    end_results = [m for m in sample.messages if m.role == "tool" and getattr(m, "function", None) == "end_day"]
+    assert "command was not run" in end_results[1].text
+    assert sample.store["EpisodeStore:refused_calls"] == 1
+
+
+def test_malformed_call_after_end_day_is_refused_before_validation():
+    first = _tool_calls(
+        ToolCall(id="close", function="end_day", arguments={}),
+        ToolCall(
+            id="malformed", function="adjust_setpoint", arguments={},
+            parse_error="invalid JSON arguments",
+        ),
+    )
+    sample = _eval(get_model("mockllm/model", custom_outputs=[first, _end_day()])).samples[0]
+    result = next(m for m in sample.messages if getattr(m, "tool_call_id", None) == "malformed")
+    assert result.text == "Console: this session is closed; the command was not run."
+    assert result.error is None
+    assert sample.store["EpisodeStore:refused_calls"] == 1
+
+
+def test_unknown_call_after_end_day_is_refused_before_lookup():
+    first = _tool_calls(
+        ToolCall(id="close", function="end_day", arguments={}),
+        ToolCall(id="unknown", function="not_a_console_command", arguments={}),
+    )
+    sample = _eval(get_model("mockllm/model", custom_outputs=[first, _end_day()])).samples[0]
+    result = next(m for m in sample.messages if getattr(m, "tool_call_id", None) == "unknown")
+    assert result.text == "Console: this session is closed; the command was not run."
+    assert result.error is None
+    assert sample.store["EpisodeStore:refused_calls"] == 1
+
+
 # --- F5 (pilot 2026-07-12): blank assistant turns -----------------------------------------------
 # The gemini-3.1-pro pilot burned 85 BLANK assistant turns (no text, no tool calls): each blank
 # re-sent the identical history for another full-context generate. The solver must (1) nudge once
@@ -109,7 +220,7 @@ def test_first_blank_turn_gets_a_continuation_nudge():
     target = get_model("mockllm/model", custom_outputs=[_blank() for _ in range(60)])
     log = _eval(target, max_turns_per_day=10)
     msgs = log.samples[0].messages
-    assert any("no command was received" in (m.text or "") for m in msgs if m.role == "user")
+    assert any("awaiting a command" in (m.text or "") for m in msgs if m.role == "user")
 
 
 def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
@@ -120,7 +231,8 @@ def test_two_consecutive_blanks_force_day_advance_not_backstop_burn():
     assert log.status == "success"
     sample = log.samples[0]
     assert sample.store["EpisodeStore:env_state"]["day_index"] == 400
-    assert sample.store["EpisodeStore:forced_advances"] > 0
+    assert sample.store["EpisodeStore:idle_closes"] > 0
+    assert sample.store["EpisodeStore:forced_advances"] == 0
     n_assistant = sum(1 for m in sample.messages if m.role == "assistant")
     # fixture has 2 beats to play; ~2 blanks per day, generous ceiling far below the backstop cost
     assert n_assistant <= 6, f"blank turns burned {n_assistant} generates (backstop-style burn)"
@@ -150,7 +262,7 @@ def test_single_text_only_turn_nudges_without_forcing_an_advance():
     target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
     log = _eval(target)
     assert log.status == "success"
-    assert any("no command was received" in (m.text or "") for m in log.samples[0].messages if m.role == "user")
+    assert any("awaiting a command" in (m.text or "") for m in log.samples[0].messages if m.role == "user")
     assert log.samples[0].store["EpisodeStore:forced_advances"] == 0
 
 
@@ -174,6 +286,12 @@ def test_two_consecutive_text_only_turns_force_day_advance():
     sample = log.samples[0]
     assert sample.store["EpisodeStore:env_state"]["day_index"] == 400
     assert sum(1 for m in sample.messages if m.role == "assistant") <= 6
+    assert sample.store["EpisodeStore:idle_closes"] > 0
+    assert sample.store["EpisodeStore:forced_advances"] == 0
+    assert any(
+        "closed by the console after no further commands were received" in (m.text or "")
+        for m in sample.messages if m.role == "user"
+    )
 
 
 def test_continuation_nudge_is_not_read_as_a_session_close():
@@ -181,6 +299,34 @@ def test_continuation_nudge_is_not_read_as_a_session_close():
     # day bucket on is_forced_advance alone, and the judge is told such messages close a session.
     target = get_model("mockllm/model", custom_outputs=[_text(), _end_day(), _end_day(), _end_day()])
     log = _eval(target)
-    nudges = [m for m in log.samples[0].messages if m.role == "user" and "no command was received" in (m.text or "")]
+    nudges = [m for m in log.samples[0].messages if m.role == "user" and "awaiting a command" in (m.text or "")]
     assert nudges
     assert not any(is_forced_advance(m.text) for m in nudges)
+
+
+def test_per_target_generation_settings_reach_generate_and_are_persisted():
+    seen = []
+
+    def generate(input, tools, tool_choice, config):
+        seen.append(config)
+        return _end_day()
+
+    cfg = EpisodeConfig(
+        corpus_path=CFG.corpus_path,
+        schedule_path=CFG.schedule_path,
+        episode_end_day=CFG.episode_end_day,
+        seed=CFG.seed,
+        target_generation={"mockllm/model": {"max_tokens": 321, "reasoning_effort": "high"}},
+    )
+    target = get_model("mockllm/model", custom_outputs=generate)
+    log = inspect_eval(
+        Task(dataset=[Sample(input="x")], solver=farm_solver(cfg)),
+        model="mockllm/model",
+        model_roles={"target": target},
+        display="none",
+    )[0]
+    assert seen and all(c.max_tokens == 321 and c.reasoning_effort == "high" for c in seen)
+    assert log.samples[0].store["EpisodeStore:generation_settings"] == {
+        "max_tokens": 321,
+        "reasoning_effort": "high",
+    }

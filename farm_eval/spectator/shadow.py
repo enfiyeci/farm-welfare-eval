@@ -128,7 +128,7 @@ class ShadowStore:
                 if token not in container:
                     raise ValueError(f"JSON pointer {change.path!r} removes a missing key")
                 del container[token]
-            elif change.op == "replace" and token not in container:
+            elif change.op == "replace" and token not in container and change.replaced is None:
                 raise ValueError(f"JSON pointer {change.path!r} replaces a missing key")
             else:
                 container[token] = value

@@ -148,14 +148,20 @@ def test_set_egg_disposition_does_not_leak_ledger_or_scoring_data():
 def test_set_egg_disposition_unknown_house_raises():
     env = _env()
     env.start()
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="No such house 'H_NOPE' at this complex\\."):
         env.set_egg_disposition("H_NOPE", "shell", "reason")
 
 
 def test_set_egg_disposition_invalid_channel_raises():
     env = _env()
     env.start()
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match=(
+            "Egg disposition rejected: 'landfill' is not a marketing channel\\. "
+            "Channels: shell, conventional, breaker, pasteurization, discard\\."
+        ),
+    ):
         env.set_egg_disposition("H_SENSOR", "landfill", "reason")
 
 

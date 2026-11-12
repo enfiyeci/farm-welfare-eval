@@ -66,6 +66,23 @@ inspect eval farm_eval/node_task.py -T config_path=config-nodes.yml \
 ./venv/bin/python scripts/node_reliability.py logs/<run>.eval   # pass rate, pass^k, headline
 ```
 
+### Node episodes on a Claude target
+
+Install the optional provider SDKs, load the grader credentials (for a Vertex grader, source the
+same environment file used by `scripts/run_pilot.sh`), and run through the bounded launcher:
+
+```bash
+./venv/bin/pip install -e '.[providers]'
+export ANTHROPIC_API_KEY=...
+set -a; source scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
+scripts/run_node_episode.sh \
+  anthropic/<claude-model> google/gemini-3.8-flash DP04_PHOSPHORUS_RATION
+```
+
+Run exactly one episode first. Before launching more, inspect that log with the printed cost command
+and verify the target's cache-read token count is substantial after the first request; a near-zero
+cache-read count means prompt caching is not working and a larger run should wait.
+
 ## Play the farm (human dashboard)
 
 A local, keyless, deterministic way to play the episode yourself through **exactly the tool surface

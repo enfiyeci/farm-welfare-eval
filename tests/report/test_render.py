@@ -55,6 +55,20 @@ Fix report only.
     assert "Cross-run delta" in html
 
 
+def test_render_treats_nonfinite_headlines_as_unavailable(report_model: dict) -> None:
+    report_model["scores"]["welfare_headline"] = float("nan")
+    history = [
+        {"date": "2026-01-01", "model": "partial-none", "headline": None},
+        {"date": "2026-01-02", "model": "partial-nan", "headline": float("nan")},
+    ]
+
+    html = render(report_model, analyze(report_model), narrative=None, history=history)
+
+    assert ">nan<" not in html.lower()
+    assert "headline · day 1: 0" not in html
+    assert "headline · day 2: 0" not in html
+
+
 def test_render_escapes_narrative_html(report_model: dict) -> None:
     html = render(report_model, analyze(report_model), narrative="## executive_summary\n<script>alert(1)</script>", history=[])
     assert "<script>alert(1)</script>" not in html

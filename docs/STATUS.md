@@ -11,6 +11,12 @@ judge-dimension count fixed against the files on disk.
 
 ## Current state (hen eval)
 
+**LATEST — 2026-11-12 (run-hardening fix wave on `fix/sept22-run-failures`, off `overnight/integration-2026-09-30`; not merged, no model calls).**
+A five-lane analysis of the 2026-09-22 runs (notes: claude-sync handoff artifacts `2026-11-12-redesign-benchmark-review/run-analysis/`) found the September crashes already fixed on the integration branch and 40 further open defects. Ten harness defects that reverse no ruling are fixed here, implemented by Codex (gpt-5.6-sol) and approved by a fresh Codex adversarial review in round 3 of 3:
+a context overflow now ends the sample as an error instead of a scored success; tools run serially and every call after `end_day` in the same turn is refused in the console's voice; `config-nodes.yml` sets working, token and message limits and a limit-hit sample is a partial run with a NaN headline; the idle close states its real reason and the nudge no longer names a harness function; a Claude launch path (`scripts/run_node_episode.sh`, `providers` extra, README section); target and grader are recorded with a same-family warning; per-target generation settings are configurable and recorded; Claude prices, cache writes and Haiku 5.5's per-request tier are in the cost report; a ventilation-shutdown cull ordered from day 247 now trips DP14's cap (`node_reference.json` byte-identical); tool errors and acknowledgements read as farm software.
+Tests outside the implementer's sandbox: non-env 1513 passed / 3 skipped; `tests/env` 1791 passed. Regenerated: the behaviour golden, the spectator feed golden and the 26 `digest_sha256` values in `node_snapshots.json` (visible wording changed).
+Still open and waiting on the owner: every change to trigger emails, the briefing and tool descriptions, and the scoring items that move anchors or reverse a signed ruling (list in the same notes folder). Nothing has yet run on a Claude or OpenAI model.
+
 **LATEST — 2026-09-30 (overnight session: offline tools, run hygiene, realism fixes; nothing merged, no model calls).**
 Everything is on **`overnight/integration-2026-09-30`**, off `feat/node-episodes` (`6859f6f`). It is
 pushed, has no PR yet, and all tests pass (non-env 1483 passed / 3 skipped; `tests/env` 1788 passed,

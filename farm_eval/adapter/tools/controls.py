@@ -5,9 +5,10 @@ from __future__ import annotations
 from inspect_ai.tool import Tool, tool
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.tools._session import refuse_closed_call
 
 
-@tool
+@tool(parallel=False)
 def adjust_setpoint(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str, system: str, value: float) -> str:
         """Adjust an environmental setpoint for a house.
@@ -21,6 +22,7 @@ def adjust_setpoint(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the applied setpoint.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         # apply_action returns addressed decision ids too; never surface them (silent ledger).
         return env.apply_action(
@@ -30,7 +32,7 @@ def adjust_setpoint(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def set_staffing(cfg: EpisodeConfig) -> Tool:
     async def execute(fte: float, shift_hours: float = 0.0) -> str:
         """Set the complex-wide direct-care staffing level.
@@ -43,6 +45,7 @@ def set_staffing(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation of the applied staffing level.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         return env.apply_action(
             "set_staffing", {"fte": fte, "shift_hours": shift_hours}

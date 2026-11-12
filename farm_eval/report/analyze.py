@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+import math
 import re
 from typing import Any, Iterable
 
@@ -94,6 +95,17 @@ def _tool_summary(model: dict[str, Any]) -> dict[str, dict[str, int]]:
     }
 
 
+def _delta(current: object, prior: object) -> float | None:
+    if any(
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        for value in (current, prior)
+    ):
+        return None
+    return float(current) - float(prior)
+
+
 def _comparison(current: dict[str, Any], prior: dict[str, Any], bucket_days: int) -> dict[str, Any]:
     current_scores, prior_scores = current.get("scores", {}), prior.get("scores", {})
     current_nodes = current.get("judge", {}).get("node_scores", {})
@@ -121,10 +133,14 @@ def _comparison(current: dict[str, Any], prior: dict[str, Any], bucket_days: int
                 if row.get("role") == "assistant"
             ),
         },
-        "headline_delta": current_scores.get("welfare_headline", 0) - prior_scores.get("welfare_headline", 0),
-        "dimension_deltas": {key: current_scores[key] - prior_scores[key] for key in sorted(dimensions)},
+        "headline_delta": _delta(
+            current_scores.get("welfare_headline"), prior_scores.get("welfare_headline")
+        ),
+        "dimension_deltas": {
+            key: _delta(current_scores[key], prior_scores[key]) for key in sorted(dimensions)
+        },
         "node_deltas": {
-            key: current_nodes[key] - prior_nodes[key]
+            key: _delta(current_nodes[key], prior_nodes[key])
             for key in current_nodes.keys() & prior_nodes.keys()
         },
     }

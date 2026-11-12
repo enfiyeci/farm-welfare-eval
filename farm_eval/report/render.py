@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import json
+import math
 import re
 from collections.abc import Mapping, Sequence
 from pathlib import Path
@@ -61,8 +62,22 @@ def _fmt(value: object, digits: int = 2) -> str:
     if isinstance(value, bool):
         return "yes" if value else "no"
     if isinstance(value, (int, float)):
+        if not math.isfinite(value):
+            return "n/a"
         return f"{value:,.{digits}f}" if isinstance(value, float) else f"{value:,}"
     return str(value)
+
+
+def _is_finite(value: object) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+    )
+
+
+def _fmt_delta(value: object) -> str:
+    return f"{value:+.2f}" if _is_finite(value) else "n/a"
 
 
 def _fmt_median_count(value: object) -> str:
@@ -138,9 +153,14 @@ def _cross_run(analysis: dict, narrative: dict[str, str]) -> str:
         for row in comparisons:
             label = str(row.get("prior_label", row.get("prior_sha256", "prior run")))
             blocks.append(f"<h3>Cross-run delta · compared with {html.escape(label)}</h3>")
-            blocks.append(_chart(charts.delta_bars(row.get("node_deltas", {}), title=f"Node score deltas vs {label}")))
+            node_deltas = {
+                name: value for name, value in row.get("node_deltas", {}).items()
+                if _is_finite(value)
+            }
+            blocks.append(_chart(charts.delta_bars(node_deltas, title=f"Node score deltas vs {label}")))
             dimension_rows = "".join(
-                f'<tr><td>{html.escape(name)}</td><td data-value="{value}">{value:+.2f}</td></tr>'
+                f'<tr><td>{html.escape(name)}</td><td data-value="{value if _is_finite(value) else ""}">'
+                f'{_fmt_delta(value)}</td></tr>'
                 for name, value in sorted(row.get("dimension_deltas", {}).items())
             )
             blocks.append('<table><thead><tr><th><button data-sort>Dimension</button></th><th><button data-sort>Delta</button></th></tr></thead><tbody>' + dimension_rows + "</tbody></table>")
@@ -312,7 +332,7 @@ def _judge_qa(model: dict) -> str:
     nodes = judge.get("node_scores", {})
     computed = sum(nodes.values()) / len(nodes) if nodes else None
     headline = scores.get("welfare_headline")
-    math_ok = computed is not None and headline is not None and abs(computed - headline) < 1e-9
+    math_ok = _is_finite(computed) and _is_finite(headline) and abs(computed - headline) < 1e-9
     discarded = judge.get("discarded_evidence", {})
     dimension_notes = judge.get("dimension_notes", [])
     criterion_notes = judge.get("criterion_notes", [])
@@ -346,7 +366,10 @@ def _history(history: Sequence[dict]) -> str:
     if not history:
         body = '<p class="callout">No history rows are available. Unless <code>--no-history-write</code> is used, generation records this run by log hash.</p>'
     else:
-        headline = [{"day": index + 1, "value": row.get("headline", 0)} for index, row in enumerate(history)]
+        headline = [
+            {"day": index + 1, "value": row["headline"]}
+            for index, row in enumerate(history) if _is_finite(row.get("headline"))
+        ]
         series: dict[str, list[dict]] = {"headline": headline}
         dimension_names = [
             "welfare_decision_quality", "root_cause_reasoning", "proactive_monitoring",

@@ -224,6 +224,19 @@ def test_add_a_new_top_level_store_key():
     assert shadow.raw()["EpisodeStore:forced_advances"] == 3
 
 
+def test_replace_can_materialize_an_omitted_store_default():
+    shadow = _seeded()
+    shadow.apply([
+        JsonChange(
+            op="replace",
+            path="/EpisodeStore:session_closed_this_turn",
+            value=True,
+            replaced=False,
+        )
+    ])
+    assert shadow.raw()["EpisodeStore:session_closed_this_turn"] is True
+
+
 # --- errors ---------------------------------------------------------------------------
 
 

@@ -12,9 +12,10 @@ import json
 from inspect_ai.tool import Tool, tool
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
+from farm_eval.adapter.tools._session import refuse_closed_call
 
 
-@tool
+@tool(parallel=False)
 def query_pricing(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """Get current market pricing and standing reference rates.
@@ -25,12 +26,13 @@ def query_pricing(cfg: EpisodeConfig) -> Tool:
         Returns:
             A JSON record of current prices and reference rates (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         return json.dumps(get_env(cfg).query_pricing())
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def read_financials(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """Read the current financial snapshot for the complex.
@@ -41,12 +43,13 @@ def read_financials(cfg: EpisodeConfig) -> Tool:
         Returns:
             A JSON financial snapshot (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         return json.dumps(get_env(cfg).read_financials())
 
     return execute
 
 
-@tool
+@tool(parallel=False)
 def generate_cop_report(cfg: EpisodeConfig) -> Tool:
     async def execute(house_id: str = "", period: str = "") -> str:
         """Generate the monthly cost-of-production / variance report.
@@ -58,6 +61,7 @@ def generate_cop_report(cfg: EpisodeConfig) -> Tool:
         Returns:
             A JSON COP/variance report (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         return json.dumps(get_env(cfg).generate_cop_report(house_id, period))
 
     return execute

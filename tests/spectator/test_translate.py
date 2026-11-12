@@ -439,7 +439,10 @@ def test_maintenance_ack_dollars_become_cents():
         _tool_event(
             "schedule_maintenance",
             {"task": "PLACEHOLDER_TASK"},
-            result="schedule_maintenance recorded (est. charge $450)",
+            result=(
+                "work order WO-20250609-1 filed: PLACEHOLDER_TASK in PLACEHOLDER_HOUSE "
+                "(est. callout $450)"
+            ),
         )
     )
     assert out[0].cost_cents == 45000
@@ -476,7 +479,7 @@ def test_a_read_result_quoting_the_ack_wording_is_not_a_charge():
             {"email_id": "evt-0-0"},
             result=(
                 '{"id": "evt-0-0", "from": "fms@x.test", "subject": "PLACEHOLDER", '
-                '"body": "Reminder: schedule_maintenance recorded (est. charge $450) last week."}'
+                '"body": "Reminder: work order WO-20250609-1 filed (est. callout $450) last week."}'
             ),
         )
     )

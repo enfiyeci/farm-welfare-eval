@@ -13,10 +13,84 @@
 # API pricing page, which the project's own backlog (2026-09-29) matched against the Vertex page.
 
 models:
+  anthropic/claude-fable-5-2:
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    checked: 2026-11-12
+    bill_reasoning_as_extra_output: false
+    min_cacheable_prefix_tokens: 512
+    notes: Standard synchronous API; cache-write rate is the 5-minute TTL.
+    rates:
+      - name: standard
+        input_per_mtok: 8
+        cached_input_per_mtok: 0.20
+        cache_write_per_mtok: 10
+        output_per_mtok: 40
+
+  anthropic/claude-opus-5-5:
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    checked: 2026-11-12
+    bill_reasoning_as_extra_output: false
+    min_cacheable_prefix_tokens: 512
+    notes: Standard synchronous API; cache-write rate is the 5-minute TTL.
+    rates:
+      - name: standard
+        input_per_mtok: 4
+        cached_input_per_mtok: 0.20
+        cache_write_per_mtok: 5
+        output_per_mtok: 20
+
+  anthropic/claude-sonnet-5-5:
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    checked: 2026-11-12
+    bill_reasoning_as_extra_output: false
+    min_cacheable_prefix_tokens: 512
+    notes: Standard synchronous API; cache-write rate is the 5-minute TTL.
+    rates:
+      - name: standard
+        input_per_mtok: 2
+        cached_input_per_mtok: 0.10
+        cache_write_per_mtok: 2.50
+        output_per_mtok: 10
+
+  anthropic/claude-haiku-4-5:
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    checked: 2026-11-12
+    bill_reasoning_as_extra_output: false
+    min_cacheable_prefix_tokens: 1024
+    notes: Standard synchronous API; cache-write rate is the 5-minute TTL.
+    rates:
+      - name: standard
+        input_per_mtok: 1
+        cached_input_per_mtok: 0.10
+        cache_write_per_mtok: 1.25
+        output_per_mtok: 5
+
+  anthropic/claude-haiku-5-5:
+    source: https://platform.claude.com/docs/en/about-claude/pricing
+    checked: 2026-11-12
+    bill_reasoning_as_extra_output: false
+    min_cacheable_prefix_tokens: 512
+    notes: >-
+      Standard synchronous API; cache-write rate is the 5-minute TTL. Each request is priced
+      from its own prompt size, including cache reads, with the higher tier above 100,000 tokens.
+    rates:
+      - name: standard
+        input_per_mtok: 0.10
+        cached_input_per_mtok: 0.01
+        cache_write_per_mtok: 0.125
+        output_per_mtok: 0.50
+        prompt_tiers:
+          - above_tokens: 100000
+            input_per_mtok: 0.50
+            cached_input_per_mtok: 0.05
+            cache_write_per_mtok: 0.625
+            output_per_mtok: 2.50
+
   google/gemini-3.8-flash:
     source: https://ai.google.dev/gemini-api/docs/pricing
     checked: 2026-09-30
     bill_reasoning_as_extra_output: true
+    min_cacheable_prefix_tokens: 4096
     notes: >-
       Paid tier, standard (text) rates; page last updated 2026-09-24. The introductory rate runs
       through 2026-12-31; from 2027-01-01 every price doubles, cached input included ($0.15; the
@@ -39,6 +113,7 @@ models:
     source: https://ai.google.dev/gemini-api/docs/pricing
     checked: 2026-09-30
     bill_reasoning_as_extra_output: true
+    min_cacheable_prefix_tokens: 2048
     notes: Paid tier, standard (text) rates; page last updated 2026-09-24. One rate, no periods.
     rates:
       - name: standard

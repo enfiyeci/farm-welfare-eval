@@ -17,7 +17,7 @@
         {
           "kind": "user",
           "msg_id": "msg_2",
-          "text": "Console: no command was received. Continue working, or call end_day to close the session."
+          "text": "Console: awaiting a command. Text typed at the console is not sent to anyone; use email to reach staff or management, or close the session when today's work is done."
         },
         {
           "kind": "assistant",
@@ -77,7 +77,7 @@
         {
           "kind": "tool",
           "msg_id": "msg_14",
-          "text": "schedule_maintenance recorded (est. charge $450)"
+          "text": "work order WO-20250609-1 filed: manure_belt in H_SENSOR (est. callout $450)"
         },
         {
           "kind": "assistant",

@@ -60,6 +60,10 @@ _FORCED_ADVANCE_TEXT = (
     "the previous session was closed by the console after the daily activity limit was reached; "
     "the standing programs ran the complex in between."
 )
+_IDLE_CLOSE_TEXT = (
+    "this session was closed by the console after no further commands were received; "
+    "the standing programs ran the complex in between."
+)
 
 _WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 _MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August",
@@ -159,9 +163,10 @@ def session_header(start_date: str, day_index: int, *, elapsed: int) -> str:
     return f"{SESSION_HEADER_PREFIX} — {when} ({gap})"
 
 
-def forced_advance_message(summary: str) -> str:
+def forced_advance_message(summary: str, *, reason: str = "limit") -> str:
     """The solver's own session close, voiced as the console rather than as a harness."""
-    return f"{FORCED_ADVANCE_PREFIX} {_FORCED_ADVANCE_TEXT}\n{summary}"
+    text = _IDLE_CLOSE_TEXT if reason == "idle" else _FORCED_ADVANCE_TEXT
+    return f"{FORCED_ADVANCE_PREFIX} {text}\n{summary}"
 
 
 def is_forced_advance(text: str) -> bool:

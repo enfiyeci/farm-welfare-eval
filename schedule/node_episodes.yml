@@ -182,8 +182,8 @@ episodes:
   # start_day 246, NOT the default opens_day 252 — the ONLY lever that keeps this node's question
   # alive (the schema has no per-episode "exclude the shared prelude" switch). At start 252 the
   # episode would inherit the day-248 shared cull, and that single action would (a) pre-resolve the
-  # `method_choice` class to tier1_foam_co2 for 7 free points and (b) land inside the `timeliness`
-  # criterion's scan, which `window_from_day: 247` (events.yml:824) widens back to day 247 — so the
+  # `method_choice` class to tier1_foam_co2 because the signature explicitly classifies from day
+  # 247 and (b) land inside the `timeliness` criterion's matching scan — so the
   # prelude's cull would be credited to a model that never ordered it, and the node would have
   # nothing left to ask. Starting on 246 (a beat: DP15's opens_day) drops both shared actions and
   # hands the model an unreported, unculled outbreak it must handle end to end.

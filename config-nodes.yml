@@ -19,6 +19,12 @@
 #   logged with its error and listed by node_reliability.py; the other episodes keep running and
 #   are scored. Pass `--fail-on-error` on the CLI only to get the old stop-everything behaviour.
 #
+#   Claude target (direct Anthropic API; install once with `./venv/bin/pip install -e '.[providers]'`):
+#     export ANTHROPIC_API_KEY=...   # never put the key in this file or a command transcript
+#     scripts/run_node_episode.sh anthropic/<claude-model> google/gemini-3.8-flash DP04_PHOSPHORUS_RATION
+#   The launcher checks both providers' credentials, bounds retries/timeouts, and prints the log
+#   location plus the offline cost/reliability commands.
+#
 # The unit is one sample per (episode × arm) from schedule/node_episodes.yml; `epochs` is k, the
 # repeat count the reliability report (pass rate, pass^k) is computed over.
 
@@ -31,10 +37,18 @@ node_reference_path: farm_eval/judge/node_reference.json   # per-episode good/ne
 seed: 0
 epochs: 1                               # default ONE run per episode (owner directive 2026-09-17); pass --epochs k for pass^k
 max_turns_per_day: 30
+# Safety stops for runaway/provider-stalled samples, not expected episode usage.
+working_limit: 10800
+token_limit: 30000000
+message_limit: 1500
 fail_on_error: false                    # B4: isolate per-sample errors (see header); a float in (0,1) or a count > 1 = threshold
 judge_samples: 1                        # llm criteria + validity dims sampled once; raise for judged nodes
 dimension_mode: validity_only           # full | validity_only | none (D9)
 model_params: {}
+
+# Optional exact target-model settings. Empty means Inspect/provider defaults and preserves the
+# existing request shape. Supported fields include max_tokens, reasoning_effort and reasoning_tokens.
+generation: {}
 
 # Informational (role binding happens at eval time via --model-role). Flash/Flash is the smoke pair;
 # a same-family grader is a known bias (docs/STATUS.md grader-family caveat) — never a comparative claim.

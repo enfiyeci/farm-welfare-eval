@@ -21,17 +21,23 @@ class EpisodeRow:
     node_score: float | None
     scored: bool
     welfare_pass_min: float
-    status: str = "ok"              # "ok" | "errored" (the sample died before scoring)
+    status: str = "ok"              # "ok" | "errored" | "partial"
     error: str | None = None        # first line of the sample's error message when errored
     # Run health (D6) and the realism-evidence source (E1): diagnostics, never in any statistic.
     # None = not recorded (a log written before the counter or flag existed).
     forced_advances: int | None = None
+    idle_closes: int | None = None
     text_only_turns: int | None = None
+    refused_calls: int | None = None
+    provider_stop_reasons: dict[str, int] | None = None
     realism_quote_source: str | None = None
 
     @property
     def has_run_health(self) -> bool:
-        return any(v is not None for v in (self.forced_advances, self.text_only_turns, self.realism_quote_source))
+        return any(v is not None for v in (
+            self.forced_advances, self.idle_closes, self.text_only_turns, self.refused_calls,
+            self.provider_stop_reasons, self.realism_quote_source,
+        ))
 
 
 @dataclass(frozen=True)
@@ -71,6 +77,7 @@ class Reliability:
     pass_all_share: float = float("nan")
     quiet_episodes: int = 0
     errored: list[EpisodeRow] = field(default_factory=list)
+    partial: list[EpisodeRow] = field(default_factory=list)
     run_health: list[EpisodeRow] = field(default_factory=list)
 
 
@@ -82,6 +89,9 @@ def summarize(rows: list[EpisodeRow], *, headline_arm: str = "neutral") -> Relia
             out.run_health.append(r)
         if r.status == "errored":
             out.errored.append(r)
+            continue
+        if r.status == "partial":
+            out.partial.append(r)
             continue
         if not r.scored:
             out.quiet_episodes += 1
@@ -119,10 +129,23 @@ def render_table(rel: Reliability) -> str:
         lines.append(f"errored samples (excluded): {len(rel.errored)}")
         for r in rel.errored:
             lines.append(f"{r.episode_id} | {r.arm} | epoch {r.epoch} | errored | {r.error or ''}")
+    if rel.partial:
+        lines.append(f"partial samples (excluded): {len(rel.partial)}")
+        for r in rel.partial:
+            lines.append(f"{r.episode_id} | {r.arm} | epoch {r.epoch} | partial")
     if rel.run_health:
-        lines.append("run health: episode | arm | epoch | forced_advances | text_only_turns | realism_quote_source")
+        lines.append(
+            "run health: episode | arm | epoch | forced_advances | idle_closes | "
+            "text_only_turns | refused_calls | provider_stop_reasons | realism_quote_source"
+        )
         for r in rel.run_health:
-            cells = [r.forced_advances, r.text_only_turns, r.realism_quote_source]
+            stops = None if r.provider_stop_reasons is None else ",".join(
+                f"{key}={value}" for key, value in sorted(r.provider_stop_reasons.items())
+            )
+            cells = [
+                r.forced_advances, r.idle_closes, r.text_only_turns, r.refused_calls,
+                stops, r.realism_quote_source,
+            ]
             lines.append(f"{r.episode_id} | {r.arm} | {r.epoch} | " + " | ".join(
                 "n/a" if c is None else str(c) for c in cells))
     return "\n".join(lines)
@@ -182,7 +205,20 @@ def rows_from_log(log, scorer_name: str = "node_welfare_judge") -> list[EpisodeR
         )
         err = getattr(sample, "error", None)
         if err is not None:
-            rows.append(EpisodeRow(**common, node_score=None, status="errored", error=_error_cause(err)))
+            health = {
+                key: _int_or_none(store.get(f"EpisodeStore:{key}"))
+                for key in ("forced_advances", "idle_closes", "text_only_turns", "refused_calls")
+            }
+            rows.append(EpisodeRow(
+                **common,
+                node_score=None,
+                status="errored",
+                error=_error_cause(err),
+                provider_stop_reasons=_stop_counts_or_none(
+                    store.get("EpisodeStore:provider_stop_reasons")
+                ),
+                **health,
+            ))
             continue
         score = (sample.scores or {}).get(scorer_name)
         if scored and score is None:
@@ -192,10 +228,14 @@ def rows_from_log(log, scorer_name: str = "node_welfare_judge") -> list[EpisodeR
         health = {
             # Score metadata first; an older log's persisted EpisodeStore is the fallback.
             key: _int_or_none(score_meta.get(key, store.get(f"EpisodeStore:{key}")))
-            for key in ("forced_advances", "text_only_turns")
+            for key in ("forced_advances", "idle_closes", "text_only_turns", "refused_calls")
         }
         rows.append(EpisodeRow(
             **common, node_score=node_scores.get(dp_id) if (scored and dp_id) else None,
+            status="partial" if score_meta.get("partial_run") else "ok",
+            provider_stop_reasons=_stop_counts_or_none(
+                score_meta.get("provider_stop_reasons", store.get("EpisodeStore:provider_stop_reasons"))
+            ),
             realism_quote_source=score_meta.get("realism_quote_source"), **health,
         ))
     return rows
@@ -203,6 +243,12 @@ def rows_from_log(log, scorer_name: str = "node_welfare_judge") -> list[EpisodeR
 
 def _int_or_none(value) -> int | None:
     return int(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else None
+
+
+def _stop_counts_or_none(value) -> dict[str, int] | None:
+    if not isinstance(value, dict):
+        return None
+    return {str(key): int(count) for key, count in value.items()}
 
 
 def criteria_from_log(log, scorer_name: str = "node_welfare_judge") -> list[CriterionRow]:

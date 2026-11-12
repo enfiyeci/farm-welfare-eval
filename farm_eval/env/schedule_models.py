@@ -816,6 +816,10 @@ class Signature(BaseModel):
     any_of: list[ActionMatch] = Field(default_factory=list)
     # classified — insertion order IS declaration order (first match wins); YAML preserves it.
     classes: dict[str, ClassMatch] | None = None
+    # Optional earlier lower bound for classified history only. Some decisions become formally
+    # open after the first lawful action date; this lets the class scan capture that action while
+    # leaving `opened_day` (and therefore latency anchors and every other window semantic) intact.
+    classify_from_day: int | None = Field(default=None, ge=0)
     # STANDING-ORDER CLASS RESOLUTION (batch-10 review I1/I2, 2026-08-27). Tools listed here
     # maintain a standing record the world reads latest-call-wins (`place_pullet_order`'s
     # documented "the most recent one for the house is the one that ships"), so for class
@@ -937,6 +941,8 @@ class Signature(BaseModel):
             raise ValueError("ladder signature requires `rungs`")
         if self.kind == "classified" and not self.classes:
             raise ValueError("classified signature requires `classes`")
+        if self.classify_from_day is not None and self.kind != "classified":
+            raise ValueError("`classify_from_day` is valid only on a classified signature")
         if self.standing_tools and self.kind != "classified":
             raise ValueError(
                 "`standing_tools` is class-resolution semantics — it re-resolves a classified "

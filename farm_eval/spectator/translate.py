@@ -110,16 +110,18 @@ _SEASONS = ("winter", "spring", "summer", "autumn")
 #: `_new(day=...)` default: stamp the event with the translator's current day.
 _CURRENT_DAY: Any = object()
 
-# The two FMS acknowledgement wordings that state a real service charge in DOLLARS:
-# "<tool> recorded (est. charge $450)" and "treatment logged (materials ~$1,860)"
+# The FMS acknowledgement wordings that state a real service charge in DOLLARS:
+# "est. callout $450", "est. $400", and "treatment logged (materials ~$1,860)"
 # (farm_eval/env/episode.py). Matching the charge PHRASE and not a bare "$" keeps a quoted unit
 # price -- "feed order placed: 20.0 t @ $412.5/ton" -- from being read as money spent.
-_CHARGE_RE = re.compile(r"(?:est\. charge|materials)\s*~?\s*\$\s*([\d,]+(?:\.\d+)?)")
+_CHARGE_RE = re.compile(
+    r"(?:est\.(?:\s+(?:charge|callout))?|materials)\s*~?\s*\$\s*([\d,]+(?:\.\d+)?)"
+)
 
 # The only tools whose ack can state a service charge: `log_treatment` and the `_TRACE_TOOLS` pair
 # (farm_eval/env/episode.py). Scanning ONLY these keeps a read result that merely QUOTES the ack
 # wording from stamping a phantom cost -- `read_email` returns a corpus body verbatim, so an email
-# echoing "recorded (est. charge $450)" would otherwise bill the reading. If the env ever charges a
+# echoing "filed (est. callout $450)" would otherwise bill the reading. If the env ever charges a
 # new tool, add it here or that tool's cost stops reaching the feed.
 _CHARGING_TOOLS = frozenset({"log_treatment", "schedule_maintenance", "schedule_vet_visit"})
 

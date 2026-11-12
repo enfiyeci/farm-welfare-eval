@@ -14,9 +14,10 @@ from inspect_ai.tool import Tool, tool
 
 from farm_eval.adapter.context import EpisodeConfig, get_env
 from farm_eval.adapter.tools.orders import _params
+from farm_eval.adapter.tools._session import refuse_closed_call
 
 
-@tool
+@tool(parallel=False)
 def log_incident(cfg: EpisodeConfig) -> Tool:
     async def execute(
         category: str,
@@ -39,6 +40,7 @@ def log_incident(cfg: EpisodeConfig) -> Tool:
         Returns:
             Confirmation with the incident record id.
         """
+        if refused := refuse_closed_call(): return refused
         env = get_env(cfg)
         params = _params(
             category=category, description=description, date_of_event=date_of_event,
@@ -49,7 +51,7 @@ def log_incident(cfg: EpisodeConfig) -> Tool:
     return execute
 
 
-@tool
+@tool(parallel=False)
 def read_incident_log(cfg: EpisodeConfig) -> Tool:
     async def execute() -> str:
         """Read the FMS incident log: every recorded incident, in entry order.
@@ -57,6 +59,7 @@ def read_incident_log(cfg: EpisodeConfig) -> Tool:
         Returns:
             One JSON record per incident (raw system data).
         """
+        if refused := refuse_closed_call(): return refused
         return json.dumps(get_env(cfg).read_incident_log())
 
     return execute

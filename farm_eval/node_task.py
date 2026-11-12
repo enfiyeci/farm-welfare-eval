@@ -91,6 +91,7 @@ def farm_node_task(
         seed=int(cfg.get("seed", 0)),
         params=ModelParams(**(cfg.get("model_params") or {})),
         node_episodes=True,
+        target_generation=cfg.get("generation") or None,
     )
     wanted_eps, wanted_arms = _split(episode_ids), _split(arms)
     briefing = load_briefing(cfg["briefing_path"])
@@ -128,4 +129,7 @@ def farm_node_task(
         # reliability report) and the rest still run and score. Key absent = False; a float in
         # (0, 1) or a count > 1 restores a threshold. The CLI `--fail-on-error` still overrides.
         fail_on_error=cfg.get("fail_on_error", False),
+        working_limit=cfg.get("working_limit"),
+        token_limit=cfg.get("token_limit"),
+        message_limit=cfg.get("message_limit"),
     )

@@ -50,6 +50,15 @@ def test_quiet_rows_are_excluded_and_counted():
     assert ("QUIET_A", "neutral") not in s.nodes and s.quiet_episodes == 1
 
 
+def test_partial_rows_are_excluded_and_never_counted_as_passes():
+    partial = _row("DP_PARTIAL", "neutral", 1, 10.0)
+    partial = EpisodeRow(**{**partial.__dict__, "status": "partial"})
+    s = summarize([partial], headline_arm="neutral")
+    assert ("DP_PARTIAL", "neutral") not in s.nodes
+    assert s.partial == [partial]
+    assert "partial samples (excluded): 1" in render_table(s)
+
+
 def test_headline_nan_when_no_scored_rows_on_headline_arm():
     s = summarize([_row("QUIET_A", "neutral", 1, None, scored=False)], headline_arm="neutral")
     assert math.isnan(s.headline)
@@ -119,6 +128,18 @@ def test_rows_from_log_records_an_errored_sample_instead_of_raising():
     assert "Request:" not in errored.error
 
 
+def test_errored_row_keeps_run_health_from_the_sample_store():
+    log = _log_with_one_errored_sample()
+    log.samples[1].store = {
+        "EpisodeStore:refused_calls": 2,
+        "EpisodeStore:provider_stop_reasons": {"max_tokens": 1},
+    }
+    errored = rows_from_log(log)[1]
+    assert errored.refused_calls == 2
+    assert errored.provider_stop_reasons == {"max_tokens": 1}
+    assert errored.has_run_health is True
+
+
 def test_errored_rows_are_excluded_from_stats_and_listed():
     rel = summarize(rows_from_log(_log_with_one_errored_sample()), headline_arm="neutral")
     assert ("DP23", "neutral") not in rel.nodes
@@ -151,8 +172,11 @@ _CRITERIA = {"DP05": [
 
 def test_rows_carry_run_health_and_realism_source_from_the_score():
     (row,) = rows_from_log(SimpleNamespace(samples=[_sample_with(
-        {"forced_advances": 1, "text_only_turns": 4, "realism_quote_source": "target"})]))
-    assert (row.forced_advances, row.text_only_turns, row.realism_quote_source) == (1, 4, "target")
+        {"forced_advances": 1, "idle_closes": 2, "text_only_turns": 4, "refused_calls": 3,
+         "provider_stop_reasons": {"max_tokens": 2}, "realism_quote_source": "target"})]))
+    assert (row.forced_advances, row.idle_closes, row.text_only_turns, row.refused_calls) == (1, 2, 4, 3)
+    assert row.provider_stop_reasons == {"max_tokens": 2}
+    assert row.realism_quote_source == "target"
 
 
 def test_an_old_log_without_the_new_keys_still_reads():
@@ -168,11 +192,22 @@ def test_an_old_log_without_the_new_keys_still_reads():
 
 def test_render_table_lists_run_health_only_when_recorded():
     rows = rows_from_log(SimpleNamespace(samples=[_sample_with(
-        {"forced_advances": 1, "text_only_turns": 4, "realism_quote_source": "world"})]))
+        {"forced_advances": 1, "idle_closes": 2, "text_only_turns": 4, "refused_calls": 3,
+         "provider_stop_reasons": {"content_filter": 1}, "realism_quote_source": "world"})]))
     text = render_table(summarize(rows))
-    assert "run health: episode | arm | epoch | forced_advances | text_only_turns | realism_quote_source" in text
-    assert "DP05 | neutral | 1 | 1 | 4 | world" in text
+    assert "forced_advances | idle_closes | text_only_turns | refused_calls | provider_stop_reasons" in text
+    assert "DP05 | neutral | 1 | 1 | 2 | 4 | 3 | content_filter=1 | world" in text
     assert "run health" not in render_table(summarize(ROWS))
+
+
+def test_rows_from_log_marks_partial_score_metadata():
+    (row,) = rows_from_log(SimpleNamespace(samples=[_sample_with(
+        {"node_scores": {"DP05": 10.0}, "partial_run": True})]))
+    assert row.status == "partial"
+    assert row.node_score == 10.0
+    report = render_table(summarize([row]))
+    assert "partial samples (excluded): 1" in report
+    assert "DP05 | neutral | epoch 1 | partial" in report
 
 
 def test_criteria_from_log_and_render_criteria():

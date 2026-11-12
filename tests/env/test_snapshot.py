@@ -50,7 +50,7 @@ def test_opening_digest_has_summary_format_and_gap():
     assert first == (f"Console session — Thursday 19 June 2025, {clock.session_open_text('2025-06-09', 10)} "
                      "(5 days since the previous session)")
     assert rest.startswith("Since last session (5 days):")
-    assert "1 new message(s), 1 unread" in rest
+    assert "1 new message, 1 unread" in rest
 
 
 def test_arm_digest_note_is_appended_as_one_line():

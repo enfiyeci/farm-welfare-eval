@@ -15,6 +15,7 @@ import copy
 from dataclasses import dataclass
 
 from inspect_ai.util import StoreModel, store_as
+from pydantic import Field
 
 from farm_eval.env.episode import FarmEnv
 from farm_eval.env.loader import (
@@ -58,6 +59,9 @@ class EpisodeConfig:
     # the derived snapshot, and `get_env` builds the FarmEnv from the store spec (end day,
     # enabled node, session clock, arm overrides) instead of this config's episode-wide values.
     node_episodes: bool = False
+    # Optional exact target-model -> Inspect GenerateConfig fields. An absent mapping preserves
+    # the historical generate call byte-for-byte (no explicit config argument).
+    target_generation: dict[str, dict] | None = None
 
 
 class EpisodeStore(StoreModel):
@@ -72,6 +76,14 @@ class EpisodeStore(StoreModel):
     # Run-health diagnostic (2026-09-22): count of assistant turns with text but no tool call. Each
     # gets the solver's continuation nudge; two consecutive tool-less turns force the day advance.
     text_only_turns: int = 0
+    idle_closes: int = 0
+    refused_calls: int = 0
+    provider_stop_reasons: dict[str, int] = Field(default_factory=dict)
+    session_closed_this_turn: bool = Field(default=False, exclude=True)
+    target_model: str | None = None
+    grader_model: str | None = None
+    same_family_grader: bool = False
+    generation_settings: dict = Field(default_factory=dict)
     # Node episodes (D5): the per-sample facts `get_env` needs — see
     # `ResolvedEpisode.to_store_dict`. None = continuous episode (unchanged behaviour).
     episode_spec: dict | None = None

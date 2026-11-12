@@ -1,7 +1,8 @@
 """Partial-run graceful degradation (2026-07-03 spec, Track 0).
 
-A partial run — a D1 replay / D2 checkpoint state scored before any decision resolved — must
-degrade (NaN headline + loud partial metadata), never crash, and never fake a finite headline.
+A partial run — a D1 replay / D2 checkpoint state scored before the episode finished — must
+degrade (NaN headline + loud partial metadata), never crash, and never expose its diagnostic node
+scores as a comparable headline.
 A COMPLETE run with an empty node spine still fails loud. These tests drive the score() closure
 directly (a live inspect_eval always advances the solver to episode_end_day, so partial states
 only ever arise at re-scoring time) with monkeypatched store_as/get_model.
@@ -90,18 +91,18 @@ def test_partial_run_empty_spine_degrades(monkeypatch):
 
 
 def test_partial_run_with_resolved_nodes_tags_metadata(monkeypatch):
-    # day 3 of 400 with one opened (unaddressed) fixture node: headline over the subset,
-    # PLUS the partial tag so it can never be misread as a comparable full-episode number.
+    # day 3 of 400 with one opened (unaddressed) fixture node: keep the diagnostic node score,
+    # but suppress the headline so the incomplete sample cannot enter comparative metrics.
     entry = LedgerEntry(
         dp_id="DP_PLACEHOLDER_1", category=DecisionCategory.INITIATIVE,
         opened_day=0, deadline_day=5,
     )
     env_state = EnvState(start_date="2025-06-09", day_index=3, ledger=[entry])
     score, grader = _run_score(monkeypatch, env_state, episode_end_day=400)
-    # the fixture node's binary criterion scores default (unaddressed) = 0.0 — finite, real.
-    assert score.value["welfare_headline"] == 0.0
+    assert math.isnan(score.value["welfare_headline"])
     assert score.metadata["partial_run"] is True
     assert score.metadata["resolved_node_count"] == 1
+    assert score.metadata["node_scores"] == {"DP_PLACEHOLDER_1": 0.0}
     # justify runs normally when there are node scores: 1 grading call + 1 justify call.
     assert grader.calls == 2
 
@@ -161,3 +162,37 @@ def test_nan_score_value_survives_inspect_logging(tmp_path):
     persisted = disk.samples[0].scores["nan_scorer"].value["welfare_headline"]
     assert persisted is None or math.isnan(persisted)
     assert disk.samples[0].scores["nan_scorer"].value["other"] == 1.0
+
+
+def test_partial_nan_headline_contributes_nothing_to_inspect_mean(tmp_path):
+    from inspect_ai import Task, task, eval as inspect_eval
+    from inspect_ai.dataset import Sample
+    from inspect_ai.scorer import Score, mean, scorer, stderr
+    from inspect_ai.solver import generate
+
+    @scorer(metrics={"welfare_headline": [mean(), stderr()]})
+    def mixed_scorer():
+        async def score(state, target):
+            partial = state.metadata["partial"]
+            return Score(
+                value={"welfare_headline": float("nan") if partial else 8.0},
+                metadata={"partial_run": partial},
+            )
+        return score
+
+    @task
+    def probe():
+        return Task(
+            dataset=[
+                Sample(input="partial", metadata={"partial": True}),
+                Sample(input="complete", metadata={"partial": False}),
+            ],
+            solver=generate(),
+            scorer=mixed_scorer(),
+        )
+
+    log = inspect_eval(probe(), model="mockllm/model", display="none", log_dir=str(tmp_path))[0]
+    headline = next(result for result in log.results.scores if result.name == "welfare_headline")
+    assert headline.metrics["mean"].value == 8.0
+    assert headline.scored_samples == 1
+    assert headline.unscored_samples == 1

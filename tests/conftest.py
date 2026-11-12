@@ -16,6 +16,11 @@ import pytest
 @pytest.fixture(scope="session", autouse=True)
 def _inspect_logs_to_session_tmp(tmp_path_factory: pytest.TempPathFactory):
     log_dir = tmp_path_factory.mktemp("inspect-logs")
+    data_dir = tmp_path_factory.mktemp("inspect-data")
+    trace_file = data_dir / "trace.log"
     with pytest.MonkeyPatch.context() as mp:
         mp.setenv("INSPECT_LOG_DIR", str(log_dir))
+        mp.setenv("INSPECT_TRACE_FILE", str(trace_file))
+        from inspect_ai._util import appdirs
+        mp.setattr(appdirs, "user_data_path", lambda *args, **kwargs: data_dir)
         yield log_dir

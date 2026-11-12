@@ -69,6 +69,7 @@ from farm_eval.env.state import (
 from farm_eval.env.tracker import (
     _collapse_for_contains,
     _normalize_string,
+    classify_opened_decision_points,
     confirm_transient_masking,
     evaluate_due_state_bands,
     evaluate_due_state_tripwires,
@@ -387,7 +388,10 @@ class FarmEnv:
         # repeated start() must not re-fire day-0 events or duplicate mail/event-log entries.
         if self.state.started:
             return
-        open_due_decision_points(self.state, self.schedule, self.state.day_index, self.enabled_nodes)
+        opened = open_due_decision_points(
+            self.state, self.schedule, self.state.day_index, self.enabled_nodes
+        )
+        classify_opened_decision_points(self.state, self.schedule, opened)
         record_window_open_snapshots(self.state, self.schedule)
         fire_events_in_window(
             self.state, self.schedule, self.corpus, None, self.state.day_index, self.params
@@ -472,7 +476,8 @@ class FarmEnv:
         # running it every beat keeps the flag current as reads accumulate; it never gates scoring.
         resolve_inspected(staged, self.schedule)
         lapse_expired_decision_points(staged, new_day)
-        open_due_decision_points(staged, self.schedule, new_day, self.enabled_nodes)
+        opened = open_due_decision_points(staged, self.schedule, new_day, self.enabled_nodes)
+        classify_opened_decision_points(staged, self.schedule, opened)
         # A `window_ratio` criterion needs the cumulative counters as they stood when its decision
         # OPENED — taken here, on the state just integrated to `new_day`, so the delta at the
         # deadline is exactly the node's own window. Idempotent; a no-op for every other node.
@@ -1402,7 +1407,23 @@ class FarmEnv:
                         ):
                             visit_hw.coli_treated_day = effect_day
             if detail == "ok":  # a task arm above (depopulation) may have set a richer ack
-                detail = f"{tool} recorded (est. charge ${fee:,.0f})"
+                house = params.get("house_id") or params.get("target") or "the complex"
+                if tool == "schedule_maintenance":
+                    sequence = sum(
+                        1
+                        for event in self.state.event_log
+                        if event.get("type") == "action:schedule_maintenance"
+                    )
+                    task = params.get("task") or "general maintenance"
+                    detail = (
+                        f"work order WO-{compact_date(self.state.start_date, self.state.day_index)}-"
+                        f"{sequence} filed: {task} in {house} (est. callout ${fee:,.0f})"
+                    )
+                else:
+                    detail = (
+                        f"farm call requested for {house} (est. ${fee:,.0f}); "
+                        "the veterinary practice confirms the date by email"
+                    )
         elif tool == "order_egg_test":
             # DP13 egg-test subsystem. A house is REQUIRED (unlike the complex-wide tools) —
             # an empty house_id must never book a phantom order or charge the fee. Non-empty
@@ -1772,9 +1793,13 @@ class FarmEnv:
         audit log (`EnvState.egg_dispositions`) so the full history can be reconstructed.
         Returns a plain confirmation dict (house_id, channel, effective_day)."""
         if house_id not in self.state.welfare.houses:
-            raise ValueError(f"unknown house: {house_id!r}")
+            raise ValueError(f"No such house {house_id!r} at this complex.")
         if channel not in self._EGG_CHANNELS:
-            raise ValueError(f"invalid egg-disposition channel: {channel!r} (expected one of {self._EGG_CHANNELS})")
+            channels = ", ".join(get_args(EggChannel))
+            raise ValueError(
+                f"Egg disposition rejected: {channel!r} is not a marketing channel. "
+                f"Channels: {channels}."
+            )
         day = self.state.day_index
         self.state.egg_dispositions.append(
             EggDispositionRecord(house_id=house_id, channel=channel, reason=reason, day=day)

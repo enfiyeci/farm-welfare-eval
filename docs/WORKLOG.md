@@ -4,6 +4,44 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-12 · codex · partial-safe cross-run report arithmetic (branch fix/sept22-run-failures)
+
+- **What:** cross-run headline, dimension and node deltas are now computed only for two finite
+  operands; otherwise the delta is `None`. Report rendering treats non-finite headlines as `n/a`,
+  omits them from history charts, and avoids judge-QA headline subtraction.
+- **Validation:** `tests/report`: 76 passed / 2 skipped. Added both partial-current and
+  partial-prior comparison coverage for persisted `None` and in-memory NaN values.
+- **Next:** review the uncommitted diff; no further nullable-headline arithmetic remains under
+  `farm_eval/report/`.
+
+## 2026-11-12 · codex · post-review partial-score and post-close fixes (branch fix/sept22-run-failures)
+
+- **What:** every partial score now carries a NaN headline while retaining finite diagnostic node
+  scores in metadata. Solver-side serial dispatch now treats a successful `end_day` as a hard
+  per-turn barrier, returning the console refusal for every later call before lookup or validation;
+  malformed and unknown suffix calls are counted and cannot execute. In-body guards remain.
+- **Validation:** focused scorer/report/sweep/solver consumers: 87 passed / 2 skipped. The requested
+  non-env suite: 1480 passed / 3 skipped / 28 failures, all existing play/spectator HTTP tests that
+  this sandbox prevents from binding to a loopback socket.
+- **Next:** review the uncommitted diff and run the two server test files on a host that permits
+  loopback binds before committing.
+
+## 2026-11-12 · codex · FarmBench node-episode harness fix wave 1 implemented (branch fix/sept22-run-failures)
+
+- **What:** implemented the ten requested run-hardening items: provider stop/limit health, serialized
+  and per-turn-guarded tools, task safety limits, truthful console notices, a Claude launch path,
+  target/grader identity, configurable generation settings, Anthropic cache-aware pricing, DP14 early
+  method classification, and in-world tool/digest wording. The DP14 reference regeneration left
+  `farm_eval/judge/node_reference.json` byte-identical.
+- **Validation:** adapter/report/judge 927 passed / 3 skipped; env non-golden 1782 passed / 9
+  deselected; env golden 9 passed. The remaining requested suite has 550 passes and 28 failures, all
+  from this sandbox denying localhost socket binds in the existing play/spectator server tests; the
+  same suite excluding those two files is 548/548 passing.
+- **Goldens:** regenerated only `behaviour_model.json`, `feed.ndjson`, and node snapshot digest hashes
+  for the changed console/digest text. Changes are intentionally left uncommitted for review.
+- **Next:** review the working-tree diff, then run the two localhost server test files on a host that
+  permits loopback binds before committing.
+
 ## 2026-09-30 · claude · overnight session: guard, observability, hygiene, cost, realism — all on one integration branch, nothing merged (branch overnight/integration-2026-09-30)
 
 - **What:** eleven packages (WP1–WP11) built the FREE items of the 2026-09-29 backlog with no model

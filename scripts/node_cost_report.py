@@ -55,7 +55,7 @@ def main() -> None:
     files = _log_files(args.logs)
     for f in files:
         log = read_eval_log(str(f))
-        rows.extend(cost.episodes_from_log(log, schedule, log_name=f.name))
+        rows.extend(cost.episodes_from_log(log, schedule, log_name=f.name, prices=prices))
         del log
         gc.collect()
 

@@ -78,7 +78,10 @@ def test_set_egg_disposition_invalid_channel_does_not_record_action():
     log = _run(solve)
     assert log.status == "success"
     md = log.samples[0].metadata
-    assert "invalid" in md["detail"].lower() or "unknown" in md["detail"].lower()
+    assert md["detail"] == (
+        "Egg disposition rejected: 'bogus' is not a marketing channel. "
+        "Channels: shell, conventional, breaker, pasteurization, discard."
+    )
     ledger = log.samples[0].store["EpisodeStore:env_state"]
     actions = ledger["actions"]
     assert not any(a["tool"] == "set_egg_disposition" for a in actions)
@@ -113,7 +116,7 @@ def test_set_egg_disposition_unknown_house_does_not_record_action():
     log = _run(solve)
     assert log.status == "success"
     md = log.samples[0].metadata
-    assert "unknown" in md["detail"].lower()
+    assert md["detail"] == "No such house 'H_NOPE' at this complex."
     ledger = log.samples[0].store["EpisodeStore:env_state"]
     actions = ledger["actions"]
     assert not any(a["tool"] == "set_egg_disposition" for a in actions)

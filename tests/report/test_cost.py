@@ -7,6 +7,7 @@ contract under test is the persisted log, not an in-memory object.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,7 @@ models:
     source: https://example.invalid/pricing
     checked: 2026-01-01
     bill_reasoning_as_extra_output: true
+    min_cacheable_prefix_tokens: 1024
     rates:
       - name: intro
         until: 2026-12-31
@@ -55,6 +57,21 @@ models:
         input_per_mtok: 3.0
         cached_input_per_mtok: 0.3
         output_per_mtok: 15.0
+  placeholder/model-tiered:
+    source: https://example.invalid/pricing-tiered
+    checked: 2026-01-01
+    rates:
+      - name: standard
+        input_per_mtok: 0.1
+        cached_input_per_mtok: 0.01
+        cache_write_per_mtok: 0.125
+        output_per_mtok: 0.5
+        prompt_tiers:
+          - above_tokens: 100000
+            input_per_mtok: 0.5
+            cached_input_per_mtok: 0.05
+            cache_write_per_mtok: 0.625
+            output_per_mtok: 2.5
 """
 
 
@@ -74,6 +91,7 @@ def test_load_prices_reads_rates_source_and_date(prices) -> None:
     assert [r.name for r in a.rates] == ["intro", "later"]
     assert a.rates[0].input_per_mtok == 1.0 and a.rates[1].output_per_mtok == 20.0
     assert a.bill_reasoning_as_extra_output is True
+    assert a.min_cacheable_prefix_tokens == 1024
 
 
 def test_load_prices_rejects_a_model_without_source_or_checked_date(tmp_path: Path) -> None:
@@ -107,6 +125,12 @@ def test_usage_cost_bills_reasoning_as_extra_output_when_the_table_says_so(price
     assert cost.usage_cost(u, intro, bill_reasoning_as_extra_output=False) == pytest.approx(2.20)
 
 
+def test_usage_cost_prices_cache_writes() -> None:
+    rate = cost.Rate("standard", 1.0, 0.1, 10.0, cache_write_per_mtok=1.25)
+    usage = cost.RoleUsage(cache_write=2_000_000)
+    assert cost.usage_cost(usage, rate, bill_reasoning_as_extra_output=False) == pytest.approx(2.50)
+
+
 def test_role_usage_shares() -> None:
     u = cost.RoleUsage(fresh_input=250, cached_input=750, output=10, reasoning=0)
     assert u.cache_hit_rate == pytest.approx(0.75)
@@ -130,6 +154,21 @@ def test_full_misses_are_calls_with_zero_cache_after_a_cacheable_prefix_existed(
     assert d.reprefilled_in_full_misses == 10000
     assert d.cached_total == 8000 + 11000
     assert d.hit_rate_if_misses_hit == pytest.approx((19000 + 10000) / (19000 + 28500))
+
+
+def test_model_specific_cache_minimum_changes_full_miss_classification(tmp_path: Path, prices) -> None:
+    log = read_eval_log(str(_write_log(tmp_path)))
+    rows = cost.episodes_from_log(
+        log,
+        _schedule(),
+        target_model="placeholder/model-a",
+        grader_model="placeholder/model-b",
+        prices=prices,
+    )
+    assert rows[0].cache_minimum == 1024
+    short_calls = [_call(1500, 0), _call(2000, 0)]
+    assert cost.cache_diagnostics(short_calls, min_cacheable=rows[0].cache_minimum).full_misses == 1
+    assert cost.cache_diagnostics(short_calls).full_misses == 0
 
 
 def test_prefix_changes_flags_a_rewritten_earlier_message_and_tool_list_changes() -> None:
@@ -305,6 +344,49 @@ def test_row_cost_is_none_for_a_model_without_a_price(tmp_path: Path, prices) ->
                                 grader_model="placeholder/model-b")[0]
     t, g = cost.row_cost(ok, prices, rate_name="intro")
     assert t is None and g is not None
+
+
+def test_tiered_model_is_priced_per_request_prompt_size(tmp_path: Path, prices) -> None:
+    log = read_eval_log(str(_write_log(tmp_path)))
+    row = cost.episodes_from_log(log, _schedule(), target_model="placeholder/model-a")[0]
+    small = cost.RoleUsage(fresh_input=90_000, output=1_000)
+    large = cost.RoleUsage(fresh_input=100_001, output=1_000)
+    row = replace(
+        row,
+        target_model="placeholder/model-tiered",
+        target=small + large,
+        target_requests=(small, large),
+    )
+    target, _ = cost.row_cost(row, prices, rate_name="standard")
+    expected = (90_000 * 0.1 + 1_000 * 0.5 + 100_001 * 0.5 + 1_000 * 2.5) / 1e6
+    assert target == pytest.approx(expected)
+
+
+def test_shipped_anthropic_prices_and_cache_rules() -> None:
+    table = cost.load_prices(from_root("scripts/model_prices.yml"))
+    expected = {
+        "anthropic/claude-fable-5-2": (8, 10, 0.20, 40),
+        "anthropic/claude-opus-5-5": (4, 5, 0.20, 20),
+        "anthropic/claude-sonnet-5-5": (2, 2.5, 0.10, 10),
+        "anthropic/claude-haiku-4-5": (1, 1.25, 0.10, 5),
+        "anthropic/claude-haiku-5-5": (0.10, 0.125, 0.01, 0.50),
+    }
+    for model, values in expected.items():
+        price = table[model]
+        rate = price.rates[0]
+        assert (
+            rate.input_per_mtok,
+            rate.cache_write_per_mtok,
+            rate.cached_input_per_mtok,
+            rate.output_per_mtok,
+        ) == values
+        assert price.bill_reasoning_as_extra_output is False
+        assert price.min_cacheable_prefix_tokens == (
+            1024 if model == "anthropic/claude-haiku-4-5" else 512
+        )
+    haiku = table["anthropic/claude-haiku-5-5"].rates[0]
+    assert len(haiku.prompt_tiers) == 1
+    assert haiku.prompt_tiers[0].above_tokens == 100_000
 
 
 # --- sweep projection --------------------------------------------------------------------
