@@ -25,8 +25,12 @@ PAGES = {
         "FarmBench Approach Rubric Pilot", "farmbench-free-checks-rubric-v1",
         "FarmBench approach rubric pilot and draft for Kate (page of 2026-11-15):", "body-rubric.html"),
     "dp01-price-ladder-cost.html": (
-        "FarmBench Price Ladder Cost", "farmbench-free-checks-ladder-v1",
+        # v2: the default of L-CAP changed on 2026-11-16 and saved answers are stored by option position
+        "FarmBench Price Ladder Cost", "farmbench-free-checks-ladder-v2",
         "FarmBench winter ammonia price ladder, cost and choices (page of 2026-11-16):", "body-ladder.html"),
+    "budget-split.html": (
+        "FarmBench Budget Split", "farmbench-free-checks-budget-v1",
+        "FarmBench budget split and model choice (page of 2026-11-16):", "body-budget.html"),
 }
 
 EXTRA_CSS = """
@@ -44,6 +48,14 @@ EXTRA_CSS = """
 td.q-cell{min-width:220px}
 .copybtn{font-family:"Schibsted Grotesk",sans-serif;font-size:13px;font-weight:700;padding:7px 12px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer;margin-top:10px}
 .copybtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.mx.lt th,.mx.lt td{text-align:left;vertical-align:top}
+.mx.lt td{padding:8px 10px 8px 4px}
+.stack{display:flex;height:20px;background:var(--rule)}
+.stack i{display:block;height:20px}
+.s1{background:var(--bar)}
+.s2{background:var(--bar-faint)}
+.s3{background:var(--rule)}
+.key{display:inline-block;width:10px;height:10px;margin-right:5px}
 """
 
 def main() -> None:

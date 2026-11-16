@@ -1,0 +1,416 @@
+<title>FarmBench Budget Split</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* layout: answer-first header beside one bar panel (where the plan's 22 experiments point), then labelled sheets on a 220px + fluid grid: the test applied with a mixes-in matrix, problems, designs, experiments, what changes on the 41-choice page */
+:root{
+  --paper:#EDEFF1; --sheet:#F8F9FA; --ink:#15191E; --muted:#56606B; --rule:#C9D0D7;
+  --accent:#0B6B66; --accent-soft:#D6E9E7; --warn:#8A5A00; --warn-soft:#F3E7CF;
+  --bar:#0B6B66; --bar-faint:#A9CFCB; --on-accent:#F8F9FA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+    --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+    --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+  --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+  --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 "Source Serif 4",Georgia,serif}
+.wrap{max-width:1240px;margin:0 auto;padding-block:40px 130px;padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4,.label,.tag,th,button,.k,.code,.opt b,.rec{font-family:"Schibsted Grotesk",system-ui,sans-serif}
+h1{font-size:40px;line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:8px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+h2{font-size:26px;font-weight:800;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:19px;font-weight:700;margin:0 0 8px;text-wrap:balance}
+h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 0 4px}
+.meta{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;color:var(--muted)}
+p{margin:0 0 12px;max-width:74ch}
+a{color:var(--accent)}
+ul{margin:0 0 12px;padding-left:20px;max-width:74ch}
+li{margin-bottom:6px}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start;padding-bottom:36px;border-bottom:3px solid var(--ink)}
+.hero > div{min-width:0}
+.lede{font-size:19px}
+.panel{background:var(--sheet);padding:22px 24px}
+.panel h4{margin-top:0}
+.after-panel{margin-top:22px}
+.section{display:grid;grid-template-columns:220px 1fr;gap:32px;padding:40px 0;border-bottom:1px solid var(--rule)}
+.section > div{min-width:0}
+.section > .label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-top:8px}
+.section > .label b{display:block;font-size:44px;line-height:1;color:var(--accent);letter-spacing:0;margin-bottom:8px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:700;padding:8px 6px;border-bottom:2px solid var(--ink);vertical-align:bottom}
+td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num{font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;background:var(--accent-soft);color:var(--accent);margin:0 4px 2px 0}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.plain{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--rule)}
+.warnline{border-left:3px solid var(--warn);padding:2px 0 2px 12px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:14px}
+.grid2 > div{min-width:0}
+/* bars */
+.cz{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 34px;gap:12px;align-items:center;margin:9px 0}
+.cz .k{font-size:14px;font-weight:700;line-height:1.25}
+.cz .k small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.cz-track{height:14px;background:var(--rule)}
+.cz-track i{display:block;height:14px;background:var(--bar-faint)}
+.cz.hit .cz-track i{background:var(--warn)}
+.cz .v{font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;text-align:right}
+.foot{font-size:14.5px;color:var(--muted);margin-top:12px}
+/* mixes-in matrix */
+.mx{font-size:13.5px;min-width:640px}
+.mx th{text-align:center;padding:6px 4px}
+.mx th:first-child,.mx td:first-child{text-align:left}
+.mx td{padding:7px 4px;text-align:center;vertical-align:middle}
+.mx td:first-child{font-family:"Schibsted Grotesk",sans-serif;font-weight:700;font-size:13.5px}
+.mx td:first-child small{display:block;font-family:"Source Serif 4",serif;font-weight:400;font-size:13px;color:var(--muted)}
+.mx tr.grprow td{font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding-top:14px;border-bottom:1px solid var(--ink)}
+.m{display:inline-block;width:12px;height:12px;vertical-align:middle}
+.m.y{background:var(--warn)}
+.m.p{box-shadow:inset 0 0 0 2px var(--warn)}
+.m.n{width:4px;height:4px;background:var(--rule)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.legend span{white-space:nowrap}
+/* items */
+.xq{padding:26px 0;border-top:1px solid var(--rule)}
+.xq:first-of-type{border-top:0;padding-top:4px}
+.xqgrid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:28px}
+.xqgrid > div{min-width:0}
+.code{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent);margin-right:8px}
+.ev{font-size:15.5px;color:var(--muted)}
+.ev b,.ev code{color:var(--ink)}
+.quote{background:var(--sheet);padding:12px 14px;font-size:15px;line-height:1.5;margin:0 0 12px}
+.quote .src{display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);margin-top:6px}
+.q{margin:0}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;padding:10px 12px;background:var(--sheet);border-left:3px solid var(--rule);cursor:pointer;font-size:15.5px;line-height:1.45}
+.opt input{margin:4px 0 0;accent-color:var(--accent);width:16px;height:16px}
+.opt:has(input:checked){border-left-color:var(--accent);background:var(--accent-soft)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt b{font-weight:700;font-size:14.5px}
+.rec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-left:6px;white-space:nowrap}
+.q textarea,#out,#general{width:100%;margin-top:8px;min-height:38px;font:14px/1.4 "Source Serif 4",serif;background:var(--paper);color:var(--ink);border:1px solid var(--rule);padding:8px}
+#general{min-height:90px;background:var(--sheet)}
+#out{min-height:220px;font-family:"IBM Plex Mono",monospace;font-size:13px}
+.vt td:first-child{font-family:"Schibsted Grotesk",sans-serif;font-weight:700;font-size:14px}
+.vt.ex{min-width:860px;font-size:14.5px}
+.bar-fixed{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:12px max(32px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(32px,env(safe-area-inset-left,0px));display:flex;gap:16px;align-items:center;justify-content:space-between;z-index:5}
+.bar-fixed span{font-family:"Schibsted Grotesk",sans-serif;font-size:14px}
+.bar-fixed button{font-size:14px;font-weight:700;padding:9px 16px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer}
+.bar-fixed button:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
+@media (max-width:900px){
+  .wrap{padding-block:24px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .hero,.grid2,.xqgrid{grid-template-columns:1fr}
+  .section{grid-template-columns:1fr;gap:10px}
+  h1{font-size:29px}
+  .panel{padding:16px 14px}
+  .bar-fixed{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+
+/* additions for the free-checks pages; every colour is a token from the block above */
+.status{display:inline-block;font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;white-space:nowrap}
+.status.no{background:var(--warn-soft);color:var(--warn)}
+.status.yes{background:var(--accent-soft);color:var(--accent)}
+.status.open{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--rule)}
+.letter{background:var(--sheet);padding:22px 26px;max-width:74ch;font-size:16.5px}
+.letter p{max-width:none}
+.wt{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;align-items:center}
+.wt-track{height:10px;background:var(--rule)}
+.wt-track i{display:block;height:10px;background:var(--bar)}
+.wt .v{font-family:"IBM Plex Mono",monospace;font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+td.q-cell{min-width:220px}
+.copybtn{font-family:"Schibsted Grotesk",sans-serif;font-size:13px;font-weight:700;padding:7px 12px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer;margin-top:10px}
+.copybtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.mx.lt th,.mx.lt td{text-align:left;vertical-align:top}
+.mx.lt td{padding:8px 10px 8px 4px}
+.stack{display:flex;height:20px;background:var(--rule)}
+.stack i{display:block;height:20px}
+.s1{background:var(--bar)}
+.s2{background:var(--bar-faint)}
+.s3{background:var(--rule)}
+.key{display:inline-block;width:10px;height:10px;margin-right:5px}
+</style>
+
+<div class="wrap">
+<!-- FarmBench · Eval: hen. How the whole budget is split between the experiments and the big runs, and which models run. Written 2026-11-16 by a side session of lane farmbench-free-checks on branch feat/dp01-price-ladder. No model was called. Look inherited from evals/hen/design/2026-11-15-design-critique-and-ideas.html. -->
+<header class="hero">
+  <div>
+    <div class="meta">FarmBench · Eval: hen · budget split · written Monday, November 16, 2026 · estimates only, no model called, nothing sent</div>
+    <h1>The budget covers every experiment and <em>two full runs of five models</em>, with about $270 kept back.</h1>
+    <p class="lede">You said the money is $900 of general credit plus $300 of Claude credit. In your order, the experiments come first and cost about $200 to $270. The big runs come after and take about $660 for five models: two from Google, two from OpenAI and one Claude.</p>
+    <p>Only Gemini 3.8 Flash has a measured cost. Every other figure prices that one September run's token counts at another model's rates, so each can be off by half either way. That is why a quarter of the money is held back.</p>
+    <p>Nothing here starts a run. Every choice in section 5 is preselected with my recommendation, except the one that spends money: that one is preselected to "nothing runs yet".</p>
+  </div>
+  <div>
+  <div class="panel">
+    <h4>The recommended split, by pot (upper estimates)</h4>
+    <p class="foot" style="margin:0 0 4px"><b>General credit · $900</b></p>
+    <div class="stack"><i class="s1" style="width:19.8%"></i><i class="s2" style="width:53.1%"></i></div>
+    <p class="foot" style="margin:4px 0 14px">Experiments $178 · big runs $478 · kept back $244</p>
+    <p class="foot" style="margin:0 0 4px"><b>Claude credit · $300</b></p>
+    <div class="stack" style="width:33.3%"><i class="s1" style="width:30.3%"></i><i class="s2" style="width:62%"></i></div>
+    <p class="foot" style="margin:4px 0 0">Experiments $91 · big runs $186 · kept back $23</p>
+    <div class="legend"><span><i class="key s1"></i> experiments</span><span><i class="key s2"></i> big runs</span><span><i class="key s3"></i> kept back</span></div>
+    <p class="foot">Both bars use one scale: the Claude bar is a third as long because its pot is a third the size. If Claude spending passes $300, the rest comes out of the general credit.</p>
+  </div>
+  </div>
+</header>
+
+<section class="section" id="money">
+  <div class="label"><b>1</b>The money</div>
+  <div>
+    <h2>Two pots, and what Google gives for free</h2>
+    <p><b>What you said today:</b> "i think we have 900 budget for credits general and 300 api credits for claude". That is $1,200, of which $300 pays for Claude models only. The page of November 12 recorded it as "up to $900 reimbursable plus a $100 Claude credit", so the Claude figure has changed from $100 to $300. ⚠️ I could not check either balance: the Claude Console in Chrome is signed out, and I did not sign in.</p>
+    <p><b>A date to confirm.</b> The design critique page says reimbursable spending ends on Saturday, November 21, 2026. If that still holds, the big runs have to finish by then.</p>
+    <h3 style="margin-top:22px">Google's free offers</h3>
+    <div class="tablebox">
+    <table class="mx lt">
+      <thead><tr><th>Offer</th><th>What it covers</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Google Cloud welcome credit, $300</td><td>Any Google model on Vertex</td><td><span class="status no">gone</span> The November 12 page checked three of your Google accounts on November 15: expired on all three. ⚠️ Not re-checked by me.</td></tr>
+        <tr><td>Gemini API free tier</td><td>Free input and output on Gemini 4 Hydrogen, Gemini 3.8 Flash, 3.6 Flash, 3.5 Flash-Lite, 3.1 Flash-Lite, 3 Flash Preview and Gemma 4</td><td><span class="status open">usable, with catches</span></td></tr>
+        <tr><td>Gemini 4 Carbon and Gemini 4 Argon</td><td>Google's two strongest models</td><td><span class="status no">not free</span> The pricing page says "not available on the Free tier".</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="warnline"><p><b>Three catches on the free tier.</b> First, Google's pricing page says free-tier content is "used to improve our products". The benchmark's emails, cards and answers would go into Google's training material, and a later Gemini could have seen the test. Second, the limits are set per project and Google does not publish them. Your AI Studio project shows "Free tier", but a terms-of-service dialog covers the limits table, and accepting terms is yours to do. One ammonia run makes about 95 calls with prompts up to 130,000 tokens, so a low daily limit would stop it. Third, this checkout is set up for Vertex and has no AI Studio key.</p></div>
+    <p>The free tier would save $14 to $36 on the card experiments, or about $200 if both big runs of Flash and Hydrogen also went through it. I would not put any benchmark text through it. Choice B-FREE is yours.</p>
+  </div>
+</section>
+
+<section class="section" id="prices">
+  <div class="label"><b>2</b>Prices</div>
+  <div>
+    <h2>What each model costs for the three kinds of run</h2>
+    <p>An <b>ammonia run</b> is one play of the winter ammonia decision on the simulated farm. A <b>full run</b> plays all 26 decisions once. The <b>card experiments</b> ask single decisions in writing, with no farm and no tools: 2,856 short calls a model for E1 to E7 and E11.</p>
+    <div class="tablebox">
+    <table class="mx">
+      <thead><tr><th>Model</th><th>One ammonia run</th><th>Full run, 26 decisions once</th><th>All card experiments</th><th>Price changes</th></tr></thead>
+      <tbody>
+        <tr class="grprow"><td colspan="5">Google</td></tr>
+        <tr><td>Gemini 3.8 Flash<small><span class="status yes">measured</span></small></td><td>$1.15</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:7%"></i></span><span class="v">$37</span></div></td><td>$5 to $12</td><td>Doubles January 1, 2027</td></tr>
+        <tr><td>Gemini 4 Hydrogen<small>newer, free tier exists</small></td><td>$1.95</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:11.6%"></i></span><span class="v">$61</span></div></td><td>$9 to $24</td><td>None listed</td></tr>
+        <tr><td>Gemini 4 Argon or Carbon<small>newer, Google's strongest; same price</small></td><td>$2.55</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:15.4%"></i></span><span class="v">$81</span></div></td><td>$13 to $31</td><td>Doubles December 1, 2026</td></tr>
+        <tr class="grprow"><td colspan="5">OpenAI</td></tr>
+        <tr><td>GPT-6 Luna<small>smallest</small></td><td>$0.20</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:1.5%"></i></span><span class="v">$8</span></div></td><td>$1 to $2</td><td>None listed</td></tr>
+        <tr><td>GPT-6.1 Terra<small>mid</small></td><td>$1.50</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:9.1%"></i></span><span class="v">$48</span></div></td><td>$6 to $16</td><td>None listed</td></tr>
+        <tr><td>GPT-6.1 Sol<small>the main ChatGPT-class model</small></td><td>$3.00</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:17.7%"></i></span><span class="v">$93</span></div></td><td>$13 to $31</td><td>None listed</td></tr>
+        <tr><td>GPT-6 Astra<small>largest</small></td><td>$16.80</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:100%"></i></span><span class="v">$526</span></div></td><td>$63 to $157</td><td>None listed</td></tr>
+        <tr class="grprow"><td colspan="5">Claude</td></tr>
+        <tr><td>Claude Haiku 5.5<small>smallest</small></td><td>$0.20 to $0.90</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:5.5%"></i></span><span class="v">$8–29</span></div></td><td>$1 to $2</td><td>Five times dearer on prompts over 100,000 tokens</td></tr>
+        <tr><td>Claude Sonnet 5.5</td><td>$3.00</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:17.7%"></i></span><span class="v">$93</span></div></td><td>$13 to $31</td><td>None listed</td></tr>
+        <tr><td>Claude Opus 5.5</td><td>$5.95</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:35%"></i></span><span class="v">$184</span></div></td><td>$25 to $63</td><td>None listed</td></tr>
+        <tr><td>Claude Fable 5.2</td><td>$11.00</td><td class="q-cell"><div class="wt"><span class="wt-track"><i style="width:64.4%"></i></span><span class="v">$339</span></div></td><td>$50 to $126</td><td>None listed</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="foot">Bars share one scale, with GPT-6 Astra's $526 as the full width. Every figure except the Flash row is an estimate. Each includes the grader's share (the grader is the model that scores a finished run; it stays on Gemini Flash, about 10 cents a run). Prices are in <code>scripts/model_prices.yml</code> with the page each was read from.</p>
+    <p><b>How the estimates are made.</b> The September report gives the Flash ammonia run's bill and its split. Worked backwards, that is about 0.85 million fresh input tokens, 4.15 million cached input tokens and 40 thousand output tokens. Each estimate prices those counts at the other model's rates. OpenAI and Claude charge extra to write a prompt into the cache, so their fresh input is priced at that write rate. A full run is priced from the average of the 12 runs that finished in September, scaled to all 26 decisions. A card call is taken as 700 tokens in and 300 out, and up to two and a half times that for a model that thinks before it answers.</p>
+    <div class="warnline"><p><b>These rest on one run and can be off by half either way.</b> A different model takes a different number of steps. A model that thinks at length writes far more than 40 thousand output tokens. Caches hit more or less often than Flash's 83%. Experiment E7 is the first paid step for this reason: it measures a real card call on every model before anything larger runs.</p></div>
+  </div>
+</section>
+
+<section class="section" id="ready">
+  <div class="label"><b>3</b>What can run today</div>
+  <div>
+    <h2>Google can run now. Claude needs one answer. OpenAI needs a key and an install.</h2>
+    <p>Checked without calling any model. Credentials were checked by name only; no key was opened, printed or copied.</p>
+    <div class="tablebox">
+    <table class="mx lt">
+      <thead><tr><th>Company</th><th>Software in the project</th><th>Credential found</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>Google</td><td>Installed (<code>google-genai</code> 2.10.0)</td><td>A Vertex project in <code>scripts/pilot-vertex.env</code>, plus a Google Cloud login on this Mac</td><td><span class="status yes">ran in September</span> ⚠️ Whether that project serves the Gemini 4 models, and at what price, is not checked. The prices here are from the Gemini API page, which says Vertex prices may differ.</td></tr>
+        <tr><td>Claude</td><td>Installed (<code>anthropic</code> 0.116.0, and <code>boto3</code> for Amazon Bedrock)</td><td>An Amazon Bedrock token in <code>scripts/pilot-bedrock.env</code>. No Anthropic key.</td><td><span class="status open">one question</span> Is the $300 an Anthropic credit or an Amazon one? An Anthropic credit needs an Anthropic key, which this checkout does not have. No Claude run has ever been made here.</td></tr>
+        <tr><td>OpenAI</td><td><span class="status no">not installed</span> The <code>openai</code> package is listed in <code>pyproject.toml</code> but missing from the environment</td><td>None. No OpenAI key in the pilot files, the shell or the keychain item names.</td><td><span class="status no">not ready</span> Needs the package installed, an API key from you, and credit on that key. The Codex login on this Mac is a ChatGPT plan login, a different thing.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="foot">The run framework, Inspect, is at version 0.3.241 in the environment, while <code>pyproject.toml</code> asks for 0.3.244. ⚠️ Whether 0.3.241 knows the Gemini 4 and GPT-6 model names is untested, because testing it means a paid call.</p>
+  </div>
+</section>
+
+<section class="section" id="plans">
+  <div class="label"><b>4</b>Three ways to split it</div>
+  <div>
+    <h2>All three keep your order: experiments first, the ammonia price check last, big runs after</h2>
+    <p>The experiments are the same in each: E7 first (the noise floor: ten ammonia runs on Flash plus 80 card calls a model), then the card experiments E1 to E3, then E4 to E6 and E11, then E8, the ammonia price check, only if the card results hold. E8 is priced as approved: two propane prices, ten runs each, so 20 runs a model.</p>
+    <div class="tablebox">
+    <table class="mx lt">
+      <thead><tr><th></th><th>A · Five models, two runs each</th><th>B · Three models, three runs each</th><th>C · Seven models, one run each</th></tr></thead>
+      <tbody>
+        <tr><td>Models in the big run</td><td>Gemini 3.8 Flash, Gemini 4 Hydrogen, GPT-6.1 Sol, GPT-6.1 Terra, Claude Sonnet 5.5</td><td>Gemini 4 Hydrogen, GPT-6.1 Sol, Claude Sonnet 5.5</td><td>A's five, plus Gemini 4 Argon and Claude Opus 5.5</td></tr>
+        <tr><td>Card experiments on</td><td>All five</td><td>The three, plus Flash as a cheap first pass</td><td>All seven</td></tr>
+        <tr><td>E8 price check on</td><td>Flash, Sol, Sonnet</td><td>Hydrogen, Sol, Sonnet</td><td>Flash, Sol, Sonnet</td></tr>
+        <tr><td>Experiments</td><td>$200 to $270</td><td>$210 to $270</td><td>$240 to $365</td></tr>
+        <tr><td>Big runs</td><td>$665</td><td>$740</td><td>$600</td></tr>
+        <tr><td>Total</td><td>$865 to $935</td><td>$950 to $1,010</td><td>$835 to $960</td></tr>
+        <tr><td>Kept back, of $1,200</td><td>$265 to $335</td><td>$190 to $250</td><td>$240 to $365</td></tr>
+        <tr><td>Claude spending, of its $300</td><td>$260 to $280</td><td>$350 to $370</td><td>$375 to $430</td></tr>
+        <tr><td>Leaves out</td><td>Opus, Fable, Astra, Google's two strongest models, a third run</td><td>Flash and Terra in the big run, Google's two strongest, Opus</td><td>Any repeat: one run a model cannot tell a real difference from chance</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><b>I recommend A,</b> with one rule fixed now: the shape of the big run is decided again after E7. E7 measures how much one model's score moves between identical runs. If it moves a lot, two runs a model cannot separate five models, and the same $665 goes to B's shape: fewer models, more runs each. If E1 fails (the cards cannot find a value planted on purpose), the remaining card experiments stop and their money goes back to the reserve.</p>
+    <p><b>Time.</b> A Flash episode took about 40 minutes in September, so one full run is about 20 hours when its episodes go one after another. In plan A each model needs about 40 hours for its two runs. The five models can run side by side, since each company has its own limits.</p>
+    <p><b>If the Claude credit is $100, not $300,</b> the total is $1,000. Plan A then keeps back only $65 to $135, which is too thin for estimates this rough. I would drop Sonnet to one full run, which frees $93.</p>
+  </div>
+</section>
+
+<section class="section" id="choices">
+  <div class="label"><b>5</b>Your call</div>
+  <div>
+    <h2>Seven choices</h2>
+    <article class="xq"><h3><span class="code">B-POTS</span>What the money is</h3>
+      <div class="xqgrid"><div><p>Everything else on this page is sized from this. If reimbursement no longer ends on November 21, or the Claude credit is an Amazon one, say so in the box.</p></div>
+      <div><div class="q" data-id="B-POTS what the money is"><div class="opts">
+        <label class="opt"><input type="radio" name="bpots" value="$900 general credit plus $300 Claude credit, $1,200 in all" checked><span><b>$900 general plus $300 Claude,</b> $1,200 in all, as you said today.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="bpots" value="$900 general credit plus $100 Claude credit, $1,000 in all"><span><b>$900 general plus $100 Claude,</b> $1,000 in all, as recorded on November 12.</span></label>
+        <label class="opt"><input type="radio" name="bpots" value="other amounts; see my note"><span><b>Other amounts.</b> Write them in the box.</span></label>
+      </div><textarea placeholder="Comment (optional): which account holds each credit, the reimbursement end date"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-PLAN</span>The split</h3>
+      <div class="xqgrid"><div><p>The three plans of section 4. Each is a ceiling per stage, not a yes to run: experiments stop at their figure, and the big runs start only on your word.</p></div>
+      <div><div class="q" data-id="B-PLAN how the budget is split"><div class="opts">
+        <label class="opt"><input type="radio" name="bplan" value="A: five models, two full runs each; experiments up to $300, big runs up to $700, at least $200 kept back; the big-run shape is decided again after E7" checked><span><b>A · Five models, two runs each.</b> Experiments up to $300, big runs up to $700, at least $200 kept back. The big-run shape is decided again after E7.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="bplan" value="B: three models, three full runs each; experiments up to $300, big runs up to $750, at least $150 kept back"><span><b>B · Three models, three runs each.</b> Experiments up to $300, big runs up to $750, at least $150 kept back.</span></label>
+        <label class="opt"><input type="radio" name="bplan" value="C: seven models, one full run each; experiments up to $400, big runs up to $600, at least $200 kept back"><span><b>C · Seven models, one run each.</b> Experiments up to $400, big runs up to $600, at least $200 kept back.</span></label>
+        <label class="opt"><input type="radio" name="bplan" value="experiments only for now, up to $300; the big runs are split after the results"><span><b>Experiments only for now,</b> up to $300. Split the big runs after the results.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-GOOGLE</span>Which newer Google models</h3>
+      <div class="xqgrid"><div><p>Hydrogen is the newer model at a stable price. Argon and Carbon are Google's strongest and cost the same as each other; both double in price on December 1, so they have to run by November 30. One full run of either is about $81.</p></div>
+      <div><div class="q" data-id="B-GOOGLE which Google models"><div class="opts">
+        <label class="opt"><input type="radio" name="bgoogle" value="Gemini 3.8 Flash and Gemini 4 Hydrogen" checked><span><b>Flash and Hydrogen.</b> The measured baseline plus one newer model.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="bgoogle" value="Flash, Hydrogen and Gemini 4 Argon, with Argon run by November 30"><span><b>Add Gemini 4 Argon,</b> run by November 30. About $160 more for two full runs.</span></label>
+        <label class="opt"><input type="radio" name="bgoogle" value="Flash, Hydrogen and Gemini 4 Carbon, with Carbon run by November 30"><span><b>Add Gemini 4 Carbon,</b> the strongest, run by November 30. About $160 more for two full runs.</span></label>
+        <label class="opt"><input type="radio" name="bgoogle" value="Gemini 4 Hydrogen only; Flash for the experiments' first pass only"><span><b>Hydrogen only</b> in the big run. Flash stays for the first pass of the experiments.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-OPENAI</span>Which OpenAI models</h3>
+      <div class="xqgrid"><div><p>None can run until the package is installed and you supply an API key with credit (section 3). Sol costs the same as Claude Sonnet. Astra is the model that reviews this design, and one full run of it is about $526.</p></div>
+      <div><div class="q" data-id="B-OPENAI which OpenAI models"><div class="opts">
+        <label class="opt"><input type="radio" name="bopenai" value="GPT-6.1 Sol and GPT-6.1 Terra" checked><span><b>GPT-6.1 Sol and GPT-6.1 Terra.</b> The main model and the mid one.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="bopenai" value="GPT-6.1 Sol only"><span><b>Sol only.</b> Saves about $96 over two full runs.</span></label>
+        <label class="opt"><input type="radio" name="bopenai" value="GPT-6.1 Sol and GPT-6 Luna"><span><b>Sol and Luna.</b> Luna is the smallest, about $8 a full run, as a low reference point.</span></label>
+        <label class="opt"><input type="radio" name="bopenai" value="no OpenAI model in this version"><span><b>No OpenAI model</b> in this version.</span></label>
+      </div><textarea placeholder="Comment (optional). Do not paste a key here."></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-FREE</span>Google's free tier</h3>
+      <div class="xqgrid"><div><p>The catches are in section 1. The main one: free-tier content goes into Google's training material, so the test items would leak to the company whose models are being tested.</p></div>
+      <div><div class="q" data-id="B-FREE use of the Gemini API free tier"><div class="opts">
+        <label class="opt"><input type="radio" name="bfree" value="no benchmark text on the free tier; paid tier only" checked><span><b>No benchmark text on the free tier.</b> Paid tier only.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="bfree" value="free tier for a wiring test with throwaway text only"><span><b>A wiring test only,</b> with throwaway text, to see that the pipeline works before paying. Needs an AI Studio key from you.</span></label>
+        <label class="opt"><input type="radio" name="bfree" value="free tier for the card experiments on Flash and Hydrogen; I accept that the cards reach Google's training data"><span><b>The card experiments on Flash and Hydrogen.</b> Saves $14 to $36. The cards reach Google's training data.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-E8</span>The ammonia price check, when its turn comes</h3>
+      <div class="xqgrid"><div><p>E8 runs last and only if the card results hold. As approved it is two propane prices with ten runs each. A third price was added later by the Claude and Astra agreement, which also says to drop the middle price first when money is tight. A third price adds half again to each figure. The ladder's own choices are on the <a href="https://claude.ai/artifact/2JzfBTq9LPMuMQYsKx3urj">price ladder page</a>.</p></div>
+      <div><div class="q" data-id="B-E8 models for the ammonia price check"><div class="opts">
+        <label class="opt"><input type="radio" name="be8" value="Flash, GPT-6.1 Sol and Claude Sonnet 5.5; two prices, ten runs each; about $143" checked><span><b>Flash, Sol and Sonnet,</b> one from each company. Two prices, ten runs each, about $143.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="be8" value="Flash only; two prices, ten runs each; about $23"><span><b>Flash only.</b> About $23. Tests the tooling and one model.</span></label>
+        <label class="opt"><input type="radio" name="be8" value="every model of the big run; two prices, ten runs each; about $210 for plan A's five"><span><b>Every model of the big run.</b> About $210 for plan A's five.</span></label>
+        <label class="opt"><input type="radio" name="be8" value="decide after the card results"><span><b>Decide after the card results.</b></span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">B-FIRST</span>The first paid step</h3>
+      <div class="xqgrid"><div><p>This is the only choice here that spends money, so it is preselected to nothing. E7 is first in your order. It costs little and it replaces the estimates on this page with measured costs. Its card half can start on the models that are ready; its ten Flash episodes need the yes as well.</p></div>
+      <div><div class="q" data-id="B-FIRST the first paid step"><div class="opts">
+        <label class="opt"><input type="radio" name="bfirst" value="no paid run yet" checked><span><b>No paid run yet.</b> Nothing starts until you choose the other option or say so.</span></label>
+        <label class="opt"><input type="radio" name="bfirst" value="yes to E7 only, with a hard cap of $30: ten ammonia runs on Gemini 3.8 Flash and 80 card calls on each chosen model that is ready; stop and report the measured costs"><span><b>Yes to E7 only, capped at $30.</b> Ten ammonia runs on Flash and 80 card calls on each chosen model that is ready. Then stop and report the measured costs.</span></label>
+      </div><textarea placeholder="Comment (optional): another cap"></textarea></div></div></div>
+    </article>
+    <h3 style="margin-top:26px">Anything else</h3>
+    <textarea id="general" placeholder="General comment (optional)" aria-label="General comment"></textarea>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="label"><b>6</b>Sources</div>
+  <div>
+    <h2>What was read and what was not</h2>
+    <p><b>Prices, read on November 16, 2026.</b> Google: <a href="https://ai.google.dev/gemini-api/docs/pricing">the Gemini API pricing page</a>. ⚠️ Read in part: the opening section, the notes, and every row of the Standard, Batch and Flex tables for Gemini 4 Carbon, Argon, Hydrogen and Gemini 3.8 Flash; the Standard table only for the older text models; the audio, image and video sections not at all. The rate-limits page was read to the end. OpenAI: <a href="https://developers.openai.com/api/docs/pricing">the API pricing page</a>. ⚠️ Read in part: the flagship text-model tables for prompts up to 272,000 tokens; the prices for longer prompts and the image and audio sections were not read. ⚠️ The OpenAI prompt-caching guide was searched for its billing rules, not read to the end. ⚠️ The Vertex price page was not read. Claude prices were already in the file, checked November 12.</p>
+    <p><b>Read to the end:</b> <code>evals/hen/runs/2026-09-30-cost-report.md</code>, <code>scripts/model_prices.yml</code>, both owner-choice records of November 15, the ladder build plan, and the four notes from the sibling sessions. ⚠️ Of the design critique page I read the opening, the experiment table and the ammonia section. ⚠️ Of the November 12 page and the value-card plan I read only the passages on money, call counts and models.</p>
+    <p><b>A correction to an earlier note.</b> A sibling note says the critique's eleven experiments total $415 to $605. That figure is the critique's own re-adding of the November 12 page's 22 experiments. The eleven experiments carry only two prices on the critique page: $12 for E7 and $24 to $49 on Flash for E8. The card experiments were never priced there; the figures on this page are from the value-card plan's call counts.</p>
+    <p><b>Not done.</b> No model was called, no key was opened, no account was signed in to, and no terms were accepted. ⚠️ The owner-feedback log of the design skill was searched, not read to the end.</p>
+  </div>
+</section>
+
+</div>
+
+<div class="bar-fixed"><span id="count"></span><button id="copy" type="button">Copy my choices</button></div>
+<textarea id="out" hidden aria-label="Your choices as text"></textarea>
+<script>
+(function(){
+  var KEY='farmbench-free-checks-budget-v1';
+  var qs=[].slice.call(document.querySelectorAll('.q'));
+  var out=document.getElementById('out');
+  var count=document.getElementById('count');
+  var general=document.getElementById('general');
+  qs.forEach(function(q,i){
+    var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+    radios.forEach(function(r,j){ r.id=r.name+'-'+j; if(r.defaultChecked){ q.dataset.rec=String(j); } });
+    var t=q.querySelector('textarea'); if(t){ t.id='note-'+(radios[0]?radios[0].name:i); t.setAttribute('aria-label','Note for '+q.dataset.id); }
+  });
+  function state(){
+    var s={};
+    qs.forEach(function(q){
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=-1; radios.forEach(function(r,j){ if(r.checked) idx=j; });
+      var t=q.querySelector('textarea');
+      s[q.dataset.id]={i:idx,n:t?t.value:''};
+    });
+    s.__general=general?general.value:'';
+    return s;
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state())); }catch(e){} }
+  function load(){
+    var s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ s=null; }
+    if(!s) return;
+    qs.forEach(function(q){
+      var v=s[q.dataset.id]; if(!v) return;
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      if(v.i>=0 && radios[v.i]) radios[v.i].checked=true;
+      var t=q.querySelector('textarea'); if(t && v.n) t.value=v.n;
+    });
+    if(general && s.__general) general.value=s.__general;
+  }
+  function update(){
+    var changed=0;
+    qs.forEach(function(q){
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=-1; radios.forEach(function(r,j){ if(r.checked) idx=j; });
+      if(String(idx)!==q.dataset.rec) changed++;
+    });
+    count.textContent=qs.length+' choices · '+changed+' changed from my recommendation';
+  }
+  load(); update();
+  document.addEventListener('change',function(){ update(); save(); });
+  document.addEventListener('input',function(e){ if(e.target && e.target.tagName==='TEXTAREA') save(); });
+  document.getElementById('copy').addEventListener('click',function(){
+    var lines=['FarmBench budget split and model choice (page of 2026-11-16):'];
+    qs.forEach(function(q){
+      var c=q.querySelector('input:checked');
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=radios.indexOf(c);
+      var t=q.querySelector('textarea'); var note=t?t.value.trim():'';
+      lines.push(q.dataset.id+': '+(c?c.value:'(skipped)')+(String(idx)===q.dataset.rec?'':' [changed]')+(note?' | note: '+note:''));
+    });
+    var g=general?general.value.trim():''; if(g) lines.push('General comment: '+g);
+    var text=lines.join('\n'); var btn=this;
+    function done(){ btn.textContent='Copied'; setTimeout(function(){ btn.textContent='Copy my choices'; },1600); }
+    function fallback(){ out.hidden=false; out.value=text; out.focus(); out.select(); btn.textContent='Select and copy the text above'; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,fallback); }
+    else{ fallback(); }
+  });
+})();
+</script>

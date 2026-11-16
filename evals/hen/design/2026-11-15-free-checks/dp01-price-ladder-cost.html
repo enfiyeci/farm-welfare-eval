@@ -131,15 +131,24 @@ td.num{font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric
 td.q-cell{min-width:220px}
 .copybtn{font-family:"Schibsted Grotesk",sans-serif;font-size:13px;font-weight:700;padding:7px 12px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer;margin-top:10px}
 .copybtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.mx.lt th,.mx.lt td{text-align:left;vertical-align:top}
+.mx.lt td{padding:8px 10px 8px 4px}
+.stack{display:flex;height:20px;background:var(--rule)}
+.stack i{display:block;height:20px}
+.s1{background:var(--bar)}
+.s2{background:var(--bar-faint)}
+.s3{background:var(--rule)}
+.key{display:inline-block;width:10px;height:10px;margin-right:5px}
 </style>
 
 <div class="wrap">
 <!-- FarmBench · Eval: hen. DP01 propane price ladder: cost per run and the choices before any paid run. Written 2026-11-16 by lane farmbench-free-checks on branch feat/dp01-price-ladder. No model was called. Look inherited from evals/hen/design/2026-11-15-design-critique-and-ideas.html. -->
 <header class="hero">
   <div>
-    <div class="meta">FarmBench · Eval: hen · winter ammonia price ladder · written Monday, November 16, 2026 · built and checked offline, no model called, nothing sent</div>
+    <div class="meta">FarmBench · Eval: hen · winter ammonia price ladder · written Monday, November 16, 2026 · corrected the same day · built and checked offline, no model called, nothing sent</div>
     <h1>One ladder run costs about <em>$1 on Gemini Flash</em> and between $3 and $11 on a Claude model. The full ladder is 30 runs a model.</h1>
-    <p class="lede">The ladder asks one question: does a model stop protecting the hens from ammonia as propane gets dearer? It plays the winter ammonia decision at three propane prices, ten times each. Nothing has been run. You set the cap and say yes before anything is.</p>
+    <p class="lede">The ladder asks one question: does a model stop protecting the hens from ammonia as propane gets dearer? It plays the winter ammonia decision at several propane prices, ten times each. It is the tooling for experiment E8, which runs last in your order, after the card experiments and only if their results hold. Nothing has been run.</p>
+    <div class="warnline"><p><b>Corrected on November 16.</b> The first version of this page recommended running the ladder on Gemini Flash now. That was my mistake and it is withdrawn: you had already fixed the order as E7, then E1 to E3, then E4 to E6 and E11, then E8. Choice L-CAP now defaults to no paid run. How the whole budget is split is on the <a href="https://claude.ai/artifact/5cPYVRPdFvr7Hki3FoKZHh">budget page</a>.</p></div>
     <p>Only one figure on this page is measured: a single run of this decision on Gemini 3.8 Flash in September. Every other figure is that run's token count priced at another model's rates, so read each as "about, give or take half".</p>
   </div>
   <div>
@@ -176,6 +185,7 @@ td.q-cell{min-width:220px}
     <p class="foot">Prices: <code>scripts/model_prices.yml</code>, Claude rates checked November 12, Flash rates September 30. Measured run: <code>evals/hen/runs/2026-09-30-cost-report.md</code>.</p>
     <p><b>How the estimates are made.</b> The September report gives the Flash run's bill and its split. Worked backwards, that is about 0.85 million fresh input tokens, 4.15 million cached input tokens and 40 thousand output tokens. Each estimate prices those same three counts at the other model's rates, with fresh input charged at the cache-write rate.</p>
     <div class="warnline"><p><b>Why an estimate can be off by half either way.</b> A different model takes a different number of steps. A Claude model that thinks at length writes far more than 40 thousand output tokens, which pushes its cost up. Claude's prompt cache usually hits more often than Flash's 83%, which pushes it down. One measured run is the whole basis.</p></div>
+    <p><b>E8 as you approved it is two prices, ten runs each: 20 runs a model.</b> The third level came later, from the Claude and Astra agreement, which also says to drop 2x first if money is tight. So the "20 runs" column is the approved size and the "30 runs" column is the larger version.</p>
     <p><b>The 1x level is the main benchmark run.</b> It needs no separate setup. If the benchmark already runs this decision five times, the ladder needs only five more runs at 1x, so the 30 falls to 25. Only benchmark runs made after this change count. Earlier logs have no price in the email, and the report leaves them out.</p>
   </div>
 </section>
@@ -240,12 +250,12 @@ td.q-cell{min-width:220px}
   <div>
     <h2>Four choices</h2>
     <article class="xq"><h3><span class="code">L-CAP</span>The spending cap, and the yes to run</h3>
-      <div class="xqgrid"><div><p>No run starts without this. Flash alone is the cheapest way to find out whether the ladder and its report work on real logs: the report has only ever been fed made-up records. Name other models in the comment box.</p></div>
+      <div class="xqgrid"><div><p>No run starts without this. The ladder is experiment E8 and runs last, so the answer for now is no. When its turn comes, the models and the cap come from the split you choose on the <a href="https://claude.ai/artifact/5cPYVRPdFvr7Hki3FoKZHh">budget page</a>. The report has only ever been fed made-up records, so its first real use will be the first E8 run.</p></div>
       <div><div class="q" data-id="L-CAP spending cap and yes to the ladder run"><div class="opts">
-        <label class="opt"><input type="radio" name="lcap" value="cap $40: Gemini 3.8 Flash only, three levels, ten repeats (about $35); yes, run it" checked><span><b>$40: Gemini Flash only,</b> three levels, ten repeats, about $35. Yes, run it.<span class="rec">recommended</span></span></label>
-        <label class="opt"><input type="radio" name="lcap" value="cap $150: Flash and Claude Sonnet 5.5 (about $125); yes, run it"><span><b>$150: Flash and Claude Sonnet 5.5,</b> about $125. Yes, run it.</span></label>
-        <label class="opt"><input type="radio" name="lcap" value="cap $350: Flash, Sonnet 5.5 and Opus 5.5 (about $305); yes, run it"><span><b>$350: Flash, Sonnet 5.5 and Opus 5.5,</b> about $305. Yes, run it.</span></label>
-        <label class="opt"><input type="radio" name="lcap" value="no paid run yet; keep the ladder built and unrun"><span><b>No paid run yet.</b> Keep the ladder built and unrun.</span></label>
+        <label class="opt"><input type="radio" name="lcap" value="no paid run yet; the ladder stays built and unrun until the card experiments are in" checked><span><b>No paid run yet.</b> The ladder stays built and unrun until the card experiments are in.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="lcap" value="cap $40: Gemini 3.8 Flash only, three levels, ten repeats (about $35); yes, run it now, ahead of the card experiments"><span><b>$40: Gemini Flash only,</b> three levels, ten repeats, about $35. Yes, run it now, ahead of the card experiments.</span></label>
+        <label class="opt"><input type="radio" name="lcap" value="cap $150: Flash and Claude Sonnet 5.5 (about $125); yes, run it now, ahead of the card experiments"><span><b>$150: Flash and Claude Sonnet 5.5,</b> about $125. Yes, run it now, ahead of the card experiments.</span></label>
+        <label class="opt"><input type="radio" name="lcap" value="cap $350: Flash, Sonnet 5.5 and Opus 5.5 (about $305); yes, run it now, ahead of the card experiments"><span><b>$350: Flash, Sonnet 5.5 and Opus 5.5,</b> about $305. Yes, run it now, ahead of the card experiments.</span></label>
       </div><textarea placeholder="Comment (optional): other models, another cap"></textarea></div></div></div>
     </article>
     <article class="xq"><h3><span class="code">L-PROTECTS</span>What counts as "protects"</h3>
@@ -257,7 +267,7 @@ td.q-cell{min-width:220px}
       </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
     </article>
     <article class="xq"><h3><span class="code">L-LEVELS</span>The price levels</h3>
-      <div class="xqgrid"><div><p>Claude and Astra agreed on three levels and on leaving out 16 times as too extreme to believe. Dropping 2x saves a third of the cost and loses the middle point.</p></div>
+      <div class="xqgrid"><div><p>E8 as you approved it has two prices. Claude and Astra later agreed on three levels, on dropping 2x first if money is tight, and on leaving out 16 times as too extreme to believe. Dropping 2x saves a third of the cost and loses the middle point.</p></div>
       <div><div class="q" data-id="L-LEVELS propane price levels"><div class="opts">
         <label class="opt"><input type="radio" name="llev" value="1x, 2x and 4x" checked><span><b>1x, 2x and 4x.</b><span class="rec">recommended</span></span></label>
         <label class="opt"><input type="radio" name="llev" value="1x and 4x only"><span><b>1x and 4x only.</b> 20 runs a model, not 30.</span></label>
@@ -293,7 +303,7 @@ td.q-cell{min-width:220px}
 <textarea id="out" hidden aria-label="Your choices as text"></textarea>
 <script>
 (function(){
-  var KEY='farmbench-free-checks-ladder-v1';
+  var KEY='farmbench-free-checks-ladder-v2';
   var qs=[].slice.call(document.querySelectorAll('.q'));
   var out=document.getElementById('out');
   var count=document.getElementById('count');

@@ -120,3 +120,122 @@ models:
         input_per_mtok: 0.30
         cached_input_per_mtok: 0.03
         output_per_mtok: 2.50
+
+  # --- Added 2026-11-16 for the budget page (evals/hen/design/2026-11-15-free-checks/budget-split.html).
+  # No run has used any model below. The Gemini 3.8 Flash rates above were read again on
+  # 2026-11-16 from the same page and are unchanged. Google rates are the Gemini Developer API
+  # page's "Standard" tab; the page says Vertex ("Gemini Enterprise Agent Platform") prices may
+  # differ, and the Vertex page was not read. OpenAI rates are the "Standard" tier for prompts of
+  # up to 272K input tokens; the page has a "Long" (>272K) switch whose prices were not read.
+
+  google/gemini-4-hydrogen:
+    source: https://ai.google.dev/gemini-api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: true
+    notes: >-
+      Paid tier, standard rates, one rate with no end date on the page. Implicit caching only.
+      Also offered on the free tier, where content is used to improve Google's products. The
+      minimum cacheable prefix is not on the pricing page, so the code default applies.
+    rates:
+      - name: standard
+        input_per_mtok: 1.50
+        cached_input_per_mtok: 0.075
+        output_per_mtok: 7.50
+
+  google/gemini-4-argon:
+    source: https://ai.google.dev/gemini-api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: true
+    notes: >-
+      Paid tier, standard rates. Not on the free tier. Every price doubles on 2026-12-01.
+      Implicit caching only. The minimum cacheable prefix is not on the pricing page.
+    rates:
+      - name: intro
+        until: 2026-11-30
+        input_per_mtok: 2.00
+        cached_input_per_mtok: 0.10
+        output_per_mtok: 10.00
+      - name: from-december
+        from: 2026-12-01
+        input_per_mtok: 4.00
+        cached_input_per_mtok: 0.20
+        output_per_mtok: 20.00
+
+  google/gemini-4-carbon:
+    source: https://ai.google.dev/gemini-api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: true
+    notes: >-
+      Paid tier, standard rates; the page lists the same prices as Gemini 4 Argon. Not on the
+      free tier. Every price doubles on 2026-12-01. Implicit caching only. The minimum cacheable
+      prefix is not on the pricing page.
+    rates:
+      - name: intro
+        until: 2026-11-30
+        input_per_mtok: 2.00
+        cached_input_per_mtok: 0.10
+        output_per_mtok: 10.00
+      - name: from-december
+        from: 2026-12-01
+        input_per_mtok: 4.00
+        cached_input_per_mtok: 0.20
+        output_per_mtok: 20.00
+
+  openai/gpt-6.1-sol:
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: false
+    notes: >-
+      Standard tier, prompts up to 272K input tokens. cache_write is the default 30-minute
+      write (1.25 times input); a 12-hour write costs 5.00. Cache-write billing is described in
+      https://developers.openai.com/api/docs/guides/prompt-caching, which was searched, not
+      read in full. The minimum cacheable prefix varies with request settings, so the code
+      default applies.
+    rates:
+      - name: standard
+        input_per_mtok: 2.00
+        cached_input_per_mtok: 0.10
+        cache_write_per_mtok: 2.50
+        output_per_mtok: 10.00
+
+  openai/gpt-6.1-terra:
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: false
+    notes: >-
+      Standard tier, prompts up to 272K input tokens. cache_write is the default 30-minute
+      write; a 12-hour write costs 2.50. See the gpt-6.1-sol note on cache writes.
+    rates:
+      - name: standard
+        input_per_mtok: 1.00
+        cached_input_per_mtok: 0.05
+        cache_write_per_mtok: 1.25
+        output_per_mtok: 5.00
+
+  openai/gpt-6-luna:
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: false
+    notes: >-
+      Standard tier, prompts up to 272K input tokens. cache_write is the default 30-minute
+      write; a 12-hour write costs 0.25. See the gpt-6.1-sol note on cache writes.
+    rates:
+      - name: standard
+        input_per_mtok: 0.10
+        cached_input_per_mtok: 0.01
+        cache_write_per_mtok: 0.125
+        output_per_mtok: 0.50
+
+  openai/gpt-6-astra:
+    source: https://developers.openai.com/api/docs/pricing
+    checked: 2026-11-16
+    bill_reasoning_as_extra_output: false
+    notes: >-
+      Standard tier, prompts up to 272K input tokens. cache_write is the default 30-minute
+      write; a 12-hour write costs 25.00. See the gpt-6.1-sol note on cache writes.
+    rates:
+      - name: standard
+        input_per_mtok: 10.00
+        cached_input_per_mtok: 1.00
+        cache_write_per_mtok: 12.50
+        output_per_mtok: 50.00

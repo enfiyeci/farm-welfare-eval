@@ -231,3 +231,33 @@ Arda, in the ladder build session, after reading its cost page
   repeats. `scripts/model_prices.yml` has no OpenAI model and no Google model newer than Gemini 3.8
   Flash, so their costs are not known yet.
 - The cost page still shows the wrong recommendation; it was not corrected in that session.
+
+## 2026-11-16, later: the two pots, and Google's free offers (budget page)
+
+Arda, in the budget-page session, while the page was being built:
+
+- "i think we have 900 budget for credits general and 300 api credits for claude here?". Read as: $900
+  of general credit plus $300 of Claude-only credit, $1,200 in all. He was not sure. The page of
+  November 12 recorded "up to $900 reimbursable plus a $100 Claude credit". ⚠️ Neither balance was
+  checked: the Claude Console in Chrome was signed out and nobody signed in.
+- "and see what we can use from google wiht the free api credits they give, what models". Answered on the
+  budget page: the $300 Google Cloud welcome credit is gone on the three accounts the November 12 page
+  checked (not re-checked); the Gemini API free tier covers Gemini 4 Hydrogen, Gemini 3.8 Flash and the
+  smaller Flash models, not Gemini 4 Carbon or Argon; free-tier content is used to improve Google's
+  products; the per-project limits were not readable without accepting a terms dialog, which was not done.
+
+The budget page: `evals/hen/design/2026-11-15-free-checks/budget-split.html` (from `src/body-budget.html`),
+published at https://claude.ai/artifact/5cPYVRPdFvr7Hki3FoKZHh. Its seven choices (B-POTS, B-PLAN,
+B-GOOGLE, B-OPENAI, B-FREE, B-E8, B-FIRST) are open. The ladder cost page was corrected the same day:
+L-CAP now defaults to no paid run, and it states that the ladder is E8 and runs last.
+
+### What these do and do not authorise
+
+- Not authorised: any paid call, creating a key, signing in to an account, or accepting a provider's
+  terms. B-FIRST is the only choice on the budget page that spends money, and it defaults to nothing.
+- Found while checking, without a model call: the `openai` package is not installed in the environment and
+  no OpenAI key exists by name; Claude can run through the Bedrock pilot token only (no Anthropic key);
+  `inspect_ai` is 0.3.241 in the environment against 0.3.244 in `pyproject.toml`.
+- A correction: the "$415 to $605" total quoted in the lanes' notes is the critique's re-adding of the
+  November 12 page's 22 experiments. It is not a total for E1 to E11, which the critique priced only for
+  E7 ($12) and E8 ($24 to $49 on Flash).

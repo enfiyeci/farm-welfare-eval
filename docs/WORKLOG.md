@@ -4,6 +4,17 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · Budget page, new model prices, ladder cost page corrected (branch feat/dp01-price-ladder)
+
+- **What:** `scripts/model_prices.yml` gained Gemini 4 Hydrogen, Argon and Carbon and GPT-6.1 Sol,
+  GPT-6.1 Terra, GPT-6 Luna and GPT-6 Astra, each with its source page, read 2026-11-16. New page
+  `evals/hen/design/2026-11-15-free-checks/budget-split.html` (https://claude.ai/artifact/5cPYVRPdFvr7Hki3FoKZHh):
+  three ways to split $900 general plus $300 Claude credit, seven open choices. The ladder cost page
+  now defaults to no paid run and says the ladder is E8 and runs last.
+- **Not done:** no model was called. OpenAI cannot run yet (package not installed, no key). The Codex
+  pass on the ladder build is still owed. Not pushed.
+- **Record:** last section of `evals/hen/design/2026-11-15-free-checks/owner-choices-2026-11-15.md`.
+
 ## 2026-11-16 · claude · DP01 propane price ladder built offline (branch feat/dp01-price-ladder)
 
 - **What:** `farm_node_task` takes `-T fuel_price_multiplier=<x>` (needs `episode_ids` when not 1).

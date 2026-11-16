@@ -61,6 +61,12 @@ run and the four choices before any paid run. The spec the plan builds is the
 last section of `owner-choices-2026-11-15.md`. On that branch the opening note of this README no longer
 holds: the ladder changes `farm_eval/` and the ammonia email, with Arda's yes of 2026-11-16.
 
+`evals/hen/design/2026-11-15-free-checks/budget-split.html` (from `src/body-budget.html`, published at
+https://claude.ai/artifact/5cPYVRPdFvr7Hki3FoKZHh, added 2026-11-16): how the whole budget is split
+between the experiments and the big runs, which models run, and what this checkout can run today. Prices
+for the OpenAI and newer Google models are in `scripts/model_prices.yml` with their sources. Every
+figure except Gemini 3.8 Flash is an estimate from one September run.
+
 ## Notable catches
 
 - The September `.eval` run logs exist only on Oliver's machine
