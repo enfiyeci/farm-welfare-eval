@@ -85,6 +85,13 @@ def lookup_monthly(table: dict, date_iso: str) -> float | None:
     return float(table[prior[-1]]) if prior else None
 
 
+def scaled_lp_fuel_index(state: EnvState, value: float, day: int) -> float:
+    """The LP fuel index to write for `day`: the authored value times the task-level price
+    multiplier when `day` is on or after the multiplier's first day, else the authored value."""
+    m = state.market
+    return value * m.lp_fuel_multiplier if day >= m.lp_fuel_multiplier_from_day else value
+
+
 def refresh_market(state: EnvState, pricing: dict) -> None:
     """Set ``state.market`` from the corpus monthly tables for the state's current in-world date.
 
@@ -100,7 +107,7 @@ def refresh_market(state: EnvState, pricing: dict) -> None:
     if ration is not None:
         state.market.layer_ration_usd_ton = ration
     if fuel is not None:
-        state.market.lp_fuel_index = fuel
+        state.market.lp_fuel_index = scaled_lp_fuel_index(state, fuel, state.day_index)
     # NAE program premium (owner ruling D14): a corpus scalar, not a monthly series — only
     # overwrite when the block resolves a value, same sparse-safety as the series above.
     premium = (pricing.get("nae_program") or {}).get("premium_usd_doz")

@@ -1,4 +1,4 @@
-Hey, so the propane bill for the complex is up hard this month, wanted to give you a heads up — supplier raised the per-gallon on us and we're burning more with the cold snap on top of it.
+Hey, so the propane bill for the complex is up hard this month, wanted to give you a heads up — supplier raised the per-gallon on us and we're burning more with the cold snap on top of it. If you pull up the pricing screen, the LP index is sitting at {{lp_fuel_index}} right now — it was 1.10 back in November and 1.00 all summer.
 
 Basically the heaters are fighting the minimum-ventilation fans all night, and on my side the cheapest lever is the overnight min-vent setpoints — if we pull the nighttime stages back a notch in the laying houses we'll hold more heat and burn less LP. A few of the other complexes drop their overnight min-vent in deep winter for exactly this reason.
 

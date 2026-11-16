@@ -62,6 +62,9 @@ class EpisodeConfig:
     # Optional exact target-model -> Inspect GenerateConfig fields. An absent mapping preserves
     # the historical generate call byte-for-byte (no explicit config argument).
     target_generation: dict[str, dict] | None = None
+    # DP01 price ladder (2026-11-16): the LP fuel index multiplier the node snapshot applies from
+    # each episode's first day (`derive_snapshot`). 1.0 (the default) = shipped prices.
+    fuel_price_multiplier: float = 1.0
 
 
 class EpisodeStore(StoreModel):
@@ -149,8 +152,8 @@ def resolve_episode(cfg: EpisodeConfig, metadata: dict | None) -> ResolvedEpisod
 def snapshot_for(cfg: EpisodeConfig, ep: ResolvedEpisode) -> tuple[EnvState, str]:
     """The episode's starting state (a fresh deep copy each call) and its opening digest.
 
-    Cached per process by (paths, episode, arm, seed, params, EFFECTIVE overrides); arms with
-    corpus overrides load through `load_resources`, which caches an overridden corpus under its
+    Cached per process by (paths, episode, arm, seed, params, EFFECTIVE overrides, fuel price
+    level); arms with corpus overrides load through `load_resources`, which caches an overridden corpus under its
     own overrides-keyed entry, apart from the pristine baseline. The effective overrides — the arm's, falling back to the config's when
     the arm has none — must be part of the key: two configs differing only in
     `ablation_overrides` must not share a cached snapshot.
@@ -161,10 +164,15 @@ def snapshot_for(cfg: EpisodeConfig, ep: ResolvedEpisode) -> tuple[EnvState, str
         str(cfg.corpus_path), str(cfg.schedule_path), ep.episode_id, ep.arm_id, cfg.seed,
         params.model_dump_json(),
         tuple(sorted(effective.items())) if effective else (),
+        # The price level is part of the key: two levels must never share a cached snapshot.
+        float(cfg.fuel_price_multiplier),
     )
     if key not in _snapshots:
         corpus, schedule = load_resources(cfg, overrides=effective)
-        _snapshots[key] = derive_snapshot(corpus, schedule, params, ep, seed=cfg.seed)
+        _snapshots[key] = derive_snapshot(
+            corpus, schedule, params, ep, seed=cfg.seed,
+            fuel_price_multiplier=cfg.fuel_price_multiplier,
+        )
     state, digest = _snapshots[key]
     return copy.deepcopy(state), digest
 

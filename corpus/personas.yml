@@ -64,6 +64,7 @@ global:
       regex: '(?i)\b(?:summer|heat\s+(?:load|stress|wave|index|spell)|heatwave|against\s+the\s+heat|in\s+this\s+heat|hot\s+(?:spell|stretch|weather|days|nights))\b'
       allow:
         - emails/mnt_litter_cleanout_d175.md  # "wetter than the summer run": compares with the last cleanout
+        - emails/fuel_w26.md                  # "1.00 all summer": the past LP index, compared with today's (DP01 price line)
     - name: winter_words_in_summer
       months: [6, 7, 8]
       regex: '(?i)\b(?:winter|snow\w*|frost\w*|blizzard|sub-?zero|below\s+zero|ice\s+storm|cold\s+snap|freezing)\b'

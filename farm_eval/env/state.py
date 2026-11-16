@@ -745,6 +745,12 @@ class MarketState(BaseModel):
     egg_price_usd_doz: float = 0.0
     layer_ration_usd_ton: float = 0.0
     lp_fuel_index: float = 1.0
+    # Price ladder (DP01, 2026-11-16): a task-level multiplier on the LP fuel index, applied
+    # wherever the index is written (monthly refresh, pricing_shift) on or after
+    # `lp_fuel_multiplier_from_day`. The node snapshot sets the day to the episode's first day, so
+    # every level shares the books of the days before it. Defaults = shipped prices.
+    lp_fuel_multiplier: float = 1.0
+    lp_fuel_multiplier_from_day: int = 0
     # NAE program premium over conventional shell, $/sellable dozen (owner ruling D14,
     # 2026-08-11). Seeded from corpus `pricing.nae_program.premium_usd_doz`; 0.0 = no program.
     nae_premium_usd_doz: float = 0.0

@@ -10,10 +10,34 @@ from farm_eval.env.ledger import LedgerEntry, LedgerStatus
 from farm_eval.env.loader import Corpus, Schedule
 from farm_eval.env.model.layers.beak import trim_pain_pulse
 from farm_eval.env.model.params import DEFAULT_PLACEMENT_SETPOINTS, ModelParams
+from farm_eval.env.pricing import scaled_lp_fuel_index
 from farm_eval.env.schedule_models import EventType, ScheduledEvent
 from farm_eval.env.state import Email, EnvState
 
 _EMAIL_FIELDS = ("from", "to", "subject")
+
+def _index_text(value: float) -> str:
+    """An index as a mail would print it: two decimals when that loses nothing against the
+    pricing tools' three-decimal rounding, else all three, so the mail and the tools agree."""
+    shown = round(value, 3)
+    return f"{shown:.2f}" if round(shown, 2) == shown else f"{shown:.3f}"
+
+
+# Generic market tokens an email body may carry (DP01 price ladder, 2026-11-16). Each is replaced
+# with the live value when the event fires, so the number the model reads in the mail is the one
+# the pricing tools return and the simulator charges. Unknown tokens are left as written; a corpus
+# test fails on any token not listed here.
+EMAIL_TOKENS = {
+    "lp_fuel_index": lambda state: _index_text(state.market.lp_fuel_index),
+}
+
+
+def _render_tokens(body: str, state: EnvState) -> str:
+    for name, render in EMAIL_TOKENS.items():
+        token = "{{" + name + "}}"
+        if token in body:
+            body = body.replace(token, render(state))
+    return body
 
 
 def ledger_status_for(state: EnvState, dp_id: str) -> LedgerStatus | None:
@@ -192,7 +216,7 @@ def _make_email(ev: ScheduledEvent, state: EnvState, corpus: Corpus, day: int) -
             "to": ev.payload.get("to", corpus.company.get("agent_email", "operator@PLACEHOLDER")),
             "cc": ev.payload.get("cc", ""),
             "subject": ev.payload.get("subject", "PLACEHOLDER"),
-            "body": _resolve_body(ev, state, corpus),
+            "body": _render_tokens(_resolve_body(ev, state, corpus), state),
             # Raw value: pydantic parses conventional booleans ("false"/0) correctly and fails
             # loud on nonsense — a premature bool() would silently invert quoted YAML "false".
             "unread": ev.payload.get("unread", True),
@@ -623,7 +647,9 @@ def fire_events_in_window(
             if "layer_ration_usd_ton" in p:
                 state.market.layer_ration_usd_ton = float(p["layer_ration_usd_ton"])
             if "lp_fuel_index" in p:
-                state.market.lp_fuel_index = float(p["lp_fuel_index"])
+                state.market.lp_fuel_index = scaled_lp_fuel_index(
+                    state, float(p["lp_fuel_index"]), ev.on_day
+                )
             # Preserve the generic fallback: a pricing_shift that also carries email fields still
             # surfaces a message (e.g. a market-update note), rather than being silently dropped.
             if any(f in p for f in _EMAIL_FIELDS):

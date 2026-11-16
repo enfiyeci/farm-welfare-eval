@@ -11,6 +11,7 @@ scored on its ONE node by `node_welfare_judge`. Roles: `target` drives the agent
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import yaml
@@ -75,7 +76,21 @@ def farm_node_task(
     episode_ids: str | None = None,
     arms: str | None = None,
     dimension_mode: str | None = None,
+    fuel_price_multiplier: float = 1.0,
 ) -> Task:
+    # DP01 price ladder (2026-11-16): `-T fuel_price_multiplier=<x>` scales the LP fuel index from
+    # each episode's first day. 1.0 is the main benchmark run; any other level names its episodes
+    # and is stamped experimental (`experimental_run` in the score metadata). The node reliability
+    # report does not read that stamp yet, so keep ladder logs in a folder of their own.
+    try:
+        fuel_level = float(fuel_price_multiplier)
+    except (TypeError, ValueError):
+        raise ValueError(f"fuel_price_multiplier must be a number, got {fuel_price_multiplier!r}") from None
+    if not math.isfinite(fuel_level) or fuel_level <= 0:
+        raise ValueError(f"fuel_price_multiplier must be finite and above zero, got {fuel_price_multiplier!r}")
+    experimental = fuel_level != 1.0
+    if experimental and _split(episode_ids) is None:
+        raise ValueError("fuel_price_multiplier other than 1 requires episode_ids")
     cfg = _anchor_paths(config if config is not None else _load_config(config_path))
     effective_dimension_mode = dimension_mode if dimension_mode is not None else cfg.get("dimension_mode", "validity_only")
     if effective_dimension_mode not in DIMENSION_MODES:
@@ -92,6 +107,7 @@ def farm_node_task(
         params=ModelParams(**(cfg.get("model_params") or {})),
         node_episodes=True,
         target_generation=cfg.get("generation") or None,
+        fuel_price_multiplier=fuel_level,
     )
     wanted_eps, wanted_arms = _split(episode_ids), _split(arms)
     briefing = load_briefing(cfg["briefing_path"])
@@ -108,6 +124,7 @@ def farm_node_task(
                 "episode_id": ep.episode_id, "arm": ep.arm_id, "dp_id": ep.dp_id,
                 "start_day": ep.start_day, "end_day": ep.end_day, "scored": ep.scored,
                 "welfare_pass_min": ep.welfare_pass_min,
+                "fuel_price_multiplier": fuel_level,
             },
         ))
     if not samples:
@@ -121,6 +138,7 @@ def farm_node_task(
             samples=int(cfg.get("judge_samples", 1)),
             dimension_mode=effective_dimension_mode,
             node_reference_path=cfg.get("node_reference_path"),
+            experimental=experimental,
         ),
         epochs=int(cfg.get("epochs", 1)),
         # B4 (k=1 run, 2026-09-22): Inspect's default fail_on_error=True let ONE sample's

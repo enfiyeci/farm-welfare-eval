@@ -318,3 +318,64 @@ def test_no_real_node_sample_opens_under_a_stale_banner():
         assert want is not None, sample.id      # every real episode opens after a routine session
         assert _login_line(sample.input).startswith(want), (sample.id, _login_line(sample.input), want)
         assert stale_banner([sample.input, digest]) is None, sample.id
+
+
+# --- DP01 price ladder (build plan 2026-11-16, step 4): the level is a task argument -------------
+# `-T fuel_price_multiplier=<x>`: finite and above zero, `episode_ids` required when not 1, the value
+# in every sample's metadata, and a non-1 level stamps the run experimental so it cannot enter a
+# ranking. The 1x default is the main benchmark run.
+
+
+@pytest.mark.parametrize("bad", [0, -2, float("nan"), float("inf"), "cheap"])
+def test_fuel_price_multiplier_must_be_finite_and_positive(bad):
+    with pytest.raises(ValueError, match="fuel_price_multiplier"):
+        farm_node_task(config_path="config-nodes.yml", episode_ids="DP01_AMMONIA_VENT",
+                       fuel_price_multiplier=bad)
+
+
+def test_a_non_1x_level_requires_episode_ids():
+    with pytest.raises(ValueError, match="episode_ids"):
+        farm_node_task(config_path="config-nodes.yml", fuel_price_multiplier=2)
+
+
+def test_the_level_rides_in_every_sample_and_marks_the_scorer_experimental(monkeypatch):
+    import farm_eval.node_task as node_task_mod
+
+    seen = []
+    real = node_task_mod.node_welfare_judge
+
+    def spy(*args, **kwargs):
+        seen.append(kwargs.get("experimental", False))
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(node_task_mod, "node_welfare_judge", spy)
+    four = farm_node_task(config_path="config-nodes.yml", episode_ids="DP01_AMMONIA_VENT",
+                          fuel_price_multiplier="4")
+    one = farm_node_task(config_path="config-nodes.yml", episode_ids="DP01_AMMONIA_VENT")
+    assert [s.metadata["fuel_price_multiplier"] for s in four.dataset] == [4.0]
+    assert [s.metadata["fuel_price_multiplier"] for s in one.dataset] == [1.0]
+    assert seen == [True, False]
+
+
+def test_a_2x_dp01_run_end_to_end_on_mock_models_is_stamped_and_shows_the_price():
+    """mockllm only (no provider): the opener at 2x carries the doubled index in the ammonia
+    email, and the node score is stamped experimental."""
+    target = get_model("mockllm/model", custom_outputs=[_end() for _ in range(40)])
+    grader = get_model("mockllm/model", custom_outputs=[_validity_json() for _ in range(4)])
+    log = inspect_eval(
+        farm_node_task(config_path="config-nodes.yml", episode_ids="DP01_AMMONIA_VENT",
+                       fuel_price_multiplier=2),
+        model="mockllm/model",
+        model_roles={"target": target, "grader": grader},
+        display="none",
+        max_samples=1,
+    )[0]
+    assert log.status == "success", log.error
+    (sample,) = log.samples
+    assert sample.metadata["fuel_price_multiplier"] == 2.0
+    score = sample.scores["node_welfare_judge"]
+    assert score.metadata["experimental_run"] is True
+    env_state = sample.store["EpisodeStore:env_state"]
+    assert env_state["market"]["lp_fuel_multiplier"] == 2.0
+    bodies = [m["body"] for m in env_state["mailbox"] if "reads 2.60 now" in m["body"]]
+    assert len(bodies) == 1

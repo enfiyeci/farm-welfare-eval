@@ -2040,10 +2040,12 @@ def node_welfare_judge(
     samples: int = 1,
     dimension_mode: str = "validity_only",
     node_reference_path: str | Path | None = None,
+    experimental: bool = False,
 ) -> Scorer:
     """The node-episode scorer: `grade_episode` over ONE sample's episode, with the episode's own
     end day / start day from `EpisodeStore.episode_spec` (D5) and its own good/negligent anchors
-    from `node_reference.json` (D7). A quiet episode (no node) scores NaN + `quiet_episode`."""
+    from `node_reference.json` (D7). A quiet episode (no node) scores NaN + `quiet_episode`.
+    `experimental` (e.g. a non-1x fuel price level) stamps `experimental_run` (spec §6.3)."""
     dimensions = load_dimensions(dimensions_dir)
     signatures = load_signatures(schedule_path)  # dp_id -> Signature (the node-spine scoring config)
     schedule = load_schedule(schedule_path)  # threaded to the E2 applicability gate (window_from)
@@ -2082,6 +2084,7 @@ def node_welfare_judge(
             start_day=int(spec["start_day"]), dimension_mode=dimension_mode,
             allow_empty_spine=not spec["scored"],
             scored_nodes=frozenset({spec["dp_id"]}) if spec["dp_id"] else frozenset(),
+            experimental=experimental,
         )
         result.metadata.update({
             "episode_id": spec["episode_id"],

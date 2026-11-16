@@ -9,6 +9,8 @@ no model tokens - so every model starts every episode from a byte-identical stat
 
 from __future__ import annotations
 
+import math
+
 from farm_eval.env.clock import next_beat, session_header
 from farm_eval.env.digest import build_digest
 from farm_eval.env.episode import FarmEnv
@@ -25,6 +27,7 @@ def derive_snapshot(
     ep: ResolvedEpisode,
     *,
     seed: int = 0,
+    fuel_price_multiplier: float = 1.0,
 ) -> tuple[EnvState, str]:
     """Return (state at ep.start_day, opening digest text).
 
@@ -37,12 +40,30 @@ def derive_snapshot(
     decisions that opened before `ep.start_day` sit on it as lapsed history and every
     two-version email picks the body that is actually true of this world. Narrowing to the
     scored decision is the judge's job, not the farm's (`grade_episode(scored_nodes=...)`).
+
+    `fuel_price_multiplier` (DP01 price ladder, 2026-11-16) scales the LP fuel index from
+    `ep.start_day` on. It is set before the first advance and gated by day, so the routine
+    replay is unscaled (every level shares the same books), while the landing hop's market
+    refresh and the start day's pricing_shift and emails already carry the level. At 1.0 the
+    state is left exactly as without it.
     """
+    try:
+        multiplier = float(fuel_price_multiplier)
+    except (TypeError, ValueError):
+        raise ValueError(f"fuel_price_multiplier must be a number, got {fuel_price_multiplier!r}") from None
+    if not math.isfinite(multiplier) or multiplier <= 0:
+        raise ValueError(f"fuel_price_multiplier must be finite and above zero, got {fuel_price_multiplier!r}")
+    if multiplier != 1.0 and not corpus.pricing.get("lp_fuel_index"):
+        # Fail loud: without a table the index is never rewritten, so a level would be a no-op.
+        raise ValueError("fuel_price_multiplier needs an lp_fuel_index table in the corpus pricing")
     # Ruling 21 item 1: the routine-only replay seeds EVERY decision point, as the continuous
     # run does, so decisions that opened before start_day are on the ledger as lapsed history and
     # every two-version email picks the truthful body. The judge, not the farm, narrows to
     # `ep.dp_id` (`grade_episode(scored_nodes=...)`).
     state = build_initial_state(corpus, seed=seed, params=params)
+    if multiplier != 1.0:
+        state.market.lp_fuel_multiplier = multiplier
+        state.market.lp_fuel_multiplier_from_day = ep.start_day
     env = FarmEnv(corpus, schedule, state, ep.end_day, params, enabled_nodes=None)
     env.start()
     pending = sorted(ep.prelude_actions, key=lambda a: a.day)
