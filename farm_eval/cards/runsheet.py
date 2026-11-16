@@ -18,7 +18,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from farm_eval.cards.loader import Bank, CardBankError, parse_price, read_yaml
-from farm_eval.cards.render import render
+from farm_eval.cards.render import planted_value, render
 
 COLUMNS = ["row_id", "experiment", "card_id", "arm_id", "phrasing_id", "order", "price_form",
            "price_per_unit", "framing_id", "repeat", "text_status"]
@@ -113,6 +113,7 @@ def build_rows(bank: Bank, experiments: ExperimentsFile, experiment_id: str) -> 
     rows: list[dict] = []
     for cell in cells:
         card = bank.cards[cell["card_id"]]
+        planted_value(card, bank.framings[cell["framing_id"]], cell["arm_id"])  # refuses a value set twice
         for price in (prices if card.is_priced else [""]):
             rendered = render(card, bank.framings[cell["framing_id"]], cell["arm_id"], cell["phrasing_id"],
                               cell["order"], cell["price_form"] or None, price or None)

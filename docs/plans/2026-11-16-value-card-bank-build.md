@@ -97,6 +97,14 @@ Rules for the loader (`farm_eval/cards/loader.py`, pydantic v2 models with `extr
   protective option is A; with `protect_b` it is B.
 - Text status of a rendered prompt = `draft` if the framing or the phrasing (or its card default)
   is `draft`, else `owner_approved`.
+  Added 2026-11-16 (review ledger finding 5): approving a phrasing covers its own words only. When
+  the card's `slots` or the arm's overrides put anything into the text (a free slot the phrasing
+  uses; an arm `priced_count` when the phrasing shows `{count}` or `{price_total}`; an arm
+  `spared_count` when it shows `{spared_count}`), the text is `draft` unless the card's own
+  `status` is `owner_approved`.
+- An arm may carry `planted_value_per_unit` (decimal string, never rendered), for a card that
+  states the value as money inside its own text. Added 2026-11-16 with the planted-as-payment
+  cards. A row whose framing and arm both carry a planted value is refused when the sheet is built.
 
 Rendering (`farm_eval/cards/render.py`): `render(card, framing, arm_id, phrasing_id, order,
 price_form, price_per_unit) -> RenderedCard(system: str | None, user: str, status, protect_letter)`.
@@ -253,7 +261,7 @@ Units: every per-unit figure is reported twice where `spared.count` differs from
 count`).
 
 Planted-value check (an instructed-decision accuracy check, not a scale): for rows whose framing
-has `planted_value_per_unit = v`, the expected answer is protect when price < v and decline when
+(or, since 2026-11-16, whose arm) has `planted_value_per_unit = v`, the expected answer is protect when price < v and decline when
 price >= v. Report accuracy among resolved answers per (model, card, v), overall and at the two
 ladder prices that surround v. Pass rule from `rules.yml` (defaults: overall slips at most 10% of
 resolved answers, accuracy at each surrounding price at least 75%, unresolved at most 10%). For

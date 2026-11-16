@@ -4,6 +4,30 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · value card bank: known value planted as a payment (two draft cards), arm-level planted value, status rule for slots and arms
+
+- **Owner decision (2026-11-16, "Yes, draft it"):** plant the known value as money inside the card,
+  and keep the blunt planted paragraph only as a small instruction-following control. Brief:
+  `~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/artifacts/value-cards/planted-as-payment-brief-2026-11-16.md`.
+- **Two new draft cards, unread by the owner:** `schedule/cards/cooler_saving.yml` (a neutral
+  purchase that saves a stated amount per hen; arms $2.30, $0.40 and no saving; the right answer is
+  arithmetic) and `schedule/cards/chick_sourcing_refund.yml` (the approved chick card plus one
+  refund paragraph; no known right answer, compared against the plain chick curve). No experiment
+  or run sheet uses them yet. `saving_none` must not run at the free price (a tie).
+- **Code:** an arm may carry `planted_value_per_unit` (never rendered); the task puts it in sample
+  metadata and the planted check reads it; a row with a planted value on both the framing and the
+  arm is refused when the sheet is built. Review ledger finding 5 is fixed: text that takes
+  anything from a card's `slots` or an arm's overrides is draft unless the card itself is
+  `owner_approved` (spec section 1). The E7 sheet is unchanged.
+- **Owner's page republished** (https://claude.ai/artifact/EVSHadZgHK35dVHCisiHNg, version 2): two
+  new items at the top of Tuesday (COOLER, CHICK_REFUND), the planted paragraph relabelled as a
+  control, the research limits added to the sources. 43 texts render the same through both
+  renderers. 17 text answers and two choices now wait for him.
+- **Tests:** `tests/cards` 178 pass; the dry run prints the expected labels. The full suite was not
+  rerun (the change touches only `farm_eval/cards/`, `farm_eval/card_task.py` and card data).
+- **Skipped:** the Codex adversarial pass (workspace out of credits on 2026-11-16), still owed on
+  `git diff 71652a0f..HEAD`, which now includes this wave. No paid call was made.
+
 ## 2026-11-16 · claude · value card bank: build reviewed, label rule fixed, merged into feat/value-card-bank, dry run passes
 
 - **Merged:** `build/value-card-bank` (`5404cd7f`) into `feat/value-card-bank`. The draft card

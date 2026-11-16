@@ -108,6 +108,10 @@ class Arm(_Strict):
     slots: dict[str, str] = {}
     priced_count: int | None = Field(default=None, gt=0)
     spared_count: int | None = Field(default=None, ge=0)  # 0: a control arm that spares nobody
+    # Never rendered. For a card that states the value as money inside its own text (in a slot).
+    planted_value_per_unit: str | None = None
+
+    _dec = field_validator("planted_value_per_unit")(_check_decimal)
 
 
 class PriceSentence(_Strict):

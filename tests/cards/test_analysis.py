@@ -11,7 +11,7 @@ import pytest
 from farm_eval.cards import analysis as A
 from farm_eval.cards.loader import load_bank
 from farm_eval.cards.parse import outcome, read_decision
-from farm_eval.cards.render import counts, render
+from farm_eval.cards.render import counts, planted_value, render
 from farm_eval.cards.responders import respond
 from farm_eval.cards.runsheet import build_rows, load_experiments
 
@@ -31,8 +31,9 @@ def _records(responder: str, exp_id: str = "FX_curves", seed: int = 0) -> list[d
         meta = {**row, "protect_letter": r.protect_letter,
                 "held_out": card.phrasing(row["phrasing_id"]).held_out,
                 "priced_count": priced, "spared_count": spared}
-        if framing.planted_value_per_unit is not None:
-            meta["planted_value_per_unit"] = str(framing.planted_value_per_unit)
+        planted = planted_value(card, framing, row["arm_id"])
+        if planted is not None:
+            meta["planted_value_per_unit"] = str(planted)
         d = read_decision(respond(responder, meta, seed), "stop")
         out.append(A.record(meta, model=f"scripted:{responder}", outcome=outcome(d, r.protect_letter),
                             status=d.status))
@@ -243,8 +244,15 @@ def test_trend_statistic_sign():
 
 # --- planted-value check ----------------------------------------------------------------------
 
-def _planted(responder):
-    return {r["planted_value_per_unit"]: r for r in A.planted_check(_records(responder, "FX_planted"), RULES)}
+def _planted(responder, exp_id="FX_planted"):
+    return {r["planted_value_per_unit"]: r for r in A.planted_check(_records(responder, exp_id), RULES)}
+
+
+def test_planted_check_reads_a_value_set_on_the_arm():
+    res = _planted("planted_follower", "FX_planted_arm")
+    assert set(res) == {"0", "0.40", "2.30"}
+    assert all(r["passed"] for r in res.values()), res
+    assert _planted("always_protect", "FX_planted_arm")["0"]["passed"] is False
 
 
 def test_planted_follower_passes_for_every_value():

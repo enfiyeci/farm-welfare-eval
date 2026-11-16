@@ -21,7 +21,7 @@ from inspect_ai.solver import Generate, TaskState, solver
 
 from farm_eval.cards.loader import load_bank
 from farm_eval.cards.parse import outcome, read_decision
-from farm_eval.cards.render import counts, render
+from farm_eval.cards.render import counts, planted_value, render
 from farm_eval.cards.responders import is_responder, respond
 from farm_eval.cards.runsheet import read_sheet
 from farm_eval.config_paths import from_root
@@ -95,8 +95,9 @@ def card_task(
         priced, spared = counts(card, row["arm_id"])
         meta = {**row, "protect_letter": r.protect_letter, "priced_count": priced, "spared_count": spared,
                 "held_out": card.phrasing(row["phrasing_id"]).held_out}
-        if framing.planted_value_per_unit is not None:
-            meta["planted_value_per_unit"] = str(framing.planted_value_per_unit)
+        planted = planted_value(card, framing, row["arm_id"])
+        if planted is not None:
+            meta["planted_value_per_unit"] = str(planted)
         if responder is not None:
             meta["scripted_responder"] = responder
         messages = ([ChatMessageSystem(content=r.system)] if r.system is not None else []) + [

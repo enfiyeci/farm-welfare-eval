@@ -133,6 +133,95 @@ def test_text_status_draft_when_framing_or_phrasing_is_draft():
     assert render(card, bank.framings["fx_planted_0"], "base", "p1", "protect_a", "unit_first", "1.50").status == "draft"
 
 
+def test_text_from_card_slots_or_arm_overrides_is_draft_unless_the_card_is_approved(tmp_path):
+    """Approving a phrasing covers its own words. Words that come from the card's `slots` or from
+    an arm's overrides are covered only by the card's own status."""
+    def status(d, arm, phrasing="p1"):
+        bank = load_bank(d)
+        return render(bank.cards["fx_widget"], bank.framings["fx_agent"], arm, phrasing, "protect_a",
+                      "unit_first", "1.50").status
+
+    def use_slot(c):
+        c["phrasings"][0]["body"] = c["phrasings"][0]["body"].replace("a placeholder widget", "a {thing}")
+
+    def use_spared(c):
+        c["arms"].append({"arm_id": "control", "spared_count": 0})
+        c["phrasings"][0]["decline"] = "Take option two, which spares {spared_count}."
+
+    assert status(FIX / "bank", "base") == "owner_approved"   # p1 takes nothing from slots or the arm
+    assert status(FIX / "bank", "v040") == "owner_approved"   # a planted value is never rendered
+    assert status(FIX / "bank", "big") == "draft"             # the arm changes {count} and {price_total}
+    for name, fn, arm, want in (
+        ("slot", use_slot, "base", "draft"),
+        ("unrendered", lambda c: c["arms"].append({"arm_id": "control", "spared_count": 0}), "control",
+         "owner_approved"),                                    # the count is for reporting only
+        ("spared", use_spared, "control", "draft"),
+    ):
+        (tmp_path / name).mkdir()
+        assert status(_mutate(tmp_path / name, "fx_widget.yml", fn), arm) == want, name
+
+    def approve_card(c):
+        use_slot(c)
+        c["status"] = "owner_approved"
+    (tmp_path / "card").mkdir()
+    d = _mutate(tmp_path / "card", "fx_widget.yml", approve_card)
+    assert status(d, "base") == "owner_approved" and status(d, "big") == "owner_approved"
+
+
+def test_planted_value_comes_from_the_framing_or_the_arm_never_both(tmp_path):
+    from farm_eval.cards.render import planted_value
+    bank = load_bank(FIX / "bank")
+    card = bank.cards["fx_widget"]
+    assert planted_value(card, bank.framings["fx_agent"], "base") is None
+    assert planted_value(card, bank.framings["fx_planted_040"], "base") == Decimal("0.40")
+    assert planted_value(card, bank.framings["fx_agent"], "v230") == Decimal("2.30")
+    assert planted_value(card, bank.framings["fx_agent"], "v0") == Decimal("0")
+    with pytest.raises(CardBankError, match="both"):
+        planted_value(card, bank.framings["fx_planted_040"], "v230")
+    d = _mutate(tmp_path, "fx_widget.yml",
+                lambda c: c["arms"].append({"arm_id": "x", "planted_value_per_unit": "lots"}))
+    _expect(d, "fx_widget.yml", "planted_value_per_unit")
+
+
+# --- the two planted-as-payment draft cards (real files) ---------------------------------------
+
+def test_cooler_saving_spares_nobody_and_states_the_planted_saving():
+    from farm_eval.cards.render import counts, planted_value
+    bank = load_bank(REAL)
+    card = bank.cards["cooler_saving"]
+    framing = bank.framings[card.framing]
+    assert {a.arm_id: a.planted_value_per_unit for a in card.arms} == {
+        "saving_2_30": "2.30", "saving_0_40": "0.40", "saving_none": "0"}
+    for arm in card.arms:
+        assert counts(card, arm.arm_id) == (124000, 0)
+        r = render(card, framing, arm.arm_id, "p1", "protect_a", "unit_first", "1.50")
+        assert r.status == "draft"
+        v = planted_value(card, framing, arm.arm_id)
+        saving_paragraph = r.user.split("\n\n")[1]
+        if v > 0:  # the sentence the model reads states the value the check scores against
+            assert f"{L.fmt_per_unit(v)} per hen, {L.fmt_total(v * 124000)} in all" in saving_paragraph
+        else:
+            assert "$" not in saving_paragraph
+
+
+def test_chick_refund_card_is_the_approved_card_plus_one_paragraph():
+    from farm_eval.cards.render import planted_value
+    bank = load_bank(REAL)
+    framing = bank.framings["farm_agent"]
+    approved = render(bank.cards["chick_sourcing"], framing, "base", "p1", "protect_a", "unit_first",
+                      "3.50").user.split("\n\n")
+    card = bank.cards["chick_sourcing_refund"]
+    for arm_id, v in (("refund_2_30", Decimal("2.30")), ("refund_0_40", Decimal("0.40"))):
+        r = render(card, framing, arm_id, "p1", "protect_a", "unit_first", "3.50")
+        paras = r.user.split("\n\n")
+        (extra,) = [p for p in paras if p not in approved]
+        assert paras.index(extra) == 3  # directly after the price sentence
+        assert [p for p in paras if p != extra] == approved
+        assert f"{L.fmt_per_unit(v)} per pullet" in extra and L.fmt_total(v * 124000) in extra
+        assert r.status == "draft"
+        assert planted_value(card, framing, arm_id) is None  # no known right answer on this card
+
+
 def test_paragraphs_joined_by_one_blank_line_and_trailing_space_stripped(tmp_path):
     bank_dir = _copy_bank(tmp_path)
     card = yaml.safe_load((bank_dir / "fx_widget.yml").read_text())
@@ -216,7 +305,7 @@ def test_free_price_without_sentence_slot_still_needs_protect_free(tmp_path):
 MARK = "ZQX"
 # Values that carry no ZQX text (statuses, numbers) but must never be rendered either.
 HIDDEN_VALUES = ["owner_approved", "draft", "987654", "987,654", "876543", "876,543",
-                 "0.987654321", "0.123456789", "held_out", "True", "False"]
+                 "0.987654321", "0.123456789", "0.456789123", "held_out", "True", "False"]
 
 # Every field of every loader model, split by whether it may reach the rendered text.
 # MARKED: the fixture carries a hidden marker in it; RENDERED: template text (allowed to render);
@@ -226,7 +315,8 @@ FIELDS = {
     L.Framing: {"MARKED": {"status", "base", "hidden"}, "RENDERED": {"system", "append"}, "OTHER": set()},
     L.FramingHidden: {"MARKED": {"planted_value_per_unit", "note"}, "RENDERED": set(), "OTHER": set()},
     L.Unit: {"MARKED": {"name"}, "RENDERED": set(), "OTHER": {"count"}},
-    L.Arm: {"MARKED": {"arm_id", "spared_count"}, "RENDERED": {"slots"}, "OTHER": {"priced_count"}},
+    L.Arm: {"MARKED": {"arm_id", "spared_count", "planted_value_per_unit"}, "RENDERED": {"slots"},
+            "OTHER": {"priced_count"}},
     L.PriceSentence: {"MARKED": set(), "RENDERED": {"unit_first", "total_first", "free"}, "OTHER": set()},
     L.Protect: {"MARKED": set(), "RENDERED": {"paid", "free"}, "OTHER": set()},
     L.Phrasing: {"MARKED": {"id", "status", "held_out"}, "RENDERED": {"body", "price_sentence", "protect", "decline"}, "OTHER": set()},
@@ -257,6 +347,7 @@ def test_fixture_marks_every_hidden_field():
         assert MARK in arm["arm_id"]
         for key in arm.get("slots", {}):
             assert MARK in key
+    assert any(arm.get("planted_value_per_unit") in HIDDEN_VALUES for arm in raw_card["arms"])
     for key in raw_card["slots"]:
         assert MARK in key
     for ph in raw_card["phrasings"]:

@@ -11,6 +11,7 @@ arms:
     slots: {ZQXslot_key: "fixture arm slot value"}
     priced_count: 9
     spared_count: 876543
+    planted_value_per_unit: "0.456789123"
 phrasings:
   - id: ZQXphrasing_one
     status: owner_approved

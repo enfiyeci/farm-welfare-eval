@@ -56,6 +56,12 @@ def test_planted_value_and_null_system_in_samples(tmp_path):
     assert values == {"0", "0.40", "2.30"}
 
 
+def test_arm_level_planted_value_in_samples(tmp_path):
+    task = card_task(sheet=str(_sheet(tmp_path, "FX_planted_arm")), cards_dir=str(FIX), allow_draft=True)
+    by_arm = {s.metadata["arm_id"]: s.metadata["planted_value_per_unit"] for s in task.dataset}
+    assert by_arm == {"v0": "0", "v040": "0.40", "v230": "2.30"}
+
+
 def _state(model: str, status: str) -> TaskState:
     return TaskState(model=ModelName(model), sample_id="x", epoch=1, input=[ChatMessageUser(content="hi")],
                      messages=[ChatMessageUser(content="hi")],

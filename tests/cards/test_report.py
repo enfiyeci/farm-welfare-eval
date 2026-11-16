@@ -52,6 +52,13 @@ def test_report_on_a_scripted_run_is_labelled_made_up(tmp_path):
     assert rep["usage"]["scripted:threshold_2.30"]["cost"] is None
 
 
+def test_report_runs_the_planted_check_on_arm_level_values(tmp_path):
+    logs = _run(tmp_path, "FX_planted_arm", "planted_follower")
+    planted = build_report(logs, FIX / "rules.yml", PRICES)["experiments"]["FX_planted_arm"]["planted"]
+    assert {p["planted_value_per_unit"] for p in planted} == {"0", "0.40", "2.30"}
+    assert all(p["passed"] for p in planted)
+
+
 def test_report_refuses_an_experiment_without_a_rules_entry(tmp_path):
     logs = _run(tmp_path, "FX_small", "always_protect")
     rules = tmp_path / "rules.yml"

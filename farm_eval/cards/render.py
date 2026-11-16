@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from farm_eval.cards.loader import (
-    Card, CardBankError, ResolvedFraming, fmt_count, fmt_per_unit, fmt_total, normalise, parse_price,
-    slot_names,
+    BODY_SLOTS, Card, CardBankError, ResolvedFraming, fmt_count, fmt_per_unit, fmt_total, normalise,
+    parse_price, slot_names,
 )
 
 ORDERS = ("protect_a", "protect_b")
@@ -30,9 +30,33 @@ def counts(card: Card, arm_id: str) -> tuple[int, int]:
     return priced, spared
 
 
-def text_status(card: Card, framing: ResolvedFraming, phrasing_id: str) -> str:
-    draft = framing.status == "draft" or card.phrasing_status(phrasing_id) == "draft"
-    return "draft" if draft else "owner_approved"
+def planted_value(card: Card, framing: ResolvedFraming, arm_id: str) -> Decimal | None:
+    """The planted value of one row: set on the framing or on the arm, never both. Never rendered."""
+    arm_value = card.arm(arm_id).planted_value_per_unit
+    if arm_value is None:
+        return framing.planted_value_per_unit
+    if framing.planted_value_per_unit is not None:
+        raise CardBankError(f"card {card.card_id!r} arm {arm_id!r} under framing {framing.framing_id!r}: "
+                            "a planted value is set on both the framing and the arm")
+    return Decimal(arm_value)
+
+
+def text_status(card: Card, framing: ResolvedFraming, arm_id: str, phrasing_id: str) -> str:
+    """`draft` when the framing or the phrasing is draft. Approving a phrasing covers its own words
+    only: when the card's `slots` or the arm's overrides put anything into the text, the text is
+    draft unless the card's own status is `owner_approved`."""
+    if framing.status == "draft" or card.phrasing_status(phrasing_id) == "draft":
+        return "draft"
+    if card.status != "owner_approved":
+        arm = card.arm(arm_id)
+        used: set[str] = set()
+        for template in card.templates(card.phrasing(phrasing_id)).values():
+            used |= slot_names(template)
+        if (used - BODY_SLOTS  # a value from the card's or the arm's `slots`
+                or (arm.priced_count is not None and used & {"count", "price_total"})
+                or (arm.spared_count is not None and "spared_count" in used)):
+            return "draft"
+    return "owner_approved"
 
 
 def render(
@@ -91,6 +115,6 @@ def render(
     return RenderedCard(
         system=framing.system,
         user=normalise(ph.body.format_map(body_values)),
-        status=text_status(card, framing, phrasing_id),
+        status=text_status(card, framing, arm_id, phrasing_id),
         protect_letter="A" if order == "protect_a" else "B",
     )

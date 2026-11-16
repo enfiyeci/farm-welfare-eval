@@ -19,6 +19,15 @@ experiments:
     framings: [fx_planted_0, fx_planted_040, fx_planted_230]
     prices: ladder
     repeats: 1
+  - id: FX_planted_arm
+    cards: [fx_widget]
+    arms: [v0, v040, v230]
+    phrasings: [p1, p2, p3, p4]
+    orders: [protect_a, protect_b]
+    price_forms: [unit_first]
+    framings: [fx_agent]
+    prices: ladder
+    repeats: 1
   - id: FX_small
     cards: [fx_widget]
     arms: [base, big]

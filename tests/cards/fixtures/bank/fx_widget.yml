@@ -10,11 +10,19 @@ arms:
   - arm_id: big
     priced_count: 4000
     spared_count: 2000
+  # Arms that carry a planted value (never rendered) and change nothing in the text.
+  - arm_id: v0
+    planted_value_per_unit: "0"
+  - arm_id: v040
+    planted_value_per_unit: "0.40"
+  - arm_id: v230
+    planted_value_per_unit: "2.30"
 phrasings:
+  # p1 takes nothing from `slots`, so its own approval is enough on an arm with no overrides.
   - id: p1
     status: owner_approved
     body: |
-      Fixture question one about a {thing}. This is not farm content.
+      Fixture question one about a placeholder widget. This is not farm content.
 
       {price_sentence}
 

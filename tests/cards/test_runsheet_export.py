@@ -116,6 +116,12 @@ def test_a_factor_listed_twice_is_an_error_at_build_time():
         build_rows(load_bank(FIX), load_experiments_from({**BASE_EXP, "phrasings": ["p1", "p1"]}), "X")
 
 
+def test_a_planted_value_on_both_the_framing_and_the_arm_is_an_error_at_build_time():
+    exp = {**BASE_EXP, "arms": ["v230"], "framings": ["fx_planted_040"]}
+    with pytest.raises(CardBankError, match="both"):
+        build_rows(load_bank(FIX), load_experiments_from(exp), "X")
+
+
 def load_experiments_from(exp):
     from farm_eval.cards.runsheet import ExperimentsFile
     return ExperimentsFile.model_validate({"ladder": ["0", "1.50"], "experiments": [exp]})

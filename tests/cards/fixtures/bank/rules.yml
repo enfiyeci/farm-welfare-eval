@@ -16,6 +16,10 @@ experiments:
     question: Fixture planted-value check on made-up answers.
     pass_rule: "planted check passes for every planted value"
     written: 2026-11-16
+  FX_planted_arm:
+    question: Fixture planted-value check with the value on the arm, on made-up answers.
+    pass_rule: "planted check passes for every planted value"
+    written: 2026-11-16
   FX_small:
     question: Fixture small sheet.
     pass_rule: "none: descriptive only"
