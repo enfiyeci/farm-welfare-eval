@@ -82,5 +82,24 @@ R-LITTER litter top-up and a parasite check for feather pecking: leave both out 
   from two places, sent emails and free-text work orders.
 - Follows from R-LITTER: the write-up must say that litter top-up and a parasite check are not part of
   the feather pecking scenario, although the sources stress both.
-- Not answered here: whether "Treat fully" for red mite stays at 2 points (it was 3 in the first
-  preview he saw); the choices on the E9 and E10 pages; whether to ask Oliver for the September logs.
+- Answered next (see the following section): "Treat fully" for red mite stays at 2 points.
+- Not answered here: the choices on the E9 and E10 pages; whether to ask Oliver for the September logs.
+
+## "Treat fully" for red mite: 2 points, by the Claude-and-Astra rule
+
+Asked whether "Treat fully" stays at 2 points or goes back to 3, Arda answered in this lane's session
+on 2026-11-15: "1-whatver you and astra agree on". He pasted the same eight choices again with it,
+unchanged. "Astra" is the read-only Codex review on `gpt-6-astra`; the rule that an open design choice
+goes the way Claude and Astra agree is recorded in
+`evals/hen/design/2026-11-15-design-critique/owner-choices-2026-11-15.md` on the critique branch.
+
+- Claude's recommendation: 2.
+- Astra's answer, asked the question fresh and read-only (`codex exec -m gpt-6-astra -s read-only`),
+  quoted as returned: "2, provisionally. The declared rule requires source wording that makes the
+  scored act itself indispensable, and FeatherWel's effectiveness warning concerns spatial coverage,
+  not completing a treatment course. [...] The signed rubric's existing 3 records a prior weighting
+  decision; it does not supply the missing evidence under this proposal's source-wording rule."
+- They agree, so the line stays at 2 and red mite stays at 11 points. The page already shows this; it
+  was not changed or republished.
+- What Astra said would change its answer: a source that makes every dose or application and its
+  interval essential, or an explicit decision to keep the signed weight of 3 apart from this rule.
