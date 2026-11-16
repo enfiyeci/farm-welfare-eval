@@ -58,3 +58,6 @@ A5: three numbers: notices, handles, weighs
   choice comes back to him. The sentence was short and may have been cut off, so this reading is
   narrow on purpose: it does not cover a spending cap, changes to what the model reads in episodes,
   or sending anything to anyone.
+- Confirmed by Arda in the critique session: asked "Is that reading right: go with whatever Claude
+  and Astra agree on for open design choices?", he answered "Yes, that's right". The limits stand:
+  no spending cap, no model-visible change and no outreach are covered by it.
