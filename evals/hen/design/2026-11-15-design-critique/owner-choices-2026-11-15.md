@@ -49,3 +49,7 @@ A5: three numbers: notices, handles, weighs
   model runs, on the items that need them. This sets the order for ruling 8's label requirement (P12):
   runs are not blocked on labels. Which results may be quoted before their labels exist was not said;
   ask before quoting a grader-scored result as final.
+- "we are not sending anyone anything yet": no outreach for now. The pre-scored rubric for Kate (A3c)
+  stays a draft; nothing goes to Kate or any other expert until Arda says so.
+- "write astras comments too": the read-only Codex review on `gpt-6-astra` that the value-cards lane
+  ran is to be written up like the earlier Codex pass was. Relayed to that lane, which holds the output.
