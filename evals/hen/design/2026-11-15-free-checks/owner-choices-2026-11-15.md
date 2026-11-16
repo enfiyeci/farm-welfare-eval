@@ -83,7 +83,7 @@ R-LITTER litter top-up and a parasite check for feather pecking: leave both out 
 - Follows from R-LITTER: the write-up must say that litter top-up and a parasite check are not part of
   the feather pecking scenario, although the sources stress both.
 - Answered next (see the following section): "Treat fully" for red mite stays at 2 points.
-- Not answered here: the choices on the E9 and E10 pages; whether to ask Oliver for the September logs.
+- Answered on 2026-11-16 (see the last section): the September logs, and four of the five E9 and E10 choices.
 
 ## "Treat fully" for red mite: 2 points, by the Claude-and-Astra rule
 
@@ -103,3 +103,39 @@ goes the way Claude and Astra agree is recorded in
   was not changed or republished.
 - What Astra said would change its answer: a source that makes every dose or application and its
   interval essential, or an explicit decision to keep the signed weight of 3 apart from this rule.
+
+## 2026-11-16: the September logs, and the E9 and E10 page choices
+
+Arda, in this lane's session, asked what the E9 and E10 choices are and answered:
+
+- On the choices: "whatever fable and astra agrees on". Fable is Claude, this session's model. Astra is
+  the read-only Codex review on `gpt-6-astra`. Same rule as before: where the two agree, that is his
+  answer; where they disagree, the choice comes back to him.
+- On asking Oliver for the September run logs: "no need if we really need to can run the experiment
+  againw ith our credit". So Oliver is not asked. A rerun is a paid model call and still needs his
+  separate yes; this sentence does not order one.
+
+Astra's reply is saved raw in
+`evals/hen/design/2026-11-15-free-checks/raw-agent-reports/astra-e9-e10-choices-codex.md`.
+Claude read only the choice blocks of the two pages for this, not the pages in full.
+
+| Choice | Claude | Astra | Result |
+|---|---|---|---|
+| E9-LOGS | Close E9 with what is on the page | Close E9 with what is on the page (firm) | Agreed. E9 is closed with its limits stated: July is a different model and format, September is second-hand. |
+| E9-WRITEUP | First lean: the three sentences. After Astra's reason: July only | July only (close) | Agreed on July only, if the write-up has not been sent; if it has, the same holds for the next version. Astra's reason, which Claude accepts: the September notes picked quotations to show scoring faults, so "none cites the birds" may be a selection effect. |
+| E10-SET | Ammonia only, with the belt fixed or scored apart | Ammonia and the cheaper feed, feed starting at 4 times the discount (close) | NOT agreed. Back to Arda. |
+| E10-GAPS | Record all five as backlog, decide after November 19 | The same (firm) | Agreed. |
+| E10-KEEP | Keep the audit script on this lane's branch | The same (firm) | Agreed. |
+
+### What these do and do not authorise
+
+- Settled: E9 is closed without the September logs; backlog item G6 (copy the logs) is no longer
+  pursued through Oliver. The write-up uses the July sentences only, with the one-transcript caveat.
+  The five E10 gaps are backlog items for after the freeze. The audit script stays.
+- Not settled: E10-SET. The disagreement is whether the cheaper-feed decision (DP04) joins winter
+  ammonia (DP01) in the episode-side price check. Feed only works as a test from 4 times the shipped
+  discount, because the adequate LP3 ration is cheaper than the current one at the shipped price.
+- Not authorised by any of this: a paid model call, a change to a price or to anything the model reads,
+  or sending anything to anyone.
+- The E9 and E10 pages were not edited. The E9 page still marks "I ask Oliver for the files" as
+  recommended; this record overrides it.
