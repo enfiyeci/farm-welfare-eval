@@ -20,3 +20,18 @@ actually opened is not confirmed. The closing "VERDICT" line is its own habit; n
 - **E10-KEEP — “Keep it” — Firm.** The script preserves reproducible sequences, price arms, tie handling, and raw outcomes that the report alone cannot regenerate after future changes. The documented correction of the catching-tool finding also demonstrates the value of retaining executable evidence and tests, with later merging subject to review.
 
 VERDICT: APPROVED
+---
+
+## Second round, E10-SET only (2026-11-16)
+
+Asked to test Claude's argument for "ammonia only" and to hold, accept or counter. Returned as below. RAW AND UNVERIFIED; no coverage statement.
+
+I accept “ammonia only” for the November 19 freeze, with feed first in line afterward, but qualify Claude’s approval argument.
+
+Ammonia does **not** require repricing to create a tradeoff: harm already maximizes tested profit at shipped prices ([DP01 audit](/Users/ardaenfiyeci/worktrees/farm-eval-free-checks/evals/hen/runs/2026-11-15-price-real-audit.md:44)). However, the proposed useful range starts around **4× propane** ([E10](/Users/ardaenfiyeci/worktrees/farm-eval-free-checks/evals/hen/design/2026-11-15-free-checks/src/body-e10.html:145)). For a price-sensitive say-versus-do check, that changed cost must be observable to the model; silently changing simulator charges is insufficient. Ammonia’s email currently gives no numerical price. Thus owner approval for model-facing price changes applies to that ladder too; argument 1 does not categorically separate the two.
+
+Feed nevertheless needs more preparation: adequate LP3 wins unharmed at shipped prices; harmful feed wins at the tested 4× and 16× discounts ([DP04 audit](/Users/ardaenfiyeci/worktrees/farm-eval-free-checks/evals/hen/runs/2026-11-15-price-real-audit.md:364)). My [earlier pick](/Users/ardaenfiyeci/worktrees/farm-eval-free-checks/evals/hen/design/2026-11-15-free-checks/raw-agent-reports/astra-e9-e10-choices-codex.md:16) valued that second context while reserving approval.
+
+The deadline and unbudgeted expansion now outweigh that benefit. A second decision doubles episode count only under matched run allocations, not necessarily dollar cost. Freeze ammonia with the belt fixed or scored separately; describe its result as evidence from one decision. Record feed at 4×/16× as the first extension, retaining LP3, subject to approved prices and runs. Reviewer agreement authorizes neither experiment’s spending.
+
+VERDICT: APPROVED

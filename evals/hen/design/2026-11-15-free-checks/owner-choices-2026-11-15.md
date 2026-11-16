@@ -139,3 +139,25 @@ Claude read only the choice blocks of the two pages for this, not the pages in f
   or sending anything to anyone.
 - The E9 and E10 pages were not edited. The E9 page still marks "I ask Oliver for the files" as
   recommended; this record overrides it.
+
+## 2026-11-16, later: E10-SET settled as ammonia only
+
+Told that E10-SET was the one choice Claude and Astra did not agree on, Arda answered in this lane's
+session: "whatever you and astra agree on". Read as: reach one answer between you if you honestly can.
+Claude put its argument to Astra in a second read-only round and asked it to hold, accept or counter.
+Astra's reply is appended to
+`evals/hen/design/2026-11-15-free-checks/raw-agent-reports/astra-e9-e10-choices-codex.md`.
+
+- Astra's position, quoted: "I accept "ammonia only" for the November 19 freeze, with feed first in
+  line afterward, but qualify Claude's approval argument."
+- Agreed answer: for the freeze, the episode-side price check covers winter ammonia (DP01) only, with
+  the manure belt fixed or scored apart. Its result is described as evidence from one decision. The
+  cheaper feed (DP04) is recorded as the first decision to add later, at 4 times and 16 times the
+  discount, with the LP3 ration kept.
+- Astra's correction to Claude, which Claude accepts: Claude argued that only feed needs a change to a
+  price the model reads. That does not separate the two. Ammonia's email gives no number today, and a
+  useful price ladder for ammonia starts near 4 times the propane price, which the model must be able
+  to see. So ammonia's ladder needs the owner's approval for a model-visible price as well. What does
+  separate them is that ammonia already has a trade-off at shipped prices and feed does not.
+- Not authorised by this: the ammonia price ladder itself, any paid run, or any change to what the
+  model reads. Each still needs Arda's separate yes.
