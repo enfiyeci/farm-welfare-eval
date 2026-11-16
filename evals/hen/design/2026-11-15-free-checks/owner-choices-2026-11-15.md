@@ -206,3 +206,28 @@ Arda, in this lane's session, three sentences:
 - No paid run starts until Arda sets a spending cap and says yes to the run itself.
 - The say-versus-do card in the value-cards lane must offer the same alternatives, information and time
   horizon as this task. That lane has to be told.
+
+## 2026-11-16, after the ladder was built: experiments first, and the whole budget
+
+Arda, in the ladder build session, after reading its cost page
+(`evals/hen/design/2026-11-15-free-checks/dp01-price-ladder-cost.html`), two sentences:
+
+- "i thought we would do experiments first that would decide our approach for the big runs". This is
+  his recorded order (EXP in `evals/hen/design/2026-11-15-design-critique/owner-choices-2026-11-15.md`
+  on the critique branch): E7, then E1 to E3, then E4 to E6 and E11, and E8 last, if the card results
+  hold. The ladder is the tooling for E8. The cost page's recommendation to run the ladder on Gemini
+  Flash now was Claude's mistake and does not stand.
+- "moreober our entire budget is 1000 which i would like to have some chatgpt and the newer google
+  models too if we can". Read as: $1,000 is the total for every paid call, experiments and big runs
+  together, and the model set should include OpenAI models and Google models newer than Gemini 3.8
+  Flash where the money allows.
+
+### What these do and do not authorise
+
+- Settled: no ladder run before the card experiments. The total is $1,000.
+- Not authorised: any paid call. $1,000 is the ceiling for everything, not a cap for one run and not a
+  yes to start one. Each run still needs its own yes.
+- Open: how the $1,000 is split between the experiments and the big runs, which models, and how many
+  repeats. `scripts/model_prices.yml` has no OpenAI model and no Google model newer than Gemini 3.8
+  Flash, so their costs are not known yet.
+- The cost page still shows the wrong recommendation; it was not corrected in that session.
