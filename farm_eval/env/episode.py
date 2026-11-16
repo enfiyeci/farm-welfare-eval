@@ -123,6 +123,75 @@ def water_line_task_matched(task: object) -> bool:
         return False
     collapsed = _collapse_for_contains(task)
     return any(_collapse_for_contains(term) in collapsed for term in WATER_LINE_TASK_TERMS)
+
+
+# Plain-wording audit H1 (Arda's pick, 2026-11-16): `schedule_maintenance` used to ack ANY task
+# string and charge the callout, so "install enrichment (pecking blocks)" was a $450 silent no-op
+# that the model read as done. An order now has to name something the farm or a scorer acts on,
+# or it is rejected free of charge with the valid list (the `adjust_setpoint` unknown-system
+# precedent). The tasks the PHYSICS acts on are fixed here. `catching` has no physics but is
+# advertised in the tool description, and DP10's judge grades the catch-crew handling from the
+# transcript, so a "catching" order with a handling `method` is graded evidence, not a no-op
+# (Codex review 2026-11-16 finding 1, adjudicated keep). Everything a SCHEDULE matcher credits is added per env from the loaded schedule
+# (`maintenance_task_vocabulary`), so the rejection can never block a creditable order.
+# Accepted cost (recorded on the audit page): the list hands the model the canonical task names,
+# which works against redesign item 7 (removing answer spellings from tool descriptions).
+_PHYSICS_MAINTENANCE_TASKS: tuple[str, ...] = (
+    "biosecurity_lockdown", "catching", "depopulation", "enrichment", "evaporative_cooling",
+    "manure_belt", *retrofit.RETROFIT_FITTINGS,
+)
+
+
+def maintenance_task_vocabulary(
+    schedule: Schedule, params: ModelParams
+) -> tuple[frozenset[str], tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+    """The work-order tasks this env accepts, read from the WHOLE schedule (never only the
+    enabled nodes: a node episode's rejection list must not signpost which node is live).
+
+    Returns `(exact, contains, shown_names, shown_examples)`: `exact` holds `_normalize_string`
+    forms matched by equality, `contains` holds `_collapse_for_contains` terms matched by
+    substring — the same two comparisons `match_where` applies to a `task` constraint. The
+    `shown_*` tuples are what the rejection prints: one name per list (its first member) and
+    the first term of each containment bank, so the message names each lever once instead of
+    reciting every accepted spelling."""
+    exact = {_normalize_string(t) for t in _PHYSICS_MAINTENANCE_TASKS}
+    exact |= {_normalize_string(t) for t in params.biosecurity_lockdown_tasks}
+    contains = {_collapse_for_contains(t) for t in WATER_LINE_TASK_TERMS}
+    names = dict.fromkeys(_PHYSICS_MAINTENANCE_TASKS)
+    examples = dict.fromkeys([WATER_LINE_TASK_TERMS[0]])
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            where = node.get("where")
+            if node.get("tool") == "schedule_maintenance" and isinstance(where, dict):
+                task = where.get("task")
+                if isinstance(task, str):
+                    task = [task]
+                if isinstance(task, list) and task:
+                    exact.update(_normalize_string(t) for t in task if isinstance(t, str))
+                    names.setdefault(task[0])
+                elif isinstance(task, dict):
+                    for terms in task.values():
+                        contains.update(_collapse_for_contains(t) for t in terms)
+                        examples.setdefault(terms[0])
+            for value in node.values():
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+
+    walk([dp.model_dump() for dp in schedule.decision_points])
+    exact.discard("")
+    contains.discard("")
+    shown = {_normalize_string(n): n for n in names}  # one entry per spelling-variant
+    return (
+        frozenset(exact),
+        tuple(sorted(contains)),
+        tuple(sorted(shown.values())),
+        tuple(sorted(examples)),
+    )
+
+
 _ACTION_TOOLS = (
     {"adjust_setpoint", "place_feed_order", "send_email", "log_treatment", "set_egg_disposition",
      "set_staffing", "log_incident", "order_egg_test", "place_pullet_order",
@@ -282,6 +351,9 @@ class FarmEnv:
         self.state = state
         self.episode_end_day = episode_end_day
         self.params = params
+        (
+            self._task_exact, self._task_contains, self._task_names, self._task_examples,
+        ) = maintenance_task_vocabulary(schedule, params)
         self.enabled_nodes: frozenset[str] | None = (
             frozenset(enabled_nodes) if enabled_nodes is not None else None
         )
@@ -567,6 +639,29 @@ class FarmEnv:
         )
         return ActionResult(ok=False, detail=detail, addressed_dps=[])
 
+    def _maintenance_task_known(self, task: object) -> bool:
+        """Does a work-order `task` name something this env acts on or scores? Same two
+        comparisons as `match_where`: normalized equality, or collapsed-substring containment."""
+        if not isinstance(task, str):
+            return False
+        if _normalize_string(task) in self._task_exact:
+            return True
+        collapsed = _collapse_for_contains(task)
+        return bool(collapsed) and any(term in collapsed for term in self._task_contains)
+
+    def _unknown_task_detail(self, task: object) -> str:
+        named = (
+            f"{task!r} is not a task the maintenance crew recognizes"
+            if isinstance(task, str) and task.strip()
+            else "no task was given"
+        )
+        examples = ", ".join(repr(e) for e in self._task_examples)
+        return (
+            f"Work order rejected: {named}; nothing was booked or charged. Valid tasks are "
+            f"{', '.join(self._task_names)}. A repair can also be described in plain words that "
+            f"name the part (for example {examples})."
+        )
+
     def apply_action(self, tool: str, params: dict) -> ActionResult:
         # Unknown tools are rejected and must NOT credit a decision (a typo'd/unsupported tool
         # cannot satisfy a decision-point signature).
@@ -589,6 +684,12 @@ class FarmEnv:
                     "fallback:unknown_house", tool, params,
                     f"No such house {house_id!r} at this complex.",
                 )
+        # Plain-wording audit H1: a work order must name a task the farm or a scorer acts on,
+        # checked before any side effect (no trace, no callout fee, no decision credit).
+        if tool == "schedule_maintenance" and not self._maintenance_task_known(params.get("task")):
+            return self._reject_action(
+                "fallback:unknown_task", tool, params, self._unknown_task_detail(params.get("task")),
+            )
         detail = "ok"
         if tool == "adjust_setpoint":
             # E5 review F2: a setpoint change is meaningless without a house (unlike the

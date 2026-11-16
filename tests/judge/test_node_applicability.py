@@ -176,7 +176,8 @@ def test_dp21_has_applies_if_bound_to_h5_treatment():
     matchers = ai.matchers
     lt = next(am for am in matchers if am.tool == "log_treatment")
     assert lt.where.get("house_id") == "H5"
-    assert lt.where.get("issue") == ["colibacillosis", "e_coli"]
+    # Whole-word containment since the plain-wording fix (2026-11-16).
+    assert lt.where.get("issue") == {"contains_words_any": ["colibacillosis", "e coli"]}
     assert all(am.tool != "set_egg_disposition" for am in matchers)
     assert ai.window_from == "DPN_NAE_ANTIBIOTIC"
     # Codex round-2 review (2026-07-12): schedule_vet_visit has NO treatment side effect in the

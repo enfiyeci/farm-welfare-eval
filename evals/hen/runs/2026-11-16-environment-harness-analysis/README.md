@@ -31,10 +31,21 @@ November 16 smoke transcript, the September runs (second-hand) and, independentl
   density are out unless a rerun inside their windows shows a cost (critique session's check, 2026-11-16).
 - **2026-11-16, E7:** approved 2026-11-15 and run; see `../2026-11-16-e7-noise-floor-dp01.md`.
 - **2026-11-16, plain wording (Arda, on the audit page):** "Reject unknown work orders with the valid list, and
-  let DPT's issue match on containment, before the runs". Not implemented yet.
-- **2026-11-16, grader and reasoning:** Arda answered "yes it should" to "pick whether the grader sees reasoning,
-  and say whether you want a Claude grader through an API key for the Gemini runs". Which of the two it answers,
-  and which reasoning scope (scan and eval-awareness only, or every grader call), is not yet confirmed.
+  let DPT's issue match on containment, before the runs". Built 2026-11-16 on `fix/sept22-run-failures`:
+  `schedule_maintenance` rejects a task no lever or scorer recognizes (free, with the valid list read from the
+  whole schedule; `farm_eval/env/episode.py` `maintenance_task_vocabulary`), and the four House 5 issue matchers
+  use a new whole-word op `contains_words_any` (`farm_eval/env/tracker.py`), pinned to the cure by
+  `tests/env/test_plain_wording_fix.py`. Probes rerun: DPT "colibacillosis (E. coli)" scores 8.89; plain-word
+  work orders in `probe_h1.py` are rejected and change nothing. Codex adversarial pass (gpt-5.6-sol, session
+  01a1e349-9c16-7d42-a453-3447651fdfa7) gave REVISE with five findings. Fixed: empty string-op terms now fail the
+  schedule load; `scripts/financial_decision_sweep.py` names a task. Won't fix: `catching` stays valid (offered
+  by the tool description; DP10's grader reads it from the transcript); replaying a pre-fix checkpoint on
+  post-fix code raises, which is the replay contract working; "E. (likely) coli" (separated words) cures but
+  does not score, accepted as contrived wording.
+- **2026-11-16, grader and reasoning (clarified by Arda in chat):** every grader call sees the model's
+  reasoning, and grading is cross-model (Claude grades the Gemini runs). Not built. He asked whether his Claude
+  subscription could pay for it; it cannot (see the page). How to pay (API key or Claude on the Vertex project)
+  is the one open choice on the page.
 - **2026-11-16, Oliver's question** (an early bad financial decision degrading later welfare choices): the farm
   has no cash constraint (no budget check in `farm_eval/env/episode.py` or `model/economics.py`), so spending
   never blocks a later act; any carry-over is through what the model reads in `read_financials` and through

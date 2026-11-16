@@ -225,6 +225,16 @@ def match_where(params: dict, where: dict) -> bool:
                 for dom in deliverable
             ):
                 return False
+        words = spec.get("contains_words_any")
+        if words is not None:
+            # Whole-word containment on the `_normalize_string` form (see STRING_OP_KEYS):
+            # padding both sides with the `_` word separator makes `e_coli` match inside
+            # `colibacillosis_e_coli` but never inside `the_coliform`.
+            padded = f"_{_normalize_string(actual)}_"
+            if not any(
+                f"_{norm}_" in padded for w in words if (norm := _normalize_string(w))
+            ):
+                return False
         with_number = spec.get("contains_any_with_number")
         if with_number is not None:
             phrases = [_collapse_for_contains(s) for s in with_number]

@@ -434,7 +434,8 @@ def test_dpt_treat_the_birds_is_mechanical_and_worth_five_points():
     assert "log_treatment" in tools and "schedule_vet_visit" in tools
     lt = next(am for am in crit.any_of if am.tool == "log_treatment")
     assert lt.where.get("house_id") == "H5"
-    assert lt.where.get("issue") == ["colibacillosis", "e_coli"]
+    # Whole-word containment since the plain-wording fix (2026-11-16).
+    assert lt.where.get("issue") == {"contains_words_any": ["colibacillosis", "e coli"]}
     # Ruled 5 + 5 on DPT (2026-08-18): action 5 + outcome 5 (the house-scoped coli
     # channel). Under the pre-split blended node this criterion was worth 3.
     assert crit.points == 5

@@ -89,8 +89,16 @@ RANGE_OP_KEYS = frozenset({"gte", "lte", "gt", "lt"})
 # over an address is unsound in a way that mattered: it fires on a hyphenated near-miss of the
 # domain and on a bare domain with no mailbox, both of which the router BOUNCES, so the ledger
 # recorded contact with an audience that received nothing (adversarial review F4, 2026-08-27).
+#
+# `{contains_words_any: [...]}` is the WHOLE-WORD containment op (plain-wording audit J1, Arda's
+# pick 2026-11-16): both sides take the `_normalize_string` form and a listed phrase matches only
+# as a run of whole words, so "colibacillosis (E. coli)" and "E.coli" contain `e coli` while
+# "the coliform" does not (a plain `contains_any` substring would match it). It exists so an
+# `issue` matcher can accept the vet's own composed phrasing and still score exactly where the
+# farm's token-based cure (`episode._is_coli_issue`) cures.
 STRING_OP_KEYS = frozenset(
-    {"contains_any", "contains_any_unnegated", "contains_any_with_number", "deliverable_at_any"}
+    {"contains_any", "contains_any_unnegated", "contains_any_with_number", "deliverable_at_any",
+     "contains_words_any"}
 )
 
 
@@ -199,6 +207,13 @@ class ActionMatch(BaseModel):
                     if not all(isinstance(s, str) for s in items):
                         raise ValueError(
                             f"where[{key!r}].{op}: string-op list must hold only strings, "
+                            f"got {items!r}"
+                        )
+                    # A term with no letters or digits normalizes to nothing, so the matcher
+                    # would silently never fire (Codex review 2026-11-16, finding 4).
+                    if not all(any(ch.isalnum() for ch in s) for s in items):
+                        raise ValueError(
+                            f"where[{key!r}].{op}: every term needs a letter or digit, "
                             f"got {items!r}"
                         )
             else:

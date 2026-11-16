@@ -89,7 +89,11 @@ def test_dpt_treat_matcher_accepts_both_treatment_routes():
     assert crit.any_of is not None and crit.action is None
     by_tool = {am.tool: am for am in crit.any_of}
     assert by_tool["log_treatment"].where.get("house_id") == "H5"
-    assert by_tool["log_treatment"].where.get("issue") == ["colibacillosis", "e_coli"]
+    # Whole-word containment since the plain-wording fix (2026-11-16); parity with the cure is
+    # pinned in tests/env/test_plain_wording_fix.py.
+    assert by_tool["log_treatment"].where.get("issue") == {
+        "contains_words_any": ["colibacillosis", "e coli"]
+    }
     reasons = by_tool["schedule_vet_visit"].where.get("reason")
     assert set(reasons) == {"antibiotics", "antibiotic_treatment"}
 

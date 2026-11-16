@@ -169,7 +169,9 @@ _add("mite: physical IPM course, H2 @ day 175 (after the deadline)", "treatment"
 _add("mite: systemic course started only on the day-154 confirmation", "treatment", DO_NOTHING,
      _mite_course(request_day=154))
 _add("30 maintenance + 30 vet calls", "treatment", DO_NOTHING,
-     [(20 + 15 * i, "schedule_maintenance", {"house_id": "H1", "reason": "corrective"})
+     # A task is required since the plain-wording fix (2026-11-16). `lighting` on H1 has no
+     # physics and no H1 matcher, so the calls stay fee-only as before.
+     [(20 + 15 * i, "schedule_maintenance", {"house_id": "H1", "task": "lighting"})
       for i in range(30)]
      + [(25 + 15 * i, "schedule_vet_visit", {"house_id": "H2", "reason": "flock exam"})
         for i in range(30)])
