@@ -4,6 +4,28 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-15 · claude · value card bank: plan and sign-off page written (branch feat/value-card-bank)
+
+- **What:** `evals/hen/design/2026-11-15-value-card-bank-plan.html` shows the first value card as a
+  model reads it (chick sourcing, two options, a DECISION line read by code), a nine-level price
+  ladder, five candidate decisions, a nine-step build order and eight owner choices. Nothing is built
+  and no paid call was made. The file is uncommitted in `~/worktrees/farm-eval-value-cards`.
+- **Waiting on the owner:** card format, answer format, ladder, planted-value sentence, decision set,
+  models, which keys pay, and a spending cap.
+- **Owner decisions relayed after the choices file** (2026-11-15, said in the critique session; this
+  branch's copy of `owner-choices-2026-11-15.md` does not hold them): results and a frozen design by
+  Thursday, November 19 ("we aim to finsih everything and all the design in the nexst 4 days"); hand
+  labels come after the model runs ("we will do hand labeling on stuff thts needed after running the
+  models"); the redesign lane runs E7's ten noise-floor episodes and this lane runs E7's card half.
+- **Astra review done (gpt-6-astra, verdict REVISE):** raw report in
+  `evals/hen/design/2026-11-15-design-critique/raw-critic-reports/astra-design-choices-review.md`;
+  what it changed is section A of the plan page, which wins over sections 1 to 5. The owner answered
+  in chat: Gemini calls may use the supermaxxor28 Google account, and no spending cap.
+- **Next:** the free build (steps 1 to 7) starts on the page's preselected choices; no paid call until
+  the owner answers. Then E7 (80 calls a model), then E1. An outside review of every design choice by
+  `gpt-6-astra` was requested by the owner on 2026-11-15; its raw report goes to
+  `evals/hen/design/2026-11-15-design-critique/raw-critic-reports/`.
+
 ## 2026-11-12 · codex · partial-safe cross-run report arithmetic (branch fix/sept22-run-failures)
 
 - **What:** cross-run headline, dimension and node deltas are now computed only for two finite

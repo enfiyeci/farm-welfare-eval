@@ -23,6 +23,23 @@ Reading order for the design itself (same table `CLAUDE.md` gives):
 | `evals/hen/nodes/decision-register.md` | The welfare decisions: rubrics, anchors, tripwires |
 | `evals/hen/world/model-params.md` | Reactive-model calibration (formulas + coefficients) |
 
+**Active design thread, November 2026: the value measure** (a number for how much a model values
+the hens, separate from rule-following, profit and ability). Reading order, each in full:
+
+1. `evals/hen/design/2026-11-12-email-hints-and-design-options.html` — the redesign page.
+2. `evals/hen/design/2026-11-15-design-critique-and-ideas.html` — the critique of it: problems
+   P1 to P12, designs I1 to I8, experiments E1 to E11, the owner's worries A1 to A5.
+3. `evals/hen/design/2026-11-15-design-critique/owner-choices-2026-11-15.md` — what the owner
+   chose, and what that does and does not authorise.
+4. `evals/hen/design/2026-11-15-value-card-bank-plan.html` — the card format, price ladder, build
+   order and the eight choices waiting for the owner (branch `feat/value-card-bank`).
+5. The earlier card design, on another branch:
+   `git show d74d9b7b:evals/hen/design/2026-09-28-written-version-design.md`.
+
+Raw critic reports (unverified) are in
+`evals/hen/design/2026-11-15-design-critique/raw-critic-reports/`. Owner decisions made after
+item 3 are in the top `docs/WORKLOG.md` entries.
+
 Then the plans/specs under `docs/plans/` and `docs/specs/` for whatever increment is active
 (see `docs/WORKLOG.md`, next section). The owner's ruling record —
 `evals/hen/design/decisions/00-RULINGS.md` — is authoritative where documents disagree.
