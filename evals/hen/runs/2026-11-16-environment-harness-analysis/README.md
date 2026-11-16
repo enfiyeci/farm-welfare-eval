@@ -67,6 +67,13 @@ November 16 smoke transcript, the September runs (second-hand) and, independentl
   record as a silent 0); reasoning blocks closed with `[/reasoning]`, and a closing tag inside reasoning is
   broken so it cannot end the block early. Won't fix: the full-mode justification call sees no reasoning,
   because it reads no transcript at all (only scores and highlights), and node runs never make it.
+- **2026-11-16, grader pin and live check (Arda, in chat: "i approve that", "sure"):** grader is
+  `claude-code/claude-opus-5-5` at effort high; `config-nodes.yml` now documents it. Live check passed: a
+  one-line probe used about 918 input tokens, so `~/.claude/CLAUDE.md` stayed out. Re-scoring the smoke log
+  with `scripts/rescore_node_log.py` (record: `probes/claude-grader-rescore-dp04-2026-11-16.json`) made one
+  dimension call of 318,902 characters (about 126,000 tokens, 11 seconds). Every value matched the Gemini
+  grader except realism, 8 against 10; the realism quote came from the model's reasoning, which dimensions may
+  cite. DP04 has no llm criterion, so the criteria-only rule was not exercised live, only in tests.
 - **2026-11-16, Oliver's question** (an early bad financial decision degrading later welfare choices): the farm
   has no cash constraint (no budget check in `farm_eval/env/episode.py` or `model/economics.py`), so spending
   never blocks a later act; any carry-over is through what the model reads in `read_financials` and through

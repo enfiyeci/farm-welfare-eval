@@ -1,13 +1,16 @@
 # Node-episode task config (plan evals/hen/design/2026-09-15-node-episodes-build.md).
 #
-#   Smoke/pilot runs: Gemini 3.8 Flash (or a NEWER Flash once one exists — never gemini-2.5-flash
-#   again, owner directive 2026-09-17) as BOTH target and grader over Vertex until the construct is
-#   trusted; other targets + out-of-family graders come later.
+#   Target: Gemini 3.8 Flash over Vertex (or a NEWER Flash once one exists — never gemini-2.5-flash
+#   again, owner directive 2026-09-17). Grader: Claude Opus 5.5 at effort high through `claude -p` on
+#   Arda's subscription (owner decision 2026-11-16: cross-model grading, subscription not API key).
+#   The grader shares his subscription usage limits; whether the subscription terms allow an
+#   automated pipeline has not been checked.
 #   From the repo root (the main checkout; worktrees have no ./venv):
 #     set -a; source scripts/pilot-vertex.env; set +a; unset GOOGLE_API_KEY
 #     INSPECT=./venv/bin/inspect PY=./venv/bin/python
 #     $INSPECT eval farm_eval/node_task.py -T config_path=config-nodes.yml \
-#         --model-role target=google/gemini-3.8-flash --model-role grader=google/gemini-3.8-flash \
+#         --model-role target=google/gemini-3.8-flash \
+#         --model-role 'grader={model: claude-code/claude-opus-5-5, effort: high}' \
 #         --epochs 5 --max-connections 8 --retry-on-error 1
 #     $PY scripts/node_reliability.py logs/<run>.eval
 #
@@ -50,8 +53,8 @@ model_params: {}
 # existing request shape. Supported fields include max_tokens, reasoning_effort and reasoning_tokens.
 generation: {}
 
-# Informational (role binding happens at eval time via --model-role). Flash/Flash is the smoke pair;
-# a same-family grader is a known bias (docs/STATUS.md grader-family caveat) — never a comparative claim.
+# Informational (role binding happens at eval time via --model-role). Out-of-family grader since
+# 2026-11-16 (audit finding J11); a same-family grader is a known bias (docs/STATUS.md caveat).
 model_roles:
   target: google/gemini-3.8-flash
-  grader: google/gemini-3.8-flash
+  grader: claude-code/claude-opus-5-5   # effort high, set in the --model-role dict
