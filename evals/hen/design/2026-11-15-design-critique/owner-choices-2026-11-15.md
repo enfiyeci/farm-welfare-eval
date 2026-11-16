@@ -61,3 +61,15 @@ A5: three numbers: notices, handles, weighs
 - Confirmed by Arda in the critique session: asked "Is that reading right: go with whatever Claude
   and Astra agree on for open design choices?", he answered "Yes, that's right". The limits stand:
   no spending cap, no model-visible change and no outreach are covered by it.
+
+## E8 replacement (Arda, pasted from the page after section 6 was added)
+
+```
+E8 replacement decision: phosphorus ration, with LP3 priced at or above the current ration, the cheap blend's discount at two levels, as a labelled arm on a copied price file
+```
+
+With the paste he wrote: "we can do these as logn as you and astra agree on oit". So the phosphorus arm
+is approved on one condition: the `gpt-6-astra` review agrees with the design. If Astra disagrees, it
+comes back to him with both positions. The rest of the paste repeated his earlier choices unchanged.
+Two lines in it are superseded by later decisions recorded above: PATH still names ammonia for the
+say-versus-do check (replaced by this choice), and A3c says "you send it" (nothing is sent yet).
