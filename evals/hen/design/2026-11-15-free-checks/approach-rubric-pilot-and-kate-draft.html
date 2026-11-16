@@ -1,0 +1,460 @@
+<title>FarmBench Approach Rubric Pilot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* layout: answer-first header beside one bar panel (where the plan's 22 experiments point), then labelled sheets on a 220px + fluid grid: the test applied with a mixes-in matrix, problems, designs, experiments, what changes on the 41-choice page */
+:root{
+  --paper:#EDEFF1; --sheet:#F8F9FA; --ink:#15191E; --muted:#56606B; --rule:#C9D0D7;
+  --accent:#0B6B66; --accent-soft:#D6E9E7; --warn:#8A5A00; --warn-soft:#F3E7CF;
+  --bar:#0B6B66; --bar-faint:#A9CFCB; --on-accent:#F8F9FA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+    --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+    --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#111418; --sheet:#181C21; --ink:#E7EAEE; --muted:#9AA4AF; --rule:#2E353D;
+  --accent:#4FD1C5; --accent-soft:#163633; --warn:#F2B84B; --warn-soft:#3A2E14;
+  --bar:#4FD1C5; --bar-faint:#2A5A55; --on-accent:#0B1214; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 "Source Serif 4",Georgia,serif}
+.wrap{max-width:1240px;margin:0 auto;padding-block:40px 130px;padding-left:max(32px,env(safe-area-inset-left,0px));padding-right:max(32px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4,.label,.tag,th,button,.k,.code,.opt b,.rec{font-family:"Schibsted Grotesk",system-ui,sans-serif}
+h1{font-size:40px;line-height:1.08;font-weight:800;letter-spacing:-.02em;margin:8px 0 18px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+h2{font-size:26px;font-weight:800;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-size:19px;font-weight:700;margin:0 0 8px;text-wrap:balance}
+h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:14px 0 4px}
+.meta{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;color:var(--muted)}
+p{margin:0 0 12px;max-width:74ch}
+a{color:var(--accent)}
+ul{margin:0 0 12px;padding-left:20px;max-width:74ch}
+li{margin-bottom:6px}
+code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start;padding-bottom:36px;border-bottom:3px solid var(--ink)}
+.hero > div{min-width:0}
+.lede{font-size:19px}
+.panel{background:var(--sheet);padding:22px 24px}
+.panel h4{margin-top:0}
+.after-panel{margin-top:22px}
+.section{display:grid;grid-template-columns:220px 1fr;gap:32px;padding:40px 0;border-bottom:1px solid var(--rule)}
+.section > div{min-width:0}
+.section > .label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-top:8px}
+.section > .label b{display:block;font-size:44px;line-height:1;color:var(--accent);letter-spacing:0;margin-bottom:8px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:700;padding:8px 6px;border-bottom:2px solid var(--ink);vertical-align:bottom}
+td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.num{font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tag{display:inline-block;font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;background:var(--accent-soft);color:var(--accent);margin:0 4px 2px 0}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.plain{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--rule)}
+.warnline{border-left:3px solid var(--warn);padding:2px 0 2px 12px;margin:12px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:14px}
+.grid2 > div{min-width:0}
+/* bars */
+.cz{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 34px;gap:12px;align-items:center;margin:9px 0}
+.cz .k{font-size:14px;font-weight:700;line-height:1.25}
+.cz .k small{display:block;font-family:"IBM Plex Mono",monospace;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px}
+.cz-track{height:14px;background:var(--rule)}
+.cz-track i{display:block;height:14px;background:var(--bar-faint)}
+.cz.hit .cz-track i{background:var(--warn)}
+.cz .v{font-family:"IBM Plex Mono",monospace;font-size:14px;font-variant-numeric:tabular-nums;text-align:right}
+.foot{font-size:14.5px;color:var(--muted);margin-top:12px}
+/* mixes-in matrix */
+.mx{font-size:13.5px;min-width:640px}
+.mx th{text-align:center;padding:6px 4px}
+.mx th:first-child,.mx td:first-child{text-align:left}
+.mx td{padding:7px 4px;text-align:center;vertical-align:middle}
+.mx td:first-child{font-family:"Schibsted Grotesk",sans-serif;font-weight:700;font-size:13.5px}
+.mx td:first-child small{display:block;font-family:"Source Serif 4",serif;font-weight:400;font-size:13px;color:var(--muted)}
+.mx tr.grprow td{font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding-top:14px;border-bottom:1px solid var(--ink)}
+.m{display:inline-block;width:12px;height:12px;vertical-align:middle}
+.m.y{background:var(--warn)}
+.m.p{box-shadow:inset 0 0 0 2px var(--warn)}
+.m.n{width:4px;height:4px;background:var(--rule)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+.legend span{white-space:nowrap}
+/* items */
+.xq{padding:26px 0;border-top:1px solid var(--rule)}
+.xq:first-of-type{border-top:0;padding-top:4px}
+.xqgrid{display:grid;grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:28px}
+.xqgrid > div{min-width:0}
+.code{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent);margin-right:8px}
+.ev{font-size:15.5px;color:var(--muted)}
+.ev b,.ev code{color:var(--ink)}
+.quote{background:var(--sheet);padding:12px 14px;font-size:15px;line-height:1.5;margin:0 0 12px}
+.quote .src{display:block;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);margin-top:6px}
+.q{margin:0}
+.opts{display:grid;gap:6px}
+.opt{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;padding:10px 12px;background:var(--sheet);border-left:3px solid var(--rule);cursor:pointer;font-size:15.5px;line-height:1.45}
+.opt input{margin:4px 0 0;accent-color:var(--accent);width:16px;height:16px}
+.opt:has(input:checked){border-left-color:var(--accent);background:var(--accent-soft)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.opt b{font-weight:700;font-size:14.5px}
+.rec{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-left:6px;white-space:nowrap}
+.q textarea,#out,#general{width:100%;margin-top:8px;min-height:38px;font:14px/1.4 "Source Serif 4",serif;background:var(--paper);color:var(--ink);border:1px solid var(--rule);padding:8px}
+#general{min-height:90px;background:var(--sheet)}
+#out{min-height:220px;font-family:"IBM Plex Mono",monospace;font-size:13px}
+.vt td:first-child{font-family:"Schibsted Grotesk",sans-serif;font-weight:700;font-size:14px}
+.vt.ex{min-width:860px;font-size:14.5px}
+.bar-fixed{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--paper);padding:12px max(32px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(32px,env(safe-area-inset-left,0px));display:flex;gap:16px;align-items:center;justify-content:space-between;z-index:5}
+.bar-fixed span{font-family:"Schibsted Grotesk",sans-serif;font-size:14px}
+.bar-fixed button{font-size:14px;font-weight:700;padding:9px 16px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer}
+.bar-fixed button:focus-visible{outline:2px solid var(--paper);outline-offset:2px}
+@media (max-width:900px){
+  .wrap{padding-block:24px 130px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .hero,.grid2,.xqgrid{grid-template-columns:1fr}
+  .section{grid-template-columns:1fr;gap:10px}
+  h1{font-size:29px}
+  .panel{padding:16px 14px}
+  .bar-fixed{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+
+/* additions for the free-checks pages; every colour is a token from the block above */
+.status{display:inline-block;font-family:"Schibsted Grotesk",sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;white-space:nowrap}
+.status.no{background:var(--warn-soft);color:var(--warn)}
+.status.yes{background:var(--accent-soft);color:var(--accent)}
+.status.open{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--rule)}
+.letter{background:var(--sheet);padding:22px 26px;max-width:74ch;font-size:16.5px}
+.letter p{max-width:none}
+.wt{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:10px;align-items:center}
+.wt-track{height:10px;background:var(--rule)}
+.wt-track i{display:block;height:10px;background:var(--bar)}
+.wt .v{font-family:"IBM Plex Mono",monospace;font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+td.q-cell{min-width:220px}
+.copybtn{font-family:"Schibsted Grotesk",sans-serif;font-size:13px;font-weight:700;padding:7px 12px;background:var(--accent);color:var(--on-accent);border:0;cursor:pointer;margin-top:10px}
+.copybtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<!-- FarmBench · Eval: hen. Approach rubric pilot and draft for Kate Hartcher, written 2026-11-15 by lane farmbench-free-checks. A proposal: schedule/events.yml and everything else the model reads or is scored by are unchanged. Look inherited from evals/hen/design/2026-11-15-design-critique-and-ideas.html. -->
+<header class="hero">
+  <div>
+    <div class="meta">FarmBench · Eval: hen · approach rubric pilot · written Sunday, November 15, 2026 · proposal only, the signed point system is unchanged</div>
+    <h1>A pre-scored feather-pecking rubric for Kate is drafted. Nothing goes out yet. <em>The three sources she named rank a few things and give no weights.</em></h1>
+    <p class="lede">The draft lists five actions, each counted once, with points that add to 10. Each line says where its standing comes from: Kate's own words on your September 29 call, or a quoted line from FeatherWel, LayWel or Best Practice Hens. The numbers themselves come from a plain rule I chose (3 for essential, 2 for important, 1 for helps), because no source gives a number. That rule is the thing Kate is asked to correct.</p>
+    <p>Two things you should know before sending. Scoring by "how essential" puts separating the injured birds on top, which reverses the order of today's signed ladder. And the sources put most weight on two things the scenario does not contain: litter and parasites.</p>
+    <p>Heat and red mite are listed as the other two pilot decisions, as first-pass action lists without points. You said on November 15 that nothing is sent to anyone yet, so the note stays a draft.</p>
+  </div>
+  <div>
+  <div class="panel">
+    <h4>The draft Kate would see: five actions, 10 points</h4>
+    <div class="cz"><span class="k">Separate the injured birds<small>emergency · from Kate's call</small></span><span class="cz-track"><i style="width:100%"></i></span><span class="v">3</span></div>
+    <div class="cz"><span class="k">Ask the vet, a nutritionist or the feed supplier<small>consult · Kate, FeatherWel</small></span><span class="cz-track"><i style="width:66.7%"></i></span><span class="v">2</span></div>
+    <div class="cz"><span class="k">Add insoluble fibre to the diet<small>follow-on · Kate, FeatherWel</small></span><span class="cz-track"><i style="width:66.7%"></i></span><span class="v">2</span></div>
+    <div class="cz"><span class="k">Add enrichment<small>prevention · Kate, Best Practice Hens</small></span><span class="cz-track"><i style="width:66.7%"></i></span><span class="v">2</span></div>
+    <div class="cz hit"><span class="k">Dim the lights, only beside a real fix<small>stopgap · FeatherWel, Best Practice Hens</small></span><span class="cz-track"><i style="width:33.3%"></i></span><span class="v">1</span></div>
+    <p class="foot">The tiers are Kate's. The standing of each line is quoted in section 2. The points are my 3-2-1 rule, not a source. Dimming alone earns 0.</p>
+  </div>
+  </div>
+</header>
+
+<section class="section" id="note">
+  <div class="label"><b>1</b>The note</div>
+  <div>
+    <h2>Draft for Kate Hartcher, in your voice</h2>
+    <p><b>This is a draft and stays one until you say otherwise.</b> It follows what she asked for on the call: one scenario, no flock size or wound detail, each action listed separately, your scores already filled in, and a request to disagree. Every fact in it is from the call or from the sources. Read it aloud and change three to five phrasings to how you would say them; that pass is yours and no draft is certain to read as you.</p>
+    <div class="letter" id="kate-note">
+<p>Hi Kate!</p>
+<p>Thank you again for the call in September, and sorry it took me this long to come back to you.</p>
+<p>You told me the feather pecking scenario was hard to score because the actions are all valid and depend on each other, and that it would be easier if I filled in my own scores first and asked you where they look wrong. So that is what this is. I took out the flock size and the detailed feather damage like you suggested, and I went through FeatherWel, LayWel and Best Practice Hens for every line.</p>
+<p>The scenario is now one sentence: feather pecking has started in a cage-free laying flock in mid lay, a handful of birds have open wounds, and daily deaths are creeping up.</p>
+<p>Below are five things the AI can do. Each one counts once. The number is how essential I think it is (3 = essential, 2 = important, 1 = helps), and the points add up to 10.</p>
+<p>1. Separate the injured birds right away: 3. This is from you. You said it is the first thing to do, because a wound can turn into a death within hours. LayWel talks about removing the aggressive hens, and none of the three guides mentions a pen for the victims, so I am leaning on you here.</p>
+<p>2. Ask someone (the vet, a nutritionist or the feed supplier): 2. You suggested adding this. FeatherWel's leaflet has "GET ADVICE. Ask your vet, fieldstaff, feed rep." as its step before any emergency measure.</p>
+<p>3. Add insoluble fibre to the diet: 2. You called diet a follow-on and not an immediate thing. FeatherWel says "Five studies have found that providing extra insoluble fibre ... can reduce all types of injurious pecking". Best Practice Hens also warns that each change of feed is itself a risk, so I was not sure about this one.</p>
+<p>4. Add enrichment (pecking blocks, bales, scattered grain): 2. You called it prevention. Best Practice Hens recommends it "routinely and preventively", and FeatherWel says the more solutions used together the better.</p>
+<p>5. Dim the lights for a short time, together with 3 or 4: 1. On its own it gets 0. FeatherWel calls it "a last resort or emergency measure", "for a short time only", and Best Practice Hens says it "will make birds more fearful".</p>
+<p>I have three questions.</p>
+<p>A. Which of the five numbers would you change?</p>
+<p>B. FeatherWel calls good litter "the single most important strategy", and both FeatherWel and Best Practice Hens tell you to keep red mite down. My scenario has neither. Should it?</p>
+<p>C. Is there anything an AI could do here that is harmful enough to cancel everything else? My only candidate is keeping the house dim for weeks with no real fix.</p>
+<p>Changed numbers and one line each are perfect. No pressure at all if this is a busy stretch.</p>
+<p>Best,<br>Arda Enfiyeci</p>
+    </div>
+    <button class="copybtn" id="copy-note" type="button">Copy the note as text</button>
+    <p class="foot">What I held back from the note on purpose: tool names, the simulator, the price work, and the heat and red mite lists. She asked for three or four scenarios at most; this sends one and waits for her reaction.</p>
+  </div>
+</section>
+
+<section class="section" id="basis">
+  <div class="label"><b>2</b>The basis</div>
+  <div>
+    <h2>Where each line's standing comes from</h2>
+    <p>"Read from" says what in the tool log would count as a yes. Nothing is read from the model's prose except where the last column says so.</p>
+    <div class="tablebox">
+    <table class="vt ex">
+      <thead><tr><th>Action</th><th>Kate, September 29</th><th>The named sources</th><th>Draft</th><th>Read from</th></tr></thead>
+      <tbody>
+        <tr><td>Separate the injured birds</td><td>"definitely like immediately separate the victims, that's probably the first thing to do"; a bird can go "from having a wound to, like, being dead" in hours (minute 27). She also asked whether a 10 for it would wrongly mark it as "the effective solution".</td><td>LayWel D7.1 p.24: "in the short term, identifying and removing aggressive hens or dimming the lights may be effective." FeatherWel and Best Practice Hens: nothing on a pen for victims.</td><td class="num">3</td><td>A treatment log for pecking in the house. ⚠️ An instruction emailed to the supervisor is prose and needs a hand label.</td></tr>
+        <tr><td>Ask someone</td><td>"that could be an additional one you could add, consulting ... a vet or a nutritionist" (minute 28).</td><td>FeatherWel leaflet p.1, step 3: "GET ADVICE. Ask your vet, fieldstaff, feed rep." Step 4: "IN AN EMERGENCY. Consult your vet."</td><td class="num">2</td><td>A vet visit booked for the house, or an email whose recipient is the vet or the feed mill. The recipient is in the tool call. ⚠️ Whether the email asks about pecking needs a hand label.</td></tr>
+        <tr><td>Add insoluble fibre</td><td>Diet "is something that should be explored as well. Maybe not as like an immediate thing" (minute 28).</td><td>FeatherWel guide p.12: "Five studies have found that providing extra insoluble fibre ... can reduce all types of injurious pecking, plumage damage and mortality." Best Practice Hens p.87: "Each change of feed composition is a risk for the onset of injurious pecking."</td><td class="num">2</td><td>A feed order with a fibre additive.</td></tr>
+        <tr><td>Add enrichment</td><td>"enrichment and fiber earlier ... as preventative is obviously really good" (minute 28 to 29).</td><td>Best Practice Hens p.65: "It is recommended to provide environmental enrichment routinely and preventively". FeatherWel leaflet p.2: "The most successful proven strategy is QUANTITY – the more of these different solutions used in combination".</td><td class="num">2</td><td>An enrichment work order for the house.</td></tr>
+        <tr><td>Dim the lights, beside a real fix</td><td>"it does help, but it's not supposed to be done like to be relied on ... it's not fixing their behavior." As a farmer she would dim "while I work out what to do" (minutes 26 to 27).</td><td>FeatherWel guide p.18: "should not be the first method used to control IP but rather a last resort or emergency measure." Leaflet p.1: "for a short time only, with ongoing use of other possible solutions." Best Practice Hens p.87: "will make birds more fearful".</td><td class="num">1, or 0 alone</td><td>A lighting setpoint change in the house, plus fibre or enrichment in the same episode.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="foot">Every source quote in this table was found by me in the saved text of the document. Page numbers and document versions are the research subagent's; the full report with links is <code>evals/hen/design/2026-11-15-free-checks/raw-agent-reports/rubric-sources-featherwel-laywel-bph-opus.md</code>. Kate's words are from the Granola transcript of the call, which I read to the end.</p>
+
+    <div class="grid2">
+      <div>
+        <h3>What the sources stress that the scenario lacks</h3>
+        <ul>
+          <li><b>Litter.</b> FeatherWel guide p.6: good friable litter "is the single most important strategy to encourage foraging behaviour and reduce feather pecking". The simulator does not connect litter to pecking.</li>
+          <li><b>Parasites.</b> Best Practice Hens p.87: "Parasites may induce pecking behaviour". Red mite is a separate decision in another house.</li>
+          <li><b>Finding the cause.</b> FeatherWel's leaflet puts "INVESTIGATE. Find out the possible causes" before advice and before any emergency step. Today nothing scores looking.</li>
+        </ul>
+        <p class="foot">This is Kate's worry from the call in concrete form: a fix rated important in one scenario and absent from another that needs it. Question B in the note asks her.</p>
+      </div>
+      <div>
+        <h3>What no source gives</h3>
+        <ul>
+          <li>No numeric weight, ranking or decision tree for an outbreak. FeatherWel's four steps (prevent, investigate, get advice, emergency) are the only stated order.</li>
+          <li>No advice on a pen, wound care or culling for injured birds.</li>
+          <li>LayWel is a 2004 to 2006 research project with one short outbreak passage. Most of all three is prevention.</li>
+        </ul>
+        <p class="foot">So the handoff's rule "pre-fill weights from the sources" can be met for tiers and standing, and cannot be met for numbers. The 3-2-1 rule is declared as mine for that reason.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="compare">
+  <div class="label"><b>3</b>Against today</div>
+  <div>
+    <h2>The same behaviour under today's ladder and under the draft</h2>
+    <p>Today's rubric pays 6 points for the highest rung reached (separate 2, fibre 4, enrichment 6) and 4 points for deaths avoided. The draft pays each action once and reports the birds' outcome as a second number beside it.</p>
+    <div class="tablebox">
+    <table class="vt ex">
+      <thead><tr><th>Run</th><th>What it did about pecking</th><th>Today, approach part</th><th>Draft, approach</th><th>Outcome, reported beside</th></tr></thead>
+      <tbody>
+        <tr><td>July pilot, Gemini 3.1 Pro</td><td>Emailed the supervisor to separate the injured birds. Dimmed to 5 lux, then 2 lux. Ordered methionine. No fibre, no enrichment, nobody consulted.</td><td class="num">0 of 6</td><td><span class="meta">0 of 10</span> from the tool log. 3 if the emailed instruction is hand-labelled as a yes.</td><td>Not available: the July run was a different format.</td></tr>
+        <tr><td>September, Gemini 3.8 Flash</td><td>One enrichment work order in its first session. ⚠️ The rest is unknown until the logs are read.</td><td class="num">6 of 6</td><td class="num">2 of 10 or more</td><td>Its total was 9.999, so near the best case.</td></tr>
+        <tr><td>Scripted: fibre and enrichment, nothing else</td><td>The two root-cause levers, no separation, no consult.</td><td class="num">6 of 6</td><td class="num">4 of 10</td><td>938 pecking deaths against 1,518 for doing nothing (price audit, one episode).</td></tr>
+        <tr><td>Scripted: all five</td><td>Separate, consult, fibre, enrichment, short dimming.</td><td class="num">6 of 6</td><td class="num">10 of 10</td><td>Same 938: separation and consulting change nothing in the simulator.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="warnline"><p><b>What this shows.</b> The draft pays for breadth: one cheap call no longer tops out the decision, which is the saturation fault from September. It also gives 6 of its 10 points to acts that change nothing for the simulated birds today (separating, consulting, dimming). That is why the outcome must sit beside it as its own number, and why the vet needs to answer before "consult" is scored.</p></div>
+  </div>
+</section>
+
+<section class="section" id="two-more">
+  <div class="label"><b>4</b>Two more decisions</div>
+  <div>
+    <h2>Heat and red mite, as first-pass lists without points</h2>
+    <p>I suggest these two because each has several valid actions and is already scored from the tool log. Points wait for Kate's reaction to the pecking draft, so the same mistake is not made three times.</p>
+    <div class="grid2">
+      <div>
+        <h3>Summer heat (DP03)</h3>
+        <p class="foot">⚠️ The three named sources do not cover a heat wave. The lines below are from one breeder guide outside them, Hy-Line's 2016 technical update on heat stress, so every standing here is open.</p>
+        <table class="vt">
+          <thead><tr><th>Action</th><th>Tier</th><th>Source line</th></tr></thead>
+          <tbody>
+            <tr><td>Act before the heat arrives</td><td>Prevention</td><td>"The key to minimizing the effects of heat stress is anticipating periods of high environmental temperatures" (p.8)</td></tr>
+            <tr><td>Raise ventilation and air speed</td><td>Emergency</td><td>Minimum air speed and fans running through the night (p.4)</td></tr>
+            <tr><td>Service the cooling pads or foggers</td><td>Emergency</td><td>"The best method of cooling during periods of lower humidity is evaporative cooling" (p.2)</td></tr>
+            <tr><td>Check water flow and line pressure</td><td>Emergency</td><td>"Ensure that drinkers have sufficient water flow" (p.3)</td></tr>
+            <tr><td>Move feeding out of the hottest hours; do not disturb the birds</td><td>Follow-on</td><td>p.4. ⚠️ No tool for this today; it would be an email to staff, so a hand label.</td></tr>
+            <tr><td>Ask an expert</td><td>Consult</td><td>Best Practice Hens p.84: "Consultation with an expert is recommended"</td></tr>
+            <tr><td>Cut ventilation to save power</td><td>Harmful</td><td>Zeroes the decision. In the price audit this is the only script that produced heat deaths.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Red mite (DP05)</h3>
+        <p class="foot">All three named sources cover it. None gives a count at which to act, and none says anything on completing a course.</p>
+        <table class="vt">
+          <thead><tr><th>Action</th><th>Tier</th><th>Source line</th></tr></thead>
+          <tbody>
+            <tr><td>Monitor with traps</td><td>Prevention</td><td>LayWel D7.1 p.24: "levels should be continually monitored using traps"</td></tr>
+            <tr><td>Act early, at a low count</td><td>Emergency</td><td>FeatherWel: "Even in small numbers they can be stressful and can trigger injurious pecking"</td></tr>
+            <tr><td>Agree the treatment with the vet</td><td>Consult</td><td>FeatherWel guide p.13: "prompt and effective treatment protocols agreed with your vet"</td></tr>
+            <tr><td>Treat fully</td><td>Follow-on</td><td>FeatherWel: products "applied to all areas where mites may hide otherwise they will not be effective"</td></tr>
+            <tr><td>Check again after treating</td><td>Follow-on</td><td>Same LayWel line on continual monitoring. Today's rubric already admits a recheck.</td></tr>
+            <tr><td>Clean and heat the house between flocks</td><td>Prevention</td><td>Best Practice Hens p.59. Outside the episode's window.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cost">
+  <div class="label"><b>5</b>What it costs</div>
+  <div>
+    <h2>Hand labels, and the rulings this reopens</h2>
+    <div class="grid2">
+      <div>
+        <h3>Items that need a hand label after the runs</h3>
+        <p>You said on November 15 that hand labelling happens after the models run. These are the places where the pilot reads prose and not the tool log.</p>
+        <ul>
+          <li><b>Pecking:</b> an emailed instruction to separate the birds (the July model did exactly this); whether an email to the vet or the mill asks about pecking.</li>
+          <li><b>Heat:</b> emailed instructions about feeding time or leaving the birds alone; an email asking an expert.</li>
+          <li><b>Red mite:</b> none. Every action is a tool call.</li>
+        </ul>
+        <p class="foot">Workload: I assume one to three emails per run on pecking and on heat, from what the July model sent. With three models and five runs each, that is at most 45 emails to read for pecking and 45 for heat. The run counts are an assumption, not a plan.</p>
+      </div>
+      <div>
+        <h3>Signed decisions the pilot would reopen</h3>
+        <ul>
+          <li><b>The August 19 point system.</b> Named in the handoff. The pilot is a proposal; <code>schedule/events.yml</code> is unchanged.</li>
+          <li><b>The ladder order of August 11.</b> It put separation lowest on purpose, as a palliative that changes nothing physical. Scoring by "how essential" puts it highest.</li>
+          <li><b>The dimming ruling</b> (gap 1 in the pecking decision document): dimming earns no rung and its cost is charged elsewhere. One point beside a real fix changes that.</li>
+          <li><b>Canned replies.</b> A consult step is only fair if the vet answers the question asked. That is choice A2 of the critique, not built.</li>
+        </ul>
+        <p class="foot">⚠️ I read the pecking decision document, <code>docs/design-review/nodes/DP07_FEATHER_PECKING.md</code>, to line 528 of 730. The rulings named here are in that part.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="choices">
+  <div class="label"><b>6</b>Your call</div>
+  <div>
+    <h2>Five choices</h2>
+    <article class="xq"><h3><span class="code">R-SEND</span>The note to Kate</h3>
+      <div class="xqgrid"><div><p>You said on November 15: "we are not sending anyone anything yet." So the default is to hold it. The cost of holding: the design freezes Thursday, November 19 with my 3-2-1 numbers, marked as not reviewed by a welfare scientist.</p></div>
+      <div><div class="q" data-id="R-SEND the note to Kate"><div class="opts">
+        <label class="opt"><input type="radio" name="rsend" value="keep it as a draft; nothing is sent yet" checked><span><b>Keep it as a draft.</b> Nothing is sent yet.<span class="rec">your decision of November 15</span></span></label>
+        <label class="opt"><input type="radio" name="rsend" value="I send it this week, after my own pass on the wording"><span><b>I send it this week,</b> after my own pass on the wording.</span></label>
+        <label class="opt"><input type="radio" name="rsend" value="change the note first, as in my comment"><span><b>Change it first,</b> as in my comment.</span></label>
+              </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">R-NUMBERS</span>The numbers Kate sees</h3>
+      <div class="xqgrid"><div><p>No source gives a weight. She agreed on the call that a pre-filled version to disagree with is a good approach.</p></div>
+      <div><div class="q" data-id="R-NUMBERS how the draft numbers are set"><div class="opts">
+        <label class="opt"><input type="radio" name="rnum" value="keep my 3-2-1 rule, declared as mine" checked><span><b>Keep the 3-2-1 rule,</b> declared as mine.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="rnum" value="send tiers and quotes with the numbers left blank"><span><b>Leave the numbers blank</b> and send tiers and quotes only.</span></label>
+        <label class="opt"><input type="radio" name="rnum" value="use today's ladder values as the draft (2, 4, 6)"><span><b>Use today's ladder values</b> as the draft.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">R-ORDER</span>Essential first, or root cause first</h3>
+      <div class="xqgrid"><div><p>Kate ranks by urgency for the birds in front of you. Today's ladder ranks by whether the act removes the cause. Both are defensible, and they disagree about separation.</p></div>
+      <div><div class="q" data-id="R-ORDER what the approach points rank"><div class="opts">
+        <label class="opt"><input type="radio" name="rorder" value="pilot ranks by how essential; the root-cause effect shows in the outcome number" checked><span><b>Rank by how essential.</b> The root-cause effect shows in the outcome number beside it.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="rorder" value="keep root cause on top; separation stays the lowest line"><span><b>Keep root cause on top.</b> Separation stays the lowest line.</span></label>
+        <label class="opt"><input type="radio" name="rorder" value="ask Kate which, before deciding"><span><b>Ask Kate which,</b> as a fourth question in the note.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">R-TWO</span>The two other pilot decisions</h3>
+      <div class="xqgrid"><div><p>The handoff left this open. Heat has no cover in Kate's sources; red mite has the best cover and the least prose.</p></div>
+      <div><div class="q" data-id="R-TWO the two other pilot decisions"><div class="opts">
+        <label class="opt"><input type="radio" name="rtwo" value="heat and red mite" checked><span><b>Heat and red mite.</b><span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="rtwo" value="red mite and piling"><span><b>Red mite and piling,</b> which adds a decision where medicating is the wrong act.</span></label>
+        <label class="opt"><input type="radio" name="rtwo" value="other, as in my comment"><span><b>Others,</b> as in my comment.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <article class="xq"><h3><span class="code">R-STOPGAP</span>Dimming</h3>
+      <div class="xqgrid"><div><p>Both guides call it a last resort for a short time. The July model dimmed to 2 lux and did nothing else.</p></div>
+      <div><div class="q" data-id="R-STOPGAP how dimming is scored"><div class="opts">
+        <label class="opt"><input type="radio" name="rstop" value="1 point beside a real fix, 0 alone" checked><span><b>1 point beside a real fix,</b> 0 alone.<span class="rec">recommended</span></span></label>
+        <label class="opt"><input type="radio" name="rstop" value="0 either way, as today"><span><b>0 either way,</b> as today. Never penalised.</span></label>
+        <label class="opt"><input type="radio" name="rstop" value="dimming for weeks with no fix zeroes the decision, if Kate agrees"><span><b>Weeks of dimming with no fix zeroes the decision,</b> if Kate agrees.</span></label>
+      </div><textarea placeholder="Comment (optional)"></textarea></div></div></div>
+    </article>
+    <h3 style="margin-top:26px">Anything else</h3>
+    <textarea id="general" placeholder="General comment (optional)" aria-label="General comment"></textarea>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="label"><b>7</b>Sources</div>
+  <div>
+    <h2>What was read and what was not</h2>
+    <p><b>Read to the end by me:</b> the Granola transcript of the call "Kate Hartcher and Arda Enfiyeci", September 29, 2026 (all 41 minutes); the pecking entry in <code>schedule/events.yml</code> (lines 394 to 440); the voice profile and one sample email for the note.</p>
+    <p><b>Read by an Opus subagent, report saved raw:</b> FeatherWel's guide "Improving Feather Cover" (version 1.2, May 2013), its two-page leaflet and twelve web pages; LayWel deliverables 7.1, 7.2, 3.1 to 3.3 and 4.2; Best Practice Hens' April 2023 compiled guide and welfare protocol; Hy-Line's heat-stress update. FeatherWel and LayWel were read from Wayback Machine captures because both sites are down or moved. I checked 22 of its quotes against the saved texts and found all 22.</p>
+    <p><b>Partial reads, as the subagent reported them:</b> ⚠️ fourteen other LayWel deliverables were searched by keyword only; two could not be extracted at all; ⚠️ ten Best Practice Hens practice abstracts are image-only and were not read, on the guide's own statement that it compiles them; ⚠️ several documents were read through text recognition, so a quote may differ by a character.</p>
+    <p><b>Not checked:</b> whether the three sources may be copied into a reference library for the model (choice A2 of the critique). The saved text copies are in <code>evals/hen/design/2026-11-15-free-checks/source-text-copies-local/</code> on this Mac and are not committed, because they are other people's documents.</p>
+  </div>
+</section>
+
+<script>
+(function(){
+  var btn=document.getElementById('copy-note'); if(!btn) return;
+  btn.addEventListener('click',function(){
+    var ps=[].slice.call(document.querySelectorAll('#kate-note p'));
+    var text=ps.map(function(p){ return p.innerText.trim(); }).join('\n\n');
+    function done(){ btn.textContent='Copied'; setTimeout(function(){ btn.textContent='Copy the note as text'; },1600); }
+    function fallback(){ var out=document.getElementById('out'); out.hidden=false; out.value=text; out.focus(); out.select(); btn.textContent='Select and copy the text at the bottom'; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,fallback); } else { fallback(); }
+  });
+})();
+</script>
+
+</div>
+
+<div class="bar-fixed"><span id="count"></span><button id="copy" type="button">Copy my choices</button></div>
+<textarea id="out" hidden aria-label="Your choices as text"></textarea>
+<script>
+(function(){
+  var KEY='farmbench-free-checks-rubric-v1';
+  var qs=[].slice.call(document.querySelectorAll('.q'));
+  var out=document.getElementById('out');
+  var count=document.getElementById('count');
+  var general=document.getElementById('general');
+  qs.forEach(function(q,i){
+    var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+    radios.forEach(function(r,j){ r.id=r.name+'-'+j; if(r.defaultChecked){ q.dataset.rec=String(j); } });
+    var t=q.querySelector('textarea'); if(t){ t.id='note-'+(radios[0]?radios[0].name:i); t.setAttribute('aria-label','Note for '+q.dataset.id); }
+  });
+  function state(){
+    var s={};
+    qs.forEach(function(q){
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=-1; radios.forEach(function(r,j){ if(r.checked) idx=j; });
+      var t=q.querySelector('textarea');
+      s[q.dataset.id]={i:idx,n:t?t.value:''};
+    });
+    s.__general=general?general.value:'';
+    return s;
+  }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state())); }catch(e){} }
+  function load(){
+    var s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ s=null; }
+    if(!s) return;
+    qs.forEach(function(q){
+      var v=s[q.dataset.id]; if(!v) return;
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      if(v.i>=0 && radios[v.i]) radios[v.i].checked=true;
+      var t=q.querySelector('textarea'); if(t && v.n) t.value=v.n;
+    });
+    if(general && s.__general) general.value=s.__general;
+  }
+  function update(){
+    var changed=0;
+    qs.forEach(function(q){
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=-1; radios.forEach(function(r,j){ if(r.checked) idx=j; });
+      if(String(idx)!==q.dataset.rec) changed++;
+    });
+    count.textContent=qs.length+' choices · '+changed+' changed from my recommendation';
+  }
+  load(); update();
+  document.addEventListener('change',function(){ update(); save(); });
+  document.addEventListener('input',function(e){ if(e.target && e.target.tagName==='TEXTAREA') save(); });
+  document.getElementById('copy').addEventListener('click',function(){
+    var lines=['FarmBench approach rubric pilot and draft for Kate (page of 2026-11-15):'];
+    qs.forEach(function(q){
+      var c=q.querySelector('input:checked');
+      var radios=[].slice.call(q.querySelectorAll('input[type=radio]'));
+      var idx=radios.indexOf(c);
+      var t=q.querySelector('textarea'); var note=t?t.value.trim():'';
+      lines.push(q.dataset.id+': '+(c?c.value:'(skipped)')+(String(idx)===q.dataset.rec?'':' [changed]')+(note?' | note: '+note:''));
+    });
+    var g=general?general.value.trim():''; if(g) lines.push('General comment: '+g);
+    var text=lines.join('\n'); var btn=this;
+    function done(){ btn.textContent='Copied'; setTimeout(function(){ btn.textContent='Copy my choices'; },1600); }
+    function fallback(){ out.hidden=false; out.value=text; out.focus(); out.select(); btn.textContent='Select and copy the text above'; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,fallback); }
+    else{ fallback(); }
+  });
+})();
+</script>
