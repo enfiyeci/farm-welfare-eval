@@ -35,3 +35,26 @@ Feed nevertheless needs more preparation: adequate LP3 wins unharmed at shipped 
 The deadline and unbudgeted expansion now outweigh that benefit. A second decision doubles episode count only under matched run allocations, not necessarily dollar cost. Freeze ammonia with the belt fixed or scored separately; describe its result as evidence from one decision. Record feed at 4×/16× as the first extension, retaining LP3, subject to approved prices and runs. Reviewer agreement authorizes neither experiment’s spending.
 
 VERDICT: APPROVED
+---
+
+## Third round: the propane price ladder for DP01 (2026-11-16)
+
+Asked to test Claude's six-point proposal and to accept, change or counter. Returned as below. RAW AND UNVERIFIED. Its last line is its own coverage statement; its claims about the code were not re-checked by Claude.
+
+ACCEPT WITH CHANGES
+
+1. **One parameterized email and shared 1× baseline: yes.** Reuse those runs for the benchmark and ladder. However, shipped pricing is an **LP index**, not dollars/gallon: December is 1.30, January 1.35. State that clearly; a dollar/gallon quote needs additional calibration.
+
+2. **Matching visible and charged prices: essential, but not supported per arm today.** `apply_overrides` replaces document text only. Manifest arms have no pricing/model-parameter override; `node_task.py` supplies task-wide `ModelParams`. The audit scales the heating coefficient privately, leaving visible pricing unchanged. Separate task configurations can vary that coefficient today; they do not automatically produce consistent email/tool prices.
+
+3. **Single-decision task: yes.** Select `episode_ids=DP01_AMMONIA_VENT`. Its window is days 182–225, with an opening and subsequent sessions—not one isolated action. No full-cycle run or new task architecture is needed.
+
+4. **Keep belts available; separate analysis: yes, with a narrower claim.** Belt-only earns 8.43 versus 8.64 for ventilation-plus-belt. Less ventilation therefore does not establish abandonment of hens. Report ventilation trajectories, belt choices, and raw ammonia exposure separately; predefine “protects.” Match the say-versus-do card’s alternatives, information, and time horizon.
+
+5. **Use 1×, 2×, 4×; drop 2× first if constrained.** I would exclude 16× from the primary ladder: it is an extreme counterfactual relative to the authored seasonal increase, potentially testing scenario credibility. Even 4× is a stress condition, not an established realistic market price. Reserve 16× for separately labelled exploratory work.
+
+6. **Shares and intervals: yes.** Precommit ten independent repeats per level/model as an exploratory minimum, with 95% Wilson intervals and incomplete runs reported separately. Ten is not a precision guarantee. Report the between-level difference with uncertainty; reject the switch-price rule given its supplied false-positive result. A cap **and separate explicit paid-run approval** are required.
+
+7. **Smallest build:** one email template, one task-level multiplier applied from a common starting snapshot, and consistent email, live-index, monthly-refresh, and scheduled-price handling. Scale fuel once. Reuse the node task and add a compact analysis script. Before November 19, verify baseline identity, price visibility, booked-cost scaling, and arm isolation offline; no files or runs changed here.
+
+Read fully: CLAUDE.md, node_task.py, loader.py, context.py, pricing.yml, pricing.py, five fuel emails; sections only: audit, E10 HTML, events/manifest, audit script, economics; not read fully: broader design/world documents.

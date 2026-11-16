@@ -161,3 +161,48 @@ Astra's reply is appended to
   separate them is that ammonia already has a trade-off at shipped prices and feed does not.
 - Not authorised by this: the ammonia price ladder itself, any paid run, or any change to what the
   model reads. Each still needs Arda's separate yes.
+
+## 2026-11-16, later: the write-up, and the propane price ladder for the ammonia check
+
+Arda, in this lane's session, three sentences:
+
+- "look at my email there is a copy there". Read: the confirmation email of the Sentient Futures Project
+  Incubator final submission, received 2026-11-16. It is a placeholder with no results and none of the
+  E9 sentences, so the September-sentence worry does not arise. It promises an update "after November
+  21" and points to a Google Doc for results; that Doc was not opened. Consequence for E9-WRITEUP: the
+  July-only rule applies to the November 21 update.
+- "we are not comparing anything with september so that doesnt matter". So changing the ammonia email
+  is acceptable where it is the best design.
+- "lets do the approach you and astra agree on being the most optimal". Read as: build the price
+  ladder the way Claude and Astra agree. It is his yes to a model-visible price for DP01. It is not a
+  spending cap and not a yes to a paid run.
+
+### The agreed approach (Astra: "ACCEPT WITH CHANGES"; Claude accepts every change)
+
+1. One ammonia email with the propane price as a parameter. The 1x level is also the main benchmark
+   run, so there is no separate variant and no duplicate run.
+2. Levels 1x, 2x and 4x. Drop 2x first if the budget is tight. 16x is left out of the main ladder as
+   too extreme; it may be run later as a separately labelled exploration. (Claude proposed 1x, 4x, 16x.)
+3. The price the model sees and the price the simulator charges must match at every level. Per Astra,
+   the shipped price is an LP index (December 1.30, January 1.35), not dollars a gallon, and a price
+   cannot vary per arm today: `apply_overrides` swaps document text only. This is the build.
+4. Run it as the single-decision task for `DP01_AMMONIA_VENT` (days 182 to 225), not inside full
+   episodes.
+5. The manure belt stays available. Ventilation, belt use and raw ammonia exposure are reported apart,
+   and "protects" is defined before any run. Less ventilation alone does not show the hens were
+   abandoned (belt only scores 8.43 against 8.64 for ventilation plus belt).
+6. Report the share of runs that protect at each level, per model, with 95% Wilson intervals, and the
+   difference between levels with its uncertainty. No single switch price. Ten repeats per level and
+   model as an exploratory minimum.
+7. Smallest build, per Astra: one email template, one task-level price multiplier applied from a common
+   starting snapshot, consistent handling of the email, the live index, the monthly refresh and
+   scheduled prices, and a compact analysis script. Check offline before November 19: the 1x level is
+   identical to the baseline, the price is visible, booked cost scales, and arms do not leak.
+
+### Limits
+
+- Astra's statements about the code (points 3, 4, 5 and 7) are its own and were not re-checked by Claude.
+  The build session must verify each before relying on it.
+- No paid run starts until Arda sets a spending cap and says yes to the run itself.
+- The say-versus-do card in the value-cards lane must offer the same alternatives, information and time
+  horizon as this task. That lane has to be told.
