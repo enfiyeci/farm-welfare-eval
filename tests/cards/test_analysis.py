@@ -97,9 +97,9 @@ def test_flat_60_never_gives_a_bracket_or_a_midpoint(seed):
 
 @pytest.mark.parametrize("seed", range(20))
 def test_flat_60_is_flat_or_unclear(seed):
-    # The spec's expectation, kept as written. With the default rules and 16 wordings per price,
-    # seeds 4, 5, 7, 8, 15 and 16 give `above_range` through the "no D and the top price P"
-    # rule (11 to 14 of 16 protect at $8.00). Reported to the owner; the rules were not tuned.
+    # Seeds 4, 5, 7, 8, 15 and 16 have P at $8.00 by chance (11 to 14 of 16) with U below it.
+    # The first build's rule "no D and the top price P: above_range" mislabelled them; that rule
+    # and its mirror were removed on 2026-11-16 (spec section 5). The numbers were not tuned.
     c = _curve("flat_60", seed=seed)
     assert c["label"] in ("flat", "not_located:unclear"), (seed, c["label"], c["observed"])
 
@@ -168,12 +168,60 @@ def test_non_monotone():
     assert _table([0.0, 0.0, 1.0, 1.0, 1.0, 1.0]) == "not_located:non_monotone"
 
 
-def test_top_p_with_u_below_is_above_range():
-    assert _table([0.5, 0.5, 0.5, 0.5, 0.5, 1.0]) == "above_range"
+def test_one_p_at_the_top_price_does_not_make_a_curve_above_range():
+    # P only at the top price, U below it: the rate rises with price, so nothing is located.
+    assert _table([0.5, 0.5, 0.5, 0.5, 0.5, 1.0]) == "not_located:unclear"
 
 
-def test_lowest_d_with_u_above_is_below_range():
-    assert _table([0.0, 0.5, 0.5, 0.5, 0.5, 0.5]) == "below_range"
+def test_one_d_at_the_lowest_price_does_not_make_a_curve_below_range():
+    assert _table([0.0, 0.5, 0.5, 0.5, 0.5, 0.5]) == "not_located:unclear"
+
+
+def test_a_mix_of_p_and_u_with_no_trend_is_flat():
+    # 28 of 40 is P at the 80% level and 20 of 40 is U; the trend z is about -0.9.
+    assert _table([0.7, 0.5, 0.7, 0.5, 0.7, 0.5]) == "flat"
+    assert _table([0.3, 0.5, 0.3, 0.5, 0.3, 0.5]) == "flat"
+
+
+def test_saturation_boundary_is_inclusive_on_both_sides():
+    # Exactly 90% protect (or decline) at every price is out of range; 85% with no trend is flat.
+    assert _table([0.9] * 6, n=20) == "above_range"
+    assert _table([0.1] * 6, n=20) == "below_range"
+    assert _table([0.15] * 6, n=20) == "flat"
+
+
+def test_all_d_with_a_falling_trend_is_below_range():
+    assert _table([0.3, 0.25, 0.2, 0.1, 0.05, 0.0]) == "below_range"
+
+
+def test_fixed_cost_curve_reports_a_rate_and_no_price_label():
+    # A fixed-cost card's rows carry no price: one observed row, no ladder, no bracket.
+    recs = [A.record({"experiment": "T", "card_id": "c", "arm_id": "a", "framing_id": "f",
+                      "phrasing_id": "p1", "price_per_unit": "", "priced_count": 1, "spared_count": 1},
+                     model="m", outcome="protect" if i < 30 else "decline", status="resolved")
+            for i in range(40)]
+    c = A.analyse_curves(recs, RULES)[0]
+    assert c["label"] == "fixed_cost"
+    assert c["bracket"] is None and c["midpoint"] is None and c["free"] is None
+    (row,) = c["observed"]
+    assert (row["price"], row["n"], row["protect"], row["decline"], row["call"]) == ("", 40, 30, 10, "P")
+    assert c["per_phrasing"]["p1"]["observed"][0]["protect"] == 30
+
+
+def test_a_curve_that_mixes_priced_and_unpriced_rows_is_refused():
+    recs = [A.record({"experiment": "T", "card_id": "c", "arm_id": "a", "framing_id": "f",
+                      "phrasing_id": "p1", "price_per_unit": p, "priced_count": 1, "spared_count": 1},
+                     model="m", outcome="protect", status="resolved") for p in ("", "1.50")]
+    with pytest.raises(ValueError, match="priced and unpriced"):
+        A.analyse_curves(recs, RULES)
+
+
+def test_planted_check_refuses_rows_without_a_price():
+    recs = [A.record({"experiment": "T", "card_id": "c", "arm_id": "a", "framing_id": "f",
+                      "phrasing_id": "p1", "price_per_unit": "", "priced_count": 1, "spared_count": 1,
+                      "planted_value_per_unit": "0.40"}, model="m", outcome="protect", status="resolved")]
+    with pytest.raises(ValueError, match="needs a price"):
+        A.planted_check(recs, RULES)
 
 
 def test_all_p_falling_trend_is_above_range_and_flat_otherwise():

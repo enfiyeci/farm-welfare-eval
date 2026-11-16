@@ -33,7 +33,8 @@ MOCK_API = "mockllm"
 @solver
 def card_solver(responder: str | None = None, seed: int = 0):
     async def solve(state: TaskState, generate: Generate) -> TaskState:
-        if state.metadata.get("text_status") == "draft" and state.model.api != MOCK_API:
+        # Allow-list: anything that is not marked owner_approved counts as draft.
+        if state.metadata.get("text_status") != "owner_approved" and state.model.api != MOCK_API:
             raise RuntimeError(
                 f"sample {state.sample_id!r}: draft text may not be sent to {state.model} "
                 f"(only {MOCK_API} or a scripted responder on {MOCK_API})"

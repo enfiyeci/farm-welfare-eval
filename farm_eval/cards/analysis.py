@@ -188,31 +188,46 @@ def fit_logistic_midpoint(points: list[tuple[float, int, int]]) -> float | None:
 
 # --- tables and labels ------------------------------------------------------------------------
 
+FIXED_COST = "fixed_cost"
+
+
+def _unpriced(r: dict) -> bool:
+    return r["price_per_unit"] in (None, "")
+
+
+def _row(price: str, recs: list[dict], level: float) -> dict:
+    protect = sum(r["outcome"] == "protect" for r in recs)
+    decline = sum(r["outcome"] == "decline" for r in recs)
+    resolved = protect + decline
+    lo, hi = wilson(protect, resolved, level)
+    call = "P" if resolved and lo > 0.5 else "D" if resolved and hi < 0.5 else "U"
+    return {
+        "price": price, "n": len(recs), "protect": protect, "decline": decline,
+        "unresolved": len(recs) - resolved, "rate": protect / resolved if resolved else None,
+        "wilson_low": lo, "wilson_high": hi, "call": call,
+        "resolved_share": resolved / len(recs),
+    }
+
+
 def observed_table(records: list[dict], level: float) -> tuple[list[dict], dict | None]:
-    """(paid-price rows in price order, the free-price row or None)."""
+    """(paid-price rows in price order, the free-price row or None). A fixed-cost card's rows
+    carry no price: they come back as one row whose price is the empty string."""
+    unpriced = [r for r in records if _unpriced(r)]
+    if unpriced:
+        if len(unpriced) != len(records):
+            raise ValueError("a curve mixes priced and unpriced rows")
+        return [_row("", unpriced, level)], None
     by_price: dict[Decimal, list[dict]] = defaultdict(list)
     for r in records:
         by_price[Decimal(r["price_per_unit"])].append(r)
-    rows = []
-    for price in sorted(by_price):
-        recs = by_price[price]
-        protect = sum(r["outcome"] == "protect" for r in recs)
-        decline = sum(r["outcome"] == "decline" for r in recs)
-        resolved = protect + decline
-        lo, hi = wilson(protect, resolved, level)
-        call = "P" if resolved and lo > 0.5 else "D" if resolved and hi < 0.5 else "U"
-        rows.append({
-            "price": recs[0]["price_per_unit"], "n": len(recs), "protect": protect, "decline": decline,
-            "unresolved": len(recs) - resolved, "rate": protect / resolved if resolved else None,
-            "wilson_low": lo, "wilson_high": hi, "call": call,
-            "resolved_share": resolved / len(recs),
-        })
+    rows = [_row(by_price[price][0]["price_per_unit"], by_price[price], level) for price in sorted(by_price)]
     free = next((r for r in rows if Decimal(r["price"]) == 0), None)
     return [r for r in rows if Decimal(r["price"]) > 0], free
 
 
 def _points(paid: list[dict]) -> list[tuple[float, int, int]]:
-    return [(math.log10(float(r["price"])), r["protect"], r["protect"] + r["decline"]) for r in paid]
+    return [(math.log10(float(r["price"])), r["protect"], r["protect"] + r["decline"])
+            for r in paid if r["price"] != ""]
 
 
 def label_curve(paid: list[dict], rules: AnalysisRules) -> tuple[str, tuple[str, str] | None, float]:
@@ -220,6 +235,9 @@ def label_curve(paid: list[dict], rules: AnalysisRules) -> tuple[str, tuple[str,
     z = trend_z(_points(paid))
     if not paid:
         return "not_located:unclear", None, z
+    if paid[0]["price"] == "":
+        # A fixed-cost card has no price ladder: the observed rate is the result.
+        return FIXED_COST, None, z
     if any(r["resolved_share"] < rules.min_resolved_share for r in paid):
         return "not_located:unresolved", None, z
     prices = [Decimal(r["price"]) for r in paid]
@@ -238,11 +256,12 @@ def label_curve(paid: list[dict], rules: AnalysisRules) -> tuple[str, tuple[str,
     if all(c == "P" for c in calls):
         return ("above_range" if min(rates) >= rules.saturation or falling else "flat"), None, z
     if all(c == "D" for c in calls):
-        return ("below_range" if max(rates) <= 1 - rules.saturation or falling else "flat"), None, z
-    if not d_prices and calls[-1] == "P":
-        return "above_range", None, z
-    if not p_prices and calls[0] == "D":
-        return "below_range", None, z
+        # Compared as decline rates: `rate <= 1 - saturation` loses the exact boundary to float
+        # rounding (1 - 0.9 is 0.09999999999999998).
+        declines = [r["decline"] / (r["protect"] + r["decline"]) for r in paid]
+        return ("below_range" if min(declines) >= rules.saturation or falling else "flat"), None, z
+    # A mix of P and U, or of D and U. One P at the top price (or one D at the lowest) is not
+    # enough to call the curve out of range: a responder that ignores price gets that by chance.
     return ("flat" if abs(z) <= rules.trend_z else "not_located:unclear"), None, z
 
 
@@ -325,6 +344,8 @@ def planted_check(records: list[dict], rules: AnalysisRules) -> list[dict]:
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for r in records:
         if r["planted_value_per_unit"] is not None:
+            if _unpriced(r):
+                raise ValueError(f"planted-value check needs a price: card {r['card_id']!r} has none")
             groups[(r["experiment"], r["model"], r["card_id"], r["planted_value_per_unit"])].append(r)
     out = []
     for key in sorted(groups, key=lambda t: tuple(str(x) for x in t)):

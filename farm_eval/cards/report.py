@@ -33,6 +33,7 @@ def read_logs(log_dir: str | Path) -> tuple[list[dict], dict[str, list[dict]], l
     records: list[dict] = []
     calls: dict[str, list[dict]] = defaultdict(list)
     configs: list[dict] = []
+    seen: dict[tuple, str] = {}
     for info in sorted(list_eval_logs(str(log_dir)), key=lambda i: i.name):
         log = read_eval_log(info)
         model = log.eval.model
@@ -44,6 +45,14 @@ def read_logs(log_dir: str | Path) -> tuple[list[dict], dict[str, list[dict]], l
         for s in log.samples or []:
             meta = dict(s.metadata or {})
             key = _model_key(model, meta)
+            # One answer per run-sheet row and model: a second log of the same sheet in this
+            # folder would double every count.
+            row_key = (key, meta.get("experiment"), meta.get("row_id"))
+            log_name = Path(info.name).name
+            if row_key in seen:
+                raise CardBankError(f"{log_dir}: row {meta.get('row_id')!r} of {key} appears more than once "
+                                    f"({seen[row_key]} and {log_name}); keep one run per log folder")
+            seen[row_key] = log_name
             score = (s.scores or {}).get(SCORER)
             if s.error is not None or score is None:
                 outcome, status = "unresolved", "error"
@@ -128,7 +137,7 @@ def _table(rows: list[dict], free: dict | None) -> list[str]:
     out = ["| price | n | protect | decline | unresolved | protect rate | Wilson interval | call |",
            "|---|---|---|---|---|---|---|---|"]
     for r in ([free] if free else []) + rows:
-        name = f"{r['price']} (free)" if free is r else r["price"]
+        name = f"{r['price']} (free)" if free is r else r["price"] or "(no price)"
         out.append(f"| {name} | {r['n']} | {r['protect']} | {r['decline']} | {r['unresolved']} | "
                    f"{_pct(r['rate'])} | {r['wilson_low']:.2f} to {r['wilson_high']:.2f} | "
                    f"{'-' if free is r else r['call']} |")

@@ -60,6 +60,14 @@ def test_report_refuses_an_experiment_without_a_rules_entry(tmp_path):
         build_report(logs, rules, PRICES)
 
 
+def test_report_refuses_the_same_row_twice_for_one_model(tmp_path):
+    # A sheet rerun into the same log folder would double every count without this refusal.
+    _run(tmp_path, "FX_small", "always_protect")
+    logs = _run(tmp_path, "FX_small", "always_protect")
+    with pytest.raises(CardBankError, match="more than once"):
+        build_report(logs, FIX / "rules.yml", PRICES)
+
+
 def test_mockllm_run_of_e7_reports_unresolved_and_config(tmp_path):
     logs = _run(tmp_path, "E7_noise_floor", None, cards_dir=REAL, sheet=REAL / "runsheets" / "E7_noise_floor.csv")
     rep = build_report(logs, REAL / "rules.yml", PRICES)

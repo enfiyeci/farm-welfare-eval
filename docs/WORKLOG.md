@@ -4,6 +4,36 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · value card bank: build reviewed, label rule fixed, merged into feat/value-card-bank, dry run passes
+
+- **Merged:** `build/value-card-bank` (`5404cd7f`) into `feat/value-card-bank`. The draft card
+  files moved from `schedule/cards-staging/` (now gone) into `schedule/cards/`: 7 cards, 11
+  framings. Only `farm_agent` and `chick_sourcing` p1 are `owner_approved`. The E7 sheet rebuilt
+  byte for byte the same, and the owner's page rebuilt byte for byte the same from the new folder
+  (`--check-against-package`: 38 identical, 0 different), so it was not republished.
+- **Label rule changed (spec section 5):** the branches "no D and the top price P: above_range" and
+  "no P and the lowest price D: below_range" are removed. A mix of P and U is now `flat` or
+  `not_located:unclear` by the trend statistic. No threshold was tuned. In a simulation of 20,000
+  curves the old rule called a flat 60% responder `above_range` 30% of the time at 16 answers a
+  price and 57% at 80.
+- **Review (lane read of all non-test code, plus an Opus reviewer subagent):** fixed in one wave:
+  the analysis crashed on fixed-cost cards (`c1_end_or_keep` is one; such a curve now gets the
+  label `fixed_cost`); the all-D saturation boundary was lost to float rounding; the report now
+  refuses the same row twice for one model (a rerun into the same log folder doubled counts); the
+  sheet builder refuses a factor listed twice; the solver's draft gate is an allow-list. Ledger with
+  every finding and outcome:
+  `~/claude-sync/handoffs/enfiyeci-farm-welfare-eval/artifacts/value-cards/build-review-ledger-2026-11-16.md`.
+- **Open, owner's call:** (1) a responder that ignores price can still get a bracket by chance
+  (about 9% of curves at a 50% rate, 3% at 60%, 16 answers a price); requiring a falling trend
+  before a bracket is reported cuts that to about 2.5% and 1% at no cost on stepped responders in
+  the simulation. Not applied. (2) Text status looks only at the framing and the phrasing, so text
+  added to a card's `slots` or to an arm rides on an approved phrasing. No leak today (the only
+  approved phrasing uses no slot and one arm); enforcing it in code is deferred.
+- **Tests:** `tests/cards` 170 pass. Dry run prints the expected labels. Full suite: see the
+  handoff (run after this entry was written).
+- **Skipped:** the Codex adversarial pass (usage limit until November 17, 2026, 3:00 AM), owed on
+  `git diff 71652a0f..HEAD`. No paid call was made. E7 waits for the owner's go.
+
 ## 2026-11-16 · claude · value card bank: code built on its own branch (unreviewed), draft texts on a page for the owner
 
 - **Built, not yet reviewed or merged:** an Opus implementer built the spec on branch

@@ -110,6 +110,12 @@ def test_unknown_arm_or_experiment_is_an_error():
         build_rows(load_bank(FIX), load_experiments_from(BASE_EXP), "Y")
 
 
+def test_a_factor_listed_twice_is_an_error_at_build_time():
+    # Without this the sheet is written with repeated row ids and Inspect refuses it at run time.
+    with pytest.raises(CardBankError, match="listed twice"):
+        build_rows(load_bank(FIX), load_experiments_from({**BASE_EXP, "phrasings": ["p1", "p1"]}), "X")
+
+
 def load_experiments_from(exp):
     from farm_eval.cards.runsheet import ExperimentsFile
     return ExperimentsFile.model_validate({"ladder": ["0", "1.50"], "experiments": [exp]})

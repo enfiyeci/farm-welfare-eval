@@ -80,6 +80,9 @@ def test_draft_gate_in_solver_refuses_a_real_model_before_generation():
         _run_solver("anthropic/claude-x", "draft")
     with pytest.raises(RuntimeError, match="draft"):
         _run_solver("anthropic/claude-x", "draft", responder="always_protect")
+    # Only the exact value owner_approved passes; a missing or unknown status counts as draft.
+    with pytest.raises(RuntimeError, match="draft"):
+        _run_solver("anthropic/claude-x", "")
 
 
 def test_draft_gate_lets_mockllm_and_approved_through():

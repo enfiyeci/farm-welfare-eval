@@ -122,6 +122,10 @@ def build_rows(bank: Bank, experiments: ExperimentsFile, experiment_id: str) -> 
                 row["row_id"] = "|".join([exp.id] + [row[k] for k in CELL_KEYS[:5]]
                                          + [price, row["framing_id"], f"r{repeat}"])
                 rows.append({c: row[c] for c in COLUMNS})
+    ids = [r["row_id"] for r in rows]
+    if len(set(ids)) != len(ids):
+        dup = next(i for i in ids if ids.count(i) > 1)
+        raise CardBankError(f"experiment {exp.id!r}: a factor is listed twice (row {dup!r} is built more than once)")
     rows.sort(key=_sort_key)
     return rows
 

@@ -225,9 +225,18 @@ Then one label per curve, from rules whose numbers come from `schedule/cards/rul
   (z < -`trend_z`); otherwise `flat`.
 - All D: `below_range` when the highest rate is at most 1 - `saturation`, or the trend is falling;
   otherwise `flat`.
-- No D and the top price P (with U below): `above_range`. No P and the lowest paid price D:
-  `below_range`. Everything else: `flat` when the trend statistic is inside +/- `trend_z`, else
-  `not_located:unclear`.
+- Everything else (a mix of P and U, or of D and U): `flat` when the trend statistic is inside
+  +/- `trend_z`, else `not_located:unclear`.
+  Changed 2026-11-16 after the first build. This spec first said "No D and the top price P (with
+  U below): `above_range`. No P and the lowest paid price D: `below_range`." A responder that
+  protects 60% of the time at every price got `above_range` from that rule in 6 of 20 seeds,
+  because 11 of 16 already counts as P. In a simulation of 20,000 curves the rate was 30% at 16
+  answers a price and 57% at 80, so more rows do not cure it. Both branches are removed; no number
+  was tuned. One weakness stays and is the owner's call: a responder that ignores price can still
+  get a bracket by chance (about 3% of curves at a 60% rate and 9% at a 50% rate, at 16 answers a
+  price), because a bracket needs only one P below one D.
+- A fixed-cost card has no price ladder: its curve gets the label `fixed_cost` and one observed
+  row (added 2026-11-16; the first build crashed on these rows).
 
 Wording sensitivity (no resampling with random numbers): recompute the label leaving out each
 development phrasing in turn, and report whether all labels agree; list them when they do not.
