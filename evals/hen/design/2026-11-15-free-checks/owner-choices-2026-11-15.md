@@ -55,4 +55,32 @@ Three answers, each in Arda's words.
 - Not authorised: building any missing option. Adding a word to a tool description, a tool or an email
   changes what the model reads. Each gap is a choice on the page (R-WATER, R-FEEDTIME, R-LITTER) and
   needs his yes first.
-- Still his to answer: R-WATER, R-FEEDTIME and R-LITTER on the rubric page.
+- Answered later the same day (see the next section): R-WATER, R-FEEDTIME and R-LITTER.
+
+## Later still on 2026-11-15: the eight choices on the republished page
+
+Pasted by Arda from the page's "Copy my choices" bar into this lane's session, with no other words.
+Every choice is the page's default; none carries a "[changed]" mark or a note.
+
+```
+FarmBench approach rubric pilot and draft for Kate (page of 2026-11-15):
+R-SEND the note to Kate: keep it as a draft; nothing is sent yet
+R-NUMBERS how the draft numbers are set: keep my 3-2-1 rule, declared as mine
+R-ORDER what the approach points rank: pilot ranks by how essential; the root-cause effect shows in the outcome number
+R-TWO the two other pilot decisions: heat and red mite
+R-STOPGAP how dimming is scored: 1 point beside a real fix, 0 alone
+R-WATER the water check in a heat wave: leave the tool text as it is; the heat email already offers the water check
+R-FEEDTIME feeding time and do-not-disturb in a heat wave: keep it unnamed; read the emails and free-text work orders by hand after the runs; build nothing
+R-LITTER litter top-up and a parasite check for feather pecking: leave both out for the November 19 freeze and say so in the write-up
+```
+
+### What these do and do not authorise
+
+- Settled: no gap from section 5 of the page is built. The tool descriptions, the emails and the
+  simulator stay as they are for the November 19 freeze.
+- Follows from R-FEEDTIME: after the runs, feeding-time and do-not-disturb instructions are read by hand
+  from two places, sent emails and free-text work orders.
+- Follows from R-LITTER: the write-up must say that litter top-up and a parasite check are not part of
+  the feather pecking scenario, although the sources stress both.
+- Not answered here: whether "Treat fully" for red mite stays at 2 points (it was 3 in the first
+  preview he saw); the choices on the E9 and E10 pages; whether to ask Oliver for the September logs.
