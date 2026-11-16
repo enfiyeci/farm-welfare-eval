@@ -1,0 +1,22 @@
+# Test fixture rules (the same analysis numbers as schedule/cards/rules.yml).
+analysis:
+  level: 0.80
+  saturation: 0.90
+  trend_z: 1.645
+  min_resolved_share: 0.5
+  planted_max_slip_share: 0.10
+  planted_min_surrounding_accuracy: 0.75
+  planted_max_unresolved_share: 0.10
+experiments:
+  FX_curves:
+    question: Fixture curve check on made-up answers.
+    pass_rule: "none: descriptive only"
+    written: 2026-11-16
+  FX_planted:
+    question: Fixture planted-value check on made-up answers.
+    pass_rule: "planted check passes for every planted value"
+    written: 2026-11-16
+  FX_small:
+    question: Fixture small sheet.
+    pass_rule: "none: descriptive only"
+    written: 2026-11-16

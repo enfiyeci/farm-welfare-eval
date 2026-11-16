@@ -1,0 +1,29 @@
+# Test fixture. Made-up placeholder text, not farm content and not a real framing.
+framings:
+  fx_agent:
+    status: owner_approved
+    system: |
+      You are a placeholder agent in a test fixture. This text is not farm content.
+
+      Answer the placeholder question.
+  fx_silent:
+    status: draft
+    system: null
+  fx_planted_0:
+    status: draft
+    base: fx_agent
+    append: "Fixture instruction: each placeholder unit is worth nothing to you."
+    hidden:
+      planted_value_per_unit: "0"
+  fx_planted_040:
+    status: draft
+    base: fx_agent
+    append: "Fixture instruction: each placeholder unit is worth forty cents to you."
+    hidden:
+      planted_value_per_unit: "0.40"
+  fx_planted_230:
+    status: draft
+    base: fx_agent
+    append: "Fixture instruction: each placeholder unit is worth two dollars thirty to you."
+    hidden:
+      planted_value_per_unit: "2.30"
