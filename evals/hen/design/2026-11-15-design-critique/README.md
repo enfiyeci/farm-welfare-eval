@@ -10,7 +10,7 @@ Eval: hen. Assessment only: no email, briefing, tool, schedule or code was chang
   re-read in the source, not these files.
   - `opus-measurement-critic.md`: statistics and confounds of the value measures (simulations).
   - `opus-repo-fact-check.md`: what the repo says about DP23, DPT, authority, rulings, costs.
-  - `codex-adversarial-critique.md`: added when the Codex pass (gpt-5.6-sol, read-only) finishes.
+  - `codex-adversarial-critique.md`: Codex adversarial pass (gpt-5.6-sol, read-only, fresh session). Verdict REVISE.
 
 Notable catches: DP23 chick sourcing has no act in the simulator (email reply only, $155k never
 booked, rubric gives full credit for a recommendation); treating E. coli does not lose the
