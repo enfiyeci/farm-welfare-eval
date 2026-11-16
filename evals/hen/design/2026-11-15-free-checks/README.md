@@ -16,7 +16,7 @@ proposal; the point system approved on 2026-08-19 stands.
 |---|---|
 | `evals/hen/design/2026-11-15-free-checks/e9-what-september-shows.html` | Experiment E9. The September run logs are not on the MacBook, so the September half is a second-hand reading of the review notes. The July round-3 pilot transcript was read end to end as a first-hand stand-in. |
 | `evals/hen/design/2026-11-15-free-checks/e10-is-the-price-real.html` | Experiment E10. Which candidate decisions can carry a price, from scripted replays through the real simulator. Numbers come from `evals/hen/runs/2026-11-15-price-real-audit.md`. |
-| `evals/hen/design/2026-11-15-free-checks/approach-rubric-pilot-and-kate-draft.html` | A pre-scored feather-pecking rubric and a draft note for Kate Hartcher (Arda sends it; nothing was sent), its source basis, first-pass lists for heat and red mite, the hand-labelling list. |
+| `evals/hen/design/2026-11-15-free-checks/approach-rubric-pilot-and-kate-draft.html` | A pre-scored feather-pecking rubric and a draft note for Kate Hartcher (Arda sends it; nothing was sent), its source basis, heat and red mite scored by the same 3-2-1 convention, a check of which actions the model can take and how the run records them, the hand-labelling list. |
 
 Each page has a choice picker with a comment box per choice and a "Copy my choices" bar.
 
@@ -63,3 +63,13 @@ Written by Codex (gpt-5.6-sol) from a brief, reviewed by a fresh Codex session, 
   committed, because they are other people's documents.
 - Scoring by "how essential" puts separating injured birds first, which reverses the ladder order
   fixed on 2026-08-11.
+- The three named sources give only general temperature advice (Best Practice Hens pp.84 to 85), not a
+  heat-wave response. The heat (DP03) points rest on Hy-Line's 2016 heat-stress update, so heat
+  standings are marked open. "Ask an expert" was removed from the heat list
+  on 2026-11-15 after Arda questioned it: Hy-Line has no consult step.
+- `schedule_maintenance` accepts any task text, books the callout fee and records the call. Only a few
+  named tasks change anything, so "accepted by the tool" does not show "did something". The water
+  check for heat is such a call: the heat email asks for it, and the tool description does not name it.
+- A comment in `schedule/events.yml` (lines 145 to 149) still calls the evaporative-cooling work order
+  inert. The code gives it an effect (`pad_serviced`). The comment was left alone: the schedule is not
+  this lane's to change.

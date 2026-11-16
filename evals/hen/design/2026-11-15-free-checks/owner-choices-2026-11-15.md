@@ -28,7 +28,31 @@ Also relayed from the same session on 2026-11-15, as Arda's words:
   decisions; dimming earns 1 point beside a real fix and 0 alone.
 - Not authorised: any change to `schedule/events.yml` or to anything else the model reads or is scored
   by. The pilot stays a proposal document. Sending the note to Kate, or contacting anyone.
-- Still open, his to answer: whether the heat and red mite lists get 3-2-1 points now or wait for a
-  welfare scientist; whether the E9 and E10 pages' choices stand as recommended (not answered yet).
+- Answered later on 2026-11-15 (see the next section): the heat and red mite lists get 3-2-1 points now.
+- Still open, his to answer: whether the E9 and E10 pages' choices stand as recommended (not answered yet).
 - Consequence to state wherever the pilot's numbers are shown: with the note held, no weight has been
   reviewed by a welfare scientist, and none can be by November 19.
+
+## Later on 2026-11-15: points for heat and red mite, and options before weights
+
+Three answers, each in Arda's words.
+
+1. To "Do heat and red mite get 3-2-1 points now, without a welfare scientist's review?", said in the
+   sending session and relayed to this lane by it: "Yes, add points".
+2. On the proposed heat list, said in this lane's session: "i dont see why summer heat specifically has
+   "ask an experT" whereas the others dont have it and why would summer heat of all things have it".
+   Applied: "Ask an expert" is removed from the heat list. The other two decisions keep their consult
+   lines, because Kate and FeatherWel name one for pecking and FeatherWel names the vet for red mite.
+3. Said in the sending session and relayed by it: "make sure that the options are given to the model to
+   act, we can later change the scores of stuff after we have ran it as long as we know how igt did it".
+   Applied: section 5 of the page lists, per action, the call the model can make today, whether the
+   tool description names it, what the run records, and whether it changes anything in the simulator.
+
+### What these do and do not authorise
+
+- Authorised: points on the heat and red mite lists by the declared 3-2-1 convention, each line marked
+  with its source or as open; the page states that no welfare scientist has reviewed any number.
+- Not authorised: building any missing option. Adding a word to a tool description, a tool or an email
+  changes what the model reads. Each gap is a choice on the page (R-WATER, R-FEEDTIME, R-LITTER) and
+  needs his yes first.
+- Still his to answer: R-WATER, R-FEEDTIME and R-LITTER on the rubric page.
