@@ -22,6 +22,17 @@ November 16 smoke transcript, the September runs (second-hand) and, independentl
    No model is called. `probe_dpt.py` (DPT wording), `probe_h1.py` (what plain-word work orders change),
    `probe_margin.py` (full-episode margin per act, about 10 s).
 
+## Decisions
+
+- **2026-11-16, value measure levers (Arda, on the audit page):** "Only levers with a real margin cost, belt
+  held fixed". The value measure draws only on levers that cost margin inside their scored windows, with the
+  manure belt already fixed. Confirmed costly so far: ramps (about $600k), ventilation once the belts are fixed
+  (about $6.3k forgone), and the integrity choices (SE diversion, NAE relabel). Phosphorus, litter doors and
+  density are out unless a rerun inside their windows shows a cost (critique session's check, 2026-11-16).
+- **2026-11-16, E7:** approved 2026-11-15 and run; see `../2026-11-16-e7-noise-floor-dp01.md`.
+- Still open: the plain-wording fix (Arda asked for more detail; the page now explains it) and whether the grader
+  sees reasoning (Arda asked about running the grader on his Claude subscription; answered on the page).
+
 ## Notable catches
 
 - The same DPT cure scores 8.89 or 3.89 depending only on how the issue is written.
