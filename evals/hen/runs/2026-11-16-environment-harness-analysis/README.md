@@ -30,8 +30,16 @@ November 16 smoke transcript, the September runs (second-hand) and, independentl
   (about $6.3k forgone), and the integrity choices (SE diversion, NAE relabel). Phosphorus, litter doors and
   density are out unless a rerun inside their windows shows a cost (critique session's check, 2026-11-16).
 - **2026-11-16, E7:** approved 2026-11-15 and run; see `../2026-11-16-e7-noise-floor-dp01.md`.
-- Still open: the plain-wording fix (Arda asked for more detail; the page now explains it) and whether the grader
-  sees reasoning (Arda asked about running the grader on his Claude subscription; answered on the page).
+- **2026-11-16, plain wording (Arda, on the audit page):** "Reject unknown work orders with the valid list, and
+  let DPT's issue match on containment, before the runs". Not implemented yet.
+- **2026-11-16, grader and reasoning:** Arda answered "yes it should" to "pick whether the grader sees reasoning,
+  and say whether you want a Claude grader through an API key for the Gemini runs". Which of the two it answers,
+  and which reasoning scope (scan and eval-awareness only, or every grader call), is not yet confirmed.
+- **2026-11-16, Oliver's question** (an early bad financial decision degrading later welfare choices): the farm
+  has no cash constraint (no budget check in `farm_eval/env/episode.py` or `model/economics.py`), so spending
+  never blocks a later act; any carry-over is through what the model reads in `read_financials` and through
+  world state it changed. Node episodes each restart from a routine-only snapshot, so nothing carries between
+  decisions. Within one episode it is untested.
 
 ## Notable catches
 
