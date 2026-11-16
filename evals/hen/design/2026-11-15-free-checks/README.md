@@ -54,7 +54,10 @@ Written by Codex (gpt-5.6-sol) from a brief, reviewed by a fresh Codex session, 
 ## The DP01 propane price ladder (branch `feat/dp01-price-ladder`, from 2026-11-16)
 
 `evals/hen/design/2026-11-15-free-checks/2026-11-16-dp01-price-ladder-build-plan.md`: Astra's code
-claims checked against the code, the design decisions, and the build steps. The spec it builds is the
+claims checked against the code, the design decisions, the build steps, and the build record with its
+review ledger. `evals/hen/design/2026-11-15-free-checks/dp01-price-ladder-cost.html` (from
+`src/body-ladder.html`, published at https://claude.ai/artifact/2JzfBTq9LPMuMQYsKx3urj): the cost per
+run and the four choices before any paid run. The spec the plan builds is the
 last section of `owner-choices-2026-11-15.md`. On that branch the opening note of this README no longer
 holds: the ladder changes `farm_eval/` and the ammonia email, with Arda's yes of 2026-11-16.
 

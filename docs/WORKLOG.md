@@ -4,6 +4,20 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · DP01 propane price ladder built offline (branch feat/dp01-price-ladder)
+
+- **What:** `farm_node_task` takes `-T fuel_price_multiplier=<x>` (needs `episode_ids` when not 1).
+  It scales the LP fuel index from the episode's first day wherever the index is written, so the
+  email, `query_pricing`/`read_financials` and the heating charge agree. The ammonia email
+  `corpus/documents/emails/fuel_w26.md` now states the index through a `{{lp_fuel_index}}` token
+  (1.30 at 1x). New analysis: `farm_eval/report/price_ladder.py`, `scripts/dp01_price_ladder.py`.
+  THE 1x EMAIL CHANGED FOR THE MAIN BENCHMARK TOO (owner's yes, 2026-11-16).
+- **Validation:** full suite 3,360 passed / 3 skipped / 1 failed (order-dependent, not from this
+  change). Reviewed by a fresh Opus subagent, REVISE then APPROVED. The Codex pass did NOT run:
+  the Codex workspace was out of credits. It is owed before a merge.
+- **Next:** owner sets a cap and says yes before any paid run. Plan, build record and review
+  ledger: `evals/hen/design/2026-11-15-free-checks/2026-11-16-dp01-price-ladder-build-plan.md`.
+
 ## 2026-11-12 · codex · partial-safe cross-run report arithmetic (branch fix/sept22-run-failures)
 
 - **What:** cross-run headline, dimension and node deltas are now computed only for two finite

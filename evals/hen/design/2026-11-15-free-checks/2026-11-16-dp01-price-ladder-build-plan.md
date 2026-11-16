@@ -115,8 +115,9 @@ dollar figure exists in `corpus/pricing.yml` or in the five fuel emails, which w
    `scripts/dp01_price_ladder.py` reads `.eval` logs (see `scripts/node_reliability.py` for how) and
    prints, per model and level: runs, incomplete runs listed apart, share that protect with its
    interval, the three separate measures, and each pair of levels' difference with its interval. No
-   switch price. A log with no multiplier in its metadata counts as 1x. Tests use made-up records,
-   because no real log is on this machine.
+   switch price. ~~A log with no multiplier in its metadata counts as 1x.~~ Corrected in review: such
+   a log predates the price line, so its runs are listed apart and not counted (section 7). Tests use
+   made-up records, because no real log is on this machine.
 7. **Full suite, then review.** One Codex adversarial pass on the combined diff (`gpt-5.6-sol`,
    read-only, mutation guard), one fix wave, re-verify by `resume`. Commit by explicit path. No push
    without Arda's yes.
@@ -135,3 +136,58 @@ dollar figure exists in `corpus/pricing.yml` or in the five fuel emails, which w
 
 A feed ladder (DP04), a 16x level, any change to the follow-up emails, any dollars-a-gallon price,
 any paid run.
+
+## 7. Build record (2026-11-16)
+
+**Who built it.** Codex could not: both `gpt-5.6-sol` and `gpt-5.6-terra` stopped with "Your workspace
+is out of credits", before any file changed. An Opus subagent built steps 1 to 6 from this plan in this
+worktree, uncommitted. A second Opus subagent, with no view of the first, reviewed the diff read-only.
+⚠️ The Codex adversarial pass required by the review rule did not run and is still owed before a merge.
+
+**Result of the four checks** (tests in `tests/schedule/test_dp01_price_ladder.py`,
+`tests/env/test_pricing.py`, `tests/adapter/test_node_task.py`):
+
+- 1x is the baseline: no golden, anchor or reference file changed.
+- The price is visible: the day-182 email reads 1.30, 2.60, 5.20 and equals `query_pricing`; January
+  reads 1.35, 2.70, 5.40.
+- Booked cost scales: protecting against cutting fuel costs $5,094 at 1x, $9,196 at 2x and $17,398 at
+  4x (re-run by the orchestrator). Window exposure is identical at every level (400 million ppm-hours
+  for the protective sequence, 3,925 million for the fuel cut), and so is the starting margin.
+- Levels do not leak: the snapshot cache key holds the level.
+- Ordering inside one advance, pinned by a test: the days of an advance are costed at the index in
+  force when it starts.
+
+**Full suite:** 3,360 passed, 3 skipped, 1 failed. The failure,
+`tests/judge/test_node_only_reference_gaps.py::test_a_missing_anchor_emits_no_subscore_instead_of_a_neutral_one`,
+is not from this change: it reproduces with that file plus `tests/scripts/test_price_real_audit.py`
+alone, because importing `scripts/price_real_audit.py` lowers a judge logger's level for the process.
+
+**Deviations from this plan.**
+
+- `corpus/personas.yml` gained one allow-list line: "1.00 all summer" in a December mail trips the
+  season lint, and the sentence is fixed.
+- At 1.0 the two state fields are left at their defaults (not set to the start day).
+- A level other than 1 on a corpus with no `lp_fuel_index` table raises.
+- "Belt shortened" is read from the ledger's `root_cause_used` flag; "ventilation lowered" means a
+  ventilation setpoint set below that house's starting-snapshot value, in any house.
+
+**Review ledger** (round 1 REVISE, round 2 APPROVED).
+
+| # | Finding | Severity | Outcome |
+|---|---|---|---|
+| 1 | Runs from logs made before the price line were pooled with 1x | important | Fixed: listed apart, not counted, unless `--legacy-as-1x` |
+| 2 | The experimental stamp reaches the score but `scripts/node_reliability.py` does not read it | minor | Won't fix here: the same gap exists for ablation runs. The comment in `farm_eval/node_task.py` now says so. Keep ladder logs in their own folder. Follow-up |
+| 3 | At off-ladder levels the email showed two decimals where the tools show three | minor | Fixed: `_index_text` |
+| 4 | The corpus token check accepted a spaced token the renderer would not fill | minor | Fixed |
+| 5 | A module-level import in the new schedule test could make the judge test above fail | minor | Fixed: imported inside the test |
+| 6 | The realism probes (`farm_eval/probe/artifacts.py`) and `kappa-labels/` see the raw `{{lp_fuel_index}}` token | minor | Won't fix now: the tested model never sees it. Follow-up before the next probe run |
+| 7 | Raw exposure included ammonia hours from before the episode (about 525 million) | minor | Fixed: the starting snapshot's value is subtracted |
+| 8 | Three cases no current episode reaches: an episode starting on day 0; a fuel `pricing_shift` dated between the last routine session and the start day; arms pooled in the report | minor | Won't fix: recorded here |
+| 9 | Two tests pass by construction (1x equals no argument; no leak) | minor | Kept as documentation; the same-books, cache-key and visibility tests are the real checks |
+| r2 | Old-log runs still add to the 1x row's "runs" column | minor | Left: the share ignores them and the list at the bottom names them |
+
+**Never run against a real log.** ⚠️ `scripts/dp01_price_ladder.py` has only read made-up records.
+
+**Cost page for Arda:** `evals/hen/design/2026-11-15-free-checks/dp01-price-ladder-cost.html`,
+published at https://claude.ai/artifact/2JzfBTq9LPMuMQYsKx3urj. Its four choices (cap and yes,
+definition of "protects", levels, index or dollars) are open.

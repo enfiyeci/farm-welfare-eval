@@ -24,6 +24,9 @@ PAGES = {
     "approach-rubric-pilot-and-kate-draft.html": (
         "FarmBench Approach Rubric Pilot", "farmbench-free-checks-rubric-v1",
         "FarmBench approach rubric pilot and draft for Kate (page of 2026-11-15):", "body-rubric.html"),
+    "dp01-price-ladder-cost.html": (
+        "FarmBench Price Ladder Cost", "farmbench-free-checks-ladder-v1",
+        "FarmBench winter ammonia price ladder, cost and choices (page of 2026-11-16):", "body-ladder.html"),
 }
 
 EXTRA_CSS = """
