@@ -163,7 +163,7 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </header>
 
 <section class="section">
-  <div class="label"><b>10</b>Checks, with evidence</div>
+  <div class="label"><b>11</b>Checks, with evidence</div>
   <div>
 
     <div class="ck">
@@ -308,6 +308,26 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
       </div>
     </div>
 
+    <div class="ck">
+      <div class="ckhead"><span class="code">E7 · DP01 LEDGER</span><h3>The belt fix works on the farm but never reaches the ledger</h3><span class="tag warn">added November 16</span></div>
+      <div class="ckgrid">
+        <div>
+          <p>Found during E7, the ten DP01 winter-ammonia runs. In all ten, the cost report shows "scored decision 0" and "first scored action none", although every run ordered a House 4 manure-belt service and emailed Rob refusing the overnight ventilation cut.</p>
+          <p>The cause is the reverse of H1. A <code>schedule_maintenance</code> order with task <code>manure_belt</code> really does reset the house's belt to every two days (<code>farm_eval/env/episode.py:1185-1202</code>). But DP01's only action matcher is <code>adjust_setpoint</code> with <code>belt_interval_days</code> below 4 (<code>schedule/events.yml</code>, DP01 <code>root_cause</code>). So the farm honours the fix and the ledger does not count it.</p>
+          <p>The node score is unaffected, because DP01 is scored on the mechanical ammonia channel. But any report or check that reads DP01's ledger actions (first-act timing, "did the model act", grader context) shows nothing.</p>
+        </div>
+        <div class="ran">
+          <div class="meta">E7 results (memo <code>evals/hen/runs/2026-11-16-e7-noise-floor-dp01.md</code>)</div>
+          <ul>
+            <li>Ten DP01 runs on Gemini 3.8 Flash: mean 8.40, standard deviation 0.47, range 7.94 to 9.21. All ten passed; no errors.</li>
+            <li>The spread tracks how many houses got more ventilation, since the channel is farm-wide.</li>
+            <li>Cost $6.62 for all ten, under the $15 cap.</li>
+          </ul>
+          <p class="meta">I confirmed the two code paths. The run figures come from the E7 session's memo; I did not open its logs.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -367,7 +387,7 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </section>
 
 <section class="section">
-  <div class="label"><b>4</b>Choices for you</div>
+  <div class="label"><b>3</b>Choices for you</div>
   <div>
     <div class="q">
       <div class="qgrid">
@@ -404,17 +424,10 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
     <div class="q">
       <div class="qgrid">
         <div>
-          <h3>E7: still winter ammonia?</h3>
-          <p>E7 only measures how much repeat runs spread, so S2 does not stop it. It does mean ammonia should not be the anchor for the value experiments. Still open from November 15: ten episodes on Gemini Flash, capped at $15 (about $0.69 each, measured on phosphorus).</p>
+          <h3>E7 <span class="tag">decided, ran November 16</span></h3>
+          <p>You approved E7 on November 15. The ten DP01 runs scored a mean of 8.40 with a standard deviation of 0.47, for $6.62. See the E7 check in the evidence section.</p>
         </div>
-        <div>
-          <div class="opts">
-            <label class="opt"><input type="radio" name="q3" id="q3a" value="Yes, run E7 as ten winter-ammonia episodes, $15 cap"><span><b>Yes, ten ammonia episodes, $15 cap</b><span class="rec">Recommended</span></span></label>
-            <label class="opt"><input type="radio" name="q3" id="q3b" value="Run E7 on phosphorus instead (smoke run already measured)"><span><b>Run E7 on phosphorus instead</b><br>Cost is known; the smoke run shows how it plays.</span></label>
-            <label class="opt"><input type="radio" name="q3" id="q3c" value="Wait until the wording fix lands"><span><b>Wait for the wording fix</b></span></label>
-          </div>
-          <textarea id="c3" aria-label="Comment on E7" placeholder="Comment (optional)"></textarea>
-        </div>
+        <div></div>
       </div>
     </div>
     <div class="q">
@@ -458,13 +471,13 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </div>
 
 <div class="bar-fixed">
-  <span id="count">0 of 4 choices answered</span>
+  <span id="count">0 of 3 choices answered</span>
   <button type="button" id="copy">Copy my answers</button>
 </div>
 
 <script>
 (function(){
-  var qs=[["q1","c1","Plain wording"],["q2","c2","Value measure levers"],["q3","c3","E7"],["q4","c4","Reasoning for the grader"]];
+  var qs=[["q1","c1","Plain wording"],["q2","c2","Value measure levers"],["q4","c4","Reasoning for the grader"]];
   var out=document.getElementById("out"),count=document.getElementById("count");
   function build(){
     var n=0,lines=["FarmBench Environment Audit, answers"];
@@ -477,7 +490,7 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
     var g=document.getElementById("c0").value.trim();
     if(g)lines.push("General: "+g);
     out.value=lines.join("\n");
-    count.textContent=n+" of 4 choices answered";
+    count.textContent=n+" of 3 choices answered";
   }
   document.addEventListener("input",build);
   document.addEventListener("change",build);
