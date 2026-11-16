@@ -40,3 +40,12 @@ A5: three numbers: notices, handles, weighs
 - Signed rulings that these touch and that must be brought back to Arda before anything model-visible
   changes: 6 (briefing), 8 (human labels before results), 19 (welfare only is scored; node episode
   unit), the 2026-08-19 point system (A3).
+
+## Later the same evening (Arda's words, in the critique session)
+
+- "we aim to finsih everything and all the design in the nexst 4 days": results and a frozen design by
+  Thursday, November 19, 2026.
+- "we will do hand labeling on stuff thts needed after running the models": hand labels come after the
+  model runs, on the items that need them. This sets the order for ruling 8's label requirement (P12):
+  runs are not blocked on labels. Which results may be quoted before their labels exist was not said;
+  ask before quoting a grader-scored result as final.
