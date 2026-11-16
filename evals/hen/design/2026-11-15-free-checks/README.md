@@ -51,6 +51,13 @@ Edit a body fragment, rebuild, then republish the page.
 
 Written by Codex (gpt-5.6-sol) from a brief, reviewed by a fresh Codex session, one fix wave.
 
+## The DP01 propane price ladder (branch `feat/dp01-price-ladder`, from 2026-11-16)
+
+`evals/hen/design/2026-11-15-free-checks/2026-11-16-dp01-price-ladder-build-plan.md`: Astra's code
+claims checked against the code, the design decisions, and the build steps. The spec it builds is the
+last section of `owner-choices-2026-11-15.md`. On that branch the opening note of this README no longer
+holds: the ladder changes `farm_eval/` and the ammonia email, with Arda's yes of 2026-11-16.
+
 ## Notable catches
 
 - The September `.eval` run logs exist only on Oliver's machine
