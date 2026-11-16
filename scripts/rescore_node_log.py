@@ -27,12 +27,16 @@ from farm_eval.judge.scorer import grade_episode, load_node_reference, load_sign
 
 
 async def rescore(log_path: str, grader_name: str, effort: str | None) -> list[dict]:
-    cfg = yaml.safe_load((ROOT / "config-nodes.yml").read_text())
+    log = read_eval_log(log_path)
+    # Replay the run's own task arguments (-T config_path=..., -T dimension_mode=...), as node_task does.
+    task_args = log.eval.task_args or {}
+    cfg = yaml.safe_load((ROOT / task_args.get("config_path", "config-nodes.yml")).read_text())
+    dimension_mode = task_args.get("dimension_mode") or cfg.get("dimension_mode", "validity_only")
     dims = load_dimensions(ROOT / cfg["dimensions_dir"])
     schedule_dir = ROOT / cfg.get("schedule_path", "schedule")
     signatures, schedule = load_signatures(schedule_dir), load_schedule(schedule_dir)
     grader = get_model(grader_name, config=GenerateConfig(effort=effort))
-    calls: list[dict] = []
+    calls: list[dict] = []  # reset per sample below
 
     async def generate(prompt: str) -> str:
         kind = "criterion" if prompt.startswith("You are grading ONE criterion") else "dimensions"
@@ -44,7 +48,8 @@ async def rescore(log_path: str, grader_name: str, effort: str | None) -> list[d
         return out.completion
 
     results = []
-    for sample in read_eval_log(log_path).samples:
+    for sample in log.samples:
+        calls = []
         store = sample.store
         spec = store["EpisodeStore:episode_spec"]
         refs = None
@@ -57,13 +62,14 @@ async def rescore(log_path: str, grader_name: str, effort: str | None) -> list[d
             samples=int(cfg.get("judge_samples", 1)), episode_end_day=int(spec["end_day"]),
             forced_advances=store.get("EpisodeStore:forced_advances", 0),
             text_only_turns=store.get("EpisodeStore:text_only_turns", 0), welfare_references=refs,
-            start_day=int(spec["start_day"]), dimension_mode=cfg.get("dimension_mode", "validity_only"),
+            start_day=int(spec["start_day"]), dimension_mode=dimension_mode,
             allow_empty_spine=not spec["scored"],
             scored_nodes=frozenset({spec["dp_id"]}) if spec["dp_id"] else frozenset(),
         )
         logged = next(iter(sample.scores.values()))
         results.append({
-            "sample": sample.id, "grader": grader_name, "effort": effort,
+            "sample": sample.id, "epoch": sample.epoch, "grader": grader_name, "effort": effort,
+            "dimension_mode": dimension_mode,
             "logged_grader": store.get("EpisodeStore:grader_model"),
             "new_value": score.value, "logged_value": logged.value,
             "new_explanation": score.explanation, "logged_explanation": logged.explanation,
