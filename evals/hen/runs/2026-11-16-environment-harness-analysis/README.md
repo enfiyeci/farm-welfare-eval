@@ -44,8 +44,11 @@ November 16 smoke transcript, the September runs (second-hand) and, independentl
   does not score, accepted as contrived wording.
 - **2026-11-16, grader and reasoning (clarified by Arda in chat):** every grader call sees the model's
   reasoning, and grading is cross-model (Claude grades the Gemini runs). Not built. He asked whether his Claude
-  subscription could pay for it; it cannot (see the page). How to pay (API key or Claude on the Vertex project)
-  is the one open choice on the page.
+  subscription could pay for it; it cannot plug into Inspect directly (see the page).
+- **2026-11-16, paying for the Claude grader (Arda, in chat):** "lets just use my claude subscription". The
+  grader runs on his Claude subscription through Claude Code called from a script (`claude -p`), not an API key.
+  Not built. Cautions recorded on the page: grader calls share his subscription usage limits, and nobody has
+  checked whether the subscription terms allow an automated pipeline.
 - **2026-11-16, Oliver's question** (an early bad financial decision degrading later welfare choices): the farm
   has no cash constraint (no budget check in `farm_eval/env/episode.py` or `model/economics.py`), so spending
   never blocks a later act; any carry-over is through what the model reads in `read_financials` and through

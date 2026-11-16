@@ -387,7 +387,7 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </section>
 
 <section class="section">
-  <div class="label"><b>1</b>Choice open</div>
+  <div class="label"><b>0</b>Choices open</div>
   <div>
     <div class="q">
       <div class="qgrid">
@@ -429,20 +429,13 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
         <div>
           <h3>Let the grader see reasoning? <span class="tag">decided November 16</span></h3>
           <p>Your answers: <b>every grader call sees the model's reasoning</b>, and <b>a model from another family grades</b> (Claude grades the Gemini runs). Neither is built yet. Reasoning only reaches the grader where the provider returns it readable; two thirds of the smoke run's blocks were redacted.</p>
-          <h4>Open: how to pay for the Claude grader</h4>
-          <p>You asked again whether your Claude subscription can do it. The answer below still holds: no.</p>
+          <h4>How to pay: your Claude subscription <span class="tag">decided November 16</span></h4>
+          <p>Your pick: <b>run the Claude grader on your Claude subscription</b>, through Claude Code called from a script (its non-interactive <code>claude -p</code> mode), not an API key. Not built yet. Two cautions from the notes below still stand: grader calls count against the same usage limits as your other sessions, and I have not checked whether the subscription terms allow an automated pipeline. The notes that follow were written before your pick.</p>
           <p><b>It would save little.</b> In the smoke run the grader was one call: 58k input tokens and about 1.6k output, roughly 5 cents of the 69-cent episode at Flash's introductory prices. The model being tested is the other 93%. Adding its reasoning to the grader input would add about 38k tokens, roughly 3 more cents.</p>
           <p><b>It does not plug in.</b> Inspect calls the grader through an API key billed per token. A Claude Pro or Max subscription is a sign-in for the Claude apps and Claude Code, not an API key. It could only be wired in by calling Claude Code from a script. ⚠️ As far as I know, Anthropic's subscription terms do not allow using a subscription to power an automated pipeline like this; I did not check the current terms. Subscription usage limits would also cap long runs.</p>
           <p><b>On the grader-family rule:</b> Claude as grader is out of family for the Gemini runs, which would fix J11 for them. For the Claude runs planned in stage C it would be same-family again, so those need a non-Claude grader. If you want an out-of-family grader for the Gemini runs, a Claude model through an API key costs cents per episode.</p>
         </div>
-        <div>
-          <div class="opts">
-            <label class="opt"><input type="radio" name="q4" id="q4a" value="Anthropic API key, billed per token"><span><b>Anthropic API key</b><span class="rec">Recommended</span><br>Billed per token, cents per episode. Plugs straight into Inspect.</span></label>
-            <label class="opt"><input type="radio" name="q4" id="q4b" value="Claude through the existing Vertex project"><span><b>Claude through your Vertex project</b><br>Billed to the Google project the Gemini runs already use. ⚠️ I have not checked that Claude models are enabled there.</span></label>
-            <label class="opt"><input type="radio" name="q4" id="q4c" value="Keep the Gemini grader for now and say so in the write-up"><span><b>Keep the Gemini grader for now</b><br>Same-family grading stays a stated limit (J11).</span></label>
-          </div>
-          <textarea id="c4" aria-label="Comment on paying for the grader" placeholder="Comment (optional)"></textarea>
-        </div>
+        <div></div>
       </div>
     </div>
     <div class="q">
@@ -470,13 +463,13 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 </div>
 
 <div class="bar-fixed">
-  <span id="count">0 of 1 choice answered</span>
+  <span id="count">No choices open; comments still welcome</span>
   <button type="button" id="copy">Copy my answers</button>
 </div>
 
 <script>
 (function(){
-  var qs=[["q4","c4","Paying for the Claude grader"]];
+  var qs=[];
   var out=document.getElementById("out"),count=document.getElementById("count");
   function build(){
     var n=0,lines=["FarmBench Environment Audit, answers"];
@@ -489,7 +482,7 @@ textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
     var g=document.getElementById("c0").value.trim();
     if(g)lines.push("General: "+g);
     out.value=lines.join("\n");
-    count.textContent=n+" of 1 choice answered";
+    count.textContent="No choices open; comments still welcome";
   }
   document.addEventListener("input",build);
   document.addEventListener("change",build);
