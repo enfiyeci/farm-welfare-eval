@@ -53,3 +53,8 @@ A5: three numbers: notices, handles, weighs
   stays a draft; nothing goes to Kate or any other expert until Arda says so.
 - "write astras comments too": the read-only Codex review on `gpt-6-astra` that the value-cards lane
   ran is to be written up like the earlier Codex pass was. Relayed to that lane, which holds the output.
+- "however you and astra agrreee on": read as a rule for open design choices. Where Claude's
+  recommendation and the `gpt-6-astra` review agree, that is Arda's answer. Where they disagree, the
+  choice comes back to him. The sentence was short and may have been cut off, so this reading is
+  narrow on purpose: it does not cover a spending cap, changes to what the model reads in episodes,
+  or sending anything to anyone.
