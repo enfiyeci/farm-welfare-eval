@@ -4,6 +4,28 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · value card bank: code built on its own branch (unreviewed), draft texts on a page for the owner
+
+- **Built, not yet reviewed or merged:** an Opus implementer built the spec on branch
+  `build/value-card-bank`, commit `5404cd7f` (33 new files; worktree
+  `~/worktrees/farm-eval-value-card-build`). `tests/cards`: 156 pass, 6 fail (rerun by the lane).
+  The 6 failures are real and left failing on purpose: with the default rules and 16 answers per
+  price, a responder that protects 60% of the time at every price is labelled `above_range` in 6 of
+  20 seeds (the "no D and the top price P" rule). The rule needs a decision before any paid run.
+  No bracket or midpoint is ever produced for that responder.
+- **Draft texts:** every model-visible text the owner has not read is in `schedule/cards-staging/`
+  as `status: draft` (commit `585adf42`, pushed). All seven card files and eleven framings load in
+  the built strict loader, and all 38 texts on the page render byte for byte the same through
+  `farm_eval.cards.render` and the page script's own renderer.
+- **Owner's page:** `evals/hen/design/2026-11-16-value-card-texts.html`
+  (https://claude.ai/artifact/EVSHadZgHK35dVHCisiHNg), built by `scripts/cards_texts_page.py`.
+  15 text answers and two choices (third card; analysis thresholds) wait for him.
+- **Skipped:** the Codex adversarial pass (usage limit until November 17, 2026, 3:00 AM). Owed on the
+  combined diff of both branches.
+- **Next:** review the build diff, settle the `above_range` rule, merge the build into
+  `feat/value-card-bank`, move the staged files into `schedule/cards/`, run the dry run. No paid
+  call until the owner says go for E7; no draft text runs until he has answered for it on the page.
+
 ## 2026-11-16 · claude · value card bank: build spec written, nothing built yet (branch feat/value-card-bank)
 
 - **What:** `docs/plans/2026-11-16-value-card-bank-build.md` is the implementer's brief for free
