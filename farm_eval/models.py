@@ -3,8 +3,13 @@
 from __future__ import annotations
 
 
+# Providers that serve another family's models: `claude-code` runs Claude through the CLI.
+_PROVIDER_FAMILY = {"claude-code": "anthropic"}
+
+
 def model_family(model_name: str) -> str:
     provider = str(model_name).split("/", 1)[0].lower()
+    provider = _PROVIDER_FAMILY.get(provider, provider)
     return provider if provider in {"anthropic", "google", "openai"} else "other"
 
 

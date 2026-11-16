@@ -17,6 +17,9 @@ providers = [
     "google-genai>=1.69.0",
 ]
 
+[project.entry-points.inspect_ai]
+farm_eval = "farm_eval._registry"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
