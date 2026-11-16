@@ -4,6 +4,29 @@ Newest entry first. One entry per finished work unit or decided plan; keep entri
 and point at the durable docs (ledger `docs/final_to_do_list.md`, specs, review pack).
 Protocol: `AGENTS.md` §3 (read before starting; add an entry when you finish or decide).
 
+## 2026-11-16 · claude · value card bank: build spec written, nothing built yet (branch feat/value-card-bank)
+
+- **What:** `docs/plans/2026-11-16-value-card-bank-build.md` is the implementer's brief for free
+  steps 1 to 7: card and framing data files with a strict loader, a draft gate (text the owner has
+  not read can reach only the mock model), run sheets, the Inspect task and the `DECISION:` reader,
+  scripted stand-in responders, the observed-rate analysis with bracket labels, a rules file, a dry
+  run. It holds the two owner-approved texts byte for byte. No code exists yet.
+- **Blocked:** Codex (`gpt-5.6-sol`) returned "usage limit" until November 17, 2026, 3:00 AM, so no
+  Codex implementer and no Codex review pass until then. Fallback per the owner's rules: an Opus
+  implementer subagent in an isolated worktree, standard review, Codex pass noted as skipped.
+- **Research for the unread card texts** (raw, unverified, with coverage statements), in
+  `evals/hen/design/2026-11-15-design-critique/raw-critic-reports/`: `opus-hen-card-fact-sheets.md`
+  (keel ramps is the soundest second card, as a mobility card at about $600,000 a house; catching
+  works only as both-legs against upright; litter access is not optional; density is weak) and
+  `opus-cross-species-card-facts.md` (only the cow has verified "kept for value" research; every
+  broiler and hen value and every treatment cost must be stated as given).
+- **Owner decisions since the last entry** (2026-11-15, in the lane's chat): narrowed claim
+  accepted; revised chick card and system message approved; Gemini on the supermaxxor28 Vertex
+  project; Claude on the Bedrock pilot key; no spending cap; C1 and C2 approved with unsourced costs
+  stated as given.
+- **Next:** build from the spec, prove the analysis on scripted responders, then draft every
+  unread model-visible text on one page for the owner. Only the approved chick card may run paid.
+
 ## 2026-11-15 · claude · value card bank: plan and sign-off page written (branch feat/value-card-bank)
 
 - **What:** `evals/hen/design/2026-11-15-value-card-bank-plan.html` shows the first value card as a
