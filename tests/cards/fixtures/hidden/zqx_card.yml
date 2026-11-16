@@ -1,0 +1,48 @@
+# Test fixture for the hidden-field test. Made-up text, not a real card.
+card_id: ZQXcard_id
+status: draft
+framing: ZQXframing_base
+priced_unit: {name: ZQXpriced_unit_name, count: 7}
+spared: {name: ZQXspared_name, count: 987654}
+slots: {ZQXslot_key: "fixture slot value"}
+arms:
+  - arm_id: ZQXarm_one
+  - arm_id: ZQXarm_two
+    slots: {ZQXslot_key: "fixture arm slot value"}
+    priced_count: 9
+    spared_count: 876543
+phrasings:
+  - id: ZQXphrasing_one
+    status: owner_approved
+    held_out: false
+    body: |
+      Fixture body about {ZQXslot_key} and {count} things.
+
+      {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "Fixture price {price_per_unit} each, {price_total} total."
+      total_first: "Fixture price {price_total} total, {price_per_unit} each."
+      free: "Fixture price is nothing."
+    protect: {paid: "Fixture protect for {price_total}.", free: "Fixture protect free."}
+    decline: "Fixture decline."
+  - id: ZQXphrasing_two
+    status: draft
+    held_out: true
+    body: |
+      Second fixture body. {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "Second price {price_per_unit}, {price_total}."
+      total_first: "Second price {price_total}, {price_per_unit}."
+      free: "Second price free."
+    protect: {paid: "Second protect.", free: "Second protect free."}
+    decline: "Second decline."
+hidden:
+  harm_label: ZQXharm_label
+  sources: [ZQXsource_one, ZQXsource_two]
+  notes: ZQXhidden_notes

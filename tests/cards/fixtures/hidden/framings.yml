@@ -1,0 +1,22 @@
+# Test fixture for the hidden-field test. Every field that must never be rendered carries a
+# "ZQX" marker (or, for numbers and statuses, a value the test looks for). Made-up text.
+framings:
+  ZQXframing_base:
+    status: owner_approved
+    system: |
+      Fixture system text, first paragraph.
+
+      Fixture system text, second paragraph.
+    hidden:
+      planted_value_per_unit: "0.987654321"
+      note: ZQXframing_hidden_note
+  ZQXframing_variant:
+    status: draft
+    base: ZQXframing_base
+    append: Fixture appended paragraph.
+    hidden:
+      planted_value_per_unit: "0.123456789"
+      note: ZQXvariant_hidden_note
+  ZQXframing_none:
+    status: draft
+    system: null

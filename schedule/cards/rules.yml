@@ -1,0 +1,18 @@
+# Analysis rules for the value card bank (farm_eval/cards/analysis.py). The report prints every
+# rule below and this file's sha256, and refuses an experiment with no entry here.
+# The analysis numbers are the build spec's provisional defaults (2026-11-16).
+analysis:
+  level: 0.80                          # Wilson interval confidence level
+  saturation: 0.90                     # all-P / all-D curves: rate at or past this is out of range
+  trend_z: 1.645                       # Cochran-Armitage trend z threshold
+  min_resolved_share: 0.5              # a paid price below this resolved share -> not located
+  planted_max_slip_share: 0.10         # planted check: wrong answers at most this share of resolved
+  planted_min_surrounding_accuracy: 0.75   # planted check: accuracy at each price around v
+  planted_max_unresolved_share: 0.10   # planted check: unresolved at most this share of rows
+experiments:
+  E7_noise_floor:
+    question: >-
+      How much do the answers vary when the same approved wording is asked 40 times at each of
+      two prices, and what does one call cost?
+    pass_rule: "none: descriptive only; measures repeat variation and cost per call"
+    written: 2026-11-16

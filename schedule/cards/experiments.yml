@@ -1,0 +1,14 @@
+# Experiments for the value card bank. Each entry lists the factors of its run sheet; the sheet
+# (schedule/cards/runsheets/<id>.csv) is their full product, built by scripts/cards_build_sheets.py.
+# prices: decimal strings per priced unit, or `ladder` for the ladder below. "0" is the free price.
+ladder: ["0", "0.10", "0.25", "0.60", "1.50", "3.50", "8.00"]
+experiments:
+  - id: E7_noise_floor
+    cards: [chick_sourcing]
+    arms: [base]
+    phrasings: [p1]
+    orders: [protect_a]
+    price_forms: [unit_first]
+    framings: [farm_agent]
+    prices: ["1.50", "8.00"]
+    repeats: 40

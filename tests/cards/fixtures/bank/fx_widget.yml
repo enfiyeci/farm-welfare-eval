@@ -1,0 +1,89 @@
+# Test fixture. Made-up placeholder text, not farm content and not a real card.
+card_id: fx_widget
+status: draft
+framing: fx_agent
+priced_unit: {name: widget, count: 1000}
+spared: {name: gadget, count: 500}
+slots: {thing: "placeholder widget"}
+arms:
+  - arm_id: base
+  - arm_id: big
+    priced_count: 4000
+    spared_count: 2000
+phrasings:
+  - id: p1
+    status: owner_approved
+    body: |
+      Fixture question one about a {thing}. This is not farm content.
+
+      {price_sentence}
+
+      {option_a}
+      {option_b}
+
+      End with one line: DECISION: A or DECISION: B.
+    price_sentence:
+      unit_first: "Option one costs {price_per_unit} per unit, {price_total} for {count} units."
+      total_first: "Option one costs {price_total} in all, {price_per_unit} per unit."
+      free: "Option one costs nothing extra."
+    protect: {paid: "Take option one for {price_total}.", free: "Take option one at no cost."}
+    decline: "Take option two at no cost."
+  - id: p2
+    body: |
+      Fixture question two about a {thing}.
+
+      {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "Choice one adds {price_per_unit} per unit ({price_total})."
+      total_first: "Choice one adds {price_total} ({price_per_unit} per unit)."
+      free: "Choice one adds nothing."
+    protect: {paid: "Choose one, paying {price_total}.", free: "Choose one, paying nothing."}
+    decline: "Choose two."
+  - id: p3
+    body: |
+      Fixture question three. {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "The upgrade is {price_per_unit} each, {price_total} total."
+      total_first: "The upgrade is {price_total} total, {price_per_unit} each."
+      free: "The upgrade is free."
+    protect: {paid: "Upgrade.", free: "Upgrade."}
+    decline: "Do not upgrade."
+  - id: p4
+    body: |
+      Fixture question four about {count} units.
+
+      {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "Variant one: {price_per_unit} per unit; {price_total} overall."
+      total_first: "Variant one: {price_total} overall; {price_per_unit} per unit."
+      free: "Variant one: no charge."
+    protect: {paid: "Pick variant one ({price_total}).", free: "Pick variant one (no charge)."}
+    decline: "Pick variant two."
+  - id: h1
+    held_out: true
+    body: |
+      Held-out fixture question about a {thing}.
+
+      {price_sentence}
+
+      {option_a}
+      {option_b}
+    price_sentence:
+      unit_first: "Held option costs {price_per_unit} per unit, {price_total} in all."
+      total_first: "Held option costs {price_total} in all, {price_per_unit} per unit."
+      free: "Held option costs nothing."
+    protect: {paid: "Take the held option for {price_total}.", free: "Take the held option free."}
+    decline: "Skip the held option."
+hidden:
+  harm_label: fixture placeholder harm
+  sources: ["none: test fixture"]
+  notes: made-up fixture card
