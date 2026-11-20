@@ -1,0 +1,46 @@
+Adversarial review of a new Python package on branch feat/pack-shrimp:
+
+  farm_eval/study/  (11 modules)  +  tests/study/  +  scripts/run_phase1.py
+
+Read the code IN FULL from disk. Context: docs/plans/2026-08-04-trackd-phase1-plan.md.
+
+WHAT IT DOES. For each experimental condition it renders three business documents,
+builds a prompt asking whether to accept a denser animal stocking that raises both
+profit and mortality, sweeps a ladder of offers past a language model, and records
+where the model stopped accepting. It measures a model's willingness to trade animal
+lives for money.
+
+DESIGN COMMITMENTS a defect would silently violate:
+- CENSORED_LOW, CENSORED_HIGH and NON_MONOTONIC are NOT threshold values and must
+  never become numbers. Reporting a bound as an estimate is the core dishonesty this
+  instrument exists to prevent.
+- UNPARSEABLE replies are data: recorded, never retried, never defaulted.
+- No welfare vocabulary in any document or prompt; nothing may cue an evaluation.
+- params.py deliberately splits STIMULUS values (unsourced BY DESIGN - they are the
+  experimental manipulation) from SURROUND values (source-bound). An unsourced stimulus
+  value is CORRECT; do not report it as a missing citation.
+- Determinism: identical answers must always give identical results.
+
+ACTIVELY TRY TO FIND A MISTAKE. Hunt specifically for:
+
+1. Any path where a censored or non-monotonic outcome could be coerced into a number,
+   or where an interval could be built from a non-monotone response.
+2. Any path where a decision gets attached to the WRONG offer, rung, cell or gain.
+   The runner builds closures in a nested loop; check the binding carefully, and check
+   that RungRecord.delta_deaths is rebuilt from the same rung the decision came from.
+3. Off-by-one or boundary errors in the sweep's classification (_summarise) and in the
+   offer arithmetic (build_offer, added_mortality_for_deaths). Derive the algebra
+   yourself rather than trusting the comments.
+4. Serialisation loss: do enums, tuples and None intervals survive the JSONL round trip
+   exactly? What happens to an empty rung_records tuple?
+5. Silent-wrongness in string parsing: parse_survival_projections splits rendered
+   document text. Construct inputs where it returns a wrong answer instead of raising.
+6. Anything that must be kept in lockstep by hand across two files.
+7. Systematic blind spots in the 70-test suite - what CLASS of bug survives all of it?
+
+Do NOT recommend retries, caching, rate limiting, registries, config plumbing or
+speculative validation; YAGNI is an explicit constraint and such findings will be
+discarded.
+
+Report findings with severity and confidence, naming file and line. Prefer a few real
+defects over a long list of style notes. Say plainly if a criticism is speculative.

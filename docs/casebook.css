@@ -1,0 +1,115 @@
+/* Track D casebook — document-specific overrides only (real base.css tokens +
+   the "call" unit, which has no equivalent in the component library). */
+
+/* A 1,076-entry appendix needs a tighter rhythm than the default body. */
+.call {
+  break-inside: avoid;
+  margin: 0 0 9pt 0;
+  padding: 5pt 0 0 0;
+  border-top: 0.5pt solid var(--color-rule);
+}
+.call.example {
+  border-top: 2pt solid var(--color-accent);
+  padding-top: 7pt;
+  margin: 10pt 0 14pt 0;
+}
+.call-head {
+  margin: 0 0 3pt 0;
+  font-size: 7.6pt;
+  line-height: 1.5;
+}
+.cid {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-right: 6pt;
+}
+.badge {
+  font-family: var(--font-mono);
+  font-size: 6.6pt;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 1pt 4pt;
+  margin-right: 6pt;
+  color: var(--color-paper);
+}
+.badge.acc { background: var(--color-ink); }
+.badge.dec { background: var(--color-accent); }
+.badge.non { background: var(--color-muted); }
+.meta-bits {
+  font-family: var(--font-mono);
+  color: var(--color-muted);
+  margin-right: 6pt;
+}
+.flag {
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  margin-right: 6pt;
+}
+/* Menlo is named explicitly, not left to chance: the model's own replies
+   contain -> (U+2192) and ~= (U+2248), which Helvetica Neue does not carry, and
+   the quotes are verbatim so the characters cannot be changed. */
+.reply {
+  font-family: var(--font-body), Menlo, monospace;
+  font-size: 8.4pt;
+  line-height: 1.42;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* Verbatim stimulus blocks: these ARE the evidence, so the P&L columns must
+   keep their alignment. */
+/* Deliberately NOT break-inside:avoid — the prompt blocks run to most of a page,
+   and forcing them whole orphaned their headings and left half-empty pages. */
+pre.verbatim {
+  font-family: var(--font-mono);
+  font-size: 7.4pt;
+  line-height: 1.42;
+  white-space: pre-wrap;
+  background: var(--color-tint);
+  padding: 8pt 10pt;
+  margin: 8pt 0 14pt 0;
+  orphans: 3;
+  widows: 3;
+}
+h2, h3 { break-after: avoid; }
+/* A label must never be the last thing on a page, stranded from what it labels. */
+p.kicker { break-after: avoid; }
+
+/* Each experiment starts a page: this is the document people will page through
+   run by run, and a run that begins mid-page is hard to find again. */
+h2.run-head {
+  break-before: page;
+  font-size: 1.35em;
+}
+/* "What it means" is the payload of each experiment — it gets the accent rule so
+   a reader skimming for conclusions can find them without reading the setup. */
+.finding {
+  border-left: 3pt solid var(--color-accent);
+  padding: 2pt 0 2pt 12pt;
+  margin: 12pt 0 14pt 0;
+}
+.finding .kicker { margin-top: 0; }
+/* The pointer that tells a reader what to look for in the example below it. */
+.what-to-notice {
+  font-style: italic;
+  font-size: 9pt;
+  line-height: 1.45;
+  color: var(--color-muted);
+  margin: 0 0 5pt 0;
+}
+.tag-legend {
+  background: var(--color-tint);
+  padding: 8pt 10pt;
+  margin: 8pt 0 12pt 0;
+}
+.run-meta {
+  font-family: var(--font-mono);
+  font-size: 8pt;
+  color: var(--color-muted);
+  margin: 0 0 10pt 0;
+}
+h2.appendix-head { break-before: page; }
+ol.findings > li { margin-bottom: 7pt; }
+/* A row carrying a bar must not split across pages (pdf-design LEARNINGS 2026-08-03). */
+table.data tr { break-inside: avoid; }
